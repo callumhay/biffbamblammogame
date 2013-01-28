@@ -35,7 +35,7 @@ private:
     static const double WAIT_TIME_AT_END_OF_OUTRO_IN_SECS;
 
     // State-related variables
-    enum BossState { IntroBossState, FadeInBossState, InPlayBossState, OutroBossState, VictoryBossState };
+    enum BossState { IntroBossState, FadeInBossState, InPlayBossState, OutroBossState };
     BossState currBossState;
     
     // IntroBossState
@@ -54,13 +54,18 @@ private:
     void ExecuteFadeInBossState(double dT);
     void ExecuteInPlayBossState(double dT);
     void ExecuteOutroBossState(double dT);
-    void ExecuteVictoryBossState(double dT);
-    
+
+    bool IsInGameMenuEnabled() const;
+
     DISALLOW_COPY_AND_ASSIGN(InGameBossLevelDisplayState);
 };
 
 inline DisplayState::DisplayStateType InGameBossLevelDisplayState::GetType() const {
     return DisplayState::InGameBossLevel;
+}
+
+inline bool InGameBossLevelDisplayState::IsInGameMenuEnabled() const {
+    return (this->currBossState != InGameBossLevelDisplayState::OutroBossState);
 }
 
 #endif // __INGAMEBOSSLEVELDISPLAYSTATE_H__

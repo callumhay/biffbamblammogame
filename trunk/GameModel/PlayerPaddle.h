@@ -269,6 +269,10 @@ public:
 
     float GetMineProjectileStartingHeightRelativeToPaddle() const;
 
+    void SetLevelBoundsChecking(bool isOn) {
+        this->levelBoundsCheckingOn = isOn;
+    }
+
 private:
 	// Default values for the dimensions of the paddle
 	static const float PADDLE_WIDTH_ANGLED_SIDE;
@@ -326,6 +330,8 @@ private:
 
 	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
 	bool isFiringBeam;			// Whether this paddle is firing the laser beam
+
+    bool levelBoundsCheckingOn;
 
 	void SetupAnimations();
 

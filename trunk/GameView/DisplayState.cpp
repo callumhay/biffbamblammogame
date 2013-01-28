@@ -23,6 +23,7 @@
 #include "InGameMenuState.h"
 #include "LevelEndDisplayState.h"
 #include "LevelCompleteSummaryDisplayState.h"
+#include "BossLevelCompleteSummaryDisplayState.h"
 #include "GameCompleteDisplayState.h"
 #include "GameOverDisplayState.h"
 
@@ -60,6 +61,8 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 			return new LevelEndDisplayState(display);
         case DisplayState::LevelCompleteSummary:
             return new LevelCompleteSummaryDisplayState(display);
+        case DisplayState::BossLevelCompleteSummary:
+            return new BossLevelCompleteSummaryDisplayState(display);
 		case DisplayState::GameComplete:
 			return new GameCompleteDisplayState(display);
 		case DisplayState::GameOver:

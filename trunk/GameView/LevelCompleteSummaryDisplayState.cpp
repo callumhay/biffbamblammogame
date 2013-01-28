@@ -22,7 +22,6 @@
 #include "../ResourceManager.h"
 
 const double LevelCompleteSummaryDisplayState::FADE_OUT_TIME                                 = 0.75;
-const double LevelCompleteSummaryDisplayState::FOOTER_FLASH_TIME                             = 0.5;
 const float LevelCompleteSummaryDisplayState::FOOTER_VERTICAL_PADDING                        = 20.0f;
 const float LevelCompleteSummaryDisplayState::LEVEL_NAME_HORIZONTAL_PADDING                  = 20.0f;
 const float LevelCompleteSummaryDisplayState::HEADER_INBETWEEN_VERTICAL_PADDING              = 30.0f;
@@ -59,8 +58,8 @@ newHighScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMa
 maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL), lensFlareTex(NULL), haloTex(NULL),
 starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), 
-starFgPulser(ScaleEffect(1.0f, 1.5f)), gameProgressWasSaved(false), starryBG(NULL),
-haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
+starFgPulser(ScaleEffect(1.0f, 1.5f)), starryBG(NULL), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
+flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
     
     const Camera& camera = this->display->GetCamera();
     GameModel* gameModel = this->display->GetModel();
@@ -68,13 +67,9 @@ haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRot
 
     const GameLevel* completedLevel = this->display->GetModel()->GetCurrentLevel();
     assert(completedLevel != NULL);
-    
-    //gameModel->GetNumStarsAwarded()
-
-
 
     // Save game progress
-    this->gameProgressWasSaved = GameProgressIO::SaveGameProgress(gameModel);
+    GameProgressIO::SaveGameProgress(gameModel);
 
     const Colour smallScoreLabelColour(0.75f, 0.75f, 0.75f);
 
@@ -182,18 +177,7 @@ haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRot
 	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
 
 	// Set the footer colour flash animation
-	std::vector<double> timeVals;
-	timeVals.reserve(3);
-	timeVals.push_back(0.0);
-	timeVals.push_back(FOOTER_FLASH_TIME);
-	timeVals.push_back(2 * FOOTER_FLASH_TIME);
-	std::vector<Colour> colourVals;
-	colourVals.reserve(3);
-	colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-	colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
-	colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-	this->footerColourAnimation.SetLerp(timeVals, colourVals);
-	this->footerColourAnimation.SetRepeat(true);
+    this->footerColourAnimation = GameViewConstants::GetInstance()->BuildFlashingColourAnimation();
 
     this->levelCompleteLabel.SetScale(1.25f);
     this->levelCompleteLabel.SetColour(Colour(1.0f, 0.8f, 0.0f));
@@ -280,6 +264,7 @@ haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRot
     {
         static const double HALF_POINT_SCORE_ANIM_TIME = POINT_SCORE_ANIM_TIME / 2.0; 
         
+        std::vector<double> timeVals;
         timeVals.clear();
         timeVals.reserve(3);
         timeVals.push_back(HALF_POINT_SCORE_ANIM_TIME);

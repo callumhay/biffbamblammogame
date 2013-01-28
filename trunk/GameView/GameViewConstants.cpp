@@ -480,3 +480,23 @@ const Colour& GameViewConstants::GetMultiplierColour(int multiplier) {
     }
     return GameViewConstants::GetInstance()->TWO_TIMES_MULTIPLIER_COLOUR;
 }
+
+AnimationMultiLerp<Colour> GameViewConstants::BuildFlashingColourAnimation() const {
+    static const double FLASH_TIME = 0.5;
+
+	std::vector<double> timeVals;
+	timeVals.reserve(3);
+	timeVals.push_back(0.0);
+	timeVals.push_back(FLASH_TIME);
+	timeVals.push_back(2 * FLASH_TIME);
+	std::vector<Colour> colourVals;
+	colourVals.reserve(3);
+	colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+	colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
+	colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+	
+    AnimationMultiLerp<Colour> flashingColourAnimation;
+    flashingColourAnimation.SetLerp(timeVals, colourVals);
+	flashingColourAnimation.SetRepeat(true);
+    return flashingColourAnimation;
+}

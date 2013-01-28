@@ -57,7 +57,8 @@ void InGameDisplayState::ButtonPressed(const GameControl::ActionButton& pressedB
     UNUSED_PARAMETER(magnitude);
 
 	// We only interpret one key press - when the user wants to access the in-game menu...
-	if (pressedButton == GameControl::EscapeButtonAction || pressedButton == GameControl::PauseButtonAction) {
+	if (this->IsInGameMenuEnabled() &&
+       (pressedButton == GameControl::EscapeButtonAction || pressedButton == GameControl::PauseButtonAction)) {
 		// Go to the next state
 		this->display->SetCurrentStateNoDeletePreviousState(new InGameMenuState(this->display, this));
 	}

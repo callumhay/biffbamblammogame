@@ -1093,6 +1093,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\BossLevelCompleteSummaryDisplayState.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\DisplayState.h"
 						>
 					</File>
@@ -1154,6 +1158,10 @@
 					>
 					<File
 						RelativePath=".\GameView\BlammopediaState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BossLevelCompleteSummaryDisplayState.cpp"
 						>
 					</File>
 					<File

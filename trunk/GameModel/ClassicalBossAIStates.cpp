@@ -313,6 +313,11 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
 
     assert(collisionPart != NULL);
 
+    // If the arm is currently animating for being hurt then we can't hurt it again until it's done
+    if (this->currState == ClassicalBossAI::HurtRightArmAIState) {
+        return;
+    }
+
     // Check to see if the ball hit one of the weakspots...
     if (collisionPart == this->rightArmSqrWeakpt) {
         this->leftArm->SetLocalTranslation(Vector3D(0,0,0));
@@ -327,9 +332,8 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
             this->rightArm->AnimateLocalTranslation(this->GenerateArmDeathTranslationAnimation(false));
             this->rightArm->AnimateLocalZRotation(this->GenerateArmDeathRotationAnimation(false));
         }
-        if (this->currState != ClassicalBossAI::HurtRightArmAIState) {
-            this->SetState(ClassicalBossAI::HurtRightArmAIState);
-        }
+
+        this->SetState(ClassicalBossAI::HurtRightArmAIState);
     }
     else if (collisionPart == this->leftArmSqrWeakpt) {
 
@@ -350,9 +354,7 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
             this->leftArm->AnimateLocalZRotation(armDeathRotAnim);
         }
 
-        if (this->currState != ClassicalBossAI::HurtLeftArmAIState) {
-            this->SetState(ClassicalBossAI::HurtLeftArmAIState);
-        }
+        this->SetState(ClassicalBossAI::HurtLeftArmAIState);
     }
 }
 
@@ -1635,7 +1637,8 @@ void HeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPar
     UNUSED_PARAMETER(gameModel);
 
     // The ball just hit the eye...
-    if (collisionPart == this->eye) {
+    if (collisionPart == this->eye && 
+        this->currState != ClassicalBossAI::HurtRightArmAIState) {
         
         this->eyeHurtMoveAnim.ClearLerp();
         this->eyeHurtMoveAnim.SetInterpolantValue(Vector3D(0.0f, 0.0f, 0.0f));
@@ -1679,9 +1682,7 @@ void HeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPar
             this->eyeHurtMoveAnim.SetRepeat(false);
         }
 
-        if (this->currState != ClassicalBossAI::HurtRightArmAIState) {
-            this->SetState(ClassicalBossAI::HurtEyeAIState);
-        }
+        this->SetState(ClassicalBossAI::HurtEyeAIState);
     }
 }
 

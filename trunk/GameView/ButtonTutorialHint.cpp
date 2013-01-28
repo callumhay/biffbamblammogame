@@ -221,21 +221,8 @@ void ButtonTutorialHint::SetMouseButton(GameViewConstants::MouseButtonType butto
 void ButtonTutorialHint::SetFlashing(bool on) {
     if (on) {
         if (this->flashAnim == NULL) {
-            this->flashAnim = new AnimationMultiLerp<Colour>();
-
-            std::vector<double> timeVals;
-            timeVals.reserve(3);
-            timeVals.push_back(0.0);
-            timeVals.push_back(0.5);
-            timeVals.push_back(1.0);
-            std::vector<Colour> colourVals;
-            colourVals.reserve(3);
-            colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-            colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
-            colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-
-            this->flashAnim->SetLerp(timeVals, colourVals);
-            this->flashAnim->SetRepeat(true);
+            this->flashAnim = new AnimationMultiLerp<Colour>(
+                GameViewConstants::GetInstance()->BuildFlashingColourAnimation());
         }
     }
     else {

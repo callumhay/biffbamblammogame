@@ -5,6 +5,8 @@ Deco
 resources/textures/deco_world_select_256x256.jpg
 
 
+resources/worlds/testing/an_almost_empty_level.lvl
+
 # Item drop block intro levels
 resources/worlds/levels/easy/running_amoc.lvl
 resources/worlds/levels/medium/a_sticky_situation.lvl
@@ -67,7 +69,6 @@ resources/worlds/levels/medium/ahead_by_a_sentry.lvl
 resources/worlds/levels/medium/obtusely_oblique.lvl
 resources/worlds/levels/medium/obscured_enlightenment.lvl
 
-resources/worlds/levels/medium/exclusive_access.lvl
 resources/worlds/levels/medium/center_on_target.lvl
 resources/worlds/levels/medium/acute_electrocution.lvl
 resources/worlds/levels/medium/lightning_round.lvl
@@ -93,8 +94,8 @@ resources/worlds/levels/hard/magnet_attack.lvl
 resources/worlds/levels/easy/invader.lvl
 
 # Testing Levels
-resources/worlds/testing/fast_points.lvl
 resources/worlds/testing/an_almost_empty_level.lvl
+resources/worlds/testing/fast_points.lvl
 resources/worlds/testing/block_test.lvl
 resources/worlds/testing/turret_test.lvl
 resources/worlds/testing/see_the_background.lvl

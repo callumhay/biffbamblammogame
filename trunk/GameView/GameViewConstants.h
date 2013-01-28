@@ -354,6 +354,8 @@ public:
     const Colour& GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const;
     const Colour& GetMultiplierColour(int multiplier);
 
+    AnimationMultiLerp<Colour> BuildFlashingColourAnimation() const;
+
 private:
 	static GameViewConstants* Instance;
 
