@@ -455,6 +455,11 @@ void SelectLevelMenuState::DrawTitleStrip(const Camera& camera) const {
 }
 
 void SelectLevelMenuState::DrawPageSelection(const Camera& camera) const {
+    // Don't bother drawing anything if there's only one page
+    if (this->pages.size() <= 1) {
+        return;
+    }
+
     static const int SQUARE_SIZE         = 16;
     static const int SQUARE_GAP_SIZE     = 5;
     static const int SQUARE_BOTTOM_Y_POS = VERTICAL_TITLE_GAP;
@@ -1141,7 +1146,9 @@ SelectLevelMenuState::BossLevelMenuItem::BossLevelMenuItem(SelectLevelMenuState*
                                                            int levelNum, const GameLevel* level,
                                                            float width, float height, const Point2D& topLeftCorner,
                                                            bool isEnabled, const Texture* bossTexture) :
-AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), height(height), bossTexture(bossTexture) {
+AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), height(height), bossTexture(bossTexture),
+bossDeadLabel(NULL) {
+
     assert(bossTexture != NULL);
     
     const Colour DISABLED_COLOUR(
@@ -1168,7 +1175,8 @@ AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
     glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
     glPushMatrix();
 
-    float iconXPos = this->topLeftCorner[0] + this->width - (this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
+    float iconXPos = this->topLeftCorner[0] + this->width - (this->width - 
+        (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
     float iconYPos = this->topLeftCorner[1] - halfBossIconSize;
 
     glTranslatef(iconXPos, iconYPos, 0.0f);
@@ -1207,6 +1215,18 @@ AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
     if (isEnabled) {
         this->bossLabel->SetColour(Colour(1, 0, 0));
         this->bossLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
+
+        // If the boss has already been defeated then we draw a big 'X' over its icon
+        if (level->GetIsLevelPassedWithScore()) {
+            this->bossDeadLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+                GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "X");
+            this->bossDeadLabel->SetScale(1.5f);
+            this->bossDeadLabel->SetTopLeftCorner(
+                (iconXPos - halfBossIconSize) + (this->bossIconSize - this->bossDeadLabel->GetLastRasterWidth()) / 2.0f,
+                (iconYPos + halfBossIconSize) - (this->bossIconSize - this->bossDeadLabel->GetHeight()) / 2.0f);
+            this->bossDeadLabel->SetColour(Colour(1, 0, 0));
+            
+        }
     }
     else {
         this->bossLabel->SetColour(DISABLED_COLOUR);
@@ -1217,6 +1237,11 @@ AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
 SelectLevelMenuState::BossLevelMenuItem::~BossLevelMenuItem() {
     delete this->bossLabel;
     this->bossLabel = NULL;
+
+    if (this->bossDeadLabel != NULL) {
+        delete this->bossDeadLabel;
+        this->bossDeadLabel = NULL;
+    }
 }
 
 void SelectLevelMenuState::BossLevelMenuItem::Draw(const Camera& camera, double dT, bool isSelected) {
@@ -1236,6 +1261,11 @@ void SelectLevelMenuState::BossLevelMenuItem::Draw(const Camera& camera, double 
     // When locked, draw the padlock
     if (!this->isEnabled) {
         this->DrawPadlock(dT);
+    }
+    else {
+        if (this->bossDeadLabel != NULL) {
+            this->bossDeadLabel->Draw();
+        }
     }
 }
 

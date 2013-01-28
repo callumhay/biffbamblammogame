@@ -17,8 +17,8 @@
 #include "ClassicalBoss.h"
 
 const double Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = 1.5;
-const double Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = TOTAL_DEATH_ANIM_TIME / 1.75;
-const double Boss::TOTAL_DEATH_ANIM_TIME = 6.5;
+const double Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = TOTAL_DEATH_ANIM_TIME / 1.25;
+const double Boss::TOTAL_DEATH_ANIM_TIME = 6.75;
 
 Boss::Boss() : currAIState(NULL), nextAIState(NULL), root(NULL), 
 deadPartsRoot(NULL), alivePartsRoot(NULL), isBossDeadAndLevelCompleted(false)  {

@@ -181,6 +181,7 @@ private:
 
         TextLabel2D* bossLabel;
         const Texture* bossTexture;
+        TextLabel2D* bossDeadLabel;
 
         DISALLOW_COPY_AND_ASSIGN(BossLevelMenuItem);
     };

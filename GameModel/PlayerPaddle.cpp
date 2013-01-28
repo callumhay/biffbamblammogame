@@ -72,7 +72,7 @@ decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADD
 timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
-impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL) {
+impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), levelBoundsCheckingOn(true) {
 	this->ResetPaddle();
 }
 
@@ -81,7 +81,7 @@ centerPos(0.0f, 0.0f), currSpeed(0.0f), lastDirection(0.0f), moveButtonDown(fals
 acceleration(PlayerPaddle::DEFAULT_ACCELERATION), decceleration(PlayerPaddle::DEFAULT_DECCELERATION),
 currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), attachedBall(NULL),
 hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
-impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL) {
+impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), levelBoundsCheckingOn(true) {
 
 	this->SetupAnimations();
 	this->SetNewMinMaxLevelBound(minBound, maxBound); // resets the paddle
@@ -110,6 +110,7 @@ void PlayerPaddle::ResetPaddle() {
     this->impulseDeceleration = 0.0f;
     this->impulseSpdDecreaseCounter = 0.0f;
     this->lastEntityThatHurtHitPaddle = NULL;
+    this->levelBoundsCheckingOn = true;
     this->attachedProjectiles.clear();
 
 	this->SetupAnimations();
@@ -473,65 +474,59 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 
         }
     }
-
-	if (minNewXPos - EPSILON <= this->minBound) {
-		// The paddle bumped into the left wall
-		this->centerPos[0] = this->minBound + halfWidthTotalWithAttachedMin;
-		
-		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
-		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
-            
-            if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
-                LevelPiece* piece = gameModel.GetCurrentLevel()->GetMinPaddleBoundPiece();
-                LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
-                UNUSED_VARIABLE(resultingPiece);
-                assert(resultingPiece == piece);
-            }
-
-			// EVENT: paddle hit left wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithAttachedMin, 0));
-		}
-
-		this->hitWall = true;
-	}
-	else if (maxNewXPos + EPSILON > this->maxBound) {
-		// The paddle bumped into the right wall
-		this->centerPos[0] = this->maxBound - halfWidthTotalWithAttachedMax;
-		
-		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
-		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
-
-            if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
-                LevelPiece* piece = gameModel.GetCurrentLevel()->GetMaxPaddleBoundPiece();
+    if (this->levelBoundsCheckingOn) {
+	    if (minNewXPos - EPSILON <= this->minBound) {
+		    // The paddle bumped into the left wall
+		    this->centerPos[0] = this->minBound + halfWidthTotalWithAttachedMin;
+    		
+		    // Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
+		    if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
                 
-                // Make sure the piece is actually being collided with
-                if (fabs(this->maxBound - gameModel.GetCurrentLevel()->GetPaddleMaxBound()) < EPSILON) {
+                if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
+                    LevelPiece* piece = gameModel.GetCurrentLevel()->GetMinPaddleBoundPiece();
                     LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
                     UNUSED_VARIABLE(resultingPiece);
                     assert(resultingPiece == piece);
                 }
-            }
 
-			// EVENT: paddle hit right wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithAttachedMax, 0));
-		}
-		this->hitWall = true;
+			    // EVENT: paddle hit left wall for first time
+			    GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithAttachedMin, 0));
+		    }
+
+		    this->hitWall = true;
+	    }
+	    else if (maxNewXPos + EPSILON > this->maxBound) {
+		    // The paddle bumped into the right wall
+		    this->centerPos[0] = this->maxBound - halfWidthTotalWithAttachedMax;
+    		
+		    // Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
+		    if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
+
+                if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
+                    LevelPiece* piece = gameModel.GetCurrentLevel()->GetMaxPaddleBoundPiece();
+                    
+                    // Make sure the piece is actually being collided with
+                    if (fabs(this->maxBound - gameModel.GetCurrentLevel()->GetPaddleMaxBound()) < EPSILON) {
+                        LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
+                        UNUSED_VARIABLE(resultingPiece);
+                        assert(resultingPiece == piece);
+                    }
+                }
+
+			    // EVENT: paddle hit right wall for first time
+			    GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithAttachedMax, 0));
+		    }
+		    this->hitWall = true;
+        }
+	    else {
+		    this->centerPos[0] = newCenterX;
+		    this->hitWall = false;
+	    }
 	}
 	else {
 		this->centerPos[0] = newCenterX;
 		this->hitWall = false;
 	}
-
-	/*
-	// Figure out the average speed over some number of ticks ... don't know if I actually need this...
-	if (this->ticksSinceAvg == 0) {
-		this->avgVel = this->currSpeed;
-	}
-	else {
-		this->avgVel = (this->avgVel + this->currSpeed) * 0.5f;
-	}
-	this->ticksSinceAvg = (this->ticksSinceAvg + 1) % AVG_OVER_TICKS;
-	*/
 
 	// Change the size gradually (lerp based on some constant time) if need be...
     float targetScaleFactor = PlayerPaddle::CalculateTargetScaleFactor(this->currSize);

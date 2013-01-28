@@ -59,6 +59,7 @@ public:
 	}
 
 	std::string Generate(SoundType type, Extremeness amt);
+    std::string GenerateVictoryDescriptor() const;
 
 	/**
 	 * Obtain a random extremeness in the given interval of min and max extremenesses.
@@ -80,6 +81,8 @@ private:
 	std::map<SoundType, std::vector<std::string> > awesomeSingleWords;
 	std::map<SoundType, std::vector<std::string> > uberSingleWords;
 
+    std::vector<std::string> victoryDescriptors;
+
 	void LoadExplosionWords();
 	void LoadBounceWords();
 	void LoadElectricWords();
@@ -92,6 +95,8 @@ private:
 	void LoadCrazyWords();
     void LoadLaunchWords();
     void LoadAttachWords();
+
+    void LoadVictoryDescriptors();
 
 	// Punctuation structures and functions
 	static const char* DEFAULT_END_PUNCTUATION;

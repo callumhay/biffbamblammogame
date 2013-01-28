@@ -299,7 +299,7 @@ void GameModel::SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNew
 }
 
 // Get the world with the given name in this model, NULL if no such world exists
-GameWorld* GameModel::GetWorldByName(const std::string& name) {
+GameWorld* GameModel::GetWorldByName(const std::string& name) const {
     for (std::vector<GameWorld*>::const_iterator iter = this->worlds.begin(); iter != this->worlds.end(); ++iter) {
         GameWorld* world = *iter;
         if (world->GetName().compare(name) == 0) {
@@ -383,6 +383,16 @@ void GameModel::DestroySafetyNet() {
         delete this->safetyNet;
         this->safetyNet = NULL;
     }
+}
+
+void GameModel::CleanUpAfterBossDeath() {
+    this->ClearStatusUpdatePieces();
+    this->ClearProjectiles();
+    this->ClearBeams();
+    this->ClearLiveItems();
+    this->ClearActiveTimers();
+    this->GetTransformInfo()->Reset();
+    this->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RocketPaddle);
 }
 
 /**

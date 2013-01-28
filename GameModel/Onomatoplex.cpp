@@ -49,6 +49,8 @@ Generator::Generator() {
 	this->LoadCrazyWords();
     this->LoadLaunchWords();
     this->LoadAttachWords();
+
+    this->LoadVictoryDescriptors();
 }
 
 // Destructor, deletes singleton, cleans up dictionaries
@@ -736,6 +738,29 @@ void Generator::LoadAttachWords() {
 	this->uberSingleWords[ATTACH]	 = attachSimpleWords;
 }
 
+void Generator::LoadVictoryDescriptors() {
+    this->victoryDescriptors.clear();
+
+    this->victoryDescriptors.push_back("Sweet");
+    this->victoryDescriptors.push_back("Succulent");
+    this->victoryDescriptors.push_back("Delicious");
+    this->victoryDescriptors.push_back("Immaculate");
+    this->victoryDescriptors.push_back("Illustrious");
+    this->victoryDescriptors.push_back("Invigorating");
+    this->victoryDescriptors.push_back("Satiating");
+    this->victoryDescriptors.push_back("Sunshiny");
+    this->victoryDescriptors.push_back("Sensational");
+    this->victoryDescriptors.push_back("Splendiferous");
+    this->victoryDescriptors.push_back("Awesome");
+    this->victoryDescriptors.push_back("Implacable");
+    this->victoryDescriptors.push_back("Juicy");
+    this->victoryDescriptors.push_back("Gooey");
+    this->victoryDescriptors.push_back("Satisfying");
+    this->victoryDescriptors.push_back("Glorious");
+    this->victoryDescriptors.push_back("Satisfying");
+
+}
+
 /*
  * Generates crazy onomatopoeia based on the sound type given and the extremeness of the context.
  * Precondition: true.
@@ -772,6 +797,10 @@ std::string Generator::Generate(SoundType type, Extremeness amt) {
 	}
 
 	return result;
+}
+
+std::string Generator::GenerateVictoryDescriptor() const {
+    return this->victoryDescriptors[Randomizer::GetInstance()->RandomUnsignedInt() % this->victoryDescriptors.size()];
 }
 
 // Private helper functions -----------------------------------------------

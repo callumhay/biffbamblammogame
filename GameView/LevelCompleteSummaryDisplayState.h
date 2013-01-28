@@ -39,7 +39,6 @@ public:
 
 private:
     static const double FADE_OUT_TIME;
-    static const double FOOTER_FLASH_TIME;
     static const float FOOTER_VERTICAL_PADDING;
     static const float LEVEL_NAME_HORIZONTAL_PADDING;
     static const float HEADER_INBETWEEN_VERTICAL_PADDING;
@@ -59,8 +58,6 @@ private:
     static const double HIDE_DIFFICULTY_CHOICE_PANE_TIME;
 
     static const double POINT_SCORE_ANIM_TIME;
-
-    bool gameProgressWasSaved;
 
     bool waitingForKeyPress;
     AnimationLerp<double> scoreValueAnimation;

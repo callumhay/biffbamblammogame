@@ -85,7 +85,7 @@ eyeGlowPulser(ScaleEffect(1.0f, 1.5f)) {
     
     this->baseExplodingEmitter     = this->BuildExplodingEmitter(ClassicalBoss::BASE_WIDTH, ClassicalBoss::BASE_HEIGHT);
     this->pedimentExplodingEmitter = this->BuildExplodingEmitter(ClassicalBoss::PEDIMENT_WIDTH, ClassicalBoss::PEDIMENT_HEIGHT);
-    this->eyeExplodingEmitter      = this->BuildExplodingEmitter(1.2f*ClassicalBoss::EYE_WIDTH, 1.2f*ClassicalBoss::EYE_HEIGHT);
+    this->eyeExplodingEmitter      = this->BuildExplodingEmitter(1.5f * ClassicalBoss::EYE_WIDTH, 1.5f * ClassicalBoss::EYE_HEIGHT);
 }
 
 ClassicalBossMesh::~ClassicalBossMesh() {
@@ -531,6 +531,7 @@ void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         else {
             glPushMatrix();
             glMultMatrixf(eye->GetWorldTransform().begin());
+            this->eyeExplodingEmitter->SetParticleAlpha(eye->GetAlpha());
             this->eyeExplodingEmitter->Tick(dT);
             this->eyeExplodingEmitter->Draw(camera);
             glPopMatrix();

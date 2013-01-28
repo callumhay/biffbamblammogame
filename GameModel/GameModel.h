@@ -123,10 +123,6 @@ private:
 	// Private getters and setters ****************************************
 	void SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNewWorldEvent);
 
-	GameWorld* GetCurrentWorld() const {
-		return this->worlds[this->currWorldNum];
-	}
-
 	void SetCurrentStateImmediately(GameState* newState) {
 		assert(newState != NULL);
 		if (this->currState != NULL) {
@@ -193,14 +189,12 @@ public:
     static bool IsTutorialLevel(int worldIdx, int levelIdx) {
         return (worldIdx == 0 && levelIdx == 0);
     }
-
     bool IsCurrentLevelTheTutorialLevel() const {
         const GameWorld* world = this->GetCurrentWorld();
         const GameLevel* level = this->GetCurrentLevel();
         // Zeroth world, zeroth level == tutorial level
         return GameModel::IsTutorialLevel(world->GetWorldIndex(), level->GetLevelIndex());
     }
-
     bool IsCurrentLevelABossLevel() const {
         const GameLevel* level = this->GetCurrentLevel();
         return level->GetHasBoss(); 
@@ -210,7 +204,16 @@ public:
     //void IncrementScore(std::list<PointAward>& pointAwardsList);
     void IncrementNumInterimBlocksDestroyed(const Point2D& pos) { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1, pos); }
 
-    GameWorld* GetWorldByName(const std::string& name);
+    GameWorld* GetWorldByName(const std::string& name) const;
+
+    GameWorld* GetWorldByIndex(int index) const {
+        assert(index >= 0 && index < static_cast<int>(this->worlds.size()));
+        return this->worlds[index];
+    }
+
+	GameWorld* GetCurrentWorld() const {
+		return this->worlds[this->currWorldNum];
+	}
 
 	GameState::GameStateType GetCurrentStateType() const {
 		if (this->currState != NULL) {
@@ -253,6 +256,8 @@ public:
     bool ActivateSafetyNet();
     void DestroySafetyNet();
 
+    void CleanUpAfterBossDeath();
+
 	// General public methods for the model ********************************
 	void Tick(double seconds);
 
@@ -276,6 +281,9 @@ public:
 	const std::string& GetCurrentWorldName() const {
 		return this->GetCurrentWorld()->GetName();
 	}
+    int GetLastWorldIndex() const {
+        return static_cast<int>(this->worlds.size()) - 1;
+    }
 	
     int GetTotalStarsCollectedInGame() const;
 

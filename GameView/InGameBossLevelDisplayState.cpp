@@ -42,6 +42,7 @@ InGameDisplayState(display) {
 
 InGameBossLevelDisplayState::~InGameBossLevelDisplayState() {
     this->display->GetAssets()->ToggleLightsForBossDeath(true, 0.01);
+    this->display->GetModel()->GetPlayerPaddle()->SetLevelBoundsChecking(true);
 }
 
 void InGameBossLevelDisplayState::RenderFrame(double dT) {
@@ -77,6 +78,10 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             break;
 
         case InGameBossLevelDisplayState::OutroBossState: {
+            
+            // Clean up all the projectiles and assorted in-game stuff from the gamemodel
+            GameModel* model = this->display->GetModel();
+            model->CleanUpAfterBossDeath();
 
             // Cancel all effects...
             this->display->GetAssets()->GetItemAssets()->ClearTimers();
@@ -85,7 +90,7 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
 
 		    // Stop world background music (if it's still going)
 		    this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
-            
+
             // The outro consists of 'explosive' white lines emitting from the boss
             // and then an animation to the whole screen going white...
             this->outroFinishCountdown =
@@ -99,16 +104,13 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
 
             PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
             float levelWidthTimes2 = 2*this->display->GetModel()->GetCurrentLevel()->GetLevelUnitWidth();
-            paddle->UpdatePaddleBounds(-levelWidthTimes2, levelWidthTimes2);
+            paddle->SetLevelBoundsChecking(false);
             this->paddlePosGetTheHellOutAnim.SetLerp(0.0, Boss::TOTAL_DEATH_ANIM_TIME, 
                 paddle->GetCenterPosition()[0], levelWidthTimes2);
 
             break;
         }
 
-        case InGameBossLevelDisplayState::VictoryBossState:
-            break;
-        
         default:
             assert(false);
             return;
@@ -138,10 +140,6 @@ void InGameBossLevelDisplayState::RenderBossState(double dT) {
             this->ExecuteOutroBossState(dT);
             break;
 
-        case InGameBossLevelDisplayState::VictoryBossState:
-            this->ExecuteVictoryBossState(dT);
-            break;
-        
         default:
             assert(false);
             break;
@@ -215,17 +213,14 @@ void InGameBossLevelDisplayState::ExecuteOutroBossState(double dT) {
     this->renderPipeline.RenderHUDWithAlpha(dT, unimportantObjectsAlpha);
 
     if (this->outroFinishCountdown <= 0.0) {
-        //this->SetBossState(InGameBossLevelDisplayState::VictoryBossState);
+        // Signal that the boss level is now complete, this will end up changing the display state
+        const GameModel* model = this->display->GetModel();
+        const GameLevel* level = model->GetCurrentLevel();
+        Boss* boss = level->GetBoss();
+        assert(boss != NULL);
+        boss->SetIsLevelCompleteDead(true);
     }
     else {
         this->outroFinishCountdown -= dT;
     }
-}
-
-void InGameBossLevelDisplayState::ExecuteVictoryBossState(double dT) {
-    const GameModel* model = this->display->GetModel();
-    const GameLevel* level = model->GetCurrentLevel();
-    Boss* boss = level->GetBoss();
-    assert(boss != NULL);
-    boss->SetIsLevelCompleteDead(true);
 }

@@ -43,6 +43,8 @@ public:
 protected:
 	InGameRenderPipeline renderPipeline;
 
+    virtual bool IsInGameMenuEnabled() const { return true; }
+
 private:
 	DISALLOW_COPY_AND_ASSIGN(InGameDisplayState);
 };

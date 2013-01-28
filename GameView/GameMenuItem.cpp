@@ -11,6 +11,7 @@
 
 #include "GameMenuItem.h"
 #include "GameMenu.h"
+#include "GameViewConstants.h"
 
 #include "../BlammoEngine/Camera.h"
 
@@ -104,18 +105,7 @@ GameMenuItemWithFlashLabel::GameMenuItemWithFlashLabel(const TextLabel2D& smLabe
                                                        const TextLabel2D& flashLabel, GameSubMenu* subMenu) :
 GameMenuItem(smLabel, lgLabel, subMenu), flashLbl(flashLabel) {
 
-    std::vector<double> timeVals;
-    timeVals.reserve(3);
-    timeVals.push_back(0.0);
-    timeVals.push_back(0.5);
-    timeVals.push_back(1.0);
-    std::vector<Colour> colourVals;
-    colourVals.reserve(3);
-    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-    colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
-    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-    this->flashAnimation.SetLerp(timeVals, colourVals);
-    this->flashAnimation.SetRepeat(true);
+    this->flashAnimation = GameViewConstants::GetInstance()->BuildFlashingColourAnimation();
 }
 
 GameMenuItemWithFlashLabel::~GameMenuItemWithFlashLabel() {
