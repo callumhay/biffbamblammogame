@@ -68,9 +68,6 @@ flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
     const GameLevel* completedLevel = this->display->GetModel()->GetCurrentLevel();
     assert(completedLevel != NULL);
 
-    // Save game progress
-    GameProgressIO::SaveGameProgress(gameModel);
-
     const Colour smallScoreLabelColour(0.75f, 0.75f, 0.75f);
 
     /*

@@ -964,7 +964,7 @@ void SelectLevelMenuState::AbstractLevelMenuItem::DrawPadlock(double dT) {
     glPushMatrix();
     glTranslatef(lockMoveX + this->topLeftCorner[0] + this->GetWidth()/2, this->topLeftCorner[1] - this->GetHeight()/2, 0.0f);
     
-    float padlockScale = PADLOCK_SCALE * this->GetHeight();
+    float padlockScale = static_cast<int>(PADLOCK_SCALE * this->GetHeight());
     glScalef(padlockScale, padlockScale, 1.0f);
     
     this->state->padlockTexture->BindTexture();

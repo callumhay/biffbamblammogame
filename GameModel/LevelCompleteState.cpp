@@ -14,6 +14,7 @@
 #include "BallOnPaddleState.h"
 #include "LevelStartState.h"
 #include "GameModel.h"
+#include "GameProgressIO.h"
 
 /**
  * When a level completes the game model needs to be set to the appropriate
@@ -40,6 +41,9 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
             currLevel->SetNewHighScore(false);
         }
     }
+
+    // Save game progress!
+    GameProgressIO::SaveGameProgress(this->gameModel);
 
     // EVENT: Level is complete
     GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
