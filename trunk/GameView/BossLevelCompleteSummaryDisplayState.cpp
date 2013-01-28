@@ -22,7 +22,7 @@
 const double BossLevelCompleteSummaryDisplayState::FADE_OUT_TIME          = 0.75;
 const float BossLevelCompleteSummaryDisplayState::FOOTER_VERTICAL_PADDING = 20.0f;
 
-const float BossLevelCompleteSummaryDisplayState::VICTORY_TO_WORLD_VERTICAL_PADDING  = 150.0f;
+const float BossLevelCompleteSummaryDisplayState::VICTORY_TO_WORLD_VERTICAL_PADDING  = 200.0f;
 const float BossLevelCompleteSummaryDisplayState::WORLD_TO_COMPLETE_VERTICAL_PADDING = 10.0f;
 
 const float BossLevelCompleteSummaryDisplayState::VICTORY_LABEL_VERTICAL_SPACING = 20.0f;
@@ -49,6 +49,14 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
         GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
     assert(this->spinGlowTex != NULL);
 
+    this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+    assert(this->flareTex != NULL);
+
+    this->bangStarTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
+    assert(this->bangStarTex != NULL);
+
     const Camera& camera = this->display->GetCamera();
 
     const GameModel* gameModel = this->display->GetModel();
@@ -58,12 +66,17 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     int completedWorldIdx = completedWorld->GetWorldIndex();
 
     // Setup all the labels...
+    this->victoryLabel1.SetColour(Colour(1,1,1));
+    this->victoryLabel1.SetDropShadow(Colour(0,0,0), 0.075f);
     this->victoryLabel1.SetScale(2.0f);
+    this->victoryLabel2.SetColour(Colour(1,1,1));
+    this->victoryLabel2.SetDropShadow(Colour(0,0,0), 0.06f);
     this->victoryLabel2.SetScale(2.0f);
 
     this->worldCompleteLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), completedWorld->GetName() + " movement COMPLETE.");
     this->worldCompleteLabel.SetColour(Colour(1,1,1));
+    this->worldCompleteLabel.SetDropShadow(Colour(0,0,0), 0.075f);
     //this->worldLeftLabel.SetScale(this->display->GetTextScalingFactor());
     
 
@@ -80,14 +93,14 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
         assert(nextWorld != NULL);
 
         this->unlockedLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
-            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), nextWorld->GetName() + " Movement UNLOCKED.");
+            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), nextWorld->GetName() + " movement UNLOCKED.");
         this->unlockedLabel->SetColour(Colour(1,1,1));
+        this->unlockedLabel->SetDropShadow(Colour(0,0,0), 0.075f);
     }
 
 	// Setup the label for the press any key text...
 	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);
 	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
-
 
     // Setup all the animations...
     static const double INITIAL_FADE_IN_TIME = 1.0;
@@ -139,9 +152,6 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
 
 	// Set the footer colour flash animation
     this->footerColourAnimation = GameViewConstants::GetInstance()->BuildFlashingColourAnimation();
-
-    // Save game progress!
-    GameProgressIO::SaveGameProgress(gameModel);
 }
 
 BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
@@ -150,11 +160,14 @@ BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
         this->unlockedLabel = NULL;
     }
 
-
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bgTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->spinGlowTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bangStarTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
     assert(success);
     UNUSED_VARIABLE(success);
 }
@@ -282,16 +295,36 @@ float BossLevelCompleteSummaryDisplayState::DrawVictoryLabel(float screenWidth) 
 	    glLoadIdentity();
         
         glTranslatef((screenWidth - glowScale) / 2.0f + glowScale / 2.0f, currYPos1 - this->GetVictoryLabelBlockHeight() / 2.0f, 0.0f);
+        
+        glPushMatrix();
         glRotatef(rotAmt, 0.0f, 0.0f, 1.0f);
-        glScalef(glowScale, glowScale, 1.0f);
-
+        glScalef(0.8f * glowScale, 0.8f * glowScale, 1.0f);
+        
         const Colour& glowColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
         glColor4f(glowColour.R(), glowColour.G(), glowColour.B(), 1.0f);
-
         this->spinGlowTex->BindTexture();
         GeometryMaker::GetInstance()->DrawQuad();
-        this->spinGlowTex->UnbindTexture();
         
+        glPopMatrix();
+
+        glPushMatrix();
+        glRotatef(-rotAmt, 0.0f, 0.0f, 1.0f);
+        glScalef(1.25f * glowScale, 1.25f * glowScale, 1.0f);
+
+        glColor4f(1.0f, 0.9f, 0.9f, 1.0f);
+        this->flareTex->BindTexture();
+        GeometryMaker::GetInstance()->DrawQuad();        
+        
+        glPopMatrix();
+
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glPushMatrix();
+        glScalef(glowScale, 0.5f*glowScale, 1.0f);
+        this->bangStarTex->BindTexture();
+        GeometryMaker::GetInstance()->DrawQuad();
+        this->bangStarTex->UnbindTexture();
+        glPopMatrix();
+
         Camera::PopWindowCoords();
         glPopAttrib();
     }
@@ -363,6 +396,9 @@ void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
 
         this->unlockedAlphaAnim.SetInterpolantValue(this->unlockedAlphaAnim.GetTargetValue());
         this->unlockedAlphaAnim.ClearLerp();
+
+        this->glowScaleAnim.SetInterpolantValue(this->glowScaleAnim.GetTargetValue());
+        this->glowScaleAnim.ClearLerp();
 
         this->allAnimationIsDone = true;
     }

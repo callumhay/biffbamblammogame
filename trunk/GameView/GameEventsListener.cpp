@@ -81,7 +81,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 	UNUSED_PARAMETER(world);
-	
+
 	// Stop world background music (if it's still going)
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
 	debug_output("EVENT: Movement/World completed");

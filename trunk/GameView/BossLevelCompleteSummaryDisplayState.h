@@ -67,6 +67,8 @@ private:
 
     Texture2D* bgTex;
     Texture2D* spinGlowTex;
+    Texture2D* flareTex;
+    Texture2D* bangStarTex;
 
     float GetCenterTextBlockTopYCoord(float screenHeight) const;
     float GetCenterTextBlockHeight() const;
