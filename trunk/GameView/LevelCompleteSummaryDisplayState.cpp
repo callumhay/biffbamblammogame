@@ -545,8 +545,6 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     }
     else {
 
-
-
         if (this->waitingForKeyPress) {
 
             // Set the score animation value

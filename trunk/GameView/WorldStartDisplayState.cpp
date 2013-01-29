@@ -30,8 +30,19 @@ worldNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 nowEnteringLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Now Entering..."),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "- Press Any Key to Continue -"){
 
+    GameModel* gameModel = this->display->GetModel();
+    assert(gameModel != NULL);
+
+    // Make sure the game is in the "BallOnPaddleState" before going through with the 
+    // initialization for the visuals
+    gameModel->UnsetPause(GameModel::PauseGame);
+    gameModel->UnsetPause(GameModel::PauseState);
+    while (gameModel->GetCurrentStateType() != GameState::BallOnPaddleStateType) {
+        this->display->UpdateModel(EPSILON);
+    }
+
 	// Pause all game play elements in the game model
-    this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall | GameModel::PauseState);
+    gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall | GameModel::PauseState);
 
     // Load background texture
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -45,7 +56,8 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 
 	// Set the header fade wipe
 	this->showHeaderAnimation.SetInterpolantValue(0.0f);
-	this->showHeaderAnimation.SetLerp(0.0f, WorldStartDisplayState::HEADER_WIPE_TIME, 0.0f, this->display->GetCamera().GetWindowWidth() + 2 * HEADER_WIPE_FADE_QUAD_SIZE);
+	this->showHeaderAnimation.SetLerp(0.0f, WorldStartDisplayState::HEADER_WIPE_TIME, 0.0f,
+        this->display->GetCamera().GetWindowWidth() + 2 * HEADER_WIPE_FADE_QUAD_SIZE);
 	this->showHeaderAnimation.SetRepeat(false);
 
 	this->titleFadeIn.SetLerp(0.1 * HEADER_WIPE_TIME, HEADER_WIPE_TIME, 0.0f, 1.0f);
@@ -68,7 +80,7 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 	this->footerColourAnimation.SetRepeat(true);
 
 	// Create a label for the current world name...
-	const std::string& worldName = this->display->GetModel()->GetCurrentWorldName();
+	const std::string& worldName = gameModel->GetCurrentWorldName();
 	this->worldNameLabel.SetText(worldName);
 	this->worldNameLabel.SetDropShadow(Colour(0, 0, 0), 0.05f);
 	this->worldNameLabel.SetColour(Colour(1.0f, 0.5f, 0.0f));			// Orange
