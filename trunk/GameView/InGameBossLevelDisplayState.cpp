@@ -15,6 +15,9 @@
 
 #include "../GameModel/Boss.h"
 
+#include "../GameControl/GameControllerManager.h"
+#include "../GameControl/BBBGameController.h"
+
 // The time that the game (boss and paddle) are unpaused right before the intro ends
 const double InGameBossLevelDisplayState::TIME_OF_UNPAUSE_BEFORE_INTRO_END = 0.85;
 
@@ -25,8 +28,10 @@ const double InGameBossLevelDisplayState::FADE_TO_BLACK_TIME_IN_SECS = Boss::WAI
 // We wait a brief amount of time at the end of the outro (for dramatic pause)
 const double InGameBossLevelDisplayState::WAIT_TIME_AT_END_OF_OUTRO_IN_SECS = 1.0;
 
+const double InGameBossLevelDisplayState::CONTROLLER_VIBE_PULSE_TIME = 0.2;
+
 InGameBossLevelDisplayState::InGameBossLevelDisplayState(GameDisplay* display) :
-InGameDisplayState(display) {
+InGameDisplayState(display), timeUntilBigFlashyBoom(0.0), pulseTimeCounter(0.0) {
 
     // Don't allow the player to launch the ball just yet, the boss has a dramatic intro that
     // needs to be animated first...
@@ -93,10 +98,11 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
 
             // The outro consists of 'explosive' white lines emitting from the boss
             // and then an animation to the whole screen going white...
-            this->outroFinishCountdown =
-                this->display->GetAssets()->ActivateBossExplodingFlashEffects(
-                Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME, this->display->GetModel());
-            this->outroFinishCountdown += WAIT_TIME_AT_END_OF_OUTRO_IN_SECS;
+            this->outroFinishCountdown = Boss::TOTAL_DEATH_ANIM_TIME + WAIT_TIME_AT_END_OF_OUTRO_IN_SECS;
+            this->timeUntilBigFlashyBoom = this->display->GetAssets()->ActivateBossExplodingFlashEffects(
+                Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME, this->display->GetModel(),
+                this->display->GetCamera());
+            this->pulseTimeCounter = 0.0;
             
             this->display->GetAssets()->ToggleLightsForBossDeath(false, FADE_TO_BLACK_TIME_IN_SECS);
 
@@ -104,9 +110,14 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
 
             PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
             float levelWidthTimes2 = 2*this->display->GetModel()->GetCurrentLevel()->GetLevelUnitWidth();
-            paddle->SetLevelBoundsChecking(false);
+
+            paddle->SetLevelBoundsChecking(false); // Turn off bounds checking so the paddle can leave the level
+
             this->paddlePosGetTheHellOutAnim.SetLerp(0.0, Boss::TOTAL_DEATH_ANIM_TIME, 
                 paddle->GetCenterPosition()[0], levelWidthTimes2);
+
+            this->display->GetCamera().SetCameraShake(Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME,
+                Vector3D(0.2f, 0.2f, 0.0), 50);
 
             break;
         }
@@ -211,6 +222,26 @@ void InGameBossLevelDisplayState::ExecuteOutroBossState(double dT) {
 
     this->renderPipeline.RenderFrameWithoutHUD(dT);
     this->renderPipeline.RenderHUDWithAlpha(dT, unimportantObjectsAlpha);
+
+    if (this->timeUntilBigFlashyBoom <= 0.0) {
+        double shakeTime = this->outroFinishCountdown - this->timeUntilBigFlashyBoom;
+        assert(shakeTime > 0.0);
+        this->display->GetCamera().SetCameraShake(shakeTime, Vector3D(0.35f, 0.35f, 0.0), 100);
+        GameControllerManager::GetInstance()->VibrateControllers(shakeTime, 
+            BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+    }
+    else {
+        this->timeUntilBigFlashyBoom -= dT;
+        // Pulse the controller...
+        if (this->pulseTimeCounter <= 0.0) {
+            GameControllerManager::GetInstance()->VibrateControllers(CONTROLLER_VIBE_PULSE_TIME/2.0, 
+                BBBGameController::SoftVibration, BBBGameController::SoftVibration);
+            this->pulseTimeCounter = CONTROLLER_VIBE_PULSE_TIME;
+        }
+        else {
+            this->pulseTimeCounter -= dT;
+        }
+    }
 
     if (this->outroFinishCountdown <= 0.0) {
         // Signal that the boss level is now complete, this will end up changing the display state

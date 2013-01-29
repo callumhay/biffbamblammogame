@@ -21,7 +21,7 @@ const double BallOnPaddleState::TOTAL_RELEASE_TIMER_TIME_IN_SECS = START_RELEASE
 BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), 
 firstTick(true), releaseTimerStarted(false), releaseTimerCounter(0.0) {
 	assert(gm != NULL);
-	
+
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
 

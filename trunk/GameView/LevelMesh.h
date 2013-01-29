@@ -81,7 +81,7 @@ public:
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
 
     double ActivateBossIntro();
-    double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model);
+    double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
 
 private:
 	const GameLevel* currLevel;

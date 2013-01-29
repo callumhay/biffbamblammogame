@@ -106,12 +106,15 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
     return result;
 }
 
-double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model) {
+double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model,
+                                                   const Camera& camera) {
+    UNUSED_PARAMETER(camera);
+
     assert(model != NULL);
     assert(!this->finalExplosionIsActive);
 
     assert(delayInSecs < Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME);
-    double lineAnimTime = (Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME - delayInSecs) / 2.25 + delayInSecs;
+    double lineAnimTime = (Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME - delayInSecs) / 2.5 + delayInSecs;
 
     const GameLevel* level = model->GetCurrentLevel();
     assert(level != NULL);
@@ -121,7 +124,7 @@ double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const Gam
 
     this->finalExplosionIsActive = true;
 
-    return Boss::TOTAL_DEATH_ANIM_TIME;
+    return lineAnimTime;
 }
 
 void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {

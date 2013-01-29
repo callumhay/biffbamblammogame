@@ -33,6 +33,7 @@ private:
     static const double TIME_OF_UNPAUSE_BEFORE_INTRO_END;
     static const double FADE_TO_BLACK_TIME_IN_SECS;
     static const double WAIT_TIME_AT_END_OF_OUTRO_IN_SECS;
+    static const double CONTROLLER_VIBE_PULSE_TIME;
 
     // State-related variables
     enum BossState { IntroBossState, FadeInBossState, InPlayBossState, OutroBossState };
@@ -44,6 +45,9 @@ private:
     double fadeInCountdown;
     // OutroBossState;
     double outroFinishCountdown;
+    double timeUntilBigFlashyBoom;
+    double pulseTimeCounter;
+
     AnimationLerp<float> fadeObjectsAnim;
     AnimationLerp<float> paddlePosGetTheHellOutAnim;
 

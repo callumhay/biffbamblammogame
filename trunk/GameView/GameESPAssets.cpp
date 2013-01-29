@@ -3878,7 +3878,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	ESPPointEmitter* angryBolts = new ESPPointEmitter();
 	angryBolts->SetNumParticleLives(1);
 	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	angryBolts->SetInitialSpd(ESPInterval(3.0f, 5.0f));
+	angryBolts->SetInitialSpd(ESPInterval(4.33f));
 	angryBolts->SetParticleLife(ESPInterval(2.0f));
 	angryBolts->SetParticleSize(ESPInterval(0.25f*maxSize), ESPInterval(0.5f*maxSize));
 	angryBolts->SetEmitAngleInDegrees(45);
