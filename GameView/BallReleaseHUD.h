@@ -27,6 +27,7 @@ public:
     void Draw(double dT, const Camera& camera, const GameModel& gameModel);
     void TimerStarted();
     void BallReleased();
+    void StopAndClearTimer();
 
     void Reinitialize();
 
@@ -52,6 +53,9 @@ inline void BallReleaseHUD::TimerStarted() {
     this->SetState(BallReleaseHUD::STARTING);
 }
 inline void BallReleaseHUD::BallReleased() {
+    this->SetState(BallReleaseHUD::RELEASED);
+}
+inline void BallReleaseHUD::StopAndClearTimer() {
     this->SetState(BallReleaseHUD::RELEASED);
 }
 

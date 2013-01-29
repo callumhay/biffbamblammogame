@@ -3,22 +3,22 @@ Invader
 S S S S S S S S S S S S S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
-S E Y Y E E E E E Y Y E S 
-S E E Y Y E E E Y Y E E S 
-S E E E Y Y Y Y Y E E E S 
-S E E Y Y Y Y Y Y Y E E S 
-S E Y Y Y Y Y Y Y Y Y E S 
-S E Y Y R Y Y Y R Y Y E S 
-S E Y Y R Y Y Y R Y Y E S 
-S Y Y Y Y Y Y Y Y Y Y Y S 
-S Y Y Y Y Y Y Y Y Y Y Y S 
-S Y Y Y Y Y Y Y Y Y Y Y S 
-S Y E Y Y Y Y Y Y Y E Y S 
-S Y E Y Y Y Y Y Y Y E Y S 
-S Y E Y E E E E E Y E Y S 
-S E E Y E E E E E Y E E S 
-S E E E Y Y E Y Y E E E S 
-S E E E Y Y E Y Y E E E S 
+S E G G E E E E E G G E S 
+S E E G G E E E G G E E S 
+S E E E G G G G G E E E S 
+S E E G G G G G G G E E S 
+S E G G G G G G G G G E S 
+S E G G R G G G R G G E S 
+S E G G R G G G R G G E S 
+S G G G G G G G G G G G S 
+S G G G G G G G G G G G S 
+S G G G G G G G G G G G S 
+S G E G G G G G G G E G S 
+S G E G G G G G G G E G S 
+S G E G E E E E E G E G S 
+S E E G E E E E E G E E S 
+S E E E G G E G G E E E S 
+S E E E G G E G G E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -59,6 +59,7 @@ BallCam 2
 MagnetPaddle 2
 MultiBall3 2
 IceBall 2
+MineLauncherPaddle 2
 SlowBall 2
 GravityBall 2
 CrazyBall 2

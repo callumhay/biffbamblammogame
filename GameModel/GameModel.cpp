@@ -364,7 +364,11 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
 
     }
 
+    
     this->difficulty = difficulty;
+
+    // EVENT: Difficulty change
+    GameEventManager::Instance()->ActionDifficultyChanged(difficulty);
 }
 
 bool GameModel::ActivateSafetyNet() {

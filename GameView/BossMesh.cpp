@@ -111,7 +111,7 @@ double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const Gam
     assert(!this->finalExplosionIsActive);
 
     assert(delayInSecs < Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME);
-    double lineAnimTime = (Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME - delayInSecs) / 1.5 + delayInSecs;
+    double lineAnimTime = (Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME - delayInSecs) / 2.25 + delayInSecs;
 
     const GameLevel* level = model->GetCurrentLevel();
     assert(level != NULL);

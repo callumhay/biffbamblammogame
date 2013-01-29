@@ -586,6 +586,14 @@ public:
         UNUSED_PARAMETER(newNumStars);
     }
 
+    /**
+     * Event triggered once right after the difficulty is changed in the gamemodel.
+     * Arguements: newDifficulty - The new difficulty level of the game.
+     */
+    virtual void DifficultyChangedEvent(const GameModel::Difficulty& newDifficulty) {
+        UNUSED_PARAMETER(newDifficulty);
+    }
+
     // AI Events ***********************************************************
 
     /**

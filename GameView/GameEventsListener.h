@@ -102,6 +102,8 @@ public:
     void PointNotificationEvent(const PointAward& pointAward);
     void NumStarsChangedEvent(int oldNumStars, int newNumStars);
 
+    void DifficultyChangedEvent(const GameModel::Difficulty& newDifficulty);
+
     void LaserTurretAIStateChangedEvent(const LaserTurretBlock& block,
         LaserTurretBlock::TurretAIState oldState, LaserTurretBlock::TurretAIState newState);
     void LaserFiredByTurretEvent(const LaserTurretBlock& block);

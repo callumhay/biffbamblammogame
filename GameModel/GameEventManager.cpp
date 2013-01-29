@@ -11,6 +11,7 @@
 
 #include "GameEventManager.h"
 #include "GameEvents.h"
+#include "GameModel.h"
 
 GameEventManager* GameEventManager::instance = NULL;
 
@@ -582,6 +583,13 @@ void GameEventManager::ActionNumStarsChanged(int oldNumStars, int newNumStars) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->NumStarsChangedEvent(oldNumStars, newNumStars);
+	}
+}
+
+void GameEventManager::ActionDifficultyChanged(int newDifficulty) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+        (*this->listenerIter)->DifficultyChangedEvent(static_cast<GameModel::Difficulty>(newDifficulty));
 	}
 }
 

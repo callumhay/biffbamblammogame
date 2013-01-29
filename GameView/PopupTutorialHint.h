@@ -17,9 +17,26 @@
 
 #include "../BlammoEngine/Camera.h"
 
+class PopupTutorialHint;
+
+class PaneHandler : public OverlayPaneEventHandler {
+public:
+    PaneHandler(PopupTutorialHint* popupHint) : popupHint(popupHint) {
+    }
+    virtual ~PaneHandler() {};
+
+    void SetPopupTutorialHint(PopupTutorialHint* popup) { this->popupHint = popup; }
+
+    virtual void OptionSelected(const std::string& optionText);
+
+protected:
+    PopupTutorialHint* popupHint;
+};
+
 class PopupTutorialHint : public TutorialHint {
 public:
     PopupTutorialHint(size_t width);
+    PopupTutorialHint(size_t width, PaneHandler* handler);
     ~PopupTutorialHint();
 
     DecoratorOverlayPane* GetPane() const {
@@ -39,16 +56,6 @@ public:
 
 private:
     static const double UNSHOW_TIME;
-
-    class PaneHandler : public OverlayPaneEventHandler {
-    public:
-        PaneHandler(PopupTutorialHint* popupHint) : popupHint(popupHint) {
-            assert(popupHint != NULL);
-        }
-        void OptionSelected(const std::string& optionText);
-    private:
-        PopupTutorialHint* popupHint;
-    };
 
     DecoratorOverlayPane* pane;
     OverlayPaneEventHandler* paneHandler;

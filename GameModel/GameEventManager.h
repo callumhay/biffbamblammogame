@@ -134,6 +134,8 @@ public:
 	void ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position);
     void ActionNumStarsChanged(int oldNumStars, int newNumStars);
 
+    void ActionDifficultyChanged(int newDifficulty);
+
     void ActionLaserTurretAIStateChanged(const LaserTurretBlock& block, LaserTurretBlock::TurretAIState oldState,
         LaserTurretBlock::TurretAIState newState);
     void ActionLaserFiredByTurret(const LaserTurretBlock& block);
