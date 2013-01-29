@@ -46,10 +46,10 @@ bool GeometryMaker::InitializeQuadDL() {
 	
 	glBegin(GL_QUADS);
 		glNormal3i(0, 0, 1);
-		glTexCoord2i(0, 0); glVertex2f(-0.5f, -0.5f);
-		glTexCoord2i(1, 0); glVertex2f( 0.5f, -0.5f);
-		glTexCoord2i(1, 1); glVertex2f( 0.5f,  0.5f);
-		glTexCoord2i(0, 1); glVertex2f(-0.5f,  0.5f);
+		glTexCoord2f(0.0f, 0.0f); glVertex2f(-0.5f, -0.5f);
+		glTexCoord2f(1.0f, 0.0f); glVertex2f( 0.5f, -0.5f);
+		glTexCoord2f(1.0f, 1.0f); glVertex2f( 0.5f,  0.5f);
+		glTexCoord2f(0.0f, 1.0f); glVertex2f(-0.5f,  0.5f);
 	glEnd();
 	glEndList();
 

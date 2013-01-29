@@ -962,7 +962,8 @@ void SelectLevelMenuState::AbstractLevelMenuItem::DrawPadlock(double dT) {
         
     glColor4f(1,1,1,1);
     glPushMatrix();
-    glTranslatef(lockMoveX + this->topLeftCorner[0] + this->GetWidth()/2, this->topLeftCorner[1] - this->GetHeight()/2, 0.0f);
+    glTranslatef(static_cast<int>(lockMoveX + this->topLeftCorner[0] + this->GetWidth()/2), 
+                 static_cast<int>(this->topLeftCorner[1] - this->GetHeight()/2), 0.0f);
     
     float padlockScale = static_cast<int>(PADLOCK_SCALE * this->GetHeight());
     glScalef(padlockScale, padlockScale, 1.0f);
@@ -1270,6 +1271,6 @@ void SelectLevelMenuState::BossLevelMenuItem::Draw(const Camera& camera, double 
 }
 
 float SelectLevelMenuState::BossLevelMenuItem::GetHeight() const {
-    return std::max<float>(this->height, NUM_TO_BOSS_NAME_GAP + 
-        std::max<float>(this->bossLabel->GetHeight(), this->bossIconSize) + this->nameLabel->GetHeight());
+    return static_cast<int>(std::max<float>(this->height, NUM_TO_BOSS_NAME_GAP + 
+        std::max<float>(this->bossLabel->GetHeight(), this->bossIconSize) + this->nameLabel->GetHeight()));
 }

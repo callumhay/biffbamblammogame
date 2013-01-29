@@ -29,7 +29,8 @@ enum SoundType {
     SHATTER = 8,
     CRAZY = 9,
     LAUNCH = 10,
-    ATTACH = 11
+    ATTACH = 11,
+    ANGRY = 12
 };
 enum Extremeness {WEAK = 0, NORMAL = 1, PRETTY_GOOD = 2, GOOD = 3, AWESOME = 4, SUPER_AWESOME = 5, UBER = 6};
 
@@ -95,6 +96,7 @@ private:
 	void LoadCrazyWords();
     void LoadLaunchWords();
     void LoadAttachWords();
+    void LoadAngryWords();
 
     void LoadVictoryDescriptors();
 

@@ -497,7 +497,7 @@ void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     }
 
     // Eye effects
-    if (eye->GetAlpha() > 0.0f && eye->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+    if (eye->GetAlpha() > 0.0f) {
         
         // Draw the eye's glowing effect
         glPushMatrix();
@@ -506,35 +506,37 @@ void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         this->eyePulseGlow.Tick(dT);
         this->eyePulseGlow.Draw(camera);
         glPopMatrix();
+        
+        if (eye->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            if (!eye->GetIsDestroyed()) {
+                const BossWeakpoint* eyeWeakpt = static_cast<const BossWeakpoint*>(eye);
+                float eyeLifePercentage = eyeWeakpt->GetCurrentLifePercentage();
+                if (eyeLifePercentage < 1.0) {
+                    
+                    glPushMatrix();
+                    glMultMatrixf(eye->GetWorldTransform().begin());
 
-        if (!eye->GetIsDestroyed()) {
-            const BossWeakpoint* eyeWeakpt = static_cast<const BossWeakpoint*>(eye);
-            float eyeLifePercentage = eyeWeakpt->GetCurrentLifePercentage();
-            if (eyeLifePercentage < 1.0) {
-                
+                    // Draw smoke
+                    this->eyeSmokeEmitter->Tick(dT);
+                    this->eyeSmokeEmitter->Draw(camera);
+
+                    if (eyeLifePercentage <= 0.5) {
+                        // Draw fire as well
+                        this->eyeFireEmitter->Tick(dT);
+                        this->eyeFireEmitter->Draw(camera);
+                    }
+
+                    glPopMatrix();
+                }
+            }
+            else {
                 glPushMatrix();
                 glMultMatrixf(eye->GetWorldTransform().begin());
-
-                // Draw smoke
-                this->eyeSmokeEmitter->Tick(dT);
-                this->eyeSmokeEmitter->Draw(camera);
-
-                if (eyeLifePercentage <= 0.5) {
-                    // Draw fire as well
-                    this->eyeFireEmitter->Tick(dT);
-                    this->eyeFireEmitter->Draw(camera);
-                }
-
+                this->eyeExplodingEmitter->SetParticleAlpha(eye->GetAlpha());
+                this->eyeExplodingEmitter->Tick(dT);
+                this->eyeExplodingEmitter->Draw(camera);
                 glPopMatrix();
             }
-        }
-        else {
-            glPushMatrix();
-            glMultMatrixf(eye->GetWorldTransform().begin());
-            this->eyeExplodingEmitter->SetParticleAlpha(eye->GetAlpha());
-            this->eyeExplodingEmitter->Tick(dT);
-            this->eyeExplodingEmitter->Draw(camera);
-            glPopMatrix();
         }
     }
 }

@@ -12,6 +12,7 @@
 #include "BossWeakpoint.h"
 #include "Projectile.h"
 #include "Beam.h"
+#include "GameEventManager.h"
 
 const double BossWeakpoint::INVULNERABLE_TIME_IN_SECS = 1.5;
 
@@ -111,6 +112,10 @@ void BossWeakpoint::Diminish(float damageAmt, GameModel* gameModel) {
     }
     
     this->currLifePoints = std::max<float>(0.0f, this->currLifePoints - damageAmt);
+    
+    // EVENT: Boss just got hurt
+    GameEventManager::Instance()->ActionBossHurt(this);
+
     if (this->currLifePoints <= 0.0) {
         this->isDestroyed = true;
         this->invulnerableTimer = 0.0;

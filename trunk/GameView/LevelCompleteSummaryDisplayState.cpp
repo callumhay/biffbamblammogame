@@ -545,7 +545,10 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     }
     else {
 
+
+
         if (this->waitingForKeyPress) {
+
             // Set the score animation value
             this->scoreValueAnimation.Tick(dT);
 
@@ -937,67 +940,67 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
 }
 
 void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
-	if (this->waitingForKeyPress) {
+	if (!this->waitingForKeyPress) {
+        return;
+    }
 
-        if (this->starAddAnimationCount == 0) {
-            // Start the fade out animation - the user wants to start playing!
-		    this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
-            waitingForKeyPress = false;
-        }
-        else {
-            // Automatically finish the score tally and other animations
-            this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
-            this->scoreValueAnimation.ClearLerp();
+    if (this->starAddAnimationCount == 0) {
+        // Start the fade out animation - the user wants to start playing!
+	    this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
+        waitingForKeyPress = false;
+    }
 
-            this->levelCompleteTextScaleAnimation.SetInterpolantValue(this->levelCompleteTextScaleAnimation.GetTargetValue());
-            this->levelCompleteTextScaleAnimation.ClearLerp();
+    // Automatically finish the score tally and other animations
+    this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
+    this->scoreValueAnimation.ClearLerp();
 
-            for (size_t i = 0; i < this->starAnimations.size(); i++) {
-                this->starAnimations[i]->SetInterpolantValue(this->starAnimations[i]->GetTargetValue());
-                this->starAnimations[i]->ClearLerp();
-            }
+    this->levelCompleteTextScaleAnimation.SetInterpolantValue(this->levelCompleteTextScaleAnimation.GetTargetValue());
+    this->levelCompleteTextScaleAnimation.ClearLerp();
 
-            this->totalScoreFlyInAnimation.SetInterpolantValue(this->totalScoreFlyInAnimation.GetTargetValue());
-            this->totalScoreFlyInAnimation.ClearLerp();
+    for (size_t i = 0; i < this->starAnimations.size(); i++) {
+        this->starAnimations[i]->SetInterpolantValue(this->starAnimations[i]->GetTargetValue());
+        this->starAnimations[i]->ClearLerp();
+    }
 
-            this->totalScoreFadeInAnimation.SetInterpolantValue(this->totalScoreFadeInAnimation.GetTargetValue());
-            this->totalScoreFadeInAnimation.ClearLerp();
+    this->totalScoreFlyInAnimation.SetInterpolantValue(this->totalScoreFlyInAnimation.GetTargetValue());
+    this->totalScoreFlyInAnimation.ClearLerp();
 
-            this->newHighScoreFade.SetInterpolantValue(this->newHighScoreFade.GetTargetValue());
-            this->newHighScoreFade.ClearLerp();
+    this->totalScoreFadeInAnimation.SetInterpolantValue(this->totalScoreFadeInAnimation.GetTargetValue());
+    this->totalScoreFadeInAnimation.ClearLerp();
 
-            std::list<AnimationMultiLerp<float>*>::iterator alphaAnimIter = this->starAddAlphaAnims.begin();
-            std::list<AnimationLerp<float>*>::iterator moveAnimIter       = this->starAddMoveAnims.begin();
-            for (; alphaAnimIter != this->starAddAlphaAnims.end() && moveAnimIter != this->starAddMoveAnims.end(); ++alphaAnimIter, ++moveAnimIter) {
-                AnimationMultiLerp<float>* alphaAnim = *alphaAnimIter;
-                AnimationLerp<float>* moveAnim = *moveAnimIter;
-                delete alphaAnim;
-                delete moveAnim;
-            }
-            this->starAddAlphaAnims.clear();
-            this->starAddMoveAnims.clear();
+    this->newHighScoreFade.SetInterpolantValue(this->newHighScoreFade.GetTargetValue());
+    this->newHighScoreFade.ClearLerp();
 
-            this->starTotalColourAnim.ClearLerp();
-            this->starTotalScaleAnim.ClearLerp();
-            
-            this->currStarTotal += this->starAddAnimationCount;
-            this->starAddAnimationCount = 0;
-            
-            this->flareEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
-            this->haloEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
+    std::list<AnimationMultiLerp<float>*>::iterator alphaAnimIter = this->starAddAlphaAnims.begin();
+    std::list<AnimationLerp<float>*>::iterator moveAnimIter       = this->starAddMoveAnims.begin();
+    for (; alphaAnimIter != this->starAddAlphaAnims.end() && moveAnimIter != this->starAddMoveAnims.end(); ++alphaAnimIter, ++moveAnimIter) {
+        AnimationMultiLerp<float>* alphaAnim = *alphaAnimIter;
+        AnimationLerp<float>* moveAnim = *moveAnimIter;
+        delete alphaAnim;
+        delete moveAnim;
+    }
+    this->starAddAlphaAnims.clear();
+    this->starAddMoveAnims.clear();
 
-            /*
-            this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
-            this->maxBlocksFadeIn.ClearLerp();
+    this->starTotalColourAnim.ClearLerp();
+    this->starTotalScaleAnim.ClearLerp();
+    
+    this->currStarTotal += this->starAddAnimationCount;
+    this->starAddAnimationCount = 0;
+    
+    this->flareEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
+    this->haloEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
 
-            this->numItemsFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
-            this->numItemsFadeIn.ClearLerp();
+    /*
+    this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+    this->maxBlocksFadeIn.ClearLerp();
 
-            this->totalTimeFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
-            this->totalTimeFadeIn.ClearLerp();
-            */
-        }
-	}
+    this->numItemsFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+    this->numItemsFadeIn.ClearLerp();
+
+    this->totalTimeFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+    this->totalTimeFadeIn.ClearLerp();
+    */
 }
 
 // Callback function for when an option is selected in the difficulty pane

@@ -36,6 +36,7 @@
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/BallBoostModel.h"
+#include "../GameModel/BossWeakpoint.h"
 
 #include "../GameControl/GameControllerManager.h"
 
@@ -1127,6 +1128,24 @@ void GameEventsListener::MineFiredByTurretEvent(const MineTurretBlock& block) {
     */
 
     debug_output("EVENT: Mine Turret fired a mine.");
+}
+
+void GameEventsListener::BossHurtEvent(const BossWeakpoint* hurtPart) {
+    Collision::AABB2D partAABB = hurtPart->GetLocalBounds().GenerateAABBFromLines();
+
+    this->display->GetAssets()->GetESPAssets()->AddBossHurtEffect(hurtPart->GetTranslationPt2D(), 
+        partAABB.GetWidth(), partAABB.GetHeight());
+    debug_output("EVENT: Boss is hurt.");
+}
+
+void GameEventsListener::BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart) {
+    UNUSED_PARAMETER(boss);
+
+    Collision::AABB2D partAABB = angryPart->GetLocalBounds().GenerateAABBFromLines();
+
+    this->display->GetAssets()->GetESPAssets()->AddBossAngryEffect(angryPart->GetTranslationPt2D(),
+        partAABB.GetWidth(), partAABB.GetHeight());
+    debug_output("EVENT: Boss is angry.");
 }
 
 /**

@@ -663,6 +663,27 @@ public:
     virtual void MineFiredByTurretEvent(const MineTurretBlock& block) {
         UNUSED_PARAMETER(block);
     }
+
+    // Boss Events ****************************************************************
+
+    /**
+     * Event triggered once right after a boss weakpoint is hurt.
+     * Arguments: hurtPart - The part that was hurt.
+     */
+    virtual void BossHurtEvent(const BossWeakpoint* hurtPart) {
+        UNUSED_PARAMETER(hurtPart);
+    }
+
+    /**
+     * Event triggered when the boss gets really angry. Happens once right when the boss is angry.
+     * Arguements: boss - The boss that got angry.
+     *             angryPart - The part of the boss that thinks / is associated with being angry.
+     */
+    virtual void BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart) {
+        UNUSED_PARAMETER(boss);
+        UNUSED_PARAMETER(angryPart);
+    }
+
 };
 
 

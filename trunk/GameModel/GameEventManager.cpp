@@ -641,3 +641,17 @@ void GameEventManager::ActionMineFiredByTurret(const MineTurretBlock& block) {
 		(*this->listenerIter)->MineFiredByTurretEvent(block);
 	}
 }
+
+void GameEventManager::ActionBossHurt(const BossWeakpoint* hurtPart) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BossHurtEvent(hurtPart);
+	}
+}
+
+void GameEventManager::ActionBossAngry(const Boss* boss, const BossBodyPart* angryPart) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BossAngryEvent(boss, angryPart);
+	}
+}

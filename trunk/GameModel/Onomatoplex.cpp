@@ -49,6 +49,7 @@ Generator::Generator() {
 	this->LoadCrazyWords();
     this->LoadLaunchWords();
     this->LoadAttachWords();
+    this->LoadAngryWords();
 
     this->LoadVictoryDescriptors();
 }
@@ -736,6 +737,27 @@ void Generator::LoadAttachWords() {
 	this->goodSingleWords[ATTACH]	 = attachSimpleWords;
 	this->awesomeSingleWords[ATTACH] = attachSimpleWords;
 	this->uberSingleWords[ATTACH]	 = attachSimpleWords;
+}
+
+void Generator::LoadAngryWords() {
+    std::vector<std::string> angrySimpleWords;
+    angrySimpleWords.push_back("Grrrrr");
+    angrySimpleWords.push_back("Rawwrr");
+    angrySimpleWords.push_back("Arrggh");
+    angrySimpleWords.push_back("Blarrg");
+    angrySimpleWords.push_back("Errggh");
+    angrySimpleWords.push_back("Errggh");
+    angrySimpleWords.push_back("Flarrg");
+    angrySimpleWords.push_back("Urrgah");
+    angrySimpleWords.push_back("Grrggh");
+    angrySimpleWords.push_back("Grrwar");
+    angrySimpleWords.push_back("Grawwr");
+    angrySimpleWords.push_back("Grawwr");
+
+	this->simpleSingleWords[ANGRY]   = angrySimpleWords;
+	this->goodSingleWords[ANGRY]	 = angrySimpleWords;
+	this->awesomeSingleWords[ANGRY]  = angrySimpleWords;
+	this->uberSingleWords[ANGRY]	 = angrySimpleWords;
 }
 
 void Generator::LoadVictoryDescriptors() {

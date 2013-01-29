@@ -17,6 +17,7 @@
 #include "../GameSound/GameSoundAssets.h"
 
 class GameDisplay;
+class BossWeakpoint;
 
 class GameEventsListener : public GameEvents {
 public:
@@ -113,6 +114,9 @@ public:
     void MineTurretAIStateChangedEvent(const MineTurretBlock& block,
         MineTurretBlock::TurretAIState oldState, MineTurretBlock::TurretAIState newState);
     void MineFiredByTurretEvent(const MineTurretBlock& block);
+
+    void BossHurtEvent(const BossWeakpoint* hurtPart);
+    void BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart);
 
 private:
 	GameDisplay* display;

@@ -55,6 +55,7 @@ particlePulseItemDropAura(0, 0),
 particlePulsePaddleLaser(0, 0),
 particlePulseFireGlobAura(0, 0),
 particlePulseIceBallAura(0, 0),
+particleLargeGrowthSuperFastPulser(0, 0),
 beamEndPulse(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
@@ -1055,6 +1056,11 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	iceBallPulseSettings.pulseRate = 1.25f;
 	this->particlePulseIceBallAura = ESPParticleScaleEffector(iceBallPulseSettings);
 
+    ScaleEffect crazyFastPulseSettings;
+    crazyFastPulseSettings.pulseGrowthScale = 2.0f;
+    crazyFastPulseSettings.pulseRate = 3.0f;
+    this->particleLargeGrowthSuperFastPulser = ESPParticleScaleEffector(crazyFastPulseSettings);
+
 	// Ghost smoke effect used for ghostball
 	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
 	this->ghostBallSmoke.SetScale(0.5f);
@@ -1556,7 +1562,7 @@ void GameESPAssets::AddCannonFireEffect(const Point3D& endOfCannonPt, const Vect
 	debrisBits->SetEmitPosition(endOfCannonPt);
 	debrisBits->SetEmitDirection(emitDir);
 	debrisBits->AddEffector(&this->particleFireColourFader);
-	result = debrisBits->SetParticles(15, this->starTex);
+	result = debrisBits->SetParticles(10, this->starTex);
 	assert(result);	
 	
 	// Create an emitter for the sound of onomatopeia of the cannon firing
@@ -3842,6 +3848,74 @@ ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, cons
     comboEffect->AddParticle(textParticle);
 
     return comboEffect;
+}
+
+void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float height) {
+    float maxSize = std::max<float>(width, height);
+    float avgSize = (width + height) / 2.0f;
+
+    // Stars fly out of the hurt part of the boss
+    ESPPointEmitter* hurtStars = new ESPPointEmitter();
+	hurtStars->SetNumParticleLives(1);
+	hurtStars->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	hurtStars->SetInitialSpd(ESPInterval(4.5f, 8.0f));
+	hurtStars->SetParticleLife(ESPInterval(1.5f, 2.75f));
+	hurtStars->SetParticleSize(ESPInterval(0.1f * avgSize, 0.5f * avgSize));
+	hurtStars->SetEmitAngleInDegrees(180);
+	hurtStars->SetRadiusDeviationFromCenter(ESPInterval(0.35f * width), ESPInterval(0.35f * height), ESPInterval(0.0f));
+	hurtStars->SetEmitPosition(Point3D(pos, 0));
+	hurtStars->SetEmitDirection(Vector3D(0,1,0));
+	hurtStars->AddEffector(&this->particleFireColourFader);
+    hurtStars->SetParticles(20, this->starTex);
+
+    this->activeGeneralEmitters.push_back(hurtStars);
+}
+
+void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float height) {
+    float maxSize = std::max<float>(width, height);
+
+    // Angry lightning bolts
+	ESPPointEmitter* angryBolts = new ESPPointEmitter();
+	angryBolts->SetNumParticleLives(1);
+	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	angryBolts->SetInitialSpd(ESPInterval(3.0f, 5.0f));
+	angryBolts->SetParticleLife(ESPInterval(2.0f));
+	angryBolts->SetParticleSize(ESPInterval(0.25f*maxSize), ESPInterval(0.5f*maxSize));
+	angryBolts->SetEmitAngleInDegrees(45);
+	angryBolts->SetEmitPosition(Point3D(pos, 0));
+	angryBolts->SetEmitDirection(Vector3D(0,1,0));
+    angryBolts->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+    angryBolts->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+    angryBolts->AddEffector(&this->particleFader);
+	angryBolts->SetParticles(10, this->lightningBoltTex);
+
+    // Angry onomatopoeia
+	ESPPointEmitter* angryOno = new ESPPointEmitter();
+	angryOno->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	angryOno->SetParticleLife(ESPInterval(2.0f));
+	angryOno->SetRadiusDeviationFromCenter(ESPInterval(0.4f * width), ESPInterval(0.4f * height), ESPInterval(0.0f));
+	angryOno->SetParticleAlignment(ESP::ScreenAligned);
+	angryOno->SetEmitPosition(Point3D(pos));
+    angryOno->SetParticleColour(ESPInterval(0.75f, 0.9f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+    angryOno->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+    angryOno->SetInitialSpd(ESPInterval(1.5f));
+    angryOno->SetEmitDirection(Vector3D(0,1,0));
+    angryOno->AddEffector(&this->particleLargeGrowthSuperFastPulser);
+    angryOno->AddEffector(&this->particleFader);
+
+	// Add the single particle to the emitter
+	DropShadow dpTemp;
+	dpTemp.amountPercentage = 0.1f;
+    dpTemp.colour = Colour(0, 0, 0);
+
+	ESPOnomataParticle* textParticle = new ESPOnomataParticle(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::SadBadGoo, GameFontAssetsManager::Big),
+        Onomatoplex::Generator::GetInstance()->Generate(Onomatoplex::ANGRY, Onomatoplex::UBER));
+	textParticle->SetDropShadow(dpTemp);
+    angryOno->AddParticle(textParticle);
+
+    this->activeGeneralEmitters.push_back(angryBolts);
+    this->activeGeneralEmitters.push_back(angryOno);
 }
 
 void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& position,

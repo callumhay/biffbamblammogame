@@ -390,20 +390,19 @@ void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
         this->fadeOutAnimation.SetLerp(FADE_TIME, 1.0f);
         waitingForKeyPress = false;
     }
-    else {
-        // Finish all of the animations...
-        this->victoryLabelMoveAnim.SetInterpolantValue(this->victoryLabelMoveAnim.GetFinalInterpolationValue());
-        this->victoryLabelMoveAnim.ClearLerp();
 
-        this->worldCompleteAlphaAnim.SetInterpolantValue(this->worldCompleteAlphaAnim.GetTargetValue());
-        this->worldCompleteAlphaAnim.ClearLerp();
+    // Finish all of the animations...
+    this->victoryLabelMoveAnim.SetInterpolantValue(this->victoryLabelMoveAnim.GetFinalInterpolationValue());
+    this->victoryLabelMoveAnim.ClearLerp();
 
-        this->unlockedAlphaAnim.SetInterpolantValue(this->unlockedAlphaAnim.GetTargetValue());
-        this->unlockedAlphaAnim.ClearLerp();
+    this->worldCompleteAlphaAnim.SetInterpolantValue(this->worldCompleteAlphaAnim.GetTargetValue());
+    this->worldCompleteAlphaAnim.ClearLerp();
 
-        this->glowScaleAnim.SetInterpolantValue(this->glowScaleAnim.GetTargetValue());
-        this->glowScaleAnim.ClearLerp();
+    this->unlockedAlphaAnim.SetInterpolantValue(this->unlockedAlphaAnim.GetTargetValue());
+    this->unlockedAlphaAnim.ClearLerp();
 
-        this->allAnimationIsDone = true;
-    }
+    this->glowScaleAnim.SetInterpolantValue(this->glowScaleAnim.GetTargetValue());
+    this->glowScaleAnim.ClearLerp();
+
+    this->allAnimationIsDone = true;
 }
