@@ -23,7 +23,7 @@ S R R R R R R R L E E E E E S
 S R R R R R R R R R R R R R S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
-S E E I E E E I E E E I E E S 
+S E E I E E E E E E E I E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
@@ -36,9 +36,9 @@ S E E E E E E E E E E E E E S
 STARS:
 10000
 50000
-90000
-120000
-130000
+70000
+83000
+105000
 
 PaddleGrow 0
 PoisonPaddle 2

@@ -38,6 +38,9 @@ class RocketProjectile;
 class PointAward;
 class BallBoostModel;
 class PaddleMineProjectile;
+class BossWeakpoint;
+class AbstractBossBodyPart;
+class Boss;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -146,6 +149,9 @@ public:
         MineTurretBlock::TurretAIState newState);
     void ActionMineFiredByTurret(const MineTurretBlock& block);
     
+    // Boss Events
+    void ActionBossHurt(const BossWeakpoint* hurtPart);
+    void ActionBossAngry(const Boss* boss, const BossBodyPart* angryPart);
 
 protected:
 	GameEventManager();

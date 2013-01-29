@@ -51,11 +51,9 @@ resources/worlds/levels/medium/death_from_above.lvl
 
 # Levels with all or some elements learned in this movement...
 resources/worlds/levels/easy/step_it_up_a_notch.lvl
-resources/worlds/levels/medium/dividing_lines.lvl
-
-
 resources/worlds/levels/medium/spike_jonze.lvl
-
+resources/worlds/levels/medium/blank_slate.lvl
+resources/worlds/levels/medium/dividing_lines.lvl
 
 
 # Boss

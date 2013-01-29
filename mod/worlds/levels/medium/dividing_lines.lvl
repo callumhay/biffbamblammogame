@@ -1,5 +1,5 @@
 Dividing Lines
-18 23
+18 24
 S S S S S S S S S S S S S S S S S S 
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
@@ -7,15 +7,16 @@ S E E E E L I G G G G I L E E E E S
 S G G G G S E E E E E E S G G G G S 
 S E E E E S E E E E E E S E E E E S 
 S E E E E S E E E E E E S E E E E S 
-S E E E E S O O O O O O S E E E E S 
+S E E E E S Y Y Y Y Y Y S E E E E S 
 S E E E E S Y Y Y Y Y Y S E E E E S 
 S E E E E S B E E E E B S E E E E S 
-S E L L E S Y Y Y Y Y Y S E L L E S 
-S G G G G S G G G G G G S G G G G S 
+S E L L E S G G G G G G S E L L E S 
+S G G G G S Y Y Y Y Y Y S G G G G S 
 S G G G G S B E E E E B S G G G G S 
 S E E E E S G G G G G G S E E E E S 
 S E E E E S G G G G G G S E E E E S 
 S Y Y Y Y S E E E E E E S Y Y Y Y S 
+S E E E E S E E E E E E S E E E E S 
 S E E E E S E E E E E E S E E E E S 
 S E E E E S E E E E E E S E E E E S 
 S E E E E S E E E E E E S E E E E S 
@@ -25,11 +26,11 @@ S E E E E E E E E E E E E E E E E S
 S E E E E E E E E E E E E E E E E S 
 
 STARS:
-30000
-50000
-60500
-84000
-105000
+10000
+20000
+30500
+33000
+44000
 
 PaddleGrow 1
 PoisonPaddle 2
@@ -45,7 +46,7 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 1
-FireBall 2
+FireBall 0
 RocketPaddle 2
 GhostBall 2
 BallShrink 1
@@ -54,8 +55,8 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 2
 MultiBall3 2
-IceBall 2
-MineLauncherPaddle 2
+IceBall 0
+MineLauncherPaddle 0
 SlowBall 3
 GravityBall 0
 CrazyBall 1

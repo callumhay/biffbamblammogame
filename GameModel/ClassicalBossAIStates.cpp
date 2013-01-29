@@ -437,7 +437,8 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossAngryFlashAnim());
             this->angryMoveAnim.ResetToStart();
 
-            // TODO: Signal an event for boss "GRRRRAAWWRRR"...
+            // EVENT: Boss is angry! Rawr.
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetEye());
             
             break;
 
@@ -494,7 +495,6 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
             break;
     }
 }
-
 
 void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
@@ -691,11 +691,20 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
                     xDirSignToPaddle = ((Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) ? 1 : -1);
                 }
                 else if (bossToPaddleVec[0] < 0) {
-                    // Move the boss away from the paddle
-                    xDirSignToPaddle = 1.0f;
+                    if (bossPos[0] >= this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
+                        xDirSignToPaddle = -1.0f;
+                    }
+                    else {
+                        xDirSignToPaddle = 1.0f;
+                    }
                 }
                 else {
-                    xDirSignToPaddle = -1.0f;
+                    if (bossPos[0] < this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
+                        xDirSignToPaddle = 1.0f;
+                    }
+                    else {
+                        xDirSignToPaddle = -1.0f;
+                    }
                 }
 
                 // Set the direction of the boss so that it chases the paddle around a bit...
@@ -1207,7 +1216,9 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossAngryFlashAnim());
             this->angryMoveAnim.ResetToStart();
 
-            // TODO: Signal an event for boss "GRRRRAAWWRRR"...
+            // EVENT: Boss is angry! Rawr.
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetEye());
+
             break;
         
         case ClassicalBossAI::MoveToCenterOfLevelAIState: {

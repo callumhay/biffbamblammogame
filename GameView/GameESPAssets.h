@@ -79,6 +79,7 @@ private:
 	ESPParticleScaleEffector  particlePulseIceBallAura;
 	ESPParticleScaleEffector  beamEndPulse;
 	ESPParticleScaleEffector  particleShrinkToNothing;
+    ESPParticleScaleEffector particleLargeGrowthSuperFastPulser;
 
 	ESPParticleAccelEffector ghostBallAccel1;
 	ESPParticleAccelEffector gravity;
@@ -247,6 +248,9 @@ public:
 	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
 		bool gravity = true, size_t numParticles = 10);
 
+
+    void AddBossHurtEffect(const Point2D& pos, float width, float height);
+    void AddBossAngryEffect(const Point2D& pos, float width, float height);
 
     void AddMultiplierComboEffect(int multiplier, const Point2D& position, const PlayerPaddle& paddle);
     //void AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle);

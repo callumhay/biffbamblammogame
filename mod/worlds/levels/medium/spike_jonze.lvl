@@ -11,8 +11,8 @@ S B T(G,lr) Y T(G,ul) E E E T(Y,ur) T(G,ll) S
 S T(G,lr) Y T(G,ul) E T(O,ur) Y T(G,ll) E T(Y,ur) S 
 S Y T(G,ul) E E E T(O,ur) Y T(G,ll) B S 
 S T(G,ul) E T(Y,lr) T(R,ul) E E T(O,ur) Y T(G,ll) S 
-S E T(Y,lr) T(R,ul) E E E T(Y,ll) T(O,ur) Y S 
-S T(Y,lr) T(R,ul) B E E E Y E T(O,ur) S 
+S E T(Y,lr) T(R,ul) E E E E T(O,ur) Y S 
+S T(Y,lr) T(R,ul) B E E E G E T(O,ur) S 
 S T(R,ul) B T(Y,lr) T(R,ul) E T(G,lr) G E I S 
 S B T(Y,lr) T(R,ul) E T(G,lr) O E E E S 
 S T(Y,lr) T(R,ul) E T(G,lr) G E E T(Y,lr) T(G,ll) S 
@@ -33,14 +33,14 @@ STARS:
 19000
 20000
 28500
-37200
+35200
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -49,18 +49,20 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
-FireBall 2
+FireBall 0
 RocketPaddle 2
 GhostBall 2
 BallShrink 2
 UpsideDown 2
-MultiBall5 2
-BallCam 1
+MultiBall5 1
+BallCam 0
+MagnetPaddle 2
 MultiBall3 2
-IceBall 2
+IceBall 0
+MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 1
+PaddleCam 0
