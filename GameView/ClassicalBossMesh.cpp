@@ -362,7 +362,7 @@ void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
             glPushMatrix();
             glMultMatrixf(eye->GetWorldTransform().begin());
             this->eyePulseGlow.SetParticleAlpha(
-                ESPInterval(0.66f * std::max<float>(0.0f, std::min<float>(1.0f, 
+                ESPInterval(0.7f * std::max<float>(0.0f, std::min<float>(1.0f, 
                 1.0f - this->introTimeCountdown / START_GLOW_TIME))));
             this->eyePulseGlow.Tick(dT);
             
@@ -502,7 +502,7 @@ void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         // Draw the eye's glowing effect
         glPushMatrix();
         glMultMatrixf(eye->GetWorldTransform().begin());
-        this->eyePulseGlow.SetParticleAlpha(eye->GetAlpha());
+        this->eyePulseGlow.SetParticleAlpha(0.7f*eye->GetAlpha());
         this->eyePulseGlow.Tick(dT);
         this->eyePulseGlow.Draw(camera);
         glPopMatrix();

@@ -115,7 +115,8 @@ public:
 	void DeactivateMiscEffects();
 
     double ActivateBossIntro();
-    double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model);
+    double ActivateBossExplodingFlashEffects(double delayInSecs,
+        const GameModel* model, const Camera& camera);
 
     void ToggleLights(bool lightsOn, double toggleTime);
     void ToggleLightsForBossDeath(bool lightsOn, double toggleTime);
@@ -286,8 +287,8 @@ inline double GameAssets::ActivateBossIntro() {
  * Activates the final exploding flash animation for a boss on its 'outro'.
  * Returns: The total time of the animation, including the given delay.
  */
-inline double GameAssets::ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model) {
-    return this->GetCurrentLevelMesh()->ActivateBossExplodingFlashEffects(delayInSecs, model);
+inline double GameAssets::ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera) {
+    return this->GetCurrentLevelMesh()->ActivateBossExplodingFlashEffects(delayInSecs, model, camera);
 }
 
 inline void GameAssets::ToggleLights(bool lightsOn, double toggleTime) {

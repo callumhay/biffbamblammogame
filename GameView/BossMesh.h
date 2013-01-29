@@ -34,7 +34,7 @@ public:
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
     virtual double ActivateIntroAnimation() = 0;
-    double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model);
+    double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
 
 protected:
     // Shared visual effects and textures for bosses
@@ -71,6 +71,7 @@ private:
 
 inline void BossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
                            const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
     this->DrawPreBodyEffects(dT, camera);
     this->DrawBody(dT, camera, keyLight, fillLight, ballLight);
     this->DrawPostBodyEffects(dT, camera);
