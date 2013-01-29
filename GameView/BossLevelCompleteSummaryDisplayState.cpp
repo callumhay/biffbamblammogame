@@ -41,6 +41,18 @@ victoryLabel1(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
              "Sweet " + Onomatoplex::Generator::GetInstance()->GenerateVictoryDescriptor()),
 victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "VICTORY!!!")
 { 
+    const Camera& camera = this->display->GetCamera();
+
+    GameModel* gameModel = this->display->GetModel();
+    assert(gameModel != NULL);
+    const GameWorld* completedWorld = gameModel->GetCurrentWorld();
+    assert(completedWorld != NULL);
+    int completedWorldIdx = completedWorld->GetWorldIndex();
+
+    this->display->GetCamera().ClearCameraShake();
+    // Pause all game play elements in the game model
+	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
+
     this->bgTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
     assert(this->bgTex != NULL);
@@ -56,14 +68,6 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     this->bangStarTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
     assert(this->bangStarTex != NULL);
-
-    const Camera& camera = this->display->GetCamera();
-
-    const GameModel* gameModel = this->display->GetModel();
-    assert(gameModel != NULL);
-    const GameWorld* completedWorld = gameModel->GetCurrentWorld();
-    assert(completedWorld != NULL);
-    int completedWorldIdx = completedWorld->GetWorldIndex();
 
     // Setup all the labels...
     this->victoryLabel1.SetColour(Colour(1,1,1));
