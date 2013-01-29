@@ -101,7 +101,10 @@ Vector2D ClassicalBossAI::GetAcceleration() const {
         return Vector2D(0,0);
     }
     accel.Normalize();
-    return ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION * accel;
+
+    // Based on how hurt the boss is, the acceleration/deceleration will be more dramatic
+    float multipler = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 2.0f, this->GetTotalLifePercent());
+    return multipler * ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION * accel;
 }
 
 void ClassicalBossAI::UpdateMovement(double dT, GameModel* gameModel) {
@@ -501,32 +504,36 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
 
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
+    // How much damage has been done so far? These two percentages will maximally add to 2.0
+    float totalLifePercent = this->GetTotalLifePercent();
+
     // The basic movement state occurs further away from the paddle, closer to the top of the level.
     // Make sure we've moved up high enough...
     float avgBasicMoveHeight = this->GetBasicMovementHeight(level);
     float upDownDistance     = ClassicalBossAI::BOSS_HEIGHT / 6.0f;
 
     if (bossPos[1] < avgBasicMoveHeight - upDownDistance) {
-        this->desiredVel[1] = this->GetMaxSpeed() / 3.0f;
+        this->desiredVel[1] = this->GetMaxSpeed() * this->GetSpeedModifier(3.0f, totalLifePercent);
     }
     else if (bossPos[1] > avgBasicMoveHeight + upDownDistance) {
-        this->desiredVel[1] = -this->GetMaxSpeed() / 3.0f;
+        this->desiredVel[1] = -this->GetMaxSpeed() * this->GetSpeedModifier(3.0f, totalLifePercent);
     }
     
     if (fabs(this->desiredVel[1]) < EPSILON) {
-        this->desiredVel[1] = this->GetMaxSpeed() / 3.0f;
+        this->desiredVel[1] = this->GetMaxSpeed() * this->GetSpeedModifier(3.0f, totalLifePercent);
     }
         
     // Side-to-side movement is basic back and forth linear translation...
     if (bossPos[0] <= this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
-        this->desiredVel[0] = this->GetMaxSpeed() / 2.0f;
+        this->desiredVel[0] = this->GetMaxSpeed() * this->GetSpeedModifier(2.0f, totalLifePercent);
     }
     else if (bossPos[0] >= this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
-        this->desiredVel[0] = -this->GetMaxSpeed() / 2.0f;
+        this->desiredVel[0] = -this->GetMaxSpeed() * this->GetSpeedModifier(2.0f, totalLifePercent);
     }
     
     if (fabs(this->desiredVel[0]) < EPSILON) {
-        this->desiredVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed() / 2.0f;
+        this->desiredVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() *
+            this->GetMaxSpeed() * this->GetSpeedModifier(2.0f, totalLifePercent);
     }
 
     if (this->countdownToNextState <= 0.0) {
@@ -535,12 +542,7 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
         
         bool goToChaseState = true;
         
-        // How much damage has been done so far? These two percentages will maximally add to 2.0
-        float percentLeftArm  = this->leftArmSqrWeakpt->GetCurrentLifePercentage();
-        float percentRightArm = this->rightArmSqrWeakpt->GetCurrentLifePercentage();
-        
         // Laser barrages will happen more frequently when the boss has taken more damage...
-        float totalLifePercent = (percentLeftArm + percentRightArm) / 2.0f;
         if (Randomizer::GetInstance()->RandomNumZeroToOne() >= (totalLifePercent - 0.1f)) {
             goToChaseState = false;
         }
@@ -581,13 +583,15 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
     const Point2D& paddlePos = paddle->GetCenterPosition();
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
+    float totalLifePercent = this->GetTotalLifePercent();
+
     bool allowedToAttack = false;
     bool leftArmIsDestroyed  = this->leftArmSqrWeakpt->GetIsDestroyed();
     bool rightArmIsDestroyed = this->rightArmSqrWeakpt->GetIsDestroyed();
 
     // Make sure the boss is at the right height from the paddle...
     if (bossPos[1] > this->GetFollowAndAttackHeight()) {
-        this->desiredVel[1] = -this->GetMaxSpeed() / 2.0f;
+        this->desiredVel[1] = -this->GetMaxSpeed() * this->GetSpeedModifier(2.0f, totalLifePercent);
     }
     else {
         this->currVel[1]    = 0.0f;
@@ -659,25 +663,27 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
         if (!rightArmIsDestroyed) {
             this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
         }
+        
+        float speedMultiplier = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.75f, totalLifePercent);
 
         // If one of the bosses' arms is destroyed it should be trying to get its last surviving arm to
         // be above the paddle...
         if (leftArmIsDestroyed) {
             // Try to get the paddle under the right arm
             Vector2D rightArmToPaddle = paddlePos - rightArmAABB.GetCenter();
-            this->desiredVel[0] = NumberFuncs::SignOf(rightArmToPaddle[0]) * this->GetMaxSpeed();
+            this->desiredVel[0] = NumberFuncs::SignOf(rightArmToPaddle[0]) * this->GetMaxSpeed() * speedMultiplier;
         }
         else if (rightArmIsDestroyed) {
             // Try to get the paddle under the left arm
             Vector2D leftArmToPaddle = paddlePos - leftArmAABB.GetCenter();
-            this->desiredVel[0] = NumberFuncs::SignOf(leftArmToPaddle[0]) * this->GetMaxSpeed();
+            this->desiredVel[0] = NumberFuncs::SignOf(leftArmToPaddle[0]) * this->GetMaxSpeed() * speedMultiplier;
         }
         else {
             // ... otherwise we just chase the paddle around...
 
             float absBossToPaddleXDist = fabs(bossToPaddleVec[0]);
             if (absBossToPaddleXDist > ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER + ClassicalBoss::HALF_ARM_WIDTH) {
-                this->desiredVel[0] = NumberFuncs::SignOf(bossToPaddleVec[0]) * this->GetMaxSpeed();
+                this->desiredVel[0] = NumberFuncs::SignOf(bossToPaddleVec[0]) * this->GetMaxSpeed() * speedMultiplier;
             }
             else {
                 float xDirSignToPaddle = 0.0f;
@@ -693,7 +699,7 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
                 }
 
                 // Set the direction of the boss so that it chases the paddle around a bit...
-                this->desiredVel[0] = xDirSignToPaddle * this->GetMaxSpeed();
+                this->desiredVel[0] = xDirSignToPaddle * this->GetMaxSpeed() * speedMultiplier;
             }
         }
     }
@@ -802,16 +808,18 @@ void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
     // Make sure the boss is at the proper height in the level for firing the laser
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
+    float totalLifePercent = this->GetTotalLifePercent();
+
     bool allowedToAttack = true;
 
     // Make sure the boss is at the correct height...
     const float laserPrepHeight = this->GetPrepLaserHeight(level);
     if (bossPos[1] > laserPrepHeight + LevelPiece::PIECE_HEIGHT) {
-        this->desiredVel[1] = -this->GetMaxSpeed() / 3.0f;
+        this->desiredVel[1] = -this->GetMaxSpeed() * this->GetSpeedModifier(3.0f, totalLifePercent);
         allowedToAttack = false;
     }
     else if (bossPos[1] < laserPrepHeight - LevelPiece::PIECE_HEIGHT) {
-        this->desiredVel[1] = this->GetMaxSpeed() / 3.0f;
+        this->desiredVel[1] = this->GetMaxSpeed() * this->GetSpeedModifier(3.0f, totalLifePercent);
         allowedToAttack = false;
     }
 
@@ -865,7 +873,7 @@ void ArmsBodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* g
         this->SetState(ClassicalBossAI::ChasePaddleAIState);
     }
     else {
-        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed() / 5.5f;
+        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed() / 4.25f;
     }
 
     // Determine whether we're shooting a laser
@@ -954,6 +962,11 @@ float ArmsBodyHeadAI::GetFollowAndAttackHeight() const {
 
 float ArmsBodyHeadAI::GetMaxArmAttackYMovement() const {
     return 0.7f * ClassicalBoss::ARM_HEIGHT;
+}
+
+float ArmsBodyHeadAI::GetTotalLifePercent() const {
+    return (this->leftArmSqrWeakpt->GetCurrentLifePercentage() + 
+        this->rightArmSqrWeakpt->GetCurrentLifePercentage()) / 2.0f;
 }
 
 ClassicalBossAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vector2D& bossToPaddleVec) const {
@@ -1265,32 +1278,35 @@ void BodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameMo
 
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
+    float totalLifePercent = this->GetTotalLifePercent();
+
     // The basic movement state occurs further away from the paddle, closer to the top of the level.
     // Make sure we've moved up high enough...
     float avgBasicMoveHeight = this->GetBasicMovementHeight(level);
     float upDownDistance     = ClassicalBossAI::BOSS_HEIGHT / 5.0f;
 
     if (bossPos[1] < avgBasicMoveHeight - upDownDistance) {
-        this->desiredVel[1] = this->GetMaxSpeed() / 1.75f;
+        this->desiredVel[1] = this->GetMaxSpeed() * this->GetSpeedModifier(1.75f, totalLifePercent);
     }
     else if (bossPos[1] > avgBasicMoveHeight + upDownDistance) {
-        this->desiredVel[1] = -this->GetMaxSpeed() / 1.75f;
+        this->desiredVel[1] = -this->GetMaxSpeed() * this->GetSpeedModifier(1.75f, totalLifePercent);
     }
     
     if (fabs(this->desiredVel[1]) < EPSILON) {
-        this->desiredVel[1] = this->GetMaxSpeed() / 1.75f;
+        this->desiredVel[1] = this->GetMaxSpeed() * this->GetSpeedModifier(1.75f, totalLifePercent);
     }
         
     // Side-to-side movement is basic back and forth linear translation...
     if (bossPos[0] <= this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
-        this->desiredVel[0] = this->GetMaxSpeed() / 1.25f;
+        this->desiredVel[0] = this->GetMaxSpeed() * this->GetSpeedModifier(1.25f, totalLifePercent);
     }
     else if (bossPos[0] >= this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
-        this->desiredVel[0] = -this->GetMaxSpeed() / 1.25f;
+        this->desiredVel[0] = -this->GetMaxSpeed() * this->GetSpeedModifier(1.25f, totalLifePercent);
     }
     
     if (fabs(this->desiredVel[0]) < EPSILON) {
-        this->desiredVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
+        this->desiredVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed() *
+            this->GetSpeedModifier(1.25f, totalLifePercent);
     }
 
     if (this->countdownToNextState <= 0.0) {
@@ -1334,16 +1350,18 @@ void BodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
     // Make sure the boss is at the proper height in the level for firing the laser
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
+    float totalLifePercent = this->GetTotalLifePercent();
+
     bool allowedToAttack = true;
 
     // Make sure the boss is at the correct height...
     const float laserPrepHeight = this->GetPrepLaserHeight(level);
     if (bossPos[1] > laserPrepHeight + LevelPiece::PIECE_HEIGHT) {
-        this->desiredVel[1] = -this->GetMaxSpeed() / 1.5f;
+        this->desiredVel[1] = -this->GetMaxSpeed() * this->GetSpeedModifier(1.5f, totalLifePercent);
         allowedToAttack = false;
     }
     else if (bossPos[1] < laserPrepHeight - LevelPiece::PIECE_HEIGHT) {
-        this->desiredVel[1] = this->GetMaxSpeed() / 1.5f;
+        this->desiredVel[1] = this->GetMaxSpeed() * this->GetSpeedModifier(1.5f, totalLifePercent);
         allowedToAttack = false;
     }
 
@@ -1407,7 +1425,8 @@ void BodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameM
         
     }
     else {
-        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed() / 4.0f;
+        float barrageSpdMultiplier = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f / 4.0f, 1.0f / 3.0f, this->GetTotalLifePercent());
+        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed() * barrageSpdMultiplier;
     }
 
     // Determine whether we're shooting a laser
@@ -1545,6 +1564,17 @@ void BodyHeadAI::ExecuteEyeRisesFromPedimentState(double dT) {
         // Go to the next high-level AI state
         this->boss->SetNextAIState(new HeadAI(this->boss));
     }
+}
+
+float BodyHeadAI::GetTotalLifePercent() const {
+    float totalAliveCols = 0.0f;
+    for (int i = 0; i < static_cast<int>(this->columnWeakpts.size()); i++) {
+        if (!this->columnWeakpts[i]->GetIsDestroyed()) {
+            totalAliveCols += 1;
+        }
+    }
+
+    return totalAliveCols / static_cast<float>(this->columnWeakpts.size());
 }
 
 AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateColumnDeathTranslationAnimation(float xForceDir) const {
@@ -1718,7 +1748,7 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
             if (this->eye->GetCurrentLifePercentage() <= 0.75f) {
                 this->movePedimentUpAndDown = true;
                 if (fabs(this->currPedimentVel[1]) < EPSILON) {
-                    this->currPedimentVel[1] = -this->GetMaxSpeed() / 1.25f;
+                    this->currPedimentVel[1] = -this->GetMaxSpeed();
                 }
             }
             else {
@@ -1778,7 +1808,7 @@ void HeadAI::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case ClassicalBossAI::FinalDeathThroesAIState:
-            this->ExecuteFinalDeathThroesState(dT);
+            this->ExecuteFinalDeathThroesState();
             break;
 
         default:
@@ -1922,7 +1952,7 @@ void HeadAI::ExecuteHurtEyeState(double dT) {
     }
 }
 
-void HeadAI::ExecuteFinalDeathThroesState(double dT) {
+void HeadAI::ExecuteFinalDeathThroesState() {
     this->currPedimentVel = Vector2D(0,0);
     this->currEyeVel = Vector2D(0,0);
 
@@ -1935,10 +1965,10 @@ void HeadAI::PerformBasicEyeMovement(const Point2D& eyePos, const GameLevel* lev
     float avgBasicEyeMoveHeight = this->GetEyeBasicMoveHeight(level);
     float upDownEyeDistance     = 1.25f * ClassicalBoss::PEDIMENT_HEIGHT;
     if (eyePos[1] < avgBasicEyeMoveHeight - upDownEyeDistance) {
-        this->currEyeVel[1] = this->GetMaxSpeed() / 1.1f;
+        this->currEyeVel[1] = this->GetMaxSpeed();
     }
     else if (eyePos[1] > avgBasicEyeMoveHeight + upDownEyeDistance) {
-        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.1f;
+        this->currEyeVel[1] = -this->GetMaxSpeed();
     }
 
     // Side-to-side movement of the eye
@@ -1958,10 +1988,10 @@ void HeadAI::PerformBasicPedimentMovement(const Point2D& pedimentPos, const Game
         float upDownPedimentDistance     = ClassicalBoss::PEDIMENT_HEIGHT;
 
         if (pedimentPos[1] < avgBasicPedimentMoveHeight - upDownPedimentDistance) {
-            this->currPedimentVel[1] = this->GetMaxSpeed() / 1.25f;
+            this->currPedimentVel[1] = this->GetMaxSpeed() / 1.1f;
         }
         else if (pedimentPos[1] > avgBasicPedimentMoveHeight + upDownPedimentDistance) {
-            this->currPedimentVel[1] = -this->GetMaxSpeed() / 1.25f;
+            this->currPedimentVel[1] = -this->GetMaxSpeed() / 1.1f;
         }
     }
 
@@ -1976,7 +2006,7 @@ void HeadAI::PerformBasicPedimentMovement(const Point2D& pedimentPos, const Game
 
 void HeadAI::UpdateEyeAndPedimentHeightMovement() {
     if (fabs(this->currEyeVel[1]) < EPSILON) {
-        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
+        this->currEyeVel[1] = -this->GetMaxSpeed();
     }
     if (fabs(this->currEyeVel[0]) < EPSILON) {
         this->currEyeVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
@@ -1992,6 +2022,10 @@ float HeadAI::GetPedimentBasicMoveHeight(const GameLevel* level) {
 
 float HeadAI::GetEyeBasicMoveHeight(const GameLevel* level) {
     return (level->GetLevelUnitHeight() / 2.0f) + this->GetEyeRiseHeight();
+}
+
+float HeadAI::GetTotalLifePercent() const {
+    return this->eye->GetCurrentLifePercentage();
 }
 
 AnimationMultiLerp<float> HeadAI::GenerateSpinningPedimentRotationAnim() {

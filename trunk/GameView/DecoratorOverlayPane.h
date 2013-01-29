@@ -16,6 +16,7 @@
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/TextLabel.h"
 #include "../GameControl/GameControl.h"
 
 class Texture;
@@ -54,6 +55,9 @@ public:
             this->fgFadeAnimation.GetInterpolantValue() <= 0.0f &&
             this->bgFadeAnimation.GetInterpolantValue() <= 0.0f);
     }
+
+    int GetSelectedOptionIdx() const { return this->selectedIdx; }
+    std::string GetSelectedOptionStr() const { return this->selectableOptions[this->selectedIdx]->GetText(); }
 
 private:
     static const float X_BORDER;

@@ -13,7 +13,6 @@
 #include "GameFontAssetsManager.h"
 #include "GameMenu.h"
 #include "../BlammoEngine/Texture2D.h"
-#include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
 const float DecoratorOverlayPane::X_BORDER     = 30;
@@ -220,7 +219,8 @@ void DecoratorOverlayPane::SetSelectableOptions(const std::vector<std::string>& 
 void DecoratorOverlayPane::Show(double delayInSecs, double timeInSecs) {
     this->fgFadeAnimation.SetLerp(delayInSecs + timeInSecs*0.6f, delayInSecs + timeInSecs, 0.0f, 1.0f);
     this->bgFadeAnimation.SetLerp(delayInSecs, delayInSecs + timeInSecs, 0.0f, 1.0f);
-    this->scaleAnimation.SetLerp(delayInSecs, delayInSecs + timeInSecs*0.6f, 0.001f, 1.0f); 
+    this->scaleAnimation.SetLerp(delayInSecs, delayInSecs + timeInSecs*0.6f, 0.001f, 1.0f);
+    this->optionActive = false;
 }
 
 void DecoratorOverlayPane::Hide(double delayInSecs, double timeInSecs) {

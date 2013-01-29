@@ -15,6 +15,9 @@
 #include "DisplayState.h"
 #include "GameMenu.h"
 #include "InGameRenderPipeline.h"
+#include "DecoratorOverlayPane.h"
+#include "PopupTutorialHint.h"
+
 #include "../ConfigOptions.h"
 
 class InGameDisplayState;
@@ -50,6 +53,9 @@ private:
 	static const Colour MENU_ITEM_ACTIVE_COLOUR;
 	static const Colour MENU_ITEM_GREYED_COLOUR;
 
+    static const char* VERIFY_MENU_YES;
+    static const char* VERIFY_MENU_NO;
+
 	enum NextAction { Nothing, ResumeGame, RestartLevel, ReturnToMainMenu, ExitToDesktop };
 	NextAction nextAction;
 
@@ -68,6 +74,9 @@ private:
     int difficultyItem;
 	int returnToMainItem;
 	int exitToDesktopItem;
+
+    int initialDifficultySelected;
+    PopupTutorialHint* difficultyRestartPopup;
 
     SelectionListMenuItem* invertBallBoostMenuItem;
     SelectionListMenuItem* difficultyMenuItem;
@@ -124,6 +133,17 @@ private:
 
 	private:
 		InGameMenuState* inGameMenuState;
+    };
+
+    class DifficultyPopupHandler : public PaneHandler {
+    public:
+        DifficultyPopupHandler(InGameMenuState *inGameMenuState) : PaneHandler(NULL), inGameMenuState(inGameMenuState) {}
+        ~DifficultyPopupHandler() {};
+
+        void OptionSelected(const std::string& optionText);
+
+    private:
+        InGameMenuState* inGameMenuState;
     };
 
 	TopMenuEventHandler* topMenuEventHandler;

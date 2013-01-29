@@ -27,10 +27,14 @@ const Colour InGameMenuState::MENU_ITEM_SEL_COLOUR		= Colour(1, 0.8f, 0);
 const Colour InGameMenuState::MENU_ITEM_ACTIVE_COLOUR	= Colour(1.0f, 1.0f, 1.0f);
 const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
+const char* InGameMenuState::VERIFY_MENU_YES  = "Yes!";
+const char* InGameMenuState::VERIFY_MENU_NO   = "NOoo!";
+
 InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
 DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
 topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL), difficultyEventHandler(NULL),
-invertBallBoostHandler(NULL), returnToDisplayState(returnToDisplayState) {
+invertBallBoostHandler(NULL), returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1),
+difficultyRestartPopup(NULL) {
 
 	// Pause all world sounds
 	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();
@@ -54,6 +58,11 @@ InGameMenuState::~InGameMenuState() {
     this->difficultyEventHandler = NULL;
     delete this->invertBallBoostHandler;
     this->invertBallBoostHandler = NULL;
+
+    if (this->difficultyRestartPopup != NULL) {
+        delete this->difficultyRestartPopup;
+        this->difficultyRestartPopup = NULL;
+    }
 }
 
 /**
@@ -132,6 +141,12 @@ void InGameMenuState::RenderFrame(double dT) {
 	this->topMenu->SetCenteredOnScreen(camera.GetWindowWidth(), camera.GetWindowHeight());
 	this->topMenu->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
 	glPopAttrib();
+
+    // Draw any extra popups/dialogs
+    if (this->difficultyRestartPopup != NULL) {
+        this->difficultyRestartPopup->Tick(dT);
+        this->difficultyRestartPopup->Draw(camera);
+    }
 }
 
 void InGameMenuState::ResumeTheGame() {
@@ -168,6 +183,12 @@ void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButt
     UNUSED_PARAMETER(magnitude);                                    
     assert(this->topMenu != NULL);
 
+    // Feed controls to the pop-up if it exists and is currently visible
+    if (this->difficultyRestartPopup != NULL && this->difficultyRestartPopup->GetIsVisible()) {
+        this->difficultyRestartPopup->ButtonPressed(pressedButton);
+        return;
+    }
+
 	// If the pause button is hit again then just exit this menu back to the game...
 	if (pressedButton == GameControl::PauseButtonAction) {
 		this->ResumeTheGame();
@@ -183,6 +204,12 @@ void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButt
  */
 void InGameMenuState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	assert(this->topMenu != NULL);
+
+    // If pop-up exists and is currently visible then controls all go to it
+    if (this->difficultyRestartPopup != NULL && this->difficultyRestartPopup->GetIsVisible()) {
+        return;
+    }
+
 	// Tell the top-most menu about the key released event
 	this->topMenu->ButtonReleased(releasedButton);
 }
@@ -215,8 +242,6 @@ void InGameMenuState::InitTopMenu() {
     static const char* VERIFY_EXIT_TO_MAIN_MENU_TEXT = "All progress in this level will be lost, exit to the main menu?";
     static const char* VERIFY_RESTART_TEXT           = "Are you sure you want to restart this level?";
     static const char* VERIFY_EXIT_TO_DESKTOP_TEXT   = "All progress in this level will be lost, are you sure you want to exit the game?";
-    static const char* VERIFY_MENU_YES  = "Yes!";
-    static const char* VERIFY_MENU_NO   = "NOoo!";
 
     // Resume Item...
 	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
@@ -267,8 +292,22 @@ void InGameMenuState::InitTopMenu() {
 	    tempLabelLg.SetText("Difficulty");
         std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
 
+        static const int POPUP_WIDTH = 750;
+        this->initialDifficultySelected = static_cast<int>(this->cfgOptions.GetDifficulty());
+        
+        std::vector<std::string> selectableOptions;
+        selectableOptions.push_back(VERIFY_MENU_YES);
+        selectableOptions.push_back(VERIFY_MENU_NO);
+
+        DifficultyPopupHandler* popupHandler = new DifficultyPopupHandler(this);
+        this->difficultyRestartPopup = new PopupTutorialHint(POPUP_WIDTH, popupHandler);
+        DecoratorOverlayPane* difficultyRestartPopupPane = this->difficultyRestartPopup->GetPane();
+        difficultyRestartPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
+        difficultyRestartPopupPane->AddText("Changing the difficulty will restart the current level. Are you sure?", Colour(1,1,1), 1.0f);
+        difficultyRestartPopupPane->SetSelectableOptions(selectableOptions, 1);
+
         this->difficultyMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, difficultyOptions);
-        this->difficultyMenuItem->SetSelectedItem(static_cast<int>(this->cfgOptions.GetDifficulty()));
+        this->difficultyMenuItem->SetSelectedItem(this->initialDifficultySelected);
         this->difficultyMenuItem->SetEventHandler(this->difficultyEventHandler);
 
         this->difficultyItem = this->topMenu->AddMenuItem(this->difficultyMenuItem); 
@@ -320,15 +359,13 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIn
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
-    if (itemIndex == this->inGameMenuState->difficultyItem) {
-        int currSelectionIdx = this->inGameMenuState->difficultyMenuItem->GetSelectedItemIndex();
-        GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(currSelectionIdx);
-        this->inGameMenuState->cfgOptions.SetDifficulty(difficultyToSet);
 
-        // Don't set the model's difficulty directly if we're currently in the tutorial
-        GameModel* gameModel = this->inGameMenuState->display->GetModel();
-        if (!gameModel->IsCurrentLevelTheTutorialLevel()) {
-            gameModel->SetDifficulty(difficultyToSet);
+    if (itemIndex == this->inGameMenuState->difficultyItem) {
+        
+        // If the difficulty is different then show the confirm dialog
+        int currSelectionIdx = this->inGameMenuState->difficultyMenuItem->GetSelectedItemIndex();
+        if (currSelectionIdx != this->inGameMenuState->initialDifficultySelected) {
+            this->inGameMenuState->difficultyRestartPopup->Show(0.0, 0.5);
         }
     }
     //else if (itemIndex == this->inGameMenuState->invertBallBoostItem) {
@@ -344,7 +381,7 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemInde
     }
 
     // A configuration option has changed - rewrite the configuration file to accomodate the change
-    ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->inGameMenuState->cfgOptions);
+    //ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->inGameMenuState->cfgOptions);
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
@@ -380,4 +417,32 @@ void InGameMenuState::VerifyMenuEventHandler::MenuItemEnteredAndSet() {
 }
 
 void InGameMenuState::VerifyMenuEventHandler::MenuItemCancelled() {
+}
+
+
+
+
+void InGameMenuState::DifficultyPopupHandler::OptionSelected(const std::string& optionText) {
+    PaneHandler::OptionSelected(optionText);
+
+    GameModel* gameModel = this->inGameMenuState->display->GetModel();
+    assert(!gameModel->IsCurrentLevelTheTutorialLevel());
+
+    if (optionText.compare(InGameMenuState::VERIFY_MENU_YES) == 0) {
+        
+        // If the difficulty is actually being changed then will have to restart the current level...
+        int currSelectionIdx = this->inGameMenuState->difficultyMenuItem->GetSelectedItemIndex();
+        GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(currSelectionIdx);
+        this->inGameMenuState->cfgOptions.SetDifficulty(difficultyToSet);
+        gameModel->SetDifficulty(difficultyToSet);
+        
+        // Rewrite the configuration file to accomodate the change in difficulty
+        ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->inGameMenuState->cfgOptions);
+
+        // Flag to restart the level...
+        this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
+    }
+    else {
+        this->inGameMenuState->difficultyMenuItem->SetSelectedItem(this->inGameMenuState->initialDifficultySelected);
+    }
 }

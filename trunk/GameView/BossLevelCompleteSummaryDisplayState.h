@@ -35,7 +35,7 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
-    static const double FADE_OUT_TIME;
+    static const double FADE_TIME;
     static const float FOOTER_VERTICAL_PADDING;
     static const float VICTORY_TO_WORLD_VERTICAL_PADDING;
     static const float WORLD_TO_COMPLETE_VERTICAL_PADDING;

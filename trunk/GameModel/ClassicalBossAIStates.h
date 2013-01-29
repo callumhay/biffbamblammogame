@@ -88,6 +88,12 @@ protected:
     float GetMaxSpeed() const;
     Vector2D GetAcceleration() const;
 
+    float GetSpeedModifier(float initialDivisor, float currHealthPercent) const {
+        return 1.0f / (initialDivisor * std::max<float>(1.0f / initialDivisor, currHealthPercent));
+    }
+
+    virtual float GetTotalLifePercent() const = 0;
+
     // Update functions
     virtual void SetState(ClassicalBossAI::AIState newState) = 0;
     virtual void UpdateState(double dT, GameModel* gameModel) = 0;
@@ -177,6 +183,8 @@ private:
     float GetFollowAndAttackHeight() const;
     float GetMaxArmAttackYMovement() const;
 
+    float GetTotalLifePercent() const;
+
     ArmsBodyHeadAI::AIState DetermineNextArmAttackState(const Vector2D& bossToPaddleVec) const;
 
     AnimationMultiLerp<Vector3D> GenerateArmDeathTranslationAnimation(bool isLeftArm) const;
@@ -257,6 +265,8 @@ private:
     double GetLaserChargeTime() const { return 1.0; }
     double GetTimeBetweenLaserBarrageShots() const { return 0.075 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1; }
 
+    float GetTotalLifePercent() const;
+
     AnimationMultiLerp<Vector3D> GenerateColumnDeathTranslationAnimation(float xForceDir) const;
     AnimationMultiLerp<float> GenerateColumnDeathRotationAnimation(float xForceDir) const;
 
@@ -308,7 +318,7 @@ private:
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
     void ExecuteSpinningPedimentState(double dT, GameModel* gameModel);
     void ExecuteHurtEyeState(double dT);
-    void ExecuteFinalDeathThroesState(double dT);
+    void ExecuteFinalDeathThroesState();
 
     void PerformBasicEyeMovement(const Point2D& eyePos, const GameLevel* level);
     void PerformBasicPedimentMovement(const Point2D& pedimentPos, const GameLevel* level);
@@ -318,6 +328,8 @@ private:
     double GetTimeBetweenLaserSprayShots() const { return 1.5; }
     float GetPedimentBasicMoveHeight(const GameLevel* level);
     float GetEyeBasicMoveHeight(const GameLevel* level);
+
+    float GetTotalLifePercent() const;
 
     double GeneratePedimentSpinningTime() const { return this->GenerateBasicMoveTime() + 1.0; }
 

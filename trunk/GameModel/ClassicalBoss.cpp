@@ -41,7 +41,7 @@ const float ClassicalBoss::EYE_HEIGHT = 1.575f;
 const float ClassicalBoss::EYE_DEPTH  = 0.788f;
 
 const float ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED     = PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
-const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = PlayerPaddle::DEFAULT_ACCELERATION / 3.0f;
+const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = PlayerPaddle::DEFAULT_ACCELERATION / 2.25f;
 
 const float ClassicalBoss::BODY_HEAD_MAX_SPEED          = PlayerPaddle::DEFAULT_MAX_SPEED + 5.0f;
 const float ClassicalBoss::BODY_HEAD_ACCELERATION       = PlayerPaddle::DEFAULT_ACCELERATION;

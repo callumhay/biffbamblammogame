@@ -132,18 +132,18 @@ void GameEventsListener::LevelAlmostCompleteEvent(const GameLevel& level) {
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
 	UNUSED_PARAMETER(world);
 	UNUSED_PARAMETER(level);
-    
-/*
+
 	// Queue up the state for ending a level - this will display the level name and do
     // proper animations, fade-outs, etc. In the case of a boss level being completed, we
     // display a "movement complete" state instead.
     if (level.GetHasBoss()) {
         // For now, every boss level should be the last level in a world
         assert(world.GetLastLevelIndex() == static_cast<int>(level.GetLevelIndex()));
-        
-        // TODO:
-        //this->display->AddStateToQueue(DisplayState::WorldUnlock);
         this->display->AddStateToQueue(DisplayState::BossLevelCompleteSummary);
+
+        // TODO: Bring the player to the world select screen and unlock the latest world.. unless this was the last level,
+        // in which case we go the state for the end of the game...
+        //this->display->AddStateToQueue(DisplayState::WorldUnlock);
 
         // If it's not the last world, then we add a world start screen after the boss level complete summary
         if (this->display->GetModel()->GetLastWorldIndex() != world.GetWorldIndex()) {
@@ -154,10 +154,6 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
         this->display->AddStateToQueue(DisplayState::LevelEnd);
 	    this->display->AddStateToQueue(DisplayState::LevelCompleteSummary);
     }
-
-*/
-    this->display->AddStateToQueue(DisplayState::BossLevelCompleteSummary);
-
 
 	this->display->SetCurrentStateAsNextQueuedState();
 
@@ -1042,6 +1038,12 @@ void GameEventsListener::NumStarsChangedEvent(int oldNumStars, int newNumStars) 
     pointHUD->SetNumStars(this->display->GetCamera(), newNumStars);
 
     debug_output("EVENT: Number of stars changed");
+}
+
+void GameEventsListener::DifficultyChangedEvent(const GameModel::Difficulty& newDifficulty) {
+    UNUSED_PARAMETER(newDifficulty);
+
+    debug_output("EVENT: Difficulty changed: " << newDifficulty);
 }
 
 void GameEventsListener::ScoreChangedEvent(int newScore) {

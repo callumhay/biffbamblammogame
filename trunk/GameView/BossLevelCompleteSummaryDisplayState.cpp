@@ -19,7 +19,7 @@
 
 #include "../ResourceManager.h"
 
-const double BossLevelCompleteSummaryDisplayState::FADE_OUT_TIME          = 0.75;
+const double BossLevelCompleteSummaryDisplayState::FADE_TIME              = 1.5;
 const float BossLevelCompleteSummaryDisplayState::FOOTER_VERTICAL_PADDING = 20.0f;
 
 const float BossLevelCompleteSummaryDisplayState::VICTORY_TO_WORLD_VERTICAL_PADDING  = 200.0f;
@@ -103,10 +103,10 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
 	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
 
     // Setup all the animations...
-    static const double INITIAL_FADE_IN_TIME = 1.0;
+
 	// Setup the fade animations
     this->fadeInAnimation.SetInterpolantValue(1.0f);
-    this->fadeInAnimation.SetLerp(0.0, INITIAL_FADE_IN_TIME, 1.0f, 0.0f);
+    this->fadeInAnimation.SetLerp(0.0, FADE_TIME, 1.0f, 0.0f);
 	this->fadeOutAnimation.SetInterpolantValue(0.0f);
 	this->fadeOutAnimation.SetLerp(0.0, 0.0, 0.0f, 0.0f);
 
@@ -114,13 +114,13 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     float centerBlockTopYCoord = this->GetCenterTextBlockTopYCoord(camera.GetWindowHeight());
 
     static const double VICTORY_LABEL_ANIM_TIME = 0.70;
-    static const double FINAL_VICTORY_LABEL_ANIM_TIME = INITIAL_FADE_IN_TIME + VICTORY_LABEL_ANIM_TIME;
+    static const double FINAL_VICTORY_LABEL_ANIM_TIME = FADE_TIME + VICTORY_LABEL_ANIM_TIME;
 
     std::vector<double> timeVals;
     timeVals.reserve(4);
-    timeVals.push_back(INITIAL_FADE_IN_TIME);
-    timeVals.push_back(INITIAL_FADE_IN_TIME + 0.5);
-    timeVals.push_back(INITIAL_FADE_IN_TIME + 0.55);
+    timeVals.push_back(FADE_TIME);
+    timeVals.push_back(FADE_TIME + 0.5);
+    timeVals.push_back(FADE_TIME + 0.55);
     timeVals.push_back(FINAL_VICTORY_LABEL_ANIM_TIME);
     
     std::vector<float> moveVals;
@@ -232,8 +232,12 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(),
-            camera.GetWindowHeight(), 1.0f, ColourRGBA(1, 1, 1, fadeValue));
+        this->bgTex->BindTexture();
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->bgTex->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->bgTex->GetHeight()),
+            ColourRGBA(1,1,1, fadeValue));
+        this->bgTex->UnbindTexture();
 
 		glPopAttrib();
 
@@ -383,7 +387,7 @@ void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
     // TODO: Check to see if all other animations are done...
     if (this->allAnimationIsDone) {
         // Setup the fade animation
-        this->fadeOutAnimation.SetLerp(BossLevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
+        this->fadeOutAnimation.SetLerp(FADE_TIME, 1.0f);
         waitingForKeyPress = false;
     }
     else {

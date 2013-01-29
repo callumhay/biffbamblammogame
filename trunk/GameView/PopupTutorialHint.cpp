@@ -27,6 +27,15 @@ TutorialHint(), pane(NULL), timeToUnshow(0.0), paneHandler(NULL) {
     
 }
 
+PopupTutorialHint::PopupTutorialHint(size_t width, PaneHandler* handler) :
+TutorialHint(), pane(NULL), timeToUnshow(0.0), paneHandler(NULL) {
+    handler->SetPopupTutorialHint(this);
+    this->paneHandler = handler;
+    
+    this->pane = new DecoratorOverlayPane(this->paneHandler, width, 
+        GameViewConstants::GetInstance()->TUTORIAL_PANE_COLOUR);
+}
+
 PopupTutorialHint::~PopupTutorialHint() {
     delete this->pane;
     this->pane = NULL;
@@ -75,7 +84,7 @@ void PopupTutorialHint::Tick(double dT) {
 }
 
 // Event handler for when an option is selected in the pop-up hint's pane
-void PopupTutorialHint::PaneHandler::OptionSelected(const std::string& optionText) {
+void PaneHandler::OptionSelected(const std::string& optionText) {
     UNUSED_PARAMETER(optionText);
     this->popupHint->GetPane()->Hide(0.0, 1.0);
 }

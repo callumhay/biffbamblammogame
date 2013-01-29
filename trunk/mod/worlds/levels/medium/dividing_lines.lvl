@@ -20,7 +20,7 @@ S E E E E S E E E E E E S E E E E S
 S E E E E S E E E E E E S E E E E S 
 S E E E E S E E E E E E S E E E E S 
 S E E E E S E E E E E E S E E E E S 
-S E E E E S E E E E E E S E E E E S 
+S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
 
@@ -52,8 +52,10 @@ BallShrink 1
 UpsideDown 2
 MultiBall5 2
 BallCam 0
+MagnetPaddle 2
 MultiBall3 2
 IceBall 2
+MineLauncherPaddle 2
 SlowBall 3
 GravityBall 0
 CrazyBall 1
