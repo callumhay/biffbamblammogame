@@ -27,6 +27,7 @@
 #include "BallBoostModel.h"
 #include "SafetyNet.h"
 #include "PaddleMineProjectile.h"
+#include "BossEffectEventInfo.h"
 
 class Point2D;
 class GameBall;
@@ -34,7 +35,6 @@ class PlayerPaddle;
 class GameItemTimer;
 class Projectile;
 class RocketProjectile;
-
 
 class GameEvents {
 public:
@@ -682,6 +682,12 @@ public:
     virtual void BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart) {
         UNUSED_PARAMETER(boss);
         UNUSED_PARAMETER(angryPart);
+    }
+
+    // Effect Events *********************************************************************
+    
+    virtual void EffectEvent(const BossEffectEventInfo& effectEvent) {
+        UNUSED_PARAMETER(effectEvent);
     }
 
 };

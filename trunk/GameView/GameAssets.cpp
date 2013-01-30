@@ -737,6 +737,26 @@ void GameAssets::DrawBackgroundEffects(const Camera& camera) {
 	this->worldAssets->DrawBackgroundEffects(camera);
 }
 
+void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera) {
+
+    if (currLevel->GetHasBoss()) {
+        Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
+        
+        glPushMatrix();
+	    glTranslatef(worldTransform[0], worldTransform[1], worldTransform[2]);
+
+	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
+	    this->lightAssets->GetBossAffectingLights(fgKeyLight, fgFillLight, ballLight);
+        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight);
+
+        // Draw the foreground effects for the boss, transform them to the boss...
+        this->espAssets->DrawForegroundBossEffects(dT, camera);
+    
+        glPopMatrix();
+    }
+}
+
+
 /**
  * Draw a given item in the world.
  */
