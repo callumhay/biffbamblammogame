@@ -1662,14 +1662,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\GameEventManager.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameEvents.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\GameLevel.h"
 					>
 				</File>
@@ -1743,10 +1735,6 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameBall.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameEventManager.cpp"
 					>
 				</File>
 				<File
@@ -2502,6 +2490,46 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\ClassicalBossAIStates.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Events"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameModel\BossEffectEventInfo.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ExpandingHaloEffectInfo.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameEventManager.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameEvents.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PowerChargeEventInfo.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\SparkBurstEffectInfo.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameModel\GameEventManager.cpp"
 						>
 					</File>
 				</Filter>

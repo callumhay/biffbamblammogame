@@ -30,6 +30,9 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
+#include "../GameModel/PowerChargeEventInfo.h"
+#include "../GameModel/ExpandingHaloEffectInfo.h"
+#include "../GameModel/SparkBurstEffectInfo.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -249,7 +252,8 @@ GameESPAssets::~GameESPAssets() {
  * Kills all active effects currently being displayed in-game.
  */
 void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
-	// Delete any leftover emitters
+	
+    // Delete any leftover emitters
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
 		iter != this->activeGeneralEmitters.end(); ++iter) {
 			delete *iter;
@@ -385,6 +389,19 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
         }
     }
     this->boostBallEmitters.clear();
+
+    // Clear boss effects
+    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->activeBossFGEmitters.begin();
+        iter1 != this->activeBossFGEmitters.end(); ++iter1) {
+
+        std::list<ESPEmitter*>& currEmitters = iter1->second;
+        for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end(); ++iter2) {
+            ESPEmitter* currEmitter = *iter2;
+            delete currEmitter;
+            currEmitter = NULL;
+        }
+    }
+    this->activeBossFGEmitters.clear();
 }
 
 void GameESPAssets::KillAllActiveTeslaLightningArcs() {
@@ -3851,7 +3868,6 @@ ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, cons
 }
 
 void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float height) {
-    float maxSize = std::max<float>(width, height);
     float avgSize = (width + height) / 2.0f;
 
     // Stars fly out of the hurt part of the boss
@@ -3916,6 +3932,136 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 
     this->activeGeneralEmitters.push_back(angryBolts);
     this->activeGeneralEmitters.push_back(angryOno);
+}
+
+void GameESPAssets::AddBossPowerChargeEffect(const PowerChargeEventInfo& info) {
+    
+    const BossBodyPart* bodyPart = info.GetChargingPart();
+    const Colour& colour = info.GetColour();
+
+	ESPPointEmitter* chargeParticles1 = new ESPPointEmitter();
+	chargeParticles1->SetSpawnDelta(ESPInterval(0.025f, 0.05f));
+	chargeParticles1->SetNumParticleLives(1);
+	chargeParticles1->SetInitialSpd(ESPInterval(2.6f, 4.5f));
+    chargeParticles1->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs() * 0.75f, info.GetChargeTimeInSecs()));
+	chargeParticles1->SetParticleSize(ESPInterval(1.5f, 3.5f));
+	chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    chargeParticles1->SetParticleAlignment(ESP::ScreenAligned);
+	chargeParticles1->SetEmitPosition(Point3D(0,0,0));
+	chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
+	chargeParticles1->SetEmitAngleInDegrees(180);
+	chargeParticles1->SetIsReversed(true);
+    chargeParticles1->SetParticleColour(
+        ESPInterval(colour.R() * 0.75f, colour.R()), 
+        ESPInterval(colour.G() * 0.75f, colour.G()),
+        ESPInterval(colour.B() * 0.75f, colour.B()), ESPInterval(1.0f));
+	chargeParticles1->AddEffector(&this->particleFader);
+	chargeParticles1->AddEffector(&this->particleMediumShrink);
+    chargeParticles1->SetParticles(13, this->sparkleTex);
+
+
+	ESPPointEmitter* chargeParticles2 = new ESPPointEmitter();
+	chargeParticles2->SetSpawnDelta(ESPInterval(0.025f, 0.05f));
+	chargeParticles2->SetNumParticleLives(1);
+	chargeParticles2->SetInitialSpd(ESPInterval(2.6f, 4.5f));
+    chargeParticles2->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs() * 0.75f, info.GetChargeTimeInSecs()));
+	chargeParticles2->SetParticleSize(ESPInterval(1.25f, 2.8f));
+	chargeParticles2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    chargeParticles2->SetParticleAlignment(ESP::ScreenAligned);
+	chargeParticles2->SetEmitPosition(Point3D(0,0,0));
+	chargeParticles2->SetEmitDirection(Vector3D(0, 1, 0));
+	chargeParticles2->SetEmitAngleInDegrees(180);
+	chargeParticles2->SetIsReversed(true);
+    chargeParticles2->SetParticleColour(ESPInterval(1), ESPInterval(1),ESPInterval(1), ESPInterval(1.0f));
+	chargeParticles2->AddEffector(&this->particleFader);
+	chargeParticles2->AddEffector(&this->particleMediumShrink);
+    chargeParticles2->SetParticles(8, this->sparkleTex);
+
+    static const unsigned int NUM_HALOS = 3;
+    ESPPointEmitter* halo = new ESPPointEmitter();
+    halo->SetSpawnDelta(ESPInterval(0.25f));
+	halo->SetNumParticleLives(1);
+    halo->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs()));
+	halo->SetParticleSize(ESPInterval(5.0f));
+	halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    halo->SetParticleAlignment(ESP::ScreenAligned);
+	halo->SetEmitPosition(Point3D(0,0,0));
+	halo->SetIsReversed(true);
+    halo->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
+	halo->AddEffector(&this->particleShrinkToNothing);
+    halo->SetParticles(NUM_HALOS, this->haloTex);
+
+    this->activeBossFGEmitters[bodyPart].push_back(halo);
+    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles1);
+    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles2);
+}
+
+void GameESPAssets::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
+
+    const BossBodyPart* bodyPart = info.GetPart();
+    const Colour& colour = info.GetColour();
+
+    Collision::AABB2D aabb = bodyPart->GetLocalBounds().GenerateAABBFromLines();
+    float minSize = std::min<float>(aabb.GetHeight(), aabb.GetWidth());
+
+    ESPPointEmitter* halo = new ESPPointEmitter();
+    halo->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	halo->SetNumParticleLives(1);
+    halo->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+	halo->SetParticleSize(ESPInterval(minSize));
+	halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    halo->SetParticleAlignment(ESP::ScreenAligned);
+	halo->SetEmitPosition(Point3D(0,0,0));
+    halo->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(0.8f));
+    halo->AddEffector(&this->particleFader);
+    halo->AddEffector(&this->particleSuperGrowth);
+    halo->SetParticles(1, this->haloTex);
+
+    this->activeBossFGEmitters[bodyPart].push_back(halo);
+}
+
+void GameESPAssets::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
+
+    const BossBodyPart* bodyPart = info.GetPart();
+    const Colour& colour = info.GetColour();
+
+	ESPPointEmitter* chargeParticles1 = new ESPPointEmitter();
+	chargeParticles1->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+	chargeParticles1->SetNumParticleLives(1);
+	chargeParticles1->SetInitialSpd(ESPInterval(5.0f, 9.0f));
+    chargeParticles1->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+	chargeParticles1->SetParticleSize(ESPInterval(0.75f, 1.9f));
+	chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    chargeParticles1->SetParticleAlignment(ESP::ScreenAligned);
+	chargeParticles1->SetEmitPosition(Point3D(0,0,0));
+	chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
+	chargeParticles1->SetEmitAngleInDegrees(180);
+    chargeParticles1->SetParticleColour(
+        ESPInterval(colour.R() * 0.75f, colour.R()), 
+        ESPInterval(colour.G() * 0.75f, colour.G()),
+        ESPInterval(colour.B() * 0.75f, colour.B()), ESPInterval(1.0f));
+	chargeParticles1->AddEffector(&this->particleFader);
+    chargeParticles1->AddEffector(&this->particleSmallGrowth);
+    chargeParticles1->SetParticles(8, this->sparkleTex);
+
+	ESPPointEmitter* chargeParticles2 = new ESPPointEmitter();
+	chargeParticles2->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+	chargeParticles2->SetNumParticleLives(1);
+	chargeParticles2->SetInitialSpd(ESPInterval(4.0f, 8.0f));
+    chargeParticles2->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+	chargeParticles2->SetParticleSize(ESPInterval(0.5f, 1.5f));
+	chargeParticles2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    chargeParticles2->SetParticleAlignment(ESP::ScreenAligned);
+	chargeParticles2->SetEmitPosition(Point3D(0,0,0));
+	chargeParticles2->SetEmitDirection(Vector3D(0, 1, 0));
+	chargeParticles2->SetEmitAngleInDegrees(180);
+    chargeParticles2->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.8f));
+	chargeParticles2->AddEffector(&this->particleFader);
+    chargeParticles2->AddEffector(&this->particleSmallGrowth);
+    chargeParticles2->SetParticles(5, this->sparkleTex);
+
+    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles1);
+    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles2);
 }
 
 void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& position,
@@ -5350,6 +5496,50 @@ void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
             ++iter1;
         }
     }
+}
+
+/**
+ * Draw particle effects associated with the boss, which get drawn infront of the boss.
+ */
+void GameESPAssets::DrawForegroundBossEffects(double dT, const Camera& camera) {
+
+	// Go through all the emitters and do book keeping and drawing
+    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->activeBossFGEmitters.begin();
+		iter1 != this->activeBossFGEmitters.end();) {
+	
+        const BossBodyPart* bodyPart = iter1->first;
+        std::list<ESPEmitter*>& currEmitters = iter1->second;
+
+        glPushMatrix();
+        glMultMatrixf(bodyPart->GetWorldTransform().begin());
+
+        for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end();) {
+            ESPEmitter* currEmitter = *iter2;
+
+		    // Check to see if dead, if so erase it...
+		    if (currEmitter->IsDead()) {
+                iter2 = currEmitters.erase(iter2);
+                delete currEmitter;
+                currEmitter = NULL;
+		    }
+		    else {
+
+			    // Not dead yet so we draw and tick - transform to the body part to draw
+			    currEmitter->Draw(camera);
+			    currEmitter->Tick(dT);
+                ++iter2;
+		    }
+        }
+
+        glPopMatrix();
+
+        if (currEmitters.empty()) {
+            iter1 = this->activeBossFGEmitters.erase(iter1);
+        }
+        else {
+            ++iter1;
+        }
+	}
 }
 
 /**

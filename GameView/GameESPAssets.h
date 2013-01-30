@@ -39,6 +39,12 @@ class Beam;
 class CgFxFireBallEffect;
 struct ESPInterval;
 
+class PowerChargeEventInfo;
+class ExpandingHaloEffectInfo;
+class SparkBurstEffectInfo;
+class BossBodyPart;
+
+
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
  */
@@ -51,6 +57,10 @@ private:
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
 	std::list<ESPEmitter*> activePaddleEmitters;
+   
+    std::map<const BossBodyPart*, std::list<ESPEmitter*> > activeBossFGEmitters;
+    //std::list<ESPEmitter*> activeBossBGEmitters;
+
 	std::map<const GameBall*, std::list<ESPEmitter*> > activeBallBGEmitters;
     BallEffectsMap boostBallEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*> > activeItemDropEmitters;
@@ -252,6 +262,10 @@ public:
     void AddBossHurtEffect(const Point2D& pos, float width, float height);
     void AddBossAngryEffect(const Point2D& pos, float width, float height);
 
+    void AddBossPowerChargeEffect(const PowerChargeEventInfo& info);
+    void AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info);
+    void AddBossSparkBurstEffect(const SparkBurstEffectInfo& info);
+
     void AddMultiplierComboEffect(int multiplier, const Point2D& position, const PlayerPaddle& paddle);
     //void AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle);
 
@@ -332,6 +346,8 @@ public:
     void ResetBulletTimeBallBoostEffects();
     void DrawBulletTimeBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel);
     void DrawBallBoostingEffects(double dT, const Camera& camera);
+
+    void DrawForegroundBossEffects(double dT, const Camera& camera);
 
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera);

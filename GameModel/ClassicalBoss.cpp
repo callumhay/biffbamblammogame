@@ -19,6 +19,7 @@
 using namespace classicalbossai;
 
 const float ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER = 10.3f;
+const float ClassicalBoss::ARM_X_TRANSLATION_TO_INNER_EDGE_FROM_CENTER = 8.797f;
 const float ClassicalBoss::ARM_WIDTH = 2.4f;
 const float ClassicalBoss::HALF_ARM_WIDTH = ARM_WIDTH / 2.0f;
 const float ClassicalBoss::ARM_HEIGHT = 9.66f;

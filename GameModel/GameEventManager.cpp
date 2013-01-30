@@ -655,3 +655,10 @@ void GameEventManager::ActionBossAngry(const Boss* boss, const BossBodyPart* ang
 		(*this->listenerIter)->BossAngryEvent(boss, angryPart);
 	}
 }
+
+void GameEventManager::ActionEffect(const BossEffectEventInfo& effectEvent) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->EffectEvent(effectEvent);
+	}
+}

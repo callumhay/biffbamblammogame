@@ -79,6 +79,7 @@ private:
     size_t leftCol1Idx, leftCol2Idx, leftCol3Idx, rightCol1Idx, rightCol2Idx, rightCol3Idx;
 
     static const float ARM_X_TRANSLATION_FROM_CENTER;
+    static const float ARM_X_TRANSLATION_TO_INNER_EDGE_FROM_CENTER;
 
     static const float ARMS_BODY_HEAD_MAX_SPEED;
     static const float ARMS_BODY_HEAD_ACCELERATION;

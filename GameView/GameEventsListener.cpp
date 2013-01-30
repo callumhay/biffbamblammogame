@@ -37,6 +37,9 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/BallBoostModel.h"
 #include "../GameModel/BossWeakpoint.h"
+#include "../GameModel/PowerChargeEventInfo.h"
+#include "../GameModel/ExpandingHaloEffectInfo.h"
+#include "../GameModel/SparkBurstEffectInfo.h"
 
 #include "../GameControl/GameControllerManager.h"
 
@@ -1146,6 +1149,37 @@ void GameEventsListener::BossAngryEvent(const Boss* boss, const BossBodyPart* an
     this->display->GetAssets()->GetESPAssets()->AddBossAngryEffect(angryPart->GetTranslationPt2D(),
         partAABB.GetWidth(), partAABB.GetHeight());
     debug_output("EVENT: Boss is angry.");
+}
+
+
+void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
+    switch (effectEvent.GetType()) {
+        
+        case BossEffectEventInfo::PowerChargeInfo: {
+            const PowerChargeEventInfo& powerChargeInfo =
+                static_cast<const PowerChargeEventInfo&>(effectEvent);
+            this->display->GetAssets()->GetESPAssets()->AddBossPowerChargeEffect(powerChargeInfo);
+            break;
+        }
+
+        case BossEffectEventInfo::ExpandingHaloInfo: {
+            const ExpandingHaloEffectInfo& expandingHaloInfo =
+                static_cast<const ExpandingHaloEffectInfo&>(effectEvent);
+            this->display->GetAssets()->GetESPAssets()->AddBossExpandingHaloEffect(expandingHaloInfo);
+            break;
+        }
+
+        case BossEffectEventInfo::SparkBurstInfo: {
+            const SparkBurstEffectInfo& sparkBurstInfo =
+                static_cast<const SparkBurstEffectInfo&>(effectEvent);
+            this->display->GetAssets()->GetESPAssets()->AddBossSparkBurstEffect(sparkBurstInfo);
+            break;
+        }
+
+        default:
+            assert(false);
+            break;
+    }
 }
 
 /**

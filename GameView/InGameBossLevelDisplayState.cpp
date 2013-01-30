@@ -223,12 +223,26 @@ void InGameBossLevelDisplayState::ExecuteOutroBossState(double dT) {
     this->renderPipeline.RenderFrameWithoutHUD(dT);
     this->renderPipeline.RenderHUDWithAlpha(dT, unimportantObjectsAlpha);
 
+    if (this->outroFinishCountdown <= 0.0) {
+        // Signal that the boss level is now complete, this will end up changing the display state
+        const GameModel* model = this->display->GetModel();
+        const GameLevel* level = model->GetCurrentLevel();
+        Boss* boss = level->GetBoss();
+        assert(boss != NULL);
+        boss->SetIsLevelCompleteDead(true);
+        return;
+    }
+    else {
+        this->outroFinishCountdown -= dT;
+    }
+
     if (this->timeUntilBigFlashyBoom <= 0.0) {
         double shakeTime = this->outroFinishCountdown - this->timeUntilBigFlashyBoom;
-        assert(shakeTime > 0.0);
-        this->display->GetCamera().SetCameraShake(shakeTime, Vector3D(0.35f, 0.35f, 0.0), 100);
-        GameControllerManager::GetInstance()->VibrateControllers(shakeTime, 
-            BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+        if (shakeTime > 0.0) {
+            this->display->GetCamera().SetCameraShake(shakeTime, Vector3D(0.35f, 0.35f, 0.0), 100);
+            GameControllerManager::GetInstance()->VibrateControllers(shakeTime, 
+                BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+        }
     }
     else {
         this->timeUntilBigFlashyBoom -= dT;
@@ -241,17 +255,5 @@ void InGameBossLevelDisplayState::ExecuteOutroBossState(double dT) {
         else {
             this->pulseTimeCounter -= dT;
         }
-    }
-
-    if (this->outroFinishCountdown <= 0.0) {
-        // Signal that the boss level is now complete, this will end up changing the display state
-        const GameModel* model = this->display->GetModel();
-        const GameLevel* level = model->GetCurrentLevel();
-        Boss* boss = level->GetBoss();
-        assert(boss != NULL);
-        boss->SetIsLevelCompleteDead(true);
-    }
-    else {
-        this->outroFinishCountdown -= dT;
     }
 }

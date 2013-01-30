@@ -41,6 +41,7 @@ class PaddleMineProjectile;
 class BossWeakpoint;
 class AbstractBossBodyPart;
 class Boss;
+class BossEffectEventInfo;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -152,6 +153,9 @@ public:
     // Boss Events
     void ActionBossHurt(const BossWeakpoint* hurtPart);
     void ActionBossAngry(const Boss* boss, const BossBodyPart* angryPart);
+
+    // Effect Events
+    void ActionEffect(const BossEffectEventInfo& effectEvent);
 
 protected:
 	GameEventManager();

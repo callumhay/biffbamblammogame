@@ -75,6 +75,7 @@ protected:
 
     // Attack routines
     void ExecuteLaserSpray(GameModel* gameModel);
+    void SignalLaserFireEffects();
 
     // Shared movement data getters
     double GenerateBasicMoveTime() const { return 10.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
@@ -87,7 +88,6 @@ protected:
     // Basic boss attribute getters
     float GetMaxSpeed() const;
     Vector2D GetAcceleration() const;
-
     float GetSpeedModifier(float initialDivisor, float currHealthPercent) const {
         return 1.0f / (initialDivisor * std::max<float>(1.0f / initialDivisor, currHealthPercent));
     }
@@ -331,9 +331,9 @@ private:
 
     float GetTotalLifePercent() const;
 
-    double GeneratePedimentSpinningTime() const { return this->GenerateBasicMoveTime() + 1.0; }
+    double GeneratePedimentSpinningTime() const { return 10.0; }
 
-    AnimationMultiLerp<float> GenerateSpinningPedimentRotationAnim();
+    AnimationMultiLerp<float> GenerateSpinningPedimentRotationAnim(double animationTime);
 
     DISALLOW_COPY_AND_ASSIGN(HeadAI);
 };

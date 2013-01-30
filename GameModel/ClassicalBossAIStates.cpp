@@ -16,6 +16,10 @@
 #include "PlayerPaddle.h"
 #include "BossLaserProjectile.h"
 
+#include "PowerChargeEventInfo.h"
+#include "ExpandingHaloEffectInfo.h"
+#include "SparkBurstEffectInfo.h"
+
 using namespace classicalbossai;
 
 // BEGIN ClassicalBossAI ***********************************************************
@@ -68,6 +72,14 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+
+    this->SignalLaserFireEffects();
+}
+
+void ClassicalBossAI::SignalLaserFireEffects() {
+    // EVENT: Boss shot a laser out of its eye, add effects for it...
+    GameEventManager::Instance()->ActionEffect(ExpandingHaloEffectInfo(this->boss->GetEye(), 0.5, Colour(1.0f, 0.2f, 0.2f)));
+    GameEventManager::Instance()->ActionEffect(SparkBurstEffectInfo(this->boss->GetEye(), 0.65, Colour(1.0f, 0.2f, 0.2f)));
 }
 
 float ClassicalBossAI::GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const {
@@ -103,7 +115,7 @@ Vector2D ClassicalBossAI::GetAcceleration() const {
     accel.Normalize();
 
     // Based on how hurt the boss is, the acceleration/deceleration will be more dramatic
-    float multipler = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 2.0f, this->GetTotalLifePercent());
+    float multipler = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.75f, this->GetTotalLifePercent());
     return multipler * ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION * accel;
 }
 
@@ -408,6 +420,7 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             debug_output("Entering PrepLaserAIState");
             this->countdownToLaserBarrage = this->GetLaserChargeTime();
             this->movingDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
+
             break;
         case ClassicalBossAI::MoveAndBarrageWithLaserAIState:
             debug_output("Entering MoveAndBarrageWithLaserAIState");
@@ -539,7 +552,7 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
     if (this->countdownToNextState <= 0.0) {
         // Determine the next state - we will either go back to chasing the paddle around and eventually attacking
         // with the arms, or we go into a laser charge and barrage state progression
-        
+/*        
         bool goToChaseState = true;
         
         // Laser barrages will happen more frequently when the boss has taken more damage...
@@ -555,6 +568,10 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
             this->desiredVel = Vector2D(0,0);
             this->SetState(ClassicalBossAI::PrepLaserAIState);
         }
+*/
+            this->currVel    = Vector2D(0,0);
+            this->desiredVel = Vector2D(0,0);
+            this->SetState(ClassicalBossAI::PrepLaserAIState);
 
     }
     else {
@@ -664,7 +681,7 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
             this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
         }
         
-        float speedMultiplier = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.75f, totalLifePercent);
+        float speedMultiplier = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.5f, totalLifePercent);
 
         // If one of the bosses' arms is destroyed it should be trying to get its last surviving arm to
         // be above the paddle...
@@ -686,12 +703,22 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
                 this->desiredVel[0] = NumberFuncs::SignOf(bossToPaddleVec[0]) * this->GetMaxSpeed() * speedMultiplier;
             }
             else {
+                // The paddle is currently somewhere under the boss but not under an arm...
+
+                // Figure out which arm is closer to the paddle...
+                float xDistToLeftArm  = fabs(leftArmAABB.GetMax()[0]  - (paddlePos[0] - paddle->GetHalfWidthTotal())); 
+                float xDistToRightArm = fabs(rightArmAABB.GetMin()[0] - (paddlePos[0] + paddle->GetHalfWidthTotal())); 
+
                 float xDirSignToPaddle = 0.0f;
-                if (absBossToPaddleXDist < EPSILON) {
-                    xDirSignToPaddle = ((Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) ? 1 : -1);
+                if (fabs(this->desiredVel[0]) < EPSILON) {
+                    xDirSignToPaddle = Randomizer::GetInstance()->RandomNegativeOrPositive();
                 }
-                else if (bossToPaddleVec[0] < 0) {
-                    if (bossPos[0] >= this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
+                else {
+                    xDirSignToPaddle = NumberFuncs::SignOf(this->desiredVel[0]);
+                }
+
+                if (xDistToLeftArm < xDistToRightArm || this->currVel[0] > 0) {
+                    if (bossPos[0] + xDistToLeftArm > this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
                         xDirSignToPaddle = -1.0f;
                     }
                     else {
@@ -699,12 +726,13 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
                     }
                 }
                 else {
-                    if (bossPos[0] < this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
+                    if (bossPos[0] - xDistToRightArm < this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
                         xDirSignToPaddle = 1.0f;
                     }
                     else {
                         xDirSignToPaddle = -1.0f;
                     }
+
                 }
 
                 // Set the direction of the boss so that it chases the paddle around a bit...
@@ -851,7 +879,8 @@ void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
         else {
             if (this->countdownToLaserBarrage == this->GetLaserChargeTime()) {
                 // EVENT: Charging for laser barrage...
-                // TODO
+                GameEventManager::Instance()->ActionEffect(
+                    PowerChargeEventInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
             }
             this->countdownToLaserBarrage -= dT;
         }
@@ -898,6 +927,12 @@ void ArmsBodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* g
         gameModel->AddProjectile(new BossLaserProjectile(eyePos, laserDir));
 
         this->laserShootTimer = this->GetTimeBetweenLaserBarrageShots();
+        
+        static int COUNTER = 0;
+        if (COUNTER % 3 == 0) {
+            this->SignalLaserFireEffects();
+        }
+        COUNTER++;
     }
     else {
         this->laserShootTimer -= dT;
@@ -1453,6 +1488,12 @@ void BodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameM
         gameModel->AddProjectile(new BossLaserProjectile(eyePos, laserDir));
 
         this->laserShootTimer = this->GetTimeBetweenLaserBarrageShots();
+
+        static int COUNTER = 0;
+        if (COUNTER % 4 == 0) {
+            this->SignalLaserFireEffects();
+        }
+        COUNTER++;
     }
     else {
         this->laserShootTimer -= dT;
@@ -1772,7 +1813,7 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->movePedimentUpAndDown = false;
             this->laserShootTimer = this->GetTimeBetweenLaserSprayShots();
             this->moveToNextStateCountdown = this->GeneratePedimentSpinningTime();
-            this->pediment->AnimateLocalZRotation(this->GenerateSpinningPedimentRotationAnim());
+            this->pediment->AnimateLocalZRotation(this->GenerateSpinningPedimentRotationAnim(this->moveToNextStateCountdown));
             this->UpdateEyeAndPedimentHeightMovement();
             break;
 
@@ -1862,6 +1903,12 @@ void HeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel
         gameModel->AddProjectile(new BossLaserProjectile(eyePos, laserDir));
 
         this->laserShootTimer = this->GetTimeBetweenLaserBarrageShots();
+
+        static int COUNTER = 0;
+        if (COUNTER % 5 == 0) {
+            this->SignalLaserFireEffects();
+        }
+        COUNTER++;
     }
     else {
         this->laserShootTimer -= dT;
@@ -1916,8 +1963,7 @@ void HeadAI::ExecuteSpinningPedimentState(double dT, GameModel* gameModel) {
         this->laserShootTimer -= dT;
     }
 
-    if (this->moveToNextStateCountdown <= 0) {
-
+    if (this->moveToNextStateCountdown <= 0.0) {
         this->pediment->ClearLocalZRotationAnimation();
         this->pediment->SetLocalZRotation(0.0f);
 
@@ -2028,7 +2074,7 @@ void HeadAI::UpdateEyeAndPedimentHeightMovement() {
 }
 
 float HeadAI::GetPedimentBasicMoveHeight(const GameLevel* level) {
-    return level->GetLevelUnitHeight() / 2.0f - 0.115f * ClassicalBoss::PEDIMENT_WIDTH;
+    return level->GetLevelUnitHeight() / 2.0f - 0.12f * ClassicalBoss::PEDIMENT_WIDTH;
 }
 
 float HeadAI::GetEyeBasicMoveHeight(const GameLevel* level) {
@@ -2039,20 +2085,27 @@ float HeadAI::GetTotalLifePercent() const {
     return this->eye->GetCurrentLifePercentage();
 }
 
-AnimationMultiLerp<float> HeadAI::GenerateSpinningPedimentRotationAnim() {
-    static const float DEFAULT_ROT_SPD = 180.0f;
+AnimationMultiLerp<float> HeadAI::GenerateSpinningPedimentRotationAnim(double animationTime) {
+    static const float NUM_ROTATIONS = 10;
+
+    double timeInc = animationTime / NUM_ROTATIONS;
 
     std::vector<double> timeVals;
-    timeVals.reserve(3);
+    timeVals.reserve(2*NUM_ROTATIONS + 2);
     timeVals.push_back(0.0);
-    timeVals.push_back(1.25);
-    timeVals.push_back(2.5);
+    for (int i = 0; i < NUM_ROTATIONS*2; i++) {
+        timeVals.push_back(timeVals.back() + timeInc);
+    }
+    timeVals.push_back(timeVals.back() + timeInc/2.0);
 
     std::vector<float> rotVals;
     rotVals.reserve(timeVals.size());
     rotVals.push_back(0.0);
-    rotVals.push_back(DEFAULT_ROT_SPD);
-    rotVals.push_back(2*DEFAULT_ROT_SPD);
+    for (int i = 0; i < NUM_ROTATIONS; i++) {
+        rotVals.push_back(-35.0f);
+        rotVals.push_back(35.0f);
+    }
+    rotVals.push_back(0.0);
 
     AnimationMultiLerp<float> rotAnim;
     rotAnim.SetLerp(timeVals, rotVals);
