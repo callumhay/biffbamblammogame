@@ -48,7 +48,12 @@ public:
 
 private:
     static const char* WORLD_SELECT_TITLE;
-    static const float MENU_ITEM_HORIZ_GAP;
+
+    static const float SELECTED_TO_UNSELECTED_MENU_ITEM_HORIZ_GAP;
+    static const float UNSELECTED_TO_UNSELECTED_MENU_ITEM_HORIZ_GAP;
+
+    static const float SELECTED_MENU_ITEM_SIZE;
+    static const float UNSELECTED_MENU_ITEM_SIZE;
 
     TextLabel2D* worldSelectTitleLbl;
     KeyboardHelperLabel* keyEscLabel;
@@ -70,18 +75,13 @@ private:
     // Inner class for representing a selectable world item in the world select menu
     class WorldSelectItem {
     public:
-        WorldSelectItem(SelectWorldMenuState* state, const GameWorld* world, size_t worldNumber,
-            float size, bool isLocked);
+        WorldSelectItem(SelectWorldMenuState* state, const GameWorld* world, bool isLocked);
         ~WorldSelectItem();
 
         void SetIsSelected(bool isSelected);
-
-        void SetTopLeftCorner(float x, float y) {
-            this->topLeftCorner[0] = x;
-            this->topLeftCorner[1] = y;
-        }
-        void Draw(const Camera& camera, double dT);
-        void DrawSelectionBorder(const Camera& camera, double dT, float orangeAlpha, float yellowAlpha, float sizeAmt);
+        void Draw(const Camera& camera, double dT, int selectedWorldNum);
+        void DrawSelectionBorder(const Camera& camera, double dT, float orangeAlpha,
+            float yellowAlpha, float sizeAmt);
 
         const GameWorld* GetWorld() const { return this->gameWorld; }
 
@@ -94,18 +94,18 @@ private:
         SelectWorldMenuState* state;
         bool isSelected;
         bool isLocked;
-        size_t worldNumber;
         const GameWorld* gameWorld;
         Texture2D* image;
-        TextLabel2DFixedWidth* label;
-        TextLabel2DFixedWidth* selectedLabel;
-        Point2D topLeftCorner;
-        float baseSize;
 
-        TextLabel2D* starTotalLabel;
+        TextLabel2DFixedWidth* unselectedLabel;
+        TextLabel2DFixedWidth* selectedLabel;
+        TextLabel2D* selectedStarTotalLabel;
+        TextLabel2D* unselectedStarTotalLabel;
 
         AnimationLerp<float> sizeAnim;
         AnimationMultiLerp<float> lockedAnim;
+
+        float GetXPosition(const Camera& camera, int selectedWorldNum) const;
 
         DISALLOW_COPY_AND_ASSIGN(WorldSelectItem);  
     };
