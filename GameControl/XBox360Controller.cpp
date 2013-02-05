@@ -270,6 +270,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 		}
 	}
 
+
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT || 
 		  (abs(controllerState.Gamepad.sThumbLX) > sensitivityLeft && controllerState.Gamepad.sThumbLX < 0)) {
 
@@ -278,6 +279,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
             GameControl::ActionMagnitude magnitude;
             if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
                 magnitude = GameControl::FullMagnitude;
+
             }
             else {
                 magnitude = XBox360Controller::GetMagnitudeForThumbpad(controllerState.Gamepad.sThumbLX);
@@ -288,8 +290,13 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 		}
 
         if (this->leftActionOn) {
-            this->directionMagnitudePercent = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
-                static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
+            if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
+                this->directionMagnitudePercent = 1.0f;
+            }
+            else {
+                this->directionMagnitudePercent = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
+                    static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
+            }
         }
 
 	}
@@ -319,8 +326,13 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 		}
 
         if (this->rightActionOn) {
-            this->directionMagnitudePercent = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
-                static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
+            if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
+                this->directionMagnitudePercent = 1.0f;
+            }
+            else {
+                this->directionMagnitudePercent = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
+                    static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
+            }
         }
 	}
 	else {
