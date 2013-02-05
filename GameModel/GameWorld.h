@@ -28,7 +28,12 @@ class GameWorld {
 public:
     static const int NO_LEVEL_PASSED;
 
-	enum WorldStyle { None = -1, Classical = 0, Deco = 1, Futurism = 2 };
+    static const char* CLASSICAL_WORLD_NAME;
+    static const char* GOTHIC_ROMANTIC_WORLD_NAME;
+    static const char* DECO_WORLD_NAME;
+    static const char* FUTURISM_WORLD_NAME;
+
+	enum WorldStyle { None = -1, Classical = 0, GothicRomantic = 1, Deco = 2, Futurism = 3 };
 
 	static bool IsValidWorldStyle(const std::string &s);
 	static WorldStyle GetWorldStyleFromString(const std::string &s);

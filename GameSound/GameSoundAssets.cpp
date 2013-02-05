@@ -100,6 +100,9 @@ void GameSoundAssets::LoadSoundPallet(GameSoundAssets::SoundPallet pallet) {
         case GameSoundAssets::ClassicalSoundPallet:
             // TODO
             break;
+        case GameSoundAssets::GothicRomanticSoundPallet:
+            // TODO
+            break;
 		case GameSoundAssets::DecoWorldSoundPallet:
 			this->LoadDecoWorldSounds();
 			break;
@@ -118,6 +121,10 @@ void GameSoundAssets::UnloadSoundPallet(GameSoundAssets::SoundPallet pallet) {
 			this->UnloadMainMenuSounds();
 			break;
         case GameSoundAssets::ClassicalSoundPallet:
+            // TODO
+            break;
+        case GameSoundAssets::GothicRomanticSoundPallet:
+            // TODO
             break;
 		case GameSoundAssets::DecoWorldSoundPallet:
 			this->UnloadDecoWorldSounds();
@@ -474,6 +481,8 @@ GameSoundAssets::SoundPallet GameSoundAssets::GetSoundPalletFromWorldStyle(GameW
 	switch (style) {
         case GameWorld::Classical:
             return GameSoundAssets::ClassicalSoundPallet;
+        case GameWorld::GothicRomantic:
+            return GameSoundAssets::GothicRomanticSoundPallet;
 		case GameWorld::Deco:
 			return GameSoundAssets::DecoWorldSoundPallet;
         case GameWorld::Futurism:

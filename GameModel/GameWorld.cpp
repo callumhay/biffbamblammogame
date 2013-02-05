@@ -19,6 +19,11 @@
 
 const int GameWorld::NO_LEVEL_PASSED = -1;
 
+const char* GameWorld::CLASSICAL_WORLD_NAME         = "Classical";
+const char* GameWorld::GOTHIC_ROMANTIC_WORLD_NAME   = "Gothic and Romantic";
+const char* GameWorld::DECO_WORLD_NAME              = "Deco";
+const char* GameWorld::FUTURISM_WORLD_NAME          = "Futurism";
+
 /* 
  * Constructor for GameWorld class, requires a list of level text/filenames
  * which will be loaded when they are required.
@@ -202,13 +207,16 @@ GameLevel* GameWorld::GetLevelByName(const std::string& name) {
  * Returns: true if s is a world style string, false otherwise.
  */
 bool GameWorld::IsValidWorldStyle(const std::string &s) {
-    if (s == "Classical") {
+    if (s == CLASSICAL_WORLD_NAME) {
         return true;
     }
-    else if (s == "Deco") {
+    else if (s == GOTHIC_ROMANTIC_WORLD_NAME) {
+        return true;
+    }
+    else if (s == DECO_WORLD_NAME) {
 		return true;
 	}
-	else if (s == "Futurism") {
+	else if (s == FUTURISM_WORLD_NAME) {
 		return true;
 	}
 	else {
@@ -223,13 +231,16 @@ bool GameWorld::IsValidWorldStyle(const std::string &s) {
  */
 GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 	GameWorld::WorldStyle ret = None;
-    if (s == "Classical") {
+    if (s == CLASSICAL_WORLD_NAME) {
         ret = Classical;
     }
-    else if (s == "Deco") {
+    else if (s == GOTHIC_ROMANTIC_WORLD_NAME) {
+        ret = GothicRomantic;
+    }
+    else if (s == DECO_WORLD_NAME) {
 		ret = Deco;
 	}
-	else if (s == "Futurism") {
+	else if (s == FUTURISM_WORLD_NAME) {
 		ret = Futurism;
 	}
 	return ret;

@@ -91,6 +91,9 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
             break;
         }
 
+        case GameWorld::GothicRomantic:
+            // TODO
+
         case GameWorld::Deco:
             // TODO
 
