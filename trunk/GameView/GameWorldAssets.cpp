@@ -15,6 +15,7 @@
 #include "ClassicalWorldAssets.h"
 #include "DecoWorldAssets.h"
 #include "FuturismWorldAssets.h"
+#include "GothicRomanticWorldAssets.h"
 
 const float GameWorldAssets::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
 
@@ -77,6 +78,8 @@ GameWorldAssets* GameWorldAssets::CreateWorldAssets(GameWorld::WorldStyle world)
 	switch (world) {
         case GameWorld::Classical:
             return new ClassicalWorldAssets();
+        case GameWorld::GothicRomantic:
+            return new GothicRomanticWorldAssets();
 		case GameWorld::Deco:
 			return new DecoWorldAssets();
         case GameWorld::Futurism:

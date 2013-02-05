@@ -73,6 +73,7 @@ std::vector<std::string> TextureFontSet::ParseTextToWidth(const std::string& s, 
             lines.push_back(s.substr(lastLineBeginIdx, lastSpaceIdx - lastLineBeginIdx));
             currCount -= countAtSpace;
             lastLineBeginIdx = lastSpaceIdx+1;
+            lastSpaceIdx = 0;
         }
         if (i == s.size()-1 && lastLineBeginIdx != i) {
             lines.push_back(s.substr(lastLineBeginIdx, s.size() - lastLineBeginIdx));

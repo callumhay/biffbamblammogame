@@ -21,7 +21,6 @@
 
 #include "../ESPEngine/ESP.h"
 
-
 class ClassicalWorldAssets : public GameWorldAssets {
 public:
 	ClassicalWorldAssets();
@@ -38,21 +37,13 @@ public:
 
 private:
     Texture2D* cloudTex;
-    std::vector<Texture2D*> smokeTextures;
-    
+
     CgFxVolumetricEffect fireEffect1, fireEffect2;
     ESPPointEmitter fireEmitter1, fireEmitter2;
-
-    //std::vector<ESPPointEmitter*> smokeEmitters1;
-    //std::vector<ESPPointEmitter*> smokeEmitters2;
 
     ESPParticleAccelEffector fireAccel1, fireAccel2;
     ESPParticleColourEffector fireColourFader;
     ESPParticleScaleEffector fireParticleScaler;
-
-    //ESPParticleScaleEffector smokeParticleScaler;
-    //ESPParticleRotateEffector smokeRotatorCW;
-    //ESPParticleRotateEffector smokeRotatorCCW;
 
     void InitializeEmitters();
 

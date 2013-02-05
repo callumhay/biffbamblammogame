@@ -2,7 +2,7 @@
  * SelectWorldMenuState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2010
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -432,6 +432,7 @@ selectedLabel(NULL), baseSize(size), isSelected(false), isLocked(isLocked), size
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
         slightlyBiggerSize, labelTextStr);
     this->label->SetColour(labelColour);
+    this->label->SetAlignment(TextLabel2DFixedWidth::CenterAligned);
     
     this->selectedLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
@@ -439,6 +440,7 @@ selectedLabel(NULL), baseSize(size), isSelected(false), isLocked(isLocked), size
     this->selectedLabel->SetDropShadow(Colour(0,0,0), 0.08f);
     this->selectedLabel->SetColour(labelSelectedColour);
     this->selectedLabel->SetScale(1.1f);
+    this->selectedLabel->SetAlignment(TextLabel2DFixedWidth::CenterAligned);
 
     this->sizeAnim.SetInterpolantValue(this->baseSize);
     this->sizeAnim.SetRepeat(false);
@@ -454,7 +456,8 @@ selectedLabel(NULL), baseSize(size), isSelected(false), isLocked(isLocked), size
     this->starTotalLabel->SetColour(Colour(1,1,1));
     this->starTotalLabel->SetScale(0.85f);
 
-    this->image = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(world->GetImageFilepath(), Texture::Trilinear, GL_TEXTURE_2D));
+    this->image = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        world->GetImageFilepath(), Texture::Trilinear, GL_TEXTURE_2D));
     assert(this->image != NULL);
 
     this->lockedAnim.ClearLerp();

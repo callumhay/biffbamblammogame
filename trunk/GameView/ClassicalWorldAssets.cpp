@@ -23,11 +23,11 @@ GameWorldAssets(new DecoSkybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BLOCK_MESH)), cloudTex(NULL),
 fireColourFader(ColourRGBA(1.0f, 0.9f, 0.0f, 1.0f), ColourRGBA(0.3f, 0.10f, 0.0f, 0.2f)),
 fireParticleScaler(1.0f, 0.025f), fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector3D(1,1,1))
-
-//smokeParticleScaler(1.0f, 1.75f),
-//smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
-//smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 {
+
+    // Initialize textures...
+	this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
+	assert(this->cloudTex != NULL);
 
     // Change the colours for the background mesh from the default to something a bit more washed out ... more classical architectury
     std::vector<Colour> colours;
@@ -42,34 +42,6 @@ fireParticleScaler(1.0f, 0.025f), fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector
     colours.push_back(Colour(0.737f, 0.933f, 0.4078f));            // olive
     this->UpdateColourChangeList(colours);
 
-    // Initialize textures...
-	this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
-	assert(this->cloudTex != NULL);
-
-    /*
-	if (this->smokeTextures.empty()) {
-		this->smokeTextures.reserve(6);
-		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);	
-	}
-    */
-
     this->InitializeEmitters();
 }
 
@@ -78,24 +50,6 @@ ClassicalWorldAssets::~ClassicalWorldAssets() {
 
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
     assert(success);
-
-    /*
-	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
-		iter != this->smokeTextures.end(); ++iter) {
-		
-		success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(success);	
-	}
-	this->smokeTextures.clear();
-
-    for (std::vector<ESPPointEmitter*>::iterator iter = this->smokeEmitters1.begin();
-         iter != this->smokeEmitters1.end(); ++iter) {
-        ESPPointEmitter* currEmitter = *iter;
-        delete currEmitter;
-        currEmitter = NULL;
-    }
-    this->smokeEmitters1.clear();
-    */
 
     UNUSED_VARIABLE(success);
 }
@@ -182,42 +136,6 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	fireEmitter2.AddEffector(&this->fireAccel2);
 	result = fireEmitter2.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect2);
 	assert(result);
-
-    /*
-    static const float SMOKE_SPAWN_DELTA = FIRE_SPAWN_DELTA * static_cast<float>(this->smokeTextures.size());
-    static const float SMOKE_LIFE_MIN = FIRE_LIFE_IN_SECS_MAX;
-    static const float SMOKE_LIFE_MAX = 1.1f * FIRE_LIFE_IN_SECS_MAX;
-    static const int NUM_SMOKE_PARTICLES_PER_EMITTER = static_cast<int>(SMOKE_LIFE_MAX / SMOKE_SPAWN_DELTA);
-    this->smokeEmitters1.reserve(this->smokeTextures.size());
-
-    for (int i = 0; i < static_cast<int>(this->smokeTextures.size()); i++) {
-        
-        ESPPointEmitter* smokeEmitter1 = new ESPPointEmitter();
-	    smokeEmitter1->SetSpawnDelta(ESPInterval(SMOKE_SPAWN_DELTA));
-	    smokeEmitter1->SetInitialSpd(ESPInterval(FIRE_SPEED_MAX, 1.25f * FIRE_SPEED_MAX));
-	    smokeEmitter1->SetParticleLife(ESPInterval(SMOKE_LIFE_MIN, SMOKE_LIFE_MAX));
-	    smokeEmitter1->SetParticleSize(ESPInterval(0.4f * FIRE_SIZE_MIN, 0.8f * FIRE_SIZE_MIN));
-	    smokeEmitter1->SetEmitAngleInDegrees(10);
-	    smokeEmitter1->SetEmitDirection(Vector3D(0, 1, 0));
-	    smokeEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, OFF_CENTER_AMT), ESPInterval(0.0f), ESPInterval(0.0f));
-	    smokeEmitter1->SetParticleAlignment(ESP::ScreenAligned);
-	    smokeEmitter1->SetEmitPosition(Point3D(X_FLAME1_POS, Y_FLAME_POS, Z_FLAME_POS));
-	    smokeEmitter1->AddEffector(&this->fireColourFader);
-        smokeEmitter1->AddEffector(&this->smokeParticleScaler);
-        if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-            smokeEmitter1->AddEffector(&this->smokeRotatorCW);
-        }
-        else {
-            smokeEmitter1->AddEffector(&this->smokeRotatorCCW);
-        }
-	    result = smokeEmitter1->SetParticles(NUM_SMOKE_PARTICLES_PER_EMITTER, this->smokeTextures[i]);
-	    assert(result);
-        
-        smokeEmitter1->SimulateTicking(i / static_cast<float>(this->smokeTextures.size()) * SMOKE_LIFE_MIN);
-
-        this->smokeEmitters1.push_back(smokeEmitter1);
-    }
-    */
 
     UNUSED_VARIABLE(result);
 
