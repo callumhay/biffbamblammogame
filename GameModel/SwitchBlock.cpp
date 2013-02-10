@@ -60,7 +60,8 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
     bool shouldGenBounds = false;
 
 	// Left boundry of the piece
-    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        leftNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND), 
 							    this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
@@ -70,7 +71,8 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
     }
 
 	// Bottom boundry of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        bottomNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l2(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
 							     this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
@@ -80,7 +82,8 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	}
 
 	// Right boundry of the piece
-    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        rightNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l3(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
 							     this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
@@ -90,7 +93,8 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	}
 
 	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        topNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l4(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND),
 							     this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
@@ -101,75 +105,6 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-    /*
-    static const float HALF_SWITCH_WIDTH  = SWITCH_WIDTH / 2.0f;
-    static const float HALF_SWITCH_HEIGHT = SWITCH_HEIGHT / 2.0f;
-
-    // Important points for the Left and right switches
-    Point2D leftTopSwitchPt     = this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, HALF_SWITCH_HEIGHT);
-    Point2D leftBottomSwitchPt  = leftTopSwitchPt + Vector2D(0, -SWITCH_HEIGHT);
-    Point2D rightTopSwitchPt    = this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, HALF_SWITCH_HEIGHT);
-    Point2D rightBottomSwitchPt = rightTopSwitchPt + Vector2D(0, -SWITCH_HEIGHT);
-
-    // Important points for the top and bottom switches
-    Point2D topleftSwitchPt     = this->center + Vector2D(-HALF_SWITCH_WIDTH, LevelPiece::HALF_PIECE_HEIGHT);
-    Point2D topRightSwitchPt    = topleftSwitchPt + Vector2D(SWITCH_WIDTH, 0);
-    Point2D bottomLeftSwitchPt  = this->center + Vector2D(-HALF_SWITCH_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT);
-    Point2D bottomRightSwitchPt = bottomLeftSwitchPt + Vector2D(SWITCH_WIDTH, 0);
-
-	// Left boundry of the piece
-	if (leftNeighbor != NULL) {
-        Collision::LineSeg2D l1(leftTopSwitchPt, leftBottomSwitchPt);
-		Vector2D n1(-1, 0);
-		boundingLines.push_back(l1);
-		boundingNorms.push_back(n1);
-	}
-
-	// Bottom boundry of the piece
-	if (bottomNeighbor != NULL) {
-		Collision::LineSeg2D l2(bottomLeftSwitchPt, bottomRightSwitchPt);
-		Vector2D n2(0, -1);
-		boundingLines.push_back(l2);
-		boundingNorms.push_back(n2);
-	}
-
-	// Right boundry of the piece
-	if (rightNeighbor != NULL) {
-		Collision::LineSeg2D l3(rightTopSwitchPt, rightBottomSwitchPt);
-		Vector2D n3(1, 0);
-		boundingLines.push_back(l3);
-		boundingNorms.push_back(n3);
-	}
-
-	// Top boundry of the piece
-	if (topNeighbor != NULL) {
-		Collision::LineSeg2D l4(topleftSwitchPt, topRightSwitchPt);
-		Vector2D n4(0, 1);
-		boundingLines.push_back(l4);
-		boundingNorms.push_back(n4);
-	}
-
-    // Finally add all of the bevels at the edges (4 of them)
-    Collision::LineSeg2D topLeftBevelLine(leftTopSwitchPt, topleftSwitchPt);
-    Collision::LineSeg2D topRightBevelLine(topRightSwitchPt, rightTopSwitchPt);
-    Collision::LineSeg2D bottomLeftBevelLine(leftBottomSwitchPt, bottomLeftSwitchPt);
-    Collision::LineSeg2D bottomRightBevelLine(rightBottomSwitchPt, bottomRightSwitchPt);
-    
-    boundingLines.push_back(topLeftBevelLine);
-    boundingNorms.push_back(Vector2D(-1.0f, 1.0f) / SQRT_2);
-
-    boundingLines.push_back(topRightBevelLine);
-    boundingNorms.push_back(Vector2D(1.0f, 1.0f) / SQRT_2);
-
-    boundingLines.push_back(bottomLeftBevelLine);
-    boundingNorms.push_back(Vector2D(-1.0f, -1.0f) / SQRT_2);
-
-    boundingLines.push_back(bottomRightBevelLine);
-    boundingNorms.push_back(Vector2D(1.0f, -1.0f) / SQRT_2);
-    
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 			topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-    */
 }
 
 bool SwitchBlock::ProjectilePassesThrough(const Projectile* projectile) const {

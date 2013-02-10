@@ -43,7 +43,8 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 	// If the tesla block is in ice then its bounds are a basic rectangle...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+            topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 		return;
 	}
 
@@ -57,7 +58,8 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
     bool shouldGenBounds = false;
 
 	// Left boundry of the piece
-    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        leftNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l1(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND), 
 							     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
@@ -67,7 +69,8 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Bottom boundry of the piece
-	shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->GetType() != LevelPiece::Solid);
+	shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        bottomNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
         Collision::LineSeg2D l2(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
 						         this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
@@ -77,7 +80,9 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Right boundry of the piece
-    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        rightNeighbor->GetType() != LevelPiece::Solid);
+
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l3(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
 							     this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
@@ -87,7 +92,8 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        topNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l4(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND),
 							     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));

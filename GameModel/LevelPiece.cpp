@@ -40,7 +40,7 @@ triggerID(LevelPiece::NO_TRIGGER_ID) {
 LevelPiece::~LevelPiece() {
 	// We need to be sure to obliterate any status effects that might be linguring on the level piece -
 	// this emits an important event to any model listeners to remove those effects as well!
-	this->RemoveAllStatus();
+	this->RemoveAllStatus(NULL);
 
     // Make sure we remove all attached projectiles as well
     // NOTE: DO NOT USE ITERATORS HERE SINCE THE MINE PROJECTILE DETACHES ITSELF IN THE SetAsFalling call
@@ -114,7 +114,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
     bool shouldGenBounds = false;
 
 	// Left boundry of the piece
-    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        leftNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -125,7 +126,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 
 	// Bottom boundry of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        bottomNeighbor->GetType() != LevelPiece::Solid);
 	if (shouldGenBounds) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -135,7 +137,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Right boundry of the piece
-    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        rightNeighbor->GetType() != LevelPiece::Solid);
 	if (shouldGenBounds) {
 		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -145,7 +148,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->GetType() != LevelPiece::Solid);
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        topNeighbor->GetType() != LevelPiece::Solid);
 	if (shouldGenBounds) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -155,8 +159,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor,
-                                  rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, 
-                                  bottomRightNeighbor, bottomLeftNeighbor);
+        rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, 
+        bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 
@@ -175,7 +179,7 @@ bool LevelPiece::ProjectileIsDestroyedOnCollision(const Projectile* projectile) 
     return !this->ProjectilePassesThrough(projectile);
 }
 
-void LevelPiece::AddStatus(const PieceStatus& status) {
+void LevelPiece::AddStatus(GameLevel* level, const PieceStatus& status) {
 	// If the piece already has the status then just exit, this saves us the trouble
 	// of emitting an event that could potentially be a more expensive operation
 	if ((this->pieceStatus & status) == status) {
@@ -185,16 +189,15 @@ void LevelPiece::AddStatus(const PieceStatus& status) {
 	this->pieceStatus = (this->pieceStatus | status);
 	if (status == LevelPiece::IceCubeStatus) {
 		// We update the bounds since ice cubes change the bounds of a block - this must be done
-		// AFTER the change to the status 
-		this->UpdateBounds(this->leftNeighbor, this->bottomNeighbor, this->rightNeighbor, this->topNeighbor,
-											 this->topRightNeighbor, this->topLeftNeighbor, this->bottomRightNeighbor, this->bottomLeftNeighbor);
+		// AFTER the change to the status
+        level->UpdateBoundsOnPieceAndSurroundingPieces(this);
 	}
 
 	// EVENT: A status has been added to this piece...
 	GameEventManager::Instance()->ActionLevelPieceStatusAdded(*this, status);
 }
 
-void LevelPiece::RemoveStatus(const PieceStatus& status) {
+void LevelPiece::RemoveStatus(GameLevel* level, const PieceStatus& status) {
 	// If the piece doesn't have the status then just exit, this saves us the trouble
 	// of emitting an event that could potentially be a more expensive operation
 	if ((this->pieceStatus & status) != status) {
@@ -206,23 +209,22 @@ void LevelPiece::RemoveStatus(const PieceStatus& status) {
 	if (status == LevelPiece::IceCubeStatus) {
 		// We update the bounds since ice cubes change the bounds of a block - this must be done
 		// AFTER the change to the status 
-		this->UpdateBounds(this->leftNeighbor, this->bottomNeighbor, this->rightNeighbor, this->topNeighbor,
-											 this->topRightNeighbor, this->topLeftNeighbor, this->bottomRightNeighbor, this->bottomLeftNeighbor);
+		level->UpdateBoundsOnPieceAndSurroundingPieces(this);
 	}
 
 	// EVENT: A status has been removed from this piece...
 	GameEventManager::Instance()->ActionLevelPieceStatusRemoved(*this, status);
 }
 
-void LevelPiece::RemoveStatuses(int32_t statusMask) {
+void LevelPiece::RemoveStatuses(GameLevel* level, int32_t statusMask) {
 	bool statusFound = false;
 	// Go through each status and remove it...
 	if ((statusMask & LevelPiece::OnFireStatus) == LevelPiece::OnFireStatus) {
-		this->RemoveStatus(LevelPiece::OnFireStatus);
+		this->RemoveStatus(level, LevelPiece::OnFireStatus);
 		statusFound = true;
 	}
 	if ((statusMask & LevelPiece::IceCubeStatus) == LevelPiece::IceCubeStatus) {
-		this->RemoveStatus(LevelPiece::IceCubeStatus);
+		this->RemoveStatus(level, LevelPiece::IceCubeStatus);
 		statusFound = true;
 	}
 	//... TODO for each other status
@@ -230,7 +232,8 @@ void LevelPiece::RemoveStatuses(int32_t statusMask) {
 	assert(statusFound);
 }
 
-void LevelPiece::RemoveAllStatus() {
+void LevelPiece::RemoveAllStatus(GameLevel* level) {
+
 	// If the piece has no status effects then just exit, this saves us the trouble
 	// of emitting an event that could potentially be a more expensive operation
 	if (this->pieceStatus == LevelPiece::NormalStatus) {
@@ -241,9 +244,10 @@ void LevelPiece::RemoveAllStatus() {
 	this->pieceStatus = LevelPiece::NormalStatus;
 	if (hadIceCubeStatus) {
 		// We update the bounds since ice cubes change the bounds of a block - this must be done
-		// AFTER the change to the status 
-		this->UpdateBounds(this->leftNeighbor, this->bottomNeighbor, this->rightNeighbor, this->topNeighbor,
-											 this->topRightNeighbor, this->topLeftNeighbor, this->bottomRightNeighbor, this->bottomLeftNeighbor);
+		// AFTER the change to the status
+        if (level != NULL) {
+		    level->UpdateBoundsOnPieceAndSurroundingPieces(this);
+        }
 	}
 
 	// EVENT: All status effects removed from this piece...
@@ -263,7 +267,7 @@ void LevelPiece::LightPieceOnFire(GameModel* gameModel) {
 		else {
 			// The ball is on fire, and so we'll make this piece catch fire too...
 			// The fire will eat away at the block over time
-			this->AddStatus(LevelPiece::OnFireStatus);
+            this->AddStatus(gameModel->GetCurrentLevel(), LevelPiece::OnFireStatus);
 			gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
 		}
 }
@@ -281,7 +285,7 @@ void LevelPiece::FreezePieceInIce(GameModel* gameModel) {
 		else {
 			// The ball is icy, encapsulate this piece in an ice cube, this will make the ball take
 			// have to hit this piece once more in order to destroy it...
-			this->AddStatus(LevelPiece::IceCubeStatus);
+            this->AddStatus(gameModel->GetCurrentLevel(), LevelPiece::IceCubeStatus);
 			gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::IceCubeStatus);
 		}
 }

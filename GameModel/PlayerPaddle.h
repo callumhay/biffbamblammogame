@@ -48,7 +48,7 @@ public:
 	static const float DEFAULT_ACCELERATION;
 	static const float DEFAULT_DECCELERATION;
 	static const float POISON_SPEED_DIMINISH;
-	static const int DEFLECTION_DEGREE_ANGLE;
+	static const int MAX_DEFLECTION_DEGREE_ANGLE;
 
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
     static const double PADDLE_MINE_LAUNCH_DELAY;   // Delay between launches of mines
@@ -137,6 +137,9 @@ public:
 	float GetLastMovingDirection() const {
 		return this->lastDirection;
 	}
+    bool GetIsMoveButtonDown() const {
+        return this->moveButtonDown;
+    }
 
 	void SetNewMinMaxLevelBound(float min, float max) {
 		this->UpdatePaddleBounds(min, max);

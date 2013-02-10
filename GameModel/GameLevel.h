@@ -167,6 +167,7 @@ public:
 
 	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter,
                       const LevelPiece::DestructionMethod& method);
+    void UpdateBoundsOnPieceAndSurroundingPieces(LevelPiece* piece);
 	
     LevelPiece* RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece);
     void RocketExplosionNoPieces(const Projectile* rocket);

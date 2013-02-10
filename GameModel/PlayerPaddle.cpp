@@ -49,7 +49,7 @@ const float PlayerPaddle::DEFAULT_DECCELERATION = -160.0f;
 const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
 
 // The coefficent angle change of the ball when deflected by a moving paddle
-const int PlayerPaddle::DEFLECTION_DEGREE_ANGLE = 20; // TODO: Fix this...
+const int PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE = 18.0f;
 
 // Delay between shots of the laser
 const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
@@ -281,7 +281,7 @@ void PlayerPaddle::FireAttachedBall() {
     }
 
     // Modify the ball's release velocity to reflect the paddle's movement
-    Vector2D newReleaseDir = Vector2D::Normalize(ballReleaseDir + 0.2f * avgPaddleVelDir);
+    Vector2D newReleaseDir = Vector2D::Normalize(ballReleaseDir + 0.175f * avgPaddleVelDir);
     ballReleaseDir.Normalize();
     if (Vector2D::Dot(newReleaseDir, ballReleaseDir) < 0.0) {
         newReleaseDir = Vector2D::Rotate(NumberFuncs::SignOf(Vector3D::cross(ballReleaseDir, avgPaddleVelDir)[2]) * 90, ballReleaseDir);
@@ -291,7 +291,7 @@ void PlayerPaddle::FireAttachedBall() {
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), newReleaseDir);
     
     // Add a brief impulse to the ball's velocity to give the launch a more viseral feeling
-    float ballImpulse = 0.62f * absPaddleSpd;
+    float ballImpulse = 0.575f * absPaddleSpd;
     this->attachedBall->ApplyImpulseForce(ballImpulse, ballImpulse); 
 
 	// Re-enable the ball's collisions

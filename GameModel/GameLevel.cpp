@@ -1194,10 +1194,10 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
 		this->currentLevelPieces[hIndex][wIndex] = pieceAfter;
 
 		// Update the neighbour's bounds...
-		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex-1); // left
-		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex); // bottom
-		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1); // right
-		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex); // top
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex-1);   // left
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex);   // bottom
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1);   // right
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex);   // top
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex-1); // top-left
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex-1); // bottom-left
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex+1); // top-right
@@ -1231,6 +1231,22 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
 		// Inline: in this case there was a change within the piece object itself
 		// since both the before and after objects are the same.
 	}
+}
+
+void GameLevel::UpdateBoundsOnPieceAndSurroundingPieces(LevelPiece* piece) {
+	unsigned int hIndex = piece->GetHeightIndex();
+	unsigned int wIndex = piece->GetWidthIndex();
+
+	// Update the neighbour's bounds...
+    GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex);     // center
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex-1);   // left
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex);   // bottom
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1);   // right
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex);   // top
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex-1); // top-left
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex-1); // bottom-left
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex+1); // top-right
+	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex+1); // top-right
 }
 
 /**

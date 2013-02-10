@@ -126,9 +126,9 @@ public:
 	// NOTE: IF YOU ADD TO THIS DON'T FORGET TO UPDATE LevelPiece::RemoveStatuses !!!!!
 	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, IceCubeStatus = 0x00000002 };
 	bool HasStatus(const PieceStatus& status) const;
-	void AddStatus(const PieceStatus& status);
-	void RemoveStatus(const PieceStatus& status);
-	void RemoveStatuses(int32_t statusMask);
+	void AddStatus(GameLevel* level, const PieceStatus& status);
+	void RemoveStatus(GameLevel* level, const PieceStatus& status);
+	void RemoveStatuses(GameLevel* level, int32_t statusMask);
 
     // Projectile attachment functionality
     void AttachProjectile(MineProjectile* p);
@@ -165,7 +165,7 @@ protected:
 
 	int32_t pieceStatus;
 
-	void RemoveAllStatus();
+	void RemoveAllStatus(GameLevel* level);
 
 	void LightPieceOnFire(GameModel* gameModel);
 	void FreezePieceInIce(GameModel* gameModel);

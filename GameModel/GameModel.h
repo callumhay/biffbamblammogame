@@ -564,7 +564,7 @@ inline void GameModel::ClearStatusUpdatePieces() {
 	this->doingPieceStatusListIteration = true;
 	for (std::map<LevelPiece*, int32_t>::iterator iter = this->statusUpdatePieces.begin(); iter != this->statusUpdatePieces.end(); ++iter) {
 		LevelPiece* currLevelPiece = iter->first;
-		currLevelPiece->RemoveStatuses(iter->second);
+        currLevelPiece->RemoveStatuses(this->GetCurrentLevel(), iter->second);
 	}
 	this->statusUpdatePieces.clear();
 	this->doingPieceStatusListIteration = false;
