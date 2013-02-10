@@ -324,6 +324,8 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             // Make ball speed slower
             GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + EASY_DIFFICULTY_BALL_SPEED_DELTA);
             // Make the paddle slightly larger (1 ball default diameter larger)
+            // WARNING: Don't make the paddle too big or it won't be able to fit under blocks that are 1 block up from the bottom,
+            // this is required in order to solve certain puzzles in the game!!!
             PlayerPaddle::SetNormalScale((PlayerPaddle::PADDLE_WIDTH_TOTAL + 1.5f * GameBall::DEFAULT_BALL_RADIUS) / PlayerPaddle::PADDLE_WIDTH_TOTAL);
 
             // N.B., We also make the chance of nice item drops higher (done automatically in GameItemFactory)

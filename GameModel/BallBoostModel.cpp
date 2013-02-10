@@ -23,6 +23,11 @@ const double BallBoostModel::DEFAULT_BULLET_TIME_DURATION = 1.3;
 // The maximum duration of bullet time before the ball is automatically boosted
 double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS = BallBoostModel::DEFAULT_BULLET_TIME_DURATION;
 
+// The minimum and maximum average slope (x = delta time, y = delta magnitude of x,y boost direction) where all
+// slopes above and under this value qualify as a 'soft-release' of the boost
+const float BallBoostModel::SOFT_RELEASE_MIN_AVG_SLOPE = 5.0f;
+const float BallBoostModel::SOFT_RELEASE_MAX_AVG_SLOPE = 100.0f;
+
 // Amount of time it takes for a ball boost to charge (default)
 const double BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS = 16.0;
 // When the level is almost complete we give players more readily available boosts so they can finish quicker
@@ -141,6 +146,7 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
         }
 
         Vector2D newBallBoostDir(x, y);
+        float magnitude = newBallBoostDir.Magnitude();
 
         // Make sure the boost direction is normalized
         newBallBoostDir.Normalize();
@@ -150,8 +156,9 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
         }
 
         // Don't let the direction change dramatically
-        if (Vector2D::Dot(this->ballBoostDir, newBallBoostDir) >= 0) {
+        if (this->ballBoostDir.IsZero() || Vector2D::Dot(this->ballBoostDir, newBallBoostDir) >= 0) {
             this->ballBoostDir = newBallBoostDir;
+            this->boostDirMagnitudeCache.push_back(std::make_pair(BlammoTime::GetSystemTimeInMillisecs(), magnitude));
         }
     }
     else {
@@ -165,8 +172,14 @@ void BallBoostModel::BallBoostDirectionReleased() {
 
         // If slingshot mode is active then this will execute the ball boost...
         if (this->gameModel->GetBallBoostMode() == BallBoostModel::Slingshot) {
-            this->BallBoosterPressed();
-            return;
+
+            // Check the cache of ball boost direction magnitudes, if the player let go
+            // of the boost 'softly' then we don't do the boost
+            if (!this->WasBoostReleasedSoftly()) {
+                this->BallBoosterPressed();
+                return;
+            }
+            
         }
 
         this->ReleaseBulletTime();
@@ -180,9 +193,72 @@ void BallBoostModel::ReleaseBulletTime() {
         this->ballBoostDir[0] = 0.0f;
         this->ballBoostDir[1] = 0.0f;
 
+        // Clear the boost magnitude cache
+        this->boostDirMagnitudeCache.clear();
+
         // End the bullet time state...
         this->SetCurrentState(BulletTimeFadeOut);
     }
+}
+
+bool BallBoostModel::WasBoostReleasedSoftly() {
+    
+    if (this->boostDirMagnitudeCache.size() <= 1) {
+        debug_output("Release was too fast, not a soft release.");
+        return false;
+    }
+ 
+    // Check to see the major difference between the last known magnitude and the 
+
+    // Figure out the slope of the release (x = time, y = magnitude of the direction)
+    float avgDT = 0;
+    float avgDMag = 0;
+
+    unsigned long lastTime = 0;
+    float lastMagnitude = 0.0f;
+
+    std::list<std::pair<unsigned long, float> >::reverse_iterator iter = this->boostDirMagnitudeCache.rbegin();
+    lastTime = iter->first;
+    lastMagnitude = iter->second;
+    ++iter;
+    
+    int count = 1;
+    for (; iter != this->boostDirMagnitudeCache.rend(); ++iter) {
+        // There has to be a time difference
+        if (lastTime <= iter->first) {
+            continue;
+        }
+
+        // Make sure the magnitude difference is increasing as we go backwards through the cache
+        if (lastMagnitude < iter->second) {
+            avgDT   += lastTime - iter->first;
+            avgDMag += iter->second - lastMagnitude;
+
+            lastTime = iter->first;
+            lastMagnitude = iter->second;
+            count++;
+        }
+        else if (lastMagnitude == iter->second) {
+            continue;
+        }
+        else {
+            break;
+        }
+    }
+    
+    if (avgDT <= 0 || avgDMag <= 0 || count <= 1) {
+        debug_output("Release was too fast, not a soft release.");
+        return false;
+    }
+
+    avgDT   /= static_cast<float>(count);
+    avgDMag /= static_cast<float>(count);
+    float avgSlopeOfRelease = avgDMag / avgDT;
+
+    debug_output("Avg Slope of Boost Release: " << avgSlopeOfRelease);
+
+    return (avgSlopeOfRelease >= SOFT_RELEASE_MIN_AVG_SLOPE &&
+            avgSlopeOfRelease <= SOFT_RELEASE_MAX_AVG_SLOPE);
 }
 
 /**

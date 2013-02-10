@@ -83,6 +83,8 @@ public:
 
 private:
     static double BULLET_TIME_MAX_DURATION_SECONDS;
+    static const float SOFT_RELEASE_MIN_AVG_SLOPE;
+    static const float SOFT_RELEASE_MAX_AVG_SLOPE;
 
     BulletTimeState currState;                  // The current bullet time state
     AnimationLerp<float> timeDialationAnim;     // Animation lerp for time dialation, changes based on state
@@ -98,12 +100,16 @@ private:
 
     bool isBallBoostInverted;  // Whether ball boosting controls are inverted or not
 
+
+    std::list<std::pair<unsigned long, float> > boostDirMagnitudeCache; // Keeps a cache of the current boost's direction magnitude values
+
     void SetCurrentState(const BulletTimeState& newState);
     void RecalculateBallZoomBounds();
     
     void IncrementBoostChargeByTime(double timeInSecs);
     
     void ReleaseBulletTime();
+    bool WasBoostReleasedSoftly();
 
     DISALLOW_COPY_AND_ASSIGN(BallBoostModel);
 };
