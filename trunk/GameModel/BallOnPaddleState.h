@@ -38,6 +38,7 @@ private:
 	bool firstTick;
     bool releaseTimerStarted;
     double releaseTimerCounter;
+    bool ballWasReleased;
 
 	void UpdateBallPosition();
 

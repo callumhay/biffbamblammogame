@@ -56,7 +56,7 @@ GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 1
-BallCam 1
+BallCam 0
 MagnetPaddle 2
 MultiBall3 2
 IceBall 0
@@ -66,4 +66,4 @@ GravityBall 2
 CrazyBall 1
 Random 2
 FastBall 2
-PaddleCam 1
+PaddleCam 0

@@ -239,7 +239,7 @@ void BallInPlayState::Tick(double seconds) {
 				    // Tell the model that a ball collision occurred with the paddle
 				    this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
-                    int count = 0;
+                    //int count = 0;
 				    if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
 				        // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
 				        // still see it fly into the void - of course, if the shield is active then no help is provided
@@ -252,6 +252,7 @@ void BallInPlayState::Tick(double seconds) {
 					    ballToMoveToFront = currBall;
 				    }
 
+                    /*
                     // Check to see whether the ball is hitting both a wall AND the paddle - if so the paddle should
                     // be repelled by the opposing force of the wall against the ball...
                     if (!paddle->UpdateForOpposingForceBallCollision(*currBall, seconds)) {
@@ -266,6 +267,7 @@ void BallInPlayState::Tick(double seconds) {
 			                }
                         }
                     }
+                    */
 			    }
             }
 
@@ -317,34 +319,7 @@ void BallInPlayState::Tick(double seconds) {
 						    // Ignore collision...
 					    }
 					    else if (paddle->GetAttachedBall() == currBall) {
-						    // Ignore the collison FOR THE BALL ONLY - the paddle should recoil since the ball attached to it just
-						    // hit a block and balls tend to be bouncy in the bbb universe
-    						
-						    float xRecoilDir = n[0];
-						    // Figure out the recoil direction by projecting the normal of the collision onto the x-axis
-						    if (fabs(xRecoilDir) < EPSILON) {
-							    // Annoying case: seems, somehow, that the ball collided with a side that is completely parallel to the x-axis
-
-							    // First see what the vector from the center of the collided block to the ball is and use it's x-component...
-							    xRecoilDir = (currBall->GetCenterPosition2D() - currPiece->GetCenter())[0];
-							    if (fabs(xRecoilDir) < EPSILON) {
-								    // Really annoying case: somehow the ball is almost at the center line of the block, wtf??, anyway, just pick the opposite
-								    // of the paddle moving direction
-								    xRecoilDir = paddle->GetLastMovingDirection();
-
-								    if (fabs(xRecoilDir) < EPSILON) {
-									    // This should just never happen, but in case it somehow does, pick a freaking random number (-1 or 1), geez
-									    xRecoilDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
-								    }
-							    }
-						    }
-    						
-						    // Make sure it's normalized (just use signof function to get either -1 or 1)
-						    xRecoilDir = NumberFuncs::SignOf(xRecoilDir);
-						    // Now we need to apply an impulse to the paddle in the direction of the recoil...
-
-                            float impulseAmt = std::max<float>(PlayerPaddle::DEFAULT_MAX_SPEED/2.0f * xRecoilDir, fabs(paddle->GetSpeed()) * xRecoilDir);
-                            paddle->ApplyImpulseForce(impulseAmt, 2*impulseAmt);
+                            // Ignore this, we deal with it later on in DoUpdateToPaddleBoundriesAndCollisions
 					    }
 					    else {
 						    // Make the ball react to the collision
@@ -460,7 +435,7 @@ void BallInPlayState::Tick(double seconds) {
     }
 
 	// Paddle-block collisions / boundry update (so that the paddle crashes into potential blocks at its sides).
-    this->DoUpdateToPaddleBoundriesAndCollisions(seconds, false);
+    this->DoUpdateToPaddleBoundriesAndCollisions(seconds, true);
 
 	// Projectile Collisions:
 	this->gameModel->DoProjectileCollisions(seconds);

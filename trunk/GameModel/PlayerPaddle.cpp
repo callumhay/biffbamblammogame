@@ -428,7 +428,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
     if (this->HasBallAttached()) {
         
 		float ballX = this->attachedBall->GetBounds().Center()[0] + distanceTravelled;
-		float slightlyBiggerRadius = 1.05f * this->attachedBall->GetBounds().Radius();
+		float slightlyBiggerRadius = this->attachedBall->GetBounds().Radius();
 		float ballMinX = ballX - slightlyBiggerRadius;
 		float ballMaxX = ballX + slightlyBiggerRadius;
 		
@@ -457,7 +457,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             Collision::Circle2D projectileCircleBounds = attachedProjectile->BuildBoundingLines().GenerateCircleFromLines();
             
             projectileX = attachedProjectile->GetPosition()[0] + distanceTravelled;
-            slightlyBiggerHalfWidth = 1.05f * projectileCircleBounds.Radius()/2.0f;
+            slightlyBiggerHalfWidth = projectileCircleBounds.Radius()/2.0f;
             projectileMinX = projectileX - slightlyBiggerHalfWidth;
             projectileMaxX = projectileX + slightlyBiggerHalfWidth;
 
@@ -984,77 +984,103 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
  */
 void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision) {
 
-	bool didCollide = false;
-	std::list<Point2D> collisionPts;
-
     if (p.GetType() != LevelPiece::NoEntry) {
 
-	    // We need to find the location of the collision so we can make the paddle stop (by updating its bounds):
-	    // Grab all of the collision points between the paddle and the level piece
-	    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		    didCollide = p.GetBounds().GetCollisionPoints(this->CreatePaddleShieldBounds(), collisionPts);
-	    }
-	    else {
-		    didCollide = p.GetBounds().GetCollisionPoints(this->bounds, collisionPts);
-	    }
+        std::list<Point2D> collisionPts;
+	    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle &&
+            p.GetBounds().GetCollisionPoints(this->CreatePaddleShieldBounds(), collisionPts)) {
 
-	    // If there's a rocket attached we need to check its bounds too...
-	    if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
-		    Point2D rocketSpawnPos;
-		    float rocketHeight, rocketWidth;
-		    this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
-		    Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
+            // Seperate points into those to the left and right of the paddle center, closest to the paddle center...
+	        bool collisionOnLeft  = false;
+	        bool collisionOnRight = false;
 
-		    //didCollide |= Collision::GetCollisionPoint(p.GetAABB(), Collision::AABB2D(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec), collisionPts);
-		    didCollide |= p.GetBounds().GetCollisionPoints(Collision::AABB2D(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec), collisionPts);
+	        for (std::list<Point2D>::iterator iter = collisionPts.begin(); iter != collisionPts.end(); ++iter) {
+		        const Point2D& currPt = *iter;
+		        // Check to see where the point is relative to the center of the paddle...
+		        if (currPt[0] < this->GetCenterPosition()[0]) {
+			        // Point is on the left of the paddle...
+			        collisionOnLeft = true;
+		        }
+		        else {
+			        // Point is on the right of the paddle (or centerish)...
+			        collisionOnRight = true;
+		        }
+	        }
+
+            if (collisionOnRight && collisionOnLeft) {
+                return;
+            }
+
+	        if (collisionOnLeft) {
+		        this->minBound = std::max<float>(this->minBound, this->GetCenterPosition()[0] - this->GetHalfWidthTotal());
+	        }
+	        else {
+		        this->maxBound = std::min<float>(this->maxBound, this->GetCenterPosition()[0] + this->GetHalfWidthTotal());
+	        }	
+
+            return;
 	    }
+        else {
+            Collision::AABB2D pieceAABB = p.GetAABB();
+            if (this->bounds.CollisionCheck(pieceAABB)) {
+	            
+                // We need to find the location of the collision so we can make the paddle stop (by updating its bounds)...
+                if (this->GetCenterPosition()[0] < p.GetCenter()[0]) {
+                    this->maxBound = pieceAABB.GetMin()[0];
+                }
+                else {
+                    this->minBound = pieceAABB.GetMax()[0];
+                }
+                
+                return;
+            }
+	        // If there's a rocket attached we need to check its bounds too...
+	        else if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+		        Point2D rocketSpawnPos;
+		        float rocketHeight, rocketWidth;
+		        this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
+		        Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
+                Collision::AABB2D rocketAABB(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec);
+                
+                if (Collision::IsCollision(pieceAABB, rocketAABB)) {
 
+                    if (rocketAABB.GetCenter()[0] < p.GetCenter()[0]) {
+                        this->maxBound = pieceAABB.GetMin()[0] + (this->GetCenterPosition()[0] + this->GetHalfWidthTotal()) - rocketAABB.GetMax()[0];
+                    }
+                    else {
+                        this->minBound = pieceAABB.GetMax()[0] + (this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) - rocketAABB.GetMin()[0];
+                    }
+
+                    return;
+                }
+	        }
+        }
     }
 	
 	// If there's a ball attached we need to check its bounds as well...
-	if (doAttachedBallCollision && this->HasBallAttached()) {
-		didCollide |= p.GetBounds().GetCollisionPoints(this->GetAttachedBall()->GetBounds(), collisionPts);
-	}
+	if (!doAttachedBallCollision || !this->HasBallAttached()) {
+        return;
+    }
+    const GameBall* attachedBall = this->GetAttachedBall();
+    assert(attachedBall != NULL);
+    if (!p.GetBounds().CollisionCheck(attachedBall->GetBounds())) {
+        return;
+    }
 
-	if (!didCollide) {
-		return;
-	}
-	
-	// The trick with the points we've obtained is to make sure we properly update the min/max bounds
-	// along the x-axis of the paddle...
-	
-	// Seperate points into those to the left and right of the paddle center, closest to the paddle center...
-	bool collisionOnLeft  = false;
-	bool collisionOnRight = false;
+    if (attachedBall->GetCenterPosition2D()[0] < p.GetCenter()[0]) {
+        float xDistFromBallEdgeToPaddleEdge = (this->GetCenterPosition()[0] + this->GetHalfWidthTotal()) - 
+            (this->GetAttachedBall()->GetCenterPosition2D()[0] + this->GetAttachedBall()->GetBounds().Radius());
+        
 
-	for (std::list<Point2D>::iterator iter = collisionPts.begin(); iter != collisionPts.end(); ++iter) {
-		const Point2D& currPt = *iter;
-		// Check to see where the point is relative to the center of the paddle...
-		if (currPt[0] < this->GetCenterPosition()[0]) {
-			// Point is on the left of the paddle...
-			collisionOnLeft = true;
-		}
-		else {
-			// Point is on the right of the paddle (or centerish)...
-			collisionOnRight = true;
-		}
-	}
+		this->maxBound = p.GetAABB().GetMin()[0] + xDistFromBallEdgeToPaddleEdge;
+    }
+    else {
+        float xDistFromBallEdgeToPaddleEdge = std::min(0.0f, (this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) - 
+            (this->GetAttachedBall()->GetCenterPosition2D()[0] - this->GetAttachedBall()->GetBounds().Radius()));
+        
 
-	if (collisionOnLeft) {
-		// If both the closest right and left coordinates were changed then the paddle is somehow
-		// centered on a block, just ignore any changes and exit if this is the case (we don't want the
-		// player to get stuck).
-		if (collisionOnRight) {
-			return;
-		}
-
-		this->minBound = std::max<float>(this->minBound, this->GetCenterPosition()[0] - this->GetHalfWidthTotal());
-	}
-	else {
-		// There must bee a collision on the right then...
-		assert(collisionOnRight);
-		this->maxBound = std::min<float>(this->maxBound, this->GetCenterPosition()[0] + this->GetHalfWidthTotal());
-	}	
+        this->minBound = p.GetAABB().GetMax()[0] + xDistFromBallEdgeToPaddleEdge;
+    }
 }
 
 /**
@@ -1530,9 +1556,7 @@ bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile
 }
 
 void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce, float deaccel) {
-	assert(xDirectionalForce != 0.0f);
-
-    if (this->impulseSpdDecreaseCounter < this->impulse || xDirectionalForce == 0.0) {
+    if (xDirectionalForce == 0.0f || this->impulseSpdDecreaseCounter < this->impulse || xDirectionalForce == 0.0) {
         // Ignore the impulse if there already is one
         return;
     }

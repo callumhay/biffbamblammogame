@@ -72,11 +72,17 @@ public:
 	PlayerPaddle();
 	~PlayerPaddle();
 
-	void UpdatePaddleBounds(float min, float max) {
+	void UpdatePaddleBounds(float min, float max, bool overrideNoMatterWhat = true) {
 		assert(min < max);
 		assert((max - min) > PADDLE_WIDTH_TOTAL);
-		this->minBound = min;
-		this->maxBound = max;
+        if (overrideNoMatterWhat) {
+		    this->minBound = min;
+		    this->maxBound = max;
+        }
+        else {
+            this->minBound = std::max<float>(this->minBound, min);
+            this->maxBound = std::min<float>(this->maxBound, max);
+        }
 	}
 
 	void ResetPaddle();
