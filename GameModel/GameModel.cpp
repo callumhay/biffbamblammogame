@@ -310,7 +310,7 @@ GameWorld* GameModel::GetWorldByName(const std::string& name) const {
 }
 
 void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
-    static const float EASY_DIFFICULTY_BALL_SPEED_DELTA = -1.5f;
+    static const float EASY_DIFFICULTY_BALL_SPEED_DELTA = -1.70f;
     static const float MED_DIFFICULTY_BALL_SPEED_DELTA  =  0.0f;
     static const float HARD_DIFFICULTY_BALL_SPEED_DELTA =  1.5f;
 
@@ -324,7 +324,7 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             // Make ball speed slower
             GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + EASY_DIFFICULTY_BALL_SPEED_DELTA);
             // Make the paddle slightly larger (1 ball default diameter larger)
-            PlayerPaddle::SetNormalScale((PlayerPaddle::PADDLE_WIDTH_TOTAL + 2.0f * GameBall::DEFAULT_BALL_RADIUS) / PlayerPaddle::PADDLE_WIDTH_TOTAL);
+            PlayerPaddle::SetNormalScale((PlayerPaddle::PADDLE_WIDTH_TOTAL + 1.5f * GameBall::DEFAULT_BALL_RADIUS) / PlayerPaddle::PADDLE_WIDTH_TOTAL);
 
             // N.B., We also make the chance of nice item drops higher (done automatically in GameItemFactory)
 

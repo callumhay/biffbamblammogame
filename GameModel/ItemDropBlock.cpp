@@ -121,7 +121,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 	}
 
 	// Tell the ball that it collided with this block
-	ball.SetLastPieceCollidedWith(this);
+	ball.SetLastPieceCollidedWith(NULL);
 	return this;
 }
 

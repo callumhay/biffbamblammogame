@@ -19,7 +19,7 @@ const double BallOnPaddleState::START_RELEASE_TIMER_TIME_IN_SECS = 2.5;
 const double BallOnPaddleState::TOTAL_RELEASE_TIMER_TIME_IN_SECS = START_RELEASE_TIMER_TIME_IN_SECS + 6.0;
 
 BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), 
-firstTick(true), releaseTimerStarted(false), releaseTimerCounter(0.0) {
+firstTick(true), releaseTimerStarted(false), releaseTimerCounter(0.0), ballWasReleased(false) {
 	assert(gm != NULL);
 
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
@@ -74,6 +74,15 @@ void BallOnPaddleState::UpdateBallPosition() {
  * Time tick in-game as dealt with when the ball is on the paddle only.
  */
 void BallOnPaddleState::Tick(double seconds) {
+
+    // Make sure the ball is attached if it hasn't been released yet
+    if (!ballWasReleased) {
+        PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+	    assert(paddle != NULL);
+	    GameBall* ball = this->GetGameBall();
+        paddle->AttachBall(ball);
+    }
+
 	// Since some piece may have status effects which cause projectiles to spawn and move around (e.g., fire globs)
 	// we still need to tick projectiles in this state... 
 	this->gameModel->UpdateActiveProjectiles(seconds);
@@ -133,6 +142,8 @@ void BallOnPaddleState::BallReleaseKeyPressed() {
 	    this->gameModel->GetPlayerPaddle()->Shoot(this->gameModel);
 	    // Now change the game model's state machine to have the ball in play
         this->gameModel->SetNextState(GameState::BallInPlayStateType);
+
+        this->ballWasReleased = true;
     }
 }
 

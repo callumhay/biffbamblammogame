@@ -72,11 +72,9 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 	assert(paddle != NULL);
 	assert(currentLevel != NULL);
 
-	// Start by setting the paddle boundries to be the innermost solid blocks on the paddle level of blocks
-	paddle->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
-
 	// Check to see if the paddle collided with any blocks...
-	bool didCollideWithPiece = false;
+	bool didCollideWithCurrentPiece = false;
+    bool didCollideWithAnyPiece = false;
 	std::set<LevelPiece*> collisionCandidatePieces = currentLevel->GetLevelPieceCollisionCandidates(*paddle, doAttachedBallCollision);
 	for (std::set<LevelPiece*>::iterator iter = collisionCandidatePieces.begin(); iter != collisionCandidatePieces.end(); ++iter) {
 		LevelPiece* currPiece = *iter;
@@ -85,14 +83,21 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 		}
 
 		// First check to see if the paddle actually collides with the piece...
-		didCollideWithPiece = paddle->CollisionCheck(currPiece->GetBounds(), doAttachedBallCollision);
-		if (didCollideWithPiece) {
+		didCollideWithCurrentPiece = paddle->CollisionCheck(currPiece->GetBounds(), doAttachedBallCollision);
+		if (didCollideWithCurrentPiece) {
 			paddle->UpdateBoundsByPieceCollision(*currPiece, doAttachedBallCollision);
             LevelPiece* resultingPiece = currPiece->CollisionOccurred(this->gameModel, *paddle);
             UNUSED_VARIABLE(resultingPiece);
             assert(resultingPiece == currPiece);
+
+            didCollideWithAnyPiece = true;
 		}
 	}
+
+    if (!didCollideWithAnyPiece) {
+	    // Set the paddle boundries to be the innermost solid blocks on the paddle level of blocks
+	    paddle->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
+    }
 
 	return false;
 }
