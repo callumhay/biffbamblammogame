@@ -177,9 +177,7 @@ void BallBoostModel::BallBoostDirectionReleased() {
             // of the boost 'softly' then we don't do the boost
             if (!this->WasBoostReleasedSoftly()) {
                 this->BallBoosterPressed();
-                return;
             }
-            
         }
 
         this->ReleaseBulletTime();

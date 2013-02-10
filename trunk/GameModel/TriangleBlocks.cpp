@@ -36,7 +36,8 @@ void BreakableTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const 
                                  topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	}
 	else {
-        this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
+        this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, 
+            leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
             leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
             topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	}
@@ -360,14 +361,14 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
     Vector2D longSideNorm, shortSideNorm, hypSideNorm;
     Collision::LineSeg2D shortSide, longSide, hypSide;
 
-    bool topNeighborNotSolid	= topNeighbor == NULL     || (topNeighbor->GetType()    != LevelPiece::Solid &&
-                                                              topNeighbor->GetType()    != LevelPiece::Breakable);
-    bool bottomNeighborNotSolid	= bottomNeighbor == NULL  || (bottomNeighbor->GetType() != LevelPiece::Solid &&
-                                                              bottomNeighbor->GetType() != LevelPiece::Breakable);
-    bool leftNeighborNotSolid   = leftNeighbor == NULL    || (leftNeighbor->GetType()   != LevelPiece::Solid &&
-                                                              leftNeighbor->GetType()   != LevelPiece::Breakable);
-    bool rightNeighborNotSolid  = rightNeighbor == NULL   || (rightNeighbor->GetType()  != LevelPiece::Solid &&
-                                                              rightNeighbor->GetType()  != LevelPiece::Breakable);
+    bool topNeighborNotSolid = topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable);
+    bool bottomNeighborNotSolid	= bottomNeighbor == NULL  || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable);
+    bool leftNeighborNotSolid = leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
+        (leftNeighbor->GetType()   != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable);
+    bool rightNeighborNotSolid = rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        (rightNeighbor->GetType()  != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable);
 
     // Triangle neighbor cases...
     if (topNeighbor != NULL && TriangleBlock::IsTriangleType(*topNeighbor)) {

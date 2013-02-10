@@ -52,7 +52,8 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
     // Left boundry of the piece
     if (leftNeighbor != NULL) {
-        if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret &&
+        if (leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret &&
             leftNeighbor->GetType() != LevelPiece::Breakable && leftNeighbor->GetType() != LevelPiece::RocketTurret &&
             leftNeighbor->GetType() != LevelPiece::MineTurret) {
 
@@ -66,7 +67,8 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
     // Bottom boundry of the piece
     if (bottomNeighbor != NULL) {
-        if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret &&
+        if (bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret &&
             bottomNeighbor->GetType() != LevelPiece::Breakable && bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
             bottomNeighbor->GetType() != LevelPiece::MineTurret) {
 
@@ -80,7 +82,8 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
     // Right boundry of the piece
     if (rightNeighbor != NULL) {
-        if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret &&
+        if (rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret &&
             rightNeighbor->GetType() != LevelPiece::Breakable && rightNeighbor->GetType() != LevelPiece::RocketTurret &&
             rightNeighbor->GetType() != LevelPiece::MineTurret) {
 
@@ -94,7 +97,8 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
     // Top boundry of the piece
     if (topNeighbor != NULL) {
-        if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret &&
+        if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret &&
             topNeighbor->GetType() != LevelPiece::Breakable && topNeighbor->GetType() != LevelPiece::RocketTurret &&
             topNeighbor->GetType() != LevelPiece::MineTurret) {
 

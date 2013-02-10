@@ -528,50 +528,23 @@ void GameModel::SetInvertBallBoostDir(bool isInverted) {
 
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	ball.BallCollided();
-	//ball.SetLastThingCollidedWith(this->playerPaddle);
 
-	// Modify the ball velocity using the current paddle speed
-	Vector2D paddleVel = this->playerPaddle->GetVelocity();
-	
-	if (fabs(paddleVel[0]) > EPSILON) {
-		// The paddle has a considerable velocity, we should augment the ball's
-		// tragectory based on this...
-		int angleDecSgn = -NumberFuncs::SignOf(paddleVel[0]);
-		float fractionOfSpeed = fabs(paddleVel[0]) / PlayerPaddle::DEFAULT_MAX_SPEED;
-		float angleChange = angleDecSgn * fractionOfSpeed * PlayerPaddle::DEFLECTION_DEGREE_ANGLE;
+	Vector2D ballVel    = ball.GetVelocity();
+	Vector2D ballVelHat = Vector2D::Normalize(ballVel);
+	float ballSpd		= ball.GetSpeed(); 
+    
+	// Make sure the ball goes upwards (it can't reflect downwards off the paddle or the game would suck)
+	if (acosf(std::min<float>(1.0f, 
+        std::max<float>(-1.0f, Vector2D::Dot(ballVelHat, Vector2D(0, 1))))) > 
+        ((M_PI / 2.0f) - GameBall::MIN_BALL_ANGLE_IN_RADS)) {
 
-        if ((this->playerPaddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-            // When the shield is active the ball should be just off the shield...
-            // NOTE: This is already should be done automatically
-        }
-        else {
-            float bottomYOfPaddle = this->playerPaddle->GetCenterPosition()[1] - this->playerPaddle->GetHalfHeight();
-            if (ball.GetCenterPosition2D()[1] < bottomYOfPaddle) {
-                // Set the ball to be just off the paddle in cases where the ball is below it
-                ball.SetCenterPosition(Point2D(ball.GetCenterPosition2D()[0], bottomYOfPaddle));
-            }
-        }
-
-		Vector2D ballVel    = ball.GetVelocity();
-		Vector2D ballVelHat = Vector2D::Normalize(ballVel);
-		float ballSpd		= ball.GetSpeed(); 
-
-		// Rotate the ball's velocity vector to reflect the momentum of the paddle
-		ball.SetVelocity(ballSpd, Vector2D::Rotate(angleChange, ballVelHat));
-		
-		// Make sure the ball goes upwards (it can't reflect downwards off the paddle or the game would suck)
-		if (acosf(std::min<float>(1.0f, 
-            std::max<float>(-1.0f, Vector2D::Dot(ballVelHat, Vector2D(0, 1))))) > 
-            ((M_PI / 2.0f) - GameBall::MIN_BALL_ANGLE_IN_RADS)) {
-
-			// Inline: The ball either at a very sharp angle w.r.t. the paddle or it is aimed downwards
-			// even though the paddle has deflected it, adjust the angle to be suitable for the game
-			if (ballVel[0] < 0) {
-				ball.SetVelocity(ballSpd, Vector2D::Rotate(-GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(-1, 0)));
-			}
-			else {
-				ball.SetVelocity(ballSpd, Vector2D::Rotate(GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(1, 0)));
-			}
+		// Inline: The ball either at a very sharp angle w.r.t. the paddle or it is aimed downwards
+		// even though the paddle has deflected it, adjust the angle to be suitable for the game
+		if (ballVel[0] < 0) {
+			ball.SetVelocity(ballSpd, Vector2D::Rotate(-GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(-1, 0)));
+		}
+		else {
+			ball.SetVelocity(ballSpd, Vector2D::Rotate(GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(1, 0)));
 		}
 	}
 
@@ -626,7 +599,9 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
  * Called to update each piece that requires per-frame updates in the current level.
  */
 void GameModel::DoPieceStatusUpdates(double dT) {
-	LevelPiece* currLevelPiece;
+    GameLevel* currLevel = this->GetCurrentLevel();
+    
+    LevelPiece* currLevelPiece;
 	int32_t statusesToRemove = static_cast<int32_t>(LevelPiece::NormalStatus);
 	bool pieceMustBeRemoved = false;
 	this->doingPieceStatusListIteration = true;	// This makes sure that no other functions try to modify the status update pieces
@@ -655,7 +630,7 @@ void GameModel::DoPieceStatusUpdates(double dT) {
 			// since the piece should have already done that for itself when we called statusTick - do it anyway though, just to be safe
 			assert((iter->second & statusesToRemove) == statusesToRemove);
 			iter->second = (iter->second & ~statusesToRemove);
-			currLevelPiece->RemoveStatuses(statusesToRemove);
+			currLevelPiece->RemoveStatuses(currLevel, statusesToRemove);
 
 			if (iter->second == static_cast<int32_t>(LevelPiece::NormalStatus)) {
 				iter = this->statusUpdatePieces.erase(iter);
@@ -1354,11 +1329,13 @@ void GameModel::AddBeam(int beamType) {
 bool GameModel::AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status) {
 	assert(p != NULL);
 
+    GameLevel* currLevel = this->GetCurrentLevel();
+
 	// First try to find the level piece among existing level pieces with status updates
 	std::map<LevelPiece*, int32_t>::iterator findIter = this->statusUpdatePieces.find(p);
 	if (findIter == this->statusUpdatePieces.end()) {
 		// Nothing was found, add a new entry for the piece with the given status...
-		p->AddStatus(status);
+		p->AddStatus(currLevel, status);
 		std::pair<std::map<LevelPiece*, int32_t>::iterator, bool> insertResult = 
 			this->statusUpdatePieces.insert(std::make_pair(p, static_cast<int32_t>(status)));
 		assert(insertResult.second);
@@ -1377,7 +1354,7 @@ bool GameModel::AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::Piece
 
 bool GameModel::RemoveStatusForLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status) {
 	assert(p != NULL);
-
+    
 	// First try to find the level piece among existing level pieces with status updates
 	std::map<LevelPiece*, int32_t>::iterator findIter = this->statusUpdatePieces.find(p);
 	if (findIter == this->statusUpdatePieces.end()) {
@@ -1388,10 +1365,12 @@ bool GameModel::RemoveStatusForLevelPiece(LevelPiece* p, const LevelPiece::Piece
 		return false;
 	}
 
+    GameLevel* currLevel = this->GetCurrentLevel();
+
 	// Remove the status, if all statuses are removed by doing this then remove the piece
 	// from the status update map
 	findIter->second = (findIter->second & ~status);
-	findIter->first->RemoveStatus(status);
+	findIter->first->RemoveStatus(currLevel, status);
 	if (findIter->second == static_cast<int32_t>(LevelPiece::NormalStatus)) {
 		this->statusUpdatePieces.erase(findIter);
 	}
