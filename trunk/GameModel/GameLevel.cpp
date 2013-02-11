@@ -1538,17 +1538,28 @@ std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNotMoving(co
 std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(double dT, const Point2D& center, 
                                                                      float radius, const Vector2D& velocity) const {
 
+    UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(velocity);
+    /*
     Point2D circleEndCenter = dT * velocity + center;
 
 	// Get the ball boundry and use it to figure out what level pieces are relevant
 	// Find the non-rounded max and min indices to look at along the x and y axis
+    float slightlyBiggerRadius = 1.25f * radius;
     Collision::AABB2D searchArea(center, center);
-    searchArea.AddCircle(Collision::Circle2D(center, radius));
-    searchArea.AddCircle(Collision::Circle2D(circleEndCenter, radius));
+    searchArea.AddCircle(Collision::Circle2D(center, slightlyBiggerRadius));
+    searchArea.AddCircle(Collision::Circle2D(circleEndCenter, slightlyBiggerRadius));
+    */
+	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
+	float xIndexMax = floorf(xNonAdjustedIndex + radius); 
+	float xIndexMin = floorf(xNonAdjustedIndex - radius);
+	
+	float yNonAdjustedIndex = center[1] / LevelPiece::PIECE_HEIGHT;
+	float yIndexMax = floorf(yNonAdjustedIndex + radius);
+	float yIndexMin = floorf(yNonAdjustedIndex - radius);
 
-    std::set<LevelPiece*> candidateSet = this->IndexCollisionCandidates(
-        searchArea.GetMin()[0] / LevelPiece::PIECE_WIDTH, searchArea.GetMax()[0] / LevelPiece::PIECE_WIDTH,
-        searchArea.GetMin()[1] / LevelPiece::PIECE_HEIGHT, searchArea.GetMax()[1] / LevelPiece::PIECE_HEIGHT);
+    std::set<LevelPiece*> candidateSet =
+        this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
 
     std::vector<PieceAndSqrDist> tempSortVec;
     tempSortVec.reserve(candidateSet.size());

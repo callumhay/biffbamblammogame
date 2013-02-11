@@ -228,43 +228,80 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         collisionLineIdx = collisionLineIdxs.front();
     }
     else {
-        // We prioritize outside over inside lines... if there are a mix, we eliminate all the inside lines
-        std::vector<size_t> finalCollisionLineIdxs;
-        finalCollisionLineIdxs.reserve(collisionLineIdxs.size());
-        for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
-            int lineIdx = collisionLineIdxs[i];
-            if (!this->onInside[lineIdx]) {
-                finalCollisionLineIdxs.push_back(lineIdx);
-            }
-        }
-        if (finalCollisionLineIdxs.empty()) {
-            finalCollisionLineIdxs = collisionLineIdxs;
-        }
-
         // We need to figure out which line got hit first
-        float smallestDist = FLT_MAX;
+        float smallestInsideDist  = FLT_MAX;
+        int insideIdx = -1;
 
-        for (int i = 0; i < static_cast<int>(finalCollisionLineIdxs.size()); i++) {
+        float smallestOutsideDist = FLT_MAX;
+        int outsideIdx = -1;
+
+        for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
             
-            int lineIdx = finalCollisionLineIdxs[i];
+            int lineIdx = collisionLineIdxs[i];
             const Collision::LineSeg2D& currLine = this->lines[lineIdx];
             const Vector2D& currNormal = this->normals[lineIdx];
 
             float d       = Vector2D::Dot(currNormal, Vector2D(currLine.P1()[0], currLine.P1()[1]));
             float absDist = fabs(Vector2D::Dot(currNormal, Vector2D(currSamplePt[0], currSamplePt[1])) - d);
 
-            if (absDist < smallestDist) {
-                
-                // Special case: check to see if the distance is really tiny, if it is we average the results
-                //if (fabs(absDist - smallestDist) < EPSILON) {  
-                //}
-
-                smallestDist = absDist;
-                n = currNormal;
-                collisionLine = currLine;
-                collisionLineIdx = lineIdx;
+            if (this->onInside[lineIdx]) {
+                if (absDist < smallestInsideDist) {
+                    smallestInsideDist = absDist;
+                    insideIdx = lineIdx;
+                }
+            }
+            else {
+                if (absDist < smallestOutsideDist) {
+                    smallestOutsideDist = absDist;
+                    outsideIdx = lineIdx;
+                }
             }
         }
+
+        #define DO_ASSIGNMENT(idx) n = this->normals[idx]; collisionLine = this->lines[idx]; collisionLineIdx = idx;
+
+        // If only an inside or an outside was found then return that
+        if (outsideIdx == -1) {
+            assert(insideIdx != -1);
+            DO_ASSIGNMENT(insideIdx);
+        }
+        else if (insideIdx == -1) {
+            assert(outsideIdx != -1);
+            DO_ASSIGNMENT(outsideIdx);
+        }
+        else {
+            const float COLLISION_DISTANCE_EPSILON = c.Radius() / 50.0f;
+
+            // There is an outside and an inside found in the tie... if they are really close together
+            // then we favour the outside boundary over the inside...
+            if (fabs(smallestInsideDist - smallestOutsideDist) <= COLLISION_DISTANCE_EPSILON) {
+                DO_ASSIGNMENT(outsideIdx);
+            }
+            else {
+                
+                if (smallestInsideDist < smallestOutsideDist) {
+
+                    // One final check: prioritize normal areas...
+                    Collision::AABB2D insideNormalArea(this->lines[insideIdx].P1(), this->lines[insideIdx].P1());
+                    insideNormalArea.AddPoint(this->lines[insideIdx].P2());
+                    insideNormalArea.AddPoint(this->lines[insideIdx].P1() + this->normals[insideIdx]);
+                    insideNormalArea.AddPoint(this->lines[insideIdx].P2() + this->normals[insideIdx]);
+
+                    if (Collision::SqDistFromPtToAABB(insideNormalArea, currSamplePt) < EPSILON) {
+                        DO_ASSIGNMENT(insideIdx);
+                    }
+                    else {
+                        DO_ASSIGNMENT(outsideIdx);
+                    }
+                    
+                }
+                else {
+                    DO_ASSIGNMENT(outsideIdx);
+                }
+            }
+        }
+        
+        #undef DO_ASSIGNMENT
     }
 
     if (n.IsZero()) {

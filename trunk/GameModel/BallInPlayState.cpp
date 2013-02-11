@@ -359,32 +359,19 @@ void BallInPlayState::Tick(double seconds) {
 			    // Get the small set of levelpieces based on the position of the ball...
 			    std::vector<LevelPiece*> collisionPieces = 
                     currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
-                    currBall->GetBounds().Radius(), currBall->GetVelocity());
+                    std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()),
+                    currBall->GetVelocity());
 
-                std::map<size_t, LevelPiece*> boundsIdxMap;
-                int collisionIdx;
-                BoundingLines combinedBounds;
+			    for (std::vector<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
+                    pieceIter != collisionPieces.end(); ++pieceIter) {
+    				
+				    LevelPiece *currPiece = *pieceIter;
+                    assert(currPiece != NULL);
 
-                while (!collisionPieces.empty()) {
-                    
-                    GameLevel::BuildCollisionBoundsCombinationAndMap(collisionPieces, boundsIdxMap, combinedBounds);
-                    collisionPieces.clear();
-                    if (boundsIdxMap.empty()) {
-                        continue;
-                    }
-
-                    didCollideWithBlock = combinedBounds.Collide(seconds, currBall->GetBounds(), currBall->GetVelocity(),
-                        n, collisionLine, collisionIdx, timeSinceCollision);
-
-                    LevelPiece* currPiece = NULL;
-                    if (didCollideWithBlock) {
-                        currPiece = boundsIdxMap.find(collisionIdx)->second;
-                        didCollideWithBlock = currPiece->SecondaryCollisionCheck(seconds, *currBall);
-                    }
+                    didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds,
+                        n, collisionLine, timeSinceCollision);
 
 			        if (didCollideWithBlock) {
-                        assert(currPiece != NULL);
-
 				        // Check to see if the ball is a ghost ball, if so there's a chance the ball will 
 				        // lose its ability to collide for 1 second, also check to see if we're already in ghost mode
 				        // if so we won't collide with anything (except solid blocks)...
@@ -434,7 +421,8 @@ void BallInPlayState::Tick(double seconds) {
                         // that collided could be destroyed during this loop by the ball
                         if (currPieceCanChangeSelfOrPiecesAroundIt) {
 			                collisionPieces = currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
-                                currBall->GetBounds().Radius(), currBall->GetVelocity());
+                                std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()), currBall->GetVelocity());
+                            pieceIter = collisionPieces.begin();
                         }
                     }
                 }
