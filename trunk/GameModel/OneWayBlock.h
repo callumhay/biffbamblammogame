@@ -75,6 +75,7 @@ public:
 
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
+    bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
@@ -117,13 +118,21 @@ inline bool OneWayBlock::BallBlastsThrough(const GameBall& b) const {
     return this->IsGoingTheOneWay(b.GetDirection());
 }
 
+inline bool OneWayBlock::SecondaryCollisionCheck(double dT, const GameBall& ball) const {
+    UNUSED_PARAMETER(dT);
+
+    // Collisions only occur if the ball is not going 'the one way' or if the piece is frozen in ice
+    if (this->IsGoingTheOneWay(ball.GetDirection()) && !this->HasStatus(LevelPiece::IceCubeStatus)) {
+        return false;
+    }
+    return true;
+}
+
 inline bool OneWayBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                         Collision::LineSeg2D& collisionLine,
                                         double& timeSinceCollision) const {
 
-    // Collisions only occur if the ball is not going 'the one way' or if the piece is
-    // frozen in ice
-    if (this->IsGoingTheOneWay(ball.GetDirection()) && !this->HasStatus(LevelPiece::IceCubeStatus)) {
+    if (!this->SecondaryCollisionCheck(dT, ball)) {
         return false;
     }
 

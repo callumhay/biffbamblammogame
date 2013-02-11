@@ -70,6 +70,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 	// Set the bounding lines for a rectangular block - these are also used when any block is frozen in an ice cube
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
+    std::vector<bool> onInside;
 
     bool shouldGenBounds = false;
 
@@ -82,6 +83,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		Vector2D n1(-1, 0);
 		boundingLines.push_back(l1);
 		boundingNorms.push_back(n1);
+        onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            leftNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	// Bottom boundry of the piece
@@ -93,6 +96,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		Vector2D n2(0, -1);
 		boundingLines.push_back(l2);
 		boundingNorms.push_back(n2);
+        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            bottomNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	// Right boundry of the piece
@@ -104,6 +109,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		Vector2D n3(1, 0);
 		boundingLines.push_back(l3);
 		boundingNorms.push_back(n3);
+        onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            rightNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	// Top boundry of the piece
@@ -115,11 +122,13 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		Vector2D n4(0, 1);
 		boundingLines.push_back(l4);
 		boundingNorms.push_back(n4);
+        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            topNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor,
-        rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, 
-        bottomRightNeighbor, bottomLeftNeighbor);
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
+        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 /**

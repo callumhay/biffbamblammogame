@@ -11,21 +11,39 @@
 
 #include "BoundingLines.h"
 
-BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms) : 
+BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines,
+                             const std::vector<Vector2D>& norms) : 
 	lines(lines), normals(norms) {
 	assert(lines.size() == norms.size());
+    this->onInside.resize(lines.size(), false);
 }
 
-BoundingLines::BoundingLines(const BoundingLines& copy) : lines(copy.lines), normals(copy.normals) {
+BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines,
+                             const std::vector<Vector2D>& norms,
+                             const std::vector<bool>& onInside) : 
+lines(lines), normals(norms), onInside(onInside) {
+    assert(lines.size() == norms.size());
+    assert(lines.size() == onInside.size());
+}
+
+BoundingLines::BoundingLines(const BoundingLines& copy) :
+lines(copy.lines), normals(copy.normals), onInside(copy.onInside) {
 }
 
 BoundingLines::~BoundingLines() {
 }
 
-void BoundingLines::AddBound(const Collision::LineSeg2D& line, const Vector2D& norm) {
+void BoundingLines::AddBound(const Collision::LineSeg2D& line, const Vector2D& norm, bool onInside) {
     this->lines.push_back(line);
     this->normals.push_back(norm);
     this->normals.back().Normalize();
+    this->onInside.push_back(onInside);
+}
+
+void BoundingLines::AddBounds(const BoundingLines& bounds) {
+    this->lines.insert(this->lines.end(), bounds.lines.begin(), bounds.lines.end());
+    this->normals.insert(this->normals.end(), bounds.normals.begin(), bounds.normals.end());
+    this->onInside.insert(this->onInside.end(), bounds.onInside.begin(), bounds.onInside.end());
 }
 
 Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
@@ -153,7 +171,7 @@ Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
 bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-							Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+							Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision) const {
 
 
     static const int NUM_COLLISON_SAMPLES = 16;
@@ -176,20 +194,19 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     double currTimeSinceCollision = 0.0;
 
     // Keep track of all the indices collided with and the collision point collided at
-    std::list<size_t> collisionLineIdxs;
-    std::list<Point2D> collisionPts;
+    std::vector<size_t> collisionLineIdxs;
+    collisionLineIdxs.reserve(this->GetNumLines());
     Point2D collisionPt;
     bool isCollision = false;
 
     // Go through all of the samples starting with the first (which is just a bit off from the previous
     // tick location) and moving towards the circle's current location, when a collision is found we exit
     for (int i = 0; i < numCollisionSamples; i++) {
-        for (size_t lineIdx = 0; lineIdx < this->lines.size(); ++lineIdx) {
+        for (int lineIdx = 0; lineIdx < static_cast<int>(this->lines.size()); ++lineIdx) {
             bool tempIsCollision = Collision::GetCollisionPoint(Collision::Circle2D(currSamplePt, c.Radius()), 
                                                                 this->lines[lineIdx], collisionPt);
             if (tempIsCollision) {
                 collisionLineIdxs.push_back(lineIdx);
-                collisionPts.push_back(Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]));
                 isCollision = true;
             }
         }
@@ -201,68 +218,60 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     if (!isCollision) {
         return false;
     }
+
     assert(!collisionLineIdxs.empty());
     timeSinceCollision = currTimeSinceCollision;
 
-    if (zeroVelocity) {
+    if (zeroVelocity || collisionLineIdxs.size() == 1) {
         n = this->normals[collisionLineIdxs.front()];
         collisionLine = this->lines[collisionLineIdxs.front()];
+        collisionLineIdx = collisionLineIdxs.front();
     }
     else {
-
-        // Figure out which collision line was closest to the center of the circle that is colliding,
-        // the closest boundry (or boundries within some delta) will be the one's we choose to collide with
-        float lowestSqrDist = FLT_MAX;
-        float currSqrDist = 0.0f;
-        std::list<size_t>::const_iterator lineIdxIter = collisionLineIdxs.begin();
-        std::list<Point2D>::const_iterator ptIter     = collisionPts.begin();
-        
-        // First pass: Get the lowest square distance between the circle's center and the lines of all the collisions...
-        for (;lineIdxIter != collisionLineIdxs.end() && ptIter != collisionPts.end(); ++lineIdxIter, ++ptIter) {
-            
-            const Point2D& currCollisionPt = *ptIter;
-            currSqrDist = Point2D::SqDistance(currSamplePt, currCollisionPt);
-            if (currSqrDist < lowestSqrDist) {
-                lowestSqrDist = currSqrDist;
+        // We prioritize outside over inside lines... if there are a mix, we eliminate all the inside lines
+        std::vector<size_t> finalCollisionLineIdxs;
+        finalCollisionLineIdxs.reserve(collisionLineIdxs.size());
+        for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
+            int lineIdx = collisionLineIdxs[i];
+            if (!this->onInside[lineIdx]) {
+                finalCollisionLineIdxs.push_back(lineIdx);
             }
         }
-
-        // Second pass: compare to the lowest square distance within some epsilon radius, the points that
-        // are within that radius count as collision points, all others are discarded
-        lineIdxIter = collisionLineIdxs.begin();
-        ptIter      = collisionPts.begin();
-        static const float SQR_EPSILON_RADIUS = 0.08 * 0.08;
-        lowestSqrDist = lowestSqrDist + SQR_EPSILON_RADIUS;
-        while (lineIdxIter != collisionLineIdxs.end() && ptIter != collisionPts.end()) {
-            
-            const Point2D& currCollisionPt = *ptIter;
-            currSqrDist = Point2D::SqDistance(currSamplePt, currCollisionPt);
-            
-            if (currSqrDist > lowestSqrDist) {
-                lineIdxIter = collisionLineIdxs.erase(lineIdxIter);
-                ptIter      = collisionPts.erase(ptIter);
-            }
-            else {
-                ++lineIdxIter;
-                ++ptIter;
-            }
+        if (finalCollisionLineIdxs.empty()) {
+            finalCollisionLineIdxs = collisionLineIdxs;
         }
 
-        // Accumulate the normals
-        for (std::list<size_t>::const_iterator iter = collisionLineIdxs.begin(); 
-             iter != collisionLineIdxs.end(); ++iter) {
-        
-            const Vector2D& currNormal = this->normals[*iter];
-            n = n + currNormal;
+        // We need to figure out which line got hit first
+        float smallestDist = FLT_MAX;
+
+        for (int i = 0; i < static_cast<int>(finalCollisionLineIdxs.size()); i++) {
+            
+            int lineIdx = finalCollisionLineIdxs[i];
+            const Collision::LineSeg2D& currLine = this->lines[lineIdx];
+            const Vector2D& currNormal = this->normals[lineIdx];
+
+            float d       = Vector2D::Dot(currNormal, Vector2D(currLine.P1()[0], currLine.P1()[1]));
+            float absDist = fabs(Vector2D::Dot(currNormal, Vector2D(currSamplePt[0], currSamplePt[1])) - d);
+
+            if (absDist < smallestDist) {
+                
+                // Special case: check to see if the distance is really tiny, if it is we average the results
+                //if (fabs(absDist - smallestDist) < EPSILON) {  
+                //}
+
+                smallestDist = absDist;
+                n = currNormal;
+                collisionLine = currLine;
+                collisionLineIdx = lineIdx;
+            }
         }
     }
 
-    if (n == Vector2D(0,0)) { return false; }
-    n.Normalize();
+    if (n.IsZero()) {
+        return false;
+    }
 
-    // Build a collision line from the given normal...
-    Vector2D lineDir(-n[1], n[0]);
-    collisionLine = Collision::LineSeg2D(collisionPt + lineDir, collisionPt - lineDir);
+    //n.Normalize();
 
     return true;
 }
@@ -599,6 +608,7 @@ BoundingLines& BoundingLines::operator=(const BoundingLines& copy) {
 
     this->lines = copy.lines;
     this->normals = copy.normals;
+    this->onInside = copy.onInside;
 
     return (*this);
 }
@@ -609,9 +619,15 @@ void BoundingLines::DebugDraw() const {
 
 	// Draw bounding lines
 	glLineWidth(1.0f);
-	glColor3f(1,0,1);
-	glBegin(GL_LINES);
+	
+    glBegin(GL_LINES);
 	for (size_t i = 0; i < this->lines.size(); i++) {
+        if (this->onInside[i]) {
+            glColor3f(0,1,1);
+        }
+        else {
+            glColor3f(1,0,1);
+        }
 		Collision::LineSeg2D currLine = this->lines[i];
 		glVertex2f(currLine.P1()[0], currLine.P1()[1]);
 		glVertex2f(currLine.P2()[0], currLine.P2()[1]);

@@ -56,6 +56,7 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	// Set the bounding lines for a diamond-shaped block
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
+    std::vector<bool> onInside;
 
 	//std::vector<Collision::LineSeg2D> reflectRefractBoundingLines;
     //std::vector<Vector2D>  reflectRefractBoundingNorms;
@@ -80,6 +81,12 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
         boundingLines.push_back(boundry);
         boundingNorms.push_back(n1);
+        onInside.push_back(
+            ((leftNeighbor == NULL || !leftNeighbor->IsNoBoundsPieceType()) && (bottomNeighbor == NULL || !bottomNeighbor->IsNoBoundsPieceType())) ||
+            ((leftNeighbor == NULL || !leftNeighbor->IsNoBoundsPieceType()) && (bottomLeftNeighbor == NULL || !bottomLeftNeighbor->IsNoBoundsPieceType())) ||
+            ((bottomNeighbor == NULL || !bottomNeighbor->IsNoBoundsPieceType()) && (bottomLeftNeighbor == NULL || !bottomLeftNeighbor->IsNoBoundsPieceType()))
+        );
+                            
         shouldGenBounds = false;
     }
     
@@ -101,6 +108,12 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
         boundingLines.push_back(boundry);
         boundingNorms.push_back(n1);
+        onInside.push_back(
+            ((rightNeighbor == NULL || !rightNeighbor->IsNoBoundsPieceType()) && (bottomNeighbor == NULL || !bottomNeighbor->IsNoBoundsPieceType())) ||
+            ((rightNeighbor == NULL || !rightNeighbor->IsNoBoundsPieceType()) && (bottomRightNeighbor == NULL || !bottomRightNeighbor->IsNoBoundsPieceType())) ||
+            ((bottomNeighbor == NULL || !bottomNeighbor->IsNoBoundsPieceType()) && (bottomRightNeighbor == NULL || !bottomRightNeighbor->IsNoBoundsPieceType()))
+        );
+
         shouldGenBounds = false;
     }
     
@@ -122,6 +135,12 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
         boundingLines.push_back(boundry);
         boundingNorms.push_back(n1);
+        onInside.push_back(
+            ((leftNeighbor == NULL || !leftNeighbor->IsNoBoundsPieceType()) && (topNeighbor == NULL || !topNeighbor->IsNoBoundsPieceType())) ||
+            ((leftNeighbor == NULL || !leftNeighbor->IsNoBoundsPieceType()) && (topLeftNeighbor == NULL || !topLeftNeighbor->IsNoBoundsPieceType())) ||
+            ((topNeighbor == NULL || !topNeighbor->IsNoBoundsPieceType()) && (topLeftNeighbor == NULL || !topLeftNeighbor->IsNoBoundsPieceType()))
+        );
+
         shouldGenBounds = false;
     }
 
@@ -143,9 +162,16 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
         boundingLines.push_back(boundry);
         boundingNorms.push_back(n1);
+        onInside.push_back(
+            ((rightNeighbor == NULL || !rightNeighbor->IsNoBoundsPieceType()) && (topNeighbor == NULL      || !topNeighbor->IsNoBoundsPieceType())) ||
+            ((rightNeighbor == NULL || !rightNeighbor->IsNoBoundsPieceType()) && (topRightNeighbor == NULL || !topRightNeighbor->IsNoBoundsPieceType())) ||
+            ((topNeighbor == NULL   || !topNeighbor->IsNoBoundsPieceType())   && (topRightNeighbor == NULL || !topRightNeighbor->IsNoBoundsPieceType()))
+        );
+
     }
 
-    this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+    this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
+        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 

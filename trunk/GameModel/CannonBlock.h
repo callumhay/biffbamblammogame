@@ -79,10 +79,12 @@ public:
 	// The cannon block cannot be destroyed
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 	
+    bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
-	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+	
+    void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
@@ -127,9 +129,14 @@ private:
 };
 
 // We need to override this in order to make sure it actually checks for a collision
+inline bool CannonBlock::SecondaryCollisionCheck(double dT, const GameBall& ball) const {
+    UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(ball);
+    return true;
+}
+
 inline bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
-																 Collision::LineSeg2D& collisionLine, 
-																 double& timeSinceCollision) const {
+										Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 
     return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
 }

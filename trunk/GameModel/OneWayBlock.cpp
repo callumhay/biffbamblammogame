@@ -148,6 +148,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	// Set the bounding lines for a rectangular block
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
+    std::vector<bool> onInside;
 
 	// Left boundry of the piece
 	if (leftNeighbor != NULL) {
@@ -160,6 +161,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 			Vector2D n1(-1, 0);
 			boundingLines.push_back(l1);
 			boundingNorms.push_back(n1);
+            onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus));
 		}
 	}
 
@@ -174,6 +176,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 			Vector2D n2(0, -1);
 			boundingLines.push_back(l2);
 			boundingNorms.push_back(n2);
+            onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus));
 		}
 	}
 
@@ -188,6 +191,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 			Vector2D n3(1, 0);
 			boundingLines.push_back(l3);
 			boundingNorms.push_back(n3);
+            onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus));
 		}
 	}
 
@@ -202,11 +206,13 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 			Vector2D n4(0, 1);
 			boundingLines.push_back(l4);
 			boundingNorms.push_back(n4);
+            onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus));
 		}
 	}
 
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 						 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
+        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {

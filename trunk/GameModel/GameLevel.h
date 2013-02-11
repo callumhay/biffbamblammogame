@@ -93,10 +93,14 @@ public:
 		return this->randomItemProbabilityNum;
 	}
 
-	std::vector<LevelPiece*> GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const;
+    std::vector<LevelPiece*> GetLevelPieceCollisionCandidatesNotMoving(const Point2D& center, float radius) const;
+	std::vector<LevelPiece*> GetLevelPieceCollisionCandidates(double dT, const Point2D& center, float radius, const Vector2D& velocity) const;
     std::set<LevelPiece*> GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const;
+
+    static void BuildCollisionBoundsCombinationAndMap(const std::vector<LevelPiece*>& pieces,
+        std::map<size_t, LevelPiece*>& boundsIdxMap, BoundingLines& combinationBounds);
 
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
         const std::set<const LevelPiece*>& ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
