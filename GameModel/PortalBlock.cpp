@@ -28,14 +28,9 @@ PortalBlock::~PortalBlock() {
 // The portal block is a 'no-bounds' block, however it does still 'consider' collisions
 // since it needs to know if something hits it so that when it does it can move it to its sibling portal...
 
-bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-                                 Collision::LineSeg2D& collisionLine,
-                                 double& timeSinceCollision) const {
-	UNUSED_PARAMETER(n);
-	UNUSED_PARAMETER(collisionLine);
-	UNUSED_PARAMETER(timeSinceCollision);
-
-	// No collision if the ball has just previously collided with this portal block OR
+bool PortalBlock::SecondaryCollisionCheck(double dT, const GameBall& ball) const {
+    
+    // No collision if the ball has just previously collided with this portal block OR
     // if the timer on this portal block for ball collisions is not past a certain time
 	if (ball.IsLastPieceCollidedWith(this) ||
         (BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastBallCollision) < TIME_BETWEEN_BALL_USES_IN_MILLISECONDS) {
@@ -49,6 +44,16 @@ bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
 
 	// Check to see if the circle is/was inside the bounding lines over the time interval dT
 	return (this->bounds.CollisionCheckIndices(sweptCenter).size() > 0);
+}
+
+bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
+                                 Collision::LineSeg2D& collisionLine,
+                                 double& timeSinceCollision) const {
+	UNUSED_PARAMETER(n);
+	UNUSED_PARAMETER(collisionLine);
+	UNUSED_PARAMETER(timeSinceCollision);
+
+	return this->SecondaryCollisionCheck(dT, ball);
 }
 
 void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,

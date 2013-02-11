@@ -444,9 +444,9 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
                 // Ball is travelling downwards/parallel at the paddle
                 Collision::LineSeg2D bottomLine = this->bounds.GetLine(3);
                 Vector2D bottomNormal           = this->bounds.GetNormal(3);
-                this->bounds.PopLastLineAndNormal();
+                this->bounds.PopLast();
                 bool wasCollision = this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
-                this->bounds.PushLineAndNormal(bottomLine, bottomNormal);
+                this->bounds.Push(bottomLine, bottomNormal);
                 return wasCollision;
             }
         }

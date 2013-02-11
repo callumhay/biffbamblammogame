@@ -1,17 +1,17 @@
 An ice way to go
 12 26
 S S S S S S S S S D(IceBall) S S 
-S G G Y O R R R E I E S 
-S G G Y O B R R E E E S 
-S G G Y O R R R E E E S 
-S G G Y O B R R E E E S 
-S G G Y O R R R E E E S 
-S G G Y O B R R E E E S 
-S G G Y O R R R E E E S 
-S G G Y O B R R E E E S 
-S G G Y O R R R E E E S 
+S G E Y E R R R E I E S 
+S E G Y O B R R E E E S 
+S G E Y E R R R E E E S 
+S E G Y O B R R E E E S 
+S G E Y E R R R E E E S 
+S E G Y O B R R E E E S 
+S G E Y E R R R E E E S 
+S E G Y O B R R E E E S 
+S G E Y E R R R E E E S 
 S Y Y Y O B R R E E E S 
-S O O O O R R R E E E S 
+S O E O E R R R E E E S 
 S B R B R B R R E E E S 
 S R R R R R R R E E E S 
 S R R R R R R R E E E S 
@@ -28,11 +28,11 @@ S E E E E E E E E E E S
 S E E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
-5000
+9000
+18000
+33000
+46000
+51000
 
 PaddleGrow 2
 PoisonPaddle 1

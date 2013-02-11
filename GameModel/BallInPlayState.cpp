@@ -289,97 +289,22 @@ void BallInPlayState::Tick(double seconds) {
 			    }
             }
 
-		    // Make sure the ball can collide with level pieces (blocks) before running the block collision simulation
-		    if (currBall->CanCollideWithBlocksAndBosses()) {
 
-			    // Check for ball collision with level pieces
-			    // Get the small set of levelpieces based on the position of the ball...
-			    std::vector<LevelPiece*> collisionPieces = 
-                    currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
-                                                                currBall->GetBounds().Radius());
+		    // Ball-ball collisions - choose the next set of balls after this one
+		    // so that collisions are not duplicated
+		    std::list<GameBall*>::iterator nextIter = iter;
+		    nextIter++;
+		    for (; nextIter != gameBalls.end(); ++nextIter) {
+			    GameBall* otherBall = *nextIter;
+			    assert(currBall != otherBall);
 
-			    for (std::vector<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
-                    pieceIter != collisionPieces.end(); ++pieceIter) {
-    				
-				    LevelPiece *currPiece = *pieceIter;
-                    
-				    didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
-				    if (didCollideWithBlock) {
-
-					    // Check to see if the ball is a ghost ball, if so there's a chance the ball will 
-					    // lose its ability to collide for 1 second, also check to see if we're already in ghost mode
-					    // if so we won't collide with anything (except solid blocks)...
-					    if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && 
-                             currPiece->GhostballPassesThrough()) {
-    						
-						    if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
-							    continue;
-						    }
-
-						    // If the ball is in ghost mode then it cannot hit anything other than the paddle and solid blocks...
-						    // NOTE: we divide the probability of entering full ghost mode (i.e., not hitting blocks) by the number of balls
-						    // because theoretically the rate of hitting blocks should increase multiplicatively with the number of balls
-						    if (this->timeSinceGhost >= GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE &&
-							    Randomizer::GetInstance()->RandomNumZeroToOne() <= 
-							    (GameModelConstants::GetInstance()->PROB_OF_GHOSTBALL_BLOCK_MISS / static_cast<float>(gameBalls.size()))) {
-    							
-							    this->timeSinceGhost = 0.0;
-							    continue;
-						    }
-					    }
-
-					    // If the piece doesnt have bounds to bounce off of then don't bounce the ball OR
-					    // In the case that the ball is uber then we only reflect if the ball is not green OR
-					    // The ball is attached to the paddle (special case)
-					    if (!currPiece->BallBouncesOffWhenHit() ||
-                           (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && 
-                           currPiece->BallBlastsThrough(*currBall))) {
-						    // Ignore collision...
-					    }
-					    else if (paddle->GetAttachedBall() == currBall) {
-                            // Ignore this, we deal with it later on in DoUpdateToPaddleBoundriesAndCollisions
-					    }
-					    else {
-						    // Make the ball react to the collision
-						    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
-					    }
-    					
-                        bool currPieceCanChangeSelfOrPiecesAroundIt = currPiece->CanChangeSelfOrOtherPiecesWhenHitByBall() ||
-                                                                      currPiece->CanBeDestroyedByBall();
-
-					    // Tell the model that a ball collision occurred with currPiece
-                        this->gameModel->CollisionOccurred(*currBall, currPiece);
-                        
-                        // Recalculate the blocks we're dealing with in this loop since 
-                        // some blocks may no longer exist after a collision - of course this would only happen if the piece
-                        // that collided could be destroyed during this loop by the ball
-                        if (currPieceCanChangeSelfOrPiecesAroundIt) {
-				            collisionPieces = currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
-                                                                                          currBall->GetBounds().Radius());
-                            pieceIter = collisionPieces.begin();
-                        }
-                    }
+			    // Make sure to check if both balls collide with each other
+			    if (currBall->CollisionCheck(*otherBall)) {
+				    // EVENT: Two balls have collided
+				    GameEventManager::Instance()->ActionBallBallCollision(*currBall, *otherBall);
+				    this->DoBallCollision(*currBall, *otherBall);
 			    }
-
-                // Now do boss collisions with the ball...
-                if (currLevel->GetHasBoss()) {
-                    Boss* boss = currLevel->GetBoss();
-                    assert(boss != NULL);
-                    
-                    BossBodyPart* collisionBossPart = boss->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
-                    if (collisionBossPart != NULL) {
-                        // NOTE: For bosses, ghostballs never pass through.
-                        // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
-
-                        // First, make the ball react to the collision
-                        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
-
-                        // Now make the boss react to the collision...
-                        this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
-                    }
-                }
-
-            }
+		    }
 
 		    // Ball Safety Net Collisions:
             if (this->gameModel->IsSafetyNetActive()) {
@@ -409,22 +334,113 @@ void BallInPlayState::Tick(double seconds) {
 			    }
 		    }
 
-		    // Ball-ball collisions - choose the next set of balls after this one
-		    // so that collisions are not duplicated
-		    std::list<GameBall*>::iterator nextIter = iter;
-		    nextIter++;
-		    for (; nextIter != gameBalls.end(); ++nextIter) {
-			    GameBall* otherBall = *nextIter;
-			    assert(currBall != otherBall);
+		    // Make sure the ball can collide with level pieces (blocks) before running the block collision simulation
+		    if (currBall->CanCollideWithBlocksAndBosses()) {
 
-			    // Make sure to check if both balls collide with each other
-			    if (currBall->CollisionCheck(*otherBall)) {
-				    // EVENT: Two balls have collided
-				    GameEventManager::Instance()->ActionBallBallCollision(*currBall, *otherBall);
-				    this->DoBallCollision(*currBall, *otherBall);
-			    }
-		    }
-	    }
+                // Now do boss collisions with the ball...
+                if (currLevel->GetHasBoss()) {
+                    Boss* boss = currLevel->GetBoss();
+                    assert(boss != NULL);
+                    
+                    BossBodyPart* collisionBossPart = boss->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+                    if (collisionBossPart != NULL) {
+                        // NOTE: For bosses, ghostballs never pass through.
+                        // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
+
+                        // First, make the ball react to the collision
+                        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+
+                        // Now make the boss react to the collision...
+                        this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
+                    }
+                }
+
+			    // Check for ball collision with level pieces
+			    // Get the small set of levelpieces based on the position of the ball...
+			    std::vector<LevelPiece*> collisionPieces = 
+                    currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
+                    currBall->GetBounds().Radius(), currBall->GetVelocity());
+
+                std::map<size_t, LevelPiece*> boundsIdxMap;
+                int collisionIdx;
+                BoundingLines combinedBounds;
+
+                while (!collisionPieces.empty()) {
+                    
+                    GameLevel::BuildCollisionBoundsCombinationAndMap(collisionPieces, boundsIdxMap, combinedBounds);
+                    collisionPieces.clear();
+                    if (boundsIdxMap.empty()) {
+                        continue;
+                    }
+
+                    didCollideWithBlock = combinedBounds.Collide(seconds, currBall->GetBounds(), currBall->GetVelocity(),
+                        n, collisionLine, collisionIdx, timeSinceCollision);
+
+                    LevelPiece* currPiece = NULL;
+                    if (didCollideWithBlock) {
+                        currPiece = boundsIdxMap.find(collisionIdx)->second;
+                        didCollideWithBlock = currPiece->SecondaryCollisionCheck(seconds, *currBall);
+                    }
+
+			        if (didCollideWithBlock) {
+                        assert(currPiece != NULL);
+
+				        // Check to see if the ball is a ghost ball, if so there's a chance the ball will 
+				        // lose its ability to collide for 1 second, also check to see if we're already in ghost mode
+				        // if so we won't collide with anything (except solid blocks)...
+				        if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && 
+                             currPiece->GhostballPassesThrough()) {
+    						
+					        if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
+						        continue;
+					        }
+
+					        // If the ball is in ghost mode then it cannot hit anything other than the paddle and solid blocks...
+					        // NOTE: we divide the probability of entering full ghost mode (i.e., not hitting blocks) by the number of balls
+					        // because theoretically the rate of hitting blocks should increase multiplicatively with the number of balls
+					        if (this->timeSinceGhost >= GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE &&
+						        Randomizer::GetInstance()->RandomNumZeroToOne() <= 
+						        (GameModelConstants::GetInstance()->PROB_OF_GHOSTBALL_BLOCK_MISS / static_cast<float>(gameBalls.size()))) {
+    							
+						        this->timeSinceGhost = 0.0;
+						        continue;
+					        }
+				        }
+
+				        // If the piece doesnt have bounds to bounce off of then don't bounce the ball OR
+				        // In the case that the ball is uber then we only reflect if the ball is not green OR
+				        // The ball is attached to the paddle (special case)
+				        if (!currPiece->BallBouncesOffWhenHit() ||
+                           (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && 
+                           currPiece->BallBlastsThrough(*currBall))) {
+					        // Ignore collision...
+				        }
+				        else if (paddle->GetAttachedBall() == currBall) {
+                            // Ignore this, we deal with it later on in DoUpdateToPaddleBoundriesAndCollisions
+				        }
+				        else {
+					        // Make the ball react to the collision
+					        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+				        }
+    					
+                        bool currPieceCanChangeSelfOrPiecesAroundIt = currPiece->CanChangeSelfOrOtherPiecesWhenHitByBall() ||
+                                                                      currPiece->CanBeDestroyedByBall();
+
+				        // Tell the model that a ball collision occurred with currPiece
+                        this->gameModel->CollisionOccurred(*currBall, currPiece);
+                        
+                        // Recalculate the blocks we're dealing with in this loop since 
+                        // some blocks may no longer exist after a collision - of course this would only happen if the piece
+                        // that collided could be destroyed during this loop by the ball
+                        if (currPieceCanChangeSelfOrPiecesAroundIt) {
+			                collisionPieces = currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
+                                currBall->GetBounds().Radius(), currBall->GetVelocity());
+                        }
+                    }
+                }
+            }
+
+        } // All GameBalls loop
 
 	    // Move the last ball that hit the paddle to the front of the list of balls
 	    if (ballToMoveToFront != NULL) {

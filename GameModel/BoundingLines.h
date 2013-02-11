@@ -18,18 +18,16 @@
 #include "../BlammoEngine/Collision.h"
 
 class BoundingLines {
-
-private:
-	std::vector<Collision::LineSeg2D> lines;
-	std::vector<Vector2D> normals;
-
 public:
 	BoundingLines(){};
 	BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms);
+    BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms,
+        const std::vector<bool>& onInside);
     BoundingLines(const BoundingLines& copy);
 	~BoundingLines();
 
-    void AddBound(const Collision::LineSeg2D& line, const Vector2D& norm);
+    void AddBound(const Collision::LineSeg2D& line, const Vector2D& norm, bool onInside = false);
+    void AddBounds(const BoundingLines& bounds);
 
 	size_t GetNumLines() const {
 		return this->lines.size();
@@ -39,7 +37,10 @@ public:
     Collision::Circle2D GenerateCircleFromLines() const;
 
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-							 Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	    Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+	    Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision) const;
+
 	Point2D ClosestPoint(const Point2D& pt) const;
 	bool IsInside(const Point2D& pt) const;
 
@@ -81,16 +82,17 @@ public:
 	void Clear() {
 		this->lines.clear();
 		this->normals.clear();
+        this->onInside.clear();
 	}
-
-
-    void PopLastLineAndNormal() {
+    void PopLast() {
         this->lines.pop_back();
         this->normals.pop_back();
+        this->onInside.pop_back();
     }
-    void PushLineAndNormal(const Collision::LineSeg2D& line, const Vector2D& normal) {
+    void Push(const Collision::LineSeg2D& line, const Vector2D& normal, bool inside = false) {
         this->lines.push_back(line);
         this->normals.push_back(normal);
+        this->onInside.push_back(inside);
     }
 
     BoundingLines& operator=(const BoundingLines& copy);
@@ -98,5 +100,17 @@ public:
 	// Debug stuffs
 	void DebugDraw() const;
 
+private:
+	std::vector<Collision::LineSeg2D> lines;
+	std::vector<Vector2D> normals;
+    std::vector<bool> onInside;
 };
+
+inline bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+                                   Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+
+    int temp;
+    return this->Collide(dT, c, velocity, n, collisionLine, temp, timeSinceCollision);
+}
+
 #endif

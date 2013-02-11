@@ -17,6 +17,8 @@
 
 namespace Collision {
 
+    class Circle2D;
+
 	/**
 	 * 2D Axis-Aligned Bounding Box for collision detection.
 	 */
@@ -77,6 +79,7 @@ namespace Collision {
             this->AddPoint(aabb.GetMin());
         }
 
+        void AddCircle(const Circle2D& circle);
 	};
 
 	class LineSeg2D {
@@ -573,6 +576,27 @@ namespace Collision {
 			return Vector2D::Dot(closestPtOnLineSeg1 - closestPtOnLineSeg2, closestPtOnLineSeg1 - closestPtOnLineSeg2);
 	}
 
+    inline void AABB2D::AddCircle(const Circle2D& circle) {
+        float temp = circle.Center()[0] - circle.Radius();
+        if (temp < this->GetMin()[0]) {
+            this->minCoord[0] = temp;
+        }
+
+        temp = circle.Center()[0] + circle.Radius();
+        if (temp > this->GetMax()[0]) {
+            this->maxCoord[0] = temp;
+        }
+
+        temp = circle.Center()[1] - circle.Radius();
+        if (temp < this->GetMin()[1]) {
+            this->minCoord[1] = temp;
+        }
+
+        temp = circle.Center()[1] + circle.Radius();
+        if (temp > this->GetMax()[1]) {
+            this->maxCoord[1] = temp;
+        }
+    }
 };
 
 #endif

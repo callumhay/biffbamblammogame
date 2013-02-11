@@ -77,6 +77,7 @@ public:
 	}
 
 	virtual Collision::AABB2D GetAABB() const;
+    virtual bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
 	virtual bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	virtual bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
@@ -183,21 +184,32 @@ inline Collision::AABB2D LevelPiece::GetAABB() const {
                              this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 }
 
-/**
- * Check for a collision of a given circle with this block.
- * Returns: true on collision as well as the normal of the line being collided with
- * and the distance from that line of the given circle; false otherwise.
- */
-inline bool LevelPiece::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
-	// If there are no bounds to collide with or this level piece was the
-	// last one collided with then we can't collide with this piece
+inline bool LevelPiece::SecondaryCollisionCheck(double dT, const GameBall& ball) const {
+    UNUSED_PARAMETER(dT);
+
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
 	if (ball.IsLastPieceCollidedWith(this)) {
 		return false;
 	}
+    return true;
+}
 
+/**
+ * Check for a collision of a given circle with this block.
+ * Returns: true on collision as well as the normal of the line being collided with
+ * and the distance from that line of the given circle; false otherwise.
+ */
+inline bool LevelPiece::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
+                                       Collision::LineSeg2D& collisionLine,
+                                       double& timeSinceCollision) const {
+
+	// If there are no bounds to collide with or this level piece was the
+	// last one collided with then we can't collide with this piece
+    if (!this->SecondaryCollisionCheck(dT, ball)) {
+        return false;
+    }
 	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
 }
 

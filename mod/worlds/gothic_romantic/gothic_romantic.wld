@@ -11,7 +11,10 @@ resources/worlds/levels/medium/a_sticky_situation.lvl
 resources/worlds/levels/medium/falling_up.lvl
 
 
+
 # A BIT MORE FILLER HERE? (drop block, ink, bomb, collateral, one-way)
+
+resources/worlds/levels/medium/a_magnetic_personality.lvl
 
 
 # Cannon block intro levels
@@ -19,15 +22,13 @@ resources/worlds/levels/easy/shot_down.lvl
 resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
 
 
+
+#
+
 # Iceball Item
 resources/worlds/levels/medium/an_ice_way_to_go.lvl
 
-# Fireball Item
 
-
-
-
-resources/worlds/levels/medium/freezing_hot.lvl
 
 
 # No-entry blocks
@@ -36,6 +37,11 @@ resources/worlds/levels/medium/freezing_hot.lvl
 
 
 # MOVE THIS STUFF TO A LATER WORLD/MOVEMENT ---------------------
+
+# Fireball Item
+# TODO
+resources/worlds/levels/medium/freezing_hot.lvl
+
 
 # Camera Ball/Paddle intro level
 resources/worlds/levels/medium/a_change_of_view.lvl

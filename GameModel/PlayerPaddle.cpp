@@ -274,7 +274,8 @@ void PlayerPaddle::FireAttachedBall() {
     // the paddle velocity to zero
     float absPaddleSpd = fabs(avgPaddleVelDir[0]);
     if (this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal() - EPSILON) ||
-        this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal() + EPSILON)) {
+        this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal() + EPSILON) ||
+        !this->GetIsMoveButtonDown()) {
 
         avgPaddleVelDir[0] = 0.0f;
         absPaddleSpd = 0.0f;
