@@ -62,9 +62,9 @@ void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDi
 		// Move the ball so that it's outside the barrel of the cannon entirely - it will
 		// currently be perfectly centered inside the cannon, so just move it along the cannon
 		// firing vector by the correct amount...
-		const Collision::Circle2D& ballBounds = this->gameBall->GetBounds();
+		//const Collision::Circle2D& ballBounds = this->gameBall->GetBounds();
         this->gameBall->SetCenterPosition(this->cannonBlock->GetCenter() + 
-            (ballBounds.Radius() + CannonBlock::HALF_CANNON_BARREL_LENGTH) * cannonFireDir);
+            CannonBlock::HALF_CANNON_BARREL_LENGTH * cannonFireDir);
 
 		// Restore ball state information that was changed during this state's operations
 		this->gameBall->SetBallBallCollisionsEnabled();

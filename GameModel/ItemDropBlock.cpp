@@ -151,6 +151,13 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+
+			// The rocket should not destroy this block, however it certainly
+			// is allowed to destroy blocks around it!
+            assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
+			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
+            assert(resultingPiece == this);
+
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				// EVENT: Ice was shattered
 				GameEventManager::Instance()->ActionBlockIceShattered(*this);
@@ -158,6 +165,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
                 UNUSED_VARIABLE(success);
 				assert(success);
 			}
+
 			this->AttemptToDropAnItem(gameModel);
 			break;
 

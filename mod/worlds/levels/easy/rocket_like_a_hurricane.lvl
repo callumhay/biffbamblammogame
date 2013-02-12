@@ -1,0 +1,71 @@
+Rocket like a hurricane
+13 30
+S S S E E E E E E E S S S 
+S C(120-160) T(S,ur) S S S S S S S T(S,ul) C(200-240) S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E R R R R R R R E E S 
+S E E O O O O O O O E E S 
+S E E O O O O O O O E E S 
+S E E Y Y R R R Y Y E E S 
+S R O Y Y R D(RocketPaddle) R Y Y O R S 
+S R O Y Y R R R Y Y O R S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+
+STARS:
+10000
+30000
+40000
+55000
+61000
+
+PaddleGrow 0
+PoisonPaddle 3
+BallSafetyNet 0
+Blackout 3
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 3
+InvisiPaddle 3
+InvisiBall 3
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 3
+GhostBall 0
+BallShrink 3
+UpsideDown 3
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 3
+PaddleCam 0
