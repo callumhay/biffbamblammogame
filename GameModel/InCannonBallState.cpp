@@ -55,7 +55,6 @@ void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDi
 
 	if (cannonHasFired) {
 		
-
 		// Set the velocity in the direction the cannon has fired in
 		Vector2D cannonFireDir = this->cannonBlock->GetCurrentCannonDirection();
 		this->gameBall->SetVelocity(this->gameBall->GetSpeed(), cannonFireDir);
@@ -64,7 +63,8 @@ void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDi
 		// currently be perfectly centered inside the cannon, so just move it along the cannon
 		// firing vector by the correct amount...
 		const Collision::Circle2D& ballBounds = this->gameBall->GetBounds();
-		this->gameBall->SetCenterPosition(ballBounds.Center() + CannonBlock::HALF_CANNON_BARREL_LENGTH * cannonFireDir);
+        this->gameBall->SetCenterPosition(this->cannonBlock->GetCenter() + 
+            (ballBounds.Radius() + CannonBlock::HALF_CANNON_BARREL_LENGTH) * cannonFireDir);
 
 		// Restore ball state information that was changed during this state's operations
 		this->gameBall->SetBallBallCollisionsEnabled();

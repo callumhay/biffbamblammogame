@@ -306,6 +306,11 @@ bool BallBoostModel::BallBoosterPressed() {
     return ballWasBoosted;
 }
 
+void BallBoostModel::BallBoostReleasedForBall(const GameBall& ball) {
+    UNUSED_PARAMETER(ball);
+    // Do nothing. (we now handle this in the state machine)
+}
+
 /**
  * Get the total number of balls currently in play.
  */

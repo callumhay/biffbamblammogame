@@ -39,6 +39,7 @@ public:
 	void BallReleaseKeyPressed();
     void BallBoostDirectionPressed(int x, int y);
     void BallBoostDirectionReleased();
+    void BallBoostReleasedForBall(const GameBall& ball);
 
 	void Tick(double seconds);
 

@@ -53,6 +53,7 @@ public:
     void BallBoostDirectionPressed(float x, float y);
     void BallBoostDirectionReleased();
     bool BallBoosterPressed();
+    void BallBoostReleasedForBall(const GameBall& ball);
 
     float GetTimeDialationFactor() const;
     float GetInverseTimeDialation() const;

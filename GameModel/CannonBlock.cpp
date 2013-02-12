@@ -54,6 +54,8 @@ currRotationSpeed(0.0f), elapsedRotationTime(0.0), totalRotationTime(0.0) {
 }
 
 CannonBlock::~CannonBlock() {
+    this->loadedBall = NULL;
+    this->loadedProjectile = NULL;
 }
 
 // Determine whether the given projectile will pass through this block...
@@ -155,7 +157,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	this->loadedBall = &ball;
 
     // Disable any boosting for the ball
-    gameModel->BallBoostDirectionReleased();
+    gameModel->BallBoostReleasedForBall(ball);
 
 	return this;
 }

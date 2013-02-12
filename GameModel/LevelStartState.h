@@ -29,6 +29,10 @@ public:
     void Tick(double seconds) {
         UNUSED_PARAMETER(seconds);
 
+        // Reset the ball
+        this->gameModel->ClearBallsToOne();
+        this->gameModel->GetGameBalls().front()->ResetBallAttributes();
+
 	    // Reset the multiplier and the max number of blocks destroyed
 	    this->gameModel->SetNumInterimBlocksDestroyed(0);
         this->gameModel->SetMaxConsecutiveBlocksDestroyed(0);

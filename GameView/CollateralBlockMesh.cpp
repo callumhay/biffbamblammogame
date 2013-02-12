@@ -15,6 +15,22 @@
 
 CollateralBlockMesh::CollateralBlockMesh() : collateralBlockGeometry(NULL) {
 	this->LoadMesh();
+
+    std::vector<double> timeVals;
+    timeVals.reserve(3);
+    timeVals.push_back(0.0);
+    timeVals.push_back(0.5);
+    timeVals.push_back(1.0);
+
+    std::vector<float> alphaVals;
+    alphaVals.reserve(timeVals.size());
+    alphaVals.push_back(1.0f);
+    alphaVals.push_back(0.5f);
+    alphaVals.push_back(1.0f);
+
+    this->alphaFlashAnim.ClearLerp();
+    this->alphaFlashAnim.SetLerp(timeVals, alphaVals);
+    this->alphaFlashAnim.SetRepeat(true);
 }
 
 CollateralBlockMesh::~CollateralBlockMesh() {
@@ -25,7 +41,7 @@ CollateralBlockMesh::~CollateralBlockMesh() {
 }
 
 void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-                               const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
+                               const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     UNUSED_PARAMETER(dT);
 
 	float currRotation;
@@ -59,7 +75,9 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 			colour[0] = 0.5f + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5f;
 			colour[1] = Randomizer::GetInstance()->RandomNumZeroToOne();
 			colour[2] = 0.0f;
-			glColor4f(colour[0], colour[1], colour[2], 1);
+			
+            this->alphaFlashAnim.Tick(dT);
+            glColor4f(colour[0], colour[1], colour[2], this->alphaFlashAnim.GetInterpolantValue());
 		}
 		else {
 			glColor4f(1, 1, 1, 1);

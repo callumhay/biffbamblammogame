@@ -32,6 +32,7 @@ public:
 	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent);
     virtual void BallBoostDirectionPressed(int x, int y);
     virtual void BallBoostDirectionReleased();
+    virtual void BallBoostReleasedForBall(const GameBall& ball);
 
 	bool DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttachedBallCollision);
 
@@ -51,6 +52,11 @@ inline void GameState::BallBoostDirectionPressed(int x, int y) {
 }
 
 inline void GameState::BallBoostDirectionReleased() {
+    // Do nothing by default
+}
+
+inline void GameState::BallBoostReleasedForBall(const GameBall& ball) {
+    UNUSED_PARAMETER(ball);
     // Do nothing by default
 }
 

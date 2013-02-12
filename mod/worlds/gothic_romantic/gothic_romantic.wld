@@ -14,7 +14,7 @@ resources/worlds/levels/medium/falling_up.lvl
 
 # A BIT MORE FILLER HERE? (drop block, ink, bomb, collateral, one-way)
 
-resources/worlds/levels/medium/a_magnetic_personality.lvl
+
 
 
 # Cannon block intro levels
@@ -22,17 +22,37 @@ resources/worlds/levels/easy/shot_down.lvl
 resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
 
 
+# Cannon + Rocket
 
-#
 
-# Iceball Item
-resources/worlds/levels/medium/an_ice_way_to_go.lvl
 
+# MORE HERE...?
 
 
 
 # No-entry blocks
-# TODO
+resources/worlds/levels/medium/theres_more_than_one_way_to_break_a_block.lvl
+
+
+# Cannon + Rocket + No-entry blocks
+resources/worlds/levels/medium/rocketeer.lvl
+
+
+
+# Iceball Item Intro
+resources/worlds/levels/medium/an_ice_way_to_go.lvl
+
+# Fireball Item Intro (uses no-entry blocks)
+resources/worlds/levels/medium/burning_down_the_house.lvl
+
+
+
+# Magnet Item
+resources/worlds/levels/medium/a_magnetic_personality.lvl
+
+
+
+
 
 
 
@@ -51,6 +71,10 @@ resources/worlds/levels/easy/electric_access.lvl
 
 # Switch block intro levels
 # TODO
+
+# Cannon + no-entry blocks + switch + rockets
+resources/worlds/levels/hard/i_think_i_cannon.lvl
+
 
 # Prism block intro levels
 resources/worlds/levels/easy/intro_to_prisms.lvl
