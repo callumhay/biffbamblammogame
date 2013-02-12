@@ -1927,7 +1927,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 	// Add the single particle to the emitter...
 	DropShadow dpTemp;
 	dpTemp.colour = Colour(0,0,0);
-    dpTemp.amountPercentage = std::min<float>(0.15f, sizeFract*0.15f);
+    dpTemp.amountPercentage = std::min<float>(0.2f, sizeFract*0.15f);
 	ESPOnomataParticle* explodeOnoParticle = 
         new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
     explodeOnoParticle->SetDropShadow(dpTemp);
