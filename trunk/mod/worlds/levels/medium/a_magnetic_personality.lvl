@@ -1,0 +1,68 @@
+A magnetic personality
+11 27
+S S S S S S S S S S S 
+S E E E E E E E E E S 
+S G G L G L G L G G S 
+S E G G G G G G G E S 
+S G L G L G L G L G S 
+S E G G G G G G G E S 
+S G G L G L G L G G S 
+S E G G G G G G G E S 
+S G L G E E E G L G S 
+S E G G E D(MagnetPaddle) E G G E S 
+S G L G E E E G L G S 
+S E G G G G G G G E S 
+S G G L G L G L G G S 
+S E G G G G G G G E S 
+S G L G L G L G L G S 
+S E G G G G G G G E S 
+S G G L G L G L G G S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+
+STARS:
+2000
+3000
+5000
+8000
+11000
+
+PaddleGrow 0
+PoisonPaddle 0
+BallSafetyNet 0
+Blackout 0
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 3
+MultiBall3 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 0
+PaddleCam 0

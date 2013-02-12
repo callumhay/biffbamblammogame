@@ -66,6 +66,12 @@ void BallInPlayState::BallReleaseKeyPressed() {
 
 void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
     assert(this->gameModel->boostModel != NULL);
+
+    // Ignore if the ball is paused
+    if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == GameModel::PauseBall) {
+        return;
+    }
+
     if (this->gameModel->AreControlsFlipped()) {
         this->gameModel->boostModel->BallBoostDirectionPressed(-x, -y);
     }
@@ -77,6 +83,11 @@ void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
 void BallInPlayState::BallBoostDirectionReleased() {
     assert(this->gameModel->boostModel != NULL);
     this->gameModel->boostModel->BallBoostDirectionReleased();
+}
+
+void BallInPlayState::BallBoostReleasedForBall(const GameBall& ball) {
+    assert(this->gameModel->boostModel != NULL);
+    this->gameModel->boostModel->BallBoostReleasedForBall(ball);
 }
 
 /**

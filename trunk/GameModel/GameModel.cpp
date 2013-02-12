@@ -203,6 +203,10 @@ void GameModel::StartGameAtWorldAndLevel(int worldIdx, int levelIdx) {
 
 void GameModel::ResetCurrentLevel() {
     this->SetNextState(GameState::LevelStartStateType);
+    
+    this->ClearBallsToOne();
+    this->GetGameBalls().front()->ResetBallAttributes();
+    
     this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
     this->SetCurrentWorldAndLevel(this->currWorldNum, static_cast<int>(this->GetCurrentLevel()->GetLevelIndex()), false);
 }
@@ -511,6 +515,12 @@ void GameModel::BallBoostDirectionPressed(int x, int y) {
 void GameModel::BallBoostDirectionReleased() {
 	if (this->currState != NULL) {
 		this->currState->BallBoostDirectionReleased();
+	}
+}
+
+void GameModel::BallBoostReleasedForBall(const GameBall& ball) {
+	if (this->currState != NULL) {
+		this->currState->BallBoostReleasedForBall(ball);
 	}
 }
 

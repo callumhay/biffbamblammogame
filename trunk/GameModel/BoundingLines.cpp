@@ -241,8 +241,9 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
             const Collision::LineSeg2D& currLine = this->lines[lineIdx];
             const Vector2D& currNormal = this->normals[lineIdx];
 
-            float d       = Vector2D::Dot(currNormal, Vector2D(currLine.P1()[0], currLine.P1()[1]));
-            float absDist = fabs(Vector2D::Dot(currNormal, Vector2D(currSamplePt[0], currSamplePt[1])) - d);
+            float d    = Vector2D::Dot(currNormal, Vector2D(currLine.P1()[0], currLine.P1()[1]));
+            float dist = Vector2D::Dot(currNormal, Vector2D(currSamplePt[0], currSamplePt[1])) - d;
+            float absDist = fabs(dist);
 
             if (this->onInside[lineIdx]) {
                 if (absDist < smallestInsideDist) {
@@ -284,8 +285,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                     // One final check: prioritize normal areas...
                     Collision::AABB2D insideNormalArea(this->lines[insideIdx].P1(), this->lines[insideIdx].P1());
                     insideNormalArea.AddPoint(this->lines[insideIdx].P2());
-                    insideNormalArea.AddPoint(this->lines[insideIdx].P1() + this->normals[insideIdx]);
-                    insideNormalArea.AddPoint(this->lines[insideIdx].P2() + this->normals[insideIdx]);
+                    insideNormalArea.AddPoint(this->lines[insideIdx].P1() + 2*c.Radius()*this->normals[insideIdx]);
+                    insideNormalArea.AddPoint(this->lines[insideIdx].P2() + 2*c.Radius()*this->normals[insideIdx]);
 
                     if (Collision::SqDistFromPtToAABB(insideNormalArea, currSamplePt) < EPSILON) {
                         DO_ASSIGNMENT(insideIdx);
