@@ -1,6 +1,6 @@
 Meanest Rain Ever
 13 27
-E E D(powerdowns,{0}) E D(powerdowns,{1}) E D(powerdowns,{2}) E D(powerdowns,{3}) E D(powerdowns,{4}) E E 
+E E D(powerdowns){0} E D(powerdowns){1} E D(powerdowns){2} E D(powerdowns){3} E D(powerdowns){4} E E 
 S F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 

@@ -173,22 +173,29 @@ Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {
 bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
 							Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision) const {
 
+    assert(c.Radius() > 0);
 
-    static const int NUM_COLLISON_SAMPLES = 16;
+    Vector2D sampleIncDist;
+    double sampleIncTime;
+    int numCollisionSamples;
 
     bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
-    int numCollisionSamples;
+    
     if (zeroVelocity) {
         numCollisionSamples = 1;
     }
     else {
-        numCollisionSamples = NUM_COLLISON_SAMPLES;
+        // Calculate the number of samples required to make sure that the increment distance is
+        // less than or equal to the radius of the circle
+        numCollisionSamples = static_cast<int>(ceil(dT / c.Radius() * velocity.Magnitude()));
+        numCollisionSamples = std::max<int>(1, numCollisionSamples);
+        assert(numCollisionSamples < 50);
     }
     
     // Figure out the distance along the vector travelled since the last collision
     // to take each sample at...
-    Vector2D sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
-    double   sampleIncTime = dT / static_cast<double>(numCollisionSamples);
+    sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
+    sampleIncTime = dT / static_cast<double>(numCollisionSamples);
 
     Point2D currSamplePt = c.Center();
     double currTimeSinceCollision = 0.0;

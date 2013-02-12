@@ -1847,6 +1847,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 	float ballRadius = ball->GetBounds().Radius();
 	float smallSize  = 2 * ballRadius;
 	float bigSize    = 2 * smallSize;
+    float sizeFract  = ballRadius / GameBall::DEFAULT_BALL_RADIUS;
 	Point2D ballCenter = ball->GetBounds().Center();
 	Point3D emitCenter(ballCenter[0], ballCenter[1], 0.0f);
 
@@ -1912,7 +1913,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 	explodeOnoEffect->SetSpawnDelta(ESPInterval(-1));
 	explodeOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	explodeOnoEffect->SetParticleLife(ESPInterval(2.5f));
-	explodeOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
+    explodeOnoEffect->SetParticleSize(ESPInterval(sizeFract));
 	explodeOnoEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	explodeOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	explodeOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
@@ -1926,9 +1927,10 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 	// Add the single particle to the emitter...
 	DropShadow dpTemp;
 	dpTemp.colour = Colour(0,0,0);
-	dpTemp.amountPercentage = 0.15f;
-	ESPOnomataParticle* explodeOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
-	explodeOnoParticle->SetDropShadow(dpTemp);
+    dpTemp.amountPercentage = std::min<float>(0.15f, sizeFract*0.15f);
+	ESPOnomataParticle* explodeOnoParticle = 
+        new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
+    explodeOnoParticle->SetDropShadow(dpTemp);
 	explodeOnoParticle->SetOnomatoplexSound(Onomatoplex::EXPLOSION, Onomatoplex::UBER);
 	explodeOnoEffect->AddParticle(explodeOnoParticle);
 
