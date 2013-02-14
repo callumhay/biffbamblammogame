@@ -45,6 +45,7 @@ public:
 
     void BallBoostGainedEvent();
     void BallBoostLostEvent(bool allBoostsLost);
+    void BallBoostUsedEvent();
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
     void NumStarsChangedEvent(int oldNumStars, int newNumStars);
 
@@ -75,6 +76,7 @@ private:
     bool keepShowingBoostHint;
     bool multPopupHintAlreadyShown;
     bool finishedPointsHint;
+    bool hasShownBoostHint;
 
     // Tutorial hints
     ButtonTutorialHint* movePaddleHint;

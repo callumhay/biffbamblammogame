@@ -18,7 +18,7 @@
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
 finishedPointsHint(false), keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
-doBoostPressToReleaseHint(NULL), doBoostSlingshotHint(NULL), holdBoostHint(NULL),
+doBoostPressToReleaseHint(NULL), doBoostSlingshotHint(NULL), holdBoostHint(NULL), hasShownBoostHint(false),
 boostAvailableHint(NULL), fadeEffector(1, 0) {
     assert(display != NULL);
 }
@@ -108,14 +108,21 @@ void TutorialEventsListener::BallBoostGainedEvent() {
     if (boostModel->GetNumAvailableBoosts() == 1 && this->keepShowingBoostHint) {
         this->startBoostHint->Show(0.0, 0.5);
         this->boostAvailableHint->Show(0.0, 0.5);
+        this->hasShownBoostHint = true;
     }
 }
 
 void TutorialEventsListener::BallBoostLostEvent(bool allBoostsLost) {
-    this->keepShowingBoostHint = false;
+    
     if (allBoostsLost) {
         this->startBoostHint->Unshow(0.0, 0.5);
         this->boostAvailableHint->Unshow(0.0, 0.5);
+    }
+}
+
+void TutorialEventsListener::BallBoostUsedEvent() {
+    if (this->hasShownBoostHint) {
+        this->keepShowingBoostHint = false;
     }
 }
 

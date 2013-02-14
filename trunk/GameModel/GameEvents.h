@@ -329,6 +329,7 @@ public:
     virtual void BallBoostGainedEvent() {}
     // Args: allBoostsLost - true if all boosts were lost
     virtual void BallBoostLostEvent(bool allBoostsLost) { UNUSED_PARAMETER(allBoostsLost); }
+    virtual void BallBoostUsedEvent() {}
 
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same

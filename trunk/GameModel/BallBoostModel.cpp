@@ -302,6 +302,8 @@ bool BallBoostModel::BallBoosterPressed() {
 
     // EVENT: Ball Boost lost
     GameEventManager::Instance()->ActionBallBoostLost(this->numAvailableBoosts == 0);
+    // EVENT: Ball Boost was used
+    GameEventManager::Instance()->ActionBallBoostUsed();
 
     return ballWasBoosted;
 }
