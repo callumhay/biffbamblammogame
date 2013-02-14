@@ -61,13 +61,13 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
         // Figure out when to fade the points hint...
         
         // The following block indices must be empty to make the points hint disappear:
-        // row idx 14 - 15
+        // row idx 14 - 16
         // col idx 1 - 8
         const GameLevel* level = this->display->GetModel()->GetCurrentLevel();
         const std::vector<std::vector<LevelPiece*> >& levelPieces = level->GetCurrentLevelLayout();
         bool blockIndicesAllEmpty = true;
 
-        for (int row = 14; row <= 15 && blockIndicesAllEmpty; row++) {
+        for (int row = 14; row <= 16 && blockIndicesAllEmpty; row++) {
             for (int col = 1; col <= 8 && blockIndicesAllEmpty; col++) {
                 if (levelPieces[row][col]->GetType() != LevelPiece::Empty) {
                     blockIndicesAllEmpty = false;

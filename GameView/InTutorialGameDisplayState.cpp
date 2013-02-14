@@ -282,7 +282,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     // The Points hint is hidden behind the first layer of blocks and is uncovered as the level is played
     TextLabel2D pointHintTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
-        GameFontAssetsManager::Small), "The longer the ball is in play = More points"); 
+        GameFontAssetsManager::Small), "Less paddle hits = More points"); 
     pointHintTextLabel.SetColour(Colour(0.3882f, 0.72157f, 1.0f));
     pointHintTextLabel.SetDropShadow(Colour(0,0,0), 0.10f);
     
