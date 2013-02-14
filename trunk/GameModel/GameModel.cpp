@@ -195,9 +195,11 @@ void GameModel::PerformLevelCompletionChecks() {
  * given zero-based index world and level number.
  */
 void GameModel::StartGameAtWorldAndLevel(int worldIdx, int levelIdx) {
-	this->SetCurrentWorldAndLevel(worldIdx, levelIdx, true);
+	this->SetNextState(GameState::LevelStartStateType);
+    
+    this->SetCurrentWorldAndLevel(worldIdx, levelIdx, true);
     this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
-    this->SetNextState(GameState::LevelStartStateType);
+    
     this->UpdateState();
 }
 
@@ -538,25 +540,6 @@ void GameModel::SetInvertBallBoostDir(bool isInverted) {
 
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	ball.BallCollided();
-
-	Vector2D ballVel    = ball.GetVelocity();
-	Vector2D ballVelHat = Vector2D::Normalize(ballVel);
-	float ballSpd		= ball.GetSpeed(); 
-    
-	// Make sure the ball goes upwards (it can't reflect downwards off the paddle or the game would suck)
-	if (acosf(std::min<float>(1.0f, 
-        std::max<float>(-1.0f, Vector2D::Dot(ballVelHat, Vector2D(0, 1))))) > 
-        ((M_PI / 2.0f) - GameBall::MIN_BALL_ANGLE_IN_RADS)) {
-
-		// Inline: The ball either at a very sharp angle w.r.t. the paddle or it is aimed downwards
-		// even though the paddle has deflected it, adjust the angle to be suitable for the game
-		if (ballVel[0] < 0) {
-			ball.SetVelocity(ballSpd, Vector2D::Rotate(-GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(-1, 0)));
-		}
-		else {
-			ball.SetVelocity(ballSpd, Vector2D::Rotate(GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(1, 0)));
-		}
-	}
 
 	// Reset the number of blocks that have been destroyed since the last paddle hit - this will
     // also get rid of any score multiplier

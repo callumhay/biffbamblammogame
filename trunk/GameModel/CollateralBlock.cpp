@@ -17,9 +17,9 @@
 #include "Beam.h"
 
 const float CollateralBlock::COLLATERAL_FALL_SPEED	= 3.0f;
-const double CollateralBlock::WARNING_TIME_MIN			= 3.0;
-const double CollateralBlock::WARNING_TIME_MAX			= 6.0;
-const float CollateralBlock::ROTATION_SPEED					= 280.0f;
+const double CollateralBlock::WARNING_TIME_MIN		= 3.0;
+const double CollateralBlock::WARNING_TIME_MAX		= 6.0;
+const float CollateralBlock::ROTATION_SPEED			= 280.0f;
 
 CollateralBlock::CollateralBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc),
 currState(CollateralBlock::InitialState), currTimeElapsedSinceHit(0.0), timeUntilCollateralDmg(0.0),

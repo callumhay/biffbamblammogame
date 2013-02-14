@@ -1,4 +1,4 @@
-An ice way to go
+Breaking the ice
 12 26
 S S S S S S S S S D(IceBall) S S 
 S G E Y E R R R E I E S 
@@ -38,8 +38,8 @@ PaddleGrow 2
 PoisonPaddle 1
 BallSafetyNet 2
 Blackout 0
-UberBall 0
 BallGrow 2
+UberBall 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 3

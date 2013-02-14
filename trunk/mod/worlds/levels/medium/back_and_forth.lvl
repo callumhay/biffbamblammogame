@@ -1,0 +1,66 @@
+Back and Forth
+19 25
+S S S S S S S S S S S S S S S S S S S 
+S E G E G E F(l) E E E E E F(r) E G E G E S 
+S G E G E E F(l) E E E E E F(r) E E G E G S 
+S E G E G E F(l) E E C(45-315) E E F(r) E G E G E S 
+S G E G E E F(l) E E E E E F(r) E E G E G S 
+S E G E G E F(l) E E I E E F(r) E G E G E S 
+S G E G E O L O G G G O L O E G E G S 
+S E G E Y E F(l) Y G G G Y F(r) E Y E G E S 
+S G E Y E E F(l) Y Y G Y Y F(r) E E Y E G S 
+S E G E Y E F(l) Y E Y E Y F(r) E Y E G E S 
+S G E G E E S E G E G E S E E G E G S 
+S E G E G E S E E G E E S E G E G E S 
+S G E G E G F(r) E G E G E F(l) G E G E G S 
+S E G E G G F(r) E E Y E E F(l) G G E G E S 
+S G E G G G F(r) E Y E Y E F(l) G G G E G S 
+S Y Y Y Y Y S Y G G G Y S Y Y Y Y Y S 
+S E E E E E S E E E E E S E E E E E S 
+S E E I E E S E E E E E S E E I E E S 
+S E E E E E S E E E E E S E E E E E S 
+S E E E E E S E E E E E S E E E E E S 
+S E E E E E N E E E E E N E E E E E S 
+S E E E E E N E E E E E N E E E E E S 
+S E E E E E N E E E E E N E E E E E S 
+S E E E E E N E E E E E N E E E E E S 
+S E E E E E N E E E E E N E E E E E S 
+
+STARS:
+6000
+20000
+40000
+60000
+72000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 0
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 0
+MultiBall3 2
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

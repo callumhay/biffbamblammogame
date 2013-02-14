@@ -157,15 +157,12 @@ public:
     // Effect Events
     void ActionEffect(const BossEffectEventInfo& effectEvent);
 
-protected:
+private:
 	GameEventManager();
 	
 	std::list<GameEvents*> eventListeners;
-	std::list<GameEvents*>::iterator listenerIter;
 
-private:
 	static GameEventManager* instance;
-
 };
 
 #endif

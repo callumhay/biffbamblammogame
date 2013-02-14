@@ -5,15 +5,16 @@ Gothic and Romantic
 resources/textures/gothic_romantic_world_select_256x256.jpg
 
 
-# Item drop block intro levels
+# Item drop block intro level
 resources/worlds/levels/easy/running_amoc.lvl
-resources/worlds/levels/medium/a_sticky_situation.lvl
-resources/worlds/levels/medium/falling_up.lvl
 
 
-
-# A BIT MORE FILLER HERE? (drop block, ink, bomb, collateral, one-way)
+# Filler levels (drop block, ink, bomb, collateral, one-way)
 resources/worlds/levels/medium/its_a_trap.lvl
+resources/worlds/levels/medium/falling_up.lvl
+resources/worlds/levels/medium/a_sticky_situation.lvl
+
+
 
 
 # Cannon block intro levels
@@ -33,6 +34,10 @@ resources/worlds/levels/easy/rocket_like_a_hurricane.lvl
 resources/worlds/levels/medium/theres_more_than_one_way_to_break_a_block.lvl
 
 
+# Cannon + No-entry + one-way blocks
+resources/worlds/levels/medium/back_and_forth.lvl
+
+
 # Cannon + Rocket + No-entry blocks
 resources/worlds/levels/medium/rocketeer.lvl
 
@@ -41,25 +46,30 @@ resources/worlds/levels/medium/rocketeer.lvl
 # Iceball Item Intro
 resources/worlds/levels/medium/an_ice_way_to_go.lvl
 
+
+
 # Fireball Item Intro (uses no-entry blocks)
 resources/worlds/levels/medium/burning_down_the_house.lvl
 
+
+
+# Fireball and Iceball
+resources/worlds/levels/medium/freezing_hot.lvl
 
 
 # Magnet Item
 resources/worlds/levels/medium/a_magnetic_personality.lvl
 
 
-
+# Using iceball + lasers to shoot through blocks
 
 
 
 
 # MOVE THIS STUFF TO A LATER WORLD/MOVEMENT ---------------------
 
-# Fireball Item
-# TODO
-resources/worlds/levels/medium/freezing_hot.lvl
+
+
 
 
 # Camera Ball/Paddle intro level
