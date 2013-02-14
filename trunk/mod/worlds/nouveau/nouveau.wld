@@ -1,0 +1,34 @@
+Nouveau
+
+Nouveau
+
+
+# Testing
+resources/worlds/testing/see_the_background.lvl
+resources/worlds/testing/an_almost_empty_level.lvl
+
+
+# TODO: ORGANIZE THIS STUFF!!
+
+
+# Camera Ball/Paddle intro level
+resources/worlds/levels/medium/a_change_of_view.lvl
+
+# Tesla block intro levels
+resources/worlds/levels/easy/electric_access.lvl
+
+# Switch block intro levels
+# TODO
+
+# Cannon + no-entry blocks + switch + rockets
+resources/worlds/levels/hard/i_think_i_cannon.lvl
+
+
+# Prism block intro levels
+resources/worlds/levels/easy/intro_to_prisms.lvl
+
+# Portal block intro levels
+resources/worlds/levels/medium/shutin.lvl
+
+# Turret levels
+resources/worlds/levels/medium/cannon_peekaboo.lvl
