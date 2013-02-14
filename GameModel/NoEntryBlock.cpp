@@ -20,6 +20,11 @@ NoEntryBlock::NoEntryBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wL
 NoEntryBlock::~NoEntryBlock() {
 }
 
+bool NoEntryBlock::ProjectilePassesThrough(const Projectile* projectile) const {
+    UNUSED_PARAMETER(projectile);
+    return true;
+}
+
 /**
  * Get the number of points when this piece changes to the given piece.
  */
@@ -31,8 +36,6 @@ int NoEntryBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
 }
 
 LevelPiece* NoEntryBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 	    // EVENT: Ice was shattered
@@ -46,6 +49,9 @@ LevelPiece* NoEntryBlock::Destroy(GameModel* gameModel, const LevelPiece::Destru
     if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
         return this;
     }
+
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	gameModel->AddPossibleItemDrop(*this);
 
@@ -66,6 +72,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
                                 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
                                 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
                                 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
 	// Set the bounding lines for a rectangular block
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;

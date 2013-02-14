@@ -235,7 +235,7 @@ void BallInPlayState::Tick(double seconds) {
 
                     // Augment the direction of the ball in cases where the paddle 'slices' the ball...
                     // To do this we augment the normal of the collision with the paddle based on the paddle velocity
-                    static const float CUTOFF_PADDLE_AFFECT_BALL_SPD = PlayerPaddle::DEFAULT_MAX_SPEED / 3.25f;
+                    static const float CUTOFF_PADDLE_AFFECT_BALL_SPD = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
                     assert(CUTOFF_PADDLE_AFFECT_BALL_SPD < PlayerPaddle::DEFAULT_MAX_SPEED);
 
                     if (paddle->GetIsMoveButtonDown() &&
@@ -246,23 +246,18 @@ void BallInPlayState::Tick(double seconds) {
 
                         if (paddle->GetSpeed() < 0) {
                             // Paddle is moving to the left
-                            n.Rotate(NumberFuncs::Lerp<float>(CUTOFF_PADDLE_AFFECT_BALL_SPD, PlayerPaddle::DEFAULT_MAX_SPEED,
+                            n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
                                 0.0f, PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
                         }
                         else {
                             // Paddle is moving to the right
-                            n.Rotate(NumberFuncs::Lerp<float>(CUTOFF_PADDLE_AFFECT_BALL_SPD, PlayerPaddle::DEFAULT_MAX_SPEED,
+                            n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
                                 0.0f, -PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
                         }
                     }
 
 				    // Do ball-paddle collision
 				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
-
-                    // Apply an impulse to the ball based on the speed of the paddle...
-                    //float dPaddleSpd = 0.45f * fabs(paddle->GetSpeed());
-                    //currBall->ApplyImpulseForce(dPaddleSpd, (3.0f * dPaddleSpd));
-
 
 				    // Tell the model that a ball collision occurred with the paddle
 				    this->gameModel->BallPaddleCollisionOccurred(*currBall);
@@ -278,25 +273,6 @@ void BallInPlayState::Tick(double seconds) {
 				    if (gameBalls.size() > 1 && currBall != (*gameBalls.begin())) {
 					    ballToMoveToFront = currBall;
 				    }
-
-                    /*
-                    int count = 0;
-
-                    // Check to see whether the ball is hitting both a wall AND the paddle - if so the paddle should
-                    // be repelled by the opposing force of the wall against the ball...
-                    if (!paddle->UpdateForOpposingForceBallCollision(*currBall, seconds)) {
-                        if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
-				            // Make sure that the ball is no longer colliding!
-			                static Vector2D tempN;
-			                static Collision::LineSeg2D tempLine;
-			                static double tempTime;
-			                while (paddle->CollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime) && count < 5) {
-				                currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
-                                count++;
-			                }
-                        }
-                    }
-                    */
 			    }
             }
 

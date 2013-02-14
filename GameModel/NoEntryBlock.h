@@ -28,7 +28,7 @@ public:
     bool CanChangeSelfOrOtherPiecesWhenHitByBall() const { return false; }
     bool BallBlastsThrough(const GameBall& b) const { UNUSED_PARAMETER(b); return false; }
 	bool GhostballPassesThrough() const { return false; }
-    bool ProjectilePassesThrough(const Projectile* projectile) const { UNUSED_PARAMETER(projectile); return true; }
+    bool ProjectilePassesThrough(const Projectile* projectile) const;
 	bool IsLightReflectorRefractor() const {
 		// When frozen in ice a block can reflect/refract lasers and the like
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
@@ -60,7 +60,7 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 private:
-    static const int POINTS_ON_BLOCK_DESTROYED = 700;
+    static const int POINTS_ON_BLOCK_DESTROYED = 100;
 
     DISALLOW_COPY_AND_ASSIGN(NoEntryBlock);
 };
@@ -93,12 +93,7 @@ inline bool NoEntryBlock::CollisionCheck(const Collision::Ray2D& ray, float& ray
 
 inline bool NoEntryBlock::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
     UNUSED_PARAMETER(velDir);
-	if (this->IsLightReflectorRefractor()) {
-		return this->bounds.CollisionCheck(boundingLines);
-	}
-    else {
-        return false;
-    }
+	return this->bounds.CollisionCheck(boundingLines);
 }
 
 inline bool NoEntryBlock::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {
