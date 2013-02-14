@@ -4,9 +4,9 @@ E E E E S S S S S E E E E
 E E E S S E R E S S E E E 
 E S S S E E R E E S S S E 
 S S E E E R R R E E E S S 
-S E E E E R R R E E E E S 
+S E E I E R R R E I E E S 
 S Y E E R R O R R E E Y S 
-S E E E R O O O R E E E S 
+S E E E R O Y O R E E E S 
 S Y E T(R,lr) R O Y O R T(R,ll) E Y S 
 S E E R O O Y O O R E E S 
 S Y E R O Y Y Y O R E Y S 
@@ -14,10 +14,10 @@ S E E R O Y Y Y O R E E S
 S G E R O Y Y Y O R E G S 
 S E E R O Y Y Y O R E E S 
 S G E T(R,ur) R Y Y Y R T(R,ul) E G S 
-S E E E R O Y O R E E E S 
-S E E E R O Y O R E E E S 
-S E E E E R R R E E E E S 
-S E G E E E R E E E G E S 
+S G E E R O Y O R E E G S 
+S G G E R O O O R E G G S 
+S E G E E R R R E E G E S 
+S E G G E E R E E G G E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -39,8 +39,8 @@ PaddleGrow 0
 PoisonPaddle 0
 BallSafetyNet 0
 Blackout 0
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 0

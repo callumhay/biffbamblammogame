@@ -187,7 +187,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     else {
         // Calculate the number of samples required to make sure that the increment distance is
         // less than or equal to the radius of the circle
-        numCollisionSamples = static_cast<int>(ceil(dT / c.Radius() * velocity.Magnitude()));
+        numCollisionSamples = static_cast<int>(ceil(dT / (0.5f * c.Radius()) * velocity.Magnitude()));
         numCollisionSamples = std::max<int>(1, numCollisionSamples);
         assert(numCollisionSamples < 50);
     }
@@ -201,8 +201,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     double currTimeSinceCollision = 0.0;
 
     // Keep track of all the indices collided with and the collision point collided at
+    
     std::vector<size_t> collisionLineIdxs;
     collisionLineIdxs.reserve(this->GetNumLines());
+    std::vector<Point2D> closestPts;
+    closestPts.reserve(this->GetNumLines());
+    
     Point2D collisionPt;
     bool isCollision = false;
 
@@ -214,6 +218,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                                                                 this->lines[lineIdx], collisionPt);
             if (tempIsCollision) {
                 collisionLineIdxs.push_back(lineIdx);
+                closestPts.push_back(Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]));
                 isCollision = true;
             }
         }
@@ -242,26 +247,58 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         float smallestOutsideDist = FLT_MAX;
         int outsideIdx = -1;
 
+        bool hasInside = false;
         for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
-            
             int lineIdx = collisionLineIdxs[i];
-            const Collision::LineSeg2D& currLine = this->lines[lineIdx];
-            const Vector2D& currNormal = this->normals[lineIdx];
+            hasInside |= this->onInside[lineIdx];
+        }
 
-            float d    = Vector2D::Dot(currNormal, Vector2D(currLine.P1()[0], currLine.P1()[1]));
-            float dist = Vector2D::Dot(currNormal, Vector2D(currSamplePt[0], currSamplePt[1])) - d;
-            float absDist = fabs(dist);
+        assert(collisionLineIdxs.size() == closestPts.size());
 
-            if (this->onInside[lineIdx]) {
-                if (absDist < smallestInsideDist) {
-                    smallestInsideDist = absDist;
-                    insideIdx = lineIdx;
+        if (hasInside) {
+
+            for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
+                
+                int lineIdx = collisionLineIdxs[i];
+                const Collision::LineSeg2D& currLine = this->lines[lineIdx];
+                const Vector2D& currNormal = this->normals[lineIdx];
+                float d    = Vector2D::Dot(currNormal, Vector2D(currLine.P1()[0], currLine.P1()[1]));
+                float dist = Vector2D::Dot(currNormal, Vector2D(currSamplePt[0], currSamplePt[1])) - d;
+                float absDist = fabs(dist);
+
+                if (this->onInside[lineIdx]) {
+                    if (absDist < smallestInsideDist) {
+                        smallestInsideDist = absDist;
+                        insideIdx = lineIdx;
+                    }
+                }
+                else {
+                    if (absDist < smallestOutsideDist) {
+                        smallestOutsideDist = absDist;
+                        outsideIdx = lineIdx;
+                    }
                 }
             }
-            else {
-                if (absDist < smallestOutsideDist) {
-                    smallestOutsideDist = absDist;
-                    outsideIdx = lineIdx;
+
+        }
+        else {
+            for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
+                
+                int lineIdx = collisionLineIdxs[i];
+                const Point2D& closestPt = closestPts[i];
+                float sqrDist = Point2D::SqDistance(currSamplePt, closestPt);
+            
+                if (this->onInside[lineIdx]) {
+                    if (sqrDist < smallestInsideDist) {
+                        smallestInsideDist = sqrDist;
+                        insideIdx = lineIdx;
+                    }
+                }
+                else {
+                    if (sqrDist < smallestOutsideDist) {
+                        smallestOutsideDist = sqrDist;
+                        insideIdx = lineIdx;
+                    }
                 }
             }
         }
