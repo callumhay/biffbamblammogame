@@ -402,6 +402,13 @@ void GameEventManager::ActionBallBoostLost(bool allBoostsLost) {
 	}
 }
 
+void GameEventManager::ActionBallBoostUsed() {
+	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+		(*listenerIter)->BallBoostUsedEvent();
+	}
+}
+
 // Action for when the release timer starts up
 void GameEventManager::ActionReleaseTimerStarted() {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

@@ -106,6 +106,7 @@ public:
     void ActionBallBoostExecuted(const BallBoostModel& boostModel);
     void ActionBallBoostGained();
     void ActionBallBoostLost(bool allBoostsLost);
+    void ActionBallBoostUsed();
 
     void ActionReleaseTimerStarted();
 
