@@ -134,6 +134,7 @@ public:
     const char* TEXTURE_BOSS_ICON;
     const char* TEXTURE_PADLOCK;
     const char* TEXTURE_PLUS;
+    const char* TEXTURE_CHEVRON;
 
     const char* TEXTURE_EXPLOSION_ANIMATION;
 

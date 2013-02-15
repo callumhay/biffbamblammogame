@@ -95,9 +95,11 @@ double BallSpeedItem::Activate() {
 	    switch (this->spdType) {
 		    case FastBall:
 			    affectedBall->IncreaseSpeed();
+                affectedBall->AddBallType(GameBall::FastBall);
 			    break;
 		    case SlowBall:
 			    affectedBall->DecreaseSpeed();
+                affectedBall->AddBallType(GameBall::SlowBall);
 			    break;
 		    default:
 			    assert(false);
@@ -118,13 +120,16 @@ void BallSpeedItem::Deactivate() {
 	}
 
 	// Shut off the item for each of the balls
+    GameBall::BallType removeType = this->spdType == FastBall ? GameBall::FastBall : GameBall::SlowBall;
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
+	
+    for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		assert(currBall != NULL);
         currBall->TurnOffBoost();
         currBall->TurnOffImpulse();
 		currBall->SetSpeed(GameBall::GetNormalSpeed());
+        currBall->RemoveBallType(removeType);
 	}
 
 	this->isActive = false;
