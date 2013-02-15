@@ -81,6 +81,8 @@ private:
 	ESPParticleColourEffector particleFaderUberballTrail;
 	ESPParticleColourEffector particleGravityArrowColour;
     ESPParticleColourEffector flashColourFader;
+    ESPParticleColourEffector slowBallColourFader;
+    ESPParticleColourEffector fastBallColourFader;
 
 	ESPParticleScaleEffector  particlePulseUberballAura;
 	ESPParticleScaleEffector  particlePulseItemDropAura;
@@ -146,6 +148,7 @@ private:
 	Texture2D* cloudTex;
     Texture2D* vapourTrailTex;
     Texture2D* heartTex;
+    Texture2D* chevronTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -203,6 +206,8 @@ private:
 	void AddIceBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddGravityBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
+    void AddSlowBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
+    void AddFastBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 
@@ -340,6 +345,8 @@ public:
 	void DrawIceBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir);
 	void DrawCrazyBallEffects(double dT, const Camera& camera, const GameBall& ball);
+    void DrawSlowBallEffects(double dT, const Camera& camera, const GameBall& ball);
+    void DrawFastBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	

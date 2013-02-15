@@ -67,6 +67,8 @@ particleSuperGrowth(1.0f, 5.0f),
 particleMediumShrink(1.0f, 0.25f),
 particleLargeVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 4.0f)),
 beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameViewConstants::GetInstance()->LASER_BEAM_COLOUR, 0.8f)),
+slowBallColourFader(ColourRGBA(0.12f, 0.72f, 0.94f, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.15f)),
+fastBallColourFader(ColourRGBA(0.95f, 0.0f, 0.0f, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.15f)),
 
 ghostBallAccel1(Vector3D(1,1,1)),
 fireBallAccel1(Vector3D(1,1,1)),
@@ -113,7 +115,8 @@ sphereNormalsTex(NULL),
 //rectPrismTexture(NULL),
 cloudTex(NULL),
 vapourTrailTex(NULL),
-heartTex(NULL) {
+heartTex(NULL),
+chevronTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -226,6 +229,8 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->vapourTrailTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->heartTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->chevronTex);
     assert(removed);
 
 	// Delete any standalone effects
@@ -674,6 +679,10 @@ void GameESPAssets::InitESPTextures() {
     if (this->heartTex == NULL) {
         this->heartTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HEART, Texture::Trilinear));
         assert(this->heartTex != NULL);
+    }
+    if (this->chevronTex == NULL) {
+        this->chevronTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CHEVRON, Texture::Trilinear));
+        assert(this->chevronTex != NULL);
     }
 
 	debug_opengl_state();
@@ -4841,6 +4850,71 @@ void GameESPAssets::AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESP
 
 }
 
+void GameESPAssets::AddSlowBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList) {
+    static const int NUM_CHEVRONS = 8;
+    static const float LIFE_TIME  = 0.75f;
+    static const float SPAWN_DELTA = LIFE_TIME / static_cast<float>(NUM_CHEVRONS);
+
+    ESPPointEmitter* slowBallAura = new ESPPointEmitter();
+	slowBallAura->SetSpawnDelta(ESPInterval(-1));
+	slowBallAura->SetInitialSpd(ESPInterval(0));
+	slowBallAura->SetParticleLife(ESPInterval(-1));
+	slowBallAura->SetParticleSize(ESPInterval(1.5f));
+	slowBallAura->SetEmitAngleInDegrees(0);
+	slowBallAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	slowBallAura->SetParticleAlignment(ESP::ScreenAligned);
+	slowBallAura->SetEmitPosition(Point3D(0, 0, 0));
+	slowBallAura->SetParticleColour(ESPInterval(0.12f), ESPInterval(0.8f), ESPInterval(0.94f), ESPInterval(0.75f));
+	slowBallAura->SetParticles(1, this->circleGradientTex);
+
+	ESPPointEmitter* slowChevrons = new ESPPointEmitter();
+	slowChevrons->SetSpawnDelta(ESPInterval(SPAWN_DELTA));
+	slowChevrons->SetParticleLife(ESPInterval(LIFE_TIME));
+    slowChevrons->SetInitialSpd(ESPInterval(2.0f * ball->GetBounds().Radius() * 4.0f));
+	slowChevrons->SetParticleSize(ESPInterval(2 * ball->GetBounds().Radius()), ESPInterval(ball->GetBounds().Radius()));
+	slowChevrons->SetParticleColour(ESPInterval(0.12f), ESPInterval(0.72f), ESPInterval(0.94f), ESPInterval(1.0f));
+	slowChevrons->SetEmitPosition(Point3D(0,0,0));
+    slowChevrons->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+	slowChevrons->AddEffector(&this->slowBallColourFader);
+	slowChevrons->SetParticles(NUM_CHEVRONS, this->chevronTex);
+
+    effectsList.push_back(slowBallAura);
+	effectsList.push_back(slowChevrons);
+}
+
+void GameESPAssets::AddFastBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList) {
+    static const int NUM_CHEVRONS = 9;
+    static const float LIFE_TIME  = 0.45f;
+    static const float SPAWN_DELTA = LIFE_TIME / static_cast<float>(NUM_CHEVRONS);
+
+    ESPPointEmitter* fastBallAura = new ESPPointEmitter();
+	fastBallAura->SetSpawnDelta(ESPInterval(-1));
+	fastBallAura->SetInitialSpd(ESPInterval(0));
+	fastBallAura->SetParticleLife(ESPInterval(-1));
+	fastBallAura->SetParticleSize(ESPInterval(1.5f));
+	fastBallAura->SetEmitAngleInDegrees(0);
+	fastBallAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	fastBallAura->SetParticleAlignment(ESP::ScreenAligned);
+	fastBallAura->SetEmitPosition(Point3D(0, 0, 0));
+	fastBallAura->SetParticleColour(ESPInterval(0.95f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(0.75f));
+	fastBallAura->SetParticles(1, this->circleGradientTex);
+
+	ESPPointEmitter* fastChevrons = new ESPPointEmitter();
+	fastChevrons->SetSpawnDelta(ESPInterval(SPAWN_DELTA));
+	fastChevrons->SetParticleLife(ESPInterval(LIFE_TIME));
+    fastChevrons->SetInitialSpd(ESPInterval(2.0f * ball->GetBounds().Radius() * 6.0f));
+	fastChevrons->SetParticleSize(ESPInterval(2 * ball->GetBounds().Radius()), ESPInterval(ball->GetBounds().Radius()));
+	fastChevrons->SetParticleColour(ESPInterval(0.95f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+	fastChevrons->SetEmitPosition(Point3D(0,0,0));
+    //fastChevrons->SetIsReversed(true);
+    fastChevrons->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+	fastChevrons->AddEffector(&this->fastBallColourFader);
+	fastChevrons->SetParticles(NUM_CHEVRONS, this->chevronTex);
+
+    effectsList.push_back(fastBallAura);
+	effectsList.push_back(fastChevrons);
+}
+
 /**
  * Add the effect for when the player acquires a 1UP power-up.
  */
@@ -4901,6 +4975,7 @@ void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
  * Adds an effect based on the given game item being activated or deactivated.
  */
 void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameModel) {
+
 	switch(item.GetItemType()) {
 
 		case GameItem::UberBallItem: {
@@ -4940,6 +5015,29 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 			}
 			break;
 
+        case GameItem::BallSlowDownItem:
+        case GameItem::BallSpeedUpItem: {
+
+				// If there are any effects assigned we need to reset the trail
+				const GameBall* ballAffected = item.GetBallAffected();
+				assert(ballAffected != NULL);
+				
+                std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+                    this->ballEffects.find(ballAffected);
+
+				if (foundBallEffects != this->ballEffects.end()) {
+					std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator foundFX = foundBallEffects->second.find(item.GetItemType());
+					if (foundFX != foundBallEffects->second.end()) {
+						std::vector<ESPPointEmitter*>& emitters = foundFX->second;
+						for (std::vector<ESPPointEmitter*>::iterator iter = emitters.begin(); iter != emitters.end(); ++iter) {
+							ESPPointEmitter* currEmitter = *iter;
+							currEmitter->Reset();
+						}	
+					}
+				}
+
+            break;
+        }
 
 		case GameItem::LaserBulletPaddleItem: {
 				this->paddleLaserGlowAura->Reset();
@@ -5284,7 +5382,9 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 	const Point2D& loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
-	for (std::vector<ESPPointEmitter*>::iterator iter = gravityBallEffectList.begin(); iter != gravityBallEffectList.end(); ++iter) {
+	for (std::vector<ESPPointEmitter*>::iterator iter = gravityBallEffectList.begin();
+         iter != gravityBallEffectList.end(); ++iter) {
+
 		ESPPointEmitter* emitter = *iter;
 
 		// If the gravity direction is changing then reset it - we reset the emitter so the
@@ -5331,13 +5431,96 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 	this->crazyBallAura->Draw(camera);
 	glPopMatrix();
 
-	for (std::vector<ESPPointEmitter*>::iterator iter = crazyBallEffectList.begin(); iter != crazyBallEffectList.end(); ++iter) {
+	for (std::vector<ESPPointEmitter*>::iterator iter = crazyBallEffectList.begin();
+         iter != crazyBallEffectList.end(); ++iter) {
+
 		ESPPointEmitter* emitter = *iter;
 		emitter->SetEmitPosition(ball.GetCenterPosition());
 		emitter->SetEmitDirection(-Vector3D(ball.GetDirection()));
 		emitter->Tick(dT);
 		emitter->Draw(camera);
 	}
+}
+
+void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	// Check to see if the ball has any associated slow ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
+
+    if (foundBallEffects->second.find(GameItem::BallSlowDownItem) == foundBallEffects->second.end()) {
+		// Didn't find an associated slow ball effects, so add them
+		this->AddSlowBallESPEffects(&ball, this->ballEffects[&ball][GameItem::BallSlowDownItem]);
+	}
+
+	std::vector<ESPPointEmitter*>& slowBallEffectList = this->ballEffects[&ball][GameItem::BallSlowDownItem];
+
+	const Point2D& loc = ball.GetBounds().Center();
+    Vector3D negBallDir = -Vector3D(ball.GetDirection());
+
+	glPushMatrix();
+	glTranslatef(loc[0], loc[1], 0);
+
+    // Draw the aura
+	slowBallEffectList[0]->SetParticleSize(ESPInterval(3.75f * ball.GetBounds().Radius()));
+	slowBallEffectList[0]->Draw(camera);
+	slowBallEffectList[0]->Tick(dT);
+
+	// Draw the tail...
+    // Reset the tail emitter when the direction of the ball changes
+    if (negBallDir != slowBallEffectList[1]->GetEmitDirection()) {
+        slowBallEffectList[1]->Reset();
+    }
+
+
+    slowBallEffectList[1]->SetEmitPosition(Point3D(0,0,0) + 0.9f * ball.GetBounds().Radius() * negBallDir);
+    slowBallEffectList[1]->SetInitialSpd(ESPInterval(2.0f * ball.GetBounds().Radius() * 3.0f));
+    slowBallEffectList[1]->SetEmitDirection(negBallDir);
+	slowBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
+	slowBallEffectList[1]->Draw(camera);
+	slowBallEffectList[1]->Tick(dT);
+
+    glPopMatrix();
+}
+
+void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+    // Check to see if the ball has any associated fast ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
+
+    if (foundBallEffects->second.find(GameItem::BallSpeedUpItem) == foundBallEffects->second.end()) {
+		// Didn't find an associated fast ball effects, so add them
+		this->AddFastBallESPEffects(&ball, this->ballEffects[&ball][GameItem::BallSpeedUpItem]);
+	}
+
+	std::vector<ESPPointEmitter*>& fastBallEffectList = this->ballEffects[&ball][GameItem::BallSpeedUpItem];
+
+	const Point2D& loc = ball.GetBounds().Center();
+    Vector3D ballDir = Vector3D(ball.GetDirection());
+
+	glPushMatrix();
+	glTranslatef(loc[0], loc[1], 0);
+
+    // Draw the aura
+	fastBallEffectList[0]->SetParticleSize(ESPInterval(3.5f * ball.GetBounds().Radius()));
+	fastBallEffectList[0]->Draw(camera);
+	fastBallEffectList[0]->Tick(dT);
+
+	// Draw the tail...
+    // Reset the tail emitter when the direction of the ball changes
+    if (ballDir != fastBallEffectList[1]->GetEmitDirection()) {
+        fastBallEffectList[1]->Reset();
+    }
+
+    fastBallEffectList[1]->SetEmitPosition(Point3D(0,0,0) + 0.9f * ball.GetBounds().Radius() * ballDir);
+    fastBallEffectList[1]->SetInitialSpd(ESPInterval(2.0f * ball.GetBounds().Radius() * 6.0f));
+    fastBallEffectList[1]->SetEmitDirection(ballDir);
+	fastBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
+	fastBallEffectList[1]->Draw(camera);
+	fastBallEffectList[1]->Tick(dT);
+
+    glPopMatrix();
 }
 
 /**

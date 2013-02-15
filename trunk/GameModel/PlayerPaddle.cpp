@@ -33,7 +33,7 @@ const Vector2D PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR(0, 1);
 const Vector2D PlayerPaddle::DEFAULT_PADDLE_RIGHT_VECTOR(1, 0);
 
 // The difference in width per size change of the paddle
-const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.65f;
+const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.7f;
 
 // Number of seconds it takes for the paddle to change between sizes
 // (bigger is slower, smaller is faster)

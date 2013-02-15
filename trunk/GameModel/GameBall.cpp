@@ -35,7 +35,7 @@ const float GameBall::MIN_BALL_ANGLE_IN_RADS = Trig::degreesToRadians(MIN_BALL_A
 
 // Ball size change related constants
 const float GameBall::SECONDS_TO_CHANGE_SIZE = 0.5f;	
-const float GameBall::RADIUS_DIFF_PER_SIZE	 = GameBall::DEFAULT_BALL_RADIUS / 3.7f;
+const float GameBall::RADIUS_DIFF_PER_SIZE	 = GameBall::DEFAULT_BALL_RADIUS / 3.6f;
 
 // Maximum rotation speed of the ball
 const float GameBall::MAX_ROATATION_SPEED	= 70;
