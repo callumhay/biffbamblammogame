@@ -48,8 +48,6 @@ CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc,
 rotationInterval(rotationInterval), loadedBall(NULL), loadedProjectile(NULL), currRotationFromXInDegs(0.0f),
 currRotationSpeed(0.0f), elapsedRotationTime(0.0), totalRotationTime(0.0) {
     
-	assert(rotationInterval.first >= 0 && rotationInterval.first <= 359);
-    assert(rotationInterval.second >= 0 && rotationInterval.second <= 359);
     assert(rotationInterval.first <= rotationInterval.second);
 }
 
@@ -286,12 +284,13 @@ void CannonBlock::SetupCannonFireTimeAndDirection() {
         // Pick the random angle...
         rotationAngleToFireAt = this->rotationInterval.first + Randomizer::GetInstance()->RandomNumZeroToOne() * 
             abs(this->rotationInterval.second - this->rotationInterval.first);
+        rotationAngleToFireAt = fmod(rotationAngleToFireAt, 360.0f);
         rotationAngleToFireAt = 90.0f - rotationAngleToFireAt;
 	}
 	else {
 		// We need to actually fire in a proper direction dictated by the degree angle in 'fixedRotation',
 		// which measures from the y-axis from 0 to 359 degrees
-        rotationAngleToFireAt = this->GetFixedRotationDegsFromX();
+        rotationAngleToFireAt = fmod(this->GetFixedRotationDegsFromX(), 360.0f);
     }
 
 	// Pick a random rotation time (this will dictate all other values)

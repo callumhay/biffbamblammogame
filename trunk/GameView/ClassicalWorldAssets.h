@@ -38,7 +38,7 @@ public:
 private:
     Texture2D* cloudTex;
 
-    CgFxVolumetricEffect fireEffect1, fireEffect2;
+    CgFxVolumetricEffect fireEffect;
     ESPPointEmitter fireEmitter1, fireEmitter2;
 
     ESPParticleAccelEffector fireAccel1, fireAccel2;
@@ -68,6 +68,8 @@ inline void ClassicalWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 }
 
 inline void ClassicalWorldAssets::Tick(double dT) {
+    GameWorldAssets::Tick(dT);
+
     static const float CONE_SIZE_IN_DEGREES = 10.0f;
     static const float ACCEL_MAG = 12.0f;
 	
@@ -83,19 +85,11 @@ inline void ClassicalWorldAssets::Tick(double dT) {
 
     // Tick the emitters
     float alpha = this->bgFadeAnim.GetInterpolantValue();
-    
+    this->fireEffect.SetAlphaMultiplier(alpha);
     this->fireEmitter1.SetParticleAlpha(ESPInterval(alpha));
     this->fireEmitter1.Tick(dT);
     this->fireEmitter2.SetParticleAlpha(ESPInterval(alpha));
-    this->fireEmitter2.Tick(dT);
-
-    //for (int i = 0; i < static_cast<int>(this->smokeEmitters1.size()); i++) {
-    //    ESPPointEmitter* emitter = this->smokeEmitters1[i];
-    //    emitter->SetParticleAlpha(alpha);
-    //    emitter->Tick(dT);
-    //}
-
-    GameWorldAssets::Tick(dT);
+    this->fireEmitter2.Tick(dT);   
 }
 
 #endif // __CLASSICALWORLDASSETS_H__

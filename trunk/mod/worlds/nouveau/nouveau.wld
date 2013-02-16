@@ -11,6 +11,9 @@ resources/worlds/testing/an_almost_empty_level.lvl
 # TODO: ORGANIZE THIS STUFF!!
 
 
+# Magnet Item
+resources/worlds/levels/medium/a_magnetic_personality.lvl
+
 # Camera Ball/Paddle intro level
 resources/worlds/levels/medium/a_change_of_view.lvl
 

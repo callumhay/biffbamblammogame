@@ -42,8 +42,8 @@ PaddleGrow 1
 PoisonPaddle 0
 BallSafetyNet 1
 Blackout 1
-BallGrow 0
 UberBall 0
+BallGrow 0
 StickyPaddle 1
 ShieldPaddle 2
 LaserBulletPaddle 1
@@ -59,7 +59,7 @@ BallShrink 1
 UpsideDown 3
 MultiBall5 1
 BallCam 0
-MagnetPaddle 1
+MagnetPaddle 0
 MultiBall3 1
 IceBall 0
 MineLauncherPaddle 0

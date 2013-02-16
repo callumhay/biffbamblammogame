@@ -1801,6 +1801,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameModel\AlwaysDropBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\BombBlock.h"
 						>
 					</File>
@@ -1884,6 +1888,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\GameModel\AlwaysDropBlock.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\GameModel\BombBlock.cpp"
 						>

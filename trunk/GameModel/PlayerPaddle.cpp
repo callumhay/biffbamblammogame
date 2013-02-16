@@ -476,7 +476,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
         }
     }
     if (this->levelBoundsCheckingOn) {
-	    if (minNewXPos - EPSILON <= this->minBound) {
+	    if (minNewXPos < this->minBound) {
 		    // The paddle bumped into the left wall
 		    this->centerPos[0] = this->minBound + halfWidthTotalWithAttachedMin;
     		
@@ -496,7 +496,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 
 		    this->hitWall = true;
 	    }
-	    else if (maxNewXPos + EPSILON > this->maxBound) {
+	    else if (maxNewXPos > this->maxBound) {
 		    // The paddle bumped into the right wall
 		    this->centerPos[0] = this->maxBound - halfWidthTotalWithAttachedMax;
     		
@@ -754,10 +754,11 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 
     // If the ball is directly below the paddle then we don't attach it
     const Point2D& ballCenter = ball->GetBounds().Center();
-    if (ballCenter[0] <= this->GetCenterPosition()[0] + this->GetHalfWidthTotal() &&
-        ballCenter[0] >= this->GetCenterPosition()[0] - this->GetHalfDepthTotal()) {
+    float ballRadius = ball->GetBounds().Radius();
+    if (ballCenter[0] - ballRadius <= this->GetCenterPosition()[0] + this->GetHalfWidthTotal() &&
+        ballCenter[0] + ballRadius >= this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) {
 
-        if (ballCenter[1] <= this->GetCenterPosition()[1] - 0.8f*this->GetHalfHeight()) {
+        if ((ballCenter[1] - 0.5f * ballRadius) <= (this->GetCenterPosition()[1] - this->GetHalfHeight())) {
             return false;
         }
     }
@@ -771,12 +772,11 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	Vector2D normal;
 	Collision::LineSeg2D collisionLine;
 	double timeSinceCollision;
-	bool onPaddle = this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeSinceCollision);
-	if (onPaddle) {
-		// Position the ball so that it is against the collision line
-		const Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
-		//this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * - this->attachedBall->GetDirection());
-		this->attachedBall->SetCenterPosition(ballBounds.Center() + (EPSILON + timeSinceCollision) * -this->attachedBall->GetVelocity());
+	
+	if (this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeSinceCollision)) {
+		// Position the ball so that it is against the collision line, perpendicular to its normal
+        Point2D closestPtOnCollisionLine = Collision::ClosestPoint(ballCenter, collisionLine);
+		this->attachedBall->SetCenterPosition(closestPtOnCollisionLine + (EPSILON + ballRadius) * normal);
 	}
 
 	// Remove the ball's direction but not its speed
@@ -1072,14 +1072,12 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
         float xDistFromBallEdgeToPaddleEdge = (this->GetCenterPosition()[0] + this->GetHalfWidthTotal()) - 
             (this->GetAttachedBall()->GetCenterPosition2D()[0] + this->GetAttachedBall()->GetBounds().Radius());
         
-
 		this->maxBound = p.GetAABB().GetMin()[0] + xDistFromBallEdgeToPaddleEdge;
     }
     else {
         float xDistFromBallEdgeToPaddleEdge = std::min(0.0f, (this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) - 
             (this->GetAttachedBall()->GetCenterPosition2D()[0] - this->GetAttachedBall()->GetBounds().Radius()));
         
-
         this->minBound = p.GetAABB().GetMax()[0] + xDistFromBallEdgeToPaddleEdge;
     }
 }

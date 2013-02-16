@@ -25,7 +25,7 @@ const double WorldStartDisplayState::FOOTER_FLASH_TIME					= 0.5;		// Time to sw
 const float  WorldStartDisplayState::HEADER_WIPE_FADE_QUAD_SIZE = 110.0f;	// Size of the gradient quad used to wipe in the header
 
 WorldStartDisplayState::WorldStartDisplayState(GameDisplay* display) : DisplayState(display),
-waitingForKeyPress(false), starryBG(NULL),
+waitingForKeyPress(false), starryBG(NULL), lineThicknessInPixels(1.0f),
 worldNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Huge), ""),
 nowEnteringLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Now Entering..."),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "- Press Any Key to Continue -"){
@@ -96,7 +96,9 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
 
 	// Make sure we dont' exceed the limits of OpenGL line widths
-	glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, this->minMaxLineWidth);
+    float minMaxLineWidth[2];
+	glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, minMaxLineWidth);
+    this->lineThicknessInPixels = std::min<float>(minMaxLineWidth[1], std::max<float>(minMaxLineWidth[0], 4.0f)); 
 }
 
 WorldStartDisplayState::~WorldStartDisplayState() {
@@ -214,8 +216,7 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 	// Draw a line that goes from the end of the label to the other side of the screen
 	glTranslatef(HORIZONTAL_PADDING + nowEnteringTextWidth + NOW_ENTERING_TO_LINE_PADDING, screenHeight - (nowEnteringTextHeight + VERTICAL_PADDING), 0.0f);
 
-	float lineThicknessInPixels = std::min<float>(this->minMaxLineWidth[1], std::max<float>(this->minMaxLineWidth[0], 0.1f * nowEnteringTextHeight)); 
-	glLineWidth(lineThicknessInPixels);
+	glLineWidth(this->lineThicknessInPixels);
 
 	float dropShadowPercent = 2.0f * this->nowEnteringLabel.GetDropShadow().amountPercentage;
 	const ColourRGBA& labelColour = this->nowEnteringLabel.GetColour();

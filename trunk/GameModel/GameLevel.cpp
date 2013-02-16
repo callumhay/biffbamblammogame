@@ -326,8 +326,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 						int rotationValue1 = 0;
 						int rotationValue2 = 0;
                         *inFile >> rotationValue1;
-						if (rotationValue1 != -1 && (rotationValue1 < 0 || rotationValue1 > 359)) {
-							debug_output("ERROR: poorly formed cannon block syntax, degree angle must either be -1 or in [0,359]");
+						if (rotationValue1 != -1 && (rotationValue1 < 0 || rotationValue1 > 720)) {
+							debug_output("ERROR: poorly formed cannon block syntax, first degree angle must either be -1 or in [0,720]");
 							break;
 						}
 
@@ -347,8 +347,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 						    *inFile >> tempChar;
 						    if (tempChar == '-') {
                                 *inFile >> rotationValue2;
-						        if (rotationValue2 != -1 && (rotationValue2 < 0 || rotationValue2 > 359)) {
-							        debug_output("ERROR: poorly formed cannon block syntax, degree angle must either be -1 or in [0,359]");
+						        if (rotationValue2 != -1 && (rotationValue2 < 0 || rotationValue2 > 720)) {
+							        debug_output("ERROR: poorly formed cannon block syntax, second degree angle must either be -1 or in [0,720]");
 							        break;
 						        }
 

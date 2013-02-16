@@ -23,8 +23,11 @@ resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
 # Cannon + Rocket
 resources/worlds/levels/easy/rocket_like_a_hurricane.lvl
 
+
 # No-entry blocks
+resources/worlds/levels/easy/access_denied.lvl
 resources/worlds/levels/medium/theres_more_than_one_way_to_break_a_block.lvl
+resources/worlds/levels/hard/balancing_act.lvl
 
 
 # Cannon + No-entry + one-way blocks
@@ -33,7 +36,6 @@ resources/worlds/levels/medium/back_and_forth.lvl
 
 # Cannon + Rocket + No-entry blocks
 resources/worlds/levels/medium/rocketeer.lvl
-
 
 
 # Iceball Item Intro
@@ -47,22 +49,14 @@ resources/worlds/levels/medium/burning_down_the_house.lvl
 # Fireball and Iceball
 resources/worlds/levels/medium/freezing_hot.lvl
 
-
-# Magnet Item
-resources/worlds/levels/medium/a_magnetic_personality.lvl
-
-
 # Using iceball + lasers to shoot through blocks
 resources/worlds/levels/medium/an_ice_way_to_go.lvl
 
 
 
-# TODO: 3 more levels here
-
-
+# TODO: 2 more levels here
 resources/worlds/levels/medium/all_of_the_above.lvl
 
 
 # Boss
 #resources/worlds/levels/bosses/itemmancer.lvl
-

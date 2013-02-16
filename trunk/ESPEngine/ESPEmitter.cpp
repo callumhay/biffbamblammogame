@@ -549,7 +549,9 @@ void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& gr
 void ESPEmitter::SetParticleAlpha(const ESPInterval& alpha) {
 	this->particleAlpha.CopyFromInterval(alpha);
 	// Go through any already assigned particles and set the alpha...
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+         iter != this->aliveParticles.end(); ++iter) {
+
 		ESPParticle* currParticle = *iter;
 		currParticle->SetAlpha(alpha.RandomValueInInterval());
 	}

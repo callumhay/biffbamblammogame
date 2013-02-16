@@ -1,26 +1,26 @@
-Upward, not Forward, and Always Twirling
+Access Denied
 13 30
 S S S S S S S S S S S S S 
 S E E E E E E E E E E E S 
-S G E G E G E G E G E G S 
-S E G E G E G E G E G E S 
-S G E F(u) F(r) E E G I G E G S 
-S E Y C(0-90) F(r) E G E G E G E S 
-S G E Y E G E G E G E G S 
+S E E E E E E E E E E E S 
+S E G G G E E E G G G E S 
+S E Y Y Y E E E Y Y Y E S 
+S E O O O E E E O O O E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
-S G E G E G E G E E E G S 
-S E G E G E G E E E G E S 
-S G E G E G E E F(l) F(u) E G S 
-S E G E G E G E F(l) C(135-360) O E S 
-S G E G E G E G E O E G S 
-S E E E E E E E E E E E S 
-S E I B E E E E E B I E S 
-S E E E E E E E E E E E S 
-S G E F(u) E G E G E G E G S 
-S E R C(0) R E G E G E G E S 
-S G E R E G E G E G E G S 
-S E E E E E E E E E E E S 
+S S N N N S D(LaserBulletPaddle,LaserBeamPaddle,RocketPaddle) S N N N S S 
+S G E E E R R R E E E G S 
+S G E E E R B R E E E G S 
+S G E E E O O O E E E G S 
+S G E E E Y Y Y E E E G S 
+S G E E E Y Y Y E E E G S 
+S Y E I E Y Y Y E I E Y S 
+S Y E E E G G G E E E Y S 
+S Y E E E G G G E E E Y S 
+S O E E E G G G E E E O S 
+S O E E E G G G E E E O S 
+S R E E E G G G E E E R S 
+S G G G G G G G G G G G S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -32,11 +32,11 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-5000
-10000
-13500
-16500
-19000
+4000
+8000
+12000
+15000
+17000
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -54,7 +54,7 @@ LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 0
 RocketPaddle 2
-GhostBall 0
+GhostBall 2
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
