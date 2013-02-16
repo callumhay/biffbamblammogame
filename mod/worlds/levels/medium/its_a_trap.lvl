@@ -1,5 +1,5 @@
 It's a trap!
-15 28
+15 30
 S S S S S D(BallShrink,FastBall,Blackout,InvisiBall,PaddleShrink,InvisiPaddle,PoisonPaddle,UpsideDown) S D(BallShrink,FastBall,Blackout,InvisiBall,PaddleShrink,InvisiPaddle,PoisonPaddle,UpsideDown) S D(BallShrink,FastBall,Blackout,InvisiBall,PaddleShrink,InvisiPaddle,PoisonPaddle,UpsideDown) S S S S S 
 S E E E E E E E E E E E E E S 
 S E I E E E E E E E E E I E S 
@@ -20,6 +20,8 @@ S E Y E O E O E O E O E Y E S
 S G E B E Y E Y E Y E B E G S 
 S E Y E Y E Y E Y E Y E Y E S 
 S G E Y E Y E Y E Y E Y E G S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 

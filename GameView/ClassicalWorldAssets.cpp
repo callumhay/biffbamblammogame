@@ -89,19 +89,12 @@ void ClassicalWorldAssets::InitializeEmitters() {
     static const float FLAME_FREQ = 0.25f;
     static const float FLAME_SCALE = 0.33f;
 
-	this->fireEffect1.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
-	this->fireEffect1.SetColour(Colour(1.0f, 1.0f, 1.0f));
-	this->fireEffect1.SetScale(FLAME_SCALE);
-	this->fireEffect1.SetFrequency(FLAME_FREQ);
-	this->fireEffect1.SetFlowDirection(Vector3D(0, 0, 1));
-	this->fireEffect1.SetMaskTexture(this->cloudTex);
-
-	this->fireEffect2.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
-	this->fireEffect2.SetColour(Colour(1.0f, 1.0f, 1.0f));
-	this->fireEffect2.SetScale(FLAME_SCALE);
-	this->fireEffect2.SetFrequency(FLAME_FREQ);
-	this->fireEffect2.SetFlowDirection(Vector3D(0, 0, 1));
-	this->fireEffect2.SetMaskTexture(this->cloudTex);
+	this->fireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
+	this->fireEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
+	this->fireEffect.SetScale(FLAME_SCALE);
+	this->fireEffect.SetFrequency(FLAME_FREQ);
+	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
+	this->fireEffect.SetMaskTexture(this->cloudTex);
 
     bool result = false;
 
@@ -118,7 +111,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	fireEmitter1.AddEffector(&this->fireColourFader);
 	fireEmitter1.AddEffector(&this->fireParticleScaler);
 	fireEmitter1.AddEffector(&this->fireAccel1);
-	result = fireEmitter1.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect1);
+	result = fireEmitter1.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect);
 	assert(result);
 
 	fireEmitter2.SetSpawnDelta(ESPInterval(FIRE_SPAWN_DELTA_MIN, FIRE_SPAWN_DELTA_MAX));
@@ -134,7 +127,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	fireEmitter2.AddEffector(&this->fireColourFader);
 	fireEmitter2.AddEffector(&this->fireParticleScaler);
 	fireEmitter2.AddEffector(&this->fireAccel2);
-	result = fireEmitter2.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect2);
+	result = fireEmitter2.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect);
 	assert(result);
 
     UNUSED_VARIABLE(result);

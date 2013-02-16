@@ -5,21 +5,21 @@ S C(120-160) T(S,ur) S S E E E S S T(S,ul) C(200-240) S
 S E E T(S,ur) S S S S S T(S,ul) E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E R R R R R R R E E S 
-S E E O O O O O O O E E S 
-S E E O O O O O O O E E S 
-S E E Y Y R R R Y Y E E S 
-S R O Y Y R D(RocketPaddle) R Y Y O R S 
-S R O Y Y R R R Y Y O R S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S E R R R R R R R R R E S 
+S Y R R R R R R R R R Y S 
+S Y R R R R R R R R R Y S 
+S G R R R R R R R R R G S 
+S G R R R R D(RocketPaddle) R R R R G S 
+S G R R R R R R R R R G S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -34,16 +34,16 @@ S E E E E E E E E E E E S
 STARS:
 10000
 30000
-42000
-54000
-60000
+50000
+70000
+82000
 
 PaddleGrow 0
 PoisonPaddle 3
 BallSafetyNet 0
 Blackout 3
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 0

@@ -124,7 +124,8 @@ protected:
 
 private:
 	double fireGlobTimeCounter;	// Used to keep track of the amount of time this block has been on fire and
-															// when it stands the chance of dropping a fire glob
+								// when it stands the chance of dropping a fire glob
+
 	DISALLOW_COPY_AND_ASSIGN(BreakableBlock);
 };
 

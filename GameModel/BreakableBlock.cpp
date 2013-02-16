@@ -31,9 +31,6 @@ fireGlobTimeCounter(0.0), timeOfLastBallCollision() {
 BreakableBlock::~BreakableBlock() {
 }
 
-/**
- * Inherited private function for destroying this breakable block.
- */
 LevelPiece* BreakableBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);

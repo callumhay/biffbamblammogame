@@ -95,6 +95,10 @@ public:
 		return Point2D((this->maxBound + this->minBound)/2.0f, this->currHalfHeight);
 	}
 	void SetCenterPosition(const Point2D& center) {
+        if (this->attachedBall != NULL) {
+            Vector2D toBallFromCenter = this->attachedBall->GetCenterPosition2D() - this->centerPos;
+            this->attachedBall->SetCenterPosition(center + toBallFromCenter);
+        }
 		this->centerPos = center;
 	}
 

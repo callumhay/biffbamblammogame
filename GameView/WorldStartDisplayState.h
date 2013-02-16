@@ -47,7 +47,7 @@ private:
 	static const double HEADER_WIPE_TIME;
 	static const double FOOTER_FLASH_TIME;
 	static const float  HEADER_WIPE_FADE_QUAD_SIZE;
-	float minMaxLineWidth[2];
+	float lineThicknessInPixels;
 
 	TextLabel2D worldNameLabel;
 	TextLabel2D nowEnteringLabel;

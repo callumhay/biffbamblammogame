@@ -36,7 +36,21 @@ public:
 	void Tick(double dT);
 
 private:
-    
+    Texture2D* cloudTex;
+
+    CgFxVolumetricEffect fireEffect;
+    ESPPointEmitter fireEmitter1, fireEmitter2, fireEmitter3, fireEmitter4, fireEmitter5, fireEmitter6;
+    ESPParticleAccelEffector fireAccel1, fireAccel2, fireAccel3, fireAccel4, fireAccel5, fireAccel6;
+
+    ESPParticleColourEffector fireColourFader;
+    ESPParticleScaleEffector fireParticleScaler;
+
+    void InitializeEmitters();
+    void ApplyRandomFireAccel(ESPParticleAccelEffector& accelEffector);
+
+    void BuildFrontDoorFireEmitter(const Point3D& pos, ESPPointEmitter& emitter);
+    void BuildWindowWallFireEmitter(const Point3D& pos, ESPPointEmitter& emitter);
+
     DISALLOW_COPY_AND_ASSIGN(GothicRomanticWorldAssets);
 };
 
@@ -53,11 +67,12 @@ inline void GothicRomanticWorldAssets::ResetToInitialState() {
 }
 
 inline void GothicRomanticWorldAssets::DrawBackgroundEffects(const Camera& camera) {
-    UNUSED_PARAMETER(camera);
-}
-
-inline void GothicRomanticWorldAssets::Tick(double dT) {
-    GameWorldAssets::Tick(dT);
+    this->fireEmitter1.Draw(camera);
+    this->fireEmitter2.Draw(camera);
+    this->fireEmitter3.Draw(camera);
+    this->fireEmitter4.Draw(camera);
+    this->fireEmitter5.Draw(camera);
+    this->fireEmitter6.Draw(camera);
 }
 
 #endif // __GOTHICROMANTICWORLDASSETS_H__

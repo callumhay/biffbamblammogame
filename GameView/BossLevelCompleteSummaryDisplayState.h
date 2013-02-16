@@ -60,7 +60,7 @@ private:
 
     TextLabel2D victoryLabel1;
     TextLabel2D victoryLabel2;
-    TextLabel2D worldCompleteLabel;
+    TextLabel2D* worldCompleteLabel;
     TextLabel2D* unlockedLabel;
 
     TextLabel2D pressAnyKeyLabel;
@@ -73,7 +73,9 @@ private:
     float GetCenterTextBlockTopYCoord(float screenHeight) const;
     float GetCenterTextBlockHeight() const;
     float GetVictoryLabelBlockHeight() const;
+    float GetWorldCompleteLabelHeight() const;
     float GetUnlockedLabelHeight() const;
+    
 
     float DrawVictoryLabel(float screenWidth);
     float DrawWorldCompleteLabel(float screenWidth, float currYPos);

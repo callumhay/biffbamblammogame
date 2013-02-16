@@ -34,7 +34,8 @@ const float BossLevelCompleteSummaryDisplayState::COMPLETE_TO_UNLOCKED_VERTICAL_
 const float BossLevelCompleteSummaryDisplayState::MAX_COMPLETE_TEXT_SCALE = 1.3f;
 
 BossLevelCompleteSummaryDisplayState::BossLevelCompleteSummaryDisplayState(GameDisplay* display) :
-DisplayState(display), allAnimationIsDone(false), waitingForKeyPress(true), unlockedLabel(NULL), bgTex(NULL), spinGlowTex(NULL),
+DisplayState(display), allAnimationIsDone(false), waitingForKeyPress(true), unlockedLabel(NULL), worldCompleteLabel(NULL),
+bgTex(NULL), spinGlowTex(NULL),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
                  GameFontAssetsManager::Medium), "- Press Any Key to Continue -"),
 victoryLabel1(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big),
@@ -77,12 +78,6 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     this->victoryLabel2.SetDropShadow(Colour(0,0,0), 0.06f);
     this->victoryLabel2.SetScale(2.0f);
 
-    this->worldCompleteLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
-        GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), completedWorld->GetName() + " movement COMPLETE.");
-    this->worldCompleteLabel.SetColour(Colour(1,1,1));
-    this->worldCompleteLabel.SetDropShadow(Colour(0,0,0), 0.075f);
-    //this->worldLeftLabel.SetScale(this->display->GetTextScalingFactor());
-    
 
     // Check to see if the next movement has already been unlocked, if not then we tell the player about it...
     // Special case: the player just completed the very last world... in this case there's nothing left to unlock
@@ -100,6 +95,11 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
             GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), nextWorld->GetName() + " movement UNLOCKED.");
         this->unlockedLabel->SetColour(Colour(1,1,1));
         this->unlockedLabel->SetDropShadow(Colour(0,0,0), 0.075f);
+
+        this->worldCompleteLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), completedWorld->GetName() + " movement COMPLETE.");
+        this->worldCompleteLabel->SetColour(Colour(1,1,1));
+        this->worldCompleteLabel->SetDropShadow(Colour(0,0,0), 0.075f);
     }
 
 	// Setup the label for the press any key text...
@@ -129,7 +129,7 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     
     std::vector<float> moveVals;
     moveVals.reserve(timeVals.size());
-    moveVals.push_back(camera.GetWindowHeight() + 5.0f + this->GetVictoryLabelBlockHeight());
+    moveVals.push_back(camera.GetWindowHeight() + 1.25f * this->GetVictoryLabelBlockHeight());
     moveVals.push_back(centerBlockTopYCoord);
     moveVals.push_back(centerBlockTopYCoord + 0.25f * this->GetVictoryLabelBlockHeight());
     moveVals.push_back(centerBlockTopYCoord);
@@ -162,6 +162,10 @@ BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
     if (this->unlockedLabel != NULL) {
         delete this->unlockedLabel;
         this->unlockedLabel = NULL;
+    }
+    if (this->worldCompleteLabel != NULL) {
+        delete this->worldCompleteLabel;
+        this->worldCompleteLabel = NULL;
     }
 
     bool success = false;
@@ -262,13 +266,20 @@ float BossLevelCompleteSummaryDisplayState::GetCenterTextBlockTopYCoord(float sc
 
 float BossLevelCompleteSummaryDisplayState::GetCenterTextBlockHeight() const {
     return  this->GetVictoryLabelBlockHeight() + VICTORY_TO_WORLD_VERTICAL_PADDING +
-        this->worldCompleteLabel.GetHeight() + COMPLETE_TO_UNLOCKED_VERTICAL_PADDING + 
+        this->GetWorldCompleteLabelHeight() + COMPLETE_TO_UNLOCKED_VERTICAL_PADDING + 
         this->GetUnlockedLabelHeight();
 }
 
 float BossLevelCompleteSummaryDisplayState::GetVictoryLabelBlockHeight() const {
     return this->victoryLabel1.GetHeight() + VICTORY_LABEL_VERTICAL_SPACING +
         this->victoryLabel2.GetHeight();
+}
+
+float BossLevelCompleteSummaryDisplayState::GetWorldCompleteLabelHeight() const {
+    if (this->worldCompleteLabel == NULL) {
+        return 0.0f;
+    }
+    return this->worldCompleteLabel->GetHeight();
 }
 
 float BossLevelCompleteSummaryDisplayState::GetUnlockedLabelHeight() const {
@@ -348,15 +359,18 @@ float BossLevelCompleteSummaryDisplayState::DrawVictoryLabel(float screenWidth) 
 }
 
 float BossLevelCompleteSummaryDisplayState::DrawWorldCompleteLabel(float screenWidth, float currYPos) {
-    
-    const float currXPos = (screenWidth - this->worldCompleteLabel.GetLastRasterWidth()) / 2.0f;
-    
-    this->worldCompleteLabel.SetTopLeftCorner(currXPos, currYPos);
-    this->worldCompleteLabel.SetAlpha(this->worldCompleteAlphaAnim.GetInterpolantValue());
+    if (this->worldCompleteLabel == NULL) {
+        return currYPos;
+    }
 
-    this->worldCompleteLabel.Draw();
+    const float currXPos = (screenWidth - this->worldCompleteLabel->GetLastRasterWidth()) / 2.0f;
+    
+    this->worldCompleteLabel->SetTopLeftCorner(currXPos, currYPos);
+    this->worldCompleteLabel->SetAlpha(this->worldCompleteAlphaAnim.GetInterpolantValue());
 
-    return currYPos - this->worldCompleteLabel.GetHeight();
+    this->worldCompleteLabel->Draw();
+
+    return currYPos - this->worldCompleteLabel->GetHeight();
 }
 
 void BossLevelCompleteSummaryDisplayState::DrawUnlockedLabel(double dT, float screenWidth, float currYPos) {

@@ -1,7 +1,6 @@
 Balancing Act
 13 28
 S S S S S S S S S S S S S 
-S S S S S S S S S S S S S 
 S F(r) F(r) F(r) E E D(LaserBulletPaddle,LaserBeamPaddle,RocketPaddle,OmniLaserBall) E E F(r) F(r) F(r) S 
 S C(90) F(r) F(r) E E E E E F(r) F(r) C(180) S 
 S F(u) F(r) F(r) E E E E E F(r) F(r) F(d) S 
@@ -28,6 +27,7 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
 
 STARS:
 3000
@@ -40,8 +40,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2
@@ -60,6 +60,7 @@ BallCam 0
 MagnetPaddle 2
 MultiBall3 0
 IceBall 0
+MineLauncherPaddle 2
 SlowBall 2
 GravityBall 2
 CrazyBall 1
