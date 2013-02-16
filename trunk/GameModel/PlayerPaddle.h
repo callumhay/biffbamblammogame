@@ -418,9 +418,7 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
 
 			// Make the collision line the tangent at the surface of the shield
 			collisionLine = Collision::LineSeg2D(approxCircleCollisionPt - perpendicularVec, approxCircleCollisionPt + perpendicularVec);
-			// A rough approximate of the the time since collision is the distance between the 
-			// ball's center and the shield barrier divided by the ball's velocity
-            timeSinceCollision = Vector2D::Magnitude(approxCircleCollisionPt - ball.GetBounds().Center() + ball.GetBounds().Radius()*n) / ball.GetSpeed();
+            timeSinceCollision = 0.0;
 
 			return true;
 		}

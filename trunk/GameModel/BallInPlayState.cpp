@@ -264,7 +264,7 @@ void BallInPlayState::Tick(double seconds) {
 
 				    if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
 				        // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
-				        // still see it fly into the void - of course, if the shield is active then no help is provided
+				        // still see it fly into the void. If the shield is active then no help is provided
                         this->AugmentBallDirectionToBeNotTooDownwards(*currBall, *paddle, n);
 				    }
 
@@ -617,21 +617,20 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 		reflectBall2Vec = Vector2D(-reflectBall2Vec[1], reflectBall2Vec[0]);
 	}
 
-	float positiveT = -NumberFuncs::SignOf(t) * (fabs(t) + 2*EPSILON);
+	//float positiveT = -NumberFuncs::SignOf(t) * (fabs(t) + 2*EPSILON);
 
 	// NOTE: we need to make sure the new velocities are not zero
-
-	// Set the new velocities and the correct center positions so that they 
-	// still remain at the current time, but it is as if the balls had originally collided
+	// Set the new velocities
 	if (reflectBall1Vec != Vector2D(0, 0)) {
 		ball1.SetVelocity(ball1.GetSpeed(), reflectBall1Vec);
-		ball1.SetCenterPosition(ball1CollisionCenter + positiveT * reflectBall1Vec);
 	}
 
 	if (reflectBall2Vec != Vector2D(0, 0)) {
 		ball2.SetVelocity(ball2.GetSpeed(), reflectBall2Vec);
-		ball2.SetCenterPosition(ball2CollisionCenter + positiveT * reflectBall2Vec);
-	}	
+	}
+
+    ball1.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball1.GetBounds().Radius() / ball1.GetSpeed()));
+    ball2.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball2.GetBounds().Radius() / ball2.GetSpeed()));
 }
 
 /**
