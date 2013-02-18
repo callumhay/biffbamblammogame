@@ -77,6 +77,7 @@ bool LevelPiece::IsValidLevelPieceType(int pieceType) {
         case LevelPiece::LaserTurret:
         case LevelPiece::RocketTurret:
         case LevelPiece::MineTurret:
+        case LevelPiece::AlwaysDrop:
             return true;
         default:
             assert(false);

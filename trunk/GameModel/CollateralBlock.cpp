@@ -56,17 +56,6 @@ bool CollateralBlock::ProjectilePassesThrough(const Projectile* projectile) cons
 
 LevelPiece* CollateralBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 
-	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		// EVENT: Ice was shattered
-		GameEventManager::Instance()->ActionBlockIceShattered(*this);
-		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-        UNUSED_VARIABLE(success);
-		assert(success);
-	}
-    else if (method == LevelPiece::RocketDestruction || method == LevelPiece::MineDestruction) {
-        return this->Detonate(gameModel);
-    }
-
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
@@ -90,29 +79,37 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 	
 	LevelPiece* resultingPiece = this;
 	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
-	if (isIceBall) {
-		this->FreezePieceInIce(gameModel);
-	}
-	else {
-		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
-		bool isInIceCube = this->HasStatus(LevelPiece::IceCubeStatus);
-		if (!isFireBall && isInIceCube) {
-			// EVENT: Ice was shattered
-			GameEventManager::Instance()->ActionBlockIceShattered(*this);
-		}
+	bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
 
-		// Unfreeze a frozen solid block
-		if (isInIceCube) {
+	if (!isFireBall && !isIceBall) {
+
+	    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		    // EVENT: Ice was shattered
+		    GameEventManager::Instance()->ActionBlockIceShattered(*this);
+		    // If the piece is frozen it shatters and is immediately destroyed on ball impact
+            resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
+	    }
+        else {
+		    // Being hit by the ball, when not frozen, causes the collateral block to detonate and
+		    // go into warning/collateral mode
+		    resultingPiece = this->Detonate(gameModel);
+        }
+	}
+    else if (isFireBall) {
+	    // Fireballs don't light collateral blocks on fire, but they do unfreeze them
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
 			assert(success);
 		}
-		else {
-			// Being hit by the ball, when not frozen, causes the collateral block to detonate and
-			// go into warning/collateral mode
-			resultingPiece = this->Detonate(gameModel);
-		}
-	}
+        else {
+            // Detonate the collateral block
+            resultingPiece = this->Detonate(gameModel); 
+        }
+    }
+    else if (isIceBall) {
+	    this->FreezePieceInIce(gameModel);
+    }
 
 	ball.SetLastPieceCollidedWith(resultingPiece);
 	return resultingPiece;
@@ -159,13 +156,17 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
             break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob just extinguishes on a collateral block, unless it's frozen in an ice cube;
+			// Fire glob detonates the collateral block, unless it's frozen in an ice cube;
 			// in that case, unfreeze a frozen collateral block
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
                 UNUSED_VARIABLE(success);
 				assert(success);
 			}
+            else {
+                // Detonate the collateral block
+                newLevelPiece = this->Detonate(gameModel); 
+            }
 			break;
 				
 		default:

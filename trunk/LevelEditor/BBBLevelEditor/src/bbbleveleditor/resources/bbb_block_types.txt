@@ -130,6 +130,10 @@ Item Drop
 item_drop.png
 D
 
+Always Drop Block (Breakable)
+always_drop.png
+K
+
 Switch
 switch.png
 W
@@ -178,11 +182,10 @@ Laser Turret
 laser_turret.png
 H
 
-Rocket_Turret
+Rocket Turret
 rocket_turret.png
 J
 
-Mine_Turret
+Mine Turret
 mine_turret.png
 M
-

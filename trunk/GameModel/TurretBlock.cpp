@@ -56,7 +56,7 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
         if (leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret &&
             leftNeighbor->GetType() != LevelPiece::Breakable && leftNeighbor->GetType() != LevelPiece::RocketTurret &&
-            leftNeighbor->GetType() != LevelPiece::MineTurret) {
+            leftNeighbor->GetType() != LevelPiece::MineTurret && leftNeighbor->GetType() != LevelPiece::AlwaysDrop) {
 
                 Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
                     this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -73,7 +73,7 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
         if (bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret &&
             bottomNeighbor->GetType() != LevelPiece::Breakable && bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
-            bottomNeighbor->GetType() != LevelPiece::MineTurret) {
+            bottomNeighbor->GetType() != LevelPiece::MineTurret && bottomNeighbor->GetType() != LevelPiece::AlwaysDrop) {
 
                 Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
                     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -90,7 +90,7 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
         if (rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret &&
             rightNeighbor->GetType() != LevelPiece::Breakable && rightNeighbor->GetType() != LevelPiece::RocketTurret &&
-            rightNeighbor->GetType() != LevelPiece::MineTurret) {
+            rightNeighbor->GetType() != LevelPiece::MineTurret && rightNeighbor->GetType() != LevelPiece::AlwaysDrop) {
 
                 Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
                     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -107,7 +107,7 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
         if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret &&
             topNeighbor->GetType() != LevelPiece::Breakable && topNeighbor->GetType() != LevelPiece::RocketTurret &&
-            topNeighbor->GetType() != LevelPiece::MineTurret) {
+            topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::AlwaysDrop) {
 
                 Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
                     this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));

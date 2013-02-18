@@ -22,6 +22,7 @@
 #include "LaserTurretBlockMesh.h"
 #include "RocketTurretBlockMesh.h"
 #include "MineTurretBlockMesh.h"
+#include "AlwaysDropBlockMesh.h"
 #include "BossMesh.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
@@ -40,12 +41,14 @@
 #include "../GameModel/OneWayBlock.h"
 #include "../GameModel/LaserTurretBlock.h"
 #include "../GameModel/RocketTurretBlock.h"
+#include "../GameModel/AlwaysDropBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
-oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
+oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL),
+statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
 remainingPiecePulser(0,0), bossMesh(NULL) {
 	
     this->remainingPieceGlowTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -70,6 +73,7 @@ remainingPiecePulser(0,0), bossMesh(NULL) {
     this->laserTurretBlock              = new LaserTurretBlockMesh();
     this->rocketTurretBlock             = new RocketTurretBlockMesh();
     this->mineTurretBlock               = new MineTurretBlockMesh();
+    this->alwaysDropBlock               = new AlwaysDropBlockMesh();
     this->noEntryBlock                  = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NO_ENTRY_BLOCK_MESH);
     this->oneWayUpBlock                 = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_UP_MESH);
     this->oneWayDownBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_DOWN_MESH);
@@ -143,6 +147,8 @@ LevelMesh::~LevelMesh() {
     this->rocketTurretBlock = NULL;
     delete this->mineTurretBlock;
     this->mineTurretBlock = NULL;
+    delete this->alwaysDropBlock;
+    this->alwaysDropBlock = NULL;
 
     // Release all resources
     bool success = false;
@@ -237,6 +243,7 @@ void LevelMesh::Flush() {
     this->laserTurretBlock->Flush();
     this->rocketTurretBlock->Flush();
     this->mineTurretBlock->Flush();
+    this->alwaysDropBlock->Flush();
 
     // Clear any boss mesh
     if (this->bossMesh != NULL) {
@@ -355,6 +362,15 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
                     break;
                 }
 
+                // 9) Always Drop Block
+                case LevelPiece::AlwaysDrop: {
+                    const AlwaysDropBlock* alwaysDropLvlPiece = static_cast<const AlwaysDropBlock*>(currPiece);
+
+                    Texture2D* itemTexture = gameItemAssets.GetItemTexture(alwaysDropLvlPiece->GetNextDropItemType());
+                    this->alwaysDropBlock->AddAlwaysDropBlock(alwaysDropLvlPiece, itemTexture);
+                    break;
+                }
+
                 default:
                     break;
             }
@@ -415,6 +431,8 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 				break;
 			case LevelPiece::Collateral:
 				break;
+            case LevelPiece::AlwaysDrop:
+                break;
 			default:
 				assert(false);
 				break;
@@ -439,40 +457,36 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 
 void LevelMesh::RemovePiece(const LevelPiece& piece) {
 	switch (piece.GetType()) {
-		case LevelPiece::Cannon:
-			{
-				const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(&piece);
-				this->cannonBlock->RemoveCannonBlock(cannonLvlPiece);
-			}
-			break;
 
-		case LevelPiece::Collateral:
-			{
-				const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(&piece);
-				this->collateralBlock->RemoveCollateralBlock(collateralLvlPiece);
-			}
+		case LevelPiece::Cannon: {
+			const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(&piece);
+			this->cannonBlock->RemoveCannonBlock(cannonLvlPiece);
 			break;
+        }
 
-		case LevelPiece::Tesla:
-			{
-				const TeslaBlock* teslaLvlPiece = static_cast<const TeslaBlock*>(&piece);
-				this->teslaBlock->RemoveTeslaBlock(teslaLvlPiece);
-			}
+		case LevelPiece::Collateral: {
+			const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(&piece);
+			this->collateralBlock->RemoveCollateralBlock(collateralLvlPiece);
 			break;
+        }
 
-		case LevelPiece::ItemDrop:
-			{
-				const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(&piece);
-				this->itemDropBlock->RemoveItemDropBlock(itemDrpPiece);
-			}
+		case LevelPiece::Tesla: {
+			const TeslaBlock* teslaLvlPiece = static_cast<const TeslaBlock*>(&piece);
+			this->teslaBlock->RemoveTeslaBlock(teslaLvlPiece);
+			break;
+        }
+
+		case LevelPiece::ItemDrop: {
+			const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(&piece);
+			this->itemDropBlock->RemoveItemDropBlock(itemDrpPiece);
             break;
+        }
 
-        case LevelPiece::Switch:
-            {
-				const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(&piece);
-				this->switchBlock->RemoveSwitchBlock(switchPiece);
-            }
+        case LevelPiece::Switch: {
+			const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(&piece);
+			this->switchBlock->RemoveSwitchBlock(switchPiece);
             break;
+        }
 
         case LevelPiece::LaserTurret: {
             const LaserTurretBlock* laserTurretPiece = static_cast<const LaserTurretBlock*>(&piece);
@@ -489,6 +503,12 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
         case LevelPiece::MineTurret: {
             const MineTurretBlock* mineTurretPiece = static_cast<const MineTurretBlock*>(&piece);
             this->mineTurretBlock->RemoveMineTurretBlock(mineTurretPiece);
+            break;
+        }
+
+        case LevelPiece::AlwaysDrop: {
+            const AlwaysDropBlock* alwaysDropPiece = static_cast<const AlwaysDropBlock*>(&piece);
+            this->alwaysDropBlock->RemoveAlwaysDropBlock(alwaysDropPiece);
             break;
         }
 
@@ -543,6 +563,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->mineTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->alwaysDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
@@ -737,6 +758,9 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 		case LevelPiece::Empty:
 			break;
 
+        case LevelPiece::AlwaysDrop:
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -857,6 +881,7 @@ void LevelMesh::SetLevelAlpha(float alpha) {
     this->laserTurretBlock->SetAlphaMultiplier(alpha);
     this->rocketTurretBlock->SetAlphaMultiplier(alpha);
     this->mineTurretBlock->SetAlphaMultiplier(alpha);
+    this->alwaysDropBlock->SetAlphaMultiplier(alpha);
 }
 
 double LevelMesh::ActivateBossIntro() {

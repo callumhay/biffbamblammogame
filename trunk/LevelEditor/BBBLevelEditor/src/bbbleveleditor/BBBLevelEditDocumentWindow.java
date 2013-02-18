@@ -571,7 +571,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						outputStr = outputStr + ")";
 						levelFileWriter.write(outputStr);
 					}
-					else if (currPieceLbl.getIsItemDrop()) {
+					else if (currPieceLbl.getIsItemDrop() || currPieceLbl.getIsAlwaysDrop()) {
 						String outputStr = currLvlPiece.getSymbol() + "(";
 						Iterator<String> iter = currPieceLbl.getItemDropTypes().iterator();
 						while (iter.hasNext()) {
@@ -926,7 +926,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		if (e.isPopupTrigger()) {
 			LevelPieceImageLabel levelPiece = this.getPieceAtLocation(e.getPoint());
 			JPopupMenu levelEditContextMenu = new JPopupMenu();
-			if (levelPiece.getIsItemDrop()) {
+			if (levelPiece.getIsItemDrop() || levelPiece.getIsAlwaysDrop()) {
 				EditItemDropsDialog blockEditDlg = new EditItemDropsDialog(this.levelEditWindow, levelPiece);
 				JMenuItem blockPropertiesItem = new JMenuItem("Block properties...");
 				blockPropertiesItem.addActionListener(new ContextMenuListener(blockEditDlg));
