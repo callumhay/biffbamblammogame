@@ -621,6 +621,21 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			break;
 
+        case LevelPiece::AlwaysDrop:
+			if (wasFrozen) {
+				// Add ice break effect
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			}
+			else {
+				// Typical break effect for basic breakable blocks
+				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				// Sound for basic breakable blocks
+				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			}
+            this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
+            break;
+
 		case LevelPiece::Bomb:
 			if (wasFrozen) {
 				// Add ice break effect
@@ -676,11 +691,20 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			break;
 
 		case LevelPiece::Collateral: {
-				// Don't show any effects / play any sounds if the ball is dead/dying
-				if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
-					this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-					this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
+
+                if (wasFrozen) {
+					// Add ice break effect
+					this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
+					//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
 				}
+                else {
+				    // Don't show any effects / play any sounds if the ball is dead/dying
+				    if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
+					    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+					    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
+				    }
+                }
+
 				this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			}
 			break;

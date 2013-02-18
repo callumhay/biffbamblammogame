@@ -16,6 +16,7 @@
 #include "GameModel.h"
 
 const float GameBall::DEFAULT_NORMAL_SPEED = 14.5f;
+const float GameBall::INCREMENT_SPD_AMT    = 4.0f;
 
 float GameBall::ZeroSpeed    = 0.0f;
 float GameBall::NormalSpeed  = GameBall::DEFAULT_NORMAL_SPEED;

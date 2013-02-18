@@ -1287,20 +1287,19 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
+
 			switch(block.GetType()) {
 
 				case LevelPiece::PrismTriangle:
-				case LevelPiece::Prism: 
-					{
-						// A laser bullet just hit a prism block... cause the proper effect
-						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
-						this->AddLaserHitPrismBlockEffect(midPoint);
-					} 
+				case LevelPiece::Prism: {
+					// A laser bullet just hit a prism block... cause the proper effect
+					Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+					this->AddLaserHitPrismBlockEffect(midPoint);
 					break;
+                }
 
 				case LevelPiece::Solid:
                 case LevelPiece::OneWay:
-                case LevelPiece::NoEntry:
 				case LevelPiece::SolidTriangle:
 				case LevelPiece::Breakable:
 				case LevelPiece::BreakableTriangle: 
@@ -1312,31 +1311,41 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
                 case LevelPiece::LaserTurret:
                 case LevelPiece::RocketTurret:
                 case LevelPiece::MineTurret:
-					{
-						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
-						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
-						if (blockIsFrozen) {
-							// Frozen blocks reflect/refract laser beams...
-							this->AddLaserHitPrismBlockEffect(midPoint);
-						}
-						else {
-							// A laser just hit a block and was disapated by it... show the particle disintegrate
-							this->AddLaserHitWallEffect(midPoint);
-						}
+                case LevelPiece::AlwaysDrop: {
+					bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+					Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+					if (blockIsFrozen) {
+						// Frozen blocks reflect/refract laser beams...
+						this->AddLaserHitPrismBlockEffect(midPoint);
+					}
+					else {
+						// A laser just hit a block and was disapated by it... show the particle disintegrate
+						this->AddLaserHitWallEffect(midPoint);
 					}
 					break;
+                }
+
+                case LevelPiece::NoEntry: {
+                    bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+					Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+					if (blockIsFrozen) {
+						// Frozen blocks reflect/refract laser beams...
+						this->AddLaserHitPrismBlockEffect(midPoint);
+					}
+                    // If not frozen then the laser passes through without effect
+                    break;
+                }
 
 				case LevelPiece::Ink:
-				case LevelPiece::Bomb:
-					{
-						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
-						if (blockIsFrozen) {
-							// Frozen blocks reflect/refract laser beams...
-							Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
-							this->AddLaserHitPrismBlockEffect(midPoint);
-						}
+				case LevelPiece::Bomb: {
+					bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+					if (blockIsFrozen) {
+						// Frozen blocks reflect/refract laser beams...
+						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+						this->AddLaserHitPrismBlockEffect(midPoint);
 					}
 					break;
+                }
 
 				case LevelPiece::Empty:
 				case LevelPiece::Portal:
@@ -1720,7 +1729,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
         case LevelPiece::MineTurret:
 			severity = Onomatoplex::SUPER_AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
-																						ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
+												  ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
 			break;
 
 		case LevelPiece::Cannon:

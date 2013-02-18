@@ -365,13 +365,17 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
     Collision::LineSeg2D shortSide, longSide, hypSide;
 
     bool topNeighborNotSolid = topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable);
+        (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
+         topNeighbor->GetType() != LevelPiece::AlwaysDrop);
     bool bottomNeighborNotSolid	= bottomNeighbor == NULL  || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable);
+        (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
+         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop);
     bool leftNeighborNotSolid = leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
-        (leftNeighbor->GetType()   != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable);
+        (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable &&
+         leftNeighbor->GetType() != LevelPiece::AlwaysDrop);
     bool rightNeighborNotSolid = rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (rightNeighbor->GetType()  != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable);
+        (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
+         rightNeighbor->GetType() != LevelPiece::AlwaysDrop);
 
     // Triangle neighbor cases...
     if (topNeighbor != NULL && TriangleBlock::IsTriangleType(*topNeighbor)) {

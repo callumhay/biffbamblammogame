@@ -33,6 +33,7 @@
 #include "LaserTurretBlock.h"
 #include "RocketTurretBlock.h"
 #include "MineTurretBlock.h"
+#include "AlwaysDropBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 #include "PointAward.h"
@@ -66,6 +67,7 @@ const char GameLevel::NO_ENTRY_BLOCK_CHAR       = 'N';
 const char GameLevel::LASER_TURRET_BLOCK_CHAR   = 'H';
 const char GameLevel::ROCKET_TURRET_BLOCK_CHAR  = 'J';
 const char GameLevel::MINE_TURRET_BLOCK_CHAR    = 'M';
+const char GameLevel::ALWAYS_DROP_BLOCK_CHAR    = 'K';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -710,77 +712,9 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 						//                   repeated in order to make higher probabilities of drops. Also, there are several special key
 						//                   words that can be used: (powerups, powerdowns, powerneutrals), which cause the block to drop 
 						//                   all items of those respective designations.
-
-						char tempChar;
-						*inFile >> tempChar;
-						if (tempChar != '(') {
-							debug_output("ERROR: poorly formed item drop block syntax, missing '('");
-							break;
-						}		
-
-						// Read each of the item type names and set the proper possible item drops for the item drop block...
-						std::string tempStr;
-						*inFile >> tempStr;
-
-						std::vector<std::string> itemNames;
-                        // Careful of the case where there's a curly bracket - we want to get rid of the curly bracket in that case
-                        size_t curlyBracketPos = tempStr.find_first_of("{");
-                        if (curlyBracketPos != std::string::npos) {
-                            stringhelper::Tokenize(tempStr, itemNames, "{");
-                            std::string putBackIntoStream = tempStr.substr(curlyBracketPos);
-                            inFile->seekg(-static_cast<int>(putBackIntoStream.size()), std::ios_base::cur);
-                            tempStr = itemNames.front();
-                            itemNames.clear();
-                        }
-						stringhelper::Tokenize(tempStr, itemNames, ",) \t\r\n"); 
 						
-						// Make sure there's at least one item defined
-						if (itemNames.empty()) {
-							debug_output("ERROR: poorly formed item drop block syntax, no item drop types defined");
-							break;
-						}
-
-						// Figure out the item types from the names...
-						bool success = true;
 						std::vector<GameItem::ItemType> itemTypes;
-						
-						for (std::vector<std::string>::const_iterator iter = itemNames.begin(); iter != itemNames.end(); ++iter) {
-							std::string currItemName = stringhelper::trim(*iter);
-
-							// There are some special keywords that we need to check for first...
-							if (currItemName.compare(ALL_ITEM_TYPES_KEYWORD) == 0) {
-								// Add all item types...
-								const std::set<GameItem::ItemType>& allItemTypes = GameItemFactory::GetInstance()->GetAllItemTypes();
-								itemTypes.insert(itemTypes.end(), allItemTypes.begin(), allItemTypes.end());
-							}
-							else if (currItemName.compare(POWERUP_ITEM_TYPES_KEYWORD) == 0) {
-								// Add all power-up item types
-								const std::set<GameItem::ItemType>& powerUpItemTypes = GameItemFactory::GetInstance()->GetPowerUpItemTypes();
-								itemTypes.insert(itemTypes.end(), powerUpItemTypes.begin(), powerUpItemTypes.end());
-							}
-							else if (currItemName.compare(POWERNEUTRAL_ITEM_TYPES_KEYWORD) == 0) {
-								// Add all power-neutral item types
-								const std::set<GameItem::ItemType>& powerNeutralItemTypes = GameItemFactory::GetInstance()->GetPowerNeutralItemTypes();
-								itemTypes.insert(itemTypes.end(), powerNeutralItemTypes.begin(), powerNeutralItemTypes.end());
-							}
-							else if (currItemName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
-								// Add all power-up item types
-								const std::set<GameItem::ItemType>& powerDownItemTypes = GameItemFactory::GetInstance()->GetPowerDownItemTypes();
-								itemTypes.insert(itemTypes.end(), powerDownItemTypes.begin(), powerDownItemTypes.end());
-							}
-							else {
-								// Check for manual entry of a specific item type name...
-								bool isValid = GameItemFactory::GetInstance()->IsValidItemTypeName(currItemName);
-								if (!isValid) {
-									debug_output("ERROR: poorly formed item drop block syntax, no item drop type found for item \"" + currItemName + "\"");
-									success = false;
-									continue;
-								}
-								
-								itemTypes.push_back(GameItemFactory::GetInstance()->GetItemTypeFromName(currItemName));
-							}
-						}
-						if (!success) {
+						if (!ReadItemList(*inFile, itemTypes)) {
 							break;
 						}
 
@@ -872,6 +806,22 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
                     // M - Mine Turret Block
                     newPiece = new MineTurretBlock(pieceWLoc, pieceHLoc);
                     break;
+
+                case GameLevel::ALWAYS_DROP_BLOCK_CHAR: {
+                    // K(i0, i1, i2, ...) - Always drop block (similar to Item drop block, but is destroyed after 1 hit):
+                    // i0, i1, i2, ... : The names of all the item types that the block is allowed to drop, names can be 
+                    //                   repeated in order to make higher probabilities of drops. Also, there are several special key
+                    //                   words that can be used: (all, powerups, powerdowns, powerneutrals), which cause the block to drop 
+                    //                   all items of those respective designations.
+
+					std::vector<GameItem::ItemType> itemTypes;
+					if (!ReadItemList(*inFile, itemTypes)) {
+						break;
+					}
+
+					newPiece = new AlwaysDropBlock(itemTypes, pieceWLoc, pieceHLoc);
+                    break;
+                }
 
 				default:
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
@@ -1068,6 +1018,84 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
     else {
 	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores);
     }
+}
+
+/**
+ * Reads a list of items from a level file. The list has the following format:
+ * "(i0,i1,i2,...)"
+ * Where ... means the list can continue indefinitely. There are also possible keywords in 
+ * the list for allpowerups, allpowerdowns, allpowerneutrals, and all.
+ */
+bool GameLevel::ReadItemList(std::stringstream& inFile, std::vector<GameItem::ItemType>& items) {
+    
+    char tempChar;
+    inFile >> tempChar;
+    if (tempChar != '(') {
+	    debug_output("ERROR: poorly formed item drop block syntax, missing '('");
+	    return false;
+    }		
+
+    // Read each of the item type names and set the proper possible item drops for the item drop block...
+    std::string tempStr;
+    inFile >> tempStr;
+
+    std::vector<std::string> itemNames;
+
+    // Careful of the case where there's a curly bracket - we want to get rid of the curly bracket in that case
+    size_t curlyBracketPos = tempStr.find_first_of("{");
+    if (curlyBracketPos != std::string::npos) {
+        stringhelper::Tokenize(tempStr, itemNames, "{");
+        std::string putBackIntoStream = tempStr.substr(curlyBracketPos);
+        inFile.seekg(-static_cast<int>(putBackIntoStream.size()), std::ios_base::cur);
+        tempStr = itemNames.front();
+        itemNames.clear();
+    }
+    stringhelper::Tokenize(tempStr, itemNames, ",) \t\r\n"); 
+
+    // Make sure there's at least one item defined
+    if (itemNames.empty()) {
+	    debug_output("ERROR: poorly formed item list syntax, no item types defined");
+	    return false;
+    }
+
+    // Figure out the item types from the names...
+    for (std::vector<std::string>::const_iterator iter = itemNames.begin(); iter != itemNames.end(); ++iter) {
+	    std::string currItemName = stringhelper::trim(*iter);
+
+	    // There are some special keywords that we need to check for first...
+	    if (currItemName.compare(ALL_ITEM_TYPES_KEYWORD) == 0) {
+		    // Add all item types...
+		    const std::set<GameItem::ItemType>& allItemTypes = GameItemFactory::GetInstance()->GetAllItemTypes();
+		    items.insert(items.end(), allItemTypes.begin(), allItemTypes.end());
+	    }
+	    else if (currItemName.compare(POWERUP_ITEM_TYPES_KEYWORD) == 0) {
+		    // Add all power-up item types
+		    const std::set<GameItem::ItemType>& powerUpItemTypes = GameItemFactory::GetInstance()->GetPowerUpItemTypes();
+		    items.insert(items.end(), powerUpItemTypes.begin(), powerUpItemTypes.end());
+	    }
+	    else if (currItemName.compare(POWERNEUTRAL_ITEM_TYPES_KEYWORD) == 0) {
+		    // Add all power-neutral item types
+		    const std::set<GameItem::ItemType>& powerNeutralItemTypes = GameItemFactory::GetInstance()->GetPowerNeutralItemTypes();
+		    items.insert(items.end(), powerNeutralItemTypes.begin(), powerNeutralItemTypes.end());
+	    }
+	    else if (currItemName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
+		    // Add all power-up item types
+		    const std::set<GameItem::ItemType>& powerDownItemTypes = GameItemFactory::GetInstance()->GetPowerDownItemTypes();
+		    items.insert(items.end(), powerDownItemTypes.begin(), powerDownItemTypes.end());
+	    }
+	    else {
+		    // Check for manual entry of a specific item type name...
+		    bool isValid = GameItemFactory::GetInstance()->IsValidItemTypeName(currItemName);
+		    if (!isValid) {
+			    debug_output("ERROR: poorly formed item list syntax, no item drop type found for item \"" + currItemName + "\"");
+			    return false;
+		    }
+    		
+		    items.push_back(GameItemFactory::GetInstance()->GetItemTypeFromName(currItemName));
+	    }
+    }
+
+    return true;
 }
 
 void GameLevel::CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces) {

@@ -2,7 +2,7 @@
  * GameViewConstants.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -206,6 +206,8 @@ FUTURISM_SOUND_SCRIPT(SOUND_DIRECTORY   "/futurism_sound.msf"),
 ITEM_LABEL_MATGRP("ItemLabel"),                             // Material group name for changing the label on the item mesh
 ITEM_END_MATGRP("ColourEnd"),                               // Material group name for changing the colour on the item mesh
 ITEM_DROP_BLOCK_ITEMTYPE_MATGRP("item_drop_item_material"), // Material group name for the item picture on the item drop block mesh
+ALWAYS_DROP_BLOCK_ITEMTYPE_MATGRP("always_drop_item_material"),      // Material group name for the item picture on the always drop block mesh
+ALWAYS_DROP_BLOCK_COLOUR_MATGRP("always_drop_item_colour_material"), // Material group name for the colour of the item on the always drop block mesh
 
 ITEM_GOOD_COLOUR(0.0f, 0.8f, 0.0f),
 ITEM_BAD_COLOUR(0.8f, 0.0f, 0.0f),
@@ -290,6 +292,8 @@ ROCKET_TURRET_BARREL_MESH(MESH_DIRECTORY "/rocket_turret_block_barrel.obj"),
 MINE_TURRET_HEAD_MESH(MESH_DIRECTORY   "/mine_turret_block_head.obj"),
 MINE_TURRET_BARREL_MESH(MESH_DIRECTORY "/mine_turret_block_barrel.obj"),
 MINE_MESH(MESH_DIRECTORY "/mine.obj"),
+ALWAYS_DROP_BLOCK_MESH(MESH_DIRECTORY "/always_drop_block.obj"),
+
 SKYBOX_MESH(MESH_DIRECTORY "/skybox.obj"),
 ITEM_MESH(MESH_DIRECTORY "/item.obj"),
 PADDLE_LASER_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_laser_attachment.obj"),

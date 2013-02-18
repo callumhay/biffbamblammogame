@@ -2,7 +2,7 @@
  * ItemDropBlockMesh.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -56,6 +56,8 @@ private:
 	
 	ESPVolumeEmitter* InitSparkEmitter(const Colour& colour);
 	void LoadMesh();
+
+    DISALLOW_COPY_AND_ASSIGN(ItemDropBlockMesh);
 };
 
 inline void ItemDropBlockMesh::Flush() {

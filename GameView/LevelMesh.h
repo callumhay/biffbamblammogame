@@ -40,6 +40,7 @@ class SwitchBlockMesh;
 class LaserTurretBlockMesh;
 class RocketTurretBlockMesh;
 class MineTurretBlockMesh;
+class AlwaysDropBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 class BossMesh;
@@ -102,6 +103,7 @@ private:
     LaserTurretBlockMesh* laserTurretBlock;
     RocketTurretBlockMesh* rocketTurretBlock;
     MineTurretBlockMesh* mineTurretBlock;
+    AlwaysDropBlockMesh* alwaysDropBlock;
     Mesh* noEntryBlock;
     Mesh* oneWayUpBlock;
     Mesh* oneWayDownBlock;

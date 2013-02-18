@@ -2,7 +2,7 @@
  * GameViewConstants.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -226,6 +226,8 @@ public:
 	const char* ITEM_LABEL_MATGRP;
 	const char* ITEM_END_MATGRP;
 	const char* ITEM_DROP_BLOCK_ITEMTYPE_MATGRP;
+    const char* ALWAYS_DROP_BLOCK_ITEMTYPE_MATGRP;
+    const char* ALWAYS_DROP_BLOCK_COLOUR_MATGRP;
 
 	const Colour ITEM_GOOD_COLOUR;
 	const Colour ITEM_BAD_COLOUR;
@@ -309,6 +311,7 @@ public:
     const char* MINE_TURRET_HEAD_MESH;
     const char* MINE_TURRET_BARREL_MESH;
     const char* MINE_MESH;
+    const char* ALWAYS_DROP_BLOCK_MESH;
 
 	const char* SKYBOX_MESH;
 	const char* ITEM_MESH;

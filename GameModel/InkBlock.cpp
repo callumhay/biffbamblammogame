@@ -124,11 +124,11 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructio
 
 	// Check to see if the ink block is frozen...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-			// EVENT: Ice was shattered
-			GameEventManager::Instance()->ActionBlockIceShattered(*this);
-			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-            UNUSED_VARIABLE(success);
-			assert(success);
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
+        assert(success);
 	}
 
 	// Tell the level that this piece has changed to empty...

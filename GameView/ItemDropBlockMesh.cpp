@@ -81,7 +81,7 @@ ItemDropBlockMesh::~ItemDropBlockMesh() {
 
 
 void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-														 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                             const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
 	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT);
 	glColor3f(1.0f, 1.0f, 1.0f);

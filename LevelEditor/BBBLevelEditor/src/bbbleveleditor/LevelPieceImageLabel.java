@@ -94,7 +94,10 @@ public class LevelPieceImageLabel extends JLabel {
 			}
 			justTheSymbol = LevelPiece.TESLA_PIECE_SYMBOL;
 		}
-		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL + "(")) {
+		else if (pieceSymbol.length() >= 3 &&
+				(pieceSymbol.substring(0, 2).equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL + "(") ||
+				 pieceSymbol.substring(0, 2).equals(LevelPiece.ALWAYS_DROP_PIECE_SYMBOL + "("))) {
+			
 			String[] itemDropTypeNames = pieceSymbol.substring(2, pieceSymbol.length()).split("[\\(,\\)]");
 			for (int i = 0; i < itemDropTypeNames.length; i++) {
 				if (itemDropTypeNames[i].length() > 1 && !itemDropTypeNames[i].contains("{") && !itemDropTypeNames[i].contains("}")) {
@@ -102,7 +105,7 @@ public class LevelPieceImageLabel extends JLabel {
 				}
 			}
 			
-			justTheSymbol = LevelPiece.ITEM_DROP_PIECE_SYMBOL;
+			justTheSymbol = pieceSymbol.substring(0,1);
 		}
 		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.CANNON_PIECE_SYMBOL + "(")) {
 
@@ -231,6 +234,9 @@ public class LevelPieceImageLabel extends JLabel {
 	}
 	public boolean getIsItemDrop() {
 		return piece.getSymbol().equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL);
+	}
+	public boolean getIsAlwaysDrop() {
+		return piece.getSymbol().equals(LevelPiece.ALWAYS_DROP_PIECE_SYMBOL);
 	}
 	public boolean getIsCannonBlock() {
 		return piece.getSymbol().equals(LevelPiece.CANNON_PIECE_SYMBOL);

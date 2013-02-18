@@ -1229,6 +1229,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameView\AlwaysDropBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\BallSafetyNetMesh.h"
 						>
 					</File>
@@ -1284,6 +1288,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\GameView\AlwaysDropBlockMesh.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\GameView\BallSafetyNetMesh.cpp"
 						>

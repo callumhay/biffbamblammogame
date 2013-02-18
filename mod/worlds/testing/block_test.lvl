@@ -8,7 +8,7 @@ S E E E E E E E F(u) F(d) F(l) F(r) E E E E E S
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
-S H J M E E E E E E E E E E E E E S 
+S H J M E E E E E K(Random) E E E E E E E S 
 S G G G S P E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
 S R O Y G A(0,1,a,b) B C(180) X(c,d) I L D(all){1} W(1) T(P,ul) T(P,ur) N F(d) S 
@@ -52,6 +52,7 @@ BallCam 2
 MagnetPaddle 2
 MultiBall3 2
 IceBall 2
+MineLauncherPaddle 2
 SlowBall 2
 GravityBall 2
 CrazyBall 2

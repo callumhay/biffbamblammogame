@@ -52,6 +52,7 @@ public:
     static const char LASER_TURRET_BLOCK_CHAR;
     static const char ROCKET_TURRET_BLOCK_CHAR;
     static const char MINE_TURRET_BLOCK_CHAR;
+    static const char ALWAYS_DROP_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -77,6 +78,7 @@ public:
 
 	// Used to create a level from file
 	static GameLevel* CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, std::string filepath);
+    static bool ReadItemList(std::stringstream& inFile, std::vector<GameItem::ItemType>& items);
 
 	/**
 	 * Obtain the set of pieces making up the current state of the level.

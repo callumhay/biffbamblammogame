@@ -303,12 +303,12 @@ public:
 
 	// Increases the Speed of the ball
 	void IncreaseSpeed() {
-		this->SetSpeed(this->currSpeed + 4.25f);
+		this->SetSpeed(this->currSpeed + INCREMENT_SPD_AMT);
 	}
 
 	// Decreases the speed of the ball
 	void DecreaseSpeed() {
-		this->SetSpeed(std::max<float>(GameBall::SlowestSpeed, this->currSpeed - 4.25f));
+		this->SetSpeed(std::max<float>(GameBall::SlowestSpeed, this->currSpeed - INCREMENT_SPD_AMT));
 	}
 
 	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;
@@ -340,6 +340,8 @@ public:
     bool IsBallBoosting() const;
 
 private:
+    static const float INCREMENT_SPD_AMT;
+
     static float ZeroSpeed;
     static float SlowestSpeed;
     static float SlowSpeed;
