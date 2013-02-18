@@ -15,12 +15,12 @@ S E T(Y,lr) T(R,ul) E E E E T(O,ur) Y S
 S T(Y,lr) T(R,ul) B E E E G E T(O,ur) S 
 S T(R,ul) B T(Y,lr) T(R,ul) E T(G,lr) G E I S 
 S B T(Y,lr) T(R,ul) E T(G,lr) O E E E S 
-S T(Y,lr) T(R,ul) E T(G,lr) G E E T(Y,lr) T(G,ll) S 
-S T(R,ul) E T(G,lr) O E E E T(G,ur) T(Y,ul) S 
-S E T(G,lr) G E E T(G,lr) T(Y,ll) E E S 
-S T(G,lr) O E E E T(Y,ur) T(G,ul) E E S 
-S G E E E E E E E E S 
-S E E E E E E E E E S 
+S T(Y,lr) T(R,ul) E T(G,lr) G E E E E S 
+S T(R,ul) E T(G,lr) O E E G Y E S 
+S E T(G,lr) G E E E Y G E S 
+S T(G,lr) O E E E E E E E S 
+S G E E E Y G E E E S 
+S E E E E G Y E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -39,8 +39,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

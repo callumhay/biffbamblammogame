@@ -23,7 +23,7 @@ S R R R R R R R L E E E E E S
 S R R R R R R R R R R R R R S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
-S E E I E E E E E E E I E E S 
+S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
@@ -44,8 +44,8 @@ PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 0
 Blackout 2
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 0
