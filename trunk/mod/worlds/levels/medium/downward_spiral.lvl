@@ -1,4 +1,4 @@
-Spiral Navigator
+Downward Spiral
 16 33
 S S S S S S S S S S S S S S E E 
 S E E E E E E E E E E E E T(S,ur) S E 
@@ -16,9 +16,9 @@ S G B G F(l) E E E E E E E E E E S
 S E G E F(l) E E E E E E E E E E S 
 S G E G S E E E E E E E E E E S 
 S E B E S T(S,ll) E E E E E E E E T(S,lr) S 
-S Y Y Y S S S F(d) F(d) F(d) F(d) F(d) S S S S 
-S G G Y Y R R E E E E E E S E E 
-S G G G Y R R B E E E E E S E E 
+S Y Y Y S S F(d) F(d) F(d) F(d) F(d) S S S S S 
+S G G Y Y R E E E E E E R S E E 
+S G G G Y R E E E E E B R S E E 
 S G G G Y R R R R R R R R S E E 
 S G G G Y R R R R R R R R S E E 
 S G G G Y O O O O O O O O S E E 
@@ -45,8 +45,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

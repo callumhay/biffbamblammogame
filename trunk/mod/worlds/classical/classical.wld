@@ -23,10 +23,6 @@ resources/worlds/levels/easy/curve_ball.lvl
 resources/worlds/levels/easy/one_way_street.lvl
 resources/worlds/levels/easy/two_step.lvl
 
-# Teaching/Encouraging boosting (with one-ways, breakables, and bombs)
-resources/worlds/levels/easy/spiral_navigator.lvl
-
-
 
 # Ink block intro levels
 resources/worlds/levels/easy/heres_ink_in_ur_eye.lvl
@@ -34,8 +30,7 @@ resources/worlds/levels/easy/blow_up_before_gooing.lvl
 
 # Ink + one-way + bomb
 resources/worlds/levels/easy/inky_access.lvl
-
-
+resources/worlds/levels/medium/spike_jonze.lvl
 
 # Collateral block intro levels
 resources/worlds/levels/easy/breaking_barriers.lvl
@@ -48,10 +43,12 @@ resources/worlds/levels/easy/collateral_damage.lvl
 resources/worlds/levels/medium/death_from_above.lvl
 
 
+# Teaching/Encouraging boosting (with one-ways, breakables, and bombs)
+resources/worlds/levels/medium/downward_spiral.lvl
+
 
 # Levels with all or some elements learned in this movement...
 resources/worlds/levels/easy/step_it_up_a_notch.lvl
-resources/worlds/levels/medium/spike_jonze.lvl
 resources/worlds/levels/medium/blank_slate.lvl
 resources/worlds/levels/medium/dividing_lines.lvl
 
