@@ -85,18 +85,20 @@ Section -Prerequisites
     IfErrors continue
     continue:
     File vcredist_x86.exe
-    restart_installing_cpp_redist:
+    #restart_installing_cpp_redist:
     ExecWait '"$INSTDIR\vcredist_x86.exe"'
-    IfErrors error_installing_cpp_redist
-    goto success_installing_cpp_redist
-    
-    error_installing_cpp_redist:
-       MessageBox MB_OKCANCEL "You must install the C++ 2010 Redistributable in order to continue installation." IDOK restart_installing_cpp_redist IDCANCEL exit_now
-       exit_now:
-       Delete "$INSTDIR\vcredist_x86.exe"
-       Quit
 
-    success_installing_cpp_redist:
+    #IfErrors error_installing_cpp_redist
+    #goto success_installing_cpp_redist
+    
+    #error_installing_cpp_redist:
+    #   MessageBox MB_OKCANCEL "You must install the C++ 2010 Redistributable in order to continue installation." IDOK #restart_installing_cpp_redist IDCANCEL exit_now
+       #exit_now:
+      # Delete "$INSTDIR\vcredist_x86.exe"
+      # Quit
+
+   # success_installing_cpp_redist:
+
     Delete "$INSTDIR\vcredist_x86.exe"
 SectionEnd
 

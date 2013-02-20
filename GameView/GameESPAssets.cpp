@@ -13,6 +13,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 #include "BallSafetyNetMesh.h"
+#include "RegenBlockMesh.h"
 #include "CgFXFireBallEffect.h"
 #include "PointsHUD.h"
 
@@ -27,6 +28,7 @@
 #include "../GameModel/PortalBlock.h"
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/TeslaBlock.h"
+#include "../GameModel/RegenBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
@@ -116,7 +118,8 @@ sphereNormalsTex(NULL),
 cloudTex(NULL),
 vapourTrailTex(NULL),
 heartTex(NULL),
-chevronTex(NULL) {
+chevronTex(NULL),
+infinityTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -231,6 +234,8 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->heartTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->chevronTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->infinityTex);
     assert(removed);
 
 	// Delete any standalone effects
@@ -683,6 +688,10 @@ void GameESPAssets::InitESPTextures() {
     if (this->chevronTex == NULL) {
         this->chevronTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CHEVRON, Texture::Trilinear));
         assert(this->chevronTex != NULL);
+    }
+    if (this->infinityTex == NULL) {
+        this->infinityTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR, Texture::Trilinear));
+        assert(this->infinityTex != NULL);
     }
 
 	debug_opengl_state();
@@ -1311,7 +1320,8 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
                 case LevelPiece::LaserTurret:
                 case LevelPiece::RocketTurret:
                 case LevelPiece::MineTurret:
-                case LevelPiece::AlwaysDrop: {
+                case LevelPiece::AlwaysDrop:
+                case LevelPiece::Regen: {
 					bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 					Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
 					if (blockIsFrozen) {
@@ -2232,6 +2242,48 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	}
 	this->activeGeneralEmitters.push_back(splatEffect);
 	this->activeGeneralEmitters.push_back(inkOnoEffect);
+}
+
+void GameESPAssets::AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock) {
+    Point3D blockCenter(regenBlock.GetCenter());
+
+    ESPPointEmitter* lifeInfoEmitter = new ESPPointEmitter();
+    lifeInfoEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+    lifeInfoEmitter->SetInitialSpd(ESPInterval(5.0f, 7.0f));
+    lifeInfoEmitter->SetParticleLife(ESPInterval(4.0f));
+    lifeInfoEmitter->SetEmitDirection(Vector3D(0, 1, 0));
+    lifeInfoEmitter->SetEmitAngleInDegrees(80);
+    lifeInfoEmitter->SetEmitPosition(blockCenter);
+    lifeInfoEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    lifeInfoEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    
+    lifeInfoEmitter->AddEffector(&this->particleFader);
+    lifeInfoEmitter->AddEffector(&this->gravity);
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+	    lifeInfoEmitter->AddEffector(&this->smokeRotatorCCW);
+    }
+    else {
+	    lifeInfoEmitter->AddEffector(&this->smokeRotatorCW);
+    }
+
+    if (regenBlock.HasInfiniteLife()) {
+        lifeInfoEmitter->SetParticleSize(ESPInterval(RegenBlockMesh::LIFE_DISPLAY_WIDTH),
+            ESPInterval(RegenBlockMesh::LIFE_DISPLAY_HEIGHT));
+        
+        // Infinity symbol goes flying
+	    lifeInfoEmitter->SetParticles(1, this->infinityTex);
+    }
+    else {
+        const TextureFontSet* font = RegenBlockMesh::GetDisplayFont();
+        TextLabel2D textLbl(font, "0%");
+
+        lifeInfoEmitter->SetParticleSize(ESPInterval(RegenBlockMesh::GenerateFontDisplayScale()), ESPInterval(font->GetHeight()));
+        
+        // 0% goes flying
+        lifeInfoEmitter->SetParticles(1, textLbl);
+    }
+
+    this->activeGeneralEmitters.push_back(lifeInfoEmitter);
 }
 
 // Adds JUST the bits of snowflakey ice that come off the block when its frozen and gets hit

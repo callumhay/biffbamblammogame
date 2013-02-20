@@ -324,6 +324,7 @@ void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPie
         case LevelPiece::RocketTurret:
         case LevelPiece::MineTurret:
         case LevelPiece::AlwaysDrop:
+        case LevelPiece::Regen:
 			this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent, volume);
 			break;
 		

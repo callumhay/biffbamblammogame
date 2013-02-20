@@ -46,8 +46,11 @@ InGameDisplayState(display), timeUntilBigFlashyBoom(0.0), pulseTimeCounter(0.0) 
 }
 
 InGameBossLevelDisplayState::~InGameBossLevelDisplayState() {
-    this->display->GetAssets()->ToggleLightsForBossDeath(true, 0.01);
+    this->display->GetAssets()->ToggleLightsForBossDeath(true, 0.001);
+    this->display->GetAssets()->ToggleLights(true, 0.001);
     this->display->GetModel()->GetPlayerPaddle()->SetLevelBoundsChecking(true);
+    this->display->GetModel()->ToggleAllowPaddleBallLaunching(true);
+    this->display->GetCamera().ClearCameraShake();
 }
 
 void InGameBossLevelDisplayState::RenderFrame(double dT) {

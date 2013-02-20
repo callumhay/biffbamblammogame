@@ -312,6 +312,7 @@ public:
     const char* MINE_TURRET_BARREL_MESH;
     const char* MINE_MESH;
     const char* ALWAYS_DROP_BLOCK_MESH;
+    const char* REGEN_BLOCK_MESH;
 
 	const char* SKYBOX_MESH;
 	const char* ITEM_MESH;

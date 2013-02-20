@@ -1265,6 +1265,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\RegenBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\RocketMesh.h"
 						>
 					</File>
@@ -1322,6 +1326,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\PrismBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\RegenBlockMesh.cpp"
 						>
 					</File>
 					<File
@@ -1869,6 +1877,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\RegenBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\RocketTurretBlock.h"
 						>
 					</File>
@@ -1950,6 +1962,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\PrismBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\RegenBlock.cpp"
 						>
 					</File>
 					<File

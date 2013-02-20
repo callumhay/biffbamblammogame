@@ -88,6 +88,7 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->blockEntries.insert(std::make_pair(LevelPiece::RocketTurret,      new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("rocket_turret_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::MineTurret,        new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("mine_turret_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::AlwaysDrop,        new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("always_drop_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Regen,             new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("regen_block.txt"))));
 }
 
 Blammopedia::~Blammopedia() {

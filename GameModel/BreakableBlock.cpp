@@ -55,9 +55,9 @@ LevelPiece* BreakableBlock::Destroy(GameModel* gameModel, const LevelPiece::Dest
 }
 
 void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                                  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                  const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                  const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	UNUSED_PARAMETER(bottomLeftNeighbor);
 	UNUSED_PARAMETER(bottomRightNeighbor);
@@ -74,7 +74,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 	// Left boundry of the piece
     shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable &&
-         leftNeighbor->GetType() != LevelPiece::AlwaysDrop));
+         leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 								this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -88,7 +88,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 	// Bottom boundry of the piece
     shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
-         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop));
+         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -102,7 +102,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 	// Right boundry of the piece
     shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
-         rightNeighbor->GetType() != LevelPiece::AlwaysDrop));
+         rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
 		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -116,7 +116,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 	// Top boundry of the piece
     shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
-         topNeighbor->GetType() != LevelPiece::AlwaysDrop));
+         topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -255,7 +255,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 			// EVENT: Ice was shattered
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
 			// If the piece is frozen it shatters and is immediately destroyed on ball impact
-            newPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
+            newPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
 		}
 		else {
 			bool isUberBall = ((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall);

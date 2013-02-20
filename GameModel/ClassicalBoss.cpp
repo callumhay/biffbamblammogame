@@ -194,11 +194,11 @@ void ClassicalBoss::Init() {
 
                 // bottomRightTablature
                 {
-                    BossBodyPart* bottomLeftTablature = new BossBodyPart(tablatureBounds);
-                    bottomLeftTablature->Translate(Vector3D(5.101f, -2.854f, 0.0f));
-                    this->alivePartsRoot->AddBodyPart(bottomLeftTablature);
+                    BossBodyPart* bottomRightTablature = new BossBodyPart(tablatureBounds);
+                    bottomRightTablature->Translate(Vector3D(5.101f, -2.854f, 0.0f));
+                    this->alivePartsRoot->AddBodyPart(bottomRightTablature);
                     this->bottomRightTablatureIdx = this->bodyParts.size();
-                    this->bodyParts.push_back(bottomLeftTablature);
+                    this->bodyParts.push_back(bottomRightTablature);
                 }
             }
 

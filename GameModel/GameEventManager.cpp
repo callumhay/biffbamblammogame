@@ -649,6 +649,13 @@ void GameEventManager::ActionMineFiredByTurret(const MineTurretBlock& block) {
 	}
 }
 
+void GameEventManager::ActionRegenBlockLifeChanged(const RegenBlock& block) {
+	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+		(*listenerIter)->RegenBlockLifeChangedEvent(block);
+	}
+}
+
 void GameEventManager::ActionBossHurt(const BossWeakpoint* hurtPart) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {

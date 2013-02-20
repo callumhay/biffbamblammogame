@@ -28,7 +28,7 @@ public:
         return Projectile::MineTurretBulletProjectile;
     }
 
-    float GetDamage() const { return 200.0f; }
+    float GetDamage() const { return 100.0f; }
 
     float GetProximityRadius() const { return MineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS; };
 };

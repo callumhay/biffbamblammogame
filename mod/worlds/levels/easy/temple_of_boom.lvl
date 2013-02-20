@@ -1,4 +1,4 @@
-Chain of BOOM
+Temple of BOOM
 11 25
 E T(S,lr) S S S S S S S T(S,ll) E 
 T(S,lr) T(S,ul) E R B R B R E T(S,ur) T(S,ll) 
@@ -37,8 +37,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0

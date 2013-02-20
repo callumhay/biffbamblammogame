@@ -37,9 +37,11 @@ public:
     Collision::Circle2D GenerateCircleFromLines() const;
 
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-	    Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	    Collision::LineSeg2D& collisionLine, double& timeSinceCollision,
+        const Vector2D& lineVelocity = Vector2D(0,0)) const;
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-	    Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision) const;
+	    Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision,
+        const Vector2D& lineVelocity = Vector2D(0,0)) const;
 
 	Point2D ClosestPoint(const Point2D& pt) const;
 	bool IsInside(const Point2D& pt) const;
@@ -107,10 +109,11 @@ private:
 };
 
 inline bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-                                   Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+                                   Collision::LineSeg2D& collisionLine, double& timeSinceCollision,
+                                   const Vector2D& lineVelocity) const {
 
     int temp;
-    return this->Collide(dT, c, velocity, n, collisionLine, temp, timeSinceCollision);
+    return this->Collide(dT, c, velocity, n, collisionLine, temp, timeSinceCollision, lineVelocity);
 }
 
 #endif

@@ -28,6 +28,7 @@
 
 class LevelPiece;
 class PortalBlock;
+class RegenBlock;
 class GameBall;
 class GameItem;
 class Texture;
@@ -149,6 +150,7 @@ private:
     Texture2D* vapourTrailTex;
     Texture2D* heartTex;
     Texture2D* chevronTex;
+    Texture2D* infinityTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -263,7 +265,6 @@ public:
 	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
 		bool gravity = true, size_t numParticles = 10);
 
-
     void AddBossHurtEffect(const Point2D& pos, float width, float height);
     void AddBossAngryEffect(const Point2D& pos, float width, float height);
 
@@ -296,7 +297,8 @@ public:
 	void AddBasicBlockBreakEffect(const LevelPiece& block);
 	void AddBombBlockBreakEffect(const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
-	
+	void AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock);
+
 	void AddIceBitsBreakEffect(const LevelPiece& block);
 	void AddIceCubeBlockBreakEffect(const LevelPiece& block, const Colour& colour);
 

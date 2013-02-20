@@ -138,6 +138,7 @@ void ClassicalBossAI::UpdateMovement(double dT, GameModel* gameModel) {
 
     // Update the speed based on the acceleration
     this->currVel = this->currVel + dT * this->GetAcceleration();
+    this->boss->alivePartsRoot->SetCollisionVelocity(this->currVel);
 }
 
 // END ClassicalBossAI *************************************************************
@@ -815,9 +816,18 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         // indicate that the boss can hurt the paddle while it attacks
         if (this->armAttackYMovementAnim.GetCurrentTimeValue() <= ARM_ATTACK_DELTA_T) {
             this->isAttackingWithArm = true;
+            Vector2D armAtkVel(0, -this->GetMaxArmAttackYMovement() / ARM_ATTACK_DELTA_T);
+            if (isLeftArmAttacking) {
+                this->leftArm->SetCollisionVelocity(armAtkVel);
+            }
+            if (isRightArmAttacking) {
+                 this->rightArm->SetCollisionVelocity(armAtkVel);
+            }
         }
         else {
             this->isAttackingWithArm = false;
+            this->leftArm->SetCollisionVelocity(Vector2D(0,0));
+            this->rightArm->SetCollisionVelocity(Vector2D(0,0));
         }
         
         if (attackIsDone) {
@@ -1875,9 +1885,11 @@ void HeadAI::UpdateMovement(double dT, GameModel* gameModel) {
     // Update the pediment movement and the eye movement independently...
     Vector2D dMovement = dT * this->currEyeVel;
     this->eye->Translate(Vector3D(dMovement));
+    this->eye->SetCollisionVelocity(this->currEyeVel);
 
     dMovement = dT * this->currPedimentVel;
     this->pediment->Translate(Vector3D(dMovement));
+    this->pediment->SetCollisionVelocity(this->currPedimentVel);
 }
 
 void HeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel) {

@@ -23,7 +23,7 @@ public:
     ProjectileType GetType() const {
         return Projectile::BallLaserBulletProjectile;
     }
-    float GetDamage() const { return 50.0f; }
+    float GetDamage() const { return 40.0f; }
 
 private:
     // Disallow assignment

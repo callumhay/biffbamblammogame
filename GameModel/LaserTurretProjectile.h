@@ -27,7 +27,7 @@ public:
         return Projectile::LaserTurretBulletProjectile;
     }
 
-    float GetDamage() const { return 80.0f; }
+    float GetDamage() const { return 40.0f; }
 
     bool BlastsThroughSafetyNets() const { return false; }
     bool IsDestroyedBySafetyNets() const { return true;  }

@@ -82,6 +82,14 @@ Green (Breakable) LR Triangle
 green_breakable_lr.png
 T(G,lr)
 
+Regen (Finite)
+regen_finite.png
+Q(f)
+
+Regen (Infinite)
+regen_infinite.png
+Q(i)
+
 Solid (Unbreakable)
 solid.png
 S

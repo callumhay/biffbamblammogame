@@ -70,6 +70,9 @@ public:
 
     virtual void ColourAnimationFinished() {};
 
+    void SetCollisionVelocity(const Vector2D& v);
+    const Vector2D& GetCollisionVelocity() const;
+
 	// Track the status of the body part, effects its properties and how it works/acts
 	//enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, FrozenStatus = 0x00000002 };
 	//bool HasStatus(const PieceStatus& status) const;
@@ -86,6 +89,8 @@ protected:
     BoundingLines localBounds;
 
     AnimationMultiLerp<ColourRGBA> rgbaAnim;
+
+    Vector2D collisionVelocity;
 
     //int32_t pieceStatus;
 
@@ -116,7 +121,8 @@ inline void BossBodyPart::Tick(double dT) {
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                                   Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
-    if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision)) {
+    if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), 
+        n, collisionLine, timeSinceCollision, this->collisionVelocity)) {
         return this;
     }
     return NULL;
@@ -224,5 +230,13 @@ inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {
     return this->GetWorldBounds().GenerateAABBFromLines();
 }
 
+// Sets the velocity to use when doing collisions with this object - allows the
+// game to accomodate the velocity that this body part is moving with
+inline void BossBodyPart::SetCollisionVelocity(const Vector2D& v) {
+    this->collisionVelocity = v;
+}
+inline const Vector2D& BossBodyPart::GetCollisionVelocity() const {
+    return this->collisionVelocity;
+}
 
 #endif // __BOSSBODYPART_H__

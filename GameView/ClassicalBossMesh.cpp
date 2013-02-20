@@ -141,6 +141,7 @@ ClassicalBossMesh::~ClassicalBossMesh() {
         delete this->columnExplodingEmitters[i];
     }
     this->columnExplodingEmitters.clear();
+
     for (int i = 0; i < static_cast<int>(this->tablatureExplodingEmitters.size()); i++) {
         delete this->tablatureExplodingEmitters[i];
     }

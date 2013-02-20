@@ -9,6 +9,11 @@
  * resulting work only under the same or similar licence to this one.
  */
 
+//#ifdef _DEBUG
+// Visual Leak Detector Includes
+//#include <vld.h>
+//#endif
+
 #include "BlammoEngine/FBObj.h"
 #include "BlammoEngine/Noise.h"
 #include "BlammoEngine/GeometryMaker.h"
@@ -42,10 +47,7 @@ static GameSoundAssets* sound = NULL;
  * Clean up the ModelViewController classes that run the game.
  */
 static void CleanUpMVC() {
-	GameControllerManager::DeleteInstance();
-
     // Order matters here!!!
-
 	if (display != NULL) {
 		delete display;
 		display = NULL;
@@ -111,6 +113,7 @@ static void KillGraphicsAndWindow(bool gameIsQuiting) {
 	CleanUpMVC();
 
 	// Clear up singletons
+    GameControllerManager::DeleteInstance();
 	LoadingScreen::DeleteInstance();
 	Noise::DeleteInstance();
 	GeometryMaker::DeleteInstance();

@@ -27,6 +27,7 @@ class CannonBlock;
 class TeslaBlock;
 class ItemDropBlock;
 class SwitchBlock;
+class RegenBlock;
 class GameItem;
 class RandomItem;
 class GameItemTimer;
@@ -151,6 +152,8 @@ public:
         MineTurretBlock::TurretAIState newState);
     void ActionMineFiredByTurret(const MineTurretBlock& block);
     
+    void ActionRegenBlockLifeChanged(const RegenBlock& block);
+
     // Boss Events
     void ActionBossHurt(const BossWeakpoint* hurtPart);
     void ActionBossAngry(const Boss* boss, const BossBodyPart* angryPart);

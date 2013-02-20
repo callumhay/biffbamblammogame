@@ -66,6 +66,9 @@ namespace NumberFuncs {
     template <typename T> T LerpOverTime(double x0, double x1, const T& y0, const T& y1, double x) {
         return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
     }
+    template <typename T> T LerpOverFloat(float x0, float x1, const T& y0, const T& y1, float x) {
+        return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+    }
 };
 
 inline int NumberFuncs::SignOf(int a) {

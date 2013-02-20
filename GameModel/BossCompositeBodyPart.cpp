@@ -149,6 +149,13 @@ void BossCompositeBodyPart::ResetColourRGBAAnimation() {
     }
 }
 
+void BossCompositeBodyPart::SetCollisionVelocity(const Vector2D& v) {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->SetCollisionVelocity(v);      
+    }
+}
+
 void BossCompositeBodyPart::RotateZ(float rotZDegs) {
     if (fabs(rotZDegs) < EPSILON) {
         return;

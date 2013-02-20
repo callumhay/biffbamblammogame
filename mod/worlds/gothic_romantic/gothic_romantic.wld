@@ -4,7 +4,7 @@ Gothic and Romantic
 
 resources/textures/gothic_romantic_world_select_256x256.jpg
 
-#resources/worlds/testing/block_test.lvl
+resources/worlds/testing/block_test.lvl
 
 # Item drop block intro level
 resources/worlds/levels/easy/running_amoc.lvl
