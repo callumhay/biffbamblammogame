@@ -34,7 +34,10 @@ Boss::~Boss() {
         part = NULL;
     }
     this->bodyParts.clear();
+
     this->root = NULL;
+    this->alivePartsRoot = NULL;
+    this->deadPartsRoot  = NULL;
 
 	// Delete the state
     if (this->currAIState != NULL) {

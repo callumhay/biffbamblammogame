@@ -87,7 +87,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 		    // EVENT: Ice was shattered
 		    GameEventManager::Instance()->ActionBlockIceShattered(*this);
 		    // If the piece is frozen it shatters and is immediately destroyed on ball impact
-            resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
 	    }
         else {
 		    // Being hit by the ball, when not frozen, causes the collateral block to detonate and
@@ -264,12 +264,13 @@ LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 	assert(this->currState == CollateralBlock::InitialState);
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // This shouldn't happen...
+        assert(false);
+
 		// EVENT: Ice was shattered
 		GameEventManager::Instance()->ActionBlockIceShattered(*this);
-		// Remove the ice status immediately...
-		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-        UNUSED_VARIABLE(success);
-		assert(success);
+        // Collateral blocks that are frozen DONT detonate, they get destroyed
+		return this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
 	}
 
 	// The block is destroyed in the game level, however it lives on as a projectile

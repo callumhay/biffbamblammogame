@@ -23,6 +23,8 @@ GameControllerManager::GameControllerManager() : model(NULL), display(NULL) {
 }
 
 GameControllerManager::~GameControllerManager() {
+    this->ClearControllerVibration();
+
 	// Clean up all the controllers...
 	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end(); ++iter) {
 		BBBGameController* currController = *iter;

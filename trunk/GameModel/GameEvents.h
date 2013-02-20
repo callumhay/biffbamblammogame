@@ -21,6 +21,7 @@
 #include "SwitchBlock.h"
 #include "ItemDropBlock.h"
 #include "LaserTurretBlock.h"
+#include "RegenBlock.h"
 #include "RandomItem.h"
 #include "Beam.h"
 #include "PointAward.h"
@@ -662,6 +663,14 @@ public:
      * Arguements: block - the mine turret block that fired.
      */
     virtual void MineFiredByTurretEvent(const MineTurretBlock& block) {
+        UNUSED_PARAMETER(block);
+    }
+
+    /**
+     * Event triggered when a regen block's life changes. Event is triggered immediately after the change.
+     * Arguements: block - The regen block that changed.
+     */
+    virtual void RegenBlockLifeChangedEvent(const RegenBlock& block) {
         UNUSED_PARAMETER(block);
     }
 

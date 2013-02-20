@@ -79,7 +79,8 @@ public:
 
     virtual void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim) = 0;
     virtual void ResetColourRGBAAnimation() = 0;
-        
+    virtual void SetCollisionVelocity(const Vector2D& v) = 0;
+
 #ifdef _DEBUG
     virtual void DebugDraw() const = 0;
 #endif

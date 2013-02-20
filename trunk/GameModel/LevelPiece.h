@@ -46,13 +46,16 @@ public:
 	static const float HALF_PIECE_HEIGHT;
 	static const float HALF_PIECE_DEPTH;
 
-    enum DestructionMethod { NotApplicableDestruction, RegularDestruction, LaserProjectileDestruction, RocketDestruction, LaserBeamDestruction,
-                             CollateralDestruction, PaddleShieldDestruction, BombDestruction, FireDestruction,
-                             TeslaDestruction, MineDestruction }; 
+    enum DestructionMethod { 
+        NotApplicableDestruction, RegularDestruction, LaserProjectileDestruction, RocketDestruction, LaserBeamDestruction,
+        CollateralDestruction, PaddleShieldDestruction, BombDestruction, FireDestruction,
+        TeslaDestruction, MineDestruction, IceShatterDestruction
+    }; 
 
-	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
-                          Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
-                          Switch, OneWay, NoEntry, LaserTurret, RocketTurret, MineTurret, AlwaysDrop };
+	enum LevelPieceType {
+        Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle, Cannon,
+        Collateral, Tesla, ItemDrop, Switch, OneWay, NoEntry, LaserTurret, RocketTurret, MineTurret, AlwaysDrop, Regen
+    };
 
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
@@ -174,6 +177,7 @@ protected:
 	void DoIceCubeReflectRefractLaserBullets(Projectile* projectile, GameModel* gameModel) const;
 	void GetIceCubeReflectionRefractionRays(const Point2D& currCenter, const Vector2D& currDir, 
 	    std::list<Collision::Ray2D>& rays) const;
+    void DoPossibleFireGlobDrop(GameModel* gameModel) const;
 
 private:
 	DISALLOW_COPY_AND_ASSIGN(LevelPiece);

@@ -34,6 +34,7 @@
 #include "RocketTurretBlock.h"
 #include "MineTurretBlock.h"
 #include "AlwaysDropBlock.h"
+#include "RegenBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 #include "PointAward.h"
@@ -68,12 +69,16 @@ const char GameLevel::LASER_TURRET_BLOCK_CHAR   = 'H';
 const char GameLevel::ROCKET_TURRET_BLOCK_CHAR  = 'J';
 const char GameLevel::MINE_TURRET_BLOCK_CHAR    = 'M';
 const char GameLevel::ALWAYS_DROP_BLOCK_CHAR    = 'K';
+const char GameLevel::REGEN_BLOCK_CHAR          = 'Q';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
 const char GameLevel::TRI_LOWER_CORNER		= 'l';
 const char GameLevel::TRI_LEFT_CORNER       = 'l';
 const char GameLevel::TRI_RIGHT_CORNER		= 'r';
+
+const char GameLevel::FINITE_LIFE_CHAR   = 'f';
+const char GameLevel::INFINITE_LIFE_CHAR = 'i';
 
 const char* GameLevel::BOSS_LEVEL_KEYWORD = "boss";
 
@@ -820,6 +825,45 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 					}
 
 					newPiece = new AlwaysDropBlock(itemTypes, pieceWLoc, pieceHLoc);
+                    break;
+                }
+
+                case GameLevel::REGEN_BLOCK_CHAR: {
+                    // Q([f|i]) - Regen block
+                    // [f|i] - 'f' means that the block has finite life, 'i' means that the block has infinite life
+
+                    char tempChar;
+
+                    // Read the opening bracket
+                    *inFile >> tempChar;
+				    if (tempChar != '(') {
+				        debug_output("ERROR: poorly formed regen block syntax, missing '('");
+					    break;
+				    }
+
+                    // Read whether it has infinite life or finite life
+                    *inFile >> tempChar;
+                    bool hasInfiniteLife = false;
+                    if (tempChar == GameLevel::FINITE_LIFE_CHAR) {
+                        hasInfiniteLife = false;
+                    }
+                    else if (tempChar == GameLevel::INFINITE_LIFE_CHAR) {
+                        hasInfiniteLife = true;
+                    }
+                    else {
+					    debug_output("ERROR: poorly formed regen block syntax '" << GameLevel::FINITE_LIFE_CHAR << "' or '" <<
+                            GameLevel::INFINITE_LIFE_CHAR << "' must be used an no other characters.");
+					    break;
+                    }
+
+                    // Read the closing bracket
+				    *inFile >> tempChar;
+				    if (tempChar != ')') {
+					    debug_output("ERROR: poorly formed regen block syntax, missing ')'");
+					    break;
+				    }
+
+                    newPiece = new RegenBlock(hasInfiniteLife, pieceWLoc, pieceHLoc);
                     break;
                 }
 

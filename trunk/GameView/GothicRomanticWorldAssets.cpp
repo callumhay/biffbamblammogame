@@ -24,8 +24,7 @@ GameWorldAssets(new DecoSkybox(),
 fireColourFader(ColourRGBA(1.0f, 0.9f, 0.0f, 1.0f), ColourRGBA(0.3f, 0.10f, 0.0f, 0.2f)),
 fireParticleScaler(1.0f, 0.025f),
 fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector3D(1,1,1)),
-fireAccel3(Vector3D(1,1,1)), fireAccel4(Vector3D(1,1,1)),
-fireAccel5(Vector3D(1,1,1)), fireAccel6(Vector3D(1,1,1)){
+fireAccel4(Vector3D(1,1,1)), fireAccel5(Vector3D(1,1,1)), fireAccel6(Vector3D(1,1,1)){
 
     // Initialize textures...
 	this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
@@ -75,7 +74,6 @@ void GothicRomanticWorldAssets::Tick(double dT) {
 
     this->ApplyRandomFireAccel(fireAccel1);
     this->ApplyRandomFireAccel(fireAccel2);
-    this->ApplyRandomFireAccel(fireAccel3);
     this->ApplyRandomFireAccel(fireAccel4);
     this->ApplyRandomFireAccel(fireAccel5);
     this->ApplyRandomFireAccel(fireAccel6);
@@ -89,8 +87,6 @@ void GothicRomanticWorldAssets::Tick(double dT) {
     this->fireEmitter2.SetParticleAlpha(ESPInterval(alpha));
     this->fireEmitter2.Tick(dT);
 
-    this->fireEmitter3.SetParticleAlpha(ESPInterval(alpha));
-    this->fireEmitter3.Tick(dT);
     this->fireEmitter4.SetParticleAlpha(ESPInterval(alpha));
     this->fireEmitter4.Tick(dT);
     this->fireEmitter5.SetParticleAlpha(ESPInterval(alpha));
@@ -112,30 +108,25 @@ void GothicRomanticWorldAssets::InitializeEmitters() {
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
 	this->fireEffect.SetMaskTexture(this->cloudTex);
 
-	this->BuildFrontDoorFireEmitter(Point3D(8.180f, 0.85f, 0.310f), fireEmitter1);
+	this->BuildFrontDoorFireEmitter(Point3D(7.180f, 0.85f, -0.690f), fireEmitter1);
 	fireEmitter1.AddEffector(&this->fireAccel1);
 
-    this->BuildFrontDoorFireEmitter(Point3D(11.067f, 0.85f, 0.310f), fireEmitter2);
+    this->BuildFrontDoorFireEmitter(Point3D(10.067f, 0.85f, -0.690f), fireEmitter2);
 	fireEmitter2.AddEffector(&this->fireAccel2);
 
-	this->BuildWindowWallFireEmitter(Point3D(-7.55f, 0.5f, -13.013f), fireEmitter3);
-	fireEmitter3.AddEffector(&this->fireAccel3);
-
-    this->BuildWindowWallFireEmitter(Point3D(-4.988f, 0.5f, -13.013), fireEmitter4);
+    this->BuildWindowWallFireEmitter(Point3D(-5.988f, 0.5f, -14.013), fireEmitter4);
 	fireEmitter4.AddEffector(&this->fireAccel4);
 
-	this->BuildWindowWallFireEmitter(Point3D(-2.438f, 0.5f, -13.013), fireEmitter5);
+	this->BuildWindowWallFireEmitter(Point3D(-3.438f, 0.5f, -14.013), fireEmitter5);
 	fireEmitter5.AddEffector(&this->fireAccel5);
 
-    this->BuildWindowWallFireEmitter(Point3D(0.112f, 0.5f, -13.013), fireEmitter6);
+    this->BuildWindowWallFireEmitter(Point3D(-0.888f, 0.5f, -14.013), fireEmitter6);
 	fireEmitter6.AddEffector(&this->fireAccel6);
-
 
 	// Tick all the emitters for a bit to get them to look like they've been spawning for awhile
 	for (int i = 0; i < 60; i++) {
 		this->fireEmitter1.Tick(0.5);
 		this->fireEmitter2.Tick(0.5);
-		this->fireEmitter3.Tick(0.5);
 		this->fireEmitter4.Tick(0.5);
 		this->fireEmitter5.Tick(0.5);
 		this->fireEmitter6.Tick(0.5);

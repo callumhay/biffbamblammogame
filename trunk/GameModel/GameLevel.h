@@ -53,12 +53,16 @@ public:
     static const char ROCKET_TURRET_BLOCK_CHAR;
     static const char MINE_TURRET_BLOCK_CHAR;
     static const char ALWAYS_DROP_BLOCK_CHAR;
+    static const char REGEN_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
 	static const char TRI_LOWER_CORNER;
 	static const char TRI_LEFT_CORNER;
 	static const char TRI_RIGHT_CORNER;
+
+    static const char FINITE_LIFE_CHAR;
+    static const char INFINITE_LIFE_CHAR;
 
     static const char* BOSS_LEVEL_KEYWORD;
 

@@ -94,6 +94,9 @@ public:
 		return this->timeSinceLastCollision;
 	}
 
+    float GetCollisionDamage() const;
+    float GetDamageMultiplier() const;
+
 	/**
 	 * Whether or not this ball can collide with other balls.
 	 */
@@ -404,6 +407,13 @@ private:
     void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
 };
+
+/**
+ * Get the amount of damage that this ball does when it collides with something.
+ */
+inline float GameBall::GetCollisionDamage() const {
+    return this->GetDamageMultiplier() * GameModelConstants::GetInstance()->DEFAULT_DAMAGE_ON_BALL_HIT;
+}
 
 inline const CannonBlock* GameBall::GetCannonBlock() const {
 	return this->currState->GetCannonBlock();

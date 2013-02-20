@@ -57,6 +57,7 @@ bool ItemDropBlock::ProjectilePassesThrough(const Projectile* projectile) const 
  * on it existing if they setup a level where it can be destroyed..
  */
 LevelPiece* ItemDropBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 		// EVENT: Ice was shattered
 		GameEventManager::Instance()->ActionBlockIceShattered(*this);

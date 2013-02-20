@@ -26,7 +26,7 @@ public:
     ProjectileType GetType() const {
         return Projectile::PaddleLaserBulletProjectile;
     }
-    float GetDamage() const { return 90.0f; }
+    float GetDamage() const { return 60.0f; }
 
     bool BlastsThroughSafetyNets() const { return false; }
     bool IsDestroyedBySafetyNets() const { return true;  }

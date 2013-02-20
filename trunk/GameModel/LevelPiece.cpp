@@ -19,6 +19,7 @@
 #include "Beam.h"
 #include "PaddleLaserProjectile.h"
 #include "PaddleMineProjectile.h"
+#include "FireGlobProjectile.h"
 
 const LevelPiece::TriggerID LevelPiece::NO_TRIGGER_ID = -1;
 
@@ -78,6 +79,7 @@ bool LevelPiece::IsValidLevelPieceType(int pieceType) {
         case LevelPiece::RocketTurret:
         case LevelPiece::MineTurret:
         case LevelPiece::AlwaysDrop:
+        case LevelPiece::Regen:
             return true;
         default:
             assert(false);
@@ -442,4 +444,23 @@ void LevelPiece::GetIceCubeReflectionRefractionRays(const Point2D& currCenter,
 	}
 
 	rays.push_front(defaultRay);
+}
+
+void LevelPiece::DoPossibleFireGlobDrop(GameModel* gameModel) const {
+    int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
+	if (fireGlobDropRandomNum != 0) {
+        return;
+    }
+
+	float globSize  = 0.4f * LevelPiece::HALF_PIECE_WIDTH + Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
+	float edgeDist  = ((LevelPiece::PIECE_WIDTH - globSize) / 2.0f) - 0.01f;
+	assert(edgeDist >= 0.0f);
+
+	// Calculate a place on the block to drop the glob from...
+	Point2D dropPos = this->GetCenter() - Vector2D(Randomizer::GetInstance()->RandomNumNegOneToOne() * edgeDist, globSize / 2.0f);
+
+	// Drop a glob of fire downwards from the block...
+	Projectile* fireGlobProjectile = new FireGlobProjectile(dropPos, globSize);
+	fireGlobProjectile->SetLastThingCollidedWith(this);
+	gameModel->AddProjectile(fireGlobProjectile);
 }

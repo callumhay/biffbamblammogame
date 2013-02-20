@@ -42,12 +42,13 @@
 #include "../GameModel/LaserTurretBlock.h"
 #include "../GameModel/RocketTurretBlock.h"
 #include "../GameModel/AlwaysDropBlock.h"
+#include "../GameModel/RegenBlock.h"
 
-LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
-styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
+LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) :
+currLevel(NULL), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
-oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL),
+oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL), regenBlock(NULL),
 statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
 remainingPiecePulser(0,0), bossMesh(NULL) {
 	
@@ -74,6 +75,7 @@ remainingPiecePulser(0,0), bossMesh(NULL) {
     this->rocketTurretBlock             = new RocketTurretBlockMesh();
     this->mineTurretBlock               = new MineTurretBlockMesh();
     this->alwaysDropBlock               = new AlwaysDropBlockMesh();
+    this->regenBlock                    = new RegenBlockMesh();
     this->noEntryBlock                  = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NO_ENTRY_BLOCK_MESH);
     this->oneWayUpBlock                 = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_UP_MESH);
     this->oneWayDownBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_DOWN_MESH);
@@ -108,6 +110,7 @@ remainingPiecePulser(0,0), bossMesh(NULL) {
     INSERT_MATERIAL_GRPS(this->oneWayDownBlock, false);
     INSERT_MATERIAL_GRPS(this->oneWayLeftBlock, false);
     INSERT_MATERIAL_GRPS(this->oneWayRightBlock, false);
+    INSERT_MATERIAL_GRPS(this->regenBlock, false);
 
 #pragma warning(pop)
 
@@ -149,6 +152,8 @@ LevelMesh::~LevelMesh() {
     this->mineTurretBlock = NULL;
     delete this->alwaysDropBlock;
     this->alwaysDropBlock = NULL;
+    delete this->regenBlock;
+    this->regenBlock = NULL;
 
     // Release all resources
     bool success = false;
@@ -244,6 +249,7 @@ void LevelMesh::Flush() {
     this->rocketTurretBlock->Flush();
     this->mineTurretBlock->Flush();
     this->alwaysDropBlock->Flush();
+    this->regenBlock->Flush();
 
     // Clear any boss mesh
     if (this->bossMesh != NULL) {
@@ -368,6 +374,13 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 
                     Texture2D* itemTexture = gameItemAssets.GetItemTexture(alwaysDropLvlPiece->GetNextDropItemType());
                     this->alwaysDropBlock->AddAlwaysDropBlock(alwaysDropLvlPiece, itemTexture);
+                    break;
+                }
+
+                // 10) Regen Block
+                case LevelPiece::Regen: {
+                    RegenBlock* regenLvlPiece = static_cast<RegenBlock*>(currPiece);
+                    this->regenBlock->AddRegenBlock(regenLvlPiece);
                     break;
                 }
 
@@ -512,6 +525,12 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
             break;
         }
 
+        case LevelPiece::Regen: {
+            const RegenBlock* regenPiece = static_cast<const RegenBlock*>(&piece);
+            this->regenBlock->RemoveRegenBlock(regenPiece);
+            break;
+        }
+
 		default:
 			break;
 	}
@@ -564,6 +583,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->mineTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->alwaysDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->regenBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
@@ -761,6 +781,9 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
         case LevelPiece::AlwaysDrop:
             break;
 
+        case LevelPiece::Regen:
+            return &this->regenBlock->GetMaterialGroups();
+
 		default:
 			assert(false);
 			break;
@@ -882,6 +905,7 @@ void LevelMesh::SetLevelAlpha(float alpha) {
     this->rocketTurretBlock->SetAlphaMultiplier(alpha);
     this->mineTurretBlock->SetAlphaMultiplier(alpha);
     this->alwaysDropBlock->SetAlphaMultiplier(alpha);
+    this->regenBlock->SetAlphaMultiplier(alpha);
 }
 
 double LevelMesh::ActivateBossIntro() {

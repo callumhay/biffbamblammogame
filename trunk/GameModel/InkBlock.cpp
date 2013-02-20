@@ -167,7 +167,8 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
             }
 		}
         else {
-            resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
+            resultingPiece = this->Destroy(gameModel, 
+                this->HasStatus(LevelPiece::IceCubeStatus) ? LevelPiece::IceShatterDestruction : LevelPiece::RegularDestruction);
         }
 	}
 

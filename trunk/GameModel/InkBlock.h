@@ -59,8 +59,6 @@ public:
 		return true;
 	}
 
-	// Ink blocks do not reflect or refract light.
-	// Returns: false
 	bool IsLightReflectorRefractor() const {
 		// When frozen in ice a block can reflect/refract lasers and the like
 		return this->HasStatus(LevelPiece::IceCubeStatus);

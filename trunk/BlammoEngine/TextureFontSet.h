@@ -32,6 +32,7 @@ public:
 	float OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn = false, float scale = 1.0f) const;
     float OrthoPrint(const Point3D& topLeftCorner, const std::string& s, float rotationInDegs, float scale = 1.0f) const;
 	void Print(const std::string& s) const;
+    void BasicPrint(const std::string& s) const;
 
 	float GetWidth(const std::string& s) const;
     std::vector<std::string> ParseTextToWidth(const std::string& s, float width, float scale) const;
@@ -62,4 +63,11 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(TextureFontSet);
 };
+
+
+inline void TextureFontSet::BasicPrint(const std::string& s) const {
+	glListBase(this->baseDisplayList);
+	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
+}
+
 #endif

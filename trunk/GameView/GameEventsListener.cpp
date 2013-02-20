@@ -34,6 +34,7 @@
 #include "../GameModel/RandomItem.h"
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/CannonBlock.h"
+#include "../GameModel/RegenBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/BallBoostModel.h"
 #include "../GameModel/BossWeakpoint.h"
@@ -588,7 +589,25 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			}
 			break;
-        
+
+        case LevelPiece::Regen: {
+            const RegenBlock& regenBlock = static_cast<const RegenBlock&>(block);
+            this->display->GetAssets()->GetESPAssets()->AddRegenBlockSpecialBreakEffect(regenBlock); // Make the counter on the block go exploding out
+			if (wasFrozen) {
+				// Add ice break effect
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			}
+			else {
+				// Typical break effect for basic breakable blocks
+				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				// Sound for basic breakable blocks
+				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			}
+            this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
+			break;
+        }
+
         case LevelPiece::LaserTurret:
         case LevelPiece::RocketTurret:
         case LevelPiece::MineTurret:
@@ -1155,6 +1174,10 @@ void GameEventsListener::MineFiredByTurretEvent(const MineTurretBlock& block) {
     */
 
     debug_output("EVENT: Mine Turret fired a mine.");
+}
+
+void GameEventsListener::RegenBlockLifeChangedEvent(const RegenBlock& block) {
+    this->display->GetAssets()->GetCurrentLevelMesh()->UpdateRegenBlock(&block);
 }
 
 void GameEventsListener::BossHurtEvent(const BossWeakpoint* hurtPart) {

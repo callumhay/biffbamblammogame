@@ -63,6 +63,11 @@ public:
 	const double FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The interval of time in seconds over which a fire glob might be dropped from a block
 	const int FIRE_GLOB_CHANCE_MOD;                 // The 1/x where x is the value of this, of a fire glob dropping after FIRE_GLOB_DROP_CHANCE_INTERVAL seconds
 
+    const int DEFAULT_DAMAGE_ON_BALL_HIT;    // Default damage that a ball tends to do when it hits stuff
+    const float MIN_BALL_DAMAGE_MULTIPLIER;  // The minimum damage multiplier a ball can have
+    const float MAX_BALL_DAMAGE_MULTIPLIER;  // The maximum damage multiplier a ball can have
+    const float UBER_BALL_DAMAGE_MULTIPLIER; // Multiplier damage that the uberball adds to a ball
+
     const int MAX_MULTIPLIER;
 
     const int TWO_TIMES_MULTIPLIER_NUM_BLOCKS;      // The number of blocks that must be destroyed between paddle hits to get a 2x multiplier

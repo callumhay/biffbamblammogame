@@ -124,7 +124,6 @@ inline bool Boss::GetIsLevelCompleteDead() const {
 inline BossBodyPart* Boss::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                           Collision::LineSeg2D& collisionLine,
                                           double& timeSinceCollision) const {
-
     return this->alivePartsRoot->CollisionCheck(ball, dT, n, collisionLine, timeSinceCollision);
 }
 

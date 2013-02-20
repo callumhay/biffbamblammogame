@@ -171,7 +171,8 @@ Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
 bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-							Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision) const {
+							Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision,
+                            const Vector2D& lineVelocity) const {
 
     assert(c.Radius() > 0);
 
@@ -179,7 +180,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     double sampleIncTime;
     int numCollisionSamples;
 
-    bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
+    Vector2D adjustedBallVel = velocity - lineVelocity;
+    bool zeroVelocity = (adjustedBallVel == Vector2D(0.0f, 0.0f));
     
     if (zeroVelocity) {
         numCollisionSamples = 1;
@@ -187,14 +189,14 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     else {
         // Calculate the number of samples required to make sure that the increment distance is
         // less than or equal to the radius of the circle
-        numCollisionSamples = static_cast<int>(ceil(dT / (0.5f * c.Radius()) * velocity.Magnitude()));
+        numCollisionSamples = static_cast<int>(ceil(dT / (0.5f * c.Radius()) * adjustedBallVel.Magnitude()));
         numCollisionSamples = std::max<int>(1, numCollisionSamples);
         assert(numCollisionSamples < 50);
     }
     
     // Figure out the distance along the vector travelled since the last collision
     // to take each sample at...
-    sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
+    sampleIncDist = dT * adjustedBallVel / static_cast<float>(numCollisionSamples);
     sampleIncTime = dT / static_cast<double>(numCollisionSamples);
 
     Point2D currSamplePt = c.Center();

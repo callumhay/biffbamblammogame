@@ -39,8 +39,8 @@ private:
     Texture2D* cloudTex;
 
     CgFxVolumetricEffect fireEffect;
-    ESPPointEmitter fireEmitter1, fireEmitter2, fireEmitter3, fireEmitter4, fireEmitter5, fireEmitter6;
-    ESPParticleAccelEffector fireAccel1, fireAccel2, fireAccel3, fireAccel4, fireAccel5, fireAccel6;
+    ESPPointEmitter fireEmitter1, fireEmitter2, fireEmitter4, fireEmitter5, fireEmitter6;
+    ESPParticleAccelEffector fireAccel1, fireAccel2, fireAccel4, fireAccel5, fireAccel6;
 
     ESPParticleColourEffector fireColourFader;
     ESPParticleScaleEffector fireParticleScaler;
@@ -69,7 +69,6 @@ inline void GothicRomanticWorldAssets::ResetToInitialState() {
 inline void GothicRomanticWorldAssets::DrawBackgroundEffects(const Camera& camera) {
     this->fireEmitter1.Draw(camera);
     this->fireEmitter2.Draw(camera);
-    this->fireEmitter3.Draw(camera);
     this->fireEmitter4.Draw(camera);
     this->fireEmitter5.Draw(camera);
     this->fireEmitter6.Draw(camera);

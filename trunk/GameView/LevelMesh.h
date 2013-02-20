@@ -15,6 +15,7 @@
 #include "BlockStatusEffectRenderer.h"
 #include "GameItemAssets.h"
 #include "ItemDropBlockMesh.h"
+#include "RegenBlockMesh.h"
 
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/ObjReader.h"
@@ -80,6 +81,7 @@ public:
 
 	void SetLevelAlpha(float alpha);
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
+    void UpdateRegenBlock(const RegenBlock* block);
 
     double ActivateBossIntro();
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
@@ -104,6 +106,7 @@ private:
     RocketTurretBlockMesh* rocketTurretBlock;
     MineTurretBlockMesh* mineTurretBlock;
     AlwaysDropBlockMesh* alwaysDropBlock;
+    RegenBlockMesh* regenBlock;
     Mesh* noEntryBlock;
     Mesh* oneWayUpBlock;
     Mesh* oneWayDownBlock;
@@ -166,6 +169,10 @@ inline void LevelMesh::UpdateItemDropBlock(const GameItemAssets& gameItemAssets,
 	// Figure out what texture is associated with the next item to be dropped from the block
 	Texture2D* itemTexture = gameItemAssets.GetItemTexture(block.GetNextDropItemType());
 	this->itemDropBlock->UpdateItemDropBlockTexture(&block, itemTexture);
+}
+
+inline void LevelMesh::UpdateRegenBlock(const RegenBlock* block) {
+    this->regenBlock->UpdateRegenBlock(block);
 }
 
 #endif

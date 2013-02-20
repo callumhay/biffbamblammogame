@@ -1,25 +1,25 @@
 Block Test
-18 20
-S S S S S S S S S S S S S S S S S S 
-S E E E E A(0,1,b,a) E E X(d,c) E E E E E E E E S 
-S T(S,ul) T(S,ur) E E E E E E E M E E E T(P,ul) T(P,ur) E S 
-S T(S,ll) T(S,lr) E E E E E E E E E E E T(P,ll) T(P,lr) E S 
-S E E E E E E E F(u) F(d) F(l) F(r) E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S H J M E E E E E K(Random) E E E E E E E S 
-S G G G S P E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S R O Y G A(0,1,a,b) B C(180) X(c,d) I L D(all){1} W(1) T(P,ul) T(P,ur) N F(d) S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E E S 
+20 20
+S S S S S S S S S S S S S S S S S S S S 
+S E E E E A(0,1,b,a) E E X(d,c) E E E E E E E E E E S 
+S T(S,ul) T(S,ur) E E E E E E E M E E E T(P,ul) T(P,ur) E E E S 
+S T(S,ll) T(S,lr) E E E E E E E E E E E T(P,ll) T(P,lr) E E E S 
+S E E E E E E E F(u) F(d) F(l) F(r) E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S H J M E E E E E K(Random) E E E E E E E E E S 
+S G G G S P E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S R O Y G A(0,1,a,b) B C(180) X(c,d) I L D(all){1} W(1) T(P,ul) T(P,ur) N F(d) Q(f) Q(i) S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E S 
 
 STARS:
 100

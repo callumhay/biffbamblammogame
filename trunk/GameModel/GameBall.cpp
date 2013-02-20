@@ -140,6 +140,20 @@ void GameBall::ResetBallAttributes() {
 }
 
 /**
+ * Get the damage multiplier for this ball based on its current state and attributes.
+ */
+float GameBall::GetDamageMultiplier() const {
+    float uberBallMultiplier = 1.0f;
+    if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+        uberBallMultiplier = GameModelConstants::GetInstance()->UBER_BALL_DAMAGE_MULTIPLIER;
+    }
+
+    return std::max<float>(GameModelConstants::GetInstance()->MIN_BALL_DAMAGE_MULTIPLIER, 
+        std::min<float>(GameModelConstants::GetInstance()->MAX_BALL_DAMAGE_MULTIPLIER,
+        this->GetBallScaleFactor() * uberBallMultiplier));
+}
+
+/**
  * Adds an animation to the ball that fades it in or out based on the
  * given parameter over the given amount of time.
  */
@@ -214,37 +228,108 @@ void GameBall::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& m
 
 
 Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
-	Onomatoplex::Extremeness result;
+	Onomatoplex::Extremeness result = Onomatoplex::GOOD;
 
-	if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
-		if (this->GetSpeed() <= GameBall::SlowSpeed) {
-			result = Onomatoplex::GOOD;
-		}
-		else if (this->GetSpeed() <= GameBall::NormalSpeed) {
-			result = Onomatoplex::AWESOME;
-		}
-		else if (this->GetSpeed() <= GameBall::FastSpeed) {
-			result =  Onomatoplex::SUPER_AWESOME;
-		}
-		else {
-			result =  Onomatoplex::UBER;
-		}	
-	}
-	else {
+    switch (this->GetBallSize()) {
+        case GameBall::SmallestSize:
+            if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+		        if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			        result = Onomatoplex::GOOD;
+		        }
+		        else {
+			        result =  Onomatoplex::AWESOME;
+		        }
+            }
+            else {
+                if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			        result = Onomatoplex::WEAK;
+		        }
+		        else {
+			        result =  Onomatoplex::GOOD;
+		        }
+            }
+            break;
 
-		if (this->GetSpeed() <= GameBall::SlowSpeed) {
-			result = Onomatoplex::WEAK;
-		}
-		else if (this->GetSpeed() <= GameBall::NormalSpeed) {
-			result = Onomatoplex::GOOD;
-		}
-		else if (this->GetSpeed() <= GameBall::FastSpeed) {
-			result =  Onomatoplex::AWESOME;
-		}
-		else {
-			result =  Onomatoplex::SUPER_AWESOME;
-		}
-	}
+        case GameBall::SmallerSize:
+            if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+		        if (this->GetSpeed() <= GameBall::SlowSpeed) {
+			        result = Onomatoplex::GOOD;
+		        }
+                else {
+			        result = Onomatoplex::AWESOME;
+                }
+            }
+            else {
+		        if (this->GetSpeed() <= GameBall::SlowSpeed) {
+			        result = Onomatoplex::WEAK;
+		        }
+		        else if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			        result = Onomatoplex::GOOD;
+		        }
+		        else {
+			        result = Onomatoplex::AWESOME;
+		        }
+            }
+            break;
+
+
+        case GameBall::NormalSize:
+            if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+		        if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			        result = Onomatoplex::AWESOME;
+		        }
+		        else {
+			        result =  Onomatoplex::SUPER_AWESOME;
+		        }
+            }
+            else {
+		        if (this->GetSpeed() <= GameBall::SlowSpeed) {
+			        result = Onomatoplex::WEAK;
+		        }
+		        else if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			        result = Onomatoplex::GOOD;
+		        }
+		        else {
+			        result = Onomatoplex::AWESOME;
+		        }
+            }
+            break;
+
+        case GameBall::BiggerSize:
+            if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+		        if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			        result = Onomatoplex::SUPER_AWESOME;
+		        }
+		        else {
+			        result =  Onomatoplex::UBER;
+		        }
+            }
+            else {
+		        if (this->GetSpeed() <= GameBall::SlowSpeed) {
+			        result = Onomatoplex::GOOD;
+		        }
+		        else if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			        result = Onomatoplex::AWESOME;
+		        }
+		        else {
+			        result = Onomatoplex::SUPER_AWESOME;
+		        }
+            }
+            break;
+
+        case GameBall::BiggestSize:
+            if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+                result =  Onomatoplex::UBER;
+            }
+            else {
+                result =  Onomatoplex::SUPER_AWESOME;
+            }
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
 
 	return result;
 }

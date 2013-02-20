@@ -293,6 +293,7 @@ MINE_TURRET_HEAD_MESH(MESH_DIRECTORY   "/mine_turret_block_head.obj"),
 MINE_TURRET_BARREL_MESH(MESH_DIRECTORY "/mine_turret_block_barrel.obj"),
 MINE_MESH(MESH_DIRECTORY "/mine.obj"),
 ALWAYS_DROP_BLOCK_MESH(MESH_DIRECTORY "/always_drop_block.obj"),
+REGEN_BLOCK_MESH(MESH_DIRECTORY "/regen_block.obj"),
 
 SKYBOX_MESH(MESH_DIRECTORY "/skybox.obj"),
 ITEM_MESH(MESH_DIRECTORY "/item.obj"),

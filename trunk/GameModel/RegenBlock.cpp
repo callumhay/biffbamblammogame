@@ -1,68 +1,98 @@
 /**
- * AlwaysDropBlock.cpp
+ * RegenBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2010-2013
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
  * resulting work only under the same or similar licence to this one.
  */
 
-#include "AlwaysDropBlock.h"
-#include "EmptySpaceBlock.h"
+#include "RegenBlock.h"
+#include "GameEventManager.h"
 #include "GameModel.h"
+#include "EmptySpaceBlock.h"
 #include "GameLevel.h"
 #include "GameBall.h"
-#include "GameEventManager.h"
+#include "FireGlobProjectile.h"
 
-AlwaysDropBlock::AlwaysDropBlock(const std::vector<GameItem::ItemType>& droppableItemTypes,
-                                 unsigned int wLoc, unsigned int hLoc) : 
-LevelPiece(wLoc, hLoc), currLifePoints(PIECE_STARTING_LIFE_POINTS) {
-    
-    assert(!droppableItemTypes.empty());
+const float RegenBlock::REGEN_LIFE_POINTS_PER_SECOND = 10.0f;
 
-    this->nextDropItemType    = droppableItemTypes[Randomizer::GetInstance()->RandomUnsignedInt() % droppableItemTypes.size()];
-    this->nextDropDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(this->nextDropItemType);
+RegenBlock::RegenBlock(bool hasInfiniteLife, unsigned int wLoc, unsigned int hLoc) :
+LevelPiece(wLoc, hLoc), currLifePoints(0.0f), fireGlobTimeCounter(0.0) {
+    if (hasInfiniteLife) {
+        this->currLifePoints = RegenBlock::INFINITE_LIFE_POINTS;
+    }
+    else {
+        this->currLifePoints = RegenBlock::MAX_LIFE_POINTS;
+    }
 }
 
-AlwaysDropBlock::~AlwaysDropBlock() {
+RegenBlock::~RegenBlock() {
 }
 
-LevelPiece* AlwaysDropBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
-
-	// When destroying an always drop block it will always drop an item...
-    gameModel->AddItemDrop(this->GetCenter(), this->nextDropItemType);
-
-	// Tell the level that this piece has changed to empty...
-	GameLevel* level = gameModel->GetCurrentLevel();
-	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece, method);
-
-	// Obliterate all that is left of this block...
-	LevelPiece* tempThis = this;
-	delete tempThis;
-	tempThis = NULL;
-
-    // Add to the ball boost meter...
-    gameModel->AddPercentageToBoostMeter(0.03);
-
-	return emptyPiece;
+// Whether or not the ball can just blast right through this block.
+// Returns: true if it can, false otherwise.
+bool RegenBlock::BallBlastsThrough(const GameBall& b) const {
+    // The may blast through this if it's uber and not firey/icy
+	return ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) &&
+           ((b.GetBallType() & GameBall::IceBall) != GameBall::IceBall) && 
+           ((b.GetBallType() & GameBall::FireBall) != GameBall::FireBall) &&
+           (!this->HasInfiniteLife() && this->currLifePoints <= b.GetCollisionDamage());
 }
 
-void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                                   const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                                   const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                                   const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+// Determine whether the given projectile will pass through this block...
+bool RegenBlock::ProjectilePassesThrough(const Projectile* projectile) const {
+	switch (projectile->GetType()) {
+		
+        case Projectile::BossLaserBulletProjectile:
+		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			return true;
+
+		case Projectile::FireGlobProjectile:
+			// Let fire globs pass through if they spawned on this block
+			if (projectile->IsLastThingCollidedWith(this)) {
+				return true;
+			}
+			break;
+
+		default:
+			break;
+	}
+	return false;
+}
+
+/**
+ * Get the number of points when this piece changes to the given piece.
+ */
+int RegenBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
+    if (changeToPiece.GetType() == LevelPiece::Empty) {
+        return RegenBlock::POINTS_ON_BLOCK_DESTROYED;
+    }
+    return 0;
+}
+
+void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	UNUSED_PARAMETER(bottomLeftNeighbor);
 	UNUSED_PARAMETER(bottomRightNeighbor);
 	UNUSED_PARAMETER(topRightNeighbor);
 	UNUSED_PARAMETER(topLeftNeighbor);
 
-	// Set the bounding lines for a rectangular block - these are also used when any block is frozen in an ice cube
+	// Set the bounding lines for a rectangular block
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
     std::vector<bool> onInside;
@@ -86,7 +116,7 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
 	// Bottom boundry of the piece
     shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
-        bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
+         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -130,34 +160,38 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
-// Eat away at this block over the given dT time at the given damage per second...
-// Returns: The resulting level piece that this becomes after exposed to the damage
-LevelPiece* AlwaysDropBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel,
-                                            const LevelPiece::DestructionMethod& method) {
+LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+    // If this block has inifinite life then it can only be destroyed in very particular ways...
+    if (this->HasInfiniteLife()) {
+        // Infinite life regen blocks may only be destroyed by being shattered or via a collateral block clobbering them
+        if (method != LevelPiece::IceShatterDestruction && method != LevelPiece::CollateralDestruction) {
+            return this;
+        }
+    }
 
-	this->currLifePoints -= static_cast<float>(dT * dmgPerSec);
-	
-	LevelPiece* newPiece = this;
-	if (currLifePoints <= 0) {
-		// The piece is dead...
-		newPiece = this->Destroy(gameModel, method);
-	}
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
-	return newPiece;
+	// When destroying a regen block there is the possiblity of dropping an item...
+	gameModel->AddPossibleItemDrop(*this);
+
+	// Tell the level that this piece has changed to empty...
+	GameLevel* level = gameModel->GetCurrentLevel();
+	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
+	level->PieceChanged(gameModel, this, emptyPiece, method);
+
+	// Obliterate all that is left of this block...
+	LevelPiece* tempThis = this;
+	delete tempThis;
+	tempThis = NULL;
+
+    // Add to the ball boost meter...
+    gameModel->AddPercentageToBoostMeter(0.25);
+
+	return emptyPiece;
 }
 
-/**
- * Call this when a collision has actually occured with the ball and this block.
- * Returns: The resulting level piece that this has become.
- */
-LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-	assert(gameModel != NULL);
-    
-    // Make sure we don't do a double collision
-    if (ball.IsLastPieceCollidedWith(this)) {
-        return this;
-    }
-    
+LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	LevelPiece* newPiece = this;
 	
 	// If the ball is an uber ball with fire or a ball without fire, then we dimish the piece,
@@ -166,15 +200,15 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
 
 	if (!isFireBall && !isIceBall) {
-
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			// EVENT: Ice was shattered
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
+			// If the piece is frozen it shatters and is immediately destroyed on ball impact
             newPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
 		}
-        else {
-            newPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
-        }
+		else {
+            newPiece = this->HurtPiece(ball.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);
+		}
 	}
 	else if (isFireBall) {
 		this->LightPieceOnFire(gameModel);
@@ -184,7 +218,6 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 	}
 
 	ball.SetLastPieceCollidedWith(newPiece);
-
 	return newPiece;
 }
 
@@ -192,7 +225,7 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
  * Call this when a collision has actually occured with a projectile and this block.
  * Returns: The resulting level piece that this has become.
  */
-LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	assert(gameModel != NULL);
 	assert(projectile != NULL);
 	LevelPiece* newPiece = this;
@@ -207,7 +240,8 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {	
-                newPiece = this->Destroy(gameModel, LevelPiece::LaserProjectileDestruction);
+				// Laser bullets dimish the piece, but don't necessarily obliterate/destroy it
+                newPiece = this->HurtPiece(projectile->GetDamage(), gameModel, LevelPiece::LaserProjectileDestruction);
 			}
 			break;
 
@@ -246,7 +280,7 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, Projectile*
  * When the piece has a per-frame effect on it (e.g., it's on fire) then this will be called
  * by the game model. See LevelPiece for more information.
  */
-bool AlwaysDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
+bool RegenBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
 	assert(gameModel != NULL);
 	
 	LevelPiece* resultingPiece = this;
@@ -256,9 +290,16 @@ bool AlwaysDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remov
 	if (this->HasStatus(LevelPiece::OnFireStatus)) {
 		assert(!this->HasStatus(LevelPiece::IceCubeStatus));
 
+		// Blocks on fire have a (very small) chance of dropping a glob of flame over some time...
+		this->fireGlobTimeCounter += dT;
+		if (this->fireGlobTimeCounter >= GameModelConstants::GetInstance()->FIRE_GLOB_DROP_CHANCE_INTERVAL) {
+			this->DoPossibleFireGlobDrop(gameModel);
+            this->fireGlobTimeCounter = 0.0;
+		}
+
 		// Fire will continue to diminish the piece... 
 		// NOTE: This can destroy this piece resulting in a new level piece to replace it (i.e., an empty piece)
-		resultingPiece = this->EatAwayAtPiece(dT, GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel,
+        resultingPiece = this->HurtPiece(dT * GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel,
             LevelPiece::FireDestruction);
 
 		// Technically if the above destroys the block then the block automatically loses all of its status
@@ -272,39 +313,57 @@ bool AlwaysDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remov
 		return true;
 	}
 
-    // No statues were removed
 	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
 	return false;
 }
 
-// Determine whether the given projectile will pass through this block...
-bool AlwaysDropBlock::ProjectilePassesThrough(const Projectile* projectile) const {
-	switch (projectile->GetType()) {
-		
-        case Projectile::BossLaserBulletProjectile:
-		case Projectile::PaddleLaserBulletProjectile:
-        case Projectile::BallLaserBulletProjectile:
-        case Projectile::LaserTurretBulletProjectile:
-			// When frozen, projectiles can pass through
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				return true;
-			}
-			break;
+/**
+ * Regenerates the life of this piece over small increments of time.
+ */
+void RegenBlock::Regen(double dT) {
+    // If the piece has infinite life then this doesn't matter
+    if (this->HasInfiniteLife()) {
+        return;
+    }
 
-		case Projectile::CollateralBlockProjectile:
-			return true;
+    // No regeneration if the piece is frozen
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        return;
+    }
+    // NOTE: if the piece is on fire it will be losing life to the fire faster then it
+    // will be regenerating it
+    
+    // Regenerate...
+    if (this->currLifePoints < MAX_LIFE_POINTS && this->currLifePoints > 0.0) {
+        float lifePointsBefore = this->currLifePoints;
+        this->currLifePoints = std::min<float>(MAX_LIFE_POINTS, this->currLifePoints + dT * REGEN_LIFE_POINTS_PER_SECOND);
 
-		case Projectile::FireGlobProjectile:
-			// Let fire globs pass through if they spawned on this block
-			if (projectile->IsLastThingCollidedWith(this)) {
-				return true;
-			}
-			break;
-
-		default:
-			break;
-	}
-
-	return false;
+        if (lifePointsBefore != this->currLifePoints) {
+            // EVENT: Life points on a regen block have changed
+            GameEventManager::Instance()->ActionRegenBlockLifeChanged(*this);
+        }
+    }
 }
 
+/**
+ * Does damage to this piece if this piece doesn't have infinite life.
+ */
+LevelPiece* RegenBlock::HurtPiece(float damage, GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+    // You can't hurt a block with infinite life, silly
+    if (this->HasInfiniteLife()) {
+        return this;
+    }
+
+    LevelPiece* resultingPiece = this;
+
+    this->currLifePoints -= damage;
+    
+    // EVENT: Life points on a regen block have changed
+    GameEventManager::Instance()->ActionRegenBlockLifeChanged(*this);
+    
+    if (this->currLifePoints <= 0.0f) {
+        resultingPiece = this->Destroy(gameModel, method);
+    }
+
+    return resultingPiece;
+}
