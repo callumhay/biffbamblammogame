@@ -16,15 +16,13 @@
 
 class LaserTurretBlock : public TurretBlock {
 public:
-    static const float BALL_DAMAGE_AMOUNT;
-    static const float ONE_MORE_BALL_HIT_LIFE_PERCENT;
     static const float FIRE_RATE_IN_BULLETS_PER_SEC;
 
     static const float BARREL_OFFSET_ALONG_X;
     static const float BARREL_OFFSET_ALONG_Y;
     static const float BARREL_OFFSET_ALONG_Z;
     static const float BARREL_OFFSET_EXTENT_ALONG_Y;
-    
+
     enum TurretAIState { IdleTurretState = 0, SeekingTurretState, TargetFoundTurretState, TargetLostTurretState };
     enum BarrelAnimationState { OneForwardTwoBack = 0, OneFiringTwoReloading, TwoForwardOneBack, TwoFiringOneReloading };
 
@@ -53,13 +51,11 @@ public:
 
 private:
     static const int POINTS_ON_BLOCK_DESTROYED  = 800;
-    static const int PIECE_STARTING_LIFE_POINTS = 500;
     
     static const float MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
     static const float ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
     static const float BARREL_RECOIL_TRANSLATION_AMT;
 
-    
     static const float BARREL_RELOAD_TIME;
     static const float BARREL_RECOIL_TIME;
 

@@ -16,9 +16,6 @@
 
 class MineTurretBlock : public TurretBlock {
 public:
-    static const float BALL_DAMAGE_AMOUNT;
-    static const float ONE_MORE_BALL_HIT_LIFE_PERCENT;
-
     static const float BARREL_OFFSET_EXTENT_ALONG_X;
     static const float BARREL_OFFSET_EXTENT_ALONG_Y;
     static const float BARREL_OFFSET_EXTENT_ALONG_Z;
@@ -56,7 +53,6 @@ public:
 
 private:
     static const int POINTS_ON_BLOCK_DESTROYED  = 800;
-    static const int PIECE_STARTING_LIFE_POINTS = 500;
 
     static const float MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
     static const float ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;

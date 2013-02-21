@@ -17,7 +17,6 @@
 #include "LaserTurretProjectile.h"
 #include "PaddleMineProjectile.h"
 
-const float LaserTurretBlock::BALL_DAMAGE_AMOUNT                  = static_cast<float>(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS) / 5.0f;
 const float LaserTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC  = 200.0f;
 const float LaserTurretBlock::ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD = 400.0f;
 const float LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT       = -0.25f;
@@ -32,9 +31,6 @@ const double LaserTurretBlock::LOST_AND_FOUND_MAX_SEEK_TIME = 110.0f / LaserTurr
 const int LaserTurretBlock::LOST_AND_FOUND_MIN_NUM_LOOK_TIMES = 3;
 const int LaserTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 7;
 
-const float LaserTurretBlock::ONE_MORE_BALL_HIT_LIFE_PERCENT = 
-    LaserTurretBlock::BALL_DAMAGE_AMOUNT / static_cast<float>(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS);
-
 // Distance along the x-axis that the base of a barrel lies (from the origin of the block)
 // in when the barrel is in its 'base' position with no turret rotation
 const float LaserTurretBlock::BARREL_OFFSET_ALONG_X = 0.32f;
@@ -47,8 +43,10 @@ const float LaserTurretBlock::BARREL_OFFSET_ALONG_Z = 0.38f;
 // The maximum extent along the y-axis (in the base position - no rotation, of the block), from the origin of the block
 const float LaserTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y = 0.28f;
 
+#define PIECE_STARTING_LIFE_POINTS (5*GameModelConstants::GetInstance()->DEFAULT_DAMAGE_ON_BALL_HIT)
+
 LaserTurretBlock::LaserTurretBlock(unsigned int wLoc, unsigned int hLoc) :
-TurretBlock(wLoc, hLoc, LaserTurretBlock::PIECE_STARTING_LIFE_POINTS),
+TurretBlock(wLoc, hLoc, PIECE_STARTING_LIFE_POINTS),
 currTurretState(SeekingTurretState), currRotationFromXInDegs(Randomizer::GetInstance()->RandomUnsignedInt() % 360), currRotationSpd(0.0f),
 lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
 

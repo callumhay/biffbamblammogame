@@ -195,7 +195,7 @@ LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
     }
     else {
         // Finite-life regen blocks need lots of boosts to bring down, give the player back some of that boost juice
-        gameModel->AddPercentageToBoostMeter(0.5);
+        gameModel->AddPercentageToBoostMeter(0.3);
     }
 
 	return emptyPiece;

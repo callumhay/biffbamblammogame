@@ -129,6 +129,7 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 }
 
 LevelPiece* TurretBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+
 	// Check to see if the block is frozen...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
         // EVENT: Ice was shattered
@@ -156,7 +157,7 @@ LevelPiece* TurretBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruc
 	tempThis = NULL;
 
     // Add to the boost meter
-    gameModel->AddPercentageToBoostMeter(0.2);
+    gameModel->AddPercentageToBoostMeter(0.25);
 
 	return emptyPiece;
 }
@@ -178,11 +179,11 @@ LevelPiece* TurretBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 				assert(success);
 			}
             else {
-                resultingPiece = this->DiminishPiece(this->GetBallDamage(), gameModel, LevelPiece::RegularDestruction);
+                resultingPiece = this->DiminishPiece(ball.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);
             }
 		}
         else {
-            resultingPiece = this->DiminishPiece(this->GetBallDamage(), gameModel, LevelPiece::RegularDestruction);
+            resultingPiece = this->DiminishPiece(ball.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);
         }
 	}
 

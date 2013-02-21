@@ -1,0 +1,67 @@
+Giving it 100%
+21 26
+E E E E S S S S S S S S S S S S S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E K(RocketPaddle) E E E E E E E K(RocketPaddle) E S E E E E 
+E E E E S R R Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) R R S E E E E 
+E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
+E E E C(90) F(r) E E Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) E E F(l) C(270) E E E 
+E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
+E E E E S E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E S E E E E 
+E E E E S K(RocketPaddle) I Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(RocketPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) I K(RocketPaddle) S E E E E 
+E E E E S E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E S E E E E 
+E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
+E E C(90) E F(r) E E Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) E E F(l) E C(270) E E 
+E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
+E E E E S R R Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) R R S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 0
+PoisonPaddle 2
+BallSafetyNet 0
+Blackout 2
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 2
+LaserBulletPaddle 0
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 0
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 0
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

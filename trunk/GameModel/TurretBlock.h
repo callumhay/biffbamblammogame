@@ -50,6 +50,7 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
 
     float GetHealthPercent() const;
+    float GetLifePercentForOneMoreBallHit() const;
 
 protected:
     const float startingLifePoints;
@@ -57,8 +58,6 @@ protected:
 
     bool IsDead() const { return this->currLifePoints <= 0; }
     LevelPiece* DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method);
-
-    float GetBallDamage() const;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(TurretBlock);
@@ -77,13 +76,15 @@ inline float TurretBlock::GetHealthPercent() const {
     return this->currLifePoints / this->startingLifePoints;
 }
 
-inline float TurretBlock::GetBallDamage() const {
-    return this->startingLifePoints / 6.0f;
+inline float TurretBlock::GetLifePercentForOneMoreBallHit() const {
+    return GameModelConstants::GetInstance()->DEFAULT_DAMAGE_ON_BALL_HIT / this->startingLifePoints;
 }
 
-inline LevelPiece* TurretBlock::DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method) {
+inline LevelPiece* TurretBlock::DiminishPiece(float dmgAmount, GameModel* model,
+                                              const LevelPiece::DestructionMethod& method) {
     this->currLifePoints -= dmgAmount;
     if (this->currLifePoints <= 0.0f) {
+        this->currLifePoints = 0.0f;
         return this->Destroy(model, method);
     }
     return this;

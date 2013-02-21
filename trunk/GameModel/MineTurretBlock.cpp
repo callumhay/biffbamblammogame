@@ -17,11 +17,6 @@
 #include "MineTurretProjectile.h"
 #include "PaddleMineProjectile.h"
 
-const float MineTurretBlock::BALL_DAMAGE_AMOUNT = static_cast<float>(MineTurretBlock::PIECE_STARTING_LIFE_POINTS) / 5.0f;
-
-const float MineTurretBlock::ONE_MORE_BALL_HIT_LIFE_PERCENT = 
-    MineTurretBlock::BALL_DAMAGE_AMOUNT / static_cast<float>(MineTurretBlock::PIECE_STARTING_LIFE_POINTS);
-
 const float MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_X = 0.52f;
 const float MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y = 0.0f;
 const float MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Z = 0.51f;
@@ -46,8 +41,10 @@ const double MineTurretBlock::LOST_AND_FOUND_MAX_SEEK_TIME = 120.0f / MineTurret
 const int MineTurretBlock::LOST_AND_FOUND_MIN_NUM_LOOK_TIMES = 3;
 const int MineTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 6;
 
+#define PIECE_STARTING_LIFE_POINTS (5*GameModelConstants::GetInstance()->DEFAULT_DAMAGE_ON_BALL_HIT)
+
 MineTurretBlock::MineTurretBlock(unsigned int wLoc, unsigned int hLoc) :
-TurretBlock(wLoc, hLoc, MineTurretBlock::PIECE_STARTING_LIFE_POINTS), 
+TurretBlock(wLoc, hLoc, PIECE_STARTING_LIFE_POINTS), 
 currTurretState(SeekingTurretState), currRotationFromXInDegs(Randomizer::GetInstance()->RandomUnsignedInt() % 360), currRotationSpd(0.0f),
 lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0),
 currBarrelAxisRotation(Randomizer::GetInstance()->RandomUnsignedInt() % 360) {

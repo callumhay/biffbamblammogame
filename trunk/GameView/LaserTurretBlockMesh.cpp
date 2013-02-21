@@ -286,7 +286,7 @@ void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& 
             this->fireySmokeEmitter->Draw(camera);
             this->fireySmokeEmitter->Tick(dT);
 
-            if (this->block.GetHealthPercent() <= LaserTurretBlock::ONE_MORE_BALL_HIT_LIFE_PERCENT) {
+            if (this->block.GetHealthPercent() <= this->block.GetLifePercentForOneMoreBallHit()) {
                 this->redColourMultiplierAnim.Tick(dT);
             }
         }
