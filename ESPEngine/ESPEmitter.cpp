@@ -370,7 +370,9 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text
 	for (unsigned int i = 0; i < numParticles; i++) {
 		// Initialize the particle and its attributes
 		ESPOnomataParticle* newParticle = new ESPOnomataParticle(text.GetFont(), text.GetText());
-		newParticle->SetDropShadow(text.GetDropShadow());
+        if (text.GetDropShadow().isSet) {
+            newParticle->SetDropShadow(text.GetDropShadow());
+        }
 
 		this->deadParticles.push_back(newParticle);
 

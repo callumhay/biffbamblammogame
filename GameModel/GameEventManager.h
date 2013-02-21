@@ -152,7 +152,8 @@ public:
         MineTurretBlock::TurretAIState newState);
     void ActionMineFiredByTurret(const MineTurretBlock& block);
     
-    void ActionRegenBlockLifeChanged(const RegenBlock& block);
+    void ActionRegenBlockLifeChanged(const RegenBlock& block, float lifePercentBefore);
+    void ActionRegenBlockPreturbed(const RegenBlock& block);
 
     // Boss Events
     void ActionBossHurt(const BossWeakpoint* hurtPart);

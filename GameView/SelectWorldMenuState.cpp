@@ -138,7 +138,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 
     glPopMatrix();
     Camera::PopWindowCoords();
-  
+
 	this->menuFBO->UnbindFBObj();
 
 	// Do bloom on the menu and draw it
@@ -159,7 +159,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         glPushMatrix();
 	    glLoadIdentity();
 
-        glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
+        glPushAttrib(GL_CURRENT_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glPolygonMode(GL_FRONT, GL_FILL);
@@ -185,8 +185,6 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         glEnd();
         this->starryBG->UnbindTexture();
 
-        /// <summary> Default constructor. </summary>
-        /// <remarks> Beowulf, 07/01/2013. </remarks>
         this->menuFBO->GetFBOTexture()->BindTexture();
         glColor4f(1,1,1,alphaAmt);
         glBegin(GL_QUADS);
@@ -520,7 +518,7 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
     const float currCenterX = this->GetXPosition(camera, selectedWorldNum);
     const float currCenterY = camera.GetWindowHeight() / 2.0f;
 
-    glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -628,7 +626,7 @@ void SelectWorldMenuState::WorldSelectItem::DrawSelectionBorder(const Camera& ca
     const float currCenterX = this->GetXPosition(camera, this->GetWorld()->GetWorldNumber());
     const float currCenterY = camera.GetWindowHeight() / 2.0f;
 
-    glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);

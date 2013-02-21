@@ -111,6 +111,7 @@ class TextLabel2D : public TextLabel {
 public:
 	TextLabel2D();
 	TextLabel2D(const TextureFontSet* font, const std::string& text);
+    TextLabel2D(const TextLabel2D& copy);
 	~TextLabel2D();
 
 	// Set the text for this label

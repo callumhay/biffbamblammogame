@@ -228,6 +228,7 @@ public:
 	const char* ITEM_DROP_BLOCK_ITEMTYPE_MATGRP;
     const char* ALWAYS_DROP_BLOCK_ITEMTYPE_MATGRP;
     const char* ALWAYS_DROP_BLOCK_COLOUR_MATGRP;
+    const char* REGEN_BLOCK_BASE_METAL_MATGRP;
 
 	const Colour ITEM_GOOD_COLOUR;
 	const Colour ITEM_BAD_COLOUR;

@@ -1,3 +1,13 @@
+/**
+ * RegenBlockMesh.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * Callum Hay, 2013
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
 
 #include "RegenBlockMesh.h"
 #include "GameViewConstants.h"
@@ -41,6 +51,12 @@ float RegenBlockMesh::GenerateFontDisplayScale() {
 
 const TextureFontSet* RegenBlockMesh::GetDisplayFont() {
     return DISPLAY_FONT;
+}
+
+Colour RegenBlockMesh::GetColourFromLifePercentage(float lifePercentage) {
+    assert(lifePercentage >= 0.0f && lifePercentage <= RegenBlock::MAX_LIFE_POINTS);
+    return NumberFuncs::LerpOverFloat<Colour>(0.0f, RegenBlock::MAX_LIFE_POINTS, Colour(1, 0, 0), 
+        Colour(0, 1, 0), lifePercentage);
 }
 
 void RegenBlockMesh::Flush() {
@@ -90,7 +106,7 @@ void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
         return;
     }
 
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
     glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);   
@@ -98,14 +114,27 @@ void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 	// Go through each block and draw the life info displays and any effects
     for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
     	
-        RegenBlock* currBlock = iter->first;
+        RegenBlock* currBlock    = iter->first;
         BlockData* currBlockData = iter->second;
+        
+        const Point2D& blockCenter = currBlock->GetCenter();
+        
+        glPushAttrib(GL_COLOR_BUFFER_BIT);
+        glPushMatrix();
+        glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+        glColor4f(1,1,1,1);
+        this->baseMetalMaterialGrp->GetMaterial()->GetProperties()->diffuse = 
+            currBlockData->GetCurrBaseMaterialColour(this->initialBaseMetalDiffuseColour);
+        this->baseMetalMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+        glPopAttrib();
 
         // Draw information on the block (life amount or infinity symbol)
         currBlockData->DrawLifeInfo();
 
-        // Regenerate the block...
+        // Regenerate and tick the block and its visual data...
         currBlock->Regen(dT);
+        currBlockData->Tick(dT);
     }
 
     glPopAttrib();
@@ -113,19 +142,18 @@ void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 
 void RegenBlockMesh::SetAlphaMultiplier(float alpha) {
     this->blockMesh->SetAlpha(alpha);
-
-    //for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
-    //    BlockData* currBlockData = iter->second;
-    //    currBlockData->SetAlpha(alpha);
-    //}
+    for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
+        BlockData* currBlockData = iter->second;
+        currBlockData->SetAlpha(alpha);
+    }
 }
 
-void RegenBlockMesh::UpdateRegenBlock(const RegenBlock* block) {
+void RegenBlockMesh::UpdateRegenBlock(const RegenBlock* block, bool gotHurt) {
     BlockCollectionConstIter findIter = this->blocks.find(const_cast<RegenBlock*>(block));
     assert(findIter != this->blocks.end());
     BlockData* data = findIter->second;
     assert(data != NULL);
-    data->Update();
+    data->Update(gotHurt);
 }
 
 void RegenBlockMesh::LoadMesh() {
@@ -136,34 +164,109 @@ void RegenBlockMesh::LoadMesh() {
 
     const std::map<std::string, MaterialGroup*>& matGrps = this->blockMesh->GetMaterialGroups();
     this->materialGroups.insert(matGrps.begin(), matGrps.end());
+    
+	std::map<std::string, MaterialGroup*>::iterator findIter = this->materialGroups.find(
+        GameViewConstants::GetInstance()->REGEN_BLOCK_BASE_METAL_MATGRP);
+	assert(findIter != this->materialGroups.end());
+	
+	this->baseMetalMaterialGrp = findIter->second;
+	this->materialGroups.erase(findIter);
+    
+    this->initialBaseMetalDiffuseColour = this->baseMetalMaterialGrp->GetMaterial()->GetProperties()->diffuse;
+
     assert(this->materialGroups.size() > 0);
+    assert(this->baseMetalMaterialGrp != NULL);
 }
 
+RegenBlockMesh::BlockData::BlockData(RegenBlockMesh* regenMesh, const RegenBlock& block) :
+regenMesh(regenMesh), block(block), alpha(1.0f) {
+
+    this->hurtRedFlashAnim.ClearLerp();
+    this->hurtRedFlashAnim.SetInterpolantValue(0.0f);
+    this->hurtRedFlashAnim.SetRepeat(false);
+}
+
+void RegenBlockMesh::BlockData::Update(bool gotHurt) {
+    if (gotHurt && this->hurtRedFlashAnim.GetInterpolantValue() == 0.0f) {
+        std::vector<float> values;
+        values.reserve(3);
+        values.push_back(0.0f);
+        values.push_back(1.0f);
+        values.push_back(0.0f);
+        std::vector<double> times;
+        times.reserve(3);
+        times.push_back(0.0);
+        times.push_back(0.2);
+        times.push_back(0.4);
+
+        this->hurtRedFlashAnim.SetLerp(times, values);
+        this->hurtRedFlashAnim.SetRepeat(false);
+        this->hurtRedFlashAnim.SetInterpolantValue(0.0f);
+    }
+}
+
+void RegenBlockMesh::BlockData::Tick(double dT) {
+    this->hurtRedFlashAnim.Tick(dT);
+}
+
+const float RegenBlockMesh::RegenBlockFiniteData::MAX_LIFE_PERCENT_FOR_FLASHING = 40.0f;
 
 RegenBlockMesh::RegenBlockFiniteData::RegenBlockFiniteData(RegenBlockMesh* regenMesh, 
                                                            const RegenBlock& block) :
 BlockData(regenMesh, block) {
+
     this->textScale = RegenBlockMesh::GenerateFontDisplayScale();
     this->percentCharWidthWithScale = this->textScale * RegenBlockMesh::GetDisplayFont()->GetWidth("%");
     this->lifeStringStr << "100";
+
+    std::vector<float> values;
+    values.reserve(3);
+    values.push_back(0.0f);
+    values.push_back(0.5f);
+    values.push_back(0.0f);
+    std::vector<double> times;
+    times.reserve(3);
+    times.push_back(0.0);
+    times.push_back(0.5);
+    times.push_back(1.0);
+    this->aboutToDieRedFlashAnim.SetLerp(times, values);
+    this->aboutToDieRedFlashAnim.SetRepeat(true);
+    this->aboutToDieRedFlashAnim.SetInterpolantValue(0.0f);
 }
 
-void RegenBlockMesh::RegenBlockFiniteData::Update() {
+void RegenBlockMesh::RegenBlockFiniteData::Update(bool gotHurt) {
+    UNUSED_PARAMETER(gotHurt);
+
     this->lifeStringStr.str("");
 
     // Create a string for the life percentage of the block
-    int lifePercentage = static_cast<int>(ceilf(this->block.GetCurrentLifePercent()));
+    int lifePercentage = this->block.GetCurrentLifePercentInt();
     this->lifeStringStr << lifePercentage;
+
+    RegenBlockMesh::BlockData::Update(gotHurt);
+}
+
+void RegenBlockMesh::RegenBlockFiniteData::Tick(double dT) {
+    if (this->block.GetCurrentLifePercent() <= MAX_LIFE_PERCENT_FOR_FLASHING) {
+        this->aboutToDieRedFlashAnim.Tick(dT);
+    }
+    RegenBlockMesh::BlockData::Tick(dT);
 }
 
 void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo() {
 
+    glPushAttrib(GL_COLOR_BUFFER_BIT);
+
     const Point2D& blockCenter = this->block.GetCenter();
 
     // Lerp the colour between red (0%) and green (100%)
-    Colour currColour = NumberFuncs::LerpOverFloat<Colour>(0.0f, 100.0f, Colour(1, 0, 0), 
-        Colour(0, 1, 0), this->block.GetCurrentLifePercent());
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), this->alpha);
+    Colour currColour = RegenBlockMesh::GetColourFromLifePercentage(this->block.GetCurrentLifePercent());
+    float redColourAdd = this->hurtRedFlashAnim.GetInterpolantValue();
+
+    glColor4f(
+        std::min<float>(1.0f, redColourAdd + currColour.R()), 
+        std::max<float>(0.0f, currColour.G() - redColourAdd), 
+        std::max<float>(0.0f, currColour.B() - redColourAdd), this->alpha);
 
     // Draw the percentage first...
 	glPushMatrix();
@@ -189,6 +292,19 @@ void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo() {
     this->regenMesh->font->BasicPrint(this->lifeStringStr.str());
 
     glPopMatrix();
+    glPopAttrib();
+}
+
+Colour RegenBlockMesh::RegenBlockFiniteData::GetCurrBaseMaterialColour(const Colour& baseColour) const {
+    Colour result = baseColour;
+    if (this->block.GetCurrentLifePercent() <= MAX_LIFE_PERCENT_FOR_FLASHING) {
+        result = Colour(result.R() + this->aboutToDieRedFlashAnim.GetInterpolantValue(), 0.5f*result.G(), 0.5f*result.B());
+    }
+    if (this->hurtRedFlashAnim.GetInterpolantValue() > 0.0f) {
+        result = Colour(result.R() + this->hurtRedFlashAnim.GetInterpolantValue(), 0.5f*result.G(), 0.5f*result.B());
+    }
+
+    return result;
 }
 
 RegenBlockMesh::RegenBlockInfiniteData::RegenBlockInfiniteData(RegenBlockMesh* regenMesh,
@@ -204,6 +320,7 @@ void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo() {
     
     const Point2D& blockCenter = this->block.GetCenter();
 
+    glPushAttrib(GL_COLOR_BUFFER_BIT);
     glPushMatrix();
 
     // Translate to the bottom left corner of the display section of the block
@@ -212,10 +329,28 @@ void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo() {
         RegenBlockMesh::CENTER_TO_DISPLAY_DEPTH + EPSILON);
     glScalef(INFINITY_WIDTH, INFINITY_HEIGHT, 1.0f);
 
-    glColor4f(1.0f, 1.0f, 1.0f, this->alpha);
+    float redColour = this->hurtRedFlashAnim.GetInterpolantValue();
+    if (redColour > 0.0f) {
+        float invRedColour = std::max<float>(0.0f, 1.0f - redColour);
+        glColor4f(1.0f, invRedColour, invRedColour, this->alpha);
+    }
+    else {
+        glColor4f(1.0f, 1.0f, 1.0f, this->alpha);
+    }
+
     this->regenMesh->infinityTex->BindTexture();
     GeometryMaker::GetInstance()->DrawQuad();
     this->regenMesh->infinityTex->UnbindTexture();
 
     glPopMatrix();
+    glPopAttrib();
+}
+
+Colour RegenBlockMesh::RegenBlockInfiniteData::GetCurrBaseMaterialColour(const Colour& baseColour) const {
+    Colour result = baseColour;
+    if (this->hurtRedFlashAnim.GetInterpolantValue() > 0.0f) {
+        result = Colour(result.R() + this->hurtRedFlashAnim.GetInterpolantValue(), 0.5f*result.G(), 0.5f*result.B());
+    }
+
+    return result;
 }

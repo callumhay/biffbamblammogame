@@ -1,20 +1,20 @@
 Breaking the ice
 12 26
 S S S S S S S S S D(IceBall) S S 
-S G E Y E R R R E I E S 
-S E G Y O B R R E E E S 
-S G E Y E R R R E E E S 
-S E G Y O B R R E E E S 
-S G E Y E R R R E E E S 
-S E G Y O B R R E E E S 
-S G E Y E R R R E E E S 
-S E G Y O B R R E E E S 
-S G E Y E R R R E E E S 
-S Y Y Y O B R R E E E S 
-S O E O E R R R E E E S 
-S B R B R B R R E E E S 
-S R R R R R R R E E E S 
-S R R R R R R R E E E S 
+S G E Y E R Q(f) Q(i) E I E S 
+S E G Y O B R Q(i) E E E S 
+S G E Y E R Q(f) Q(i) E E E S 
+S E G Y O B R Q(i) E E E S 
+S G E Y E R Q(f) Q(i) E E E S 
+S E G Y O B R Q(i) E E E S 
+S G E Y E R Q(f) Q(i) E E E S 
+S E G Y O B R Q(i) E E E S 
+S G E Y E R Q(f) Q(i) E E E S 
+S Y Y Y O B R Q(i) E E E S 
+S O E O K(LaserBulletPaddle) R Q(f) Q(i) E E E S 
+S B R B R B R Q(i) E E E S 
+S R Q(f) R Q(f) R Q(f) Q(i) E E E S 
+S Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) E E E S 
 S L L L L L L L E E E S 
 S E E E E E E E E E E S 
 S E E E E E E E E E E S 
@@ -30,9 +30,9 @@ S E E E E E E E E E E S
 STARS:
 9000
 18000
-33000
-46000
-54300
+35000
+48000
+55000
 
 PaddleGrow 2
 PoisonPaddle 1

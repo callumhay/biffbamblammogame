@@ -669,8 +669,18 @@ public:
     /**
      * Event triggered when a regen block's life changes. Event is triggered immediately after the change.
      * Arguements: block - The regen block that changed.
+     *             lifePercentBefore - The life the block had before its life percent changed.
      */
-    virtual void RegenBlockLifeChangedEvent(const RegenBlock& block) {
+    virtual void RegenBlockLifeChangedEvent(const RegenBlock& block, float lifePercentBefore) {
+        UNUSED_PARAMETER(block);
+        UNUSED_PARAMETER(lifePercentBefore);
+    }
+
+    /** 
+     * Signals that a regen block was preturbed (hit by something that could have done damage, or affected in some negative way.
+     * Arguements: block - The regen block that was preturbed.
+     */
+    virtual void RegenBlockPreturbedEvent(const RegenBlock& block) {
         UNUSED_PARAMETER(block);
     }
 

@@ -91,6 +91,8 @@ explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f
 explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
 smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+fastRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 4.0f, ESPParticleRotateEffector::CLOCKWISE),
+fastRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 4.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 loopRotateEffectorCW(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 loopRotateEffectorCCW(90.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 
@@ -2249,36 +2251,45 @@ void GameESPAssets::AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock
 
     ESPPointEmitter* lifeInfoEmitter = new ESPPointEmitter();
     lifeInfoEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-    lifeInfoEmitter->SetInitialSpd(ESPInterval(5.0f, 7.0f));
-    lifeInfoEmitter->SetParticleLife(ESPInterval(4.0f));
+    lifeInfoEmitter->SetInitialSpd(ESPInterval(4.0f, 6.0f));
+    lifeInfoEmitter->SetParticleLife(ESPInterval(2.5f));
     lifeInfoEmitter->SetEmitDirection(Vector3D(0, 1, 0));
+    lifeInfoEmitter->SetToggleEmitOnPlane(true);
     lifeInfoEmitter->SetEmitAngleInDegrees(80);
     lifeInfoEmitter->SetEmitPosition(blockCenter);
     lifeInfoEmitter->SetParticleAlignment(ESP::ScreenAligned);
-    lifeInfoEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-    
+
     lifeInfoEmitter->AddEffector(&this->particleFader);
     lifeInfoEmitter->AddEffector(&this->gravity);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-	    lifeInfoEmitter->AddEffector(&this->smokeRotatorCCW);
+	    lifeInfoEmitter->AddEffector(&this->fastRotatorCCW);
     }
     else {
-	    lifeInfoEmitter->AddEffector(&this->smokeRotatorCW);
+	    lifeInfoEmitter->AddEffector(&this->fastRotatorCW);
     }
 
     if (regenBlock.HasInfiniteLife()) {
-        lifeInfoEmitter->SetParticleSize(ESPInterval(RegenBlockMesh::LIFE_DISPLAY_WIDTH),
+        lifeInfoEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+        lifeInfoEmitter->SetParticleSize(ESPInterval(RegenBlockMesh::LIFE_DISPLAY_WIDTH - 2*RegenBlockMesh::X_DISPLAY_BORDER),
             ESPInterval(RegenBlockMesh::LIFE_DISPLAY_HEIGHT));
         
         // Infinity symbol goes flying
 	    lifeInfoEmitter->SetParticles(1, this->infinityTex);
     }
     else {
-        const TextureFontSet* font = RegenBlockMesh::GetDisplayFont();
-        TextLabel2D textLbl(font, "0%");
+        int lifePercentage = regenBlock.GetCurrentLifePercentInt();
+        Colour lifeColour = RegenBlockMesh::GetColourFromLifePercentage(lifePercentage);
 
-        lifeInfoEmitter->SetParticleSize(ESPInterval(RegenBlockMesh::GenerateFontDisplayScale()), ESPInterval(font->GetHeight()));
-        
+        std::stringstream percentStrStream;
+        percentStrStream << lifePercentage << "%";
+
+        const TextureFontSet* font = RegenBlockMesh::GetDisplayFont();
+        TextLabel2D textLbl(font, percentStrStream.str());
+
+        lifeInfoEmitter->SetParticleSize(ESPInterval(0.7f));
+        lifeInfoEmitter->SetParticleColour(ESPInterval(lifeColour.R()), ESPInterval(lifeColour.G()),
+            ESPInterval(lifeColour.B()), ESPInterval(1.0f));
+
         // 0% goes flying
         lifeInfoEmitter->SetParticles(1, textLbl);
     }
@@ -3488,47 +3499,27 @@ void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectil
 // Add effects for a fire glob projectile (from blocks on fire)
 void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 
-	static const ESPInterval SMOKE_LIFE = ESPInterval(0.5f, 1.0f);
+	static const ESPInterval SMOKE_LIFE = ESPInterval(0.7f, 1.0f);
 	static const ESPInterval FIRE_TRAIL_LIFE = ESPInterval(SMOKE_LIFE.minValue - 0.05f, SMOKE_LIFE.maxValue - 0.1f);
-	static const ESPInterval SMOKE_SPAWN_DELTA = ESPInterval(0.2f, 0.35f);
+	static const ESPInterval SMOKE_SPAWN_DELTA = ESPInterval(0.2f, 0.3f);
 	static const ESPInterval SMOKE_SPD = ESPInterval(0.8f, 1.5f);
 	static const ESPInterval FIRE_TRAIL_SPD = ESPInterval(SMOKE_SPD.minValue - 0.1f, SMOKE_SPD.maxValue - 0.25f);
-	static const int NUM_SMOKE_PARTICLES_PER_EMITTER = 4;
+	static const int NUM_SMOKE_PARTICLES_PER_EMITTER = 5;
 
-	size_t randomTexIndex1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
-	size_t randomTexIndex2 = (randomTexIndex1 + 1) % this->smokeTextures.size();
-
-	ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
-	smokeyTrailEmitter1->SetSpawnDelta(SMOKE_SPAWN_DELTA);
-	smokeyTrailEmitter1->SetInitialSpd(SMOKE_SPD);
-	smokeyTrailEmitter1->SetParticleLife(SMOKE_LIFE);
-	smokeyTrailEmitter1->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 1.0f*projectile.GetWidth()));
-	smokeyTrailEmitter1->SetEmitAngleInDegrees(30);
-	smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, 1, 0));
-	smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, 0));
-	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
-	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
-	bool result = smokeyTrailEmitter1->SetParticles(NUM_SMOKE_PARTICLES_PER_EMITTER, this->smokeTextures[randomTexIndex1]);
-	assert(result);
-
-	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
-	smokeyTrailEmitter2->SetSpawnDelta(SMOKE_SPAWN_DELTA);
-	smokeyTrailEmitter2->SetInitialSpd(SMOKE_SPD);
-	smokeyTrailEmitter2->SetParticleLife(SMOKE_LIFE);
-	smokeyTrailEmitter2->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
-	smokeyTrailEmitter2->SetEmitAngleInDegrees(30);
-	smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, 1, 0));
-	smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, 0));
-	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
-	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
-	result = smokeyTrailEmitter2->SetParticles(NUM_SMOKE_PARTICLES_PER_EMITTER, this->smokeTextures[randomTexIndex2]);
-	smokeyTrailEmitter2->SimulateTicking(0.5f);
+	ESPPointEmitter* smokeyTrailEmitter = new ESPPointEmitter();
+	smokeyTrailEmitter->SetSpawnDelta(SMOKE_SPAWN_DELTA);
+	smokeyTrailEmitter->SetInitialSpd(SMOKE_SPD);
+	smokeyTrailEmitter->SetParticleLife(SMOKE_LIFE);
+	smokeyTrailEmitter->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 1.0f*projectile.GetWidth()));
+	smokeyTrailEmitter->SetEmitAngleInDegrees(30);
+	smokeyTrailEmitter->SetEmitDirection(Vector3D(0, 1, 0));
+	smokeyTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	smokeyTrailEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	smokeyTrailEmitter->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter->AddEffector(&this->particleFireColourFader);
+	smokeyTrailEmitter->AddEffector(&this->particleLargeGrowth);
+	smokeyTrailEmitter->AddEffector(&this->explosionRayRotatorCW);
+    bool result = smokeyTrailEmitter->SetRandomTextureParticles(NUM_SMOKE_PARTICLES_PER_EMITTER, this->smokeTextures);
 	assert(result);
 
 	size_t randomRockIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->moltenRockEffects.size();
@@ -3580,12 +3571,11 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 	fireBallEmitterTrail->SetEmitDirection(Vector3D(0, 1, 0));
 	fireBallEmitterTrail->AddEffector(&this->fireBallColourFader);
 	fireBallEmitterTrail->AddEffector(&this->particleMediumGrowth);
-	result = fireBallEmitterTrail->SetParticles(9, &this->fireBallTrailEffect);
+	result = fireBallEmitterTrail->SetParticles(8, &this->fireBallTrailEffect);
 	assert(result);
 
 	std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
-	projectileEmitters.push_back(smokeyTrailEmitter1);
-	projectileEmitters.push_back(smokeyTrailEmitter2);
+	projectileEmitters.push_back(smokeyTrailEmitter);
 	projectileEmitters.push_back(fireBallEmitterTrail);
 	projectileEmitters.push_back(fireRockAura);
 	projectileEmitters.push_back(fireRock);

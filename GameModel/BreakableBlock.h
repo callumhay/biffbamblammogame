@@ -95,12 +95,9 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 protected:
-	static const int PIECE_STARTING_LIFE_POINTS     = 100;	// Starting life points given to a breakable block
-	static const int POINTS_ON_RED_TO_ORANGE_HIT    = 300;
-    static const int POINTS_ON_ORANGE_TO_YELLOW_HIT = 200;
-    static const int POINTS_ON_YELLOW_TO_GREEN_HIT  = 150;
-	static const int POINTS_ON_BLOCK_DESTROYED	    = 100;   // Points obtained when you destory a breakable block
-
+	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
+	static const int POINTS_ON_BLOCK_DESTROYED	= 100;  // Points obtained when you destory a breakable block
+	
     static const double ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS;
 
 	float currLifePoints;	// Current life points of this block

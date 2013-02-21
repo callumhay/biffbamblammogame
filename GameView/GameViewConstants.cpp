@@ -208,6 +208,7 @@ ITEM_END_MATGRP("ColourEnd"),                               // Material group na
 ITEM_DROP_BLOCK_ITEMTYPE_MATGRP("item_drop_item_material"), // Material group name for the item picture on the item drop block mesh
 ALWAYS_DROP_BLOCK_ITEMTYPE_MATGRP("always_drop_item_material"),      // Material group name for the item picture on the always drop block mesh
 ALWAYS_DROP_BLOCK_COLOUR_MATGRP("always_drop_item_colour_material"), // Material group name for the colour of the item on the always drop block mesh
+REGEN_BLOCK_BASE_METAL_MATGRP("RegenBlockBaseColourMetal"), // Material group name for the base metal of the regen block mesh
 
 ITEM_GOOD_COLOUR(0.0f, 0.8f, 0.0f),
 ITEM_BAD_COLOUR(0.8f, 0.0f, 0.0f),

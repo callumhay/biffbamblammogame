@@ -17,7 +17,7 @@
 #include "GameBall.h"
 #include "FireGlobProjectile.h"
 
-const float RegenBlock::REGEN_LIFE_POINTS_PER_SECOND = 10.0f;
+const float RegenBlock::REGEN_LIFE_POINTS_PER_SECOND = 6.0f;
 
 RegenBlock::RegenBlock(bool hasInfiniteLife, unsigned int wLoc, unsigned int hLoc) :
 LevelPiece(wLoc, hLoc), currLifePoints(0.0f), fireGlobTimeCounter(0.0) {
@@ -165,6 +165,8 @@ LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
     if (this->HasInfiniteLife()) {
         // Infinite life regen blocks may only be destroyed by being shattered or via a collateral block clobbering them
         if (method != LevelPiece::IceShatterDestruction && method != LevelPiece::CollateralDestruction) {
+            // EVENT: The block has been 'preturbed'
+            GameEventManager::Instance()->ActionRegenBlockPreturbed(*this);
             return this;
         }
     }
@@ -186,7 +188,15 @@ LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
 	tempThis = NULL;
 
     // Add to the ball boost meter...
-    gameModel->AddPercentageToBoostMeter(0.25);
+    if (this->HasInfiniteLife()) {
+        // Infinite-life regen blocks tend to have a very particular way of being destroyed that doesn't
+        // rely heavily on boosting, don't give back quite as much boost juice as finite
+        gameModel->AddPercentageToBoostMeter(0.2);
+    }
+    else {
+        // Finite-life regen blocks need lots of boosts to bring down, give the player back some of that boost juice
+        gameModel->AddPercentageToBoostMeter(0.5);
+    }
 
 	return emptyPiece;
 }
@@ -340,7 +350,7 @@ void RegenBlock::Regen(double dT) {
 
         if (lifePointsBefore != this->currLifePoints) {
             // EVENT: Life points on a regen block have changed
-            GameEventManager::Instance()->ActionRegenBlockLifeChanged(*this);
+            GameEventManager::Instance()->ActionRegenBlockLifeChanged(*this, lifePointsBefore);
         }
     }
 }
@@ -349,6 +359,9 @@ void RegenBlock::Regen(double dT) {
  * Does damage to this piece if this piece doesn't have infinite life.
  */
 LevelPiece* RegenBlock::HurtPiece(float damage, GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+    // EVENT: The block has been 'preturbed'
+    GameEventManager::Instance()->ActionRegenBlockPreturbed(*this);
+
     // You can't hurt a block with infinite life, silly
     if (this->HasInfiniteLife()) {
         return this;
@@ -356,10 +369,11 @@ LevelPiece* RegenBlock::HurtPiece(float damage, GameModel* gameModel, const Leve
 
     LevelPiece* resultingPiece = this;
 
-    this->currLifePoints -= damage;
+    float lifePointsBefore = this->currLifePoints;
+    this->currLifePoints = std::max<float>(0.0, this->currLifePoints - damage);
     
     // EVENT: Life points on a regen block have changed
-    GameEventManager::Instance()->ActionRegenBlockLifeChanged(*this);
+    GameEventManager::Instance()->ActionRegenBlockLifeChanged(*this, lifePointsBefore);
     
     if (this->currLifePoints <= 0.0f) {
         resultingPiece = this->Destroy(gameModel, method);

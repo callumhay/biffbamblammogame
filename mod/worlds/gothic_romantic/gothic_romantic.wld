@@ -4,7 +4,8 @@ Gothic and Romantic
 
 resources/textures/gothic_romantic_world_select_256x256.jpg
 
-resources/worlds/testing/block_test.lvl
+#resources/worlds/testing/regen_block_test.lvl
+
 
 # Item drop block intro level
 resources/worlds/levels/easy/running_amoc.lvl
@@ -39,6 +40,13 @@ resources/worlds/levels/medium/back_and_forth.lvl
 resources/worlds/levels/medium/rocketeer.lvl
 
 
+# Regen blocks
+resources/worlds/levels/medium/why_wont_you_just_die.lvl
+# One more regen level here (for infinity blocks)
+
+# TODO: put regen blocks in the iceball and fireball level(s) and the "all of the above" level
+
+
 # Iceball Item Intro
 resources/worlds/levels/medium/breaking_the_ice.lvl
 
@@ -52,6 +60,9 @@ resources/worlds/levels/medium/freezing_hot.lvl
 
 # Using iceball + lasers to shoot through blocks
 resources/worlds/levels/medium/an_ice_way_to_go.lvl
+
+
+
 
 
 

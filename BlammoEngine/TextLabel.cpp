@@ -37,6 +37,10 @@ text(text), lastRasterWidth(font->GetWidth(text)) {
 	assert(font != NULL);
 }
 
+TextLabel2D::TextLabel2D(const TextLabel2D& copy) :
+TextLabel(copy), text(copy.text), lastRasterWidth(copy.lastRasterWidth) {
+}
+
 TextLabel2D::~TextLabel2D() {
 }
 
