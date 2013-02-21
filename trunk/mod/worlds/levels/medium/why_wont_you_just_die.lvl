@@ -1,0 +1,68 @@
+Why won't you just die?!
+13 27
+E E E S S S S S S S E E E 
+E E E S L S S S L S E E E 
+S S S S Q(f) S S S Q(f) S S S S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S G E G Q(f) E E E Q(f) G E G S 
+S E G E Q(f) E E E Q(f) E G E S 
+S G E G Q(f) E E E Q(f) G E G S 
+S E G E Q(f) E E E Q(f) E G E S 
+S G I G Q(f) E E E Q(f) G I G S 
+S E G E Q(f) E E E Q(f) E G E S 
+S G E G Q(f) E E E Q(f) G E G S 
+S E G E Q(f) E E E Q(f) E G E S 
+S G E G Q(i) E E E Q(i) G E G S 
+S E E E E E E E E E E E S 
+S E E E E E K(LaserBeamPaddle) E E E E E S 
+S Q(f) Q(f) Q(f) Q(f) Q(f) R Q(f) Q(f) Q(f) Q(f) Q(f) S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+
+STARS:
+5000
+10000
+15000
+20000
+24000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 0
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 0
+MultiBall3 2
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

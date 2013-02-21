@@ -649,10 +649,17 @@ void GameEventManager::ActionMineFiredByTurret(const MineTurretBlock& block) {
 	}
 }
 
-void GameEventManager::ActionRegenBlockLifeChanged(const RegenBlock& block) {
+void GameEventManager::ActionRegenBlockLifeChanged(const RegenBlock& block, float lifePercentBefore) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->RegenBlockLifeChangedEvent(block);
+		(*listenerIter)->RegenBlockLifeChangedEvent(block, lifePercentBefore);
+	}
+}
+
+void GameEventManager::ActionRegenBlockPreturbed(const RegenBlock& block) {
+	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+		(*listenerIter)->RegenBlockPreturbedEvent(block);
 	}
 }
 

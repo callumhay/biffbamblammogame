@@ -3,7 +3,8 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/TextureFontSet.h"
 
-ESPOnomataParticle::ESPOnomataParticle(const TextureFontSet* font, const std::string& text) : ESPParticle(), font(font), currStr(text), useGivenString(true) {
+ESPOnomataParticle::ESPOnomataParticle(const TextureFontSet* font, const std::string& text) : 
+ESPParticle(), font(font), currStr(text), useGivenString(true) {
 	assert(font != NULL);
 	this->currHalfStrHeight = TextureFontSet::TEXT_3D_SCALE * font->GetHeight() * 0.5f;
 	this->currHalfStrWidth = TextureFontSet::TEXT_3D_SCALE * this->font->GetWidth(this->currStr) * 0.5f;

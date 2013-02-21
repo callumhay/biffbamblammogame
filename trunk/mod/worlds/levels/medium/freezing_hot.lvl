@@ -1,17 +1,17 @@
 Freezing Hot
 13 27
-E E E E S S S S S E E E E 
+E E E E S S D(FireBall,IceBall) S S E E E E 
 E E E S S E R E S S E E E 
 E S S S E E R E E S S S E 
 S S E E E R R R E E E S S 
 S E E I E R R R E I E E S 
-S Y E E R R O R R E E Y S 
+S Q(f) E E R R O R R E E Q(f) S 
 S E E E R O Y O R E E E S 
-S Y E T(R,lr) R O Y O R T(R,ll) E Y S 
+S Q(f) E T(R,lr) R O Y O R T(R,ll) E Q(f) S 
 S E E R O O Y O O R E E S 
-S Y E R O Y Y Y O R E Y S 
+S Q(f) E R O Y Y Y O R E Q(f) S 
 S E E R O Y Y Y O R E E S 
-S G E R O Y Y Y O R E G S 
+S Q(i) E R O Y Y Y O R E Q(i) S 
 S E E R O Y Y Y O R E E S 
 S G E T(R,ur) R Y Y Y R T(R,ul) E G S 
 S G E E R O Y O R E E G S 

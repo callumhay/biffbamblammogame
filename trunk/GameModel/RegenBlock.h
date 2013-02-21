@@ -17,6 +17,8 @@
 
 class RegenBlock : public LevelPiece {
 public:
+    static const int MAX_LIFE_POINTS = 100;  // Starting life points given to a regen block
+
 	RegenBlock(bool hasInfiniteLife, unsigned int wLoc, unsigned int hLoc);
 	~RegenBlock();
 
@@ -32,7 +34,7 @@ public:
 	}
 
 	bool MustBeDestoryedToEndLevel() const {
-		return true;
+        return !this->HasInfiniteLife();
 	}
 	bool CanBeDestroyedByBall() const {
 		return true;
@@ -71,6 +73,7 @@ public:
 
     bool HasInfiniteLife() const;
     float GetCurrentLifePercent() const;
+    int GetCurrentLifePercentInt() const;
 
     void Regen(double dT);
 
@@ -78,7 +81,6 @@ private:
     static const int INFINITE_LIFE_POINTS = -1;
 
 	static const int POINTS_ON_BLOCK_DESTROYED  = 500;	// Points obtained when you destory a regen block
-	static const int MAX_LIFE_POINTS            = 100;  // Starting life points given to a regen block
 
     static const float REGEN_LIFE_POINTS_PER_SECOND; // Number of points this block regenerates per-second
 
@@ -126,6 +128,10 @@ inline bool RegenBlock::HasInfiniteLife() const {
 inline float RegenBlock::GetCurrentLifePercent() const {
     assert(this->currLifePoints >= 0 && this->currLifePoints <= MAX_LIFE_POINTS);
     return this->currLifePoints;
+}
+
+inline int RegenBlock::GetCurrentLifePercentInt() const {
+    return static_cast<int>(ceilf(this->GetCurrentLifePercent()));
 }
 
 #endif // __REGENBLOCK_H__

@@ -111,7 +111,6 @@ void BlockStatusEffectRenderer::AddLevelPieceStatus(const LevelPiece& piece, con
 		case LevelPiece::OnFireStatus:
 			emitterList.push_back(this->BuildBlockOnFireScortchEffect(piece));
 			emitterList.push_back(this->BuildBlockOnFireSmokeEffect(piece));
-			emitterList.push_back(this->BuildBlockOnFireSmokeEffect(piece));
 			emitterList.push_back(this->BuildBlockOnFireFlameEffect(piece, false));
 			emitterList.push_back(this->BuildBlockOnFireFlameEffect(piece, true));
 			break;
@@ -273,13 +272,14 @@ void BlockStatusEffectRenderer::SetupTextures() {
 
 ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const LevelPiece& piece, bool spinCW) {
 	ESPPointEmitter* pulsingFlame = new ESPPointEmitter();
-	pulsingFlame->SetSpawnDelta(ESPInterval(0.075f, 0.125f));
+	pulsingFlame->SetSpawnDelta(ESPInterval(0.225f, 0.31f));
 	pulsingFlame->SetInitialSpd(ESPInterval(0.1f, 0.5f));
 	pulsingFlame->SetParticleLife(ESPInterval(0.75f, 1.25f));
 	pulsingFlame->SetEmitAngleInDegrees(30);
 	pulsingFlame->SetEmitDirection(Vector3D(0, 1, 0));
-	pulsingFlame->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH/3.1f), 
-																					   ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.2f), ESPInterval(0.0f));
+	pulsingFlame->SetRadiusDeviationFromCenter(
+        ESPInterval(0.0f, LevelPiece::PIECE_WIDTH/3.1f), 
+        ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.2f), ESPInterval(0.0f));
 	pulsingFlame->SetParticleAlignment(ESP::ScreenAligned);
 	pulsingFlame->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 3.4f, LevelPiece::PIECE_WIDTH / 2.15f));
 	pulsingFlame->SetParticleRotation(ESPInterval(0, 359.99));
@@ -293,7 +293,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const Le
 	else {
 		pulsingFlame->AddEffector(&this->smokeRotatorCCW);
 	}
-	bool result = pulsingFlame->SetParticles(8, &this->fireEffect);
+	bool result = pulsingFlame->SetParticles(4, &this->fireEffect);
     UNUSED_VARIABLE(result);
 	pulsingFlame->SimulateTicking(Randomizer::GetInstance()->RandomNumZeroToOne() * 10);
 	assert(result);
@@ -302,7 +302,6 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const Le
 }
 
 ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireSmokeEffect(const LevelPiece& piece) {
-	size_t randomTexIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokePuffTextures.size();
 
 	ESPPointEmitter* smokeClouds = new ESPPointEmitter();
 	smokeClouds->SetSpawnDelta(ESPInterval(0.1f, 0.20f));
@@ -311,12 +310,12 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireSmokeEffect(const Le
 	smokeClouds->SetParticleLife(ESPInterval(0.5f, 1.20f));
 	smokeClouds->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 3.8f, LevelPiece::PIECE_WIDTH / 2.4f));
 	smokeClouds->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH/3.0f), 
-																					  ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.0f), ESPInterval(0.0f));
+											  ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.0f), ESPInterval(0.0f));
 	smokeClouds->SetParticleAlignment(ESP::ScreenAligned);
 	smokeClouds->SetEmitPosition(Point3D(piece.GetCenter()));
 	smokeClouds->SetEmitDirection(Vector3D(0, 1, 0));
 	smokeClouds->SetEmitAngleInDegrees(30.0f);
-	smokeClouds->SetParticles(4, this->smokePuffTextures[randomTexIdx]);
+	smokeClouds->SetRandomTextureParticles(6, this->smokePuffTextures);
 	smokeClouds->AddEffector(&this->particleLargeGrowth);
 	smokeClouds->AddEffector(&this->fireColourEffector);
 

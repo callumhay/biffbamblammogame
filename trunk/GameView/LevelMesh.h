@@ -81,7 +81,7 @@ public:
 
 	void SetLevelAlpha(float alpha);
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
-    void UpdateRegenBlock(const RegenBlock* block);
+    void UpdateRegenBlock(const RegenBlock* block, bool gotHurt);
 
     double ActivateBossIntro();
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
@@ -171,8 +171,8 @@ inline void LevelMesh::UpdateItemDropBlock(const GameItemAssets& gameItemAssets,
 	this->itemDropBlock->UpdateItemDropBlockTexture(&block, itemTexture);
 }
 
-inline void LevelMesh::UpdateRegenBlock(const RegenBlock* block) {
-    this->regenBlock->UpdateRegenBlock(block);
+inline void LevelMesh::UpdateRegenBlock(const RegenBlock* block, bool gotHurt) {
+    this->regenBlock->UpdateRegenBlock(block, gotHurt);
 }
 
 #endif

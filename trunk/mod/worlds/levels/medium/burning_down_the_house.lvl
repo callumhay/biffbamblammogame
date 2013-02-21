@@ -1,7 +1,7 @@
 Burning down the house
 11 28
 S S S S S S S S D(FireBall) S S 
-S R R R R R N E E E S 
+S Q(i) Q(i) Q(i) Q(i) Q(i) N E E E S 
 S R R R R R N E E E S 
 S R R R R R N E E E S 
 S R R R R T(R,ul) E E E E S 
@@ -19,7 +19,7 @@ S Y Y Y Y Y N E E E S
 S Y Y Y Y Y N E E E S 
 S Y Y Y Y Y N E E E S 
 S R R R R R N E E E S 
-S E E E E E E E E E S 
+S R R R R R N E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -31,17 +31,17 @@ S E E E E E E E E E S
 
 STARS:
 4000
-8000
+7000
+9500
 11500
-14500
-17500
+12500
 
 PaddleGrow 2
 PoisonPaddle 0
 BallSafetyNet 2
 Blackout 2
-UberBall 0
 BallGrow 2
+UberBall 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0

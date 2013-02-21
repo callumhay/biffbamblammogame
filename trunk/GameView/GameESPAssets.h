@@ -110,6 +110,8 @@ private:
 	ESPParticleRotateEffector explosionRayRotatorCCW;
 	ESPParticleRotateEffector smokeRotatorCW;
 	ESPParticleRotateEffector smokeRotatorCCW;
+    ESPParticleRotateEffector fastRotatorCW;
+    ESPParticleRotateEffector fastRotatorCCW;
 	ESPParticleRotateEffector loopRotateEffectorCW;
 	ESPParticleRotateEffector loopRotateEffectorCCW;
 

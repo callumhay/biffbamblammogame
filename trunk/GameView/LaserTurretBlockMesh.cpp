@@ -189,9 +189,6 @@ alpha(1.0f) {
     this->emoteLabel->SetTopLeftCorner(LevelPiece::PIECE_WIDTH / 2.0f, LevelPiece::PIECE_HEIGHT / 2.1f);
     this->emoteLabel->SetDropShadow(Colour(0,0,0), 0.2f);
 
-	size_t randomTexIndex1 = Randomizer::GetInstance()->RandomUnsignedInt() % smokeTextures.size();
-	size_t randomTexIndex2 = (randomTexIndex1 + 1) % smokeTextures.size();
-
     // Setup the emitters...
 	this->fireySmokeEmitter = new ESPPointEmitter();
 	this->fireySmokeEmitter->SetSpawnDelta(ESPInterval(0.2f, 0.35f));
@@ -206,7 +203,7 @@ alpha(1.0f) {
 	this->fireySmokeEmitter->AddEffector(&this->particleFireColourFader);
 	this->fireySmokeEmitter->AddEffector(&this->particleMediumGrowth);
 	this->fireySmokeEmitter->AddEffector(&this->rotateEffectorCW);
-	bool result = this->fireySmokeEmitter->SetParticles(10, smokeTextures[randomTexIndex1]);
+    bool result = this->fireySmokeEmitter->SetRandomTextureParticles(10, smokeTextures);
 	assert(result);
 
 	this->smokeySmokeEmitter = new ESPPointEmitter();
@@ -222,7 +219,7 @@ alpha(1.0f) {
 	this->smokeySmokeEmitter->AddEffector(&this->smokeColourFader);
 	this->smokeySmokeEmitter->AddEffector(&this->particleLargeGrowth);
 	this->smokeySmokeEmitter->AddEffector(&this->rotateEffectorCW);
-	result = this->smokeySmokeEmitter->SetParticles(10, smokeTextures[randomTexIndex2]);
+	result = this->smokeySmokeEmitter->SetRandomTextureParticles(10, smokeTextures);
 	assert(result);
 
     this->laserAfterGlowEmitter = new ESPPointEmitter();

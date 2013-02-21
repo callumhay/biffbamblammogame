@@ -1176,8 +1176,14 @@ void GameEventsListener::MineFiredByTurretEvent(const MineTurretBlock& block) {
     debug_output("EVENT: Mine Turret fired a mine.");
 }
 
-void GameEventsListener::RegenBlockLifeChangedEvent(const RegenBlock& block) {
-    this->display->GetAssets()->GetCurrentLevelMesh()->UpdateRegenBlock(&block);
+void GameEventsListener::RegenBlockLifeChangedEvent(const RegenBlock& block, float lifePercentBefore) {
+    this->display->GetAssets()->GetCurrentLevelMesh()->UpdateRegenBlock(&block, lifePercentBefore > block.GetCurrentLifePercent());
+}
+
+void GameEventsListener::RegenBlockPreturbedEvent(const RegenBlock& block) {
+    if (block.HasInfiniteLife()) {
+        this->display->GetAssets()->GetCurrentLevelMesh()->UpdateRegenBlock(&block, true);
+    }
 }
 
 void GameEventsListener::BossHurtEvent(const BossWeakpoint* hurtPart) {

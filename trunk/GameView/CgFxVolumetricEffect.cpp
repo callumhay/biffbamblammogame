@@ -25,8 +25,7 @@ const char* CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME		= "FireSprite";
 // Default constructor
 CgFxVolumetricEffect::CgFxVolumetricEffect() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_VOLUMEMETRIC_SHADER), 
-scale(1.0f), freq(1.0f), fadeExponent(1),
-colour(1,1,1), flowDir(0, 0, 1), 
+scale(1.0f), freq(1.0f), fadeExponent(1), colour(1,1,1), flowDir(0, 0, 1), alphaMultiplier(1.0f), 
 noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL) {
 
 	// Set the technique

@@ -2,7 +2,7 @@
  * RegenBlockMesh.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011-2013
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -32,6 +32,7 @@ public:
 
     static float GenerateFontDisplayScale();
     static const TextureFontSet* GetDisplayFont();
+    static Colour GetColourFromLifePercentage(float lifePercentage);
 
 	void Flush();
 
@@ -45,23 +46,26 @@ public:
 
 	void SetAlphaMultiplier(float alpha);
 
-	void UpdateRegenBlock(const RegenBlock* block);
+	void UpdateRegenBlock(const RegenBlock* block, bool gotHurt);
 
 private:
     
     class BlockData {
     public:
-        BlockData(RegenBlockMesh* regenMesh, const RegenBlock& block) : regenMesh(regenMesh), block(block), alpha(1.0f) {};
+        BlockData(RegenBlockMesh* regenMesh, const RegenBlock& block);
         virtual ~BlockData() {};
 
         void SetAlpha(float alpha) { this->alpha = alpha; }
-        virtual void Update() = 0;
+        virtual void Update(bool gotHurt);
+        virtual void Tick(double dT);
         virtual void DrawLifeInfo() = 0;
+        virtual Colour GetCurrBaseMaterialColour(const Colour& baseColour) const = 0;
 
     protected:
         RegenBlockMesh* regenMesh;
         const RegenBlock& block;
         float alpha;
+        AnimationMultiLerp<float> hurtRedFlashAnim;
 
     private:
         DISALLOW_COPY_AND_ASSIGN(BlockData);
@@ -71,14 +75,19 @@ private:
     public:
         RegenBlockFiniteData(RegenBlockMesh* regenMesh, const RegenBlock& block);
 
-        void Update();
+        void Update(bool gotHurt);
+        void Tick(double dT);
         void DrawLifeInfo();
+        Colour GetCurrBaseMaterialColour(const Colour& baseColour) const;
 
     private:
+        static const float MAX_LIFE_PERCENT_FOR_FLASHING;
         float textScale;
         float percentCharWidthWithScale;
-
         std::stringstream lifeStringStr;
+
+        AnimationMultiLerp<float> aboutToDieRedFlashAnim;
+
         DISALLOW_COPY_AND_ASSIGN(RegenBlockFiniteData);
     };
 
@@ -86,8 +95,10 @@ private:
     public:
         RegenBlockInfiniteData(RegenBlockMesh* regenMesh, const RegenBlock& block);
 
-        void Update() { /* Nothing to update */ };
+        void Update(bool gotHurt) { RegenBlockMesh::BlockData::Update(gotHurt); }
+        void Tick(double dT) { RegenBlockMesh::BlockData::Tick(dT); }
         void DrawLifeInfo();
+        Colour GetCurrBaseMaterialColour(const Colour& baseColour) const;
 
     private:
         DISALLOW_COPY_AND_ASSIGN(RegenBlockInfiniteData);
@@ -101,7 +112,10 @@ private:
 	Mesh* blockMesh;
     const TextureFontSet* font;
     Texture* infinityTex;
+
     std::map<std::string, MaterialGroup*> materialGroups;
+    MaterialGroup* baseMetalMaterialGrp;
+    Colour initialBaseMetalDiffuseColour;
 
     BlockCollection blocks;
 
