@@ -42,9 +42,7 @@ resources/worlds/levels/medium/rocketeer.lvl
 
 # Regen blocks
 resources/worlds/levels/medium/why_wont_you_just_die.lvl
-# One more regen level here (for infinity blocks)
-
-# TODO: put regen blocks in the iceball and fireball level(s) and the "all of the above" level
+resources/worlds/levels/medium/giving_it_100_percent.lvl
 
 
 # Iceball Item Intro
@@ -62,12 +60,8 @@ resources/worlds/levels/medium/freezing_hot.lvl
 resources/worlds/levels/medium/an_ice_way_to_go.lvl
 
 
-
-
-
-
-# TODO: 2 more levels here
-resources/worlds/levels/medium/all_of_the_above.lvl
+# All of the things!
+resources/worlds/levels/hard/all_of_the_above.lvl
 
 
 # Boss

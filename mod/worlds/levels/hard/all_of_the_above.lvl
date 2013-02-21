@@ -8,18 +8,18 @@ S E E E S E E E S E E E E E E E S
 S E E E S E E E S E E E C(60) E E E S 
 S E E E S E E E S E E E E E E E S 
 S S S S S S N S D(LaserBulletPaddle,LaserBeamPaddle) S N S S E E E S 
-S E E E E E E E E E E E S E C(180) E S 
+S E Q(i) E E E E E E E E E S E C(180) E S 
 S E E E E E E E E E E E S E E E S 
-S G G G G G B G G G G G S E E E S 
-S G G G G G G G G G G G S E E E S 
+S G Q(f) G G G B G G G Q(f) G S E E E S 
+S G Q(f) G G G Q(f) G G G Q(f) G S E E E S 
 S E E E E E E E E E E E S E E E S 
-S Y Y Y Y Y B Y Y Y Y Y S E E E S 
-S Y Y Y Y Y Y Y Y Y Y Y S E E E S 
+S Y Q(f) Y Y Y B Y Y Y Q(f) Y S E E E S 
+S Y Q(f) Y Y Y Q(f) Y Y Y Q(f) Y S E E E S 
 S E E E E E E E E E E E S E R E S 
-S O O O O O B O O O O O S E E E S 
-S O O O O O O O O O O O S S S S S 
+S O Q(f) O O O B O O O Q(f) O S E E E S 
+S O Q(f) O O O Q(f) O O O Q(f) O S S S S S 
 S E E E E E I E E E E E S E E E E 
-S R R R R R R R R R R R S E E E E 
+S R Q(f) R R R R R R R Q(f) R S E E E E 
 S E E E E E E E E E E E S E E E E 
 S E E E E E E E E E E E S E E E E 
 S E E E E E E E E E E E S E E E E 
@@ -40,8 +40,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

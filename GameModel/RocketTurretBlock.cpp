@@ -17,11 +17,6 @@
 #include "RocketTurretProjectile.h"
 #include "PaddleMineProjectile.h"
 
-const float RocketTurretBlock::BALL_DAMAGE_AMOUNT = static_cast<float>(RocketTurretBlock::PIECE_STARTING_LIFE_POINTS) / 5.0f;
-
-const float RocketTurretBlock::ONE_MORE_BALL_HIT_LIFE_PERCENT = 
-    RocketTurretBlock::BALL_DAMAGE_AMOUNT / static_cast<float>(RocketTurretBlock::PIECE_STARTING_LIFE_POINTS);
-
 const float RocketTurretBlock::ROCKET_HOLE_RADIUS = 0.21f;
 
 const float RocketTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC  = 180.0f;
@@ -48,8 +43,10 @@ const double RocketTurretBlock::LOST_AND_FOUND_MAX_SEEK_TIME = 120.0f / RocketTu
 const int RocketTurretBlock::LOST_AND_FOUND_MIN_NUM_LOOK_TIMES = 2;
 const int RocketTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 5;
 
+#define PIECE_STARTING_LIFE_POINTS (5*GameModelConstants::GetInstance()->DEFAULT_DAMAGE_ON_BALL_HIT)
+
 RocketTurretBlock::RocketTurretBlock(unsigned int wLoc, unsigned int hLoc) :
-TurretBlock(wLoc, hLoc, RocketTurretBlock::PIECE_STARTING_LIFE_POINTS), 
+TurretBlock(wLoc, hLoc, PIECE_STARTING_LIFE_POINTS), 
 currTurretState(SeekingTurretState), currRotationFromXInDegs(Randomizer::GetInstance()->RandomUnsignedInt() % 360), currRotationSpd(0.0f),
 lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
 

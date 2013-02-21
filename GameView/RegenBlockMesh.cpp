@@ -196,8 +196,8 @@ void RegenBlockMesh::BlockData::Update(bool gotHurt) {
         std::vector<double> times;
         times.reserve(3);
         times.push_back(0.0);
-        times.push_back(0.2);
-        times.push_back(0.4);
+        times.push_back(0.15);
+        times.push_back(0.3);
 
         this->hurtRedFlashAnim.SetLerp(times, values);
         this->hurtRedFlashAnim.SetRepeat(false);
@@ -298,10 +298,13 @@ void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo() {
 Colour RegenBlockMesh::RegenBlockFiniteData::GetCurrBaseMaterialColour(const Colour& baseColour) const {
     Colour result = baseColour;
     if (this->block.GetCurrentLifePercent() <= MAX_LIFE_PERCENT_FOR_FLASHING) {
-        result = Colour(result.R() + this->aboutToDieRedFlashAnim.GetInterpolantValue(), 0.5f*result.G(), 0.5f*result.B());
+        result = Colour(std::min<float>(1.0f, result.R() + this->aboutToDieRedFlashAnim.GetInterpolantValue()), 0.5f*result.G(), 0.5f*result.B());
     }
     if (this->hurtRedFlashAnim.GetInterpolantValue() > 0.0f) {
-        result = Colour(result.R() + this->hurtRedFlashAnim.GetInterpolantValue(), 0.5f*result.G(), 0.5f*result.B());
+        result = Colour(
+            std::min<float>(1.0f, result.R() + this->hurtRedFlashAnim.GetInterpolantValue()),
+            std::max<float>(0.0f, result.G() - this->hurtRedFlashAnim.GetInterpolantValue()),
+            std::max<float>(0.0f, result.B() - this->hurtRedFlashAnim.GetInterpolantValue()));
     }
 
     return result;
@@ -349,7 +352,7 @@ void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo() {
 Colour RegenBlockMesh::RegenBlockInfiniteData::GetCurrBaseMaterialColour(const Colour& baseColour) const {
     Colour result = baseColour;
     if (this->hurtRedFlashAnim.GetInterpolantValue() > 0.0f) {
-        result = Colour(result.R() + this->hurtRedFlashAnim.GetInterpolantValue(), 0.5f*result.G(), 0.5f*result.B());
+        result = Colour(std::min<float>(1.0f, result.R() + this->hurtRedFlashAnim.GetInterpolantValue()), 0.5f*result.G(), 0.5f*result.B());
     }
 
     return result;
