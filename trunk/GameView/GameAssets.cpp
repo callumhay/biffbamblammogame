@@ -1028,8 +1028,7 @@ void GameAssets::BallSafetyNetCreated() {
  * animations / effects associated with the mesh representing the safety net.
  */
 void GameAssets::BallSafetyNetDestroyed(const GameLevel& currLevel, const Point2D& pos) {
-	Vector2D levelDimensions = Vector2D(currLevel.GetLevelUnitWidth(), currLevel.GetLevelUnitHeight());
-	this->ballSafetyNet->DestroyBallSafetyNet(levelDimensions, pos[0]);
+	this->ballSafetyNet->DestroyBallSafetyNet(currLevel, pos[0]);
 }
 
 void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
@@ -1043,8 +1042,7 @@ void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
 	}
     
     // Setup the ball safety net for the new level...
-	Vector2D levelDimensions = Vector2D(currLevel.GetLevelUnitWidth(), currLevel.GetLevelUnitHeight());
-	this->ballSafetyNet->Regenerate(levelDimensions);
+	this->ballSafetyNet->Regenerate(currLevel);
 }
 
 void GameAssets::LoadRegularMeshAssets() {

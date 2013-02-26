@@ -2,7 +2,7 @@
  * ClassicalBoss.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2012
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -25,6 +25,11 @@ class BossBodyPart;
 class BossWeakpoint;
 class BossCompositeBodyPart;
 
+/**
+ * Child class of Boss that represents the Classical movement's boss ("Pediment Head").
+ * This class contains all of the setup and constants and particulars for the
+ * Classical movement boss.
+ */
 class ClassicalBoss : public Boss {
 
     friend class classicalbossai::ClassicalBossAI;
@@ -95,10 +100,6 @@ private:
 
     ClassicalBoss();
     void BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);
-    
-    void ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoints, float ballDmgOnHit);
-    void ConvertAliveBodyPartToDeadBodyPart(size_t index);
-    void ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart);
 
     // Inherited from Boss
     void Init();

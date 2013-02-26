@@ -40,6 +40,7 @@ public:
 	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir);
 
     void Translate(const Vector3D& t);
+    void RotateY(float rotYDegs);
     void RotateZ(float rotZDegs);
     void Transform(const Matrix4x4& m);
 
@@ -161,6 +162,10 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Circle2D& c, 
 
 inline void BossBodyPart::Translate(const Vector3D& t) {
     this->worldTransform = Matrix4x4::translationMatrix(t) * this->worldTransform;
+}
+
+inline void BossBodyPart::RotateY(float rotYDegs) {
+    this->worldTransform = Matrix4x4::rotationYMatrix(rotYDegs) * this->worldTransform;
 }
 
 inline void BossBodyPart::RotateZ(float rotZDegs) {

@@ -21,6 +21,7 @@
 class Camera;
 class PointLight;
 class CgFxPhong;
+class GameLevel;
 
 class BallSafetyNetMesh {
 private:
@@ -54,16 +55,16 @@ public:
 	bool IsPlayingAnimation() const { 
 		return this->currAnimation == BallSafetyNetMesh::CreationAnimation || this->currAnimation == BallSafetyNetMesh::DestructionAnimation;
 	}
-	void Regenerate(const Vector2D& levelDimensions);
+	void Regenerate(const GameLevel& currLevel);
 
 	void CreateBallSafetyNet();
-	void DestroyBallSafetyNet(const Vector2D& levelDimensions, float destructionXPos);
+	void DestroyBallSafetyNet(const GameLevel& currLevel, float destructionXPos);
 	void SetAlpha(float alpha) {
 		assert(alpha >= 0 && alpha <= 1);
 		this->idleAlpha = alpha;
 	}
 	
-
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+
 };
 #endif

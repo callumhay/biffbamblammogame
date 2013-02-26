@@ -1,0 +1,72 @@
+boss
+Itemmancer
+21 30
+S S S S S S S S S S S S S S S S S S S S S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E C(180) E E E E E E E E E E E E E E E C(180) E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E N N N N N N N N N N N N N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E C(30-180) E N F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) N E C(180) E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
+
+STARS:
+0
+0
+0
+0
+0
+
+PaddleGrow 0
+PoisonPaddle 0
+BallSafetyNet 0
+Blackout 0
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 0
+PaddleCam 0

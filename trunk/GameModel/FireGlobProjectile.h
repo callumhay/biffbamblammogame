@@ -27,9 +27,9 @@ public:
     ProjectileType GetType() const {
         return Projectile::FireGlobProjectile;
     }
-    float GetDamage() const { return 0.0f; }
+    float GetDamage() const { return 0.0f; /* NEVER CHANGE THIS TO ANYTHING BUT ZERO! */ }
 
-	enum RelativeSize { Small, Medium, Large };
+	enum RelativeSize { Small = 1, Medium = 2, Large = 3 };
 	const FireGlobProjectile::RelativeSize& GetRelativeSize() const;
 
 private:

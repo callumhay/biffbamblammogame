@@ -2,7 +2,7 @@
  * ClassicalBossMesh.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2012
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -24,9 +24,6 @@ class ClassicalBossMesh : public BossMesh {
 public:
     ClassicalBossMesh(ClassicalBoss* boss);
     ~ClassicalBossMesh();
-
-    void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
     double ActivateIntroAnimation();
 

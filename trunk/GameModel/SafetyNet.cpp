@@ -18,11 +18,15 @@ const float SafetyNet::SAFETY_NET_HALF_HEIGHT = SafetyNet::SAFETY_NET_HEIGHT / 2
 
 SafetyNet::SafetyNet(const GameLevel& currLevel) {
 
+    const LevelPiece* maxBoundPiece = currLevel.GetMaxPaddleBoundPiece();
+    const LevelPiece* minBoundPiece = currLevel.GetMinPaddleBoundPiece();
+
 	// Create the safety net bounding line for this level
 	std::vector<Collision::LineSeg2D> lines;
 	lines.reserve(1);
-	Collision::LineSeg2D safetyNetLine(Point2D(0.0f, -LevelPiece::HALF_PIECE_HEIGHT),
-        Point2D(currLevel.GetLevelUnitWidth(), -LevelPiece::HALF_PIECE_HEIGHT));
+    Collision::LineSeg2D safetyNetLine(
+        Point2D(minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+        Point2D(maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 	lines.push_back(safetyNetLine);
 
 	std::vector<Vector2D> normals;

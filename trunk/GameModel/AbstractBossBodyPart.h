@@ -45,6 +45,7 @@ public:
 	virtual BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) = 0;
 
     virtual void Translate(const Vector3D& t)  = 0;
+    virtual void RotateY(float rotYDegs)       = 0;
     virtual void RotateZ(float rotZDegs)       = 0;
     virtual void Transform(const Matrix4x4& m) = 0;
 

@@ -156,18 +156,22 @@ void BossCompositeBodyPart::SetCollisionVelocity(const Vector2D& v) {
     }
 }
 
+void BossCompositeBodyPart::RotateY(float rotYDegs) {
+    if (fabs(rotYDegs) < EPSILON) {
+        return;
+    }
+
+    Matrix4x4 rotMatrix = Matrix4x4::rotationYMatrix(rotYDegs);
+    this->Transform(rotMatrix);
+}
+
 void BossCompositeBodyPart::RotateZ(float rotZDegs) {
     if (fabs(rotZDegs) < EPSILON) {
         return;
     }
 
     Matrix4x4 rotMatrix = Matrix4x4::rotationZMatrix(rotZDegs);
-    this->worldTransform = rotMatrix * this->worldTransform;
-
-    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
-        AbstractBossBodyPart* part = this->childParts[i];
-        part->Transform(rotMatrix);
-    }
+    this->Transform(rotMatrix);
 }
 
 void BossCompositeBodyPart::Transform(const Matrix4x4& m) {

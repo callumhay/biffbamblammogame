@@ -355,6 +355,7 @@ public:
 	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	
     void ResetBulletTimeBallBoostEffects();
+    void ResetProjectileEffects(const Projectile& projectile);
     void DrawBulletTimeBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel);
     void DrawBallBoostingEffects(double dT, const Camera& camera);
 

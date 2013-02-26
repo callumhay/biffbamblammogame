@@ -1,5 +1,5 @@
 All of the above
-17 28
+17 29
 S S S S S S S S S S S S S S S S S 
 S E E E S E E E S E E E E E E E S 
 S E E E S E E E S E C(120) E E E C(180) E S 
@@ -18,8 +18,9 @@ S Y Q(f) Y Y Y Q(f) Y Y Y Q(f) Y S E E E S
 S E E E E E E E E E E E S E R E S 
 S O Q(f) O O O B O O O Q(f) O S E E E S 
 S O Q(f) O O O Q(f) O O O Q(f) O S S S S S 
-S E E E E E I E E E E E S E E E E 
-S R Q(f) R R R R R R R Q(f) R S E E E E 
+S E E E E E E E E E E E S E E E E 
+S R R R R R R R R R R R S E E E E 
+S E E E E E E E E E E E S E E E E 
 S E E E E E E E E E E E S E E E E 
 S E E E E E E E E E E E S E E E E 
 S E E E E E E E E E E E S E E E E 

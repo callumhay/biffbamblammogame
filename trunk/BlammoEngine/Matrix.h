@@ -202,6 +202,18 @@ public:
 		return r;
 	}
 
+	static Matrix4x4 rotationYMatrix(float angleInDegs) {
+		float radAngle = Trig::degreesToRadians(angleInDegs);
+		Vector4D row1 = Vector4D(cos(radAngle), 0, sin(radAngle), 0);
+		Vector4D row2 = Vector4D(0, 1, 0, 0);
+		Vector4D row3 = Vector4D(-sin(radAngle), 0, cos(radAngle), 0);
+		Vector4D row4 = Vector4D(0, 0, 0, 1);
+
+		// Create and return the matrix based on the values calculated
+		Matrix4x4 r(row1, row2, row3, row4);
+		return r;
+	}
+
 	static Matrix4x4 rotationMatrix(float angleInRads, const Vector3D& rotationVec) {
 		Vector3D unitRotVec = Vector3D::Normalize(rotationVec);
 		if (unitRotVec == Vector3D(0,0,0)) {
