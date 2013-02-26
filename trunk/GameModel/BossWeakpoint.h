@@ -51,6 +51,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(BossWeakpoint);
 };
 
+/**
+ * Return life percentage fraction in [0,1].
+ */
 inline float BossWeakpoint::GetCurrentLifePercentage() const {
     assert(this->currLifePoints <= this->totalLifePoints);
     return std::max<float>(0.0f, this->currLifePoints / this->totalLifePoints);

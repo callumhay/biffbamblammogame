@@ -1197,7 +1197,9 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
     const LevelPiece* minBoundPiece = currLevel->GetMinPaddleBoundPiece();
     const LevelPiece* maxBoundPiece = currLevel->GetMaxPaddleBoundPiece();
     
-    if (p.GetWidthIndex() <= minBoundPiece->GetWidthIndex() || p.GetWidthIndex() >= maxBoundPiece->GetWidthIndex()) {
+    if (p.GetWidthIndex() <= minBoundPiece->GetWidthIndex() ||
+        p.GetWidthIndex() >= maxBoundPiece->GetWidthIndex()) {
+
         droppedItemLastTime = false;
         return;
     }

@@ -22,7 +22,7 @@
 #include "../GameModel/GothicRomanticBoss.h"
 #include "../GameModel/BossWeakpoint.h"
 
-const double GothicRomanticBossMesh::INTRO_TIME_IN_SECS = 0.0;
+const double GothicRomanticBossMesh::INTRO_TIME_IN_SECS = 3.0;
 
 GothicRomanticBossMesh::GothicRomanticBossMesh(GothicRomanticBoss* boss) :
 BossMesh(), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL), legMesh(NULL) {

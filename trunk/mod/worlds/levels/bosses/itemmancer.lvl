@@ -2,25 +2,25 @@ boss
 Itemmancer
 21 30
 S S S S S S S S S S S S S S S S S S S S S 
-S E E E E E E E E E E E E E E E E E E E S 
+S E E E E E Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) E E E E E S 
 S E C(180) E E E E E E E E E E E E E E E C(180) E S 
 S E E E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
-S E E E N N N N N N N N N N N N N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E E E N E E E E E E E E E E E N E E E S 
-S E C(30-180) E N F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) N E C(180) E S 
-S E E E E E E E E E E E E E E E E E E E S 
+S E E E F(l) N N N N N N N N N N N F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E E E F(l) E E E E E E E E E E E F(r) E E E S 
+S E C(30-180) E F(l) E E E E E E E E E E E F(r) E C(180) E S 
+S E E E F(l) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(r) E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
@@ -43,8 +43,8 @@ PaddleGrow 0
 PoisonPaddle 0
 BallSafetyNet 0
 Blackout 0
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 0

@@ -185,7 +185,9 @@ void BossCompositeBodyPart::Transform(const Matrix4x4& m) {
 void BossCompositeBodyPart::SetLocalTranslation(const Vector3D& t) {
     Matrix4x4 changeTransform =
         Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::rotationYMatrix(-this->localYRotation) * 
         Matrix4x4::translationMatrix(-this->localTranslation + t) *
+        Matrix4x4::rotationYMatrix(this->localYRotation) * 
         Matrix4x4::rotationZMatrix(this->localZRotation);
 
     Matrix4x4 prevWorldTransform = this->worldTransform;
@@ -217,11 +219,32 @@ void BossCompositeBodyPart::SetLocalZRotation(float zRotInDegs) {
     }
 }
 
+void BossCompositeBodyPart::SetLocalYRotation(float yRotInDegs) {
+    Matrix4x4 changeTransform = 
+        Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::rotationYMatrix(-this->localYRotation) *
+        Matrix4x4::rotationYMatrix(yRotInDegs) *
+        Matrix4x4::rotationZMatrix(this->localZRotation);
+
+    Matrix4x4 prevWorldTransform = this->worldTransform;
+    this->worldTransform = prevWorldTransform * changeTransform;
+    changeTransform = this->worldTransform * prevWorldTransform.inverse();
+
+    this->localYRotation = yRotInDegs;
+
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->Transform(changeTransform);
+    }
+}
+
 void BossCompositeBodyPart::SetLocalTransform(const Vector3D& translation, float zRotInDegs) {
     Matrix4x4 changeTransform = 
         Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::rotationYMatrix(-this->localYRotation) * 
         Matrix4x4::translationMatrix(-this->localTranslation) *
         Matrix4x4::translationMatrix(translation) *
+        Matrix4x4::rotationYMatrix(this->localYRotation) * 
         Matrix4x4::rotationZMatrix(zRotInDegs);
 
     Matrix4x4 prevWorldTransform = this->worldTransform;
@@ -240,7 +263,6 @@ void BossCompositeBodyPart::SetLocalTransform(const Vector3D& translation, float
 void BossCompositeBodyPart::GetReflectionRefractionRays(const Point2D& hitPoint,
                                                         const Vector2D& impactDir,
                                                         std::list<Collision::Ray2D>& rays) const {
-
     rays.clear();
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         AbstractBossBodyPart* part = this->childParts[i];
@@ -249,7 +271,6 @@ void BossCompositeBodyPart::GetReflectionRefractionRays(const Point2D& hitPoint,
             return;
         }
     }
-
 }
 
 void BossCompositeBodyPart::TickBeamCollision(double dT, const BeamSegment* beamSegment,

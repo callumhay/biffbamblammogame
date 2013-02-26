@@ -42,6 +42,8 @@ public:
 
     virtual void UpdateMovement(double dT, GameModel* gameModel);
     virtual void UpdateState(double dT, GameModel* gameModel) = 0;
+    
+    virtual float GetTotalLifePercent() const = 0;
 
 protected:
     Vector2D currVel;

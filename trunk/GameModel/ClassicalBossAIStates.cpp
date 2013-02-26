@@ -492,8 +492,6 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
     assert(level != NULL);
 
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
-
-    // How much damage has been done so far? These two percentages will maximally add to 2.0
     float totalLifePercent = this->GetTotalLifePercent();
 
     // The basic movement state occurs further away from the paddle, closer to the top of the level.
@@ -526,29 +524,9 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
     }
 
     if (this->countdownToNextState <= 0.0) {
-        // Determine the next state - we will either go back to chasing the paddle around and eventually attacking
-        // with the arms, or we go into a laser charge and barrage state progression
-/*        
-        bool goToChaseState = true;
-        
-        // Laser barrages will happen more frequently when the boss has taken more damage...
-        if (Randomizer::GetInstance()->RandomNumZeroToOne() >= (totalLifePercent - 0.1f)) {
-            goToChaseState = false;
-        }
-        
-        if (goToChaseState) {
-            this->SetState(ClassicalBossAI::ChasePaddleAIState);
-        }
-        else {
-            this->currVel    = Vector2D(0,0);
-            this->desiredVel = Vector2D(0,0);
-            this->SetState(ClassicalBossAI::PrepLaserAIState);
-        }
-*/
-            this->currVel    = Vector2D(0,0);
-            this->desiredVel = Vector2D(0,0);
-            this->SetState(ClassicalBossAI::PrepLaserAIState);
-
+        this->currVel    = Vector2D(0,0);
+        this->desiredVel = Vector2D(0,0);
+        this->SetState(ClassicalBossAI::PrepLaserAIState);
     }
     else {
         this->countdownToNextState -= dT;
