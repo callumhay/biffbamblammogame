@@ -46,6 +46,7 @@ public:
 
     void SetLocalTranslation(const Vector3D& t);
     void SetLocalZRotation(float zRotInDegs);
+    void SetLocalYRotation(float yRotInDegs);
     void SetLocalTransform(const Vector3D& translation, float zRotInDegs);
 
     void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;

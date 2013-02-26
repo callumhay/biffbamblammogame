@@ -14,14 +14,18 @@
 
 using namespace gothicromanticbossai;
 
+const float GothicRomanticBoss::TOTAL_WIDTH_WITH_LEGS = 10.25f;
+const float GothicRomanticBoss::TOTAL_HEIGHT          = 9.258f;
+
 const float GothicRomanticBoss::BODY_HEIGHT = 7.0f;
 const float GothicRomanticBoss::BODY_WIDTH  = 3.45f;
 
 const float GothicRomanticBoss::TOP_POINT_WIDTH  = 2.644f;
-const float GothicRomanticBoss::TOP_POINT_HEIGHT = 0.742f;
+const float GothicRomanticBoss::TOP_POINT_HEIGHT = 1.492f;
 
 const float GothicRomanticBoss::BOTTOM_POINT_WIDTH  = 3.75f;
-const float GothicRomanticBoss::BOTTOM_POINT_HEIGHT = 1.016f;
+const float GothicRomanticBoss::BOTTOM_POINT_HEIGHT = 1.516f;
+const float GothicRomanticBoss::BOTTOM_POINT_TIP_Y  = -1.069f;
 
 const float GothicRomanticBoss::DEFAULT_ACCELERATION = 1.25f * PlayerPaddle::DEFAULT_ACCELERATION;
 
@@ -32,6 +36,20 @@ GothicRomanticBoss::GothicRomanticBoss() : Boss(), bodyIdx(0), topPointIdx(0), b
 }
 
 GothicRomanticBoss::~GothicRomanticBoss() {
+}
+
+Point3D GothicRomanticBoss::GetLegPointPos(int idx) const {
+    const BossBodyPart* leg = this->GetLeg(idx);
+    assert(leg != NULL);
+
+    return leg->GetWorldTransform() * Point3D(0.0f, -1.875f, 3.0f);
+}
+
+Point3D GothicRomanticBoss::GetBottomPointTipPos() const {
+    const BossBodyPart* bottomPt = this->GetBottomPoint();
+    assert(bottomPt != NULL);
+
+    return bottomPt->GetWorldTransform() * Point3D(0.0f, BOTTOM_POINT_TIP_Y, 0.0f);
 }
 
 void GothicRomanticBoss::Init() {
@@ -93,12 +111,12 @@ void GothicRomanticBoss::Init() {
                 static const float WIDTH  = TOP_POINT_WIDTH;
                 static const float HALF_WIDTH = WIDTH / 2.0f;
 
-                static const float TOP_Y    = 0.458f;
+                static const float TOP_Y    = 1.208f;
                 static const float BOTTOM_Y = -0.284f;
 
                 BoundingLines topPtBounds;
-                topPtBounds.AddBound(Collision::LineSeg2D(Point2D(0, TOP_Y), Point2D(-HALF_WIDTH, BOTTOM_Y)), Vector2D(TOP_Y - BOTTOM_Y, HALF_WIDTH));
-                topPtBounds.AddBound(Collision::LineSeg2D(Point2D(0, TOP_Y), Point2D(HALF_WIDTH,  BOTTOM_Y)), Vector2D(BOTTOM_Y - TOP_Y, HALF_WIDTH));
+                topPtBounds.AddBound(Collision::LineSeg2D(Point2D(0, TOP_Y), Point2D(-HALF_WIDTH, BOTTOM_Y)), Vector2D(BOTTOM_Y - TOP_Y, HALF_WIDTH));
+                topPtBounds.AddBound(Collision::LineSeg2D(Point2D(0, TOP_Y), Point2D(HALF_WIDTH,  BOTTOM_Y)), Vector2D(TOP_Y - BOTTOM_Y, HALF_WIDTH));
 
                 BossBodyPart* topPt = new BossBodyPart(topPtBounds);
                 topPt->Translate(Vector3D(0, 3.542f, 0));
@@ -114,7 +132,7 @@ void GothicRomanticBoss::Init() {
                 static const float HALF_WIDTH = WIDTH / 2.0f;
 
                 static const float TOP_Y    = 0.447f;
-                static const float BOTTOM_Y = -0.569f;
+                static const float BOTTOM_Y = BOTTOM_POINT_TIP_Y;
 
                 BoundingLines bottomPtBounds;
                 bottomPtBounds.AddBound(Collision::LineSeg2D(Point2D(0, BOTTOM_Y), Point2D(-HALF_WIDTH, TOP_Y)), Vector2D(BOTTOM_Y - TOP_Y, -HALF_WIDTH));
@@ -130,18 +148,21 @@ void GothicRomanticBoss::Init() {
 
             // Legs
             {
-                this->BuildLeg(Vector3D(0.0f, -1.859f, -1.876f), 0.0f, this->legIdxs[0]);
-                this->BuildLeg(Vector3D(1.326f, -1.859f, -1.327f), 45.0f, this->legIdxs[1]);
+                this->BuildLeg(Vector3D(0.0f, -1.859f, 1.876f), 0.0f, this->legIdxs[0]);
+                this->BuildLeg(Vector3D(1.326f, -1.859f, 1.327f), 45.0f, this->legIdxs[1]);
                 this->BuildLeg(Vector3D(1.875f, -1.859f, 0.0f), 90.0f, this->legIdxs[2]);
-                this->BuildLeg(Vector3D(1.326f, -1.859f, 1.325f), 135.0f, this->legIdxs[3]);
-                this->BuildLeg(Vector3D(0.0f, -1.859f, 1.876f), 180.0f, this->legIdxs[4]);
-                this->BuildLeg(Vector3D(-1.326f, -1.859f, 1.325f), 225.0f, this->legIdxs[5]);
+                this->BuildLeg(Vector3D(1.326f, -1.859f, -1.325f), 135.0f, this->legIdxs[3]);
+                this->BuildLeg(Vector3D(0.0f, -1.859f, -1.876f), 180.0f, this->legIdxs[4]);
+                this->BuildLeg(Vector3D(-1.326f, -1.859f, -1.325f), 225.0f, this->legIdxs[5]);
                 this->BuildLeg(Vector3D(-1.875f, -1.859f, 0.0f), 270.0f, this->legIdxs[6]);
-                this->BuildLeg(Vector3D(-1.326f, -1.859f, -1.327f), 315.0f, this->legIdxs[7]);
+                this->BuildLeg(Vector3D(-1.326f, -1.859f, 1.327f), 315.0f, this->legIdxs[7]);
             }
 
         } // end alivePartsRoot
     } // end root
+
+    // Move the boss up a bit to start off
+    this->Translate(Vector3D(0.0f, 2*LevelPiece::PIECE_HEIGHT, 0.0f));
 
     this->SetNextAIState(new FireBallAI(this));
     // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.

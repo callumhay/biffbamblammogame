@@ -41,6 +41,9 @@ class GothicRomanticBoss : public Boss {
 public:
     static const int NUM_LEGS = 8;
 
+    static const float TOTAL_WIDTH_WITH_LEGS;
+    static const float TOTAL_HEIGHT;
+
     static const float BODY_WIDTH;
     static const float BODY_HEIGHT;
     
@@ -49,6 +52,7 @@ public:
 
     static const float BOTTOM_POINT_WIDTH;
     static const float BOTTOM_POINT_HEIGHT;
+    static const float BOTTOM_POINT_TIP_Y;
 
     static const float DEFAULT_ACCELERATION;
 
@@ -59,12 +63,21 @@ public:
     const BossBodyPart* GetBottomPoint() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->bottomPointIdx]); }
     const BossBodyPart* GetLeg(int idx) const { assert(idx >= 0 && idx < 8); return static_cast<const BossBodyPart*>(this->bodyParts[this->legIdxs[idx]]); }
 
+    Point3D GetLegPointPos(int idx) const;
+    Point3D GetBottomPointTipPos() const;
+
 private:
     size_t bodyIdx;
     size_t topPointIdx, bottomPointIdx;
     size_t legIdxs[NUM_LEGS];
 
     GothicRomanticBoss();
+
+    static const int CONFINES_NUM_PIECES_IN_X = 5;
+    float GetMinXOfConfines() const { return CONFINES_NUM_PIECES_IN_X*LevelPiece::PIECE_WIDTH; }
+    float GetMaxXOfConfines(float levelWidth) const { return levelWidth - CONFINES_NUM_PIECES_IN_X*LevelPiece::PIECE_WIDTH; }
+    float GetMinYOfConfines() const { return 11*LevelPiece::PIECE_HEIGHT; }
+    float GetMaxYOfConfines(float levelHeight) const { return levelHeight - 6*LevelPiece::PIECE_HEIGHT; }
 
     void BuildLeg(const Vector3D& legTranslation, float legYRotation, size_t& legIdx);
 

@@ -82,8 +82,6 @@ protected:
         return 1.0f / (initialDivisor * std::max<float>(1.0f / initialDivisor, currHealthPercent));
     }
 
-    virtual float GetTotalLifePercent() const = 0;
-
     // Update functions
     virtual void SetState(ClassicalBossAI::AIState newState) = 0;
     

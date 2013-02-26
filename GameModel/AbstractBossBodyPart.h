@@ -51,7 +51,9 @@ public:
 
     virtual void SetLocalTranslation(const Vector3D& t) = 0;
     virtual void SetLocalZRotation(float zRotInDegs)    = 0;
+    virtual void SetLocalYRotation(float yRotInDegs)    = 0;
     virtual void SetLocalTransform(const Vector3D& translation, float zRotInDegs) = 0;
+
     void AnimateLocalTranslation(const AnimationMultiLerp<Vector3D>& animation);
     void ClearLocalTranslationAnimation();
     void AnimateLocalZRotation(const AnimationMultiLerp<float>& animationZDegs);
@@ -91,6 +93,7 @@ protected:
 
     Vector3D localTranslation;
     float localZRotation;
+    float localYRotation;
 
     AnimationMultiLerp<Vector3D> transAnim;
     AnimationMultiLerp<float> zRotAnim;
@@ -100,7 +103,7 @@ private:
 };
 
 inline AbstractBossBodyPart::AbstractBossBodyPart() : 
-localZRotation(0.0f), localTranslation(0.0f, 0.0f, 0.0f) {
+localZRotation(0.0f), localYRotation(0.0f), localTranslation(0.0f, 0.0f, 0.0f) {
 
     this->ClearLocalTranslationAnimation();
     this->ClearLocalZRotationAnimation();

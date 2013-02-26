@@ -22,6 +22,7 @@ public:
 
     explicit BossLaserProjectile(const Point2D& spawnLoc);
     BossLaserProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);
+    //BossLaserProjectile(const Point2D& spawnLoc, const Vector2D& dirVec, float width);
     BossLaserProjectile(const BossLaserProjectile& copy);
     ~BossLaserProjectile();
 

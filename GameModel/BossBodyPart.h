@@ -46,6 +46,7 @@ public:
 
     void SetLocalTranslation(const Vector3D& t);
     void SetLocalZRotation(float zRotInDegs);
+    void SetLocalYRotation(float yRotInDegs);
     void SetLocalTransform(const Vector3D& translation, float zRotInDegs);
 
     virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball) { UNUSED_PARAMETER(gameModel); UNUSED_PARAMETER(ball); }
@@ -109,7 +110,8 @@ inline const BoundingLines& BossBodyPart::GetLocalBounds() const {
 
 inline BoundingLines BossBodyPart::GetWorldBounds() const {
     BoundingLines worldBounds(localBounds);
-    worldBounds.Transform(this->worldTransform);
+    worldBounds.RotateLinesAndNormals(this->localZRotation, Point2D(0,0));
+    worldBounds.TranslateBounds(this->worldTransform.getTranslationVec2D());
     return worldBounds;
 }
 
@@ -181,7 +183,9 @@ inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {
     this->worldTransform = 
         this->worldTransform *
         Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::rotationYMatrix(-this->localYRotation) *
         Matrix4x4::translationMatrix(-this->localTranslation + t) *
+        Matrix4x4::rotationYMatrix(this->localYRotation) *
         Matrix4x4::rotationZMatrix(this->localZRotation);
     
     // Change the local translation
@@ -199,12 +203,27 @@ inline void BossBodyPart::SetLocalZRotation(float zRotInDegs) {
     this->localZRotation = zRotInDegs;
 }
 
+inline void BossBodyPart::SetLocalYRotation(float yRotInDegs) {
+    // Remove the previous rotation...
+    this->worldTransform =
+        this->worldTransform *
+        Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::rotationYMatrix(-this->localYRotation) *
+        Matrix4x4::rotationYMatrix(yRotInDegs) *
+        Matrix4x4::rotationZMatrix(this->localZRotation);
+
+    // Change the local y-axis rotation
+    this->localYRotation = yRotInDegs;
+}
+
 inline void BossBodyPart::SetLocalTransform(const Vector3D& translation, float zRotInDegs) {
     // Remove the previous local rotation and translation from the world transform
     this->worldTransform = 
         this->worldTransform *
         Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::rotationYMatrix(-this->localYRotation) *
         Matrix4x4::translationMatrix(-this->localTranslation + translation) *
+        Matrix4x4::rotationYMatrix(this->localYRotation) *
         Matrix4x4::rotationZMatrix(zRotInDegs);
     
     // Change the local translation and z-axis rotation
