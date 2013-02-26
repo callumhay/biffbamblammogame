@@ -29,13 +29,17 @@ const float ClassicalBossAI::BOSS_WIDTH = 25.0f;
 const float ClassicalBossAI::HALF_BOSS_WIDTH = ClassicalBossAI::BOSS_WIDTH / 2.0f;
 
 ClassicalBossAI::ClassicalBossAI(ClassicalBoss* boss) : BossAIState(), boss(boss),
-currState(ClassicalBossAI::BasicMoveAndLaserSprayAIState), currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f) {
+currState(ClassicalBossAI::BasicMoveAndLaserSprayAIState) {
     assert(boss != NULL);
     this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(BOSS_WIDTH/20.0f);
 }
 
 ClassicalBossAI::~ClassicalBossAI() {
     this->boss = NULL;
+}
+
+Boss* ClassicalBossAI::GetBoss() const {
+    return this->boss;
 }
 
 Collision::AABB2D ClassicalBossAI::GenerateDyingAABB() const {
@@ -107,38 +111,9 @@ float ClassicalBossAI::GetMaxSpeed() const {
     return ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED;
 }
 
-Vector2D ClassicalBossAI::GetAcceleration() const {
-    Vector2D accel = this->desiredVel - this->currVel;
-    if (accel.IsZero()) {
-        return Vector2D(0,0);
-    }
-    accel.Normalize();
-
-    // Based on how hurt the boss is, the acceleration/deceleration will be more dramatic
-    float multipler = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.75f, this->GetTotalLifePercent());
-    return multipler * ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION * accel;
-}
-
-void ClassicalBossAI::UpdateMovement(double dT, GameModel* gameModel) {
-    // Figure out how much to move and update the position of the boss
-    if (!this->currVel.IsZero()) {
-        
-        Vector2D dMovement = dT * this->currVel;
-        this->boss->alivePartsRoot->Translate(Vector3D(dMovement));
-
-        // Update the position of the boss based on whether it is now colliding with the boundaries/walls of the level
-        const GameLevel* level = gameModel->GetCurrentLevel();
-        Vector2D correctionVec;
-        if (level->CollideBossWithLevel(this->boss->alivePartsRoot->GenerateWorldAABB(), correctionVec)) {
-            
-            Vector3D correctionVec3D(correctionVec);
-            this->boss->alivePartsRoot->Translate(correctionVec3D);
-        }
-    }
-
-    // Update the speed based on the acceleration
-    this->currVel = this->currVel + dT * this->GetAcceleration();
-    this->boss->alivePartsRoot->SetCollisionVelocity(this->currVel);
+float ClassicalBossAI::GetAccelerationMagnitude() const {
+    return NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.75f, this->GetTotalLifePercent()) *
+        ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION;
 }
 
 // END ClassicalBossAI *************************************************************

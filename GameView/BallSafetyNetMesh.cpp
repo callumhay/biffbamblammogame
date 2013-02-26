@@ -16,6 +16,7 @@
 
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/SafetyNet.h"
+#include "../GameModel/GameLevel.h"
 
 #include "../ResourceManager.h"
 #include "../BlammoEngine/CgFxEffect.h"
@@ -76,11 +77,11 @@ void BallSafetyNetMesh::InitializeMaterials() {
 	// Create the material properties for the mesh
 	MaterialProperties* matProps  = new MaterialProperties();
 	matProps->diffuseTexture = ballSafetyNetTex;
-	matProps->diffuse				= Colour(1,1,1);
-	matProps->specular			= Colour(0.3, 0.3, 0.3);
-	matProps->shininess			= 50.0f;
-	matProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
-	matProps->materialType	= MaterialProperties::MATERIAL_PHONG_TYPE;	// Not really necessary, but just for brevity
+	matProps->diffuse        = Colour(1,1,1);
+	matProps->specular       = Colour(0.3, 0.3, 0.3);
+	matProps->shininess      = 50.0f;
+	matProps->geomType       = MaterialProperties::MATERIAL_GEOM_FG_TYPE;
+	matProps->materialType 	= MaterialProperties::MATERIAL_PHONG_TYPE;	// Not really necessary, but just for brevity
 
 	// Associate material properties with appropriate shading technique
 	this->shadingMaterial = new CgFxPhong(matProps);
@@ -90,8 +91,8 @@ void BallSafetyNetMesh::InitializeMaterials() {
  * Static function for drawing the safety net mesh with the given parameters.
  */
 void BallSafetyNetMesh::DrawSafetyNetMesh(float minXCoord, float maxXCoord, float minTexCoordU, float maxTexCoordU) {
-	const float HalfDepth		= BallSafetyNetMesh::SAFETY_NET_DEPTH	 / 2.0f;
-	const float HalfHeight	= BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f;	
+	const float HalfDepth  = BallSafetyNetMesh::SAFETY_NET_DEPTH  / 2.0f;
+	const float HalfHeight = BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f;	
 	
 	// The safety net is just a long rectangular prism that spans the bottom portion
 	// of the current level
@@ -163,14 +164,19 @@ void BallSafetyNetMesh::DrawSafetyNetMesh(float minXCoord, float maxXCoord, floa
  * a given level dimension - this will reshape and initialize the 
  * display list for the mesh so that the Draw function can be used properly.
  */
-void BallSafetyNetMesh::Regenerate(const Vector2D& levelDimensions) {
+void BallSafetyNetMesh::Regenerate(const GameLevel& currLevel) {
 	assert(this->displayListID != 0);
 
-	const float width = levelDimensions[0];
-	const float maxTexCoordU = width / 2.0f;
+    const LevelPiece* maxBoundPiece = currLevel.GetMaxPaddleBoundPiece();
+    const LevelPiece* minBoundPiece = currLevel.GetMinPaddleBoundPiece();
+    
+    const float minX = minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+    const float maxX = maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+
+	const float maxTexCoordU = (maxX - minX) / 2.0f;
 
 	glNewList(this->displayListID, GL_COMPILE);
-	BallSafetyNetMesh::DrawSafetyNetMesh(0.0f, width, 0.0f, maxTexCoordU);
+    BallSafetyNetMesh::DrawSafetyNetMesh(minX, maxX, 0.0f, maxTexCoordU);
 	glEndList();
 
 	debug_opengl_state();
@@ -192,27 +198,39 @@ void BallSafetyNetMesh::CreateBallSafetyNet() {
  * this animation is the breaking apart of the mesh at the location where the ball 
  * hit it.
  */
-void BallSafetyNetMesh::DestroyBallSafetyNet(const Vector2D& levelDimensions, float destructionXPos) {
+void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float destructionXPos) {
 	assert(this->displayListID != 0);
 	
 	// Make sure that both display lists for the broken pieces get initialized
 	assert(this->leftPieceDispListID != 0 && this->rightPieceDispListID != 0);
 
-	// (Re)compile the 2 new display lists of the broken pieces of the safety net
-	const float maxLeft = destructionXPos;
-	const float maxRight = levelDimensions[0];
+    const LevelPiece* maxBoundPiece = currLevel.GetMaxPaddleBoundPiece();
+    const LevelPiece* minBoundPiece = currLevel.GetMinPaddleBoundPiece();
 
-	const float maxTexCoordLeft  = maxLeft / 2.0f;
-	const float maxTexCoordRight = maxRight / 2.0f;
+	// (Re)compile the 2 new display lists of the broken pieces of the safety net
+	const float minX = minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+    const float maxX = maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+
+    if (minX > destructionXPos) {
+        assert(false);
+        destructionXPos = minX;
+    }
+    if (maxX < destructionXPos) {
+        assert(false);
+        destructionXPos = maxX;
+    }
+
+	const float maxTexCoordLeft  = destructionXPos / 2.0f;
+	const float maxTexCoordRight = (maxX - minX) / 2.0f;
 	
 	// Left broken piece
 	glNewList(this->leftPieceDispListID, GL_COMPILE);
-	BallSafetyNetMesh::DrawSafetyNetMesh(0.0f, maxLeft, 0.0f, maxTexCoordLeft);
+    BallSafetyNetMesh::DrawSafetyNetMesh(minX, destructionXPos, 0.0f, maxTexCoordLeft);
 	glEndList();
 
 	// Right broken piece
 	glNewList(this->rightPieceDispListID, GL_COMPILE);
-	BallSafetyNetMesh::DrawSafetyNetMesh(maxLeft, maxRight, maxTexCoordLeft, maxTexCoordRight);
+	BallSafetyNetMesh::DrawSafetyNetMesh(destructionXPos, maxX, maxTexCoordLeft, maxTexCoordRight);
 	glEndList();
 
 	// Setup the linear interpolation values for the animations of the two pieces

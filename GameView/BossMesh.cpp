@@ -2,7 +2,7 @@
  * BossMesh.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2012
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -11,6 +11,7 @@
 
 #include "BossMesh.h"
 #include "ClassicalBossMesh.h"
+#include "GothicRomanticBossMesh.h"
 #include "GameViewConstants.h"
 
 #include "../BlammoEngine/Texture2D.h"
@@ -18,6 +19,7 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/ClassicalBoss.h"
+#include "../GameModel/GothicRomanticBoss.h"
 
 #include "../ResourceManager.h"
 
@@ -91,8 +93,12 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
             break;
         }
 
-        case GameWorld::GothicRomantic:
-            // TODO
+        case GameWorld::GothicRomantic: {
+            assert(dynamic_cast<GothicRomanticBoss*>(boss) != NULL);
+            GothicRomanticBoss* gothicBoss = static_cast<GothicRomanticBoss*>(boss);
+            result = new GothicRomanticBossMesh(gothicBoss);
+            break;
+        }
 
         case GameWorld::Deco:
             // TODO

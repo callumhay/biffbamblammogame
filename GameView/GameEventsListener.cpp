@@ -511,6 +511,9 @@ void GameEventsListener::ProjectileEnteredCannonEvent(const Projectile& projecti
 	UNUSED_PARAMETER(cannonBlock);
 
     if (projectile.IsRocket()) {
+        // Reset the rocket effects
+        this->display->GetAssets()->GetESPAssets()->ResetProjectileEffects(projectile);
+
         // TODO: Fix sounds to be bound to particular game objects and not be global effects/masks!
 
 	    // Suspend certain elements of the rocket projectile until it's fired back out of the cannon...
@@ -534,6 +537,9 @@ void GameEventsListener::ProjectileFiredFromCannonEvent(const Projectile& projec
 
     if (projectile.IsRocket()) {
         // TODO: Fix sounds to be bound to particular game objects and not be global effects/masks!
+
+        // Reset the rocket effects
+        this->display->GetAssets()->GetESPAssets()->ResetProjectileEffects(projectile);
 
 	    // ... and for the rocket moving mask again
 	    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);

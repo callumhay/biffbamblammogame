@@ -1367,6 +1367,10 @@
 							RelativePath=".\GameView\ClassicalBossMesh.h"
 							>
 						</File>
+						<File
+							RelativePath=".\GameView\GothicRomanticBossMesh.h"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="Source Files"
@@ -1377,6 +1381,10 @@
 						</File>
 						<File
 							RelativePath=".\GameView\ClassicalBossMesh.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameView\GothicRomanticBossMesh.cpp"
 							>
 						</File>
 					</Filter>
@@ -2504,12 +2512,24 @@
 						RelativePath=".\GameModel\ClassicalBossAIStates.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameModel\GothicRomanticBoss.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GothicRomanticBossAIStates.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
 					>
 					<File
 						RelativePath=".\GameModel\Boss.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossAIState.cpp"
 						>
 					</File>
 					<File
@@ -2530,6 +2550,14 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\ClassicalBossAIStates.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GothicRomanticBoss.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GothicRomanticBossAIStates.cpp"
 						>
 					</File>
 				</Filter>

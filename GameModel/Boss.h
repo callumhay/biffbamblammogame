@@ -25,6 +25,7 @@
 class BossAIState;
 
 class Boss {
+    friend class BossAIState;
 public:
     static const double WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME;
     static const double FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME;
@@ -87,6 +88,10 @@ protected:
     std::vector<AbstractBossBodyPart*> bodyParts;
 
     Boss();
+
+    void ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoints, float ballDmgOnHit);
+    void ConvertAliveBodyPartToDeadBodyPart(size_t index);
+    void ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart);
 
     void SetNextAIState(BossAIState* nextState);
 

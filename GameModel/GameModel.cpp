@@ -1190,6 +1190,18 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 		return;
 	}
 
+    // Check to see if the level piece is outside of the boundaries for the paddle to even get it,
+    // if it is then we exit -- don't want to drop items that just frustrate the player
+    const GameLevel* currLevel = this->GetCurrentLevel();
+    assert(currLevel != NULL);
+    const LevelPiece* minBoundPiece = currLevel->GetMinPaddleBoundPiece();
+    const LevelPiece* maxBoundPiece = currLevel->GetMaxPaddleBoundPiece();
+    
+    if (p.GetWidthIndex() <= minBoundPiece->GetWidthIndex() || p.GetWidthIndex() >= maxBoundPiece->GetWidthIndex()) {
+        droppedItemLastTime = false;
+        return;
+    }
+
     // Special case where the multiplier is about to change (or already changed) to the max multiplier
     // and the player is missing a life - in this case we will be dropping a life-up item
     if (!this->droppedLifeForMaxMultiplier &&

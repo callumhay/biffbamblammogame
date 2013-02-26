@@ -13,7 +13,6 @@
 #define __CLASSICALBOSSAISTATES_H__
 
 #include "../BlammoEngine/Algebra.h"
-#include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Matrix.h"
@@ -31,7 +30,7 @@ class PlayerPaddle;
 namespace classicalbossai {
 
 /**
- * Abstract superclass for all of the ClassicalBosses AI state machine classes.
+ * Abstract superclass for all of the ClassicalBoss AI state machine classes.
  */
 class ClassicalBossAI : public BossAIState {
 public:
@@ -39,13 +38,7 @@ public:
     virtual ~ClassicalBossAI();
 
     // Inherited functions
-    void ClassicalBossAI::Tick(double dT, GameModel* gameModel) {
-        // Update the state of the AI
-        this->UpdateState(dT, gameModel);
-        // Update the bosses' movement
-        this->UpdateMovement(dT, gameModel);
-    }
-
+    Boss* GetBoss() const;
     virtual bool IsStateMachineFinished() const { return false; }
     Collision::AABB2D GenerateDyingAABB() const;
 
@@ -55,9 +48,6 @@ protected:
     static const float HALF_BOSS_WIDTH;
 
     ClassicalBoss* boss;
-
-    Vector2D currVel;
-    Vector2D desiredVel;
 
     // State-related variables
     enum AIState { BasicMoveAndLaserSprayAIState, ChasePaddleAIState, 
@@ -87,7 +77,7 @@ protected:
 
     // Basic boss attribute getters
     float GetMaxSpeed() const;
-    Vector2D GetAcceleration() const;
+    float GetAccelerationMagnitude() const;
     float GetSpeedModifier(float initialDivisor, float currHealthPercent) const {
         return 1.0f / (initialDivisor * std::max<float>(1.0f / initialDivisor, currHealthPercent));
     }
@@ -96,9 +86,7 @@ protected:
 
     // Update functions
     virtual void SetState(ClassicalBossAI::AIState newState) = 0;
-    virtual void UpdateState(double dT, GameModel* gameModel) = 0;
-    virtual void UpdateMovement(double dT, GameModel* gameModel);
-
+    
 private:
     DISALLOW_COPY_AND_ASSIGN(ClassicalBossAI);
 };

@@ -5650,6 +5650,19 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
 	glPopMatrix();
 }
 
+void GameESPAssets::ResetProjectileEffects(const Projectile& projectile) {
+    std::map<const Projectile*, std::list<ESPPointEmitter*> > ::iterator findIter = this->activeProjectileEmitters.find(&projectile);
+    if (findIter == this->activeProjectileEmitters.end()) {
+        return;
+    }
+
+    std::list<ESPPointEmitter*> emitters = findIter->second;
+    for (std::list<ESPPointEmitter*>::iterator iter = emitters.begin(); iter != emitters.end(); ++iter) {
+        ESPPointEmitter* emitter = *iter;
+        emitter->Reset();
+    }
+}
+
 void GameESPAssets::DrawBulletTimeBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel) {
     const BallBoostModel* boostModel = gameModel.GetBallBoostModel();
     assert(boostModel != NULL);

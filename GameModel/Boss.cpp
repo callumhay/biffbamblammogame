@@ -15,6 +15,7 @@
 #include "BossWeakpoint.h"
 #include "BossAIState.h"
 #include "ClassicalBoss.h"
+#include "GothicRomanticBoss.h"
 
 const double Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = 1.5;
 const double Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = TOTAL_DEATH_ANIM_TIME / 1.25;
@@ -61,13 +62,20 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
             break;
 
         case GameWorld::GothicRomantic:
-            // TODO
+            boss = new GothicRomanticBoss();
+            break;
+
+        //case GameWorld::Nouveau:
 
         case GameWorld::Deco:
             // TODO
 
         case GameWorld::Futurism:
             // TODO
+
+        //case GameWorld::SurrealDada:
+
+        //case GameWorld::Postmodernism:
 
         default:
             assert(false);
@@ -309,6 +317,61 @@ AnimationMultiLerp<float> Boss::BuildLimbFallOffZRotationAnim(double totalAnimTi
     limbFallOffRotAnim.SetRepeat(false);
 
     return limbFallOffRotAnim;
+}
+
+void Boss::ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoints, float ballDmgOnHit) {
+    assert(index < this->bodyParts.size());
+
+    AbstractBossBodyPart* bodyPart = this->bodyParts[index];
+    assert(bodyPart != NULL);
+    if (dynamic_cast<BossBodyPart*>(bodyPart) == NULL ||
+        dynamic_cast<BossWeakpoint*>(bodyPart) != NULL ||
+        !this->alivePartsRoot->IsOrContainsPart(bodyPart, true)) {
+
+        assert(false);
+        return;
+    }
+
+    // Create a weakpoint part
+    BossWeakpoint* weakpointBodyPart = BossWeakpoint::BuildWeakpoint(static_cast<BossBodyPart*>(bodyPart), lifePoints, ballDmgOnHit);
+    assert(weakpointBodyPart != NULL);
+    
+    AbstractBossBodyPart* parentPart = this->alivePartsRoot->SearchForParent(bodyPart);
+    if (parentPart != NULL) {
+        assert(dynamic_cast<BossCompositeBodyPart*>(parentPart) != NULL);
+        
+        BossCompositeBodyPart* compositeParentPart = static_cast<BossCompositeBodyPart*>(parentPart);
+        compositeParentPart->RemoveBodyPart(bodyPart);
+        compositeParentPart->AddBodyPart(weakpointBodyPart);
+    }
+
+    delete bodyPart;
+    bodyPart = NULL;
+
+    this->bodyParts[index] = weakpointBodyPart;
+}
+
+void Boss::ConvertAliveBodyPartToDeadBodyPart(size_t index) {
+    assert(index < this->bodyParts.size());
+    this->ConvertAliveBodyPartToDeadBodyPart(this->bodyParts[index]);
+}
+
+void Boss::ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart) {
+    // Make sure the body part exists as an alive part of this boss,
+    // the parent better be the alivePartsRoot too.
+    assert(bodyPart != NULL);
+    if (!this->alivePartsRoot->IsOrContainsPart(bodyPart, true) ||
+        this->alivePartsRoot->SearchForParent(bodyPart) != this->alivePartsRoot) {
+        assert(false);
+        return;
+    }
+
+    // Move it from the alivePartsRoot to the deadPartsRoot
+    this->alivePartsRoot->RemoveBodyPart(bodyPart);
+    this->deadPartsRoot->AddBodyPart(bodyPart);
+
+    // Find all weakpoints and turn them off
+    bodyPart->SetAsDestroyed();
 }
 
 void Boss::SetNextAIState(BossAIState* nextState) {
