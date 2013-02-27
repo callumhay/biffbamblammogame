@@ -129,8 +129,6 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 			// its current direction, we also need to spin it on that axis
 			glMultMatrixf(Matrix4x4::rotationMatrix(Trig::degreesToRadians(currYRotation), Vector3D(rocketDir, 0.0f)).begin());
 			glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
-			
-            
 			glScalef(scaleFactor, scaleFactor, scaleFactor);
             
             switch (rocketProjectile->GetType()) {
@@ -138,6 +136,7 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 			        this->paddleRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
                     break;
                 case Projectile::RocketTurretBulletProjectile:
+                case Projectile::BossRocketBulletProjectile:
                     this->turretRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
                     break;
                 default:

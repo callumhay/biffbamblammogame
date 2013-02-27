@@ -142,6 +142,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
 
 			newLevelPiece = this->Detonate(gameModel);
 

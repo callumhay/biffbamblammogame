@@ -143,7 +143,8 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-        case Projectile::RocketTurretBulletProjectile: {
+        case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile: {
 				// The rocket should not destroy this block, however it certainly
 				// is allowed to destroy blocks around it!
 

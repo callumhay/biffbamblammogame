@@ -163,7 +163,8 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
 			break;
 
         case Projectile::PaddleRocketBulletProjectile:
-        case Projectile::RocketTurretBulletProjectile: {
+        case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile: {
 
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				// EVENT: Ice was shattered

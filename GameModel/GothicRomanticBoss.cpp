@@ -29,6 +29,8 @@ const float GothicRomanticBoss::BOTTOM_POINT_TIP_Y  = -1.069f;
 
 const float GothicRomanticBoss::DEFAULT_ACCELERATION = 1.25f * PlayerPaddle::DEFAULT_ACCELERATION;
 
+const double GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS = 1.0;
+
 GothicRomanticBoss::GothicRomanticBoss() : Boss(), bodyIdx(0), topPointIdx(0), bottomPointIdx(0) {
     for (int i = 0; i < NUM_LEGS; i++) {
         this->legIdxs[i] = 0;

@@ -65,6 +65,10 @@ public:
     return colours[2];
   }
 
+  float GetLuminance() const {
+      return this->R() * 0.3f + this->G() * 0.59f + this->B() * 0.11f;
+  }
+
 	Colour GetComplementaryColour() const {
 		return Colour(1.0f - this->colours[0], 1.0f - this->colours[1], 1.0f - this->colours[2]);
 	}

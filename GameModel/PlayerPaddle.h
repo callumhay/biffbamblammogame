@@ -466,6 +466,7 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& project
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             // These projectiles can only collide with the paddle if it's NOT going upwards into the level
             if (Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector()) <= 0) {
                 return this->CollisionCheck(bounds, true);
@@ -493,6 +494,7 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
             case Projectile::LaserTurretBulletProjectile:
             case Projectile::PaddleMineBulletProjectile:
             case Projectile::MineTurretBulletProjectile:
+            case Projectile::BossRocketBulletProjectile:
                 return true;
             default:
                 break;

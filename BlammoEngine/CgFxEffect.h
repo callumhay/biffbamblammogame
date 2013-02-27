@@ -156,6 +156,17 @@ public:
 			currPass = cgGetNextPass(currPass);
 		}
 	}
+    void DrawText(const Camera& camera, GLuint baseDispList, const std::string& s) {
+		this->SetupBeforePasses(camera);
+		
+		// Draw each pass of this effect
+		CGpass currPass = cgGetFirstPass(this->currTechnique);
+		while (currPass) {
+			CgFxEffectBase::DrawPass(currPass, baseDispList, s);
+			currPass = cgGetNextPass(currPass);
+		}
+    }
+
 
 	/**
 	 * Obtain the current technique for this effect.
@@ -193,6 +204,12 @@ private:
 		glCallList(displayListID);
 		cgResetPassState(pass);
 	}
+    static void DrawPass(CGpass pass, GLuint baseDispList, const std::string& s) {
+		cgSetPassState(pass);
+	    glListBase(baseDispList);
+	    glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
+		cgResetPassState(pass);
+    }
 	static void DrawPass(CGpass pass, const std::vector<GLuint> &displayListIDs) {
 		assert(displayListIDs.size() > 0);
 		cgSetPassState(pass);

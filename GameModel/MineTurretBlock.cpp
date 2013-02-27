@@ -132,9 +132,8 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
 
 
+        case Projectile::BossRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
-            break;
-
         case Projectile::PaddleRocketBulletProjectile: {
 
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
