@@ -911,6 +911,7 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			this->RocketProjectileCollision(gameModel, *static_cast<const RocketProjectile*>(&projectile));
 			break;
@@ -946,6 +947,7 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
             case Projectile::RocketTurretBulletProjectile:
+            case Projectile::BossRocketBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
             case Projectile::PaddleMineBulletProjectile:
             case Projectile::MineTurretBulletProjectile: {

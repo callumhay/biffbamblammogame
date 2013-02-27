@@ -56,6 +56,8 @@ public:
 
     static const float DEFAULT_ACCELERATION;
 
+    static const double DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
+
     ~GothicRomanticBoss();
     
     const BossBodyPart* GetBody() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->bodyIdx]); }

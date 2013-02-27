@@ -2365,6 +2365,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\BossRocketProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\CollateralBlockProjectile.h"
 						>
 					</File>
@@ -2422,6 +2426,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\BossLaserProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossRocketProjectile.cpp"
 						>
 					</File>
 					<File

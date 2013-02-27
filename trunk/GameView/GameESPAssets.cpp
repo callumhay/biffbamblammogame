@@ -1375,6 +1375,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 		
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             // NOTE: THIS IS NOW TAKEN CARE OF BY THE RocketExploded event
 			break;
 
@@ -2703,6 +2704,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             // NOTE: THIS IS TAKEN CARE OF BY THE RocketExplodedEvent
 			break;
 
@@ -2918,6 +2920,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			this->AddRocketProjectileEffects(*static_cast<const RocketProjectile*>(&projectile));
 			break;

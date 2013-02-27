@@ -85,6 +85,7 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
             break;
 
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             break;
 
         default:

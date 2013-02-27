@@ -184,6 +184,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
 			// If the cannon isn't already loaded with a projectile then
 			// the rocket gets captured by the cannon block and shot somewhere else...
 			if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {

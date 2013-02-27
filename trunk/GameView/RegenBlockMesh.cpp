@@ -130,7 +130,7 @@ void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
         glPopAttrib();
 
         // Draw information on the block (life amount or infinity symbol)
-        currBlockData->DrawLifeInfo();
+        currBlockData->DrawLifeInfo(camera, keyLight, fillLight, ballLight);
 
         // Regenerate and tick the block and its visual data...
         currBlock->Regen(dT);
@@ -253,7 +253,11 @@ void RegenBlockMesh::RegenBlockFiniteData::Tick(double dT) {
     RegenBlockMesh::BlockData::Tick(dT);
 }
 
-void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo() {
+void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo(const Camera& camera, const BasicPointLight& keyLight,
+                                                        const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+    UNUSED_PARAMETER(camera);
+    UNUSED_PARAMETER(ballLight);
 
     glPushAttrib(GL_COLOR_BUFFER_BIT);
 
@@ -262,11 +266,12 @@ void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo() {
     // Lerp the colour between red (0%) and green (100%)
     Colour currColour = RegenBlockMesh::GetColourFromLifePercentage(this->block.GetCurrentLifePercent());
     float redColourAdd = this->hurtRedFlashAnim.GetInterpolantValue();
+    float lightMultiplier = std::min<float>(1.0f, fillLight.GetDiffuseColour().GetLuminance() + keyLight.GetDiffuseColour().GetLuminance());
 
     glColor4f(
-        std::min<float>(1.0f, redColourAdd + currColour.R()), 
-        std::max<float>(0.0f, currColour.G() - redColourAdd), 
-        std::max<float>(0.0f, currColour.B() - redColourAdd), this->alpha);
+        lightMultiplier * std::min<float>(1.0f, redColourAdd + currColour.R()), 
+        lightMultiplier * std::max<float>(0.0f, currColour.G() - redColourAdd), 
+        lightMultiplier * std::max<float>(0.0f, currColour.B() - redColourAdd), this->alpha);
 
     // Draw the percentage first...
 	glPushMatrix();
@@ -315,7 +320,12 @@ RegenBlockMesh::RegenBlockInfiniteData::RegenBlockInfiniteData(RegenBlockMesh* r
 BlockData(regenMesh, block) {
 }
 
-void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo() {
+void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo(const Camera& camera, const BasicPointLight& keyLight,
+                                                          const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+    UNUSED_PARAMETER(camera);
+    UNUSED_PARAMETER(ballLight);
+
     static const float INFINITY_WIDTH       = LIFE_DISPLAY_WIDTH - 2*X_DISPLAY_BORDER;
     static const float HALF_INFINITY_WIDTH  = INFINITY_WIDTH / 2.0f; 
     static const float INFINITY_HEIGHT      = HALF_INFINITY_WIDTH;
@@ -332,13 +342,15 @@ void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo() {
         RegenBlockMesh::CENTER_TO_DISPLAY_DEPTH + EPSILON);
     glScalef(INFINITY_WIDTH, INFINITY_HEIGHT, 1.0f);
 
+    float lightMultiplier = std::min<float>(1.0f, fillLight.GetDiffuseColour().GetLuminance() + keyLight.GetDiffuseColour().GetLuminance());
     float redColour = this->hurtRedFlashAnim.GetInterpolantValue();
+    
     if (redColour > 0.0f) {
-        float invRedColour = std::max<float>(0.0f, 1.0f - redColour);
-        glColor4f(1.0f, invRedColour, invRedColour, this->alpha);
+        float invRedColour = lightMultiplier*std::max<float>(0.0f, 1.0f - redColour);
+        glColor4f(lightMultiplier, invRedColour, invRedColour, this->alpha);
     }
     else {
-        glColor4f(1.0f, 1.0f, 1.0f, this->alpha);
+        glColor4f(lightMultiplier, lightMultiplier, lightMultiplier, this->alpha);
     }
 
     this->regenMesh->infinityTex->BindTexture();

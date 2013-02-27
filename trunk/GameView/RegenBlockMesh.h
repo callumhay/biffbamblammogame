@@ -58,7 +58,8 @@ private:
         void SetAlpha(float alpha) { this->alpha = alpha; }
         virtual void Update(bool gotHurt);
         virtual void Tick(double dT);
-        virtual void DrawLifeInfo() = 0;
+        virtual void DrawLifeInfo(const Camera& camera, const BasicPointLight& keyLight,
+            const BasicPointLight& fillLight, const BasicPointLight& ballLight) = 0;
         virtual Colour GetCurrBaseMaterialColour(const Colour& baseColour) const = 0;
 
     protected:
@@ -77,7 +78,8 @@ private:
 
         void Update(bool gotHurt);
         void Tick(double dT);
-        void DrawLifeInfo();
+        void DrawLifeInfo(const Camera& camera, const BasicPointLight& keyLight,
+            const BasicPointLight& fillLight, const BasicPointLight& ballLight);
         Colour GetCurrBaseMaterialColour(const Colour& baseColour) const;
 
     private:
@@ -97,7 +99,8 @@ private:
 
         void Update(bool gotHurt) { RegenBlockMesh::BlockData::Update(gotHurt); }
         void Tick(double dT) { RegenBlockMesh::BlockData::Tick(dT); }
-        void DrawLifeInfo();
+        void DrawLifeInfo(const Camera& camera, const BasicPointLight& keyLight,
+            const BasicPointLight& fillLight, const BasicPointLight& ballLight);
         Colour GetCurrBaseMaterialColour(const Colour& baseColour) const;
 
     private:
@@ -116,6 +119,8 @@ private:
     std::map<std::string, MaterialGroup*> materialGroups;
     MaterialGroup* baseMetalMaterialGrp;
     Colour initialBaseMetalDiffuseColour;
+
+    
 
     BlockCollection blocks;
 

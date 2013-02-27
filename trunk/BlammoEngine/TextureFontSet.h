@@ -42,6 +42,10 @@ public:
 		return this->heightInPixels;
 	}
 
+    GLuint GetBaseDisplayList() const {
+        return this->baseDisplayList;
+    }
+
 	// Creator Functions
 	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(PHYSFS_File* fileHandle, 
 		const std::vector<unsigned int>& heightsInPixels, Texture::TextureFilterType filterType);

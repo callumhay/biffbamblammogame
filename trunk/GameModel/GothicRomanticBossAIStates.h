@@ -48,12 +48,13 @@ protected:
     static const float MOVE_X_BORDER;
     static const float MOVE_Y_BORDER;
     static const float DEFAULT_LASER_SPIN_DEGREES_PER_SEC;
+    static const float DEFAULT_ROCKET_SPIN_DEGREES_PER_SEC;
 
     GothicRomanticBoss* boss;
 
     // State-related variables
     enum AIState { BasicMoveAndShootState, SpinLaserAttackAIState, 
-                   SummonItemsAIState, OrbProjectileAttackAIState,
+                   SummonItemsAIState, RocketAttackAIState,
                    HurtTopAIState, HurtBottomAIState, GlitchAIState,
                    MoveToCenterOfLevelAIState, DestroyConfinesAIState,
                    FinalDeathThroesAIState};
@@ -69,7 +70,7 @@ protected:
         return static_cast<ConfinedMovePos>((currPos + (1 + Randomizer::GetInstance()->RandomUnsignedInt() % 4)) % 5);
     }
     static ConfinedMovePos GetRandomConfinedCornerMovePosition(const ConfinedMovePos& currPos);
-    static AIState GetAIStateForConfinedMovePos(const ConfinedMovePos& pos, float probabilityOfOrb);
+    static AIState GetAIStateForConfinedMovePos(const ConfinedMovePos& pos, float probabilityOfRocket);
 
     float GetSlowestConfinedMoveSpeed() const { return LevelPiece::PIECE_WIDTH; }
     double GetLaserSpinTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 4.0; }
@@ -79,6 +80,12 @@ protected:
 
     void ShootLaserFromLegPoint(int legIdx, GameModel* gameModel) const;
     void ShootLaserFromBody(GameModel* gameModel) const;
+    void ShootRocket(const Point2D& rocketTarget, GameModel* gameModel) const;
+
+    static void GetItemDropPositions(int numItemsToDrop, const GameLevel& level, std::vector<Point2D>& positions);
+
+    static AnimationMultiLerp<float> GenerateRocketSpinAnimation(int numRockets);
+    static void GenerateRocketTargetPositions(int numRockets, std::vector<Point2D>& positions);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(GothicRomanticBossAI);
@@ -95,6 +102,7 @@ public:
     void CollisionOccurred(GameModel*, PlayerPaddle&, BossBodyPart*) {};
 
 private:
+    static const int NUM_ITEMS_PER_SUMMONING = 4;
     static const int NUM_OF_TOP_POINT_HITS = 5; // Number of times the weakpoint has to be hit before we move to the next state
     static const float TOP_POINT_LIFE_POINTS;
 
@@ -105,13 +113,22 @@ private:
     AIState nextAtkAIState;
 
     int attacksSinceLastSummon;
+    int summonsSinceLastFireball;
     double shootCountdown;
     AnimationLerp<float> laserSpinRotAnim;
+    double summonItemsDelayCountdown;
+    int numRocketsToFire;
+    AnimationMultiLerp<float> rocketSpinRotAnim;
+    std::vector<Point2D> rocketTargetPositions;
 
-    double GenerateShootCountdownAmtForMoving()   const { return 0.2 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.25; }
+
+    double GenerateShootCountdownAmtForMoving()   const { return 0.15 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.25; }
     double GenerateShootCountdownAmtForSpinning() const { return 0.075 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2; }
+    double GenerateTimeBetweenRockets() const { return this->rocketSpinRotAnim.GetTimeValues().back() / static_cast<double>(this->numRocketsToFire+1); }
     float GenerateSummonProbability() const;
-    float GenerateOrbAttackProbability() const { return NumberFuncs::LerpOverFloat<float>(0.0f, 1.0f, 0.33f, 0.66f, this->GetTotalLifePercent()); }
+    float GenerateRocketAttackProbability() const { return NumberFuncs::LerpOverFloat<float>(0.0f, 1.0f, 0.33f, 0.66f, this->GetTotalLifePercent()); }
+    float GenerateFireballSummonProbability() const;
+    int GenerateNumRocketsToFire() const { return 2 + Randomizer::GetInstance()->RandomUnsignedInt() % 2; }
 
     void SetupNextAttackStateAndMove();
 
@@ -123,6 +140,8 @@ private:
     // State methods
     void ExecuteBasicMoveAndShootState(double dT, GameModel* gameModel);
     void ExecuteSpinLaserAttackState(double dT, GameModel* gameModel);
+    void ExecuteRocketAttackState(double dT, GameModel* gameModel);
+    void ExecuteSummonItemsState(double dT, GameModel* gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(FireBallAI);
 };

@@ -1156,6 +1156,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			// Notify assets of the rocket...
 			this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
@@ -1184,6 +1185,7 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			this->rocketMesh->DeactivateRocket(static_cast<const RocketProjectile*>(&projectile));
 
@@ -1252,6 +1254,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             intensity = PlayerHurtHUD::ModeratePain;
             break;
 

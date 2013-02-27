@@ -152,6 +152,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
 
 			// The rocket should not destroy this block, however it certainly
 			// is allowed to destroy blocks around it!

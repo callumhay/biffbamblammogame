@@ -262,6 +262,7 @@ LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
 			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
 			break;
