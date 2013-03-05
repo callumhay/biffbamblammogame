@@ -2581,7 +2581,15 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\ElectricitySpasmEffectInfo.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\ExpandingHaloEffectInfo.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\FullscreenFlashEffectInfo.h"
 						>
 					</File>
 					<File
@@ -2593,7 +2601,15 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameModel\PowerChargeEventInfo.h"
+						RelativePath=".\GameModel\PowerChargeEffectInfo.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PuffOfSmokeEffectInfo.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ShockwaveEffectInfo.h"
 						>
 					</File>
 					<File

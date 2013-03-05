@@ -22,6 +22,7 @@ class LevelPiece;
 class GameModel;
 class SafetyNet;
 class PlayerPaddle;
+class Boss;
 
 /**
  * An 'abstract class' for representing in-game projectiles.
@@ -49,6 +50,7 @@ public:
     virtual void SafetyNetCollisionOccurred(SafetyNet* safetyNet) { this->SetLastThingCollidedWith(safetyNet); };
     virtual void LevelPieceCollisionOccurred(LevelPiece* block)   { UNUSED_PARAMETER(block); };
     virtual void PaddleCollisionOccurred(PlayerPaddle* paddle)    { UNUSED_PARAMETER(paddle); };
+    virtual void BossCollisionOccurred(Boss* boss)                { this->SetLastThingCollidedWith(boss); };
 
     virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; };
 

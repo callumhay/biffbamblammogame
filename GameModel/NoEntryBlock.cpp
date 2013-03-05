@@ -45,15 +45,19 @@ LevelPiece* NoEntryBlock::Destroy(GameModel* gameModel, const LevelPiece::Destru
 	    assert(success);
 	}
 
-    // Only collateral blocks and tesla lightning can destroy a no-entry block
-    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+    // Only collateral blocks, tesla lightning and disintegration can destroy a no-entry block
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction &&
+        method != LevelPiece::DisintegrationDestruction) {
         return this;
     }
 
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
-	gameModel->AddPossibleItemDrop(*this);
+    // Only drop an item if the block wasn't disintegrated
+    if (method != LevelPiece::DisintegrationDestruction) {
+	    gameModel->AddPossibleItemDrop(*this);
+    }
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
@@ -226,10 +230,12 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
                 assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
 			    resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
 
-                GameEventManager::Instance()->ActionBlockIceShattered(*this);
-                bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-                assert(success);
+                if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+                    GameEventManager::Instance()->ActionBlockIceShattered(*this);
+                    bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                    UNUSED_VARIABLE(success);
+                    assert(success);
+                }
             }
 
 			break;

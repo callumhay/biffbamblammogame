@@ -61,6 +61,8 @@ public:
 
     bool CanHurtPaddleWithBody() const;
 
+    virtual bool ProjectilePassesThrough(const Projectile* projectile) const = 0;
+
     // Builders for various boss animations
     static AnimationMultiLerp<ColourRGBA> BuildBossHurtAndInvulnerableColourAnim();
     static AnimationMultiLerp<ColourRGBA> BuildBossHurtFlashAndFadeAnim(double totalAnimTime);

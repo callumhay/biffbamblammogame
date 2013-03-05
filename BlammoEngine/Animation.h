@@ -79,6 +79,9 @@ public:
     const T& GetTargetValue() const {
         return this->y1;
     }
+    double GetFinalTime() const {
+        return this->x1;
+    }
 
 	/**
 	 * Set whether the animation is on repeat or not.

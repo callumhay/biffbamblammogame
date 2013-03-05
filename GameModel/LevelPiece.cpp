@@ -452,7 +452,7 @@ void LevelPiece::DoPossibleFireGlobDrop(GameModel* gameModel) const {
         return;
     }
 
-	float globSize  = 0.4f * LevelPiece::HALF_PIECE_WIDTH + Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
+	float globSize  = 0.4f * LevelPiece::HALF_PIECE_WIDTH + 0.9f * Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
 	float edgeDist  = ((LevelPiece::PIECE_WIDTH - globSize) / 2.0f) - 0.01f;
 	assert(edgeDist >= 0.0f);
 

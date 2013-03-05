@@ -172,7 +172,7 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim() {
 
 AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtFlashAndFadeAnim(double totalAnimTime) {
     const double FIRST_FADE_OUT_TIME = 0.5;
-    const double NUM_FLASHES = 25 * totalAnimTime / 4.0;
+    const int NUM_FLASHES = static_cast<int>(25 * totalAnimTime / 4.0);
     const double FLASH_TIME_INC = (totalAnimTime - FIRST_FADE_OUT_TIME) / (2*NUM_FLASHES + 1);
 
     std::vector<double> timeValues;

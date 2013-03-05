@@ -18,6 +18,7 @@ class PaddleLaserProjectile : public LaserBulletProjectile {
 public:
 	static const float HEIGHT_DEFAULT;
 	static const float WIDTH_DEFAULT;
+    static const float DAMAGE_DEFAULT;
 
     explicit PaddleLaserProjectile(const Point2D& spawnLoc);
     PaddleLaserProjectile(const PaddleLaserProjectile& copy);
@@ -26,7 +27,7 @@ public:
     ProjectileType GetType() const {
         return Projectile::PaddleLaserBulletProjectile;
     }
-    float GetDamage() const { return 50.0f; }
+    float GetDamage() const { return DAMAGE_DEFAULT; }
 
     bool BlastsThroughSafetyNets() const { return false; }
     bool IsDestroyedBySafetyNets() const { return true;  }

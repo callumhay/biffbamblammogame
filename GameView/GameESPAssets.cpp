@@ -32,9 +32,12 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
-#include "../GameModel/PowerChargeEventInfo.h"
+#include "../GameModel/PowerChargeEffectInfo.h"
 #include "../GameModel/ExpandingHaloEffectInfo.h"
 #include "../GameModel/SparkBurstEffectInfo.h"
+#include "../GameModel/ElectricitySpasmEffectInfo.h"
+#include "../GameModel/PuffOfSmokeEffectInfo.h"
+#include "../GameModel/ShockwaveEffectInfo.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -121,7 +124,8 @@ cloudTex(NULL),
 vapourTrailTex(NULL),
 heartTex(NULL),
 chevronTex(NULL),
-infinityTex(NULL) {
+infinityTex(NULL),
+lightningAnimTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -238,6 +242,8 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->chevronTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->infinityTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
     assert(removed);
 
 	// Delete any standalone effects
@@ -694,6 +700,10 @@ void GameESPAssets::InitESPTextures() {
     if (this->infinityTex == NULL) {
         this->infinityTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR, Texture::Trilinear));
         assert(this->infinityTex != NULL);
+    }
+    if (this->lightningAnimTex == NULL) {
+        this->lightningAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION, Texture::Trilinear));
+        assert(this->lightningAnimTex != NULL);
     }
 
 	debug_opengl_state();
@@ -2080,10 +2090,6 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	Colour lightInkBlockColour		= inkBlockColour + Colour(0.15f, 0.15f, 0.15f);
 	Colour lighterInkBlockColour	= lightInkBlockColour + Colour(0.2f, 0.2f, 0.2f);
 
-	unsigned int randomSmoke1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
-	unsigned int randomSmoke2 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
-	unsigned int randomSmoke3 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
-
 	// Inky clouds
 	ESPPointEmitter* inkyClouds1 = new ESPPointEmitter();
 	inkyClouds1->SetSpawnDelta(ESPInterval(0.0f));
@@ -2095,18 +2101,13 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds1->SetParticleAlignment(ESP::ScreenAligned);
 	inkyClouds1->SetEmitPosition(emitCenter);
 	inkyClouds1->SetEmitAngleInDegrees(180);
-	inkyClouds1->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
-	inkyClouds1->SetParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures[randomSmoke1]);
+	inkyClouds1->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()),
+        ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
+    inkyClouds1->SetRandomTextureParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures);
 	inkyClouds1->AddEffector(&this->particleFader);
 	inkyClouds1->AddEffector(&this->particleMediumGrowth);
+	inkyClouds1->AddEffector(&this->smokeRotatorCW);
 	
-	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		inkyClouds1->AddEffector(&this->smokeRotatorCW);
-	}
-	else {
-		inkyClouds1->AddEffector(&this->smokeRotatorCCW);
-	}
-
 	ESPPointEmitter* inkyClouds2 = new ESPPointEmitter();
 	inkyClouds2->SetSpawnDelta(ESPInterval(0.0f));
 	inkyClouds2->SetNumParticleLives(1);
@@ -2117,39 +2118,12 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds2->SetParticleAlignment(ESP::ScreenAligned);
 	inkyClouds2->SetEmitPosition(emitCenter);
 	inkyClouds2->SetEmitAngleInDegrees(180);
-	inkyClouds2->SetParticleColour(ESPInterval(lightInkBlockColour.R()), ESPInterval(lightInkBlockColour.G()), ESPInterval(lightInkBlockColour.B()), ESPInterval(1.0f));
-	inkyClouds2->SetParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures[randomSmoke2]);
+	inkyClouds2->SetParticleColour(ESPInterval(lightInkBlockColour.R()), ESPInterval(lightInkBlockColour.G()),
+        ESPInterval(lightInkBlockColour.B()), ESPInterval(1.0f));
+	inkyClouds2->SetRandomTextureParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures);
 	inkyClouds2->AddEffector(&this->particleFader);
 	inkyClouds2->AddEffector(&this->particleMediumGrowth);
-	
-	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		inkyClouds2->AddEffector(&this->smokeRotatorCW);
-	}
-	else {
-		inkyClouds2->AddEffector(&this->smokeRotatorCCW);
-	}
-
-	ESPPointEmitter* inkyClouds3 = new ESPPointEmitter();
-	inkyClouds3->SetSpawnDelta(ESPInterval(0.0f));
-	inkyClouds3->SetNumParticleLives(1);
-	inkyClouds3->SetInitialSpd(ESPInterval(2.0f, 2.5f));
-	inkyClouds3->SetParticleLife(ESPInterval(3.0f, 4.0f));
-	inkyClouds3->SetParticleSize(ESPInterval(1.0f, 3.0f));
-	inkyClouds3->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
-	inkyClouds3->SetParticleAlignment(ESP::ScreenAligned);
-	inkyClouds3->SetEmitPosition(emitCenter);
-	inkyClouds3->SetEmitAngleInDegrees(180);
-	inkyClouds3->SetParticleColour(ESPInterval(lighterInkBlockColour.R()), ESPInterval(lighterInkBlockColour.G()), ESPInterval(lighterInkBlockColour.B()), ESPInterval(1.0f));
-	inkyClouds3->SetParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures[randomSmoke3]);
-	inkyClouds3->AddEffector(&this->particleFader);
-	inkyClouds3->AddEffector(&this->particleMediumGrowth);
-	
-	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		inkyClouds3->AddEffector(&this->smokeRotatorCW);
-	}
-	else {
-		inkyClouds3->AddEffector(&this->smokeRotatorCCW);
-	}
+	inkyClouds2->AddEffector(&this->smokeRotatorCCW);
 
 	ESPPointEmitter* inkySpray = NULL;
 	if (shootSpray) {
@@ -2157,7 +2131,6 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 		Vector3D negHalfLevelDim = -0.5 * Vector3D(level.GetLevelUnitWidth(), level.GetLevelUnitHeight(), 0.0f);
 		Point3D emitCenterWorldCoords = emitCenter + negHalfLevelDim;
 		Vector3D sprayVec = currCamPos - emitCenterWorldCoords;
-		
 		
 		Vector3D inkySprayDir = Vector3D::Normalize(sprayVec);
 		float distToCamera = sprayVec.length();
@@ -2239,7 +2212,6 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 
 	this->activeGeneralEmitters.push_back(inkyClouds1);
 	this->activeGeneralEmitters.push_back(inkyClouds2);
-	this->activeGeneralEmitters.push_back(inkyClouds3);
 	if (shootSpray) {
 		this->activeGeneralEmitters.push_back(inkySpray);
 	}
@@ -2421,13 +2393,9 @@ void GameESPAssets::AddFireGlobDestroyedEffect(const Projectile& projectile) {
 	fireDisperseEffect->SetEmitAngleInDegrees(180);
 	fireDisperseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     fireDisperseEffect->SetEmitPosition(Point3D(projectile.GetPosition(), 0));
-    fireDisperseEffect->SetAsPointSpriteEmitter(true);
 	fireDisperseEffect->AddEffector(&this->particleFireColourFader);
     fireDisperseEffect->AddEffector(&this->particleMediumGrowth);
-    size_t randomTexIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
-    bool result = fireDisperseEffect->SetParticles(8, this->smokeTextures[randomTexIdx]);
-    UNUSED_VARIABLE(result);
-	assert(result);
+    fireDisperseEffect->SetRandomTextureParticles(8, this->smokeTextures);
 
     this->activeGeneralEmitters.push_back(fireDisperseEffect);
 }
@@ -3458,9 +3426,6 @@ void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectil
 	bool result = fireyTrailEmitter->SetParticles(25, &this->fireEffect);
 	assert(result);
 
-	size_t randomTexIndex1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
-	size_t randomTexIndex2 = (randomTexIndex1 + 1) % this->smokeTextures.size();
-
 	ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
 	smokeyTrailEmitter1->SetSpawnDelta(ESPInterval(0.1f));
 	smokeyTrailEmitter1->SetInitialSpd(ESPInterval(1.0f));
@@ -3474,7 +3439,7 @@ void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectil
 	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
 	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
 	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
-	result = smokeyTrailEmitter1->SetParticles(5, this->smokeTextures[randomTexIndex1]);
+    result = smokeyTrailEmitter1->SetRandomTextureParticles(5, this->smokeTextures);
 	assert(result);
 
 	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
@@ -3490,7 +3455,7 @@ void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectil
 	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
 	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
 	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
-	result = smokeyTrailEmitter2->SetParticles(5, this->smokeTextures[randomTexIndex2]);
+    result = smokeyTrailEmitter2->SetRandomTextureParticles(5, this->smokeTextures);
 	assert(result);
 
 	std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
@@ -3999,7 +3964,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
     this->activeGeneralEmitters.push_back(angryOno);
 }
 
-void GameESPAssets::AddBossPowerChargeEffect(const PowerChargeEventInfo& info) {
+void GameESPAssets::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
     
     const BossBodyPart* bodyPart = info.GetChargingPart();
     const Colour& colour = info.GetColour();
@@ -4009,7 +3974,7 @@ void GameESPAssets::AddBossPowerChargeEffect(const PowerChargeEventInfo& info) {
 	chargeParticles1->SetNumParticleLives(1);
 	chargeParticles1->SetInitialSpd(ESPInterval(2.6f, 4.5f));
     chargeParticles1->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs() * 0.75f, info.GetChargeTimeInSecs()));
-	chargeParticles1->SetParticleSize(ESPInterval(1.5f, 3.5f));
+	chargeParticles1->SetParticleSize(ESPInterval(info.GetSizeMultiplier() * 1.5f, info.GetSizeMultiplier() * 3.5f));
 	chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     chargeParticles1->SetParticleAlignment(ESP::ScreenAligned);
 	chargeParticles1->SetEmitPosition(Point3D(0,0,0));
@@ -4073,7 +4038,7 @@ void GameESPAssets::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& in
     halo->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	halo->SetNumParticleLives(1);
     halo->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
-	halo->SetParticleSize(ESPInterval(minSize));
+	halo->SetParticleSize(ESPInterval(info.GetSizeMultiplier() * minSize));
 	halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     halo->SetParticleAlignment(ESP::ScreenAligned);
 	halo->SetEmitPosition(Point3D(0,0,0));
@@ -4127,6 +4092,59 @@ void GameESPAssets::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
 
     this->activeBossFGEmitters[bodyPart].push_back(chargeParticles1);
     this->activeBossFGEmitters[bodyPart].push_back(chargeParticles2);
+}
+
+void GameESPAssets::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info) {
+    
+    static const double FPS = 60.0;
+    static const int NUM_PARTICLES = 40;
+
+    const BossBodyPart* bodyPart = info.GetPart();
+    const Colour& colour = info.GetColour();
+    Collision::AABB2D bodyPartAABB = bodyPart->GenerateWorldAABB();
+    
+    float maxSize = std::max<float>(bodyPartAABB.GetHeight(), bodyPartAABB.GetWidth());
+    float minSize = std::min<float>(bodyPartAABB.GetHeight(), bodyPartAABB.GetWidth());
+
+	ESPPointEmitter* electricSpasm = new ESPPointEmitter();
+	electricSpasm->SetSpawnDelta(ESPInterval(info.GetTimeInSecs() / static_cast<double>(2.2*NUM_PARTICLES)));
+	electricSpasm->SetNumParticleLives(1);
+    electricSpasm->SetParticleLife(ESPInterval(1.5f * info.GetTimeInSecs() / static_cast<double>(NUM_PARTICLES),
+        2.25f * info.GetTimeInSecs() / static_cast<double>(NUM_PARTICLES)));
+    electricSpasm->SetParticleSize(ESPInterval(0.75f * minSize, 0.75f * maxSize));
+	electricSpasm->SetRadiusDeviationFromCenter(ESPInterval(bodyPartAABB.GetWidth()/2.25f),
+        ESPInterval(bodyPartAABB.GetHeight()/3.0f), ESPInterval(0.0f));
+    electricSpasm->SetParticleAlignment(ESP::ScreenAligned);
+	electricSpasm->SetEmitPosition(Point3D(0,0,0));
+    electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
+    electricSpasm->SetAnimatedParticles(NUM_PARTICLES, this->lightningAnimTex, 64, 64, FPS);
+
+    this->activeBossFGEmitters[bodyPart].push_back(electricSpasm);
+}
+
+void GameESPAssets::AddPuffOfSmokeEffect(const PuffOfSmokeEffectInfo& info) {
+    ESPPointEmitter* puffOfSmokeEffect = new ESPPointEmitter();
+    puffOfSmokeEffect->SetNumParticleLives(1);
+    puffOfSmokeEffect->SetSpawnDelta(ESPInterval(0.01f, 0.015f));
+    puffOfSmokeEffect->SetInitialSpd(ESPInterval(1.5f, 4.0f));
+    puffOfSmokeEffect->SetParticleLife(ESPInterval(0.8f, 1.5f));
+    puffOfSmokeEffect->SetParticleSize(ESPInterval(0.75f*info.GetSize(), 1.25f*info.GetSize()));
+    puffOfSmokeEffect->SetEmitAngleInDegrees(180);
+    puffOfSmokeEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    puffOfSmokeEffect->SetEmitPosition(Point3D(info.GetPosition(), 0));
+    puffOfSmokeEffect->SetParticleColour(
+        ESPInterval(info.GetColour().R()), ESPInterval(info.GetColour().G()), ESPInterval(info.GetColour().B()), ESPInterval(1.0f));
+    puffOfSmokeEffect->AddEffector(&this->particleMediumGrowth);
+    puffOfSmokeEffect->AddEffector(&this->particleFader);
+    puffOfSmokeEffect->SetRandomTextureParticles(8, this->smokeTextures);
+
+    this->activeGeneralEmitters.push_back(puffOfSmokeEffect);
+}
+
+void GameESPAssets::AddShockwaveEffect(const ShockwaveEffectInfo& info) {
+    ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(Point3D(info.GetPosition()), info.GetSize(), info.GetTime()); 
+    this->activeGeneralEmitters.push_back(shockwaveEffect);
 }
 
 void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& position,
@@ -5760,10 +5778,12 @@ void GameESPAssets::DrawForegroundBossEffects(double dT, const Camera& camera) {
 		iter1 != this->activeBossFGEmitters.end();) {
 	
         const BossBodyPart* bodyPart = iter1->first;
+        Point3D bodyPartPos = bodyPart->GetTranslationPt3D();
+
         std::list<ESPEmitter*>& currEmitters = iter1->second;
 
         glPushMatrix();
-        glMultMatrixf(bodyPart->GetWorldTransform().begin());
+        glTranslatef(bodyPartPos[0], bodyPartPos[1], bodyPartPos[2]);
 
         for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end();) {
             ESPEmitter* currEmitter = *iter2;

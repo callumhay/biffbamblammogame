@@ -20,7 +20,7 @@
 const float RegenBlock::REGEN_LIFE_POINTS_PER_SECOND = 6.0f;
 
 RegenBlock::RegenBlock(bool hasInfiniteLife, unsigned int wLoc, unsigned int hLoc) :
-LevelPiece(wLoc, hLoc), currLifePoints(0.0f), fireGlobTimeCounter(0.0) {
+LevelPiece(wLoc, hLoc), currLifePoints(0.0f), fireGlobDropCountdown(GameModelConstants::GetInstance()->GenerateFireGlobDropTime()) {
     if (hasInfiniteLife) {
         this->currLifePoints = RegenBlock::INFINITE_LIFE_POINTS;
     }
@@ -164,7 +164,8 @@ LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
     // If this block has inifinite life then it can only be destroyed in very particular ways...
     if (this->HasInfiniteLife()) {
         // Infinite life regen blocks may only be destroyed by being shattered or via a collateral block clobbering them
-        if (method != LevelPiece::IceShatterDestruction && method != LevelPiece::CollateralDestruction) {
+        if (method != LevelPiece::IceShatterDestruction && method != LevelPiece::CollateralDestruction &&
+            method != LevelPiece::TeslaDestruction && method != LevelPiece::RocketDestruction) {
             // EVENT: The block has been 'preturbed'
             GameEventManager::Instance()->ActionRegenBlockPreturbed(*this);
             return this;
@@ -301,12 +302,14 @@ bool RegenBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedSta
 	if (this->HasStatus(LevelPiece::OnFireStatus)) {
 		assert(!this->HasStatus(LevelPiece::IceCubeStatus));
 
-		// Blocks on fire have a (very small) chance of dropping a glob of flame over some time...
-		this->fireGlobTimeCounter += dT;
-		if (this->fireGlobTimeCounter >= GameModelConstants::GetInstance()->FIRE_GLOB_DROP_CHANCE_INTERVAL) {
+		// Blocks on fire have a chance of dropping a glob of flame over some time...
+		if (this->fireGlobDropCountdown <= 0.0) {
 			this->DoPossibleFireGlobDrop(gameModel);
-            this->fireGlobTimeCounter = 0.0;
+            this->fireGlobDropCountdown = GameModelConstants::GetInstance()->GenerateFireGlobDropTime();
 		}
+        else {
+            this->fireGlobDropCountdown -= dT;
+        }
 
 		// Fire will continue to diminish the piece... 
 		// NOTE: This can destroy this piece resulting in a new level piece to replace it (i.e., an empty piece)

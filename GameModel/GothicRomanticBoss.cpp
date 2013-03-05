@@ -21,15 +21,18 @@ const float GothicRomanticBoss::BODY_HEIGHT = 7.0f;
 const float GothicRomanticBoss::BODY_WIDTH  = 3.45f;
 
 const float GothicRomanticBoss::TOP_POINT_WIDTH  = 2.644f;
+const float GothicRomanticBoss::HALF_TOP_POINT_WIDTH = TOP_POINT_WIDTH / 2.0f;
 const float GothicRomanticBoss::TOP_POINT_HEIGHT = 1.492f;
+const float GothicRomanticBoss::TOP_POINT_TIP_Y  = 1.208f;
 
 const float GothicRomanticBoss::BOTTOM_POINT_WIDTH  = 3.75f;
+const float GothicRomanticBoss::HALF_BOTTOM_POINT_WIDTH = BOTTOM_POINT_WIDTH / 2.0f;
 const float GothicRomanticBoss::BOTTOM_POINT_HEIGHT = 1.516f;
 const float GothicRomanticBoss::BOTTOM_POINT_TIP_Y  = -1.069f;
 
 const float GothicRomanticBoss::DEFAULT_ACCELERATION = 1.25f * PlayerPaddle::DEFAULT_ACCELERATION;
 
-const double GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS = 1.0;
+const double GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS = 2.0;
 
 GothicRomanticBoss::GothicRomanticBoss() : Boss(), bodyIdx(0), topPointIdx(0), bottomPointIdx(0) {
     for (int i = 0; i < NUM_LEGS; i++) {
@@ -38,6 +41,18 @@ GothicRomanticBoss::GothicRomanticBoss() : Boss(), bodyIdx(0), topPointIdx(0), b
 }
 
 GothicRomanticBoss::~GothicRomanticBoss() {
+}
+
+bool GothicRomanticBoss::ProjectilePassesThrough(const Projectile* projectile) const {
+    switch (projectile->GetType()) {
+        case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
+            return true;
+        default:
+            break;
+    }
+
+    return false;
 }
 
 Point3D GothicRomanticBoss::GetLegPointPos(int idx) const {
@@ -52,6 +67,13 @@ Point3D GothicRomanticBoss::GetBottomPointTipPos() const {
     assert(bottomPt != NULL);
 
     return bottomPt->GetWorldTransform() * Point3D(0.0f, BOTTOM_POINT_TIP_Y, 0.0f);
+}
+
+Point3D GothicRomanticBoss::GetTopPointTipPos() const {
+    const BossBodyPart* topPt = this->GetTopPoint();
+    assert(topPt != NULL);
+
+    return topPt->GetWorldTransform() * Point3D(0.0f, TOP_POINT_TIP_Y, 0.0f);
 }
 
 void GothicRomanticBoss::Init() {
@@ -113,7 +135,7 @@ void GothicRomanticBoss::Init() {
                 static const float WIDTH  = TOP_POINT_WIDTH;
                 static const float HALF_WIDTH = WIDTH / 2.0f;
 
-                static const float TOP_Y    = 1.208f;
+                static const float TOP_Y    = TOP_POINT_TIP_Y;
                 static const float BOTTOM_Y = -0.284f;
 
                 BoundingLines topPtBounds;

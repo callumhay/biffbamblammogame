@@ -49,7 +49,7 @@ public:
     enum DestructionMethod { 
         NotApplicableDestruction, RegularDestruction, LaserProjectileDestruction, RocketDestruction, LaserBeamDestruction,
         CollateralDestruction, PaddleShieldDestruction, BombDestruction, FireDestruction,
-        TeslaDestruction, MineDestruction, IceShatterDestruction
+        TeslaDestruction, MineDestruction, IceShatterDestruction, DisintegrationDestruction
     }; 
 
 	enum LevelPieceType {

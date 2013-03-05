@@ -25,7 +25,8 @@
 const double GothicRomanticBossMesh::INTRO_TIME_IN_SECS = 3.0;
 
 GothicRomanticBossMesh::GothicRomanticBossMesh(GothicRomanticBoss* boss) :
-BossMesh(), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL), legMesh(NULL) {
+BossMesh(), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL), legMesh(NULL),
+topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(NULL) {
     assert(boss != NULL);
 
     // Load the mesh assets...
@@ -38,6 +39,9 @@ BossMesh(), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL
     this->legMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->GOTHIC_ROMANTIC_BOSS_LEG_MESH);
     assert(this->legMesh != NULL);
 
+    this->topPointSmokeEmitter  = this->BuildSmokeEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
+    this->topPointFireEmitter   = this->BuildFireEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
+    this->topPointExplodingEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
 }
 
 GothicRomanticBossMesh::~GothicRomanticBossMesh() {
@@ -57,6 +61,13 @@ GothicRomanticBossMesh::~GothicRomanticBossMesh() {
     assert(success);
 
     UNUSED_VARIABLE(success);
+
+    delete this->topPointSmokeEmitter;
+    this->topPointSmokeEmitter = NULL;
+    delete this->topPointFireEmitter;
+    this->topPointFireEmitter = NULL;
+    delete this->topPointExplodingEmitter;
+    this->topPointExplodingEmitter = NULL;
 }
 
 double GothicRomanticBossMesh::ActivateIntroAnimation() {
@@ -133,5 +144,36 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
 }
 
 void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
-    // TODO
+
+    const BossBodyPart* topPoint = this->boss->GetTopPoint();
+    if (topPoint->GetAlpha() > 0.0f) {
+
+        if (topPoint->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            const BossWeakpoint* topPointWeakPt = static_cast<const BossWeakpoint*>(topPoint);
+            const Point3D topPointPos = topPoint->GetTranslationPt3D();
+
+            if (!topPointWeakPt->GetIsDestroyed()) {
+                if (topPointWeakPt->GetCurrentLifePercentage() < 1.0) {
+                    float lifePercentage = topPointWeakPt->GetCurrentLifePercentage();
+                    this->topPointFireEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->topPointFireEmitter->Tick(dT);
+                    this->topPointSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->topPointSmokeEmitter->Tick(dT);
+
+                    glPushMatrix();
+                    glTranslatef(topPointPos[0], topPointPos[1], topPointPos[2]);
+                    this->topPointSmokeEmitter->Draw(camera);
+                    this->topPointFireEmitter->Draw(camera);
+                    glPopMatrix();
+                }
+            }
+            else {
+                glPushMatrix();
+                glTranslatef(topPointPos[0], topPointPos[1], topPointPos[2]);
+                this->topPointExplodingEmitter->Tick(dT);
+                this->topPointExplodingEmitter->Draw(camera);
+                glPopMatrix();
+            }
+        }
+    }
 }

@@ -16,6 +16,8 @@
 #include "GameModel.h"
 #include "GameEventManager.h"
 
+const float OneWayBlock::ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS = M_PI / 180.0f * 70.0f; // (70 degrees)
+
 OneWayBlock::OneWayBlock(const OneWayDir& dir, unsigned int wLoc, unsigned int hLoc) :
 LevelPiece(wLoc, hLoc), dirType(dir) {
 
@@ -103,8 +105,6 @@ int OneWayBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
 }
 
 LevelPiece* OneWayBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			// EVENT: Ice was shattered
@@ -114,12 +114,19 @@ LevelPiece* OneWayBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruc
 			assert(success);
 	}
 
-    // Only collateral blocks and tesla lightning can destroy a one-way block
-    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+    // Only collateral blocks, tesla lightning and disintegration can destroy a one-way block
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction &&
+        method != LevelPiece::DisintegrationDestruction) {
         return this;
     }
 
-	gameModel->AddPossibleItemDrop(*this);
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
+
+    // Only drop an item if the block wasn't disintegrated
+    if (method != LevelPiece::DisintegrationDestruction) {
+	    gameModel->AddPossibleItemDrop(*this);
+    }
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();

@@ -60,7 +60,8 @@ public:
     const int MAXIMUM_POSSIBLE_LIVES;           // Max player lives possible at any given time during game play
 
 	const int FIRE_DAMAGE_PER_SECOND;               // The damage that fire does per second
-	const double FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The interval of time in seconds over which a fire glob might be dropped from a block
+	const double MIN_FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The min interval of time in which a fire glob will be dropped from a block
+    const double MAX_FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The maximum interval of time in which a fire glob will be dropped from a block
 	const int FIRE_GLOB_CHANCE_MOD;                 // The 1/x where x is the value of this, of a fire glob dropping after FIRE_GLOB_DROP_CHANCE_INTERVAL seconds
 
     const int DEFAULT_DAMAGE_ON_BALL_HIT;    // Default damage that a ball tends to do when it hits stuff
@@ -87,6 +88,8 @@ public:
 
 	const Colour SHIELD_PADDLE_COLOUR;
 
+    double GenerateFireGlobDropTime() const;
+
 private:
 	static GameModelConstants* Instance;
 
@@ -100,6 +103,12 @@ private:
 inline std::string GameModelConstants::GetResourceWorldDir() const {
     return this->RESOURCE_DIR + std::string("/") + this->WORLD_DIR;
 }
+
+inline double GameModelConstants::GenerateFireGlobDropTime() const {
+    return this->MIN_FIRE_GLOB_DROP_CHANCE_INTERVAL + Randomizer::GetInstance()->RandomNumZeroToOne() * 
+        (this->MAX_FIRE_GLOB_DROP_CHANCE_INTERVAL - this->MIN_FIRE_GLOB_DROP_CHANCE_INTERVAL);
+}
+
 inline std::string GameModelConstants::GetWorldDefinitonFilePath() const {
 #ifdef _DEMO
     return this->RESOURCE_DIR + std::string("/") + this->WORLD_DIR + std::string("/worlds_demo");

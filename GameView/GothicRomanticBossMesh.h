@@ -36,6 +36,11 @@ private:
     Mesh* bottomPointMesh;
     Mesh* legMesh;
 
+    ESPPointEmitter* topPointSmokeEmitter;
+    ESPPointEmitter* topPointFireEmitter;
+    ESPPointEmitter* topPointExplodingEmitter;
+
+
     void DrawPreBodyEffects(double dT, const Camera& camera);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);

@@ -38,9 +38,13 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/BallBoostModel.h"
 #include "../GameModel/BossWeakpoint.h"
-#include "../GameModel/PowerChargeEventInfo.h"
+#include "../GameModel/PowerChargeEffectInfo.h"
 #include "../GameModel/ExpandingHaloEffectInfo.h"
 #include "../GameModel/SparkBurstEffectInfo.h"
+#include "../GameModel/ElectricitySpasmEffectInfo.h"
+#include "../GameModel/PuffOfSmokeEffectInfo.h"
+#include "../GameModel/ShockwaveEffectInfo.h"
+#include "../GameModel/FullscreenFlashEffectInfo.h"
 
 #include "../GameControl/GameControllerManager.h"
 
@@ -573,7 +577,7 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
 	bool wasFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 
-	// Add the effects based on the type of block that is being destroyed...
+	// Add the effects based on the type of block that is being destroyed, its status and method of destruction...
 	switch (block.GetType()) {
 		
 		case LevelPiece::Breakable:
@@ -611,7 +615,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				// Sound for basic breakable blocks
 				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			}
-            this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			break;
         }
 
@@ -629,7 +632,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				// Sound for basic breakable blocks
 				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			}
-            this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			break;
 
 		case LevelPiece::ItemDrop:
@@ -644,7 +646,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				// Sound for basic breakable blocks
 				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			}
-			this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			break;
 
         case LevelPiece::AlwaysDrop:
@@ -659,7 +660,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				// Sound for basic breakable blocks
 				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			}
-            this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
             break;
 
 		case LevelPiece::Bomb:
@@ -680,30 +680,30 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			break;
 
 		case LevelPiece::Ink: {
-				const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+		    const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
 
-				// We do not do any ink blotches while in ball or paddle camera modes, also, if the ink block is frozen
-				// then it just shatters...
-				bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen &&
-                    method != LevelPiece::BombDestruction && method != LevelPiece::RocketDestruction;
+		    // We do not do any ink blotches while in ball or paddle camera modes, also, if the ink block is frozen
+		    // then it just shatters...
+		    bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen &&
+                method != LevelPiece::BombDestruction && method != LevelPiece::RocketDestruction;
 
-				if (wasFrozen) {
-					// Add ice break effect
-					this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
-					//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-				}
-				else {
-					// Emit goo from ink block and make onomata effects
-					this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
-					this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundInkBlockDestroyedEvent);
+		    if (wasFrozen) {
+		    	// Add ice break effect
+		    	this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
+		    	//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+		    }
+		    else {
+		    	// Emit goo from ink block and make onomata effects
+		    	this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
+		    	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundInkBlockDestroyedEvent);
 
-					if (inkSplatter) {
-						// Cover camera in ink with a fullscreen splatter effect
-						this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
-					}
-				}
-			}
+		    	if (inkSplatter) {
+		    		// Cover camera in ink with a fullscreen splatter effect
+		    		this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
+		    	}
+		    }
 			break;
+        }
 
 		case LevelPiece::Prism:
 		case LevelPiece::PrismTriangle:
@@ -711,35 +711,62 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			break;
 
 		case LevelPiece::Cannon: {
-				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
-			}
+            this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
 			break;
+        }
 
 		case LevelPiece::Collateral: {
-
-                if (wasFrozen) {
-					// Add ice break effect
-					this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
-					//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-				}
-                else {
-				    // Don't show any effects / play any sounds if the ball is dead/dying
-				    if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
-					    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-					    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
-				    }
-                }
-
-				this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
+            if (wasFrozen) {
+				// Add ice break effect
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
+				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
 			}
-			break;
+            else {
+			    // Don't show any effects / play any sounds if the ball is dead/dying
+			    if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
+				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
+			    }
+            }
+            break;
+        }
 
 		default:
 			break;
 	}
 
-	// TODO: Transmit data concerning the level of sound needed
+    // Blocks implemented in particular ways have to be disposed of in particular ways... ugh.
+    switch (block.GetType()) {
+
+        case LevelPiece::Regen:
+        case LevelPiece::LaserTurret:
+        case LevelPiece::RocketTurret:
+        case LevelPiece::MineTurret:
+		case LevelPiece::ItemDrop:
+        case LevelPiece::AlwaysDrop:
+		case LevelPiece::Cannon:
+		case LevelPiece::Collateral:
+			this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
+            break;
+
+	    case LevelPiece::Breakable:
+		case LevelPiece::BreakableTriangle:
+		case LevelPiece::Solid:
+		case LevelPiece::SolidTriangle:
+		case LevelPiece::Tesla:
+        case LevelPiece::Switch:
+        case LevelPiece::OneWay:
+        case LevelPiece::NoEntry:
+		case LevelPiece::Bomb:
+		case LevelPiece::Ink:
+		case LevelPiece::Prism:
+		case LevelPiece::PrismTriangle:
+        case LevelPiece::Empty:
+        case LevelPiece::Portal:
+		default:
+			break;
+    }
+
 	debug_output("EVENT: Block destroyed");
 }
 
@@ -1216,8 +1243,8 @@ void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
     switch (effectEvent.GetType()) {
         
         case BossEffectEventInfo::PowerChargeInfo: {
-            const PowerChargeEventInfo& powerChargeInfo =
-                static_cast<const PowerChargeEventInfo&>(effectEvent);
+            const PowerChargeEffectInfo& powerChargeInfo =
+                static_cast<const PowerChargeEffectInfo&>(effectEvent);
             this->display->GetAssets()->GetESPAssets()->AddBossPowerChargeEffect(powerChargeInfo);
             break;
         }
@@ -1233,6 +1260,34 @@ void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
             const SparkBurstEffectInfo& sparkBurstInfo =
                 static_cast<const SparkBurstEffectInfo&>(effectEvent);
             this->display->GetAssets()->GetESPAssets()->AddBossSparkBurstEffect(sparkBurstInfo);
+            break;
+        }
+
+        case BossEffectEventInfo::ElectricitySpasmInfo: {
+            const ElectricitySpasmEffectInfo& electricitySpasmInfo =
+                static_cast<const ElectricitySpasmEffectInfo&>(effectEvent);
+            this->display->GetAssets()->GetESPAssets()->AddElectricitySpasmEffect(electricitySpasmInfo);
+            break;
+        }
+
+        case BossEffectEventInfo::PuffOfSmokeInfo: {
+            const PuffOfSmokeEffectInfo& puffInfo =
+                static_cast<const PuffOfSmokeEffectInfo&>(effectEvent);
+            this->display->GetAssets()->GetESPAssets()->AddPuffOfSmokeEffect(puffInfo);            
+            break;
+        }
+
+        case BossEffectEventInfo::ShockwaveInfo: {
+            const ShockwaveEffectInfo& shockwaveInfo =
+                static_cast<const ShockwaveEffectInfo&>(effectEvent);
+            this->display->GetAssets()->GetESPAssets()->AddShockwaveEffect(shockwaveInfo);  
+            break;
+        }
+
+        case BossEffectEventInfo::FullscreenFlashInfo: {
+            const FullscreenFlashEffectInfo& flashInfo = 
+                static_cast<const FullscreenFlashEffectInfo&>(effectEvent);
+            this->display->GetAssets()->FullscreenFlashExplosion(flashInfo, this->display->GetCamera());
             break;
         }
 
