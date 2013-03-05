@@ -75,8 +75,8 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
         return this;
     }
 
-	// When destroying a breakable there is the possiblity of dropping an item...
-	gameModel->AddPossibleItemDrop(*this);
+	// Currently, solid blocks don't drop items
+	//gameModel->AddPossibleItemDrop(*this);
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();

@@ -82,9 +82,6 @@ PointsHUD::~PointsHUD() {
     delete this->multiplierGage;
     this->multiplierGage = NULL;
 
-    // Clean up any leftover notifications
-    this->ClearNotifications();
-
     // Clean up all the star animations and emitters
     for (size_t i = 0; i < this->starSizeAnimators.size(); i++) {
         delete this->starSizeAnimators[i];
@@ -291,8 +288,6 @@ void PointsHUD::Reinitialize() {
     }
     this->starEffectEmitters.clear();
 
-    this->ClearNotifications();
-
     this->numStars         = 0;
     this->currPtScore      = 0;
     this->multiplier->Reinitialize();
@@ -345,17 +340,6 @@ const char* PointsHUD::GetPointNotificationName(const PointAward& pointAward) {
     }
 }
 
-void PointsHUD::ClearNotifications() {
-    /*
-    for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end(); ++iter) {
-        PointNotification* ptNotify = *iter;
-        delete ptNotify;
-        ptNotify = NULL;
-    }
-    this->ptNotifications.clear();
-    */
-}
-
 /**
  * Sets the current alpha (1 for completely visible, 0 for completely invisible) for the entire
  * points HUD.
@@ -367,14 +351,10 @@ void PointsHUD::SetAlpha(float alpha) {
     
     this->starAlpha = alpha;
     for (std::list<ESPPointEmitter*>::iterator iter = this->starEffectEmitters.begin();
-         iter != this->starEffectEmitters.end();) {
+         iter != this->starEffectEmitters.end(); ++iter) {
         ESPPointEmitter* currEmitter = *iter;
         currEmitter->SetParticleAlpha(ESPInterval(alpha)); 
     }
-    //for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
-    //    PointNotification* ptNotification = *iter;
-    //    ptNotification->SetAlpha(alpha);
-    //}
 }
 
 const int PointsHUD::PointNotification::NOTIFIER_TO_NOTIFIER_VERTICAL_GAP = -2;

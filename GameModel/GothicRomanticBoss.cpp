@@ -19,6 +19,8 @@ const float GothicRomanticBoss::TOTAL_HEIGHT          = 9.258f;
 
 const float GothicRomanticBoss::BODY_HEIGHT = 7.0f;
 const float GothicRomanticBoss::BODY_WIDTH  = 3.45f;
+const float GothicRomanticBoss::HALF_BODY_WIDTH  = BODY_WIDTH / 2.0f;
+const float GothicRomanticBoss::HALF_BODY_HEIGHT = BODY_HEIGHT / 2.0f;
 
 const float GothicRomanticBoss::TOP_POINT_WIDTH  = 2.644f;
 const float GothicRomanticBoss::HALF_TOP_POINT_WIDTH = TOP_POINT_WIDTH / 2.0f;

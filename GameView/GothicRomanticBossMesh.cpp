@@ -153,7 +153,7 @@ void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera
             const Point3D topPointPos = topPoint->GetTranslationPt3D();
 
             if (!topPointWeakPt->GetIsDestroyed()) {
-                if (topPointWeakPt->GetCurrentLifePercentage() < 1.0) {
+                if (topPointWeakPt->GetCurrentLifePercentage() <= 0.5) {
                     float lifePercentage = topPointWeakPt->GetCurrentLifePercentage();
                     this->topPointFireEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
                     this->topPointFireEmitter->Tick(dT);

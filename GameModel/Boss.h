@@ -70,6 +70,7 @@ public:
     static AnimationMultiLerp<ColourRGBA> BuildBossAngryFlashAnim();
     static AnimationMultiLerp<Vector3D>   BuildBossAngryShakeAnim(float shakeMagnitude);
     static AnimationMultiLerp<Vector3D>   BuildBossFinalDeathShakeAnim(float shakeMagnitude);
+    static AnimationMultiLerp<Vector3D>   BuildBossHurtMoveAnim(const Vector2D& hurtDir, float shakeMagnitude);
 
     static AnimationMultiLerp<Vector3D> BuildLimbFallOffTranslationAnim(double totalAnimTime, float xDist, float yDist);
     static AnimationMultiLerp<float> BuildLimbFallOffZRotationAnim(double totalAnimTime, float rotAmtInDegs);

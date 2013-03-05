@@ -1691,39 +1691,7 @@ void HeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPar
             this->eye->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
             Vector2D ballToEyeVec = this->eye->GetTranslationPt2D() - ball.GetCenterPosition2D();
             ballToEyeVec.Normalize();
-
-            static const double FINAL_JITTER_TIME = 0.3;
-            static const double SHAKE_INC_TIME = 0.075;
-            static const int NUM_SHAKES = (BossWeakpoint::INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
-
-            std::vector<double> timeValues;
-            timeValues.clear();
-            timeValues.reserve(3 + NUM_SHAKES + 1);
-            timeValues.push_back(0.0);
-            timeValues.push_back(2.0 * FINAL_JITTER_TIME / 3.0);
-            timeValues.push_back(FINAL_JITTER_TIME);
-            for (int i = 0; i <= NUM_SHAKES*2; i++) {
-                timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
-            }
-            assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
-
-            Vector2D hurtPos2D = ClassicalBoss::EYE_WIDTH * ballToEyeVec;
-            std::vector<Vector3D> moveValues;
-            moveValues.reserve(timeValues.size());
-            moveValues.push_back(Vector3D(0,0,0));
-            moveValues.push_back(Vector3D(hurtPos2D[0], hurtPos2D[1], 0.0f));
-            moveValues.push_back(Vector3D(0,0,0));
-            for (int i = 0; i < NUM_SHAKES; i++) {
-                float randomVal1 = Randomizer::GetInstance()->RandomNumNegOneToOne() * ClassicalBoss::EYE_WIDTH / 5.0f;
-                float randomVal2 = Randomizer::GetInstance()->RandomNumNegOneToOne() * ClassicalBoss::EYE_WIDTH / 5.0f;
-                moveValues.push_back(Vector3D(randomVal1, randomVal2, 0));
-                moveValues.push_back(Vector3D(-randomVal1, -randomVal2, 0));
-            }
-            moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));
-
-            // Set up the hurt animation for the eye...
-            this->eyeHurtMoveAnim.SetLerp(timeValues, moveValues);
-            this->eyeHurtMoveAnim.SetRepeat(false);
+            this->eyeHurtMoveAnim = Boss::BuildBossHurtMoveAnim(ballToEyeVec, ClassicalBoss::EYE_WIDTH);
         }
 
         this->SetState(ClassicalBossAI::HurtEyeAIState);
