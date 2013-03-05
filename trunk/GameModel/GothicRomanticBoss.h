@@ -48,6 +48,8 @@ public:
 
     static const float BODY_WIDTH;
     static const float BODY_HEIGHT;
+    static const float HALF_BODY_WIDTH;
+    static const float HALF_BODY_HEIGHT;
     
     static const float TOP_POINT_WIDTH;
     static const float HALF_TOP_POINT_WIDTH;

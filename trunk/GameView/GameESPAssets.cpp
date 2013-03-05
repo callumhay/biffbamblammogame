@@ -2270,6 +2270,48 @@ void GameESPAssets::AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock
     this->activeGeneralEmitters.push_back(lifeInfoEmitter);
 }
 
+void GameESPAssets::AddBlockDisintegrationEffect(const LevelPiece& block) {
+    const Colour& colour = block.GetColour();
+
+    // Disintegration results in chared bits of the block and a puff of smoke
+	ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
+	smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	smashBitsEffect->SetInitialSpd(ESPInterval(2.0f, 5.0f));
+	smashBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
+	smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	smashBitsEffect->SetEmitAngleInDegrees(180);
+	smashBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 16.0f, LevelPiece::PIECE_WIDTH / 10.0f));
+	smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+	smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 3.0f));
+	smashBitsEffect->SetEmitPosition(Point3D(block.GetCenter(), 0.0f));
+	smashBitsEffect->SetParticleAlignment(ESP::ScreenAligned);
+    smashBitsEffect->SetParticleColour(
+        ESPInterval(0.25f * colour.R(), 0.6f * colour.R()),
+        ESPInterval(0.25f * colour.G(), 0.6f * colour.G()),
+	    ESPInterval(0.25f * colour.B(), 0.6f * colour.B()),
+        ESPInterval(1.0f));
+	smashBitsEffect->AddEffector(&this->gravity);
+	smashBitsEffect->AddEffector(&this->particleFader);
+    smashBitsEffect->SetRandomTextureParticles(3, this->rockTextures);
+
+    ESPPointEmitter* puffOfSmokeEffect = new ESPPointEmitter();
+    puffOfSmokeEffect->SetNumParticleLives(1);
+    puffOfSmokeEffect->SetSpawnDelta(ESPInterval(0.01f, 0.015f));
+    puffOfSmokeEffect->SetInitialSpd(ESPInterval(1.5f, 4.0f));
+    puffOfSmokeEffect->SetParticleLife(ESPInterval(0.8f, 1.5f));
+    puffOfSmokeEffect->SetParticleSize(ESPInterval(0.5f*LevelPiece::PIECE_WIDTH, 0.85f*LevelPiece::PIECE_WIDTH));
+    puffOfSmokeEffect->SetEmitAngleInDegrees(180);
+    puffOfSmokeEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    puffOfSmokeEffect->SetEmitPosition(Point3D(block.GetCenter(), 0));
+    puffOfSmokeEffect->SetParticleColour(ESPInterval(0.5f), ESPInterval(0.5f), ESPInterval(0.5f), ESPInterval(1.0f));
+    puffOfSmokeEffect->AddEffector(&this->particleMediumGrowth);
+    puffOfSmokeEffect->AddEffector(&this->particleFader);
+    puffOfSmokeEffect->SetRandomTextureParticles(6, this->smokeTextures);
+
+	this->activeGeneralEmitters.push_back(smashBitsEffect);
+    this->activeGeneralEmitters.push_back(puffOfSmokeEffect);
+}
+
 // Adds JUST the bits of snowflakey ice that come off the block when its frozen and gets hit
 // by a ball...
 void GameESPAssets::AddIceBitsBreakEffect(const LevelPiece& block) {
@@ -2313,27 +2355,24 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	bool result = false;
 
 	// Create the smashy block bits
-	size_t randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->rockTextures.size();
-	for (int i = 0; i < 3; i++) {
-		ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
-		smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-		smashBitsEffect->SetInitialSpd(ESPInterval(2.0f, 5.0f));
-		smashBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
-		smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
-		smashBitsEffect->SetEmitAngleInDegrees(180);
-		smashBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 14.0f, LevelPiece::PIECE_WIDTH / 3.0f));
-		smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
-		smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 3.0f));
-		smashBitsEffect->SetEmitPosition(emitCenter);
-		smashBitsEffect->SetParticleAlignment(ESP::ScreenAligned);
-		smashBitsEffect->SetParticleColour(ESPInterval(0.5f * colour.R(), 0.75f * colour.R()), ESPInterval(0.5f * colour.G(), 0.75f * colour.G()),
-																			 ESPInterval(0.5f * colour.B(), 0.75f * colour.B()), ESPInterval(0.8f, 1.0f));
-		smashBitsEffect->AddEffector(&this->gravity);
-		smashBitsEffect->AddEffector(&this->particleFader);
-		result = smashBitsEffect->SetParticles(2, this->rockTextures[(randomIdx + i) % this->rockTextures.size()]);
-		assert(result);
-		this->activeGeneralEmitters.push_back(smashBitsEffect);
-	}
+	ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
+	smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	smashBitsEffect->SetInitialSpd(ESPInterval(2.0f, 5.0f));
+	smashBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
+	smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	smashBitsEffect->SetEmitAngleInDegrees(180);
+	smashBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 14.0f, LevelPiece::PIECE_WIDTH / 3.0f));
+	smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+	smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 3.0f));
+	smashBitsEffect->SetEmitPosition(emitCenter);
+	smashBitsEffect->SetParticleAlignment(ESP::ScreenAligned);
+	smashBitsEffect->SetParticleColour(ESPInterval(0.5f * colour.R(), 0.75f * colour.R()), ESPInterval(0.5f * colour.G(), 0.75f * colour.G()),
+	    ESPInterval(0.5f * colour.B(), 0.75f * colour.B()), ESPInterval(0.8f, 1.0f));
+	smashBitsEffect->AddEffector(&this->gravity);
+	smashBitsEffect->AddEffector(&this->particleFader);
+    result = smashBitsEffect->SetRandomTextureParticles(6, this->rockTextures);
+	assert(result);
+	this->activeGeneralEmitters.push_back(smashBitsEffect);
 
 	// Create an emitter for a single large snowflake
 	ESPPointEmitter* snowflakeBackingEffect = new ESPPointEmitter();
@@ -2348,7 +2387,7 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	snowflakeBackingEffect->SetParticleSize(ESPInterval(1.5f * LevelPiece::PIECE_WIDTH));
 	snowflakeBackingEffect->AddEffector(&this->particleFader);
 	snowflakeBackingEffect->AddEffector(&this->particleMediumGrowth);
-	result = snowflakeBackingEffect->SetParticles(1, this->snowflakeTextures[1]);
+    result = snowflakeBackingEffect->SetRandomTextureParticles(1, this->snowflakeTextures);
 	assert(result);
 	this->activeGeneralEmitters.push_back(snowflakeBackingEffect);
 
@@ -2364,7 +2403,7 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	iceSmashOnoEffect->SetEmitPosition(emitCenter);
 	iceSmashOnoEffect->SetParticleColour(ESPInterval(iceColour.R()), ESPInterval(iceColour.G()), 
-																			 ESPInterval(iceColour.B()), ESPInterval(1));
+	    ESPInterval(iceColour.B()), ESPInterval(1));
 	
 	// Add effectors...
 	iceSmashOnoEffect->AddEffector(&this->particleFader);

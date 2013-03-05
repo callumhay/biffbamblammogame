@@ -51,6 +51,8 @@ protected:
     static const float DEFAULT_ROCKET_SPIN_DEGREES_PER_SEC;
     static const float DEFAULT_DROP_Y_POS;
 
+    static const double GLITCH_TIME_IN_SECS;
+
     GothicRomanticBoss* boss;
     int attacksSinceLastSummon;
     AnimationMultiLerp<Vector3D> angryMoveAnim;
@@ -86,7 +88,7 @@ protected:
         return NumberFuncs::LerpOverFloat<float>(0.0f, 1.0f, multiplier*0.3f, multiplier*0.6f, this->GetTotalLifePercent());
     }
     float GenerateRocketPaddleAttackProbability(float multiplier = 1.0f) const {
-        return NumberFuncs::LerpOverFloat<float>(0.0f, 1.0f, multiplier*0.2f, multiplier*0.4f, this->GetTotalLifePercent());
+        return NumberFuncs::LerpOverFloat<float>(0.0f, 1.0f, multiplier*0.15f, multiplier*0.3f, this->GetTotalLifePercent());
     }
 
     float GetAccelerationMagnitude() const;
@@ -100,6 +102,7 @@ protected:
     static void GetItemDropPositions(int numItemsToDrop, const GameLevel& level, std::vector<Point2D>& positions);
 
     static AnimationMultiLerp<float> GenerateRocketSpinAnimation(int numRockets);
+    static AnimationMultiLerp<Vector2D> GenerateGlitchShakeAnimation();
     static void GenerateRocketTargetCannonPositions(int numRockets, std::vector<Point2D>& positions);
     static void GenerateTargetRegenBlockPositions(std::vector<Point2D>& positions);
 
@@ -116,7 +119,6 @@ public:
     void CollisionOccurred(GameModel*, PlayerPaddle&, BossBodyPart*) {};
 
 protected:
-
     // State variables
     ConfinedMovePos nextMovePos;
     AIState nextAtkAIState;
@@ -130,12 +132,12 @@ protected:
     int numItemsPerSummoning;
     int summonsSinceLastSpecialItemDrop;
 
-    float GenerateSpecialItemSummonProbability() const;
+    virtual float GenerateSpecialItemSummonProbability() const;
     double GenerateShootCountdownAmtForMoving()   const { return 0.5 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
     double GenerateShootCountdownAmtForSpinning() const { return 0.1 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.3; }
     double GenerateTimeBetweenRockets() const { return this->rocketSpinRotAnim.GetTimeValues().back() / static_cast<double>(this->numRocketsToFire+1); }
 
-    virtual void SetupNextAttackStateAndMove();
+    virtual void SetupNextAttackStateAndMove(GameModel* gameModel);
 
     // State methods
     void ExecuteBasicMoveAndShootState(double dT, GameModel* gameModel);
@@ -162,7 +164,7 @@ public:
     void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
 
 private:
-    static const int NUM_OF_TOP_POINT_HITS = 5; // Number of times the weakpoint has to be hit before we move to the next state
+    static const int NUM_OF_TOP_POINT_HITS = 3; // Number of times the weakpoint has to be hit before we move to the next state
     static const float TOP_POINT_LIFE_POINTS;
 
     static const double TIME_BETWEEN_REGEN_BLOCK_DESTROYING_ROCKETS;
@@ -208,10 +210,9 @@ public:
     void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
 
 private:
+    static const int NUM_LASER_HITS = 4;
     static const float BOTTOM_POINT_LIFE_POINTS;
     static const double BOTTOM_FADE_TIME;
-
-    static const double GLITCH_TIME_IN_SECS;
 
     static const double DESTROY_CONFINES_TIME_IN_SECS;
     static const float DESTROY_CONFINES_SPIN_ROT_SPD;
@@ -223,25 +224,27 @@ private:
     // State variables
     AnimationMultiLerp<float> hitOnBottomTiltAnim;
     AnimationMultiLerp<float> hitOnBottomMoveUpAnim;
-    int numRocketsToFireAtPaddle;
-    int glitchCounter;
     AnimationMultiLerp<Vector2D> glitchShakeAnim;
+    int numRocketsToFireAtPaddle;
     double glitchSummonCountdown;
     AnimationLerp<float> spinningDestroyConfinesAnim;
     double destroyConfinesCountdown;
     double chargeDestroyerBlastCountdown;
 
     int GenerateNumRocketsToFire() const { return 3 + Randomizer::GetInstance()->RandomUnsignedInt() % 3; }
-
+    
     AnimationMultiLerp<float> GenerateHitOnBottomTiltAnim(const Point2D& hitPos) const;
     AnimationMultiLerp<Vector3D> GenerateBottomDeathTranslationAnimation(bool fallLeft) const;
     AnimationMultiLerp<float> GenerateBottomDeathRotationAnimation(bool fallLeft) const;
 
+    void BlowUpLegs();
+
     // Inherited from ConfinedAI/GothicRomanticBossAI/BossAIState
     void SetState(GothicRomanticBossAI::AIState newState);
     void UpdateState(double dT, GameModel* gameModel);
-    void SetupNextAttackStateAndMove();
+    void SetupNextAttackStateAndMove(GameModel* gameModel);
     float GetTotalLifePercent() const;
+    float GenerateSpecialItemSummonProbability() const { return 1.0f; } // Always drop the special item
     float GetRocketCannonAtkProbabilityMultiplier() const { return 1.0f; }
     float GetRocketPaddleAtkProbabilityMultiplier() const { return 0.5f; }
     GameItem::ItemType GetSpecialItemDropType() const { return GameItem::IceBallItem; }
@@ -266,14 +269,39 @@ public:
 
     bool IsStateMachineFinished() const;
 
-    void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
-    void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
+    void CollisionOccurred(GameModel*, GameBall& ball, BossBodyPart*) {
+        this->DoCollisionOccurredStuff(ball.GetCenterPosition2D());
+    }
+    void CollisionOccurred(GameModel*, Projectile* projectile, BossBodyPart*) {
+        this->DoCollisionOccurredStuff(projectile->GetPosition());
+    }
     void CollisionOccurred(GameModel*, PlayerPaddle&, BossBodyPart*) {}
 
 private:
+    static const int NUM_BALL_HITS = 5;
     static const float BODY_LIFE_POINTS;
+    static const float MAX_SPEED;
 
     BossWeakpoint* bodyWeakpt;
+
+    // State variables
+    AnimationMultiLerp<Vector2D> glitchShakeAnim;
+    int glitchCounter;
+    int numItemsPerSummoning;
+    double moveToNextStateCountdown;
+    double summonItemsDelayCountdown;
+    double shootCountdown;
+    double glitchSummonCountdown;
+    int numRocketsToFire;
+    std::vector<Point2D> rocketTargetPositions;
+    AnimationMultiLerp<Vector3D> hurtMoveAnim;
+
+    double GenerateBasicMoveAndShootTime() const { return 8.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
+    double GenerateTimeBetweenLaserShots() const { return 0.3 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2; }
+    double GenerateTimeBetweenRockets() const { return 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 1.0; }
+    int GenerateNumRocketsToFire() const { return 3 + Randomizer::GetInstance()->RandomUnsignedInt() % 4; }
+    void SetNextAttackState();
+    void DoCollisionOccurredStuff(const Point2D& collisionPos);
 
     // Inherited from GothicRomanticBossAI/BossAIState
     void SetState(GothicRomanticBossAI::AIState newState);
@@ -281,7 +309,16 @@ private:
     float GetTotalLifePercent() const;
 
     // State methods
-    
+    void ExecuteBasicMoveAndShootState(double dT, GameModel* gameModel);
+    void ExecuteSummonItemsState(double dT, GameModel* gameModel);
+    void ExecuteRocketToCannonAndPaddleAttackState(double dT, GameModel* gameModel);
+    void ExecuteGlitchState(double dT, GameModel* gameModel);
+    void ExecuteHurtBodyState(double dT, GameModel* gameModel);
+    void ExecuteFinalDeathThroesState();
+
+    void PerformBasicMovement(const Point2D& pos, const GameLevel* level);
+    void UpdateBasicMovement();
+    void ExecuteLaserSpray(GameModel* gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(FreeMovingAttackAI);
 };

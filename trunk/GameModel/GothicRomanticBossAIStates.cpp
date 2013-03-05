@@ -24,6 +24,7 @@
 #include "ShockwaveEffectInfo.h"
 #include "ExpandingHaloEffectInfo.h"
 #include "FullscreenFlashEffectInfo.h"
+#include "SparkBurstEffectInfo.h"
 
 using namespace gothicromanticbossai;
 
@@ -37,6 +38,8 @@ const float GothicRomanticBossAI::DEFAULT_LASER_SPIN_DEGREES_PER_SEC  = 360.0f;
 const float GothicRomanticBossAI::DEFAULT_ROCKET_SPIN_DEGREES_PER_SEC = 600.0f;
 
 const float GothicRomanticBossAI::DEFAULT_DROP_Y_POS = 10;
+
+const double GothicRomanticBossAI::GLITCH_TIME_IN_SECS = 5.0;
 
 const GothicRomanticBossAI::ConfinedMovePos GothicRomanticBossAI::CORNER_POSITIONS[] = { 
     // Make sure these are in the same order as they are in the enumeration!!!
@@ -122,19 +125,22 @@ GothicRomanticBossAI::ConfinedMovePos GothicRomanticBossAI::GetRandomConfinedCor
 GothicRomanticBossAI::AIState GothicRomanticBossAI::GetAIStateForConfinedMovePos(const GothicRomanticBossAI::ConfinedMovePos& pos,
                                                                                  float probabilityOfTargetCannonRocket,
                                                                                  float probabilityOfTargetPaddleRocket) {
-    float randomNum = Randomizer::GetInstance()->RandomNumZeroToOne() + EPSILON;
+
+    float randomNum1 = Randomizer::GetInstance()->RandomNumZeroToOne() + EPSILON;
+    float randomNum2 = Randomizer::GetInstance()->RandomNumZeroToOne() + EPSILON;
+
     switch (pos) {
 
         case TopLeftCorner:
         case TopRightCorner:
             
-            if (randomNum <= 1.25f * probabilityOfTargetCannonRocket) {
-                if (randomNum <= 1.25f * probabilityOfTargetPaddleRocket) {
+            if (randomNum1 <= 1.1f * probabilityOfTargetCannonRocket) {
+                if (randomNum2 <= 1.1f * probabilityOfTargetPaddleRocket) {
                     return RocketToCannonAndPaddleAttackAIState;
                 }
                 return RocketToCannonAttackAIState;
             }
-            else if (randomNum <= 1.25f * probabilityOfTargetPaddleRocket) {
+            else if (randomNum2 <= 1.1f * probabilityOfTargetPaddleRocket) {
                 return RocketToPaddleAttackAIState;
             }
 
@@ -143,13 +149,13 @@ GothicRomanticBossAI::AIState GothicRomanticBossAI::GetAIStateForConfinedMovePos
         case BottomLeftCorner:
         case BottomRightCorner:
 
-            if (randomNum <= probabilityOfTargetCannonRocket) {
-                if (randomNum <= probabilityOfTargetPaddleRocket) {
+            if (randomNum1 <= probabilityOfTargetCannonRocket) {
+                if (randomNum2 <= probabilityOfTargetPaddleRocket) {
                     return RocketToCannonAndPaddleAttackAIState;
                 }
                 return RocketToCannonAttackAIState;
             }
-            else if (randomNum <= probabilityOfTargetPaddleRocket) {
+            else if (randomNum2 <= probabilityOfTargetPaddleRocket) {
                 return RocketToPaddleAttackAIState;
             }
 
@@ -290,6 +296,38 @@ AnimationMultiLerp<float> GothicRomanticBossAI::GenerateRocketSpinAnimation(int 
     return animation;
 }
 
+AnimationMultiLerp<Vector2D> GothicRomanticBossAI::GenerateGlitchShakeAnimation() {
+    AnimationMultiLerp<Vector2D> result;
+    
+    static const int NUM_SHAKES = 50;
+    static const double SHAKE_TIME_INC = GLITCH_TIME_IN_SECS / static_cast<double>(NUM_SHAKES+1);
+    
+    std::vector<double> timeVals;
+    timeVals.reserve(NUM_SHAKES + 1);
+    timeVals.push_back(0.0);
+    for (int i = 0; i < NUM_SHAKES; i++) {
+        timeVals.push_back(timeVals.back() + SHAKE_TIME_INC);
+    }
+
+    static const float SHAKE_RADIUS = std::min<float>(MOVE_X_BORDER, MOVE_Y_BORDER) / 2.0f;
+
+    std::vector<Vector2D> shakeVals;
+    shakeVals.reserve(timeVals.size());
+    shakeVals.push_back(Vector2D(0,0));
+    for (int i = 0; i < NUM_SHAKES-1; i++) {
+        shakeVals.push_back(Vector2D(
+            Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_RADIUS,
+            Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_RADIUS));
+    }
+    shakeVals.push_back(Vector2D(0,0));
+
+    result.SetLerp(timeVals, shakeVals);
+    result.SetInterpolantValue(Vector2D(0,0));
+    result.SetRepeat(false);
+
+    return result;
+}
+
 /**
  * Generates a set of randomly sequenced positions for where the cannons are in the boss level. This
  * provides the boss with a list of these positions to shoot rockets at.
@@ -361,11 +399,12 @@ float ConfinedAI::GenerateSpecialItemSummonProbability() const {
     return 1.0f;
 }
 
-void ConfinedAI::SetupNextAttackStateAndMove() {
+void ConfinedAI::SetupNextAttackStateAndMove(GameModel* gameModel) {
 
     // Check to see if we're going into a summoning state or not
     float summonProb = this->GenerateSummonProbability();
-    if (Randomizer::GetInstance()->RandomNumZeroToOne() <= summonProb) {
+    if (Randomizer::GetInstance()->RandomNumZeroToOne() <= summonProb &&
+        gameModel->GetCurrentStateType() == GameState::BallInPlayStateType) {
         // Summoning attack...
         this->nextAtkAIState = GothicRomanticBossAI::SummonItemsAIState;
         this->nextMovePos    = GothicRomanticBossAI::Center;
@@ -425,7 +464,7 @@ void ConfinedAI::ExecuteSpinLaserAttackState(double dT, GameModel* gameModel) {
         // Make sure we reset the rotation!!!
         this->boss->alivePartsRoot->SetLocalYRotation(0.0f);
         // Move somewhere else...
-        this->SetupNextAttackStateAndMove();
+        this->SetupNextAttackStateAndMove(gameModel);
         return;
     }
 
@@ -466,7 +505,7 @@ void ConfinedAI::ExecuteRocketToCannonAttackState(double dT, GameModel* gameMode
         this->boss->alivePartsRoot->SetLocalYRotation(0.0f);
 
         // Move somewhere else...
-        this->SetupNextAttackStateAndMove();
+        this->SetupNextAttackStateAndMove(gameModel);
         return;
     }
 
@@ -474,6 +513,13 @@ void ConfinedAI::ExecuteRocketToCannonAttackState(double dT, GameModel* gameMode
 }
 
 void ConfinedAI::ExecuteSummonItemsState(double dT, GameModel* gameModel) {
+
+    // Check to see if the game is in a suitable state for items to be dropped...
+    if (gameModel->GetCurrentStateType() != GameState::BallInPlayStateType) {
+        // If the ball isn't in play then we go to another state...
+        this->SetupNextAttackStateAndMove(gameModel);
+        return;
+    }
 
     if (this->summonItemsDelayCountdown <= 0.0) {
 
@@ -517,7 +563,7 @@ void ConfinedAI::ExecuteSummonItemsState(double dT, GameModel* gameModel) {
         }
 
         // Go to the next state...
-        this->SetupNextAttackStateAndMove();
+        this->SetupNextAttackStateAndMove(gameModel);
     }
     else {
         this->summonItemsDelayCountdown -= dT;
@@ -693,6 +739,7 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->attacksSinceLastSummon = 0;
+
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
             // EVENT: Summon items power charge
             GameEventManager::Instance()->ActionEffect(
@@ -714,7 +761,7 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->angryMoveAnim.ResetToStart();
 
             // EVENT: Boss is angry! Rawr.
-            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetTopPoint());
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetBody());
             break;
 
         case DestroyRegenBlocksAIState:
@@ -796,7 +843,7 @@ void FireBallAI::ExecuteHurtTopState(double dT, GameModel* gameModel) {
             this->SetState(GothicRomanticBossAI::VeryHurtAndAngryAIState);
         }
         else {
-            this->SetupNextAttackStateAndMove();
+            this->SetupNextAttackStateAndMove(gameModel);
         }
     }
 }
@@ -853,19 +900,17 @@ void FireBallAI::ExecuteDestroyRegenBlocksState(double dT, GameModel* gameModel)
 
 // Begin IceBallAI ******************************************************************************
 
-const float IceBallAI::BOTTOM_POINT_LIFE_POINTS = PaddleLaserProjectile::DAMAGE_DEFAULT * 10;
+const float IceBallAI::BOTTOM_POINT_LIFE_POINTS = PaddleLaserProjectile::DAMAGE_DEFAULT * IceBallAI::NUM_LASER_HITS;
 const double IceBallAI::BOTTOM_FADE_TIME = 3.0;
-
-const double IceBallAI::GLITCH_TIME_IN_SECS = 5.0;
 
 const double IceBallAI::DESTROY_CONFINES_TIME_IN_SECS           = 6.0;
 const float IceBallAI::DESTROY_CONFINES_SPIN_ROT_SPD            = 500.0f;
 const double IceBallAI::TIME_TO_CHARGE_CONFINE_DESTROYER_BLAST  = 2.0;
-const double IceBallAI::TIME_BEFORE_DESTROY_CONFINES_FLASH      = 1.0;
+const double IceBallAI::TIME_BEFORE_DESTROY_CONFINES_FLASH      = 0.75;
 
 IceBallAI::IceBallAI(GothicRomanticBoss* boss, ConfinedMovePos prevMovePos) : 
 ConfinedAI(boss, IceBallAI::NUM_ITEMS_PER_SUMMONING), bottomPointWeakpt(NULL),
-numRocketsToFireAtPaddle(0), glitchCounter(0) {
+numRocketsToFireAtPaddle(0) {
 
     // Make the bottom point of the boss the new weakpoint...
     boss->ConvertAliveBodyPartToWeakpoint(boss->bottomPointIdx, IceBallAI::BOTTOM_POINT_LIFE_POINTS, 0);
@@ -873,6 +918,7 @@ numRocketsToFireAtPaddle(0), glitchCounter(0) {
     this->bottomPointWeakpt = static_cast<BossWeakpoint*>(boss->bodyParts[this->boss->bottomPointIdx]);
 
     // Setup any animations for this state
+    this->glitchShakeAnim = GothicRomanticBossAI::GenerateGlitchShakeAnimation();
     {
         std::vector<double> timeVals;
         timeVals.reserve(3);
@@ -889,33 +935,6 @@ numRocketsToFireAtPaddle(0), glitchCounter(0) {
         this->hitOnBottomMoveUpAnim.SetLerp(timeVals, moveVals);
         this->hitOnBottomMoveUpAnim.SetInterpolantValue(0.0f);
         this->hitOnBottomMoveUpAnim.SetRepeat(false);
-    }
-    {
-        static const int NUM_SHAKES = 50;
-        static const double SHAKE_TIME_INC = GLITCH_TIME_IN_SECS / static_cast<double>(NUM_SHAKES+1);
-        
-        std::vector<double> timeVals;
-        timeVals.reserve(NUM_SHAKES + 1);
-        timeVals.push_back(0.0);
-        for (int i = 0; i < NUM_SHAKES; i++) {
-            timeVals.push_back(timeVals.back() + SHAKE_TIME_INC);
-        }
-
-        static const float SHAKE_RADIUS = std::min<float>(MOVE_X_BORDER, MOVE_Y_BORDER) / 2.0f;
-
-        std::vector<Vector2D> shakeVals;
-        shakeVals.reserve(timeVals.size());
-        shakeVals.push_back(Vector2D(0,0));
-        for (int i = 0; i < NUM_SHAKES-1; i++) {
-            shakeVals.push_back(Vector2D(
-                Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_RADIUS,
-                Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_RADIUS));
-        }
-        shakeVals.push_back(Vector2D(0,0));
-
-        this->glitchShakeAnim.SetLerp(timeVals, shakeVals);
-        this->glitchShakeAnim.SetInterpolantValue(Vector2D(0,0));
-        this->glitchShakeAnim.SetRepeat(false);
     }
 
     this->spinningDestroyConfinesAnim.SetLerp(0.0, DESTROY_CONFINES_TIME_IN_SECS, 0.0f, 
@@ -1014,6 +1033,26 @@ AnimationMultiLerp<float> IceBallAI::GenerateBottomDeathRotationAnimation(bool f
     return Boss::BuildLimbFallOffZRotationAnim(BOTTOM_FADE_TIME, fallLeft ? 720.0f : -720.0f);
 }
 
+void IceBallAI::BlowUpLegs() {
+    Point2D bossCenterPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+
+    for (int i = 0; i < GothicRomanticBoss::NUM_LEGS; i++) {
+        
+        AbstractBossBodyPart* leg = this->boss->bodyParts[this->boss->legIdxs[i]];
+        bool fallLeft = leg->GetTranslationPt2D()[0] < bossCenterPos[0];
+
+        this->boss->ConvertAliveBodyPartToDeadBodyPart(this->boss->legIdxs[i]);
+        
+        // Animate the leg to fade and fall off the body
+        double animationTime = 0.75*DESTROY_CONFINES_TIME_IN_SECS;
+        leg->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(animationTime));
+        leg->AnimateLocalTranslation(
+            Boss::BuildLimbFallOffTranslationAnim(animationTime, (fallLeft ? -1 : 1) * 4 * GothicRomanticBoss::BOTTOM_POINT_WIDTH, 
+                                                  -1.5f * this->boss->alivePartsRoot->GetTranslationPt2D()[1]));
+        leg->AnimateLocalZRotation(Boss::BuildLimbFallOffZRotationAnim(animationTime, fallLeft ? 1080.0f : -1080.0f));
+    }
+}
+
 void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
 
     switch (newState) {
@@ -1066,7 +1105,10 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             break;
 
         case SummonItemsAIState:
+            this->desiredVel = Vector2D(0,0);
+            this->currVel    = Vector2D(0,0);
             this->attacksSinceLastSummon = 0;
+
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
             // EVENT: Summon items power charge
             GameEventManager::Instance()->ActionEffect(
@@ -1074,6 +1116,8 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             break;
 
         case GlitchAIState:
+            this->desiredVel = Vector2D(0,0);
+            this->currVel    = Vector2D(0,0);
             this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.1;
             this->glitchShakeAnim.ResetToStart();
             // EVENT: Boss effect for glitch (electricity spasm)
@@ -1095,7 +1139,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->angryMoveAnim.ResetToStart();
 
             // EVENT: Boss is angry! Rawr.
-            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetTopPoint());
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetBody());
             break;
 
         case MoveToCenterAIState:
@@ -1175,21 +1219,20 @@ void IceBallAI::UpdateState(double dT, GameModel* gameModel) {
     }
 }
 
-void IceBallAI::SetupNextAttackStateAndMove() {
+void IceBallAI::SetupNextAttackStateAndMove(GameModel* gameModel) {
     // Check to see if we should go into a glitch state:
     // We do this when the boss has just summoned the special item required to solve the puzzle
-    // to hurt it, and it hasn't just been in a glitch state
-    if (this->summonsSinceLastSpecialItemDrop == 0 && this->currState == GothicRomanticBossAI::SummonItemsAIState) {
-        // We only glitch every second time that the boss drops the special item (in this case an iceball item)
-        if (this->glitchCounter % 2 == 0) {
-            // Do the glitch...
-            this->SetState(GothicRomanticBossAI::GlitchAIState);
-            return;
-        }
-        this->glitchCounter++;
+    // to hurt it, and it hasn't just been in a glitch state... also see if the game is in a suitable state for items to be dropped...
+    if (this->summonsSinceLastSpecialItemDrop == 0 &&
+        this->currState == GothicRomanticBossAI::SummonItemsAIState &&
+        gameModel->GetCurrentStateType() == GameState::BallInPlayStateType) {
+
+        // Do the glitch...
+        this->SetState(GothicRomanticBossAI::GlitchAIState);
+        return;
     }
 
-    ConfinedAI::SetupNextAttackStateAndMove();
+    ConfinedAI::SetupNextAttackStateAndMove(gameModel);
 }
 
 float IceBallAI::GetTotalLifePercent() const {
@@ -1220,7 +1263,7 @@ void IceBallAI::ExecuteRocketToPaddleAttackState(double dT, GameModel* gameModel
         this->boss->alivePartsRoot->SetLocalYRotation(0.0f);
 
         // Move somewhere else...
-        this->SetupNextAttackStateAndMove();
+        this->SetupNextAttackStateAndMove(gameModel);
         return;
     }
 
@@ -1252,7 +1295,7 @@ void IceBallAI::ExecuteRocketToCannonAndPaddleAttackState(double dT, GameModel* 
         this->boss->alivePartsRoot->SetLocalYRotation(0.0f);
 
         // Move somewhere else...
-        this->SetupNextAttackStateAndMove();
+        this->SetupNextAttackStateAndMove(gameModel);
         return;
     }
 
@@ -1289,7 +1332,7 @@ void IceBallAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
     if (isFinished) {
         this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
         this->attacksSinceLastSummon = 0;
-        this->SetupNextAttackStateAndMove();
+        this->SetupNextAttackStateAndMove(gameModel);
         return;
     }
 
@@ -1319,7 +1362,7 @@ void IceBallAI::ExecuteHurtBottomState(double dT, GameModel* gameModel) {
             this->SetState(GothicRomanticBossAI::VeryHurtAndAngryAIState);
         }
         else {
-            this->SetupNextAttackStateAndMove();
+            this->SetupNextAttackStateAndMove(gameModel);
         }
     }
 }
@@ -1343,13 +1386,14 @@ void IceBallAI::ExecuteVeryHurtAndAngryState(double dT, GameModel* gameModel) {
         // Clean up all the translations on the body of the boss for this state
         this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
 
-        // The final state for this high-level class state is the one where the boss blows up the
-        // its confines (all of the blocks that surround it and keep it 'safe')
-        this->SetState(GothicRomanticBossAI::DestroyConfinesAIState);
+        // Move the boss to the center in prep for blowing up the confines
+        this->SetState(GothicRomanticBossAI::MoveToCenterAIState);
     }
 }
 
 void IceBallAI::ExecuteMoveToCenterState(double dT, GameModel* gameModel) {
+    UNUSED_PARAMETER(dT);
+
     const GameLevel* level = gameModel->GetCurrentLevel();
     assert(level != NULL);
 
@@ -1359,7 +1403,10 @@ void IceBallAI::ExecuteMoveToCenterState(double dT, GameModel* gameModel) {
 
     float dist = Point2D::Distance(bossPos, moveToPos);
     if (dist < 0.1f) {
-        // Close enough. Go to the final state for the IceBallAI state: Destroying the confines.
+        // TODO: Pause the ball and paddle?
+
+        // The final state for this high-level class state is the one where the boss blows up the
+        // its confines (all of the blocks that surround it and keep it 'safe')
         this->desiredVel = Vector2D(0,0);
         this->currVel    = Vector2D(0,0);
         this->SetState(GothicRomanticBossAI::DestroyConfinesAIState);
@@ -1376,9 +1423,13 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
     if (this->chargeDestroyerBlastCountdown <= 0.0) {
         // EVENT: Huge energy wave that will disintigrate the confines
         GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(
-            this->boss->alivePartsRoot->GetTranslationPt2D(), GothicRomanticBoss::BODY_HEIGHT, 2.0));
+            this->boss->alivePartsRoot->GetTranslationPt2D(), GothicRomanticBoss::BODY_HEIGHT, 
+            2.0*TIME_BEFORE_DESTROY_CONFINES_FLASH));
         GameEventManager::Instance()->ActionEffect(ExpandingHaloEffectInfo(
-            this->boss->GetBody(), TIME_BEFORE_DESTROY_CONFINES_FLASH, Colour(1,1,1), 8));
+            this->boss->GetBody(), 2.0*TIME_BEFORE_DESTROY_CONFINES_FLASH, Colour(1,1,1), 8));
+
+        // Completely blow-off all of the legs...
+        this->BlowUpLegs();
 
         // Make sure this doesn't happen again
         this->chargeDestroyerBlastCountdown = DESTROY_CONFINES_TIME_IN_SECS + 1;
@@ -1391,6 +1442,9 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
         // Destroy the confine blocks...
         GameLevel* level = gameModel->GetCurrentLevel();
         
+        // EVENT: Big flash for the destruction...
+        GameEventManager::Instance()->ActionEffect(FullscreenFlashEffectInfo(0.75, 1.0f));
+
         // Top row of confine blocks
         for (int i = 0; i < 13; i++) {
             LevelPiece* confinePiece = level->GetLevelPieceFromCurrentLayout(25, 4 + i);
@@ -1420,9 +1474,6 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
             confinePiece->Destroy(gameModel, LevelPiece::DisintegrationDestruction);
         }
 
-        // EVENT: Big flash for the destruction...
-        GameEventManager::Instance()->ActionEffect(FullscreenFlashEffectInfo(0.75, 1.0f));
-
         // Make sure this doesn't happen again
         this->destroyConfinesCountdown = DESTROY_CONFINES_TIME_IN_SECS + 1;
     }
@@ -1430,12 +1481,14 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
         this->destroyConfinesCountdown -= dT;
     }
 
-
     bool isFinished = this->spinningDestroyConfinesAnim.Tick(dT);
     if (isFinished) {
+        this->boss->alivePartsRoot->SetLocalYRotation(0.0);
         // Go to the next high-level AI state
         this->boss->SetNextAIState(new FreeMovingAttackAI(this->boss));
     }
+
+    this->boss->alivePartsRoot->SetLocalYRotation(this->spinningDestroyConfinesAnim.GetInterpolantValue());
 }
 
 // End IceBallAI ********************************************************************************
@@ -1444,13 +1497,22 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
 // Begin FreeMovingAttackAI *********************************************************************
 
 const float FreeMovingAttackAI::BODY_LIFE_POINTS = 500.0f;
+const float FreeMovingAttackAI::MAX_SPEED        = PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
 
-FreeMovingAttackAI::FreeMovingAttackAI(GothicRomanticBoss* boss) : GothicRomanticBossAI(boss), bodyWeakpt(NULL) {
+FreeMovingAttackAI::FreeMovingAttackAI(GothicRomanticBoss* boss) : 
+GothicRomanticBossAI(boss), bodyWeakpt(NULL), numItemsPerSummoning(5), glitchCounter(0) {
     
     // The whole body is now a weakpoint
-    boss->ConvertAliveBodyPartToWeakpoint(boss->bodyIdx, FreeMovingAttackAI::BODY_LIFE_POINTS, FreeMovingAttackAI::BODY_LIFE_POINTS / 5.0f);
+    boss->ConvertAliveBodyPartToWeakpoint(boss->bodyIdx,
+        FreeMovingAttackAI::BODY_LIFE_POINTS, FreeMovingAttackAI::BODY_LIFE_POINTS / static_cast<float>(NUM_BALL_HITS));
     assert(dynamic_cast<BossWeakpoint*>(boss->bodyParts[this->boss->bodyIdx]) != NULL);
     this->bodyWeakpt = static_cast<BossWeakpoint*>(boss->bodyParts[this->boss->bodyIdx]);
+
+    // Setup animations
+    this->glitchShakeAnim = GothicRomanticBossAI::GenerateGlitchShakeAnimation();
+
+    // Start by just moving and shooting
+    this->SetState(GothicRomanticBossAI::BasicMoveAndShootState);
 }
 
 FreeMovingAttackAI::~FreeMovingAttackAI() {
@@ -1461,39 +1523,102 @@ bool FreeMovingAttackAI::IsStateMachineFinished() const {
            (this->currState == GothicRomanticBossAI::HurtBodyAIState && this->bodyWeakpt->GetIsDestroyed());
 }
 
-void FreeMovingAttackAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
-    
+void FreeMovingAttackAI::SetNextAttackState() {
+    if (this->attacksSinceLastSummon == 0 && this->currState == GothicRomanticBossAI::SummonItemsAIState &&
+        this->currState != GothicRomanticBossAI::GlitchAIState) {
+        if (this->glitchCounter % 2 == 1) {
+            this->SetState(GothicRomanticBossAI::GlitchAIState);
+            return;
+        }
+        else {
+            this->glitchCounter++;
+        }
+    }
+
+    float summonProb = this->GenerateSummonProbability();
+    if (Randomizer::GetInstance()->RandomNumZeroToOne() <= summonProb) {
+        this->SetState(GothicRomanticBossAI::SummonItemsAIState);
+    }
+    else {
+        if (this->currState == GothicRomanticBossAI::BasicMoveAndShootState ||
+            Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
+            this->SetState(GothicRomanticBossAI::RocketToCannonAndPaddleAttackAIState);
+        }
+        else {
+            this->SetState(GothicRomanticBossAI::BasicMoveAndShootState);
+        }
+    }
 }
 
-void FreeMovingAttackAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
-    
+void FreeMovingAttackAI::DoCollisionOccurredStuff(const Point2D& collisionPos) {
+    // If the boss is currently in a hurt state then ignore the collision
+    if (this->currState == GothicRomanticBossAI::HurtBodyAIState ||
+        this->currState == GothicRomanticBossAI::FinalDeathThroesAIState) {
+        return;
+    }
+
+    // Make sure the body is not oddly transformed locally
+    this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+
+    // Apply hurt animations to the boss
+    if (!this->bodyWeakpt->GetIsDestroyed()) {
+        this->bodyWeakpt->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+
+        Vector2D collisionToBodyVec = this->bodyWeakpt->GetTranslationPt2D() - collisionPos;
+        collisionToBodyVec.Normalize();
+        this->hurtMoveAnim = Boss::BuildBossHurtMoveAnim(collisionToBodyVec, GothicRomanticBoss::BODY_WIDTH);
+    }
+
+    this->SetState(GothicRomanticBossAI::HurtBodyAIState);
 }
 
 void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
     switch (newState) {
 
         case BasicMoveAndShootState:
+            this->UpdateBasicMovement();
+            this->moveToNextStateCountdown = this->GenerateBasicMoveAndShootTime();
+            this->shootCountdown = this->GenerateTimeBetweenLaserShots();
+            this->attacksSinceLastSummon++;
             break;
 
         case SummonItemsAIState:
-            break;
+            this->desiredVel = Vector2D(0,0);
+            this->currVel    = Vector2D(0,0);
+            this->attacksSinceLastSummon = 0;
+            this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
 
-        case RocketToCannonAttackAIState:
-            break;
-
-        case RocketToPaddleAttackAIState:
+            // EVENT: Summon items power charge
+            GameEventManager::Instance()->ActionEffect(
+                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
             break;
 
         case RocketToCannonAndPaddleAttackAIState:
+            this->numRocketsToFire  = this->GenerateNumRocketsToFire();
+            this->shootCountdown = this->GenerateTimeBetweenRockets();
+            GothicRomanticBossAI::GenerateRocketTargetCannonPositions(this->numRocketsToFire, this->rocketTargetPositions);
+            this->attacksSinceLastSummon++;
             break;
 
         case GlitchAIState:
+            this->desiredVel = Vector2D(0,0);
+            this->currVel    = Vector2D(0,0);
+            this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.1;
+            this->glitchShakeAnim.ResetToStart();
+            // EVENT: Boss effect for glitch (electricity spasm)
+            GameEventManager::Instance()->ActionEffect(ElectricitySpasmEffectInfo(this->boss->GetBody(), 1.2f * GLITCH_TIME_IN_SECS, Colour(1,1,1)));
             break;
 
         case HurtBodyAIState:
+            this->desiredVel = Vector2D(0,0);
+            this->currVel    = Vector2D(0,0);
+
             break;
 
         case FinalDeathThroesAIState:
+            this->desiredVel = Vector2D(0,0);
+            this->currVel    = Vector2D(0,0);
+
             break;
 
         default:
@@ -1508,27 +1633,27 @@ void FreeMovingAttackAI::UpdateState(double dT, GameModel* gameModel) {
     switch (this->currState) {
 
         case BasicMoveAndShootState:
+            this->ExecuteBasicMoveAndShootState(dT, gameModel);
             break;
 
         case SummonItemsAIState:
-            break;
-
-        case RocketToCannonAttackAIState:
-            break;
-
-        case RocketToPaddleAttackAIState:
+            this->ExecuteSummonItemsState(dT, gameModel);
             break;
 
         case RocketToCannonAndPaddleAttackAIState:
+            this->ExecuteRocketToCannonAndPaddleAttackState(dT, gameModel);
             break;
 
         case GlitchAIState:
+            this->ExecuteGlitchState(dT, gameModel);
             break;
         
         case HurtBodyAIState:
+            this->ExecuteHurtBodyState(dT, gameModel);
             break;
 
         case FinalDeathThroesAIState:
+            this->ExecuteFinalDeathThroesState();
             break;
 
         default:
@@ -1541,5 +1666,242 @@ float FreeMovingAttackAI::GetTotalLifePercent() const {
     return this->bodyWeakpt->GetCurrentLifePercentage();
 }
 
+void FreeMovingAttackAI::ExecuteBasicMoveAndShootState(double dT, GameModel* gameModel) {
+    
+    GameLevel* level = gameModel->GetCurrentLevel();
+    Point2D bodyPos = this->bodyWeakpt->GetTranslationPt2D();
+    this->PerformBasicMovement(bodyPos, level);
+
+    if (this->shootCountdown <= 0.0) {
+        // Fire ze laser!
+        this->ExecuteLaserSpray(gameModel);
+        this->shootCountdown = this->GenerateTimeBetweenLaserShots();
+    }
+    else {
+        this->shootCountdown -= dT;
+    }
+
+    if (this->moveToNextStateCountdown <= 0.0) {
+        this->SetNextAttackState();
+    }
+    else {
+        this->moveToNextStateCountdown -= dT;
+    }
+}
+
+void FreeMovingAttackAI::ExecuteSummonItemsState(double dT, GameModel* gameModel) {
+
+    // Check to see if the game is in a suitable state for items to be dropped...
+    if (gameModel->GetCurrentStateType() != GameState::BallInPlayStateType) {
+        // If the ball isn't in play then we go to another state...
+        this->SetState(GothicRomanticBossAI::BasicMoveAndShootState);
+        return;
+    }
+
+    if (this->summonItemsDelayCountdown <= 0.0) {
+        const GameLevel* level = gameModel->GetCurrentLevel();
+        assert(level != NULL);
+
+        // Summon the items...
+        // Figure out where to drop the items that will be summoned
+        std::vector<Point2D> itemDropPositions;
+        GothicRomanticBossAI::GetItemDropPositions(this->numItemsPerSummoning, *level, itemDropPositions);
+
+        // Generate a random set of items with the possibility of dropping the fireball (which is used to
+        // hurt the boss at this stage) -- the allowable drops have been custom taylored to ensure they are all awful for the player
+        const std::vector<GameItem::ItemType>& allowableItemDrops = level->GetAllowableItemDropTypes();
+        std::vector<GameItem::ItemType> dropTypes;
+        dropTypes.reserve(this->numItemsPerSummoning);
+        for (int i = 0; i < this->numItemsPerSummoning; i++) {
+            dropTypes.push_back(allowableItemDrops[Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size()]);
+        }
+
+        assert(static_cast<int>(itemDropPositions.size()) == this->numItemsPerSummoning);
+        assert(dropTypes.size() == itemDropPositions.size());
+
+        for (int i = 0; i < this->numItemsPerSummoning; i++) {
+            gameModel->AddItemDrop(itemDropPositions[i], dropTypes[i]);
+
+            // EVENT: Effects for each of the items being magically spawned
+            GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(itemDropPositions[i], GameItem::ITEM_WIDTH, 1.0));
+            GameEventManager::Instance()->ActionEffect(PuffOfSmokeEffectInfo(itemDropPositions[i], 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
+        }
+
+        // Go to the next state...
+        this->SetState(GothicRomanticBossAI::BasicMoveAndShootState);
+    }
+    else {
+        this->summonItemsDelayCountdown -= dT;
+    }
+}
+
+void FreeMovingAttackAI::ExecuteRocketToCannonAndPaddleAttackState(double dT, GameModel* gameModel) {
+    
+    GameLevel* level = gameModel->GetCurrentLevel();
+    Point2D bodyPos = this->bodyWeakpt->GetTranslationPt2D();
+    this->PerformBasicMovement(bodyPos, level);
+
+    // Shoot the rockets as the timer ticks down...
+    if (this->rocketTargetPositions.empty()) {
+        this->SetNextAttackState();
+    }
+    else {
+        if (this->shootCountdown <= 0.0) {
+            
+            // SHOOT the missiles: 1 at a cannon and the other at the paddle...
+            Point2D rocketTarget = this->rocketTargetPositions.back();
+            this->rocketTargetPositions.pop_back();
+
+            this->ShootRocket(rocketTarget, gameModel);
+            this->ShootRocketAtPaddle(gameModel);
+
+            this->shootCountdown = this->GenerateTimeBetweenRockets();
+        }
+        else {
+            this->shootCountdown -= dT;
+        }
+    }
+}
+
+void FreeMovingAttackAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
+
+    if (this->glitchSummonCountdown <= 0.0) {
+
+        // Summon a helpful item for the paddle - this will help to defeat the boss when
+        // coupled with the ice ball
+
+        const GameLevel* level = gameModel->GetCurrentLevel();
+        float midX = (level->GetMaxPaddleBoundPiece()->GetCenter()[0] - level->GetMinPaddleBoundPiece()->GetCenter()[0]) / 2.0f;
+
+        // Generate an item drop position that is random and reasonably close to or at the center of the level...
+        static const float X_POS_VARIATION = 3*LevelPiece::PIECE_WIDTH;
+        Point2D dropPos(midX + Randomizer::GetInstance()->RandomNumNegOneToOne() * X_POS_VARIATION, GothicRomanticBossAI::DEFAULT_DROP_Y_POS);
+
+        // Determine a random and reasonably-good item to drop
+        static const GameItem::ItemType REASONABLY_GOOD_ITEMS[] = {
+            GameItem::BallSlowDownItem,
+            GameItem::BallGrowItem,
+            GameItem::LaserBulletPaddleItem,
+            GameItem::BallSafetyNetItem
+        };
+
+        gameModel->AddItemDrop(dropPos, REASONABLY_GOOD_ITEMS[Randomizer::GetInstance()->RandomUnsignedInt() % 4]);
+        
+        // EVENT: Effect the item being magically spawned
+        GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(dropPos, GameItem::ITEM_WIDTH, 1.0));
+        GameEventManager::Instance()->ActionEffect(PuffOfSmokeEffectInfo(dropPos, 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
+
+        this->glitchSummonCountdown = GLITCH_TIME_IN_SECS + 1; // Make sure we only summon once in the glitch state
+    }
+    else {
+        this->glitchSummonCountdown -= dT;
+    }
+
+    bool isFinished = this->glitchShakeAnim.Tick(dT);
+    if (isFinished) {
+        this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+        this->attacksSinceLastSummon = 0;
+        this->SetNextAttackState();
+        return;
+    }
+
+    this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(this->glitchShakeAnim.GetInterpolantValue(), 0.0f));
+}
+
+void FreeMovingAttackAI::ExecuteHurtBodyState(double dT, GameModel* gameModel) {
+    UNUSED_PARAMETER(gameModel);
+    this->desiredVel = Vector2D(0,0);
+    this->currVel = Vector2D(0,0);
+
+    bool isFinished = this->hurtMoveAnim.Tick(dT);
+    this->bodyWeakpt->SetLocalTranslation(this->hurtMoveAnim.GetInterpolantValue());
+
+    if (isFinished) {
+        this->bodyWeakpt->SetLocalTranslation(Vector3D(0,0,0));
+        if (this->bodyWeakpt->GetIsDestroyed()) {
+            this->SetState(GothicRomanticBossAI::FinalDeathThroesAIState);
+        }
+        else {
+            this->SetNextAttackState();
+        }
+    }
+}
+
+void FreeMovingAttackAI::ExecuteFinalDeathThroesState() {
+    this->currVel = Vector2D(0,0);
+    this->desiredVel = Vector2D(0,0);
+
+    // The boss is dead dead dead.
+}
+
+void FreeMovingAttackAI::PerformBasicMovement(const Point2D& pos, const GameLevel* level) {
+    
+    // Up-down movement
+    float maxHeight = level->GetLevelUnitHeight() - 4*LevelPiece::PIECE_HEIGHT - GothicRomanticBoss::HALF_BODY_HEIGHT;
+    float minHeight = 10*LevelPiece::PIECE_HEIGHT + GothicRomanticBoss::HALF_BODY_HEIGHT;
+    assert(minHeight < maxHeight);
+
+    if (pos[1] <= minHeight) {
+        this->currVel[1] = MAX_SPEED;
+    }
+    else if (pos[1] >= maxHeight) {
+        this->currVel[1] = -MAX_SPEED;
+    }
+
+    // Side-to-side movement
+    float maxWidth = level->GetLevelUnitWidth() - 4*LevelPiece::PIECE_WIDTH - GothicRomanticBoss::HALF_BODY_WIDTH;
+    float minWidth = 4*LevelPiece::PIECE_WIDTH + GothicRomanticBoss::HALF_BODY_WIDTH;
+    if (pos[0] <= minWidth) {
+        this->currVel[0] = MAX_SPEED;
+    }
+    else if (pos[0] >= maxWidth) {
+        this->currVel[0] = -MAX_SPEED;
+    }
+}
+
+void FreeMovingAttackAI::UpdateBasicMovement() {
+    if (fabs(this->currVel[1]) < EPSILON) {
+        this->currVel[1] = Randomizer::GetInstance()->RandomNegativeOrPositive() * MAX_SPEED;
+    }
+    if (fabs(this->currVel[0]) < EPSILON) {
+        this->currVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * MAX_SPEED;
+    }
+}
+
+void FreeMovingAttackAI::ExecuteLaserSpray(GameModel* gameModel) {
+    assert(gameModel != NULL);
+    
+    const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
+    assert(paddle != NULL);
+    
+    static const float ANGLE_BETWEEN_LASERS_IN_DEGS = 15.0f;
+
+    // The boss will fire a spray of laser bullets from its eye, in the general direction of the paddle...
+    Point2D shootPos  = this->boss->GetBody()->GetTranslationPt2D() - Vector2D(0.0f, GothicRomanticBoss::HALF_BODY_HEIGHT);
+    Point2D paddlePos = paddle->GetCenterPosition();
+
+    Vector2D initLaserDir = Vector2D::Normalize(paddlePos - shootPos);
+    Vector2D currLaserDir = initLaserDir;
+
+    // Middle laser shot directly towards the paddle...
+    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+
+    // Right fan-out of lasers
+    currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+    currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+
+    // Left fan-out of lasers
+    currLaserDir = initLaserDir;
+    currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+    currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+
+    // EVENT: Boss shot a laser out of its eye, add effects for it...
+    GameEventManager::Instance()->ActionEffect(ExpandingHaloEffectInfo(this->boss->GetBody(), 0.5, Colour(1.0f, 0.2f, 0.2f)));
+    GameEventManager::Instance()->ActionEffect(SparkBurstEffectInfo(this->boss->GetBody(), 0.65, Colour(1.0f, 0.2f, 0.2f)));
+}
 
 // End FreeMovingAttackAI ***********************************************************************

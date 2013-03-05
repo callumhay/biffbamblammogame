@@ -283,6 +283,44 @@ AnimationMultiLerp<Vector3D> Boss::BuildBossFinalDeathShakeAnim(float shakeMagni
     return anim;
 }
 
+AnimationMultiLerp<Vector3D> Boss::BuildBossHurtMoveAnim(const Vector2D& hurtVec, float shakeMagnitude) {
+    AnimationMultiLerp<Vector3D> result;
+
+    static const double FINAL_JITTER_TIME = 0.3;
+    static const double SHAKE_INC_TIME = 0.075;
+    static const int NUM_SHAKES = (BossWeakpoint::INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+
+    std::vector<double> timeValues;
+    timeValues.clear();
+    timeValues.reserve(3 + NUM_SHAKES + 1);
+    timeValues.push_back(0.0);
+    timeValues.push_back(2.0 * FINAL_JITTER_TIME / 3.0);
+    timeValues.push_back(FINAL_JITTER_TIME);
+    for (int i = 0; i <= NUM_SHAKES*2; i++) {
+        timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
+    }
+    assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
+
+    Vector2D hurtPos2D = shakeMagnitude * hurtVec;
+
+    std::vector<Vector3D> moveValues;
+    moveValues.reserve(timeValues.size());
+    moveValues.push_back(Vector3D(0,0,0));
+    moveValues.push_back(Vector3D(hurtPos2D[0], hurtPos2D[1], 0.0f));
+    moveValues.push_back(Vector3D(0,0,0));
+    for (int i = 0; i < NUM_SHAKES; i++) {
+        float randomVal1 = Randomizer::GetInstance()->RandomNumNegOneToOne() * shakeMagnitude / 5.0f;
+        float randomVal2 = Randomizer::GetInstance()->RandomNumNegOneToOne() * shakeMagnitude / 5.0f;
+        moveValues.push_back(Vector3D(randomVal1, randomVal2, 0));
+        moveValues.push_back(Vector3D(-randomVal1, -randomVal2, 0));
+    }
+    moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));
+
+    result.SetLerp(timeValues, moveValues);
+    result.SetRepeat(false);
+    return result;
+}
+
 AnimationMultiLerp<Vector3D> Boss::BuildLimbFallOffTranslationAnim(double totalAnimTime, float xDist, float yDist) {
     std::vector<double> timeValues;
     timeValues.reserve(2);

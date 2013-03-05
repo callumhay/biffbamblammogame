@@ -575,165 +575,170 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
-	bool wasFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+    if (method == LevelPiece::DisintegrationDestruction) {
+        this->display->GetAssets()->GetESPAssets()->AddBlockDisintegrationEffect(block);
+    }
+    else {
+        bool wasFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 
-	// Add the effects based on the type of block that is being destroyed, its status and method of destruction...
-	switch (block.GetType()) {
-		
-		case LevelPiece::Breakable:
-		case LevelPiece::BreakableTriangle:
-		case LevelPiece::Solid:
-		case LevelPiece::SolidTriangle:
-		case LevelPiece::Tesla:
-        case LevelPiece::Switch:
-        case LevelPiece::OneWay:
-        case LevelPiece::NoEntry:
-			if (wasFrozen) {
-				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-			}
-			else {
-				// Typical break effect for basic breakable blocks
-				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				// Sound for basic breakable blocks
-				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
-			}
-			break;
-
-        case LevelPiece::Regen: {
-            const RegenBlock& regenBlock = static_cast<const RegenBlock&>(block);
-            this->display->GetAssets()->GetESPAssets()->AddRegenBlockSpecialBreakEffect(regenBlock); // Make the counter on the block go exploding out
-			if (wasFrozen) {
-				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-			}
-			else {
-				// Typical break effect for basic breakable blocks
-				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				// Sound for basic breakable blocks
-				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
-			}
-			break;
-        }
-
-        case LevelPiece::LaserTurret:
-        case LevelPiece::RocketTurret:
-        case LevelPiece::MineTurret:
-			if (wasFrozen) {
-				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-			}
-			else {
-				// Typical break effect for basic breakable blocks
-				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				// Sound for basic breakable blocks
-				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
-			}
-			break;
-
-		case LevelPiece::ItemDrop:
-			if (wasFrozen) {
-				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.9f, 0.45f, 0.0f));
-				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-			}
-			else {
-				// Typical break effect
-				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				// Sound for basic breakable blocks
-				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
-			}
-			break;
-
-        case LevelPiece::AlwaysDrop:
-			if (wasFrozen) {
-				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-			}
-			else {
-				// Typical break effect for basic breakable blocks
-				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				// Sound for basic breakable blocks
-				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
-			}
-            break;
-
-		case LevelPiece::Bomb:
-			if (wasFrozen) {
-				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
-				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-			}
-			else {
-				// Bomb effect - big explosion!
-				this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
-				this->display->GetCamera().SetCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
-				GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
-
-				// Sound for bomb explosion
-				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBombBlockDestroyedEvent, GameSoundAssets::LoudVolume);
-			}
-			break;
-
-		case LevelPiece::Ink: {
-		    const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
-
-		    // We do not do any ink blotches while in ball or paddle camera modes, also, if the ink block is frozen
-		    // then it just shatters...
-		    bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen &&
-                method != LevelPiece::BombDestruction && method != LevelPiece::RocketDestruction;
-
-		    if (wasFrozen) {
-		    	// Add ice break effect
-		    	this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
-		    	//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-		    }
-		    else {
-		    	// Emit goo from ink block and make onomata effects
-		    	this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
-		    	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundInkBlockDestroyedEvent);
-
-		    	if (inkSplatter) {
-		    		// Cover camera in ink with a fullscreen splatter effect
-		    		this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
-		    	}
-		    }
-			break;
-        }
-
-		case LevelPiece::Prism:
-		case LevelPiece::PrismTriangle:
-			this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-			break;
-
-		case LevelPiece::Cannon: {
-            this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-			break;
-        }
-
-		case LevelPiece::Collateral: {
-            if (wasFrozen) {
-				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
-				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
-			}
-            else {
-			    // Don't show any effects / play any sounds if the ball is dead/dying
-			    if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
-				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
+	    // Add the effects based on the type of block that is being destroyed, its status and method of destruction...
+	    switch (block.GetType()) {
+    		
+		    case LevelPiece::Breakable:
+		    case LevelPiece::BreakableTriangle:
+		    case LevelPiece::Solid:
+		    case LevelPiece::SolidTriangle:
+		    case LevelPiece::Tesla:
+            case LevelPiece::Switch:
+            case LevelPiece::OneWay:
+            case LevelPiece::NoEntry:
+			    if (wasFrozen) {
+				    // Add ice break effect
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
 			    }
-            }
-            break;
-        }
+			    else {
+				    // Typical break effect for basic breakable blocks
+				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				    // Sound for basic breakable blocks
+				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			    }
+			    break;
 
-		default:
-			break;
-	}
+            case LevelPiece::Regen: {
+                const RegenBlock& regenBlock = static_cast<const RegenBlock&>(block);
+                this->display->GetAssets()->GetESPAssets()->AddRegenBlockSpecialBreakEffect(regenBlock); // Make the counter on the block go exploding out
+			    if (wasFrozen) {
+				    // Add ice break effect
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			    }
+			    else {
+				    // Typical break effect for basic breakable blocks
+				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				    // Sound for basic breakable blocks
+				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			    }
+			    break;
+            }
+
+            case LevelPiece::LaserTurret:
+            case LevelPiece::RocketTurret:
+            case LevelPiece::MineTurret:
+			    if (wasFrozen) {
+				    // Add ice break effect
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			    }
+			    else {
+				    // Typical break effect for basic breakable blocks
+				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				    // Sound for basic breakable blocks
+				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			    }
+			    break;
+
+		    case LevelPiece::ItemDrop:
+			    if (wasFrozen) {
+				    // Add ice break effect
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.9f, 0.45f, 0.0f));
+				    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			    }
+			    else {
+				    // Typical break effect
+				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				    // Sound for basic breakable blocks
+				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			    }
+			    break;
+
+            case LevelPiece::AlwaysDrop:
+			    if (wasFrozen) {
+				    // Add ice break effect
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			    }
+			    else {
+				    // Typical break effect for basic breakable blocks
+				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				    // Sound for basic breakable blocks
+				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			    }
+                break;
+
+		    case LevelPiece::Bomb:
+			    if (wasFrozen) {
+				    // Add ice break effect
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
+				    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			    }
+			    else {
+				    // Bomb effect - big explosion!
+				    this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
+				    this->display->GetCamera().SetCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
+				    GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+
+				    // Sound for bomb explosion
+				    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBombBlockDestroyedEvent, GameSoundAssets::LoudVolume);
+			    }
+			    break;
+
+		    case LevelPiece::Ink: {
+		        const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+
+		        // We do not do any ink blotches while in ball or paddle camera modes, also, if the ink block is frozen
+		        // then it just shatters...
+		        bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen &&
+                    method != LevelPiece::BombDestruction && method != LevelPiece::RocketDestruction;
+
+		        if (wasFrozen) {
+		    	    // Add ice break effect
+		    	    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
+		    	    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+		        }
+		        else {
+		    	    // Emit goo from ink block and make onomata effects
+		    	    this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
+		    	    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundInkBlockDestroyedEvent);
+
+		    	    if (inkSplatter) {
+		    		    // Cover camera in ink with a fullscreen splatter effect
+		    		    this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
+		    	    }
+		        }
+			    break;
+            }
+
+		    case LevelPiece::Prism:
+		    case LevelPiece::PrismTriangle:
+			    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+			    break;
+
+		    case LevelPiece::Cannon: {
+                this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+			    break;
+            }
+
+		    case LevelPiece::Collateral: {
+                if (wasFrozen) {
+				    // Add ice break effect
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
+				    //this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			    }
+                else {
+			        // Don't show any effects / play any sounds if the ball is dead/dying
+			        if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
+				        this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				        this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
+			        }
+                }
+                break;
+            }
+
+		    default:
+			    break;
+	    }
+    }
 
     // Blocks implemented in particular ways have to be disposed of in particular ways... ugh.
     switch (block.GetType()) {

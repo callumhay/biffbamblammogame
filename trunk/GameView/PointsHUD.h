@@ -198,8 +198,6 @@ private:
 
     void SetStarAcquiredAnimation(const Camera& camera, size_t starIdx);
 
-    void ClearNotifications();
-
     DISALLOW_COPY_AND_ASSIGN(PointsHUD);
 };
 

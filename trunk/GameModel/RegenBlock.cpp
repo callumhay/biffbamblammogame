@@ -175,8 +175,10 @@ LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
-	// When destroying a regen block there is the possiblity of dropping an item...
-	gameModel->AddPossibleItemDrop(*this);
+	// When destroying a non-infinite regen block there is the possiblity of dropping an item...
+    if (!this->HasInfiniteLife()) {
+	    gameModel->AddPossibleItemDrop(*this);
+    }
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();

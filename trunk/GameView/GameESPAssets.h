@@ -308,6 +308,8 @@ public:
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
 	void AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock);
 
+    void AddBlockDisintegrationEffect(const LevelPiece& block);
+
 	void AddIceBitsBreakEffect(const LevelPiece& block);
 	void AddIceCubeBlockBreakEffect(const LevelPiece& block, const Colour& colour);
 
