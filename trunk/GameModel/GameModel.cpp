@@ -502,6 +502,24 @@ void GameModel::CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* boss
 	this->PerformLevelCompletionChecks();
 }
 
+/**
+ * Called when a collision occurs between a projectile and a part of a boss in the current level.
+ */
+void GameModel::CollisionOccurred(Projectile* projectile, Boss* boss, BossBodyPart* bossPart) {
+    assert(projectile != NULL);
+    assert(boss != NULL);
+    assert(bossPart != NULL);
+
+	bool alreadyCollided = projectile->IsLastThingCollidedWith(boss) || projectile->IsAttachedToSomething();
+    if (!alreadyCollided) {
+        projectile->BossCollisionOccurred(boss);
+        // EVENT: Projectile-boss collision
+        //GameEventManager::Instance()->ActionProjectileBossCollision(projectile, *boss, *bossPart);
+    }
+
+    boss->CollisionOccurred(this, projectile, bossPart);
+}
+
 void GameModel::ToggleAllowPaddleBallLaunching(bool allow) {
     if (this->currState->GetType() == GameState::BallOnPaddleStateType) {
         BallOnPaddleState* onPaddleState = static_cast<BallOnPaddleState*>(this->currState);
@@ -714,7 +732,7 @@ void GameModel::DoProjectileCollisions(double dT) {
                 // In the special case of a rocket projectile we cause an explosion...
                 if (currProjectile->IsRocket()) {
                     std::set<LevelPiece*> collisionPieces = 
-                        this->GetCurrentLevel()->GetLevelPieceCollisionCandidatesNoSort(currProjectile->GetPosition(), EPSILON);
+                        currLevel->GetLevelPieceCollisionCandidatesNoSort(currProjectile->GetPosition(), EPSILON);
                     if (!collisionPieces.empty()) {
                         assert(dynamic_cast<RocketProjectile*>(currProjectile) != NULL);
                         currLevel->RocketExplosion(this, static_cast<RocketProjectile*>(currProjectile), *collisionPieces.begin());
@@ -734,8 +752,26 @@ void GameModel::DoProjectileCollisions(double dT) {
             }
         }
 
+        // Check to see if the projectile collided with a boss
+        if (currLevel->GetHasBoss()) {
+            Boss* boss = currLevel->GetBoss();
+            if (!boss->ProjectilePassesThrough(currProjectile)) {
+                BossBodyPart* hitBodyPart = boss->CollisionCheck(projectileBoundingLines, currProjectile->GetVelocityDirection());
+                if (hitBodyPart != NULL) {
+
+                    this->CollisionOccurred(currProjectile, boss, hitBodyPart);
+
+                    // NOTE: We assume that the projectile is destroyed on collision
+			        // Despose of the projectile...
+                    iter = gameProjectiles.erase(iter);
+                    PROJECTILE_CLEANUP(currProjectile);
+                    continue;  
+                }
+            }
+        }
+
 		// Find the any level pieces that the current projectile may have collided with and test for collision
-		std::set<LevelPiece*> collisionPieces = this->GetCurrentLevel()->GetLevelPieceCollisionCandidates(*currProjectile);
+		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currProjectile);
         incIter = true;	// Keep track of whether we need to increment the iterator or not
 		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
 			LevelPiece *currPiece = *pieceIter;
@@ -1266,6 +1302,11 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 
 void GameModel::AddItemDrop(const Point2D& p, const GameItem::ItemType& itemType) {
     
+    // Don't add the item if the ball is not in play
+    if (this->currState->GetType() != GameState::BallInPlayStateType) {
+        return;
+    }
+
 	// We always drop items in this manor, even if we've exceeded the max!
 	GameItem* newGameItem = GameItemFactory::GetInstance()->CreateItem(itemType, p, this);
 	this->currLiveItems.push_back(newGameItem);

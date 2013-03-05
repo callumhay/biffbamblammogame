@@ -94,6 +94,7 @@ public:
 
 private:
     static const int POINTS_ON_BLOCK_DESTROYED = 700;
+    static const float ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS;
 
     //static const int LEFT_BOUNDRY_IDX   = 0;
     //static const int BOTTOM_BOUNDRY_IDX = 1;
@@ -174,7 +175,13 @@ inline bool OneWayBlock::StatusTick(double dT, GameModel* gameModel, int32_t& re
 inline bool OneWayBlock::IsGoingTheOneWay(const Vector2D& v) const {
     // Make sure the given direction is going in relatively the same way as the one
     // way direction for this block...
-    return Vector2D::Dot(this->oneWayDir, v) > EPSILON;
+    float dot = Vector2D::Dot(this->oneWayDir, v);
+    if (dot > EPSILON) {
+        float angleToOneWayInRads = acos(std::min<float>(1.0f, std::max<float>(-1.0f, dot)));
+        return (angleToOneWayInRads <= ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS);
+    }
+    
+    return false;
 }
 
 #endif // __ONEWAYBLOCK_H__

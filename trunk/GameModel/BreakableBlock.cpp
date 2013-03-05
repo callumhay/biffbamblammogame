@@ -21,7 +21,7 @@ const double BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS = 67;
 
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS),
-fireGlobTimeCounter(0.0), timeOfLastBallCollision() {
+fireGlobDropCountdown(GameModelConstants::GetInstance()->GenerateFireGlobDropTime()), timeOfLastBallCollision() {
 	assert(IsValidBreakablePieceType(type));
 
 	this->colour = ColourRGBA(BreakableBlock::GetColourOfBreakableType(this->pieceType), 1.0f);
@@ -350,28 +350,15 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 	// If this piece is on fire then we slowly eat away at it with fire...
 	if (this->HasStatus(LevelPiece::OnFireStatus)) {
 		assert(!this->HasStatus(LevelPiece::IceCubeStatus));
-		// Blocks on fire have a (very small) chance of dropping a glob of flame over some time...
-		this->fireGlobTimeCounter += dT;
-		if (this->fireGlobTimeCounter >= GameModelConstants::GetInstance()->FIRE_GLOB_DROP_CHANCE_INTERVAL) {
-			this->fireGlobTimeCounter = 0.0;
 
-			int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
-			if (fireGlobDropRandomNum == 0) {
-
-				// Do the same for the width and height...
-				float globSize  = 0.4f * LevelPiece::HALF_PIECE_WIDTH + Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
-				float edgeDist  = ((LevelPiece::PIECE_WIDTH - globSize) / 2.0f) - 0.01f;
-				assert(edgeDist >= 0.0f);
-
-				// Calculate a place on the block to drop the glob from...
-				Point2D dropPos = this->center - Vector2D(Randomizer::GetInstance()->RandomNumNegOneToOne() * edgeDist, globSize / 2.0f);
-
-				// Drop a glob of fire downwards from the block...
-				Projectile* fireGlobProjectile = new FireGlobProjectile(dropPos, globSize);
-				fireGlobProjectile->SetLastThingCollidedWith(this);
-				gameModel->AddProjectile(fireGlobProjectile);
-			}
+		// Blocks on fire have a chance of dropping a glob of flame over some time...
+		if (this->fireGlobDropCountdown <= 0.0) {
+			this->DoPossibleFireGlobDrop(gameModel);
+            this->fireGlobDropCountdown = GameModelConstants::GetInstance()->GenerateFireGlobDropTime();
 		}
+        else {
+            this->fireGlobDropCountdown -= dT;
+        }
 
 		// Fire will continue to diminish the piece... 
 		// NOTE: This can destroy this piece resulting in a new level piece to replace it (i.e., an empty piece)

@@ -1,26 +1,27 @@
 boss
 Itemmancer
-21 30
+21 31
 S S S S S S S S S S S S S S S S S S S S S 
-S E E E E E Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) E E E E E S 
+S E E E E E E Q(i) E E Q(i) E E Q(i) E E E E E E S 
 S E C(180) E E E E E E E E E E E E E E E C(180) E S 
 S E E E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
-S E E E F(l) N N N N N N N N N N N F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E E E F(l) E E E E E E E E E E E F(r) E E E S 
-S E C(120-180) E F(l) E E E E E E E E E E E F(r) E C(180-210) E S 
-S E E E F(l) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(r) E E E S 
+S E E E N N N N N N N N N N N N N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E C(130-180) E N E E E E E E E E E E E N E C(180-200) E S 
+S E E E N F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) N E E E S 
+S E E E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E S 
@@ -43,8 +44,8 @@ PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 0
 Blackout 2
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 0

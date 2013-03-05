@@ -1,5 +1,5 @@
 /**
- * PowerChargeEffectInfo.h
+ * ElectricitySpasmEffectInfo.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2013
@@ -9,18 +9,18 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef __SPARKBURSTEFFECTINFO_H__
-#define __SPARKBURSTEFFECTINFO_H__
+#ifndef __ELECTRICITYSPASMEFFECTINFO_H__
+#define __ELECTRICITYSPASMEFFECTINFO_H__
 
 #include "BossEffectEventInfo.h"
 
-class SparkBurstEffectInfo : public BossEffectEventInfo {
+class ElectricitySpasmEffectInfo : public BossEffectEventInfo {
 public:
-    SparkBurstEffectInfo(const BossBodyPart* part, double timeInSecs, const Colour& colour) : 
+    ElectricitySpasmEffectInfo(const BossBodyPart* part, double timeInSecs, const Colour& colour) : 
       BossEffectEventInfo(), part(part), timeInSecs(timeInSecs), colour(colour) {}
-    ~SparkBurstEffectInfo() {}
+    ~ElectricitySpasmEffectInfo() {}
 
-    BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::SparkBurstInfo; }
+    BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::ElectricitySpasmInfo; }
 
     const BossBodyPart* GetPart() const { return this->part; }
     double GetTimeInSecs() const { return this->timeInSecs; }
@@ -31,7 +31,7 @@ private:
     const double timeInSecs;
     const Colour colour;
 
-    DISALLOW_COPY_AND_ASSIGN(SparkBurstEffectInfo);
+    DISALLOW_COPY_AND_ASSIGN(ElectricitySpasmEffectInfo);
 };
 
-#endif // __SPARKBURSTEFFECTINFO_H__
+#endif // __ELECTRICITYSPASMEFFECTINFO_H__

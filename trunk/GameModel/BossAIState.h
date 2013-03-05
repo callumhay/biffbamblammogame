@@ -35,6 +35,7 @@ public:
 	virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart)         = 0;
 	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) = 0;
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart)   = 0;
+    // TODO: Beams!!!
 
     virtual bool CanHurtPaddleWithBody() const = 0;
     virtual bool IsStateMachineFinished() const = 0;

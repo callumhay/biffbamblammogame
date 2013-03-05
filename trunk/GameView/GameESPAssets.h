@@ -40,9 +40,12 @@ class Beam;
 class CgFxFireBallEffect;
 struct ESPInterval;
 
-class PowerChargeEventInfo;
+class PowerChargeEffectInfo;
 class ExpandingHaloEffectInfo;
 class SparkBurstEffectInfo;
+class ElectricitySpasmEffectInfo;
+class PuffOfSmokeEffectInfo;
+class ShockwaveEffectInfo;
 class BossBodyPart;
 
 
@@ -153,6 +156,7 @@ private:
     Texture2D* heartTex;
     Texture2D* chevronTex;
     Texture2D* infinityTex;
+    Texture2D* lightningAnimTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -169,7 +173,7 @@ private:
 	static const int NUM_PADDLE_SIZE_CHANGE_PARTICLES = 24;
 	static const int NUM_BALL_SIZE_CHANGE_PARTICLES = 20;
 	static const int NUM_ITEM_ACQUIRED_SPARKS = 20;
-	static const int NUM_INK_CLOUD_PART_PARTICLES = 5;
+	static const int NUM_INK_CLOUD_PART_PARTICLES = 6;
 	static const int NUM_INK_SPRAY_PARTICLES = 20;
 	static const int NUM_EXPLOSION_SMOKE_PART_PARTICLES = 6;
 
@@ -270,9 +274,12 @@ public:
     void AddBossHurtEffect(const Point2D& pos, float width, float height);
     void AddBossAngryEffect(const Point2D& pos, float width, float height);
 
-    void AddBossPowerChargeEffect(const PowerChargeEventInfo& info);
+    void AddBossPowerChargeEffect(const PowerChargeEffectInfo& info);
     void AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info);
     void AddBossSparkBurstEffect(const SparkBurstEffectInfo& info);
+    void AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info);
+    void AddPuffOfSmokeEffect(const PuffOfSmokeEffectInfo& info);
+    void AddShockwaveEffect(const ShockwaveEffectInfo& info);
 
     void AddMultiplierComboEffect(int multiplier, const Point2D& position, const PlayerPaddle& paddle);
     //void AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle);

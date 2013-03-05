@@ -40,6 +40,8 @@ void ESPAnimatedSpriteParticle::Tick(const double dT) {
 	ESPParticle::Tick(dT);
 
     if (this->currSpriteIdx >= this->numSprites) {
+        this->currSpriteIdx = 0;
+        this->currFrameTimeCounter = 0.0;
         return;
     }
 

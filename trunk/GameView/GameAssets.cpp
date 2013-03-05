@@ -39,6 +39,7 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
+#include "../GameModel/FullscreenFlashEffectInfo.h"
 
 // Game Control Includes
 #include "../GameControl/GameControllerManager.h"
@@ -1297,11 +1298,21 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera)
     this->espAssets->AddRocketBlastEffect(forcePercentage, rocket.GetPosition());
 
 	// Add a camera/controller shake and flash for when the rocket explodes...
-	camera.SetCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 130);
-    GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
-        BBBGameController::MediumVibration, BBBGameController::HeavyVibration);
+    
+    // Make boss rockets a bit weaker (interferes a bit less with the gameplay during the boss fight)
+    if (rocket.GetType() == Projectile::BossRocketBulletProjectile) {
+        camera.SetCameraShake(forcePercentage * 0.75f, forcePercentage * Vector3D(0.7f, 0.6f, 0.1f), 100);
+        GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
+            BBBGameController::SoftVibration, BBBGameController::MediumVibration);
+        this->flashHUD->Activate(0.33, 0.75f);
+    }
+    else {
+        camera.SetCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 130);
+        GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
+            BBBGameController::MediumVibration, BBBGameController::HeavyVibration);
+        this->flashHUD->Activate(0.5, 1.0f);
+    }
 
-	this->flashHUD->Activate(0.5, 1.0f);
 	// Play the explosion sound
 	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);
 }
@@ -1317,6 +1328,18 @@ void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
 
 	// TODO: Play the explosion sound
 	//this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundMineExplodedEvent, GameSoundAssets::LoudVolume);
+}
+
+void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera) {
+	// Add a camera/controller shake and fullscreen flash
+    if (info.GetShakeMultiplier() > 0.0f) {
+        double shakeTime = 0.9 * info.GetTime();
+        camera.SetCameraShake(shakeTime, info.GetShakeMultiplier() * Vector3D(0.2f, 0.5f, 0.3f), 100);
+        GameControllerManager::GetInstance()->VibrateControllers(shakeTime,
+            BBBGameController::MediumVibration, BBBGameController::MediumVibration);
+    }
+    
+    this->flashHUD->Activate(info.GetTime(), 1.0f);
 }
 
 /*

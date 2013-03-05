@@ -63,11 +63,11 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
 	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-			// EVENT: Ice was shattered
-			GameEventManager::Instance()->ActionBlockIceShattered(*this);
-			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-            UNUSED_VARIABLE(success);
-			assert(success);
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
+        assert(success);
 	}
 
     // Only collateral blocks and tesla lightning can destroy a solid block

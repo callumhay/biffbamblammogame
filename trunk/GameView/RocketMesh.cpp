@@ -156,8 +156,7 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 void RocketMesh::LoadMesh() {
 	assert(this->paddleRocketMesh == NULL);
     assert(this->turretRocketMesh == NULL);
-	
-    
+
     this->paddleRocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_ROCKET_MESH);
 	assert(this->paddleRocketMesh != NULL);
 

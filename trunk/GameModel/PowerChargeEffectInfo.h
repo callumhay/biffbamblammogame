@@ -1,5 +1,5 @@
 /**
- * PowerChargeEventInfo.h
+ * PowerChargeEffectInfo.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2013
@@ -9,8 +9,8 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef __POWERCHARGEEVENTINFO_H__
-#define __POWERCHARGEEVENTINFO_H__
+#ifndef __POWERCHARGEEFFECTINFO_H__
+#define __POWERCHARGEEFFECTINFO_H__
 
 #include "BossEffectEventInfo.h"
 
@@ -20,24 +20,26 @@ class BossBodyPart;
  * Information carried from the GameModel to represent a a boss effect where the boss is charging up
  * their weapon.
  */
-class PowerChargeEventInfo : public BossEffectEventInfo {
+class PowerChargeEffectInfo : public BossEffectEventInfo {
 public:
-    PowerChargeEventInfo(const BossBodyPart* chargingPart, double timeInSecs, const Colour& colour) : 
-      BossEffectEventInfo(), chargingPart(chargingPart), chargeTimeInSecs(timeInSecs), colour(colour) {}
-    ~PowerChargeEventInfo() {}
+    PowerChargeEffectInfo(const BossBodyPart* chargingPart, double timeInSecs, const Colour& colour, float sizeMultiplier = 1.0f) : 
+      BossEffectEventInfo(), chargingPart(chargingPart), chargeTimeInSecs(timeInSecs), colour(colour), sizeMultiplier(sizeMultiplier) {}
+    ~PowerChargeEffectInfo() {}
 
     BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::PowerChargeInfo; }
 
     const BossBodyPart* GetChargingPart() const { return this->chargingPart; }
     double GetChargeTimeInSecs() const { return this->chargeTimeInSecs; }
     const Colour& GetColour() const { return this->colour; }
+    float GetSizeMultiplier() const { return this->sizeMultiplier; }
 
 private:
     const BossBodyPart* chargingPart;
     const double chargeTimeInSecs;
     const Colour colour;
+    const float sizeMultiplier;
 
-    DISALLOW_COPY_AND_ASSIGN(PowerChargeEventInfo);
+    DISALLOW_COPY_AND_ASSIGN(PowerChargeEffectInfo);
 };
 
-#endif // __POWERCHARGEEVENTINFO_H__
+#endif // __POWERCHARGEEFFECTINFO_H__

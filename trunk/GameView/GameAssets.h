@@ -60,6 +60,7 @@ class OmniLaserBallEffect;
 class MagnetPaddleEffect;
 class RocketProjectile;
 class MineMeshManager;
+class FullscreenFlashEffectInfo;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -164,6 +165,8 @@ public:
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void RocketExplosion(const RocketProjectile& rocket, Camera& camera);
     void MineExplosion(const MineProjectile& mine, Camera& camera);
+
+    void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera);
 
 private:
 	GameWorldAssets* worldAssets;	    // World-related assets

@@ -57,6 +57,8 @@ public:
 
     ~ClassicalBoss();
 
+    bool ProjectilePassesThrough(const Projectile*) const { return true; } // This boss is not affected by projectiles
+
     const BossBodyPart* GetEye() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->eyeIdx]); }
     const BossBodyPart* GetPediment() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->pedimentIdx]); }
     const BossBodyPart* GetBase() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->baseIdx]); }

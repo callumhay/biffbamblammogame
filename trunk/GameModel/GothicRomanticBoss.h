@@ -18,6 +18,7 @@ class BossCompositeBodyPart;
 
 namespace gothicromanticbossai {
 class GothicRomanticBossAI;
+class ConfinedAI;
 class FireBallAI;
 class IceBallAI;
 class FreeMovingAttackAI;
@@ -34,6 +35,7 @@ class GothicRomanticBoss : public Boss {
 
     friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
     friend class gothicromanticbossai::GothicRomanticBossAI;
+    friend class gothicromanticbossai::ConfinedAI;
     friend class gothicromanticbossai::FireBallAI;
     friend class gothicromanticbossai::IceBallAI;
     friend class gothicromanticbossai::FreeMovingAttackAI;
@@ -48,9 +50,12 @@ public:
     static const float BODY_HEIGHT;
     
     static const float TOP_POINT_WIDTH;
+    static const float HALF_TOP_POINT_WIDTH;
     static const float TOP_POINT_HEIGHT;
+    static const float TOP_POINT_TIP_Y;
 
     static const float BOTTOM_POINT_WIDTH;
+    static const float HALF_BOTTOM_POINT_WIDTH;
     static const float BOTTOM_POINT_HEIGHT;
     static const float BOTTOM_POINT_TIP_Y;
 
@@ -60,6 +65,8 @@ public:
 
     ~GothicRomanticBoss();
     
+    bool ProjectilePassesThrough(const Projectile* projectile) const;
+
     const BossBodyPart* GetBody() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->bodyIdx]); }
     const BossBodyPart* GetTopPoint() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->topPointIdx]); }
     const BossBodyPart* GetBottomPoint() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->bottomPointIdx]); }
@@ -67,6 +74,7 @@ public:
 
     Point3D GetLegPointPos(int idx) const;
     Point3D GetBottomPointTipPos() const;
+    Point3D GetTopPointTipPos() const;
 
 private:
     size_t bodyIdx;
@@ -78,7 +86,7 @@ private:
     static const int CONFINES_NUM_PIECES_IN_X = 5;
     float GetMinXOfConfines() const { return CONFINES_NUM_PIECES_IN_X*LevelPiece::PIECE_WIDTH; }
     float GetMaxXOfConfines(float levelWidth) const { return levelWidth - CONFINES_NUM_PIECES_IN_X*LevelPiece::PIECE_WIDTH; }
-    float GetMinYOfConfines() const { return 11*LevelPiece::PIECE_HEIGHT; }
+    float GetMinYOfConfines() const { return 12*LevelPiece::PIECE_HEIGHT; }
     float GetMaxYOfConfines(float levelHeight) const { return levelHeight - 6*LevelPiece::PIECE_HEIGHT; }
 
     void BuildLeg(const Vector3D& legTranslation, float legYRotation, size_t& legIdx);

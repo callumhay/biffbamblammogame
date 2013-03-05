@@ -16,7 +16,7 @@
 #include "PlayerPaddle.h"
 #include "BossLaserProjectile.h"
 
-#include "PowerChargeEventInfo.h"
+#include "PowerChargeEffectInfo.h"
 #include "ExpandingHaloEffectInfo.h"
 #include "SparkBurstEffectInfo.h"
 
@@ -31,7 +31,7 @@ const float ClassicalBossAI::HALF_BOSS_WIDTH = ClassicalBossAI::BOSS_WIDTH / 2.0
 ClassicalBossAI::ClassicalBossAI(ClassicalBoss* boss) : BossAIState(), boss(boss),
 currState(ClassicalBossAI::BasicMoveAndLaserSprayAIState) {
     assert(boss != NULL);
-    this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(BOSS_WIDTH/20.0f);
+    this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(1.0f);
 }
 
 ClassicalBossAI::~ClassicalBossAI() {
@@ -129,7 +129,7 @@ const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
 const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
 
 const double ArmsBodyHeadAI::ARM_ATTACK_DELTA_T = 0.4;
-const double ArmsBodyHeadAI::ARM_FADE_TIME = 4.0;
+const double ArmsBodyHeadAI::ARM_FADE_TIME = 3.0;
 
 ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss),
 leftArm(NULL), rightArm(NULL), leftArmSqrWeakpt(NULL), rightArmSqrWeakpt(NULL),
@@ -366,13 +366,13 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
     switch (newState) {
 
         case ClassicalBossAI::BasicMoveAndLaserSprayAIState:
-            debug_output("Entering BasicMoveAndLaserSprayAIState");
+            //debug_output("Entering BasicMoveAndLaserSprayAIState");
             this->laserSprayCountdown  = ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS;
             this->countdownToNextState = this->GenerateBasicMoveTime();
             break;
 
         case ClassicalBossAI::ChasePaddleAIState:
-            debug_output("Entering ChasePaddleAIState");
+            //debug_output("Entering ChasePaddleAIState");
             this->armShakeAnim.ResetToStart();
             this->armShakeAnim.SetRepeat(true);
             this->temptAttackCountdown = this->GenerateTemptAttackTime();
@@ -383,7 +383,7 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
         case ClassicalBossAI::AttackLeftArmAIState:
         case ClassicalBossAI::AttackRightArmAIState:
         case ClassicalBossAI::AttackBothArmsAIState:
-            debug_output("Entering AttackxArmAIState");
+            //debug_output("Entering AttackXArmAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->armShakeAnim.ResetToStart();
@@ -393,26 +393,26 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
 
         case ClassicalBossAI::PrepLaserAIState:
-            debug_output("Entering PrepLaserAIState");
+            //debug_output("Entering PrepLaserAIState");
             this->countdownToLaserBarrage = this->GetLaserChargeTime();
             this->movingDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
 
             break;
         case ClassicalBossAI::MoveAndBarrageWithLaserAIState:
-            debug_output("Entering MoveAndBarrageWithLaserAIState");
+            //debug_output("Entering MoveAndBarrageWithLaserAIState");
             this->laserShootTimer = 0.0;
             this->movingDir = -this->movingDir;
             break;
 
         case ClassicalBossAI::HurtLeftArmAIState:
-            debug_output("Entering HurtLeftArmAIState");
+            //debug_output("Entering HurtLeftArmAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
             this->leftArmHurtMoveAnim.ResetToStart();
             break;
         case ClassicalBossAI::HurtRightArmAIState:
-            debug_output("Entering HurtRightArmAIState");
+            //debug_output("Entering HurtRightArmAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
@@ -420,7 +420,7 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
 
         case ClassicalBossAI::LostArmsAngryAIState:
-            debug_output("Entering LostArmsAngryAIState");
+            //debug_output("Entering LostArmsAngryAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossAngryFlashAnim());
@@ -843,7 +843,7 @@ void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
             if (this->countdownToLaserBarrage == this->GetLaserChargeTime()) {
                 // EVENT: Charging for laser barrage...
                 GameEventManager::Instance()->ActionEffect(
-                    PowerChargeEventInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
+                    PowerChargeEffectInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
             }
             this->countdownToLaserBarrage -= dT;
         }
@@ -1029,7 +1029,7 @@ AnimationMultiLerp<float> ArmsBodyHeadAI::GenerateArmDeathRotationAnimation(bool
 const float BodyHeadAI::COLUMN_LIFE_POINTS = 100.0f;
 const float BodyHeadAI::COLUMN_BALL_DAMAGE = 100.0f;
 
-const double BodyHeadAI::COLUMN_FADE_TIME = 4.0;
+const double BodyHeadAI::COLUMN_FADE_TIME = 3.0;
 const double BodyHeadAI::BODY_FADE_TIME = COLUMN_FADE_TIME;
 
 const double BodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
@@ -1092,8 +1092,6 @@ tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL) {
         this->columnHurtMoveAnim.SetLerp(timeValues, moveValues);
         this->columnHurtMoveAnim.SetRepeat(false);
     }
-
-    this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(BOSS_WIDTH/25.0f);
 
     this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
 }
@@ -1393,7 +1391,8 @@ void BodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
         else {
             if (this->countdownToLaserBarrage == this->GetLaserChargeTime()) {
                 // EVENT: Charging for laser barrage...
-                // TODO
+                GameEventManager::Instance()->ActionEffect(
+                    PowerChargeEffectInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
             }
             this->countdownToLaserBarrage -= dT;
         }
@@ -1623,7 +1622,7 @@ AnimationMultiLerp<float> BodyHeadAI::GenerateColumnDeathRotationAnimation(float
     std::vector<float> rotationValues;
     rotationValues.reserve(timeValues.size());
     rotationValues.push_back(0.0f);
-    rotationValues.push_back(xForceDir < 0 ? 1800.0f : -1800.0f);
+    rotationValues.push_back(xForceDir < 0 ? 1350.0f : -1350.0f);
 
     AnimationMultiLerp<float> columnDeathRotAnim;
     columnDeathRotAnim.SetLerp(timeValues, rotationValues);
