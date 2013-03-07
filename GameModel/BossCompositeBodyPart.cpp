@@ -282,7 +282,7 @@ void BossCompositeBodyPart::TickBeamCollision(double dT, const BeamSegment* beam
     }
 }
 
-bool BossCompositeBodyPart::IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const {
+bool BossCompositeBodyPart::IsOrContainsPart(const AbstractBossBodyPart* part, bool recursiveSearch) const {
     if (this == part) {
         return true;
     }

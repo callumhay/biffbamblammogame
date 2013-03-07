@@ -3,7 +3,7 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
-const Vector3D ESPParticle::PARTICLE_UP_VEC				= Vector3D(0, 1, 0);
+const Vector3D ESPParticle::PARTICLE_UP_VEC			= Vector3D(0, 1, 0);
 const Vector3D ESPParticle::PARTICLE_NORMAL_VEC		= Vector3D(0, 0, 1);
 const Vector3D ESPParticle::PARTICLE_RIGHT_VEC		= Vector3D::cross(PARTICLE_UP_VEC, PARTICLE_NORMAL_VEC);
 
@@ -21,7 +21,9 @@ ESPParticle::~ESPParticle() {
 /**
  * Revive this particle with the given lifespan length in seconds.
  */
-void ESPParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan) {
+void ESPParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size,
+                         float rot, float totalLifespan) {
+
 	// Set the members to reflect a 'new life'
 	this->totalLifespan = totalLifespan;
 	this->currLifeElapsed = 0.0f;

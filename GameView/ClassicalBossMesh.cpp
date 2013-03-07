@@ -186,10 +186,6 @@ double ClassicalBossMesh::ActivateIntroAnimation() {
     return this->introTimeCountdown;
 }
 
-void ClassicalBossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
-    BossMesh::DrawPreBodyEffects(dT, camera);
-}
-
 void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
                                  const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     
@@ -544,7 +540,6 @@ void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
 
 Point3D ClassicalBossMesh::GetBossFinalExplodingEpicenter() const {
     // This bosses' final body part is its eye, so we return the very front-center of the eye
-    Point3D eyePos = this->boss->GetEye()->GetTranslationPt3D();
-    eyePos[2] += ClassicalBoss::EYE_DEPTH;
+    Point3D eyePos(this->boss->GetEye()->GetTranslationPt2D(), ClassicalBoss::EYE_DEPTH);
     return eyePos;
 }

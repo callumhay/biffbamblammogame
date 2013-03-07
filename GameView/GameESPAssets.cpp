@@ -2292,7 +2292,7 @@ void GameESPAssets::AddBlockDisintegrationEffect(const LevelPiece& block) {
         ESPInterval(1.0f));
 	smashBitsEffect->AddEffector(&this->gravity);
 	smashBitsEffect->AddEffector(&this->particleFader);
-    smashBitsEffect->SetRandomTextureParticles(3, this->rockTextures);
+    smashBitsEffect->SetRandomTextureParticles(2, this->rockTextures);
 
     ESPPointEmitter* puffOfSmokeEffect = new ESPPointEmitter();
     puffOfSmokeEffect->SetNumParticleLives(1);
@@ -2306,7 +2306,7 @@ void GameESPAssets::AddBlockDisintegrationEffect(const LevelPiece& block) {
     puffOfSmokeEffect->SetParticleColour(ESPInterval(0.5f), ESPInterval(0.5f), ESPInterval(0.5f), ESPInterval(1.0f));
     puffOfSmokeEffect->AddEffector(&this->particleMediumGrowth);
     puffOfSmokeEffect->AddEffector(&this->particleFader);
-    puffOfSmokeEffect->SetRandomTextureParticles(6, this->smokeTextures);
+    puffOfSmokeEffect->SetRandomTextureParticles(4, this->smokeTextures);
 
 	this->activeGeneralEmitters.push_back(smashBitsEffect);
     this->activeGeneralEmitters.push_back(puffOfSmokeEffect);
@@ -3965,7 +3965,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryBolts->SetInitialSpd(ESPInterval(4.33f));
 	angryBolts->SetParticleLife(ESPInterval(2.0f));
-	angryBolts->SetParticleSize(ESPInterval(0.25f*maxSize), ESPInterval(0.5f*maxSize));
+	angryBolts->SetParticleSize(ESPInterval(0.15f*maxSize), ESPInterval(0.33f*maxSize));
 	angryBolts->SetEmitAngleInDegrees(45);
 	angryBolts->SetEmitPosition(Point3D(pos, 0));
 	angryBolts->SetEmitDirection(Vector3D(0,1,0));
@@ -4136,7 +4136,7 @@ void GameESPAssets::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
 void GameESPAssets::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info) {
     
     static const double FPS = 60.0;
-    static const int NUM_PARTICLES = 40;
+    static const int NUM_PARTICLES = 20;
 
     const BossBodyPart* bodyPart = info.GetPart();
     const Colour& colour = info.GetColour();
@@ -4146,15 +4146,17 @@ void GameESPAssets::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& 
     float minSize = std::min<float>(bodyPartAABB.GetHeight(), bodyPartAABB.GetWidth());
 
 	ESPPointEmitter* electricSpasm = new ESPPointEmitter();
-	electricSpasm->SetSpawnDelta(ESPInterval(info.GetTimeInSecs() / static_cast<double>(2.2*NUM_PARTICLES)));
+	electricSpasm->SetSpawnDelta(ESPInterval(0.05f, 0.1f));
 	electricSpasm->SetNumParticleLives(1);
-    electricSpasm->SetParticleLife(ESPInterval(1.5f * info.GetTimeInSecs() / static_cast<double>(NUM_PARTICLES),
-        2.25f * info.GetTimeInSecs() / static_cast<double>(NUM_PARTICLES)));
+    electricSpasm->SetParticleLife(ESPInterval(0.5f * info.GetTimeInSecs(), 0.8f * info.GetTimeInSecs()));
     electricSpasm->SetParticleSize(ESPInterval(0.75f * minSize, 0.75f * maxSize));
-	electricSpasm->SetRadiusDeviationFromCenter(ESPInterval(bodyPartAABB.GetWidth()/2.25f),
-        ESPInterval(bodyPartAABB.GetHeight()/3.0f), ESPInterval(0.0f));
+	electricSpasm->SetRadiusDeviationFromCenter(ESPInterval(0.0f, bodyPartAABB.GetWidth()/2.25f),
+        ESPInterval(0.0f, bodyPartAABB.GetHeight()/2.75f), ESPInterval(0.0f));
     electricSpasm->SetParticleAlignment(ESP::ScreenAligned);
 	electricSpasm->SetEmitPosition(Point3D(0,0,0));
+    electricSpasm->SetEmitDirection(Vector3D(0, 1, 0));
+    electricSpasm->SetInitialSpd(ESPInterval(0.0f, 0.1f));
+    electricSpasm->SetEmitAngleInDegrees(180);
     electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
     electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
     electricSpasm->SetAnimatedParticles(NUM_PARTICLES, this->lightningAnimTex, 64, 64, FPS);
@@ -5836,8 +5838,8 @@ void GameESPAssets::DrawForegroundBossEffects(double dT, const Camera& camera) {
 		    else {
 
 			    // Not dead yet so we draw and tick - transform to the body part to draw
-			    currEmitter->Draw(camera);
 			    currEmitter->Tick(dT);
+                currEmitter->Draw(camera);
                 ++iter2;
 		    }
         }

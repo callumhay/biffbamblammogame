@@ -58,7 +58,7 @@ public:
     
     //virtual void TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
-    bool IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const;
+    bool IsOrContainsPart(const AbstractBossBodyPart* part, bool recursiveSearch) const;
 
     bool GetIsDestroyed() const;
     virtual void SetAsDestroyed();

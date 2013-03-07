@@ -46,7 +46,7 @@ void BossBodyPart::TickBeamCollision(double dT, const BeamSegment* beamSegment, 
 	assert(gameModel != NULL);
 }
 
-bool BossBodyPart::IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const {
+bool BossBodyPart::IsOrContainsPart(const AbstractBossBodyPart* part, bool recursiveSearch) const {
     if (this == part) {
         return true;
     }

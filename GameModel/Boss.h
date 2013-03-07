@@ -51,6 +51,8 @@ public:
 
     void Tick(double dT, GameModel* gameModel);
 
+    bool IsBodyPartDead(const AbstractBossBodyPart* bodyPart) const;
+
     bool GetIsStateMachineFinished() const;
     void SetIsLevelCompleteDead(bool isComplete);
     bool GetIsLevelCompleteDead() const;
@@ -108,6 +110,10 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(Boss);
 };
+
+inline bool Boss::IsBodyPartDead(const AbstractBossBodyPart* bodyPart) const {
+    return this->deadPartsRoot->IsOrContainsPart(bodyPart, true);
+}
 
 inline float Boss::GetAliveHeight() const {
     return this->alivePartsRoot->GenerateWorldAABB().GetHeight();
