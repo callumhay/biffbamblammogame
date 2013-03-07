@@ -80,7 +80,7 @@ protected:
     static AIState GetAIStateForConfinedMovePos(const ConfinedMovePos& pos, 
         float probabilityOfTargetCannonRocket, float probabilityOfTargetPaddleRocket);
 
-    float GetSlowestConfinedMoveSpeed() const { return LevelPiece::PIECE_WIDTH; }
+    float GetSlowestConfinedMoveSpeed() const { return 1.15f * LevelPiece::PIECE_WIDTH; }
     double GetLaserSpinTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 4.0; }
 
     float GenerateSummonProbability() const;
@@ -295,11 +295,12 @@ private:
     int numRocketsToFire;
     std::vector<Point2D> rocketTargetPositions;
     AnimationMultiLerp<Vector3D> hurtMoveAnim;
+    AnimationLerp<float> twirlAnim;
 
     double GenerateBasicMoveAndShootTime() const { return 8.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
-    double GenerateTimeBetweenLaserShots() const { return 0.3 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2; }
+    double GenerateTimeBetweenLaserShots() const { return 0.8 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
     double GenerateTimeBetweenRockets() const { return 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 1.0; }
-    int GenerateNumRocketsToFire() const { return 3 + Randomizer::GetInstance()->RandomUnsignedInt() % 4; }
+    int GenerateNumRocketsToFire() const { return 4 + Randomizer::GetInstance()->RandomUnsignedInt() % 4; }
     void SetNextAttackState();
     void DoCollisionOccurredStuff(const Point2D& collisionPos);
 

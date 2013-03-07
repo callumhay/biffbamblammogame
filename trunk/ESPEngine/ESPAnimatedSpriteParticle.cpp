@@ -39,15 +39,9 @@ void ESPAnimatedSpriteParticle::Revive(const Point3D& pos, const Vector3D& vel, 
 void ESPAnimatedSpriteParticle::Tick(const double dT) {
 	ESPParticle::Tick(dT);
 
-    if (this->currSpriteIdx >= this->numSprites) {
-        this->currSpriteIdx = 0;
-        this->currFrameTimeCounter = 0.0;
-        return;
-    }
-
     // Update the current frame of the sprite's animation...
     if (this->currFrameTimeCounter >= this->timePerFrame) {
-        this->currSpriteIdx = (this->currSpriteIdx + 1);
+        this->currSpriteIdx = (this->currSpriteIdx + 1) % this->numSprites;
         this->currFrameTimeCounter = 0.0;
     }
     else {
@@ -99,5 +93,8 @@ void ESPAnimatedSpriteParticle::GetCurrAnimationTextureCoords(float& leftTexCoor
     bottomTexCoord = static_cast<float>((this->numSpriteRows - (rowIdx + 1)) * this->spriteYSize) / static_cast<float>(this->spriteTex->GetHeight());
     topTexCoord    = static_cast<float>((this->numSpriteRows - (rowIdx + 1)) * this->spriteYSize + this->spriteYSize) / static_cast<float>(this->spriteTex->GetHeight());
 
-
+    assert(leftTexCoord >= 0.0 && leftTexCoord <= 1.0);
+    assert(rightTexCoord >= 0.0 && rightTexCoord <= 1.0);
+    assert(bottomTexCoord >= 0.0 && bottomTexCoord <= 1.0);
+    assert(topTexCoord >= 0.0 && topTexCoord <= 1.0);
 }

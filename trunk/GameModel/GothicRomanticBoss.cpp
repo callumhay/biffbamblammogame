@@ -32,6 +32,9 @@ const float GothicRomanticBoss::HALF_BOTTOM_POINT_WIDTH = BOTTOM_POINT_WIDTH / 2
 const float GothicRomanticBoss::BOTTOM_POINT_HEIGHT = 1.516f;
 const float GothicRomanticBoss::BOTTOM_POINT_TIP_Y  = -1.069f;
 
+const float GothicRomanticBoss::LEG_WIDTH  = 3.25f;
+const float GothicRomanticBoss::LEG_HEIGHT = 3.0f;
+
 const float GothicRomanticBoss::DEFAULT_ACCELERATION = 1.25f * PlayerPaddle::DEFAULT_ACCELERATION;
 
 const double GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS = 2.0;
@@ -118,12 +121,13 @@ void GothicRomanticBoss::Init() {
                 static const float WIDTH  = BODY_WIDTH;
                 static const float HALF_HEIGHT = HEIGHT / 2.0f;
                 static const float HALF_WIDTH  = WIDTH  / 2.0f;
+                static const float Y_NEG = -2.984f;
 
                 BoundingLines bodyBounds;
-                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, HALF_HEIGHT)), Vector2D(0, 1));    // Top
-                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, -HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(0, -1)); // Bottom
-                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, HALF_HEIGHT), Point2D(-HALF_WIDTH, -HALF_HEIGHT)), Vector2D(-1, 0)); // Left
-                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(1, 0));    // Right
+                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, HALF_HEIGHT)), Vector2D(0, 1)); // Top
+                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, Y_NEG), Point2D(HALF_WIDTH, Y_NEG)), Vector2D(0, -1));            // Bottom
+                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, HALF_HEIGHT), Point2D(-HALF_WIDTH, Y_NEG)), Vector2D(-1, 0));     // Left
+                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, Y_NEG)), Vector2D(1, 0));        // Right
 
                 BossBodyPart* body = new BossBodyPart(bodyBounds);
 
@@ -195,8 +199,27 @@ void GothicRomanticBoss::Init() {
 }
 
 void GothicRomanticBoss::BuildLeg(const Vector3D& legTranslation, float legYRotation, size_t& legIdx) {
-    // Legs have no bounds
+    // Legs have no bounds unless they are the ones hanging off the sides on the x/y plane
     BoundingLines legBounds;
+
+    /*
+    static const float LEFT_TOP_Y = 1.125f;
+    static const float LEFT_BOTTOM_Y = -1.125f;
+    static const float RIGHT_TOP_Y = 0.175f;
+    static const float RIGHT_BOTTOM_Y = -1.875f;
+    static const float RIGHT_X = LEG_WIDTH;
+
+    if (legYRotation == 90.0f) {
+        legBounds.AddBound(Collision::LineSeg2D(Point2D(RIGHT_X, RIGHT_TOP_Y), Point2D(RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(1, 0), false);
+        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_TOP_Y), Point2D(RIGHT_X, RIGHT_TOP_Y)), Vector2D(LEFT_TOP_Y - RIGHT_TOP_Y, RIGHT_X), false);
+        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_BOTTOM_Y), Point2D(RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(RIGHT_BOTTOM_Y - LEFT_BOTTOM_Y, -RIGHT_X), false);
+    }
+    else if (legYRotation == 270.0f) {
+        legBounds.AddBound(Collision::LineSeg2D(Point2D(-RIGHT_X, RIGHT_TOP_Y), Point2D(-RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(-1, 0), false);
+        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_TOP_Y), Point2D(-RIGHT_X, RIGHT_TOP_Y)), Vector2D(RIGHT_TOP_Y - LEFT_TOP_Y, RIGHT_X), false);
+        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_BOTTOM_Y), Point2D(-RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(LEFT_BOTTOM_Y - RIGHT_BOTTOM_Y, -RIGHT_X), false);
+    }
+    */
 
     BossBodyPart* leg = new BossBodyPart(legBounds);
     leg->RotateY(legYRotation);

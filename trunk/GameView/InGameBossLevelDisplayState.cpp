@@ -19,7 +19,7 @@
 #include "../GameControl/BBBGameController.h"
 
 // The time that the game (boss and paddle) are unpaused right before the intro ends
-const double InGameBossLevelDisplayState::TIME_OF_UNPAUSE_BEFORE_INTRO_END = 0.85;
+const double InGameBossLevelDisplayState::TIME_OF_UNPAUSE_BEFORE_INTRO_END = 0.75;
 
 // Time for background to turn black leaving only the boss and the paddle when the boss
 // is dying in the outro state

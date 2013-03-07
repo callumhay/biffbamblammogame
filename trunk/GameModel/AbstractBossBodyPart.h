@@ -76,7 +76,7 @@ public:
     Point2D GetTranslationPt2D() const { return this->worldTransform.getTranslationPt2D(); }
     Point3D GetTranslationPt3D() const { return this->worldTransform.getTranslationPt3D(); }
 
-    virtual bool IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const = 0;
+    virtual bool IsOrContainsPart(const AbstractBossBodyPart* part, bool recursiveSearch) const = 0;
 
     virtual AbstractBossBodyPart* SearchForParent(AbstractBossBodyPart* part) { UNUSED_PARAMETER(part); return NULL; }
 

@@ -36,12 +36,28 @@ private:
     Mesh* bottomPointMesh;
     Mesh* legMesh;
 
+    Texture2D* circleGlowTex;
+    AnimationMultiLerp<float> glowCirclePulseAnim;
+
     ESPPointEmitter* topPointSmokeEmitter;
     ESPPointEmitter* topPointFireEmitter;
     ESPPointEmitter* topPointExplodingEmitter;
 
+    ESPPointEmitter* explodingLegEmitter;
 
-    void DrawPreBodyEffects(double dT, const Camera& camera);
+    ESPPointEmitter* bottomPointSmokeEmitter;
+    ESPPointEmitter* bottomPointFireEmitter;
+    ESPPointEmitter* bottomPointExplodingEmitter;
+
+    ESPPointEmitter* bodySmokeEmitter;
+    ESPPointEmitter* bodyFireEmitter;
+    ESPPointEmitter* bodyExplodingEmitter;
+
+    // Intro animations and effects
+    double introTimeCountdown;
+    AnimationLerp<float> bottomPtGlowAlphaAnim;
+    std::vector<AnimationLerp<float> > legGlowAlphaAnims;
+
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawPostBodyEffects(double dT, const Camera& camera);
@@ -50,9 +66,5 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(GothicRomanticBossMesh);
 };
-
-inline Point3D GothicRomanticBossMesh::GetBossFinalExplodingEpicenter() const {
-    return Point3D(0,0,0);
-}
 
 #endif // __GOTHICROMANTICBOSSMESH_H__

@@ -277,7 +277,7 @@ void ESPEmitter::Draw(const Camera& camera, const Vector3D& worldTranslation, bo
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
 	glPolygonMode(GL_FRONT, GL_FILL);
 
@@ -399,7 +399,6 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text
 		ESPOnomataParticle* newParticle = new ESPOnomataParticle(text.GetFont());
 		newParticle->SetDropShadow(text.GetDropShadow());
 		newParticle->SetOnomatoplexSound(st, e);
-
 		this->deadParticles.push_back(newParticle);
 
 		// Assign the number of lives...

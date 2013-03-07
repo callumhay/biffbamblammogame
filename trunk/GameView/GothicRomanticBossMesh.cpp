@@ -12,6 +12,7 @@
 #include "GothicRomanticBossMesh.h"
 #include "GameViewConstants.h"
 #include "GameLightAssets.h"
+#include "InGameBossLevelDisplayState.h"
 
 #include "../ResourceManager.h"
 
@@ -22,11 +23,11 @@
 #include "../GameModel/GothicRomanticBoss.h"
 #include "../GameModel/BossWeakpoint.h"
 
-const double GothicRomanticBossMesh::INTRO_TIME_IN_SECS = 3.0;
+const double GothicRomanticBossMesh::INTRO_TIME_IN_SECS = 4.0;
 
 GothicRomanticBossMesh::GothicRomanticBossMesh(GothicRomanticBoss* boss) :
 BossMesh(), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL), legMesh(NULL),
-topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(NULL) {
+topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(NULL), circleGlowTex(NULL) {
     assert(boss != NULL);
 
     // Load the mesh assets...
@@ -42,6 +43,49 @@ topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(
     this->topPointSmokeEmitter  = this->BuildSmokeEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
     this->topPointFireEmitter   = this->BuildFireEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
     this->topPointExplodingEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
+
+    this->explodingLegEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::LEG_WIDTH, GothicRomanticBoss::LEG_HEIGHT);
+
+    this->bottomPointSmokeEmitter = this->BuildSmokeEmitter(GothicRomanticBoss::BOTTOM_POINT_WIDTH, GothicRomanticBoss::BOTTOM_POINT_HEIGHT);
+    this->bottomPointFireEmitter  = this->BuildFireEmitter(GothicRomanticBoss::BOTTOM_POINT_WIDTH, GothicRomanticBoss::BOTTOM_POINT_HEIGHT);
+    this->bottomPointExplodingEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::BOTTOM_POINT_WIDTH, GothicRomanticBoss::BOTTOM_POINT_HEIGHT);
+
+    this->bodySmokeEmitter = this->BuildSmokeEmitter(GothicRomanticBoss::BODY_WIDTH/1.5f, GothicRomanticBoss::BODY_HEIGHT/2.0f);
+    this->bodyFireEmitter  = this->BuildFireEmitter(GothicRomanticBoss::BODY_WIDTH/1.5f, GothicRomanticBoss::BODY_HEIGHT/2.0f);
+    this->bodyExplodingEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::BODY_WIDTH, GothicRomanticBoss::BODY_HEIGHT);
+
+    this->circleGlowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
+    assert(this->circleGlowTex != NULL);
+
+    {
+        std::vector<double> timeVals;
+        timeVals.reserve(3);
+        timeVals.push_back(0.0);
+        timeVals.push_back(1.0);
+        timeVals.push_back(2.0);
+
+        std::vector<float> pulseVals;
+        pulseVals.reserve(timeVals.size());
+        pulseVals.push_back(1.0f);
+        pulseVals.push_back(1.33f);
+        pulseVals.push_back(1.0f);
+
+        this->glowCirclePulseAnim.SetLerp(timeVals, pulseVals);
+        this->glowCirclePulseAnim.SetRepeat(true);
+    }
+
+    this->bottomPtGlowAlphaAnim.ClearLerp();
+    this->bottomPtGlowAlphaAnim.SetInterpolantValue(0.0f);
+    this->bottomPtGlowAlphaAnim.SetRepeat(false);
+
+    this->legGlowAlphaAnims.resize(GothicRomanticBoss::NUM_LEGS);
+    for (int i = 0; i < static_cast<int>(this->legGlowAlphaAnims.size()); i++) {
+        this->legGlowAlphaAnims[i].ClearLerp();
+        this->legGlowAlphaAnims[i].SetInterpolantValue(0.0f);
+        this->legGlowAlphaAnims[i].SetRepeat(false);
+    }
+
 }
 
 GothicRomanticBossMesh::~GothicRomanticBossMesh() {
@@ -60,6 +104,9 @@ GothicRomanticBossMesh::~GothicRomanticBossMesh() {
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->legMesh);
     assert(success);
 
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGlowTex);
+    assert(success);
+
     UNUSED_VARIABLE(success);
 
     delete this->topPointSmokeEmitter;
@@ -68,21 +115,51 @@ GothicRomanticBossMesh::~GothicRomanticBossMesh() {
     this->topPointFireEmitter = NULL;
     delete this->topPointExplodingEmitter;
     this->topPointExplodingEmitter = NULL;
+    delete this->explodingLegEmitter;
+    this->explodingLegEmitter = NULL;
+    delete this->bottomPointExplodingEmitter;
+    this->bottomPointExplodingEmitter = NULL;
+    delete this->bottomPointFireEmitter;
+    this->bottomPointFireEmitter = NULL;
+    delete this->bottomPointSmokeEmitter;
+    this->bottomPointSmokeEmitter = NULL;
+    delete this->bodySmokeEmitter;
+    this->bodySmokeEmitter = NULL;
+    delete this->bodyFireEmitter;
+    this->bodyFireEmitter = NULL;
+    delete this->bodyExplodingEmitter;
+    this->bodyExplodingEmitter = NULL;
 }
 
 double GothicRomanticBossMesh::ActivateIntroAnimation() {
-    // TODO
-    
-    return GothicRomanticBossMesh::INTRO_TIME_IN_SECS;
-}
+    static const float MAX_GLOW_ALPHA = 0.75f;
 
-void GothicRomanticBossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
+    double nextStartTime = INTRO_TIME_IN_SECS/3.0;
+    this->bottomPtGlowAlphaAnim.SetLerp(0.0, nextStartTime, 0.0f, MAX_GLOW_ALPHA);
+    this->bottomPtGlowAlphaAnim.SetInterpolantValue(0.0f);
+    this->bottomPtGlowAlphaAnim.SetRepeat(false);
+    nextStartTime += 0.5;
+
+    const double TIME_PER_LEG_GLOW = 
+        (INTRO_TIME_IN_SECS - nextStartTime - InGameBossLevelDisplayState::TIME_OF_UNPAUSE_BEFORE_INTRO_END) / 
+        static_cast<double>(GothicRomanticBoss::NUM_LEGS);
+
+    for (int i = 0; i < static_cast<int>(this->legGlowAlphaAnims.size()); i++) {
+        this->legGlowAlphaAnims[i].SetLerp(nextStartTime, nextStartTime + TIME_PER_LEG_GLOW, 0.0f, MAX_GLOW_ALPHA);
+        this->legGlowAlphaAnims[i].SetInterpolantValue(0.0f);
+        this->legGlowAlphaAnims[i].SetRepeat(false);
+        nextStartTime += TIME_PER_LEG_GLOW;
+    }
+
+    this->introTimeCountdown = INTRO_TIME_IN_SECS;
+    return GothicRomanticBossMesh::INTRO_TIME_IN_SECS;
 }
 
 void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
                                       const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
  
-   // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
+    UNUSED_PARAMETER(dT);
+    // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // worldspace locations...
 
     ColourRGBA currColour;
@@ -144,6 +221,23 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
 }
 
 void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
+    this->glowCirclePulseAnim.Tick(dT);
+    float pulseScaler = this->glowCirclePulseAnim.GetInterpolantValue();
+
+    // Check to see if we're drawing intro effects
+    if (this->introTimeCountdown > 0.0) {
+        this->bottomPtGlowAlphaAnim.Tick(dT);
+        for (int i = 0; i < static_cast<int>(this->legGlowAlphaAnims.size()); i++) {
+            this->legGlowAlphaAnims[i].Tick(dT);
+        }
+
+        this->introTimeCountdown -= dT;
+    }
+
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 
     const BossBodyPart* topPoint = this->boss->GetTopPoint();
     if (topPoint->GetAlpha() > 0.0f) {
@@ -151,19 +245,24 @@ void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera
         if (topPoint->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
             const BossWeakpoint* topPointWeakPt = static_cast<const BossWeakpoint*>(topPoint);
             const Point3D topPointPos = topPoint->GetTranslationPt3D();
-
+            
             if (!topPointWeakPt->GetIsDestroyed()) {
-                if (topPointWeakPt->GetCurrentLifePercentage() <= 0.5) {
-                    float lifePercentage = topPointWeakPt->GetCurrentLifePercentage();
-                    this->topPointFireEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
-                    this->topPointFireEmitter->Tick(dT);
-                    this->topPointSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
-                    this->topPointSmokeEmitter->Tick(dT);
-
+                float lifePercentage = topPointWeakPt->GetCurrentLifePercentage();
+                
+                if (lifePercentage < 1.0f) {
                     glPushMatrix();
                     glTranslatef(topPointPos[0], topPointPos[1], topPointPos[2]);
+
+                    this->topPointSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->topPointSmokeEmitter->Tick(dT);
                     this->topPointSmokeEmitter->Draw(camera);
-                    this->topPointFireEmitter->Draw(camera);
+
+                    if (lifePercentage <= 0.5f) {
+                        this->topPointFireEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                        this->topPointFireEmitter->Tick(dT);
+                        this->topPointFireEmitter->Draw(camera);
+                    }
+
                     glPopMatrix();
                 }
             }
@@ -176,4 +275,137 @@ void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera
             }
         }
     }
+
+    // Bottom point effects
+    // NOTE: Be sure to do this before the leg effects, so that the leg effects include the effects
+    // of the bottom point in their alpha blending
+    const BossBodyPart* bottomPoint = this->boss->GetBottomPoint();
+    if (bottomPoint->GetAlpha() > 0.0f) {
+
+        if (bottomPoint->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            const BossWeakpoint* bottomPointWeakPt = static_cast<const BossWeakpoint*>(bottomPoint);
+            const Point3D bottomPointPos = bottomPoint->GetTranslationPt3D();
+
+            if (!bottomPointWeakPt->GetIsDestroyed()) {
+                float lifePercentage = bottomPointWeakPt->GetCurrentLifePercentage();
+                if (lifePercentage < 1.0) {
+                    glPushMatrix();
+                    glTranslatef(bottomPointPos[0], bottomPointPos[1], bottomPointPos[2]);
+                    
+                    this->bottomPointSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->bottomPointSmokeEmitter->Tick(dT);
+                    this->bottomPointSmokeEmitter->Draw(camera);
+
+                    if (lifePercentage <= 0.25) {
+                        this->bottomPointFireEmitter->SetSpawnDelta(ESPInterval(0.1f, 0.23f));
+                        this->bottomPointFireEmitter->Tick(dT);
+                        this->bottomPointFireEmitter->Draw(camera);
+                    }
+
+                    glPopMatrix();
+                }
+            }
+            else {
+                glPushMatrix();
+                glTranslatef(bottomPointPos[0], bottomPointPos[1], bottomPointPos[2]);
+                this->bottomPointExplodingEmitter->Tick(dT);
+                this->bottomPointExplodingEmitter->Draw(camera);
+                glPopMatrix();
+            }
+        }
+
+        glColor4f(1.0f, 0.1f, 0.1f, this->bottomPtGlowAlphaAnim.GetInterpolantValue());
+        this->circleGlowTex->BindTexture();
+        
+        Point3D pointPos = this->boss->GetBottomPointTipPos();
+        glPushMatrix();
+        glTranslatef(pointPos[0], pointPos[1], pointPos[2]);
+        glScalef(pulseScaler, pulseScaler, 1.0f);
+        GeometryMaker::GetInstance()->DrawQuad();
+        glPopMatrix();
+        this->circleGlowTex->UnbindTexture();
+    }
+
+    // Body effects
+    const BossBodyPart* body = this->boss->GetBody();
+    if (body->GetAlpha() > 0.0f) {
+        
+        if (body->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            Point3D bodyPos = body->GetTranslationPt3D();
+
+            if (!body->GetIsDestroyed()) {
+                const BossWeakpoint* bodyWeakpt = static_cast<const BossWeakpoint*>(body);
+                float lifePercentage = bodyWeakpt->GetCurrentLifePercentage();
+                
+                if (lifePercentage < 1.0) {
+                    
+                    glPushMatrix();
+                    glTranslatef(bodyPos[0], bodyPos[1], bodyPos[2]);
+
+                    // Draw smoke
+                    this->bodySmokeEmitter->Tick(dT);
+                    this->bodySmokeEmitter->Draw(camera);
+
+                    if (lifePercentage <= 0.5) {
+                        // Draw fire as well
+                        this->bodyFireEmitter->Tick(dT);
+                        this->bodyFireEmitter->Draw(camera);
+                    }
+
+                    glPopMatrix();
+                }
+            }
+            else {
+                glPushMatrix();
+                glTranslatef(bodyPos[0], bodyPos[1], bodyPos[2]);
+                this->bodyExplodingEmitter->SetParticleAlpha(body->GetAlpha());
+                this->bodyExplodingEmitter->Tick(dT);
+                this->bodyExplodingEmitter->Draw(camera);
+                glPopMatrix();
+            }
+        }
+    }
+
+
+    // Leg effects
+    const BossBodyPart* leg = this->boss->GetLeg(0);
+    if (leg->GetAlpha() > 0.0f) {
+
+        if (this->boss->IsBodyPartDead(leg)) {
+            this->explodingLegEmitter->Tick(dT);
+
+            for (int i = 0; i < GothicRomanticBoss::NUM_LEGS; i++) {
+                const BossBodyPart* leg = this->boss->GetLeg(i);
+                assert(leg != NULL);
+                Point3D legPos = leg->GetTranslationPt3D();
+
+                glPushMatrix();
+                glTranslatef(legPos[0], legPos[1], legPos[2]);
+                this->explodingLegEmitter->Draw(camera);
+                glPopMatrix();
+            }
+        }
+        else {
+            this->circleGlowTex->BindTexture();
+            for (int i = 0; i < GothicRomanticBoss::NUM_LEGS; i++) {
+                glColor4f(1.0f, 0.1f, 0.1f, this->legGlowAlphaAnims[i].GetInterpolantValue());
+
+                Point3D legPos = this->boss->GetLegPointPos(i);
+
+                glPushMatrix();
+                glTranslatef(legPos[0], legPos[1], legPos[2]);
+                glScalef(pulseScaler*0.75f, pulseScaler*0.75f, 1.0f);
+                GeometryMaker::GetInstance()->DrawQuad();
+                glPopMatrix();
+            }
+            this->circleGlowTex->UnbindTexture();
+        }
+    }
+
+    glPopAttrib();
+}
+
+Point3D GothicRomanticBossMesh::GetBossFinalExplodingEpicenter() const {
+    Point3D center(this->boss->GetBody()->GetTranslationPt2D(), GothicRomanticBoss::HALF_BODY_WIDTH);
+    return center;
 }

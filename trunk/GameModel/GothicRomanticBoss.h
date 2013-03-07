@@ -61,6 +61,9 @@ public:
     static const float BOTTOM_POINT_HEIGHT;
     static const float BOTTOM_POINT_TIP_Y;
 
+    static const float LEG_WIDTH;
+    static const float LEG_HEIGHT;
+
     static const float DEFAULT_ACCELERATION;
 
     static const double DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;

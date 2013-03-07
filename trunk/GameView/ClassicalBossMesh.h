@@ -74,7 +74,6 @@ private:
     ESPPointEmitter* pedimentExplodingEmitter;
     ESPPointEmitter* eyeExplodingEmitter;
 
-    void DrawPreBodyEffects(double dT, const Camera& camera);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawPostBodyEffects(double dT, const Camera& camera);
