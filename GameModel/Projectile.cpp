@@ -21,6 +21,7 @@
 #include "MineTurretProjectile.h"
 #include "BossLaserProjectile.h"
 #include "BossRocketProjectile.h"
+#include "BossOrbProjectile.h"
 #include "GameModel.h"
 
 // Projectile ====================================================================================================================
@@ -66,6 +67,8 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
             return new PaddleMineProjectile(*static_cast<const PaddleMineProjectile*>(p));
         case Projectile::MineTurretBulletProjectile:
             return new MineTurretProjectile(*static_cast<const MineTurretProjectile*>(p));
+        case Projectile::BossOrbBulletProjectile:
+            return new BossOrbProjectile(*static_cast<const BossOrbProjectile*>(p));
         default:
 			assert(false);
 			break;

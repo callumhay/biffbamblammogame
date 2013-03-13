@@ -314,6 +314,13 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
 	assert(rays.size() >= 1);
 					
 	std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
+
+    // Make refracted rays smaller based on how many there are
+    float scaleFactor = Projectile::GetProjectileSplitScaleFactor(rays.size());
+
+    projectile->SetWidth(scaleFactor * projectile->GetWidth());
+    projectile->SetHeight(scaleFactor * projectile->GetHeight());
+
 	// The first ray is how the current projectile gets transmitted through this block...
 	projectile->SetPosition(rayIter->GetOrigin());
 	projectile->SetVelocity(rayIter->GetUnitDirection(), projectile->GetVelocityMagnitude());
@@ -323,9 +330,13 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
 	++rayIter;
 	for (; rayIter != rays.end(); ++rayIter) {
         Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile);
-		newProjectile->SetPosition(rayIter->GetOrigin());
+		
+        newProjectile->SetWidth(scaleFactor * newProjectile->GetWidth());
+        newProjectile->SetHeight(scaleFactor * newProjectile->GetHeight());
+        newProjectile->SetPosition(rayIter->GetOrigin());
 		newProjectile->SetVelocity(rayIter->GetUnitDirection(), projectile->GetVelocityMagnitude());
 		newProjectile->SetLastThingCollidedWith(this); // If we don't do this then it will cause recursive doom
+
 		gameModel->AddProjectile(newProjectile);
 	}
 }

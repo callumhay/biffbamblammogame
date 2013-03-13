@@ -80,6 +80,7 @@ bool LaserTurretBlock::ProjectilePassesThrough(const Projectile* projectile) con
                 return true;
             }
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -123,6 +124,9 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
             if (projectile->IsLastThingCollidedWith(this)) {
                 break;
             }
+            // NOTE: We fall through here and treat the laser turret projectile like a typical laser if it
+            // hasn't already collided with this block
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

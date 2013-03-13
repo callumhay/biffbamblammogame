@@ -902,6 +902,10 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 			this->CollateralBlockProjectileCollision(projectile);
 			break;
 
+        case Projectile::BossOrbBulletProjectile:
+            this->OrbProjectileCollision(projectile);
+            break;
+
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
@@ -942,6 +946,7 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
         switch (projectile.GetType()) {
 
+            case Projectile::BossOrbBulletProjectile:
             case Projectile::BossLaserBulletProjectile:
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
@@ -1169,6 +1174,11 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
 
     this->lastEntityThatHurtHitPaddle = &projectile;
+}
+
+void PlayerPaddle::OrbProjectileCollision(const Projectile& projectile) {
+	float currHeight = 2.0f * this->GetHalfHeight();
+	this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 1.6f, currHeight, currHeight, 17.0f);
 }
 
 // A laser bullet just collided with the paddle...

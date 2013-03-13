@@ -1241,10 +1241,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 	PlayerHurtHUD::PainIntensity intensity = PlayerHurtHUD::MinorPain;
 	switch (projectile.GetType()) {
 
-		case Projectile::CollateralBlockProjectile:
-			intensity = PlayerHurtHUD::MajorPain;
-			break;
-
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
@@ -1259,6 +1256,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
             intensity = PlayerHurtHUD::ModeratePain;
             break;
 
+        case Projectile::CollateralBlockProjectile:
 		case Projectile::PaddleRocketBulletProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
 			break;

@@ -8,30 +8,110 @@ resources/worlds/testing/see_the_background.lvl
 resources/worlds/testing/an_almost_empty_level.lvl
 
 
+
+
+
 # TODO: ORGANIZE THIS STUFF!!
 
 
 # Magnet Item
 resources/worlds/levels/medium/a_magnetic_personality.lvl
 
-# Camera Ball/Paddle intro level
-resources/worlds/levels/medium/a_change_of_view.lvl
 
-# Tesla block intro levels
-resources/worlds/levels/easy/electric_access.lvl
 
-# Switch block intro levels
-# TODO
-
-# Cannon + no-entry blocks + switch + rockets
-resources/worlds/levels/hard/i_think_i_cannon.lvl
 
 
 # Prism block intro levels
 resources/worlds/levels/easy/intro_to_prisms.lvl
 
+
+
+
+# Tesla block intro levels
+resources/worlds/levels/easy/electric_access.lvl
+resources/worlds/levels/medium/lightning_round.lvl
+
+
+# Switch block intro levels
+# TODO
+
+
+# Prism + Switch
+resources/worlds/levels/hard/prismatic_pragmatism.lvl
+
+
+# Magnet Item + Cannons (to redirect rockets) + Prisms (to redirect lasers) + Switches
+resources/worlds/levels/hard/lodestone_shootout.lvl
+
+
+
+# Tesla + Switch
+resources/worlds/levels/medium/acute_electrocution.lvl
+
+
+# Cannon + no-entry blocks + switch + rockets
+resources/worlds/levels/hard/i_think_i_cannon.lvl
+
+
+# IN ANOTHER MOVEMENT... --------------------------------------------------
+
+
+# Mine Launcher Item intro level
+# TODO
+
+# Mine Launcher + Cannon level
+
+
+
+
+# Camera Ball/Paddle Item intro level
+resources/worlds/levels/medium/a_change_of_view.lvl
+
+
+# Switch Blocks + Item-drop Blocks + Really nasty items
+resources/worlds/levels/hard/meanest_rain_ever.lvl
+
+
 # Portal block intro levels
+# Rename "checker portals" to "Plinko... but with teleportation"
+resources/worlds/levels/medium/checker_portals.lvl 
 resources/worlds/levels/medium/shutin.lvl
 
-# Turret levels
+
+# Portal + Cannon
+resources/worlds/levels/medium/center_on_target.lvl
+
+
+# Portals + Tesla + Collateral + One-way
+# Rename this one...
+resources/worlds/levels/hard/portals_and_tesla_coils.lvl
+
+
+# Portal + Prism + One-way + Item-drop
+resources/worlds/levels/medium/obscured_enlightenment.lvl
+
+
+# Portal + Cannon + Tesla... this one looks pretty boring though...
+resources/worlds/levels/medium/electric_fencing.lvl
+
+
+
+# Turret intro levels
+resources/worlds/levels/medium/ahead_by_a_sentry.lvl
+
+
+# Turrets + collateral block
+resources/worlds/levels/hard/turrets_syndrome.lvl
+
+
+# Turret + Cannon + no-entry + Ink + One-way
+# This level uses rocket-turret + cannon block to fire missles to beat a level
 resources/worlds/levels/medium/cannon_peekaboo.lvl
+
+
+# Mine Turret + Sticky Paddle + Cannon
+resources/worlds/levels/medium/yours_and_mine.lvl
+
+
+# ALL of the Turrets
+resources/worlds/levels/hard/shooting_gallery.lvl

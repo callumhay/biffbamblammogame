@@ -59,6 +59,9 @@ resources/worlds/levels/medium/freezing_hot.lvl
 # Using iceball + lasers to shoot through blocks
 resources/worlds/levels/medium/an_ice_way_to_go.lvl
 
+# Cannon + rocket + paddle size to increase rocket size and blast radius
+#resources/worlds/levels/hard/i_think_i_cannon.lvl
+
 
 # All of the things!
 resources/worlds/levels/hard/all_of_the_above.lvl

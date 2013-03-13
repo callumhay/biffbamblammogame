@@ -36,7 +36,7 @@ public:
 
 private:
     // Disallow assignment
-    void operator=(const LaserBulletProjectile& copy);
+    void operator=(const BossLaserProjectile& copy);
 };
 
 #endif // __BOSSLASERPROJECTILE_H__

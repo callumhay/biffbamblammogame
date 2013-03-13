@@ -2068,6 +2068,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const BoundingLines& bounds) const 
 bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
     switch (p.GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

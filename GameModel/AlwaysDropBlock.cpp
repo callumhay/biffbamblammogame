@@ -199,6 +199,7 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 
 	switch (projectile->GetType()) {
 	
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -282,6 +283,7 @@ bool AlwaysDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remov
 bool AlwaysDropBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 		
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

@@ -93,6 +93,7 @@ private:
 	ESPParticleScaleEffector  particlePulsePaddleLaser;
 	ESPParticleScaleEffector  particlePulseFireGlobAura;
 	ESPParticleScaleEffector  particlePulseIceBallAura;
+    ESPParticleScaleEffector  particlePulseOrb;
 	ESPParticleScaleEffector  beamEndPulse;
 	ESPParticleScaleEffector  particleShrinkToNothing;
     ESPParticleScaleEffector particleLargeGrowthSuperFastPulser;
@@ -130,6 +131,7 @@ private:
 	std::vector<Texture2D*> rockTextures;
 	std::vector<CgFxFireBallEffect*> moltenRockEffects;
 	
+    Texture2D* cleanCircleGradientTex;
 	Texture2D* circleGradientTex;
 	Texture2D* starTex;
 	Texture2D* starOutlineTex;
@@ -157,6 +159,8 @@ private:
     Texture2D* chevronTex;
     Texture2D* infinityTex;
     Texture2D* lightningAnimTex;
+    Texture2D* circleTex;
+    Texture2D* outlinedHoopTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -243,11 +247,17 @@ private:
     void AddLaserBallESPEffects(const GameModel& gameModel, const Projectile& projectile);
     void AddLaserTurretESPEffects(const GameModel& gameModel, const Projectile& projectile);
     void AddLaserBossESPEffects(const GameModel& gameModel, const Projectile& projectile);
-    void AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile, const Colour& baseColour, const Colour& brightColour, bool hasTrail = true);
+    void AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile, const Colour& baseColour,
+        const Colour& brightColour, bool hasTrail = true);
 
+    void AddOrbESPEffects(const Projectile& projectile, const Colour& baseColour,
+        const Colour& brightColour);
+    
+    void AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
-	void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
+	void AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc, const Colour& baseColour, const Colour& brightColour);
+    void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect();

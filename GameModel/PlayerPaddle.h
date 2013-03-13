@@ -358,6 +358,7 @@ private:
 	void MoveAttachedObjectsToNewBounds(double dT);
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
+    void OrbProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
     void MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile);
@@ -460,6 +461,7 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& project
                                                        const BoundingLines& bounds) const {
     switch (projectile.GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
@@ -486,6 +488,7 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
 
         switch (projectile.GetType()) {
 
+            case Projectile::BossOrbBulletProjectile:
             case Projectile::BossLaserBulletProjectile:
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:

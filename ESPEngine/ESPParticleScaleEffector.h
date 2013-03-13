@@ -47,6 +47,10 @@ public:
 	ESPParticleScaleEffector(const ScaleEffect& effect);
 	~ESPParticleScaleEffector();
 
+    const Vector2D& GetEndScale() const {
+        return this->endScale;
+    }
+
     void ResetScaleEffect(const ScaleEffect& effect) {
         assert(this->effect.isInit);
         this->effect = effect;
