@@ -5,27 +5,6 @@ Deco
 resources/textures/deco_world_select_256x256.jpg
 
 
-resources/worlds/levels/medium/ahead_by_a_sentry.lvl
-resources/worlds/levels/medium/obtusely_oblique.lvl
-resources/worlds/levels/medium/obscured_enlightenment.lvl
-
-resources/worlds/levels/medium/center_on_target.lvl
-resources/worlds/levels/medium/acute_electrocution.lvl
-resources/worlds/levels/medium/lightning_round.lvl
-resources/worlds/levels/medium/checker_portals.lvl
-resources/worlds/levels/medium/electric_fencing.lvl
-
-resources/worlds/levels/medium/yours_and_mine.lvl
-
-resources/worlds/levels/hard/discombobulation_101.lvl
-resources/worlds/levels/hard/shooting_gallery.lvl
-resources/worlds/levels/hard/meanest_rain_ever.lvl
-resources/worlds/levels/hard/portals_and_tesla_coils.lvl
-resources/worlds/levels/hard/prismatic_pragmatism.lvl
-
-resources/worlds/levels/hard/turrets_syndrome.lvl
-resources/worlds/levels/hard/i_think_i_cannon.lvl
-resources/worlds/levels/hard/balancing_act.lvl
 resources/worlds/levels/hard/magnet_attack.lvl
 
 

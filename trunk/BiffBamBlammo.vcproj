@@ -2365,6 +2365,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\BossOrbProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\BossRocketProjectile.h"
 						>
 					</File>
@@ -2390,6 +2394,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\MineTurretProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\OrbProjectile.h"
 						>
 					</File>
 					<File
@@ -2429,6 +2437,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\BossOrbProjectile.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\BossRocketProjectile.cpp"
 						>
 					</File>
@@ -2454,6 +2466,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\MineTurretProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\OrbProjectile.cpp"
 						>
 					</File>
 					<File

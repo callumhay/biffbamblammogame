@@ -69,6 +69,7 @@ RocketTurretBlock::~RocketTurretBlock() {
 bool RocketTurretBlock::ProjectilePassesThrough(const Projectile* projectile) const {
     switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
@@ -114,6 +115,7 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
     LevelPiece* newPiece = this;
 	switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 	    case Projectile::LaserTurretBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:

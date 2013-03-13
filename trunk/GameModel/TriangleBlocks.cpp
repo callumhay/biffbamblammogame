@@ -144,6 +144,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
@@ -213,13 +214,20 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 							    Vector2D longSideNormal  = TriangleBlock::GetSideNormal(true, TriangleBlock::LongSide, this->orient);
 
 							    // Send the current projectile out the long side, spawn a new one for the short side
+                                float scaleFactor = Projectile::GetProjectileSplitScaleFactor(2);
                                 Projectile* newProjectile  = Projectile::CreateProjectileFromCopy(projectile); 
+                                
+                                newProjectile->SetWidth(scaleFactor * newProjectile->GetWidth());
+                                newProjectile->SetHeight(scaleFactor * newProjectile->GetHeight());
                                 newProjectile->SetPosition(Point2D(projectile->GetPosition()[0], this->GetCenter()[1])
                                                            + projectile->GetHalfHeight() * shortSideNormal);
 							    newProjectile->SetVelocity(shortSideNormal, projectile->GetVelocityMagnitude());
 							    newProjectile->SetLastThingCollidedWith(this);
 							    gameModel->AddProjectile(newProjectile);
 
+
+                                projectile->SetWidth(scaleFactor * projectile->GetWidth());
+                                projectile->SetHeight(scaleFactor * projectile->GetHeight());
 							    projectile->SetPosition(Point2D(this->GetCenter()[0], projectile->GetPosition()[1])
                                                         + projectile->GetHalfHeight() * shortSideNormal);
 							    projectile->SetVelocity(longSideNormal, projectile->GetVelocityMagnitude());

@@ -15,7 +15,7 @@
 #include "GameModel.h"
 #include "PlayerPaddle.h"
 #include "Projectile.h"
-#include "BossLaserProjectile.h"
+#include "BossOrbProjectile.h"
 #include "BossRocketProjectile.h"
 #include "PaddleLaserProjectile.h"
 #include "PowerChargeEffectInfo.h"
@@ -39,7 +39,7 @@ const float GothicRomanticBossAI::DEFAULT_ROCKET_SPIN_DEGREES_PER_SEC = 600.0f;
 
 const float GothicRomanticBossAI::DEFAULT_DROP_Y_POS = 10;
 
-const double GothicRomanticBossAI::GLITCH_TIME_IN_SECS = 3.0;
+const double GothicRomanticBossAI::GLITCH_TIME_IN_SECS = 2.25;
 
 const GothicRomanticBossAI::ConfinedMovePos GothicRomanticBossAI::CORNER_POSITIONS[] = { 
     // Make sure these are in the same order as they are in the enumeration!!!
@@ -195,7 +195,7 @@ float GothicRomanticBossAI::GetAccelerationMagnitude() const {
     return GothicRomanticBoss::DEFAULT_ACCELERATION;
 }
 
-void GothicRomanticBossAI::ShootLaserFromLegPoint(int legIdx, GameModel* gameModel) const {
+void GothicRomanticBossAI::ShootOrbFromLegPoint(int legIdx, GameModel* gameModel) const {
     assert(gameModel != NULL);
     
     Point3D spawnPos = this->boss->GetLegPointPos(legIdx);
@@ -206,10 +206,10 @@ void GothicRomanticBossAI::ShootLaserFromLegPoint(int legIdx, GameModel* gameMod
     Vector2D toPaddleVec2D(toPaddleVec[0], toPaddleVec[1]);
     toPaddleVec2D.Rotate(Randomizer::GetInstance()->RandomNumNegOneToOne() * 25.0f);
 
-    gameModel->AddProjectile(new BossLaserProjectile(Point2D(spawnPos[0], spawnPos[1]), toPaddleVec2D));
+    gameModel->AddProjectile(new BossOrbProjectile(Point2D(spawnPos[0], spawnPos[1]), toPaddleVec2D));
 }
 
-void GothicRomanticBossAI::ShootLaserFromBody(GameModel* gameModel) const {
+void GothicRomanticBossAI::ShootOrbFromBody(GameModel* gameModel) const {
     assert(gameModel != NULL);
 
     Point3D spawnPos = this->boss->GetBottomPointTipPos();
@@ -220,7 +220,7 @@ void GothicRomanticBossAI::ShootLaserFromBody(GameModel* gameModel) const {
     Vector2D toPaddleVec2D(toPaddleVec[0], toPaddleVec[1]);
     toPaddleVec2D.Rotate(Randomizer::GetInstance()->RandomNumNegOneToOne() * 12.0f);
 
-    gameModel->AddProjectile(new BossLaserProjectile(Point2D(spawnPos[0], spawnPos[1]), toPaddleVec2D));
+    gameModel->AddProjectile(new BossOrbProjectile(Point2D(spawnPos[0], spawnPos[1]), toPaddleVec2D));
 }
 
 void GothicRomanticBossAI::ShootRocket(const Point2D& rocketTarget, GameModel* gameModel) const {
@@ -437,7 +437,7 @@ void ConfinedAI::ExecuteBasicMoveAndShootState(double dT, GameModel* gameModel) 
     // Shoot if the timer has counted-down
     if (this->shootCountdown <= 0.0) {
         // SHOOT!
-        this->ShootLaserFromBody(gameModel);
+        this->ShootOrbFromBody(gameModel);
         this->shootCountdown = this->GenerateShootCountdownAmtForMoving();
     }
     else {
@@ -479,7 +479,7 @@ void ConfinedAI::ExecuteSpinLaserAttackState(double dT, GameModel* gameModel) {
     // Shoot if the timer has counted-down
     if (this->shootCountdown <= 0.0) {
         // SHOOT!
-        this->ShootLaserFromLegPoint(Randomizer::GetInstance()->RandomUnsignedInt() % GothicRomanticBoss::NUM_LEGS, gameModel);
+        this->ShootOrbFromLegPoint(Randomizer::GetInstance()->RandomUnsignedInt() % GothicRomanticBoss::NUM_LEGS, gameModel);
         this->shootCountdown = this->GenerateShootCountdownAmtForSpinning();
     }
     else {
@@ -1116,7 +1116,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
         case GlitchAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.1;
+            this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.5;
             this->glitchShakeAnim.ResetToStart();
             // EVENT: Boss effect for glitch (electricity spasm)
             GameEventManager::Instance()->ActionEffect(ElectricitySpasmEffectInfo(this->boss->GetBody(), 1.2f * GLITCH_TIME_IN_SECS, Colour(1,1,1)));
@@ -1607,7 +1607,7 @@ void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
         case GlitchAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.1;
+            this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.5;
             this->glitchShakeAnim.ResetToStart();
             // EVENT: Boss effect for glitch (electricity spasm)
             GameEventManager::Instance()->ActionEffect(ElectricitySpasmEffectInfo(this->boss->GetBody(), GLITCH_TIME_IN_SECS, Colour(1,1,1)));
@@ -1680,7 +1680,7 @@ void FreeMovingAttackAI::ExecuteBasicMoveAndShootState(double dT, GameModel* gam
 
     if (this->shootCountdown <= 0.0) {
         // Fire ze laser!
-        this->ExecuteLaserSpray(gameModel);
+        this->ExecuteOrbSpray(gameModel);
         this->shootCountdown = this->GenerateTimeBetweenLaserShots();
     }
     else {
@@ -1878,7 +1878,7 @@ void FreeMovingAttackAI::UpdateBasicMovement() {
     }
 }
 
-void FreeMovingAttackAI::ExecuteLaserSpray(GameModel* gameModel) {
+void FreeMovingAttackAI::ExecuteOrbSpray(GameModel* gameModel) {
     assert(gameModel != NULL);
     
     const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
@@ -1894,20 +1894,20 @@ void FreeMovingAttackAI::ExecuteLaserSpray(GameModel* gameModel) {
     Vector2D currLaserDir = initLaserDir;
 
     // Middle laser shot directly towards the paddle...
-    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+    gameModel->AddProjectile(new BossOrbProjectile(shootPos, currLaserDir));
 
     // Right fan-out of lasers
     currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
-    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+    gameModel->AddProjectile(new BossOrbProjectile(shootPos, currLaserDir));
     currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
-    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+    gameModel->AddProjectile(new BossOrbProjectile(shootPos, currLaserDir));
 
     // Left fan-out of lasers
     currLaserDir = initLaserDir;
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
-    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+    gameModel->AddProjectile(new BossOrbProjectile(shootPos, currLaserDir));
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
-    gameModel->AddProjectile(new BossLaserProjectile(shootPos, currLaserDir));
+    gameModel->AddProjectile(new BossOrbProjectile(shootPos, currLaserDir));
 
     // EVENT: Boss shot a laser out of its eye, add effects for it...
     GameEventManager::Instance()->ActionEffect(ExpandingHaloEffectInfo(this->boss->GetBody(), 0.5, Colour(1.0f, 0.2f, 0.2f)));

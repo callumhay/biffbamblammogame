@@ -31,6 +31,7 @@ BombBlock::~BombBlock() {
 bool BombBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -215,6 +216,7 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 
 	switch(projectile->GetType()) {
 		
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

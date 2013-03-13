@@ -32,7 +32,7 @@ public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, RocketTurretBulletProjectile,
                           FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
-                          BossLaserBulletProjectile, BossRocketBulletProjectile };
+                          BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile };
 
 	virtual ~Projectile();
 	virtual void Tick(double seconds, const GameModel& model) = 0;
@@ -97,6 +97,8 @@ public:
 
     static Projectile* CreateProjectileFromCopy(const Projectile* p);
 
+    static float GetProjectileSplitScaleFactor(int numSplits);
+
 	virtual bool GetIsActive() const {
 		return true;
 	}
@@ -115,5 +117,8 @@ protected:
 
 };
 
+inline float Projectile::GetProjectileSplitScaleFactor(int numSplits) {
+    return std::min<float>(1.0f, std::max<float>(0.5f, (1.5f / static_cast<float>(numSplits))));
+}
 
 #endif

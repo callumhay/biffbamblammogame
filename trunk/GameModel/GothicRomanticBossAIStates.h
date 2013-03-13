@@ -81,7 +81,7 @@ protected:
         float probabilityOfTargetCannonRocket, float probabilityOfTargetPaddleRocket);
 
     float GetSlowestConfinedMoveSpeed() const { return 1.15f * LevelPiece::PIECE_WIDTH; }
-    double GetLaserSpinTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 4.0; }
+    double GetLaserSpinTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 3.5; }
 
     float GenerateSummonProbability() const;
     float GenerateRocketCannonAttackProbability(float multiplier = 1.0f) const {
@@ -94,8 +94,8 @@ protected:
     float GetAccelerationMagnitude() const;
     virtual void SetState(GothicRomanticBossAI::AIState newState) = 0;
 
-    void ShootLaserFromLegPoint(int legIdx, GameModel* gameModel) const;
-    void ShootLaserFromBody(GameModel* gameModel) const;
+    void ShootOrbFromLegPoint(int legIdx, GameModel* gameModel) const;
+    void ShootOrbFromBody(GameModel* gameModel) const;
     void ShootRocket(const Point2D& rocketTarget, GameModel* gameModel) const;
     void ShootRocketAtPaddle(GameModel* gameModel) const;
 
@@ -134,7 +134,7 @@ protected:
 
     virtual float GenerateSpecialItemSummonProbability() const;
     double GenerateShootCountdownAmtForMoving()   const { return 0.5 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
-    double GenerateShootCountdownAmtForSpinning() const { return 0.1 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.3; }
+    double GenerateShootCountdownAmtForSpinning() const { return 0.3 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.3; }
     double GenerateTimeBetweenRockets() const { return this->rocketSpinRotAnim.GetTimeValues().back() / static_cast<double>(this->numRocketsToFire+1); }
 
     virtual void SetupNextAttackStateAndMove(GameModel* gameModel);
@@ -298,7 +298,7 @@ private:
     AnimationLerp<float> twirlAnim;
 
     double GenerateBasicMoveAndShootTime() const { return 8.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
-    double GenerateTimeBetweenLaserShots() const { return 0.8 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
+    double GenerateTimeBetweenLaserShots() const { return 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
     double GenerateTimeBetweenRockets() const { return 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 1.0; }
     int GenerateNumRocketsToFire() const { return 4 + Randomizer::GetInstance()->RandomUnsignedInt() % 4; }
     void SetNextAttackState();
@@ -319,7 +319,7 @@ private:
 
     void PerformBasicMovement(const Point2D& pos, const GameLevel* level);
     void UpdateBasicMovement();
-    void ExecuteLaserSpray(GameModel* gameModel);
+    void ExecuteOrbSpray(GameModel* gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(FreeMovingAttackAI);
 };

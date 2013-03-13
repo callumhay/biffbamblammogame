@@ -84,6 +84,7 @@ void InkBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bo
 bool InkBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -181,6 +182,7 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

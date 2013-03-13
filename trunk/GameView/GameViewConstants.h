@@ -135,6 +135,7 @@ public:
     const char* TEXTURE_PADLOCK;
     const char* TEXTURE_PLUS;
     const char* TEXTURE_CHEVRON;
+    const char* TEXTURE_CIRCLE;
 
     const char* TEXTURE_EXPLOSION_ANIMATION;
     const char* TEXTURE_LIGHTNING_ANIMATION;
@@ -264,6 +265,8 @@ public:
 	const Colour STICKYPADDLE_PLUS_BEAM_GOO_COLOUR;
 	const Colour PRISM_BLOCK_COLOUR;
 	const Colour LASER_BEAM_COLOUR;
+    const Colour BOSS_ORB_BASE_COLOUR;
+    const Colour BOSS_ORB_BRIGHT_COLOUR;
 
     const Colour TUTORIAL_PANE_COLOUR;
 

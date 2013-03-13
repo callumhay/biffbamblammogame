@@ -26,6 +26,7 @@ SolidBlock::~SolidBlock() {
 bool SolidBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -271,6 +272,7 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 
 	switch (projectile->GetType()) {
 		
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

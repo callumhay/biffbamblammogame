@@ -184,6 +184,7 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
@@ -206,13 +207,21 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 				projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
 				projectile->SetLastThingCollidedWith(this);
 
+                // Make refracted rays smaller based on how many there are
+                float scaleFactor = Projectile::GetProjectileSplitScaleFactor(rays.size());
+
 				// All the other rays were created via refraction or some such thing, so spawn new particles for them
 				++rayIter;
 				for (; rayIter != rays.end(); ++rayIter) {
                     Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile);
+
+                    newProjectile->SetWidth(scaleFactor * newProjectile->GetWidth());
+                    newProjectile->SetHeight(scaleFactor * newProjectile->GetHeight());
+
 					newProjectile->SetPosition(rayIter->GetOrigin() + newProjectile->GetHalfHeight() * rayIter->GetUnitDirection());
 					newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
 					newProjectile->SetLastThingCollidedWith(this); // If we don't do this then it will cause recursive doom
+
 					gameModel->AddProjectile(newProjectile);
 				}
 			}

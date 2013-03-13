@@ -52,6 +52,7 @@ bool GothicRomanticBoss::ProjectilePassesThrough(const Projectile* projectile) c
     switch (projectile->GetType()) {
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
+        case Projectile::BossOrbBulletProjectile:
             return true;
         default:
             break;

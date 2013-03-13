@@ -63,6 +63,7 @@ particlePulseItemDropAura(0, 0),
 particlePulsePaddleLaser(0, 0),
 particlePulseFireGlobAura(0, 0),
 particlePulseIceBallAura(0, 0),
+particlePulseOrb(0, 0),
 particleLargeGrowthSuperFastPulser(0, 0),
 beamEndPulse(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
@@ -99,6 +100,7 @@ fastRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 4.0f, ESPPa
 loopRotateEffectorCW(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 loopRotateEffectorCCW(90.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 
+cleanCircleGradientTex(NULL),
 circleGradientTex(NULL), 
 starTex(NULL), 
 starOutlineTex(NULL),
@@ -125,7 +127,9 @@ vapourTrailTex(NULL),
 heartTex(NULL),
 chevronTex(NULL),
 infinityTex(NULL),
-lightningAnimTex(NULL) {
+lightningAnimTex(NULL),
+circleTex(NULL),
+outlinedHoopTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -191,6 +195,8 @@ GameESPAssets::~GameESPAssets() {
 	}
 	this->moltenRockEffects.clear();
 
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cleanCircleGradientTex);
+    assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGradientTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
@@ -244,6 +250,10 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->infinityTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->outlinedHoopTex);
     assert(removed);
 
 	// Delete any standalone effects
@@ -597,6 +607,10 @@ void GameESPAssets::InitESPTextures() {
 		}
 	}
 
+    if (this->cleanCircleGradientTex == NULL) {
+        this->cleanCircleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
+		assert(this->cleanCircleGradientTex != NULL);
+    }
 	if (this->circleGradientTex == NULL) {
 		this->circleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
 		assert(this->circleGradientTex != NULL);
@@ -704,6 +718,14 @@ void GameESPAssets::InitESPTextures() {
     if (this->lightningAnimTex == NULL) {
         this->lightningAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION, Texture::Trilinear));
         assert(this->lightningAnimTex != NULL);
+    }
+    if (this->circleTex == NULL) {
+        this->circleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE, Texture::Trilinear));
+        assert(this->circleTex != NULL);
+    }
+    if (this->outlinedHoopTex == NULL) {
+        this->outlinedHoopTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP, Texture::Trilinear));
+        assert(this->outlinedHoopTex != NULL);
     }
 
 	debug_opengl_state();
@@ -1108,6 +1130,11 @@ void GameESPAssets::InitStandaloneESPEffects() {
     crazyFastPulseSettings.pulseRate = 3.0f;
     this->particleLargeGrowthSuperFastPulser = ESPParticleScaleEffector(crazyFastPulseSettings);
 
+    ScaleEffect orbPulseSettings;
+    orbPulseSettings.pulseGrowthScale = 1.5f;
+    orbPulseSettings.pulseRate = 0.75f;
+    this->particlePulseOrb = ESPParticleScaleEffector(orbPulseSettings);
+
 	// Ghost smoke effect used for ghostball
 	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
 	this->ghostBallSmoke.SetScale(0.5f);
@@ -1304,6 +1331,7 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
 void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block) {
 	switch (projectile.GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
@@ -1342,7 +1370,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 					}
 					else {
 						// A laser just hit a block and was disapated by it... show the particle disintegrate
-						this->AddLaserHitWallEffect(midPoint);
+						this->AddHitWallEffect(projectile, midPoint);
 					}
 					break;
                 }
@@ -1411,6 +1439,12 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 
 void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projectile) {
     switch (projectile.GetType()) {
+
+        case Projectile::BossOrbBulletProjectile:
+            this->AddOrbHitWallEffect(projectile, projectile.GetPosition(),
+                GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
+                GameViewConstants::GetInstance()->BOSS_ORB_BRIGHT_COLOUR);
+            break;
 
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -2559,6 +2593,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 			size.maxValue = 0.9f;
 			break;
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
@@ -2644,23 +2679,36 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 		minHeightOfImpact * paddle.GetHalfHeight() * paddle.GetUpVector());
 
 	// Add firey impact at hit location...
-	ESPPointEmitter* fireyImpactOnPaddle = new ESPPointEmitter();
-	fireyImpactOnPaddle->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	fireyImpactOnPaddle->SetInitialSpd(ESPInterval(0.001f));
-	fireyImpactOnPaddle->SetParticleLife(ESPInterval(0.85f));
-	fireyImpactOnPaddle->SetParticleSize(ESPInterval(projectile.GetWidth(), 1.5f * projectile.GetWidth()), 
-																			 ESPInterval(minHeightOfImpact, 3.0f * projectile.GetHeight()));
-	fireyImpactOnPaddle->SetEmitAngleInDegrees(0);
-	fireyImpactOnPaddle->SetAsPointSpriteEmitter(false);
-	fireyImpactOnPaddle->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
-	fireyImpactOnPaddle->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	fireyImpactOnPaddle->SetEmitPosition(hitPositionRelativeToPaddleCenter);
-	fireyImpactOnPaddle->SetEmitDirection(emitDirection);
-	fireyImpactOnPaddle->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
-	fireyImpactOnPaddle->AddEffector(&this->particleFader);
-	fireyImpactOnPaddle->SetParticles(1, this->sideBlastTex);
+	ESPPointEmitter* impactEmitter = NULL;
+    switch (projectile.GetType()) {
 
-	this->activePaddleEmitters.push_back(fireyImpactOnPaddle);
+        case Projectile::BossOrbBulletProjectile: {
+            // Impact emitter is a shockwave...
+            impactEmitter = this->CreateShockwaveEffect(hitPositionRelativeToPaddleCenter, projectile.GetWidth(), 0.85f);
+            break;
+        }
+
+        default: {
+            impactEmitter = new ESPPointEmitter();
+	        impactEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	        impactEmitter->SetInitialSpd(ESPInterval(0.001f));
+	        impactEmitter->SetParticleLife(ESPInterval(0.85f));
+	        impactEmitter->SetParticleSize(ESPInterval(projectile.GetWidth(), 1.5f * projectile.GetWidth()), 
+																			         ESPInterval(minHeightOfImpact, 3.0f * projectile.GetHeight()));
+	        impactEmitter->SetEmitAngleInDegrees(0);
+	        impactEmitter->SetAsPointSpriteEmitter(false);
+	        impactEmitter->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+	        impactEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	        impactEmitter->SetEmitPosition(hitPositionRelativeToPaddleCenter);
+	        impactEmitter->SetEmitDirection(emitDirection);
+	        impactEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	        impactEmitter->AddEffector(&this->particleFader);
+	        impactEmitter->SetParticles(1, this->sideBlastTex);
+            break;
+        }
+    }
+    assert(impactEmitter != NULL);
+	this->activePaddleEmitters.push_back(impactEmitter);
 
 	// Smashy star texture particle
 	ESPPointEmitter* starEmitter = new ESPPointEmitter();
@@ -2674,7 +2722,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	starEmitter->SetParticleAlignment(ESP::ViewPlaneAligned);
 	starEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()));
 	starEmitter->SetEmitPosition(Point3D(paddle.GetCenterPosition()[0] + hitPositionRelativeToPaddleCenter[0],
-																			 paddle.GetCenterPosition()[1] + hitPositionRelativeToPaddleCenter[1], 0.0f));
+        paddle.GetCenterPosition()[1] + hitPositionRelativeToPaddleCenter[1], 0.0f));
 
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		starEmitter->AddEffector(&this->explosionRayRotatorCCW);
@@ -2700,6 +2748,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 
 	switch (projectile.GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
 		case Projectile::CollateralBlockProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
@@ -2908,6 +2957,11 @@ void GameESPAssets::TurnOffCurrentItemDropStars() {
  */
 void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile) {
 	switch (projectile.GetType()) {
+
+        case Projectile::BossOrbBulletProjectile:
+            this->AddOrbESPEffects(projectile, GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
+                GameViewConstants::GetInstance()->BOSS_ORB_BRIGHT_COLOUR);
+            break;
 
         case Projectile::BallLaserBulletProjectile:
             this->AddLaserBallESPEffects(gameModel, projectile);
@@ -3758,6 +3812,28 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
+	// Create the trail effects
+    if (hasTrail) {
+	    ESPPointEmitter* laserTrailSparks = new ESPPointEmitter();
+	    laserTrailSparks->SetSpawnDelta(ESPInterval(0.01f, 0.033f));
+	    laserTrailSparks->SetInitialSpd(ESPInterval(projectileSpd));
+	    laserTrailSparks->SetParticleLife(ESPInterval(0.5f, 0.6f));
+        laserTrailSparks->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+	    laserTrailSparks->SetParticleSize(ESPInterval(0.8f * projectile.GetHalfWidth(), 0.8f * projectile.GetWidth()));
+        laserTrailSparks->SetParticleColour(ESPInterval(baseColour.R(), brightColour.R()), ESPInterval(baseColour.G(), brightColour.G()),
+            ESPInterval(baseColour.B(), brightColour.B()), ESPInterval(1.0f));
+	    laserTrailSparks->SetEmitAngleInDegrees(15);
+	    laserTrailSparks->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
+	    laserTrailSparks->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfWidth()));
+	    laserTrailSparks->SetAsPointSpriteEmitter(true);
+	    laserTrailSparks->SetEmitPosition(projectilePos3D);
+	    laserTrailSparks->AddEffector(&this->particleFader);
+	    laserTrailSparks->AddEffector(&this->particleMediumShrink);
+	    laserTrailSparks->SetParticles(10, this->circleGradientTex);
+
+	    this->activeProjectileEmitters[&projectile].push_back(laserTrailSparks);
+    }
+
 	// Create the basic laser beam
 	ESPPointEmitter* laserBeamEmitter = new ESPPointEmitter();
 	laserBeamEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
@@ -3801,26 +3877,104 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 
 	this->activeProjectileEmitters[&projectile].push_back(laserAuraEmitter);
 	this->activeProjectileEmitters[&projectile].push_back(laserBeamEmitter);
+}
 
-	// Create the trail effects
-    if (hasTrail) {
-	    ESPPointEmitter* laserTrailSparks = new ESPPointEmitter();
-	    laserTrailSparks->SetSpawnDelta(ESPInterval(0.01f, 0.033f));
-	    laserTrailSparks->SetInitialSpd(ESPInterval(projectileSpd));
-	    laserTrailSparks->SetParticleLife(ESPInterval(0.5f, 0.6f));
-	    laserTrailSparks->SetParticleSize(ESPInterval(0.8f * projectile.GetHalfWidth(), 0.8f * projectile.GetWidth()));
-        laserTrailSparks->SetParticleColour(ESPInterval(baseColour.R(), brightColour.R()), ESPInterval(baseColour.G(), brightColour.G()),
-            ESPInterval(baseColour.B(), brightColour.B()), ESPInterval(1.0f));
-	    laserTrailSparks->SetEmitAngleInDegrees(15);
-	    laserTrailSparks->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
-	    laserTrailSparks->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfWidth()));
-	    laserTrailSparks->SetAsPointSpriteEmitter(true);
-	    laserTrailSparks->SetEmitPosition(projectilePos3D);
-	    laserTrailSparks->AddEffector(&this->particleFader);
-	    laserTrailSparks->AddEffector(&this->particleMediumShrink);
-	    laserTrailSparks->SetParticles(10, this->circleGradientTex);
+void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
+                                     const Colour& baseColour, const Colour& brightColour) {
 
-	    this->activeProjectileEmitters[&projectile].push_back(laserTrailSparks);
+    const Vector2D& projectileDir = projectile.GetVelocityDirection();
+
+    // The orb itself...
+	ESPPointEmitter* orbEmitter = new ESPPointEmitter();
+	orbEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	orbEmitter->SetInitialSpd(ESPInterval(0));
+	orbEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+	orbEmitter->SetParticleSize(ESPInterval(projectile.GetWidth()));
+	orbEmitter->SetEmitAngleInDegrees(0);
+	orbEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	orbEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	orbEmitter->SetEmitPosition(Point3D(0,0,0));
+    orbEmitter->SetParticleColour(ESPInterval(baseColour.R()),
+        ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
+    orbEmitter->SetParticles(1, this->circleTex);
+
+    // Orbs have a pulsing aura
+	// Create the slightly-pulsing-glowing aura
+	ESPPointEmitter* auraEmitter = new ESPPointEmitter();
+	auraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	auraEmitter->SetInitialSpd(ESPInterval(0));
+	auraEmitter->SetParticleLife(ESPInterval(-1));
+	auraEmitter->SetParticleSize(ESPInterval(1.2f * projectile.GetWidth()));
+	auraEmitter->SetEmitAngleInDegrees(0);
+	auraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	auraEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	auraEmitter->SetEmitPosition(Point3D(0,0,0));
+	auraEmitter->SetParticleColour(ESPInterval(brightColour.R()), ESPInterval(brightColour.G()),
+        ESPInterval(brightColour.B()), ESPInterval(1.0f));
+	auraEmitter->AddEffector(&this->particlePulseOrb);
+	auraEmitter->SetParticles(1, this->outlinedHoopTex);
+
+    // Lens flare
+	ESPPointEmitter* lensFlareEmitter = new ESPPointEmitter();
+	lensFlareEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	lensFlareEmitter->SetInitialSpd(ESPInterval(0));
+	lensFlareEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+	lensFlareEmitter->SetParticleSize(ESPInterval(3.0f*projectile.GetWidth()));
+	lensFlareEmitter->SetEmitAngleInDegrees(0);
+	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	lensFlareEmitter->SetEmitPosition(Point3D(0,0,0));
+	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.5f));
+	lensFlareEmitter->AddEffector(&this->loopRotateEffectorCW);
+	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
+
+    // Orbs have a consistent trail of energy
+    static const int NUM_TRAIL_PARTICLES = 20;
+    
+    float maxParticleSize = 1.25f * projectile.GetWidth();
+    float minParticleSize = maxParticleSize * this->particleMediumShrink.GetEndScale()[0];
+    float distance = ((maxParticleSize + minParticleSize) / (2.0f * 5.0f)) * NUM_TRAIL_PARTICLES;
+    float spawnDelta = (distance / (NUM_TRAIL_PARTICLES+1)) / projectile.GetVelocityMagnitude();
+
+    ESPPointEmitter* trailEmitter = new ESPPointEmitter();
+    trailEmitter->SetSpawnDelta(ESPInterval(spawnDelta));
+    trailEmitter->SetInitialSpd(ESPInterval(0.0f));
+    trailEmitter->SetParticleLife(ESPInterval(NUM_TRAIL_PARTICLES * spawnDelta));
+    trailEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+    trailEmitter->SetParticleSize(ESPInterval(maxParticleSize));
+    trailEmitter->SetParticleColour(ESPInterval(brightColour.R()), ESPInterval(brightColour.G()),
+        ESPInterval(brightColour.B()), ESPInterval(1.0f));
+    trailEmitter->SetEmitAngleInDegrees(0);
+    trailEmitter->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
+    trailEmitter->SetAsPointSpriteEmitter(true);
+    trailEmitter->SetEmitPosition(Point3D(0, 0, 0));
+    trailEmitter->AddEffector(&this->particleMediumShrink);
+    trailEmitter->AddEffector(&this->particleBoostFader);
+    trailEmitter->SetParticles(NUM_TRAIL_PARTICLES, this->cleanCircleGradientTex);
+
+    this->activeProjectileEmitters[&projectile].push_back(trailEmitter);
+    this->activeProjectileEmitters[&projectile].push_back(auraEmitter);
+    this->activeProjectileEmitters[&projectile].push_back(orbEmitter);
+    this->activeProjectileEmitters[&projectile].push_back(lensFlareEmitter);
+}
+
+void GameESPAssets::AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos) {
+    switch (projectile.GetType()) {
+        case Projectile::BossOrbBulletProjectile:
+            this->AddOrbHitWallEffect(projectile, hitPos, GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
+                GameViewConstants::GetInstance()->BOSS_ORB_BRIGHT_COLOUR);
+            break;
+
+        case Projectile::BossLaserBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
+		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
+            this->AddLaserHitWallEffect(hitPos);
+            break;
+
+        default:
+            assert(false);
+            return;
     }
 }
 
@@ -3896,14 +4050,48 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	particleSparks->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 10.0f, LevelPiece::PIECE_WIDTH / 8.0f));
 	particleSparks->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	particleSparks->SetEmitAngleInDegrees(180);
-	particleSparks->SetAsPointSpriteEmitter(true);
 	particleSparks->SetEmitPosition(EMITTER_LOCATION);
 	particleSparks->AddEffector(&this->particleFader);
 	particleSparks->AddEffector(&this->particleMediumGrowth);
-	particleSparks->SetParticles(10, this->circleGradientTex);
+	particleSparks->SetParticles(6, this->circleGradientTex);
 
 	this->activeGeneralEmitters.push_back(lensFlareEmitter);
 	this->activeGeneralEmitters.push_back(particleSparks);
+}
+
+void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc,
+                                        const Colour& baseColour, const Colour& brightColour) {
+
+    const Point3D EMITTER_LOCATION = Point3D(loc[0], loc[1], 0.0f);
+    
+    // Shockwave
+    ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(EMITTER_LOCATION, projectile.GetWidth(), 0.75f);
+    
+	// Create a dispertion of particle bits
+	ESPPointEmitter* particleSparks = new ESPPointEmitter();
+	particleSparks->SetSpawnDelta(ESPInterval(0.02f, 0.03f));
+	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	particleSparks->SetInitialSpd(ESPInterval(1.5f, 4.0f));
+	particleSparks->SetParticleLife(ESPInterval(0.5f, 0.75f));
+    particleSparks->SetParticleSize(ESPInterval(projectile.GetWidth() / 3.0f, projectile.GetWidth() / 1.5f));
+    
+    Colour brighterBaseColour = 1.5f * baseColour;
+    Colour brighterBrightColour = 2.0f * brightColour;
+
+    particleSparks->SetParticleColour(
+        ESPInterval(brighterBaseColour.R(), brighterBrightColour.R()),
+        ESPInterval(brighterBaseColour.G(), brighterBrightColour.G()), 
+        ESPInterval(brighterBaseColour.B(), brighterBrightColour.B()),
+        ESPInterval(1.0f));
+
+	particleSparks->SetEmitAngleInDegrees(180);
+	particleSparks->SetEmitPosition(EMITTER_LOCATION);
+	particleSparks->AddEffector(&this->particleFader);
+	particleSparks->AddEffector(&this->particleMediumGrowth);
+	particleSparks->SetParticles(6, this->circleGradientTex);
+
+    this->activeGeneralEmitters.push_back(shockwaveEffect);
+    this->activeGeneralEmitters.push_back(particleSparks);
 }
 
 ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, const Point2D& position) {
@@ -4136,7 +4324,7 @@ void GameESPAssets::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
 void GameESPAssets::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info) {
     
     static const double FPS = 60.0;
-    static const int NUM_PARTICLES = 20;
+    static const int NUM_PARTICLES = 15;
 
     const BossBodyPart* bodyPart = info.GetPart();
     const Colour& colour = info.GetColour();
@@ -4146,16 +4334,16 @@ void GameESPAssets::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& 
     float minSize = std::min<float>(bodyPartAABB.GetHeight(), bodyPartAABB.GetWidth());
 
 	ESPPointEmitter* electricSpasm = new ESPPointEmitter();
-	electricSpasm->SetSpawnDelta(ESPInterval(0.05f, 0.1f));
+	electricSpasm->SetSpawnDelta(ESPInterval(0.02f, 0.1f));
 	electricSpasm->SetNumParticleLives(1);
     electricSpasm->SetParticleLife(ESPInterval(0.5f * info.GetTimeInSecs(), 0.8f * info.GetTimeInSecs()));
     electricSpasm->SetParticleSize(ESPInterval(0.75f * minSize, 0.75f * maxSize));
 	electricSpasm->SetRadiusDeviationFromCenter(ESPInterval(0.0f, bodyPartAABB.GetWidth()/2.25f),
-        ESPInterval(0.0f, bodyPartAABB.GetHeight()/2.75f), ESPInterval(0.0f));
+        ESPInterval(0.0f, bodyPartAABB.GetHeight()/2.5f), ESPInterval(0.0f));
     electricSpasm->SetParticleAlignment(ESP::ScreenAligned);
 	electricSpasm->SetEmitPosition(Point3D(0,0,0));
     electricSpasm->SetEmitDirection(Vector3D(0, 1, 0));
-    electricSpasm->SetInitialSpd(ESPInterval(0.0f, 0.1f));
+    electricSpasm->SetInitialSpd(ESPInterval(0.0f));
     electricSpasm->SetEmitAngleInDegrees(180);
     electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
     electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
