@@ -65,7 +65,8 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
             boss = new GothicRomanticBoss();
             break;
 
-        //case GameWorld::Nouveau:
+        case GameWorld::Nouveau:
+            // TODO
 
         case GameWorld::Deco:
             // TODO

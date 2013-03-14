@@ -485,6 +485,8 @@ GameSoundAssets::SoundPallet GameSoundAssets::GetSoundPalletFromWorldStyle(GameW
             return GameSoundAssets::ClassicalSoundPallet;
         case GameWorld::GothicRomantic:
             return GameSoundAssets::GothicRomanticSoundPallet;
+        case GameWorld::Nouveau:
+            return GameSoundAssets::NouveauSoundPallet;
 		case GameWorld::Deco:
 			return GameSoundAssets::DecoWorldSoundPallet;
         case GameWorld::Futurism:

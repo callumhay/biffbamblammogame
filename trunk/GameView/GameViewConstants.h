@@ -361,15 +361,26 @@ public:
     const char* GOTHIC_ROMANTIC_BOSS_BODY_MESH;
     const char* GOTHIC_ROMANTIC_BOSS_LEG_MESH;
 
+    // NOUVEAU WORLD
+    const char* NOUVEAU_PADDLE_MESH;
+    const char* NOUVEAU_BACKGROUND_MESH;
+    const char* NOUVEAU_BLOCK_MESH;
+    // NOUVEAU BOSS
+    // TODO
+
 	// DECO WORLD
 	const char* DECO_PADDLE_MESH;
 	const char* DECO_BACKGROUND_MESH;
 	const char* DECO_BLOCK_MESH;
+    // DECO BOSS
+    // TODO
 
     // FUTURISM WORLD
     const char* FUTURISM_PADDLE_MESH;
     const char* FUTURISM_BACKGROUND_MESH;
     const char* FUTURISM_BLOCK_MESH;
+    // FUTURISM BOSS
+    // TODO
 
     const Colour& GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const;
     const Colour& GetMultiplierColour(int multiplier);

@@ -3,6 +3,10 @@ Nouveau
 Nouveau
 
 
+resources/textures/nouveau_world_select_256x256.jpg
+
+
+
 # Testing
 resources/worlds/testing/see_the_background.lvl
 resources/worlds/testing/an_almost_empty_level.lvl
@@ -14,22 +18,31 @@ resources/worlds/testing/an_almost_empty_level.lvl
 # TODO: ORGANIZE THIS STUFF!!
 
 
-# Magnet Item
+# Magnet Item intro level (magnet item + a ton of collateral blocks)
 resources/worlds/levels/medium/a_magnetic_personality.lvl
 
+# TODO: Using the magnet item to redirect rockets
 
 
+
+# TODO: Insert more levels here
+
+
+# Introduce Paddle Mines??
 
 
 # Prism block intro levels
 resources/worlds/levels/easy/intro_to_prisms.lvl
 
 
+# TODO: Insert a BUNCH of levels here
 
 
 # Tesla block intro levels
 resources/worlds/levels/easy/electric_access.lvl
 resources/worlds/levels/medium/lightning_round.lvl
+
+# TODO: Insert a BUNCH of levels here
 
 
 # Switch block intro levels
@@ -51,6 +64,10 @@ resources/worlds/levels/medium/acute_electrocution.lvl
 
 # Cannon + no-entry blocks + switch + rockets
 resources/worlds/levels/hard/i_think_i_cannon.lvl
+
+
+
+# TODO: Boss...
 
 
 # IN ANOTHER MOVEMENT... --------------------------------------------------

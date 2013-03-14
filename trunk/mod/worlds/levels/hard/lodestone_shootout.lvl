@@ -1,7 +1,7 @@
 Lodestone Shootout
 19 22
 E E E E E S S S S S S S S S E E E E E 
-E E E E S S D(MagnetPaddle){1} T(P,ul) E E E T(P,ur) D(RocketPaddle){2} S S E E E E 
+E E E E S S D(MagnetPaddle){1} T(P,ul) E E E T(P,ur) D(LaserBulletPaddle,RocketPaddle){2} S S E E E E 
 E E E E S E E N E E E N E E S E E E E 
 E E E E S E E N C(190-195) P C(165-170) N E E S E E E E 
 E E E E S G R Y R G R Y R G S E E E E 
@@ -34,8 +34,8 @@ PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 0
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

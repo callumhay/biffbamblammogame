@@ -28,6 +28,10 @@ GameViewConstants* GameViewConstants::Instance = NULL;
 #define GOTHIC_ROMANTIC_MESH_DIRECTORY MESH_DIRECTORY "/gothic_romantic"
 #define GOTHIC_ROMANTIC_BOSS_MESH_DIRECTORY GOTHIC_ROMANTIC_MESH_DIRECTORY BOSS_DIRECTORY
 
+
+#define NOUVEAU_MESH_DIRECTORY MESH_DIRECTORY "/nouveau"
+#define NOUVEAU_BOSS_MESH_DIRECTORY NOUVEAU_MESH_DIRECTORY BOSS_DIRECTORY
+
 #define DECO_MESH_DIRECTORY MESH_DIRECTORY "/deco"
 #define DECO_BOSS_MESH_DIRECTORY DECO_MESH_DIRECTORY BOSS_DIRECTORY
 
@@ -316,7 +320,7 @@ ONE_WAY_BLOCK_RIGHT_MESH(MESH_DIRECTORY "/one_way_block_right.obj"),
 
 SKYBEAM_MESH(MESH_DIRECTORY "/skybeam.obj"),
 
-// PRE-MODERNISM
+// PRE-MODERNISM ==================================================================
 
 // Classical Asset Paths
 CLASSICAL_PADDLE_MESH(CLASSICAL_MESH_DIRECTORY "/classical_paddle.obj"),
@@ -343,10 +347,15 @@ GOTHIC_ROMANTIC_BOSS_BODY_MESH(GOTHIC_ROMANTIC_BOSS_MESH_DIRECTORY "/gothic_roma
 GOTHIC_ROMANTIC_BOSS_LEG_MESH(GOTHIC_ROMANTIC_BOSS_MESH_DIRECTORY "/gothic_romantic_boss_leg.obj"),
 
 
-// MODERNISM
+// MODERNISM =======================================================================
 
-// Art Nouveau...
-// TODO
+// Nouveau Asset Paths
+NOUVEAU_PADDLE_MESH(NOUVEAU_MESH_DIRECTORY "/nouveau_paddle.obj"),
+NOUVEAU_BACKGROUND_MESH(NOUVEAU_MESH_DIRECTORY "/nouveau_background.obj"),
+NOUVEAU_BLOCK_MESH(NOUVEAU_MESH_DIRECTORY "/nouveau_block.obj"),
+
+
+
 
 // Deco Asset Paths
 DECO_PADDLE_MESH(DECO_MESH_DIRECTORY "/deco_paddle.obj"),
@@ -358,9 +367,10 @@ FUTURISM_PADDLE_MESH(FUTURISM_MESH_DIRECTORY "/futurism_paddle.obj"),
 FUTURISM_BACKGROUND_MESH(FUTURISM_MESH_DIRECTORY "/futurism_background.obj"),
 FUTURISM_BLOCK_MESH(FUTURISM_MESH_DIRECTORY "/futurism_block.obj")
 
-// ...
+// Surrealism-Dada Asset Paths
+// TODO
 
-// POST-MODERNISM
+// POST-MODERNISM ==================================================================
 // ...
 
 {

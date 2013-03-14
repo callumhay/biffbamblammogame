@@ -1444,6 +1444,10 @@
 						RelativePath=".\GameView\GothicRomanticWorldAssets.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameView\NouveauWorldAssets.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -1494,6 +1498,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\GothicRomanticWorldAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\NouveauWorldAssets.cpp"
 						>
 					</File>
 				</Filter>
