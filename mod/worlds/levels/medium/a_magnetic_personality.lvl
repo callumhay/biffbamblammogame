@@ -9,7 +9,7 @@ S E G G G G G G G E S
 S G G L G L G L G G S 
 S E G G G G G G G E S 
 S G L G E E E G L G S 
-S E G G E D(MagnetPaddle) E G G E S 
+S K(ShieldPaddle) G G E D(MagnetPaddle) E G G K(ShieldPaddle) S 
 S G L G E E E G L G S 
 S E G G G G G G G E S 
 S G G L G L G L G G S 

@@ -331,8 +331,6 @@ void DecoWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
 void DecoWorldAssets::ResetToInitialState() {
     GameWorldAssets::ResetToInitialState();
 
-	this->currBGMeshColourAnim.ResetToStart();
-
 	this->beamRotationfg1 = 0.0f;
 	this->beamRotationfg2 = 0.0f;
 	this->beamRotationbg1 = 0.0f;

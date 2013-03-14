@@ -100,10 +100,19 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
             break;
         }
 
+        case GameWorld::Nouveau:
+            // TODO
+
         case GameWorld::Deco:
             // TODO
 
         case GameWorld::Futurism:
+            // TODO
+
+        //case GameWorld::SurrealismDada:
+            // TODO
+
+        //case GameWorld::Postmodernism:
             // TODO
 
         default:

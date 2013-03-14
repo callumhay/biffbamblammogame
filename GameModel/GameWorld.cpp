@@ -21,6 +21,7 @@ const int GameWorld::NO_LEVEL_PASSED = -1;
 
 const char* GameWorld::CLASSICAL_WORLD_NAME         = "Classical";
 const char* GameWorld::GOTHIC_ROMANTIC_WORLD_NAME   = "Gothic and Romantic";
+const char* GameWorld::NOUVEAU_WORLD_NAME           = "Nouveau";
 const char* GameWorld::DECO_WORLD_NAME              = "Deco";
 const char* GameWorld::FUTURISM_WORLD_NAME          = "Futurism";
 
@@ -213,6 +214,9 @@ bool GameWorld::IsValidWorldStyle(const std::string &s) {
     else if (s == GOTHIC_ROMANTIC_WORLD_NAME) {
         return true;
     }
+    else if (s == NOUVEAU_WORLD_NAME) {
+        return true;
+    }
     else if (s == DECO_WORLD_NAME) {
 		return true;
 	}
@@ -236,6 +240,9 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
     }
     else if (s == GOTHIC_ROMANTIC_WORLD_NAME) {
         ret = GothicRomantic;
+    }
+    else if (s == NOUVEAU_WORLD_NAME) {
+        ret = Nouveau;
     }
     else if (s == DECO_WORLD_NAME) {
 		ret = Deco;

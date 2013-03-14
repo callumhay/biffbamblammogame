@@ -13,9 +13,10 @@
 
 // Subclasses that can be created...
 #include "ClassicalWorldAssets.h"
+#include "GothicRomanticWorldAssets.h"
+#include "NouveauWorldAssets.h"
 #include "DecoWorldAssets.h"
 #include "FuturismWorldAssets.h"
-#include "GothicRomanticWorldAssets.h"
 
 const float GameWorldAssets::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
 
@@ -71,6 +72,7 @@ void GameWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
 void GameWorldAssets::ResetToInitialState() {
 	this->bgFadeAnim.ClearLerp();
 	this->bgFadeAnim.SetInterpolantValue(1.0f);
+    this->currBGMeshColourAnim.ResetToStart();
 }
 
 // Static creation method
@@ -80,6 +82,8 @@ GameWorldAssets* GameWorldAssets::CreateWorldAssets(GameWorld::WorldStyle world)
             return new ClassicalWorldAssets();
         case GameWorld::GothicRomantic:
             return new GothicRomanticWorldAssets();
+        case GameWorld::Nouveau:
+            return new NouveauWorldAssets();
 		case GameWorld::Deco:
 			return new DecoWorldAssets();
         case GameWorld::Futurism:
