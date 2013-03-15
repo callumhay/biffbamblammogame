@@ -16,7 +16,7 @@
 #include "GameModel.h"
 #include "GameEventManager.h"
 
-const float OneWayBlock::ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS = M_PI / 180.0f * 70.0f; // (70 degrees)
+const float OneWayBlock::ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS = M_PI / 180.0f * 82.0f; // (82 degrees)
 
 OneWayBlock::OneWayBlock(const OneWayDir& dir, unsigned int wLoc, unsigned int hLoc) :
 LevelPiece(wLoc, hLoc), dirType(dir) {
