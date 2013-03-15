@@ -42,8 +42,8 @@ const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 // Default speed of the paddle (units/sec)
 const float PlayerPaddle::DEFAULT_MAX_SPEED = 26.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
-const float PlayerPaddle::DEFAULT_ACCELERATION  = 138.0f;
-const float PlayerPaddle::DEFAULT_DECCELERATION = -160.0f;
+const float PlayerPaddle::DEFAULT_ACCELERATION  = 145.0f;
+const float PlayerPaddle::DEFAULT_DECCELERATION = -165.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
 const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
@@ -222,7 +222,7 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	// The momentum of the paddle will change as well - we do a physics hack here where the acceleration/decceleration
 	// are effected directly by the inverse scale factor of the paddle
 	if (this->currScaleFactor != PlayerPaddle::NormalSizeScale) {
-		static const float INTENSIFIER = 1.2f;
+		static const float INTENSIFIER = 1.075f;
 	
 	    float invCurrScaleFactor = 1.0f / (INTENSIFIER * this->currScaleFactor);
 	    this->acceleration  = invCurrScaleFactor * PlayerPaddle::DEFAULT_ACCELERATION;
