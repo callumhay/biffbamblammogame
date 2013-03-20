@@ -172,7 +172,7 @@ Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {
  */
 bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
 							Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeSinceCollision,
-                            const Vector2D& lineVelocity) const {
+                            const Vector2D& lineVelocity, const Vector2D& lineAcceleration) const {
 
     assert(c.Radius() > 0);
 
@@ -180,7 +180,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     double sampleIncTime;
     int numCollisionSamples;
 
-    Vector2D adjustedBallVel = velocity - lineVelocity;
+    Vector2D adjustedBallVel = velocity - (lineVelocity + dT * lineAcceleration);
     bool zeroVelocity = (adjustedBallVel == Vector2D(0.0f, 0.0f));
     
     if (zeroVelocity) {

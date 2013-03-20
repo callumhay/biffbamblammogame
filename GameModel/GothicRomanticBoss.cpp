@@ -35,7 +35,7 @@ const float GothicRomanticBoss::BOTTOM_POINT_TIP_Y  = -1.069f;
 const float GothicRomanticBoss::LEG_WIDTH  = 3.25f;
 const float GothicRomanticBoss::LEG_HEIGHT = 3.0f;
 
-const float GothicRomanticBoss::DEFAULT_ACCELERATION = 1.25f * PlayerPaddle::DEFAULT_ACCELERATION;
+const float GothicRomanticBoss::DEFAULT_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION;
 
 const double GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS = 2.0;
 

@@ -43,7 +43,7 @@ STARS:
 PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 0
-Blackout 2
+Blackout 0
 UberBall 0
 BallGrow 0
 StickyPaddle 0

@@ -39,6 +39,8 @@ void BossAIState::UpdateMovement(double dT, GameModel* gameModel) {
     }
 
     // Update the speed based on the acceleration
-    this->currVel = this->currVel + dT * this->GetAcceleration();
+    Vector2D currAccel = this->GetAcceleration();
+    this->currVel = this->currVel + dT * currAccel;
     boss->alivePartsRoot->SetCollisionVelocity(this->currVel);
+    boss->alivePartsRoot->SetCollisionAcceleration(currAccel);
 }

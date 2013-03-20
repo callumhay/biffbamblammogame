@@ -397,12 +397,6 @@ summonsSinceLastSpecialItemDrop(0), numItemsPerSummoning(numItemsPerSummoning) {
  * Get the probability of the boss summoning a special item when summoning items.
  */
 float ConfinedAI::GenerateSpecialItemSummonProbability() const {
-    switch (this->summonsSinceLastSpecialItemDrop) {
-        case 0:
-            return 0.33f;
-        default:
-            break;
-    }
     return 1.0f;
 }
 

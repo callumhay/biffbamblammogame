@@ -150,7 +150,7 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
     //float addedSensitivityDeadZoneLThumb = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
     //float addedSensitivityDeadZoneRThumb = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
 
-    this->UpdateDirections(controllerState, static_cast<int>(1.85f * XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE));
+    this->UpdateDirections(controllerState, static_cast<int>(XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE));
 
 	// Triggers
 	if (controllerState.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD || 
@@ -223,7 +223,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 	// Movement controls:
 	// D-Pad
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP ||
-		(abs(controllerState.Gamepad.sThumbLY) > sensitivityLeft && controllerState.Gamepad.sThumbLY > 0)) {
+		(abs(controllerState.Gamepad.sThumbLY) >= sensitivityLeft && controllerState.Gamepad.sThumbLY > 0)) {
 
 		if (!this->upActionOn) {
 
@@ -247,7 +247,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 	}
 
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ||
-		(abs(controllerState.Gamepad.sThumbLY) > sensitivityLeft && controllerState.Gamepad.sThumbLY < 0)) {
+		(abs(controllerState.Gamepad.sThumbLY) >= sensitivityLeft && controllerState.Gamepad.sThumbLY < 0)) {
 
 		if (!this->downActionOn) {
 
@@ -272,7 +272,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 
 
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT || 
-		  (abs(controllerState.Gamepad.sThumbLX) > sensitivityLeft && controllerState.Gamepad.sThumbLX < 0)) {
+		  (abs(controllerState.Gamepad.sThumbLX) >= sensitivityLeft && controllerState.Gamepad.sThumbLX < 0)) {
 
 		if (!this->leftActionOn && !this->rightActionOn) {
 
@@ -309,7 +309,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 	}
 
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT || 
-		  (abs(controllerState.Gamepad.sThumbLX) > sensitivityLeft && controllerState.Gamepad.sThumbLX > 0)) {
+		  (abs(controllerState.Gamepad.sThumbLX) >= sensitivityLeft && controllerState.Gamepad.sThumbLX > 0)) {
 
 		if (!this->rightActionOn && !this->leftActionOn) {
 

@@ -1,6 +1,8 @@
 Falling Up
-15 30
+15 32
 S S S S S S S S S S S S S S S 
+S E E E E E E E E E E E E E S 
+S E E K(UpsideDown) E E E K(GravityBall) E E E K(UpsideDown) E E S 
 S E E E E E E E E E E E E E S 
 S E E E Y E E E E Y Y Y E E S 
 S E E Y G Y E E E Y G Y E E S 
@@ -13,12 +15,12 @@ S E E Y G Y E Y G G G G G Y S
 S E E Y G Y E E Y G G G Y E S 
 S E E Y G Y E E E Y G Y E E S 
 S E E Y Y Y E E E E Y E E E S 
-S E E E E E E G E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E K(GravityBall) E E E K(UpsideDown) E E E K(GravityBall) E E S 
+S E E E E E E E E E E E E E S 
 S S S E G E G E G E G E S S S 
 S S D(UpsideDown) G E G E G E G E G D(GravityBall) S S 
 S E E E G E G E G E G E E E S 
-S E E E E E E G E E E E E E S 
-S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
@@ -42,8 +44,8 @@ PaddleGrow 1
 PoisonPaddle 0
 BallSafetyNet 1
 Blackout 1
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 1
 ShieldPaddle 2
 LaserBulletPaddle 1

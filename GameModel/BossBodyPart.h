@@ -74,6 +74,7 @@ public:
 
     void SetCollisionVelocity(const Vector2D& v);
     const Vector2D& GetCollisionVelocity() const;
+    void SetCollisionAcceleration(const Vector2D& a);
 
 	// Track the status of the body part, effects its properties and how it works/acts
 	//enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, FrozenStatus = 0x00000002 };
@@ -93,6 +94,7 @@ protected:
     AnimationMultiLerp<ColourRGBA> rgbaAnim;
 
     Vector2D collisionVelocity;
+    Vector2D collisionAccel;
 
     //int32_t pieceStatus;
 
@@ -125,7 +127,7 @@ inline void BossBodyPart::Tick(double dT) {
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                                   Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
     if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), 
-        n, collisionLine, timeSinceCollision, this->collisionVelocity)) {
+        n, collisionLine, timeSinceCollision, this->collisionVelocity, this->collisionAccel)) {
         return this;
     }
     return NULL;
@@ -261,6 +263,10 @@ inline void BossBodyPart::SetCollisionVelocity(const Vector2D& v) {
 }
 inline const Vector2D& BossBodyPart::GetCollisionVelocity() const {
     return this->collisionVelocity;
+}
+
+inline void BossBodyPart::SetCollisionAcceleration(const Vector2D& a) {
+    this->collisionAccel = a;
 }
 
 #endif // __BOSSBODYPART_H__

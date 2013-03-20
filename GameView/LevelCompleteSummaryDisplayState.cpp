@@ -820,7 +820,7 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
 
     const float STAR_ICON_SIZE = 1.75f * this->starTotalLabel.GetHeight();
 
-    static const float BORDER_GAP     = 15.0f;
+    static const float BORDER_GAP     = 20.0f;
     static const float STAR_LABEL_GAP = 5.0f;
 
     float starXPos  = screenWidth - (BORDER_GAP + STAR_ICON_SIZE/2.0f);
@@ -837,10 +837,10 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
     const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
     Colour labelColour = starColour;
 
-    if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
-        flareEmitter.SetEmitPosition(Point3D(starXPos + STAR_ICON_SIZE*0.15f, starYPos + STAR_ICON_SIZE*0.15f, 0.0f));
-        haloEmitter.SetEmitPosition(Point3D(starXPos, starYPos, 0.0f));
+    this->flareEmitter.SetEmitPosition(Point3D(starXPos + STAR_ICON_SIZE*0.15f, starYPos + STAR_ICON_SIZE*0.15f, 0.0f));
+    this->haloEmitter.SetEmitPosition(Point3D(starXPos, starYPos, 0.0f));
 
+    if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
         this->flareEmitter.Tick(dT);
         this->haloEmitter.Tick(dT);
 

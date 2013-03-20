@@ -103,7 +103,7 @@ inline bool ItemDropBlock::BallBlastsThrough(const GameBall& b) const {
 // Whether or not the ghost ball can just pass through this block.
 // Returns: true if it can, false otherwise.
 inline bool ItemDropBlock::GhostballPassesThrough() const {
-	return true;
+	return false;
 }
 
 // Item drop blocks do not reflect or refract light.
