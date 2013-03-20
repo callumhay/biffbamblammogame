@@ -1190,10 +1190,10 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	// The effect is a basic onomatopeia word that occurs at the position of the ball
 	ESPPointEmitter* bounceEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	bounceEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	bounceEffect->SetSpawnDelta(ESPInterval(-1));
 	bounceEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
-	bounceEffect->SetParticleLife(ESPInterval(1.2f, 1.5f));
-	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
+	bounceEffect->SetParticleLife(ESPInterval(0.9f, 1.15f));
+	
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetEmitAngleInDegrees(10);
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
@@ -1203,7 +1203,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	Vector2D ballVelocity = ball.GetVelocity();
 	bounceEffect->SetEmitDirection(Vector3D(ballVelocity[0], ballVelocity[1], 0.0f));
 
-	Point2D ballCenter    = ball.GetBounds().Center();
+	Point2D ballCenter = ball.GetBounds().Center();
 	bounceEffect->SetEmitPosition(Point3D(ballCenter[0], ballCenter[1], 0.0f));
 	
 	// Add effectors...
@@ -1217,33 +1217,34 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	// Font style is based off the type of sound
 	GameFontAssetsManager::FontStyle fontStyle;
 	switch (soundType) {
-		case Onomatoplex::BOUNCE:
-			fontStyle = GameFontAssetsManager::ExplosionBoom;
-			break;
+
 		case Onomatoplex::GOO:
+            bounceEffect->SetParticleSize(ESPInterval(0.4f, 0.5f));
 			fontStyle = GameFontAssetsManager::SadBadGoo;
 			break;
+
+        case Onomatoplex::BOUNCE:
 		default:
+            bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.7f));
 			fontStyle = GameFontAssetsManager::ExplosionBoom;
 			break;
 	}
 
-	ESPOnomataParticle* bounceParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, GameFontAssetsManager::Small));
-	bounceParticle->SetDropShadow(dpTemp);
-	bounceParticle->SetOnomatoplexSound(soundType, ball.GetOnomatoplexExtremeness());
-	bounceEffect->AddParticle(bounceParticle);
+    TextLabel2D bounceLabel(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, GameFontAssetsManager::Small), "");
+    bounceLabel.SetDropShadow(Colour(0,0,0), 0.10f);
+    bounceEffect->SetParticles(1, bounceLabel, soundType, ball.GetOnomatoplexExtremeness());
 
 	return bounceEffect;
 }
 
 /**
  * Adds a ball bouncing ESP - the effect that occurs when a ball typically
- * bounces off a level piece (e.g., a block).
+ * bounces off a levelpiece/block.
  */
 void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block) {
 	// We don't do the effect for certain types of blocks...
-	if (block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink || block.GetType() == LevelPiece::Portal ||
-		block.GetType() == LevelPiece::Cannon) {
+	if (block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink || 
+        block.GetType() == LevelPiece::Portal || block.GetType() == LevelPiece::Cannon) {
 		return;
 	}
 
@@ -4096,12 +4097,12 @@ void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Poin
 
 ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, const Point2D& position) {
     std::stringstream comboStrStream;
-    comboStrStream << "Combo (" << multiplier << "x)!";
+    comboStrStream << "COMBO " << multiplier << "x!";
 
 	ESPPointEmitter* comboEffect = new ESPPointEmitter();
 	comboEffect->SetSpawnDelta(ESPInterval(-1, -1));
 	comboEffect->SetParticleLife(ESPInterval(2.25f));
-	comboEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
+	comboEffect->SetParticleSize(ESPInterval(0.75f));
 	comboEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
 	comboEffect->SetParticleAlignment(ESP::ScreenAligned);
 	comboEffect->SetEmitPosition(Point3D(position));
@@ -4382,45 +4383,6 @@ void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& posi
     this->activeGeneralEmitters.push_back(this->CreateMultiplierComboEffect(multiplier, position));
     this->activeGeneralEmitters.push_back(this->CreateMultiplierComboEffect(multiplier, paddle.GetCenterPosition()));
 }
-
-// This is currently not in use...
-//void GameESPAssets::AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle) {
-//    std::string awardName(PointsHUD::GetPointNotificationName(pointAward));
-//
-//	// The effect is a basic onomatopeia point score with optional name (e.g., "Paddle Daredevil +1000pts!")
-//    std::stringstream ptStrStream;
-//    if (!awardName.empty()) {
-//        ptStrStream << awardName << " ";
-//    }
-//    if (pointAward.GetTotalPointAmount() > 0) {
-//        ptStrStream << "+";
-//    }
-//    ptStrStream << pointAward.GetTotalPointAmount() << "pts!";
-//
-//	DropShadow dpTemp;
-//	dpTemp.amountPercentage = 0.05f;
-//    dpTemp.colour = Colour(0, 0, 0);
-//
-//	ESPOnomataParticle* textParticle = new ESPOnomataParticle(
-//        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
-//        ptStrStream.str());
-//	textParticle->SetDropShadow(dpTemp);
-//
-//	ESPPointEmitter* ptTextEffect = new ESPPointEmitter();
-//	ptTextEffect->SetSpawnDelta(ESPInterval(-1, -1));
-//	ptTextEffect->SetParticleLife(ESPInterval(1.5f));
-//	ptTextEffect->SetParticleSize(ESPInterval(0.75f));
-//	ptTextEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-//	ptTextEffect->SetParticleAlignment(ESP::ScreenAligned);
-//    ptTextEffect->SetEmitPosition(Point3D(paddle.GetCenterPosition() - Vector2D(0, 2.0f * paddle.GetHalfHeight())));
-//
-//    this->flashColourFader.SetEndColour(GameViewConstants::GetInstance()->GetMultiplierColour(pointAward.GetMultiplierAmount()));
-//    ptTextEffect->AddEffector(&this->flashColourFader);
-//    ptTextEffect->AddEffector(&this->particleLargeGrowth);
-//    ptTextEffect->AddParticle(textParticle);
-//
-//    this->activeGeneralEmitters.push_back(ptTextEffect);
-//}
 
 void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
     bool result = false;

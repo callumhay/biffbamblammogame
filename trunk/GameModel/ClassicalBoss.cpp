@@ -41,17 +41,17 @@ const float ClassicalBoss::EYE_WIDTH  = 3.150f;
 const float ClassicalBoss::EYE_HEIGHT = 1.575f;
 const float ClassicalBoss::EYE_DEPTH  = 0.788f;
 
-const float ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED     = PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
-const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = PlayerPaddle::DEFAULT_ACCELERATION / 2.25f;
+const float ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED     = 0.9f * PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
+const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = 0.9f * PlayerPaddle::DEFAULT_ACCELERATION / 2.25f;
 
-const float ClassicalBoss::BODY_HEAD_MAX_SPEED          = PlayerPaddle::DEFAULT_MAX_SPEED + 5.0f;
-const float ClassicalBoss::BODY_HEAD_ACCELERATION       = PlayerPaddle::DEFAULT_ACCELERATION;
+const float ClassicalBoss::BODY_HEAD_MAX_SPEED          = 0.9f * PlayerPaddle::DEFAULT_MAX_SPEED + 5.0f;
+const float ClassicalBoss::BODY_HEAD_ACCELERATION       = 0.9f * PlayerPaddle::DEFAULT_ACCELERATION;
 
-const float ClassicalBoss::PEDIMENT_MAX_SPEED    = PlayerPaddle::DEFAULT_MAX_SPEED;
-const float ClassicalBoss::PEDIMENT_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION;
+const float ClassicalBoss::PEDIMENT_MAX_SPEED    = 0.9f * PlayerPaddle::DEFAULT_MAX_SPEED;
+const float ClassicalBoss::PEDIMENT_ACCELERATION = 0.9f * PlayerPaddle::DEFAULT_ACCELERATION;
 
-const float ClassicalBoss::EYE_MAX_SPEED    = PlayerPaddle::DEFAULT_MAX_SPEED + 10.0f;
-const float ClassicalBoss::EYE_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION + 15.0f;
+const float ClassicalBoss::EYE_MAX_SPEED    = 0.9f * PlayerPaddle::DEFAULT_MAX_SPEED + 10.0f;
+const float ClassicalBoss::EYE_ACCELERATION = 0.9f * PlayerPaddle::DEFAULT_ACCELERATION + 15.0f;
 
 
 ClassicalBoss::ClassicalBoss() : Boss(),

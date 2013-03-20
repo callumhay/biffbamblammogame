@@ -156,6 +156,13 @@ void BossCompositeBodyPart::SetCollisionVelocity(const Vector2D& v) {
     }
 }
 
+void BossCompositeBodyPart::SetCollisionAcceleration(const Vector2D& a) {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->SetCollisionAcceleration(a);      
+    }
+}
+
 void BossCompositeBodyPart::RotateY(float rotYDegs) {
     if (fabs(rotYDegs) < EPSILON) {
         return;

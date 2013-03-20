@@ -419,7 +419,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 
 		// We shake things up if the ball is uber...
 		if (ballIsUber) {
-			this->display->GetCamera().SetCameraShake(0.2f, Vector3D(0.8f, 0.2f, 0.0f), 100);
+			this->display->GetCamera().SetCameraShake(0.2f, Vector3D(0.7f, 0.2f, 0.0f), 90);
 			loudness = GameSoundAssets::VeryLoudVolume;
 			vibration = BBBGameController::HeavyVibration;
 		}

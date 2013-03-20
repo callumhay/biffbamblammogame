@@ -3,17 +3,17 @@ Giving it 100%
 E E E E S S S S S S S S S S S S S E E E E 
 E E E E S E E E E E E E E E E E S E E E E 
 E E E E S E K(RocketPaddle) E E E E E E E K(RocketPaddle) E S E E E E 
-E E E E S R R Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) R R S E E E E 
-E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
+E E E E S R R Q(f) R Q(f) R Q(f) R Q(f) R R S E E E E 
+E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
 E E E C(90) F(r) E E Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) E E F(l) C(270) E E E 
-E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
-E E E E S E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E S E E E E 
-E E E E S K(RocketPaddle) I Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(RocketPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) I K(RocketPaddle) S E E E E 
-E E E E S E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E S E E E E 
-E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
+E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
+E E E E S E E Q(f) R Q(f) R Q(f) R Q(f) E E S E E E E 
+E E E E S K(RocketPaddle) I R K(LaserBulletPaddle,LaserBeamPaddle) R K(RocketPaddle) R K(LaserBulletPaddle,LaserBeamPaddle) R I K(RocketPaddle) S E E E E 
+E E E E S E E Q(f) R Q(f) R Q(f) R Q(f) E E S E E E E 
+E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
 E E C(90) E F(r) E E Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) E E F(l) E C(270) E E 
-E E E E F(r) E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E F(l) E E E E 
-E E E E S R R Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) R R S E E E E 
+E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
+E E E E S R R Q(f) R Q(f) R Q(f) R Q(f) R R S E E E E 
 E E E E S E E E E E E E E E E E S E E E E 
 E E E E S E E E E E E E E E E E S E E E E 
 E E E E S E E E E E E E E E E E S E E E E 
@@ -38,8 +38,8 @@ PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 0
 Blackout 2
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 0

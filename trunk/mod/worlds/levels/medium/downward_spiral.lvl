@@ -21,7 +21,7 @@ S G G Y Y R E E E E E E R S E E
 S G G G Y R E E E E E B R S E E 
 S G G G Y R R R R R R R R S E E 
 S G G G Y R R R R R R R R S E E 
-S G G G Y O O O O O O O O S E E 
+S G G G Y O O O K(MultiBall5) O O O O S E E 
 S G G G Y O O O O O O O O S E E 
 S G G G Y R R R R R R R R S E E 
 S E E E E E E E E E E E E S E E 
@@ -37,9 +37,9 @@ S E E E E E E E E E E E E S E E
 STARS:
 9000
 16000
-19000
-24000
-27950
+18000
+23500
+27550
 
 PaddleGrow 2
 PoisonPaddle 2

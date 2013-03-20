@@ -112,7 +112,7 @@ float ClassicalBossAI::GetMaxSpeed() const {
 }
 
 float ClassicalBossAI::GetAccelerationMagnitude() const {
-    return NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.75f, this->GetTotalLifePercent()) *
+    return NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.5f, this->GetTotalLifePercent()) *
         ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION;
 }
 
@@ -635,7 +635,7 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
             this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
         }
         
-        float speedMultiplier = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.5f, totalLifePercent);
+        float speedMultiplier = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.33f, totalLifePercent);
 
         // If one of the bosses' arms is destroyed it should be trying to get its last surviving arm to
         // be above the paddle...
