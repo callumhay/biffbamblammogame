@@ -1,4 +1,4 @@
-I Think I Cannon
+Size Matters
 16 28
 S S S S S S S S S S S S E R E E 
 S E E N E E D(PaddleGrow) E E E E N R R R E 
@@ -10,12 +10,12 @@ S E E E E E E E E E E S E R E E
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
+S R R R R R R R R R R S E E E E 
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
+S R R R R R R R R R R S E E E E 
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
@@ -40,8 +40,8 @@ PaddleGrow 3
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2

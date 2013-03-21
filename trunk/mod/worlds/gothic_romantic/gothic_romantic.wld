@@ -4,8 +4,6 @@ Gothic and Romantic
 
 resources/textures/gothic_romantic_world_select_256x256.jpg
 
-#resources/worlds/testing/regen_block_test.lvl
-
 
 # Item drop block intro level
 resources/worlds/levels/easy/running_amoc.lvl
@@ -19,7 +17,6 @@ resources/worlds/levels/medium/a_sticky_situation.lvl
 
 # Cannon block intro levels
 resources/worlds/levels/easy/shot_down.lvl
-resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
 
 
 # Cannon + Rocket
@@ -59,9 +56,8 @@ resources/worlds/levels/medium/freezing_hot.lvl
 # Using iceball + lasers to shoot through blocks
 resources/worlds/levels/medium/an_ice_way_to_go.lvl
 
-# Cannon + rocket + paddle size to increase rocket size and blast radius
-#resources/worlds/levels/hard/i_think_i_cannon.lvl
-
+# Multiball craziness, Rockets + Cannons, Ice + Lasers (to shoot through multiple solid blocks)
+resources/worlds/levels/medium/as_easy_as_1_2_3_4.lvl
 
 # All of the things!
 resources/worlds/levels/hard/all_of_the_above.lvl
