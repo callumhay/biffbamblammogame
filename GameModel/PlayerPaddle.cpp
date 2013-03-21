@@ -299,6 +299,9 @@ void PlayerPaddle::FireAttachedBall() {
 	this->attachedBall->SetBallBallCollisionsEnabled();
 	this->attachedBall->SetBallPaddleCollisionsEnabled();
 
+    // The last thing the ball collided with is this paddle...
+    this->attachedBall->SetLastThingCollidedWith(this);
+
 	// EVENT: Ball Shot
 	GameEventManager::Instance()->ActionBallShot(*this->attachedBall);
 
@@ -785,6 +788,7 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	// Disable collisions for the ball (reenable them when the ball is detached)
 	this->attachedBall->SetBallBallCollisionsDisabled();
 	this->attachedBall->SetBallPaddleCollisionsDisabled();
+
 	// Tell the ball not to collide with this paddle again when it's released until it hits something else...
 	this->attachedBall->SetLastThingCollidedWith(this);
 

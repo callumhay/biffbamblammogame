@@ -220,7 +220,7 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float d
         destructionXPos = maxX;
     }
 
-	const float maxTexCoordLeft  = destructionXPos / 2.0f;
+	const float maxTexCoordLeft  = (destructionXPos - minX) / 2.0f;
 	const float maxTexCoordRight = (maxX - minX) / 2.0f;
 	
 	// Left broken piece
