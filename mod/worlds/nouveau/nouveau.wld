@@ -49,6 +49,9 @@ resources/worlds/levels/medium/lightning_round.lvl
 # TODO
 
 
+# Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
+#resources/worlds/levels/hard/size_matters.lvl
+
 # Prism + Switch
 resources/worlds/levels/hard/prismatic_pragmatism.lvl
 

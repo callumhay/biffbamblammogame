@@ -13,7 +13,7 @@ S Q(f) E R O Y Y Y O R E Q(f) S
 S E E R O Y Y Y O R E E S 
 S Q(i) E R O Y Y Y O R E Q(i) S 
 S E E R O Y Y Y O R E E S 
-S G E T(R,ur) R Y Y Y R T(R,ul) E G S 
+S K(FireBall) E T(R,ur) R Y Y Y R T(R,ul) E K(FireBall) S 
 S G E E R O Y O R E E G S 
 S G G E R O O O R E G G S 
 S E G E E R R R E E G E S 

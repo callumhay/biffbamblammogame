@@ -14,7 +14,7 @@ S E Y E O E R E O E Y E S
 S G E Q(f) E O E R E Q(f) E Y S 
 S E G E Y E O E R E O E S 
 S G E G E Y E O E R E O S 
-S E G E G E Q(f) E O E R E S 
+S E G E K(MultiBall3) E Q(f) E K(LaserBulletPaddle,LaserBeamPaddle) E R E S 
 S G E G E G E Y E O E R S 
 S E G E G E G E Y E O E S 
 S G E Q(f) E G E G E Q(f) E O S 
@@ -40,8 +40,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 1
 BallGrow 2
+UberBall 1
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 1
