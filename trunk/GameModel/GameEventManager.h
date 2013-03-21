@@ -82,6 +82,9 @@ public:
 	void ActionProjectileFiredFromCannon(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
+    void ActionFireBallCancelledByIceBall(const GameBall& ball);
+    void ActionIceBallCancelledByFireBall(const GameBall& ball);
+
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);
 	void ActionBlockDestroyed(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
@@ -133,6 +136,8 @@ public:
 	void ActionLivesChanged(int livesLeftBefore, int livesLeftAfter);
 
 	void ActionBlockIceShattered(const LevelPiece& block);
+    void ActionBlockIceCancelledWithFire(const LevelPiece& block);
+    void ActionBlockFireCancelledWithIce(const LevelPiece& block);
 
     void ActionPointNotification(const PointAward& pointAward);
 	void ActionScoreChanged(int newScore);

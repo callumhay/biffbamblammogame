@@ -126,13 +126,6 @@ void PrismTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Leve
 	UNUSED_PARAMETER(bottomRightNeighbor);
 	UNUSED_PARAMETER(bottomLeftNeighbor);
 
-	// TODO: If we want to support ice cube prisms...
-	// If the triangle block is in ice then its bounds are a basic rectangle...
-	//if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-	//	LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-	//}
-	//else {
-
 	this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
 									leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
 	 								topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
@@ -373,7 +366,8 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
     Vector2D longSideNorm, shortSideNorm, hypSideNorm;
     Collision::LineSeg2D shortSide, longSide, hypSide;
 
-    bool topNeighborNotSolid = topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+    bool topNeighborNotSolid = topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
+        topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
         (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
          topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen);
     bool bottomNeighborNotSolid	= bottomNeighbor == NULL  || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||

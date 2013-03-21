@@ -182,13 +182,9 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
         }
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob just extinguishes on a laser turret block, unless it's frozen in an ice cube;
+			// Fire glob just extinguishes on a mine turret block, unless it's frozen in an ice cube;
 			// in that case, unfreeze it
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
-			}
+			this->LightPieceOnFire(gameModel, false);
 			break;
 
 		default:

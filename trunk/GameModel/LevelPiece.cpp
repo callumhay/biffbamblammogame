@@ -152,7 +152,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 	// Top boundry of the piece
     shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        topNeighbor->GetType() != LevelPiece::Solid);
+        topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() != LevelPiece::Solid);
 	if (shouldGenBounds) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -190,11 +190,10 @@ void LevelPiece::AddStatus(GameLevel* level, const PieceStatus& status) {
 	}
 
 	this->pieceStatus = (this->pieceStatus | status);
-	if (status == LevelPiece::IceCubeStatus) {
-		// We update the bounds since ice cubes change the bounds of a block - this must be done
-		// AFTER the change to the status
-        level->UpdateBoundsOnPieceAndSurroundingPieces(this);
-	}
+	
+	// We update the bounds since the status can change the nature of the boundaries generated for this block and
+    // its surrounding blocks
+    level->UpdateBoundsOnPieceAndSurroundingPieces(this);
 
 	// EVENT: A status has been added to this piece...
 	GameEventManager::Instance()->ActionLevelPieceStatusAdded(*this, status);
@@ -209,11 +208,9 @@ void LevelPiece::RemoveStatus(GameLevel* level, const PieceStatus& status) {
 
 	this->pieceStatus = (this->pieceStatus & ~status);
 	
-	if (status == LevelPiece::IceCubeStatus) {
-		// We update the bounds since ice cubes change the bounds of a block - this must be done
-		// AFTER the change to the status 
-		level->UpdateBoundsOnPieceAndSurroundingPieces(this);
-	}
+	// We update the bounds since the status can change the nature of the boundaries generated for this block and
+    // its surrounding blocks
+    level->UpdateBoundsOnPieceAndSurroundingPieces(this);
 
 	// EVENT: A status has been removed from this piece...
 	GameEventManager::Instance()->ActionLevelPieceStatusRemoved(*this, status);
@@ -257,40 +254,42 @@ void LevelPiece::RemoveAllStatus(GameLevel* level) {
 	GameEventManager::Instance()->ActionLevelPieceAllStatusRemoved(*this);
 }
 
-// Helper function used to light this piece on fire - ONLY CALL THIS IF YOU CAN ACTUALLY
-// PLACE AN ONFIRE STATUS ON THIS BLOCK!!!
-void LevelPiece::LightPieceOnFire(GameModel* gameModel) {
-		// If this piece is currently in an ice cube then just melt the ice cube but don't
-		// make the block catch on fire...
-		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-            UNUSED_VARIABLE(success);
-			assert(success);
-		}
-		else {
-			// The ball is on fire, and so we'll make this piece catch fire too...
-			// The fire will eat away at the block over time
-            this->AddStatus(gameModel->GetCurrentLevel(), LevelPiece::OnFireStatus);
-			gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
-		}
+// Helper function used to light this piece on fire (if it is allowed to catch on fire).
+void LevelPiece::LightPieceOnFire(GameModel* gameModel, bool canCatchOnFire) {
+	// If this piece is currently in an ice cube then just melt the ice cube but don't
+	// make the block catch on fire...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
+		assert(success);
+
+        // EVENT: Frozen block cancelled-out by fire
+        GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
+	}
+	else if (canCatchOnFire) {
+        this->AddStatus(gameModel->GetCurrentLevel(), LevelPiece::OnFireStatus);
+		gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
+	}
 }
 
-// Helper function used to freeze this piece in an ice block - ONLY CALL THIS IF YOU CAN ACTUALLY
-// PLACE AN ICECUBE STATUS ON THIS BLOCK!!!
-void LevelPiece::FreezePieceInIce(GameModel* gameModel) {
-		// If this piece is currently on fire then the ice will cancel with the fire and
-		// the piece will no longer be on fire
-		if (this->HasStatus(LevelPiece::OnFireStatus)) {
-			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::OnFireStatus);
-            UNUSED_VARIABLE(success);
-			assert(success);
-		}
-		else {
-			// The ball is icy, encapsulate this piece in an ice cube, this will make the ball take
-			// have to hit this piece once more in order to destroy it...
-            this->AddStatus(gameModel->GetCurrentLevel(), LevelPiece::IceCubeStatus);
-			gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::IceCubeStatus);
-		}
+// Helper function used to freeze this piece in an ice block (if it is allowed to be frozen).
+void LevelPiece::FreezePieceInIce(GameModel* gameModel, bool canBeFrozen) {
+	// If this piece is currently on fire then the ice will cancel with the fire and
+	// the piece will no longer be on fire
+	if (this->HasStatus(LevelPiece::OnFireStatus)) {
+		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::OnFireStatus);
+        UNUSED_VARIABLE(success);
+		assert(success);
+
+        // EVENT: On-fire block cancelled-out by ice
+        GameEventManager::Instance()->ActionBlockFireCancelledWithIce(*this);
+	}
+	else if (canBeFrozen) {
+		// The ball is icy, encapsulate this piece in an ice cube, this will make the ball take
+		// have to hit this piece once more in order to destroy it...
+        this->AddStatus(gameModel->GetCurrentLevel(), LevelPiece::IceCubeStatus);
+		gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::IceCubeStatus);
+	}
 }
 
 /**

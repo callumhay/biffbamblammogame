@@ -111,11 +111,16 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
 		}
 
-		// Unfreeze a frozen solid block
+		// Unfreeze a frozen item-drop block
 		if (isInIceCube) {
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
 			assert(success);
+
+            if (isFireBall) {
+                // EVENT: Frozen block cancelled-out by fire
+                GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
+            }
 		}
 		else {
 			this->AttemptToDropAnItem(gameModel);
@@ -180,12 +185,8 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes on a item drop block, unless it's frozen in an ice cube;
-			// in that case, unfreeze a frozen item drop block
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
-			}
+			// in that case, unfreeze it
+			this->LightPieceOnFire(gameModel, false);
 			break;
 
 		default:

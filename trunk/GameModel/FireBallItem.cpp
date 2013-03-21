@@ -39,6 +39,17 @@ double FireBallItem::Activate() {
 			currTimer = NULL;
 		}
 		else if (currTimer->GetTimerItemType() == GameItem::IceBallItem) {
+
+            // EVENT: Iceball(s) are being cancelled by a fireball item
+            const std::set<const GameBall*>& affectedBalls = currTimer->GetAssociatedBalls();
+            for (std::set<const GameBall*>::const_iterator ballIter = affectedBalls.begin();
+                 ballIter != affectedBalls.end(); ++ballIter) {
+
+                const GameBall* currBall = *ballIter;
+                assert(currBall != NULL);
+                GameEventManager::Instance()->ActionIceBallCancelledByFireBall(*currBall);
+            }
+
 			// If there's an ice ball item going right now then the effects just cancel each other out
 			iter = activeTimers.erase(iter);
 			delete currTimer;

@@ -108,11 +108,11 @@ int OneWayBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
 LevelPiece* OneWayBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-			// EVENT: Ice was shattered
-			GameEventManager::Instance()->ActionBlockIceShattered(*this);
-			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-            UNUSED_VARIABLE(success);
-			assert(success);
+	    // EVENT: Ice was shattered
+	    GameEventManager::Instance()->ActionBlockIceShattered(*this);
+	    bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
+	    assert(success);
 	}
 
     // Only collateral blocks, tesla lightning and disintegration can destroy a one-way block
@@ -211,7 +211,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
 	// Top boundry of the piece
 	if (topNeighbor != NULL) {
-		if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+		if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
             topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::OneWay &&
             topNeighbor->GetType() != LevelPiece::LaserTurret && topNeighbor->GetType() != LevelPiece::RocketTurret &&
             topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::Breakable &&
@@ -222,7 +222,8 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 			Vector2D n4(0, 1);
 			boundingLines.push_back(l4);
 			boundingNorms.push_back(n4);
-            onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus));
+            onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::OnFireStatus) || 
+                topNeighbor->HasStatus(LevelPiece::IceCubeStatus));
 		}
 	}
 
@@ -253,6 +254,11 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
 			assert(success);
+
+            if (isFireBall) {
+                // EVENT: Frozen block cancelled-out by fire
+                GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
+            }
 		}
 	}
 
@@ -304,13 +310,9 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
             break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob just extinguishes on a solid block, unless it's frozen in an ice cube;
-			// in that case, unfreeze a frozen solid block
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
-			}
+			// Fire glob just extinguishes on a one-way block, unless it's frozen in an ice cube;
+			// in that case, unfreeze it
+            this->LightPieceOnFire(gameModel, false);
 			break;
 
 		default:

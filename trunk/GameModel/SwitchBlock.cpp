@@ -94,6 +94,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
 	// Top boundry of the piece
     shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
         topNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l4(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND),
@@ -144,14 +145,22 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	}
 	else {
         if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+            
             if (!isFireBall) {
 				// EVENT: Ice was shattered
 				GameEventManager::Instance()->ActionBlockIceShattered(*this);
             }
+
             // Unfreeze a frozen block
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
 			assert(success);
+
+            if (isFireBall) {
+                // EVENT: Frozen block cancelled-out by fire
+                GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
+            }
+
         }
         else {
             this->SwitchPressed(gameModel);
@@ -214,12 +223,10 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
             break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob just extinguishes on a switch block, unless it's frozen in an ice cube;
-			// in that case, unfreeze a frozen switch block
+			// Fire glob activates a switch block, unless it's frozen in an ice cube;
+			// in that case, unfreeze it
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
+				this->LightPieceOnFire(gameModel, false);
 			}
             else {
                 this->SwitchPressed(gameModel);
@@ -239,7 +246,6 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& p
 
     if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 	    GameEventManager::Instance()->ActionBlockIceShattered(*this);
-        // Unfreeze a frozen block
 		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
         UNUSED_VARIABLE(success);
 		assert(success);

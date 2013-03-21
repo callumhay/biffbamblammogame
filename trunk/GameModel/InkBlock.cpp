@@ -162,6 +162,9 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
                 UNUSED_VARIABLE(success);
 				assert(success);
+
+                // EVENT: Frozen block cancelled-out by fire
+                GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 			}
             else {
                 resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
@@ -213,12 +216,8 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes on an ink block, unless it's frozen in an ice cube;
-			// in that case, unfreeze a frozen ink block
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
-			}
+			// in that case, unfreeze it
+			this->LightPieceOnFire(gameModel, false);
 			break;
 
 		default:
