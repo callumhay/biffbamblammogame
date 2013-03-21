@@ -56,6 +56,8 @@ public:
 	void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
+    void FireBallCancelledByIceBallEvent(const GameBall& ball);
+    void IceBallCancelledByFireBallEvent(const GameBall& ball);
 
 	// Misc game events
 	void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
@@ -94,6 +96,8 @@ public:
 	void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 
 	void BlockIceShatteredEvent(const LevelPiece& block);
+    void BlockIceCancelledWithFireEvent(const LevelPiece& block);
+    void BlockFireCancelledWithIceEvent(const LevelPiece& block);
 
     void ReleaseTimerStartedEvent();
 

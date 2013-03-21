@@ -198,7 +198,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 	// Top boundry of the piece
 	if (topNeighbor != NULL) {
-		if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+		if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
             topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret && 
             topNeighbor->GetType() != LevelPiece::RocketTurret && topNeighbor->GetType() != LevelPiece::NoEntry &&
             topNeighbor->GetType() != LevelPiece::Tesla && topNeighbor->GetType() != LevelPiece::Switch &&
@@ -222,7 +222,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l4);
 	    boundingNorms.push_back(n4);
         onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            topNeighbor->GetType() == LevelPiece::OneWay);
+            topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay);
     }
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
@@ -257,6 +257,11 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
 			assert(success);
+
+            if (isFireBall) {
+                // EVENT: Frozen block cancelled-out by fire
+                GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
+            }
 		}
 	}
 
@@ -309,12 +314,8 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes on a solid block, unless it's frozen in an ice cube;
-			// in that case, unfreeze a frozen solid block
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
-			}
+			// in that case, unfreeze it
+			this->LightPieceOnFire(gameModel, false);
 			break;
 
 		default:

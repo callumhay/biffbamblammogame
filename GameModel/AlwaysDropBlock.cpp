@@ -112,7 +112,7 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
 	}
 
 	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
         (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
          topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
@@ -122,7 +122,7 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
 		boundingLines.push_back(l4);
 		boundingNorms.push_back(n4);
         onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            topNeighbor->GetType() == LevelPiece::OneWay);
+            topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),

@@ -171,8 +171,8 @@ protected:
 
 	void RemoveAllStatus(GameLevel* level);
 
-	void LightPieceOnFire(GameModel* gameModel);
-	void FreezePieceInIce(GameModel* gameModel);
+	void LightPieceOnFire(GameModel* gameModel, bool canCatchOnFire = true);
+	void FreezePieceInIce(GameModel* gameModel, bool canBeFrozen = true);
 
 	void DoIceCubeReflectRefractLaserBullets(Projectile* projectile, GameModel* gameModel) const;
 	void GetIceCubeReflectionRefractionRays(const Point2D& currCenter, const Vector2D& currDir, 

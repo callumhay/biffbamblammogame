@@ -102,6 +102,9 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
 			assert(success);
+
+            // EVENT: Frozen block cancelled-out by fire
+            GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 		}
         else {
             // Detonate the collateral block
@@ -160,11 +163,9 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 
 		case Projectile::FireGlobProjectile:
 			// Fire glob detonates the collateral block, unless it's frozen in an ice cube;
-			// in that case, unfreeze a frozen collateral block
+			// in that case, unfreeze it
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
+				this->LightPieceOnFire(gameModel, false);
 			}
             else {
                 // Detonate the collateral block

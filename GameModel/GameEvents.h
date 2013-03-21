@@ -279,6 +279,18 @@ public:
         UNUSED_PARAMETER(teslaBlock2);
     }
 
+    /**
+     * Event triggered when a ball loses the fireball ability due to the player acquiring the iceball ability.
+	 * Arguements: ball - The ball that lost the fireball ability.
+     */
+    virtual void FireBallCancelledByIceBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
+    
+    /**
+     * Event triggered when a ball loses the iceball ability due to the player acquiring the fireball ability.
+	 * Arguements: ball - The ball that lost the iceball ability.
+     */
+    virtual void IceBallCancelledByFireBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
+
 	// Misc Events (Destruction, Combos, etc.) ************************************************
 
 	/**
@@ -536,6 +548,19 @@ public:
 	 */
     virtual void BlockIceShatteredEvent(const LevelPiece& block) { UNUSED_PARAMETER(block); }
 
+    /**
+     * Event triggered when a frozen block is cancelled-out by something firey hitting it. Occurs just after
+     * the ice status is removed.
+	 * Arguements: block - The block whose ice was cancelled-out.
+     */
+    virtual void BlockIceCancelledWithFireEvent(const LevelPiece& block) { UNUSED_PARAMETER(block); }
+
+    /**
+     * Event triggered when a block on fire is cancelled-out by something icy hitting it. Occurs just after
+     * the fire status is removed.
+	 * Arguements: block - The block whose fire was cancelled-out.
+     */
+    virtual void BlockFireCancelledWithIceEvent(const LevelPiece& block) { UNUSED_PARAMETER(block); }
 
     /**
      * Event triggered when the release timer starts ticking while the ball is on the paddle. Only

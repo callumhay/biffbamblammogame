@@ -107,7 +107,7 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
     // Top boundry of the piece
     if (topNeighbor != NULL) {
-        if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
             topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret &&
             topNeighbor->GetType() != LevelPiece::Breakable && topNeighbor->GetType() != LevelPiece::RocketTurret &&
             topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::AlwaysDrop &&
@@ -119,7 +119,7 @@ void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
                 boundingLines.push_back(l4);
                 boundingNorms.push_back(n4);
                 onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-                    topNeighbor->GetType() == LevelPiece::OneWay);
+                    topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay);
         }
     }
 
@@ -171,16 +171,14 @@ LevelPiece* TurretBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	}
 	else {
 		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
-		if (isFireBall) {
-			// Unfreeze a frozen block if it gets hit by a fireball
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
-			}
-            else {
-                resultingPiece = this->DiminishPiece(ball.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);
-            }
+		// Unfreeze a frozen turret if it gets hit by a fireball
+        if (isFireBall && this->HasStatus(LevelPiece::IceCubeStatus)) {
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            UNUSED_VARIABLE(success);
+			assert(success);
+            
+            // EVENT: Frozen block cancelled-out by fire
+            GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 		}
         else {
             resultingPiece = this->DiminishPiece(ball.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);

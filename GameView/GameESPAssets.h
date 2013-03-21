@@ -78,6 +78,8 @@ private:
 	ESPParticleColourEffector particleFader;
     ESPParticleColourEffector particleBoostFader;
 	ESPParticleColourEffector particleFireColourFader;
+    ESPParticleColourEffector particleWaterVapourColourFader;
+    ESPParticleColourEffector particleSmokeColourFader;
     ESPParticleColourEffector particleFireFastColourFader;
 	ESPParticleColourEffector fireBallColourFader;
 	ESPParticleColourEffector iceBallColourFader;
@@ -161,6 +163,7 @@ private:
     Texture2D* lightningAnimTex;
     Texture2D* circleTex;
     Texture2D* outlinedHoopTex;
+    Texture2D* dropletTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -322,6 +325,11 @@ public:
 
 	void AddIceBitsBreakEffect(const LevelPiece& block);
 	void AddIceCubeBlockBreakEffect(const LevelPiece& block, const Colour& colour);
+    void AddIceMeltedByFireEffect(const LevelPiece& block);
+    void AddFirePutOutByIceEffect(const LevelPiece& block);
+
+    void AddFireballCancelledEffect(const GameBall* ball);
+    void AddIceballCancelledEffect(const GameBall* ball);
 
     void AddFireGlobDestroyedEffect(const Projectile& projectile);
 

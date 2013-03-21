@@ -136,6 +136,7 @@ public:
     const char* TEXTURE_PLUS;
     const char* TEXTURE_CHEVRON;
     const char* TEXTURE_CIRCLE;
+    const char* TEXTURE_DROPLET;
 
     const char* TEXTURE_EXPLOSION_ANIMATION;
     const char* TEXTURE_LIGHTNING_ANIMATION;

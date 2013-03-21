@@ -206,6 +206,22 @@ void GameEventManager::ActionBallHitTeslaLightningArc(const GameBall& ball, cons
 	}		
 }
 
+// Action for when a fireball is cancelled by the player acquiring an iceball item
+void GameEventManager::ActionFireBallCancelledByIceBall(const GameBall& ball) {
+	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+		(*listenerIter)->FireBallCancelledByIceBallEvent(ball);
+	}	
+}
+
+// Action for when an iceball is cancelled by the player acquiring a fireball item
+void GameEventManager::ActionIceBallCancelledByFireBall(const GameBall& ball) {
+	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+		(*listenerIter)->IceBallCancelledByFireBallEvent(ball);
+	}
+}
+
 // Action for when the ball collides with the player paddle
 void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
@@ -551,6 +567,22 @@ void GameEventManager::ActionBlockIceShattered(const LevelPiece& block) {
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
 		(*listenerIter)->BlockIceShatteredEvent(block);
 	}	
+}
+
+// Action for when a block that is frozen is cancelled-out by something firey hitting it
+void GameEventManager::ActionBlockIceCancelledWithFire(const LevelPiece& block) {
+	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+		(*listenerIter)->BlockIceCancelledWithFireEvent(block);
+	}
+}
+
+// Action for when a block that is on fire is cancelled-out by something icy hitting it
+void GameEventManager::ActionBlockFireCancelledWithIce(const LevelPiece& block) {
+	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+		(*listenerIter)->BlockFireCancelledWithIceEvent(block);
+	}
 }
 
 // Action for when points are awarded and the GUI needs to be notified

@@ -574,6 +574,16 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 	debug_output("EVENT: Ball hit tesla lightning arc");
 }
 
+void GameEventsListener::FireBallCancelledByIceBallEvent(const GameBall& ball) {
+    this->display->GetAssets()->GetESPAssets()->AddFireballCancelledEffect(&ball);
+	debug_output("EVENT: Fireball cancelled by Iceball");
+}
+
+void GameEventsListener::IceBallCancelledByFireBallEvent(const GameBall& ball) {
+    this->display->GetAssets()->GetESPAssets()->AddIceballCancelledEffect(&ball);
+	debug_output("EVENT: Iceball cancelled by Fireball");
+}
+
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
     if (method == LevelPiece::DisintegrationDestruction) {
         this->display->GetAssets()->GetESPAssets()->AddBlockDisintegrationEffect(block);
@@ -1096,6 +1106,16 @@ void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAft
 void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
 	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block);
 	debug_output("EVENT: Ice shattered");
+}
+
+void GameEventsListener::BlockIceCancelledWithFireEvent(const LevelPiece& block) {
+    this->display->GetAssets()->GetESPAssets()->AddIceMeltedByFireEffect(block);
+    debug_output("EVENT: Frozen block cancelled-out");
+}
+
+void GameEventsListener::BlockFireCancelledWithIceEvent(const LevelPiece& block) {
+    this->display->GetAssets()->GetESPAssets()->AddFirePutOutByIceEffect(block);
+    debug_output("EVENT: Block on fire cancelled-out");
 }
 
 void GameEventsListener::ReleaseTimerStartedEvent() {
