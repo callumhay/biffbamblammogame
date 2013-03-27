@@ -14,7 +14,6 @@
 
 #include "../GameModel/GameEvents.h"
 #include "../GameControl/BBBGameController.h"
-#include "../GameSound/GameSoundAssets.h"
 
 class GameDisplay;
 class BossWeakpoint;
@@ -52,7 +51,8 @@ public:
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
 	void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal);
-	void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
+	void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
+    void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
 	void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
@@ -139,9 +139,8 @@ private:
 
 	void DestroyBallSafetyNet(const Point2D& pt);
 
-	static void GetVolAndShakeForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,
-																				float& shakeLength, GameSoundAssets::SoundVolumeLoudness& volume,
-																				BBBGameController::VibrateAmount& controllerVibeAmt);
+	static void GetEffectsForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,
+        float& shakeLength, BBBGameController::VibrateAmount& controllerVibeAmt);
 };
 
 #endif

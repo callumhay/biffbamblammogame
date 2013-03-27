@@ -2,7 +2,7 @@
  * GameAssets.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -63,7 +63,6 @@ espAssets(NULL),
 itemAssets(NULL),
 fboAssets(NULL),
 lightAssets(NULL),
-soundAssets(NULL),
 tutorialAssets(NULL),
 
 lifeHUD(NULL),
@@ -92,7 +91,6 @@ fireBallEffect(NULL),
 omniLaserBallEffect(NULL),
 magnetPaddleEffect(NULL)
 {
-
 	// Load ESP assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading purdy pictures...");
 	this->espAssets      = new GameESPAssets();
@@ -107,11 +105,6 @@ magnetPaddleEffect(NULL)
 	bool didItemAssetsLoad = this->itemAssets->LoadItemAssets();
     UNUSED_VARIABLE(didItemAssetsLoad);
 	assert(didItemAssetsLoad);
-
-	// Load basic default in-memory sounds
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
-	this->soundAssets = new GameSoundAssets();
-	this->soundAssets->LoadSoundPallet(GameSoundAssets::MainMenuSoundPallet);
 
 	// Load all fonts
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading fonts...");
@@ -198,10 +191,6 @@ GameAssets::~GameAssets() {
 	// Clear up the light assets
 	delete this->lightAssets;
 	this->lightAssets = NULL;
-
-	// Clean up sound assets
-	delete this->soundAssets;
-	this->soundAssets = NULL;
 
 	// Delete any HUD objects
 	delete this->lifeHUD;
@@ -1192,7 +1181,7 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 
 			// Turn off the sound for the rocket mask if there are no rockets left...
             // TODO: have separate masks for each rocket...
-			this->soundAssets->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+			//this->gameSound->StopSound(projectile, GameSound::RocketMovingLoop);
 			break;
         
         case Projectile::FireGlobProjectile:
@@ -1225,7 +1214,7 @@ void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
  */
 void GameAssets::FireRocket(const RocketProjectile& rocketProjectile) {
 	this->rocketMesh->ActivateRocket(static_cast<const PaddleRocketProjectile*>(&rocketProjectile));
-	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+	//this->gameSound->StartSound(rocketProjectile, GameSound::RocketMovingLoop);
 }
 
 /**
@@ -1312,7 +1301,7 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera)
     }
 
 	// Play the explosion sound
-	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);
+	//this->gameSound->PlaySoundAtPosition(GameSound::RocketExplodedEvent, rocket.GetPosition(), 1);
 }
 
 void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
@@ -1325,7 +1314,7 @@ void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
         BBBGameController::SoftVibration, BBBGameController::SoftVibration);
 
 	// TODO: Play the explosion sound
-	//this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundMineExplodedEvent, GameSoundAssets::LoudVolume);
+	//this->gameSound->PlaySoundAtPosition(GameSound::MineExplodedEvent, mine.GetPosition(), 1);
 }
 
 void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera) {
@@ -1355,7 +1344,7 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 	}
 
 	// Check to see if we've already loaded the world assets...
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading world assets...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading movement assets...");
 	if (this->worldAssets == NULL || this->worldAssets->GetStyle() != world.GetStyle()) {
 		// Delete all previously loaded style-related assets
 		delete this->worldAssets;
@@ -1364,13 +1353,6 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 		// Load up the new set of world geometry assets
 		this->worldAssets = GameWorldAssets::CreateWorldAssets(world.GetStyle());
 		assert(this->worldAssets != NULL);
-
-		// Unload any previous world's sound assets and load the new world sound assets
-		this->soundAssets->SetActiveWorldSounds(world.GetStyle(), true, true);
-	}
-	else {
-		// Make sure the sound and world assets are in sync
-		assert(this->soundAssets->GetActiveWorldSounds() == world.GetStyle());
 	}
 
 	LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);

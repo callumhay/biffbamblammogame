@@ -210,7 +210,7 @@ public:
     void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
 
 private:
-    static const int NUM_LASER_HITS = 4;
+    static const int NUM_LASER_HITS = 3;
     static const float BOTTOM_POINT_LIFE_POINTS;
     static const double BOTTOM_FADE_TIME;
 

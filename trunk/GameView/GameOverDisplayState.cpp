@@ -9,11 +9,15 @@
  * resulting work only under the same or similar licence to this one.
  */
 
+// GameDisplay Includes
 #include "GameOverDisplayState.h"
 #include "MainMenuDisplayState.h"
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+
+// GameSound Includes
+#include "../GameSound/GameSound.h"
 
 const char* GameOverDisplayState::GAME_OVER_TEXT         = "Game Over";
 const int GameOverDisplayState::GAME_OVER_LABEL_X_BORDER = 50;
@@ -46,6 +50,8 @@ GameOverDisplayState::~GameOverDisplayState() {
     this->gameOverMenu = NULL;
     delete this->topMenuEventHandler;
     this->topMenuEventHandler = NULL;
+    delete this->quitSubMenuEventHandler;
+    this->quitSubMenuEventHandler = NULL;
 }
 
 void GameOverDisplayState::RenderFrame(double dT) {
@@ -119,10 +125,12 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
 
                 assert(this->selectedAndActivatedItem >= 0);
                 if (this->selectedAndActivatedItem == this->retryMenuItem) {
+
 			        // Clean up any misc. visual effects
 			        this->display->GetAssets()->DeactivateMiscEffects();
-			        // Kill all sounds
-			        this->display->GetAssets()->GetSoundAssets()->StopAllSounds();
+			        
+                    // Kill all sounds
+			        this->display->GetSound()->StopAllSounds();
 
                     // Reset the level
                     this->display->GetModel()->ResetCurrentLevel();
@@ -241,7 +249,8 @@ void GameOverDisplayState::SetupMenu() {
 	const float textScaleFactor = this->display->GetTextScalingFactor();
 
 	// Set up the handlers
-	this->topMenuEventHandler    = new TopMenuEventHandler(this);
+	this->topMenuEventHandler     = new TopMenuEventHandler(this);
+    this->quitSubMenuEventHandler = new QuitVerifyMenuEventHandler(this);
 
     this->gameOverMenu = new GameMenu();
 	this->gameOverMenu->AddEventHandler(this->topMenuEventHandler);
@@ -285,13 +294,13 @@ void GameOverDisplayState::SetupMenu() {
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
 	exitMenuItem->SetVerifyMenuColours(Colour(1,1,1), Colour(0.5f, 0.5f, 0.5f), Colour(1,1,1));
 	exitMenuItem->SetVerifyMenuText("Are you sure you want to quit?", "Yes", "No");
-	//exitMenuItem->SetEventHandler(???);
+	exitMenuItem->SetEventHandler(this->quitSubMenuEventHandler);
 
     this->exitGameItem = this->gameOverMenu->AddMenuItem(exitMenuItem);
     this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
     this->menuHeight += tempLabelLg.GetHeight();
 
-	this->gameOverMenu->SetSelectedMenuItem(this->retryMenuItem);
+	this->gameOverMenu->SetSelectedMenuItem(this->retryMenuItem, false);
 }
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
@@ -300,7 +309,8 @@ void GameOverDisplayState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
 	// Play the sound effect assoicated with menu item selection/activation
-	//GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+	//GameSound* sound = this->mainMenuState->display->GetSound();
+    //sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, 1);
     
     if (itemIndex != this->state->exitGameItem) {
         this->state->selectedAndActivatedItem = itemIndex;
@@ -313,15 +323,20 @@ void GameOverDisplayState::TopMenuEventHandler::GameMenuItemChangedEvent(int ite
 }
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
-    if (itemIndex == this->state->exitGameItem) {
-
-        //GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-		//soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemVerifyAndSelectEvent);
-
-        // We exit the game if the exit game item has both been activated and verified...
-		this->state->display->QuitGame();
-    }
+    UNUSED_PARAMETER(itemIndex);
 }
 
 void GameOverDisplayState::TopMenuEventHandler::EscMenu() {
+}
+
+
+GameOverDisplayState::QuitVerifyMenuEventHandler::QuitVerifyMenuEventHandler(GameOverDisplayState* state) : 
+VerifyMenuEventHandlerWithSound(state->display->GetSound()), state(state) {
+}
+
+void GameOverDisplayState::QuitVerifyMenuEventHandler::MenuItemConfirmed() {
+    VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
+    SDL_Delay(500);
+    // We exit the game if the exit game item has both been activated and verified...
+    this->state->display->QuitGame();
 }

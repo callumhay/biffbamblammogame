@@ -221,9 +221,7 @@ public:
 	const char* FONT_ALLPURPOSE;
 
 	// Sound Script File (.msf) path constants *********************************
-	const char* MAIN_MENU_SOUND_SCRIPT;
-	const char* DECO_SOUND_SCRIPT;
-    const char* FUTURISM_SOUND_SCRIPT;
+	const char* GAME_SOUND_SCRIPT;
 
 	// Item-related constants *******************************
 	const char* ITEM_LABEL_MATGRP;

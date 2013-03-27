@@ -2,74 +2,64 @@
  * Sound.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef _SOUND_H_
-#define _SOUND_H_
+#ifndef __SOUND_H__
+#define __SOUND_H__
+
+#include <irrKlang.h>
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Point.h"
 
-/**
- * Class to represent the abstract highlevel structure of a in-game sound.
- * This class encapsulates much of the functionality for loading sounds using 
- * the SDL Mixer library.
- */
+#include "SoundCommon.h"
+
 class Sound {
-
 public:
-	virtual ~Sound();
-	
-	enum SoundType { EventSound, MaskSound, MusicSound };
-	virtual Sound::SoundType GetType() const = 0;
-		
-	// Whether or not this sound is valid
-	// Returns: true if valid, false otherwise.
-	virtual bool IsValid() const;
-	// Plays the sound
-	virtual void Play(bool doFadeIn) = 0;
-	// Pauses/Unpauses the sound
-	virtual void Pause() = 0;
-	virtual void UnPause() = 0;
-	// Stops the sound from playing
-	virtual void Stop(bool doFadeOut) = 0;
-	// Whether this sound is playing or not
-	virtual bool IsPlaying() const = 0;
-	// Whether this sound is paused or not
-	virtual bool IsPaused() const = 0;
-	// Whether this sound loops indefintely
-	virtual bool IsLooped() const = 0;
+    Sound(irrklang::ISound* sound);
+    ~Sound();
 
-	virtual void SetVolume(int volume);
+    SoundID GetSoundID() const;
 
-	std::string GetSoundName() const { return this->soundName; }
+    bool IsFinished() const;
+    void Stop();
+    void SetPosition(const Point3D& pos);
 
+private:
+    const SoundID id;
+    irrklang::ISound* sound;
 
-protected:
-	Sound(const std::string& name, int msFadein, int msFadeout);
-
-	static const int INVALID_SDL_CHANNEL;	// Invalid value for a channel
-
-	std::string soundName;
-	int volume;			// The volume specified in the interval [0, MIX_MAX_VOLUME]
-	int msFadein;		// Millisecond fade in when playing this sound
-	int msFadeout;	// Millisecond fade out when playing this sound
+    DISALLOW_COPY_AND_ASSIGN(Sound);
 };
 
-inline bool Sound::IsValid() const {
-	if (this->msFadein < 0 || this->msFadeout < 0) {
-		return false;
-	}
-	return true;
+inline Sound::Sound(irrklang::ISound* sound) : 
+id(GenerateSoundID()), sound(sound) {
+    assert(sound != NULL);
 }
 
-inline void Sound::SetVolume(int volume) {
-	assert(volume >= 0 && volume <= MIX_MAX_VOLUME);
-	this->volume = volume;
+inline Sound::~Sound() {
+    this->sound->drop();
 }
 
-#endif
+inline SoundID Sound::GetSoundID() const {
+    return this->id;
+}
+
+inline bool Sound::IsFinished() const {
+    return this->sound->isFinished();
+}
+
+inline void Sound::Stop() {
+    this->sound->stop();
+}
+
+inline void Sound::SetPosition(const Point3D& pos) {
+    this->sound->setPosition(irrklang::vec3df(pos[0], pos[1], pos[2]));
+}
+
+#endif // __SOUND_H__

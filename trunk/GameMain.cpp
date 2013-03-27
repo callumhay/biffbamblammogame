@@ -28,8 +28,6 @@
 #include "GameModel/GameModelConstants.h"
 #include "GameModel/Onomatoplex.h"
 
-#include "GameSound/GameSoundAssets.h"
-
 #include "GameControl/GameControllerManager.h"
 
 #include "ResourceManager.h"
@@ -39,9 +37,8 @@
 // Initialization Constants for the application
 static const char* RESOURCE_ZIP = "BBBResources.zip";
 
-static GameModel *model = NULL;
-static GameDisplay *display = NULL;
-static GameSoundAssets* sound = NULL;
+static GameModel* model     = NULL;
+static GameDisplay* display = NULL;
 
 /**
  * Clean up the ModelViewController classes that run the game.
@@ -51,11 +48,6 @@ static void CleanUpMVC() {
 	if (display != NULL) {
 		delete display;
 		display = NULL;
-	}
-
-	if (sound != NULL) {
-		delete sound;
-		sound = NULL;
 	}
 
 	if (model != NULL) {
@@ -182,8 +174,7 @@ int main(int argc, char *argv[]) {
 
 		// Create the MVC while showing the loading screen...
 		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 7);
-		// Set the volume from the initial configuration options
-		GameSoundAssets::SetGameVolume(initCfgOptions.GetVolume());
+		
         // Set the controller sensitivity from the initial configuration options
         //GameControllerManager::GetInstance()->SetControllerSensitivity(initCfgOptions.GetControllerSensitivity());
 

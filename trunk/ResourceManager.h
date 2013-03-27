@@ -70,12 +70,6 @@ public:
 	void GetCgFxEffectResource(const std::string &filepath, CGeffect &effect, std::map<std::string, CGtechnique> &techniques);
 	bool ReleaseCgFxEffectResource(CGeffect &effect);
 
-	// Sound Resource Functions
-	Mix_Chunk* GetEventSoundResource(const std::string &filepath);
-	Mix_Music* GetMusicSoundResource(const std::string &filepath);
-	bool ReleaseEventSoundResource(Mix_Chunk* sound);
-	bool ReleaseMusicSoundResource(Mix_Music* music);
-
 	// Initialization configuration loading
     static void SetLoadDir(const char* loadDir);
     static inline const std::string& GetLoadDir() { return baseLoadDir; }
@@ -122,14 +116,6 @@ private:
 	std::map<std::string, CGeffect> loadedEffects;																	// Effects already loaded into the blammo engine
 	std::map<CGeffect, std::map<std::string, CGtechnique> > loadedEffectTechniques;	// Techniques associated with each effect
 	std::map<CGeffect, unsigned int> numRefPerEffect;																// Number of references per effect
-
-	// SDL Mixer loaded sounds
-	std::map<std::string, Mix_Chunk*> loadedEventSounds;
-	std::map<Mix_Chunk*, int> numReservedEventSounds;
-	std::map<std::string, Mix_Music*> loadedMusicSounds;
-	std::map<Mix_Music*, SDL_RWops*> musicSDLMemory;
-	std::map<Mix_Music*, char*> musicBuffers;
-	std::map<Mix_Music*, int> numReservedMusicSounds;
 
 	// Blammopedia - where all information and textures for items, blocks, etc. are archived for easy lookup
 	Blammopedia* blammopedia;

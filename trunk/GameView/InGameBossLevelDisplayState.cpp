@@ -97,7 +97,7 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             this->display->GetAssets()->DeactivateMiscEffects();
 
 		    // Stop world background music (if it's still going)
-		    this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
+		    //this->display->GetSound()->StopSound(GameSound::BackgroundMusicLoop, 0.5, /*seconds fade-out*/); ??
 
             // The outro consists of 'explosive' white lines emitting from the boss
             // and then an animation to the whole screen going white...

@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
@@ -125,7 +125,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -146,7 +146,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
@@ -205,7 +205,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_DEMO"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -227,7 +227,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
@@ -288,7 +288,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_DEMO"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -309,7 +309,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
@@ -2866,11 +2866,7 @@
 				Name="Header Files"
 				>
 				<File
-					RelativePath=".\GameSound\EventSound.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameSound\GameSoundAssets.h"
+					RelativePath=".\GameSound\GameSound.h"
 					>
 				</File>
 				<File
@@ -2878,19 +2874,19 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameSound\MusicSound.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameSound\Sound.h"
 					>
 				</File>
 				<File
-					RelativePath=".\GameSound\SoundProbabilityPair.h"
+					RelativePath=".\GameSound\SoundCommon.h"
 					>
 				</File>
 				<File
-					RelativePath=".\GameSound\SoundTimedSequence.h"
+					RelativePath=".\GameSound\SoundEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\SoundSource.h"
 					>
 				</File>
 			</Filter>
@@ -2898,11 +2894,7 @@
 				Name="Source Files"
 				>
 				<File
-					RelativePath=".\GameSound\EventSound.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameSound\GameSoundAssets.cpp"
+					RelativePath=".\GameSound\GameSound.cpp"
 					>
 				</File>
 				<File
@@ -2910,15 +2902,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameSound\MusicSound.cpp"
+					RelativePath=".\GameSound\SoundEffect.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\GameSound\Sound.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameSound\SoundTimedSequence.cpp"
+					RelativePath=".\GameSound\SoundSource.cpp"
 					>
 				</File>
 			</Filter>

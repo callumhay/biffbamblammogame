@@ -233,6 +233,16 @@ public:
         UNUSED_PARAMETER(enterPortal);
     }
 
+    /**
+	 * Event triggered when a ball enters a cannon block. Only occurs once as the ball is JUST entering.
+	 * Arguements: ball        - The ball entering the cannon.
+	 *             cannonBlock - The cannon block that the ball is entering.
+	 */
+    virtual void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
+        UNUSED_PARAMETER(ball);
+        UNUSED_PARAMETER(cannonBlock);
+    }
+
 	/**
 	 * Event triggered when a ball is fired out of a cannon block. Only occurs once as the ball is JUST being
 	 * fired out of the barrel of the cannon.

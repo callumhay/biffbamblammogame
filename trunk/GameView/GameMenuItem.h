@@ -19,15 +19,69 @@
 
 #include "../GameControl/GameControl.h"
 
+#include "../GameSound/GameSound.h"
+
 class GameMenu;
 class GameSubMenu;
 
-
 class GameMenuItemEventHandler {
 public:
-	virtual void MenuItemScrolled() = 0;
-	virtual void MenuItemEnteredAndSet() = 0;
-	virtual void MenuItemCancelled() = 0;
+    GameMenuItemEventHandler() {}
+    virtual ~GameMenuItemEventHandler() {}
+
+    virtual void MenuItemActivated()   {};
+    virtual void MenuItemDeactivated() {};
+    virtual void MenuItemScrolled()    {};
+    virtual void MenuItemConfirmed()   {};
+    virtual void MenuItemCancelled()   {};
+};
+
+class SelectionListEventHandlerWithSound : public GameMenuItemEventHandler {
+public:
+    SelectionListEventHandlerWithSound(GameSound* sound) : GameMenuItemEventHandler(), sound(sound) {}
+    virtual ~SelectionListEventHandlerWithSound() {}
+
+    virtual void MenuItemActivated() { this->sound->PlaySound(GameSound::MenuItemEnteredEvent, false); }
+    virtual void MenuItemScrolled()  { this->sound->PlaySound(GameSound::MenuSelectionItemScrolledEvent, false); }
+    virtual void MenuItemConfirmed() { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
+    virtual void MenuItemCancelled() { this->sound->PlaySound(GameSound::MenuItemCancelEvent, false); }
+
+private:
+    GameSound* sound;
+};
+
+class ScrollerItemEventHandlerWithSound : public GameMenuItemEventHandler {
+public:
+    ScrollerItemEventHandlerWithSound(GameSound* sound) : GameMenuItemEventHandler(), sound(sound), lastScrollingSoundID(INVALID_SOUND_ID) {}
+    virtual ~ScrollerItemEventHandlerWithSound() {}
+
+    virtual void MenuItemActivated() { this->sound->PlaySound(GameSound::MenuItemEnteredEvent, false); }
+    virtual void MenuItemScrolled()  { 
+        if (!this->sound->IsSoundPlaying(this->lastScrollingSoundID)) {
+            this->lastScrollingSoundID = this->sound->PlaySound(GameSound::MenuScrollerItemScrolledEvent, false);
+        }
+    }
+    virtual void MenuItemConfirmed() { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
+    virtual void MenuItemCancelled() { this->sound->PlaySound(GameSound::MenuItemCancelEvent, false); }
+
+private:
+    GameSound* sound;
+    SoundID lastScrollingSoundID;
+};
+
+class VerifyMenuEventHandlerWithSound : public GameMenuItemEventHandler {
+public:
+    VerifyMenuEventHandlerWithSound(GameSound* sound) : GameMenuItemEventHandler(), sound(sound) {}
+    virtual ~VerifyMenuEventHandlerWithSound() {}
+
+    virtual void MenuItemActivated()   { this->sound->PlaySound(GameSound::MenuOpenSubMenuWindowEvent, false); }
+    virtual void MenuItemDeactivated() { this->sound->PlaySound(GameSound::MenuCloseSubMenuWindowEvent, false); }
+    virtual void MenuItemScrolled()    { this->sound->PlaySound(GameSound::MenuItemChangedEvent, false); }
+    virtual void MenuItemConfirmed()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
+    virtual void MenuItemCancelled()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
+
+protected:
+    GameSound* sound;
 };
 
 /**
@@ -83,8 +137,8 @@ public:
         this->lgTextLabel.SetText(text);
     }
 
-	virtual void Activate() {};
-	virtual void Deactivate() {};
+    virtual void Activate() { if (this->eventHandler != NULL) { this->eventHandler->MenuItemActivated(); } };
+    virtual void Deactivate() { if (this->eventHandler != NULL) { this->eventHandler->MenuItemDeactivated(); } };
 
 	GameSubMenu* GetSubMenu() { return this->subMenu; }
 
@@ -227,15 +281,19 @@ private:
 	bool increaseValueButtonPressed;
 	bool decreaseValueButtonPressed;
 
-	void ChangeScrollerValue(float changeAmt);
+	void ChangeScrollerValue(float changeAmt, bool signalEvent);
 	void DrawScrollerArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing);
 	
 
-	void Activate() { 
+	void Activate() {
+        GameMenuItem::Activate();
 		this->isActive = true; 
 		this->previouslySelectedValue = this->currentValue;
 	}
-	void Deactivate() { this->isActive = false; }
+	void Deactivate() { 
+        GameMenuItem::Deactivate();
+        this->isActive = false;
+    }
 
     void EscapeFromMenuItem(bool saveChange);
 

@@ -317,7 +317,7 @@ void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
  * game menu. This will change its properties to make it obvious that
  * it has been highlighted.
  */
-void GameMenu::SetSelectedMenuItem(int index) {
+void GameMenu::SetSelectedMenuItem(int index, bool signalEvents) {
 	assert(index >= 0 && index < static_cast<int>(this->menuItems.size()));
 	
 	// Deselect the previous selection if necessary
@@ -331,7 +331,8 @@ void GameMenu::SetSelectedMenuItem(int index) {
 	this->menuItems[index]->ToggleWiggleAnimationOn(GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE, GameMenuItem::MENU_ITEM_WOBBLE_FREQ);
 	this->menuItems[index]->SetSize(true);
 	this->menuItems[index]->SetTextColour(this->highlightColour);
-	this->MenuItemHighlighted();
+
+	this->MenuItemHighlighted(signalEvents);
 }
 
 /**
@@ -363,7 +364,7 @@ void GameMenu::ActivateSelectedMenuItem() {
 
 void GameMenu::DeactivateSelectedMenuItem() {
 	this->isSelectedItemActivated = false;
-	this->SetSelectedMenuItem(this->selectedMenuItemIndex);
+	this->SetSelectedMenuItem(this->selectedMenuItemIndex, false);
 	this->menuItems[this->selectedMenuItemIndex]->Deactivate();
 
 	// Go through all the menu items except the selected one and set their idle colours
@@ -719,7 +720,7 @@ void GameSubMenu::DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menu
 	this->menuItemOpenFadeIn.Tick(dT);
 }
 
-void GameSubMenu::SetSelectedMenuItem(int index) {
+void GameSubMenu::SetSelectedMenuItem(int index, bool signalEvents) {
 	assert(index >= 0 && index < static_cast<int>(this->menuItems.size()));
 	
 	// Deselect the previous selection if necessary
@@ -734,7 +735,7 @@ void GameSubMenu::SetSelectedMenuItem(int index) {
 	this->menuItems[index]->SetSize(true);
 	this->menuItems[index]->SetTextColour(this->highlightColour);
 
-	this->MenuItemHighlighted();
+	this->MenuItemHighlighted(signalEvents);
 }
 
 /** 

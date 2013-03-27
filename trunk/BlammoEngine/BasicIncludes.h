@@ -37,6 +37,8 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
+#define STRINGIFY(x) # x
+
 // STL includes
 //#ifdef _SECURE_SCL
 //#undef _SECURE_SCL
@@ -85,7 +87,6 @@
 #include "SDL.h"
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
-#include "SDL_mixer.h"
 
 // Cg includes
 #include "Cg/cg.h"
