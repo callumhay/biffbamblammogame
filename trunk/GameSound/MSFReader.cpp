@@ -325,6 +325,7 @@ void MSFReader::InitSoundTypeMapping() {
 
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaMenuBackgroundLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemChangedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemEnteredEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemCancelEvent));

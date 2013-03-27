@@ -60,6 +60,9 @@ private:
 
 	static const float CAM_DIST_FROM_ORIGIN;
 
+    static const double FADE_IN_TIME_IN_SECS;
+    static const double FADE_OUT_TIME_IN_SECS;
+
 	// The configuration options for the game
 	ConfigOptions cfgOptions;
 

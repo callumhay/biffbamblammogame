@@ -48,6 +48,9 @@ const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 
 const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
 
+const double MainMenuDisplayState::FADE_IN_TIME_IN_SECS = 3.0;
+const double MainMenuDisplayState::FADE_OUT_TIME_IN_SECS = 1.25;
+
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
@@ -100,7 +103,7 @@ titleDisplay(1.0f)
 	this->InitializeMainMenu();
 
 	// Setup the fade-in animation
-	this->fadeAnimation.SetLerp(0.0, 3.0, 1.0f, 0.0f);
+	this->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_IN_TIME_IN_SECS, 1.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(1.0f);
 
@@ -490,10 +493,11 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	// Check to see if we're switching game states...
     if (finishFadeAnim) {
+        static const double SOUND_FADE_OUT_TIME = 0.5;
 	    if (this->changeToPlayGameState) {
     		
 		    // Turn off the background music...
-            sound->StopSound(this->bgLoopedSoundID);
+            sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
 
 		    // Start the game at the furthest level of player progress - this will queue up the next states that we need to go to
             int furthestWorldIdx, furthestLevelIdx;
@@ -512,7 +516,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
         else if (this->changeToBlammopediaState) {
 		    
             // Turn off the background music...
-            sound->StopSound(this->bgLoopedSoundID);
+            sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
 
             // Change to the blammopedia state
             this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::BlammopediaMenu, this->display));
@@ -521,7 +525,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
         else if (this->changeToLevelSelectState) {
 
             // Turn off the background music...
-            sound->StopSound(this->bgLoopedSoundID);
+            sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
 
             // Change to the blammopedia state
             this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::SelectWorldMenu, this->display));
@@ -817,7 +821,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
         sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
 		
         this->mainMenuState->changeToPlayGameState = true;
-		this->mainMenuState->fadeAnimation.SetLerp(0.0, 2.0, 0.0f, 1.0f);
+		this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
 	}
 	else if (itemIndex == this->mainMenuState->playLevelMenuItemIndex) {
@@ -826,7 +830,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
         sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
         
         this->mainMenuState->changeToLevelSelectState = true;
-		this->mainMenuState->fadeAnimation.SetLerp(0.0, 1.0, 0.0f, 1.0f);
+		this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
 	}
 	else if (itemIndex == this->mainMenuState->optionsMenuItemIndex) {
@@ -836,15 +840,17 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 	}
     else if (itemIndex == this->mainMenuState->blammopediaItemIndex) {
         debug_output("Selected " << BLAMMOPEDIA_MENUITEM << " from menu");
+
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
+
         this->mainMenuState->changeToBlammopediaState = true;
-		this->mainMenuState->fadeAnimation.SetLerp(0.0, 1.0, 0.0f, 1.0f);
+		this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
     }
 	else if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
 		// We don't do anything since the user is currently being asked
 		// for verification to quit the game
 		debug_output("Selected " << EXIT_MENUITEM << " from menu");
-		sound->PlaySound(GameSound::MenuOpenSubMenuWindowEvent, false);
 	}
 	else {
 		assert(false);

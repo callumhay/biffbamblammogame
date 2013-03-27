@@ -22,6 +22,8 @@
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
+#include "../GameSound/GameSound.h"
+
 #include "../GameModel/GameItemFactory.h"
 
 const int BlammopediaState::ITEM_NAME_BORDER_SIZE = 10;
@@ -41,6 +43,9 @@ const float BlammopediaState::LABEL_ITEM_GAP = 50;
 BlammopediaState::BlammopediaState(GameDisplay* display) : 
 DisplayState(display), currMenuItemIndex(NO_MENU_ITEM_INDEX), currListViewIndex(0), 
 goBackToMainMenu(false), starryBG(NULL) {
+
+    // Start the background music for the blammopedia
+    this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::BlammopediaMenuBackgroundLoop, true);
 
     this->itemSelTabAnim.SetInterpolantValue(0.0f);
     this->itemSelTabAnim.SetRepeat(false);
@@ -314,6 +319,8 @@ void BlammopediaState::RenderFrame(double dT) {
     }
   
     if (fadeDone && this->goBackToMainMenu) {
+        this->display->GetSound()->StopSound(this->bgLoopedSoundID, 0.5);
+
         // Go back to the main menu now
         this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, this->display));
         return;

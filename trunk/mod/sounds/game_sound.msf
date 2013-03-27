@@ -6,6 +6,11 @@ MainMenuBackgroundLoop {
 	file = menu/bg_piano.wav
 }
 
+// Blammopedia menu background music (looped)
+BlammopediaMenuBackgroundLoop {
+	file = menu/bg_blammopedia.wav
+}
+
 // Plays when the user highlights a new item in a menu
 MenuItemChangedEvent {
 	file = menu/item_select.wav
