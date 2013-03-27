@@ -65,11 +65,13 @@ bool GameSound::Init() {
 }
 
 void GameSound::Tick(double dT) {
-    UNUSED_PARAMETER(dT);
 
-    // Go through all the currently playing sounds and clean up any that have finished playing
+    // Go through all the currently playing sounds, tick them, and clean up any that have finished playing
     for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end();) {
+        
         Sound* currSound = iter->second;
+        currSound->Tick(dT);
+        
         if (currSound->IsFinished()) {
             delete currSound;
             currSound = NULL;
@@ -83,10 +85,17 @@ void GameSound::Tick(double dT) {
 }
 
 void GameSound::LoadGlobalSounds() {
-    for (SoundSourceMapIter iter = this->globalSounds.begin(); iter != this->globalSounds.end(); ++iter) {
+    for (SoundSourceMapIter iter = this->globalSounds.begin(); iter != this->globalSounds.end();) {
         SoundSource* currSoundSrc = iter->second;
         assert(currSoundSrc != NULL);
-        currSoundSrc->Load();
+        if (!currSoundSrc->Load()) {
+            delete currSoundSrc;
+            currSoundSrc = NULL;
+            iter = this->globalSounds.erase(iter);
+        }
+        else {
+            ++iter;
+        }
     }
 }
 
@@ -96,10 +105,17 @@ void GameSound::LoadWorldSounds(const GameWorld::WorldStyle& world) {
     for (WorldSoundSourceMapIter iter1 = this->worldSounds.begin(); iter1 != this->worldSounds.end(); ++iter1) {
         SoundSourceMap& relevantWorldSoundSourceMap = iter1->second;
         if (iter1->first == world) {
-            for (SoundSourceMapIter iter2 = relevantWorldSoundSourceMap.begin(); iter2 != relevantWorldSoundSourceMap.end(); ++iter2) {
+            for (SoundSourceMapIter iter2 = relevantWorldSoundSourceMap.begin(); iter2 != relevantWorldSoundSourceMap.end();) {
                 SoundSource* currSoundSrc = iter2->second;
                 assert(currSoundSrc != NULL);
-                currSoundSrc->Load();
+                if (!currSoundSrc->Load()) {
+                    delete currSoundSrc;
+                    currSoundSrc = NULL;
+                    iter2 = relevantWorldSoundSourceMap.erase(iter2);
+                }
+                else {
+                    ++iter2;
+                }
             }
         }
         else {
@@ -176,8 +192,6 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
 }
 
 void GameSound::StopSound(SoundID soundID, double fadeOutTimeInSecs) {
-    assert(fadeOutTimeInSecs == 0.0); // TODO: add this functionality...
-
     if (this->soundEngine == NULL || soundID == INVALID_SOUND_ID) {
         return;
     }
@@ -187,7 +201,12 @@ void GameSound::StopSound(SoundID soundID, double fadeOutTimeInSecs) {
         return;
     }
 
-    sound->Stop();
+    if (fadeOutTimeInSecs > 0.0) {
+        sound->SetFadeout(fadeOutTimeInSecs);
+    }
+    else {
+        sound->Stop();
+    }
 }
 
 void GameSound::SetMasterVolume(float volume) {

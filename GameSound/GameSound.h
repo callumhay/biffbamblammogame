@@ -43,6 +43,7 @@ public:
 
         // Main menu sounds
 		MainMenuBackgroundLoop,
+        BlammopediaMenuBackgroundLoop,
 		MenuItemChangedEvent, 
 		MenuItemEnteredEvent,
 		MenuItemCancelEvent,
@@ -147,10 +148,6 @@ private:
     typedef std::map<SoundID, Sound*> SoundMap;
     typedef SoundMap::iterator SoundMapIter;
 
-
-    // IrrKlang stuff
-    irrklang::ISoundEngine* soundEngine;
-    
     // Sound Source and Effects Maps
     SoundSourceMap globalSounds;
     EffectMap globalEffects;
@@ -161,7 +158,10 @@ private:
     SoundMap nonAttachedPlayingSounds;
     //AttachedSoundMap attachedSounds;
 
+    // IrrKlang stuff
+    irrklang::ISoundEngine* soundEngine;
 
+    // Helper functions
     SoundSource* BuildSoundSource(const std::string& soundName, const std::string& filePath);
 
     void ClearSounds();

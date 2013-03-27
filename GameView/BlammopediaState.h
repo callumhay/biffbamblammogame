@@ -18,6 +18,8 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
 
+#include "../GameSound/SoundCommon.h"
+
 #include "../Blammopedia.h"
 
 class Texture;
@@ -55,6 +57,8 @@ private:
 
     std::map<ItemListView::ListItem*, Blammopedia::Entry*> itemToEntryMap;
     //std::map<ItemListView::ListItem*, PopupTutorialHint*> itemToTutorialMap;
+
+    SoundID bgLoopedSoundID;
 
     // Menu items and states
     static const int NO_MENU_ITEM_INDEX       = -1;
