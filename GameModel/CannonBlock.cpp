@@ -157,6 +157,9 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
     // Disable any boosting for the ball
     gameModel->BallBoostReleasedForBall(ball);
 
+    // EVENT: Ball has entered the cannon block
+    GameEventManager::Instance()->ActionBallEnteredCannon(ball, *this);
+
 	return this;
 }
 

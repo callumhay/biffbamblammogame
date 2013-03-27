@@ -79,19 +79,30 @@ private:
 
 	class TopMenuEventHandler : public GameMenuEventHandler {
 	public:
-		TopMenuEventHandler(GameOverDisplayState* state) : state(state) {}
+		TopMenuEventHandler(GameOverDisplayState* state) : state(state) { assert(state != NULL); }
 		~TopMenuEventHandler() {}
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
 		void GameMenuItemVerifiedEvent(int itemIndex);
-		void EscMenu();
+        void EscMenu();
 	private:
 		GameOverDisplayState* state;
 	};
 
+    class QuitVerifyMenuEventHandler : public VerifyMenuEventHandlerWithSound {
+    public:
+        QuitVerifyMenuEventHandler(GameOverDisplayState* state);
+        ~QuitVerifyMenuEventHandler() {}
+
+        void MenuItemConfirmed();
+
+    private:
+        GameOverDisplayState* state;
+    };
 
 	TopMenuEventHandler* topMenuEventHandler;
+    QuitVerifyMenuEventHandler* quitSubMenuEventHandler;
 
     DISALLOW_COPY_AND_ASSIGN(GameOverDisplayState);
 };

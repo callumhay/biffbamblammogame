@@ -24,8 +24,6 @@
 #include "../GameModel/GameItemTimer.h"
 #include "../GameModel/SafetyNet.h"
 
-#include "../GameSound/GameSoundAssets.h"
-
 // Compositional classes for asssets
 #include "GameWorldAssets.h"
 #include "GameESPAssets.h"
@@ -139,9 +137,6 @@ public:
 		return this->fboAssets;
 	}
 
-	GameSoundAssets* GetSoundAssets() {
-		return this->soundAssets;
-	}
     GameTutorialAssets* GetTutorialAssets() {
         return this->tutorialAssets;
     }
@@ -174,7 +169,6 @@ private:
 	GameItemAssets* itemAssets;		    // Item-related assets (item drops, timers, etc.)
 	GameFBOAssets* fboAssets;           // Framebuffer Object related assets
 	GameLightAssets* lightAssets;       // Light assets in the foreground and background
-	GameSoundAssets* soundAssets;       // Sound assets for everything
     GameTutorialAssets* tutorialAssets; // Tutorial texture assets
 
 	LivesLeftHUD* lifeHUD;

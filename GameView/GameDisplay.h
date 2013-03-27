@@ -18,9 +18,11 @@
 
 #include "../GameModel/GameModel.h"
 
+#include "../GameSound/GameSound.h"
+
 class GameModel;
 class GameAssets;
-class GameSoundAssets;
+class GameSound;
 class GameEventsListener;
 
 // The main display class, used to execute the main rendering loop
@@ -73,10 +75,12 @@ public:
 	GameAssets* GetAssets() {
 		return this->assets;
 	}
-
 	GameModel* GetModel() {
 		return this->model;
 	}
+    GameSound* GetSound() {
+        return this->sound;
+    }
 	Camera& GetCamera() {
 		return this->gameCamera;
 	}
@@ -121,9 +125,10 @@ private:
 	std::list<DisplayState::DisplayStateType> stateQueue;
 	DisplayState* currState;
 
-
-	GameModel* model;
+	GameModel*  model;
+    GameSound*  sound;
 	GameAssets* assets;
+
 	GameEventsListener* gameListener;
 
 	bool gameReinitialized;		// Whether or not we should reinitialize the whole game (recreate the window, etc.)
@@ -163,6 +168,10 @@ inline void GameDisplay::Render(double dT) {
     if (this->currState->AllowsGameModelUpdates()) {
         this->UpdateModel(dT);
     }
+
+    // Update sounds
+    //this->sound->SetListenerPosition(this->gameCamera);
+    this->sound->Tick(dT);
 }
 
 inline void GameDisplay::UpdateModel(double dT) {

@@ -43,26 +43,6 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
         return false;
     }
 	
-	// Load the SDL Audio Mixer
-    static const int audio_rate = 44100;
-    static const Uint16 audio_format = AUDIO_S16SYS; // 16-bit stereo
-    static const int audio_channels = 2;
-    static const int audio_buffers = 2048;
-
-	if (Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)) {
-		debug_output("Unable to open SDL audio: " << SDL_GetError());
-		std::cerr << "Unable to open SDL audio: " << SDL_GetError();
-        return false;
-    }
-	
-	int resultAudioRate, resultAudioChannels;
-	Uint16 resultAudioFormat;
-	Mix_QuerySpec(&resultAudioRate, &resultAudioFormat, &resultAudioChannels);
-	debug_output("SDL Audio Information:" << std::endl << 
-                 "Audio rate: " << resultAudioRate << "Hz" << std::endl <<
-                 "Audio channels: " << resultAudioChannels << std::endl);
-		           
-
 	// Don't show the mouse cursor unless we're in debug mode
 #ifdef _DEBUG
 	SDL_ShowCursor(1);
@@ -129,8 +109,7 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
  * Shut down the windowing system. Call this before calling Init again.
  */
 void WindowManager::Shutdown() {
-	Mix_CloseAudio();						// Close/clean-up all SDL audio/mixer stuff
-	SDL_Quit();									// This will obliterate all surfaces and other SDL objects
+	SDL_Quit();                 // This will obliterate all surfaces and other SDL objects
 	this->videoSurface = NULL;	// To tell this object that video is dead
 }
 

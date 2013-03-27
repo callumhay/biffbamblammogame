@@ -102,7 +102,7 @@ public:
 	}
 
 	// Set the currently highlighted menu item
-	virtual void SetSelectedMenuItem(int index);
+	virtual void SetSelectedMenuItem(int index, bool signalEvents = true);
 
 	// Functions for Activating and Deactivating the currently selected/highlighted menu item
 	void ActivateSelectedMenuItem();
@@ -167,7 +167,8 @@ public:
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 
-	inline void MenuItemHighlighted() {
+	inline void MenuItemHighlighted(bool signalEvents) {
+        if (!signalEvents) { return; }
 		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
 			(*iter)->GameMenuItemHighlightedEvent(this->selectedMenuItemIndex);
 		}
@@ -231,7 +232,7 @@ protected:
 		if (this->menuItems.size() == 0) {
 			return;
 		}
-		this->SetSelectedMenuItem((this->selectedMenuItemIndex + this->menuItems.size() - 1) % this->menuItems.size());
+		this->SetSelectedMenuItem((this->selectedMenuItemIndex + this->menuItems.size() - 1) % this->menuItems.size(), true);
 	}
 
 	// Tell the menu that the user has moved their selection down 1 item
@@ -239,7 +240,7 @@ protected:
 		if (this->menuItems.size() == 0) {
 			return;
 		}
-		this->SetSelectedMenuItem((this->selectedMenuItemIndex + 1) % this->menuItems.size());
+		this->SetSelectedMenuItem((this->selectedMenuItemIndex + 1) % this->menuItems.size(), true);
 	}
 
     void LeftAction();
@@ -282,7 +283,7 @@ public:
 	GameSubMenu();
 	~GameSubMenu();
 
-	void SetSelectedMenuItem(int index);
+	void SetSelectedMenuItem(int index, bool signalEvents = true);
 
 	void AnimateMenuOpen();
 

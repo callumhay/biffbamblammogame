@@ -9,6 +9,12 @@
  * resulting work only under the same or similar licence to this one.
  */
 
+// BlammoEngine Includes
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/GeometryMaker.h"
+#include "../BlammoEngine/Camera.h"
+
+// GameDisplay Includes
 #include "InGameMenuState.h"
 #include "InGameDisplayState.h"
 #include "MainMenuDisplayState.h"
@@ -16,11 +22,11 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
+// GameModel Includes
 #include "../GameModel/GameModel.h"
 
-#include "../BlammoEngine/BasicIncludes.h"
-#include "../BlammoEngine/GeometryMaker.h"
-#include "../BlammoEngine/Camera.h"
+// GameSound Includes
+#include "../GameSound/GameSound.h"
 
 const Colour InGameMenuState::MENU_ITEM_IDLE_COLOUR		= Colour(0.75f, 0.75f, 0.75f);
 const Colour InGameMenuState::MENU_ITEM_SEL_COLOUR		= Colour(1, 0.8f, 0);
@@ -32,12 +38,14 @@ const char* InGameMenuState::VERIFY_MENU_NO   = "NOoo!";
 
 InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
 DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
-topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL), difficultyEventHandler(NULL),
-invertBallBoostHandler(NULL), returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1),
+topMenu(NULL), topMenuEventHandler(NULL), difficultyEventHandler(NULL), invertBallBoostHandler(NULL),
+restartVerifyHandler(NULL), exitGameVerifyHandler(NULL), returnToMainMenuVerifyHandler(NULL),
+returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1),
 difficultyRestartPopup(NULL) {
 
 	// Pause all world sounds
-	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();
+	this->display->GetSound()->PauseAllSounds();
+
 	// Pause the game itself
 	this->display->GetModel()->SetPause(GameModel::PauseGame);
 
@@ -52,12 +60,17 @@ InGameMenuState::~InGameMenuState() {
 	this->topMenu = NULL;
 	delete this->topMenuEventHandler;
 	this->topMenuEventHandler = NULL;
-	delete this->verifyMenuEventHandler;
-	this->verifyMenuEventHandler = NULL;
     delete this->difficultyEventHandler;
     this->difficultyEventHandler = NULL;
     delete this->invertBallBoostHandler;
     this->invertBallBoostHandler = NULL;
+
+    delete this->restartVerifyHandler;
+    this->restartVerifyHandler = NULL;
+    delete this->exitGameVerifyHandler;
+    this->exitGameVerifyHandler = NULL;
+    delete this->returnToMainMenuVerifyHandler;
+    this->returnToMainMenuVerifyHandler = NULL;
 
     if (this->difficultyRestartPopup != NULL) {
         delete this->difficultyRestartPopup;
@@ -80,10 +93,11 @@ void InGameMenuState::RenderFrame(double dT) {
 			return;
 
         case InGameMenuState::RestartLevel:
-			// Clean up any misc. visual effects
+            // Clean up any misc. visual effects
 			this->display->GetAssets()->DeactivateMiscEffects();
-			// Kill all sounds
-			this->display->GetAssets()->GetSoundAssets()->StopAllSounds();
+			
+            // Kill all sounds
+			this->display->GetSound()->StopAllSounds();
 
             // Reset the level
             this->display->GetModel()->ResetCurrentLevel();
@@ -97,10 +111,11 @@ void InGameMenuState::RenderFrame(double dT) {
             return;
 
 		case InGameMenuState::ReturnToMainMenu:
-			// Clean up any misc. visual effects
+            // Clean up any misc. visual effects
 			this->display->GetAssets()->DeactivateMiscEffects();
-			// Kill all sounds
-			this->display->GetAssets()->GetSoundAssets()->StopAllSounds();
+			
+            // Kill all sounds
+			this->display->GetSound()->StopAllSounds();
             
 			// Go back to the main menu state
             this->CleanUpReturnToDisplayState();
@@ -151,7 +166,7 @@ void InGameMenuState::RenderFrame(double dT) {
 
 void InGameMenuState::ResumeTheGame() {
 	// Resume world sounds - these are initially paused when coming to this state (in the constructor)
-	this->display->GetAssets()->GetSoundAssets()->UnpauseWorldSounds();
+	this->display->GetSound()->UnpauseAllSounds();
 	
     // Unpause the game
 	this->display->GetModel()->UnsetPause(GameModel::PauseGame);
@@ -223,16 +238,19 @@ void InGameMenuState::InitTopMenu() {
 
 	// Set up the handlers
 	this->topMenuEventHandler    = new TopMenuEventHandler(this);
-	this->verifyMenuEventHandler = new VerifyMenuEventHandler(this);
     this->difficultyEventHandler = new DifficultyEventHandler(this);
     this->invertBallBoostHandler = new InvertBallBoostEventHandler(this);
+
+    this->restartVerifyHandler          = new RestartVerifyEventHandler(this);
+    this->exitGameVerifyHandler         = new ExitGameVerifyEventHandler(this);
+    this->returnToMainMenuVerifyHandler = new ReturnToMainMenuVerifyEventHandler(this);
 
 	// Setup the top menu attributes
 	this->topMenu = new GameMenu();
 	this->topMenu->SetAlignment(GameMenu::CenterJustified);
 	this->topMenu->AddEventHandler(this->topMenuEventHandler);
 	this->topMenu->SetColourScheme(InGameMenuState::MENU_ITEM_IDLE_COLOUR, InGameMenuState::MENU_ITEM_SEL_COLOUR, 
-																 InGameMenuState::MENU_ITEM_ACTIVE_COLOUR, InGameMenuState::MENU_ITEM_GREYED_COLOUR);
+	    InGameMenuState::MENU_ITEM_ACTIVE_COLOUR, InGameMenuState::MENU_ITEM_GREYED_COLOUR);
 
 	// Prepare some of the properties of the text labels in the top level menu...
 	const float dropShadowAmtSm = 0.10f;
@@ -267,7 +285,7 @@ void InGameMenuState::InitTopMenu() {
 
 	restartLevelItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
 	restartLevelItem->SetVerifyMenuText(VERIFY_RESTART_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
-	restartLevelItem->SetEventHandler(this->verifyMenuEventHandler);
+    restartLevelItem->SetEventHandler(this->restartVerifyHandler);
 
     this->restartItem = this->topMenu->AddMenuItem(restartLevelItem);
 
@@ -324,7 +342,7 @@ void InGameMenuState::InitTopMenu() {
 
 	returnToMainMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
 	returnToMainMenuItem->SetVerifyMenuText(VERIFY_EXIT_TO_MAIN_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
-	returnToMainMenuItem->SetEventHandler(this->verifyMenuEventHandler);
+    returnToMainMenuItem->SetEventHandler(this->returnToMainMenuVerifyHandler);
 
 	this->returnToMainItem = this->topMenu->AddMenuItem(returnToMainMenuItem);
 	
@@ -339,11 +357,11 @@ void InGameMenuState::InitTopMenu() {
 
 	exitToDesktopMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
 	exitToDesktopMenuItem->SetVerifyMenuText(VERIFY_EXIT_TO_DESKTOP_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
-	exitToDesktopMenuItem->SetEventHandler(this->verifyMenuEventHandler);
+    exitToDesktopMenuItem->SetEventHandler(this->exitGameVerifyHandler);
 
 	this->exitToDesktopItem = this->topMenu->AddMenuItem(exitToDesktopMenuItem);
 
-	this->topMenu->SetSelectedMenuItem(this->resumeItem);
+	this->topMenu->SetSelectedMenuItem(this->resumeItem, false);
 }
 
 // Top Menu Handler Functions ***********************************************************
@@ -385,15 +403,7 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemInde
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
-    if (itemIndex == this->inGameMenuState->restartItem) {
-        this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
-    }
-    else if (itemIndex == this->inGameMenuState->returnToMainItem) {
-		this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
-	}	
-	else if (itemIndex == this->inGameMenuState->exitToDesktopItem) {
-		this->inGameMenuState->nextAction = InGameMenuState::ExitToDesktop;
-	}
+    UNUSED_PARAMETER(itemIndex);
 }
 
 void InGameMenuState::TopMenuEventHandler::EscMenu() {
@@ -402,7 +412,7 @@ void InGameMenuState::TopMenuEventHandler::EscMenu() {
 
 	// Select the exit game option from the main menu if not selected, if selected then activate it
 	if (topMenu->GetSelectedMenuItem() != this->inGameMenuState->resumeItem) {
-		topMenu->SetSelectedMenuItem(this->inGameMenuState->resumeItem);
+		topMenu->SetSelectedMenuItem(this->inGameMenuState->resumeItem, true);
 	}
 	else {
 		topMenu->ActivateSelectedMenuItem();
@@ -410,17 +420,38 @@ void InGameMenuState::TopMenuEventHandler::EscMenu() {
 }
 
 // Verify Menu Event Handler ******************************************************
-void InGameMenuState::VerifyMenuEventHandler::MenuItemScrolled() {
+InGameMenuState::RestartVerifyEventHandler::RestartVerifyEventHandler(InGameMenuState* inGameMenuState) : 
+VerifyMenuEventHandlerWithSound(inGameMenuState->display->GetSound()),
+inGameMenuState(inGameMenuState) {
 }
 
-void InGameMenuState::VerifyMenuEventHandler::MenuItemEnteredAndSet() {
+void InGameMenuState::RestartVerifyEventHandler::MenuItemConfirmed() {
+    VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
+    SDL_Delay(500);
+    this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
 }
 
-void InGameMenuState::VerifyMenuEventHandler::MenuItemCancelled() {
+InGameMenuState::ExitGameVerifyEventHandler::ExitGameVerifyEventHandler(InGameMenuState* inGameMenuState) : 
+VerifyMenuEventHandlerWithSound(inGameMenuState->display->GetSound()),
+inGameMenuState(inGameMenuState) {
 }
 
+void InGameMenuState::ExitGameVerifyEventHandler::MenuItemConfirmed() {
+    VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
+    SDL_Delay(500);
+    this->inGameMenuState->nextAction = InGameMenuState::ExitToDesktop;
+}
 
+InGameMenuState::ReturnToMainMenuVerifyEventHandler::ReturnToMainMenuVerifyEventHandler(InGameMenuState* inGameMenuState) : 
+VerifyMenuEventHandlerWithSound(inGameMenuState->display->GetSound()),
+inGameMenuState(inGameMenuState) {
+}
 
+void InGameMenuState::ReturnToMainMenuVerifyEventHandler::MenuItemConfirmed() {
+    VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
+    SDL_Delay(500);
+    this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
+}
 
 void InGameMenuState::DifficultyPopupHandler::OptionSelected(const std::string& optionText) {
     PaneHandler::OptionSelected(optionText);

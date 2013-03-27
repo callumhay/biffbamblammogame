@@ -363,7 +363,7 @@ void SelectionListMenuItem::EscapeFromMenuItem(bool saveChange) {
 			this->parent->DeactivateSelectedMenuItem();
 		}
 		if (this->eventHandler != NULL) {
-			this->eventHandler->MenuItemEnteredAndSet();
+			this->eventHandler->MenuItemConfirmed();
 		}
     }
     else {
@@ -383,6 +383,7 @@ void SelectionListMenuItem::EscapeFromMenuItem(bool saveChange) {
  * in order to ensure this item is properly activated.
  */
 void SelectionListMenuItem::Activate() {
+    GameMenuItem::Activate();
 	// Set the previous index to the current one (so we keep track of it)
 	this->previouslySelectedIndex = this->selectedIndex;
 }
@@ -403,8 +404,7 @@ const float AmountScrollerMenuItem::SCROLLER_WIDTH = 180.0f;
 const double AmountScrollerMenuItem::INCREMENT_PULSE_TIME = 0.05;
 
 AmountScrollerMenuItem::AmountScrollerMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, 
-																							 float minValue, float maxValue, float currentValue, 
-																							 float incrementAmt) :
+                                               float minValue, float maxValue, float currentValue, float incrementAmt) :
 GameMenuItem(smLabel, lgLabel, NULL),
 isActive(false),
 minValue(minValue),
@@ -455,10 +455,10 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 		timeCounter = 0.0;
 		
 		if (this->increaseValueButtonPressed) {
-			this->ChangeScrollerValue(this->incrementAmt);
+			this->ChangeScrollerValue(this->incrementAmt, true);
 		}
 		else if (this->decreaseValueButtonPressed) {
-			this->ChangeScrollerValue(-this->incrementAmt);
+			this->ChangeScrollerValue(-this->incrementAmt, true);
 		}
 	}
 
@@ -540,17 +540,20 @@ void AmountScrollerMenuItem::ButtonPressed(const GameControl::ActionButton& pres
 	}
 	*/
 
+    this->increaseValueButtonPressed = false;
+    this->decreaseValueButtonPressed = false;
+
 	switch (pressedButton) {
 		case GameControl::LeftButtonAction:
 			// Decrease the scroller value...
 			this->decreaseValueButtonPressed = true;
-			this->ChangeScrollerValue(-this->incrementAmt);
+			//this->ChangeScrollerValue(-this->incrementAmt);
 			break;
 
 		case GameControl::RightButtonAction:
 			// Increase the scroller value...
 			this->increaseValueButtonPressed = true;
-			this->ChangeScrollerValue(this->incrementAmt);
+			//this->ChangeScrollerValue(this->incrementAmt);
 			break;
 
 		case GameControl::EnterButtonAction:
@@ -571,7 +574,7 @@ void AmountScrollerMenuItem::ButtonPressed(const GameControl::ActionButton& pres
             }
             break;
 		case GameControl::EscapeButtonAction:
-            this->EscapeFromMenuItem(true);
+            this->EscapeFromMenuItem(false);
 			break;
 
 		default:
@@ -592,12 +595,11 @@ void AmountScrollerMenuItem::EscapeFromMenuItem(bool saveChange) {
 			this->parent->DeactivateSelectedMenuItem();
 		}
 		if (this->eventHandler != NULL) {
-			this->eventHandler->MenuItemEnteredAndSet();
+			this->eventHandler->MenuItemConfirmed();
 		}
     }
     else {
-        // If the user hits ESC then we sure the selection inside the item doesn't change
-	    this->ChangeScrollerValue(this->previouslySelectedValue - this->currentValue);
+	    this->ChangeScrollerValue(this->previouslySelectedValue - this->currentValue, false);
 	    if (this->parent != NULL) {
 		    this->parent->DeactivateSelectedMenuItem();
 	    }
@@ -608,21 +610,12 @@ void AmountScrollerMenuItem::EscapeFromMenuItem(bool saveChange) {
 }
 
 void AmountScrollerMenuItem::ButtonReleased(const GameControl::ActionButton& releasedButton) {
-	switch (releasedButton) {
-		case GameControl::LeftButtonAction:
-			this->decreaseValueButtonPressed = false;
-			break;
-
-		case GameControl::RightButtonAction:
-			this->increaseValueButtonPressed = false;
-			break;
-
-		default:
-			break;
-	}
+    UNUSED_PARAMETER(releasedButton);
+    this->decreaseValueButtonPressed = false;
+    this->increaseValueButtonPressed = false;
 }
 
-void AmountScrollerMenuItem::ChangeScrollerValue(float changeAmt) {
+void AmountScrollerMenuItem::ChangeScrollerValue(float changeAmt, bool signalEvent) {
 	if (fabs(changeAmt) < EPSILON) {
 		return;
 	}
@@ -630,9 +623,11 @@ void AmountScrollerMenuItem::ChangeScrollerValue(float changeAmt) {
 	float valueBefore = this->currentValue;
 	this->currentValue = std::max<float>(this->minValue, std::min<float>(this->maxValue, this->currentValue + changeAmt));
 
-	if (this->parent != NULL && this->alwaysSendChangeUpdates && this->currentValue != valueBefore) {
-		this->parent->ActivatedMenuItemChanged();
-	}
+	if (signalEvent && this->alwaysSendChangeUpdates && this->currentValue != valueBefore) {
+        if (this->eventHandler != NULL && signalEvent) {
+            this->eventHandler->MenuItemScrolled();
+        }
+    }
 }
 
 void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing) {
@@ -926,6 +921,7 @@ void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButto
 	switch (pressedButton) {
 		case GameControl::LeftButtonAction:
 		case GameControl::RightButtonAction:
+
 			// Change the selected item in the verify menu
 			if (this->selectedOption == VerifyMenuItem::Cancel) {
 				this->SetSelectedVerifyMenuOption(VerifyMenuItem::Confirm);
@@ -933,9 +929,11 @@ void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButto
 			else {
 				this->SetSelectedVerifyMenuOption(VerifyMenuItem::Cancel);
 			}
-			if (this->parent != NULL) {
-				this->parent->MenuItemHighlighted();
-			}
+
+            if (this->eventHandler != NULL) {
+			    this->eventHandler->MenuItemScrolled();
+            }
+
 			break;
 
 		case GameControl::EnterButtonAction:
@@ -954,9 +952,12 @@ void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButto
 				// If the user decided to confirm then tell the parent that the activated
 				// menu item has been verified
 				if (this->parent != NULL) {
-					this->parent->ActivatedMenuItemVerified();
 				    this->parent->DeactivateSelectedMenuItem();
                 }
+
+				if (this->eventHandler != NULL) {
+					this->eventHandler->MenuItemConfirmed();
+				}
 			}
 			break;
 
@@ -973,6 +974,10 @@ void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButto
 			}
 			else {
 				this->SetSelectedVerifyMenuOption(VerifyMenuItem::Cancel);
+
+                if (this->eventHandler != NULL) {
+			        this->eventHandler->MenuItemScrolled();
+                }
 			}
 			break;
 
@@ -982,6 +987,8 @@ void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButto
 }
 
 void VerifyMenuItem::Activate() {
+    GameMenuItem::Activate();
+
 	// Assign a random colour for the background of the verify menu
 	const int randomColourIdx = (Randomizer::GetInstance()->RandomUnsignedInt() % GameMenu::NUM_RAND_COLOURS);
 	this->randomMenuBGColour = GameMenu::RAND_COLOUR_LIST[randomColourIdx];
@@ -1033,6 +1040,8 @@ void VerifyMenuItem::Activate() {
 }
 
 void VerifyMenuItem::Deactivate() {
+    GameMenuItem::Deactivate();
+
 	// Deactivate the menu
 	this->verifyMenuActive = false;
 

@@ -90,7 +90,7 @@ private:
 	private:
 		InGameMenuState* inGameMenuState;
 	public:
-		TopMenuEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
+		TopMenuEventHandler(InGameMenuState* inGameMenuState) : inGameMenuState(inGameMenuState) {}
 		~TopMenuEventHandler() {}
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
@@ -99,25 +99,44 @@ private:
 		void EscMenu();
 	};
 
-	// Event handler for verify menus
-	class VerifyMenuEventHandler : public GameMenuItemEventHandler {
+	// Event handlers for verify menus
+	class RestartVerifyEventHandler : public VerifyMenuEventHandlerWithSound {
 	public:
-		VerifyMenuEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
-		~VerifyMenuEventHandler() {}
+		RestartVerifyEventHandler(InGameMenuState* inGameMenuState);
+		~RestartVerifyEventHandler() {}
 
-		void MenuItemScrolled();
-		void MenuItemEnteredAndSet();
-		void MenuItemCancelled();
+		void MenuItemConfirmed();
+
+	private:
+		InGameMenuState* inGameMenuState;
+	};
+	class ExitGameVerifyEventHandler : public VerifyMenuEventHandlerWithSound {
+	public:
+		ExitGameVerifyEventHandler(InGameMenuState* inGameMenuState);
+		~ExitGameVerifyEventHandler() {}
+
+		void MenuItemConfirmed();
+
+	private:
+		InGameMenuState* inGameMenuState;
+	};
+	class ReturnToMainMenuVerifyEventHandler : public VerifyMenuEventHandlerWithSound {
+	public:
+		ReturnToMainMenuVerifyEventHandler(InGameMenuState* inGameMenuState);
+		~ReturnToMainMenuVerifyEventHandler() {}
+
+		void MenuItemConfirmed();
 
 	private:
 		InGameMenuState* inGameMenuState;
 	};
 
+
     class InvertBallBoostEventHandler : public GameMenuItemEventHandler {
     public:
-        InvertBallBoostEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
+        InvertBallBoostEventHandler(InGameMenuState* inGameMenuState) : inGameMenuState(inGameMenuState) {}
         void MenuItemScrolled() {};
-        void MenuItemEnteredAndSet() {};
+        void MenuItemConfirmed() {};
         void MenuItemCancelled() {};
 
 	private:
@@ -128,7 +147,7 @@ private:
     public:
         DifficultyEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
         void MenuItemScrolled() {};
-        void MenuItemEnteredAndSet() {};
+        void MenuItemConfirmed() {};
         void MenuItemCancelled() {};
 
 	private:
@@ -147,10 +166,13 @@ private:
     };
 
 	TopMenuEventHandler* topMenuEventHandler;
-	VerifyMenuEventHandler* verifyMenuEventHandler;
     InvertBallBoostEventHandler* invertBallBoostHandler;
     DifficultyEventHandler* difficultyEventHandler;
     
+    RestartVerifyEventHandler* restartVerifyHandler;
+    ExitGameVerifyEventHandler* exitGameVerifyHandler;
+    ReturnToMainMenuVerifyEventHandler* returnToMainMenuVerifyHandler;
+
 
 	DISALLOW_COPY_AND_ASSIGN(InGameMenuState);
 };

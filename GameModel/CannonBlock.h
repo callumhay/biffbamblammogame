@@ -101,6 +101,7 @@ public:
 
 	bool GetHasRandomRotation() const;
 	float GetFixedRotationDegsFromX() const;
+    float GetRotationSpeed() const;
 
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
@@ -186,6 +187,10 @@ inline bool CannonBlock::GetHasRandomRotation() const {
 inline float CannonBlock::GetFixedRotationDegsFromX() const {
 	assert(!this->GetHasRandomRotation());
 	return 90.0f - this->rotationInterval.first;
+}
+
+inline float CannonBlock::GetRotationSpeed() const {
+    return this->currRotationSpeed;
 }
 
 #endif // __CANNONBLOCK_H__

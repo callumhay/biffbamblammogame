@@ -1,0 +1,272 @@
+
+// Menu sounds/music ==================================================
+
+// Main menu background music (looped)
+MainMenuBackgroundLoop {
+	file = menu/bg_piano.wav
+}
+
+// Plays when the user highlights a new item in a menu
+MenuItemChangedEvent {
+	file = menu/item_select.wav
+}
+
+// Plays when the user selects a scroller or selection list menu item
+MenuItemEnteredEvent {
+	file = menu/item_entered.wav
+}
+
+// Plays when the user cancels out of a scroller or selection list menu item
+MenuItemCancelEvent {
+	file = menu/item_cancel.wav
+}
+
+// Plays when the user verifies/selects (hits 'enter' on) a menu item
+MenuItemVerifyAndSelectEvent {
+	file = menu/item_confirm.wav
+}
+
+// Plays when a sub-menu or verify menu opens up
+MenuOpenSubMenuWindowEvent {
+	file = menu/open_sub_menu_win.wav
+}
+
+// Plays when a sub-menu or verify menu closes 
+// NOTE: This doesn't feel right when it plays, just ignore it for now.
+MenuCloseSubMenuWindowEvent {
+	file =
+}
+
+// Plays when a selection list menu item is scrolled
+MenuSelectionItemScrolledEvent {
+	file = menu/item_selection_list_scrolled.wav
+}
+
+// Plays when a scroller (e.g., volume control) menu item is scrolled
+MenuScrollerItemScrolledEvent {
+	file = menu/item_scroller_scrolled.wav
+}
+
+
+
+
+// Movement-specific Sound ===================================================
+
+// Classical *****************************************************************
+WorldBackgroundLoop {
+	world = Classical
+	file  =
+}
+
+// Gothic-Romantic ***********************************************************
+WorldBackgroundLoop {
+	world = Gothic and Romantic
+	file  =
+}
+
+// Nouveau *******************************************************************
+WorldBackgroundLoop {
+	world = Nouveau
+	file  = 
+}
+
+// Deco **********************************************************************
+WorldBackgroundLoop {
+	world = Deco
+	file  =
+}
+
+// Futurism ******************************************************************
+WorldBackgroundLoop {
+	world = Futurism
+	file  =
+}
+
+
+// Game Events ===============================================================
+
+// Paddle Events *************************************************************
+
+PaddleHitWallEvent {
+	file = global/paddle_hit_wall.ogg
+}
+
+
+// Ball Events ***************************************************************
+
+PlayerLostABallButIsStillAliveEvent {
+	file = global/lost_ball.ogg
+}
+
+LastBallExplodedEvent {
+	file = global/last_ball_death.ogg
+}
+
+ignore BallSpawnEvent {
+	file = 
+}
+
+BallBallCollisionEvent {
+	file = global/ball_ball_hit.ogg
+}
+
+
+// Ball and Paddle Events ****************************************************
+
+BallPaddleCollisionEvent {
+	file = global/ball_paddle_hit.ogg
+}
+
+StickyBallPaddleCollisionEvent {
+	file = global/ball_sticky_paddle_hit.ogg
+}
+
+ignore ShieldBallPaddleCollisionEvent {
+
+}
+
+ignore BallOrPaddleGrowEvent {
+	file = 
+}
+
+ignore BallOrPaddleShrinkEvent {
+	file = 
+}
+
+LastBallSpiralingToDeathLoop {
+	file = global/ball_spiral_to_death.ogg
+}
+
+
+// Ball and Block Events ******************************************************
+
+BallBlockCollisionEvent {
+	file = global/ball_block_hit.ogg
+}
+
+
+// Block Events ***************************************************************
+
+BombBlockDestroyedEvent {
+	file = global/bomb_explode.ogg
+}
+
+InkBlockDestroyedEvent {
+	file = global/ink_splat.ogg
+}
+
+BasicBlockDestroyedEvent {
+	file = global/block_break_basic.ogg
+}
+
+CannonBlockLoadedEvent {
+	file = global/cannon_loaded.ogg
+}
+
+CannonBlockFiredEvent {
+	file = global/cannon_fired.ogg
+}
+
+PortalTeleportEvent {
+	file = global/portal_warp.ogg
+}
+
+ignore CollateralBlockFlashingLoop {
+	file = 
+}
+
+ignore CollateralBlockFallingLoop {
+	file = 
+}
+
+CannonBlockRotatingLoop {
+	file = global/cannon_rotate.ogg
+}
+
+
+// Projectile and Beam Events **************************************************
+
+RocketExplodedEvent {
+	file = global/rocket_explode.ogg
+}
+
+RocketMovingLoop {
+	file = global/rocket.ogg
+}
+
+ignore LaserBulletShotEvent {
+	file = 
+}
+
+ignore LaserBulletMovingLoop {
+	file = 
+}
+
+LaserBeamFiringLoop {
+	file = global/laser_beam.ogg
+}
+
+
+// Game Item Events ************************************************************
+
+BallSafetyNetCreatedEvent {
+	file = global/safety_net_created.ogg
+}
+
+BallSafetyNetDestroyedEvent {
+	file = global/safety_net_destroyed.ogg
+}
+
+ItemSpawnedEvent {
+	file = global/item_spawn.ogg
+}
+
+PowerUpItemActivatedEvent {
+	file = global/power_up_item.ogg
+}
+
+PowerNeutralItemActivatedEvent {
+	file = global/power_neutral_item.ogg
+}
+
+PowerDownItemActivatedEvent {
+	file = global/power_down_item.ogg
+}
+
+ignore PowerUpItemTimerEndsEvent {
+	file = 
+}
+
+ignore PowerNeutralItemTimerEndsEvent {
+	file = 
+}
+
+ignore PowerDownItemTimerEndsEvent {
+	file = 
+}
+
+ItemMovingLoop {
+	file = global/item_moving.ogg
+}
+
+
+// World State Change Events ***************************************************
+
+ignore LevelCompletedEvent {
+	file = 
+}
+
+ignore WorldCompletedEvent {
+	file = 
+}
+
+
+// Global Sound Effects ===================================================================
+
+ignore InkSplatterEffect {
+	type = 
+}
+
+ignore PoisonEffect {
+	type =
+}

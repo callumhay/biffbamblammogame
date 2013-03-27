@@ -14,7 +14,6 @@
 
 #include "../GameModel/GameEvents.h"
 #include "../GameControl/BBBGameController.h"
-#include "../GameSound/GameSoundAssets.h"
 
 #include "../ESPEngine/ESP.h"
 

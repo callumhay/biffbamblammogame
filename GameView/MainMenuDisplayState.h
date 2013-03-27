@@ -128,6 +128,9 @@ private:
     bool changeToBlammopediaState;
     bool changeToLevelSelectState;
 
+    //TODO? static const int BG_SOUND_FADEOUT_IN_MILLISECS = 1000;
+    SoundID bgLoopedSoundID;
+
 	void InitializeESPEffects();
 	void InitializeMainMenu();
 	void InitializeOptionsSubMenu();
@@ -163,8 +166,6 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 	class MainMenuEventHandler : public GameMenuEventHandler {
-	private:
-		MainMenuDisplayState* mainMenuState;
 	public:
 		MainMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		~MainMenuEventHandler() {}
@@ -173,11 +174,11 @@ public:
 		void GameMenuItemChangedEvent(int itemIndex);
 		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
+	private:
+		MainMenuDisplayState* mainMenuState;
 	};
 
 	class OptionsSubMenuEventHandler : public GameMenuEventHandler {
-	private:
-		MainMenuDisplayState* mainMenuState;
 	public:
 		OptionsSubMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		~OptionsSubMenuEventHandler() {}
@@ -186,19 +187,54 @@ public:
 		void GameMenuItemChangedEvent(int itemIndex);
 		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
-	};
-
-	class AllMenuItemsEventHandler : public GameMenuItemEventHandler {
 	private:
 		MainMenuDisplayState* mainMenuState;
-	public:
-		AllMenuItemsEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
-		~AllMenuItemsEventHandler() {}
-
-		void MenuItemScrolled();
-		void MenuItemEnteredAndSet();
-		void MenuItemCancelled();
 	};
+
+	class SelectListItemsEventHandler : public SelectionListEventHandlerWithSound {
+	public:
+		SelectListItemsEventHandler(MainMenuDisplayState* mainMenuState);
+		~SelectListItemsEventHandler() {}
+
+	private:
+		MainMenuDisplayState* mainMenuState;
+	};
+
+    class VolumeItemEventHandler : public ScrollerItemEventHandlerWithSound {
+	public:
+		VolumeItemEventHandler(MainMenuDisplayState* mainMenuState);
+		~VolumeItemEventHandler() {}
+
+        void MenuItemScrolled();
+        void MenuItemConfirmed();
+        void MenuItemCancelled();
+
+	private:
+        void UpdateGameMasterVolume(int volumeLevel);
+		MainMenuDisplayState* mainMenuState;
+    };
+
+    class QuitVerifyEventHandler : public VerifyMenuEventHandlerWithSound {
+	public:
+        QuitVerifyEventHandler(MainMenuDisplayState *mainMenuState);
+		~QuitVerifyEventHandler() {}
+
+		void MenuItemConfirmed();
+
+	private:
+		MainMenuDisplayState* mainMenuState;
+    };
+
+    class EraseProgressVerifyEventHandler : public VerifyMenuEventHandlerWithSound {
+	public:
+        EraseProgressVerifyEventHandler(MainMenuDisplayState *mainMenuState);
+		~EraseProgressVerifyEventHandler() {}
+
+		void MenuItemConfirmed();
+
+	private:
+		MainMenuDisplayState* mainMenuState;
+    };
 
 	class BangParticleEventHandler : public ESPEmitterEventHandler {
 	private:
@@ -211,10 +247,13 @@ public:
 	};
 
 private:
-	MainMenuEventHandler* mainMenuEventHandler;						// Event handler for the main (top-most) menu
+	MainMenuEventHandler* mainMenuEventHandler;             // Event handler for the main (top-most) menu
 	OptionsSubMenuEventHandler* optionsMenuEventHandler;	// Event handler for the options sub-menu
-	AllMenuItemsEventHandler* itemsEventHandler;					// Event handler for more complicated items (e.g., scrollers, verify menus)
-	BangParticleEventHandler* particleEventHandler;				// Event handler for the sound particles
+	SelectListItemsEventHandler* selectListItemsHandler;            // Event handler for more complicated items (e.g., scrollers, verify menus)
+	VolumeItemEventHandler* volItemHandler;
+    BangParticleEventHandler* particleEventHandler;         // Event handler for the sound particles
+    QuitVerifyEventHandler* quitVerifyHandler;
+    EraseProgressVerifyEventHandler* eraseProgVerifyHandler;
 
 	DISALLOW_COPY_AND_ASSIGN(MainMenuDisplayState);
 };

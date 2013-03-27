@@ -9,18 +9,19 @@
  * resulting work only under the same or similar licence to this one.
  */
 
+// GameDisplay Includes
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "GameEventsListener.h"
-
-// State includes
 #include "InGameDisplayState.h"
 #include "InGameMenuState.h"
 #include "MainMenuDisplayState.h"
+#include "LoadingScreen.h"
 
 // Model includes
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameEventManager.h"
+
 
 #ifdef _DEBUG
 bool GameDisplay::drawDebugBounds           = false;
@@ -28,14 +29,27 @@ bool GameDisplay::drawDebugLightGeometry    = false;
 bool GameDisplay::detachedCamera            = false;
 #endif
 
-const int GameDisplay::MAX_FRAMERATE						= 500;
+const int GameDisplay::MAX_FRAMERATE = 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): 
-gameListener(NULL), currState(NULL), model(model), assets(new GameAssets(initWidth, initHeight)), 
+gameListener(NULL), currState(NULL), model(model), 
+assets(new GameAssets(initWidth, initHeight)), sound(NULL),
 gameExited(false), gameReinitialized(false),
 gameCamera(initWidth, initHeight) {
+
 	assert(model != NULL);
+
+	// Load basic default in-memory sounds
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
+    this->sound = new GameSound();
+    if (this->sound->Init()) {
+        this->sound->LoadGlobalSounds();
+        std::cout << "Sound initialized successfully." << std::endl;
+    }
+    else {
+        std::cerr << "Failed to load game sound." << std::endl;
+    }
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
@@ -61,11 +75,15 @@ GameDisplay::~GameDisplay() {
 	// Remove any action listeners for the model
 	this->RemoveActionListeners();
 
+    // Delete game sound
+    delete this->sound;
+    this->sound = NULL;
+
 	// Delete game assets LAST!! (If you don't do this last
 	// then all the other things being destroyed in this destructor
 	// will try to access the assets that no longer exist).
 	delete this->assets;
-	this->assets = NULL;
+	this->assets = NULL; 
 }
 
 // RENDER FUNCTIONS ****************************************************
