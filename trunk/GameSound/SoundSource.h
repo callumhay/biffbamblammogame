@@ -50,6 +50,8 @@ private:
     irrklang::ISoundEngine* soundEngine;
     irrklang::ISoundSource* source;
 
+    Sound* Spawn2DSoundWithID(const SoundID& id, bool isLooped);
+
     DISALLOW_COPY_AND_ASSIGN(SoundSource);
 };
 
@@ -59,6 +61,10 @@ inline GameSound::SoundType SoundSource::GetSoundType() const {
 
 inline bool SoundSource::IsLoaded() const {
     return (this->source != NULL);
+}
+
+inline Sound* SoundSource::Spawn2DSound(bool isLooped) {
+    return this->Spawn2DSoundWithID(GenerateSoundID(), isLooped);
 }
 
 #endif // __SOUNDSOURCE_H__

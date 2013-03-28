@@ -76,7 +76,7 @@ public:
 
     virtual void MenuItemActivated()   { this->sound->PlaySound(GameSound::MenuOpenSubMenuWindowEvent, false); }
     virtual void MenuItemDeactivated() { this->sound->PlaySound(GameSound::MenuCloseSubMenuWindowEvent, false); }
-    virtual void MenuItemScrolled()    { this->sound->PlaySound(GameSound::MenuItemChangedEvent, false); }
+    virtual void MenuItemScrolled()    { this->sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false); }
     virtual void MenuItemConfirmed()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
     virtual void MenuItemCancelled()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
 

@@ -51,6 +51,9 @@ goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL)
 }
 
 SelectWorldMenuState::~SelectWorldMenuState() {
+    // Fade out background music
+    this->display->GetSound()->StopSound(this->bgSoundLoopID, 0.5);
+
     delete this->worldSelectTitleLbl;
     this->worldSelectTitleLbl = NULL;
 
@@ -227,6 +230,9 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
 
     UNUSED_PARAMETER(magnitude);
 
+    GameSound* sound = this->display->GetSound();
+    int selectedItemIdxBefore = this->selectedItemIdx;
+
     switch (pressedButton) {
         case GameControl::EscapeButtonAction:
             this->GoBackToMainMenu();
@@ -248,25 +254,29 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
             this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
             break;
 
-        case GameControl::EnterButtonAction:
-            {
-                WorldSelectItem* selectedItem = this->worldItems[this->selectedItemIdx];
-                assert(selectedItem != NULL);
-                if (selectedItem->GetIsLocked()) {
-                    // The world is locked... do an animation to shake it around a bit
-                    selectedItem->ExecuteLockedAnimation();
-                }
-                else {
-                    const Camera& camera = this->display->GetCamera();
-                    this->itemActivated = true;
-                    this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
-                    this->goToLevelSelectAlphaAnim.SetRepeat(false);
-                    this->goToLevelSelectMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
-                    this->goToLevelSelectMoveAnim.SetRepeat(false);
-                }
-            }
+        case GameControl::EnterButtonAction: {
+            WorldSelectItem* selectedItem = this->worldItems[this->selectedItemIdx];
+            assert(selectedItem != NULL);
+            if (selectedItem->GetIsLocked()) {
 
+                sound->PlaySound(GameSound::WorldMenuItemLockedEvent, false);
+
+                // The world is locked... do an animation to shake it around a bit
+                selectedItem->ExecuteLockedAnimation();
+            }
+            else {
+                sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
+
+                const Camera& camera = this->display->GetCamera();
+                this->itemActivated = true;
+                this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
+                this->goToLevelSelectAlphaAnim.SetRepeat(false);
+                this->goToLevelSelectMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
+                this->goToLevelSelectMoveAnim.SetRepeat(false);
+            }
             break;
+        }
+
 #ifdef _DEBUG
         case GameControl::SpecialCheatButtonAction:
             // Unlock all levels in the game...
@@ -279,6 +289,10 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
             break;
     }
 
+    // If the selection changed then we play a sound for it
+    if (selectedItemIdxBefore != this->selectedItemIdx) {
+        sound->PlaySound(GameSound::WorldMenuItemChangedSelectionEvent, false);
+    }
 }
 
 void SelectWorldMenuState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
@@ -293,6 +307,8 @@ void SelectWorldMenuState::GoBackToMainMenu() {
 }
 
 void SelectWorldMenuState::Init(int selectedIdx) {
+    // Background music...
+    this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldSelectMenuBackgroundLoop, true);
 
     // Load background texture
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(

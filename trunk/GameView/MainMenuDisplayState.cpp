@@ -802,7 +802,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(in
     
     // Play the sound effect assoicated with menu item changing/being highlighted by the user
     GameSound* sound = this->mainMenuState->display->GetSound();
-    sound->PlaySound(GameSound::MenuItemChangedEvent, false);
+    sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false);
 }
 
 /**
@@ -882,7 +882,7 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEv
 
     // Play the sound effect assoicated with menu item changing/being highlighted by the user
     GameSound* sound = this->mainMenuState->display->GetSound();
-    sound->PlaySound(GameSound::MenuItemChangedEvent, false);
+    sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false);
 }
 
 /**

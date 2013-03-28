@@ -62,7 +62,7 @@ void SoundSource::Unload() {
     }
 }
 
-Sound* SoundSource::Spawn2DSound(bool isLooped) {
+Sound* SoundSource::Spawn2DSoundWithID(const SoundID& id, bool isLooped) {
     if (this->source == NULL) {
         assert(false);
         return NULL;
@@ -74,5 +74,5 @@ Sound* SoundSource::Spawn2DSound(bool isLooped) {
         return NULL;
     }
 
-    return new Sound(this->soundType, newSound);
+    return new Sound(id, this->soundType, newSound);
 }
