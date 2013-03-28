@@ -861,10 +861,6 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemChangedEvent(int it
 	UNUSED_PARAMETER(itemIndex);
 };
 
-void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
-	UNUSED_PARAMETER(itemIndex);
-}
-
 void MainMenuDisplayState::MainMenuEventHandler::EscMenu() {
 	GameMenu* mainMenu = this->mainMenuState->mainMenu;
 
@@ -982,10 +978,6 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 
 	// A configuration option has changed - rewrite the configuration file to accomodate the change
 	ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->mainMenuState->cfgOptions);
-}
-
-void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
-    UNUSED_PARAMETER(itemIndex);
 }
 
 void MainMenuDisplayState::OptionsSubMenuEventHandler::EscMenu() {

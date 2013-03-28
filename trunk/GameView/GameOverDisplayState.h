@@ -84,7 +84,6 @@ private:
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
-		void GameMenuItemVerifiedEvent(int itemIndex);
         void EscMenu();
 	private:
 		GameOverDisplayState* state;

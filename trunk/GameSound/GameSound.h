@@ -68,6 +68,10 @@ public:
         LevelMenuItemSelectEvent,
         LevelMenuItemLockedEvent,
 
+        // -> In-game menu sounds
+        InGameMenuOpened,
+        InGameMenuClosed,
+
         // World-specific sounds
         WorldBackgroundLoop,
 

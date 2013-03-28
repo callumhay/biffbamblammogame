@@ -138,8 +138,6 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
 }
 
 SelectLevelMenuState::~SelectLevelMenuState() {
-    this->display->GetSound()->StopSound(this->bgSoundLoopID, 0.5);
-
     delete this->menuFBO;
     this->menuFBO = NULL;
     delete this->bloomEffect;
@@ -300,7 +298,6 @@ void SelectLevelMenuState::RenderFrame(double dT) {
         if (animDone) {
             // Switch states back to the world select menu...
             this->display->SetCurrentState(new SelectWorldMenuState(this->display, this->world));
-            
             debug_opengl_state();
             return;
         }
@@ -311,7 +308,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 
     // Handle the case where the player selected a level
     if (this->goToStartLevel && fadeDone) {
-
+        
         // Start the currently selected level
         AbstractLevelMenuItem* selectedLevelItem = this->pages[this->selectedPage]->GetSelectedItem();
         const GameLevel* selectedLevel = selectedLevelItem->GetLevel();
@@ -627,6 +624,8 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
  * Call this to indicate that we will be going back to the world select menu.
  */
 void SelectLevelMenuState::GoBackToWorldSelectMenu() {
+    this->display->GetSound()->StopSound(this->bgSoundLoopID, 0.5);
+
     const Camera& camera = this->display->GetCamera();
     this->goBackMenuMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
     this->goBackMenuMoveAnim.SetRepeat(false);
@@ -642,7 +641,9 @@ void SelectLevelMenuState::GoToStartLevel() {
     AbstractLevelMenuItem* selectedItem = this->pages[this->selectedPage]->GetSelectedItem();
     assert(selectedItem != NULL);
     if (selectedItem->GetIsEnabled()) {
+
         sound->PlaySound(GameSound::LevelMenuItemSelectEvent, false);
+        sound->StopSound(this->bgSoundLoopID, 0.5);
 
         // Finishing animation for starting the level
         this->fadeAnimation.SetLerp(0.5f, 1.0f);

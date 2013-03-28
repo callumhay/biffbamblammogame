@@ -1533,6 +1533,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\IGameMenu.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\ItemListView.h"
 						>
 					</File>

@@ -21,6 +21,8 @@
 
 #include "../GameSound/GameSound.h"
 
+#include "IGameMenu.h"
+
 class GameMenu;
 class GameSubMenu;
 
@@ -88,7 +90,7 @@ protected:
  * An item in a game menu that may be highlighted and selected
  * by the user.
  */
-class GameMenuItem {
+class GameMenuItem : public IGameMenu {
 public:
 	static const float MENU_ITEM_WOBBLE_AMT_LARGE;
 	static const float MENU_ITEM_WOBBLE_AMT_SMALL;
@@ -122,7 +124,7 @@ public:
 	void ToggleWiggleAnimationOn(float amplitude, float frequency);
 	void ToggleWiggleAnimationOff();
 
-	void SetParent(GameMenu* parent) { this->parent = parent; }
+	void SetParent(IGameMenu* parent) { this->parent = parent; }
 
 	inline void SetSize(bool isLarge) {
 		if (isLarge) {
@@ -155,13 +157,18 @@ public:
     virtual bool IsLeftRightScrollable() const { return false; }
 
 protected:
-	GameMenu* parent;
+	IGameMenu* parent;
 	GameSubMenu* subMenu;
 	TextLabel2D* currLabel;
 	TextLabel2D smTextLabel, lgTextLabel;
 	AnimationMultiLerp<float> wiggleAnimation;
 	GameMenuItemEventHandler* eventHandler;
 
+    virtual void ActivatedMenuItemChanged()  {}
+    virtual void DeactivateSelectedMenuItem() {}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(GameMenuItem);
 };
 
 /**
@@ -187,7 +194,7 @@ private:
 class SelectionListMenuItem : public GameMenuItem {
 public:
 	SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const std::vector<std::string>& items);
-	~SelectionListMenuItem();
+	virtual ~SelectionListMenuItem();
 
 	void SetSelectionList(const std::vector<std::string>& items);
 	
@@ -203,14 +210,14 @@ public:
 		return this->selectionList[this->selectedIndex];
 	}
 
-	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
+	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton);
     float GetWidth(bool useMax) const;
 	void Activate();
 
     bool IsLeftRightScrollable() const { return (this->selectionList.size() > 1); }
 
-private:
+protected:
 	static const int NO_SELECTION = -1;
 
 	static const float INTERIOR_PADDING;
@@ -224,8 +231,33 @@ private:
 	float maxWidth;	// The maximum width of this menu item
 
 	void DrawSelectionArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing);
-    void EscapeFromMenuItem(bool saveChange);
+    
+    virtual void EscapeFromMenuItem(bool saveChange);
+
+private:
     DISALLOW_COPY_AND_ASSIGN(SelectionListMenuItem);
+};
+
+class VerifyMenuItem;
+
+class SelectionListMenuItemWithVerify : public SelectionListMenuItem {
+public:
+    SelectionListMenuItemWithVerify(const TextLabel2D& smLabel, const TextLabel2D& lgLabel,
+        const std::vector<std::string>& items, VerifyMenuItem* verifyMenu);
+    ~SelectionListMenuItemWithVerify();
+
+    void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
+    void ButtonPressed(const GameControl::ActionButton& pressedButton);
+    void ButtonReleased(const GameControl::ActionButton& releasedButton);
+
+private:
+    VerifyMenuItem* verifyMenu;
+    bool verifyMenuActive;
+    
+    void EscapeFromMenuItem(bool saveChange);
+    void DeactivateSelectedMenuItem();
+
+    DISALLOW_COPY_AND_ASSIGN(SelectionListMenuItemWithVerify);
 };
 
 /**
@@ -323,6 +355,9 @@ public:
 	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 
+	void Activate();
+	void Deactivate();
+
 private:
 	static const float VERIFY_MENU_HPADDING;
 	static const float VERIFY_MENU_VPADDING;
@@ -330,25 +365,22 @@ private:
 	static const float VERIFY_MENU_OPTION_VSPACING;
 	static const float VERIFY_MENU_OPTION_WOBBLE_FREQ;	
 
-	bool verifyMenuActive;                                   // Whether or not the verify menu is active or not
-	float verifyMenuWidth, verifyMenuHeight;                 // Dimensions of the menu
+	bool verifyMenuActive;                     // Whether or not the verify menu is active or not
+	float verifyMenuWidth, verifyMenuHeight;   // Dimensions of the menu
     TextLabel2DFixedWidth descriptionLabel;
-	TextLabel2D confirmLabel, cancelLabel; // Labels for the verify menu
-	VerifyMenuOption selectedOption;                         // The option currently selecteded/highlighted in the verify menu
+	TextLabel2D confirmLabel, cancelLabel;
+	VerifyMenuOption selectedOption;           // The option currently selecteded/highlighted in the verify menu
 	
 	const TextureFontSet* verifyDescFont;
 	const TextureFontSet* verifyIdleFont;
 	const TextureFontSet* verifySelFont;
 
-	Colour randomMenuBGColour;						// Random colour assigned to the background of the verify menu
+	Colour randomMenuBGColour;			    // Random colour assigned to the background of the verify menu
 	Colour idleColour, selectionColour;		// Colours used for confirm/cancel items when idle and selected
 	
 	AnimationMultiLerp<float> optionItemWiggleAnim;	// Wiggle animation for verify menu items
 	AnimationMultiLerp<float> verifyMenuBGScaleAnim;
 	AnimationMultiLerp<float> verifyMenuBGFadeAnim;
-
-	void Activate();
-	void Deactivate();
 };
 
 #endif
