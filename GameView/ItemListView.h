@@ -24,6 +24,18 @@ class TextLabel2DFixedWidth;
 class KeyboardHelperLabel;
 class PopupTutorialHint;
 
+
+class ItemListViewEventHandler {
+public:
+    ItemListViewEventHandler() {}
+    virtual ~ItemListViewEventHandler() {}
+
+    virtual void ItemHighlightedChanged()   = 0;
+    virtual void ItemActivated(bool locked) = 0;
+    virtual void ItemDeactivated()          = 0;
+};
+
+
 class ItemListView {
 public:
 	static const int NO_ITEM_SELECTED_INDEX;
@@ -131,6 +143,7 @@ public:
 	ItemListView(size_t width, size_t height);
 	~ItemListView();
 
+    void SetEventHandler(ItemListViewEventHandler* handler);
 
 	void Draw(double dT, const Camera& camera);
     void DrawPost(const Camera& camera);
@@ -160,6 +173,8 @@ private:
     int numItemsPerRow;
 
     KeyboardHelperLabel* keyLabel;
+
+    ItemListViewEventHandler* eventHandler;
 
 	// Item information
     bool itemIsActivated;
@@ -205,6 +220,10 @@ private:
 
 	DISALLOW_COPY_AND_ASSIGN(ItemListView);
 };
+
+inline void ItemListView::SetEventHandler(ItemListViewEventHandler* handler) {
+    this->eventHandler = handler;
+}
 
 inline void ItemListView::SetSelectedItemIndex(int index) {
     if (index == -1 || (index >= 0 && index < static_cast<int>(this->items.size()))) {

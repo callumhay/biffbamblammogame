@@ -34,11 +34,8 @@ MenuOpenSubMenuWindowEvent {
 	file = menu/open_sub_menu_win.wav
 }
 
-// Plays when a sub-menu or verify menu closes 
-// NOTE: This doesn't feel right when it plays, just ignore it for now.
-MenuCloseSubMenuWindowEvent {
-	file =
-}
+// NOTE: No sound for the closing of sub menus: It doesn't feel right when it plays since
+// there's no accompanying animation
 
 // Plays when a selection list menu item is scrolled
 MenuSelectionItemScrolledEvent {
@@ -52,10 +49,46 @@ MenuScrollerItemScrolledEvent {
 
 // Blammopedia Sounds ********************************************************
 
-// Blammopedia menu background music (looped)
-BlammopediaMenuBackgroundLoop {
+// Blammopedia background music (looped)
+BlammopediaBackgroundLoop {
 	file = menu/bg_blammopedia.wav
 }
+
+// Plays when the user highlights (i.e., changes the selection to) a new item in the base blammopedia menu
+BlammopediaBaseMenuItemChangedSelectionEvent {
+	file = menu/item_select.wav
+}
+
+// Plays when the user verifies/selects (hits 'enter' on) a base blammopedia menu item
+BlammopediaBaseMenuItemSelectEvent {
+	file = menu/item_confirm.wav
+}
+
+// Plays when the user highlights (i.e., changes the selection to) a new item in on of the blammopedia lists
+BlammopediaListItemChangedSelectionEvent {
+	file = menu/item_select.wav
+}
+
+// Plays when the user verifies/selects (hits 'enter' on) an item in one of the blammopedia lists
+BlammopediaListItemSelectEvent {
+	file = menu/list_item_open.wav
+}
+
+// Plays when the user cancels-out-of/deselects (hits 'esc' on) a previously activated item in one of the blammopedia lists
+BlammopediaListItemDeselectEvent {
+	file = menu/list_item_close.wav
+}
+
+// Plays when the user cancels out of a list and goes back to the base-blammopedia menu
+BlammopediaListDeselectEvent {
+	file = menu/item_cancel.wav
+}
+
+// Plays when the user attempts to select a blammopedia list item that is locked
+BlammopediaListItemLockedEvent {
+	file = menu/item_locked.wav
+}
+
 
 // World/Movement Select Menu Sounds *****************************************
 

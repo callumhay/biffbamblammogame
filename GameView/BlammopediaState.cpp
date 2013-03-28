@@ -42,10 +42,10 @@ const float BlammopediaState::LABEL_ITEM_GAP = 50;
 
 BlammopediaState::BlammopediaState(GameDisplay* display) : 
 DisplayState(display), currMenuItemIndex(NO_MENU_ITEM_INDEX), currListViewIndex(0), 
-goBackToMainMenu(false), starryBG(NULL) {
+goBackToMainMenu(false), starryBG(NULL), listEventHandler(NULL) {
 
     // Start the background music for the blammopedia
-    this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::BlammopediaMenuBackgroundLoop, true);
+    this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::BlammopediaBackgroundLoop, true);
 
     this->itemSelTabAnim.SetInterpolantValue(0.0f);
     this->itemSelTabAnim.SetRepeat(false);
@@ -55,6 +55,8 @@ goBackToMainMenu(false), starryBG(NULL) {
     this->fadeAnimation.SetLerp(0.0, 0.5f, 1.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(1.0f);
+
+    this->listEventHandler = new BlammopediaListEventHandler(this);
 
     Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
     assert(blammopedia != NULL);
@@ -147,8 +149,8 @@ goBackToMainMenu(false), starryBG(NULL) {
     this->blammoMenuLabels[BLOCK_MENU_ITEM_INDEX]    = blockMenuItem;
     this->blammoMenuLabels[BACK_MENU_ITEM_INDEX]     = backMenuItem;
 
-    this->SetBlammoMenuItemHighlighted(GAMEPLAY_MENU_ITEM_INDEX);
-    this->SetBlammoMenuItemSelection();
+    this->SetBlammoMenuItemHighlighted(GAMEPLAY_MENU_ITEM_INDEX, false);
+    this->SetBlammoMenuItemSelection(false);
 
     debug_opengl_state();
 }
@@ -173,6 +175,9 @@ BlammopediaState::~BlammopediaState() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
     assert(success);
     UNUSED_VARIABLE(success);
+
+    delete this->listEventHandler;
+    this->listEventHandler = NULL;
 }
 
 void BlammopediaState::RenderFrame(double dT) {
@@ -429,6 +434,24 @@ void BlammopediaState::ButtonReleased(const GameControl::ActionButton& releasedB
 	UNUSED_PARAMETER(releasedButton);
 }
 
+void BlammopediaState::BlammopediaListEventHandler::ItemHighlightedChanged() {
+    this->state->display->GetSound()->PlaySound(GameSound::BlammopediaListItemChangedSelectionEvent, false);
+}
+
+void BlammopediaState::BlammopediaListEventHandler::ItemActivated(bool locked) {
+    GameSound* sound = this->state->display->GetSound();
+    if (locked) {
+        sound->PlaySound(GameSound::BlammopediaListItemLockedEvent, false);
+    }
+    else {
+        sound->PlaySound(GameSound::BlammopediaListItemSelectEvent, false);
+    }
+}
+
+void BlammopediaState::BlammopediaListEventHandler::ItemDeactivated() {
+    this->state->display->GetSound()->PlaySound(GameSound::BlammopediaListItemDeselectEvent, false);
+}
+
 ItemListView* BlammopediaState::BuildGameplayListView() {
 
     GameTutorialAssets* tutorialAssets = this->display->GetAssets()->GetTutorialAssets();
@@ -524,6 +547,8 @@ ItemListView* BlammopediaState::BuildGameplayListView() {
     
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
     itemsListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    itemsListView->SetEventHandler(this->listEventHandler);
+
 	return itemsListView;
 }
 
@@ -564,6 +589,8 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
 
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
     itemsListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    itemsListView->SetEventHandler(this->listEventHandler);
+
 	return itemsListView;
 }
 
@@ -597,6 +624,8 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
     blockListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    blockListView->SetEventHandler(this->listEventHandler);
+
 	return blockListView;
 }
 
@@ -609,7 +638,7 @@ void BlammopediaState::GoBackToMainMenu() {
     this->goBackToMainMenu = true;
 }
 
-void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex) {
+void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex, bool playSound) {
     // Unhighlight the previously selected item (if there was one)...
     if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
         TextLabel2D* prevSelection = this->blammoMenuLabels[this->currMenuItemIndex];
@@ -630,6 +659,10 @@ void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex) {
         newSelection->SetColour(SELECTION_COLOUR);
     }
 
+    if (this->currMenuItemIndex != menuItemIndex && playSound) {
+        this->display->GetSound()->PlaySound(GameSound::BlammopediaBaseMenuItemChangedSelectionEvent, false);
+    }
+
     this->currMenuItemIndex = menuItemIndex;
     // Now set the proper list as well...
     if (this->currMenuItemIndex < static_cast<int>(this->listViews.size())) {
@@ -637,7 +670,11 @@ void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex) {
     }
 }
 
-void BlammopediaState::SetBlammoMenuItemSelection() {
+void BlammopediaState::SetBlammoMenuItemSelection(bool playSound) {
+    if (playSound) {
+        this->display->GetSound()->PlaySound(GameSound::BlammopediaBaseMenuItemSelectEvent, false);
+    }
+
     if (this->currMenuItemIndex == BACK_MENU_ITEM_INDEX) {
         this->GoBackToMainMenu();
     }
@@ -660,6 +697,8 @@ void BlammopediaState::SetBlammoMenuItemSelection() {
 }
 
 void BlammopediaState::SetBlammoMenuItemDeselection() {
+    this->display->GetSound()->PlaySound(GameSound::BlammopediaListDeselectEvent, false);
+
     ItemListView* prevListSelected = this->listViews[this->currListViewIndex];
     assert(prevListSelected != NULL);
     prevListSelected->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);

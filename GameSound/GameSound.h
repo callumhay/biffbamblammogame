@@ -50,10 +50,16 @@ public:
 		MenuSelectionItemScrolledEvent,
         MenuScrollerItemScrolledEvent,
         MenuOpenSubMenuWindowEvent,
-        MenuCloseSubMenuWindowEvent,
         
         // -> Blammopedia sounds
-        BlammopediaMenuBackgroundLoop,
+        BlammopediaBackgroundLoop,
+        BlammopediaBaseMenuItemChangedSelectionEvent,
+        BlammopediaBaseMenuItemSelectEvent,
+        BlammopediaListItemChangedSelectionEvent,
+        BlammopediaListItemSelectEvent,
+        BlammopediaListItemDeselectEvent,
+        BlammopediaListDeselectEvent,
+        BlammopediaListItemLockedEvent,
 
         // -> World select menu sounds
         WorldMenuBackgroundLoop,

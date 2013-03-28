@@ -332,9 +332,16 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuSelectionItemScrolledEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuScrollerItemScrolledEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuOpenSubMenuWindowEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuCloseSubMenuWindowEvent));
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaMenuBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaBaseMenuItemChangedSelectionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaBaseMenuItemSelectEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemChangedSelectionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemSelectEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemDeselectEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListDeselectEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemLockedEvent));
+
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuItemChangedSelectionEvent));
@@ -350,7 +357,6 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuOpened));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuClosed));
     
-
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldBackgroundLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleHitWallEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent));
