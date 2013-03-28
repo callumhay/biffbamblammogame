@@ -1,7 +1,8 @@
+// ---------------------------------------------------------------------------
+// Menu sounds/music =========================================================
+// ---------------------------------------------------------------------------
 
-// Menu sounds/music ==================================================
-
-// Main Menu and General Sounds ***************************************
+// Main Menu and General Sounds **********************************************
 
 // Main menu background music (looped)
 MainMenuBackgroundLoop {
@@ -56,9 +57,9 @@ BlammopediaMenuBackgroundLoop {
 	file = menu/bg_blammopedia.wav
 }
 
-// World/Movement Select Sounds **********************************************
+// World/Movement Select Menu Sounds *****************************************
 
-WorldSelectMenuBackgroundLoop {
+WorldMenuBackgroundLoop {
 	file = menu/bg_world_select.wav
 }
 
@@ -74,8 +75,31 @@ WorldMenuItemLockedEvent {
 	file = menu/item_locked.wav
 }
 
+// Level Select Menu Sounds **************************************************
 
+LevelMenuBackgroundLoop {
+	file = menu/bg_level_select.wav
+}
+
+LevelMenuItemChangedSelectionEvent {
+	file = menu/item_select.wav
+}
+
+LevelMenuPageChangedSelectionEvent {
+	file = menu/page_changed.wav
+}
+
+LevelMenuItemSelectEvent {
+	file = menu/item_confirm.wav
+}
+
+LevelMenuItemLockedEvent {
+	file = menu/item_locked.wav
+}
+
+// ---------------------------------------------------------------------------
 // Movement-specific Sound ===================================================
+// ---------------------------------------------------------------------------
 
 // Classical *****************************************************************
 WorldBackgroundLoop {
@@ -107,8 +131,9 @@ WorldBackgroundLoop {
 	file  =
 }
 
-
+// ---------------------------------------------------------------------------
 // Game Events ===============================================================
+// ---------------------------------------------------------------------------
 
 // Paddle Events *************************************************************
 
@@ -163,14 +188,14 @@ LastBallSpiralingToDeathLoop {
 }
 
 
-// Ball and Block Events ******************************************************
+// Ball and Block Events *****************************************************
 
 BallBlockCollisionEvent {
 	file = global/ball_block_hit.ogg
 }
 
 
-// Block Events ***************************************************************
+// Block Events **************************************************************
 
 BombBlockDestroyedEvent {
 	file = global/bomb_explode.ogg
@@ -209,7 +234,7 @@ CannonBlockRotatingLoop {
 }
 
 
-// Projectile and Beam Events **************************************************
+// Projectile and Beam Events ************************************************
 
 RocketExplodedEvent {
 	file = global/rocket_explode.ogg
@@ -232,7 +257,7 @@ LaserBeamFiringLoop {
 }
 
 
-// Game Item Events ************************************************************
+// Game Item Events **********************************************************
 
 BallSafetyNetCreatedEvent {
 	file = global/safety_net_created.ogg
@@ -275,7 +300,7 @@ ItemMovingLoop {
 }
 
 
-// World State Change Events ***************************************************
+// World State Change Events *************************************************
 
 ignore LevelCompletedEvent {
 	file = 
@@ -285,9 +310,9 @@ ignore WorldCompletedEvent {
 	file = 
 }
 
-
-// Global Sound Effects ===================================================================
-
+// ---------------------------------------------------------------------------
+// Global Sound Effects ======================================================
+// ---------------------------------------------------------------------------
 ignore InkSplatterEffect {
 	type = 
 }

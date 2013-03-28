@@ -33,6 +33,8 @@ goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f),
 bossIconTexture(NULL), arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL), starryBG(NULL), padlockTexture(NULL),
 selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumStarsLabel(NULL) {
 
+    this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::LevelMenuBackgroundLoop, true);
+
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starTexture != NULL);
@@ -136,6 +138,8 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
 }
 
 SelectLevelMenuState::~SelectLevelMenuState() {
+    this->display->GetSound()->StopSound(this->bgSoundLoopID, 0.5);
+
     delete this->menuFBO;
     this->menuFBO = NULL;
     delete this->bloomEffect;
@@ -379,9 +383,11 @@ void SelectLevelMenuState::ButtonReleased(const GameControl::ActionButton& relea
 
 // Event called whenever the selection of a level in the menu changes
 void SelectLevelMenuState::LevelSelectionChanged() {
-    // TODO ?
+    this->display->GetSound()->PlaySound(GameSound::LevelMenuItemChangedSelectionEvent, false);
 }
 void SelectLevelMenuState::PageSelectionChanged() {
+    this->display->GetSound()->PlaySound(GameSound::LevelMenuPageChangedSelectionEvent, false);
+
     this->nextPgArrowEmitter->Reset();
     this->prevPgArrowEmitter->Reset();
 }
@@ -631,9 +637,13 @@ void SelectLevelMenuState::GoBackToWorldSelectMenu() {
 }
 
 void SelectLevelMenuState::GoToStartLevel() {
+    GameSound* sound = this->display->GetSound();
+    
     AbstractLevelMenuItem* selectedItem = this->pages[this->selectedPage]->GetSelectedItem();
     assert(selectedItem != NULL);
     if (selectedItem->GetIsEnabled()) {
+        sound->PlaySound(GameSound::LevelMenuItemSelectEvent, false);
+
         // Finishing animation for starting the level
         this->fadeAnimation.SetLerp(0.5f, 1.0f);
 	    this->fadeAnimation.SetRepeat(false);
@@ -641,6 +651,8 @@ void SelectLevelMenuState::GoToStartLevel() {
         this->goToStartLevel = true;
     }
     else {
+        sound->PlaySound(GameSound::LevelMenuItemLockedEvent, false);
+
         // Play animation to indicate/show that the level is disabled
         selectedItem->ExecuteLockedAnimation();
     }

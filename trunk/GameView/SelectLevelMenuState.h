@@ -20,6 +20,8 @@
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../ESPEngine/ESPVolumeEmitter.h"
 
+#include "../GameSound/SoundCommon.h"
+
 class FBObj;
 class CgFxBloom;
 class TextLabel2D;
@@ -73,6 +75,8 @@ private:
     Texture2D* padlockTexture;
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
+
+    SoundID bgSoundLoopID;
 
     ESPVolumeEmitter* nextPgArrowEmitter;
     ESPMultiColourEffector nextArrowFader;
