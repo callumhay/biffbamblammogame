@@ -46,6 +46,19 @@ private:
     static const int ITEM_NAME_BORDER_SIZE;
     static const int TOTAL_MENU_HEIGHT;
 
+    class BlammopediaListEventHandler : public ItemListViewEventHandler {
+    public:
+        BlammopediaListEventHandler(BlammopediaState* state) : state(state) {}
+        ~BlammopediaListEventHandler() {}
+
+        void ItemHighlightedChanged();
+        void ItemActivated(bool locked);
+        void ItemDeactivated();
+
+    private:
+        BlammopediaState* state;
+    };
+
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
 
@@ -85,6 +98,8 @@ private:
 
     bool goBackToMainMenu;
 
+    BlammopediaListEventHandler* listEventHandler;
+
     ItemListView* BuildGameplayListView();
 	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia);
 	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia);
@@ -92,8 +107,8 @@ private:
     ItemListView* GetCurrentListView() const;
         
     void GoBackToMainMenu();
-    void SetBlammoMenuItemHighlighted(int menuItemIndex);
-    void SetBlammoMenuItemSelection();
+    void SetBlammoMenuItemHighlighted(int menuItemIndex, bool playSound = true);
+    void SetBlammoMenuItemSelection(bool playSound = true);
     void SetBlammoMenuItemDeselection();
 
 	DISALLOW_COPY_AND_ASSIGN(BlammopediaState);

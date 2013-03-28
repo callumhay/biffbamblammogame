@@ -77,7 +77,7 @@ public:
     virtual ~VerifyMenuEventHandlerWithSound() {}
 
     virtual void MenuItemActivated()   { this->sound->PlaySound(GameSound::MenuOpenSubMenuWindowEvent, false); }
-    virtual void MenuItemDeactivated() { this->sound->PlaySound(GameSound::MenuCloseSubMenuWindowEvent, false); }
+    virtual void MenuItemDeactivated() { /* Sounds don't really work well here... need an animation to make it work */ }
     virtual void MenuItemScrolled()    { this->sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false); }
     virtual void MenuItemConfirmed()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
     virtual void MenuItemCancelled()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }

@@ -33,7 +33,7 @@ const int ItemListView::BLACK_BORDER_HEIGHT         = 100;
 const int ItemListView::HORIZ_ITEM_ACTIVATED_BORDER = 50;
 
 ItemListView::ItemListView(size_t width, size_t height) : listWidth(width), listHeight(height),
-selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX), 
+selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX), eventHandler(NULL),
 itemIsActivated(false), nonActivatedItemsFadeAnim(1), activatedItemFadeAnim(1), 
 activatedItemGrowAnim(1), blackBorderAnim(0.0f), activatedItemXPicAnim(width + 1), keyLabel(NULL),
 activatedItemAlphaAnim(0.0f), pressEscAlphaAnim(0.0f) {
@@ -389,6 +389,7 @@ size_t ItemListView::AdjustItemWidthAndListLayout(size_t width) {
 void ItemListView::MoveSelectionX(bool right) {
     if (this->GetSelectedItem() == NULL) { return; }
 
+    int prevSelectedItemIndex = this->selectedItemIndex;
     int wrapAroundX;
     if (this->itemIsActivated) {
         // Can't go to another item if only one is unlocked.
@@ -424,6 +425,10 @@ void ItemListView::MoveSelectionX(bool right) {
         this->SetSelection(this->numItemsPerRow * currRowIndex + wrapAroundX);
     }
 
+    if (this->eventHandler != NULL && prevSelectedItemIndex != this->selectedItemIndex) {
+        this->eventHandler->ItemHighlightedChanged();
+    }
+
     assert(this->GetSelectedItem() != NULL);
 }
 
@@ -436,6 +441,8 @@ void ItemListView::MoveSelectionY(bool up) {
         return;
     }
 
+    int prevSelectedIndex = this->selectedItemIndex;
+
     int numRows = (this->items.size() / this->numItemsPerRow) + 1;
     int rowsAllFilledNumItems = (numRows * this->numItemsPerRow);
     int newSelectedIndex = (rowsAllFilledNumItems + this->selectedItemIndex - y * this->numItemsPerRow) % rowsAllFilledNumItems;
@@ -447,8 +454,12 @@ void ItemListView::MoveSelectionY(bool up) {
             newSelectedIndex %= this->numItemsPerRow;
         }
     }
-    this->SetSelection(newSelectedIndex);
 
+    if (this->eventHandler != NULL && prevSelectedIndex != newSelectedIndex) {
+        this->eventHandler->ItemHighlightedChanged();
+    }
+
+    this->SetSelection(newSelectedIndex);
     assert(this->GetSelectedItem() != NULL);
 }
 
@@ -463,6 +474,10 @@ void ItemListView::ItemActivated() {
     if (selectedItem == NULL) { return; }
 
     if (selectedItem->GetIsLocked()) {
+        
+        if (this->eventHandler != NULL) {
+            this->eventHandler->ItemActivated(true);
+        }
         this->StartLockedAnimation();
     }
     else {
@@ -498,11 +513,16 @@ void ItemListView::ItemActivated() {
         this->pressEscAlphaAnim.SetRepeat(true);
 
         selectedItem->Activated();
+
+        if (this->eventHandler != NULL) {
+            this->eventHandler->ItemActivated(false);
+        }
     }   
 }
 
 void ItemListView::ItemDeactivated() {
     this->arrowFlashAnim.ResetToStart();
+
     if (this->itemIsActivated) {
         this->itemIsActivated = false;
 
@@ -530,6 +550,10 @@ void ItemListView::ItemDeactivated() {
         this->pressEscAlphaAnim.SetInterpolantValue(0.0f);
 
         this->GetSelectedItem()->Deactivated();
+
+        if (this->eventHandler != NULL) {
+            this->eventHandler->ItemDeactivated();
+        }
     }
 }
 
