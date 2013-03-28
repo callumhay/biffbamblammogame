@@ -347,6 +347,10 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemSelectEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemLockedEvent));
 
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuOpened));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuClosed));
+    
+
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldBackgroundLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleHitWallEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent));

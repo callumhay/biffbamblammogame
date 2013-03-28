@@ -116,13 +116,13 @@ private:
     GameMenuItem* startGameMenuItem;
 
 	// Pointers for tracking the menu items in the options menu
-	SelectionListMenuItem* fullscreenMenuItem;
-	SelectionListMenuItem* resolutionMenuItem;
-	SelectionListMenuItem* vSyncMenuItem;
+	SelectionListMenuItem*  fullscreenMenuItem;
+	SelectionListMenuItem*  resolutionMenuItem;
+	SelectionListMenuItem*  vSyncMenuItem;
 	AmountScrollerMenuItem* soundVolumeMenuItem;
-    SelectionListMenuItem* invertBallBoostItem;
-    SelectionListMenuItem* ballBoostModeItem;
-    SelectionListMenuItem* difficultyItem;
+    SelectionListMenuItem*  invertBallBoostItem;
+    SelectionListMenuItem*  ballBoostModeItem;
+    SelectionListMenuItem*  difficultyItem;
     //AmountScrollerMenuItem* controllerSensitivityItem;
 
 	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
@@ -175,7 +175,6 @@ public:
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
-		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
 	private:
 		MainMenuDisplayState* mainMenuState;
@@ -188,7 +187,6 @@ public:
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
-		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
 	private:
 		MainMenuDisplayState* mainMenuState;

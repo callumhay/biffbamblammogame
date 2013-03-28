@@ -322,10 +322,6 @@ void GameOverDisplayState::TopMenuEventHandler::GameMenuItemChangedEvent(int ite
     UNUSED_PARAMETER(itemIndex);
 }
 
-void GameOverDisplayState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
-    UNUSED_PARAMETER(itemIndex);
-}
-
 void GameOverDisplayState::TopMenuEventHandler::EscMenu() {
 }
 

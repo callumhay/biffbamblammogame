@@ -2,7 +2,7 @@
  * GameMenu.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -19,6 +19,7 @@
 
 #include "GameFontAssetsManager.h"
 #include "GameMenuItem.h"
+#include "IGameMenu.h"
 
 class Texture;
 
@@ -50,12 +51,6 @@ public:
 	 */
 	virtual void GameMenuItemChangedEvent(int itemIndex) = 0;
 
-	/**
-	 * Event called when a menu item has both been activated and then verified (via a verify menu).
-	 * Parameters: itemIndex - the index of the item that has been verified.
-	 */
-	virtual void GameMenuItemVerifiedEvent(int itemIndex) = 0;
-
 	/** 
 	 * Event called when the user tries to quickly escape from a menu
 	 * (by hitting Esc key).
@@ -67,7 +62,7 @@ public:
  * An organized set of menu items, formated for selection by the
  * user.
  */
-class GameMenu {
+class GameMenu : public IGameMenu {
 public:
 	enum MenuAlignment { LeftJustified, CenterJustified };
 
@@ -180,15 +175,6 @@ public:
 	inline void ActivatedMenuItemChanged() {
 		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
 			(*iter)->GameMenuItemChangedEvent(this->selectedMenuItemIndex);
-		}
-	}
-
-	/**
-	 * Tell this menu that the currently activated menu item has been verified
-	 */
-	inline void ActivatedMenuItemVerified() {
-		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
-			(*iter)->GameMenuItemVerifiedEvent(this->selectedMenuItemIndex);
 		}
 	}
 

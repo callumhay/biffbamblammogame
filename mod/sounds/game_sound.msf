@@ -59,42 +59,63 @@ BlammopediaMenuBackgroundLoop {
 
 // World/Movement Select Menu Sounds *****************************************
 
+// World selection menu background music (looped)
 WorldMenuBackgroundLoop {
 	file = menu/bg_world_select.wav
 }
 
+// Plays when the user changes which world is highlighted/selected in the world selection menu
 WorldMenuItemChangedSelectionEvent {
 	file = menu/item_select.wav
 }
 
+// Plays when the user confirms the selection of a world in the world selection menu
 WorldMenuItemSelectEvent {
 	file = menu/item_confirm.wav
 }
 
+// Plays when the user attempts to select a world that is locked in the world selection menu
 WorldMenuItemLockedEvent {
 	file = menu/item_locked.wav
 }
 
 // Level Select Menu Sounds **************************************************
 
+// Level selection menu background music (looped)
 LevelMenuBackgroundLoop {
 	file = menu/bg_level_select.wav
 }
 
+// Plays when the user changes which level is highlighted/selected in the level selection menu
 LevelMenuItemChangedSelectionEvent {
 	file = menu/item_select.wav
 }
 
+// Plays when the user changes the page (among the pages of levels) in the level selection menu
 LevelMenuPageChangedSelectionEvent {
 	file = menu/page_changed.wav
 }
 
+// Plays when the user confirms the selection of a level in the level selection menu
 LevelMenuItemSelectEvent {
 	file = menu/item_confirm.wav
 }
 
+// Plays when the user attempts to select a level that is locked in the level selection menu
 LevelMenuItemLockedEvent {
 	file = menu/item_locked.wav
+}
+
+// In-Game Menu Sounds *******************************************************
+
+// Plays when the player pauses the game (which opens the in-game menu)
+InGameMenuOpened {
+	file = menu/paused.wav
+}
+
+// Plays when the player unpauses the game (exits the in-game menu and goes back to playing)
+InGameMenuClosed {
+	file = menu/unpaused.wav
 }
 
 // ---------------------------------------------------------------------------

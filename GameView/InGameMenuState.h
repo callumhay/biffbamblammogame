@@ -2,7 +2,7 @@
  * InGameMenuState.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -74,12 +74,9 @@ private:
     int difficultyItem;
 	int returnToMainItem;
 	int exitToDesktopItem;
-
     int initialDifficultySelected;
-    PopupTutorialHint* difficultyRestartPopup;
 
-    SelectionListMenuItem* invertBallBoostMenuItem;
-    SelectionListMenuItem* difficultyMenuItem;
+    SelectionListMenuItemWithVerify* difficultyMenuItem;
 
 	void InitTopMenu();
 
@@ -87,16 +84,16 @@ private:
     
 	// Top Level Menu Handler class
 	class TopMenuEventHandler : public GameMenuEventHandler {
-	private:
-		InGameMenuState* inGameMenuState;
 	public:
 		TopMenuEventHandler(InGameMenuState* inGameMenuState) : inGameMenuState(inGameMenuState) {}
 		~TopMenuEventHandler() {}
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
-		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
+
+	private:
+		InGameMenuState* inGameMenuState;
 	};
 
 	// Event handlers for verify menus
@@ -120,6 +117,7 @@ private:
 	private:
 		InGameMenuState* inGameMenuState;
 	};
+
 	class ReturnToMainMenuVerifyEventHandler : public VerifyMenuEventHandlerWithSound {
 	public:
 		ReturnToMainMenuVerifyEventHandler(InGameMenuState* inGameMenuState);
@@ -131,48 +129,29 @@ private:
 		InGameMenuState* inGameMenuState;
 	};
 
-
-    class InvertBallBoostEventHandler : public GameMenuItemEventHandler {
+    class DifficultyEventHandler : public SelectionListEventHandlerWithSound {
     public:
-        InvertBallBoostEventHandler(InGameMenuState* inGameMenuState) : inGameMenuState(inGameMenuState) {}
-        void MenuItemScrolled() {};
-        void MenuItemConfirmed() {};
-        void MenuItemCancelled() {};
+        DifficultyEventHandler(InGameMenuState* inGameMenuState);
 
 	private:
 		InGameMenuState* inGameMenuState;
     };
 
-    class DifficultyEventHandler : public GameMenuItemEventHandler {
+    class DifficultyVerifyEventHandler : public VerifyMenuEventHandlerWithSound {
     public:
-        DifficultyEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
-        void MenuItemScrolled() {};
-        void MenuItemConfirmed() {};
-        void MenuItemCancelled() {};
-
-	private:
-		InGameMenuState* inGameMenuState;
-    };
-
-    class DifficultyPopupHandler : public PaneHandler {
-    public:
-        DifficultyPopupHandler(InGameMenuState *inGameMenuState) : PaneHandler(NULL), inGameMenuState(inGameMenuState) {}
-        ~DifficultyPopupHandler() {};
-
-        void OptionSelected(const std::string& optionText);
+        DifficultyVerifyEventHandler(InGameMenuState* inGameMenuState);
+        void MenuItemConfirmed();
 
     private:
-        InGameMenuState* inGameMenuState;
+		InGameMenuState* inGameMenuState;
     };
 
 	TopMenuEventHandler* topMenuEventHandler;
-    InvertBallBoostEventHandler* invertBallBoostHandler;
     DifficultyEventHandler* difficultyEventHandler;
-    
+    DifficultyVerifyEventHandler* difficultyVerifyHandler;
     RestartVerifyEventHandler* restartVerifyHandler;
     ExitGameVerifyEventHandler* exitGameVerifyHandler;
     ReturnToMainMenuVerifyEventHandler* returnToMainMenuVerifyHandler;
-
 
 	DISALLOW_COPY_AND_ASSIGN(InGameMenuState);
 };

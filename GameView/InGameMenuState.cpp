@@ -2,7 +2,7 @@
  * InGameMenuState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -38,13 +38,18 @@ const char* InGameMenuState::VERIFY_MENU_NO   = "NOoo!";
 
 InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
 DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
-topMenu(NULL), topMenuEventHandler(NULL), difficultyEventHandler(NULL), invertBallBoostHandler(NULL),
+topMenu(NULL), topMenuEventHandler(NULL), difficultyEventHandler(NULL), difficultyVerifyHandler(NULL),
 restartVerifyHandler(NULL), exitGameVerifyHandler(NULL), returnToMainMenuVerifyHandler(NULL),
-returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1),
-difficultyRestartPopup(NULL) {
+returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1) {
 
+    GameSound* sound = this->display->GetSound();
+        
 	// Pause all world sounds
-	this->display->GetSound()->PauseAllSounds();
+	sound->PauseAllSounds();
+    // ... but unpause the looped background music, and set its volume to about half
+    // TODO
+    // ..and play the paused sound
+    sound->PlaySound(GameSound::InGameMenuOpened, false);
 
 	// Pause the game itself
 	this->display->GetModel()->SetPause(GameModel::PauseGame);
@@ -62,20 +67,14 @@ InGameMenuState::~InGameMenuState() {
 	this->topMenuEventHandler = NULL;
     delete this->difficultyEventHandler;
     this->difficultyEventHandler = NULL;
-    delete this->invertBallBoostHandler;
-    this->invertBallBoostHandler = NULL;
-
+    delete this->difficultyVerifyHandler;
+    this->difficultyVerifyHandler = NULL;
     delete this->restartVerifyHandler;
     this->restartVerifyHandler = NULL;
     delete this->exitGameVerifyHandler;
     this->exitGameVerifyHandler = NULL;
     delete this->returnToMainMenuVerifyHandler;
     this->returnToMainMenuVerifyHandler = NULL;
-
-    if (this->difficultyRestartPopup != NULL) {
-        delete this->difficultyRestartPopup;
-        this->difficultyRestartPopup = NULL;
-    }
 }
 
 /**
@@ -156,17 +155,15 @@ void InGameMenuState::RenderFrame(double dT) {
 	this->topMenu->SetCenteredOnScreen(camera.GetWindowWidth(), camera.GetWindowHeight());
 	this->topMenu->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
 	glPopAttrib();
-
-    // Draw any extra popups/dialogs
-    if (this->difficultyRestartPopup != NULL) {
-        this->difficultyRestartPopup->Tick(dT);
-        this->difficultyRestartPopup->Draw(camera);
-    }
 }
 
 void InGameMenuState::ResumeTheGame() {
+    GameSound* sound = this->display->GetSound();
+    
+    // Play unpause sound
+    sound->PlaySound(GameSound::InGameMenuClosed, false);
 	// Resume world sounds - these are initially paused when coming to this state (in the constructor)
-	this->display->GetSound()->UnpauseAllSounds();
+	sound->UnpauseAllSounds();
 	
     // Unpause the game
 	this->display->GetModel()->UnsetPause(GameModel::PauseGame);
@@ -198,12 +195,6 @@ void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButt
     UNUSED_PARAMETER(magnitude);                                    
     assert(this->topMenu != NULL);
 
-    // Feed controls to the pop-up if it exists and is currently visible
-    if (this->difficultyRestartPopup != NULL && this->difficultyRestartPopup->GetIsVisible()) {
-        this->difficultyRestartPopup->ButtonPressed(pressedButton);
-        return;
-    }
-
 	// If the pause button is hit again then just exit this menu back to the game...
 	if (pressedButton == GameControl::PauseButtonAction) {
 		this->ResumeTheGame();
@@ -220,11 +211,6 @@ void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButt
 void InGameMenuState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	assert(this->topMenu != NULL);
 
-    // If pop-up exists and is currently visible then controls all go to it
-    if (this->difficultyRestartPopup != NULL && this->difficultyRestartPopup->GetIsVisible()) {
-        return;
-    }
-
 	// Tell the top-most menu about the key released event
 	this->topMenu->ButtonReleased(releasedButton);
 }
@@ -239,8 +225,8 @@ void InGameMenuState::InitTopMenu() {
 	// Set up the handlers
 	this->topMenuEventHandler    = new TopMenuEventHandler(this);
     this->difficultyEventHandler = new DifficultyEventHandler(this);
-    this->invertBallBoostHandler = new InvertBallBoostEventHandler(this);
 
+    this->difficultyVerifyHandler       = new DifficultyVerifyEventHandler(this);
     this->restartVerifyHandler          = new RestartVerifyEventHandler(this);
     this->exitGameVerifyHandler         = new ExitGameVerifyEventHandler(this);
     this->returnToMainMenuVerifyHandler = new ReturnToMainMenuVerifyEventHandler(this);
@@ -289,42 +275,31 @@ void InGameMenuState::InitTopMenu() {
 
     this->restartItem = this->topMenu->AddMenuItem(restartLevelItem);
 
-    // Invert ball boost Item...
-    //tempLabelSm.SetText("Invert Ball Boost");
-    //tempLabelLg.SetText("Invert Ball Boost");
-    //std::vector<std::string> invertOptions = ConfigOptions::GetOnOffItems();
-
-    //this->invertBallBoostMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, invertOptions);
-    //this->invertBallBoostMenuItem->SetSelectedItem(this->cfgOptions.GetInvertBallBoost() ? 1 : 0);
-    //this->invertBallBoostMenuItem->SetEventHandler(this->invertBallBoostHandler);
-
-    //this->invertBallBoostItem = this->topMenu->AddMenuItem(this->invertBallBoostMenuItem);
-
     // We don't allow a difficulty item to be part of the menu if the player is in the tutorial
     if (this->returnToDisplayState->GetType() == DisplayState::InTutorialGame) {
         this->difficultyItem = GameMenu::NO_MENU_ITEM_INDEX;
     }
     else {
         // Add the difficulty item to the menu...
+        static const int POPUP_WIDTH = 750;
+        this->initialDifficultySelected = static_cast<int>(this->cfgOptions.GetDifficulty());
+        
+        tempLabelSm.SetText("");
+	    tempLabelLg.SetText("");
+	    VerifyMenuItem* verifyDifficultyMenuItem  = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
+		    GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
+		    GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		    GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+
+	    verifyDifficultyMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
+	    verifyDifficultyMenuItem->SetVerifyMenuText("Changing the difficulty will restart the current level. Are you sure?", VERIFY_MENU_YES, VERIFY_MENU_NO);
+        verifyDifficultyMenuItem->SetEventHandler(this->difficultyVerifyHandler);
+
         tempLabelSm.SetText("Difficulty");
 	    tempLabelLg.SetText("Difficulty");
         std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
 
-        static const int POPUP_WIDTH = 750;
-        this->initialDifficultySelected = static_cast<int>(this->cfgOptions.GetDifficulty());
-        
-        std::vector<std::string> selectableOptions;
-        selectableOptions.push_back(VERIFY_MENU_YES);
-        selectableOptions.push_back(VERIFY_MENU_NO);
-
-        DifficultyPopupHandler* popupHandler = new DifficultyPopupHandler(this);
-        this->difficultyRestartPopup = new PopupTutorialHint(POPUP_WIDTH, popupHandler);
-        DecoratorOverlayPane* difficultyRestartPopupPane = this->difficultyRestartPopup->GetPane();
-        difficultyRestartPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
-        difficultyRestartPopupPane->AddText("Changing the difficulty will restart the current level. Are you sure?", Colour(1,1,1), 1.0f);
-        difficultyRestartPopupPane->SetSelectableOptions(selectableOptions, 1);
-
-        this->difficultyMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, difficultyOptions);
+        this->difficultyMenuItem = new SelectionListMenuItemWithVerify(tempLabelSm, tempLabelLg, difficultyOptions, verifyDifficultyMenuItem);
         this->difficultyMenuItem->SetSelectedItem(this->initialDifficultySelected);
         this->difficultyMenuItem->SetEventHandler(this->difficultyEventHandler);
 
@@ -368,41 +343,24 @@ void InGameMenuState::InitTopMenu() {
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	UNUSED_PARAMETER(itemIndex);
+
+    // Play the sound effect assoicated with menu item changing/being highlighted by the user
+    GameSound* sound = this->inGameMenuState->display->GetSound();
+    sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false);
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
+
+    // Play the sound for item selection/activation
+    GameSound* sound = this->inGameMenuState->display->GetSound();
+    sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
+
 	if (itemIndex == this->inGameMenuState->resumeItem) {
 		this->inGameMenuState->nextAction = InGameMenuState::ResumeGame;
 	}
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
-
-    if (itemIndex == this->inGameMenuState->difficultyItem) {
-        
-        // If the difficulty is different then show the confirm dialog
-        int currSelectionIdx = this->inGameMenuState->difficultyMenuItem->GetSelectedItemIndex();
-        if (currSelectionIdx != this->inGameMenuState->initialDifficultySelected) {
-            this->inGameMenuState->difficultyRestartPopup->Show(0.0, 0.5);
-        }
-    }
-    //else if (itemIndex == this->inGameMenuState->invertBallBoostItem) {
-    //    GameModel* gameModel = this->inGameMenuState->display->GetModel();
-
-    //    bool isInverted = ConfigOptions::IsOnItemSelected(
-    //        this->inGameMenuState->invertBallBoostMenuItem->GetSelectedItemIndex());
-    //    gameModel->SetInvertBallBoostDir(isInverted);
-    //    this->inGameMenuState->cfgOptions.SetInvertBallBoost(isInverted);
-    //}
-    else {
-        return;
-    }
-
-    // A configuration option has changed - rewrite the configuration file to accomodate the change
-    //ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->inGameMenuState->cfgOptions);
-}
-
-void InGameMenuState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
     UNUSED_PARAMETER(itemIndex);
 }
 
@@ -453,27 +411,30 @@ void InGameMenuState::ReturnToMainMenuVerifyEventHandler::MenuItemConfirmed() {
     this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
 }
 
-void InGameMenuState::DifficultyPopupHandler::OptionSelected(const std::string& optionText) {
-    PaneHandler::OptionSelected(optionText);
+InGameMenuState::DifficultyEventHandler::DifficultyEventHandler(InGameMenuState *inGameMenuState) : 
+SelectionListEventHandlerWithSound(inGameMenuState->display->GetSound()),
+inGameMenuState(inGameMenuState) {
+}
+
+InGameMenuState::DifficultyVerifyEventHandler::DifficultyVerifyEventHandler(InGameMenuState* inGameMenuState) :
+VerifyMenuEventHandlerWithSound(inGameMenuState->display->GetSound()),
+inGameMenuState(inGameMenuState) {
+}
+
+void InGameMenuState::DifficultyVerifyEventHandler::MenuItemConfirmed() {
 
     GameModel* gameModel = this->inGameMenuState->display->GetModel();
     assert(!gameModel->IsCurrentLevelTheTutorialLevel());
 
-    if (optionText.compare(InGameMenuState::VERIFY_MENU_YES) == 0) {
-        
-        // If the difficulty is actually being changed then will have to restart the current level...
-        int currSelectionIdx = this->inGameMenuState->difficultyMenuItem->GetSelectedItemIndex();
-        GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(currSelectionIdx);
-        this->inGameMenuState->cfgOptions.SetDifficulty(difficultyToSet);
-        gameModel->SetDifficulty(difficultyToSet);
-        
-        // Rewrite the configuration file to accomodate the change in difficulty
-        ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->inGameMenuState->cfgOptions);
+    // If the difficulty is actually being changed then will have to restart the current level...
+    int currSelectionIdx = this->inGameMenuState->difficultyMenuItem->GetSelectedItemIndex();
+    GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(currSelectionIdx);
+    this->inGameMenuState->cfgOptions.SetDifficulty(difficultyToSet);
+    gameModel->SetDifficulty(difficultyToSet);
+    
+    // Rewrite the configuration file to accomodate the change in difficulty
+    ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->inGameMenuState->cfgOptions);
 
-        // Flag to restart the level...
-        this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
-    }
-    else {
-        this->inGameMenuState->difficultyMenuItem->SetSelectedItem(this->inGameMenuState->initialDifficultySelected);
-    }
+    // Flag to restart the level...
+    this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
 }

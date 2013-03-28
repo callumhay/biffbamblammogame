@@ -388,6 +388,80 @@ void SelectionListMenuItem::Activate() {
 	this->previouslySelectedIndex = this->selectedIndex;
 }
 
+// SelectionListMenuItemWithVerify Functions **********************************************************
+
+SelectionListMenuItemWithVerify::SelectionListMenuItemWithVerify(const TextLabel2D& smLabel, const TextLabel2D& lgLabel,
+                                                                 const std::vector<std::string>& items, VerifyMenuItem* verifyMenu) :
+SelectionListMenuItem(smLabel, lgLabel, items), verifyMenu(verifyMenu), verifyMenuActive(false) {
+    assert(verifyMenu != NULL);
+    this->verifyMenu->SetParent(this);
+}
+
+SelectionListMenuItemWithVerify::~SelectionListMenuItemWithVerify() {
+    delete this->verifyMenu;
+    this->verifyMenu = NULL;
+}
+
+void SelectionListMenuItemWithVerify::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
+    SelectionListMenuItem::Draw(dT, topLeftCorner, windowWidth, windowHeight);
+    if (this->verifyMenuActive) {
+        this->verifyMenu->Draw(dT, topLeftCorner, windowWidth, windowHeight);
+    }
+}
+
+void SelectionListMenuItemWithVerify::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+    if (this->verifyMenuActive) {
+        this->verifyMenu->ButtonPressed(pressedButton);
+    }
+    else {
+        SelectionListMenuItem::ButtonPressed(pressedButton);
+    }
+}
+
+void SelectionListMenuItemWithVerify::ButtonReleased(const GameControl::ActionButton& releasedButton) {
+    if (this->verifyMenuActive) {
+        this->verifyMenu->ButtonReleased(releasedButton);
+    }
+    else {
+        SelectionListMenuItem::ButtonReleased(releasedButton);
+    }
+}
+
+void SelectionListMenuItemWithVerify::EscapeFromMenuItem(bool saveChange) {
+    if (saveChange) {
+        if (this->verifyMenuActive) {
+            assert(this->verifyMenu->GetSelectedVerifyMenuOption() == VerifyMenuItem::Confirm);
+            SelectionListMenuItem::EscapeFromMenuItem(true);
+        }
+        else {
+            // Check to see if the selected option is the same as what it was before the menu was opened, if
+            // so then we just escape from the menu without saving changes
+            if (this->previouslySelectedIndex == this->selectedIndex) {
+                SelectionListMenuItem::EscapeFromMenuItem(true);
+            }
+            else {
+                // Open up the verify menu...
+                this->verifyMenuActive = true;
+                this->verifyMenu->SetSelectedVerifyMenuOption(VerifyMenuItem::Cancel);
+                this->verifyMenu->Activate();
+            }
+        }
+    }
+    else {
+        SelectionListMenuItem::EscapeFromMenuItem(false);
+    }
+}
+
+void SelectionListMenuItemWithVerify::DeactivateSelectedMenuItem() {
+    assert(this->verifyMenuActive);
+
+    if (this->verifyMenu->GetSelectedVerifyMenuOption() == VerifyMenuItem::Confirm) {
+        this->EscapeFromMenuItem(true);
+    }
+    this->verifyMenuActive = false;
+    this->verifyMenu->Deactivate();
+}
+
 // AmountScrollerMenuItem Functions *******************************************************************
 
 // The distance between the text and arrows 
@@ -721,7 +795,7 @@ randomMenuBGColour(1,1,1), idleColour(1,1,1), selectionColour(1,0,0),
 verifyDescFont(verifyDescFont), verifyIdleFont(verifyIdleFont), verifySelFont(verifySelFont) {
 
 	// Initialize the text for the verify menu to something sensible
-	this->SetVerifyMenuText("Are you sure?", "Yes", "No");
+	//this->SetVerifyMenuText("Are you sure?", "Yes", "No");
 
 	// Setup the animations to their initial values
 	this->optionItemWiggleAnim.SetInterpolantValue(0.0f);
