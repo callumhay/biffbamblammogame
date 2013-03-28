@@ -134,7 +134,7 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
                 assert(lastSoundEnum != GameSound::NoSound);
                 assert(!soundFilePaths.empty());
 
-                SoundSource* newSoundSrc = gameSound.BuildSoundSource(lastBlockName, soundFilePaths.front());//probabilities, soundFilePaths);
+                SoundSource* newSoundSrc = gameSound.BuildSoundSource(lastSoundEnum, lastBlockName, soundFilePaths.front());//probabilities, soundFilePaths);
 			    assert(newSoundSrc != NULL);
             
                 if (worldSoundStyle != GameWorld::None) {

@@ -14,19 +14,23 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 
+#include "GameSound.h"
+
 // IrrKlang Forward Declarations
 namespace irrklang {
 class ISoundEngine;
 class ISoundSource;
 };
 
-class GameSound;
 class Sound;
 
 class SoundSource {
     friend class GameSound;
 public:
     ~SoundSource();
+
+    GameSound::SoundType GetSoundType() const;
+    bool IsLoaded() const;
 
     // Sound sources start off as proxies and must be loaded into memory to spawn playable sounds
     bool Load();
@@ -36,9 +40,10 @@ public:
 
 
 private:
-    SoundSource(irrklang::ISoundEngine* soundEngine, const std::string& soundName,
-        const std::string& filePath);
+    SoundSource(irrklang::ISoundEngine* soundEngine, const GameSound::SoundType& soundType,
+        const std::string& soundName, const std::string& filePath);
 
+    const GameSound::SoundType soundType;
     const std::string soundName;
     const std::string soundFilePath;
 
@@ -47,5 +52,13 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(SoundSource);
 };
+
+inline GameSound::SoundType SoundSource::GetSoundType() const {
+    return this->soundType;
+}
+
+inline bool SoundSource::IsLoaded() const {
+    return (this->source != NULL);
+}
 
 #endif // __SOUNDSOURCE_H__

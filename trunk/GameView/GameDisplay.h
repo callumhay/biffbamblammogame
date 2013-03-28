@@ -117,6 +117,11 @@ public:
 	static bool IsCameraDetached() {
 		return detachedCamera;
 	}
+
+    void ReloadSound() {
+        this->sound->ReloadFromMSF();
+    }
+
 #endif
 
 private:
