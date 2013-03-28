@@ -336,10 +336,16 @@ void MSFReader::InitSoundTypeMapping() {
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaMenuBackgroundLoop));
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldSelectMenuBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuItemChangedSelectionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuItemSelectEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuItemLockedEvent));
+
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemChangedSelectionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuPageChangedSelectionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemSelectEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemLockedEvent));
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldBackgroundLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleHitWallEvent));

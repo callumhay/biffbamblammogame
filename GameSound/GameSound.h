@@ -56,10 +56,17 @@ public:
         BlammopediaMenuBackgroundLoop,
 
         // -> World select menu sounds
-        WorldSelectMenuBackgroundLoop,
+        WorldMenuBackgroundLoop,
         WorldMenuItemChangedSelectionEvent,
         WorldMenuItemSelectEvent,
         WorldMenuItemLockedEvent,
+
+        // -> Level select menu sounds
+        LevelMenuBackgroundLoop,
+        LevelMenuItemChangedSelectionEvent,
+        LevelMenuPageChangedSelectionEvent,
+        LevelMenuItemSelectEvent,
+        LevelMenuItemLockedEvent,
 
         // World-specific sounds
         WorldBackgroundLoop,

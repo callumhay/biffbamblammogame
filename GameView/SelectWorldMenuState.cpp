@@ -308,7 +308,7 @@ void SelectWorldMenuState::GoBackToMainMenu() {
 
 void SelectWorldMenuState::Init(int selectedIdx) {
     // Background music...
-    this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldSelectMenuBackgroundLoop, true);
+    this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
 
     // Load background texture
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
