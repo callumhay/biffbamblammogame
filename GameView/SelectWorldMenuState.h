@@ -14,7 +14,10 @@
 
 #include "DisplayState.h"
 #include "CgFxGreyscale.h"
+
 #include "../BlammoEngine/Animation.h"
+
+#include "../GameSound/SoundCommon.h"
 
 class TextLabel2D;
 class FBObj;
@@ -71,6 +74,8 @@ private:
 
     Texture2D* starryBG;
     Texture2D* padlockTex;
+
+    SoundID bgSoundLoopID;
 
     // Inner class for representing a selectable world item in the world select menu
     class WorldSelectItem {

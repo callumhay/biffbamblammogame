@@ -129,16 +129,14 @@ void GameSound::ReloadFromMSF() {
     }
 
     // Figure out what sounds are looping, we'll need to restart these after the reload...
-    std::list<GameSound::SoundType> loopingSounds;
+    std::list<std::pair<GameSound::SoundType, SoundID> > loopingSounds;
     for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
         Sound* currSound = iter->second;
         if (currSound->IsLooped() && !currSound->IsFinished() && !currSound->IsFadingOut()) {
-            loopingSounds.push_back(currSound->GetSoundType());
+            loopingSounds.push_back(std::make_pair(currSound->GetSoundType(), currSound->GetSoundID()));
         }
     }
 
-
-    
     // Clear all effects, sounds and sound sources...
     this->ClearAll();
 
@@ -152,9 +150,11 @@ void GameSound::ReloadFromMSF() {
     this->LoadWorldSounds(this->currLoadedWorldStyle);
 
     // Play anything that was looped before
-    for (std::list<GameSound::SoundType>::iterator iter = loopingSounds.begin();
+    for (std::list<std::pair<GameSound::SoundType, SoundID> >::iterator iter = loopingSounds.begin();
          iter != loopingSounds.end(); ++iter) {
-        this->PlaySound(*iter, true);
+
+        const std::pair<GameSound::SoundType, SoundID>& currPair = *iter;
+        this->PlaySoundWithID(currPair.second, currPair.first, true);
     }
 }
 
@@ -278,6 +278,35 @@ bool GameSound::LoadFromMSF() {
     }
 
     return success;
+}
+
+bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& soundType, bool isLooped) {
+    assert(soundType != GameSound::NoSound);
+    assert(id != INVALID_SOUND_ID);
+
+    if (this->soundEngine == NULL) {
+        return false;
+    }
+
+    // Make sure the id isn't already taken...
+    if (this->GetPlayingSound(id) != NULL) {
+        return false;
+    }
+
+    // Try to find the source associated with the given sound type
+    SoundSource* source = this->GetSoundSourceFromType(soundType);
+    if (source == NULL) {
+        return false;
+    }
+
+    Sound* newSound = source->Spawn2DSoundWithID(id, isLooped);
+    if (newSound == NULL) {
+        assert(false);
+        return false;
+    }
+    
+    this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
+    return true;
 }
 
 void GameSound::ClearAll() {

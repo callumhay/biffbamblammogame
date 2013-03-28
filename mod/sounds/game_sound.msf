@@ -1,18 +1,15 @@
 
 // Menu sounds/music ==================================================
 
+// Main Menu and General Sounds ***************************************
+
 // Main menu background music (looped)
 MainMenuBackgroundLoop {
 	file = menu/bg_piano.wav
 }
 
-// Blammopedia menu background music (looped)
-BlammopediaMenuBackgroundLoop {
-	file = menu/bg_blammopedia.wav
-}
-
-// Plays when the user highlights a new item in a menu
-MenuItemChangedEvent {
+// Plays when the user highlights (i.e., changes the selection to) a new item in a menu
+MenuItemChangedSelectionEvent {
 	file = menu/item_select.wav
 }
 
@@ -52,7 +49,30 @@ MenuScrollerItemScrolledEvent {
 	file = menu/item_scroller_scrolled.wav
 }
 
+// Blammopedia Sounds ********************************************************
 
+// Blammopedia menu background music (looped)
+BlammopediaMenuBackgroundLoop {
+	file = menu/bg_blammopedia.wav
+}
+
+// World/Movement Select Sounds **********************************************
+
+WorldSelectMenuBackgroundLoop {
+	file = menu/bg_world_select.wav
+}
+
+WorldMenuItemChangedSelectionEvent {
+	file = menu/item_select.wav
+}
+
+WorldMenuItemSelectEvent {
+	file = menu/item_confirm.wav
+}
+
+WorldMenuItemLockedEvent {
+	file = menu/item_locked.wav
+}
 
 
 // Movement-specific Sound ===================================================

@@ -41,10 +41,9 @@ public:
     enum SoundType {
         NoSound = -1,
 
-        // Main menu sounds
+        // Menu sounds
 		MainMenuBackgroundLoop,
-        BlammopediaMenuBackgroundLoop,
-		MenuItemChangedEvent, 
+		MenuItemChangedSelectionEvent, 
 		MenuItemEnteredEvent,
 		MenuItemCancelEvent,
 		MenuItemVerifyAndSelectEvent, 
@@ -52,6 +51,15 @@ public:
         MenuScrollerItemScrolledEvent,
         MenuOpenSubMenuWindowEvent,
         MenuCloseSubMenuWindowEvent,
+        
+        // -> Blammopedia sounds
+        BlammopediaMenuBackgroundLoop,
+
+        // -> World select menu sounds
+        WorldSelectMenuBackgroundLoop,
+        WorldMenuItemChangedSelectionEvent,
+        WorldMenuItemSelectEvent,
+        WorldMenuItemLockedEvent,
 
         // World-specific sounds
         WorldBackgroundLoop,
@@ -166,6 +174,8 @@ private:
         const std::string& soundName, const std::string& filePath);
 
     bool LoadFromMSF();
+
+    bool PlaySoundWithID(const SoundID& id, const GameSound::SoundType& soundType, bool isLooped);
 
     void ClearAll();
     void ClearEffects();

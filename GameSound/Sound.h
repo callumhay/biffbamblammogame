@@ -22,7 +22,7 @@
 
 class Sound {
 public:
-    Sound(const GameSound::SoundType& soundType, irrklang::ISound* sound);
+    Sound(const SoundID& id, const GameSound::SoundType& soundType, irrklang::ISound* sound);
     ~Sound();
 
     SoundID GetSoundID() const;
@@ -50,9 +50,10 @@ private:
     DISALLOW_COPY_AND_ASSIGN(Sound);
 };
 
-inline Sound::Sound(const GameSound::SoundType& soundType, irrklang::ISound* sound) : 
-id(GenerateSoundID()), soundType(soundType), sound(sound), fadeOutTimeCountdown(-1), totalFadeOutTime(-1) {
+inline Sound::Sound(const SoundID& id, const GameSound::SoundType& soundType, irrklang::ISound* sound)  : 
+id(id), soundType(soundType), sound(sound), fadeOutTimeCountdown(-1), totalFadeOutTime(-1) {
     assert(sound != NULL);
+    assert(id != INVALID_SOUND_ID);
 }
 
 inline Sound::~Sound() {
