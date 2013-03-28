@@ -162,11 +162,16 @@ private:
     irrklang::ISoundEngine* soundEngine;
 
     // Helper functions
-    SoundSource* BuildSoundSource(const std::string& soundName, const std::string& filePath);
+    SoundSource* BuildSoundSource(const GameSound::SoundType& soundType,
+        const std::string& soundName, const std::string& filePath);
 
+    bool LoadFromMSF();
+
+    void ClearAll();
+    void ClearEffects();
     void ClearSounds();
     void ClearSoundSources();
-    
+
     SoundSource* GetSoundSourceFromType(const GameSound::SoundType& type);
     Sound* GetPlayingSound(SoundID soundID);
 

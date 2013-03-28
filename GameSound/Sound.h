@@ -18,16 +18,19 @@
 #include "../BlammoEngine/Algebra.h"
 #include "../BlammoEngine/Point.h"
 
-#include "SoundCommon.h"
+#include "GameSound.h"
 
 class Sound {
 public:
-    Sound(irrklang::ISound* sound);
+    Sound(const GameSound::SoundType& soundType, irrklang::ISound* sound);
     ~Sound();
 
     SoundID GetSoundID() const;
+    GameSound::SoundType GetSoundType() const;
 
+    bool IsLooped() const;
     bool IsFinished() const;
+    bool IsFadingOut() const;
     
     void Tick(double dT);
 
@@ -38,6 +41,7 @@ public:
 
 private:
     const SoundID id;
+    const GameSound::SoundType soundType;
     irrklang::ISound* sound;
 
     double fadeOutTimeCountdown;
@@ -46,8 +50,8 @@ private:
     DISALLOW_COPY_AND_ASSIGN(Sound);
 };
 
-inline Sound::Sound(irrklang::ISound* sound) : 
-id(GenerateSoundID()), sound(sound), fadeOutTimeCountdown(-1), totalFadeOutTime(-1) {
+inline Sound::Sound(const GameSound::SoundType& soundType, irrklang::ISound* sound) : 
+id(GenerateSoundID()), soundType(soundType), sound(sound), fadeOutTimeCountdown(-1), totalFadeOutTime(-1) {
     assert(sound != NULL);
 }
 
@@ -59,14 +63,26 @@ inline SoundID Sound::GetSoundID() const {
     return this->id;
 }
 
+inline GameSound::SoundType Sound::GetSoundType() const {
+    return this->soundType;
+}
+
+inline bool Sound::IsLooped() const {
+    return this->sound->isLooped();
+}
+
 inline bool Sound::IsFinished() const {
     return this->sound->isFinished();
+}
+
+inline bool Sound::IsFadingOut() const {
+    return this->totalFadeOutTime > 0;
 }
 
 inline void Sound::Tick(double dT) {
 
     // Perform any fade-out on the sound
-    if (this->totalFadeOutTime > 0) {
+    if (this->IsFadingOut()) {
         this->fadeOutTimeCountdown = std::max<double>(0.0, this->fadeOutTimeCountdown - dT);
         if (this->fadeOutTimeCountdown == 0.0) {
             this->sound->stop();

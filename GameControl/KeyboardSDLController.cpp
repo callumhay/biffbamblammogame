@@ -459,7 +459,6 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                 break;
             case SDLK_SLASH:
                 GameDisplay::ToggleDetachCamera();
-
                 break;
             case SDLK_COMMA:
                 this->model->TogglePause(GameModel::PauseBall);
@@ -467,12 +466,16 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
             case SDLK_PERIOD:
                 this->model->TogglePause(GameModel::PauseAI);
                 break;
-            
+
+            case SDLK_QUOTEDBL:
+            case SDLK_QUOTE:
+                this->display->ReloadSound();
+                break;
+
             default:
                 break;
         }
 
-#ifdef _DEBUG
         // Shift + Ctrl
         if (SDL_GetModState() & KMOD_CTRL) {
             switch (key) {
@@ -484,7 +487,6 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                     break;
             }
         }
-#endif
 
     }
 #endif

@@ -28,8 +28,7 @@ GameSound::GameSound() : soundEngine(NULL), currLoadedWorldStyle(GameWorld::None
 
 GameSound::~GameSound() {
 
-    this->ClearSounds();
-    this->ClearSoundSources();
+    this->ClearAll();
 
     // ALWAYS KILL THE ENGINE LAST!
     if (this->soundEngine != NULL) {
@@ -43,17 +42,8 @@ GameSound::~GameSound() {
 }
 
 bool GameSound::Init() {
-
-    if (this->soundEngine == NULL) {
-        return false;
-    }
-
-    // Load the pallet of all game sounds (this will not load the actual sounds, just their proxies).
-    // N.B., Sounds are loaded after this function call by calling the Load*Sounds functions of GameSound.
-    bool success = MSFReader::ReadMSF(*this, GameViewConstants::GetInstance()->GAME_SOUND_SCRIPT);
-    if (!success) {
-        // Clean up...
-        this->ClearSoundSources();
+    // Load from the game's MSF file, it defines where all sounds can be found and their settings
+    if (!this->LoadFromMSF()) {
         return false;
     }
 
@@ -61,7 +51,7 @@ bool GameSound::Init() {
     ConfigOptions cfgOptions = ResourceManager::ReadConfigurationOptions(true);
     this->SetMasterVolume(static_cast<float>(cfgOptions.GetVolume()) / 100.0f);
 
-    return success;
+    return true;
 }
 
 void GameSound::Tick(double dT) {
@@ -138,11 +128,34 @@ void GameSound::ReloadFromMSF() {
         return;
     }
 
-    // TODO...
-    // Figure out what sounds are looping, we'll need to restart these after the load...
-    //std::list<GameSound::SoundType> loopingSounds;
-    
+    // Figure out what sounds are looping, we'll need to restart these after the reload...
+    std::list<GameSound::SoundType> loopingSounds;
+    for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
+        Sound* currSound = iter->second;
+        if (currSound->IsLooped() && !currSound->IsFinished() && !currSound->IsFadingOut()) {
+            loopingSounds.push_back(currSound->GetSoundType());
+        }
+    }
 
+
+    
+    // Clear all effects, sounds and sound sources...
+    this->ClearAll();
+
+    // Reload the game's MSF (Music Script File)
+    if (!this->LoadFromMSF()) {
+        return;
+    }
+
+    // Reload all global sources and world sources
+    this->LoadGlobalSounds();
+    this->LoadWorldSounds(this->currLoadedWorldStyle);
+
+    // Play anything that was looped before
+    for (std::list<GameSound::SoundType>::iterator iter = loopingSounds.begin();
+         iter != loopingSounds.end(); ++iter) {
+        this->PlaySound(*iter, true);
+    }
 }
 
 void GameSound::StopAllSounds() {
@@ -240,14 +253,45 @@ bool GameSound::IsSoundPlaying(SoundID soundID) const {
     return this->nonAttachedPlayingSounds.find(soundID) != this->nonAttachedPlayingSounds.end();
 }
 
-SoundSource* GameSound::BuildSoundSource(const std::string& soundName, const std::string& filePath) {
+SoundSource* GameSound::BuildSoundSource(const GameSound::SoundType& soundType,
+                                         const std::string& soundName, const std::string& filePath) {
     if (this->soundEngine == NULL) {
         assert(false);
         return NULL;
     }
 
-    SoundSource* result = new SoundSource(this->soundEngine, soundName, filePath);
+    SoundSource* result = new SoundSource(this->soundEngine, soundType, soundName, filePath);
     return result;
+}
+
+bool GameSound::LoadFromMSF() {
+    if (this->soundEngine == NULL) {
+        return false;
+    }
+
+    // Load the pallet of all game sounds (this will not load the actual sounds, just their proxies).
+    // N.B., Sounds are loaded after this function call by calling the Load*Sounds functions of GameSound.
+    bool success = MSFReader::ReadMSF(*this, GameViewConstants::GetInstance()->GAME_SOUND_SCRIPT);
+    if (!success) {
+        // Clean up...
+        this->ClearAll();
+    }
+
+    return success;
+}
+
+void GameSound::ClearAll() {
+    this->ClearEffects();
+    this->ClearSounds();
+    this->ClearSoundSources();
+}
+
+void GameSound::ClearEffects() {
+    for (EffectMapIter iter = this->globalEffects.begin(); iter != this->globalEffects.end(); ++iter) {
+        SoundEffect* currEffect = iter->second;
+        delete currEffect;
+    }
+    this->globalEffects.clear();
 }
 
 void GameSound::ClearSounds() {

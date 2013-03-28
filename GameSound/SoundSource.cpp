@@ -16,8 +16,9 @@
 
 #include "../ResourceManager.h"
 
-SoundSource::SoundSource(irrklang::ISoundEngine* soundEngine, const std::string& soundName, const std::string& filePath) : 
-soundEngine(soundEngine), soundName(soundName), soundFilePath(filePath), source(NULL) {
+SoundSource::SoundSource(irrklang::ISoundEngine* soundEngine, const GameSound::SoundType& soundType,
+                         const std::string& soundName, const std::string& filePath) : 
+soundEngine(soundEngine), soundType(soundType), soundName(soundName), soundFilePath(filePath), source(NULL) {
     assert(soundEngine != NULL);
 }
 
@@ -73,5 +74,5 @@ Sound* SoundSource::Spawn2DSound(bool isLooped) {
         return NULL;
     }
 
-    return new Sound(newSound);
+    return new Sound(this->soundType, newSound);
 }
