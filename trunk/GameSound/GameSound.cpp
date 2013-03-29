@@ -57,6 +57,8 @@ bool GameSound::Init() {
 void GameSound::Tick(double dT) {
 
     // Go through all the currently playing sounds, tick them, and clean up any that have finished playing
+
+    // Non-attached sounds...
     for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end();) {
         
         Sound* currSound = iter->second;
@@ -69,6 +71,36 @@ void GameSound::Tick(double dT) {
         }
         else {
             ++iter;
+        }
+    }
+
+    // Attached sounds...
+    for (AttachedSoundMapIter iter1 = this->attachedPlayingSounds.begin(); iter1 != this->attachedPlayingSounds.end();) {
+        
+        const IPositionObject* positionObj = iter1->first;
+        SoundMap& soundMap = iter1->second;
+
+        for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end();) {
+            
+            Sound* currSound = iter2->second;
+            currSound->Tick(dT);
+
+            if (currSound->IsFinished()) {
+                delete currSound;
+                currSound = NULL;
+                iter2 = soundMap.erase(iter2);
+            }
+            else {
+                currSound->SetPosition(positionObj->GetPosition3D());
+                ++iter2;
+            }
+        }
+
+        if (soundMap.empty()) {
+            iter1 = this->attachedPlayingSounds.erase(iter1);
+        }
+        else {
+            ++iter1;
         }
     }
 
@@ -180,23 +212,12 @@ void GameSound::UnpauseAllSounds() {
     this->soundEngine->setAllSoundsPaused(false);
 }
 
-SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLooped, double fadeInTimeInSecs) {
-    assert(soundType != GameSound::NoSound);
-    assert(fadeInTimeInSecs == 0.0); // TODO: add this functionality...
+// Plays a non-positional sound in the game.
+// Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
+SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLooped) {
 
-    if (this->soundEngine == NULL) {
-        return INVALID_SOUND_ID;
-    }
-
-    // Try to find the source associated with the given sound type
-    SoundSource* source = this->GetSoundSourceFromType(soundType);
-    if (source == NULL) {
-        return INVALID_SOUND_ID;
-    }
-
-    Sound* newSound = source->Spawn2DSound(isLooped);
+    Sound* newSound = this->BuildSound(soundType, isLooped, NULL);
     if (newSound == NULL) {
-        assert(false);
         return INVALID_SOUND_ID;
     }
     
@@ -204,6 +225,22 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
     return newSound->GetSoundID();
 }
 
+// Plays a positional sound in the game.
+// Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
+SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType,
+                                       bool isLooped, const Point3D& position) {
+
+    Sound* newSound = this->BuildSound(soundType, isLooped, &position);
+    if (newSound == NULL) {
+        return INVALID_SOUND_ID;
+    }
+    
+    this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
+    return newSound->GetSoundID();
+}
+
+// Stops the sound with the given ID, it doesn't matter if the sound is attached to an object or not,
+// the sound will be stopped.
 void GameSound::StopSound(SoundID soundID, double fadeOutTimeInSecs) {
     if (this->soundEngine == NULL || soundID == INVALID_SOUND_ID) {
         return;
@@ -219,6 +256,52 @@ void GameSound::StopSound(SoundID soundID, double fadeOutTimeInSecs) {
     }
     else {
         sound->Stop();
+    }
+}
+
+SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType,
+                                      bool isLooped) {
+
+    Point3D position = posObj->GetPosition3D();
+    Sound* newSound = this->BuildSound(soundType, isLooped, &position);
+    if (newSound == NULL) {
+        return INVALID_SOUND_ID;
+    }
+
+    // Attach the new sound to the object and return its ID
+    this->attachedPlayingSounds[posObj].insert(std::make_pair(newSound->GetSoundID(), newSound));
+    return newSound->GetSoundID();
+}
+
+void GameSound::DetachAndStopAllSounds(const IPositionObject* posObj) {
+    // Try to find the given object among the attached playing sounds
+    AttachedSoundMapIter findIter = this->attachedPlayingSounds.find(posObj);
+    if (findIter == this->attachedPlayingSounds.end()) {
+        return;
+    }
+    
+    // Kill all the sounds for that object and then erase it from the attached sounds map
+    SoundMap& objSoundMap = findIter->second;
+    for (SoundMapIter iter = objSoundMap.begin(); iter != objSoundMap.end(); ++iter) {
+        Sound* currSound = iter->second;
+        delete currSound;
+    }
+    objSoundMap.clear();
+    this->attachedPlayingSounds.erase(findIter);
+}
+
+void GameSound::SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused) {
+    // Try to find the given object among the attached playing sounds
+    AttachedSoundMapIter findIter = this->attachedPlayingSounds.find(posObj);
+    if (findIter == this->attachedPlayingSounds.end()) {
+        return;
+    }
+    
+    // Kill all the sounds for that object and then erase it from the attached sounds map
+    SoundMap& objSoundMap = findIter->second;
+    for (SoundMapIter iter = objSoundMap.begin(); iter != objSoundMap.end(); ++iter) {
+        Sound* currSound = iter->second;
+        currSound->SetPause(isPaused);
     }
 }
 
@@ -324,11 +407,23 @@ void GameSound::ClearEffects() {
 }
 
 void GameSound::ClearSounds() {
+    // Clear all non-attached sounds from memory
     for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
         Sound* currSound = iter->second;
         delete currSound;
     }
     this->nonAttachedPlayingSounds.clear();
+
+    // Clear all attached sounds from memory
+    for (AttachedSoundMapIter iter1 = this->attachedPlayingSounds.begin(); iter1 != this->attachedPlayingSounds.end(); ++iter1) {
+        SoundMap& soundMap = iter1->second;
+        for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end(); ++iter2) {
+            Sound* currSound = iter2->second;
+            delete currSound;
+        }
+        soundMap.clear();
+    }
+    this->attachedPlayingSounds.clear();
 }
 
 void GameSound::ClearSoundSources() {
@@ -391,10 +486,49 @@ SoundSource* GameSound::GetSoundSourceFromType(const GameSound::SoundType& type)
 }
 
 Sound* GameSound::GetPlayingSound(SoundID soundID) {
+
+    // Try to find the sound among the non-attached sounds
     SoundMapIter findIter = this->nonAttachedPlayingSounds.find(soundID);
-    if (findIter == this->nonAttachedPlayingSounds.end()) {
+    if (findIter != this->nonAttachedPlayingSounds.end()) {
+        return findIter->second;
+    }
+
+    // Couldn't find the sound in the non-attached, try searching through attached sounds
+    for (AttachedSoundMapIter iter = this->attachedPlayingSounds.begin(); iter != this->attachedPlayingSounds.end(); ++iter) {
+        SoundMap& soundMap = iter->second;
+        findIter = soundMap.find(soundID);
+        if (findIter != soundMap.end()) {
+            return findIter->second;
+        }
+    }
+
+    // No sound was found
+    return NULL;
+}
+
+// Private helper function for building 2D and 3D sounds
+// If the sound could not be built it returns NULL.
+Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position) {
+    assert(soundType != GameSound::NoSound);
+
+    if (this->soundEngine == NULL) {
         return NULL;
     }
 
-    return findIter->second;
+    // Try to find the source associated with the given sound type
+    SoundSource* source = this->GetSoundSourceFromType(soundType);
+    if (source == NULL) {
+        return NULL;
+    }
+
+    // Build the sound (either 2D or 3D based on whether position was provided or not)
+    Sound* newSound = NULL;
+    if (position != NULL) {
+        newSound = source->Spawn3DSound(isLooped, *position);
+    }
+    else {
+        newSound = source->Spawn2DSound(isLooped);
+    }
+
+    return newSound;
 }

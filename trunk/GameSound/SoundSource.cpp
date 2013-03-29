@@ -76,3 +76,19 @@ Sound* SoundSource::Spawn2DSoundWithID(const SoundID& id, bool isLooped) {
 
     return new Sound(id, this->soundType, newSound);
 }
+
+Sound* SoundSource::Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos) {
+    if (this->source == NULL) {
+        assert(false);
+        return NULL;
+    }
+
+    irrklang::ISound* newSound = this->soundEngine->play3D(this->source, irrklang::vec3df(pos[0], pos[1], pos[2]), isLooped, false, true, true);
+    newSound->setMinDistance(1000.0f); // Make sure we're playing at max volume everywhere in the game
+    if (newSound == NULL) {
+        assert(false);
+        return NULL;
+    }
+
+    return new Sound(id, this->soundType, newSound);
+}

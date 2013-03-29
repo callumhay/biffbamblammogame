@@ -41,6 +41,9 @@
 #include "../GameModel/PaddleMineProjectile.h"
 #include "../GameModel/FullscreenFlashEffectInfo.h"
 
+// Game Sound Includes
+#include "../GameSound/GameSound.h"
+
 // Game Control Includes
 #include "../GameControl/GameControllerManager.h"
 
@@ -55,7 +58,8 @@
 
 // *****************************************************
 
-GameAssets::GameAssets(int screenWidth, int screenHeight): 
+GameAssets::GameAssets(int screenWidth, int screenHeight, GameSound* sound): 
+sound(sound),
 
 currentLevelMesh(NULL),
 worldAssets(NULL),
@@ -1301,7 +1305,7 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera)
     }
 
 	// Play the explosion sound
-	//this->gameSound->PlaySoundAtPosition(GameSound::RocketExplodedEvent, rocket.GetPosition(), 1);
+	this->sound->PlaySoundAtPosition(GameSound::RocketExplodedEvent, false, Point3D(rocket.GetPosition(), 0.0f));
 }
 
 void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
@@ -1313,8 +1317,8 @@ void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
     GameControllerManager::GetInstance()->VibrateControllers(forcePercentage,
         BBBGameController::SoftVibration, BBBGameController::SoftVibration);
 
-	// TODO: Play the explosion sound
-	//this->gameSound->PlaySoundAtPosition(GameSound::MineExplodedEvent, mine.GetPosition(), 1);
+	// Play the explosion sound
+	this->sound->PlaySoundAtPosition(GameSound::MineExplodedEvent, false, Point3D(mine.GetPosition(), 0.0f));
 }
 
 void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera) {

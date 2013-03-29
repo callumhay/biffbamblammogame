@@ -37,7 +37,7 @@ public:
     void Unload();
 
     Sound* Spawn2DSound(bool isLooped);
-
+    Sound* Spawn3DSound(bool isLooped, const Point3D& position);
 
 private:
     SoundSource(irrklang::ISoundEngine* soundEngine, const GameSound::SoundType& soundType,
@@ -51,6 +51,7 @@ private:
     irrklang::ISoundSource* source;
 
     Sound* Spawn2DSoundWithID(const SoundID& id, bool isLooped);
+    Sound* Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos);
 
     DISALLOW_COPY_AND_ASSIGN(SoundSource);
 };
@@ -65,6 +66,10 @@ inline bool SoundSource::IsLoaded() const {
 
 inline Sound* SoundSource::Spawn2DSound(bool isLooped) {
     return this->Spawn2DSoundWithID(GenerateSoundID(), isLooped);
+}
+
+inline Sound* SoundSource::Spawn3DSound(bool isLooped, const Point3D& position) {
+    return this->Spawn3DSoundWithID(GenerateSoundID(), isLooped, position);
 }
 
 #endif // __SOUNDSOURCE_H__

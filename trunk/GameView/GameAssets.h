@@ -35,6 +35,7 @@
 #include "LevelMesh.h"
 #include "BallSafetyNetMesh.h"
 
+class GameSound;
 class GameModel;
 class Texture3D;
 class LevelMesh;
@@ -63,7 +64,7 @@ class FullscreenFlashEffectInfo;
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
 public:
-	GameAssets(int screenWidth, int screenHeight);
+	GameAssets(int screenWidth, int screenHeight, GameSound* sound);
 	~GameAssets();
 
 	void LoadWorldAssets(const GameWorld& world);
@@ -164,6 +165,8 @@ public:
     void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera);
 
 private:
+    GameSound* sound; // Sound module for the game
+
 	GameWorldAssets* worldAssets;	    // World-related assets
 	GameESPAssets* espAssets;           // Emitter/Sprite/Particle assets
 	GameItemAssets* itemAssets;		    // Item-related assets (item drops, timers, etc.)

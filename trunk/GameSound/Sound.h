@@ -34,6 +34,7 @@ public:
     
     void Tick(double dT);
 
+    void SetPause(bool isPaused);
     void Stop();
     void SetPosition(const Point3D& pos);
 
@@ -57,6 +58,7 @@ id(id), soundType(soundType), sound(sound), fadeOutTimeCountdown(-1), totalFadeO
 }
 
 inline Sound::~Sound() {
+    this->Stop();
     this->sound->drop();
 }
 
@@ -94,6 +96,10 @@ inline void Sound::Tick(double dT) {
         }
     }
 
+}
+
+inline void Sound::SetPause(bool isPaused) {
+    this->sound->setIsPaused(isPaused);
 }
 
 inline void Sound::Stop() {

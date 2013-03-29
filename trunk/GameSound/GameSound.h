@@ -28,6 +28,7 @@ class SoundSource;
 
 // BlammoEngine forward declarations
 class Camera;
+class IPositionObject;
 
 class GameSound {
     friend class MSFReader;
@@ -82,22 +83,44 @@ public:
         WorldBackgroundLoop,
 
         // In-game event sounds
+        // -> Paddle-only sounds
 		PaddleHitWallEvent,
-		PlayerLostABallButIsStillAliveEvent,
+		
+        // -> Ball-only sounds
+        PlayerLostABallButIsStillAliveEvent,
 		LastBallExplodedEvent,
 		BallSpawnEvent,
+        BallBallCollisionEvent,
+        LastBallSpiralingToDeathLoop,
 
+        // -> Paddle/ball sounds
+        BallPaddleCollisionEvent,
+        BallStickyPaddleCollisionEvent,
+        BallShieldPaddleCollisionEvent,
+		BallOrPaddleGrowEvent,
+		BallOrPaddleShrinkEvent,
+        
+        // -> Ball/block sounds
 		BallBlockCollisionEvent,
-		BallPaddleCollisionEvent,
-		StickyBallPaddleCollisionEvent,
-		BallBallCollisionEvent,
+		
+		// -> Block-only sounds
 		BombBlockDestroyedEvent,
 		InkBlockDestroyedEvent,
 		BasicBlockDestroyedEvent,
 		CannonBlockLoadedEvent,
 		CannonBlockFiredEvent,
 		PortalTeleportEvent,
+		CollateralBlockFlashingLoop,
+		CollateralBlockFallingLoop,
+        CannonBlockRotatingLoop,
+
+        // -> Projectile and beam sounds
 		RocketExplodedEvent,
+        RocketMovingLoop,
+        MineExplodedEvent,
+        LaserBulletShotEvent,
+		LaserBulletMovingLoop,
+		LaserBeamFiringLoop,
 
 		BallSafetyNetCreatedEvent,
 		BallSafetyNetDestroyedEvent,
@@ -108,21 +131,7 @@ public:
 		PowerUpItemTimerEndsEvent,
 		PowerNeutralItemTimerEndsEvent,
 		PowerDownItemTimerEndsEvent,
-		BallOrPaddleGrowEvent,
-		BallOrPaddleShrinkEvent,
-		LaserBulletShotEvent,
-		LevelCompletedEvent,
-		WorldCompletedEvent,
-
-		// In-game looped sounds
-		LaserBulletMovingLoop,
-		RocketMovingLoop,
-		LaserBeamFiringLoop,
-		CollateralBlockFlashingLoop,
-		CollateralBlockFallingLoop,
-		CannonBlockRotatingLoop,
-		LastBallSpiralingToDeathLoop,
-		ItemMovingLoop
+        ItemMovingLoop
     };
 
     typedef std::map<GameSound::SoundType, SoundSource*> SoundSourceMap;
@@ -152,12 +161,14 @@ public:
     void StopAllSounds();
     void PauseAllSounds();
     void UnpauseAllSounds();
-    SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, double fadeInTimeInSecs = 0.0);
+    SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped);
+    SoundID PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, const Point3D& position);
     void StopSound(SoundID soundID, double fadeOutTimeInSecs = 0.0);
 
-    // Game object sound attaching functions
-    //void AttachAndPlaySound(const IPositionGameObj* posGameObj, const GameSound::SoundType& soundType, int numPlays);
-    //void DetachAndStopSound(const IPositionGameObj* posGameObj, const GameSound::SoundType& soundType);
+    // Game object positional sound attaching/detaching functions
+    SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped);
+    void DetachAndStopAllSounds(const IPositionObject* posObj);
+    void SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused);
  
     // Volume functions
     void SetMasterVolume(float volume);
@@ -173,6 +184,9 @@ private:
     typedef std::map<SoundID, Sound*> SoundMap;
     typedef SoundMap::iterator SoundMapIter;
 
+    typedef std::map<const IPositionObject*, SoundMap> AttachedSoundMap;
+    typedef AttachedSoundMap::iterator AttachedSoundMapIter;
+
     // Sound Source and Effects Maps
     SoundSourceMap globalSounds;
     EffectMap globalEffects;
@@ -181,7 +195,7 @@ private:
     
     // Active sounds (i.e., sounds that are playing in the game right now)
     SoundMap nonAttachedPlayingSounds;
-    //AttachedSoundMap attachedSounds;
+    AttachedSoundMap attachedPlayingSounds;
 
     // IrrKlang stuff
     irrklang::ISoundEngine* soundEngine;
@@ -201,6 +215,8 @@ private:
 
     SoundSource* GetSoundSourceFromType(const GameSound::SoundType& type);
     Sound* GetPlayingSound(SoundID soundID);
+
+    Sound* BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position = NULL);
 
     DISALLOW_COPY_AND_ASSIGN(GameSound);
 };

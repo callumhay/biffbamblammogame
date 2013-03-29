@@ -175,7 +175,7 @@ inline void GameDisplay::Render(double dT) {
     }
 
     // Update sounds
-    //this->sound->SetListenerPosition(this->gameCamera);
+    this->sound->SetListenerPosition(this->gameCamera);
     this->sound->Tick(dT);
 }
 

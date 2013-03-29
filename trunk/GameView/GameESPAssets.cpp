@@ -1252,8 +1252,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
  */
 void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block) {
 	// We don't do the effect for certain types of blocks...
-	if (block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink || 
-        block.GetType() == LevelPiece::Portal || block.GetType() == LevelPiece::Cannon) {
+    if (!LevelPiece::HasBounceEffectWithBall(block)) {
 		return;
 	}
 

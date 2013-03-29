@@ -12,6 +12,7 @@
 #ifndef __PROJECTILE_H__
 #define __PROJECTILE_H__
 
+#include "../BlammoEngine/IPositionObject.h"
 #include "../BlammoEngine/Collision.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Vector.h"
@@ -27,7 +28,7 @@ class Boss;
 /**
  * An 'abstract class' for representing in-game projectiles.
  */
-class Projectile {
+class Projectile : public IPositionObject {
 public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, RocketTurretBulletProjectile,
@@ -65,6 +66,11 @@ public:
 	float GetHalfHeight() const { return  0.5f * this->currHeight; }
 	void SetWidth(float width) { this->currWidth = width; }
 	void SetHeight(float height) { this->currHeight = height; }
+
+    // Inherited from the IPositionObject interface
+    Point3D GetPosition3D() const {
+        return Point3D(this->GetPosition(), 0.0f);
+    }
 
 	const Point2D& GetPosition() const { return this->position; }
 
