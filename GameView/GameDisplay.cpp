@@ -34,7 +34,7 @@ const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMER
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): 
 gameListener(NULL), currState(NULL), model(model), 
-assets(new GameAssets(initWidth, initHeight)), sound(NULL),
+assets(NULL), sound(NULL),
 gameExited(false), gameReinitialized(false),
 gameCamera(initWidth, initHeight) {
 
@@ -50,6 +50,8 @@ gameCamera(initWidth, initHeight) {
     else {
         std::cerr << "Failed to load game sound." << std::endl;
     }
+
+    this->assets = new GameAssets(initWidth, initHeight, this->sound);
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));

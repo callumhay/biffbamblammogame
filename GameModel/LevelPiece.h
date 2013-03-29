@@ -12,6 +12,7 @@
 #ifndef __LEVELPIECE_H__
 #define __LEVELPIECE_H__
 
+#include "../BlammoEngine/IPositionObject.h"
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Vector.h"
@@ -31,7 +32,7 @@ class Projectile;
 class BeamSegment;
 class SwitchBlock;
 
-class LevelPiece {
+class LevelPiece : public IPositionObject {
 public:
     // Typedef and constants for trigger IDs - used to indicate a unique id for a level piece
     // so it can be triggered by switches
@@ -60,10 +61,20 @@ public:
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
 
+    static bool HasBounceEffectWithBall(const LevelPiece& block) {
+        return !(block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink || 
+        block.GetType() == LevelPiece::Portal || block.GetType() == LevelPiece::Cannon);
+    }
+
 	LevelPiece(unsigned int wLoc, unsigned int hLoc);
 	virtual ~LevelPiece();
 
 	void SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc);
+
+    // Inherited from IPositionObject interface
+    Point3D GetPosition3D() const {
+        return Point3D(this->GetCenter(), 0.0f);
+    }
 
 	const Point2D& GetCenter() const {	return this->center; }
 	const BoundingLines& GetBounds() const { return this->bounds; }

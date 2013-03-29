@@ -394,6 +394,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\IPositionObject.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\Light.h"
 					>
 				</File>

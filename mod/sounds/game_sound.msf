@@ -206,12 +206,16 @@ LastBallExplodedEvent {
 	file = global/last_ball_death.ogg
 }
 
-ignore BallSpawnEvent {
+BallSpawnEvent {
 	file = 
 }
 
 BallBallCollisionEvent {
 	file = global/ball_ball_hit.ogg
+}
+
+LastBallSpiralingToDeathLoop {
+	file = global/ball_spiral_to_death.ogg
 }
 
 
@@ -221,24 +225,20 @@ BallPaddleCollisionEvent {
 	file = global/ball_paddle_hit.ogg
 }
 
-StickyBallPaddleCollisionEvent {
+BallStickyPaddleCollisionEvent {
 	file = global/ball_sticky_paddle_hit.ogg
 }
 
-ignore ShieldBallPaddleCollisionEvent {
-
+BallShieldPaddleCollisionEvent {
+	file =
 }
 
-ignore BallOrPaddleGrowEvent {
+BallOrPaddleGrowEvent {
 	file = 
 }
 
-ignore BallOrPaddleShrinkEvent {
+BallOrPaddleShrinkEvent {
 	file = 
-}
-
-LastBallSpiralingToDeathLoop {
-	file = global/ball_spiral_to_death.ogg
 }
 
 
@@ -275,7 +275,7 @@ PortalTeleportEvent {
 	file = global/portal_warp.ogg
 }
 
-ignore CollateralBlockFlashingLoop {
+CollateralBlockFlashingLoop {
 	file = 
 }
 
@@ -298,11 +298,15 @@ RocketMovingLoop {
 	file = global/rocket.ogg
 }
 
-ignore LaserBulletShotEvent {
+MineExplodedEvent {
+	file = global/rocket_explode.ogg
+}
+
+LaserBulletShotEvent {
 	file = 
 }
 
-ignore LaserBulletMovingLoop {
+LaserBulletMovingLoop {
 	file = 
 }
 
@@ -337,15 +341,15 @@ PowerDownItemActivatedEvent {
 	file = global/power_down_item.ogg
 }
 
-ignore PowerUpItemTimerEndsEvent {
+PowerUpItemTimerEndsEvent {
 	file = 
 }
 
-ignore PowerNeutralItemTimerEndsEvent {
+PowerNeutralItemTimerEndsEvent {
 	file = 
 }
 
-ignore PowerDownItemTimerEndsEvent {
+PowerDownItemTimerEndsEvent {
 	file = 
 }
 
@@ -356,13 +360,7 @@ ItemMovingLoop {
 
 // World State Change Events *************************************************
 
-ignore LevelCompletedEvent {
-	file = 
-}
-
-ignore WorldCompletedEvent {
-	file = 
-}
+// TODO
 
 // ---------------------------------------------------------------------------
 // Global Sound Effects ======================================================

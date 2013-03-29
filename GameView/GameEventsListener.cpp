@@ -240,7 +240,7 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	this->display->GetAssets()->GetESPAssets()->AddPaddleHitWallEffect(paddle, hitLoc);
 
 	// Add the sound for the smacking against the wall
-	//this->display->GetSound()->PlaySoundAtPosition(hitLoc, GameSound::PaddleHitWallEvent, 1);
+	this->display->GetSound()->PlaySoundAtPosition(GameSound::PaddleHitWallEvent, false, Point3D(hitLoc, 0.0f));
 
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
@@ -280,7 +280,7 @@ void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 
 	// If it's not the last ball then we play the lost ball effect...
 	if (this->display->GetModel()->GetGameBalls().size() >= 2) {
-		//this->display->GetSound()->PlaySoundAtLocation(GameSound::PlayerLostABallButIsStillAliveEvent, deadBall.GetCenterPosition(), 1);
+		this->display->GetSound()->PlaySoundAtPosition(GameSound::PlayerLostABallButIsStillAliveEvent, false, deadBall.GetCenterPosition());
 	}
 }
 
@@ -290,9 +290,9 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
 	this->display->GetAssets()->ActivateLastBallDeathEffects(lastBallToDie);
 
 	// Setup the sound to quiet everything else and play the sound of the ball spiralling to its most horrible death
-    //GameSound* sound = this->display->GetSound();
+    GameSound* sound = this->display->GetSound();
     //sound->SetAllPlayingSoundVolume(0.5f, 0.5);
-	//sound->StartSound(GameSound::LastBallSpiralingToDeathLoop);
+	sound->AttachAndPlaySound(&lastBallToDie, GameSound::LastBallSpiralingToDeathLoop, true);
 
 	// Clear out the timers - they no longer matter since the ball is doomed
 	this->display->GetAssets()->GetItemAssets()->ClearTimers();
@@ -305,10 +305,10 @@ void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
 	this->display->GetAssets()->GetESPAssets()->AddBallExplodedEffect(&explodedBall);
 
 	// Stop the spiraling sound loop, restore all previous sounds to their proper volume and add the sound for the last ball exploding
-    //GameSound* sound = this->display->GetSound();
-	//sound->StopSound(GameSound::LastBallSpiralingToDeathLoop);
-    //sound->SetAllPlayingSoundVolume(1.0f, 1.0); 
-	//sound->PlaySound(GameSound::LastBallExplodedEvent, 1);
+    GameSound* sound = this->display->GetSound();
+    sound->DetachAndStopAllSounds(&explodedBall);
+    //sound->SetAllPlayingSoundVolume(1.0f, 1.0);
+    sound->PlaySoundAtPosition(GameSound::LastBallExplodedEvent, false, explodedBall.GetCenterPosition());
 }
 
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
@@ -396,8 +396,11 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 			GameControllerManager::GetInstance()->VibrateControllers(shakeLength, leftVibeAmt, rightVibeAmt);
 		}
 
-        //Point3D approxCollisionPos = ball.GetCenterPosition() + ball.GetBounds().Radius() * Vector3D::Normalize(block.GetPosition() - ball.GetCenterPosition());
-		//this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBlockCollisionEvent, approxCollisionPos, 1);
+        if (LevelPiece::HasBounceEffectWithBall(block)) {
+            Point3D approxCollisionPos = ball.GetCenterPosition() + ball.GetBounds().Radius() * 
+                Vector3D::Normalize(block.GetPosition3D() - ball.GetCenterPosition());
+		    this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBlockCollisionEvent, false, approxCollisionPos);
+        }
 	}
 
 	this->timeSinceLastBallBlockCollisionEventInMS = currSystemTime;
@@ -410,6 +413,20 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 									EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 
 	if (doEffect) {
+		// Play the sound for when the ball hits the paddle
+        Point3D collisionPtEstimate = ball.GetCenterPosition() + ball.GetBounds().Radius() * 
+            Vector3D::Normalize(Point3D(paddle.GetCenterPosition()) - ball.GetCenterPosition());
+        GameSound* sound = this->display->GetSound();
+        if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+            sound->PlaySoundAtPosition(GameSound::BallShieldPaddleCollisionEvent, false, collisionPtEstimate);
+		}
+		else if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+            sound->PlaySoundAtPosition(GameSound::BallStickyPaddleCollisionEvent, false, collisionPtEstimate);
+		}
+		else {
+			sound->PlaySoundAtPosition(GameSound::BallPaddleCollisionEvent, false, collisionPtEstimate);
+		}
+
 		// Add the visual effect for when the ball hits the paddle
 		this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(ball, paddle);
 
@@ -434,21 +451,6 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 		}
 
 		GameControllerManager::GetInstance()->VibrateControllers(0.15f, vibrationLeft, vibrationRight);
-        
-        
-
-		// Play the sound for when the ball hits the paddle
-        //Point3D collisionPtEstimate = ball.GetCenterPosition() + ball.GetBounds().Radius() * Vector3D::Normalize(Point3D(paddle.GetCenterPosition()) - ball.GetCenterPosition());
-        //GameSound* sound = this->display->GetSound();
-        if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-            //sound->PlaySoundAtPosition(GameSound::ShieldBallPaddleCollisionEvent, collisionPtEstimate, 1);
-		}
-		else if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-            //sound->PlaySoundAtPosition(GameSound::StickyBallPaddleCollisionEvent, collisionPtEstimate, 1);
-		}
-		else {
-			//sound->PlaySoundAtPosition(GameSound::BallPaddleCollisionEvent, collisionPtEstimate, 1);
-		}
 	}
 
 	this->timeSinceLastBallPaddleCollisionEventInMS = currSystemTime;
@@ -456,22 +458,22 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 }
 
 void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) {
-	// Add the effect for ball-ball collision
-	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(ball1, ball2);
-
 	// Play the sound for the collision
-    //Point3D collisionPtEstimate = ball1.GetCenterPosition() + ball1.GetBounds().Radius() * Vector3D::Normalize(ball2.GetCenterPosition() - ball1.GetCenterPosition());
-	//this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBallCollisionEvent, collisionPtEstimate, 1);
+    Point3D collisionPtEstimate = ball1.GetCenterPosition() + ball1.GetBounds().Radius() * Vector3D::Normalize(ball2.GetCenterPosition() - ball1.GetCenterPosition());
+	this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBallCollisionEvent, false, collisionPtEstimate);
+    
+    // Add the effect for ball-ball collision
+	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(ball1, ball2);
 
 	debug_output("EVENT: Ball-ball collision");
 }
 
 void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) {
-	// Add the teleportation effect
-	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball.GetBounds().Center(), enterPortal);
-
     // Play the ball teleportation sound
-    //this->display->GetSound()->PlaySoundAtPosition(GameSound::PortalTeleportEvent, enterPortal.GetPosition(), 1);
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::PortalTeleportEvent, false, enterPortal.GetPosition3D());
+
+    // Add the teleportation effect
+	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball.GetBounds().Center(), enterPortal);
 
 	debug_output("EVENT: Ball teleported by portal block");
 }
@@ -510,7 +512,7 @@ void GameEventsListener::BallEnteredCannonEvent(const GameBall& ball, const Cann
     UNUSED_PARAMETER(cannonBlock);
 
     // Start the sound of the cannon rotating
-    //this->display->GetSound()->PlaySoundAtPosition(cannonBlock, GameSound::CannonBlockRotatingLoop, cannonBlock.GetPosition(), GameSound::LOOP_FOREVER);
+    this->display->GetSound()->AttachAndPlaySound(&cannonBlock, GameSound::CannonBlockRotatingLoop, true);
 
     debug_output("EVENT: Ball entered cannon");
 }
@@ -518,29 +520,29 @@ void GameEventsListener::BallEnteredCannonEvent(const GameBall& ball, const Cann
 void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
 	UNUSED_PARAMETER(ball);
 
+    // Stop the sound of the cannon rotating and add a sound for the blast
+	GameSound* sound = this->display->GetSound();
+    sound->DetachAndStopAllSounds(&cannonBlock);
+	sound->PlaySoundAtPosition(GameSound::CannonBlockFiredEvent, false, cannonBlock.GetPosition3D());
+
 	// Add the blast effect of the ball exiting the cannon
 	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(
         Point3D(cannonBlock.GetEndOfBarrelPoint()), cannonBlock.GetCurrentCannonDirection());
-	
-    // Stop the sound of the cannon rotating and add a sound for the blast
-	//GameSound* sound = this->display->GetSound();
-    //sound->StopSound(cannonBlock, GameSound::CannonBlockRotatingLoop);
-	//sound->PlaySoundAtPosition(GameSound::CannonBlockFiredEvent, cannonBlock.GetPosition(), 1);
 
 	debug_output("EVENT: Ball fired out of cannon");
 }
 
 void GameEventsListener::ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
 	UNUSED_PARAMETER(cannonBlock);
+    
+    GameSound* sound = this->display->GetSound();
+    // Make sure the object no longer is making any noise (since it's now loaded into the cannon)
+	sound->SetPauseForAllAttachedSounds(&projectile, true);
+    // Start the sound of the cannon rotating
+    sound->AttachAndPlaySound(&cannonBlock, GameSound::CannonBlockRotatingLoop, true);
 
     // Reset the projectile's effects
     this->display->GetAssets()->GetESPAssets()->ResetProjectileEffects(projectile);
-
-    // Make sure the object no longer is making any noise (since it's now loaded into the cannon)
-	//this->display->GetSound()->PauseAllSoundsForObject(projectile);
-
-    // Start the sound of the cannon rotating
-    //this->display->GetSound()->PlaySoundAtPosition(cannonBlock, GameSound::CannonBlockRotatingLoop, cannonBlock.GetPosition(), GameSound::LOOP_FOREVER);
 
 	debug_output("EVENT: Projectile entered cannon");
 }
@@ -552,15 +554,15 @@ void GameEventsListener::ProjectileFiredFromCannonEvent(const Projectile& projec
         Point3D(cannonBlock.GetEndOfBarrelPoint()), cannonBlock.GetCurrentCannonDirection());
 	
     // Stop the sound of the cannon rotating and add a sound for the blast
-	//GameSound* sound = this->display->GetSound();
-    //sound->StopSound(cannonBlock, GameSound::CannonBlockRotatingLoop);
-	//sound->PlaySoundAtPosition(GameSound::CannonBlockFiredEvent, cannonBlock.GetPosition(), 1);
+	GameSound* sound = this->display->GetSound();
+    sound->DetachAndStopAllSounds(&cannonBlock);
+	sound->PlaySoundAtPosition(GameSound::CannonBlockFiredEvent, false, cannonBlock.GetPosition3D());
 
     // Reset the projectile effects
     this->display->GetAssets()->GetESPAssets()->ResetProjectileEffects(projectile);
 
     // Resume all the projectile's sounds (if any)
-    //this->display->GetSound()->ResumeAllSoundsForObject(projectile);
+    sound->SetPauseForAllAttachedSounds(&projectile, false);
 
 	debug_output("EVENT: Projectile fired out of cannon");
 }
@@ -619,12 +621,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition3D(), 1);
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+				    //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition3D(), 1);
 			    }
 			    break;
 

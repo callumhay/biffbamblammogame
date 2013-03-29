@@ -12,6 +12,7 @@
 #ifndef __GAMEBALL_H__
 #define __GAMEBALL_H__
 
+#include "../BlammoEngine/IPositionObject.h"
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Point.h"
@@ -27,7 +28,7 @@ class LevelPiece;
 class CannonBlock;
 class GameModel;
 
-class GameBall {
+class GameBall : public IPositionObject {
 	// State Machine Design Pattern Friendships
 	friend class NormalBallState;
 	friend class InCannonBallState;
@@ -181,6 +182,11 @@ public:
 	const Point2D& GetCenterPosition2D() const {
 		return this->bounds.Center();
 	}
+
+    // From the IPositionObject interface
+    Point3D GetPosition3D() const {
+        return this->GetCenterPosition();
+    }
 
 	const Vector2D& GetDirection() const {
 		return this->currDir;
