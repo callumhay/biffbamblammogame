@@ -186,7 +186,7 @@ WorldBackgroundLoop {
 }
 
 // ---------------------------------------------------------------------------
-// Game Events ===============================================================
+// In-Game Events ============================================================
 // ---------------------------------------------------------------------------
 
 // Paddle Events *************************************************************
@@ -287,8 +287,20 @@ CannonBlockRotatingLoop {
 	file = global/cannon_rotate.ogg
 }
 
+TeslaLightningArcLoop {
+	file = global/electricity.ogg
+}
+
 SwitchBlockActivated {
 	file = global/switch.wav
+}
+
+BlockFrozenEvent {
+	file = global/frozen.wav
+}
+
+BlockOnFireLoop {
+	file = global/on_fire.wav
 }
 
 IceShatterEvent {
@@ -348,15 +360,12 @@ PowerDownItemActivatedEvent {
 	file = global/power_down_item.ogg
 }
 
-PowerUpItemTimerEndsEvent {
-	file = 
+// TODO - hook not implemented yet
+ItemTimerEndingLoop {
+	file =
 }
-
-PowerNeutralItemTimerEndsEvent {
-	file = 
-}
-
-PowerDownItemTimerEndsEvent {
+// TODO - hook not implemented yet
+ItemTimerEndedEvent {
 	file = 
 }
 
@@ -365,7 +374,35 @@ ItemMovingLoop {
 }
 
 
-// World State Change Events *************************************************
+// Bullet-time / Ball Boost Events *******************************************
+
+EnterBulletTimeEvent {
+	file = global/woosh.ogg
+}
+
+ExitBulletTimeEvent {
+	file = global/unwoosh.ogg
+}
+
+BallBoostEvent {
+	file = global/boost.ogg
+}
+
+BallBoostGainedEvent {
+	file = global/boost_acquired.ogg
+}
+
+// ---------------------------------------------------------------------------
+// Non-In-Game State Events ==================================================
+// ---------------------------------------------------------------------------
+
+// Level Summary State Events ************************************************
+
+// Game-over state events ****************************************************
+
+GameOverEvent {
+	file = global/game_over.ogg
+}
 
 // TODO
 

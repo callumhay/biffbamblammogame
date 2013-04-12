@@ -14,6 +14,7 @@
 
 #include "../BlammoEngine/Collision.h"
 #include "../BlammoEngine/Animation.h"
+#include "../BlammoEngine/IPositionObject.h"
 
 #include <list>
 
@@ -71,7 +72,7 @@ private:
 
 };
 
-class Beam {
+class Beam : public IPositionObject {
 public:
 	enum BeamType { PaddleLaserBeam };
 
@@ -89,6 +90,12 @@ public:
 	virtual int GetNumBaseBeamSegments() const = 0;
 
 	void DebugDraw() const;
+
+    // Inherited from IPositionObject
+    Point3D GetPosition3D() const {
+        if (this->beamParts.empty()) { return Point3D(0,0,0); }
+        return Point3D(this->beamParts.front()->GetStartPoint(), 0.0f);
+    }
 
 protected:
 	static const float MIN_BEAM_RADIUS;

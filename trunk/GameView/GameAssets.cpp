@@ -101,7 +101,7 @@ magnetPaddleEffect(NULL)
     this->tutorialAssets = new GameTutorialAssets();
 
 	// Load FBO assets
-	this->fboAssets = new GameFBOAssets(screenWidth, screenHeight);
+    this->fboAssets = new GameFBOAssets(screenWidth, screenHeight, this->sound);
 
 	// Load item assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading game items...");

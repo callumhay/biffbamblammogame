@@ -3547,8 +3547,11 @@ void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, con
 
 // Removes a tesla lightning arc barrier from the effects list
 void GameESPAssets::RemoveTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2) {
-	// Find the effect for the lightning arc among the existing effects
-	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator findIter = this->teslaLightningArcs.find(std::make_pair(&block1, &block2));
+	
+    // Find the effect for the lightning arc among the existing effects
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator findIter = 
+        this->teslaLightningArcs.find(std::make_pair(&block1, &block2));
+
 	if (findIter == this->teslaLightningArcs.end()) {
 		findIter = this->teslaLightningArcs.find(std::make_pair(&block2, &block1));
 		assert(findIter != this->teslaLightningArcs.end());

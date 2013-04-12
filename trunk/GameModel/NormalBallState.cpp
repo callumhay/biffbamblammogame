@@ -127,7 +127,7 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
 	}
 
 	// Decrement the collision disabled timer if necessary
-	if (this->gameBall->ballballCollisionsDisabledTimer >= EPSILON) {
+	if (this->gameBall->ballballCollisionsDisabledTimer >= 0.0) {
 		this->gameBall->ballballCollisionsDisabledTimer -= seconds;
 	}
 	else {

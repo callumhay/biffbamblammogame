@@ -115,7 +115,10 @@ public:
 		CollateralBlockFlashingLoop,
 		CollateralBlockFallingLoop,
         CannonBlockRotatingLoop,
+        TeslaLightningArcLoop,
         SwitchBlockActivated,
+        BlockFrozenEvent,
+        BlockOnFireLoop,
         IceShatterEvent,
 
         // -> Projectile and beam sounds
@@ -132,10 +135,17 @@ public:
 		PowerUpItemActivatedEvent,
 		PowerNeutralItemActivatedEvent,
 		PowerDownItemActivatedEvent,
-		PowerUpItemTimerEndsEvent,
-		PowerNeutralItemTimerEndsEvent,
-		PowerDownItemTimerEndsEvent,
-        ItemMovingLoop
+        ItemTimerEndingLoop,
+		ItemTimerEndedEvent,
+        ItemMovingLoop,
+
+        EnterBulletTimeEvent,
+        ExitBulletTimeEvent,
+        BallBoostEvent,
+        BallBoostGainedEvent,
+
+        // Non-in-game State Events
+        GameOverEvent
     };
 
     typedef std::map<GameSound::SoundType, SoundSource*> SoundSourceMap;
@@ -175,6 +185,7 @@ public:
     // Game object positional sound attaching/detaching functions
     SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped);
     void DetachAndStopAllSounds(const IPositionObject* posObj);
+    void DetachAndStopSound(const IPositionObject* posObj, const GameSound::SoundType& soundType);
     void SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused);
  
     // Sound effect functions
@@ -191,6 +202,7 @@ public:
     
     // Query functions
     bool IsSoundPlaying(SoundID soundID) const;
+    bool IsEffectActive(GameSound::EffectType type) const;
 
 private:
     typedef std::map<SoundID, Sound*> SoundMap;
@@ -246,5 +258,13 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(GameSound);
 };
+
+inline bool GameSound::IsSoundPlaying(SoundID soundID) const {
+    return this->GetPlayingSound(soundID) != NULL;
+}
+
+inline bool GameSound::IsEffectActive(GameSound::EffectType type) const {
+    return activeEffects.find(type) != this->activeEffects.end();
+}
 
 #endif // __GAMESOUND_H__

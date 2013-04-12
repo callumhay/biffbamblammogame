@@ -428,7 +428,7 @@ void MSFReader::InitSoundTypeMapping() {
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockCollisionEvent));
 	
-	
+
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BombBlockDestroyedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, InkBlockDestroyedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BasicBlockDestroyedEvent));
@@ -438,7 +438,10 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFlashingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFallingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockRotatingLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, TeslaLightningArcLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, SwitchBlockActivated));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockFrozenEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockOnFireLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, IceShatterEvent));
 
 
@@ -456,10 +459,16 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerUpItemActivatedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerNeutralItemActivatedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerDownItemActivatedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerUpItemTimerEndsEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerNeutralItemTimerEndsEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerDownItemTimerEndsEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemTimerEndingLoop));
+	soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemTimerEndedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemMovingLoop));
+
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, EnterBulletTimeEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ExitBulletTimeEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostGainedEvent));
+
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GameOverEvent));
 }
 
 void MSFReader::InitEffectTypeMapping() {

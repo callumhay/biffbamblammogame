@@ -25,6 +25,7 @@
 #include "CgFxPostBulletTime.h"
 
 class GameModel;
+class GameSound;
 class GameItem;
 class CgFxPostSmokey;
 class CgFxPostUberIntense;
@@ -35,7 +36,58 @@ class CgFxPostFirey;
  * pipeline. These are used for full screen effects.
  */
 class GameFBOAssets {
+public:
+	GameFBOAssets(int displayWidth, int displayHeight, GameSound* sound);
+	~GameFBOAssets();
+
+	inline FBObj* GetBackgroundFBO() { return this->bgFBO; }
+	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
+	inline FBObj* GetPostFullSceneFBO() { return this->postFgAndBgFBO; }
+	inline FBObj* GetInitialFullScreenFBO() { return this->initialFSEffectFBO; }
+	inline FBObj* GetFinalFullScreenFBO()	{ return this->finalFSEffectFBO; }
+
+	
+	inline bool DrawItemsInLastPass() const { return this->drawItemsInLastPass; }
+
+	inline void RenderFullSceneBlur(int width, int height, double dT) {
+		this->fgAndBgBlurEffect->Draw(width, height, dT);
+	}
+
+	/**
+	 * Render all fullscreen effects that are required before
+	 * particles and items are drawn.
+	 */
+	inline FBObj* RenderInitialFullscreenEffects(int width, int height, double dT) {
+		// Do some purdy bloom - this adds a nice contrasty highlighted touch to the entire scene
+		this->bloomEffect->Draw(width, height, dT);
+		// Add motion blur / afterimage effect 
+		this->afterImageEffect->Draw(width, height, dT);
+
+		return this->initialFSEffectFBO;
+	}
+
+	/**
+	 * Render all fullscreen effects that are required at the very
+	 * end of the 3D pipeline.
+	 */
+	void RenderFinalFullscreenEffects(int width, int height, double dT, const GameModel& gameModel);
+
+	void Tick(double dT);
+	void ResizeFBOAssets(int width, int height);
+
+	void ActivateItemEffects(const GameItem& item);
+	void DeactivateItemEffects(const GameItem& item);
+	
+	void ActivateInkSplatterEffect();
+	void DeactivateInkSplatterEffect();
+
+	void SetupPaddleShieldEffect();
+    void UpdateBulletTimeState(const BallBoostModel& boostModel) {
+        this->bulletTimeEffect->UpdateBulletTimeState(boostModel);
+    }
 private:
+    GameSound* sound; // Not owned by this
+
 	// FBO assets for the game pipeline
 	FBObj* bgFBO;			
 	FBObj* fgAndBgFBO;
@@ -86,67 +138,7 @@ private:
 	}
 
 	void DrawCannonBarrelOverlay(int width, int height, float alpha);
-
-public:
-	GameFBOAssets(int displayWidth, int displayHeight);
-	~GameFBOAssets();
-
-	inline FBObj* GetBackgroundFBO() { return this->bgFBO; }
-	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
-	inline FBObj* GetPostFullSceneFBO() { return this->postFgAndBgFBO; }
-	inline FBObj* GetInitialFullScreenFBO() { return this->initialFSEffectFBO; }
-	inline FBObj* GetFinalFullScreenFBO()	{ return this->finalFSEffectFBO; }
-
-	
-	inline bool DrawItemsInLastPass() const { return this->drawItemsInLastPass; }
-
-	inline void RenderFullSceneBlur(int width, int height, double dT) {
-		this->fgAndBgBlurEffect->Draw(width, height, dT);
-	}
-
-	/**
-	 * Render all fullscreen effects that are required before
-	 * particles and items are drawn.
-	 */
-	inline FBObj* RenderInitialFullscreenEffects(int width, int height, double dT) {
-		// Do some purdy bloom - this adds a nice contrasty highlighted touch to the entire scene
-		this->bloomEffect->Draw(width, height, dT);
-		// Add motion blur / afterimage effect 
-		this->afterImageEffect->Draw(width, height, dT);
-
-		return this->initialFSEffectFBO;
-	}
-
-	/**
-	 * Render all fullscreen effects that are required at the very
-	 * end of the 3D pipeline.
-	 */
-	void RenderFinalFullscreenEffects(int width, int height, double dT, const GameModel& gameModel);
-
-	void Tick(double dT);
-	void ResizeFBOAssets(int width, int height);
-
-	void ActivateItemEffects(const GameItem& item);
-	void DeactivateItemEffects(const GameItem& item);
-	
-	/**
-	 * Activates the ink splatter effect - a full screen effect drawn
-	 * at the end of the engine pipeline.
-	 */
-	void ActivateInkSplatterEffect() {
-		this->inkSplatterEffect->ActivateInkSplat();
-	}
-	/**
-	 * Deactivates the ink splatter effect.
-	 */
-	void DeactivateInkSplatterEffect() {
-		this->inkSplatterEffect->DeactivateInkSplat();
-	}
-
-	void SetupPaddleShieldEffect();
-    void UpdateBulletTimeState(const BallBoostModel& boostModel) {
-        this->bulletTimeEffect->UpdateBulletTimeState(boostModel);
-    }
-
+    
+    DISALLOW_COPY_AND_ASSIGN(GameFBOAssets);
 };
 #endif

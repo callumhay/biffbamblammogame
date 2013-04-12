@@ -48,6 +48,10 @@ MineMeshManager::~MineMeshManager() {
 	assert(success);
 
     UNUSED_VARIABLE(success);
+
+
+    // Clean up the left-over mines...
+    this->ClearMines();
 }
 
 
@@ -84,6 +88,13 @@ void MineMeshManager::DrawLoadingMine(double dT, const PlayerPaddle& paddle, con
     glPopMatrix();
 
     this->timeSinceLastMineLaunch += dT;
+}
+
+void MineMeshManager::ClearMines() {
+    for (MineInstanceMapIter iter = this->mineInstanceMap.begin(); iter != this->mineInstanceMap.end(); ++iter) {
+        delete iter->second;
+    }
+    this->mineInstanceMap.clear();
 }
 
 #define TRAIL_EMITTER_DELTA_TIME 0.005f

@@ -479,18 +479,23 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
     const float BALL_RADIUS  = b.GetBounds().Radius();
     const float BALL_EPSILON = 0.001f * BALL_RADIUS;
-	// Position the ball so that it is at the location it was at when it collided...
-	b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
+
 
 	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
 	Vector2D reflVecHat;
 	if (Vector2D::Dot(b.GetDirection(), n) >= 0) {
 		// Somehow the ball is travelling away from the normal but is hitting the line...
         
-        // Adjust the ball's velocity to be moving away (i.e., in the direction of the normal) from the line a bit more...
-        reflVecHat = Vector2D::Normalize(b.GetDirection() + 0.5f*n);
+        // Position the ball so that it is at the location it was at when it collided...
+	    b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * b.GetVelocity());
+
+        // The ball will reflect off its own direction vector...
+        reflVecHat = b.GetDirection();
 	}
 	else {
+        // Position the ball so that it is at the location it was at when it collided...
+	    b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
+
         // Typical bounce off the normal: figure out the reflection vector
         reflVecHat = Vector2D::Normalize(Reflect(b.GetDirection(), n));
 

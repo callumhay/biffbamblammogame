@@ -75,6 +75,7 @@ private:
     typedef MineInstanceMap::const_iterator MineInstanceMapConstIter;
     MineInstanceMap mineInstanceMap;
 
+    void ClearMines();
 
     DISALLOW_COPY_AND_ASSIGN(MineMeshManager);
 };

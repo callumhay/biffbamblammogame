@@ -14,6 +14,7 @@
 
 #include "../GameModel/GameEvents.h"
 #include "../GameControl/BBBGameController.h"
+#include "../GameSound/GameSound.h"
 
 class GameDisplay;
 class BossWeakpoint;
@@ -132,6 +133,10 @@ private:
 	long timeSinceLastBallBlockCollisionEventInMS;
 	long timeSinceLastBallPaddleCollisionEventInMS;
 	long timeSinceLastBallTeslaCollisionEventInMS;
+
+    typedef std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, SoundID> TeslaLightningSoundIDMap;
+    typedef TeslaLightningSoundIDMap::iterator TeslaLightningSoundIDMapIter;
+    TeslaLightningSoundIDMap teslaLightningSoundIDs;
 
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;

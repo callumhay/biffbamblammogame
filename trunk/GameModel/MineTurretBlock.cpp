@@ -375,7 +375,7 @@ void MineTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMode
         case MineTurretBlock::BarrelRecoiling: {
             assert(model != NULL);
 
-            // Fire a rocket from the barrel...
+            // Fire a mine from the barrel...
             Vector2D vec(MineTurretBlock::MINE_DISPLACEMENT_ON_LOAD, MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y);
             vec.Rotate(this->currRotationFromXInDegs);
             Point2D mineOrigin = this->GetCenter() + vec;
@@ -385,7 +385,7 @@ void MineTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMode
             turretProjectile->SetLastThingCollidedWith(this);
             model->AddProjectile(turretProjectile);
 
-            // EVENT: The rocket turret just fired a rocket
+            // EVENT: The mine turret just fired a mine
             GameEventManager::Instance()->ActionMineFiredByTurret(*this);
 
             this->barrelMovementAnim.SetLerp(MineTurretBlock::BARREL_RECOIL_TIME, MineTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);

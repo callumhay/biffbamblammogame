@@ -23,9 +23,6 @@
 #include "BallReleaseHUD.h"
 #include "BallSafetyNetMesh.h"
 
-// GameSound Includes
-#include "../GameSound/GameSound.h"
-
 // GameModel Includes
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameBall.h"
@@ -100,6 +97,8 @@ void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 
 void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
 	UNUSED_PARAMETER(world);
+
+    this->teslaLightningSoundIDs.clear();
 
 	// Load the level geometry/mesh data for display...
 	this->display->GetAssets()->LoadNewLevelMesh(level);
@@ -307,7 +306,7 @@ void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
 	// Stop the spiraling sound loop, restore all previous sounds to their proper volume and add the sound for the last ball exploding
     GameSound* sound = this->display->GetSound();
     sound->DetachAndStopAllSounds(&explodedBall);
-    //sound->SetAllPlayingSoundVolume(1.0f, 1.0);
+
     sound->PlaySoundAtPosition(GameSound::LastBallExplodedEvent, false, explodedBall.GetCenterPosition());
 }
 
@@ -843,22 +842,45 @@ void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 }
 
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
+    // Stop all sounds for the piece that has changed...
+    this->display->GetSound()->DetachAndStopAllSounds(&pieceBefore);
+
 	this->display->GetAssets()->GetCurrentLevelMesh()->ChangePiece(pieceBefore, pieceAfter);
 	debug_output("EVENT: LevelPiece changed");
 }
 
 void GameEventsListener::LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus) {
+    switch (addedStatus) {
+        case LevelPiece::IceCubeStatus:
+            this->display->GetSound()->PlaySoundAtPosition(GameSound::BlockFrozenEvent, false, piece.GetPosition3D());
+            break;
+        case LevelPiece::OnFireStatus:
+            this->display->GetSound()->AttachAndPlaySound(&piece, GameSound::BlockOnFireLoop, true);
+            break;
+        default:
+            break;
+    }
+
 	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceStatusAdded(piece, addedStatus);
 	debug_output("EVENT: LevelPiece status added");
 }
 
 void GameEventsListener::LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus) {
-	UNUSED_PARAMETER(removedStatus);
+    switch (removedStatus) {
+        case LevelPiece::OnFireStatus:
+            this->display->GetSound()->DetachAndStopSound(&piece, GameSound::BlockOnFireLoop);
+            break;
+        default:
+            break;
+    }
+
 	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceAllStatusRemoved(piece);
 	debug_output("EVENT: LevelPiece status removed");
 }
 
 void GameEventsListener::LevelPieceAllStatusRemovedEvent(const LevelPiece& piece) {
+    this->display->GetSound()->DetachAndStopSound(&piece, GameSound::BlockOnFireLoop);
+
 	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceAllStatusRemoved(piece);
 	debug_output("EVENT: LevelPiece all status removed");
 }
@@ -879,7 +901,7 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 
 	// Play the item moving loop - plays as the item falls towards the paddle until it leaves play
     SoundID itemMovingSoundID = sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true);
-    sound->SetSoundVolume(itemMovingSoundID, 0.33f);
+    sound->SetSoundVolume(itemMovingSoundID, 0.5f);
 
 	debug_output("EVENT: Item Spawned: " << item);
 }
@@ -985,12 +1007,44 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
         this->display->GetAssets()->GetESPAssets()->ResetBulletTimeBallBoostEffects();
     }
 
-    //debug_output("EVENT: Bullet time state changed");
+    GameSound* sound = this->display->GetSound();
+
+    static SoundID enterBulletTimeSoundID = INVALID_SOUND_ID;
+    static SoundID exitBulletTimeSoundID  = INVALID_SOUND_ID;
+    
+    switch (boostModel.GetBulletTimeState()) {
+
+        case BallBoostModel::BulletTimeFadeIn: {
+            // Sounds and sound effects for going into bullet time mode
+            enterBulletTimeSoundID = sound->PlaySound(GameSound::EnterBulletTimeEvent, false);
+            sound->StopSound(exitBulletTimeSoundID);
+            sound->ToggleSoundEffect(GameSound::BulletTimeEffect, true);
+            break;
+        }
+
+        case BallBoostModel::BulletTimeFadeOut: {
+            // Sounds for exiting bullet time mode
+            exitBulletTimeSoundID = sound->PlaySound(GameSound::ExitBulletTimeEvent, false);
+            sound->StopSound(enterBulletTimeSoundID);
+            break;
+        }
+        case BallBoostModel::NotInBulletTime: {
+            // Turn off the bullet time sound effects
+            sound->ToggleSoundEffect(GameSound::BulletTimeEffect, false);
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 void GameEventsListener::BallBoostExecutedEvent(const BallBoostModel& boostModel) {
     UNUSED_PARAMETER(boostModel);
+
+    this->display->GetSound()->PlaySound(GameSound::BallBoostEvent, false);
     this->display->GetAssets()->GetESPAssets()->AddBallBoostEffect(boostModel);
+    
     debug_output("EVENT: Ball boost executed");
 }
 
@@ -1004,9 +1058,17 @@ void GameEventsListener::BallBoostGainedEvent() {
         // NOTE: Make sure this happens BEFORE telling the HUD that it's gained the boost -
         // that way we get the correct colour from it
         const std::list<GameBall*>& balls = this->display->GetModel()->GetGameBalls();
+        Point3D avgPos(0,0,0);
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
-            this->display->GetAssets()->GetESPAssets()->AddBallAcquiredBoostEffect(**iter, boostHUD->GetCurrentBoostColour());
+            
+            GameBall* currBall = *iter;
+            avgPos += Vector3D(currBall->GetCenterPosition2D()[0], currBall->GetCenterPosition2D()[1], 0.0f);
+
+            this->display->GetAssets()->GetESPAssets()->AddBallAcquiredBoostEffect(*currBall, boostHUD->GetCurrentBoostColour());
         }
+        avgPos /= static_cast<float>(balls.size());
+
+        this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBoostGainedEvent, false, avgPos);
     }
     
     // Make the HUD change for indicating the number of boosts that the player has
@@ -1028,13 +1090,11 @@ void GameEventsListener::BallBoostLostEvent(bool allBoostsLost) {
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 	// Tell the assets - this will spawn the appropriate sprites/projectiles and effects
 	this->display->GetAssets()->AddProjectile(*this->display->GetModel(), projectile);
-	//debug_output("EVENT: Projectile spawned");
 }
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
 	this->display->GetAssets()->RemoveProjectile(projectile);
-	//debug_output("EVENT: Projectile removed");
 }
 
 void GameEventsListener::RocketExplodedEvent(const PaddleRocketProjectile& rocket) {
@@ -1054,7 +1114,7 @@ void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
 	// Add the appropriate sounds for the beam
 	switch (beam.GetBeamType()) {
 		case Beam::PaddleLaserBeam:
-			//this->display->GetSound()->StartSound(beam, GameSound::LaserBeamFiringLoop, 50);
+			this->display->GetSound()->AttachAndPlaySound(&beam, GameSound::LaserBeamFiringLoop, true);
 			break;
 		default:
 			assert(false);
@@ -1077,7 +1137,7 @@ void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
 	// Removed the appropriate sounds for the beam
 	switch (beam.GetBeamType()) {
 		case Beam::PaddleLaserBeam:
-			//this->display->GetSound()->StopSound(beam, GameSound::LaserBeamFiringLoop);
+			this->display->GetSound()->DetachAndStopAllSounds(&beam);
 			break;
 		default:
 			assert(false);
@@ -1088,12 +1148,35 @@ void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
 }
 
 void GameEventsListener::TeslaLightningBarrierSpawnedEvent(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock) {
+    GameSound* sound = this->display->GetSound();
+
+    // Attach a sound for the lightning...
+    Point3D midPt = Point3D::GetMidPoint(newlyOnTeslaBlock.GetPosition3D(), previouslyOnTeslaBlock.GetPosition3D());
+    SoundID lightningSoundID = sound->PlaySoundAtPosition(GameSound::TeslaLightningArcLoop, true, midPt);
+    sound->SetSoundVolume(lightningSoundID, 0.33f);
+    this->teslaLightningSoundIDs.insert(std::make_pair(std::make_pair(&newlyOnTeslaBlock, &previouslyOnTeslaBlock), lightningSoundID));
+
 	Vector3D negHalfLevelDim(-0.5 * this->display->GetModel()->GetLevelUnitDimensions(), 0.0f);
 	this->display->GetAssets()->GetESPAssets()->AddTeslaLightningBarrierEffect(newlyOnTeslaBlock, previouslyOnTeslaBlock, negHalfLevelDim);
 	debug_output("EVENT: Tesla lightning barrier spawned");
 }
 
 void GameEventsListener::TeslaLightningBarrierRemovedEvent(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock) {
+    
+    // Find and stop the sound for the lightning arc
+    TeslaLightningSoundIDMapIter findIter = this->teslaLightningSoundIDs.find(std::make_pair(&newlyOffTeslaBlock, &stillOnTeslaBlock));
+    if (findIter == this->teslaLightningSoundIDs.end()) {
+        findIter = this->teslaLightningSoundIDs.find(std::make_pair(&stillOnTeslaBlock, &newlyOffTeslaBlock));
+    }
+    if (findIter != this->teslaLightningSoundIDs.end()) {
+        this->display->GetSound()->StopSound(findIter->second);
+        this->teslaLightningSoundIDs.erase(findIter);
+    }
+    else {
+        // This should never happen... there should always be a sound ID for each lightning arc!
+        assert(false);
+    }
+
 	this->display->GetAssets()->GetESPAssets()->RemoveTeslaLightningBarrierEffect(newlyOffTeslaBlock, stillOnTeslaBlock);
 	debug_output("EVENT: Tesla lightning barrier removed");
 }
