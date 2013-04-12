@@ -171,7 +171,20 @@ public:
     return v_[ idx ];
   }
 
-	
+    inline Point3D& operator+=(const Vector3D& other) {
+        this->v_[0] += other[0];
+        this->v_[1] += other[1];
+        this->v_[2] += other[2];
+        return *this;
+    }
+
+    inline Point3D& operator/=(float value) {
+        this->v_[0] /= value;
+        this->v_[1] /= value;
+        this->v_[2] /= value;
+        return *this;
+    }
+
 	// Robust equivalence
 	inline bool operator==(const Point3D &other) {
 		return 	fabs(v_[0] - other[0]) < EPSILON &&

@@ -190,7 +190,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         // Calculate the number of samples required to make sure that the increment distance is
         // less than or equal to the radius of the circle
         numCollisionSamples = static_cast<int>(ceil(dT / (0.5f * c.Radius()) * adjustedBallVel.Magnitude()));
-        numCollisionSamples = std::max<int>(1, numCollisionSamples);
+        numCollisionSamples = std::max<int>(1, numCollisionSamples + 1);
         assert(numCollisionSamples < 50);
     }
     

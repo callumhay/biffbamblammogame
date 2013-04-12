@@ -727,6 +727,7 @@ void GameModel::DoProjectileCollisions(double dT) {
 
         // Check if the projectile collided with any tesla lightning arcs...
         if (currLevel->IsDestroyedByTelsaLightning(*currProjectile)) {
+
             if (currLevel->TeslaLightningCollisionCheck(projectileBoundingLines)) {
                 
                 // In the special case of a rocket projectile we cause an explosion...

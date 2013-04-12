@@ -9,10 +9,10 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
 // Visual Leak Detector Includes
 //#include <vld.h>
-//#endif
+#endif
 
 #include "BlammoEngine/FBObj.h"
 #include "BlammoEngine/Noise.h"

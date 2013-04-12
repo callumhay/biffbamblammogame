@@ -18,12 +18,17 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
 
-GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
+#include "../GameSound/GameSound.h"
+
+GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight, GameSound* sound) :
+sound(sound), bgFBO(NULL), fgAndBgFBO(NULL), 
 postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
 fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
 stickyPaddleCamEffect(NULL), shieldPaddleCamEffect(NULL), smokeyCamEffect(NULL), icyCamEffect(NULL), 
 uberIntenseCamEffect(NULL), fireBallCamEffect(NULL), bulletTimeEffect(NULL), drawItemsInLastPass(true) {
 	
+    assert(sound != NULL);
+
 	// Framebuffer object setup
 	this->fgAndBgFBO            = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->bgFBO                 = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
@@ -109,7 +114,7 @@ void GameFBOAssets::Tick(double dT) {
 	for (std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float> > >::iterator iter1 = this->fboAnimations.begin();
 		iter1 != this->fboAnimations.end(); ++iter1) {
 
-    std::list<std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator > toRemove;
+        std::list<std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator > toRemove;
 		std::map<FBOAnimationItem, AnimationMultiLerp<float> >& currAnimSet = iter1->second;
 		for (std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator iter2 = currAnimSet.begin(); iter2 != currAnimSet.end(); ++iter2) {
 			bool finished = iter2->second.Tick(dT);
@@ -118,10 +123,10 @@ void GameFBOAssets::Tick(double dT) {
 			}
 		}
 
-    for (std::list<std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator >::iterator iterRemove = toRemove.begin();
-            iterRemove != toRemove.end(); ++iterRemove) {
-        currAnimSet.erase(*iterRemove);
-    }
+        for (std::list<std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator >::iterator iterRemove = toRemove.begin();
+                iterRemove != toRemove.end(); ++iterRemove) {
+            currAnimSet.erase(*iterRemove);
+        }
 	}
 }
 
@@ -238,6 +243,12 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 		swapFBO = inputFBO;
 		inputFBO = outputFBO;
 		outputFBO = swapFBO;
+
+        // The ink splatter might no longer be active, in this case we turn off any effects that
+        // got toggled when it was activated
+        if (!this->inkSplatterEffect->IsInkSplatActive()) {
+            sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false);
+        }
 	}
 
 
@@ -465,6 +476,22 @@ void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) 
 	glPopAttrib();
 
 	debug_opengl_state();
+}
+
+/**
+ * Activates the ink splatter effect - a full screen effect drawn
+ * at the end of the engine pipeline.
+ */
+void GameFBOAssets::ActivateInkSplatterEffect() {
+	this->inkSplatterEffect->ActivateInkSplat();
+    sound->ToggleSoundEffect(GameSound::InkSplatterEffect, true);
+}
+/**
+ * Deactivates the ink splatter effect.
+ */
+void GameFBOAssets::DeactivateInkSplatterEffect() {
+	this->inkSplatterEffect->DeactivateInkSplat();
+    sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false);
 }
 
 void GameFBOAssets::SetupPaddleShieldEffect() {

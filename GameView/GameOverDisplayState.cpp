@@ -2,7 +2,7 @@
  * GameOverDisplayState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,9 +16,6 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
-// GameSound Includes
-#include "../GameSound/GameSound.h"
-
 const char* GameOverDisplayState::GAME_OVER_TEXT         = "Game Over";
 const int GameOverDisplayState::GAME_OVER_LABEL_X_BORDER = 50;
 const int GameOverDisplayState::GAME_OVER_LABEL_Y_BORDER = GameOverDisplayState::GAME_OVER_LABEL_X_BORDER;
@@ -31,7 +28,7 @@ const Colour GameOverDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 
 GameOverDisplayState::GameOverDisplayState(GameDisplay* display) :
 DisplayState(display), renderPipeline(display), gameOverMenu(NULL),
 deathFSEffect(display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()),
-maxMenuItemWidth(0.0f), menuHeight(0.0f), selectedAndActivatedItem(-1) {
+maxMenuItemWidth(0.0f), menuHeight(0.0f), selectedAndActivatedItem(-1), gameOverSoundID(INVALID_SOUND_ID) {
 
 	this->gameOverLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Huge), GAME_OVER_TEXT);
@@ -52,6 +49,9 @@ GameOverDisplayState::~GameOverDisplayState() {
     this->topMenuEventHandler = NULL;
     delete this->quitSubMenuEventHandler;
     this->quitSubMenuEventHandler = NULL;
+
+    // Make sure the game over sound is stopped
+    this->display->GetSound()->StopSound(this->gameOverSoundID, 0.5);
 }
 
 void GameOverDisplayState::RenderFrame(double dT) {
@@ -100,8 +100,14 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
             this->deathFSEffect.SetIntensity(this->fadeAnim.GetInterpolantValue());
             this->gameOverLabel.SetAlpha(this->fadeAnim.GetInterpolantValue());
 
-            if (this->fastFadeAnim.Tick(dT) && this->fadeAnim.Tick(dT) &&
-                this->moveLabelAnim.Tick(dT)) {
+            if (this->fastFadeAnim.Tick(dT) && this->fadeAnim.Tick(dT) && this->moveLabelAnim.Tick(dT)) {
+
+                // Stop all sounds and play the game over sound...
+                GameSound* sound = this->display->GetSound();
+                sound->StopAllSounds();
+                sound->StopAllEffects();
+                this->gameOverSoundID = sound->PlaySound(GameSound::GameOverEvent, false);
+
                 this->SetState(ShowingTextState);
             }
             break;

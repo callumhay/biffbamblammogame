@@ -97,6 +97,7 @@ void InGameMenuState::RenderFrame(double dT) {
 			
             // Kill all sounds
 			this->display->GetSound()->StopAllSounds();
+            this->display->GetSound()->StopAllEffects();
 
             // Reset the level
             this->display->GetModel()->ResetCurrentLevel();
@@ -115,6 +116,7 @@ void InGameMenuState::RenderFrame(double dT) {
 			
             // Kill all sounds
 			this->display->GetSound()->StopAllSounds();
+            this->display->GetSound()->StopAllEffects();
             
 			// Go back to the main menu state
             this->CleanUpReturnToDisplayState();

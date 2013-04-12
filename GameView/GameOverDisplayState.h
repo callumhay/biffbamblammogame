@@ -2,7 +2,7 @@
  * GameOverDisplayState.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -15,6 +15,9 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/Animation.h"
+
+// GameSound Includes
+#include "../GameSound/GameSound.h"
 
 #include "DisplayState.h"
 #include "InGameRenderPipeline.h"
@@ -50,6 +53,8 @@ private:
 	static const Colour MENU_ITEM_SEL_COLOUR;
 	static const Colour MENU_ITEM_ACTIVE_COLOUR;
 	static const Colour MENU_ITEM_GREYED_COLOUR;
+
+    SoundID gameOverSoundID;
 
 	TextLabel2D gameOverLabel;
     InGameRenderPipeline renderPipeline;

@@ -102,7 +102,7 @@ public:
 	 * Whether or not this ball can collide with other balls.
 	 */
 	bool CanCollideWithOtherBalls() const {
-		return this->ballballCollisionsDisabledTimer <= EPSILON;
+		return this->ballballCollisionsDisabledTimer <= 0.0;
 	}
 
 	/**

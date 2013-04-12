@@ -313,10 +313,6 @@ void SelectLevelMenuState::RenderFrame(double dT) {
         AbstractLevelMenuItem* selectedLevelItem = this->pages[this->selectedPage]->GetSelectedItem();
         const GameLevel* selectedLevel = selectedLevelItem->GetLevel();
 
-		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
-		//GameSound* sound = this->display->GetSound();
-		//sound->StopAllSounds();
-
 		// Load all the initial stuffs for the game - this will queue up the next states that we need to go to
         this->display->GetModel()->StartGameAtWorldAndLevel(this->world->GetWorldIndex(), selectedLevel->GetLevelIndex());
 		// Place the view into the proper state to play the game	

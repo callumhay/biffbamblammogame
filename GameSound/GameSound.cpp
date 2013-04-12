@@ -169,6 +169,9 @@ void GameSound::ReloadFromMSF() {
         }
     }
 
+    // Figure out what effects are active, we'll need to restart these after the reload...
+    EffectSet effectsThatWereActive = this->activeEffects;
+
     // Clear all effects, sounds and sound sources...
     this->ClearAll();
 
@@ -180,6 +183,11 @@ void GameSound::ReloadFromMSF() {
     // Reload all global sources and world sources
     this->LoadGlobalSounds();
     this->LoadWorldSounds(this->currLoadedWorldStyle);
+
+    // Setup all of the previously active effects...
+    for (EffectSetIter iter = effectsThatWereActive.begin(); iter != effectsThatWereActive.end(); ++iter) {
+        this->ToggleSoundEffect(*iter, true);
+    }
 
     // Play anything that was looped before
     for (std::list<std::pair<GameSound::SoundType, SoundID> >::iterator iter = loopingSounds.begin();
@@ -194,9 +202,9 @@ void GameSound::StopAllSounds() {
     if (this->soundEngine == NULL) {
         return;
     }
+
     this->soundEngine->stopAllSounds();
     this->ClearSounds();
-    this->StopAllEffects();
 }
 
 void GameSound::PauseAllSounds() {
@@ -274,6 +282,11 @@ SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameS
     return newSound->GetSoundID();
 }
 
+/**
+ * Completely gets rid of the given positional object from the game sound -- this will stop
+ * all sounds that are currently attached to that object and the object itself will no longer
+ * be tracked.
+ */
 void GameSound::DetachAndStopAllSounds(const IPositionObject* posObj) {
     // Try to find the given object among the attached playing sounds
     AttachedSoundMapIter findIter = this->attachedPlayingSounds.find(posObj);
@@ -289,6 +302,32 @@ void GameSound::DetachAndStopAllSounds(const IPositionObject* posObj) {
     }
     objSoundMap.clear();
     this->attachedPlayingSounds.erase(findIter);
+}
+
+void GameSound::DetachAndStopSound(const IPositionObject* posObj, const GameSound::SoundType& soundType) {
+    // Try to find the given object among the attached playing sounds
+    AttachedSoundMapIter findIter = this->attachedPlayingSounds.find(posObj);
+    if (findIter == this->attachedPlayingSounds.end()) {
+        return;
+    }
+
+    // Find the given sound type among those attached to the object...
+    SoundMap& objSoundMap = findIter->second;
+    for (SoundMapIter iter = objSoundMap.begin(); iter != objSoundMap.end();) {
+        Sound* currSound = iter->second;
+        if (currSound->GetSoundType() == soundType) {
+            delete currSound;
+            iter = objSoundMap.erase(iter);
+        }
+        else {
+            ++iter;
+        }
+    }
+
+    // Check to see if there are any sounds left for the object, if not we remove it entirely
+    if (objSoundMap.empty()) {
+        this->attachedPlayingSounds.erase(findIter);
+    }
 }
 
 void GameSound::SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused) {
@@ -318,6 +357,11 @@ void GameSound::StopAllEffects() {
 }
 
 void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn) {
+    // If we're turning the effect on and it's already active then just ignore it
+    if (this->IsEffectActive(effectType) && effectOn) {
+        return;
+    }
+    
     SoundEffect* effect = this->GetSoundEffectFromType(effectType);
     if (effect == NULL) {
         return;
@@ -373,10 +417,6 @@ void GameSound::SetListenerPosition(const Camera& camera) {
         irrklang::vec3df(pos[0], pos[1], pos[2]),
         irrklang::vec3df(lookDir[0], lookDir[1], lookDir[2]), irrklang::vec3df(0,0,0),
         irrklang::vec3df(upVec[0], upVec[1], upVec[2]));
-}
-
-bool GameSound::IsSoundPlaying(SoundID soundID) const {
-    return this->nonAttachedPlayingSounds.find(soundID) != this->nonAttachedPlayingSounds.end();
 }
 
 SoundSource* GameSound::BuildSoundSource(const GameSound::SoundType& soundType,
@@ -445,6 +485,13 @@ bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& s
         return false;
     }
     
+    // Apply any active effects to the sound
+    for (EffectSetConstIter iter = this->activeEffects.begin(); iter != this->activeEffects.end(); ++iter) {
+        SoundEffect* currEffect = this->GetSoundEffectFromType(*iter);
+        assert(currEffect != NULL);
+        currEffect->ToggleEffectOnSound(newSound, true);
+    }
+
     this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
     return true;
 }
@@ -461,6 +508,7 @@ void GameSound::ClearEffects() {
         delete currEffect;
     }
     this->globalEffects.clear();
+    this->activeEffects.clear();
 }
 
 void GameSound::ClearSounds() {
