@@ -12,8 +12,7 @@
 #ifndef __GAMEITEM_H__
 #define __GAMEITEM_H__
 
-#include "../BlammoEngine/BasicIncludes.h"
-#include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/IPositionObject.h"
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Animation.h"
 
@@ -24,7 +23,7 @@ class GameModel;
 class GameItemTimer;
 class GameBall;
 
-class GameItem {
+class GameItem : public IPositionObject {
 public:
 	enum ItemDisposition { Good, Bad, Neutral };
 	enum ItemType { BallSafetyNetItem = 0, 
@@ -86,6 +85,11 @@ public:
 	const Point2D& GetCenter() const {
 		return this->center;
 	}
+
+    // Inherited from the IPositionObject interface
+    Point3D GetPosition3D() const {
+        return Point3D(this->GetCenter(), 0.0f);
+    }
 
 	// For obtaining the type of item (e.g., power-up, power-down, ...)
 	const GameItem::ItemDisposition& GetItemDisposition() const {

@@ -15,6 +15,7 @@
 #include "../GameModel/GameWorld.h"
 
 #include "SoundCommon.h"
+#include "SoundEffect.h"
 
 // IrrKlang forward declarations
 namespace irrklang {
@@ -35,6 +36,7 @@ class GameSound {
 public:
     enum EffectType {
         NoEffect = -1,
+        BulletTimeEffect,
 		InkSplatterEffect,
 		PoisonEffect
     };
@@ -113,6 +115,8 @@ public:
 		CollateralBlockFlashingLoop,
 		CollateralBlockFallingLoop,
         CannonBlockRotatingLoop,
+        SwitchBlockActivated,
+        IceShatterEvent,
 
         // -> Projectile and beam sounds
 		RocketExplodedEvent,
@@ -136,12 +140,15 @@ public:
 
     typedef std::map<GameSound::SoundType, SoundSource*> SoundSourceMap;
     typedef SoundSourceMap::iterator SoundSourceMapIter;
+    typedef SoundSourceMap::const_iterator SoundSourceMapConstIter;
 
     typedef std::map<GameSound::EffectType, SoundEffect*> EffectMap;
     typedef EffectMap::iterator EffectMapIter;
+    typedef EffectMap::const_iterator EffectMapConstIter;
 
     typedef std::map<GameWorld::WorldStyle, SoundSourceMap> WorldSoundSourceMap;
     typedef WorldSoundSourceMap::iterator WorldSoundSourceMapIter;
+    typedef WorldSoundSourceMap::const_iterator WorldSoundSourceMapConstIter;
 
     GameSound();
     ~GameSound();
@@ -170,8 +177,13 @@ public:
     void DetachAndStopAllSounds(const IPositionObject* posObj);
     void SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused);
  
+    // Sound effect functions
+    void StopAllEffects();
+    void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn);
+
     // Volume functions
     void SetMasterVolume(float volume);
+    void SetSoundVolume(const SoundID& soundID, float volume);
     //void SetAllPlayingSoundsVolume(float volume, double lerpTimeInSecs = 0.0);
 
     // 3D/2D Sound functions
@@ -183,9 +195,15 @@ public:
 private:
     typedef std::map<SoundID, Sound*> SoundMap;
     typedef SoundMap::iterator SoundMapIter;
+    typedef SoundMap::const_iterator SoundMapConstIter;
 
     typedef std::map<const IPositionObject*, SoundMap> AttachedSoundMap;
     typedef AttachedSoundMap::iterator AttachedSoundMapIter;
+    typedef AttachedSoundMap::const_iterator AttachedSoundMapConstIter;
+
+    typedef std::set<GameSound::EffectType> EffectSet;
+    typedef EffectSet::iterator EffectSetIter;
+    typedef EffectSet::const_iterator EffectSetConstIter;
 
     // Sound Source and Effects Maps
     SoundSourceMap globalSounds;
@@ -197,12 +215,18 @@ private:
     SoundMap nonAttachedPlayingSounds;
     AttachedSoundMap attachedPlayingSounds;
 
+    // Active effects (i.e., effects that are affecting all playing sounds in the game right now)
+    EffectSet activeEffects;
+
     // IrrKlang stuff
     irrklang::ISoundEngine* soundEngine;
 
     // Helper functions
     SoundSource* BuildSoundSource(const GameSound::SoundType& soundType,
         const std::string& soundName, const std::string& filePath);
+    SoundEffect* BuildSoundEffect(const GameSound::EffectType& effectType, 
+        const std::string& effectName, const std::vector<std::string>& effectsStrs,
+        const SoundEffect::EffectParameterMap& parameterMap);
 
     bool LoadFromMSF();
 
@@ -213,8 +237,10 @@ private:
     void ClearSounds();
     void ClearSoundSources();
 
-    SoundSource* GetSoundSourceFromType(const GameSound::SoundType& type);
-    Sound* GetPlayingSound(SoundID soundID);
+    SoundSource* GetSoundSourceFromType(const GameSound::SoundType& type) const;
+    SoundEffect* GetSoundEffectFromType(const GameSound::EffectType& type) const;
+    Sound* GetPlayingSound(SoundID soundID) const;
+    void GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) const;
 
     Sound* BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position = NULL);
 

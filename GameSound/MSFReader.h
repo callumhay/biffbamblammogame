@@ -39,6 +39,7 @@ private:
 	// Keyword parameters for the MSF definition blocks
 	static const char* FILE_KEYWORD;
     static const char* WORLD_KEYWORD;
+    static const char* TYPE_KEYWORD;
 
 	// Sound string identifiers
 	static void InitSoundTypeMapping();

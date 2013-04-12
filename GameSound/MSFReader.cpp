@@ -12,6 +12,7 @@
 #include "MSFReader.h"
 #include "GameSound.h"
 #include "SoundSource.h"
+#include "SoundEffect.h"
 
 #include "../ResourceManager.h"
 #include "../GameView/GameViewConstants.h"
@@ -29,6 +30,7 @@ const char* MSFReader::IGNORE_KEYWORD = "ignore";
 const char* MSFReader::IGNORE_LINE    = "//";
 const char* MSFReader::FILE_KEYWORD   = "file";
 const char* MSFReader::WORLD_KEYWORD  = "world";
+const char* MSFReader::TYPE_KEYWORD   = "type";
 
 const char* MSFReader::NO_BLOCK_NAME = "";
 
@@ -62,7 +64,10 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
     GameSound::EffectType lastEffectEnum  = GameSound::NoEffect;
     GameSound::SoundType lastSoundEnum    = GameSound::NoSound;
 	std::vector<std::string> soundFilePaths;
+    std::vector<std::string> effectTypes;
 	std::vector<int> probabilities;
+    SoundEffect::EffectParameterMap effectParamMap;
+
 	double resetSequenceTime = -1;
 
 	// Read through the music script file
@@ -105,6 +110,8 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
             worldSoundStyle = GameWorld::None;
 			soundFilePaths.clear();
 			probabilities.clear();
+            effectTypes.clear();
+            effectParamMap.clear();
 
 		}
 		// Check for the closing of a music defintion block...
@@ -117,15 +124,24 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 				continue;
 			}
             if (lastBlockName == MSFReader::NO_BLOCK_NAME) {
-                error = true;
-                errorStr = "No block name found for sound/effect.";
+                soundDefBlockOpen = false;
+                std::cerr << "No block name found for sound/effect." << std::endl;
                 continue;
             }
 
             if (lastEffectEnum != GameSound::NoEffect) {
-                //SoundEffect* newSoundEffect = new SoundEffect(lastBlockName, ...);
-                assert(false);
-                //gameSound.globalEffects.insert(std::make_pair(lastEffectEnum, newSoundEffect));
+
+                SoundEffect* newSoundEffect = gameSound.BuildSoundEffect(lastEffectEnum, lastBlockName, effectTypes, effectParamMap);
+                if (newSoundEffect == NULL) {
+                    std::cerr << "Could not build effect: " << lastBlockName << std::endl;
+                    effectTypes.clear();
+                    effectParamMap.clear();
+                    soundDefBlockOpen = false;
+                    continue;
+                }
+
+                assert(gameSound.globalEffects.find(lastEffectEnum) == gameSound.globalEffects.end());
+                gameSound.globalEffects.insert(std::make_pair(lastEffectEnum, newSoundEffect));
             }
             else {
                 // If it's not a sound effect then it must be a sound
@@ -260,12 +276,35 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 						if (failed) {
 							probabilities.clear();
 							soundFilePaths.clear();
+                            effectTypes.clear();
 							error = true;
 							continue;
 						}
 
 					}
 				}
+                else if (currReadStr == MSFReader::TYPE_KEYWORD) {
+                    if (!FoundEqualsSyntax(error, errorStr, inStream)) {
+						continue;
+					}
+
+                    // The type can be a comma separated list of types of effects...
+                    std::string typeLine;
+                    std::getline(*inStream, typeLine);
+                    typeLine = stringhelper::trim(typeLine);
+                    
+                    // Tokenize the string by commas
+                    stringhelper::Tokenize(typeLine, effectTypes, ",");
+                    for (int i = 0; i < static_cast<int>(effectTypes.size()); i++) {
+                        effectTypes[i] = stringhelper::trim(effectTypes[i]);
+                    }
+                
+                    if (effectTypes.empty()) {
+                        errorStr = "Invalid effect type declaration found, type was left empty.";
+					    error = true;
+					    continue;
+                    }
+                }
                 else if (currReadStr == MSFReader::WORLD_KEYWORD) {
                     if (!FoundEqualsSyntax(error, errorStr, inStream)) {
 						continue;
@@ -283,6 +322,19 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 					    error = true;
 					    continue;
                     }
+                }
+                else if (!currReadStr.empty()) {
+                    // Must be some sort of effect parameter...
+                    if (!FoundEqualsSyntax(error, errorStr, inStream)) {
+						continue;
+					}
+                    float paramValue;
+                    if (!(*inStream >> paramValue)) {
+                        errorStr = "Invalid parameter value found for " + currReadStr + ", in block " + lastBlockName + ". Value must be a float!";
+					    error = true;
+					    continue;
+                    }
+                    effectParamMap.insert(std::make_pair(stringhelper::trim(currReadStr), paramValue)); 
                 }
 			}
 			else {
@@ -386,6 +438,8 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFlashingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFallingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockRotatingLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, SwitchBlockActivated));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, IceShatterEvent));
 
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketExplodedEvent));
@@ -413,6 +467,7 @@ void MSFReader::InitEffectTypeMapping() {
         return;
     }
 
+    effectTypeMapping.insert(MAPPING_PAIR(GameSound, BulletTimeEffect));
 	effectTypeMapping.insert(MAPPING_PAIR(GameSound, InkSplatterEffect));
 	effectTypeMapping.insert(MAPPING_PAIR(GameSound, PoisonEffect));
 }

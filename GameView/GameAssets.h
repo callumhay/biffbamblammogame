@@ -96,6 +96,7 @@ public:
 
 	void DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight);
 
+    const Point2D& GetBallSafetyNetPosition() const;
     void BallSafetyNetCreated();
     void BallSafetyNetDestroyed(const GameLevel& currLevel, const Point2D& pos);
 

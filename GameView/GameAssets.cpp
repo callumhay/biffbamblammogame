@@ -1009,6 +1009,10 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 	this->flashHUD->Draw(dT, displayWidth, displayHeight);
 }
 
+const Point2D& GameAssets::GetBallSafetyNetPosition() const {
+    return this->ballSafetyNet->GetSafetyNetCenterPosition();
+}
+
 /**
  * Call when the ball safety net has been created. This will prompt any animations /
  * effects associated with the mesh representing the safety net.
@@ -1406,6 +1410,9 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 				this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
 				this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);
 				this->lightAssets->StartStrobeLight(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+
+                // Apply the sound effect for poison...
+                this->sound->ToggleSoundEffect(GameSound::PoisonEffect, true);
 			}
 		  break;
 
@@ -1495,6 +1502,9 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 				this->lightAssets->StopStrobeLight(GameLightAssets::FGKeyLight);
 				this->lightAssets->StopStrobeLight(GameLightAssets::FGFillLight);
 				this->lightAssets->StopStrobeLight(GameLightAssets::BallKeyLight);
+
+                // Deactivate sound effects
+                this->sound->ToggleSoundEffect(GameSound::PoisonEffect, false);
 			}
 		  break;
 
