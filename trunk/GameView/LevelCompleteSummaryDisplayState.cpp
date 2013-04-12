@@ -330,16 +330,6 @@ flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
         this->flareEmitter.AddEffector(&this->flareRotator);
         this->flareEmitter.SetParticles(1, this->lensFlareTex);
         this->flareEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
-
-        this->haloEmitter.SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
-	    this->haloEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	    this->haloEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.9f));
-        this->haloEmitter.SetParticleSize(ESPInterval(1.5f * this->starTotalLabel.GetHeight()));
-	    this->haloEmitter.SetParticleAlignment(ESP::ScreenAligned);
-        this->haloEmitter.AddEffector(&this->haloGrower);
-        this->haloEmitter.AddEffector(&this->haloFader);
-        this->haloEmitter.SetParticles(1, this->haloTex);
-        this->haloEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
     }
 
     // Grab any required texture resources
@@ -838,11 +828,8 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
     Colour labelColour = starColour;
 
     this->flareEmitter.SetEmitPosition(Point3D(starXPos + STAR_ICON_SIZE*0.15f, starYPos + STAR_ICON_SIZE*0.15f, 0.0f));
-    this->haloEmitter.SetEmitPosition(Point3D(starXPos, starYPos, 0.0f));
-
     if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
         this->flareEmitter.Tick(dT);
-        this->haloEmitter.Tick(dT);
 
         this->starTotalColourAnim.Tick(dT);
         this->starTotalScaleAnim.Tick(dT);
@@ -853,8 +840,6 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
         std::stringstream starTotalStrStream;
         starTotalStrStream << this->currStarTotal;
         this->starTotalLabel.SetText(starTotalStrStream.str());
-
-        this->haloEmitter.Draw(this->display->GetCamera());
     }
     
     this->starTotalLabel.SetColour(Colour(1,1,1));
@@ -923,7 +908,6 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
                     this->starTotalScaleAnim.ResetToStart();
                     this->starTotalColourAnim.ResetToStart();
                 }
-                this->haloEmitter.Reset();
                 this->flareEmitter.Reset();
             }
             else {
@@ -987,7 +971,6 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
     this->starAddAnimationCount = 0;
     
     this->flareEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
-    this->haloEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
 
     /*
     this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());

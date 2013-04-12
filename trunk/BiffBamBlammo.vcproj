@@ -2874,11 +2874,27 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameSound\CompositeSoundEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\DistortionSoundEffect.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\GameSound.h"
 					>
 				</File>
 				<File
+					RelativePath=".\GameSound\GargleSoundEffect.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\MSFReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\Reverb3DSoundEffect.h"
 					>
 				</File>
 				<File
@@ -2902,11 +2918,27 @@
 				Name="Source Files"
 				>
 				<File
+					RelativePath=".\GameSound\CompositeSoundEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\DistortionSoundEffect.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\GameSound.cpp"
 					>
 				</File>
 				<File
+					RelativePath=".\GameSound\GargleSoundEffect.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\MSFReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\Reverb3DSoundEffect.cpp"
 					>
 				</File>
 				<File

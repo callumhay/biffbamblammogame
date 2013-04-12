@@ -19,6 +19,7 @@
 #include "../BlammoEngine/Point.h"
 
 #include "GameSound.h"
+#include "SoundEffect.h"
 
 class Sound {
 public:
@@ -38,7 +39,11 @@ public:
     void Stop();
     void SetPosition(const Point3D& pos);
 
+    void SetVolume(float volume);
     void SetFadeout(double timeInSecs);
+    
+    void Visit(SoundEffect& soundEffect, bool effectOn);
+    void StopAllEffects();
 
 private:
     const SoundID id;
@@ -110,12 +115,28 @@ inline void Sound::SetPosition(const Point3D& pos) {
     this->sound->setPosition(irrklang::vec3df(pos[0], pos[1], pos[2]));
 }
 
+inline void Sound::SetVolume(float volume) {
+    assert(volume >= 0.0f && volume <= 1.0f);
+    this->sound->setVolume(volume);
+}
+
 inline void Sound::SetFadeout(double timeInSecs) {
     assert(timeInSecs >= 0);
     if (this->totalFadeOutTime > 0) {
         return;
     }
     this->totalFadeOutTime = this->fadeOutTimeCountdown = timeInSecs;
+}
+
+inline void Sound::Visit(SoundEffect& soundEffect, bool effectOn) {
+    soundEffect.ToggleEffect(this->sound, effectOn);
+}
+
+inline void Sound::StopAllEffects() {
+    irrklang::ISoundEffectControl* effectCtrl = this->sound->getSoundEffectControl();
+    if (effectCtrl != NULL) {
+        effectCtrl->disableAllEffects();
+    }
 }
 
 #endif // __SOUND_H__

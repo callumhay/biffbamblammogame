@@ -599,7 +599,7 @@ void GameEventsListener::IceBallCancelledByFireBallEvent(const GameBall& ball) {
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
-    //GameSound* sound = this->display->GetSound();
+    GameSound* sound = this->display->GetSound();
 
     if (method == LevelPiece::DisintegrationDestruction) {
         this->display->GetAssets()->GetESPAssets()->AddBlockDisintegrationEffect(block);
@@ -621,12 +621,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition3D(), 1);
+				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition3D(), 1);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
 			    break;
 
@@ -636,12 +636,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
 			    break;
             }
@@ -652,12 +652,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
 			    break;
 
@@ -665,12 +665,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.9f, 0.45f, 0.0f));
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
 			    break;
 
@@ -678,12 +678,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
                 break;
 
@@ -691,14 +691,14 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Bomb effect - big explosion!
 				    this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
 				    this->display->GetCamera().SetCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
 				    GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
-                    //sound->PlaySoundAtPosition(GameSound::BombBlockDestroyedEvent, block.GetPosition(), 1);
+                    sound->PlaySoundAtPosition(GameSound::BombBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
 			    break;
 
@@ -713,12 +713,13 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		        if (wasFrozen) {
 		    	    // Add ice break effect
 		    	    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
-		    	    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+		    	    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 		        }
 		        else {
 		    	    // Emit goo from ink block and make onomata effects
-		    	    this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
-		    	    //sound->PlaySoundAtPosition(GameSound::InkBlockDestroyedEvent, block.GetPosition(), 1);
+		    	    this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(
+                        this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
+		    	    sound->PlaySoundAtPosition(GameSound::InkBlockDestroyedEvent, false, block.GetPosition3D());
 
 		    	    if (inkSplatter) {
 		    		    // Cover camera in ink with a fullscreen splatter effect
@@ -731,12 +732,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		    case LevelPiece::Prism:
 		    case LevelPiece::PrismTriangle:
 			    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-                //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+                sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			    break;
 
 		    case LevelPiece::Cannon: {
                 this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-                //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+                sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			    break;
             }
 
@@ -744,13 +745,13 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
                 if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
-				    //sound->PlaySoundAtPosition(GameSound::FrozenBlockDestroyedEvent, block.GetPosition(), 1);
+				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
                 else {
 			        // Don't show any effects / play any sounds if the ball is dead/dying
 			        if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
 				        this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				        //sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, block.GetPosition(), 1);
+				        sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
 			        }
                 }
                 break;
@@ -797,13 +798,14 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 }
 
 void GameEventsListener::BallSafetyNetCreatedEvent() {
-    //this->display->GetSound()->PlaySound(GameSound::BallSafetyNetCreatedEvent, 1);
-    
+
     // Tell the level mesh about it so it can show any effects for the creation
 	// of the safety net mesh
 	this->display->GetAssets()->BallSafetyNetCreated();
 
-
+    // Play the sound for the creation of the net
+    const Point2D& safetyNetCenterPos = this->display->GetAssets()->GetBallSafetyNetPosition();
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::BallSafetyNetCreatedEvent, false, Point3D(safetyNetCenterPos, 0.0f));
 
 	debug_output("EVENT: Ball safety net created");
 }
@@ -827,7 +829,8 @@ void GameEventsListener::BallSafetyNetDestroyedEvent(const Projectile& projectil
 
 // Private helper for when the safety net is destroyed
 void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
-	//this->display->GetSound()->PlaySoundAtPosition(GameSound::BallSafetyNetDestroyedEvent, Point3D(pt, 0.0f), 1);
+
+	this->display->GetSound()->PlaySoundAtPosition(GameSound::BallSafetyNetDestroyedEvent, false, Point3D(pt, 0.0f));
 
 	// Tell the level mesh about it so it can show any effects for the destruction
 	// of the safety net mesh
@@ -861,8 +864,10 @@ void GameEventsListener::LevelPieceAllStatusRemovedEvent(const LevelPiece& piece
 }
 
 void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
+    GameSound* sound = this->display->GetSound();
+
 	// Play item spawn sound
-	//this->display->GetSound()->PlaySoundAtPosition(GameSound::ItemSpawnedEvent, item.GetPosition(), 1);
+	sound->PlaySoundAtPosition(GameSound::ItemSpawnedEvent, false, item.GetPosition3D());
 
 	// We don't show the stars coming off the dropping items if it gets in the way of playing
 	// the game - e.g., when in paddle camera mode
@@ -873,14 +878,15 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(item, showItemDropStars);
 
 	// Play the item moving loop - plays as the item falls towards the paddle until it leaves play
-	//this->display->GetSound()->AttachSound(item, GameSound::ItemMovingLoop, 25 /* volume option!! */);
+    SoundID itemMovingSoundID = sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true);
+    sound->SetSoundVolume(itemMovingSoundID, 0.33f);
 
 	debug_output("EVENT: Item Spawned: " << item);
 }
 
 void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
-	// Stop the item moving mask sound
-	//this->display->GetSound()->RemoveSound(item, GameSound::ItemMovingLoop);
+	// Stop the item moving sounds
+    this->display->GetSound()->DetachAndStopAllSounds(&item);
 
 	// Remove any previous item drop effect
 	this->display->GetAssets()->GetESPAssets()->RemoveItemDropEffect(item);
@@ -901,18 +907,18 @@ void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const Pla
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 
 	// Play the appropriate sound based on the item acquired by the player
-	//GameSound* sound = this->display->GetSound();
+	GameSound* sound = this->display->GetSound();
 	switch (item.GetItemDisposition()) {
 		case GameItem::Good:
-			//sound->PlaySound(GameSound::PowerUpItemActivatedEvent, 1);
+            sound->PlaySoundAtPosition(GameSound::PowerUpItemActivatedEvent, false, item.GetPosition3D());
 			break;
 
 		case GameItem::Neutral:
-			//sound->PlaySound(GameSound::PowerNeutralItemActivatedEvent, 1);
+			sound->PlaySoundAtPosition(GameSound::PowerNeutralItemActivatedEvent, false, item.GetPosition3D());
 			break;
 
 		case GameItem::Bad:
-			//sound->PlaySound(GameSound::PowerDownItemActivatedEvent, 1);
+			sound->PlaySoundAtPosition(GameSound::PowerDownItemActivatedEvent, false, item.GetPosition3D());
 			break;
 
 		default:
@@ -964,7 +970,7 @@ void GameEventsListener::ItemDropBlockItemChangeEvent(const ItemDropBlock& dropB
 
 void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBlock) {
 
-    //this->display->GetSound()->PlaySoundAtPosition(GameSound::ActionSwitchBlockActivated, switchBlock.GetPosition(), 1);
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::SwitchBlockActivated, false, switchBlock.GetPosition3D());
     this->display->GetAssets()->GetCurrentLevelMesh()->SwitchActivated(&switchBlock, this->display->GetModel()->GetCurrentLevel());
 
     debug_output("EVENT: Switch block activated");

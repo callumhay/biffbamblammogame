@@ -24,27 +24,6 @@ class CgFxPhong;
 class GameLevel;
 
 class BallSafetyNetMesh {
-private:
-	enum BallSafetyNetAnimation{ Dead, Idle, CreationAnimation, DestructionAnimation };
-
-	BallSafetyNetAnimation currAnimation;
-
-	CgFxPhong* shadingMaterial;
-	GLuint displayListID;
-	
-	// Destruction animation values 
-	GLuint leftPieceDispListID, rightPieceDispListID;
-	Orientation3D leftPieceOrient, rightPieceOrient;
-	AnimationLerp<Orientation3D> leftPieceAnim, rightPieceAnim;
-
-	// Misc. animation values
-	float idleAlpha;
-	float pieceAlpha;
-	AnimationLerp<float> pieceFadeAnim;
-
-	void InitializeMaterials();
-	static void DrawSafetyNetMesh(float minXCoord, float maxXCoord, float minTexCoordU, float maxTexCoordU);
-
 public:
 	static const float SAFETY_NET_HEIGHT;
 	static const float SAFETY_NET_DEPTH;
@@ -66,5 +45,34 @@ public:
 	
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
+    const Point2D& GetSafetyNetCenterPosition() const;
+
+private:
+	enum BallSafetyNetAnimation{ Dead, Idle, CreationAnimation, DestructionAnimation };
+
+	BallSafetyNetAnimation currAnimation;
+
+	CgFxPhong* shadingMaterial;
+	GLuint displayListID;
+    Point2D centerPos;
+	
+	// Destruction animation values 
+	GLuint leftPieceDispListID, rightPieceDispListID;
+	Orientation3D leftPieceOrient, rightPieceOrient;
+	AnimationLerp<Orientation3D> leftPieceAnim, rightPieceAnim;
+
+	// Misc. animation values
+	float idleAlpha;
+	float pieceAlpha;
+	AnimationLerp<float> pieceFadeAnim;
+
+	void InitializeMaterials();
+	static void DrawSafetyNetMesh(float minXCoord, float maxXCoord, float minTexCoordU, float maxTexCoordU);
 };
+
+inline const Point2D& BallSafetyNetMesh::GetSafetyNetCenterPosition() const {
+    return this->centerPos;
+}
+
+
 #endif

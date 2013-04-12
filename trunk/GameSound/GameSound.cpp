@@ -196,6 +196,7 @@ void GameSound::StopAllSounds() {
     }
     this->soundEngine->stopAllSounds();
     this->ClearSounds();
+    this->StopAllEffects();
 }
 
 void GameSound::PauseAllSounds() {
@@ -305,6 +306,37 @@ void GameSound::SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool
     }
 }
 
+void GameSound::StopAllEffects() {
+    this->activeEffects.clear();
+
+    std::list<Sound*> allPlayingSounds;
+    this->GetAllPlayingSoundsAsList(allPlayingSounds);
+    for (std::list<Sound*>::iterator iter = allPlayingSounds.begin(); iter != allPlayingSounds.end(); ++iter) {
+        Sound* currSound = *iter;
+        currSound->StopAllEffects();
+    }
+}
+
+void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn) {
+    SoundEffect* effect = this->GetSoundEffectFromType(effectType);
+    if (effect == NULL) {
+        return;
+    }
+
+    // Apply the effect to EVERY sound playing in the game...
+    std::list<Sound*> allPlayingSounds;
+    this->GetAllPlayingSoundsAsList(allPlayingSounds);
+    effect->ToggleEffectOnSounds(allPlayingSounds, effectOn);
+
+    // Also deal with memoized effect data...
+    if (effectOn) {
+        this->activeEffects.insert(effectType); 
+    }
+    else {
+        this->activeEffects.erase(effectType);
+    }
+}
+
 void GameSound::SetMasterVolume(float volume) {
     if (this->soundEngine == NULL) {
         return;
@@ -315,6 +347,17 @@ void GameSound::SetMasterVolume(float volume) {
     }
 
     this->soundEngine->setSoundVolume(volume);
+}
+
+void GameSound::SetSoundVolume(const SoundID& soundID, float volume) {
+    if (this->soundEngine == NULL) {
+        return;
+    }
+    Sound* sound = this->GetPlayingSound(soundID);
+    if (sound == NULL) {
+        return;
+    }
+    sound->SetVolume(volume);
 }
 
 void GameSound::SetListenerPosition(const Camera& camera) {
@@ -345,6 +388,20 @@ SoundSource* GameSound::BuildSoundSource(const GameSound::SoundType& soundType,
 
     SoundSource* result = new SoundSource(this->soundEngine, soundType, soundName, filePath);
     return result;
+}
+
+SoundEffect* GameSound::BuildSoundEffect(const GameSound::EffectType& effectType, 
+                                         const std::string& effectName, const std::vector<std::string>& effectsStrs,
+                                         const SoundEffect::EffectParameterMap& parameterMap) {
+    UNUSED_PARAMETER(effectName);
+    UNUSED_PARAMETER(effectType);
+                    
+    if (this->soundEngine == NULL) {
+        return NULL;
+    }
+
+    size_t effectFlags = SoundEffect::GetEffectFlagsFromStrList(effectsStrs);
+    return SoundEffect::Build(effectFlags, parameterMap);
 }
 
 bool GameSound::LoadFromMSF() {
@@ -462,10 +519,10 @@ void GameSound::ClearSoundSources() {
     this->globalEffects.clear();
 }
 
-SoundSource* GameSound::GetSoundSourceFromType(const GameSound::SoundType& type) {
+SoundSource* GameSound::GetSoundSourceFromType(const GameSound::SoundType& type) const {
 
     // Try the global sounds...
-    SoundSourceMapIter findIter = this->globalSounds.find(type);
+    SoundSourceMapConstIter findIter = this->globalSounds.find(type);
     if (findIter != this->globalSounds.end()) {
         return findIter->second;
     }
@@ -476,7 +533,12 @@ SoundSource* GameSound::GetSoundSourceFromType(const GameSound::SoundType& type)
     }
 
     // Not in the global sounds, try to find it among the world sounds...
-    SoundSourceMap& currWorldSoundSourceMap = this->worldSounds[this->currLoadedWorldStyle];
+    WorldSoundSourceMapConstIter worldFindIter = this->worldSounds.find(this->currLoadedWorldStyle);
+    if (worldFindIter == this->worldSounds.end()) {
+        return NULL;
+    }
+
+    const SoundSourceMap& currWorldSoundSourceMap = worldFindIter->second;
     findIter = currWorldSoundSourceMap.find(type);
     if (findIter != currWorldSoundSourceMap.end()) {
         return findIter->second;
@@ -485,17 +547,25 @@ SoundSource* GameSound::GetSoundSourceFromType(const GameSound::SoundType& type)
     return NULL;
 }
 
-Sound* GameSound::GetPlayingSound(SoundID soundID) {
+SoundEffect* GameSound::GetSoundEffectFromType(const GameSound::EffectType& type) const {
+    EffectMapConstIter findIter = this->globalEffects.find(type);
+    if (findIter != this->globalEffects.end()) {
+        return findIter->second;
+    }
+    return NULL;
+}
+
+Sound* GameSound::GetPlayingSound(SoundID soundID) const {
 
     // Try to find the sound among the non-attached sounds
-    SoundMapIter findIter = this->nonAttachedPlayingSounds.find(soundID);
+    SoundMapConstIter findIter = this->nonAttachedPlayingSounds.find(soundID);
     if (findIter != this->nonAttachedPlayingSounds.end()) {
         return findIter->second;
     }
 
     // Couldn't find the sound in the non-attached, try searching through attached sounds
-    for (AttachedSoundMapIter iter = this->attachedPlayingSounds.begin(); iter != this->attachedPlayingSounds.end(); ++iter) {
-        SoundMap& soundMap = iter->second;
+    for (AttachedSoundMapConstIter iter = this->attachedPlayingSounds.begin(); iter != this->attachedPlayingSounds.end(); ++iter) {
+        const SoundMap& soundMap = iter->second;
         findIter = soundMap.find(soundID);
         if (findIter != soundMap.end()) {
             return findIter->second;
@@ -504,6 +574,19 @@ Sound* GameSound::GetPlayingSound(SoundID soundID) {
 
     // No sound was found
     return NULL;
+}
+
+void GameSound::GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) const {
+    playingSounds.clear();
+    for (SoundMapConstIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
+        playingSounds.push_back(iter->second);
+    }
+    for (AttachedSoundMapConstIter iter1 = this->attachedPlayingSounds.begin(); iter1 != this->attachedPlayingSounds.end(); ++iter1) {
+        const SoundMap& soundMap = iter1->second;
+        for (SoundMapConstIter iter2 = soundMap.begin(); iter2 != soundMap.end(); ++iter2) {
+            playingSounds.push_back(iter2->second);
+        }
+    }
 }
 
 // Private helper function for building 2D and 3D sounds
@@ -528,6 +611,13 @@ Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLoope
     }
     else {
         newSound = source->Spawn2DSound(isLooped);
+    }
+
+    // Apply any active effects to the sound
+    for (EffectSetConstIter iter = this->activeEffects.begin(); iter != this->activeEffects.end(); ++iter) {
+        SoundEffect* currEffect = this->GetSoundEffectFromType(*iter);
+        assert(currEffect != NULL);
+        currEffect->ToggleEffectOnSound(newSound, true);
     }
 
     return newSound;

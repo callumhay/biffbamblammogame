@@ -28,7 +28,7 @@ const float BallSafetyNetMesh::SAFETY_NET_HEIGHT	= SafetyNet::SAFETY_NET_HEIGHT;
 const float BallSafetyNetMesh::SAFETY_NET_DEPTH		= 1.25f;
 
 BallSafetyNetMesh::BallSafetyNetMesh() : shadingMaterial(NULL), displayListID(0), leftPieceDispListID(0),
-rightPieceDispListID(0), currAnimation(BallSafetyNetMesh::Dead), idleAlpha(1.0f),
+rightPieceDispListID(0), currAnimation(BallSafetyNetMesh::Dead), idleAlpha(1.0f), centerPos(0,0),
 leftPieceAnim(&leftPieceOrient), rightPieceAnim(&rightPieceOrient), pieceFadeAnim(&pieceAlpha) {
 
 	this->displayListID = glGenLists(1);
@@ -180,6 +180,9 @@ void BallSafetyNetMesh::Regenerate(const GameLevel& currLevel) {
 	glEndList();
 
 	debug_opengl_state();
+
+    this->centerPos[0] = maxTexCoordU;
+    this->centerPos[1] = BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f;
 }
 
 /**
@@ -250,7 +253,8 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float d
  * Draw the active display lists for this mesh.
  */
 void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-														 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                             const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
 	// TODO: Creation animation?
 
 	// Set the appropriate light values for the shading material

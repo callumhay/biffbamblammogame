@@ -81,9 +81,7 @@ private:
     AnimationMultiLerp<Colour> starTotalColourAnim;
     AnimationMultiLerp<float> starTotalScaleAnim;
 
-    //ESPPointEmitter sparkEmitter;
     ESPPointEmitter flareEmitter;
-    ESPPointEmitter haloEmitter;
 
     ESPParticleRotateEffector flareRotator;
     ESPParticleScaleEffector haloGrower;

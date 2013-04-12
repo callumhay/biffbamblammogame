@@ -279,7 +279,7 @@ CollateralBlockFlashingLoop {
 	file = 
 }
 
-ignore CollateralBlockFallingLoop {
+CollateralBlockFallingLoop {
 	file = 
 }
 
@@ -287,6 +287,13 @@ CannonBlockRotatingLoop {
 	file = global/cannon_rotate.ogg
 }
 
+SwitchBlockActivated {
+	file = global/switch.wav
+}
+
+IceShatterEvent {
+	file = global/shatter.ogg
+}
 
 // Projectile and Beam Events ************************************************
 
@@ -365,10 +372,38 @@ ItemMovingLoop {
 // ---------------------------------------------------------------------------
 // Global Sound Effects ======================================================
 // ---------------------------------------------------------------------------
-ignore InkSplatterEffect {
-	type = 
+
+BulletTimeEffect {
+	type  = reverb3D
+	volume = 0.75
+	roomAtten = -1000
+	roomHighFreqAtten = -100
+	roomRolloff = 0
+	decayTime = 1.49
+	decayHighFreqRatio = 0.83
+	reflectionAtten = -2602
+	reflectionDelay = 0.007
+	reverbAtten = 200
+	reverbDelay = 0.011
+	diffusion = 100
+	density = 100
+	highFreqReference = 5000
 }
 
-ignore PoisonEffect {
-	type =
+InkSplatterEffect {
+	type = gargle
+	volume = 1
+	rate = 30
+	isSinWave = 1
 }
+
+PoisonEffect {
+	type = distortion
+	volume = 0.8
+	gain = -18
+	intensity = 20.0
+	postEQCenterFreq = 2400
+	postEQBandwidth = 2400
+	preLowpassCutoff = 8000
+}
+
