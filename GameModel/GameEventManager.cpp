@@ -610,26 +610,26 @@ void GameEventManager::ActionScoreChanged(int newScore) {
 }
 
 // Action for when the multiplier counter changes
-void GameEventManager::ActionScoreMultiplierCounterChanged(int newCounterValue) {
+void GameEventManager::ActionScoreMultiplierCounterChanged(int oldCounterValue, int newCounterValue) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->ScoreMultiplierCounterChangedEvent(newCounterValue);
+		(*listenerIter)->ScoreMultiplierCounterChangedEvent(oldCounterValue, newCounterValue);
 	}	
 }
 
 // Action for when the score multiplier changes
-void GameEventManager::ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position) {
+void GameEventManager::ActionScoreMultiplierChanged(int oldMultiplier, int newMultiplier, const Point2D& position) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->ScoreMultiplierChangedEvent(newMultiplier, position);
+		(*listenerIter)->ScoreMultiplierChangedEvent(oldMultiplier, newMultiplier, position);
 	}	
 }
 
 // Action for when the number of awarded stars changes
-void GameEventManager::ActionNumStarsChanged(int oldNumStars, int newNumStars) {
+void GameEventManager::ActionNumStarsChanged(const PointAward* pointAward, int oldNumStars, int newNumStars) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->NumStarsChangedEvent(oldNumStars, newNumStars);
+		(*listenerIter)->NumStarsChangedEvent(pointAward, oldNumStars, newNumStars);
 	}
 }
 

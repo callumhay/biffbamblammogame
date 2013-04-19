@@ -24,6 +24,11 @@ public:
 		return LevelPiece::Empty;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
+        return false;
+    }
+
 	// Empty blocks have no bounds... they don't exist as physical entities
 	bool IsNoBoundsPieceType() const {
 		return true;

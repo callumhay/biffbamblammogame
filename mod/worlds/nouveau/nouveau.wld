@@ -2,10 +2,10 @@ Nouveau
 
 Nouveau
 
-
 resources/textures/nouveau_world_select_256x256.jpg
 
-
+# This world is intended to introduce the magnet paddle item, prism blocks,
+# mines, and switch blocks, ...?
 
 # Testing
 resources/worlds/testing/see_the_background.lvl
@@ -15,32 +15,43 @@ resources/worlds/testing/an_almost_empty_level.lvl
 
 
 
-# TODO: ORGANIZE THIS STUFF!!
-
-
-# Magnet Item intro level (magnet item + a ton of collateral blocks)
+# Magnet Item Intro: Magnet Item + collateral blocks...
 resources/worlds/levels/medium/a_magnetic_personality.lvl
 
-# TODO: Using the magnet item to redirect rockets
+# A fun block-destroying level to break it up a bit
+resources/worlds/levels/medium/tower_offense.lvl
+
+
+# Using the magnet item to redirect balls
+resources/worlds/levels/medium/a_minor_deviation.lvl
+
+
+# TODO: Insert more general levels here?
 
 
 
-# TODO: Insert more levels here
-
-
-# Introduce Paddle Mines??
 
 
 # Prism block intro levels
 resources/worlds/levels/easy/intro_to_prisms.lvl
 
+# Prism blocks + iceball to freeze a block and combine with the prisms that it exposes
+resources/worlds/levels/medium/work_around.lvl
+
+
+# Mine Launcher Item intro level
+# TODO
+
+# Mine Launcher + Cannon level
+
+
+
+
+
 
 # TODO: Insert a BUNCH of levels here
 
 
-# Tesla block intro levels
-resources/worlds/levels/easy/electric_access.lvl
-resources/worlds/levels/medium/lightning_round.lvl
 
 # TODO: Insert a BUNCH of levels here
 
@@ -61,14 +72,6 @@ resources/worlds/levels/hard/lodestone_shootout.lvl
 
 
 
-# Tesla + Switch
-resources/worlds/levels/medium/acute_electrocution.lvl
-
-
-# Cannon + no-entry blocks + switch + rockets
-resources/worlds/levels/hard/i_think_i_cannon.lvl
-
-
 
 # TODO: Boss...
 
@@ -76,10 +79,6 @@ resources/worlds/levels/hard/i_think_i_cannon.lvl
 # IN ANOTHER MOVEMENT... --------------------------------------------------
 
 
-# Mine Launcher Item intro level
-# TODO
-
-# Mine Launcher + Cannon level
 
 
 

@@ -120,17 +120,25 @@ public:
         BlockFrozenEvent,
         BlockOnFireLoop,
         IceShatterEvent,
+        IceMeltedEvent,
+        FireFrozeEvent,
 
         // -> Projectile and beam sounds
-		RocketExplodedEvent,
-        RocketMovingLoop,
+		PaddleRocketLaunchEvent,
+        PaddleRocketMovingLoop,
+        RocketExplodedEvent,
         MineExplodedEvent,
         LaserBulletShotEvent,
-		LaserBulletMovingLoop,
 		LaserBeamFiringLoop,
 
+        // -> Item sounds
 		BallSafetyNetCreatedEvent,
 		BallSafetyNetDestroyedEvent,
+        LevelFlipEvent,
+        LevelUnflipEvent,
+        PaddleShieldActivatedEvent,
+        PaddleShieldDeactivatedEvent,
+        MagnetPaddleLoop,
 		ItemSpawnedEvent,
 		PowerUpItemActivatedEvent,
 		PowerNeutralItemActivatedEvent,
@@ -139,12 +147,30 @@ public:
 		ItemTimerEndedEvent,
         ItemMovingLoop,
 
+        // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,
         ExitBulletTimeEvent,
         BallBoostEvent,
         BallBoostGainedEvent,
 
-        // Non-in-game State Events
+        // -> Star, points and life sounds
+        LifeUpAcquiredEvent,
+        StarAcquiredEvent,
+        ScoreMultiplierIncreasedTo2Event,
+        ScoreMultiplierIncreasedTo3Event,
+        ScoreMultiplierIncreasedTo4Event,
+        ScoreMultiplierLostEvent,
+        BlockBrokenMultiplierCounterInc1,
+        BlockBrokenMultiplierCounterInc2,
+        BlockBrokenMultiplierCounterInc3,
+        BlockBrokenMultiplierCounterInc4,
+        BlockBrokenMultiplierCounterInc5,
+        BlockBrokenMultiplierCounterInc6,
+        BlockBrokenMultiplierCounterInc7,
+        BlockBrokenMultiplierCounterInc8,
+        BlockBrokenMultiplierCounterInc9,
+
+        // Non-in-game state sounds
         GameOverEvent
     };
 

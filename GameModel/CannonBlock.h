@@ -34,6 +34,10 @@ public:
 		return LevelPiece::Cannon;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall&) const {
+        return false; // The ball will NEVER bounce off a cannon
+    }
+
 	// Cannon blocks have no bounds per-se... the ball doesn't bounce off of them,
 	// instead, much like the portal block, they manipulate ball properties when it hits
 	bool IsNoBoundsPieceType() const {

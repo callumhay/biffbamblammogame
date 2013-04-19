@@ -142,9 +142,9 @@ public:
 
     void ActionPointNotification(const PointAward& pointAward);
 	void ActionScoreChanged(int newScore);
-    void ActionScoreMultiplierCounterChanged(int newCounterValue);
-	void ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position);
-    void ActionNumStarsChanged(int oldNumStars, int newNumStars);
+    void ActionScoreMultiplierCounterChanged(int oldCounterValue, int newCounterValue);
+	void ActionScoreMultiplierChanged(int oldMultiplier, int newMultiplier, const Point2D& position);
+    void ActionNumStarsChanged(const PointAward* pointAward, int oldNumStars, int newNumStars);
 
     void ActionDifficultyChanged(int newDifficulty);
 

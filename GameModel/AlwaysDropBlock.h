@@ -26,6 +26,12 @@ public:
 		return LevelPiece::AlwaysDrop;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+        return !this->BallBlastsThrough(b) && 
+            ((b.GetBallType() & GameBall::IceBall) == GameBall::IceBall) ||
+            ((b.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+    }
+
 	// Is this piece one without any boundries (i.e., no collision surface/line)?
 	// Return: true if non-collider, false otherwise.
 	bool IsNoBoundsPieceType() const {

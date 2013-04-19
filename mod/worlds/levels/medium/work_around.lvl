@@ -1,0 +1,69 @@
+Work Around
+19 28
+S S S S S S S S E E E S S S S S S S S 
+S T(P,ul) E E E E T(P,ur) S E E E S T(P,ul) E E E E T(P,ur) S 
+S E E E E E E S E E E S E E E E E E S 
+S G E E E E E S E E E S E E E E E G S 
+S S S S S S S S S S S S S S S S S S S 
+E E E E S E E E E E E E E E S E E E S 
+E E E E N E E E E E E E E E N E E E S 
+E E T(P,ul) E N E E E E E E E E E N E D(LaserBulletPaddle,LaserBeamPaddle) E S 
+E E E E N E E E E E E E E E N E E E S 
+E E E E S E E E E E E E E E S E E E S 
+E E E E S E E E E E E E E E S E E E S 
+E E E E S E E E E E E E E E S S S S S 
+E E E E S E E E E D(LaserBulletPaddle,LaserBeamPaddle) E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E S E E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E N E E E E 
+S E E E N E E E E E E E E E N E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 0
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

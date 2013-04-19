@@ -32,6 +32,26 @@ LevelPiece(wLoc, hLoc), currLifePoints(0.0f), fireGlobDropCountdown(GameModelCon
 RegenBlock::~RegenBlock() {
 }
 
+bool RegenBlock::ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+    // Fire and ice balls always bounce off
+    if (((b.GetBallType() & GameBall::IceBall) != GameBall::IceBall) || 
+        ((b.GetBallType() & GameBall::FireBall) != GameBall::FireBall)) {
+        return true;
+    }
+
+    // Deal with the infinite life version of the regen block...
+    if (this->HasInfiniteLife()) {
+        // Always bounces off unless it is frozen and gets hit by a non-iceball...
+        if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+            return false;
+        }
+        return true;
+    }
+
+    // If the ball destroys the block then there's no bounce effect
+    return b.GetCollisionDamage() < this->currLifePoints;
+}
+
 // Whether or not the ball can just blast right through this block.
 // Returns: true if it can, false otherwise.
 bool RegenBlock::BallBlastsThrough(const GameBall& b) const {

@@ -58,6 +58,7 @@ particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
 particleGravityArrowColour(ColourRGBA(GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
 flashColourFader(ColourRGBA(1,1,1,1), ColourRGBA(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR, 0.0f)),
+starColourFlasher(),
 
 particleShrinkToNothing(1, 0),
 particlePulseUberballAura(0, 0),
@@ -1144,6 +1145,18 @@ void GameESPAssets::InitStandaloneESPEffects() {
     orbPulseSettings.pulseRate = 0.75f;
     this->particlePulseOrb = ESPParticleScaleEffector(orbPulseSettings);
 
+
+    std::vector<ColourRGBA> starFlashColours;
+    starFlashColours.reserve(6);
+    starFlashColours.push_back(ColourRGBA(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR, 1.0f));
+    starFlashColours.push_back(ColourRGBA(1,1,1,1));
+    starFlashColours.push_back(ColourRGBA(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR, 1.0f));
+    starFlashColours.push_back(ColourRGBA(1,1,1,1));
+    starFlashColours.push_back(ColourRGBA(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR, 1.0f));
+    starFlashColours.push_back(ColourRGBA(1,1,1,0));
+
+    this->starColourFlasher.SetColours(starFlashColours);
+
 	// Ghost smoke effect used for ghostball
 	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
 	this->ghostBallSmoke.SetScale(0.5f);
@@ -1252,7 +1265,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
  */
 void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block) {
 	// We don't do the effect for certain types of blocks...
-    if (!LevelPiece::HasBounceEffectWithBall(block)) {
+    if (!block.ProducesBounceEffectsWithBallWhenHit(ball)) {
 		return;
 	}
 
@@ -4353,6 +4366,39 @@ ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, cons
     return comboEffect;
 }
 
+void GameESPAssets::CreateStarAcquiredEffect(const Point2D& position, std::list<ESPEmitter*>& emitterListToAddTo) {
+
+    static const float LIFE_TIME = 1.75f;
+
+    ESPPointEmitter* starEmitter = new ESPPointEmitter();
+	starEmitter->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+	starEmitter->SetParticleLife(ESPInterval(LIFE_TIME));
+	starEmitter->SetParticleSize(ESPInterval(1.0f));
+	starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
+	starEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	starEmitter->SetEmitPosition(Point3D(position));
+    starEmitter->AddEffector(&this->smokeRotatorCCW);
+    starEmitter->AddEffector(&this->particleLargeGrowth);
+    starEmitter->AddEffector(&this->starColourFlasher);
+    starEmitter->SetParticles(1, this->starTex);
+
+    // Flare on top of the star
+    ESPPointEmitter* flareEmitter = new ESPPointEmitter();
+    flareEmitter->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+    flareEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    flareEmitter->SetParticleLife(ESPInterval(LIFE_TIME));
+    flareEmitter->SetParticleSize(ESPInterval(3.0f));
+    flareEmitter->SetEmitPosition(Point3D(position[0] - 0.25f, position[1] + 0.25f, 0.0f));
+    flareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    flareEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+    flareEmitter->AddEffector(&this->fastRotatorCW);
+    flareEmitter->AddEffector(&this->particleFader);
+    flareEmitter->SetParticles(1, this->lensFlareTex);
+
+    emitterListToAddTo.push_back(starEmitter);
+    emitterListToAddTo.push_back(flareEmitter);
+}
+
 void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float height) {
     float avgSize = (width + height) / 2.0f;
 
@@ -4610,6 +4656,10 @@ void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& posi
 
     this->activeGeneralEmitters.push_back(this->CreateMultiplierComboEffect(multiplier, position));
     this->activeGeneralEmitters.push_back(this->CreateMultiplierComboEffect(multiplier, paddle.GetCenterPosition()));
+}
+
+void GameESPAssets::AddStarAcquiredEffect(const Point2D& pointAwardPos) {
+    this->CreateStarAcquiredEffect(pointAwardPos, this->activeGeneralEmitters);
 }
 
 void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {

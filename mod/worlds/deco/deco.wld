@@ -6,6 +6,15 @@ resources/textures/deco_world_select_256x256.jpg
 
 
 
+# Tesla block intro levels
+resources/worlds/levels/easy/electric_access.lvl
+resources/worlds/levels/medium/lightning_round.lvl
+
+
+# Tesla + Switch
+resources/worlds/levels/medium/acute_electrocution.lvl
+
+
 
 
 # Bonus Levels

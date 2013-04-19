@@ -10,6 +10,7 @@
  */
 
 #include "LevelPiece.h"
+#include "BreakableBlock.h"
 #include "GameEventManager.h"
 #include "GameBall.h"
 #include "GameModel.h"

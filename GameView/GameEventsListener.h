@@ -103,10 +103,10 @@ public:
     void ReleaseTimerStartedEvent();
 
 	void ScoreChangedEvent(int newScore);
-    void ScoreMultiplierCounterChangedEvent(int newCounterValue);
-	void ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position);
+    void ScoreMultiplierCounterChangedEvent(int oldCounterValue, int newCounterValue);
+	void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier, const Point2D& position);
     void PointNotificationEvent(const PointAward& pointAward);
-    void NumStarsChangedEvent(int oldNumStars, int newNumStars);
+    void NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars);
 
     void DifficultyChangedEvent(const GameModel::Difficulty& newDifficulty);
 

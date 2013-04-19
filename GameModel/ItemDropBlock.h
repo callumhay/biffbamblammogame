@@ -23,6 +23,7 @@ public:
 	~ItemDropBlock();
 
 	LevelPieceType GetType() const;
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const;
 	bool IsNoBoundsPieceType() const;
 	bool BallBouncesOffWhenHit() const;
 	bool MustBeDestoryedToEndLevel() const;
@@ -73,6 +74,11 @@ inline LevelPiece::LevelPieceType ItemDropBlock::GetType() const {
 	return LevelPiece::ItemDrop;
 }
 
+inline bool ItemDropBlock::ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+    UNUSED_PARAMETER(b);
+    return true;
+}
+
 // Is this piece one without any boundries (i.e., no collision surface/line)?
 // Return: true if non-collider, false otherwise.
 inline bool ItemDropBlock::IsNoBoundsPieceType() const {
@@ -97,7 +103,7 @@ inline bool ItemDropBlock::CanChangeSelfOrOtherPiecesWhenHitByBall() const {
 // Returns: true if it can, false otherwise.
 inline bool ItemDropBlock::BallBlastsThrough(const GameBall& b) const {
     UNUSED_PARAMETER(b);
-	return false;	// Cannot pass through tesla blocks...
+	return false;
 }
 
 // Whether or not the ghost ball can just pass through this block.

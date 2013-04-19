@@ -290,6 +290,8 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
 
 	// Setup the sound to quiet everything else and play the sound of the ball spiralling to its most horrible death
     GameSound* sound = this->display->GetSound();
+    // Kill any sound effects that might be active
+    sound->StopAllEffects();
     //sound->SetAllPlayingSoundVolume(0.5f, 0.5);
 	sound->AttachAndPlaySound(&lastBallToDie, GameSound::LastBallSpiralingToDeathLoop, true);
 
@@ -305,6 +307,7 @@ void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
 
 	// Stop the spiraling sound loop, restore all previous sounds to their proper volume and add the sound for the last ball exploding
     GameSound* sound = this->display->GetSound();
+    sound->StopAllEffects();
     sound->DetachAndStopAllSounds(&explodedBall);
 
     sound->PlaySoundAtPosition(GameSound::LastBallExplodedEvent, false, explodedBall.GetCenterPosition());
@@ -313,11 +316,15 @@ void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
     UNUSED_PARAMETER(livesLeft);
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
-	
+
 	// Kill all effects that may have previously been occuring...
 	this->display->GetAssets()->DeactivateLastBallDeathEffects();
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects(false);
 		
+    // Clean up all sound effects
+    GameSound* sound = this->display->GetSound();
+    sound->StopAllEffects();
+
 	// Check to see if it's game over, and switch the display state appropriately
 	if (this->display->GetModel()->IsGameOver()) {
 		
@@ -395,7 +402,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 			GameControllerManager::GetInstance()->VibrateControllers(shakeLength, leftVibeAmt, rightVibeAmt);
 		}
 
-        if (LevelPiece::HasBounceEffectWithBall(block)) {
+        if (block.ProducesBounceEffectsWithBallWhenHit(ball)) {
             Point3D approxCollisionPos = ball.GetCenterPosition() + ball.GetBounds().Radius() * 
                 Vector3D::Normalize(block.GetPosition3D() - ball.GetCenterPosition());
 		    this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBlockCollisionEvent, false, approxCollisionPos);
@@ -620,7 +627,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -635,7 +641,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -651,7 +656,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -664,7 +668,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.9f, 0.45f, 0.0f));
-				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect
@@ -677,7 +680,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
-				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -690,7 +692,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
-				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
 			    else {
 				    // Bomb effect - big explosion!
@@ -712,7 +713,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		        if (wasFrozen) {
 		    	    // Add ice break effect
 		    	    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
-		    	    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 		        }
 		        else {
 		    	    // Emit goo from ink block and make onomata effects
@@ -744,7 +744,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
                 if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
-				    sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 			    }
                 else {
 			        // Don't show any effects / play any sounds if the ball is dead/dying
@@ -928,25 +927,30 @@ void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const Pla
 
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 
-	// Play the appropriate sound based on the item acquired by the player
-	GameSound* sound = this->display->GetSound();
-	switch (item.GetItemDisposition()) {
-		case GameItem::Good:
-            sound->PlaySoundAtPosition(GameSound::PowerUpItemActivatedEvent, false, item.GetPosition3D());
-			break;
+    bool playItemActivateGeneralSound = (item.GetItemType() != GameItem::LifeUpItem);
+    if (playItemActivateGeneralSound) {
 
-		case GameItem::Neutral:
-			sound->PlaySoundAtPosition(GameSound::PowerNeutralItemActivatedEvent, false, item.GetPosition3D());
-			break;
+        // Play the appropriate general sound based on the disposition type of item acquired by the player
+	    GameSound* sound = this->display->GetSound();
+	    switch (item.GetItemDisposition()) {
 
-		case GameItem::Bad:
-			sound->PlaySoundAtPosition(GameSound::PowerDownItemActivatedEvent, false, item.GetPosition3D());
-			break;
+		    case GameItem::Good:
+                sound->PlaySoundAtPosition(GameSound::PowerUpItemActivatedEvent, false, item.GetPosition3D());
+			    break;
 
-		default:
-			assert(false);
-			break;
-	}
+		    case GameItem::Neutral:
+			    sound->PlaySoundAtPosition(GameSound::PowerNeutralItemActivatedEvent, false, item.GetPosition3D());
+			    break;
+
+		    case GameItem::Bad:
+			    sound->PlaySoundAtPosition(GameSound::PowerDownItemActivatedEvent, false, item.GetPosition3D());
+			    break;
+
+		    default:
+			    assert(false);
+			    break;
+	    }
+    }
 
 	// Activate the item's effects (if any)
 	this->display->GetAssets()->ActivateItemEffects(*this->display->GetModel(), item);
@@ -1203,17 +1207,26 @@ void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAft
 }
 
 void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
+    
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::IceShatterEvent, false, block.GetPosition3D());
 	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block);
+
 	debug_output("EVENT: Ice shattered");
 }
 
 void GameEventsListener::BlockIceCancelledWithFireEvent(const LevelPiece& block) {
+
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::IceMeltedEvent, false, block.GetPosition3D());
     this->display->GetAssets()->GetESPAssets()->AddIceMeltedByFireEffect(block);
+
     debug_output("EVENT: Frozen block cancelled-out");
 }
 
 void GameEventsListener::BlockFireCancelledWithIceEvent(const LevelPiece& block) {
+
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::FireFrozeEvent, false, block.GetPosition3D());
     this->display->GetAssets()->GetESPAssets()->AddFirePutOutByIceEffect(block);
+
     debug_output("EVENT: Block on fire cancelled-out");
 }
 
@@ -1227,18 +1240,19 @@ void GameEventsListener::PointNotificationEvent(const PointAward& pointAward) {
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->PostPointNotification(pointAward);
 
-    // When large point amounts are awarded, display them in the game
-    // **MEH - this is pretty unimpressive
-    //if (pointAward.GetTotalPointAmount() >= 1000) {
-    //    this->display->GetAssets()->GetESPAssets()->AddPointAwardEffect(pointAward, 
-    //        *this->display->GetModel()->GetPlayerPaddle());
-    //}
-
     debug_output("EVENT: Point notification");
 }
 
-void GameEventsListener::NumStarsChangedEvent(int oldNumStars, int newNumStars) {
+void GameEventsListener::NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars) {
     UNUSED_PARAMETER(oldNumStars);
+    
+    // Have a sound for when a star is acquired!
+    if (oldNumStars < newNumStars && pointAward != NULL) {
+        this->display->GetSound()->PlaySound(GameSound::StarAcquiredEvent, false);
+        GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+        espAssets->AddStarAcquiredEffect(pointAward->GetLocation());
+    }
+    
     PointsHUD* pointHUD = this->display->GetAssets()->GetPointsHUD();
     pointHUD->SetNumStars(this->display->GetCamera(), newNumStars);
 
@@ -1258,24 +1272,83 @@ void GameEventsListener::ScoreChangedEvent(int newScore) {
 	debug_output("EVENT: Score Change: " << newScore);
 }
 
-void GameEventsListener::ScoreMultiplierCounterChangedEvent(int newCounterValue) {
+void GameEventsListener::ScoreMultiplierCounterChangedEvent(int oldCounterValue, int newCounterValue) {
+    
+    if (oldCounterValue < newCounterValue && newCounterValue > 0) {
+        // Play sounds as we count up towards higher multipliers by destroying more blocks...
+        GameSound* sound = this->display->GetSound();
+        switch (newCounterValue) {
+            case 1:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc1, false);
+                break;
+            case 2:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc2, false);
+                break;
+            case 3:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc3, false);
+                break;
+            case 4:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc4, false);
+                break;
+            case 5:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc5, false);
+                break;
+            case 6:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc6, false);
+                break;
+            case 7:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc7, false);
+                break;
+            case 8:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc8, false);
+                break;
+            case 9:
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc9, false);
+                break;
+
+            default:
+                // Just ignore after we hit 9...
+                break;
+        }
+    }
+    
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->SetMultiplierCounter(newCounterValue);
 
     debug_output("EVENT: Multiplier Counter Change: " << newCounterValue);
 }
 
-void GameEventsListener::ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position) {
+void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier,
+                                                     const Point2D& position) {
+    
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->SetMultiplier(newMultiplier);
 
     // Indicate the change in multiplier where it happens in the level...
-    if (newMultiplier > 1) {
+    GameSound* sound = this->display->GetSound();
+    if (newMultiplier > 1 && oldMultiplier != newMultiplier) {
+
+        // Play a sound for the increase in multiplier
+        if (newMultiplier == 2) {
+            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo2Event, false);
+        }
+        else if (newMultiplier == 3) {
+            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo3Event, false);
+
+        }
+        else if (newMultiplier == 4) {
+            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo4Event, false);
+        }
+
         this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(newMultiplier, position, 
             *this->display->GetModel()->GetPlayerPaddle());
     }
+    else if (newMultiplier == 1 && oldMultiplier > 1) {
+        // The player lost their multiplier, play a sound for that
+        sound->PlaySound(GameSound::ScoreMultiplierLostEvent, false);
+    }
 
-	debug_output("EVENT: Score Multiplier Change: " << newMultiplier); 
+	debug_output("EVENT: Score Multiplier Change: " << oldMultiplier << " -> " << newMultiplier); 
 }
 
 void GameEventsListener::LaserTurretAIStateChangedEvent(const LaserTurretBlock& block,

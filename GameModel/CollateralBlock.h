@@ -27,6 +27,12 @@ public:
 		return LevelPiece::Collateral;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+        return !this->BallBlastsThrough(b) && 
+               ((b.GetBallType() & GameBall::IceBall) == GameBall::IceBall) ||
+               ((b.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+    }
+
 	// Collateral blocks have bounds and the ball bounces off them...
 	bool IsNoBoundsPieceType() const {
 		return false;

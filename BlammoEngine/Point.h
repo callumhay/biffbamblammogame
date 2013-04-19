@@ -52,6 +52,12 @@ public:
     return *this;
   }
 
+  Point2D& operator/=(float f) {
+    v_[0] /= f;
+    v_[1] /= f;
+    return *this;
+  }
+
   float& operator[](size_t idx) {
 		assert(idx < 2);
     return v_[ idx ];

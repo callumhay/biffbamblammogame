@@ -32,6 +32,11 @@ public:
 		return LevelPiece::OneWay;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
+        return true;
+    }
+
 	// Is this piece one without any boundries (i.e., no collision surface/line)?
 	// Return: true if non-collider, false otherwise.
 	bool IsNoBoundsPieceType() const {

@@ -21,6 +21,8 @@ public:
 	~NoEntryBlock();
 
 	LevelPieceType GetType() const { return LevelPiece::NoEntry; }
+
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const { UNUSED_PARAMETER(b); return true; }
 	bool IsNoBoundsPieceType() const { return false; }
 	bool BallBouncesOffWhenHit() const { return true; }
 	bool MustBeDestoryedToEndLevel() const { return false; }

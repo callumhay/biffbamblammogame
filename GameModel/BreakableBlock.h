@@ -17,12 +17,16 @@
 
 class BreakableBlock : public LevelPiece {
 public:
+    enum BreakablePieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R' }; 
+
 	BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc);
 	virtual ~BreakableBlock();
 
 	virtual LevelPieceType GetType() const { 
 		return LevelPiece::Breakable;
 	}
+
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const;
 
 	// Is this piece one without any boundries (i.e., no collision surface/line)?
 	// Return: true if non-collider, false otherwise.
@@ -94,6 +98,8 @@ public:
 
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
+    const BreakablePieceType& GetBreakablePieceType() const { return this->pieceType; }
+
 protected:
 	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
 	static const int POINTS_ON_BLOCK_DESTROYED	= 100;  // Points obtained when you destory a breakable block
@@ -101,8 +107,6 @@ protected:
     static const double ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS;
 
 	float currLifePoints;	// Current life points of this block
-
-	enum BreakablePieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R' }; 
 	BreakablePieceType pieceType;
 
     long timeOfLastBallCollision;
