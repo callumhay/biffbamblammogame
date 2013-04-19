@@ -126,7 +126,15 @@ public class LevelPieceImageLabel extends JLabel {
 			justTheSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.SWITCH_PIECE_SYMBOL + "(")) {
-			String switchTriggerIDStr = pieceSymbol.substring(2, pieceSymbol.length()-1);
+			int endSubstringIdx;
+			if (pieceSymbol.charAt(pieceSymbol.length()-1) == '}') {
+				endSubstringIdx = pieceSymbol.indexOf('{');
+			}
+			else {
+				endSubstringIdx = pieceSymbol.length()-1;
+			}
+			
+			String switchTriggerIDStr = pieceSymbol.substring(2, endSubstringIdx);
 			this.switchTriggerID = Integer.parseInt(switchTriggerIDStr);
 			justTheSymbol = LevelPiece.SWITCH_PIECE_SYMBOL;
 		}

@@ -1,7 +1,7 @@
 Size Matters
 16 28
-S S S S S S S S S S S S E R E E 
-S E E N E E D(PaddleGrow) E E E E N R R R E 
+E E E S S S S S S S S S E R E E 
+S S S S E E D(PaddleGrow) E E E E N R R R E 
 S E E N E E E E E E E N E R R E 
 S D(RocketPaddle){1} C(90) N E E E E E E E N E S R R 
 S E E N E E E E E E E N E R R E 
@@ -24,8 +24,8 @@ S E E E E E E E E E E S E E E E
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
 S E E E E E E E E E E S S S S S 
+S E E E E E E E E E E N E E E S 
 S E E E E E E E E E E N E E E S 
 S E E E E E E E E E E N E E E W(1) 
 
