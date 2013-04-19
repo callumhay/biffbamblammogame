@@ -1,0 +1,69 @@
+As easy as 1, 2, 3, 4
+19 28
+E E E E E E S S S R S S S E E E E E E 
+E E E E E E S E E S E E S E E E E E E 
+E E E E E E S E E E E E S E E E E E E 
+E E E E E E S E E E E E S E C(90) E D(IceBall) E E 
+E E E E E E S E E E E E S E E E E E E 
+E E E E E E S E E E E E S E E E E E E 
+E E E E E E S E E S E E S E E E E E E 
+S S D(RocketPaddle) S D(LaserBulletPaddle) S S E E E E E S S N F(d) F(d) F(d) S 
+S E E E E E S E E E E E S E E E E E S 
+S E E I E E S E E E E E S E E E E E S 
+S E E E E E S E E E E E S E E E E E S 
+S E E E E E S E E S E E S E E E E E S 
+S R R R R R S E E E E E S R R R R R S 
+S R R R R R S Q(f) Q(f) Q(f) Q(f) Q(f) S R R R R R S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E K(MultiBall3) E E E E E K(MultiBall5) E E E E E K(MultiBall3) E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S G Y O R R R R R R R R R R R O Y G S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+
+STARS:
+2000
+5000
+7000
+9000
+11000
+
+PaddleGrow 0
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 3
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 0
+MultiBall3 2
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 1
+Random 2
+FastBall 2
+PaddleCam 0

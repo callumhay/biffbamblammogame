@@ -14,7 +14,7 @@
 #include "GameItemTimer.h"
 
 const char* UpsideDownItem::UPSIDEDOWN_ITEM_NAME      = "UpsideDown";
-const double UpsideDownItem::UPSIDEDOWN_TIMER_IN_SECS = 20.0;
+const double UpsideDownItem::UPSIDEDOWN_TIMER_IN_SECS = 22.0;
 
 UpsideDownItem::UpsideDownItem(const Point2D &spawnOrigin, GameModel *gameModel) :
 GameItem(UpsideDownItem::UPSIDEDOWN_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {

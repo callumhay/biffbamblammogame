@@ -22,6 +22,14 @@ LevelPiece(wLoc, hLoc), currLifePoints(life), startingLifePoints(life) {
 TurretBlock::~TurretBlock() {
 }
 
+bool TurretBlock::ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+    if (((b.GetBallType() & GameBall::IceBall) == GameBall::IceBall)) {
+        return false;
+    }
+
+    return b.GetCollisionDamage() < this->currLifePoints ;
+}
+
 bool TurretBlock::ProjectileIsDestroyedOnCollision(const Projectile* projectile) const {
     switch (projectile->GetType()) {
 
@@ -181,6 +189,9 @@ LevelPiece* TurretBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
             GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 		}
         else {
+            // TODO: Set turrets on fire? Have them say "ouch" when they are...?
+            // If I change this then I need to change the ProducesBounceEffectsWithBallWhenHit method as well!
+
             resultingPiece = this->DiminishPiece(ball.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);
         }
 	}

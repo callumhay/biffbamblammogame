@@ -18,6 +18,7 @@
 #include "ESPParticleEffector.h"
 #include "ESPParticleAccelEffector.h"
 #include "ESPParticleColourEffector.h"
+#include "ESPMultiColourEffector.h"
 #include "ESPParticleScaleEffector.h"
 #include "ESPParticleRotateEffector.h"
 #include "ESPParticleMagneticEffector.h"

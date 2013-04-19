@@ -413,6 +413,7 @@ public:
     const std::list<GameBall*>& GetGameBalls() const {
         return this->balls;
     }
+    Point2D GetAvgBallLoc() const;
 
     Vector3D GetGravityDir() {
         Vector3D gravityDir = this->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
@@ -557,7 +558,7 @@ inline void GameModel::ResetScore() {
     int oldNumStars = this->numStarsAwarded;
     this->numStarsAwarded = 0;
     // EVENT: Number of stars changed
-    GameEventManager::Instance()->ActionNumStarsChanged(oldNumStars, this->numStarsAwarded);
+    GameEventManager::Instance()->ActionNumStarsChanged(NULL, oldNumStars, this->numStarsAwarded);
 }
 
 inline void GameModel::ClearStatusUpdatePieces() {

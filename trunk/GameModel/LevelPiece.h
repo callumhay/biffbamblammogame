@@ -61,11 +61,6 @@ public:
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
 
-    static bool HasBounceEffectWithBall(const LevelPiece& block) {
-        return !(block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink || 
-        block.GetType() == LevelPiece::Portal || block.GetType() == LevelPiece::Cannon);
-    }
-
 	LevelPiece(unsigned int wLoc, unsigned int hLoc);
 	virtual ~LevelPiece();
 
@@ -114,6 +109,8 @@ public:
 	virtual LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
 	virtual bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
+
+    virtual bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const = 0;
 
 	virtual bool IsNoBoundsPieceType() const = 0;
 	virtual bool BallBouncesOffWhenHit() const = 0;

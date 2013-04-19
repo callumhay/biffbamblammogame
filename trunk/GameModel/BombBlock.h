@@ -24,6 +24,12 @@ public:
 		return LevelPiece::Bomb;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+        return !this->BallBlastsThrough(b) && 
+               ((b.GetBallType() & GameBall::IceBall) == GameBall::IceBall) ||
+               ((b.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+    }
+
 	// Bomb blocks have bounds...
 	bool IsNoBoundsPieceType() const {
 		return false;

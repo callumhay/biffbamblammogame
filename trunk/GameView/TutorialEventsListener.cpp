@@ -200,7 +200,8 @@ void TutorialEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToD
     this->holdBoostHint->Unshow(0.0, 0.5);
 }
 
-void TutorialEventsListener::NumStarsChangedEvent(int oldNumStars, int newNumStars) {
+void TutorialEventsListener::NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars) {
+    UNUSED_PARAMETER(pointAward);
     UNUSED_PARAMETER(oldNumStars);
     UNUSED_PARAMETER(newNumStars);
 }

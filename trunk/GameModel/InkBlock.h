@@ -23,6 +23,16 @@ public:
 		return LevelPiece::Ink;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+        // If the ball is an iceball then it will always bounce off
+        if ((b.GetBallType() & GameBall::IceBall) == GameBall::IceBall) {
+            return true;
+        }
+
+        // If the ball is a fire ball then it will only bounce off if this piece is frozen
+        return this->HasStatus(LevelPiece::IceCubeStatus) && ((b.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+    }
+
 	// Is this piece one without any boundries (i.e., no collision surface/line)?
 	// Return: true if non-collider, false otherwise.
 	bool IsNoBoundsPieceType() const {

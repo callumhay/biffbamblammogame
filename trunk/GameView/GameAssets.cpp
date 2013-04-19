@@ -1152,6 +1152,12 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 			this->FirePaddleLaser(*gameModel.GetPlayerPaddle());
 			break;
 
+        case Projectile::BossLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
+            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, projectile.GetPosition3D());
+            break;
+
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
@@ -1178,6 +1184,9 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
  */
 void GameAssets::RemoveProjectile(const Projectile& projectile) {
 	this->espAssets->RemoveProjectileEffect(projectile);
+    
+    // Kill all sounds for the projectile
+    this->sound->DetachAndStopAllSounds(&projectile);
 
 	switch (projectile.GetType()) {
 
@@ -1186,10 +1195,6 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			this->rocketMesh->DeactivateRocket(static_cast<const RocketProjectile*>(&projectile));
-
-			// Turn off the sound for the rocket mask if there are no rockets left...
-            // TODO: have separate masks for each rocket...
-			//this->gameSound->StopSound(projectile, GameSound::RocketMovingLoop);
 			break;
         
         case Projectile::FireGlobProjectile:
@@ -1214,6 +1219,9 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
  * a bullet or something.
  */
 void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
+    // Add a sound for firing the laser
+    this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, paddle.GetPosition3D());
+    // Make the laser attachment animate for firing the gun...
 	this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
 }
 
@@ -1221,8 +1229,30 @@ void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
  * Private helper, causes the rocket to be fired and drawn.
  */
 void GameAssets::FireRocket(const RocketProjectile& rocketProjectile) {
-	this->rocketMesh->ActivateRocket(static_cast<const PaddleRocketProjectile*>(&rocketProjectile));
-	//this->gameSound->StartSound(rocketProjectile, GameSound::RocketMovingLoop);
+    // Play a sound for a rocket firing and travelling (based off the type)
+    switch (rocketProjectile.GetType()) {
+
+        case Projectile::BossRocketBulletProjectile:
+            
+            break;
+        
+        case Projectile::RocketTurretBulletProjectile:
+
+            break;
+
+        case Projectile::PaddleRocketBulletProjectile:
+            // The rocket launch sound
+            this->sound->PlaySoundAtPosition(GameSound::PaddleRocketLaunchEvent, false, rocketProjectile.GetPosition3D());
+            // Attach a moving sound loop to the rocket
+            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::PaddleRocketMovingLoop, true);
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+
+	this->rocketMesh->ActivateRocket(&rocketProjectile);
 }
 
 /**
@@ -1396,81 +1426,109 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 
 	// Deal with any light changes...
 	switch (item.GetItemType()) {
+
+        case GameItem::LifeUpItem:
+            this->sound->PlaySound(GameSound::LifeUpAcquiredEvent, false);
+            break;
+
 		case GameItem::BlackoutItem: {
-				// Turn the lights off and make only the paddle and ball visible.
-				assert(gameModel.IsBlackoutEffectActive());
-				this->lightAssets->ToggleLights(false, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
-			}
+			// Turn the lights off and make only the paddle and ball visible.
+			assert(gameModel.IsBlackoutEffectActive());
+			this->lightAssets->ToggleLights(false, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
 			break;
+        }
 			
 		case GameItem::PoisonPaddleItem: {
-				// The poison item will make the lights turn a sickly green colour
-				assert((gameModel.GetPlayerPaddle()->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle);
+			// The poison item will make the lights turn a sickly green colour
+			assert((gameModel.GetPlayerPaddle()->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle);
 
-				this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
-				this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);
-				this->lightAssets->StartStrobeLight(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+			this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+			this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);
+			this->lightAssets->StartStrobeLight(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
 
-                // Apply the sound effect for poison...
-                this->sound->ToggleSoundEffect(GameSound::PoisonEffect, true);
-			}
-		  break;
+            // Apply the sound effect for poison...
+            this->sound->ToggleSoundEffect(GameSound::PoisonEffect, true);
+            break;
+		}
 
 		case GameItem::PaddleCamItem: {
-				// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
-				// NOTE that this is not permanent and just does so for any currently falling items
-				this->espAssets->TurnOffCurrentItemDropStars();
-				
-				// We make the safety net transparent so that it doesn't obstruct the paddle cam... too much
+			// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
+			// NOTE that this is not permanent and just does so for any currently falling items
+			this->espAssets->TurnOffCurrentItemDropStars();
+			
+			// We make the safety net transparent so that it doesn't obstruct the paddle cam... too much
 
-                // Call to make the safety net visible or not when its activated. This is
-                // useful to avoid obstruction of the player's viewpoint e.g., when in paddle camera mode.
-	            this->ballSafetyNet->SetAlpha(0.5f);
+            // Call to make the safety net visible or not when its activated. This is
+            // useful to avoid obstruction of the player's viewpoint e.g., when in paddle camera mode.
+            this->ballSafetyNet->SetAlpha(0.5f);
 
-				// Move the key light in the foreground so that it is behind the camera when it goes into
-				// paddle cam mode.
-				float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
-				float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
+			// Move the key light in the foreground so that it is behind the camera when it goes into
+			// paddle cam mode.
+			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+			float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
 
-				Point3D newFGKeyLightPos(halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
-				Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
-				
-				this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
-				this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+			Point3D newFGKeyLightPos(halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
+			Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
+			
+			this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
+			this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
 
-				// Fade out the background...
-				this->worldAssets->FadeBackground(true, 2.0f);
-			}
-			break;
+			// Fade out the background...
+			this->worldAssets->FadeBackground(true, 2.0f);
+            break;
+		}
 
 		case GameItem::BallCamItem: {
-				// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
-				// NOTE that this is not permanent and just does so for any currently falling items
-				this->espAssets->TurnOffCurrentItemDropStars();
+			// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
+			// NOTE that this is not permanent and just does so for any currently falling items
+			this->espAssets->TurnOffCurrentItemDropStars();
 
-				// Change the position of the key light so that it is facing down with the ball
-				float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+			// Change the position of the key light so that it is facing down with the ball
+			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
 
-				Point3D newFGKeyLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
-				Point3D newFGFillLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
-				
-				this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
-				this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+			Point3D newFGKeyLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
+			Point3D newFGFillLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
+			
+			this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
+			this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
 
-				// Fade out the background...
-				this->worldAssets->FadeBackground(true, 2.0f);
-			}
-			break;
+			// Fade out the background...
+			this->worldAssets->FadeBackground(true, 2.0f);
+            break;
+        }
 
 		case GameItem::ShieldPaddleItem: {
-				const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
-				assert(fullscreenFBOTex != NULL);
-				this->paddleShield->ActivateShield(*gameModel.GetPlayerPaddle(), *fullscreenFBOTex);
-			}
-			break;
+
+            this->sound->PlaySoundAtPosition(GameSound::PaddleShieldActivatedEvent, false, 
+                gameModel.GetPlayerPaddle()->GetPosition3D());
+
+			const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
+			assert(fullscreenFBOTex != NULL);
+			this->paddleShield->ActivateShield(*gameModel.GetPlayerPaddle(), *fullscreenFBOTex);
+            break;
+        }
 
         case GameItem::MagnetPaddleItem:
+            this->sound->AttachAndPlaySound(gameModel.GetPlayerPaddle(), GameSound::MagnetPaddleLoop, true);
             this->magnetPaddleEffect->Reset();
+            break;
+
+        case GameItem::UpsideDownItem:
+            this->sound->PlaySound(GameSound::LevelFlipEvent, false);
+            break;
+
+        case GameItem::BallGrowItem:
+            this->sound->PlaySound(GameSound::BallOrPaddleGrowEvent, false);
+            break;
+        case GameItem::PaddleGrowItem:
+            this->sound->PlaySound(GameSound::BallOrPaddleGrowEvent, false);
+            break;
+
+        case GameItem::BallShrinkItem:
+            this->sound->PlaySound(GameSound::BallOrPaddleShrinkEvent, false);
+            break;
+        case GameItem::PaddleShrinkItem:
+            this->sound->PlaySound(GameSound::BallOrPaddleShrinkEvent, false);
             break;
 
 		default:
@@ -1491,35 +1549,35 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 	// Deal with any light changes...
 	switch (item.GetItemType()) {
 		case GameItem::BlackoutItem: {
-				// Turn the lights back on and revert lights back to their defaults
-				assert(!gameModel.IsBlackoutEffectActive());
-				this->lightAssets->ToggleLights(true, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
-			}
-		  break;
+			// Turn the lights back on and revert lights back to their defaults
+			assert(!gameModel.IsBlackoutEffectActive());
+			this->lightAssets->ToggleLights(true, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
+            break;
+        }
 
 		case GameItem::PoisonPaddleItem: {
-				// Stop strobing the lights
-				this->lightAssets->StopStrobeLight(GameLightAssets::FGKeyLight);
-				this->lightAssets->StopStrobeLight(GameLightAssets::FGFillLight);
-				this->lightAssets->StopStrobeLight(GameLightAssets::BallKeyLight);
+			// Stop strobing the lights
+			this->lightAssets->StopStrobeLight(GameLightAssets::FGKeyLight);
+			this->lightAssets->StopStrobeLight(GameLightAssets::FGFillLight);
+			this->lightAssets->StopStrobeLight(GameLightAssets::BallKeyLight);
 
-                // Deactivate sound effects
-                this->sound->ToggleSoundEffect(GameSound::PoisonEffect, false);
-			}
-		  break;
+            // Deactivate sound effects
+            this->sound->ToggleSoundEffect(GameSound::PoisonEffect, false);
+            break;
+		}
 
 		case GameItem::PaddleCamItem: {
-				// We make the safety net visible (if activated) again
-				this->ballSafetyNet->SetAlpha(1.0f);
+			// We make the safety net visible (if activated) again
+			this->ballSafetyNet->SetAlpha(1.0f);
 
-				// Move the foreground key and fill lights back to their default positions...
-				this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
-				this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
+			// Move the foreground key and fill lights back to their default positions...
+			this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
+			this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
 
-				// Show the background once again...
-				this->worldAssets->FadeBackground(false, 2.0f);
-			}
-			break;
+			// Show the background once again...
+			this->worldAssets->FadeBackground(false, 2.0f);
+            break;
+        }
 
 		case GameItem::BallCamItem: 
 			// Move the foreground key and fill lights back to their default positions...
@@ -1530,10 +1588,19 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 			this->worldAssets->FadeBackground(false, 2.0f);
 			break;
 
-		case GameItem::ShieldPaddleItem: {
-				this->paddleShield->DeactivateShield();
-			}
-			break;
+		case GameItem::ShieldPaddleItem:
+            this->sound->PlaySoundAtPosition(GameSound::PaddleShieldDeactivatedEvent, false, 
+                gameModel.GetPlayerPaddle()->GetPosition3D());
+			this->paddleShield->DeactivateShield();
+            break;
+
+        case GameItem::UpsideDownItem:
+            this->sound->PlaySound(GameSound::LevelUnflipEvent, false);
+            break;
+
+        case GameItem::MagnetPaddleItem:
+            this->sound->DetachAndStopSound(gameModel.GetPlayerPaddle(), GameSound::MagnetPaddleLoop);
+            break;
 
 		default:
 			break;

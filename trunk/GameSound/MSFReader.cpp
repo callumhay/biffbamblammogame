@@ -443,18 +443,25 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockFrozenEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockOnFireLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, IceShatterEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, IceMeltedEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, FireFrozeEvent));
 
 
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketLaunchEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketMovingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketExplodedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketMovingLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, MineExplodedEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBulletShotEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBulletMovingLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBeamFiringLoop));
 
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallSafetyNetCreatedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallSafetyNetDestroyedEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelFlipEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelUnflipEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleShieldActivatedEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleShieldDeactivatedEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MagnetPaddleLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemSpawnedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerUpItemActivatedEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerNeutralItemActivatedEvent));
@@ -467,6 +474,23 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ExitBulletTimeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostGainedEvent));
+
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LifeUpAcquiredEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, StarAcquiredEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo2Event));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo3Event));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo4Event));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierLostEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc1));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc2));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc3));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc4));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc5));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc6));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc7));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc8));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc9));
+
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GameOverEvent));
 }

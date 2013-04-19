@@ -19,6 +19,7 @@ public:
 	TurretBlock(unsigned int wLoc, unsigned int hLoc, float life);
     virtual ~TurretBlock();
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const;
 	bool IsNoBoundsPieceType() const { return false; }
 	bool BallBouncesOffWhenHit() const { return true; }
 	bool MustBeDestoryedToEndLevel() const { return false; }

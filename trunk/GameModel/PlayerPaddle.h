@@ -12,7 +12,7 @@
 #ifndef __PLAYERPADDLE_H__
 #define __PLAYERPADDLE_H__
 
-#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/IPositionObject.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Colour.h"
@@ -35,7 +35,7 @@ class BossBodyPart;
 //                -------------
 //               /_____________\
 
-class PlayerPaddle {
+class PlayerPaddle : public IPositionObject {
 public:
 	static const float PADDLE_HEIGHT_TOTAL;
 	static const float PADDLE_WIDTH_TOTAL;
@@ -91,6 +91,10 @@ public:
 	const Point2D& GetCenterPosition() const {
 		return this->centerPos;
 	}
+    // Inherited from the IPositionObj interface
+    Point3D GetPosition3D() const {
+        return Point3D(this->GetCenterPosition(), 0.0f);
+    }
 	Point2D GetDefaultCenterPosition() const {
 		return Point2D((this->maxBound + this->minBound)/2.0f, this->currHalfHeight);
 	}

@@ -26,6 +26,8 @@ public:
 		return LevelPiece::Regen;
 	}
 
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const;
+
 	bool IsNoBoundsPieceType() const {
 		return false;
 	}

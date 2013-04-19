@@ -1003,7 +1003,7 @@ void GameModel::IncrementScore(PointAward& pointAward) {
             int oldNumStars = this->numStarsAwarded;
             this->numStarsAwarded = numStarsForCurrScore;
             // EVENT: The number of stars changed
-            GameEventManager::Instance()->ActionNumStarsChanged(oldNumStars, this->numStarsAwarded);
+            GameEventManager::Instance()->ActionNumStarsChanged(&pointAward, oldNumStars, this->numStarsAwarded);
         }
     }
 }
@@ -1020,17 +1020,20 @@ void GameModel::SetNumInterimBlocksDestroyed(int value, const Point2D& pos) {
 	if (value != this->numInterimBlocksDestroyed) {
 
         int oldMultiplier = this->GetCurrentMultiplier();
+        int oldNumInterimBlocksDestroyed = this->numInterimBlocksDestroyed;
 		this->numInterimBlocksDestroyed = value;
+        
+        // NOTE: This is no longer really used (was a stat for showing the player in level summary)
         this->maxInterimBlocksDestroyed = std::max<int>(this->maxInterimBlocksDestroyed, this->numInterimBlocksDestroyed);
 
         int newMultiplier = this->GetCurrentMultiplier();
 		
         // EVENT: The value has changed for the number of interim blocks destroyed (the multiplier part counter)
-        GameEventManager::Instance()->ActionScoreMultiplierCounterChanged(this->numInterimBlocksDestroyed);
+        GameEventManager::Instance()->ActionScoreMultiplierCounterChanged(oldNumInterimBlocksDestroyed, this->numInterimBlocksDestroyed);
 
 		// EVENT: The score multiplier has changed
         if (oldMultiplier != newMultiplier) {
-		    GameEventManager::Instance()->ActionScoreMultiplierChanged(newMultiplier, pos);
+		    GameEventManager::Instance()->ActionScoreMultiplierChanged(oldMultiplier, newMultiplier, pos);
         }
 
         // Reset the dropped life flag if the multiplier is lower than the max multiplier
@@ -1436,6 +1439,19 @@ void GameModel::WipePieceFromAuxLists(LevelPiece* piece) {
 			this->statusUpdatePieces.erase(findIter);
 		}
 	}
+}
+
+Point2D GameModel::GetAvgBallLoc() const {
+    Point2D avgLoc(0,0);
+    for (std::list<GameBall*>::const_iterator iter = this->balls.begin(); iter != this->balls.end(); ++iter) {
+        GameBall* currBall = *iter;
+        const Point2D& ballPos = currBall->GetCenterPosition2D();
+        avgLoc[0] += ballPos[0];
+        avgLoc[1] += ballPos[1];
+    }
+
+    avgLoc /= static_cast<float>(this->balls.size());
+    return avgLoc;
 }
 
 float GameModel::GetPercentBallReleaseTimerElapsed() const {

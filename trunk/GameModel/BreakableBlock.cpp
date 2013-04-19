@@ -17,7 +17,7 @@
 #include "GameEventManager.h"
 #include "FireGlobProjectile.h"
 
-const double BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS = 67;
+const double BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS = 17;
 
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS),
@@ -29,6 +29,27 @@ fireGlobDropCountdown(GameModelConstants::GetInstance()->GenerateFireGlobDropTim
 
 
 BreakableBlock::~BreakableBlock() {
+}
+
+bool BreakableBlock::ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+    // If the ball is a fire or ice ball then it will always bounce off
+    if (((b.GetBallType() & GameBall::IceBall) == GameBall::IceBall) ||
+        ((b.GetBallType() & GameBall::FireBall) == GameBall::FireBall)) {
+        return true;
+    }
+
+    // If this piece is green then it will break no matter what, since the ball has no special status
+    if (this->GetBreakablePieceType() == GreenBreakable) {
+        return false;
+    }
+
+    // Only other special case is the uber ball...
+    if (((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) && 
+        (this->GetBreakablePieceType() == YellowBreakable)) {
+        return false;
+    }
+
+    return true;
 }
 
 LevelPiece* BreakableBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {

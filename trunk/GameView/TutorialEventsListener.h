@@ -46,7 +46,7 @@ public:
     void BallBoostLostEvent(bool allBoostsLost);
     void BallBoostUsedEvent();
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
-    void NumStarsChangedEvent(int oldNumStars, int newNumStars);
+    void NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars);
 
     // Set methods for various tutorial hints
     void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(0.0, 0.75); }

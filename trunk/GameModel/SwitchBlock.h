@@ -24,6 +24,7 @@ public:
 	~SwitchBlock();
 
 	LevelPieceType GetType() const;
+    bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const;
 	bool IsNoBoundsPieceType() const;
 	bool BallBouncesOffWhenHit() const;
 	bool MustBeDestoryedToEndLevel() const;
@@ -74,6 +75,10 @@ private:
 
 inline LevelPiece::LevelPieceType SwitchBlock::GetType() const { 
     return LevelPiece::Switch;
+}
+inline bool SwitchBlock::ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
+    UNUSED_PARAMETER(b);
+    return true;
 }
 inline bool SwitchBlock::IsNoBoundsPieceType() const {
 	return false;

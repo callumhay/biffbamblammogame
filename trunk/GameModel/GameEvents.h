@@ -597,17 +597,23 @@ public:
     /**
      * Event triggered whenever a block is destroyed or something happens that causes the multiplier
      * counter to increase or decrease - the counter is what causes the multiplier to change.
-     * Arguements: newCounterValue - The new counter value (0 to 9).
+     * Arguements: oldCounterValue - The previous/old counter value (0 to 9).
+     *             newCounterValue - The new counter value (0 to 9).
      */
-    virtual void ScoreMultiplierCounterChangedEvent(int newCounterValue) { UNUSED_PARAMETER(newCounterValue); }
+    virtual void ScoreMultiplierCounterChangedEvent(int oldCounterValue, int newCounterValue) {
+        UNUSED_PARAMETER(oldCounterValue);
+        UNUSED_PARAMETER(newCounterValue);
+    }
 
 	/**
 	 * Event triggered when there is a change to the player's score multiplier. 
 	 * Only occurs once per change.
-	 * Arguements: newMultiplier - The multiplier after the change.
+	 * Arguements: oldMultiplier - The multiplier before the change.
+     *             newMultiplier - The multiplier after the change.
      *             position      - The position in the game where the event occurred that changed the multiplier.
 	 */
-    virtual void ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position) {
+    virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier, const Point2D& position) {
+        UNUSED_PARAMETER(oldMultiplier);
         UNUSED_PARAMETER(newMultiplier);
         UNUSED_PARAMETER(position);
     }
@@ -615,10 +621,12 @@ public:
     /**
      * Event triggered when the number of stars awarded to the player has changed
      * Occurs once per change, right after the change occurs.
-     * Arguements: oldNumStars - The previous number of stars.
+     * Arguements: pointAward  - The point award associated with the star amount change, NULL if the number of stars is being reset.
+     *             oldNumStars - The previous number of stars.
      *             newNumStars - The new number of stars.
      */
-    virtual void NumStarsChangedEvent(int oldNumStars, int newNumStars) {
+    virtual void NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars) {
+        UNUSED_PARAMETER(pointAward);
         UNUSED_PARAMETER(oldNumStars);
         UNUSED_PARAMETER(newNumStars);
     }

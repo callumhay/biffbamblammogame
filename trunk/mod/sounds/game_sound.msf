@@ -234,11 +234,11 @@ BallShieldPaddleCollisionEvent {
 }
 
 BallOrPaddleGrowEvent {
-	file = 
+	file = global/grow.ogg
 }
 
 BallOrPaddleShrinkEvent {
-	file = 
+	file = global/shrink.ogg
 }
 
 
@@ -248,8 +248,23 @@ BallBlockCollisionEvent {
 	file = global/ball_block_hit.ogg
 }
 
+// TODO: Replace a single collision sound with multiple ones that go off in sequence (or random?)
+// BallBlockBasicBounce1Event
+// BallBlockBasicBounce2Event
+// BallBlockBasicBounce3Event
+// BallBlockBasicBounce4Event
+// BallBlockBasicBounce5Event
+// BallBlockBasicBounce6Event
+// BallBlockBasicBounce7Event
+// BallBlockBasicBounce8Event
+
+
+
 
 // Block Events **************************************************************
+
+// TODO: Have a set of sounds for when blocks that contribute to the score multiplier meter
+// break... it increases in pitch with each block that gets broken...(see points section)
 
 BombBlockDestroyedEvent {
 	file = global/bomb_explode.ogg
@@ -271,6 +286,8 @@ CannonBlockFiredEvent {
 	file = global/cannon_fired.ogg
 }
 
+// CannonBlockLoadedWithBallCamBallEvent
+
 PortalTeleportEvent {
 	file = global/portal_warp.ogg
 }
@@ -286,6 +303,9 @@ CollateralBlockFallingLoop {
 CannonBlockRotatingLoop {
 	file = global/cannon_rotate.ogg
 }
+
+// TODO? Have a sound for when lightning is first activated
+// and then make the lightning loop be a low hum of electricity
 
 TeslaLightningArcLoop {
 	file = global/electricity.ogg
@@ -307,15 +327,34 @@ IceShatterEvent {
 	file = global/shatter.ogg
 }
 
+IceMeltedEvent {
+	file =
+}
+
+// A block that was on fire is hit by the ice ball and the fire 'smokes-out' / gets cancelled by the ice
+FireFrozeEvent {
+	file =
+}
+
 // Projectile and Beam Events ************************************************
+
+// TurretRocketFiredEvent
+// BossRocketFiredEvent
+
+PaddleRocketLaunchEvent {
+	file =
+}
+
+PaddleRocketMovingLoop {
+	file = global/rocket.ogg
+}
 
 RocketExplodedEvent {
 	file = global/rocket_explode.ogg
 }
 
-RocketMovingLoop {
-	file = global/rocket.ogg
-}
+// TurretMineFiredEvent
+// PaddleMineFiredEvent
 
 MineExplodedEvent {
 	file = global/rocket_explode.ogg
@@ -325,13 +364,16 @@ LaserBulletShotEvent {
 	file = 
 }
 
-LaserBulletMovingLoop {
-	file = 
-}
-
 LaserBeamFiringLoop {
 	file = global/laser_beam.ogg
 }
+
+// LaserDeflectedByShieldEvent {
+// }
+
+// RocketOrMineDeflectedByShieldEvent {
+// }
+
 
 
 // Game Item Events **********************************************************
@@ -339,10 +381,28 @@ LaserBeamFiringLoop {
 BallSafetyNetCreatedEvent {
 	file = global/safety_net_created.ogg
 }
-
 BallSafetyNetDestroyedEvent {
 	file = global/safety_net_destroyed.ogg
 }
+
+LevelFlipEvent {
+	file = 
+}
+LevelUnflipEvent {
+	file =
+}
+
+PaddleShieldActivatedEvent {
+	file =
+}
+PaddleShieldDeactivatedEvent {
+	file =
+}
+
+MagnetPaddleLoop {
+	file = global/drone.ogg
+}
+
 
 ItemSpawnedEvent {
 	file = global/item_spawn.ogg
@@ -369,9 +429,29 @@ ItemTimerEndedEvent {
 	file = 
 }
 
+// NOTE: This happens a lot in-game and probably shouldn't have a sound/loop associated with it
+// but I'm leaving it just in case something works
 ItemMovingLoop {
-	file = global/item_moving.ogg
+	file = 
 }
+
+// Boss-specific Events ******************************************************
+
+// BossFadeInIntroEvent
+// BossBackgroundLoop
+// BossSparkleEvent
+// BossGlowEvent
+// BossPowerChargeEvent
+// BossElectricitySpasmLoop
+// BossMassiveShockwaveEvent
+// BossHurtEvent
+// BossAngryEvent
+// BossBlowingUpLoop
+// BossDeathFlashToFullscreenWhiteoutEvent
+
+// ClassicalBossArmShakeLoop?
+// ClassicalBossArmAttackEvent?
+
 
 
 // Bullet-time / Ball Boost Events *******************************************
@@ -392,11 +472,84 @@ BallBoostGainedEvent {
 	file = global/boost_acquired.ogg
 }
 
+// Star, points and life Events **********************************************
+
+LifeUpAcquiredEvent {
+	file = global/one_up.ogg
+}
+
+StarAcquiredEvent {
+	file = global/star_gained.ogg
+}
+
+ScoreMultiplierIncreasedTo2Event {
+	file = 
+}
+
+ScoreMultiplierIncreasedTo3Event {
+	file = 
+}
+
+ScoreMultiplierIncreasedTo4Event {
+	file = 
+}
+
+ScoreMultiplierLostEvent {
+	file = multiplier_lost.ogg
+}
+
+// TODO... Make the sounds increase in pitch (or something) to indicate that good things are happening...
+BlockBrokenMultiplierCounterInc1 {
+	file =
+}
+BlockBrokenMultiplierCounterInc2 {
+	file =
+}
+BlockBrokenMultiplierCounterInc3 {
+	file =
+}
+BlockBrokenMultiplierCounterInc4 {
+	file =
+}
+BlockBrokenMultiplierCounterInc5 {
+	file =
+}
+BlockBrokenMultiplierCounterInc6 {
+	file =
+}
+BlockBrokenMultiplierCounterInc7 {
+	file =
+}
+BlockBrokenMultiplierCounterInc8 {
+	file =
+}
+BlockBrokenMultiplierCounterInc9 {
+	file =
+}
+
+
 // ---------------------------------------------------------------------------
 // Non-In-Game State Events ==================================================
 // ---------------------------------------------------------------------------
 
+// Level Start and End State Events ******************************************
+
+// LevelStartPaddleMoveUpEvent
+// LevelStartBallSpawnOnPaddleEvent
+// LevelEndFadeoutEvent
+
+
 // Level Summary State Events ************************************************
+
+// LevelSummaryBackgroundLoop
+// LevelSummaryPointTallyLoop
+// LevelSummaryNewHighScoreEvent
+
+
+// World Complete State Events ***********************************************
+
+// WorldCompleteBackgroundLoop
+
 
 // Game-over state events ****************************************************
 
@@ -427,6 +580,7 @@ BulletTimeEffect {
 	highFreqReference = 5000
 }
 
+// TODO: Gargle effect sucks, change it
 InkSplatterEffect {
 	type = gargle
 	volume = 1
@@ -443,4 +597,7 @@ PoisonEffect {
 	postEQBandwidth = 2400
 	preLowpassCutoff = 8000
 }
+
+// PaddleCamStickyGooEffect {
+// }
 
