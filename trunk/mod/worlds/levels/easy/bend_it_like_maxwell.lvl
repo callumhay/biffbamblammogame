@@ -1,4 +1,4 @@
-Intro to Prisms
+Bend it Like Maxwell
 11 25
 E E E E E S S S S S S 
 E E E S S T(P,ul) E N E G S 
@@ -37,8 +37,8 @@ PaddleGrow 1
 PoisonPaddle 0
 BallSafetyNet 1
 Blackout 1
-UberBall 1
 BallGrow 0
+UberBall 1
 StickyPaddle 0
 ShieldPaddle 2
 LaserBulletPaddle 3

@@ -4,14 +4,14 @@ Nouveau
 
 resources/textures/nouveau_world_select_256x256.jpg
 
-# This world is intended to introduce the magnet paddle item, prism blocks,
-# mines, and switch blocks, ...?
+# This world is intended to introduce the magnet paddle item, switch blocks,
+# mines, and prism blocks.
 
-# Testing
+
+# Testing ------------------------------------------
 resources/worlds/testing/see_the_background.lvl
 resources/worlds/testing/an_almost_empty_level.lvl
-
-
+# End Testing --------------------------------------
 
 
 
@@ -21,22 +21,26 @@ resources/worlds/levels/medium/a_magnetic_personality.lvl
 # A fun block-destroying level to break it up a bit
 resources/worlds/levels/medium/tower_offense.lvl
 
-
 # Using the magnet item to redirect balls
 resources/worlds/levels/medium/a_minor_deviation.lvl
 
 
-# TODO: Insert more general levels here?
+# TODO: MORE HERE?
 
 
+# Switch block intro levels
+resources/worlds/levels/easy/on_the_button.lvl
 
 
+# Combine rocket/cannon mechanics, collateral blocks, ice balls, and switches...
+resources/worlds/levels/hard/the_ol_switchero.lvl
 
-# Prism block intro levels
-resources/worlds/levels/easy/intro_to_prisms.lvl
 
-# Prism blocks + iceball to freeze a block and combine with the prisms that it exposes
-resources/worlds/levels/medium/work_around.lvl
+# Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
+resources/worlds/levels/hard/size_matters.lvl
+
+
+# TODO: MORE GOES HERE!
 
 
 # Mine Launcher Item intro level
@@ -47,6 +51,17 @@ resources/worlds/levels/medium/work_around.lvl
 
 
 
+# Prism block intro levels
+resources/worlds/levels/easy/bend_it_like_maxwell.lvl
+
+# Prism blocks + iceball to freeze a block and combine with the prisms that it exposes
+resources/worlds/levels/medium/work_around.lvl
+
+
+
+
+
+
 
 
 # TODO: Insert a BUNCH of levels here
@@ -56,12 +71,6 @@ resources/worlds/levels/medium/work_around.lvl
 # TODO: Insert a BUNCH of levels here
 
 
-# Switch block intro levels
-# TODO
-
-
-# Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
-#resources/worlds/levels/hard/size_matters.lvl
 
 # Prism + Switch
 resources/worlds/levels/hard/prismatic_pragmatism.lvl
@@ -74,6 +83,7 @@ resources/worlds/levels/hard/lodestone_shootout.lvl
 
 
 # TODO: Boss...
+# resources/worlds/levels/bosses/?.lvl
 
 
 # IN ANOTHER MOVEMENT... --------------------------------------------------
