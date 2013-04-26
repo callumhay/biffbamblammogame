@@ -57,9 +57,10 @@ public:
 
 	// Whether or not the uber ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.
-	virtual bool BallBlastsThrough(const GameBall& b) const {
-        // The ball may blast through ONLY IF the piece is green, the ball is uber and NOT on fire / icy
-        return (this->pieceType == GreenBreakable) && 
+	bool BallBlastsThrough(const GameBall& b) const {
+        // The ball may blast through ONLY IF the piece is (green OR frozen) AND
+        // the ball is uber AND NOT on fire AND NOT icy
+        return (this->pieceType == GreenBreakable || this->HasStatus(LevelPiece::IceCubeStatus)) && 
                ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) &&
                ((b.GetBallType() & GameBall::IceBall) != GameBall::IceBall) && 
                ((b.GetBallType() & GameBall::FireBall) != GameBall::FireBall);
@@ -67,7 +68,7 @@ public:
 
 	// Whether or not the ghost ball can just pass through this block.
 	// Returns: true if it can, false otherwise.
-	virtual bool GhostballPassesThrough() const {
+	bool GhostballPassesThrough() const {
 		return true;
 	}
 

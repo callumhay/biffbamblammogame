@@ -1,0 +1,71 @@
+Smashy Smashy
+16 30
+S S S S S S S S S S S S S S S S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E K(UberBall) E E K(UberBall) E E E E E S 
+S E R Q(f) R R E R R E R R Q(f) R E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E Q(f) E E Q(f) E E Q(f) E E Q(f) E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E R E E R E E R E E R E E S 
+S E E Q(f) E E Q(f) E E Q(f) E E Q(f) E E S 
+S E E K(IceBall) E E K(IceBall) E E K(IceBall) E E K(IceBall) E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 1
+PoisonPaddle 3
+BallSafetyNet 1
+Blackout 3
+UberBall 0
+BallGrow 1
+StickyPaddle 1
+ShieldPaddle 2
+LaserBulletPaddle 1
+PaddleShrink 3
+InvisiPaddle 3
+InvisiBall 3
+LaserBeamPaddle 1
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 1
+GhostBall 2
+BallShrink 3
+UpsideDown 3
+MultiBall5 1
+BallCam 0
+MagnetPaddle 0
+MultiBall3 1
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 1
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 3
+PaddleCam 0

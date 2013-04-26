@@ -355,7 +355,6 @@ NOUVEAU_BLOCK_MESH(NOUVEAU_MESH_DIRECTORY "/nouveau_block.obj"),
 
 
 
-
 // Deco Asset Paths
 DECO_PADDLE_MESH(DECO_MESH_DIRECTORY "/deco_paddle.obj"),
 DECO_BACKGROUND_MESH(DECO_MESH_DIRECTORY "/deco_background.obj"),
