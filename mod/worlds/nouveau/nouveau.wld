@@ -14,6 +14,9 @@ resources/worlds/testing/an_almost_empty_level.lvl
 # End Testing --------------------------------------
 
 
+# A level where you need to (sortof) strategize about getting an iceball and then the uberball to
+# smash through all the frozen blocks
+resources/worlds/levels/easy/smashy_smashy.lvl
 
 # Magnet Item Intro: Magnet Item + collateral blocks...
 resources/worlds/levels/medium/a_magnetic_personality.lvl
@@ -24,29 +27,24 @@ resources/worlds/levels/medium/tower_offense.lvl
 # Using the magnet item to redirect balls
 resources/worlds/levels/medium/a_minor_deviation.lvl
 
-
-# TODO: MORE HERE?
-
+# A fun level, has all items up to this point available (as typical item drops)
+resources/worlds/levels/easy/all_balls_no_brains.lvl
 
 # Switch block intro levels
 resources/worlds/levels/easy/on_the_button.lvl
 
+# Switch + Cannon + rocket + magnet paddle
+resources/worlds/levels/medium/shoot_zen_guide_ze_missiles.lvl
 
 # Combine rocket/cannon mechanics, collateral blocks, ice balls, and switches...
 resources/worlds/levels/hard/the_ol_switchero.lvl
 
 
-# Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
-resources/worlds/levels/hard/size_matters.lvl
 
-
-# TODO: MORE GOES HERE!
-
-
-# Mine Launcher Item intro level
+# Mine Launcher intro level
 # TODO
 
-# Mine Launcher + Cannon level
+# Mine Launcher + cannon level
 
 
 
@@ -59,17 +57,11 @@ resources/worlds/levels/medium/work_around.lvl
 
 
 
+# TODO: Insert some more levels somewhere below here (make them a bit less hard)?
 
 
-
-
-
-# TODO: Insert a BUNCH of levels here
-
-
-
-# TODO: Insert a BUNCH of levels here
-
+# Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
+resources/worlds/levels/hard/size_matters.lvl
 
 
 # Prism + Switch

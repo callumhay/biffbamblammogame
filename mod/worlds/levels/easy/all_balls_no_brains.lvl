@@ -1,0 +1,72 @@
+All Balls, No Brains
+19 31
+S S S S S S S S S S S S S S S S S S S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E R F(d) F(d) F(d) R E E E E E E S 
+S E E E E E R R E E E R R E E E E E S 
+S E E E E R R Y E E E Y R R E E E E S 
+S E E R R R O Y E E E Y O R R R E E S 
+S E E R O O O Y E E E Y O O O R E E S 
+S E E R O Y Y Y E K(MultiBall5) E Y Y Y O R E E S 
+S E E R O E G G E E E G G E O R E E S 
+S E E R O E G G G G G G G E O R E E S 
+S E E R O E E G G G G G E E O R E E S 
+S E E R O K(MultiBall3) E G G G G G E K(MultiBall3) O R E E S 
+S E E R O E E G G G G G E E O R E E S 
+S E E R O E G G G G G G G E O R E E S 
+S E E R O E G Y Y Y Y Y G E O R E E S 
+S E E R O Y Y Y O O O Y Y Y O R E E S 
+S E E R O Y Y Y O R O Y Y Y O R E E S 
+S E E R O Y I Y O R O Y I Y O R E E S 
+S E E R O Y Y Y O R O Y Y Y O R E E S 
+S E E R O O O O O I O O O O O R E E S 
+S E E R R R R R R R R R R R R R E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 1
+PoisonPaddle 2
+BallSafetyNet 0
+Blackout 3
+UberBall 1
+BallGrow 1
+StickyPaddle 2
+ShieldPaddle 0
+LaserBulletPaddle 1
+PaddleShrink 3
+InvisiPaddle 2
+InvisiBall 3
+LaserBeamPaddle 1
+OmniLaserBall 1
+FireBall 2
+RocketPaddle 0
+GhostBall 3
+BallShrink 2
+UpsideDown 3
+MultiBall5 3
+BallCam 0
+MagnetPaddle 3
+MultiBall3 2
+IceBall 2
+MineLauncherPaddle 0
+SlowBall 1
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 3
+PaddleCam 0
