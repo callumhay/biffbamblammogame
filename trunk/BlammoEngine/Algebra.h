@@ -2,7 +2,7 @@
  * Algebra.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -49,6 +49,7 @@ inline float Trig::radiansToDegrees(float rads){
 };
 
 namespace NumberFuncs {
+
 	int SignOf(int a);
 	int SignOf(float a);
 	int NextPowerOfTwo(int a);
@@ -102,8 +103,6 @@ inline float NumberFuncs::Clamp(float n, float min, float max) {
 	if (n > max) { return max; }
 	return n;
 }
-
-
 
 class Randomizer {
 private:
