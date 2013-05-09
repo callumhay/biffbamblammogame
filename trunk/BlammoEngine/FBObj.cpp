@@ -14,7 +14,7 @@
 #include "Texture.h"
 
 FBObj::FBObj(int width, int height, Texture::TextureFilterType filter, int attachments) : 
-fboID(0), depthBuffID(0), stencilBuffID(0), packedStencilDepthBuffID(0), fboTex(NULL) {
+fboID(0), depthBuffID(0), stencilBuffID(0), packedStencilDepthBuffID(0), fboTex(NULL), depthTex(NULL) {
 	// Generate the framebuffer object
 	glGenFramebuffersEXT(1, &this->fboID);
 	assert(this->fboID != 0);
@@ -64,6 +64,18 @@ fboID(0), depthBuffID(0), stencilBuffID(0), packedStencilDepthBuffID(0), fboTex(
 	// Bind the given texture to the FBO
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, this->fboTex->GetTextureType(), this->fboTex->GetTextureID(), 0);
 
+    // Check to see if we're also creating and binding a depth texture...
+    if ((attachments & DepthTextureAttachment) == DepthTextureAttachment) {
+
+        assert((attachments & DepthAttachment) == 0x00000000); // There will be no rendering to depth texture if the depth renderbuffer is also active!
+
+        this->depthTex = Texture2D::CreateEmptyDepthTextureRectangle(width, height);
+        assert(this->depthTex != NULL);
+
+        // Bind the depth texture to the depth component of the FBO
+        glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, this->depthTex->GetTextureID(), 0);
+    }
+
 	// Unbind the FBO for now
 	this->UnbindFBObj();
 
@@ -93,6 +105,12 @@ FBObj::~FBObj() {
 	// Clean-up the fbo texture
 	delete this->fboTex;
 	this->fboTex = NULL;
+
+    // Clean up any depth texture
+    if (this->depthTex != NULL) {
+        delete this->depthTex;
+        this->depthTex = NULL;
+    }
 
 	debug_opengl_state();
 	assert(FBObj::CheckFBOStatus());

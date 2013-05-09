@@ -27,7 +27,7 @@
 
 class FuturismWorldAssets : public GameWorldAssets {
 public:
-    FuturismWorldAssets();
+    FuturismWorldAssets(GameAssets* assets);
     ~FuturismWorldAssets();
     
     GameWorld::WorldStyle GetStyle() const;

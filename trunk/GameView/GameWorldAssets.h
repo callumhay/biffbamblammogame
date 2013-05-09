@@ -2,7 +2,7 @@
  * GameWorldAssets.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -24,12 +24,14 @@
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/PlayerPaddle.h"
 
+class GameAssets;
+
 // Abstract class for game world assets - this includes all
 // the specific meshes, effects, etc. associated with a particular
 // game world.
 class GameWorldAssets {
 public:
-	GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock);
+	GameWorldAssets(GameAssets* assets, Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock);
 	virtual ~GameWorldAssets();
 
 	Mesh* GetWorldStyleBlock() const {
@@ -54,6 +56,7 @@ public:
 
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 	virtual void DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight) = 0;
+    virtual void FastDrawBackgroundModel();
 	virtual void FadeBackground(bool fadeout, float fadeTime);
 	virtual void ResetToInitialState();
 
@@ -78,8 +81,13 @@ public:
 		glPopMatrix();
 	}
 
+    float GetOutlineMinDistance() const;
+    float GetOutlineMaxDistance() const;
+    float GetOutlineContrast() const;
+    float GetOutlineOffset() const;
+
 	// Factory methods
-	static GameWorldAssets* CreateWorldAssets(GameWorld::WorldStyle world);
+	static GameWorldAssets* CreateWorldAssets(GameWorld::WorldStyle world, GameAssets* assets);
 
 protected:
 	static const float COLOUR_CHANGE_TIME;
@@ -92,6 +100,12 @@ protected:
 	AnimationMultiLerp<float> bgFadeAnim;			  // Fade animation (for the alpha) for when the background is being fadeded in/out
 	AnimationMultiLerp<Colour> currBGMeshColourAnim;  // Colour animation progression of the background mesh
 
+    // Cel-outline specific parameters
+    float outlineMinDistance;
+    float outlineMaxDistance;
+    float outlineContrast;
+    float outlineOffset;
+
     const Colour& GetColourChangeListAt(int i) const;
     void UpdateColourChangeList(const std::vector<Colour>& newList);
 
@@ -102,8 +116,28 @@ private:
 
 };
 
+inline void GameWorldAssets::FastDrawBackgroundModel() {
+    this->background->FastDraw();
+}
+
 inline const Colour& GameWorldAssets::GetColourChangeListAt(int i) const {
     return this->colourChangeList[i];
+}
+
+inline float GameWorldAssets::GetOutlineMinDistance() const {
+    return this->outlineMinDistance;
+}
+
+inline float GameWorldAssets::GetOutlineMaxDistance() const {
+    return this->outlineMaxDistance;
+}
+
+inline float GameWorldAssets::GetOutlineContrast() const {
+    return this->outlineContrast;
+}
+
+inline float GameWorldAssets::GetOutlineOffset() const {
+    return this->outlineOffset;
 }
 
 #endif

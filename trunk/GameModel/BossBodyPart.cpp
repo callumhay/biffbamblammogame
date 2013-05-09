@@ -12,7 +12,8 @@
 #include "BossBodyPart.h"
 
 BossBodyPart::BossBodyPart(const BoundingLines& localBounds) :
-AbstractBossBodyPart(), localBounds(localBounds), isDestroyed(false), collisionVelocity(0,0), collisionAccel(0,0) {
+AbstractBossBodyPart(), localBounds(localBounds), isDestroyed(false),
+collisionVelocity(0,0), externalAnimationVelocity(0,0) {
 
     this->rgbaAnim.SetInterpolantValue(ColourRGBA(1,1,1,1));
     this->rgbaAnim.SetRepeat(false);

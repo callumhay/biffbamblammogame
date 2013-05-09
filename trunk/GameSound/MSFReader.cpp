@@ -477,6 +477,7 @@ void MSFReader::InitSoundTypeMapping() {
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LifeUpAcquiredEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, StarAcquiredEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, FiveStarsAcquiredEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo2Event));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo3Event));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo4Event));

@@ -62,14 +62,14 @@ void CgFxMaterialEffect::LoadParameters() {
 
 	// Set all parameters initially to NULL
 	this->worldITMatrixParam		= NULL;
-	this->wvpMatrixParam				= NULL;
+	this->wvpMatrixParam			= NULL;
 	this->worldMatrixParam			= NULL;
 	this->viewInvMatrixParam		= NULL;
-	this->texSamplerParam				= NULL;
+	this->texSamplerParam			= NULL;
 	this->diffuseColourParam		= NULL;
-	this->shininessParam				= NULL;
+	this->shininessParam			= NULL;
 	this->specularColourParam		= NULL;
-	this->alphaMultiplierParam	= NULL;
+	this->alphaMultiplierParam	    = NULL;
 	
 	this->keyPointLightPosParam				= NULL;
 	this->keyPointLightColourParam		= NULL;

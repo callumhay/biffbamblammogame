@@ -72,19 +72,20 @@ public:
 
 	// Draw functions ******************************************************************************
 	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera);
-	void DrawPaddlePostEffects(double dT, GameModel& gameModel, const Camera& camera);
+	void DrawPaddlePostEffects(double dT, GameModel& gameModel, const Camera& camera, FBObj* sceneFBO);
 
 	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Vector2D& worldT);
 	void DrawGameBallsPostEffects(double dT, GameModel& gameModel, const Camera& camera);
 
 	void DrawSkybox(const Camera& camera);
+    void FastDrawBackgroundModel();
 	void DrawBackgroundModel(const Camera& camera);
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
     void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
-	void DrawStatusEffects(double dT, const Camera& camera);
+	void DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(double dT, const Camera& camera);
 
@@ -127,6 +128,10 @@ public:
 
     void ReinitializeAssets();
 
+    GameLightAssets* GetLightAssets() const {
+        return this->lightAssets;
+    }
+
 	GameItemAssets* GetItemAssets() const {
 		return this->itemAssets;
 	}
@@ -141,6 +146,10 @@ public:
 
     GameTutorialAssets* GetTutorialAssets() {
         return this->tutorialAssets;
+    }
+
+    const GameWorldAssets* GetCurrentWorldAssets() const {
+        return this->worldAssets;
     }
 
 	LivesLeftHUD* GetLifeHUD() const {
@@ -242,7 +251,7 @@ inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, c
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
 	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera,
         this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight,
-        ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+        ballLight, /*this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture()*/ this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 
 inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {
@@ -261,8 +270,8 @@ inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, c
 }
 
 // Draw the block status effects
-inline void GameAssets::DrawStatusEffects(double dT, const Camera& camera) {
-	this->GetCurrentLevelMesh()->DrawStatusEffects(dT, camera, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+inline void GameAssets::DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO) {
+	this->GetCurrentLevelMesh()->DrawStatusEffects(dT, camera, sceneFBO->GetFBOTexture());
 }
 
 /**

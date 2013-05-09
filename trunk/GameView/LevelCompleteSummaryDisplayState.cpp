@@ -827,7 +827,7 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
     const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
     Colour labelColour = starColour;
 
-    this->flareEmitter.SetEmitPosition(Point3D(starXPos + STAR_ICON_SIZE*0.15f, starYPos + STAR_ICON_SIZE*0.15f, 0.0f));
+    this->flareEmitter.OverwriteEmittedPosition(Point3D(starXPos + STAR_ICON_SIZE*0.15f, starYPos + STAR_ICON_SIZE*0.15f, 0.0f));
     if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
         this->flareEmitter.Tick(dT);
 

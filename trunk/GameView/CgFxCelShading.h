@@ -31,9 +31,7 @@ private:
 
 	// Cel shading texture: parameter and texture objects
 	CGparameter celSamplerParam;
-	
-	CGparameter outlineWidthParam;
-	CGparameter outlineColourParam;
+    CGparameter keyPointLightAttenParam;
 
 protected:
 	virtual void SetupBeforePasses(const Camera& camera);

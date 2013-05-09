@@ -65,6 +65,7 @@ public:
     void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);
     void ResetColourRGBAAnimation();
     void SetCollisionVelocity(const Vector2D& v);
+    void SetExternalAnimationVelocity(const Vector2D& v);
     void SetCollisionAcceleration(const Vector2D& a);
 
 #ifdef _DEBUG

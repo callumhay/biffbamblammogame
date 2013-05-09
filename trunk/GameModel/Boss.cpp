@@ -438,7 +438,7 @@ void Boss::SetCurrentAIStateImmediately(BossAIState* newState) {
 #ifdef _DEBUG
 void Boss::DebugDraw() const {
     if (this->root != NULL) {
-        this->root->DebugDraw();
+        this->alivePartsRoot->DebugDraw();
     }
 }
 #endif

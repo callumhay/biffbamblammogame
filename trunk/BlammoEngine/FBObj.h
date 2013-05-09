@@ -21,7 +21,10 @@ class Camera;
 
 class FBObj {
 public:
-	enum FBOAttachments {NoAttachment = 0x00000000, DepthAttachment = 0x00000001, StencilAttachment = 0x00000010};
+	enum FBOAttachments {
+        NoAttachment = 0x00000000, DepthAttachment = 0x00000001, StencilAttachment = 0x00000010,
+        DepthTextureAttachment = 0x00000020
+    };
 
 	FBObj(int width, int height, Texture::TextureFilterType filter, int attachments);
 	~FBObj();
@@ -29,6 +32,9 @@ public:
 	inline const Texture2D* GetFBOTexture() const { 
 		return this->fboTex; 
 	}
+    inline const Texture2D* GetRenderToDepthTexture() const {
+        return this->depthTex;
+    }
 	inline void BindFBObj() const {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, this->fboID);
 	}
@@ -40,14 +46,18 @@ public:
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->depthBuffID);
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,  GL_RENDERBUFFER_EXT, this->depthBuffID);
 	}
+    inline void BindDepthRenderTexture() {
+        glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, this->depthTex->GetTextureID(), 0);
+    }
 
 private:
-	GLuint fboID;											// OGL Framebuffer object ID
-	GLuint depthBuffID;								// OGL depth renderbuffer object ID
-	GLuint stencilBuffID;							// OGL stencil renderbuffer object ID
+	GLuint fboID;                       // OGL Framebuffer object ID
+	GLuint depthBuffID;                 // OGL depth renderbuffer object ID
+	GLuint stencilBuffID;               // OGL stencil renderbuffer object ID
 	GLuint packedStencilDepthBuffID;	// OGL packed depth-stencil renderbuffer object ID
 
 	Texture2D* fboTex;
+    Texture2D* depthTex;
 
 	static bool CheckFBOStatus();
 

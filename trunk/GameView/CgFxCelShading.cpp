@@ -15,15 +15,15 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../ResourceManager.h"
 
-const char* CgFxCelShading::BASIC_FG_TECHNIQUE_NAME			= "BasicFG";
+const char* CgFxCelShading::BASIC_FG_TECHNIQUE_NAME		= "BasicFG";
 const char* CgFxCelShading::TEXTURED_FG_TECHNIQUE_NAME	= "TexturedFG";
-const char* CgFxCelShading::BASIC_BG_TECHNIQUE_NAME			= "BasicBG";
+const char* CgFxCelShading::BASIC_BG_TECHNIQUE_NAME		= "BasicBG";
 const char* CgFxCelShading::TEXTURED_BG_TECHNIQUE_NAME	= "TexturedBG";
 Texture* CgFxCelShading::CelDiffuseTexture = NULL;
 
 // Default constructor, builds default, white material
 CgFxCelShading::CgFxCelShading(MaterialProperties* properties) : 
-CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties) {
+CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties), keyPointLightAttenParam(NULL) {
 	assert(properties->materialType == MaterialProperties::MATERIAL_CELBASIC_TYPE);
 
 	// Set up the cel-shading texture parameter, unique to this material
@@ -36,11 +36,8 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 	assert(CgFxCelShading::CelDiffuseTexture != NULL);
 
 	// Set up other cel-shading parameters
-	this->outlineWidthParam		= NULL;
-	this->outlineColourParam	= NULL;
-	this->outlineWidthParam		=	cgGetNamedEffectParameter(this->cgEffect, "OutlineWidth");
-	this->outlineColourParam	=	cgGetNamedEffectParameter(this->cgEffect, "OutlineColour");
-	assert(this->outlineWidthParam && this->outlineColourParam);
+    this->keyPointLightAttenParam = cgGetNamedEffectParameter(this->cgEffect, "KeyPointLightLinearAtten");
+    assert(this->keyPointLightAttenParam != NULL);
 
 	// Set the correct technique based on whether there's a texture and whether the
 	// geometry is in the foreground or background
@@ -87,8 +84,6 @@ void CgFxCelShading::SetupBeforePasses(const Camera& camera) {
 	}
 
 	cgGLSetTextureParameter(this->celSamplerParam, CgFxCelShading::CelDiffuseTexture->GetTextureID());
-	cgGLSetParameter1f(this->outlineWidthParam, this->properties->outlineSize);
-	cgGLSetParameter3fv(this->outlineColourParam, this->properties->outlineColour.begin());
-
+    cgGLSetParameter1f(this->keyPointLightAttenParam, this->keyLight.GetLinearAttenuation());
 	CgFxMaterialEffect::SetupBeforePasses(camera);
 }

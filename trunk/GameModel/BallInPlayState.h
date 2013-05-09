@@ -48,7 +48,8 @@ public:
 private:
 	double timeSinceGhost;		// The time since the ball stopped colliding with blocks
 
-	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision);
+	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine,
+        double dT, double timeSinceCollision);
 	void DoBallCollision(GameBall& ball1, GameBall& ball2);
 	void DoItemCollision();
 

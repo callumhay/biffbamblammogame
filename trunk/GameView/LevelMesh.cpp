@@ -50,7 +50,7 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collater
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
 oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL), regenBlock(NULL),
 statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
-remainingPiecePulser(0,0), bossMesh(NULL) {
+remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
 	
     this->remainingPieceGlowTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
@@ -878,6 +878,7 @@ void LevelMesh::MineFired(const MineTurretBlock* block) {
 
 void LevelMesh::SetLevelAlpha(float alpha) {
 	assert(alpha >= 0.0f && alpha <= 1.0f);
+    this->levelAlpha = alpha;
 
 	// First go through each stored material effect and change its alpha multiplier
 	std::map<CgFxMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();

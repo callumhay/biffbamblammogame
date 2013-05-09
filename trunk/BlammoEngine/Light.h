@@ -27,7 +27,7 @@ public:
 	BasicPointLight(const Point3D& pos, const Colour& diffuse, float linAtten) : 
 			position(pos), diffuseColour(diffuse), linearAttenuation(linAtten) {}
 
-	void Copy(BasicPointLight& light) const;
+    BasicPointLight(const BasicPointLight& copy);
 
 	inline const Colour& GetDiffuseColour() const { return this->diffuseColour; }
 	inline const Point3D& GetPosition() const { return this->position; }
@@ -37,21 +37,30 @@ public:
 	inline void SetPosition(const Point3D& p) { this->position = p; }
 	inline void SetLinearAttenuation(float a) { this->linearAttenuation = a; }
 
+    BasicPointLight& operator=(const BasicPointLight& copy);
+
 private:
 	Colour diffuseColour;
 	Point3D position;
 	float linearAttenuation;
-
-	// Disallow copy and assignment
-	BasicPointLight(const BasicPointLight& p);
-	BasicPointLight& operator=(const BasicPointLight& p);
 };
 
-inline void BasicPointLight::Copy(BasicPointLight& light) const {
-	light.SetDiffuseColour(this->GetDiffuseColour());
-	light.SetPosition(this->GetPosition());
-	light.SetLinearAttenuation(this->GetLinearAttenuation());
+inline BasicPointLight::BasicPointLight(const BasicPointLight& copy) :
+diffuseColour(copy.diffuseColour), position(copy.position), linearAttenuation(copy.linearAttenuation) {
 }
+
+inline BasicPointLight& BasicPointLight::operator=(const BasicPointLight& copy) {
+    if (this == &copy) {
+        return *this;
+    }
+
+    this->diffuseColour = copy.diffuseColour;
+    this->position = copy.position;
+    this->linearAttenuation = copy.linearAttenuation;
+
+    return *this;
+}
+
 
 // Full animating, state-tracking point light
 class PointLight {
@@ -74,6 +83,8 @@ public:
 	inline void SetDiffuseColour(const Colour& c) { this->onDiffuseColour = c; }
 	inline void SetPosition(const Point3D& p) { this->position = p; }
 	inline void SetLinearAttenuation(float a) { this->linearAttenuation = a; }
+
+    void SetFromBasicPointLight(const BasicPointLight& light);
 
 	void SetLightOn(bool turnOn, double animationTime);
 	void SetLightStrobeOn(const Colour& strobeEndColour, float strobeTime);
@@ -128,6 +139,12 @@ inline void PointLight::ConvertToBasicPointLight(BasicPointLight& basicPtLight) 
 	basicPtLight.SetDiffuseColour(this->GetDiffuseColour());
 	basicPtLight.SetPosition(this->GetPosition());
 	basicPtLight.SetLinearAttenuation(this->GetLinearAttenuation());
+}
+
+inline void PointLight::SetFromBasicPointLight(const BasicPointLight& light) {
+    this->SetDiffuseColour(light.GetDiffuseColour());
+    this->SetPosition(light.GetPosition());
+    this->SetLinearAttenuation(light.GetLinearAttenuation());
 }
 
 #endif

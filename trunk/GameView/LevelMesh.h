@@ -80,6 +80,8 @@ public:
     void MineFired(const MineTurretBlock* block);
 
 	void SetLevelAlpha(float alpha);
+    float GetLevelAlpha() const;
+
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
     void UpdateRegenBlock(const RegenBlock* block, bool gotHurt);
 
@@ -138,12 +140,18 @@ private:
 	// Block status rendering object
 	BlockStatusEffectRenderer* statusEffectRenderer;
 
+    float levelAlpha;
+        
 	const std::map<std::string, MaterialGroup*>* GetMaterialGrpsForPieceType(const LevelPiece* piece) const;
 	void CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateDisplayListForBallSafetyNet(float levelWidth);
 	void Flush();	
 };
+
+inline float LevelMesh::GetLevelAlpha() const {
+    return this->levelAlpha;
+}
 
 inline void LevelMesh::LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {
 	this->statusEffectRenderer->AddLevelPieceStatus(piece, status);

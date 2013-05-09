@@ -86,7 +86,7 @@ public:
 		assert(success);
 	}
 
-	virtual void Draw(int screenWidth, int screenHeight, double dT) = 0;
+	
 
 	inline void SetInputFBO(FBObj* sceneFBO) {
 		this->sceneFBO = sceneFBO;
@@ -119,6 +119,8 @@ protected:
 
 	// Pointer to the scene FBO - this must be passed to the effect
 	FBObj* sceneFBO;
+
+    virtual void Draw(int screenWidth, int screenHeight, double dT) = 0;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(CgFxPostProcessingEffect);
@@ -234,13 +236,13 @@ public:
 	}
 
 	void SetKeyLight(const BasicPointLight& keyLight) {
-		keyLight.Copy(this->keyLight);
+        this->keyLight = keyLight;
 	}
 	void SetFillLight(const BasicPointLight& fillLight) {
-		fillLight.Copy(this->fillLight);
+		this->fillLight = fillLight;
 	}
 	void SetBallLight(const BasicPointLight& ballLight) {
-		ballLight.Copy(this->ballLight);
+		this->ballLight = ballLight;
 	}
 
 protected:

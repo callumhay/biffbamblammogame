@@ -156,10 +156,10 @@ void BossCompositeBodyPart::SetCollisionVelocity(const Vector2D& v) {
     }
 }
 
-void BossCompositeBodyPart::SetCollisionAcceleration(const Vector2D& a) {
+void BossCompositeBodyPart::SetExternalAnimationVelocity(const Vector2D& v) {
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         AbstractBossBodyPart* part = this->childParts[i];
-        part->SetCollisionAcceleration(a);      
+        part->SetExternalAnimationVelocity(v);      
     }
 }
 

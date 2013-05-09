@@ -23,7 +23,7 @@
 
 class GothicRomanticWorldAssets : public GameWorldAssets {
 public:
-	GothicRomanticWorldAssets();
+	GothicRomanticWorldAssets(GameAssets* assets);
 	~GothicRomanticWorldAssets();
 
 	GameWorld::WorldStyle GetStyle() const;

@@ -28,6 +28,10 @@ public:
     v_[1] = 0.0f;
   }
 
+  explicit Vector2D(float f) {
+    v_[0] = v_[1] = f;
+  }
+
   Vector2D(float x, float y) { 
     v_[0] = x;
     v_[1] = y;
@@ -166,6 +170,10 @@ public:
     v_[0] = 0.0f;
     v_[1] = 0.0f;
     v_[2] = 0.0f;
+  }
+
+  explicit Vector3D(float f) {
+    v_[0] = v_[1] = v_[2] = f;
   }
 
   Vector3D(float x, float y, float z) { 

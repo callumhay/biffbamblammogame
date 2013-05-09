@@ -21,6 +21,20 @@
  * also has the sticky paddle powerup active.
  */
 class CgFxFullscreenGoo : public CgFxPostProcessingEffect {
+
+public:
+	CgFxFullscreenGoo(FBObj* outputFBO);
+	virtual ~CgFxFullscreenGoo();
+
+	virtual void Draw(int screenWidth, int screenHeight, double dT);
+
+	void SetColour(const Colour& c);
+	void SetMask(const std::string& texMaskFilepath);
+	void SetOutputFBO(FBObj* renderOut);
+	void SetFadeAlpha(float alpha);
+	void SetDisplacement(float d);
+	void SetScale(float s);
+
 protected:
 	static const char* MASK_SPLATTER_TECHNIQUE_NAME;
 	static const char* NOMASK_SPLATTER_TECHNIQUE_NAME;
@@ -48,18 +62,8 @@ protected:
 
 	FBObj* resultFBO;
 
-public:
-	CgFxFullscreenGoo(FBObj* outputFBO);
-	virtual ~CgFxFullscreenGoo();
-
-	virtual void Draw(int screenWidth, int screenHeight, double dT);
-
-	void SetColour(const Colour& c);
-	void SetMask(const std::string& texMaskFilepath);
-	void SetOutputFBO(FBObj* renderOut);
-	void SetFadeAlpha(float alpha);
-	void SetDisplacement(float d);
-	void SetScale(float s);
+private:
+    DISALLOW_COPY_AND_ASSIGN(CgFxFullscreenGoo);
 };
 
 inline void CgFxFullscreenGoo::SetColour(const Colour& c) {

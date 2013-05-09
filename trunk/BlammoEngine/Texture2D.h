@@ -23,6 +23,7 @@ private:
 public:
 	virtual ~Texture2D();
 	
+    void RenderTextureToFullscreenQuadNoDepth() const;
 	void RenderTextureToFullscreenQuad(float depth = 0.0f) const;
     void RenderTextureToFullscreenQuad(float depth, float uvX, float uvY) const;
 
@@ -32,6 +33,7 @@ public:
 	static Texture2D* CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter);
 	static Texture2D* CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilterType texFilter);
 	static Texture2D* CreateEmptyTextureRectangle(int width, int height, Texture::TextureFilterType filter);
+    static Texture2D* CreateEmptyDepthTextureRectangle(int width, int height);
 };
 
 #endif

@@ -21,27 +21,26 @@
 #include "../GameSound/GameSound.h"
 
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight, GameSound* sound) :
-sound(sound), bgFBO(NULL), fgAndBgFBO(NULL), 
-postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
-fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
+sound(sound), bgFBO(NULL), fgAndBgFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL), colourAndDepthTexFBO(NULL),
+fgAndBgBlurEffect(NULL), bloomEffect(NULL), inkSplatterEffect(NULL), 
 stickyPaddleCamEffect(NULL), shieldPaddleCamEffect(NULL), smokeyCamEffect(NULL), icyCamEffect(NULL), 
-uberIntenseCamEffect(NULL), fireBallCamEffect(NULL), bulletTimeEffect(NULL), drawItemsInLastPass(true) {
+uberIntenseCamEffect(NULL), fireBallCamEffect(NULL), bulletTimeEffect(NULL), 
+drawItemsInLastPass(true) {
 	
     assert(sound != NULL);
 
 	// Framebuffer object setup
 	this->fgAndBgFBO            = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->bgFBO                 = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->postFgAndBgFBO        = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->initialFSEffectFBO    = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->finalFSEffectFBO      = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
 	this->tempFBO = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
+    this->colourAndDepthTexFBO = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthTextureAttachment);
+
 	// Effects setup
-	this->fgAndBgBlurEffect         = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
-	this->bloomEffect               = new CgFxBloom(this->postFgAndBgFBO);
-	this->afterImageEffect			= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
+	this->fgAndBgBlurEffect         = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
+	this->bloomEffect               = new CgFxBloom(this->fgAndBgFBO);
 	this->inkSplatterEffect			= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
 	this->stickyPaddleCamEffect     = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
@@ -67,23 +66,20 @@ GameFBOAssets::~GameFBOAssets() {
 	this->bgFBO = NULL;
 	delete this->fgAndBgFBO;
 	this->fgAndBgFBO = NULL;
-	delete this->postFgAndBgFBO;
-	this->postFgAndBgFBO = NULL;
 
-	delete this->initialFSEffectFBO;
-	this->initialFSEffectFBO = NULL;
 	delete this->finalFSEffectFBO;
 	this->finalFSEffectFBO = NULL;
 
 	delete this->tempFBO;
 	this->tempFBO = NULL;
 
+    delete this->colourAndDepthTexFBO;
+    this->colourAndDepthTexFBO = NULL;
+
 	delete this->fgAndBgBlurEffect;
 	this->fgAndBgBlurEffect = NULL;
 	delete this->bloomEffect;
 	this->bloomEffect = NULL;
-	delete this->afterImageEffect;
-	this->afterImageEffect = NULL;
 	delete this->inkSplatterEffect;
 	this->inkSplatterEffect = NULL;
 	delete this->stickyPaddleCamEffect;
@@ -138,20 +134,17 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->bgFBO = new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	delete this->fgAndBgFBO;
 	this->fgAndBgFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
-	delete this->postFgAndBgFBO;
-	this->postFgAndBgFBO = new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
-	
-	delete this->initialFSEffectFBO;
-	this->initialFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	delete this->finalFSEffectFBO;
 	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 
 	delete this->tempFBO;
 	this->tempFBO = new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 
+    delete this->colourAndDepthTexFBO;
+    this->colourAndDepthTexFBO = new FBObj(width, height, Texture::Nearest, FBObj::DepthTextureAttachment);
+
 	delete this->fgAndBgBlurEffect;
 	delete this->bloomEffect;
-	delete this->afterImageEffect;
 	delete this->inkSplatterEffect;
 	delete this->stickyPaddleCamEffect;
 	delete this->smokeyCamEffect;
@@ -161,13 +154,13 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->fireBallCamEffect;
     delete this->bulletTimeEffect;
 
-	this->fgAndBgBlurEffect     = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
-	this->bloomEffect           = new CgFxBloom(this->postFgAndBgFBO);
-	this->afterImageEffect      = new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
-	this->inkSplatterEffect     = new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
+    this->smokeyCamEffect           = new CgFxPostSmokey(this->tempFBO);
+	this->fgAndBgBlurEffect         = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
+	this->bloomEffect               = new CgFxBloom(this->fgAndBgFBO);
+	this->inkSplatterEffect         = new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
+	
+    this->stickyPaddleCamEffect     = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
-	this->smokeyCamEffect       = new CgFxPostSmokey(this->tempFBO);
 	
 	this->icyCamEffect = new CgFxPostSmokey(this->tempFBO);
 	this->icyCamEffect->SetTechnique(CgFxPostSmokey::POST_ICY_TECHNIQUE_NAME);
@@ -193,7 +186,6 @@ void GameFBOAssets::ActivateItemEffects(const GameItem& item) {
 		case GameItem::PoisonPaddleItem: {
 				// Poison items cause the blur to get fuzzier, tell the blur to do this
 				this->fgAndBgBlurEffect->SetPoisonBlurAnimation(true);
-				this->afterImageEffect->SetBlurAmount(0.4f);
 				// Make items also blurry - in order to do this they must be drawn before the post-processing effects
 				this->drawItemsInLastPass = false;
 			}
@@ -215,7 +207,6 @@ void GameFBOAssets::DeactivateItemEffects(const GameItem& item) {
 		case GameItem::PoisonPaddleItem: {
 				// Turn off the poison blur effect
 				this->fgAndBgBlurEffect->SetPoisonBlurAnimation(false);
-				this->afterImageEffect->SetBlurAmount(CgFxAfterImage::AFTERIMAGE_BLURSTRENGTH_DEFAULT);
 				this->drawItemsInLastPass = true;
 			}
 			break;

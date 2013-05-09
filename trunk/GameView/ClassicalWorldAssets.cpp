@@ -16,8 +16,8 @@
 // TODO: Get rid of this
 #include "DecoSkybox.h"
 
-ClassicalWorldAssets::ClassicalWorldAssets() :
-GameWorldAssets(new DecoSkybox(),
+ClassicalWorldAssets::ClassicalWorldAssets(GameAssets* assets) :
+GameWorldAssets(assets, new DecoSkybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BACKGROUND_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_PADDLE_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BLOCK_MESH)), cloudTex(NULL),

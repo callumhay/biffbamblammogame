@@ -18,8 +18,8 @@
 #define STARTING_BACK_BEAM_ANGLE  18.0f
 #define STARTING_FRONT_BEAM_ANGLE -15.0f
 
-FuturismWorldAssets::FuturismWorldAssets() :
-GameWorldAssets(new DecoSkybox(),
+FuturismWorldAssets::FuturismWorldAssets(GameAssets* assets) :
+GameWorldAssets(assets, new DecoSkybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->FUTURISM_BACKGROUND_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->FUTURISM_PADDLE_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->FUTURISM_BLOCK_MESH)),

@@ -112,7 +112,7 @@ float ClassicalBossAI::GetMaxSpeed() const {
 }
 
 float ClassicalBossAI::GetAccelerationMagnitude() const {
-    return NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.5f, this->GetTotalLifePercent()) *
+    return NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.33f, this->GetTotalLifePercent()) *
         ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION;
 }
 
@@ -363,6 +363,7 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddl
 
 void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
 
+    this->boss->alivePartsRoot->SetExternalAnimationVelocity(Vector2D(0,0));
     switch (newState) {
 
         case ClassicalBossAI::BasicMoveAndLaserSprayAIState:
@@ -760,27 +761,20 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         float armYMovement = this->armAttackYMovementAnim.GetInterpolantValue();
         if (!this->leftArmSqrWeakpt->GetIsDestroyed() && isLeftArmAttacking) {
             this->leftArm->SetLocalTranslation(Vector3D(0.0f, armYMovement, 0.0f));
+            this->leftArm->SetExternalAnimationVelocity(Vector2D(0, this->armAttackYMovementAnim.GetDxDt()));
         }
         if (!this->rightArmSqrWeakpt->GetIsDestroyed() && isRightArmAttacking) {
             this->rightArm->SetLocalTranslation(Vector3D(0.0f, armYMovement, 0.0f));
+            this->rightArm->SetExternalAnimationVelocity(Vector2D(0, this->armAttackYMovementAnim.GetDxDt()));
         }
 
         // If the arm is moving downward then we are in the midst of attacking, set a flag to
         // indicate that the boss can hurt the paddle while it attacks
         if (this->armAttackYMovementAnim.GetCurrentTimeValue() <= ARM_ATTACK_DELTA_T) {
             this->isAttackingWithArm = true;
-            Vector2D armAtkVel(0, -this->GetMaxArmAttackYMovement() / ARM_ATTACK_DELTA_T);
-            if (isLeftArmAttacking) {
-                this->leftArm->SetCollisionVelocity(armAtkVel);
-            }
-            if (isRightArmAttacking) {
-                 this->rightArm->SetCollisionVelocity(armAtkVel);
-            }
         }
         else {
             this->isAttackingWithArm = false;
-            this->leftArm->SetCollisionVelocity(Vector2D(0,0));
-            this->rightArm->SetCollisionVelocity(Vector2D(0,0));
         }
         
         if (attackIsDone) {
@@ -788,13 +782,14 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
 
             if (!this->leftArmSqrWeakpt->GetIsDestroyed()) {
                 this->leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+                this->leftArm->SetExternalAnimationVelocity(Vector2D(0,0));
             }
             if (!this->rightArmSqrWeakpt->GetIsDestroyed()) {
                 this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+                this->rightArm->SetExternalAnimationVelocity(Vector2D(0,0));
             }
 
             this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
-            return;
         }
     }
 }
@@ -1078,16 +1073,16 @@ tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL) {
         }
         assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
 
-        std::vector<Vector3D> moveValues;
+        std::vector<Vector2D> moveValues;
         moveValues.reserve(timeValues.size());
-        moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));
+        moveValues.push_back(Vector2D(0.0f, 0.0f));
         for (int i = 0; i < NUM_SHAKES; i++) {
             float randomVal1 = Randomizer::GetInstance()->RandomNumNegOneToOne() * BOSS_WIDTH / 25.0f;
             float randomVal2 = Randomizer::GetInstance()->RandomNumNegOneToOne() * BOSS_WIDTH / 25.0f;
-            moveValues.push_back(Vector3D(randomVal1, randomVal2, 0));
-            moveValues.push_back(Vector3D(-randomVal1, -randomVal2, 0));
+            moveValues.push_back(Vector2D(randomVal1, randomVal2));
+            moveValues.push_back(Vector2D(-randomVal1, -randomVal2));
         }
-        moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));  
+        moveValues.push_back(Vector2D(0.0f, 0.0f));  
 
         this->columnHurtMoveAnim.SetLerp(timeValues, moveValues);
         this->columnHurtMoveAnim.SetRepeat(false);
@@ -1144,6 +1139,8 @@ void BodyHeadAI::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, B
 }
 
 void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
+    this->boss->alivePartsRoot->SetExternalAnimationVelocity(Vector2D(0,0));
+
     switch (newState) {
 
         case ClassicalBossAI::BasicMoveAndLaserSprayAIState:
@@ -1468,7 +1465,7 @@ void BodyHeadAI::ExecuteLostColumnState(double dT) {
     this->desiredVel = Vector2D(0,0);
 
     bool isFinished = this->columnHurtMoveAnim.Tick(dT);
-    this->boss->alivePartsRoot->SetLocalTranslation(this->columnHurtMoveAnim.GetInterpolantValue());
+    this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(this->columnHurtMoveAnim.GetInterpolantValue(), 0));
 
     if (isFinished) {
         this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
@@ -1533,7 +1530,7 @@ void BodyHeadAI::ExecuteLostBodyAngryState(double dT, GameModel* gameModel) {
         Vector2D bossToCenterVec = levelCenter - this->pediment->GetTranslationPt2D();
         
         double travelTime = bossToCenterVec.Magnitude() / this->GetMaxSpeed();
-        this->bossToCenterOfLevelAnim.SetLerp(0.0, travelTime, Vector3D(0,0,0), Vector3D(bossToCenterVec, 0.0f));
+        this->bossToCenterOfLevelAnim.SetLerp(0.0, travelTime, Vector2D(0,0), Vector2D(bossToCenterVec));
 
         this->SetState(ClassicalBossAI::MoveToCenterOfLevelAIState);
     }
@@ -1546,10 +1543,13 @@ void BodyHeadAI::ExecuteMoveToCenterOfLevelState(double dT, GameModel* gameModel
     this->desiredVel = Vector2D(0,0);
 
     bool isFinished = this->bossToCenterOfLevelAnim.Tick(dT);
-    this->boss->alivePartsRoot->SetLocalTranslation(this->bossToCenterOfLevelAnim.GetInterpolantValue());
+    this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(this->bossToCenterOfLevelAnim.GetInterpolantValue(), 0.0f));
+    this->boss->alivePartsRoot->SetExternalAnimationVelocity(this->bossToCenterOfLevelAnim.GetDxDt());
+    
     if (isFinished) {
         // Make sure the boss is centered in the level...
         this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
+        this->boss->alivePartsRoot->SetExternalAnimationVelocity(Vector2D(0,0));
         
         const GameLevel* level = gameModel->GetCurrentLevel();
         assert(level != NULL);
@@ -1559,7 +1559,7 @@ void BodyHeadAI::ExecuteMoveToCenterOfLevelState(double dT, GameModel* gameModel
 
         // Now that the boss is centered, we make the eye emerge from the pediment in prep for the next high-level state
         AnimationMultiLerp<ColourRGBA> angryColourAnim = Boss::BuildBossAngryFlashAnim();
-        this->eyeRiseAnim.SetLerp(0.0, 3.0, Vector3D(0,0,0), Vector3D(0, this->GetEyeRiseHeight(), 0));
+        this->eyeRiseAnim.SetLerp(0.0, 3.0, Vector2D(0,0), Vector2D(0, this->GetEyeRiseHeight()));
         this->eye->AnimateColourRGBA(angryColourAnim);
 
         this->SetState(ClassicalBossAI::EyeRisesFromPedimentAIState);
@@ -1568,11 +1568,13 @@ void BodyHeadAI::ExecuteMoveToCenterOfLevelState(double dT, GameModel* gameModel
 
 void BodyHeadAI::ExecuteEyeRisesFromPedimentState(double dT) {
     bool isFinished = this->eyeRiseAnim.Tick(dT);
-    this->eye->SetLocalTranslation(this->eyeRiseAnim.GetInterpolantValue());
+    this->eye->SetLocalTranslation(Vector3D(this->eyeRiseAnim.GetInterpolantValue(), 0.0f));
+    this->eye->SetExternalAnimationVelocity(this->eyeRiseAnim.GetDxDt());
     
     if (isFinished) {
         this->eye->ResetColourRGBAAnimation();
         this->eye->SetLocalTranslation(Vector3D(0,0,0));
+        this->eye->SetExternalAnimationVelocity(Vector2D(0,0));
         this->eye->Translate(Vector3D(0, this->GetEyeRiseHeight(), 0));
 
         // Go to the next high-level AI state
@@ -1720,6 +1722,7 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
 
     this->currPedimentVel = Vector2D(0,0);
     this->currEyeVel      = Vector2D(0,0);
+    this->boss->alivePartsRoot->SetExternalAnimationVelocity(Vector2D(0,0));
 
     switch (newState) {
 

@@ -482,6 +482,10 @@ StarAcquiredEvent {
 	file = global/star_gained.ogg
 }
 
+FiveStarsAcquiredEvent {
+	file = global/star_gained.ogg
+}
+
 ScoreMultiplierIncreasedTo2Event {
 	file = 
 }
