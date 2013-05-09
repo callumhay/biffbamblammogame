@@ -48,10 +48,10 @@ bool PortalBlock::SecondaryCollisionCheck(double dT, const GameBall& ball) const
 
 bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                  Collision::LineSeg2D& collisionLine,
-                                 double& timeSinceCollision) const {
+                                 double& timeUntilCollision) const {
 	UNUSED_PARAMETER(n);
 	UNUSED_PARAMETER(collisionLine);
-	UNUSED_PARAMETER(timeSinceCollision);
+	UNUSED_PARAMETER(timeUntilCollision);
 
 	return this->SecondaryCollisionCheck(dT, ball);
 }

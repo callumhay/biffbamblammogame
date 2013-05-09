@@ -774,9 +774,9 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	// Make sure the position of the ball is sitting on-top of the paddle
 	Vector2D normal;
 	Collision::LineSeg2D collisionLine;
-	double timeSinceCollision;
+	double timeUntilCollision;
 	
-	if (this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeSinceCollision)) {
+	if (this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeUntilCollision)) {
 		// Position the ball so that it is against the collision line, perpendicular to its normal
         Point2D closestPtOnCollisionLine = Collision::ClosestPoint(ballCenter, collisionLine);
 		this->attachedBall->SetCenterPosition(closestPtOnCollisionLine + (EPSILON + ballRadius) * normal);
@@ -1377,7 +1377,7 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, double dT) {
     static Vector2D normal;
     static Collision::LineSeg2D collisionLine;
-    static double timeSinceCollision;
+    static double timeUntilCollision;
     
     // Check to see if the ball is hitting the bounds of the level...
     float ballMinX = ball.GetCenterPosition2D()[0] - ball.GetBounds().Radius();
@@ -1388,7 +1388,7 @@ bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, dou
         // minimum X position for the paddle to move to
 
         // Check for the paddle collision...
-        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeSinceCollision)) {
+        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeUntilCollision)) {
             // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
             float impulseAmt = std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed());
             this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);
@@ -1401,7 +1401,7 @@ bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, dou
         // maximum X position for the paddle to move to
 
         // Check for the paddle collision...
-        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeSinceCollision)) {
+        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeUntilCollision)) {
             // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
             float impulseAmt = std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed());
             this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);

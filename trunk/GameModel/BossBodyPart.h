@@ -33,7 +33,7 @@ public:
     virtual void Tick(double dT);
 
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-        Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
     BossBodyPart* CollisionCheck(const PlayerPaddle& paddle);
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir);
@@ -126,12 +126,12 @@ inline void BossBodyPart::Tick(double dT) {
 }
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-                                                  Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
+                                                  Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
 
     Vector2D bossVelocity = this->GetCollisionVelocity();
 
     if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), 
-        n, collisionLine, timeSinceCollision, bossVelocity)) {
+        n, collisionLine, timeUntilCollision, bossVelocity)) {
         return this;
     }
     return NULL;

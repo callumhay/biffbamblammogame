@@ -30,7 +30,7 @@ BallState* NormalBallState::Clone(GameBall* newBall) const {
 	return new NormalBallState(newBall);
 }
 
-void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
+void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
 	// Update based on any active paddle magnet
     this->gameBall->AugmentDirectionOnPaddleMagnet(seconds, *gameModel, 80.0f);
     
@@ -110,9 +110,11 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
         currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
     }
-
-	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
-	this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + dDist);
+    
+    if (simulateMovement) {
+	    Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
+	    this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + dDist);
+    }
 
 	// Update the rotation of the ball
 	float dRotSpd = GameBall::MAX_ROATATION_SPEED * static_cast<float>(seconds);

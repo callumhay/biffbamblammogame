@@ -323,7 +323,7 @@ public:
 
 	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;
 
-	void Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
+	void Tick(bool simulateMovement, double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
 	void Animate(double seconds);
 
 	// Set and get for the last level piece that this ball collided with

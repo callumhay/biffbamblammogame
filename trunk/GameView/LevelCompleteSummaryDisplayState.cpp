@@ -40,7 +40,7 @@ const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     
 const double LevelCompleteSummaryDisplayState::SHOW_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 const double LevelCompleteSummaryDisplayState::HIDE_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 
-const double LevelCompleteSummaryDisplayState::POINT_SCORE_ANIM_TIME = 0.5;
+const double LevelCompleteSummaryDisplayState::POINT_SCORE_ANIM_TIME = 0.75;
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),
@@ -324,8 +324,8 @@ flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
 
         this->flareEmitter.SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
 	    this->flareEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	    this->flareEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.9f));
-	    this->flareEmitter.SetParticleSize(ESPInterval(2.0f * this->starTotalLabel.GetHeight()));
+	    this->flareEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.93f));
+	    this->flareEmitter.SetParticleSize(ESPInterval(3.0f * this->starTotalLabel.GetHeight()));
 	    this->flareEmitter.SetParticleAlignment(ESP::ScreenAligned);
         this->flareEmitter.AddEffector(&this->flareRotator);
         this->flareEmitter.SetParticles(1, this->lensFlareTex);

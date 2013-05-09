@@ -36,7 +36,7 @@ public:
     const BoundingLines& GetBounds() { return this->bounds; }
 
     bool BallCollisionCheck(const GameBall& b, double dT, Vector2D& n,
-        Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
 	bool PaddleCollisionCheck(const PlayerPaddle& p);
 	bool ProjectileCollisionCheck(const BoundingLines& projectileBoundingLines);
 
@@ -52,8 +52,8 @@ private:
 
 inline bool SafetyNet::BallCollisionCheck(const GameBall& b, double dT, Vector2D& n,
                                           Collision::LineSeg2D& collisionLine,
-                                          double& timeSinceCollision) {
-	return this->bounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeSinceCollision);
+                                          double& timeUntilCollision) {
+	return this->bounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeUntilCollision);
 }
 
 inline bool SafetyNet::PaddleCollisionCheck(const PlayerPaddle& p) {

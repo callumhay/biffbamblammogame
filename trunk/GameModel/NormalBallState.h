@@ -25,7 +25,7 @@ public:
 	~NormalBallState();
 
 	BallState* Clone(GameBall* newBall) const;
-	void Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
+	void Tick(bool simulateMovement, double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
 	ColourRGBA GetBallColour() const;
 
 	BallState::BallStateType GetBallStateType() const;
