@@ -30,6 +30,9 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::LaserBeamPaddleItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(LaserBeamPaddleItem);
 };
 
 #endif // __LASERBEAMPADDLEITEM_H_

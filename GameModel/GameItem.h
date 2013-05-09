@@ -2,7 +2,7 @@
  * GameItem.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -72,9 +72,10 @@ public:
 	
 	virtual ~GameItem();
 
-	virtual const GameBall* GetBallAffected() const {
-		return NULL;
-	}
+    virtual std::set<const GameBall*> GetBallsAffected() const {
+        // By default no balls are affected...
+        return std::set<const GameBall*>();
+    }
 
 	// For obtaining the name of this item
 	const std::string& GetName() const {

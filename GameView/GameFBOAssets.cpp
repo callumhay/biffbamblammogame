@@ -154,12 +154,12 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->fireBallCamEffect;
     delete this->bulletTimeEffect;
 
-    this->smokeyCamEffect           = new CgFxPostSmokey(this->tempFBO);
-	this->fgAndBgBlurEffect         = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
-	this->bloomEffect               = new CgFxBloom(this->fgAndBgFBO);
-	this->inkSplatterEffect         = new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
+    this->smokeyCamEffect   = new CgFxPostSmokey(this->tempFBO);
+	this->fgAndBgBlurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
+	this->bloomEffect       = new CgFxBloom(this->fgAndBgFBO);
+	this->inkSplatterEffect = new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
 	
-    this->stickyPaddleCamEffect     = new CgFxFullscreenGoo(this->tempFBO);
+    this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	
 	this->icyCamEffect = new CgFxPostSmokey(this->tempFBO);

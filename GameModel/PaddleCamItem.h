@@ -34,5 +34,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::PaddleCamItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(PaddleCamItem);
 };
 #endif

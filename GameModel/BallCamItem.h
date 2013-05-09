@@ -33,5 +33,7 @@ public:
 		return GameItem::BallCamItem;
 	}
 
+private:
+    DISALLOW_COPY_AND_ASSIGN(BallCamItem);
 };
 #endif

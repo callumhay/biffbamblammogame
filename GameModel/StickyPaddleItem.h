@@ -33,5 +33,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::StickyPaddleItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(StickyPaddleItem);
 };
 #endif

@@ -5521,47 +5521,53 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 
 		case GameItem::UberBallItem: {
 
-				const GameBall* ballAffected = item.GetBallAffected();
-				assert(ballAffected != NULL);
+            std::set<const GameBall*> ballsAffected = item.GetBallsAffected();
+            for (std::set<const GameBall*>::const_iterator iter = ballsAffected.begin(); iter != ballsAffected.end(); ++iter) {
+                const GameBall* ballAffected = *iter;
 
-				// If there are any effects assigned for the uber ball then we need to reset the trail
-				std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(ballAffected);
-				if (foundBallEffects != this->ballEffects.end()) {
-					std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator foundUberBallFX = foundBallEffects->second.find(GameItem::UberBallItem);
-					if (foundUberBallFX != foundBallEffects->second.end()) {
-						std::vector<ESPPointEmitter*>& uberBallEffectsList = foundUberBallFX->second;
-						assert(uberBallEffectsList.size() > 0);
-						uberBallEffectsList[0]->Reset();
-					}
-				}
-			}
-			break;
+			    // If there are any effects assigned for the uber ball then we need to reset the trail
+			    std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(ballAffected);
+			    if (foundBallEffects != this->ballEffects.end()) {
+				    std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator foundUberBallFX = foundBallEffects->second.find(GameItem::UberBallItem);
+				    if (foundUberBallFX != foundBallEffects->second.end()) {
+					    std::vector<ESPPointEmitter*>& uberBallEffectsList = foundUberBallFX->second;
+					    assert(uberBallEffectsList.size() > 0);
+					    uberBallEffectsList[0]->Reset();
+				    }
+			    }
+            }
+            break;
+        }
+			
 
-		case GameItem::IceBallItem:
-			{
-				// If there are any effects assigned for the ice ball then we need to reset the trail
-				const GameBall* ballAffected = item.GetBallAffected();
-				assert(ballAffected != NULL);
-				std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(ballAffected);
-				if (foundBallEffects != this->ballEffects.end()) {
-					std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator foundIceBallFX = foundBallEffects->second.find(GameItem::IceBallItem);
-					if (foundIceBallFX != foundBallEffects->second.end()) {
-						std::vector<ESPPointEmitter*>& emitters = foundIceBallFX->second;
-						for (std::vector<ESPPointEmitter*>::iterator iter = emitters.begin(); iter != emitters.end(); ++iter) {
-							ESPPointEmitter* currEmitter = *iter;
-							currEmitter->Reset();
-						}	
-					}
-				}
-			}
+		case GameItem::IceBallItem: {
+			// If there are any effects assigned for the ice ball then we need to reset the trail
+			std::set<const GameBall*> ballsAffected = item.GetBallsAffected();
+            for (std::set<const GameBall*>::const_iterator iter = ballsAffected.begin(); iter != ballsAffected.end(); ++iter) {
+                const GameBall* ballAffected = *iter;
+
+			    std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(ballAffected);
+			    if (foundBallEffects != this->ballEffects.end()) {
+				    std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator foundIceBallFX = foundBallEffects->second.find(GameItem::IceBallItem);
+				    if (foundIceBallFX != foundBallEffects->second.end()) {
+					    std::vector<ESPPointEmitter*>& emitters = foundIceBallFX->second;
+					    for (std::vector<ESPPointEmitter*>::iterator iter = emitters.begin(); iter != emitters.end(); ++iter) {
+						    ESPPointEmitter* currEmitter = *iter;
+						    currEmitter->Reset();
+					    }	
+				    }
+			    }
+            }
 			break;
+        }
 
         case GameItem::BallSlowDownItem:
         case GameItem::BallSpeedUpItem: {
 
-				// If there are any effects assigned we need to reset the trail
-				const GameBall* ballAffected = item.GetBallAffected();
-				assert(ballAffected != NULL);
+			// If there are any effects assigned we need to reset the trail
+			std::set<const GameBall*> ballsAffected = item.GetBallsAffected();
+            for (std::set<const GameBall*>::const_iterator iter = ballsAffected.begin(); iter != ballsAffected.end(); ++iter) {
+                const GameBall* ballAffected = *iter;
 				
                 std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
                     this->ballEffects.find(ballAffected);
@@ -5576,6 +5582,7 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 						}	
 					}
 				}
+            }
 
             break;
         }
@@ -5607,19 +5614,28 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 			break;
 
 		case GameItem::BallGrowItem: {
-				this->AddBallGrowEffect(item.GetBallAffected());
+            std::set<const GameBall*> ballsAffected = item.GetBallsAffected();
+            for (std::set<const GameBall*>::const_iterator iter = ballsAffected.begin(); iter != ballsAffected.end(); ++iter) {
+                const GameBall* ballAffected = *iter;
+				this->AddBallGrowEffect(ballAffected);
 			}
 			break;
+        }
 
 		case GameItem::BallShrinkItem: {
-				this->AddBallShrinkEffect(item.GetBallAffected());
-			}
-			break;
+            std::set<const GameBall*> ballsAffected = item.GetBallsAffected();
+            for (std::set<const GameBall*>::const_iterator iter = ballsAffected.begin(); iter != ballsAffected.end(); ++iter) {
+                const GameBall* ballAffected = *iter;
+			    this->AddBallShrinkEffect(ballAffected);
+            }
+            break;
+		}
+			
 
 		case GameItem::LifeUpItem: {
-                this->AddLifeUpEffect(gameModel.GetPlayerPaddle());
-			}
+            this->AddLifeUpEffect(gameModel.GetPlayerPaddle());
 			break;
+        }
 
 		default:
 			break;

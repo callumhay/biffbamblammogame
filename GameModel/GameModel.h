@@ -467,6 +467,7 @@ public:
     void BallBoostDirectionPressed(int x, int y);
     void BallBoostDirectionReleased();
     void BallBoostReleasedForBall(const GameBall& ball);
+    void ReleaseBulletTime();
 
     float GetTimeDialationFactor() const;
     const BallBoostModel* GetBallBoostModel() const {

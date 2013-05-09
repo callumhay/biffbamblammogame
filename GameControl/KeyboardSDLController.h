@@ -34,8 +34,7 @@ private:
     static const double TIME_TO_MAX_SPEED;
 
     double dirHeldDownTimeCounter;
-
-    bool specialDirOn;
+    bool windowHasFocus;
 
 	bool keyPressed[SDLK_LAST];
 	void SetKeyPress(int key, bool isPressed);
@@ -50,9 +49,9 @@ private:
 	void ExecuteDisplayKeyPressedNotifications(SDLKey key);
 	void ExecuteDisplayKeyReleasedNotifications(SDLKey key);
 
-    
-
     void GetSpecialDirectionVector(Vector2D& dir);
+
+    void WindowActiveEvent(const SDL_ActiveEvent& sdlActiveEvent);
 
 	void DebugRepeatActions();
 	void DebugKeyDownActions(SDLKey key);
@@ -101,5 +100,7 @@ inline void KeyboardSDLController::GetSpecialDirectionVector(Vector2D& dir) {
         dir[1] += 0;
     }
 }
+
+
 
 #endif // __KEYBOARDSDLCONTROLLER_H__

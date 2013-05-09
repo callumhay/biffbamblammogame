@@ -23,21 +23,12 @@ class BallSizeItem : public GameItem {
 public:
 	enum BallSizeChangeType { ShrinkBall, GrowBall };
 
-private:
-	BallSizeChangeType sizeChangeType;
-
-public:
 	static const char* BALL_GROW_ITEM_NAME;
 	static const char* BALL_SHRINK_ITEM_NAME;
 	static const double BALL_SIZE_TIMER_IN_SECS;
 
 	BallSizeItem(const BallSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel);
 	~BallSizeItem();
-
-	const GameBall* GetBallAffected() const {
-		assert(this->gameModel->GetGameBalls().size() > 0);
-		return *this->gameModel->GetGameBalls().begin();
-	}
 
 	double Activate();
 	void Deactivate();
@@ -46,5 +37,14 @@ public:
 		return (this->sizeChangeType == ShrinkBall) ? GameItem::BallShrinkItem : GameItem::BallGrowItem;
 	}
 
+    std::set<const GameBall*> GetBallsAffected() const {
+	    std::set<const GameBall*> ballsAffected;
+        ballsAffected.insert(this->gameModel->GetGameBalls().begin(), this->gameModel->GetGameBalls().end());
+        return ballsAffected;
+    }
+
+private:
+	BallSizeChangeType sizeChangeType;
+    DISALLOW_COPY_AND_ASSIGN(BallSizeItem);
 };
 #endif

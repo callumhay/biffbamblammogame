@@ -28,6 +28,9 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::ShieldPaddleItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(ShieldPaddleItem);
 };
 
 #endif // __SHIELDPADDLEITEM_H__

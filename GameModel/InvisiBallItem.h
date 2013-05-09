@@ -27,16 +27,20 @@ public:
 	InvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
 	~InvisiBallItem();
 	
-	const GameBall* GetBallAffected() const {
-		assert(this->gameModel->GetGameBalls().size() > 0);
-		return *this->gameModel->GetGameBalls().begin();
-	}
-
 	double Activate();
 	void Deactivate();
 
 	GameItem::ItemType GetItemType() const {
 		return GameItem::InvisiBallItem;
 	}
+
+    std::set<const GameBall*> GetBallsAffected() const {
+	    std::set<const GameBall*> ballsAffected;
+        ballsAffected.insert(this->gameModel->GetGameBalls().begin(), this->gameModel->GetGameBalls().end());
+        return ballsAffected;
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(InvisiBallItem);
 };
 #endif

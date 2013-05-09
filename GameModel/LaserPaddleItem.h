@@ -37,5 +37,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::LaserBulletPaddleItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(LaserPaddleItem);
 };
 #endif

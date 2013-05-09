@@ -21,12 +21,8 @@ assocGameItem(gameItem), timeElapsedInSecs(0.0) , wasStopped(false), deactivateI
 		GameEventManager::Instance()->ActionItemTimerStarted(*this);
 	}
 
-    // If there's a ball associated with the item then add it to the set of associated balls
-    const GameBall* assocBall = gameItem->GetBallAffected();
-    if (assocBall != NULL) {
-        this->assocGameBalls.insert(assocBall);
-    }
-
+    // If there are balls associated with the item then add it to the set of associated balls
+    this->assocGameBalls = gameItem->GetBallsAffected();
 }
 
 GameItemTimer::~GameItemTimer() {

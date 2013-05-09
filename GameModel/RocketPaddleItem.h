@@ -38,5 +38,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::RocketPaddleItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(RocketPaddleItem);
 };
 #endif // __ROCKETPADDLEITEM_H__
