@@ -366,6 +366,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Bezier.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\BlammoTime.h"
 					>
 				</File>
@@ -487,6 +491,10 @@
 				>
 				<File
 					RelativePath=".\BlammoEngine\Algebra.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Bezier.cpp"
 					>
 				</File>
 				<File

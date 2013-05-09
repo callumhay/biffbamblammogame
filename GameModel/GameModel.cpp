@@ -991,20 +991,25 @@ void GameModel::IncrementScore(PointAward& pointAward) {
         int incrementAmt = static_cast<int>(currMultiplier * pointAward.GetPointAmount());
         this->currPlayerScore += incrementAmt;
 
-		// EVENT: Score was changed
-        GameEventManager::Instance()->ActionScoreChanged(this->currPlayerScore);
-        // EVENT: Point notification
-        GameEventManager::Instance()->ActionPointNotification(pointAward);
+        // No points, stars or score notifications on boss levels
+        const GameLevel* currLevel = this->GetCurrentLevel();
+        if (!currLevel->GetHasBoss()) {
+		    // EVENT: Score was changed
+            GameEventManager::Instance()->ActionScoreChanged(this->currPlayerScore);
+            // EVENT: Point notification
+            GameEventManager::Instance()->ActionPointNotification(pointAward);
+        
 
-        // Check to see if the number of stars changed...
-        GameLevel* currLevel = this->GetCurrentLevel();
-        int numStarsForCurrScore = currLevel->GetNumStarsForScore(this->currPlayerScore);
-        if (this->numStarsAwarded != numStarsForCurrScore) {
-            int oldNumStars = this->numStarsAwarded;
-            this->numStarsAwarded = numStarsForCurrScore;
-            // EVENT: The number of stars changed
-            GameEventManager::Instance()->ActionNumStarsChanged(&pointAward, oldNumStars, this->numStarsAwarded);
+            // Check to see if the number of stars changed...
+            int numStarsForCurrScore = currLevel->GetNumStarsForScore(this->currPlayerScore);
+            if (this->numStarsAwarded != numStarsForCurrScore) {
+                int oldNumStars = this->numStarsAwarded;
+                this->numStarsAwarded = numStarsForCurrScore;
+                // EVENT: The number of stars changed
+                GameEventManager::Instance()->ActionNumStarsChanged(&pointAward, oldNumStars, this->numStarsAwarded);
+            }
         }
+
     }
 }
 //void GameModel::IncrementScore(std::list<PointAward>& pointAwardsList) {
@@ -1028,12 +1033,16 @@ void GameModel::SetNumInterimBlocksDestroyed(int value, const Point2D& pos) {
 
         int newMultiplier = this->GetCurrentMultiplier();
 		
-        // EVENT: The value has changed for the number of interim blocks destroyed (the multiplier part counter)
-        GameEventManager::Instance()->ActionScoreMultiplierCounterChanged(oldNumInterimBlocksDestroyed, this->numInterimBlocksDestroyed);
+        // No events for boss levels
+        if (!this->GetCurrentLevel()->GetHasBoss()) {
 
-		// EVENT: The score multiplier has changed
-        if (oldMultiplier != newMultiplier) {
-		    GameEventManager::Instance()->ActionScoreMultiplierChanged(oldMultiplier, newMultiplier, pos);
+            // EVENT: The value has changed for the number of interim blocks destroyed (the multiplier part counter)
+            GameEventManager::Instance()->ActionScoreMultiplierCounterChanged(oldNumInterimBlocksDestroyed, this->numInterimBlocksDestroyed);
+
+		    // EVENT: The score multiplier has changed
+            if (oldMultiplier != newMultiplier) {
+		        GameEventManager::Instance()->ActionScoreMultiplierChanged(oldMultiplier, newMultiplier, pos);
+            }
         }
 
         // Reset the dropped life flag if the multiplier is lower than the max multiplier
