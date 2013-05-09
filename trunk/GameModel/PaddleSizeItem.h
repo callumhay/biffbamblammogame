@@ -21,10 +21,6 @@ class PaddleSizeItem : public GameItem {
 public:
 	enum PaddleSizeChangeType { ShrinkPaddle, GrowPaddle };
 
-private:
-	PaddleSizeChangeType sizeChangeType;
-
-public:
 	static const char* PADDLE_GROW_ITEM_NAME;
 	static const char* PADDLE_SHRINK_ITEM_NAME;
 	static const double PADDLE_SIZE_TIMER_IN_SECS;
@@ -38,5 +34,9 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return (this->sizeChangeType == ShrinkPaddle) ? GameItem::PaddleShrinkItem : GameItem::PaddleGrowItem;
 	}
+
+private:
+    PaddleSizeChangeType sizeChangeType;
+    DISALLOW_COPY_AND_ASSIGN(PaddleSizeItem);
 };
 #endif

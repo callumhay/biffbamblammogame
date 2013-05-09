@@ -35,5 +35,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::PoisonPaddleItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(PoisonPaddleItem);
 };
 #endif

@@ -2,7 +2,7 @@
  * CgFxGaussianBlur.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -21,7 +21,7 @@ const char* CgFxGaussianBlur::GAUSSIANBLUR_7x7_TECHNIQUE_NAME = "GaussianBlur7x7
 
 CgFxGaussianBlur::CgFxGaussianBlur(BlurType blurType, FBObj* sceneFBO) : 
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_GAUSSIAN_SHADER, sceneFBO),
-tempFBO(NULL) {
+tempFBO(NULL), sigma(0.8f) {
 
 	// Set the blur type - this will also set the proper technique for the shader
 	this->SetBlurType(blurType);
@@ -33,9 +33,10 @@ tempFBO(NULL) {
 														FBObj::NoAttachment);
 
 	// Establish all the CG parameters in the effect
-	this->sceneSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
-	this->sceneWidthParam		= cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
-	this->sceneHeightParam	= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
+	this->sceneSamplerParam       = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->blurSizeHorizontalParam = cgGetNamedEffectParameter(this->cgEffect, "BlurSizeHorizontal");
+    this->blurSizeVerticalParam   = cgGetNamedEffectParameter(this->cgEffect, "BlurSizeVertical");
+	this->sigmaParam              = cgGetNamedEffectParameter(this->cgEffect, "Sigma");
 	
 	debug_cg_state();
 }
@@ -93,8 +94,9 @@ void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
 
 	// Step 0: Establish uniform parameter(s)
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
-	cgGLSetParameter1f(this->sceneWidthParam,  revisedWidth);
-	cgGLSetParameter1f(this->sceneHeightParam, revisedHeight);
+    cgGLSetParameter1f(this->blurSizeHorizontalParam, 1.0f / revisedWidth);
+    cgGLSetParameter1f(this->blurSizeVerticalParam,   1.0f / revisedHeight);
+    cgGLSetParameter1f(this->sigmaParam, this->sigma);
 
 	// Step 1: Bind the temporary FBO and draw a fullscreen quad with the first pass of the effect.
 	this->tempFBO->BindFBObj();

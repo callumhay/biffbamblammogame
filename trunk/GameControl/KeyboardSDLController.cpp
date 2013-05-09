@@ -21,7 +21,7 @@
 const double KeyboardSDLController::TIME_TO_MAX_SPEED = 0.2;
 
 KeyboardSDLController::KeyboardSDLController(GameModel* model, GameDisplay* display) :
-BBBGameController(model, display), specialDirOn(false), dirHeldDownTimeCounter(0.0) {
+BBBGameController(model, display), dirHeldDownTimeCounter(0.0), windowHasFocus(true) {
 	for (int i = 0; i < SDLK_LAST; i++) {
 		this->keyPressed[i] = false;
 	}
@@ -35,6 +35,10 @@ bool KeyboardSDLController::ProcessState() {
 	// Grab all the events off the queue
 	while (SDL_PollEvent(&keyEvent)) {
 		switch (keyEvent.type) {
+
+            case SDL_ACTIVEEVENT:
+                this->WindowActiveEvent(keyEvent.active);
+                break;
 
 			case SDL_KEYDOWN:
 				this->KeyDown(keyEvent.key.keysym.sym);
@@ -161,16 +165,18 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
 void KeyboardSDLController::MouseButtonUp(unsigned int button) {
 
     switch (button) {
+
         case SDL_BUTTON_LEFT:
             this->display->SpecialDirectionReleased();
             this->display->MouseReleased(GameControl::LeftMouseButton);
             //debug_output("Left button released.");
             break;
+
         case SDL_BUTTON_RIGHT:
             this->display->MouseReleased(GameControl::RightMouseButton);
             //debug_output("Right button released.");
-
             break;
+
         default:
             break;
     }
@@ -184,31 +190,86 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
     UNUSED_PARAMETER(relX);
     UNUSED_PARAMETER(relY);
 
-    // Convert to OpenGL screen-space coordinates system (origin in lower-left corner)...
-    unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
+    if (this->windowHasFocus) {
 
-    if (this->model->GetCurrentStateType() == GameState::BallInPlayStateType) {
-        const BallBoostModel* boostModel = this->model->GetBallBoostModel();
-        if (boostModel == NULL) {
-            return;
-        }
+        // Convert to OpenGL screen-space coordinates system (origin in lower-left corner)...
+        unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
 
-        if (boostModel->IsInBulletTime()) {
-            Vector2D previousBoostDir = boostModel->GetBallBoostDirection();
-
-            // Calculate the angular difference from the previous mouse position to the current,
-            // this, added to the previous boost direction, determines the special direction used for ball boosting
-            const Camera& camera = this->display->GetCamera();
-
-            Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
-            Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
-            if (boostDir.IsZero()) {
-                boostDir[0] = 1;
+        if (this->model->GetCurrentStateType() == GameState::BallInPlayStateType) {
+            const BallBoostModel* boostModel = this->model->GetBallBoostModel();
+            if (boostModel == NULL) {
+                return;
             }
 
-            this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+            if (boostModel->IsInBulletTime()) {
+                Vector2D previousBoostDir = boostModel->GetBallBoostDirection();
+
+                // Calculate the angular difference from the previous mouse position to the current,
+                // this, added to the previous boost direction, determines the special direction used for ball boosting
+                const Camera& camera = this->display->GetCamera();
+
+                Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
+                Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
+                if (boostDir.IsZero()) {
+                    boostDir[0] = 1;
+                }
+
+                this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+            }
         }
     }
+}
+
+void KeyboardSDLController::WindowActiveEvent(const SDL_ActiveEvent& sdlActiveEvent) {
+    enum ApplicationWindowState {
+        Minimized,   // application window has been iconified
+        Restored,    // application window has been restored
+        GainedFocus, // application window got input focus
+        LostFocus    // application window lost input focus
+    };
+
+    static ApplicationWindowState appWindowState = Restored;
+
+    if (sdlActiveEvent.state == (SDL_APPINPUTFOCUS | SDL_APPACTIVE)) {
+        if (sdlActiveEvent.gain == 0) {
+            this->windowHasFocus = false;
+            appWindowState = Minimized;
+            debug_output("Window Minimized");
+        }
+        else {
+            this->windowHasFocus = true;
+
+            if (appWindowState == LostFocus) {    
+                appWindowState = GainedFocus;
+                debug_output("Window Gained Focus");
+            }
+            else {
+                appWindowState = Restored;
+                debug_output("Window Restored");
+            }
+        }
+    }
+    else if ((sdlActiveEvent.state & SDL_APPINPUTFOCUS) == SDL_APPINPUTFOCUS) {
+        if (sdlActiveEvent.gain == 0) {
+            this->windowHasFocus = false;
+            appWindowState = LostFocus;
+            debug_output("Window Lost Focus");
+        }
+        else {
+            this->windowHasFocus = true;
+            debug_output("Window Gained Focus");
+            appWindowState = GainedFocus;
+        }
+    }
+
+    if (!this->windowHasFocus) {
+        // If we just lost focus then we need to stop any ball boosting...
+        const BallBoostModel* boostModel = this->model->GetBallBoostModel();
+        if (boostModel != NULL) {
+            this->display->GetModel()->ReleaseBulletTime();
+        }
+    }
+
 }
 
 /**

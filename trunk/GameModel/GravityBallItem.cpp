@@ -40,7 +40,6 @@ double GravityBallItem::Activate() {
 		}
 	}
 
-	// Make the last ball to hit the paddle into a gravity ball
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
     for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 	    GameBall* affectedBall = *iter;

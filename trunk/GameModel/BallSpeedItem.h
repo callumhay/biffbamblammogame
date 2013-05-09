@@ -21,23 +21,12 @@
  * Item associated with speeding up or slowing down the ball.
  */
 class BallSpeedItem : public GameItem {
-
 public:
 	enum BallSpeedType { FastBall, SlowBall };
 
-private:
-	BallSpeedType spdType;
-	void SwitchSpeed(BallSpeedType newSpd);
-
-public:
 	static const double BALL_SPEED_TIMER_IN_SECS;
 	static const char* SLOW_BALL_ITEM_NAME;
 	static const char* FAST_BALL_ITEM_NAME;
-
-	const GameBall* GetBallAffected() const {
-		assert(this->gameModel->GetGameBalls().size() > 0);
-		return *this->gameModel->GetGameBalls().begin();
-	}
 
 	BallSpeedItem(const BallSpeedType type, const Point2D &spawnOrigin, GameModel *gameModel);
 	~BallSpeedItem();
@@ -48,5 +37,17 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return (this->spdType == FastBall) ? GameItem::BallSpeedUpItem : GameItem::BallSlowDownItem;
 	}
+
+    std::set<const GameBall*> GetBallsAffected() const {
+	    std::set<const GameBall*> ballsAffected;
+        ballsAffected.insert(this->gameModel->GetGameBalls().begin(), this->gameModel->GetGameBalls().end());
+        return ballsAffected;
+    }
+
+private:
+	BallSpeedType spdType;
+	void SwitchSpeed(BallSpeedType newSpd);
+
+    DISALLOW_COPY_AND_ASSIGN(BallSpeedItem);
 };
 #endif

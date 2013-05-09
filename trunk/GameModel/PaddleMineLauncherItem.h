@@ -37,5 +37,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::MineLauncherPaddleItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(PaddleMineLauncherItem);
 };
 #endif // __PADDLEMINELAUNCHERITEM_H__

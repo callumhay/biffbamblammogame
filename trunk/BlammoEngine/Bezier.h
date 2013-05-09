@@ -17,15 +17,15 @@
 
 class Bezier {
 public:
-
     static void GeneratePointsAlongBezier2D(const std::vector<Point2D>& bezierControlPts, int numPointsToGenerate,
-                                         std::vector<Point2D>& generatedPointsOnCurve);
-    
+                                            std::vector<Point2D>& generatedPointsOnCurve);
 
 private:
     static const int NUM_FACTORIALS_IN_TABLE = 33;
     static const double FACTORIAL_TABLE[NUM_FACTORIALS_IN_TABLE];
 
+
+    //std::vector<Point2D> controlPoints;
 
     Bezier() {};
     ~Bezier() {};

@@ -544,6 +544,12 @@ void GameModel::BallBoostReleasedForBall(const GameBall& ball) {
 	}
 }
 
+void GameModel::ReleaseBulletTime() {
+    if (this->boostModel != NULL) {
+        this->boostModel->ReleaseBulletTime();
+    }
+}
+
 float GameModel::GetTimeDialationFactor() const {
     if (this->boostModel == NULL) { return 1.0f; }
     return this->boostModel->GetTimeDialationFactor();
@@ -1204,8 +1210,10 @@ void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
     // if so we expire and remove them 
     for (std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end();) {
 	    GameItemTimer* currTimer = *iter;
+        
         if (currTimer->GetAssociatedBalls().find(ball) != currTimer->GetAssociatedBalls().end()) {
             currTimer->RemoveAssociatedBall(ball);
+
             if (currTimer->GetAssociatedBalls().empty()) {
 		        iter = this->activeTimers.erase(iter);
 		        delete currTimer;

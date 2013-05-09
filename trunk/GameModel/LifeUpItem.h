@@ -32,6 +32,9 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::LifeUpItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(LifeUpItem);
 };
 
 #endif // __LIFEUPITEM_H__

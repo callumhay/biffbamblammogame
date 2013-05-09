@@ -37,5 +37,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::UpsideDownItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(UpsideDownItem);
 };
 #endif

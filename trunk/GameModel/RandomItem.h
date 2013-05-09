@@ -27,7 +27,7 @@ public:
 	RandomItem(const Point2D &spawnOrigin, GameModel *gameModel);
 	~RandomItem();
 	
-	const GameBall* GetBallAffected() const;
+	std::set<const GameBall*> GetBallsAffected() const ;
 	double Activate();
 	void Deactivate();
 	GameItem::ItemType GetItemType() const;
@@ -35,10 +35,11 @@ public:
 private:
 	GameItem* randomItem;
 
+    DISALLOW_COPY_AND_ASSIGN(RandomItem);
 };
 
-inline const GameBall* RandomItem::GetBallAffected() const {
-	return this->randomItem->GetBallAffected();
+inline std::set<const GameBall*> RandomItem::GetBallsAffected() const {
+	return this->randomItem->GetBallsAffected();
 }
 
 inline double RandomItem::Activate() {

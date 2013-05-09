@@ -20,7 +20,6 @@
  * except for the paddle and ball.
  */
 class BlackoutItem : public GameItem {
-
 public:
 	static const char* BLACKOUT_ITEM_NAME;
 	static const double BLACKOUT_TIMER_IN_SECS;
@@ -34,5 +33,8 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::BlackoutItem;
 	}
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(BlackoutItem);
 };
 #endif

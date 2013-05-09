@@ -79,6 +79,8 @@ public:
     void SetInvertBallBoostDir(bool isInverted);
     
     void IncrementBoostChargeByPercent(double percent);
+    
+    void ReleaseBulletTime();
 
     void DebugDraw() const;
 
@@ -108,8 +110,6 @@ private:
     void RecalculateBallZoomBounds();
     
     void IncrementBoostChargeByTime(double timeInSecs);
-    
-    void ReleaseBulletTime();
     bool WasBoostReleasedSoftly();
 
     DISALLOW_COPY_AND_ASSIGN(BallBoostModel);

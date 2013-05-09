@@ -34,9 +34,13 @@ public:
 		return GameItem::GhostBallItem;
 	}
 
-	const GameBall* GetBallAffected() const {
-		assert(this->gameModel->GetGameBalls().size() > 0);
-		return *this->gameModel->GetGameBalls().begin();
-	}
+    std::set<const GameBall*> GetBallsAffected() const {
+	    std::set<const GameBall*> ballsAffected;
+        ballsAffected.insert(this->gameModel->GetGameBalls().begin(), this->gameModel->GetGameBalls().end());
+        return ballsAffected;
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(GhostBallItem);
 };
 #endif

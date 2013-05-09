@@ -28,6 +28,20 @@ public:
 	static const double MULTI_BALL_TIMER_IN_SECS;
 	static const double BALL_COLLISIONS_DISABLED_DURATION;
 
+	static const unsigned int MAX_NUM_SPLITBALLS = 5;		// Maximum number of balls that can split off in a multiball
+	static const unsigned int MIN_NUM_SPLITBALLS = 1;		// Minimum number of balls that can split off in a multiball
+	static const float MIN_SPLIT_DEGREES;								// Minimum number of degrees between balls when splitting
+
+	MultiBallItem(const Point2D &spawnOrigin, GameModel *gameModel, NumMultiBalls numBalls);
+	~MultiBallItem();
+
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return (this->numBalls == ThreeMultiBalls) ? GameItem::MultiBall3Item : GameItem::MultiBall5Item;
+	}
+
 private:
 	NumMultiBalls numBalls;
 	unsigned int numNewSpawnedBalls;	// The number of balls created for each preexisting gameball in play
@@ -45,19 +59,7 @@ private:
 		return MULTI3_BALL_ITEM_NAME;
 	}
 
-public:
-	static const unsigned int MAX_NUM_SPLITBALLS = 5;		// Maximum number of balls that can split off in a multiball
-	static const unsigned int MIN_NUM_SPLITBALLS = 1;		// Minimum number of balls that can split off in a multiball
-	static const float MIN_SPLIT_DEGREES;								// Minimum number of degrees between balls when splitting
-
-	MultiBallItem(const Point2D &spawnOrigin, GameModel *gameModel, NumMultiBalls numBalls);
-	~MultiBallItem();
-
-	double Activate();
-	void Deactivate();
-
-	GameItem::ItemType GetItemType() const {
-		return (this->numBalls == ThreeMultiBalls) ? GameItem::MultiBall3Item : GameItem::MultiBall5Item;
-	}
+    DISALLOW_COPY_AND_ASSIGN(MultiBallItem);
 };
+
 #endif

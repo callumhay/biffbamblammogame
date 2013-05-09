@@ -35,5 +35,7 @@ public:
 		return GameItem::BallSafetyNetItem;
 	}
 
+private:
+    DISALLOW_COPY_AND_ASSIGN(BallSafetyNetItem);
 };
 #endif

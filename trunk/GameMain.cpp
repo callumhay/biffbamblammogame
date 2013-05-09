@@ -83,8 +83,7 @@ static void GameRenderLoop() {
 
 		SDL_Delay(GameDisplay::FRAME_SLEEP_MS);
 
-		// Process events (like input from controllers/windows)...
-		// TODO: Signal a quit here via a boolean
+		// Process controller events
 		quitGame = GameControllerManager::GetInstance()->ProcessControllers();
 		if (quitGame) {
 			display->QuitGame();
