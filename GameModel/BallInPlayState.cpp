@@ -119,7 +119,7 @@ void BallInPlayState::Tick(double seconds) {
 	// Variables that will be needed for collision detection
 	Vector2D n;
 	Collision::LineSeg2D collisionLine;
-	double timeSinceCollision;
+	double timeUntilCollision;
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
 	bool didCollideWithTeslaLightning = false;
@@ -200,7 +200,9 @@ void BallInPlayState::Tick(double seconds) {
         }
 
 
-	    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+        std::vector<bool> ballPositionChangedByCollision(gameBalls.size(), false);
+        int ballIdx = 0;
+	    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter, ballIdx++) {
 		    GameBall *currBall = *iter;
 
 		    // Check to see if the ball is allowed to collide with paddles, if so run the ball-paddle
@@ -208,7 +210,7 @@ void BallInPlayState::Tick(double seconds) {
 		    if (currBall->CanCollideWithPaddles()) {
 
 			    // Check for ball collision with the player's paddle
-			    didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+			    didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision);
 			    if (didCollideWithPaddle) {
 				    // The ball no longer has a last piece that it collided with - it gets reset when it hits the paddle
 				    currBall->SetLastPieceCollidedWith(NULL);
@@ -257,8 +259,9 @@ void BallInPlayState::Tick(double seconds) {
                     }
 
 				    // Do ball-paddle collision
-				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
-
+				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
+                    ballPositionChangedByCollision[ballIdx] = true;
+                    
 				    // Tell the model that a ball collision occurred with the paddle
 				    this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
@@ -295,29 +298,31 @@ void BallInPlayState::Tick(double seconds) {
 
 		    // Ball Safety Net Collisions:
             if (this->gameModel->IsSafetyNetActive()) {
-		        if (this->gameModel->safetyNet->BallCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision)) {
+		        if (this->gameModel->safetyNet->BallCollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision)) {
                     
                     this->gameModel->DestroySafetyNet();
 
                     // EVENT: The ball just destroyed the safety net
                     GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currBall);
 
-			        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+			        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
+                    ballPositionChangedByCollision[ballIdx] = true;
 		        }
             }
 
 		    // Ball - tesla lightning arc collisions:
-		    didCollideWithTeslaLightning = currLevel->TeslaLightningCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+		    didCollideWithTeslaLightning = currLevel->TeslaLightningCollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision);
 		    if (didCollideWithTeslaLightning) {
 			    // Clear the last piece collided with since the ball is now colliding with a tesla lightning arc
 			    currBall->SetLastPieceCollidedWith(NULL);
     			
 			    // Calculate the ball position/velocity after collision
-			    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+			    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
+                ballPositionChangedByCollision[ballIdx] = true;
     			
 			    // Make for damn sure that the ball is no longer colliding!
-			    while (currLevel->TeslaLightningCollisionCheck(*currBall, 0.0, n, collisionLine, timeSinceCollision)) {
-				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+			    while (currLevel->TeslaLightningCollisionCheck(*currBall, 0.0, n, collisionLine, timeUntilCollision)) {
+				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
 			    }
 		    }
 
@@ -329,16 +334,28 @@ void BallInPlayState::Tick(double seconds) {
                     Boss* boss = currLevel->GetBoss();
                     assert(boss != NULL);
                     
-                    BossBodyPart* collisionBossPart = boss->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
-                    if (collisionBossPart != NULL) {
+                    // Collide with the boss until there are no more collisions
+                    BossBodyPart* collisionBossPart = NULL;
+                    double currBallDt = seconds;
+                    while (currBallDt >= 0) {
+
                         // NOTE: For bosses, ghostballs never pass through.
                         // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
+                        collisionBossPart = boss->CollisionCheck(*currBall, currBallDt, n, collisionLine, timeUntilCollision);
+                        if (collisionBossPart == NULL) {
+                            break;
+                        }
 
-                        // First, make the ball react to the collision
-                        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+                        // Make the ball react to the collision...
+                        this->DoBallCollision(*currBall, n, collisionLine, currBallDt, timeUntilCollision,
+                            collisionBossPart->GetCollisionVelocity());
+                        ballPositionChangedByCollision[ballIdx] = true;
 
                         // Now make the boss react to the collision...
                         this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
+
+                        // Update the time delta for the ball, up to the time right after the collision
+                        currBallDt = currBallDt - timeUntilCollision;
                     }
                 }
 
@@ -356,7 +373,7 @@ void BallInPlayState::Tick(double seconds) {
                     assert(currPiece != NULL);
 
                     didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds,
-                        n, collisionLine, timeSinceCollision);
+                        n, collisionLine, timeUntilCollision);
 
 			        if (didCollideWithBlock) {
 				        // Check to see if the ball is a ghost ball, if so there's a chance the ball will 
@@ -394,7 +411,8 @@ void BallInPlayState::Tick(double seconds) {
 				        }
 				        else {
 					        // Make the ball react to the collision
-					        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+					        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
+                            ballPositionChangedByCollision[ballIdx] = true;
 				        }
     					
                         bool currPieceCanChangeSelfOrPiecesAroundIt = currPiece->CanChangeSelfOrOtherPiecesWhenHitByBall() ||
@@ -417,17 +435,21 @@ void BallInPlayState::Tick(double seconds) {
 
         } // All GameBalls loop
 
+	    // Tick the balls
+        ballIdx = 0;
+	    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter, ballIdx++) {
+		    GameBall *currBall = *iter;
+
+		    // Update the current ball, we don't simulate any ball movement if the ball's position has already
+            // been augmented by a previous collision during this frame/tick
+            currBall->Tick(!ballPositionChangedByCollision[ballIdx], seconds, worldGravity2D, this->gameModel);
+	    }
+
+        // NOTE: DO THIS LAST SINCE IT CHANGES THE ORDERING OF THE BALLS!
 	    // Move the last ball that hit the paddle to the front of the list of balls
 	    if (ballToMoveToFront != NULL) {
 		    gameBalls.remove(ballToMoveToFront);
 		    gameBalls.push_front(ballToMoveToFront);
-	    }
-
-	    // Tick the balls
-	    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
-		    GameBall *currBall = *iter;
-		    // Update the current ball
-            currBall->Tick(seconds, worldGravity2D, this->gameModel);
 	    }
 
 	} // Pause ball
@@ -463,12 +485,13 @@ void BallInPlayState::Tick(double seconds) {
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, 
                                       Collision::LineSeg2D& collisionLine, 
-                                      double dT, double timeSinceCollision) {
+                                      double dT, double timeUntilCollision,
+                                      const Vector2D& lineVelocity) {
 	b.BallCollided();
 
 	// Calculate the time of collision and then the difference up to this point
 	// based on the velocity and then move it to that position...
-	double timeToMoveInReflectionDir = std::max<double>(0.0, dT + timeSinceCollision);
+	double timeToMoveInReflectionDir = std::max<double>(0.0, dT - timeUntilCollision);
 
 	// Make sure the ball is on the correct side of the collision line (i.e., the side that the normal is pointing in)
 	Vector2D fromLineToBall = b.GetCenterPosition2D() - collisionLine.P1();
@@ -477,24 +500,20 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 		assert(fromLineToBall != Vector2D(0, 0));
 	}
 
-    const float BALL_RADIUS  = b.GetBounds().Radius();
-    const float BALL_EPSILON = 0.001f * BALL_RADIUS;
-
-
 	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
 	Vector2D reflVecHat;
 	if (Vector2D::Dot(b.GetDirection(), n) >= 0) {
 		// Somehow the ball is travelling away from the normal but is hitting the line...
         
         // Position the ball so that it is at the location it was at when it collided...
-	    b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * b.GetVelocity());
+	    b.SetCenterPosition(b.GetCenterPosition2D() + timeUntilCollision * -b.GetVelocity());
 
         // The ball will reflect off its own direction vector...
         reflVecHat = b.GetDirection();
 	}
 	else {
         // Position the ball so that it is at the location it was at when it collided...
-	    b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
+	    b.SetCenterPosition(b.GetCenterPosition2D() + timeUntilCollision * b.GetVelocity());
 
         // Typical bounce off the normal: figure out the reflection vector
         reflVecHat = Vector2D::Normalize(Reflect(b.GetDirection(), n));
@@ -559,12 +578,20 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 		}
 	}
 
-	// Reflect the ball off the normal
-	b.SetVelocity(reflSpd, reflVecHat);
+	// Reflect the ball off the normal... this will have some dependance on whether there is a velocity for the line...
+    if (lineVelocity.IsZero()) {
+	    b.SetVelocity(reflSpd, reflVecHat);
+    }
+    else {
+        Vector2D reflectionVel = reflSpd * reflVecHat;
+        Vector2D augmentedReflectionVecHat = Vector2D::Normalize(reflectionVel + lineVelocity);
+        b.SetVelocity(reflSpd, augmentedReflectionVecHat);
+    }
 
 	// Now move the ball in that direction over how ever much time was lost during the collision
 	b.SetCenterPosition(b.GetCenterPosition2D() + timeToMoveInReflectionDir * b.GetVelocity());
 }
+
 
 /**
  * Private helper function to calculate the new velocities for two balls that just

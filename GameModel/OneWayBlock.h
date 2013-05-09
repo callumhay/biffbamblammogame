@@ -82,7 +82,7 @@ public:
 
     bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-        Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
@@ -136,14 +136,14 @@ inline bool OneWayBlock::SecondaryCollisionCheck(double dT, const GameBall& ball
 
 inline bool OneWayBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                         Collision::LineSeg2D& collisionLine,
-                                        double& timeSinceCollision) const {
+                                        double& timeUntilCollision) const {
 
     if (!this->SecondaryCollisionCheck(dT, ball)) {
         return false;
     }
 
     return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), 
-                                n, collisionLine, timeSinceCollision);
+                                n, collisionLine, timeUntilCollision);
 }
 
 inline bool OneWayBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {

@@ -1746,7 +1746,7 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->movePedimentUpAndDown = false;
             this->laserShootTimer = this->GetTimeBetweenLaserSprayShots();
             this->moveToNextStateCountdown = this->GeneratePedimentSpinningTime();
-            this->pediment->AnimateLocalZRotation(this->GenerateSpinningPedimentRotationAnim(this->moveToNextStateCountdown));
+            //this->pediment->AnimateLocalZRotation(this->GenerateSpinningPedimentRotationAnim(this->moveToNextStateCountdown));
             this->UpdateEyeAndPedimentHeightMovement();
             break;
 

@@ -45,7 +45,8 @@ BallState* InCannonBallState::Clone(GameBall* newBall) const {
 	return new InCannonBallState(newBall, this->cannonBlock, this->previousState->Clone(newBall));
 }
 
-void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
+void InCannonBallState::Tick(bool simulateMovement, double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
+    UNUSED_PARAMETER(simulateMovement);
     UNUSED_PARAMETER(gameModel);
 	UNUSED_PARAMETER(worldSpaceGravityDir);
 

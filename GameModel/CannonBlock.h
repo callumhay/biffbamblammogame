@@ -84,7 +84,7 @@ public:
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 	
     bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
-	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	
@@ -141,9 +141,9 @@ inline bool CannonBlock::SecondaryCollisionCheck(double dT, const GameBall& ball
 }
 
 inline bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
-										Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+										Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const {
 
-    return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+    return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision);
 }
 
 inline bool CannonBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {

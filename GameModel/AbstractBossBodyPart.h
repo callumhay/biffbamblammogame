@@ -38,7 +38,7 @@ public:
     virtual void Tick(double dT);
 
     virtual BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-        Collision::LineSeg2D& collisionLine, double& timeSinceCollision) = 0;
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision) = 0;
     virtual BossBodyPart* CollisionCheck(const PlayerPaddle& paddle) = 0;
 	virtual BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT) = 0;
 	virtual BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) = 0;

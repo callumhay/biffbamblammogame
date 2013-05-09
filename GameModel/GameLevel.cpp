@@ -1914,7 +1914,7 @@ void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const Tesl
 
 bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, 
 											 Collision::LineSeg2D& collisionLine, 
-                                             double& timeSinceCollision) const {
+                                             double& timeUntilCollision) const {
 	// Fast exit if there's no tesla stuffs
 	if (this->teslaLightning.empty()) {
 		return false;
@@ -1937,7 +1937,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
     double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
 
     Point2D currSamplePt = b.GetCenterPosition2D() - (dT * b.GetVelocity()) + sampleIncDist;
-    double currTimeSinceCollision = dT - sampleIncTime;
+    double currTimeUntilCollision = dT - sampleIncTime;
 
     // Keep track of all the indices collided with and the collision point collided at
     Point2D collisionPt;
@@ -1989,14 +1989,14 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
         }
 
         currSamplePt = currSamplePt + sampleIncDist;
-        currTimeSinceCollision -= sampleIncTime;
+        currTimeUntilCollision -= sampleIncTime;
     }
 
     if (!stillFindingACollision) {
         return false;
     }
 
-    timeSinceCollision = currTimeSinceCollision;
+    timeUntilCollision = currTimeUntilCollision;
 
 	// Figure out what the normal of the collision was
 	// and set all the other relevant parameter values

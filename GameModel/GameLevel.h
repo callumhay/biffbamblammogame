@@ -116,7 +116,7 @@ public:
 	// Ability to add/remove tesla lightning barriers
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
-	bool TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	bool TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
 	bool TeslaLightningCollisionCheck(const BoundingLines& bounds) const;
     bool IsDestroyedByTelsaLightning(const Projectile& p) const;
     void InitAfterLevelLoad(GameModel* model);

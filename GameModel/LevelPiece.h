@@ -87,7 +87,7 @@ public:
 
 	virtual Collision::AABB2D GetAABB() const;
     virtual bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
-	virtual bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	virtual bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	virtual bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	virtual bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
@@ -215,14 +215,14 @@ inline bool LevelPiece::SecondaryCollisionCheck(double dT, const GameBall& ball)
  */
 inline bool LevelPiece::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                        Collision::LineSeg2D& collisionLine,
-                                       double& timeSinceCollision) const {
+                                       double& timeUntilCollision) const {
 
 	// If there are no bounds to collide with or this level piece was the
 	// last one collided with then we can't collide with this piece
     if (!this->SecondaryCollisionCheck(dT, ball)) {
         return false;
     }
-	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision);
 }
 
 /**

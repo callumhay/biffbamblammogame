@@ -334,8 +334,8 @@ Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 	return result;
 }
 
-void GameBall::Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
-	this->currState->Tick(seconds, worldSpaceGravityDir, gameModel);
+void GameBall::Tick(bool simulateMovement, double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
+	this->currState->Tick(simulateMovement, seconds, worldSpaceGravityDir, gameModel);
 	this->timeSinceLastCollision += seconds;
 }
 
