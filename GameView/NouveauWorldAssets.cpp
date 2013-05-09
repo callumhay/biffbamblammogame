@@ -12,15 +12,27 @@
 #include "NouveauWorldAssets.h"
 #include "GameViewConstants.h"
 #include "DecoSkybox.h"
+#include "GameAssets.h"
 
 #include "../ResourceManager.h"
 
 // Basic constructor: Load all the basic assets for the deco world...
-NouveauWorldAssets::NouveauWorldAssets() : 
-GameWorldAssets(new DecoSkybox(),
+NouveauWorldAssets::NouveauWorldAssets(GameAssets* assets) : 
+GameWorldAssets(assets, new DecoSkybox(),
         ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BACKGROUND_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_PADDLE_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BLOCK_MESH)) {
+
+    // Change the positions of the background lights to something that compliements the background more
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(Point3D(60.0f, 60.0f, 60.0f), Colour(0.4f, 0.45f, 0.45f), 0.06f),
+        BasicPointLight(Point3D(30.0f, 11.0f, -15.0f), Colour(0.8f, 0.8f, 0.8f),  0.01f));
+
+    // Change the default values for drawing outlines
+    this->outlineMinDistance = 0.01f;
+    this->outlineMaxDistance = 11.0f;
+    this->outlineContrast    = 3.0f;
+    this->outlineOffset      = 0.8f;
 }
 
 NouveauWorldAssets::~NouveauWorldAssets() {

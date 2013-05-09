@@ -12,7 +12,6 @@
 #include "BallSafetyNetMesh.h"
 #include "GameViewConstants.h"
 #include "CgFxCelShading.h"
-#include "CgFxPhong.h"
 
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/SafetyNet.h"
@@ -71,7 +70,8 @@ void BallSafetyNetMesh::InitializeMaterials() {
 
 	// Read in the texture for the mesh and create the material properties
 	// and shader effect
-	Texture* ballSafetyNetTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_SAFETY_NET, Texture::Trilinear, GL_TEXTURE_2D);
+	Texture* ballSafetyNetTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BALL_SAFETY_NET, Texture::Trilinear, GL_TEXTURE_2D);
 	assert(ballSafetyNetTex != NULL);
 
 	// Create the material properties for the mesh
@@ -81,10 +81,10 @@ void BallSafetyNetMesh::InitializeMaterials() {
 	matProps->specular       = Colour(0.3, 0.3, 0.3);
 	matProps->shininess      = 50.0f;
 	matProps->geomType       = MaterialProperties::MATERIAL_GEOM_FG_TYPE;
-	matProps->materialType 	= MaterialProperties::MATERIAL_PHONG_TYPE;	// Not really necessary, but just for brevity
+    matProps->materialType 	 = MaterialProperties::MATERIAL_CELBASIC_TYPE;  	// Not really necessary, but just for brevity
 
 	// Associate material properties with appropriate shading technique
-	this->shadingMaterial = new CgFxPhong(matProps);
+	this->shadingMaterial = new CgFxCelShading(matProps);
 }
 
 /**

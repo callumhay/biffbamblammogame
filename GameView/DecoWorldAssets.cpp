@@ -18,8 +18,8 @@
 
 
 // Basic constructor: Load all the basic assets for the deco world...
-DecoWorldAssets::DecoWorldAssets() : 
-GameWorldAssets(new DecoSkybox(),
+DecoWorldAssets::DecoWorldAssets(GameAssets* assets) : 
+GameWorldAssets(assets, new DecoSkybox(),
         ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH)),

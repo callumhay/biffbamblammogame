@@ -16,7 +16,7 @@
 
 class NouveauWorldAssets : public GameWorldAssets {
 public:
-	NouveauWorldAssets();
+	NouveauWorldAssets(GameAssets* assets);
 	~NouveauWorldAssets();
 
 	GameWorld::WorldStyle GetStyle() const;
@@ -28,7 +28,6 @@ public:
 	void Tick(double dT);
 
 private:
-
     DISALLOW_COPY_AND_ASSIGN(NouveauWorldAssets);
 };
 

@@ -2,7 +2,7 @@
  * GameWorldAssets.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -10,6 +10,8 @@
  */
 
 #include "GameWorldAssets.h"
+#include "GameAssets.h"
+#include "GameViewConstants.h"
 
 // Subclasses that can be created...
 #include "ClassicalWorldAssets.h"
@@ -20,11 +22,20 @@
 
 const float GameWorldAssets::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
 
-GameWorldAssets::GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock) : 
-		skybox(skybox), background(bg), playerPaddle(paddle), styleBlock(styleBlock), bgFadeAnim(1) {
+GameWorldAssets::GameWorldAssets(GameAssets* assets, Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock) : 
+skybox(skybox), background(bg), playerPaddle(paddle), styleBlock(styleBlock), bgFadeAnim(1),
+outlineMinDistance(0.001f), outlineMaxDistance(30.0f), outlineContrast(1.0f), outlineOffset(0.75f) {
+
+    assert(assets != NULL);
 	assert(skybox != NULL);
 	assert(bg != NULL);
 	assert(paddle != NULL);
+
+    // Set the background lights to their default positions
+    // Setup the Background lights
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.005f),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f));
 
 	// No animation to start for the background fade (needs to be activated via the appropriate member function)
 	this->bgFadeAnim.SetRepeat(false);
@@ -76,18 +87,18 @@ void GameWorldAssets::ResetToInitialState() {
 }
 
 // Static creation method
-GameWorldAssets* GameWorldAssets::CreateWorldAssets(GameWorld::WorldStyle world) {
+GameWorldAssets* GameWorldAssets::CreateWorldAssets(GameWorld::WorldStyle world, GameAssets* assets) {
 	switch (world) {
         case GameWorld::Classical:
-            return new ClassicalWorldAssets();
+            return new ClassicalWorldAssets(assets);
         case GameWorld::GothicRomantic:
-            return new GothicRomanticWorldAssets();
+            return new GothicRomanticWorldAssets(assets);
         case GameWorld::Nouveau:
-            return new NouveauWorldAssets();
+            return new NouveauWorldAssets(assets);
 		case GameWorld::Deco:
-			return new DecoWorldAssets();
+			return new DecoWorldAssets(assets);
         case GameWorld::Futurism:
-            return new FuturismWorldAssets();
+            return new FuturismWorldAssets(assets);
 		default:
 			break;
 	}

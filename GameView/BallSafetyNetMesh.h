@@ -20,7 +20,7 @@
 
 class Camera;
 class PointLight;
-class CgFxPhong;
+class CgFxCelShading;
 class GameLevel;
 
 class BallSafetyNetMesh {
@@ -52,7 +52,7 @@ private:
 
 	BallSafetyNetAnimation currAnimation;
 
-	CgFxPhong* shadingMaterial;
+	CgFxCelShading* shadingMaterial;
 	GLuint displayListID;
     Point2D centerPos;
 	

@@ -127,6 +127,7 @@ public:
 	}
 
     void ApplyImpulseForce(float impulseAmt, float deceleration);
+    //void ApplyNewtonsThirdLawCollisionVelocity(const Vector2D& impulse);
 
 	/** 
 	 * Set ball-ball collisions for this ball to be diabled for the given duration in seconds.

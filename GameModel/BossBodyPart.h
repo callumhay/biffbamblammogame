@@ -73,8 +73,9 @@ public:
     virtual void ColourAnimationFinished() {};
 
     void SetCollisionVelocity(const Vector2D& v);
-    const Vector2D& GetCollisionVelocity() const;
-    void SetCollisionAcceleration(const Vector2D& a);
+    void SetExternalAnimationVelocity(const Vector2D& v);
+
+    Vector2D GetCollisionVelocity() const;
 
 	// Track the status of the body part, effects its properties and how it works/acts
 	//enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, FrozenStatus = 0x00000002 };
@@ -94,7 +95,7 @@ protected:
     AnimationMultiLerp<ColourRGBA> rgbaAnim;
 
     Vector2D collisionVelocity;
-    Vector2D collisionAccel;
+    Vector2D externalAnimationVelocity;
 
     //int32_t pieceStatus;
 
@@ -126,8 +127,11 @@ inline void BossBodyPart::Tick(double dT) {
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                                   Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
+
+    Vector2D bossVelocity = this->GetCollisionVelocity();
+
     if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), 
-        n, collisionLine, timeSinceCollision, this->collisionVelocity, this->collisionAccel)) {
+        n, collisionLine, timeSinceCollision, bossVelocity)) {
         return this;
     }
     return NULL;
@@ -261,12 +265,12 @@ inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {
 inline void BossBodyPart::SetCollisionVelocity(const Vector2D& v) {
     this->collisionVelocity = v;
 }
-inline const Vector2D& BossBodyPart::GetCollisionVelocity() const {
-    return this->collisionVelocity;
+inline void BossBodyPart::SetExternalAnimationVelocity(const Vector2D& v) {
+    this->externalAnimationVelocity = v;
 }
-
-inline void BossBodyPart::SetCollisionAcceleration(const Vector2D& a) {
-    this->collisionAccel = a;
+inline Vector2D BossBodyPart::GetCollisionVelocity() const {
+    Vector3D translationAnimVec = this->transAnim.GetDxDt();
+    return this->collisionVelocity + Vector2D(translationAnimVec[0], translationAnimVec[1]) + this->externalAnimationVelocity;
 }
 
 #endif // __BOSSBODYPART_H__

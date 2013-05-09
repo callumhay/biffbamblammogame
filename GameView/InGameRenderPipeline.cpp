@@ -17,6 +17,7 @@
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
+#include "CgFxCelOutlines.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
@@ -92,11 +93,19 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(double dT) {
 
 	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
 	
-	// Attach the background FBO
-	FBObj* backgroundFBO = this->display->GetAssets()->GetFBOAssets()->GetBackgroundFBO();
+    GameAssets* assets = this->display->GetAssets();
+    GameFBOAssets* fboAssets = assets->GetFBOAssets();
+
+    const Camera& camera = this->display->GetCamera();
+
+	FBObj* backgroundFBO = fboAssets->GetBackgroundFBO();
 	assert(backgroundFBO != NULL);
 
-	backgroundFBO->BindFBObj();
+    FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
+    assert(colourAndDepthFBO != NULL);
+
+    // Render the background geometry into the colour and depth FBO
+    colourAndDepthFBO->BindFBObj();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -105,13 +114,35 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(double dT) {
 	glPushMatrix();
 	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
 
-	this->display->GetAssets()->DrawSkybox(this->display->GetCamera());
-	this->display->GetAssets()->DrawBackgroundModel(this->display->GetCamera());
-	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
-
+	assets->DrawSkybox(camera);
+	assets->DrawBackgroundModel(camera);
+	
 	glPopMatrix();
+    
+    // Render the outlines using the special cel outline effect on what we just rendered...
+    {
+        const GameWorldAssets* currWorldAssets = assets->GetCurrentWorldAssets();
+        static const float OUTLINE_AMBIENT_BRIGHTNESS = 1.0f;
 
-	// Unbind the background FBO
+        CgFxCelOutlines& celOutlineEffect = fboAssets->GetCelOutlineEffect();
+        celOutlineEffect.SetMinDistance(currWorldAssets->GetOutlineMinDistance());
+        celOutlineEffect.SetMaxDistance(currWorldAssets->GetOutlineMaxDistance());
+        celOutlineEffect.SetContrastExponent(currWorldAssets->GetOutlineContrast());
+        celOutlineEffect.SetOffsetMultiplier(currWorldAssets->GetOutlineOffset());
+        celOutlineEffect.SetAlphaMultiplier(assets->GetCurrentLevelMesh()->GetLevelAlpha());
+        celOutlineEffect.SetAmbientBrightness(OUTLINE_AMBIENT_BRIGHTNESS);
+        celOutlineEffect.Draw(colourAndDepthFBO, backgroundFBO);
+    }
+
+	// Draw background effects into the background FBO -- we do this as a separate pass because
+    // if we include it in the previous pass, the outlines will show through all the effects (which is not so pretty)
+    backgroundFBO->BindFBObj();
+    
+	glPushMatrix();
+	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
+    assets->DrawBackgroundEffects(camera);
+    glPopMatrix();
+
 	backgroundFBO->UnbindFBObj();
 
 	debug_opengl_state();
@@ -126,29 +157,34 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	const GameLevel* currLevel = gameModel->GetCurrentLevel();
 
     Vector2D negHalfLevelDim = -0.5 * gameModel->GetLevelUnitDimensions();
-	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
-	FBObj* postFullSceneFBO = fboAssets->GetPostFullSceneFBO();
+	
+    GameAssets* assets = this->display->GetAssets();
+    GameFBOAssets* fboAssets = assets->GetFBOAssets();
+    
+    FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
 	FBObj* fullSceneFBO = fboAssets->GetFullSceneFBO();
     
-	assert(postFullSceneFBO != NULL);
-	assert(fullSceneFBO != NULL);
+    assert(colourAndDepthFBO != NULL);
+	assert(fullSceneFBO      != NULL);
 
-	fullSceneFBO->BindFBObj();
+    colourAndDepthFBO->BindFBObj();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	backgroundFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+	//backgroundFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+    backgroundFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
+    //glClear(GL_DEPTH_BUFFER_BIT);
 
 	glPushMatrix();
 	Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 
 	// Tesla lightning arcs
-	this->display->GetAssets()->DrawTeslaLightning(dT, camera);
+	assets->DrawTeslaLightning(dT, camera);
 
     // Bosses
-    this->display->GetAssets()->DrawBoss(dT, currLevel, camera);
+    assets->DrawBoss(dT, currLevel, camera);
 
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
@@ -157,25 +193,25 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
     this->DrawSpecialEmbeddedLabels(dT);
 
     // Paddle...
-	this->display->GetAssets()->DrawPaddle(dT, *gameModel->GetPlayerPaddle(), camera);
+	assets->DrawPaddle(dT, *gameModel->GetPlayerPaddle(), camera);
 	glPopMatrix();
 
 	// Level pieces
-	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, camera);
+	assets->DrawLevelPieces(dT, currLevel, camera);
 
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
 	// Balls...
-	this->display->GetAssets()->DrawGameBalls(dT, *gameModel, camera, negHalfLevelDim);
+	assets->DrawGameBalls(dT, *gameModel, camera, negHalfLevelDim);
 
 	// Projectiles...
-	this->display->GetAssets()->DrawProjectiles(dT, *gameModel, camera);
+	assets->DrawProjectiles(dT, *gameModel, camera);
 
 	glPopMatrix();
 
 	// Safety net (if active)
-	this->display->GetAssets()->DrawSafetyNetIfActive(dT, camera, *gameModel);
+	assets->DrawSafetyNetIfActive(dT, camera, *gameModel);
 
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
@@ -183,56 +219,70 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	if (!fboAssets->DrawItemsInLastPass()) {
 		std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
 		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); ++iter) {
-			this->display->GetAssets()->DrawItem(dT, camera, (**iter));
+			assets->DrawItem(dT, camera, (**iter));
 		}				
 	}
 
 	// Render the beam effects
-	this->display->GetAssets()->DrawBeams(*gameModel, camera);
+	assets->DrawBeams(*gameModel, camera);
 
-	// Draw Post-Fullscene effects
-	postFullSceneFBO->BindFBObj();
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	fullSceneFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1);
+    // Add outlines to the scene...
+    {
+        static const float OUTLINE_MIN_DIST = 0.0001f;
+        static const float OUTLINE_MAX_DIST = 5.0f;
+        static const float OUTLINE_CONTRAST = 1.0f;
+        static const float OUTLINE_OFFSET = 0.75f;
+
+        CgFxCelOutlines& celOutlineEffect = fboAssets->GetCelOutlineEffect();
+        celOutlineEffect.SetMinDistance(OUTLINE_MIN_DIST);
+        celOutlineEffect.SetMaxDistance(OUTLINE_MAX_DIST);
+        celOutlineEffect.SetContrastExponent(OUTLINE_CONTRAST);
+        celOutlineEffect.SetOffsetMultiplier(OUTLINE_OFFSET);
+        celOutlineEffect.SetAlphaMultiplier(assets->GetCurrentLevelMesh()->GetLevelAlpha());
+        celOutlineEffect.SetAmbientBrightness(1.0f);
+        celOutlineEffect.Draw(colourAndDepthFBO, fullSceneFBO);
+    }
+
+	// Draw Post-Fullscene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
+    fullSceneFBO->BindFBObj();
 	
 	// Render any post-processing effects for various items/objects in the game
-	this->display->GetAssets()->DrawPaddlePostEffects(dT, *gameModel, camera);
-	
-	// We bind the full scene FBO's depth buffer temporarily so that we can render our ice cubes
-	// (and other status effects) with proper depth data available
-	fullSceneFBO->BindDepthRenderBuffer();
-	this->display->GetAssets()->DrawStatusEffects(dT, camera);
-	postFullSceneFBO->BindDepthRenderBuffer();
+	assets->DrawPaddlePostEffects(dT, *gameModel, camera, fullSceneFBO);
+	assets->DrawStatusEffects(dT, camera, fullSceneFBO);
 
 	FBObj::UnbindFBObj();
 
 	glPopMatrix();
 
 	// Do a gaussian blur for a softer feeling
-	this->display->GetAssets()->GetFBOAssets()->RenderFullSceneBlur(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
+	assets->GetFBOAssets()->RenderFullSceneBlur(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
 
 	debug_opengl_state();
 
-	return postFullSceneFBO;
+    return fullSceneFBO;
 }
 
 void InGameRenderPipeline::RenderFinalGather(double dT) {
-	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
-	GameModel* gameModel = this->display->GetModel();
-	const Camera& camera = this->display->GetCamera();
+
+    GameAssets* assets       = this->display->GetAssets();
+	GameFBOAssets* fboAssets = assets->GetFBOAssets();
+	GameModel* gameModel     = this->display->GetModel();
+	const Camera& camera     = this->display->GetCamera();
 
 	// Render fullscreen effects 
 	FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
-	assert(initialFBO != NULL);
-
-	FBObj* finalFBO = fboAssets->GetFinalFullScreenFBO();
-	assert(finalFBO != NULL);
-
+    FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
+    FBObj* finalFBO = fboAssets->GetFinalFullScreenFBO();
+    
+    assert(initialFBO != NULL);
+    assert(colourAndDepthFBO != NULL);
+    assert(finalFBO != NULL);
+   
 	// Final non-fullscreen draw pass - draw the falling items and particles
-	finalFBO->BindFBObj();
+	colourAndDepthFBO->BindFBObj();
+
 	glClear(GL_DEPTH_BUFFER_BIT);
-	initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+    initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
 
 	// Render all effects that do not go through all the post-processing filters...
 	Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel->GetLevelUnitDimensions(), 0.0);
@@ -245,19 +295,34 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 	if (fboAssets->DrawItemsInLastPass()) {
 		std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
 		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); ++iter) {
-			this->display->GetAssets()->DrawItem(dT, camera, (**iter));
+			assets->DrawItem(dT, camera, (**iter));
 		}			
 	}
 
 	// Typical Particle effects...
-	GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+	GameESPAssets* espAssets = assets->GetESPAssets();
 	espAssets->DrawBeamEffects(dT, camera, negHalfLevelDim);
 	espAssets->DrawParticleEffects(dT, camera);
 
 	// Absolute post effects call for various object effects
-	this->display->GetAssets()->DrawGameBallsPostEffects(dT, *gameModel, camera);
+	assets->DrawGameBallsPostEffects(dT, *gameModel, camera);
 
-	finalFBO->UnbindFBObj();
+    // Add outlines to the scene...
+    {
+        static const float OUTLINE_MIN_DIST = 0.001f;
+        static const float OUTLINE_MAX_DIST = 5.0f;
+        static const float OUTLINE_CONTRAST = 1.0f;
+        static const float OUTLINE_OFFSET = 0.75f;
+
+        CgFxCelOutlines& celOutlineEffect = fboAssets->GetCelOutlineEffect();
+        celOutlineEffect.SetMinDistance(OUTLINE_MIN_DIST);
+        celOutlineEffect.SetMaxDistance(OUTLINE_MAX_DIST);
+        celOutlineEffect.SetContrastExponent(OUTLINE_CONTRAST);
+        celOutlineEffect.SetOffsetMultiplier(OUTLINE_OFFSET);
+        celOutlineEffect.SetAlphaMultiplier(assets->GetCurrentLevelMesh()->GetLevelAlpha());
+        celOutlineEffect.SetAmbientBrightness(1.0f);
+        celOutlineEffect.Draw(colourAndDepthFBO, finalFBO);
+    }
 
 	// Render the final fullscreen effects
 	fboAssets->RenderFinalFullscreenEffects(camera.GetWindowWidth(), camera.GetWindowHeight(), dT, *gameModel);
@@ -267,6 +332,7 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 }
 
 void InGameRenderPipeline::RenderHUD(double dT) {
+    
     GameAssets* gameAssets = this->display->GetAssets();
     GameModel* gameModel   = this->display->GetModel();
 	const Camera& camera   = this->display->GetCamera();
@@ -285,7 +351,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 
 	// Draw the number of lives left in the top-left corner of the display
 	gameAssets->GetLifeHUD()->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-	
+
 	// Draw the ball boost HUD display in the top-left corner, under the number of balls left
     BallBoostHUD* boostHUD = gameAssets->GetBoostHUD();
     boostHUD->Draw(camera, gameModel->GetBallBoostModel(), DISPLAY_HEIGHT, dT);
@@ -304,7 +370,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	// this stuff should always be on the top
 	gameAssets->DrawInformativeGameElements(camera, dT, *gameModel);
 
-	debug_opengl_state();
+    debug_opengl_state();
 }
 
 void InGameRenderPipeline::RenderHUDWithAlpha(double dT, float alpha) {

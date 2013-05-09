@@ -224,16 +224,16 @@ private:
     int numConsecutiveBarrages;
 
     // LostColumnAIState
-    AnimationMultiLerp<Vector3D> columnHurtMoveAnim;
+    AnimationMultiLerp<Vector2D> columnHurtMoveAnim;
 
     // LostAllColumnsAIState
     double lostAllColumnsWaitCountdown;
 
     // MoveToCenterOfLevelAIState
-    AnimationLerp<Vector3D> bossToCenterOfLevelAnim;
+    AnimationLerp<Vector2D> bossToCenterOfLevelAnim;
     
     // EyeRisesFromPedimentAIState
-    AnimationLerp<Vector3D> eyeRiseAnim;
+    AnimationLerp<Vector2D> eyeRiseAnim;
 
     // --------------------------------------------------------------------------------------------
 

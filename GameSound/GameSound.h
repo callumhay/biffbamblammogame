@@ -156,6 +156,7 @@ public:
         // -> Star, points and life sounds
         LifeUpAcquiredEvent,
         StarAcquiredEvent,
+        FiveStarsAcquiredEvent,
         ScoreMultiplierIncreasedTo2Event,
         ScoreMultiplierIncreasedTo3Event,
         ScoreMultiplierIncreasedTo4Event,

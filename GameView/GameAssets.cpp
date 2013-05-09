@@ -454,7 +454,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
                 // INVISIBALL:
                 // Obtain the POST full screen rendering from the previous frame - this is
 				// a bit of a hack but it saves us from reading/writing to the same FBO simultaneously
-				this->invisibleEffect->SetFBOTexture(this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+                this->invisibleEffect->SetFBOTexture(this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 				ballEffectTemp = this->invisibleEffect;
             }
 		}
@@ -481,17 +481,21 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
 		glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
 
+		BasicPointLight ballKeyLight, ballFillLight;
+		this->lightAssets->GetBallAffectingLights(ballKeyLight, ballFillLight);
+
 		// Always make the colour of the invisiball to be plain white - we don't want to affect
 		// the cloaking effect
+        glPushAttrib(GL_DEPTH_BUFFER_BIT);
 		if (ballIsInvisible) {
 			glColor4f(1.0f, 1.0f, 1.0f, ballColour.A());
+
+            // Disable the depth draw, this will make sure the ball doesn't get outlined
+            glDepthMask(GL_FALSE);
 		}
 		else {
 			glColor4f(ballColour.R(), ballColour.G(), ballColour.B(), ballColour.A());
 		}
-
-		BasicPointLight ballKeyLight, ballFillLight;
-		this->lightAssets->GetBallAffectingLights(ballKeyLight, ballFillLight);
 
 		if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
 			this->spikeyBall->Draw(camera, ballEffectTemp, ballKeyLight, ballFillLight);
@@ -499,6 +503,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		else {
 			this->ball->Draw(camera, ballEffectTemp, ballKeyLight, ballFillLight);
 		}
+        glPopAttrib();
 
 		glPopMatrix();
 	}
@@ -584,10 +589,15 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
     // to draw it with an invisible material...
     bool paddleIsInvisible = (p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle;
     CgFxEffectBase* paddleReplacementMat = NULL;
+    
+    glPushAttrib(GL_DEPTH_BUFFER_BIT);
     if (paddleIsInvisible) {
         paddleReplacementMat = this->invisibleEffect;
         // Just tick the effects on the paddle, no drawing
         this->espAssets->TickButDontDrawBackgroundPaddleEffects(dT);
+
+        // Disable the depth draw, this will make sure the paddle doesn't get outlined
+        glDepthMask(GL_FALSE);
     }
     else {
 	    // Draw any effects on the paddle (e.g., item acquiring effects)
@@ -600,6 +610,8 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	// Draw the paddle
 	this->worldAssets->DrawPaddle(p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
+
+    glPopAttrib();
 
 	if ((p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
 		if (p.GetIsLaserBeamFiring()) {
@@ -658,7 +670,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 /**
  * Used to draw any relevant post-processing-related effects for the paddle.
  */
-void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Camera& camera) {
+void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Camera& camera, FBObj* sceneFBO) {
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
 	// Do nothing if we are in paddle camera mode
@@ -686,7 +698,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 
 		// Set the texture for the refraction in the goo - be careful here, we can't get
 		// the 'post full scene' fbo because we are currently in the middle of drawing to it
-		this->paddleStickyAttachment->SetSceneTexture(this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+		this->paddleStickyAttachment->SetSceneTexture(sceneFBO->GetFBOTexture());
 
 		// In the case where the paddle laser beam is also active then the beam will refract through the goo,
 		// illuminate the goo alot more
@@ -732,13 +744,17 @@ void GameAssets::DrawSkybox(const Camera& camera) {
 	this->worldAssets->DrawSkybox(camera);
 }
 
+void GameAssets::FastDrawBackgroundModel() {
+    this->worldAssets->FastDrawBackgroundModel();
+}
+
 /**
  * Draw the background model for the current world type.
  */
 void GameAssets::DrawBackgroundModel(const Camera& camera) {
-	BasicPointLight bgKeyLight, bgFillLight;
-	this->lightAssets->GetBackgroundAffectingLights(bgKeyLight, bgFillLight);
-	this->worldAssets->DrawBackgroundModel(camera, bgKeyLight, bgFillLight);
+    BasicPointLight bgKeyLight, bgFillLight;
+    this->lightAssets->GetBackgroundAffectingLights(bgKeyLight, bgFillLight);
+    this->worldAssets->DrawBackgroundModel(camera, bgKeyLight, bgFillLight);
 }
 
 /**
@@ -808,6 +824,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
+
 	glBegin(GL_QUADS);
 	Point3D temp;
 	Point3D beamSegStart, beamSegEnd;
@@ -1389,7 +1406,7 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 		this->worldAssets = NULL;
 
 		// Load up the new set of world geometry assets
-		this->worldAssets = GameWorldAssets::CreateWorldAssets(world.GetStyle());
+		this->worldAssets = GameWorldAssets::CreateWorldAssets(world.GetStyle(), this);
 		assert(this->worldAssets != NULL);
 	}
 
@@ -1502,7 +1519,7 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
             this->sound->PlaySoundAtPosition(GameSound::PaddleShieldActivatedEvent, false, 
                 gameModel.GetPlayerPaddle()->GetPosition3D());
 
-			const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
+            const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetFullSceneFBO()->GetFBOTexture();
 			assert(fullscreenFBOTex != NULL);
 			this->paddleShield->ActivateShield(*gameModel.GetPlayerPaddle(), *fullscreenFBOTex);
             break;

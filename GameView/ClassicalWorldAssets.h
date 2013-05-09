@@ -23,7 +23,7 @@
 
 class ClassicalWorldAssets : public GameWorldAssets {
 public:
-	ClassicalWorldAssets();
+	ClassicalWorldAssets(GameAssets* assets);
 	~ClassicalWorldAssets();
 
 	GameWorld::WorldStyle GetStyle() const;

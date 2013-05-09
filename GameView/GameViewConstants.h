@@ -73,6 +73,7 @@ public:
     const char* CGFX_POSTBULLETTIME_SHADER;
     const char* CGFX_FULLSCREEN_POSTDEATH_SHADER;
     const char* CGFX_GREYSCALE_SHADER;
+    const char* CGFX_CELOUTLINES_SHADER;
 
 	// Texture path constants *******************************
 	const char* TEXTURE_BANG1;

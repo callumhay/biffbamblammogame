@@ -16,8 +16,8 @@
 // TODO: Get rid of this
 #include "DecoSkybox.h"
 
-GothicRomanticWorldAssets::GothicRomanticWorldAssets() : 
-GameWorldAssets(new DecoSkybox(),
+GothicRomanticWorldAssets::GothicRomanticWorldAssets(GameAssets* assets) : 
+GameWorldAssets(assets, new DecoSkybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->GOTHIC_ROMANTIC_BACKGROUND_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->GOTHIC_ROMANTIC_PADDLE_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->GOTHIC_ROMANTIC_BLOCK_MESH)),

@@ -1248,8 +1248,16 @@ void GameEventsListener::NumStarsChangedEvent(const PointAward* pointAward, int 
     
     // Have a sound for when a star is acquired!
     if (oldNumStars < newNumStars && pointAward != NULL) {
-        this->display->GetSound()->PlaySound(GameSound::StarAcquiredEvent, false);
+        GameSound* sound = this->display->GetSound();
         GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+
+        // Check for the special case, where the player has acquired all stars in the level...
+        if (newNumStars == 5) {
+            sound->PlaySound(GameSound::FiveStarsAcquiredEvent, false);
+        }
+        else {
+            sound->PlaySound(GameSound::StarAcquiredEvent, false);
+        }
         espAssets->AddStarAcquiredEffect(pointAward->GetLocation());
     }
     

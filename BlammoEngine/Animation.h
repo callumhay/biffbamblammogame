@@ -20,16 +20,6 @@
  */
 template<class T> 
 class AnimationLerp {
-
-private:
-	bool hasOwnInterpolant;	// Whether an interpolant was provided or not
-	bool repeat;						// Whether we repeat the animation or not
-
-	T* interpolant;	// The given interpolant pointer
-	T y0, y1;				// Initial and final values of the interpolant
-	double x0, x1;	// Initial and final time
-	double x;				// The currently tracked time value - increases with each tick until it reaches x1 (final time)
-
 public:	
 	AnimationLerp() : repeat(false), hasOwnInterpolant(true), interpolant(new T()), x(0), x0(0), x1(1) {}
 	AnimationLerp(T value) : repeat(false), hasOwnInterpolant(true), interpolant(new T(value)), x(0), x0(0), x1(1), y0(value), y1(value) {}
@@ -171,6 +161,28 @@ public:
 		
 		return !this->repeat;
 	}
+
+        // Get the derivative of the interpolant with respect to time for the current
+    // Lerp interval that this animation is animating on
+    T GetDxDt() const {
+        double dT = x1 - x0;
+        if (dT <= 0) {
+            return T(0);
+        }
+
+        T dX = y1 - y0;
+
+        return dX / dT;
+    }
+
+private:
+	bool hasOwnInterpolant;	// Whether an interpolant was provided or not
+	bool repeat;						// Whether we repeat the animation or not
+
+	T* interpolant;	// The given interpolant pointer
+	T y0, y1;				// Initial and final values of the interpolant
+	double x0, x1;	// Initial and final time
+	double x;				// The currently tracked time value - increases with each tick until it reaches x1 (final time)
 };
 
 
@@ -179,18 +191,6 @@ public:
  */
 template<class T> 
 class AnimationMultiLerp {
-
-private:
-	bool hasOwnInterpolant;	// Whether an interpolant was provided or not
-	bool repeat;						// Whether we repeat the animation or not
-
-	T* interpolant;										// The given interpolant pointer
-	std::vector<T> interpolationPts;	// Values to interpolate across for the interpolant
-	std::vector<double>	timePts;			// Times for each interpolation
-	double x;													// The currently tracked time value - increases with each tick until it reaches x1 (final time)
-
-	unsigned int tracker;		// Tracks the index of the interpolation/time values currently being used
-
 public:	
 	AnimationMultiLerp() : hasOwnInterpolant(true), interpolant(new T()), repeat(false), x(0.0), tracker(0) {}
 	AnimationMultiLerp(T value) : hasOwnInterpolant(true), interpolant(new T(value)), repeat(false), x(0.0), tracker(0) {}
@@ -448,6 +448,60 @@ public:
 		
 		return !this->repeat && (this->tracker == this->timePts.size()-1);
 	}
+
+    // Get the derivative of the interpolant with respect to time for the current
+    // Lerp interval that this animation is animating on
+    T GetDxDt() const {
+
+        if (this->timePts.size() < 2 || this->timePts.size() != this->interpolationPts.size() || x < this->timePts[0]) {
+            return T(0);
+        }
+        else if (this->tracker == this->timePts.size()-1) {
+            if (this->repeat) {
+                // Bit tricky, need to wrap...
+                const double timeStart = this->timePts[this->tracker];
+                const double timeEnd   = timeStart + (this->timePts[1] - this->timePts[0]);
+                double dT = timeEnd - timeStart;
+                if (dT <= 0) {
+                    return T(0);
+                }
+
+                const T& valueStart = this->interpolationPts[this->tracker];
+		        const T& valueEnd   = this->interpolationPts[this->tracker+1];
+                T dX = valueEnd - valueStart;
+
+                return dX / dT;
+            }
+            else {
+                return T(0);
+            }
+        }
+
+		double timeStart = this->timePts[this->tracker];
+		double timeEnd   = this->timePts[this->tracker+1];
+        double dT = timeEnd - timeStart;
+
+        if (dT <= 0) {
+            return T(0);
+        }
+
+        const T& valueStart = this->interpolationPts[this->tracker];
+		const T& valueEnd   = this->interpolationPts[this->tracker+1];
+        T dX = valueEnd - valueStart;
+
+        return dX / dT;
+    }
+
+private:
+	bool hasOwnInterpolant;	// Whether an interpolant was provided or not
+	bool repeat;						// Whether we repeat the animation or not
+
+	T* interpolant;										// The given interpolant pointer
+	std::vector<T> interpolationPts;	// Values to interpolate across for the interpolant
+	std::vector<double>	timePts;			// Times for each interpolation
+	double x;													// The currently tracked time value - increases with each tick until it reaches x1 (final time)
+
+	unsigned int tracker;		// Tracks the index of the interpolation/time values currently being used
 };
 
 

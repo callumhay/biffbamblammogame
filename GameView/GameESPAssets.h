@@ -429,14 +429,15 @@ inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera&
  */
 inline void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
+    float tempYBound = paddle.GetHalfHeight();
 	float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
 	assert(tempXBound > 0);
 	assert(tempZBound > 0);
 
-	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, 0, -tempZBound), Point3D(tempXBound, 0, tempZBound));
+	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, tempYBound, -tempZBound), Point3D(tempXBound, tempYBound, tempZBound));
 	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
 
-	this->paddleBeamGlowSparks->Draw(camera, Vector3D(0, 0, 0), true);
+	this->paddleBeamGlowSparks->Draw(camera);
 	this->paddleBeamGlowSparks->Tick(dT);
 }
 

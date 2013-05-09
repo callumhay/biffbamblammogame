@@ -23,6 +23,7 @@
 #include "CgFxFullscreenGoo.h"
 #include "CgFxInkSplatter.h"
 #include "CgFxPostBulletTime.h"
+#include "CgFxCelOutlines.h"
 
 class GameModel;
 class GameSound;
@@ -42,11 +43,11 @@ public:
 
 	inline FBObj* GetBackgroundFBO() { return this->bgFBO; }
 	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
-	inline FBObj* GetPostFullSceneFBO() { return this->postFgAndBgFBO; }
-	inline FBObj* GetInitialFullScreenFBO() { return this->initialFSEffectFBO; }
 	inline FBObj* GetFinalFullScreenFBO()	{ return this->finalFSEffectFBO; }
+    inline FBObj* GetColourAndDepthTexFBO() { return this->colourAndDepthTexFBO; }
 
-	
+    inline CgFxCelOutlines& GetCelOutlineEffect() { return this->celOutlineEffect; }
+
 	inline bool DrawItemsInLastPass() const { return this->drawItemsInLastPass; }
 
 	inline void RenderFullSceneBlur(int width, int height, double dT) {
@@ -60,10 +61,7 @@ public:
 	inline FBObj* RenderInitialFullscreenEffects(int width, int height, double dT) {
 		// Do some purdy bloom - this adds a nice contrasty highlighted touch to the entire scene
 		this->bloomEffect->Draw(width, height, dT);
-		// Add motion blur / afterimage effect 
-		this->afterImageEffect->Draw(width, height, dT);
-
-		return this->initialFSEffectFBO;
+        return this->fgAndBgFBO;
 	}
 
 	/**
@@ -91,16 +89,15 @@ private:
 	// FBO assets for the game pipeline
 	FBObj* bgFBO;			
 	FBObj* fgAndBgFBO;
-	FBObj* postFgAndBgFBO;
-	FBObj* initialFSEffectFBO;
 	FBObj* finalFSEffectFBO;
 
 	FBObj* tempFBO;	// FBO used for temporary work
 
+    FBObj* colourAndDepthTexFBO;
+
 	// Post-processing / fullscreen filters and effects used with the FBOs
 	CgFxGaussianBlur* fgAndBgBlurEffect;
 	CgFxBloom* bloomEffect;
-	CgFxAfterImage* afterImageEffect;
 	CgFxInkSplatter* inkSplatterEffect;
 	CgFxFullscreenGoo* stickyPaddleCamEffect;
 	CgFxPostSmokey* smokeyCamEffect;
@@ -109,6 +106,8 @@ private:
 	CgFxFullscreenGoo* shieldPaddleCamEffect;
 	CgFxPostFirey* fireBallCamEffect;
     CgFxPostBulletTime* bulletTimeEffect;
+
+    CgFxCelOutlines celOutlineEffect;
 
 	// Misc. Textures and overlays
 	Texture* barrelOverlayTex;	// Texture for overlay of the cannon barrel

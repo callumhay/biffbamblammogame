@@ -388,6 +388,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 
 	// Pop modelview matrix
 	glPopMatrix();
+
 	// Pop the projection matrix
 	Camera::PopWindowCoords();
 	glPopAttrib();

@@ -22,6 +22,13 @@ Texture2D::Texture2D(TextureFilterType texFilter) : Texture(texFilter, GL_TEXTUR
 Texture2D::~Texture2D() {
 }
 
+void Texture2D::RenderTextureToFullscreenQuadNoDepth() const {
+	// Draw the full screen quad
+	this->BindTexture();
+	GeometryMaker::GetInstance()->DrawFullScreenQuadNoDepth(this->width, this->height);
+	this->UnbindTexture();
+	debug_opengl_state();
+}
 
 /**
  * Renders this texture to a full screen quad in the viewport.
@@ -65,6 +72,7 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height, Texture
 	glEnable(newTex->textureType);
 	glGenTextures(1, &newTex->texID);
 	if (newTex->texID == 0) {
+        glPopAttrib();
 		delete newTex;
 		return NULL;
 	}
@@ -86,6 +94,34 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height, Texture
 	debug_opengl_state();
 
 	return newTex;
+}
+
+Texture2D* Texture2D::CreateEmptyDepthTextureRectangle(int width, int height) {
+    glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
+    Texture2D* newTex = new Texture2D(Texture::Linear);
+
+    glEnable(newTex->textureType);
+    glGenTextures(1, &newTex->texID);
+	if (newTex->texID == 0) {
+        glPopAttrib();
+		delete newTex;
+		return NULL;
+	}
+
+    newTex->BindTexture();
+
+    Texture::SetFilteringParams(newTex->texFilter, newTex->textureType);
+    glTexParameteri(newTex->textureType, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(newTex->textureType, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+    glTexImage2D(newTex->textureType, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
+    newTex->UnbindTexture();
+    glPopAttrib();
+    debug_opengl_state();
+
+    return newTex;
 }
 
 Texture2D* Texture2D::CreateTexture2DFromBuffer(unsigned char* fileBuffer, long fileBufferLength, TextureFilterType texFilter) {

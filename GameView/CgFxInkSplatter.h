@@ -2,7 +2,7 @@
  * CgFxInkSplatter.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2010-2011
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -36,7 +36,7 @@ public:
 		return this->isInkSplatActivated;
 	}
 
-	virtual void Draw(int screenWidth, int screenHeight, double dT);
+	void Draw(int screenWidth, int screenHeight, double dT);
 
 };
 #endif

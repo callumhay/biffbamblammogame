@@ -921,6 +921,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxCelOutlines.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxCelShading.h"
 						>
 					</File>
@@ -1006,6 +1010,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxBloom.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxCelOutlines.cpp"
 						>
 					</File>
 					<File

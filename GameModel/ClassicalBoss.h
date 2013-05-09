@@ -101,7 +101,7 @@ private:
     static const float EYE_ACCELERATION;
 
     ClassicalBoss();
-    void BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);
+    void BuildArm(bool isLeftArm, const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);
 
     // Inherited from Boss
     void Init();

@@ -16,14 +16,15 @@
 const float GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME = 1.0f;
 
 GameLightAssets::GameLightAssets() : 
-// Foreground lights
+// Setup the Foreground lights
 fgKeyLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f),
 fgFillLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f),
-ballLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN),
-// Background lights
-bgKeyLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.0f),
-bgFillLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f)
-{
+ballLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN) {
+
+    // Setup the Background lights
+    this->SetBackgroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.005f),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f));
 
 	// Ball and paddle specific foreground lights
 	this->fgKeyLight.CopyBasicAttributes(this->ballKeyLight);
@@ -176,10 +177,10 @@ void GameLightAssets::RestoreLightPosition(GameLightType lightType, float restor
 			this->fgFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, restoreTime);
 			break;
 		case BGKeyLight:
-			this->bgKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, restoreTime);
+            this->bgKeyLight.SetLightPositionChange(this->defaultBGKeyLightProperties.GetPosition(), restoreTime);
 			break;
 		case BGFillLight:
-			this->bgFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, restoreTime);
+            this->bgFillLight.SetLightPositionChange(this->defaultBGFillLightProperties.GetPosition(), restoreTime);
 			break;
 		case BallKeyLight:
 			this->ballKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_POSITION, restoreTime);

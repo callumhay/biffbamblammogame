@@ -27,7 +27,7 @@ class CgFxVolumetricEffect;
 
 class DecoWorldAssets : public GameWorldAssets {
 public:
-	DecoWorldAssets();
+	DecoWorldAssets(GameAssets* assets);
 	~DecoWorldAssets();
 
 	GameWorld::WorldStyle GetStyle() const;

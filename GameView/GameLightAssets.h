@@ -63,6 +63,9 @@ public:
 		return this->isBlackOutActive;
 	}
 
+
+    void SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes, const BasicPointLight& bgFillAttributes);
+
 #ifdef _DEBUG
 	void DebugDrawLights() const;
 #endif
@@ -86,5 +89,18 @@ private:
 
 	PointLight* GetLightFromType(GameLightType lightType);
 
+    BasicPointLight defaultBGKeyLightProperties;
+    BasicPointLight defaultBGFillLightProperties;
+
+    DISALLOW_COPY_AND_ASSIGN(GameLightAssets);
 };
+
+inline void GameLightAssets::SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes,
+                                                        const BasicPointLight& bgFillAttributes) {
+    this->defaultBGKeyLightProperties  = bgKeyAttributes;
+    this->defaultBGFillLightProperties = bgFillAttributes;
+    this->bgKeyLight.SetFromBasicPointLight(bgKeyAttributes);
+    this->bgFillLight.SetFromBasicPointLight(bgFillAttributes);
+}
+
 #endif
