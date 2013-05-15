@@ -1,12 +1,12 @@
 /**
  * DecoWorldAssets.h
  *
- * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
- * resulting work only under the same or similar licence to this one.
+ * resulting work only under the same or similar license to this one.
  */
 
 #ifndef __DECOWORLDASSETS_H__
@@ -67,6 +67,27 @@ private:
 
 inline GameWorld::WorldStyle DecoWorldAssets::GetStyle() const {
 	return GameWorld::Deco;
+}
+
+/**
+ * Fade the background out or in based on the given parameter, the fade
+ * will occur over the given amount of time.
+ */
+inline void DecoWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
+    GameWorldAssets::FadeBackground(fadeout, fadeTime);
+}
+
+/**
+ * Reset the world to its initial state - makes sure that nothing is faded/invisible etc.
+ * and is ready to be see for the first time by the player.
+ */
+inline void DecoWorldAssets::ResetToInitialState() {
+    GameWorldAssets::ResetToInitialState();
+
+	this->beamRotationfg1 = 0.0f;
+	this->beamRotationfg2 = 0.0f;
+	this->beamRotationbg1 = 0.0f;
+	this->beamRotationbg2 = 0.0f;
 }
 
 #endif

@@ -1,12 +1,12 @@
 /**
  * DecoWorldAssets.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
- * resulting work only under the same or similar licence to this one.
+ * resulting work only under the same or similar license to this one.
  */
 
 #include "DecoWorldAssets.h"
@@ -314,25 +314,4 @@ void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 	glPopMatrix();
 
 	glPopAttrib();
-}
-
-/**
- * Fade the background out or in based on the given parameter, the fade
- * will occur over the given amount of time.
- */
-void DecoWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
-    GameWorldAssets::FadeBackground(fadeout, fadeTime);
-}
-
-/**
- * Reset the world to its initial state - makes sure that nothing is faded/invisible etc.
- * and is ready to be see for the first time by the player.
- */
-void DecoWorldAssets::ResetToInitialState() {
-    GameWorldAssets::ResetToInitialState();
-
-	this->beamRotationfg1 = 0.0f;
-	this->beamRotationfg2 = 0.0f;
-	this->beamRotationbg1 = 0.0f;
-	this->beamRotationbg2 = 0.0f;
 }
