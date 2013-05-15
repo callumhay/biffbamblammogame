@@ -1,12 +1,12 @@
 /**
  * GameAssets.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
- * resulting work only under the same or similar licence to this one.
+ * resulting work only under the same or similar license to this one.
  */
 
 #include "GameAssets.h"
@@ -1648,6 +1648,7 @@ void GameAssets::ActivateLastBallDeathEffects(const GameBall& lastBall) {
 	// Fade out the world background since the camera is going to be moving places we don't
 	// want the player to see
 	this->worldAssets->FadeBackground(true, 0.2f);
+    //this->fboAssets->
 }
 
 /**

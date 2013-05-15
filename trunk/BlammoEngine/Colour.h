@@ -1,12 +1,12 @@
 /**
  * Colour.h
  *
- * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
- * resulting work only under the same or similar licence to this one.
+ * resulting work only under the same or similar license to this one.
  */
 
 #ifndef __COLOUR_H___
@@ -27,6 +27,11 @@ public:
     colours[0] = r;
     colours[1] = g;
     colours[2] = b;
+  }
+  Colour(int hexColour) {
+    colours[0] = static_cast<float>((hexColour & 0xFF0000) >> 16) / 255.0f;
+    colours[1] = static_cast<float>((hexColour & 0x00FF00) >>  8) / 255.0f;
+    colours[2] = static_cast<float>((hexColour & 0x0000FF)) / 255.0f;
   }
   Colour(const Colour& other) {
     colours[0] = other.colours[0];

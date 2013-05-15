@@ -1,12 +1,12 @@
 /**
  * ESPEmitter.h
  *
- * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
- * resulting work only under the same or similar licence to this one.
+ * resulting work only under the same or similar license to this one.
  */
 
 #ifndef __ESPEMITTER_H__
@@ -29,6 +29,7 @@
 class CgFxEffectBase;
 class TextLabel2D;
 class ESPEmitterEventHandler;
+class Bezier;
 
 /**
  * ESPEmitter.h
@@ -67,8 +68,11 @@ public:
 	bool SetParticles(unsigned int numParticles, CgFxEffectBase* effect);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e);
+    
     bool SetAnimatedParticles(unsigned int numParticles, Texture2D* texture, int spriteSizeX, int spriteSizeY, double animationFPS);
     bool SetRandomTextureParticles(unsigned int numParticles, std::vector<Texture2D*>& textures);
+    bool SetRandomCurveParticles(unsigned int numParticles, const ESPInterval& lineThickness, 
+        const std::vector<Bezier*>& curves, const ESPInterval& animateTimeInSecs);
 
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
@@ -80,6 +84,7 @@ public:
     void SetParticleSpawnSize(const ESPInterval& particleSize);
 
 	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);
+    void SetParticleColourPalette(const std::vector<Colour>& colours);
 	void SetParticleAlpha(const ESPInterval& alpha);
 	void SetParticleRotation(const ESPInterval& particleRot);
 	void SetNumParticleLives(int lives);
@@ -142,6 +147,9 @@ protected:
 	ESPInterval particleRotation;
 	// Inclusive intervals for the colour of particles
 	ESPInterval particleRed, particleGreen, particleBlue, particleAlpha;
+    // Discrete particle colours may also be defined, if this is not empty then a random
+    // colour from the collection of particleColours will be chosen
+    std::vector<Colour> particleColourPalette;
 	// Inclusive interval for how far from the emitPt this particle may spawn at
 	ESPInterval radiusDeviationFromPtX;
 	ESPInterval radiusDeviationFromPtY;

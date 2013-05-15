@@ -1,12 +1,12 @@
 /**
  * GameWorldAssets.h
  *
- * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
- * resulting work only under the same or similar licence to this one.
+ * resulting work only under the same or similar license to this one.
  */
 
 #ifndef __GAMEWORLDASSETS_H__
@@ -85,6 +85,8 @@ public:
     float GetOutlineMaxDistance() const;
     float GetOutlineContrast() const;
     float GetOutlineOffset() const;
+    
+    float GetAlpha() const;
 
 	// Factory methods
 	static GameWorldAssets* CreateWorldAssets(GameWorld::WorldStyle world, GameAssets* assets);
@@ -138,6 +140,10 @@ inline float GameWorldAssets::GetOutlineContrast() const {
 
 inline float GameWorldAssets::GetOutlineOffset() const {
     return this->outlineOffset;
+}
+
+inline float GameWorldAssets::GetAlpha() const {
+    return this->bgFadeAnim.GetInterpolantValue();
 }
 
 #endif

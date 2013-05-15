@@ -1,12 +1,12 @@
 /**
  * ESPEmitter.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
- * resulting work only under the same or similar licence to this one.
+ * resulting work only under the same or similar license to this one.
  */
 
 #include "ESPEmitter.h"
@@ -14,6 +14,7 @@
 #include "ESPOnomataParticle.h"
 #include "ESPAnimatedSpriteParticle.h"
 #include "ESPRandomTextureParticle.h"
+#include "ESPAnimatedCurveParticle.h"
 #include "ESPEmitterEventHandler.h"
 
 #include "../BlammoEngine/TextLabel.h"
@@ -115,9 +116,15 @@ void ESPEmitter::ReviveParticle() {
 		zombie->Revive(initialPt, initialParticleVel, randomSizing, randomRotation, randomLifetime); 
 	}
 	
-	zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
-		this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
-
+    // Depending on whether there's a colour pallet or not, assign a random colour value to the particle that we're reviving
+    if (this->particleColourPalette.empty()) {
+	    zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
+		    this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
+    }
+    else {
+        const Colour& randomColour = this->particleColourPalette[Randomizer::GetInstance()->RandomUnsignedInt() % this->particleColourPalette.size()];
+        zombie->SetColour(randomColour, 1.0f);
+    }
 	this->aliveParticles.push_back(zombie);
 
 	// Subtract a life from the particle if the lives are not infinite
@@ -446,6 +453,26 @@ bool ESPEmitter::SetRandomTextureParticles(unsigned int numParticles, std::vecto
 	return true;
 }
 
+bool ESPEmitter::SetRandomCurveParticles(unsigned int numParticles, const ESPInterval& lineThickness, 
+                                         const std::vector<Bezier*>& curves, const ESPInterval& animateTimeInSecs) {
+    assert(numParticles > 0);
+    // Clean up previous emitter data
+    this->Flush();
+
+    // Create each of the new particles
+    for (unsigned int i = 0; i < numParticles; i++) {
+        // Initialize the particle and its attributes
+        ESPAnimatedCurveParticle* newParticle = new ESPAnimatedCurveParticle(curves, lineThickness, animateTimeInSecs);
+        this->deadParticles.push_back(newParticle);
+
+        // Assign the number of lives...
+        this->particleLivesLeft[newParticle] = this->numParticleLives;
+    }
+
+
+	return true;
+}
+
 /**
  * Sets the particle alignments for this emitter.
  */
@@ -545,6 +572,22 @@ void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& gr
 		ESPParticle* currParticle = *iter;
 		currParticle->SetColour(red.RandomValueInInterval(), green.RandomValueInInterval(), blue.RandomValueInInterval(), alpha.RandomValueInInterval());
 	}
+}
+
+void ESPEmitter::SetParticleColourPalette(const std::vector<Colour>& colours) {
+    this->particleColourPalette = colours;
+
+    if (this->particleColourPalette.empty()) {
+        this->SetParticleColour(this->particleRed, this->particleGreen, this->particleBlue, this->particleAlpha);
+    }
+    else {
+        // Go through any already assigned particles and set the colour...
+        for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+            ESPParticle* currParticle = *iter;
+            const Colour& randomColour = this->particleColourPalette[Randomizer::GetInstance()->RandomUnsignedInt() % colours.size()];
+            currParticle->SetColour(randomColour, 1.0f);
+        }
+    }
 }
 
 void ESPEmitter::SetParticleAlpha(const ESPInterval& alpha) {
