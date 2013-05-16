@@ -42,7 +42,10 @@ private:
 
 inline void ESPAnimatedCurveParticle::SelectRandomCurve() {
     this->currSelectedCurveIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->possibleCurves.size();
-    this->currLineThickness = lineThickness.RandomValueInInterval();
+    
+    this->currLineThickness = 
+        lineThickness.LerpInterval(1.0f, 20.0f, std::min<float>(20.0f, std::max<float>(1.0f, std::max<float>(this->size[0], this->size[1]))));
+
     this->timeToAnimate = this->timeToAnimateInterval.RandomValueInInterval();
     this->currTimeCounter = this->timeToAnimate;
     assert(this->timeToAnimate > 0);

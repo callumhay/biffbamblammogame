@@ -97,7 +97,7 @@ fadeEffector() {
         curve1->MoveToCubicBezier(true, 9.585,-1.264,14.968,-7.558,17.857,-16.413);
         curve1->MoveToCubicBezier(true, 0.114,-0.35,-0.38,-0.512,-0.619,-0.534);
         curve1->MoveToCubicBezier(true, -9.26,-0.869,-18.646,-1.904,-20.297,-12.812);
-        curve1->SmartSample(125);
+        curve1->SmartSample(150);
         curve1->Normalize();
         this->curves.push_back(curve1);
     }
@@ -117,7 +117,7 @@ fadeEffector() {
         curve2->MoveToCubicBezier(true, 3.782,-1.553,13.098,-10.794,5.366,-13.051);
         curve2->MoveToCubicBezier(true, -4.013,-1.172,-7.978,3.703,-10.545,-1.804);
 
-        curve2->SmartSample(100);
+        curve2->SmartSample(120);
         curve2->Normalize();
         this->curves.push_back(curve2);
     }
@@ -137,7 +137,7 @@ fadeEffector() {
         curve3->MoveToCubicBezier(true, -0.347,6.289,-6.359,6.278,-9.236,10.936);
         curve3->MoveToCubicBezier(true, -7.198,11.654,13.195,20.758,15.811,6.373);
 
-        curve3->SmartSample(100);
+        curve3->SmartSample(120);
         curve3->Normalize();
         this->curves.push_back(curve3);
     }
@@ -172,10 +172,10 @@ fadeEffector() {
         // Setup each of the background emitters...
         const ESPInterval SPAWN_INTERVAL(0.75f, 1.5f);
         const ESPInterval SPEED_INTERVAL(0.0f, 0.2f);
-        const ESPInterval LIFE_INTERVAL(5.0f, 20.0f);
+        const ESPInterval LIFE_INTERVAL(7.0f, 14.0f);
         const ESPInterval SIZE_INTERVAL(5.0f, 28.0f);
         const ESPInterval ROTATION_INTERVAL(0.0f, 359.999f);
-        const ESPInterval ANIMATION_INTERVAL(1.0f, LIFE_INTERVAL.minValue);
+        const ESPInterval ANIMATION_INTERVAL(LIFE_INTERVAL.minValue / 2.0f, LIFE_INTERVAL.minValue);
         
         const int NUM_CURVES_PER_MID_EMITTER  = 10;
         const int NUM_CURVES_PER_SIDE_EMITTER = 12;

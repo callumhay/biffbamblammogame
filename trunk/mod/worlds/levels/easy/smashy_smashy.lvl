@@ -1,7 +1,7 @@
 Smashy Smashy
 16 30
 S S S S S S S S S S S S S S S S 
-S E E E E E E E E E E E E E E S 
+S K(UberBall) E E E E E E E E E E E E K(UberBall) S 
 S E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E S 
 S E E E E E K(UberBall) E E K(UberBall) E E E E E S 
@@ -32,18 +32,18 @@ S E E E E E E E E E E E E E E S
 S E E E E E E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
 5000
+10000
+15000
+21000
+26400
 
 PaddleGrow 1
 PoisonPaddle 3
 BallSafetyNet 1
 Blackout 3
-UberBall 0
 BallGrow 1
+UberBall 0
 StickyPaddle 1
 ShieldPaddle 2
 LaserBulletPaddle 1

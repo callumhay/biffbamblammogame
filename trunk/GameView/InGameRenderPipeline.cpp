@@ -247,8 +247,8 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
     fullSceneFBO->BindFBObj();
 	
 	// Render any post-processing effects for various items/objects in the game
-	assets->DrawPaddlePostEffects(dT, *gameModel, camera, fullSceneFBO);
-	assets->DrawStatusEffects(dT, camera, fullSceneFBO);
+	assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
+	assets->DrawStatusEffects(dT, camera, colourAndDepthFBO);
 
 	FBObj::UnbindFBObj();
 
