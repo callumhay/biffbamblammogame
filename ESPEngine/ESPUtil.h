@@ -51,6 +51,10 @@ struct ESPInterval {
 		return (minValue + maxValue) / 2.0f;
 	}
 
+    float LerpInterval(double x0, double x1, double x) const {
+        return NumberFuncs::LerpOverFloat<float>(x0, x1, this->minValue, this->maxValue, x);
+    }
+
 	bool operator==(const ESPInterval& other) const {
 		return (this->minValue == other.minValue) && (this->maxValue == other.maxValue);
 	}

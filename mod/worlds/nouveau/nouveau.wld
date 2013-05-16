@@ -21,7 +21,7 @@ resources/worlds/levels/easy/smashy_smashy.lvl
 # Magnet Item Intro: Magnet Item + collateral blocks...
 resources/worlds/levels/medium/a_magnetic_personality.lvl
 
-# A fun block-destroying level to break it up a bit
+# A fun block-destroying level to break things up a bit
 resources/worlds/levels/medium/tower_offense.lvl
 
 # Using the magnet item to redirect balls
@@ -42,10 +42,13 @@ resources/worlds/levels/hard/the_ol_switchero.lvl
 
 
 # Mine Launcher intro level
-# TODO
+resources/worlds/levels/easy/mine_time.lvl
 
 # Mine Launcher + cannon level
+resources/worlds/levels/medium/a_vicinity_for_proximity.lvl
 
+
+# TODO: Some combination of mines, rockets, etc. goes here
 
 
 

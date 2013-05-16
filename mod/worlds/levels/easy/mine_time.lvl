@@ -1,0 +1,69 @@
+Mine Time
+13 28
+S S S S S S S S S S S S S 
+S E E E E E E E E E E E S 
+S G G G G G G G G G G G S 
+S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
+S G G G G G K(UberBall) G G G G G S 
+S G G G G G G G G G G G S 
+S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
+S G G G G G K(UberBall) G G G G G S 
+S G G G G G G G G G G G S 
+S E Q(f) E Q(f) E Q(f) E Q(f) E Q(f) E S 
+S G G G G G G G G G G G S 
+S G G G G G K(UberBall) G G G G G S 
+S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
+S G G G G G G G G G G G S 
+S G G G G G K(UberBall) G G G G G S 
+S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
+S G G G G G G G G G G G S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 0
+UberBall 0
+BallGrow 2
+StickyPaddle 3
+ShieldPaddle 2
+LaserBulletPaddle 0
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 1
+RocketPaddle 0
+GhostBall 0
+BallShrink 2
+UpsideDown 3
+MultiBall5 1
+BallCam 0
+MagnetPaddle 2
+MultiBall3 1
+IceBall 1
+MineLauncherPaddle 3
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0
