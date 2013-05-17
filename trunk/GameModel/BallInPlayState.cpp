@@ -199,7 +199,6 @@ void BallInPlayState::Tick(double seconds) {
             ++iter;
         }
 
-
         std::vector<bool> ballPositionChangedByCollision(gameBalls.size(), false);
         int ballIdx = 0;
 	    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter, ballIdx++) {
@@ -209,7 +208,6 @@ void BallInPlayState::Tick(double seconds) {
 		    // collision simulation
 		    if (currBall->CanCollideWithPaddles()) {
 
-			    // Check for ball collision with the player's paddle
 			    didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision);
 			    if (didCollideWithPaddle) {
 				    // The ball no longer has a last piece that it collided with - it gets reset when it hits the paddle
@@ -235,26 +233,30 @@ void BallInPlayState::Tick(double seconds) {
 					    }
 				    }
 
+                    // In cases where the paddle doesn't have a shield...
                     // Augment the direction of the ball in cases where the paddle 'slices' the ball...
                     // To do this we augment the normal of the collision with the paddle based on the paddle velocity
-                    static const float CUTOFF_PADDLE_AFFECT_BALL_SPD = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
-                    assert(CUTOFF_PADDLE_AFFECT_BALL_SPD < PlayerPaddle::DEFAULT_MAX_SPEED);
+                    if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == 0x0) {
 
-                    if (paddle->GetIsMoveButtonDown() &&
-                        fabs(paddle->GetSpeed()) > CUTOFF_PADDLE_AFFECT_BALL_SPD && 
-                        (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
+                        static const float CUTOFF_PADDLE_AFFECT_BALL_SPD = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
+                        assert(CUTOFF_PADDLE_AFFECT_BALL_SPD < PlayerPaddle::DEFAULT_MAX_SPEED);
 
-                        float truncPaddleSpd = std::min<float>(PlayerPaddle::DEFAULT_MAX_SPEED, fabs(paddle->GetSpeed()));
+                        if (paddle->GetIsMoveButtonDown() &&
+                            fabs(paddle->GetSpeed()) > CUTOFF_PADDLE_AFFECT_BALL_SPD && 
+                            (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
 
-                        if (paddle->GetSpeed() < 0) {
-                            // Paddle is moving to the left
-                            n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
-                                0.0f, PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
-                        }
-                        else {
-                            // Paddle is moving to the right
-                            n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
-                                0.0f, -PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
+                            float truncPaddleSpd = std::min<float>(PlayerPaddle::DEFAULT_MAX_SPEED, fabs(paddle->GetSpeed()));
+
+                            if (paddle->GetSpeed() < 0) {
+                                // Paddle is moving to the left
+                                n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
+                                    0.0f, PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
+                            }
+                            else {
+                                // Paddle is moving to the right
+                                n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
+                                    0.0f, -PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
+                            }
                         }
                     }
 

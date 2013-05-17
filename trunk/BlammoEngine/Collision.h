@@ -2,7 +2,7 @@
  * Collision.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -195,26 +195,38 @@ namespace Collision {
 	};
 
 	class Circle2D {
+    public:
+        Circle2D(const Point2D& c, float r): center(c), radius(r) {}
+        Circle2D(const Circle2D& copy) : center(copy.center), radius(copy.radius) {}
+        ~Circle2D(){}
+
+        void SetCenter(const Point2D& c) {
+            this->center = c;
+        }
+        const Point2D& Center() const {
+            return this->center;
+        }
+        void SetRadius(float r) {
+            this->radius = r;
+        }
+        float Radius() const {
+            return this->radius;
+        }
+
+        bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+            Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
+        bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+            Collision::LineSeg2D& collisionLine, double& timeUntilCollision, const Vector2D& thisCircleVelocity) const;
+
+        Circle2D& operator=(const Circle2D& copy) {
+            this->center = copy.center;
+            this->radius = copy.radius;
+            return *this;
+        }
+
 	private:
 		Point2D center;
 		float radius;
-
-	public:
-		Circle2D(const Point2D& c, float r): center(c), radius(r) {}
-		~Circle2D(){}
-		
-		void SetCenter(const Point2D& c) {
-			this->center = c;
-		}
-		const Point2D& Center() const {
-			return this->center;
-		}
-		void SetRadius(float r) {
-			this->radius = r;
-		}
-		float Radius() const {
-			return this->radius;
-		}
 	};
 
 	/**

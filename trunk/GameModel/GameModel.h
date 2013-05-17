@@ -141,8 +141,6 @@ private:
 	void BallDied(GameBall* deadBall, bool& stateChanged);
 	void DoPieceStatusUpdates(double dT);
 	void DoProjectileCollisions(double dT);
-	
-	bool IsOutOfGameBounds(const Point2D& pos);
 
 	void UpdateActiveTimers(double seconds);
 	void UpdateActiveItemDrops(double seconds);
@@ -184,6 +182,8 @@ public:
     GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
         const BallBoostModel::BallBoostMode& ballBoostMode);
 	~GameModel();
+
+    bool IsOutOfGameBounds(const Point2D& pos) const;
 
     void GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) const;
     

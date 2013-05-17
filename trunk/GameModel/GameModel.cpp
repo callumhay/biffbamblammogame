@@ -830,8 +830,8 @@ void GameModel::DoProjectileCollisions(double dT) {
  * out of game bounds or not.
  * Returns: true if out of bounds, false otherwise.
  */
-bool GameModel::IsOutOfGameBounds(const Point2D& pos) {
-	GameLevel* currLevel = this->GetCurrentLevel();
+bool GameModel::IsOutOfGameBounds(const Point2D& pos) const {
+	const GameLevel* currLevel = this->GetCurrentLevel();
 	float levelWidthBounds	= currLevel->GetLevelUnitWidth()  + GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE;
 	float levelHeightBounds = currLevel->GetLevelUnitHeight() + GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE;
 

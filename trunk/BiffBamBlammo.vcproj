@@ -510,6 +510,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Collision.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\FBObj.cpp"
 					>
 				</File>
