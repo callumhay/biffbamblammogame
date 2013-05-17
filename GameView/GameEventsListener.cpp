@@ -746,10 +746,20 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
 			    }
                 else {
-			        // Don't show any effects / play any sounds if the ball is dead/dying
-			        if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
+                    
+                    
+			        // Don't show any effects / play any sounds if the ball is dead/dying or if the block is off screen...
+                    const GameModel* gameModel = this->display->GetModel();
+                    if (!gameModel->IsOutOfGameBounds(block.GetCenter()) && 
+                        gameModel->GetCurrentStateType() != GameState::BallDeathStateType) {
+
 				        this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				        sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
+
+                        if ((gameModel->GetCurrentStateType() == GameState::BallInPlayStateType ||
+                            gameModel->GetCurrentStateType() == GameState::BallOnPaddleStateType)) {
+				            sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D());
+                        }
+
 			        }
                 }
                 break;

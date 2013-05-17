@@ -44,7 +44,7 @@ public:
 
     // Ball-boundingline collisions where both the ball and these bounding lines are moving...
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-	    Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Vector2D& lineVelocity) const;
+	    Collision::LineSeg2D& collisionLine, double& timeUntilCollision, const Vector2D& lineVelocity) const;
 
 
 	Point2D ClosestPoint(const Point2D& pt) const;
