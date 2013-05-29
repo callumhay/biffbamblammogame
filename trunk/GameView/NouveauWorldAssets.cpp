@@ -277,6 +277,17 @@ void NouveauWorldAssets::Tick(double dT) {
     this->leftGapEmitter.Tick(dT);
     this->rightGapEmitter.Tick(dT);
 
+    // Curves need to fade with the rest of the background in certain cases (e.g., ball death)
+    float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+    if (currBGAlpha < 1.0f) {
+        float lessAlpha = 0.5f*currBGAlpha;
+        this->leftSideEmitter.SetParticleAlpha(lessAlpha);
+        this->centerEmitter.SetParticleAlpha(lessAlpha);
+        this->rightSideEmitter.SetParticleAlpha(lessAlpha);
+        this->leftGapEmitter.SetParticleAlpha(lessAlpha);
+        this->rightGapEmitter.SetParticleAlpha(lessAlpha);
+    }
+
 	GameWorldAssets::Tick(dT);
 }
 

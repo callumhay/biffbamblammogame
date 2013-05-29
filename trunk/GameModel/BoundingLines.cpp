@@ -26,6 +26,29 @@ lines(lines), normals(norms), onInside(onInside) {
     assert(lines.size() == onInside.size());
 }
 
+BoundingLines::BoundingLines(const Collision::AABB2D& aabb) {
+    Point2D aabbTopLeft(aabb.GetMin()[0], aabb.GetMax()[1]);
+    Point2D aabbBottomRight(aabb.GetMax()[0], aabb.GetMin()[1]);
+
+    // Top
+    this->lines.push_back(Collision::LineSeg2D(aabbTopLeft, aabb.GetMax()));
+    this->normals.push_back(Vector2D(0, 1));
+
+    // Left
+    this->lines.push_back(Collision::LineSeg2D(aabb.GetMin(), aabbTopLeft));
+    this->normals.push_back(Vector2D(-1, 0));
+
+    // Right
+    this->lines.push_back(Collision::LineSeg2D(aabb.GetMax(), aabbBottomRight));
+    this->normals.push_back(Vector2D(1, 0));
+
+    // Bottom
+    this->lines.push_back(Collision::LineSeg2D(aabb.GetMin(), aabbBottomRight));
+    this->normals.push_back(Vector2D(0, -1));
+
+    this->onInside.resize(4, false);
+}
+
 BoundingLines::BoundingLines(const BoundingLines& copy) :
 lines(copy.lines), normals(copy.normals), onInside(copy.onInside) {
 }

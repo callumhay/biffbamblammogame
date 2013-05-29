@@ -2588,6 +2588,14 @@
 						RelativePath=".\GameModel\GothicRomanticBossAIStates.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameModel\NouveauBoss.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\NouveauBossAIStates.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -2626,6 +2634,14 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\GothicRomanticBossAIStates.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\NouveauBoss.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\NouveauBossAIStates.cpp"
 						>
 					</File>
 				</Filter>

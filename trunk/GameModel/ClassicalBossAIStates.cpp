@@ -137,7 +137,9 @@ countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0), isA
 nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.0), countdownToLaserBarrage(0.0), lastRecourceLaserCountdown(0.0) {
     
     // Grab the parts of the boss that matter to this AI state...
+    assert(dynamic_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->leftArmIdx]) != NULL);
     this->leftArm  = static_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->leftArmIdx]);
+    assert(dynamic_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->rightArmIdx]) != NULL);
     this->rightArm = static_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->rightArmIdx]);
     
     // Turn the squares on both arms into weakpoints...

@@ -136,6 +136,10 @@ void Boss::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBod
     this->currAIState->CollisionOccurred(gameModel, paddle, collisionPart);
 }
 
+void Boss::MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine) {
+    this->currAIState->MineExplosionOccurred(gameModel, mine);
+}
+
 bool Boss::CanHurtPaddleWithBody() const {
     if (this->currAIState != NULL) {
         return this->currAIState->CanHurtPaddleWithBody();

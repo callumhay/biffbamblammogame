@@ -48,6 +48,15 @@ namespace Collision {
             this->maxCoord = max;
         }
 
+        void GetCorners(std::vector<Point2D>& corners) {
+            corners.clear();
+            corners.reserve(4);
+            corners.push_back(minCoord);
+            corners.push_back(maxCoord);
+            corners.push_back(Point2D(minCoord[0], maxCoord[1]));
+            corners.push_back(Point2D(maxCoord[0], minCoord[1]));
+        }
+
 		Point2D GetCenter() const {
 			return Point2D::GetMidPoint(this->maxCoord, this->minCoord);
 		}

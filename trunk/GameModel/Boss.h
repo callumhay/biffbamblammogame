@@ -61,6 +61,8 @@ public:
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
     void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
+    void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
+
     bool CanHurtPaddleWithBody() const;
 
     virtual bool ProjectilePassesThrough(const Projectile* projectile) const = 0;
