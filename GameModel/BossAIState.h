@@ -22,6 +22,7 @@ class GameBall;
 class Projectile;
 class PlayerPaddle;
 class Boss;
+class MineProjectile;
 
 class BossAIState {
 public:
@@ -35,6 +36,8 @@ public:
 	virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart)         = 0;
 	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) = 0;
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart)   = 0;
+    
+    virtual void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
     // TODO: Beams!!!
 
     virtual bool CanHurtPaddleWithBody() const = 0;
@@ -62,6 +65,9 @@ inline void BossAIState::Tick(double dT, GameModel* gameModel) {
     this->UpdateState(dT, gameModel);
     // Update the bosses' movement
     this->UpdateMovement(dT, gameModel);
+}
+
+inline void BossAIState::MineExplosionOccurred(GameModel*, const MineProjectile*) {
 }
 
 inline Vector2D BossAIState::GetAcceleration() const {

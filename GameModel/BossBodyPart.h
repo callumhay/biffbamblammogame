@@ -65,6 +65,7 @@ public:
 
     ColourRGBA GetColour() const { return this->rgbaAnim.GetInterpolantValue(); }
     float GetAlpha() const { return this->rgbaAnim.GetInterpolantValue().A(); }
+    void SetColour(double animateTimeInSecs, const ColourRGBA& colour);
     void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);
     void ResetColourRGBAAnimation();
 
@@ -235,6 +236,10 @@ inline void BossBodyPart::SetLocalTransform(const Vector3D& translation, float z
     // Change the local translation and z-axis rotation
     this->localTranslation = translation;
     this->localZRotation   = zRotInDegs;
+}
+
+inline void BossBodyPart::SetColour(double animateTimeInSecs, const ColourRGBA& colour) {
+    this->rgbaAnim.SetLerp(animateTimeInSecs, colour);
 }
 
 inline void BossBodyPart::AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim) {

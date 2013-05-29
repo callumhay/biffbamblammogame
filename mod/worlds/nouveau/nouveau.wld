@@ -8,12 +8,6 @@ resources/textures/nouveau_world_select_256x256.jpg
 # mines, and prism blocks.
 
 
-# Testing ------------------------------------------
-resources/worlds/testing/see_the_background.lvl
-resources/worlds/testing/an_almost_empty_level.lvl
-# End Testing --------------------------------------
-
-
 # A level where you need to (sortof) strategize about getting an iceball and then the uberball to
 # smash through all the frozen blocks
 resources/worlds/levels/easy/smashy_smashy.lvl
@@ -47,10 +41,11 @@ resources/worlds/levels/easy/mine_time.lvl
 # Mine Launcher + cannon level
 resources/worlds/levels/medium/a_vicinity_for_proximity.lvl
 
+# Mines and rockets with cannons
+resources/worlds/levels/medium/good_shot_bad_shot.lvl
 
-# TODO: Some combination of mines, rockets, etc. goes here
 
-
+# TODO: One more level goes here
 
 # Prism block intro levels
 resources/worlds/levels/easy/bend_it_like_maxwell.lvl
@@ -71,6 +66,9 @@ resources/worlds/levels/hard/size_matters.lvl
 resources/worlds/levels/hard/prismatic_pragmatism.lvl
 
 
+# Mines + Switch + Sticky Paddle + Cannons
+resources/worlds/levels/medium/mine_the_gap.lvl
+
 # Magnet Item + Cannons (to redirect rockets) + Prisms (to redirect lasers) + Switches
 resources/worlds/levels/hard/lodestone_shootout.lvl
 
@@ -79,6 +77,9 @@ resources/worlds/levels/hard/lodestone_shootout.lvl
 
 # TODO: Boss...
 # resources/worlds/levels/bosses/?.lvl
+
+
+
 
 
 # IN ANOTHER MOVEMENT... --------------------------------------------------

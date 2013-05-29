@@ -1449,6 +1449,11 @@ void GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine) 
 		++iter;
 	}
 
+    // If there's a boss then it needs to be informed of the explosion as well
+    if (this->GetHasBoss()) {
+        this->boss->MineExplosionOccurred(gameModel, mine);
+    }
+
 	// EVENT: Mine exploded!!
 	GameEventManager::Instance()->ActionMineExploded(*mine);
 }

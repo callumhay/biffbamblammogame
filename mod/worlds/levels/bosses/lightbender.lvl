@@ -1,0 +1,74 @@
+boss
+Lightbender
+23 32
+E E E D(MineLauncherPaddle){2} S S S S S S S D(MagnetPaddle) S S S S S S S D(LaserBulletPaddle){1} E E E 
+E E T(P,ul) E N E E E E E E E E E E E E E N E C(270) E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E T(P,ul) E E N E E E E E E E E E E E E E N E E T(P,ur) E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E S E E E E E E E E E E E E E S E E E E 
+S S E E S E E E E E E E E E E E E E S E E S S 
+S E E E N E E E E E E E E E E E E E N E E E S 
+W(1) E E E N E E E E E E E E E E E E E N E E E W(2) 
+
+STARS:
+0
+0
+0
+0
+0
+
+PaddleGrow 0
+PoisonPaddle 0
+BallSafetyNet 0
+Blackout 0
+BallGrow 0
+UberBall 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 0
+PaddleCam 0
