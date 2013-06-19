@@ -12,6 +12,7 @@
 #include "BossMesh.h"
 #include "ClassicalBossMesh.h"
 #include "GothicRomanticBossMesh.h"
+#include "NouveauBossMesh.h"
 #include "GameViewConstants.h"
 
 #include "../BlammoEngine/Texture2D.h"
@@ -20,6 +21,7 @@
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/ClassicalBoss.h"
 #include "../GameModel/GothicRomanticBoss.h"
+#include "../GameModel/NouveauBoss.h"
 
 #include "../ResourceManager.h"
 
@@ -100,8 +102,12 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
             break;
         }
 
-        case GameWorld::Nouveau:
-            // TODO
+        case GameWorld::Nouveau: {
+            assert(dynamic_cast<NouveauBoss*>(boss) != NULL);
+            NouveauBoss* nouveauBoss = static_cast<NouveauBoss*>(boss);
+            result = new NouveauBossMesh(nouveauBoss);
+            break;
+        }
 
         case GameWorld::Deco:
             // TODO

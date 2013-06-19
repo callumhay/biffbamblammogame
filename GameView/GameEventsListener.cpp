@@ -708,7 +708,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		        // We do not do any ink blotches while in ball or paddle camera modes, also, if the ink block is frozen
 		        // then it just shatters...
 		        bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen &&
-                    method != LevelPiece::BombDestruction && method != LevelPiece::RocketDestruction;
+                    method != LevelPiece::BombDestruction && method != LevelPiece::RocketDestruction && 
+                    method != LevelPiece::MineDestruction;
 
 		        if (wasFrozen) {
 		    	    // Add ice break effect

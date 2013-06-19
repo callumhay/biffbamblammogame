@@ -217,7 +217,7 @@ void GameBall::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& m
     const PlayerPaddle* paddle = model.GetPlayerPaddle();
 
     // If the ball is moving upwards in the level AT ALL then we don't effect it
-    if (Vector2D::Dot(this->currDir, Vector2D(0,1)) >= 0) {
+    if (Vector2D::Dot(this->currDir, Vector2D(0,1)) >= -EPSILON) {
         return;
     }
 

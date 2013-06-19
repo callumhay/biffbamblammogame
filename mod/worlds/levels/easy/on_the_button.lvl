@@ -1,20 +1,20 @@
 On the Button
 17 25
-S S S S S S S S S S S E E E E E E 
+S S C(180) S C(180) S C(180) S C(180) S S E E E E E E 
 S E E E E E E E E E S E E E E E E 
-S E E E E E E E E E S E E E E E E 
-S E E E E E E E E E S E E E E E E 
-S E E E E E E E E E S E E E E E E 
-S E E E E E E E E E S E E E E E E 
-S E E E E E E E E E S S S D(LaserBulletPaddle,LaserBeamPaddle,RocketPaddle){1} S S S 
-S E E E E E E E E E S E E E E E S 
-S E E E E E E E E E S G G E G G S 
-S E E E E E E E E E S G G E G G S 
-S E E E E R E E E E S O O E O O S 
-S E E E R W(1) R E E E S Y Y E Y Y S 
-S E E E E R E E E E S Y Y E Y Y S 
-S E E E E E E E E E S Y Y E Y Y S 
-S E E E E E E E E E S Y Y E Y Y S 
+S E T(G,ur) E E I E E T(G,ul) E S E E E E E E 
+S E E T(G,ur) E E E T(G,ul) E E S E E E E E E 
+S E E E T(Y,ur) E T(Y,ul) E E E S E E E E E E 
+S E T(Y,ur) E E E E E T(Y,ul) E S E E E E E E 
+S E E T(G,ur) E E E T(G,ul) E E S S S D(RocketPaddle){1} S S S 
+S E T(O,ur) E T(Y,ur) E T(Y,ul) E T(O,ul) E S E E E E E S 
+S I E T(R,ul) E E E T(R,ur) E I S G G E G G S 
+S E T(O,ul) E G E G E T(O,ur) E S G G E G G S 
+S T(Y,ul) E T(Y,ul) E R E T(Y,ur) E T(Y,ur) S O O E O O S 
+S E R E R W(1) R E R E S Y Y E Y Y S 
+S Y E Y E Y E Y E Y S Y Y E Y Y S 
+S E Y E Y E Y E Y E S Y Y E Y Y S 
+S G E G E G E G E G S Y Y E Y Y S 
 S E E E E E E E E E S O O E O O S 
 S E E E E E E E E E S G G E G G S 
 S E E E E E E E E E S G G E G G S 
@@ -27,18 +27,18 @@ S E E E E E E E E E N E E E E E S
 S E E E E E E E E E N E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
-5000
+4000
+6000
+8000
+9000
+13000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

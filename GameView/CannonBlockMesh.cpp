@@ -58,8 +58,7 @@ CannonBlockMesh::~CannonBlockMesh() {
 
 
 void CannonBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
-                           bool lightsAreOff) const {
+                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
 
 	bool doCannonActiveEffectTick = false;
 
@@ -97,8 +96,8 @@ void CannonBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
 
 		// If the lights are out and a ball is inside the current cannon block 
 		// then we illuminate the cannon block
-		if (lightsAreOff && currCannonBlock->GetLoadedBall() != NULL) {
-			BasicPointLight newKeyLight(Point3D(0, 0, -10), Colour(1, 1, 1), 0.01f);
+		if (currCannonBlock->GetLoadedBall() != NULL) {
+			BasicPointLight newKeyLight(Point3D(blockCenter[0], blockCenter[1], 10), Colour(1, 1, 1), 0.0f);
 			this->cannonBlockBarrelGeometry->Draw(camera, newKeyLight, fillLight, ballLight);
 		}
 		else {

@@ -2114,6 +2114,49 @@ void GameLevel::InitAfterLevelLoad(GameModel* model) {
 	}
 }
 
+LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
+    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
+    for (; col > 0; col--) {
+        const LevelPiece* currPiece = this->currentLevelPieces[0][col];
+        if (currPiece->GetType() == LevelPiece::Solid ||
+            currPiece->GetType() == LevelPiece::SolidTriangle ||
+            currPiece->GetType() == LevelPiece::Prism ||
+            currPiece->GetType() == LevelPiece::PrismTriangle ||
+            currPiece->GetType() == LevelPiece::Switch) {
+            break;
+        }
+        else if (currPiece->GetType() == LevelPiece::OneWay) {
+            const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(currPiece);
+            if (oneWayBlock->GetDirType() != OneWayBlock::OneWayLeft) {
+                break;
+            }
+        }
+    }
+    return this->currentLevelPieces[0][col];
+}
+
+LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
+    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
+    for (; col < static_cast<int>(this->currentLevelPieces[0].size())-1; col++) {
+        const LevelPiece* currPiece = this->currentLevelPieces[0][col];
+        if (currPiece->GetType() == LevelPiece::Solid ||
+            currPiece->GetType() == LevelPiece::SolidTriangle ||
+            currPiece->GetType() == LevelPiece::Prism ||
+            currPiece->GetType() == LevelPiece::PrismTriangle ||
+            currPiece->GetType() == LevelPiece::Switch) {
+            break;
+        }
+        else if (currPiece->GetType() == LevelPiece::OneWay) {
+            const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(currPiece);
+            if (oneWayBlock->GetDirType() != OneWayBlock::OneWayRight) {
+                break;
+            }
+        }
+    }
+
+    return this->currentLevelPieces[0][col];
+}
+
 float GameLevel::GetPaddleMinBound() const {
 	LevelPiece* temp = this->GetMinPaddleBoundPiece();
     if (temp->IsNoBoundsPieceType()) {

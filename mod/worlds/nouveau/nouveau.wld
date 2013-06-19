@@ -18,8 +18,7 @@ resources/worlds/levels/medium/a_magnetic_personality.lvl
 # A fun block-destroying level to break things up a bit
 resources/worlds/levels/medium/tower_offense.lvl
 
-# Using the magnet item to redirect balls
-resources/worlds/levels/medium/a_minor_deviation.lvl
+
 
 # A fun level, has all items up to this point available (as typical item drops)
 resources/worlds/levels/easy/all_balls_no_brains.lvl
@@ -28,7 +27,7 @@ resources/worlds/levels/easy/all_balls_no_brains.lvl
 resources/worlds/levels/easy/on_the_button.lvl
 
 # Switch + Cannon + rocket + magnet paddle
-resources/worlds/levels/medium/shoot_zen_guide_ze_missiles.lvl
+resources/worlds/levels/medium/a_little_guidance_is_required.lvl
 
 # Combine rocket/cannon mechanics, collateral blocks, ice balls, and switches...
 resources/worlds/levels/hard/the_ol_switchero.lvl
@@ -45,8 +44,6 @@ resources/worlds/levels/medium/a_vicinity_for_proximity.lvl
 resources/worlds/levels/medium/good_shot_bad_shot.lvl
 
 
-# TODO: One more level goes here
-
 # Prism block intro levels
 resources/worlds/levels/easy/bend_it_like_maxwell.lvl
 
@@ -57,6 +54,8 @@ resources/worlds/levels/medium/work_around.lvl
 
 # TODO: Insert some more levels somewhere below here (make them a bit less hard)?
 
+# Using the magnet item to redirect mines
+resources/worlds/levels/hard/a_minor_deviation.lvl
 
 # Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
 resources/worlds/levels/hard/size_matters.lvl

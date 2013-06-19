@@ -33,7 +33,7 @@ public:
 	void Tick(double dT);
 
 private:
-
+    /*
     // Background effects: Nouveau curves/flourishes
     std::vector<Bezier*> curves;
     ESPVolumeEmitter leftSideEmitter;
@@ -42,6 +42,7 @@ private:
     ESPVolumeEmitter leftGapEmitter;
     ESPVolumeEmitter rightGapEmitter;
     ESPMultiColourEffector fadeEffector;
+    */
 
     DISALLOW_COPY_AND_ASSIGN(NouveauWorldAssets);
 };

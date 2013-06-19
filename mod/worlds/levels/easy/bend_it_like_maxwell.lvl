@@ -7,9 +7,9 @@ S T(P,ul) O E R R R S S S S
 S Y E E R R R E D(LaserBulletPaddle,LaserBeamPaddle) E S 
 S E O E Y E R E E E S 
 S Y E Y E R E R R R S 
-S E R E Y E Y E R E S 
+S E R E Y E K(MineLauncherPaddle) E R E S 
 S O E O E R E O E O S 
-S E R E R B R E R E S 
+S E K(MultiBall5) E R B R E R E S 
 S Y E O E O E O E Y S 
 S E Y E G E G E Y E S 
 S Y E O E Y E O E Y S 
@@ -29,9 +29,9 @@ S E E E E E E E E E S
 STARS:
 3000
 6000
-10000
-15000
-20000
+9000
+12000
+16000
 
 PaddleGrow 1
 PoisonPaddle 0

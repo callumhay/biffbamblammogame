@@ -248,7 +248,7 @@ Point2D SideSphereAI::ChooseTargetPosition(const Point2D& startPos) const {
     std::sort(intersectionTRayArray.begin(), intersectionTRayArray.end());
 
     // Choose at random from the last distances
-    static const NUM_RAYS_TO_ELIMINATE = 1;
+    static const int NUM_RAYS_TO_ELIMINATE = 1;
     int randomIndex = NUM_RAYS_TO_ELIMINATE +
         Randomizer::GetInstance()->RandomUnsignedInt() % (intersectionTRayArray.size() - NUM_RAYS_TO_ELIMINATE);
     
@@ -346,7 +346,7 @@ void SideSphereAI::ExecuteBasicMoveAndShootState(double dT, GameModel* gameModel
     // (unless we're getting close then we want to slow down and stop)
 
     // With a bit of kinematics we figure out when to start stopping...
-    float distToTargetToStartStopping = -(this->currVel * this->currVel) / (2 * -this->GetAccelerationMagnitude());
+    float distToTargetToStartStopping = -this->currVel.SqrMagnitude() / (2 * -this->GetAccelerationMagnitude());
     assert(distToTargetToStartStopping >= 0.0);
     if (currPosToTargetVec.SqrMagnitude() <= distToTargetToStartStopping * distToTargetToStartStopping) {
         this->desiredVel = Vector2D(0,0);

@@ -1,47 +1,47 @@
 Work Around
 19 28
-S S S S S S S S E E E S S S S S S S S 
+S S S S S S S S G E G S S S S S S S S 
 S T(P,ul) E E E E T(P,ur) S E E E S T(P,ul) E E E E T(P,ur) S 
 S E E E E E E S E E E S E E E E E E S 
 S G E E E E E S E E E S E E E E E G S 
-S S S S S S S S S S S S S S S S S S S 
+S S E E S S S S P D(LaserBulletPaddle,LaserBeamPaddle) P S S S S E E S S 
+S D(LaserBulletPaddle,LaserBeamPaddle){1} S S S E E E E E E E E E S S S S S 
+E E E E N Y E Y Q(f) E Q(f) Y E Y N E E E S 
+E E T(P,ul) E N E Y E Q(f) E Q(f) E Y E N E D(IceBall) E S 
+E E E E N Y E Y Q(f) E Q(f) Y E Y N E E E S 
 E E E E S E E E E E E E E E S E E E S 
-E E E E N E E E E E E E E E N E E E S 
-E E T(P,ul) E N E E E E E E E E E N E D(LaserBulletPaddle,LaserBeamPaddle) E S 
-E E E E N E E E E E E E E E N E E E S 
-E E E E S E E E E E E E E E S E E E S 
-E E E E S E E E E E E E E E S E E E S 
-E E E E S E E E E E E E E E S S S S S 
-E E E E S E E E E D(LaserBulletPaddle,LaserBeamPaddle) E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E S E E E E 
+E E E E S E R E E R E E R E S E E E S 
+E E E E S R B R R B R R B R S S S S S 
+E E E E S E R E E R E E R E S E E E E 
+E E E E S E E O O E O O E E S E E E E 
+E E E E S O O B O O O B O O S E E E E 
+E E E E S E E O O E O O E E S E E E E 
+E E E E S Y Y E E Y E E Y Y S E E E E 
+E E E E S B Y Y Y B Y Y Y B S E E E E 
+E E E E S Y Y E E Y E E Y Y S E E E E 
+E E E E S E E G G E G G E E S E E E E 
+E E E E S G G I G G G I G G S E E E E 
+E E E E S E E G G E G G E E S E E E E 
 E E E E S E E E E E E E E E S E E E E 
 E E E E S E E E E E E E E E S E E E E 
 E E E E S E E E E E E E E E S E E E E 
 E E E E N E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E N E E E E 
-S E E E N E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E N E E E W(1) 
 
 STARS:
-100
-500
-1000
-2000
-5000
+6000
+10000
+14000
+17000
+19000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

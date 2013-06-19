@@ -9,7 +9,6 @@
  * resulting work only under the same or similar license to this one.
  */
 
-
 #ifndef __GOTHICROMANTICBOSSMESH_H__
 #define __GOTHICROMANTICBOSSMESH_H__
 
@@ -24,6 +23,7 @@ public:
     GothicRomanticBossMesh(GothicRomanticBoss* boss);
     ~GothicRomanticBossMesh();
 
+    // Inherited from BossMesh
     double ActivateIntroAnimation();
 
 private:
@@ -58,6 +58,7 @@ private:
     AnimationLerp<float> bottomPtGlowAlphaAnim;
     std::vector<AnimationLerp<float> > legGlowAlphaAnims;
 
+    // Inherited from BossMesh;
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawPostBodyEffects(double dT, const Camera& camera);

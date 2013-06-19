@@ -5,24 +5,24 @@ E S S S S S S S S S S E S S S S S S S S S
 E S E L E E E E E E S E S E E E E E E E S 
 E S E E E E E E E E S E S E C(90) E E E W(3) E S 
 E S E E E E E E E E S E S E E E E E E E S 
-E S E E E E E E E E S S S N N N S S S S S 
-E S E E E E E E E E E E E E E E S E E E S 
-E S E E E E E E E E E E E E E E S E W(2) E S 
-E S E E E E E E E E E E E E E E S E E E S 
-E S S S S E E E E E E E E E E E S N N N S 
-E E S W(0) S E E E E E E E E E E E E E E E S 
-E E S S S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
+E S E E E E E E E G S S S N N N S S S S S 
+E S E E E E E E G T(Y,ul) E E E E E E S E E E S 
+E S E E E E E G T(Y,ul) E E E E E Q(f) E S E W(2) E S 
+E S E E E E G T(Y,ul) E E E E E E E E S E E E S 
+E S S S S G T(Y,ul) E E E E R E E E E S N N N S 
+E E S W(1) S T(Y,ul) E E E E R Y R E E E E E E E S 
+E E S S S E E E E R Y Y Y R E E E E Q(f) E S 
+E E E E S E E E R Y Y Y Y Y R E E E E E S 
+E E E E S E E E R R R Y R R R E E E E E S 
+E E E E S E E E E E R Y R E E E E E E E S 
+E E E E S E E E E E R Y R E E E E E E E S 
+E E E E S E E E E E R Y R E E E E E E E S 
+S S S S S E E E E E R Y R E E E E E E E S 
+S D(RocketPaddle){2} D(LaserBulletPaddle){1} D(IceBall){3} S E E E E E R R R E E E E E E E S 
 S S S S S E E E E E E E E E E E E E E E S 
-S D(RocketPaddle){2} D(LaserBeamPaddle){1} D(IceBall){3} S E E E E E E E E E E E E E E E S 
-S S S S S E E E E E E E E E E E E E E E S 
-S E E E N E E E E E E E E E E E E E E E S 
+S E E E S E E E E E E E E E E E E E E E S 
+S E E E S E E E E E E E E E E E E E E E S 
+S E E E S E E E E E E E E E E E E E E E S 
 S E E E N E E E E E E E E E E E E E E E S 
 S E E E N E E E E E E E E E E E E E E E S 
 S E E E N E E E E E E E E E E E E E E E S 
@@ -38,8 +38,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

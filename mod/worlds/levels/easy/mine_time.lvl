@@ -2,21 +2,21 @@ Mine Time
 13 28
 S S S S S S S S S S S S S 
 S E E E E E E E E E E E S 
-S G G G G G G G G G G G S 
-S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
+S O G G G G G G G G G O S 
+S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
 S G G G G G K(UberBall) G G G G G S 
-S G G G G G G G G G G G S 
-S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
+S G G R G G G G G R G G S 
+S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
 S G G G G G K(UberBall) G G G G G S 
-S G G G G G G G G G G G S 
+S O G G G G G G G G G O S 
 S E Q(f) E Q(f) E Q(f) E Q(f) E Q(f) E S 
-S G G G G G G G G G G G S 
+S O G G G G G G G G G O S 
 S G G G G G K(UberBall) G G G G G S 
-S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
-S G G G G G G G G G G G S 
+S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
+S G G R G G G G G R G G S 
 S G G G G G K(UberBall) G G G G G S 
-S G G K(MineLauncherPaddle) G G G G G K(MineLauncherPaddle) G G S 
-S G G G G G G G G G G G S 
+S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
+S O G G G G G G G G G O S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -30,18 +30,18 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
 5000
+10000
+20000
+30000
+40000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 0
-UberBall 0
 BallGrow 2
+UberBall 0
 StickyPaddle 3
 ShieldPaddle 2
 LaserBulletPaddle 0

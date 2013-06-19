@@ -169,7 +169,9 @@ inline void MineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
 
     // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
     // or if it just can't collide with the block
-    if (block->GetType() == LevelPiece::Cannon || block->IsNoBoundsPieceType()) {
+    if (block->GetType() == LevelPiece::Cannon || block->GetType() == LevelPiece::NoEntry || 
+        block->IsNoBoundsPieceType()) {
+
         return;
     }
 

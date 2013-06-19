@@ -206,7 +206,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	assets->DrawGameBalls(dT, *gameModel, camera, negHalfLevelDim);
 
 	// Projectiles...
-	assets->DrawProjectiles(dT, *gameModel, camera);
+	//assets->DrawProjectiles(dT, *gameModel, camera);
 
 	glPopMatrix();
 
@@ -243,11 +243,12 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
         celOutlineEffect.Draw(colourAndDepthFBO, fullSceneFBO);
     }
 
-	// Draw Post-Fullscene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
+	// Draw Post-fullscene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
     fullSceneFBO->BindFBObj();
-	
+
 	// Render any post-processing effects for various items/objects in the game
-	assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
+	assets->DrawProjectiles(dT, *gameModel, camera); // ?
+    assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
 	assets->DrawStatusEffects(dT, camera, colourAndDepthFBO);
 
 	FBObj::UnbindFBObj();

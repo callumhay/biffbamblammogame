@@ -1,0 +1,69 @@
+A Minor Deviation
+21 28
+E E E E E E C(180) E C(270) S D(LaserBulletPaddle) S C(90) E C(180) E E E E E E 
+E E E E E E C(180) E N E E E N E C(180) E E E E E E 
+E E E E E E E T(S,lr) E E G E E T(S,ll) E E E E E E E 
+E E E E E E E F(r) E G G G E F(l) E E E E E E E 
+E E E E E E E F(r) E G G G E F(l) E E E E E E E 
+E E E E E E E F(r) E E G E E F(l) E E E E E E E 
+C(90) E E E E E E F(r) E E E E E F(l) E E E E E E C(270) 
+E E E E E E E F(r) E E G E E F(l) E E E E E E E 
+E E E E E Q(f) E F(r) E G G G E F(l) E Q(f) E E E E E 
+E E E E E E E F(r) E G G G E F(l) E E E E E E E 
+E E E E E E E F(r) E E G E E F(l) E E E E E E E 
+E E E E E E E F(r) E E E E E F(l) E E E E E E E 
+E E E E T(S,lr) S F(d) T(S,ul) E E E E E T(S,ur) F(d) S T(S,ll) E E E E 
+E E E E T(S,ur) E E E E E E E E E E E T(S,ul) E E E E 
+C(0) E E E C(270) R E E E E R E E E E R C(90) E E E C(0) 
+E E E E T(S,lr) E E E E O G O E E E E T(S,ll) E E E E 
+E E E E S E E E G G Y G G E E E S E E E E 
+E E E E S E E O G G G G G O E E S E E E E 
+E E E E S E R G Y G K(UberBall) G Y G R E S E E E E 
+E E E E S E E O G G G G G O E E S E E E E 
+E E E E S E E E G G Y G G E E E S E E E E 
+E E D(MagnetPaddle){1} E S E E E E O G O E E E E S S D(MineLauncherPaddle) S S 
+S S S S S E E E E E R E E E E E S E E E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E N E E E S 
+W(1) E E E N E E E E E E E E E E E N E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 0
+BallGrow 0
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 0
+FireBall 2
+RocketPaddle 0
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0
