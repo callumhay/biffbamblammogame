@@ -66,14 +66,15 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 		    // the speed of the ball as it gets pulled down by gravity - currSpeed does not do this
 		    Vector2D currGravityVelocity = (this->gameBall->gravitySpeed * this->gameBall->currDir);
     		
-		    // If the ball ever exceeds the current ball speed projected on the gravity vector then slow it down along that axis
 		    // Figure out the projected gravity vector and speed
 		    Vector2D nGravityDir = Vector2D::Normalize(worldSpaceGravityDir);
-		    float projectedGravitySpeed  = Vector2D::Dot(currGravityVelocity, nGravityDir);
+            float projectedGravitySpeed  = std::max<float>(GameBall::SlowestSpeed, Vector2D::Dot(currGravityVelocity, nGravityDir));
 		    Vector2D projectedGravityVec = projectedGravitySpeed * nGravityDir;
 
+            // If the ball ever exceeds the current ball speed projected on the gravity vector then slow it down along that axis
 		    if (projectedGravitySpeed > this->gameBall->currSpeed) {
-			    currVelocity = currGravityVelocity - projectedGravityVec + (this->gameBall->currSpeed * nGravityDir);
+			    currVelocity = currGravityVelocity - projectedGravityVec + (this->gameBall->currSpeed * nGravityDir) + 
+                    (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);
 		    }
 		    else {
 			    currVelocity = currGravityVelocity + (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);

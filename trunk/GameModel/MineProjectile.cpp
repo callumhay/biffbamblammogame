@@ -23,8 +23,8 @@ const Vector2D MineProjectile::MINE_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 
 const float MineProjectile::MINE_DEFAULT_ACCEL = 80.0f;
 
-const float MineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.9f * LevelPiece::PIECE_HEIGHT;
-const float MineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.00f * LevelPiece::PIECE_WIDTH;
+const float MineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.9f  * LevelPiece::PIECE_HEIGHT;
+const float MineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.33f * LevelPiece::PIECE_WIDTH;
 
 const double MineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.75;
 const double MineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.75;
@@ -86,13 +86,13 @@ void MineProjectile::Tick(double seconds, const GameModel& model) {
 			// EVENT: Mine has officially been fired from the cannon
 			GameEventManager::Instance()->ActionProjectileFiredFromCannon(*this, *this->cannonBlock);
 
+            this->SetLastThingCollidedWith(this->cannonBlock);
 			this->cannonBlock = NULL;
 		}
 	}
 	else {
-        // Make sure that there's a velocity or magnitude before doing all the calcuations
-        // for those things...
 
+        // Make sure that there's a velocity or magnitude before doing all the calculations for those things...
         if (this->GetVelocityMagnitude() != 0.0f || this->GetAccelerationMagnitude() != 0.0f) {
             this->AugmentDirectionOnPaddleMagnet(seconds, model, 60.0f);
 
@@ -109,6 +109,10 @@ void MineProjectile::Tick(double seconds, const GameModel& model) {
 		    this->currRotation += dV;
             this->currRotation = fmod(this->currRotation, 360.0f);
         }
+        // TODO:
+        //else { 
+        // The mine has landed on something, don't let it sit there forever, have a timer for it to be armed after a particular time period... 
+        //}
 	}
 }
 

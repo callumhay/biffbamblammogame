@@ -1,25 +1,28 @@
 Good Shot, Bad Shot
-15 30
-E E E E E E E G E E E E E E E 
-E E E E E E E Q(i) E E E E E E E 
+15 33
+C(180) E E E E C(270) E G E C(90) E E E E C(180) 
+E E E E G E E Q(i) E E G E E E E 
 C(180) E E E E E C(270) Q(i) C(90) E E E E E C(180) 
-E E E E E E E Q(i) E E E E E E E 
-E S S D(MineLauncherPaddle) S S N N N S S D(RocketPaddle) S S E 
+E E E E Q(i) E E Q(i) E E Q(i) E E E E 
+E S S D(MineLauncherPaddle) N N N N N N N D(RocketPaddle) S S E 
+E S E E Q(i) E E Q(i) E E Q(i) E E S E 
 E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
+E S E E E E E I E E E E E S E 
+E S E R Q(f) G E Q(f) E G Q(f) R E S E 
+E S O E G E G E G E G E O S E 
+E S E R E G E G E G E R E S E 
+E S O E G E G E G E G E O S E 
+E S E R E G E G E G E R E S E 
+E S O E I E G E G E G E O S E 
+E S E R Q(f) G E Q(f) E G Q(f) R E S E 
+E S Y E G E G E G E G E Y S E 
+E S E R E G E G E G E R E S E 
+E S Y E G E G E G E G E Y S E 
+E S E R E G E G E G E R E S E 
+E S Y E G E G E G E I E Y S E 
+E S E R Q(f) G E Q(f) E G Q(f) R E S E 
+E S G E G E G E G E G E G S E 
+E S E G E G E G E G E G E S E 
 E S E E E E E E E E E E E S E 
 E S E E E E E E E E E E E S E 
 E S E E E E E E E E E E E S E 
@@ -32,33 +35,33 @@ E F(r) E E E E E E E E E E E F(l) E
 C(90) F(r) E E E E E E E E E E E F(l) C(270) 
 
 STARS:
-100
-500
-1000
-2000
 5000
+10000
+15000
+20000
+25000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
-LaserBulletPaddle 2
+LaserBulletPaddle 1
 PaddleShrink 2
 InvisiPaddle 2
 InvisiBall 2
-LaserBeamPaddle 2
+LaserBeamPaddle 1
 OmniLaserBall 2
 FireBall 2
-RocketPaddle 2
-GhostBall 2
+RocketPaddle 0
+GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
-BallCam 2
+BallCam 0
 MagnetPaddle 2
 MultiBall3 2
 IceBall 2
@@ -68,4 +71,4 @@ GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0

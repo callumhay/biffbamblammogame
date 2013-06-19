@@ -540,7 +540,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
 void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera,
-                           bool lightsAreOut, const BasicPointLight& keyLight, 
+                           const BasicPointLight& keyLight, 
                            const BasicPointLight& fillLight, const BasicPointLight& ballLight,
                            const Texture2D* sceneTexture) {
 
@@ -574,11 +574,11 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 
 	glPushMatrix();
 	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
-	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
+	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-    this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
+    this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->mineTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);

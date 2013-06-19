@@ -22,15 +22,7 @@ NouveauWorldAssets::NouveauWorldAssets(GameAssets* assets) :
 GameWorldAssets(assets, new DecoSkybox(),
         ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BACKGROUND_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_PADDLE_MESH),
-		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BLOCK_MESH)),
-fadeEffector() {
-
-    std::vector<ColourRGBA> fadeColours;
-    fadeColours.reserve(3);
-    fadeColours.push_back(ColourRGBA(1,1,1,0));
-    fadeColours.push_back(ColourRGBA(1,1,1,1));
-    fadeColours.push_back(ColourRGBA(1,1,1,0));
-    this->fadeEffector.SetColours(fadeColours);
+		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BLOCK_MESH)) {
 
     // Change the positions of the background lights to something that compliements the background more
     assets->GetLightAssets()->SetBackgroundLightDefaults(
@@ -42,7 +34,6 @@ fadeEffector() {
     this->outlineMaxDistance = 21.0f;
     this->outlineContrast    = 2.25f;
     this->outlineOffset      = 0.8f;
-
 
     // Colour Pallet for art nouveau...
     std::vector<Colour> nouveauColourPalette;
@@ -76,6 +67,7 @@ fadeEffector() {
     
     this->UpdateColourChangeList(nouveauColourPalette);
 
+    /*
     // Setup each of the curves...
     {
         Bezier* curve1 = new Bezier();
@@ -167,6 +159,12 @@ fadeEffector() {
         this->curves.push_back(curve4);
     }
 
+    std::vector<ColourRGBA> fadeColours;
+    fadeColours.reserve(3);
+    fadeColours.push_back(ColourRGBA(1,1,1,0));
+    fadeColours.push_back(ColourRGBA(1,1,1,1));
+    fadeColours.push_back(ColourRGBA(1,1,1,0));
+    this->fadeEffector.SetColours(fadeColours);
 
     {
         // Setup each of the background emitters...
@@ -257,36 +255,34 @@ fadeEffector() {
             this->rightGapEmitter.Tick(0.5);
         }
     }
+    */
 }
 
 NouveauWorldAssets::~NouveauWorldAssets() {
     // Delete all the curves...
-    for (int i = 0; i < static_cast<int>(this->curves.size()); i++) {
-        Bezier* curve = this->curves[i];
-        delete curve;
-        curve = NULL;
-    }
-    this->curves.clear();
+    //for (int i = 0; i < static_cast<int>(this->curves.size()); i++) {
+    //    Bezier* curve = this->curves[i];
+    //    delete curve;
+    //    curve = NULL;
+    //}
+    //this->curves.clear();
 }
 
 void NouveauWorldAssets::Tick(double dT) {
 
-    this->leftSideEmitter.Tick(dT);
-    this->centerEmitter.Tick(dT);
-    this->rightSideEmitter.Tick(dT);
-    this->leftGapEmitter.Tick(dT);
-    this->rightGapEmitter.Tick(dT);
+    //this->leftSideEmitter.Tick(dT);
+    //this->centerEmitter.Tick(dT);
+    //this->rightSideEmitter.Tick(dT);
+    //this->leftGapEmitter.Tick(dT);
+    //this->rightGapEmitter.Tick(dT);
 
     // Curves need to fade with the rest of the background in certain cases (e.g., ball death)
-    float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
-    if (currBGAlpha < 1.0f) {
-        float lessAlpha = 0.5f*currBGAlpha;
-        this->leftSideEmitter.SetParticleAlpha(lessAlpha);
-        this->centerEmitter.SetParticleAlpha(lessAlpha);
-        this->rightSideEmitter.SetParticleAlpha(lessAlpha);
-        this->leftGapEmitter.SetParticleAlpha(lessAlpha);
-        this->rightGapEmitter.SetParticleAlpha(lessAlpha);
-    }
+    //float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+    //this->leftSideEmitter.SetParticleAlpha(currBGAlpha);
+    //this->centerEmitter.SetParticleAlpha(currBGAlpha);
+    //this->rightSideEmitter.SetParticleAlpha(currBGAlpha);
+    //this->leftGapEmitter.SetParticleAlpha(currBGAlpha);
+    //this->rightGapEmitter.SetParticleAlpha(currBGAlpha);
 
 	GameWorldAssets::Tick(dT);
 }
@@ -295,11 +291,11 @@ void NouveauWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPo
                                              const BasicPointLight& bgFillLight) {
 
     // Draw the curve emitters behind the background model
-    this->leftSideEmitter.Draw(camera);
-    this->centerEmitter.Draw(camera);
-    this->rightSideEmitter.Draw(camera);
-    this->leftGapEmitter.Draw(camera);
-    this->rightGapEmitter.Draw(camera);
+    //this->leftSideEmitter.Draw(camera);
+    //this->centerEmitter.Draw(camera);
+    //this->rightSideEmitter.Draw(camera);
+    //this->leftGapEmitter.Draw(camera);
+    //this->rightGapEmitter.Draw(camera);
 
 	const Colour& currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
 	glPushAttrib(GL_CURRENT_BIT);

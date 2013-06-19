@@ -14,9 +14,10 @@
 
 using namespace nouveaubossai;
 
-const float NouveauBoss::BODY_CORE_HEIGHT       = 4.719f;
-const float NouveauBoss::BODY_CORE_TOP_WIDTH    = 4.236f;
-const float NouveauBoss::BODY_CORE_BOTTOM_WIDTH = 9.705f;
+const float NouveauBoss::BODY_CORE_HEIGHT         = 4.719f;
+const float NouveauBoss::BODY_CORE_TOP_WIDTH      = 4.236f;
+const float NouveauBoss::BODY_CORE_BOTTOM_WIDTH   = 9.705f;
+const float NouveauBoss::BODY_CORE_MID_HALF_DEPTH = 8.463f / 2.0f;
 
 const float NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT  = 2.480f;
 const float NouveauBoss::TOP_ENCLOSURE_GAZEBO_WIDTH   = 3.972f;
@@ -31,6 +32,18 @@ const float NouveauBoss::MIN_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 5
 const float NouveauBoss::MAX_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 18 - LevelPiece::PIECE_WIDTH;
 const float NouveauBoss::MIN_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 12;
 const float NouveauBoss::MAX_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 25;
+
+const std::pair<int,int> NouveauBoss::SIDE_PRISM_IDX_PAIRS[NUM_SIDE_PRISMS] = {
+    std::make_pair(2, LEVEL_NUM_PIECES_HEIGHT-2),
+    std::make_pair(1, LEVEL_NUM_PIECES_HEIGHT-4), std::make_pair(LEVEL_NUM_PIECES_WIDTH-2, LEVEL_NUM_PIECES_HEIGHT-4),
+    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-6), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-6),
+    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-9), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-9),
+    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-12), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-12),
+    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-15), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-15),
+    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-18), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-18),
+    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-21), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-21),
+    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-24), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-24)
+};
 
 NouveauBoss::NouveauBoss() {
 }

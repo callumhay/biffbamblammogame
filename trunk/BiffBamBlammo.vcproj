@@ -1403,6 +1403,10 @@
 							RelativePath=".\GameView\GothicRomanticBossMesh.h"
 							>
 						</File>
+						<File
+							RelativePath=".\GameView\NouveauBossMesh.h"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="Source Files"
@@ -1417,6 +1421,10 @@
 						</File>
 						<File
 							RelativePath=".\GameView\GothicRomanticBossMesh.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameView\NouveauBossMesh.cpp"
 							>
 						</File>
 					</Filter>

@@ -54,7 +54,7 @@ public:
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void RemovePiece(const LevelPiece& piece);
 	
-	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
+	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight, 
 	    const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
     void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,

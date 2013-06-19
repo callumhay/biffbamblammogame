@@ -59,11 +59,6 @@ public:
     void GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const;
 	PointLight& GetBallLight() { return this->ballLight; };
 
-	bool GetIsBlackOutActive() const {
-		return this->isBlackOutActive;
-	}
-
-
     void SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes, const BasicPointLight& bgFillAttributes);
 
 #ifdef _DEBUG
@@ -71,8 +66,6 @@ public:
 #endif
 
 private:
-	bool isBlackOutActive;	// Whether or not all lights are in black-out mode
-
 	// Lights for typical foreground geometry: key, fill and ball
 	PointLight fgKeyLight;		// The key light for all general foreground geometry (not including ball(s) and paddle)
 	PointLight fgFillLight;		// The fill light for all general foregorund geometry (not including ball(s) and paddle)

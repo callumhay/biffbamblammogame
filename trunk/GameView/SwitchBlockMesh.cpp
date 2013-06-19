@@ -78,8 +78,7 @@ void SwitchBlockMesh::Flush() {
 }
 
 void SwitchBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
-                           bool lightsAreOff) {
+                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     
 
     MaterialProperties* switchOnMatProperties       = this->switchOnMaterialGrp->GetMaterial()->GetProperties();
@@ -110,17 +109,10 @@ void SwitchBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
             switchOnMatProperties->diffuseTexture      = this->offSwitchTexture;
             switchCurrentMatProperties->diffuseTexture = this->redOnSwitchTexture;
         }
-        
-		// If the lights are out we still illuminate the switch block
-		if (lightsAreOff) {
-			BasicPointLight newKeyLight(Point3D(0, 0, -10), Colour(1, 1, 1), 0.01f);
-            this->switchOnMaterialGrp->Draw(camera, newKeyLight, fillLight, ballLight);
-            this->switchOffMaterialGrp->Draw(camera, newKeyLight, fillLight, ballLight);
-		}
-		else {
-            this->switchOnMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
-            this->switchOffMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
-		}
+
+		BasicPointLight newKeyLight(Point3D(blockCenter[0], blockCenter[1], 10), Colour(1, 1, 1), 0.0f);
+        this->switchOnMaterialGrp->Draw(camera, newKeyLight, fillLight, ballLight);
+        this->switchOffMaterialGrp->Draw(camera, newKeyLight, fillLight, ballLight);
         this->switchCurrentMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
 
         glPopMatrix();

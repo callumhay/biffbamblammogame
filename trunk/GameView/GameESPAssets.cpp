@@ -1441,7 +1441,9 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
-            if (!block.ProjectileIsDestroyedOnCollision(&projectile)) {
+            if (!block.ProjectileIsDestroyedOnCollision(&projectile) && 
+                projectile.GetVelocityMagnitude() == 0.0f) {
+
                 this->AddPaddleMineAttachedEffects(projectile);
             }
             break;

@@ -32,7 +32,7 @@ public:
 	void RemoveCannonBlock(const CannonBlock* cannonBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const;
+	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 	
 	void SetAlphaMultiplier(float alpha);
 

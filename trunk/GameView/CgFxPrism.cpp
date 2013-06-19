@@ -32,8 +32,10 @@ sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(200) {
 	this->sceneSamplerParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
 
 	// Set the appropriate diffuse colour
-	this->properties->diffuse = GameViewConstants::GetInstance()->PRISM_BLOCK_COLOUR;
-	this->properties->specular = Colour(0.75f, 0.75f, 0.75f);
+	this->properties->diffuse   = GameViewConstants::GetInstance()->PRISM_BLOCK_COLOUR;
+	this->properties->specular  = Colour(0.7f, 0.7f, 0.7f);
+    this->properties->shininess = 90.0f;
+    this->properties->geomType  = MaterialProperties::MATERIAL_GEOM_FG_TYPE;
 
 	debug_cg_state();
 }

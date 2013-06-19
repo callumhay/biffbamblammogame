@@ -25,8 +25,11 @@ const double LevelEndDisplayState::FADE_TIME = 2.0;
 
 LevelEndDisplayState::LevelEndDisplayState(GameDisplay* display) : DisplayState(display),
 renderPipeline(display), renderABitMoreCount(0.0) {
-    // Update the points HUD with the latest score (this makes sure that the last block's points are counted).
-    //this->display->GetAssets()->GetPointsHUD()->DoImmediatePointAnimation();
+
+    // Stop all sounds...
+    this->display->GetSound()->StopAllSounds();
+    // TODO: Play end-of-level fade out sounds/music or something
+    
 
 	// Pause all game play elements in the game model
 	this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);

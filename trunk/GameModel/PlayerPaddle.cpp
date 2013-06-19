@@ -1434,8 +1434,8 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
     Vector2D projectileToPaddleVec = this->GetCenterPosition() - currCenter;
     projectileToPaddleVec.Normalize();
 
-    if (Vector2D::Dot(vectorToAugment, projectileToPaddleVec) <= 0) {
-        // The projectile is not within a 90 degree angle of the vector from the projectile to the paddle
+    if (Vector2D::Dot(vectorToAugment, projectileToPaddleVec) <= 0.01) {
+        // The projectile is not within approximately a 90 degree angle of the vector from the projectile to the paddle
         return;
     }
     
@@ -1479,7 +1479,6 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
             // We've gone out of range, don't change anything and exit
             return;
         }
-
     }
 
     vectorToAugment = newVector;
@@ -1555,6 +1554,103 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
 	}
    
 	return didCollide;
+}
+
+// Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
+// as the time since the collision occurred
+bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
+                                  Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
+
+     if (ball.IsLastThingCollidedWith(this)) {
+         return false;
+     }
+
+     // If the paddle has a shield around it do the collision with the shield
+     if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+         Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
+         return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+     }
+     else {
+
+         if (this->bounds.GetNumLines() == 3) {
+             return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+         }
+         else {
+
+             // Don't allow the bottom paddle collision boundry line to factor into the collision if the ball is traveling downward
+             // at the paddle or the ball is above the paddle
+             assert(this->bounds.GetNumLines() == 4);
+
+             if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight())) &&
+                 Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
+                     // Ball is travelling upwards at the paddle from below it...
+                     return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+             }
+             else {
+                 // Ball is travelling downwards/parallel at the paddle
+                 Collision::LineSeg2D bottomLine = this->bounds.GetLine(3);
+                 Vector2D bottomNormal           = this->bounds.GetNormal(3);
+                 this->bounds.PopLast();
+                 bool wasCollision = this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+                 this->bounds.Push(bottomLine, bottomNormal);
+                 return wasCollision;
+             }
+         }
+     }
+}
+
+// Check for a collision with the given projectile
+bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, const BoundingLines& bounds) const {
+
+    switch (projectile.GetType()) {
+
+        case Projectile::BossOrbBulletProjectile:
+        case Projectile::BossLaserBulletProjectile:
+        case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
+        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile: {
+            // These projectiles can only collide with the paddle if it's NOT going upwards into the level
+            float dot = Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector());
+            if (dot <= EPSILON) {
+                return this->CollisionCheck(bounds, true);
+            }
+            break;
+        }
+
+        default:
+            return this->CollisionCheck(bounds, true);
+    }
+
+    return false;
+}
+
+// The paddle destroys all projectiles that collide with it, currently
+bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
+    // Projectiles can pass through when reflected by the paddle shield
+    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+
+        switch (projectile.GetType()) {
+
+            case Projectile::BossOrbBulletProjectile:
+            case Projectile::BossLaserBulletProjectile:
+            case Projectile::BallLaserBulletProjectile:
+            case Projectile::PaddleLaserBulletProjectile:
+            case Projectile::PaddleRocketBulletProjectile:
+            case Projectile::RocketTurretBulletProjectile:
+            case Projectile::LaserTurretBulletProjectile:
+            case Projectile::PaddleMineBulletProjectile:
+            case Projectile::MineTurretBulletProjectile:
+            case Projectile::BossRocketBulletProjectile:
+                return true;
+            default:
+                break;
+        }
+    }
+
+    return false;
 }
 
 bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile) {

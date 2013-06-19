@@ -249,8 +249,7 @@ inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, c
 
 	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera,
-        this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight,
+	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight,
         ballLight, /*this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture()*/ this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 

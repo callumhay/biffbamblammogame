@@ -33,14 +33,14 @@ const float LevelCompleteSummaryDisplayState::STAR_SIZE                         
 const float LevelCompleteSummaryDisplayState::STAR_HORIZONTAL_GAP                            = 10.0f;
 const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING                       = 100.0f;
 
-const double LevelCompleteSummaryDisplayState::MAX_TALLY_TIME_IN_SECS           = 4.0;
+const double LevelCompleteSummaryDisplayState::MAX_TALLY_TIME_IN_SECS           = 3.0;
 const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 10000;
 const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     = 0.25;
 
 const double LevelCompleteSummaryDisplayState::SHOW_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 const double LevelCompleteSummaryDisplayState::HIDE_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 
-const double LevelCompleteSummaryDisplayState::POINT_SCORE_ANIM_TIME = 0.75;
+const double LevelCompleteSummaryDisplayState::POINT_SCORE_ANIM_TIME = 0.6;
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),
@@ -59,7 +59,7 @@ maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL
 starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), 
 starFgPulser(ScaleEffect(1.0f, 1.5f)), starryBG(NULL), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
-flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
+flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
     
     const Camera& camera = this->display->GetCamera();
     GameModel* gameModel = this->display->GetModel();
@@ -264,14 +264,14 @@ flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
         std::vector<double> timeVals;
         timeVals.clear();
         timeVals.reserve(3);
-        timeVals.push_back(HALF_POINT_SCORE_ANIM_TIME);
-        timeVals.push_back(HALF_POINT_SCORE_ANIM_TIME + HALF_POINT_SCORE_ANIM_TIME/2.0);
-        timeVals.push_back(POINT_SCORE_ANIM_TIME);
+        timeVals.push_back(HALF_POINT_SCORE_ANIM_TIME + 0.75f*HALF_POINT_SCORE_ANIM_TIME);
+        timeVals.push_back(timeVals.back() + 0.1f);
+        timeVals.push_back(timeVals.back() + 0.15f);
         
         std::vector<Colour> colourVals;
         colourVals.reserve(3);
         colourVals.push_back(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
-        colourVals.push_back(1.5f*GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+        colourVals.push_back(Colour(1,1,1));
         colourVals.push_back(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
 
         this->starTotalColourAnim.SetInterpolantValue(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
@@ -281,7 +281,7 @@ flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
         std::vector<float> scaleVals;
         scaleVals.reserve(3);
         scaleVals.push_back(1.0f);
-        scaleVals.push_back(2.0f);
+        scaleVals.push_back(1.75f);
         scaleVals.push_back(1.0f);
 
         this->starTotalScaleAnim.SetInterpolantValue(1.0f);
@@ -324,8 +324,8 @@ flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
 
         this->flareEmitter.SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
 	    this->flareEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	    this->flareEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.93f));
-	    this->flareEmitter.SetParticleSize(ESPInterval(3.0f * this->starTotalLabel.GetHeight()));
+	    this->flareEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.25f));
+	    this->flareEmitter.SetParticleSize(ESPInterval(2.5f * this->starTotalLabel.GetHeight()));
 	    this->flareEmitter.SetParticleAlignment(ESP::ScreenAligned);
         this->flareEmitter.AddEffector(&this->flareRotator);
         this->flareEmitter.SetParticles(1, this->lensFlareTex);

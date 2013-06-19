@@ -306,25 +306,5 @@ inline int GameLevel::GetNumStarsForScore(long score) const {
     return starIdx;
 }
 
-inline LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
-    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
-    for (; col > 0; col--) {
-        if (this->currentLevelPieces[0][col]->GetType() == LevelPiece::Solid) {
-            break;
-        }
-    }
-    return this->currentLevelPieces[0][col];
-}
-inline LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
-    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
-    for (; col < static_cast<int>(this->currentLevelPieces[0].size())-1; col++) {
-        if (this->currentLevelPieces[0][col]->GetType() == LevelPiece::Solid) {
-            break;
-        }
-    }
-
-    return this->currentLevelPieces[0][col];
-}
-
 #endif
 

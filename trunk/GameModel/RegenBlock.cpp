@@ -182,11 +182,14 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 }
 
 LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-    // If this block has inifinite life then it can only be destroyed in very particular ways...
+    
+    // If this block has infinite life then it can only be destroyed in very particular ways...
     if (this->HasInfiniteLife()) {
         // Infinite life regen blocks may only be destroyed by being shattered or via a collateral block clobbering them
         if (method != LevelPiece::IceShatterDestruction && method != LevelPiece::CollateralDestruction &&
-            method != LevelPiece::TeslaDestruction && method != LevelPiece::RocketDestruction) {
+            method != LevelPiece::TeslaDestruction && method != LevelPiece::RocketDestruction && 
+            method != LevelPiece::MineDestruction) {
+
             // EVENT: The block has been 'preturbed'
             GameEventManager::Instance()->ActionRegenBlockPreturbed(*this);
             return this;

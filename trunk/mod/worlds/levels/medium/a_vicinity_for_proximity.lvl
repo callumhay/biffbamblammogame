@@ -1,24 +1,24 @@
 A Vicinity for Proximity
 18 28
 E E E E E E E S S S S S D(MineLauncherPaddle) S S S S S 
+E E E E E E E S E E E T(R,ur) R T(R,ul) E E E S 
+E E E E E E E S E L E L E L E L E S 
 E E E E E E E S E E E E E E E E E S 
+E E E E E E E S E R L R L R L R E S 
 E E E E E E E S E E E E E E E E E S 
+E E E E E E E S E L R L R L R L E S 
 E E E E E E E S E E E E E E E E E S 
-E E E E E E E S E E E E E E E E E S 
-E E E E E E E S E E E E E E E E E S 
-E E E E E E E S E E E E E E E E E S 
-E E E E E E E S E E E E E E E E E S 
-E E E E E E E S E E E E E E E E E S 
-E E E E S S S S E E E E E E E E E S 
-E E E E S G G S E E E E E E E E E S 
-S S S S S G E S E E E E E E E E E S 
-S E E E F(r) E E Q(i) E E E E E E E E E S 
-S E C(90) E F(r) E E Q(i) E E E E E E E E E S 
-S E E E F(r) E E Q(i) E E E E E E E E E S 
-S E E E S G E S E E E E E E E E E S 
-S E E E S G G S E E E E E E E E E S 
-S E E E S S S S E E E E E E E E E S 
-S E E E E E E S E E E E E E E E E S 
+E E E E E E E S B O G O G O G O B S 
+E E E E S S S S E E O G G G O E E S 
+E E E E S G G S E O G Y G Y G O E S 
+S S S S S G E S E G O G Y G O G E S 
+S E E E F(r) E E Q(i) E Y G O R O G Y E S 
+S E C(90) E F(r) E E Q(i) E G Y R Q(f) R Y G E S 
+S E E E F(r) E E Q(i) E Y G O R O G Y E S 
+S E E E S G E S E G O G Y G O G E S 
+S E E E S G G S E O G Y G Y G O E S 
+S E E E S S S S E E O G G G O E E S 
+S E E E E E E S R O G O G O G O R S 
 S E E E E E E S E E E E E E E E E S 
 S E E E E E E S E E E E E E E E E S 
 S E E E E E E S E E E E E E E E E S 
@@ -30,18 +30,18 @@ S E E E E E E N E E E E E E E E E S
 S E E E E E E N E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
 5000
+10000
+16000
+22000
+26000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
+UberBall 1
 BallGrow 2
-UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -56,14 +56,14 @@ GhostBall 2
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
-BallCam 2
-MagnetPaddle 2
+BallCam 0
+MagnetPaddle 0
 MultiBall3 2
 IceBall 2
-MineLauncherPaddle 2
+MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0
