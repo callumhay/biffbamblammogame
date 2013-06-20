@@ -96,7 +96,10 @@ public:
         LastBallSpiralingToDeathLoop,
 
         // -> Paddle/ball sounds
-        BallPaddleCollisionEvent,
+        BallPaddleCollision1Event,
+        BallPaddleCollision2Event,
+        BallPaddleCollision3Event,
+        BallPaddleCollision4Event,
         BallStickyPaddleCollisionEvent,
         BallShieldPaddleCollisionEvent,
 		BallOrPaddleGrowEvent,
@@ -149,6 +152,7 @@ public:
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,
+        InBulletTimeLoop,
         ExitBulletTimeEvent,
         BallBoostEvent,
         BallBoostGainedEvent,
@@ -203,10 +207,12 @@ public:
 
     // Play/stop functions
     void StopAllSounds();
+    void StopAllSoundLoops();
     void PauseAllSounds();
     void UnpauseAllSounds();
-    SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped);
-    SoundID PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, const Point3D& position);
+    SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects = true);
+    SoundID PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, 
+        const Point3D& position, bool applyActiveEffects = true);
     void StopSound(SoundID soundID, double fadeOutTimeInSecs = 0.0);
 
     // Game object positional sound attaching/detaching functions
@@ -218,6 +224,7 @@ public:
     // Sound effect functions
     void StopAllEffects();
     void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn);
+    void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn, const std::set<SoundID>& ignoreSounds);
 
     // Volume functions
     void SetMasterVolume(float volume);
@@ -230,6 +237,10 @@ public:
     // Query functions
     bool IsSoundPlaying(SoundID soundID) const;
     bool IsEffectActive(GameSound::EffectType type) const;
+
+    // SoundType-specific functions
+    static GameSound::SoundType GetRandomBallPaddleCollisionEventSoundType();
+
 
 private:
     typedef std::map<SoundID, Sound*> SoundMap;
@@ -281,7 +292,8 @@ private:
     Sound* GetPlayingSound(SoundID soundID) const;
     void GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) const;
 
-    Sound* BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position = NULL);
+    Sound* BuildSound(const GameSound::SoundType& soundType, bool isLooped, 
+        const Point3D* position = NULL, bool applyActiveEffects = true);
 
     DISALLOW_COPY_AND_ASSIGN(GameSound);
 };
@@ -292,6 +304,11 @@ inline bool GameSound::IsSoundPlaying(SoundID soundID) const {
 
 inline bool GameSound::IsEffectActive(GameSound::EffectType type) const {
     return activeEffects.find(type) != this->activeEffects.end();
+}
+
+inline void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn) {
+    std::set<SoundID> temp;
+    this->ToggleSoundEffect(effectType, effectOn, temp);
 }
 
 #endif // __GAMESOUND_H__

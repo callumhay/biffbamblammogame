@@ -1,22 +1,22 @@
 Prismatic Pragmatism
 15 25
 S S S S S S S S S S S S T(P,ul) E T(P,ur) 
-S T(P,ul) O Y Y O R P O Y T(P,ur) S E D(LaserBulletPaddle,LaserBeamPaddle){0} E 
-S R O Y Y O O O O Y G S E E E 
-S T(P,ul) O Y Y Y Y Y Y Y G S E E E 
-S O O Y G G G G G G G S E E E 
-S Y Y Y G G E E E E E S E E E 
-S G G G G E E G G G G S E E E 
-S G G G E E G G Y Y Y S E E E 
-S E E E E G G G Y O O N E E E 
-S G G G G G G G Y O O N E E E 
-S G G Y Y Y Y Y Y O R T(P,lr) E E T(P,lr) 
-S G G Y O O O Y Y O O S E E E 
-S G G Y O P O Y Y O O S E E E 
-S G G Y O R O Y Y Y Y S E E E 
-S G G Y O O O Y G G E S E E E 
-S G G Y Y Y Y Y G E E S E E E 
-S G G G G G G G E E E S E E E 
+S T(P,ul) O E E O R P O E T(P,ur) S E D(LaserBulletPaddle,LaserBeamPaddle){0} E 
+S R O G G O O O O G G S E E E 
+S T(P,ul) O G G G G G G G G S E E E 
+S O O G G G G G G G G S E E E 
+S G G G G G G E E E E S E E E 
+S G G G G G E E E E E S E E E 
+S E E E E E E E G G G S E E E 
+S E E E E E E G G O O N E E E 
+S G G G G G G G G O O N E E E 
+S G G Y Y G Y Y G O R T(P,lr) E E T(P,lr) 
+S G G Y O O O Y G O O S E E E 
+S G G G O P O G G O O S E E E 
+S G G Y O O O Y G G G S E E E 
+S G G Y Y G Y Y G G E S E E E 
+S G G G G G G G G E E S E E E 
+S E E E E E E E E E E S E E E 
 S E E E E E E E E E E S E E E 
 S E E E E E E E E E E S G E E 
 S E E E E E E E E E E S G E E 
@@ -27,11 +27,11 @@ S E E E E E E E E E E S S S S
 S E E E E E E E E E E N E E W(0) 
 
 STARS:
-9000
+8000
 12000
-16000
-18000
-21000
+17000
+22000
+28000
 
 PaddleGrow 0
 PoisonPaddle 2
@@ -64,3 +64,5 @@ CrazyBall 2
 Random 2
 FastBall 2
 PaddleCam 2
+
+PADDLESTARTXPOS: 13.75

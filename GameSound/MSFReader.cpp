@@ -418,8 +418,11 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBallCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LastBallSpiralingToDeathLoop));
 
-
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollisionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision1Event));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision2Event));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision3Event));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision4Event));
+    
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallStickyPaddleCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallShieldPaddleCollisionEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOrPaddleGrowEvent));
@@ -471,6 +474,7 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemMovingLoop));
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, EnterBulletTimeEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, InBulletTimeLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ExitBulletTimeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostGainedEvent));

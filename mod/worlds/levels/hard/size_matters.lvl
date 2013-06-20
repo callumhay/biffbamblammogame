@@ -1,40 +1,40 @@
 Size Matters
-16 28
-E E E S S S S S S S S S E R E E 
-S S S S E E D(PaddleGrow) E E E E N R R R E 
-S E E N E E E E E E E N E R R E 
-S D(RocketPaddle){1} C(90) N E E E E E E E N E S R R 
-S E E N E E E E E E E N E R R E 
-S N N N E E E E E E E S R R R E 
-S E E E E E E E E E E S E R E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S R R R R R R R R R R S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S R R R R R R R R R R S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S E E E E 
-S E E E E E E E E E E S S S S S 
-S E E E E E E E E E E N E E E S 
-S E E E E E E E E E E N E E E S 
-S E E E E E E E E E E N E E E W(1) 
+15 28
+E E E S S S S S S S S E R E E 
+S S S S E E D(PaddleGrow) E E E S R R R E 
+S E E N E E E E E E N E R R E 
+S D(RocketPaddle){1} C(90) N E E E E E E N E S R R 
+S E E N E E E E E E N E R R E 
+S N N N E E E E E E S R R R E 
+S E E E E E E E E E S E R E E 
+S G G G G G G G G G S E E E E 
+S G Y Y Y G Y Y Y G S E E E E 
+S Y Y R Y B Y R Y Y S E E E E 
+S O R B R O R B R O S E E E E 
+S R R R R R R R R R S E E E E 
+S R R R R R R R R R S E E E E 
+S E E I E E E I E E S E E E E 
+S R R R R R R R R R S E E E E 
+S R R R R R R R R R S E E E E 
+S O R B R O R B R O S E E E E 
+S Y Y R Y B Y R Y Y S E E E E 
+S G Y Y Y G Y Y Y G S E E E E 
+S G G G G G G G G G S E E E E 
+S E E E E E E E E E S E E E E 
+S E E E E E E E E E S E E E E 
+S E E E E E E E E E S E E E E 
+S E E E E E E E E E S E E E E 
+S E E E E E E E E E S S S S S 
+S E E E E E E E E E N E E E S 
+S E E E E E E E E E N E E E S 
+S E E E E E E E E E N E E E W(1) 
 
 STARS:
+8000
+12000
+15000
 20000
 25000
-33000
-40000
-55000
 
 PaddleGrow 3
 PoisonPaddle 2
@@ -67,3 +67,5 @@ CrazyBall 2
 Random 2
 FastBall 2
 PaddleCam 0
+
+PADDLESTARTXPOS: 13.75

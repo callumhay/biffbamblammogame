@@ -89,12 +89,14 @@ const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD         = "powerdowns";
 
 const char* GameLevel::STAR_POINT_MILESTONE_KEYWORD = "STARS:";
 
+const char* GameLevel::PADDLE_STARTING_X_POS = "PADDLESTARTXPOS:";
+
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
                      unsigned int numBlocks, 
                      const std::vector<std::vector<LevelPiece*> >& pieces,
                      const std::vector<GameItem::ItemType>& allowedDropTypes, 
-                     size_t randomItemProbabilityNum, long* starAwardScores) :
+                     size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos) :
 
 levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum), piecesLeft(numBlocks),
@@ -109,11 +111,14 @@ levelAlmostCompleteSignaled(false), boss(NULL) {
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
         this->starAwardScores[i] = starAwardScores[i];
     }
+
+    this->SetPaddleStartXPos(paddleStartXPos);
 }
 
 GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName,
                      const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss,
-                     const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum) :
+                     const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum,
+                     float paddleStartXPos) :
 
 levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
@@ -132,6 +137,8 @@ levelAlmostCompleteSignaled(false), boss(boss) {
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
         this->starAwardScores[i] = 0;
     }
+
+    this->SetPaddleStartXPos(paddleStartXPos);
 }
 
 // Destructor, clean up heap stuffs
@@ -191,6 +198,19 @@ void GameLevel::InitPieces(const std::vector<std::vector<LevelPiece*> >& pieces)
                 }
             }
         }
+    }
+}
+
+void GameLevel::SetPaddleStartXPos(float xPos) {
+    // Setup the paddle start x position...
+    float minBound = this->GetPaddleMinBound();
+    float maxBound = this->GetPaddleMaxBound();
+    if (xPos < 0) {
+        this->paddleStartXPos = (maxBound + minBound) / 2.0f;
+    }
+    else {
+        assert(xPos >= minBound + PlayerPaddle::PADDLE_HALF_WIDTH && xPos <= maxBound - PlayerPaddle::PADDLE_HALF_WIDTH);
+        this->paddleStartXPos = xPos;
     }
 }
 
@@ -951,13 +971,20 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 	    inFile = NULL;
 	    return NULL;
     }
-    
+
 	// Finished reading in all the blocks for the level, now read in the allowed item drops and their probabilities...
 	std::string itemTypeName;
 	int probabilityNum = 0;
 	size_t randomItemProbabilityNum = 0;
 	std::vector<GameItem::ItemType> allowedDropTypes;
 	while (*inFile >> itemTypeName) {
+        if (itemTypeName.compare(GameLevel::PADDLE_STARTING_X_POS) == 0) {
+            for (int i = 0; i < static_cast<int>(itemTypeName.size()); i++) {
+                inFile->unget();
+            }
+            break;
+        }
+
 		// There are some special keywords that we need to check for first...
 		if (itemTypeName.compare(ALL_ITEM_TYPES_KEYWORD) == 0) {
 			// Add all item types...
@@ -1027,6 +1054,19 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 		randomItemProbabilityNum = 0;
 	}
 
+    // Get the x-coordinate where the paddle starts the level (and goes to when the ball dies), 
+    // if this is missing then the default (center of the entire level) will be used
+    float paddleStartXPos = GameLevel::DEFAULT_PADDLE_START_IDX;
+    if ((*inFile >> tempReadStr) && tempReadStr.compare(GameLevel::PADDLE_STARTING_X_POS) == 0) {
+        if (!(*inFile >> paddleStartXPos)) {
+            debug_output("ERROR: No paddle starting block index value was provided with keyword!");
+            GameLevel::CleanUpFileReadData(levelPieces);
+            delete inFile;
+            inFile = NULL;
+            return NULL;
+        }
+    }
+
 	delete inFile;
 	inFile = NULL;
 
@@ -1056,11 +1096,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
             return NULL;
         }
     
-        return new GameLevel(levelIdx, filepath, levelName, levelPieces, boss, allowedDropTypes, randomItemProbabilityNum);
+        return new GameLevel(levelIdx, filepath, levelName, levelPieces, boss, allowedDropTypes, randomItemProbabilityNum, paddleStartXPos);
 
     }
     else {
-	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores);
+	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores, paddleStartXPos);
     }
 }
 

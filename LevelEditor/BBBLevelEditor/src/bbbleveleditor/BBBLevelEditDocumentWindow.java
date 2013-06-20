@@ -42,6 +42,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private String fileName = "";
 	private int currWidth = -1;
 	private int currHeight = -1;
+	private double currPaddleStartingXPos = -1;
 	private File savedFileOnDisk = null;
 	private boolean hasBeenModified = false;
 	
@@ -69,6 +70,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.fileName = this.levelName = "";
 		this.currWidth = 0;
 		this.currHeight = 0;
+		this.currPaddleStartingXPos = -1;
 		
 		this.starPointAmounts[0] = 100;
 		this.starPointAmounts[1] = 500;
@@ -88,6 +90,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.fileName = this.levelName = fileName;
 		this.currWidth = width;
 		this.currHeight = height;
+		this.currPaddleStartingXPos = -1;
 		this.itemDropSettings = ItemDrop.populateDefaultItemDropSettings();
 		this.hasBeenModified = true;
 		
@@ -267,6 +270,10 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		}
 	}
 	
+	public void setPaddleStartingXPos(double xPos) {
+		this.currPaddleStartingXPos = xPos;
+	}
+	
 	public void setItemDropSettings(HashMap<String, Integer> settings) {
 		assert(settings.size() == this.itemDropSettings.size());
 		this.itemDropSettings = settings;
@@ -288,6 +295,9 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	}
 	public int GetLevelHeight() {
 		return this.currHeight;
+	}
+	public double GetPaddleStartingXPos() {
+		return this.currPaddleStartingXPos;
 	}
 
 	public boolean open() {
@@ -403,6 +413,15 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					this.readStarAmounts(levelFileScanner);
 				}
 				
+				// Read the paddle starting x position, if it exists (for backwards compatibility)
+				if (levelFileScanner.hasNext("PADDLESTARTXPOS:")) {
+					levelFileScanner.next();
+					this.currPaddleStartingXPos = levelFileScanner.nextDouble();
+				}
+				else {
+					this.currPaddleStartingXPos = -1;
+				}
+				
 				this.fileName = this.savedFileOnDisk.getName();
 				this.fileName = this.fileName.substring(0, this.fileName.lastIndexOf('.'));
 				this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
@@ -447,6 +466,11 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	private boolean readItemLiklihoods(Scanner levelFileScanner) {
 		while (levelFileScanner.hasNext()) {
+			
+			if (levelFileScanner.hasNext("PADDLESTARTXPOS:")) {
+				break;
+			}
+			
 			String possibleItemDropName = levelFileScanner.next();
 			boolean itemExists = this.itemDropSettings.containsKey(possibleItemDropName);
 			if (itemExists) {
@@ -628,6 +652,12 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				String itemDropName = itemDropIter.next();
 				Integer itemDropLikelihood = this.itemDropSettings.get(itemDropName);
 				levelFileWriter.write(itemDropName + " " + itemDropLikelihood + "\r\n");
+			}
+			
+			// Add the paddle starting x position if there is one...
+			if (this.currPaddleStartingXPos >= 0) {
+				levelFileWriter.write("\r\n");
+				levelFileWriter.write("PADDLESTARTXPOS: " + this.currPaddleStartingXPos + "\r\n");
 			}
 			
 			this.fileName = this.savedFileOnDisk.getName();

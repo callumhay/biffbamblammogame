@@ -73,6 +73,9 @@ public:
 
     static const char* STAR_POINT_MILESTONE_KEYWORD;
 
+    static const char* PADDLE_STARTING_X_POS;
+    static const int DEFAULT_PADDLE_START_IDX = -1;
+
 	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 10;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
@@ -135,6 +138,10 @@ public:
 
 	float GetPaddleMinBound() const;
 	float GetPaddleMaxBound() const;
+
+    float GetPaddleStartingXPosition() const {
+        return this->paddleStartXPos;
+    }
 
     LevelPiece* GetMinPaddleBoundPiece() const;
     LevelPiece* GetMaxPaddleBoundPiece() const;
@@ -229,6 +236,7 @@ private:
 	size_t piecesLeft;                  // Pieces left before the end of the level
 	size_t width, height;               // Size values for the level
     size_t randomItemProbabilityNum;    // A number >= 0 for random item probability in the level
+    float paddleStartXPos;
 
     bool levelAlmostCompleteSignaled; // Whether or not the event for the level being almost completed has already been signaled
 
@@ -236,7 +244,7 @@ private:
 
     Boss* boss; // If the current level has a boss, this is a pointer to it, otherwise it will be NULL
 
-    // Persistant scoring variables - used to mark previously saved scores and calculate high scores
+    // Persistent scoring variables - used to mark previously saved scores and calculate high scores
     long starAwardScores[5];  // Scores where stars are awarded
     long prevHighScore;
     long highScore;           // Current high score for this level
@@ -245,13 +253,14 @@ private:
     // Constructor for non-boss levels
 	GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes,
-        size_t randomItemProbabilityNum, long* starAwardScores);
+        size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos);
 	// Constructor for boss levels
     GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss, const std::vector<GameItem::ItemType>& allowedDropTypes,
-        size_t randomItemProbabilityNum);
+        size_t randomItemProbabilityNum, float paddleStartXPos);
 
     void InitPieces(const std::vector<std::vector<LevelPiece*> >& pieces);
+    void SetPaddleStartXPos(float xPos);
 
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;

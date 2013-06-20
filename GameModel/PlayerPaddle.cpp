@@ -11,6 +11,7 @@
 
 #include "PlayerPaddle.h"
 #include "GameModel.h"
+#include "GameLevel.h"
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
 #include "PaddleLaserProjectile.h"
@@ -72,19 +73,9 @@ decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADD
 timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
-impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), levelBoundsCheckingOn(true) {
+impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), 
+levelBoundsCheckingOn(true), startingXPos(0.0) {
 	this->ResetPaddle();
-}
-
-PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : 
-centerPos(0.0f, 0.0f), currSpeed(0.0f), lastDirection(0.0f), moveButtonDown(false), 
-acceleration(PlayerPaddle::DEFAULT_ACCELERATION), decceleration(PlayerPaddle::DEFAULT_DECCELERATION),
-currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), attachedBall(NULL),
-hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
-impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), levelBoundsCheckingOn(true) {
-
-	this->SetupAnimations();
-	this->SetNewMinMaxLevelBound(minBound, maxBound); // resets the paddle
 }
 
 PlayerPaddle::~PlayerPaddle() {
@@ -103,7 +94,7 @@ void PlayerPaddle::ResetPaddle() {
 	this->hitWall = false;
 	this->lastDirection = 0.0f;
 	this->currSpeed = 0.0f;
-	this->maxSpeed = PlayerPaddle::DEFAULT_MAX_SPEED;
+	this->maxSpeed      = PlayerPaddle::DEFAULT_MAX_SPEED;
 	this->acceleration  = PlayerPaddle::DEFAULT_ACCELERATION; 
 	this->decceleration = PlayerPaddle::DEFAULT_DECCELERATION;
 	this->impulse = 0.0f;
@@ -1665,6 +1656,15 @@ bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile
     return !this->ProjectilePassesThrough(projectile); 
 
 }
+
+void PlayerPaddle::UpdateLevel(const GameLevel& level) {
+    this->UpdatePaddleBounds(level.GetPaddleMinBound(), level.GetPaddleMaxBound());
+    this->startingXPos = level.GetPaddleStartingXPosition();
+
+    // Reset the paddle to the center of the new bounds
+    this->ResetPaddle();
+}
+
 
 void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce, float deaccel) {
     if (xDirectionalForce == 0.0f || this->impulseSpdDecreaseCounter < this->impulse || xDirectionalForce == 0.0) {

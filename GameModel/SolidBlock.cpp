@@ -111,7 +111,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (leftNeighbor != NULL) {
 		if (leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret && 
-            leftNeighbor->GetType() != LevelPiece::RocketTurret && leftNeighbor->GetType() != LevelPiece::NoEntry &&
+            leftNeighbor->GetType() != LevelPiece::RocketTurret &&
             leftNeighbor->GetType() != LevelPiece::Tesla && leftNeighbor->GetType() != LevelPiece::Switch &&
             leftNeighbor->GetType() != LevelPiece::MineTurret) {
 
@@ -132,7 +132,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l1);
 	    boundingNorms.push_back(n1);
         onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            leftNeighbor->GetType() == LevelPiece::OneWay);
+            leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::NoEntry);
     }
     shouldGenBounds = false;
 
@@ -141,7 +141,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (bottomNeighbor != NULL) {
 		if (bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret && 
-            bottomNeighbor->GetType() != LevelPiece::RocketTurret && bottomNeighbor->GetType() != LevelPiece::NoEntry &&
+            bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
             bottomNeighbor->GetType() != LevelPiece::Tesla && bottomNeighbor->GetType() != LevelPiece::Switch &&
             bottomNeighbor->GetType() != LevelPiece::MineTurret) {
 
@@ -162,7 +162,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l2);
 	    boundingNorms.push_back(n2);
         onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            bottomNeighbor->GetType() == LevelPiece::OneWay);
+            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry);
     }
     shouldGenBounds = false;
 
@@ -171,7 +171,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (rightNeighbor != NULL) {
 		if (rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret && 
-            rightNeighbor->GetType() != LevelPiece::RocketTurret && rightNeighbor->GetType() != LevelPiece::NoEntry &&
+            rightNeighbor->GetType() != LevelPiece::RocketTurret &&
             rightNeighbor->GetType() != LevelPiece::Tesla && rightNeighbor->GetType() != LevelPiece::Switch &&
             rightNeighbor->GetType() != LevelPiece::MineTurret) {
 
@@ -192,7 +192,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l3);
 	    boundingNorms.push_back(n3);
         onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            rightNeighbor->GetType() == LevelPiece::OneWay);
+            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry);
     }
     shouldGenBounds = false;
 
@@ -200,7 +200,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (topNeighbor != NULL) {
 		if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
             topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret && 
-            topNeighbor->GetType() != LevelPiece::RocketTurret && topNeighbor->GetType() != LevelPiece::NoEntry &&
+            topNeighbor->GetType() != LevelPiece::RocketTurret &&
             topNeighbor->GetType() != LevelPiece::Tesla && topNeighbor->GetType() != LevelPiece::Switch &&
             topNeighbor->GetType() != LevelPiece::MineTurret) {
 
@@ -222,7 +222,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l4);
 	    boundingNorms.push_back(n4);
         onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay);
+            topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay ||
+            topNeighbor->GetType() == LevelPiece::NoEntry);
     }
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
