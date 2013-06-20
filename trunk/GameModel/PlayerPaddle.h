@@ -25,6 +25,7 @@
 
 
 class GameModel;
+class GameLevel;
 class GameBall;
 class PaddleMineProjectile;
 class MineTurretProjectile;
@@ -68,7 +69,7 @@ public:
     static const float DEFAULT_PADDLE_SCALE;
     static void SetNormalScale(float scale) { assert(scale > 0.0f); PlayerPaddle::NormalSizeScale = scale; };
 
-	PlayerPaddle(float minBound, float maxBound);
+	//PlayerPaddle(float minBound, float maxBound);
 	PlayerPaddle();
 	~PlayerPaddle();
 
@@ -96,7 +97,7 @@ public:
         return Point3D(this->GetCenterPosition(), 0.0f);
     }
 	Point2D GetDefaultCenterPosition() const {
-		return Point2D((this->maxBound + this->minBound)/2.0f, this->currHalfHeight);
+		return Point2D(this->startingXPos, this->currHalfHeight);
 	}
 	void SetCenterPosition(const Point2D& center) {
         if (this->attachedBall != NULL) {
@@ -149,12 +150,6 @@ public:
         return this->moveButtonDown;
     }
 
-	void SetNewMinMaxLevelBound(float min, float max) {
-		this->UpdatePaddleBounds(min, max);
-		// Reset the paddle to the center of the new bounds
-		this->ResetPaddle();
-	}
-
 	float GetSpeed() const {
         float tempSpd = this->currSpeed;
         if ((this->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
@@ -174,6 +169,8 @@ public:
 	float GetPaddleScaleFactor() const {
 		return this->currScaleFactor;
 	}
+
+    void UpdateLevel(const GameLevel& level);
 
 	void ApplyImpulseForce(float xDirectionalForce, float deaccel);
 
@@ -316,6 +313,8 @@ private:
 	float minBound, maxBound;			// The current level's boundries along its width for the paddle
 	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
 	
+    float startingXPos; // Starting position of the paddle when the level begins or the ball dies and is revived
+
 	// Movement 
 	float acceleration;	  // The paddle's acceleration in units / second^2 (always positive)
 	float decceleration;  // The paddle's deceleration in units / second^2 (always negative)

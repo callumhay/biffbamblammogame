@@ -34,8 +34,8 @@ PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 0
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -61,3 +61,5 @@ CrazyBall 2
 Random 2
 FastBall 2
 PaddleCam 0
+
+PADDLESTARTXPOS: 26.25

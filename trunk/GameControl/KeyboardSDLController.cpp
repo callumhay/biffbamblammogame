@@ -118,42 +118,53 @@ void KeyboardSDLController::KeyUp(SDLKey key) {
 
 void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x, unsigned int y) {
 
-    if (this->model->GetCurrentStateType() != GameState::BallInPlayStateType) {
-        return;
-    }
+    // If the game is not in-play then we do nothing with the boost model...
+    if (this->display->GetCurrentDisplayState() == DisplayState::InGame) {
 
-    const BallBoostModel* boostModel = this->model->GetBallBoostModel();
-    if (boostModel == NULL) {
-        return;
-    }
+        const BallBoostModel* boostModel = this->model->GetBallBoostModel();
+        if (boostModel == NULL) {
+            return;
+        }
 
-    unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
-    const Camera& camera = this->display->GetCamera();
-    Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
-    Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
+        unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
+        const Camera& camera = this->display->GetCamera();
+        Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
+        Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
 
-    if (boostDir.IsZero()) {
-        boostDir[0] = 1;
+        if (boostDir.IsZero()) {
+            boostDir[0] = 1;
+        }
+        
+        switch (button) {
+            case SDL_BUTTON_LEFT:
+                if (boostModel->IsInBulletTime()) {
+                    this->model->ShootActionReleaseUse();
+                }
+                else {
+                    this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+                }
+                break;
+
+            case SDL_BUTTON_RIGHT:
+                if (boostModel->IsInBulletTime()) {
+                    this->model->ShootActionReleaseUse();
+                }
+                else {
+                    this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+                }
+                break;
+
+            default:
+                break;
+        }
     }
     
     switch (button) {
         case SDL_BUTTON_LEFT:
-            if (boostModel->IsInBulletTime()) {
-                this->model->ShootActionReleaseUse();
-            }
-            else {
-                this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
-            }
             this->display->MousePressed(GameControl::LeftMouseButton);
             break;
 
         case SDL_BUTTON_RIGHT:
-            if (boostModel->IsInBulletTime()) {
-                this->model->ShootActionReleaseUse();
-            }
-            else {
-                this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
-            }
             this->display->MousePressed(GameControl::RightMouseButton);
             break;
 
@@ -164,19 +175,25 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
 
 void KeyboardSDLController::MouseButtonUp(unsigned int button) {
 
+    if (this->display->GetCurrentDisplayState() == DisplayState::InGame) {
+        switch (button) {
+            case SDL_BUTTON_LEFT:
+                // Release the boost...
+                this->display->SpecialDirectionReleased();
+                break;
+
+            default:
+                break;
+        }
+    }
+
     switch (button) {
-
         case SDL_BUTTON_LEFT:
-            this->display->SpecialDirectionReleased();
             this->display->MouseReleased(GameControl::LeftMouseButton);
-            //debug_output("Left button released.");
             break;
-
         case SDL_BUTTON_RIGHT:
             this->display->MouseReleased(GameControl::RightMouseButton);
-            //debug_output("Right button released.");
             break;
-
         default:
             break;
     }

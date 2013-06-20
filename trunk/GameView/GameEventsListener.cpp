@@ -430,7 +430,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
             sound->PlaySoundAtPosition(GameSound::BallStickyPaddleCollisionEvent, false, collisionPtEstimate);
 		}
 		else {
-			sound->PlaySoundAtPosition(GameSound::BallPaddleCollisionEvent, false, collisionPtEstimate);
+			sound->PlaySoundAtPosition(GameSound::GetRandomBallPaddleCollisionEventSoundType(), false, collisionPtEstimate);
 		}
 
 		// Add the visual effect for when the ball hits the paddle
@@ -1024,23 +1024,33 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
 
     GameSound* sound = this->display->GetSound();
 
-    static SoundID enterBulletTimeSoundID = INVALID_SOUND_ID;
-    static SoundID exitBulletTimeSoundID  = INVALID_SOUND_ID;
+    static SoundID enterBulletTimeSoundID  = INVALID_SOUND_ID;
+    static SoundID exitBulletTimeSoundID   = INVALID_SOUND_ID;
+    static SoundID inBulletTimeLoopSoundID = INVALID_SOUND_ID;
     
     switch (boostModel.GetBulletTimeState()) {
 
         case BallBoostModel::BulletTimeFadeIn: {
             // Sounds and sound effects for going into bullet time mode
-            enterBulletTimeSoundID = sound->PlaySound(GameSound::EnterBulletTimeEvent, false);
+            enterBulletTimeSoundID = sound->PlaySound(GameSound::EnterBulletTimeEvent, false, false);
             sound->StopSound(exitBulletTimeSoundID);
-            sound->ToggleSoundEffect(GameSound::BulletTimeEffect, true);
+            
+            std::set<SoundID> ignoreSoundSet;
+            ignoreSoundSet.insert(enterBulletTimeSoundID);
+            sound->ToggleSoundEffect(GameSound::BulletTimeEffect, true, ignoreSoundSet);
+
+            inBulletTimeLoopSoundID = sound->PlaySound(GameSound::InBulletTimeLoop, true, false);
+
             break;
         }
 
         case BallBoostModel::BulletTimeFadeOut: {
             // Sounds for exiting bullet time mode
-            exitBulletTimeSoundID = sound->PlaySound(GameSound::ExitBulletTimeEvent, false);
+            exitBulletTimeSoundID = sound->PlaySound(GameSound::ExitBulletTimeEvent, false, false);
+            
             sound->StopSound(enterBulletTimeSoundID);
+            sound->StopSound(inBulletTimeLoopSoundID);
+
             break;
         }
         case BallBoostModel::NotInBulletTime: {

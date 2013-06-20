@@ -27,7 +27,7 @@ LevelEndDisplayState::LevelEndDisplayState(GameDisplay* display) : DisplayState(
 renderPipeline(display), renderABitMoreCount(0.0) {
 
     // Stop all sounds...
-    this->display->GetSound()->StopAllSounds();
+    this->display->GetSound()->StopAllSoundLoops();
     // TODO: Play end-of-level fade out sounds/music or something
     
 

@@ -207,6 +207,44 @@ void GameSound::StopAllSounds() {
     this->ClearSounds();
 }
 
+void GameSound::StopAllSoundLoops() {
+    if (this->soundEngine == NULL) {
+        return;
+    }
+    
+    // Clear all looped non-attached sounds from memory
+    for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
+        Sound* currSound = iter->second;
+        if (currSound->IsLooped()) {
+            delete currSound;
+            currSound = NULL;
+            iter = this->nonAttachedPlayingSounds.erase(iter);
+        }
+    }
+
+    // Clear all looped attached sounds from memory
+    for (AttachedSoundMapIter iter1 = this->attachedPlayingSounds.begin(); iter1 != this->attachedPlayingSounds.end();) {
+        SoundMap& soundMap = iter1->second;
+        for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end();) {
+            Sound* currSound = iter2->second;
+            if (currSound->IsLooped()) {
+                delete currSound;
+                currSound = NULL;
+                iter2 = soundMap.erase(iter2);
+            }
+            else {
+                ++iter2;
+            }
+        }
+        if (soundMap.empty()) {
+            iter1 = this->attachedPlayingSounds.erase(iter1);
+        }
+        else {
+            ++iter1;
+        }
+    }
+}
+
 void GameSound::PauseAllSounds() {
     if (this->soundEngine == NULL) {
         return;
@@ -223,9 +261,9 @@ void GameSound::UnpauseAllSounds() {
 
 // Plays a non-positional sound in the game.
 // Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
-SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLooped) {
+SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects) {
 
-    Sound* newSound = this->BuildSound(soundType, isLooped, NULL);
+    Sound* newSound = this->BuildSound(soundType, isLooped, NULL, applyActiveEffects);
     if (newSound == NULL) {
         return INVALID_SOUND_ID;
     }
@@ -237,9 +275,10 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
 // Plays a positional sound in the game.
 // Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
 SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType,
-                                       bool isLooped, const Point3D& position) {
+                                       bool isLooped, const Point3D& position, 
+                                       bool applyActiveEffects) {
 
-    Sound* newSound = this->BuildSound(soundType, isLooped, &position);
+    Sound* newSound = this->BuildSound(soundType, isLooped, &position, applyActiveEffects);
     if (newSound == NULL) {
         return INVALID_SOUND_ID;
     }
@@ -356,7 +395,9 @@ void GameSound::StopAllEffects() {
     }
 }
 
-void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn) {
+void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn, 
+                                  const std::set<SoundID>& ignoreSounds) {
+
     // If we're turning the effect on and it's already active then just ignore it
     if (this->IsEffectActive(effectType) && effectOn) {
         return;
@@ -367,9 +408,18 @@ void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool 
         return;
     }
 
-    // Apply the effect to EVERY sound playing in the game...
+    // Apply the effect to EVERY sound playing in the game other than the provided ignore sounds...
     std::list<Sound*> allPlayingSounds;
     this->GetAllPlayingSoundsAsList(allPlayingSounds);
+    for (std::list<Sound*>::iterator iter = allPlayingSounds.begin(); iter != allPlayingSounds.end();) {
+        Sound* currSound = *iter;
+        if (ignoreSounds.find(currSound->GetSoundID()) != ignoreSounds.end()) {
+            iter = allPlayingSounds.erase(iter);
+        }
+        else {
+            ++iter;
+        }
+    } 
     effect->ToggleEffectOnSounds(allPlayingSounds, effectOn);
 
     // Also deal with memoized effect data...
@@ -417,6 +467,12 @@ void GameSound::SetListenerPosition(const Camera& camera) {
         irrklang::vec3df(pos[0], pos[1], pos[2]),
         irrklang::vec3df(lookDir[0], lookDir[1], lookDir[2]), irrklang::vec3df(0,0,0),
         irrklang::vec3df(upVec[0], upVec[1], upVec[2]));
+}
+
+GameSound::SoundType GameSound::GetRandomBallPaddleCollisionEventSoundType() {
+    static const int NUM_BALL_PADDLE_COLLISION_SOUNDS = 4;
+    int randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % NUM_BALL_PADDLE_COLLISION_SOUNDS;
+    return static_cast<GameSound::SoundType>(GameSound::BallPaddleCollision1Event + randomNum);
 }
 
 SoundSource* GameSound::BuildSoundSource(const GameSound::SoundType& soundType,
@@ -639,7 +695,7 @@ void GameSound::GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) cons
 
 // Private helper function for building 2D and 3D sounds
 // If the sound could not be built it returns NULL.
-Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position) {
+Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position, bool applyActiveEffects) {
     assert(soundType != GameSound::NoSound);
 
     if (this->soundEngine == NULL) {
@@ -662,10 +718,12 @@ Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLoope
     }
 
     // Apply any active effects to the sound
-    for (EffectSetConstIter iter = this->activeEffects.begin(); iter != this->activeEffects.end(); ++iter) {
-        SoundEffect* currEffect = this->GetSoundEffectFromType(*iter);
-        assert(currEffect != NULL);
-        currEffect->ToggleEffectOnSound(newSound, true);
+    if (applyActiveEffects) {
+        for (EffectSetConstIter iter = this->activeEffects.begin(); iter != this->activeEffects.end(); ++iter) {
+            SoundEffect* currEffect = this->GetSoundEffectFromType(*iter);
+            assert(currEffect != NULL);
+            currEffect->ToggleEffectOnSound(newSound, true);
+        }
     }
 
     return newSound;

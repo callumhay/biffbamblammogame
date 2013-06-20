@@ -1,12 +1,12 @@
 There's more than one way to break a block
 19 26
 S S S S D(StickyPaddle) S S S S D(LaserBeamPaddle) S S S S S S S S S 
-S E E E E E E E E E E E E N E E E E S 
-S E E E E E E E E E E E E N E E E E S 
-S I E R R R E E R R R E I N E G G E S 
-S E E R B R E E R B R E E N E G G E S 
-S E E R R R E E R R R E E N E E E E S 
-S E E E E E E E E E E E E N E E E E S 
+S E E E E E E E E E E E E F(l) E E E E F(l) 
+S E E E E E E E E E E E E F(l) E E E E F(l) 
+S I E R R R E E R R R E I F(l) E G G E F(l) 
+S E E R B R E E R B R E E N E G G E F(l) 
+S E E R R R E E R R R E E N E E E E F(l) 
+S E E E E E E E E E E E E N N N T(S,lr) S S 
 S E E E E E E E E E E E E N E E E E S 
 S E O O O E G G E O O O E N E E E E S 
 S E O B O E G G E O B O E N E E E E S 
@@ -38,8 +38,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 1
 BallGrow 2
+UberBall 1
 StickyPaddle 3
 ShieldPaddle 0
 LaserBulletPaddle 2
@@ -65,3 +65,5 @@ CrazyBall 1
 Random 2
 FastBall 2
 PaddleCam 0
+
+PADDLESTARTXPOS: 17.5

@@ -35,7 +35,7 @@ firstTick(true), releaseTimerStarted(false), releaseTimerCounter(0.0), ballWasRe
 	assert(currLevel != NULL);
 
 	// Make sure the paddle and ball are in a nice default state and position
-	paddle->SetNewMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
+	paddle->UpdateLevel(*currLevel);
 	paddle->ResetPaddle();
 	ball->ResetBallAttributes();
 

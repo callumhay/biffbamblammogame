@@ -124,7 +124,7 @@ protected:
 };
 
 inline float Projectile::GetProjectileSplitScaleFactor(int numSplits) {
-    return std::min<float>(1.0f, std::max<float>(0.5f, (1.5f / static_cast<float>(numSplits))));
+    return std::min<float>(1.0f, std::max<float>(0.66666f, (1.5f / static_cast<float>(numSplits))));
 }
 
 #endif

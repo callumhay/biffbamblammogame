@@ -295,7 +295,7 @@ void GameModel::SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNew
 	GameEventManager::Instance()->ActionLevelStarted(*world, *currLevel);
 
 	// Tell the paddle what the boundries of the level are and reset the paddle
-	this->playerPaddle->SetNewMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound()); // resets the paddle
+	this->playerPaddle->UpdateLevel(*currLevel); // resets the paddle
 	//this->playerPaddle->ResetPaddle();
 
     // Reload all progress numbers

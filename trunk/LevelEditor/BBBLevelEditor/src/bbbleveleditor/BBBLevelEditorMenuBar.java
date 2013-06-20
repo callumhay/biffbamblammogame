@@ -213,11 +213,12 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 			
 			if (e.getActionCommand().equals("dimensions")) {
 				EditDimensionsDialog dlg = new EditDimensionsDialog(levelEditWindow, 
-						activeDoc.GetLevelWidth(), activeDoc.GetLevelHeight());
+						activeDoc.GetLevelWidth(), activeDoc.GetLevelHeight(), activeDoc.GetPaddleStartingXPos());
 				dlg.setVisible(true);
 				
 				if (dlg.getExitedWithOK()) {
 					activeDoc.setLevelDimensions(dlg.getNewWidth(), dlg.getNewHeight());
+					activeDoc.setPaddleStartingXPos(dlg.getNewPaddleXPos());
 				}
 			}
 			else if (e.getActionCommand().equals("item_drops")) {

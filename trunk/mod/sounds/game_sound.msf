@@ -221,8 +221,17 @@ LastBallSpiralingToDeathLoop {
 
 // Ball and Paddle Events ****************************************************
 
-BallPaddleCollisionEvent {
-	file = global/ball_paddle_hit.ogg
+BallPaddleCollision1Event {
+	file = global/ball_paddle_hit_01.wav
+}
+BallPaddleCollision2Event {
+	file = global/ball_paddle_hit_02.wav
+}
+BallPaddleCollision3Event {
+	file = global/ball_paddle_hit_03.wav
+}
+BallPaddleCollision4Event {
+	file = global/ball_paddle_hit_04.wav
 }
 
 BallStickyPaddleCollisionEvent {
@@ -457,7 +466,11 @@ ItemMovingLoop {
 // Bullet-time / Ball Boost Events *******************************************
 
 EnterBulletTimeEvent {
-	file = global/woosh.ogg
+	file = global/BulletTimeFire.wav
+}
+
+InBulletTimeLoop {
+	file = global/BulletTime.wav
 }
 
 ExitBulletTimeEvent {
