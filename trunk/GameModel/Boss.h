@@ -32,8 +32,9 @@ public:
     static const double TOTAL_DEATH_ANIM_TIME;
 
     virtual ~Boss();
-
+    
     static Boss* BuildStyleBoss(const GameWorld::WorldStyle& style);
+    virtual void Init(float startingX, float startingY) = 0;
 
     Collision::AABB2D GenerateDyingAABB() const;
 
@@ -47,7 +48,7 @@ public:
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
 
-    void Translate(const Vector3D& t);
+    //void Translate(const Vector3D& t);
 
     void Tick(double dT, GameModel* gameModel);
 
@@ -63,9 +64,13 @@ public:
 
     void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
 
+    void AttachProjectile(Projectile* projectile, BossBodyPart* bodyPart);
+    void DetachProjectile(Projectile* projectile);
+
     bool CanHurtPaddleWithBody() const;
 
     virtual bool ProjectilePassesThrough(const Projectile* projectile) const = 0;
+    virtual bool ProjectileIsDestroyedOnCollision(const Projectile* projectile) const;
 
     // Builders for various boss animations
     static AnimationMultiLerp<ColourRGBA> BuildBossHurtAndInvulnerableColourAnim();
@@ -102,8 +107,6 @@ protected:
 
     void SetNextAIState(BossAIState* nextState);
 
-    virtual void Init() = 0;
-
 private:
     bool isBossDeadAndLevelCompleted;
 
@@ -125,9 +128,9 @@ inline float Boss::GetAliveWidth() const {
     return this->alivePartsRoot->GenerateWorldAABB().GetWidth();
 }
 
-inline void Boss::Translate(const Vector3D& t) {
-    this->root->Translate(t);
-}
+//inline void Boss::Translate(const Vector3D& t) {
+//    this->root->Translate(t);
+//}
 
 inline void Boss::SetIsLevelCompleteDead(bool isComplete) {
     this->isBossDeadAndLevelCompleted = isComplete;
@@ -157,6 +160,16 @@ inline BossBodyPart* Boss::CollisionCheck(const BoundingLines& boundingLines, co
 
 inline BossBodyPart* Boss::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {
     return this->alivePartsRoot->CollisionCheck(c, velDir);
+}
+
+inline void Boss::AttachProjectile(Projectile* projectile, BossBodyPart* bodyPart) {
+    assert(!bodyPart->GetIsDestroyed());
+    bodyPart->AttachProjectile(projectile);
+}
+
+inline void Boss::DetachProjectile(Projectile* projectile) {
+    // Find the projectile among the various body parts and remove it...
+    this->root->DetachProjectile(projectile);
 }
 
 #endif // __BOSS_H__

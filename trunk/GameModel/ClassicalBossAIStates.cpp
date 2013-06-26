@@ -642,12 +642,12 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
 
         // If one of the bosses' arms is destroyed it should be trying to get its last surviving arm to
         // be above the paddle...
-        if (leftArmIsDestroyed) {
+        if (leftArmIsDestroyed && !rightArmIsDestroyed) {
             // Try to get the paddle under the right arm
             Vector2D rightArmToPaddle = paddlePos - rightArmAABB.GetCenter();
             this->desiredVel[0] = NumberFuncs::SignOf(rightArmToPaddle[0]) * this->GetMaxSpeed() * speedMultiplier;
         }
-        else if (rightArmIsDestroyed) {
+        else if (rightArmIsDestroyed && !leftArmIsDestroyed) {
             // Try to get the paddle under the left arm
             Vector2D leftArmToPaddle = paddlePos - leftArmAABB.GetCenter();
             this->desiredVel[0] = NumberFuncs::SignOf(leftArmToPaddle[0]) * this->GetMaxSpeed() * speedMultiplier;
@@ -915,7 +915,6 @@ void ArmsBodyHeadAI::ExecuteHurtArmState(double dT, bool isLeftArm) {
     }
 
     if (isFinished) {
-        this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
         this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
 
         // Check to see if both arms are now gone, if they are then we move to a special state

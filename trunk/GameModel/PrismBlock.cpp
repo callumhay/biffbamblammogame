@@ -267,9 +267,9 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 
 	// Determine how the ray will move through the prism based on where it hit...
 	const Vector2D OLD_PROJECTILE_DELTA     = hitPoint - this->GetCenter();
-	const float MIDDLE_HALF_INTERVAL_X      = LevelPiece::PIECE_WIDTH / 5.25f;
+	const float MIDDLE_HALF_INTERVAL_X      = LevelPiece::PIECE_WIDTH / 5.2f;
 	const float MIDDLE_HALF_INTERVAL_Y      = LevelPiece::PIECE_HEIGHT / 3.5f;
-	const float REFLECTION_REFRACTION_ANGLE	= 15.0f;
+	const float REFLECTION_REFRACTION_ANGLE	= 25.0f;
 	
 	if (fabs(OLD_PROJECTILE_DELTA[0]) <= MIDDLE_HALF_INTERVAL_X) {
 
@@ -280,7 +280,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			// almost perfectly perpendicular to the bottom
 			const Vector2D CURRENT_NORMAL = Vector2D(0.0f, -1.0f);
 			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
-			if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
+			if (angleBetweenNormalAndLaser <= REFLECTION_REFRACTION_ANGLE) {
 				// We spawn two other rays to go out of the top right and left
 				const Vector2D TOP_RIGHT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
 				const Vector2D TOP_LEFT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
@@ -293,7 +293,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			// almost perfectly perpendicular to the top
 			const Vector2D CURRENT_NORMAL = Vector2D(0.0f, 1.0f);
 			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
-			if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
+			if (angleBetweenNormalAndLaser <= REFLECTION_REFRACTION_ANGLE) {
 				// We spawn two other rays to go out of the bottom right and left
 				const Vector2D BOTTOM_RIGHT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
 				const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;

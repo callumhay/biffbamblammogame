@@ -85,7 +85,6 @@ topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(
         this->legGlowAlphaAnims[i].SetInterpolantValue(0.0f);
         this->legGlowAlphaAnims[i].SetRepeat(false);
     }
-
 }
 
 GothicRomanticBossMesh::~GothicRomanticBossMesh() {
@@ -156,9 +155,12 @@ double GothicRomanticBossMesh::ActivateIntroAnimation() {
 }
 
 void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                                      const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                                      const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                                      const Texture2D* sceneTex) {
  
     UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(sceneTex);
+
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // worldspace locations...
 

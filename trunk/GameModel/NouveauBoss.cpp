@@ -16,7 +16,7 @@ using namespace nouveaubossai;
 
 const float NouveauBoss::BODY_CORE_HEIGHT         = 4.719f;
 const float NouveauBoss::BODY_CORE_TOP_WIDTH      = 4.236f;
-const float NouveauBoss::BODY_CORE_BOTTOM_WIDTH   = 9.705f;
+const float NouveauBoss::BODY_CORE_BOTTOM_WIDTH   = 10.7f;
 const float NouveauBoss::BODY_CORE_MID_HALF_DEPTH = 8.463f / 2.0f;
 
 const float NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT  = 2.480f;
@@ -26,23 +26,47 @@ const float NouveauBoss::TOP_ENCLOSURE_DOME_TOP_WIDTH = 1.312f;
 
 const float NouveauBoss::ARM_SPHERE_HOLDER_CURL_WIDTH = 5.485f;
 
-const float NouveauBoss::DEFAULT_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION;
+const float NouveauBoss::MIN_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 5  + 3.75f * GameBall::DEFAULT_BALL_RADIUS;
+const float NouveauBoss::MAX_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 18 - 3.75f * GameBall::DEFAULT_BALL_RADIUS;
+const float NouveauBoss::MIN_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 8;
+const float NouveauBoss::MAX_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 30;
 
-const float NouveauBoss::MIN_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 5  + LevelPiece::PIECE_WIDTH;
-const float NouveauBoss::MAX_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 18 - LevelPiece::PIECE_WIDTH;
-const float NouveauBoss::MIN_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 12;
-const float NouveauBoss::MAX_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 25;
+const float NouveauBoss::LEFT_SIDE_CURL_SHOOT1_OFFSET_X = -2.359f;
+const float NouveauBoss::LEFT_SIDE_CURL_SHOOT1_OFFSET_Y = -0.366f;
+const float NouveauBoss::LEFT_SIDE_CURL_SHOOT2_OFFSET_X = -4.470f;
+const float NouveauBoss::LEFT_SIDE_CURL_SHOOT2_OFFSET_Y = -1.267f;
+
+const float NouveauBoss::RIGHT_SIDE_CURL_SHOOT1_OFFSET_X = -NouveauBoss::LEFT_SIDE_CURL_SHOOT1_OFFSET_X;
+const float NouveauBoss::RIGHT_SIDE_CURL_SHOOT1_OFFSET_Y =  NouveauBoss::LEFT_SIDE_CURL_SHOOT1_OFFSET_Y;
+const float NouveauBoss::RIGHT_SIDE_CURL_SHOOT2_OFFSET_X = -NouveauBoss::LEFT_SIDE_CURL_SHOOT2_OFFSET_X;
+const float NouveauBoss::RIGHT_SIDE_CURL_SHOOT2_OFFSET_Y =  NouveauBoss::LEFT_SIDE_CURL_SHOOT2_OFFSET_Y;
+
+const float NouveauBoss::SIDE_CURL_SHOOT_OFFSET_Z = 0.805f;
+
+const float NouveauBoss::BOTTOM_SPHERE_SHOOT_OFFSET_Y = -2.250f;
 
 const std::pair<int,int> NouveauBoss::SIDE_PRISM_IDX_PAIRS[NUM_SIDE_PRISMS] = {
-    std::make_pair(2, LEVEL_NUM_PIECES_HEIGHT-2),
-    std::make_pair(1, LEVEL_NUM_PIECES_HEIGHT-4), std::make_pair(LEVEL_NUM_PIECES_WIDTH-2, LEVEL_NUM_PIECES_HEIGHT-4),
-    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-6), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-6),
-    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-9), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-9),
-    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-12), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-12),
-    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-15), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-15),
-    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-18), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-18),
-    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-21), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-21),
-    std::make_pair(0, LEVEL_NUM_PIECES_HEIGHT-24), std::make_pair(LEVEL_NUM_PIECES_WIDTH-1, LEVEL_NUM_PIECES_HEIGHT-24)
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  1), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  LEVEL_NUM_PIECES_WIDTH-2),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  LEVEL_NUM_PIECES_WIDTH-1),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, 0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, LEVEL_NUM_PIECES_WIDTH-1),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, 0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, LEVEL_NUM_PIECES_WIDTH-1),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, 0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, LEVEL_NUM_PIECES_WIDTH-1)
+};
+
+const std::pair<int,int> NouveauBoss::LEFT_SIDE_PRISM_IDX_PAIRS[NUM_LEFT_SIDE_PRISMS] = {
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  1), 
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  0),  
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, 0),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, 0),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, 0)
+};
+
+const std::pair<int,int> NouveauBoss::RIGHT_SIDE_PRISM_IDX_PAIRS[NUM_RIGHT_SIDE_PRISMS] = {
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  LEVEL_NUM_PIECES_WIDTH-2),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  LEVEL_NUM_PIECES_WIDTH-1),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, LEVEL_NUM_PIECES_WIDTH-1),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, LEVEL_NUM_PIECES_WIDTH-1),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, LEVEL_NUM_PIECES_WIDTH-1)
 };
 
 NouveauBoss::NouveauBoss() {
@@ -64,7 +88,7 @@ bool NouveauBoss::ProjectilePassesThrough(const Projectile* projectile) const {
     return false;
 }
 
-void NouveauBoss::Init() {
+void NouveauBoss::Init(float startingX, float startingY) {
 
     // Body Layout for the Nouveau Boss:
     // -----------------------------------
@@ -111,20 +135,21 @@ void NouveauBoss::Init() {
 
             // body (core)
             {
-                static const float HEIGHT        = BODY_CORE_HEIGHT;
-                static const float BOTTOM_WIDTH  = BODY_CORE_BOTTOM_WIDTH;
-                static const float TOP_WIDTH     = BODY_CORE_TOP_WIDTH;
-                static const float HALF_HEIGHT       = HEIGHT / 2.0f;
-                static const float HALF_BOTTOM_WIDTH = BOTTOM_WIDTH  / 2.0f;
-                static const float HALF_TOP_WIDTH    = TOP_WIDTH / 2.0f;
+                static const float HEIGHT         = BODY_CORE_HEIGHT;
+                static const float TOP_WIDTH      = BODY_CORE_TOP_WIDTH;
+                static const float HALF_HEIGHT    = HEIGHT / 2.0f; // 
+                static const float HALF_TOP_WIDTH = TOP_WIDTH / 2.0f;
+
+                const Point2D leftPt(-3.0f, 0.8f);
+                const Point2D rightPt(-leftPt[0], leftPt[1]);
 
                 BoundingLines bodyBounds;
                 bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), 
-                    Point2D(HALF_TOP_WIDTH, HALF_HEIGHT)), Vector2D(0, 1));  // Top
-                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), 
-                    Point2D(-HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(-HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH)); // Left diagonal
-                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_TOP_WIDTH, HALF_HEIGHT), 
-                    Point2D(HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH));   // Right diagonal
+                    Point2D(HALF_TOP_WIDTH, HALF_HEIGHT)), Vector2D(0, 1), true);  // Top
+                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), leftPt), 
+                    Vector2D(leftPt[1] - HALF_HEIGHT, -leftPt[0] - HALF_TOP_WIDTH), true); // Left diagonal
+                bodyBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_TOP_WIDTH, HALF_HEIGHT), rightPt), 
+                    Vector2D(HALF_HEIGHT - rightPt[1], rightPt[0] - HALF_TOP_WIDTH), true);  // Right diagonal
 
                 BossBodyPart* body = new BossBodyPart(bodyBounds);
                 this->alivePartsRoot->AddBodyPart(body);
@@ -147,7 +172,7 @@ void NouveauBoss::Init() {
 
                     BoundingLines gazeboBounds;
                     gazeboBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, HALF_HEIGHT), Point2D(-HALF_WIDTH, -HALF_HEIGHT)), Vector2D(-1,0)); // Left
-                    gazeboBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, HALF_HEIGHT)), Vector2D(1,0));     // Right
+                    gazeboBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(1,0));    // Right
 
                     BossBodyPart* gazebo = new BossBodyPart(gazeboBounds);
                     topEnclosure->AddBodyPart(gazebo);
@@ -166,7 +191,7 @@ void NouveauBoss::Init() {
                     static const float HALF_TOP_WIDTH = TOP_ENCLOSURE_DOME_TOP_WIDTH / 2.0f;
 
                     BoundingLines domeBounds = BuildSemiCircleBoundingLines(HEIGHT, LOWER_MID_HEIGHT, UPPER_MID_HEIGHT, HALF_BOTTOM_WIDTH,
-                        HALF_LOWER_MID_WIDTH, HALF_UPPER_MID_WIDTH, HALF_TOP_WIDTH);
+                        HALF_LOWER_MID_WIDTH, HALF_UPPER_MID_WIDTH, HALF_TOP_WIDTH, false);
 
                     BossBodyPart* dome = new BossBodyPart(domeBounds);
                     dome->Translate(Vector3D(0.0f, TOP_ENCLOSURE_GAZEBO_HEIGHT/2.0f, 0.0f));
@@ -187,19 +212,22 @@ void NouveauBoss::Init() {
                 static const float HALF_BOTTOM_WIDTH = 1.343f;
                 static const float HALF_MID_WIDTH = 0.928f;
 
+                static const float START_Y = -0.3f;
+
                 BoundingLines topSphereBounds;
                 topSphereBounds.AddBound(Collision::LineSeg2D(
-                    Point2D(-HALF_BOTTOM_WIDTH, 0.0f), Point2D(-HALF_MID_WIDTH, MID_HEIGHT)), 
-                    Vector2D(0.0f - MID_HEIGHT, HALF_BOTTOM_WIDTH - HALF_MID_WIDTH)); // Left-Bottom
+                    Point2D(-HALF_BOTTOM_WIDTH, START_Y), Point2D(-HALF_MID_WIDTH, MID_HEIGHT)), 
+                    Vector2D(START_Y - MID_HEIGHT, HALF_BOTTOM_WIDTH - HALF_MID_WIDTH), true); // Left-Bottom
                 topSphereBounds.AddBound(Collision::LineSeg2D(
                     Point2D(-HALF_MID_WIDTH, MID_HEIGHT), Point2D(0.0f, HEIGHT)), 
                     Vector2D(MID_HEIGHT - HEIGHT, HALF_MID_WIDTH)); // Left-Top
+
                 topSphereBounds.AddBound(Collision::LineSeg2D(
-                    Point2D(HALF_BOTTOM_WIDTH, 0.0f), Point2D(HALF_MID_WIDTH, MID_HEIGHT)),
-                    Vector2D(MID_HEIGHT, HALF_BOTTOM_WIDTH - HALF_MID_WIDTH)); // Right-Middle
+                    Point2D(HALF_BOTTOM_WIDTH, START_Y), Point2D(HALF_MID_WIDTH, MID_HEIGHT)),
+                    Vector2D(MID_HEIGHT - START_Y, HALF_BOTTOM_WIDTH - HALF_MID_WIDTH), true); // Right-Bottom
                 topSphereBounds.AddBound(Collision::LineSeg2D(
                     Point2D(HALF_MID_WIDTH, MID_HEIGHT), Point2D(0.0f, HEIGHT)),
-                    Vector2D(MID_HEIGHT - HEIGHT, HALF_MID_WIDTH)); // Right-Top
+                    Vector2D(HEIGHT - MID_HEIGHT, HALF_MID_WIDTH)); // Right-Top
 
                 BossBodyPart* topSphere = new BossBodyPart(topSphereBounds);
                 topSphere->Translate(Vector3D(0.0f, 1.597f + 1.070, 0.0f));
@@ -210,25 +238,34 @@ void NouveauBoss::Init() {
 
             // Side Curls...
             {
-                const Point2D PT0(0.0f, 0.0f);
-                const Point2D PT1(-2.689f, 1.173f);
-                const Point2D PT2(-5.390f, 0.0f);
-                const Point2D PT3(-5.773f, -0.902f);
-                const Point2D PT4(-5.118f, -2.362f);
-                const Point2D PT5(-4.390f, -2.510f);
-                const Point2D PT6(-0.750f, -1.361f);
+                Point2D PT0(0.0f, 0.0f);
+                Point2D PT1(-2.689f, 1.173f);
+                Point2D PT2(-5.390f, 0.0f);
+                Point2D PT3(-5.773f, -0.902f);
+                Point2D PT4(-5.118f, -2.362f);
+                Point2D PT5(-4.390f, -2.510f);
+                Point2D PT6(-2.5f, -1.9f);
 
-                BoundingLines curlBounds;
-                curlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(PT1[1] - PT0[1], PT0[0] - PT1[0]));
-                curlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(PT2[1] - PT1[1], PT1[0] - PT2[0]));
-                curlBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(PT3[1] - PT2[1], PT2[0] - PT3[0]));
-                curlBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(PT4[1] - PT3[1], PT3[0] - PT4[0]));
-                curlBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(PT5[1] - PT4[1], PT4[0] - PT5[0]));
-                curlBounds.AddBound(Collision::LineSeg2D(PT5, PT6), Vector2D(PT6[1] - PT5[1], PT5[0] - PT6[0]));
+                BoundingLines leftCurlBounds;
+                leftCurlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(PT1[1] - PT0[1], PT0[0] - PT1[0]), true);
+                leftCurlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(PT2[1] - PT1[1], PT1[0] - PT2[0]), true);
+                leftCurlBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(PT3[1] - PT2[1], PT2[0] - PT3[0]));
+                leftCurlBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(PT4[1] - PT3[1], PT3[0] - PT4[0]));
+                leftCurlBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(PT5[1] - PT4[1], PT4[0] - PT5[0]));
+                leftCurlBounds.AddBound(Collision::LineSeg2D(PT5, PT6), Vector2D(PT6[1] - PT5[1], PT5[0] - PT6[0]));
+
+                PT0[0] *= -1; PT1[0] *= -1; PT2[0] *= -1; PT3[0] *= -1; PT4[0] *= -1; PT5[0] *= -1; PT6[0] *= -1;
+                BoundingLines rightCurlBounds;
+                rightCurlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(-(PT1[1] - PT0[1]), -(PT0[0] - PT1[0])), true);
+                rightCurlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(-(PT2[1] - PT1[1]), -(PT1[0] - PT2[0])), true);
+                rightCurlBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(-(PT3[1] - PT2[1]), -(PT2[0] - PT3[0])));
+                rightCurlBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(-(PT4[1] - PT3[1]), -(PT3[0] - PT4[0])));
+                rightCurlBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(-(PT5[1] - PT4[1]), -(PT4[0] - PT5[0])));
+                rightCurlBounds.AddBound(Collision::LineSeg2D(PT5, PT6), Vector2D(-(PT6[1] - PT5[1]), -(PT5[0] - PT6[0])));
 
                 // leftSideCurls
                 {
-                    BossBodyPart* leftSideCurls = new BossBodyPart(curlBounds);
+                    BossBodyPart* leftSideCurls = new BossBodyPart(leftCurlBounds);
                     leftSideCurls->Translate(Vector3D(-2.986f, 0.82f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(leftSideCurls);
                     this->leftSideCurlsIdx = this->bodyParts.size();
@@ -237,7 +274,7 @@ void NouveauBoss::Init() {
 
                 // rightSideCurls
                 {
-                    BossBodyPart* rightSideCurls = new BossBodyPart(curlBounds);
+                    BossBodyPart* rightSideCurls = new BossBodyPart(rightCurlBounds);
                     rightSideCurls->RotateY(180.0f);
                     rightSideCurls->Translate(Vector3D(2.986f, 0.82f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(rightSideCurls);
@@ -249,13 +286,18 @@ void NouveauBoss::Init() {
             // Side Sphere Holders...
             {
 
-                BoundingLines holderCurlBounds;
+                BoundingLines leftHolderCurlBounds;
+                BoundingLines rightHolderCurlBounds;
                 {
-                    const Point2D PT0(0.15f, 1.961f);
-                    const Point2D PT1(-5.485f, 1.961f);
-                    const Point2D PT2(-5.485f, 0.154f);
-                    holderCurlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(0, 1));
-                    holderCurlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(-1, 0));
+                    Point2D PT0(0.35f, 1.714f);
+                    Point2D PT1(-5.718f, 1.714f);
+                    Point2D PT2(-5.718f, -0.15f);
+                    leftHolderCurlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(0, 1), true);
+                    leftHolderCurlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(-1, 0), false);
+
+                    PT0[0] *= -1; PT1[0] *= -1; PT2[0] *= -1;
+                    rightHolderCurlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(0, 1), true);
+                    rightHolderCurlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(1, 0), false);
                 }
 
                 BoundingLines sideSphereBounds;
@@ -270,23 +312,31 @@ void NouveauBoss::Init() {
                     static const float HALF_TOP_WIDTH       = 0.251f;
 
                     sideSphereBounds = BuildSemiCircleBoundingLines(HEIGHT, LOWER_MID_HEIGHT, UPPER_MID_HEIGHT, HALF_BOTTOM_WIDTH,
-                        HALF_LOWER_MID_WIDTH, HALF_UPPER_MID_WIDTH, HALF_TOP_WIDTH);
+                        HALF_LOWER_MID_WIDTH, HALF_UPPER_MID_WIDTH, HALF_TOP_WIDTH, true);
                 }
 
-                BoundingLines frillBounds;
+                BoundingLines leftFrillBounds;
+                BoundingLines rightFrillBounds;
                 {
-                    const Point2D PT0(-2.606f, 0.0f);
-                    const Point2D PT1(-2.606f, 1.407f);
-                    const Point2D PT2(-0.984f, 2.599f);
-                    const Point2D PT3(0.984f, 2.599f);
-                    const Point2D PT4(2.606f, 1.407f);
-                    const Point2D PT5(2.606f, 0.0f);
+                    Point2D PT0(-2.606f, 0.0f);
+                    Point2D PT1(-2.606f, 1.407f);
+                    Point2D PT2(-0.984f, 2.599f);
+                    Point2D PT3(0.984f, 2.599f);
+                    Point2D PT4(2.606f, 1.407f);
+                    Point2D PT5(3.5f, 1.407f);
 
-                    frillBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(-1, 0));
-                    frillBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(PT1[1] - PT2[1], PT2[0] - PT1[0]));
-                    frillBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, 1));
-                    frillBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(PT3[1] - PT4[1], PT4[0] - PT3[0]));
-                    frillBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(1, 0));
+                    leftFrillBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(-1, 0));
+                    leftFrillBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(PT1[1] - PT2[1], PT2[0] - PT1[0]));
+                    leftFrillBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, 1));
+                    leftFrillBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(PT3[1] - PT4[1], PT4[0] - PT3[0]));
+                    leftFrillBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(0, 1));
+
+                    PT0[0] *= -1; PT1[0] *= -1; PT2[0] *= -1; PT3[0] *= -1; PT4[0] *= -1; PT5[0] *= -1;
+                    rightFrillBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(1, 0));
+                    rightFrillBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(-(PT1[1] - PT2[1]), -(PT2[0] - PT1[0])));
+                    rightFrillBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, 1));
+                    rightFrillBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(-(PT3[1] - PT4[1]), -(PT4[0] - PT3[0])));
+                    rightFrillBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(0, 1));
                 }
 
                 // leftSideSphereHolderCurl
@@ -298,7 +348,7 @@ void NouveauBoss::Init() {
 
                     // leftSideHolderCurl
                     {
-                        BossBodyPart* leftSideHolderCurl = new BossBodyPart(holderCurlBounds);
+                        BossBodyPart* leftSideHolderCurl = new BossBodyPart(leftHolderCurlBounds);
                         leftSideSphereHolder->AddBodyPart(leftSideHolderCurl);
                         this->leftSideHolderCurlIdx = this->bodyParts.size();
                         this->bodyParts.push_back(leftSideHolderCurl);
@@ -315,7 +365,7 @@ void NouveauBoss::Init() {
                     }
                     // leftSideSphereFrills
                     {
-                        BossBodyPart* leftSideSphereFrills = new BossBodyPart(frillBounds);
+                        BossBodyPart* leftSideSphereFrills = new BossBodyPart(leftFrillBounds);
                         leftSideSphereFrills->Translate(Vector3D(-3.112f , 1.558f, 0.0f));
                         leftSideSphereHolder->AddBodyPart(leftSideSphereFrills);
                         this->leftSideSphereFrillsIdx = this->bodyParts.size();
@@ -334,7 +384,7 @@ void NouveauBoss::Init() {
                     
                     // rightSideHolderCurl
                     {
-                        BossBodyPart* rightSideHolderCurl = new BossBodyPart(holderCurlBounds);
+                        BossBodyPart* rightSideHolderCurl = new BossBodyPart(rightHolderCurlBounds);
                         rightSideHolderCurl->RotateY(180.0f);
                         rightSideSphereHolder->AddBodyPart(rightSideHolderCurl);
                         this->rightSideHolderCurlIdx = this->bodyParts.size();
@@ -353,7 +403,8 @@ void NouveauBoss::Init() {
 
                     // rightSideSphereFrills
                     {
-                        BossBodyPart* rightSideSphereFrills = new BossBodyPart(frillBounds);
+                        BossBodyPart* rightSideSphereFrills = new BossBodyPart(rightFrillBounds);
+                        
                         rightSideSphereFrills->Translate(Vector3D(3.112f , 1.558f, 0.0f));
                         rightSideSphereHolder->AddBodyPart(rightSideSphereFrills);
                         this->rightSideSphereFrillsIdx = this->bodyParts.size();
@@ -380,19 +431,11 @@ void NouveauBoss::Init() {
             
             // bottomHexSphere
             {
-                const Point2D PT0(-2.456f, 0.0f);
-                const Point2D PT1(-1.616f, -1.250f);
-                const Point2D PT2(-0.512f, -2.250f);
-                const Point2D PT3(0.512f, -2.250f);
-                const Point2D PT4(1.616f, -1.250f);
-                const Point2D PT5(2.456f, 0.0f);
+                const Point2D PT2(-1.94f, -2.250f);
+                const Point2D PT3(1.94f, -2.250f);
 
                 BoundingLines hexSphereBounds;
-                hexSphereBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(PT1[1] - PT0[1], PT0[0] - PT1[0]));
-                hexSphereBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(PT2[1] - PT1[1], PT1[0] - PT2[0]));
                 hexSphereBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, -1));
-                hexSphereBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(PT4[1] - PT3[1], PT3[0] - PT4[0]));
-                hexSphereBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(PT5[1] - PT4[1], PT4[0] - PT5[0]));
 
                 BossBodyPart* bottomHexSphere = new BossBodyPart(hexSphereBounds);
                 bottomHexSphere->Translate(Vector3D(0.0f, -1.680f, 0.0f));
@@ -404,8 +447,7 @@ void NouveauBoss::Init() {
         } // end alivePartsRoot
     } // end root
 
-    // Move the boss up a bit to start off
-    //this->Translate(Vector3D(0.0f, 2*LevelPiece::PIECE_HEIGHT, 0.0f));
+    this->root->Translate(Vector3D(startingX, startingY, 0.0f)); // NOTE: THIS MUST BE DONE BEFORE SETTING THE FIRST AI STATE!
 
     this->SetNextAIState(new SideSphereAI(this));
     // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
@@ -415,17 +457,24 @@ void NouveauBoss::BuildBottomCurl(const Vector3D& translation, float yRotation, 
     // Curls have no bounds unless they are the ones hanging off the front-sides
     BoundingLines curlBounds;
 
-    static const Point2D PT0(-0.570f, 0.0f);
-    static const Point2D PT1(-0.570f, -2.275f);
-    static const Point2D PT2(0.505f, -3.549f);
-    static const Point2D PT3(3.034f, -3.549f);
-    static const Point2D PT4(3.034f, 0.0f);
+    Point2D PT0(-0.570f, 0.5f);
+    Point2D PT1(-0.570f, -2.275f);
+    Point2D PT2(0.505f, -3.549f);
+    Point2D PT3(3.034f, -3.549f);
+    Point2D PT4(3.034f, -2.35f);
 
-    if (yRotation == 22.5f || yRotation == 157.5f) {
+    if (yRotation == 22.5f) {
         curlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(-1, 0));
         curlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(PT2[1] - PT1[1], PT1[0] - PT2[0]));
         curlBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, -1));
         curlBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(1, 0));
+    }
+    else if (yRotation == 157.5f) {
+        PT0[0] *= -1; PT1[0] *= -1; PT2[0] *= -1; PT3[0] *= -1; PT4[0] *= -1; 
+        curlBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(1, 0));
+        curlBounds.AddBound(Collision::LineSeg2D(PT1, PT2), Vector2D(-(PT2[1] - PT1[1]), -(PT1[0] - PT2[0])));
+        curlBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, -1));
+        curlBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(-1, 0));
     }
 
     BossBodyPart* bottomCurl = new BossBodyPart(curlBounds);
@@ -439,37 +488,149 @@ void NouveauBoss::BuildBottomCurl(const Vector3D& translation, float yRotation, 
 
 BoundingLines NouveauBoss::BuildSemiCircleBoundingLines(float height, float lowerMidHeight, float upperMidHeight,
                                                         float halfBottomWidth, float halfLowerMidWidth,
-                                                        float halfUpperMidWidth, float halfTopWidth) {
+                                                        float halfUpperMidWidth, float halfTopWidth, bool doInsideOnSides) {
 
     BoundingLines domeBounds;
 
     domeBounds.AddBound(Collision::LineSeg2D(
         Point2D(-halfBottomWidth, 0.0f), 
         Point2D(-halfLowerMidWidth, lowerMidHeight)), 
-        Vector2D(0.0f - lowerMidHeight, halfBottomWidth - halfLowerMidWidth)); // Left-Bottom
+        Vector2D(0.0f - lowerMidHeight, halfBottomWidth - halfLowerMidWidth), doInsideOnSides); // Left-Bottom
     domeBounds.AddBound(Collision::LineSeg2D(
         Point2D(-halfLowerMidWidth, lowerMidHeight), 
         Point2D(-halfUpperMidWidth, upperMidHeight)), 
-        Vector2D(lowerMidHeight - upperMidHeight, halfLowerMidWidth - halfUpperMidWidth)); // Left-Middle
+        Vector2D(lowerMidHeight - upperMidHeight, halfLowerMidWidth - halfUpperMidWidth), doInsideOnSides); // Left-Middle
     domeBounds.AddBound(Collision::LineSeg2D(
         Point2D(-halfUpperMidWidth, upperMidHeight), 
         Point2D(-halfTopWidth, height)), 
-        Vector2D(upperMidHeight - halfTopWidth, halfUpperMidWidth - halfTopWidth)); // Left-Top
+        Vector2D(upperMidHeight - height, halfUpperMidWidth - halfTopWidth)); // Left-Top
 
     domeBounds.AddBound(Collision::LineSeg2D(Point2D(-halfTopWidth, height), Point2D(halfTopWidth, height)), Vector2D(0,1)); // Top
 
     domeBounds.AddBound(Collision::LineSeg2D(
         Point2D(halfBottomWidth, 0.0f),
         Point2D(halfLowerMidWidth, lowerMidHeight)),
-        Vector2D(lowerMidHeight - 0.0f, halfBottomWidth - halfLowerMidWidth)); // Right-Bottom
+        Vector2D(lowerMidHeight - 0.0f, halfBottomWidth - halfLowerMidWidth), doInsideOnSides); // Right-Bottom
     domeBounds.AddBound(Collision::LineSeg2D(
         Point2D(halfLowerMidWidth, lowerMidHeight),
         Point2D(halfUpperMidWidth, upperMidHeight)),
-        Vector2D(upperMidHeight - lowerMidHeight, halfLowerMidWidth - halfUpperMidWidth)); // Right-Middle
+        Vector2D(upperMidHeight - lowerMidHeight, halfLowerMidWidth - halfUpperMidWidth), doInsideOnSides); // Right-Middle
     domeBounds.AddBound(Collision::LineSeg2D(
         Point2D(halfUpperMidWidth, upperMidHeight),
         Point2D(halfTopWidth, height)),
-        Vector2D(upperMidHeight - height, halfUpperMidWidth - halfTopWidth)); // Right-Top
+        Vector2D(height - upperMidHeight, halfUpperMidWidth - halfTopWidth)); // Right-Top
 
     return domeBounds;
+}
+
+PrismTriangleBlock* NouveauBoss::GetSidePrism(const GameLevel& level, int idx) {
+    assert(idx >= 0 && idx < NUM_SIDE_PRISMS);
+    assert(LEVEL_NUM_PIECES_HEIGHT == level.GetCurrentLevelLayout().size());
+    assert(LEVEL_NUM_PIECES_WIDTH  == level.GetCurrentLevelLayout()[0].size());
+
+    const std::pair<int, int>& prismIdxPair = SIDE_PRISM_IDX_PAIRS[idx];
+    LevelPiece* piece = level.GetCurrentLevelLayout()[prismIdxPair.first][prismIdxPair.second];
+
+    assert(piece != NULL);
+    assert(piece->GetType() == LevelPiece::PrismTriangle);
+
+    return static_cast<PrismTriangleBlock*>(piece);
+}
+PrismTriangleBlock* NouveauBoss::GetLeftSidePrism(const GameLevel& level, int idx) {
+    assert(idx >= 0 && idx < NUM_LEFT_SIDE_PRISMS);
+    assert(LEVEL_NUM_PIECES_HEIGHT == level.GetCurrentLevelLayout().size());
+    assert(LEVEL_NUM_PIECES_WIDTH  == level.GetCurrentLevelLayout()[0].size());
+
+    const std::pair<int, int>& prismIdxPair = LEFT_SIDE_PRISM_IDX_PAIRS[idx];
+    LevelPiece* piece = level.GetCurrentLevelLayout()[prismIdxPair.first][prismIdxPair.second];
+
+    assert(piece != NULL);
+    assert(piece->GetType() == LevelPiece::PrismTriangle);
+
+    return static_cast<PrismTriangleBlock*>(piece);
+}
+PrismTriangleBlock* NouveauBoss::GetRightSidePrism(const GameLevel& level, int idx) {
+    assert(idx >= 0 && idx < NUM_RIGHT_SIDE_PRISMS);
+    assert(LEVEL_NUM_PIECES_HEIGHT == level.GetCurrentLevelLayout().size());
+    assert(LEVEL_NUM_PIECES_WIDTH  == level.GetCurrentLevelLayout()[0].size());
+
+    const std::pair<int, int>& prismIdxPair = RIGHT_SIDE_PRISM_IDX_PAIRS[idx];
+    LevelPiece* piece = level.GetCurrentLevelLayout()[prismIdxPair.first][prismIdxPair.second];
+
+    assert(piece != NULL);
+    assert(piece->GetType() == LevelPiece::PrismTriangle);
+
+    return static_cast<PrismTriangleBlock*>(piece);
+}
+
+std::vector<PrismTriangleBlock*> NouveauBoss::GetBestSidePrismCandidates(const GameLevel& level,
+                                                                         const PlayerPaddle& paddle, 
+                                                                         const Point2D& shotOrigin,
+                                                                         bool leftSide, bool rightSide) {
+    std::vector<PrismTriangleBlock*> result;
+    result.reserve(8);
+    
+    Vector2D laserDir;
+    std::list<Collision::Ray2D> collisionRays;
+    PrismTriangleBlock* currPrism = NULL;
+
+    Vector2D shootPosToPaddleDir = paddle.GetCenterPosition() - shotOrigin;
+    shootPosToPaddleDir.Normalize();
+
+    if (leftSide) {
+        for (int i = 0; i < NouveauBoss::NUM_LEFT_SIDE_PRISMS; i++) {
+            currPrism = NouveauBoss::GetLeftSidePrism(level, i);
+            laserDir = currPrism->GetCenter() - shotOrigin;
+            laserDir.Normalize();
+
+            currPrism->GetReflectionRefractionRays(currPrism->GetCenter() - LevelPiece::HALF_PIECE_WIDTH * laserDir, laserDir, collisionRays);
+            if (collisionRays.empty()) {
+                continue;
+            }
+
+            // Make sure the collision ray goes in the general direction of the paddle...
+            if (Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
+                Vector2D::Dot(shootPosToPaddleDir, collisionRays.begin()->GetUnitDirection()))))) <= 15.0f) {
+                    result.push_back(currPrism);
+            }  
+        }
+    }
+    if (rightSide) {
+        for (int i = 0; i < NouveauBoss::NUM_RIGHT_SIDE_PRISMS; i++) {
+            currPrism = NouveauBoss::GetRightSidePrism(level, i);
+
+            laserDir = currPrism->GetCenter() - shotOrigin;
+            laserDir.Normalize();
+
+            currPrism->GetReflectionRefractionRays(currPrism->GetCenter() - LevelPiece::HALF_PIECE_WIDTH * laserDir, laserDir, collisionRays);
+            if (collisionRays.empty()) {
+                continue;
+            }
+
+            // Make sure the collision ray goes in the general direction of the paddle...
+            if (Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
+                Vector2D::Dot(shootPosToPaddleDir, collisionRays.begin()->GetUnitDirection()))))) <= 15.0f) {
+                    result.push_back(currPrism);
+            }  
+        }
+    }
+    
+    return result;
+}
+
+PrismBlock* NouveauBoss::GetLeftSplitterPrism(const GameLevel& level) {
+    LevelPiece* piece = level.GetCurrentLevelLayout()[7][8];
+
+    assert(piece != NULL);
+    assert(piece->GetType() == LevelPiece::Prism);
+
+    return static_cast<PrismBlock*>(piece);
+}
+PrismBlock* NouveauBoss::GetRightSplitterPrism(const GameLevel& level) {
+    LevelPiece* piece = level.GetCurrentLevelLayout()[7][14];
+
+    assert(piece != NULL);
+    assert(piece->GetType() == LevelPiece::Prism);
+
+    return static_cast<PrismBlock*>(piece);
 }

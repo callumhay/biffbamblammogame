@@ -210,12 +210,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     else {
         // Calculate the number of samples required to make sure that the increment distance is
         // less than or equal to the radius of the circle
-        numCollisionSamples = static_cast<int>(ceil(dT / (0.25f * c.Radius()) * velocity.Magnitude()));
+        numCollisionSamples = static_cast<int>(ceil(dT / (0.2f * c.Radius()) * velocity.Magnitude()));
         numCollisionSamples = std::max<int>(1, numCollisionSamples + 1);
         assert(numCollisionSamples < 50);
     }
     
-    // Figure out the distance along the vector travelled since the last collision
+    // Figure out the distance along the vector traveled since the last collision
     // to take each sample at...
     sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
     sampleIncTime = dT / static_cast<double>(numCollisionSamples);
@@ -311,17 +311,10 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                 const Point2D& closestPt = closestPts[i];
                 float sqrDist = Point2D::SqDistance(currSamplePt, closestPt);
             
-                if (this->onInside[lineIdx]) {
-                    if (sqrDist < smallestInsideDist) {
-                        smallestInsideDist = sqrDist;
-                        insideIdx = lineIdx;
-                    }
-                }
-                else {
-                    if (sqrDist < smallestOutsideDist) {
-                        smallestOutsideDist = sqrDist;
-                        insideIdx = lineIdx;
-                    }
+                assert(!this->onInside[lineIdx]);
+                if (sqrDist < smallestOutsideDist) {
+                    smallestOutsideDist = sqrDist;
+                    outsideIdx = lineIdx;
                 }
             }
         }
@@ -376,8 +369,6 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         return false;
     }
 
-    //n.Normalize();
-
     return true;
 }
 
@@ -401,14 +392,14 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     if (!zeroBallVelocity) {
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to a fraction of the radius of the circle
-        numBallCollisionSamples = static_cast<int>(ceil(dT / (0.25f * c.Radius()) * velocity.Magnitude()));
+        numBallCollisionSamples = static_cast<int>(ceil(dT / (0.2f * c.Radius()) * velocity.Magnitude()));
         numBallCollisionSamples = std::max<int>(1, numBallCollisionSamples + 1);
         assert(numBallCollisionSamples < 50);
     }
     if (!zeroLineVelocity) {
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to some reasonable delta distance (a fraction of the radius of the circle)...
-        numLineCollisionSamples = static_cast<int>(ceil(dT / (0.25f * c.Radius()) * lineVelocity.Magnitude()));
+        numLineCollisionSamples = static_cast<int>(ceil(dT / (0.2f * c.Radius()) * lineVelocity.Magnitude()));
         numLineCollisionSamples = std::max<int>(1, numLineCollisionSamples + 1);
         assert(numLineCollisionSamples < 50);
     }
@@ -520,17 +511,10 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                 const Point2D& closestPt = closestPts[i];
                 float sqrDist = Point2D::SqDistance(currBallSamplePt, closestPt);
             
-                if (currSampleLines.onInside[lineIdx]) {
-                    if (sqrDist < smallestInsideDist) {
-                        smallestInsideDist = sqrDist;
-                        insideIdx = lineIdx;
-                    }
-                }
-                else {
-                    if (sqrDist < smallestOutsideDist) {
-                        smallestOutsideDist = sqrDist;
-                        insideIdx = lineIdx;
-                    }
+                assert(!currSampleLines.onInside[lineIdx]);
+                if (sqrDist < smallestOutsideDist) {
+                    smallestOutsideDist = sqrDist;
+                    outsideIdx = lineIdx;
                 }
             }
         }
@@ -913,6 +897,17 @@ void BoundingLines::Transform(const Matrix4x4& transform) {
         currNormal = Vector2D(temp[0], temp[1]);
         currNormal.Normalize();
 	}
+}
+
+void BoundingLines::SetAllBoundsInside(bool inside) {
+    for (std::vector<bool>::iterator iter = this->onInside.begin(); iter != this->onInside.end(); ++iter) {
+        *iter = inside;
+    }
+}
+
+void BoundingLines::SetBoundInside(int index, bool inside) {
+    assert(index < static_cast<int>(this->onInside.size()) && index >= 0);
+    this->onInside[index] = inside;
 }
 
 BoundingLines& BoundingLines::operator=(const BoundingLines& copy) {

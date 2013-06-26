@@ -75,7 +75,7 @@ private:
     ESPPointEmitter* eyeExplodingEmitter;
 
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
     void DrawPostBodyEffects(double dT, const Camera& camera);
 
     Point3D GetBossFinalExplodingEpicenter() const;

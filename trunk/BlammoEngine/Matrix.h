@@ -331,6 +331,23 @@ inline Point3D operator*(const Matrix4x4& m, const Point3D& p) {
 	return ret;
 }
 
+inline Point2D operator*(const Matrix4x4& m, const Point2D& p) {
+    Point2D ret;
+    Vector4D temp = Vector4D(p[0], p[1], 0, 1);
+
+    for (int i = 0; i < 2; i++) {
+        Vector4D currRow = m.getRow(i);
+        float sum = 0.0f;
+
+        for (int j = 0; j < 4; j++) {
+            sum += temp[j] * currRow[j];
+        }
+        ret[i] = sum;
+    }
+
+    return ret;
+}
+
 inline Matrix4x4 Matrix4x4::inverse() const {
 
   float fA0 = v_[ 0]*v_[ 5] - v_[ 1]*v_[ 4];

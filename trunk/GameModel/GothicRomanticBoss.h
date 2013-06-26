@@ -97,7 +97,7 @@ private:
     void BuildLeg(const Vector3D& legTranslation, float legYRotation, size_t& legIdx);
 
     // Inherited from Boss
-    void Init();
+    void Init(float startingX, float startingY);
 
     DISALLOW_COPY_AND_ASSIGN(GothicRomanticBoss);
 };

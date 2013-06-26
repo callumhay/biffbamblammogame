@@ -774,7 +774,8 @@ void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& c
 
 	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	    this->lightAssets->GetBossAffectingLights(fgKeyLight, fgFillLight, ballLight);
-        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight);
+        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight, 
+            this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 
         // Draw the foreground effects for the boss, transform them to the boss...
         this->espAssets->DrawForegroundBossEffects(dT, camera);

@@ -510,9 +510,9 @@ void GameModel::CollisionOccurred(Projectile* projectile, Boss* boss, BossBodyPa
     assert(boss != NULL);
     assert(bossPart != NULL);
 
-	bool alreadyCollided = projectile->IsLastThingCollidedWith(boss) || projectile->IsAttachedToSomething();
+	bool alreadyCollided = projectile->IsLastThingCollidedWith(bossPart) || projectile->IsAttachedToSomething();
     if (!alreadyCollided) {
-        projectile->BossCollisionOccurred(boss);
+        projectile->BossCollisionOccurred(boss, bossPart);
         // EVENT: Projectile-boss collision
         //GameEventManager::Instance()->ActionProjectileBossCollision(projectile, *boss, *bossPart);
     }
@@ -752,7 +752,7 @@ void GameModel::DoProjectileCollisions(double dT) {
                     currLevel->MineExplosion(this, static_cast<MineProjectile*>(currProjectile));
                 }
 
-			    // Despose of the projectile...
+			    // Dispose of the projectile...
                 iter = gameProjectiles.erase(iter);
                 PROJECTILE_CLEANUP(currProjectile);
                 continue;    
@@ -767,12 +767,13 @@ void GameModel::DoProjectileCollisions(double dT) {
                 if (hitBodyPart != NULL) {
 
                     this->CollisionOccurred(currProjectile, boss, hitBodyPart);
-
-                    // NOTE: We assume that the projectile is destroyed on collision
-			        // Despose of the projectile...
-                    iter = gameProjectiles.erase(iter);
-                    PROJECTILE_CLEANUP(currProjectile);
-                    continue;  
+                    
+                    if (boss->ProjectileIsDestroyedOnCollision(currProjectile)) {
+                        // Dispose of the projectile...
+                        iter = gameProjectiles.erase(iter);
+                        PROJECTILE_CLEANUP(currProjectile);
+                        continue;  
+                    }
                 }
             }
         }

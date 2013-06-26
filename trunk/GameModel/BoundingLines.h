@@ -85,6 +85,9 @@ public:
 		return this->normals[index];
 	}
 
+    void SetAllBoundsInside(bool inside);
+    void SetBoundInside(int index, bool inside);
+
 	// Completely obliterates all the bounding lines for this
 	void Clear() {
 		this->lines.clear();

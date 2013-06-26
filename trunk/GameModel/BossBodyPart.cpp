@@ -10,6 +10,7 @@
  */
 
 #include "BossBodyPart.h"
+#include "MineProjectile.h"
 
 BossBodyPart::BossBodyPart(const BoundingLines& localBounds) :
 AbstractBossBodyPart(), localBounds(localBounds), isDestroyed(false),
@@ -20,6 +21,7 @@ collisionVelocity(0,0), externalAnimationVelocity(0,0) {
 }
 
 BossBodyPart::~BossBodyPart() {
+    this->RemoveAllAttachedProjectiles();
 }
 
 void BossBodyPart::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
@@ -58,11 +60,42 @@ bool BossBodyPart::IsOrContainsPart(const AbstractBossBodyPart* part, bool recur
 //}
 
 
+void BossBodyPart::RemoveAllAttachedProjectiles() {
+
+    // Make sure we remove all attached projectiles as well
+    // NOTE: DO NOT USE ITERATORS HERE SINCE THE MINE PROJECTILE DETACHES ITSELF IN THE SetAsFalling call
+    while (!this->attachedProjectiles.empty()) {
+
+        Projectile* p = this->attachedProjectiles.begin()->first;
+        p->SetLastThingCollidedWith(NULL);
+
+        if (p->IsMine()) {
+            assert(dynamic_cast<MineProjectile*>(p) != NULL);
+            MineProjectile* mine = static_cast<MineProjectile*>(p);
+            mine->DestroyWithoutExplosion();
+        }
+        this->DetachProjectile(p); // This is redundant and will be ignored, just here for robustness
+    }
+    this->attachedProjectiles.clear();
+}
+
 void BossBodyPart::GetFrozenReflectionRefractionRays(const Point2D& impactPt, const Vector2D& currDir,
                                                      std::list<Collision::Ray2D>& rays) const {
 
     // TODO.. do this based on the bounds of the body part...
     
+}
+
+void BossBodyPart::OnTransformUpdate() {
+
+    // Transform all attached projectiles so that they move with this body part
+    for (std::map<Projectile*, Point2D>::iterator iter = this->attachedProjectiles.begin();
+         iter != this->attachedProjectiles.end(); ++iter) {
+
+        Projectile* projectile = iter->first;
+        const Point2D& projectileLocalPos = iter->second;
+        projectile->SetPosition(this->worldTransform * projectileLocalPos);
+    }
 }
 
 #ifdef _DEBUG

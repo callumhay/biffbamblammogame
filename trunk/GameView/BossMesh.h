@@ -31,7 +31,7 @@ public:
     static BossMesh* Build(const GameWorld::WorldStyle& style, Boss* boss);
     
     void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
 
     virtual double ActivateIntroAnimation() = 0;
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
@@ -55,7 +55,7 @@ protected:
 
     virtual void DrawPreBodyEffects(double dT, const Camera& camera);
     virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight) = 0;
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex) = 0;
     virtual void DrawPostBodyEffects(double dT, const Camera& camera) = 0;
 
     virtual Point3D GetBossFinalExplodingEpicenter() const = 0;
@@ -70,10 +70,11 @@ private:
 };
 
 inline void BossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                           const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                           const Texture2D* sceneTex) {
 
     this->DrawPreBodyEffects(dT, camera);
-    this->DrawBody(dT, camera, keyLight, fillLight, ballLight);
+    this->DrawBody(dT, camera, keyLight, fillLight, ballLight, sceneTex);
     this->DrawPostBodyEffects(dT, camera);
 }
 

@@ -27,6 +27,7 @@ public:
                             InTutorialGame, InGame, InGameBossLevel, InGameMenu, LevelEnd, LevelCompleteSummary,
                             BossLevelCompleteSummary, GameComplete, GameOver };
 	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display);
+    static bool IsGameInPlayDisplayState(const DisplayStateType& type);
 
 	DisplayState(GameDisplay* display) : display(display) {}
 	virtual ~DisplayState() {};
@@ -56,6 +57,10 @@ private:
 	DISALLOW_COPY_AND_ASSIGN(DisplayState);
 
 };
+
+inline bool DisplayState::IsGameInPlayDisplayState(const DisplayStateType& type) {
+    return (type == DisplayState::InGame || type == DisplayState::InGameBossLevel || type == DisplayState::InTutorialGame);
+}
 
 inline void DisplayState::DrawFadeOverlay(int width, int height, float alpha) {
     // Draw the fade quad overlay

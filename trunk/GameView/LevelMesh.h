@@ -58,7 +58,7 @@ public:
 	    const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
     void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
 
 	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 

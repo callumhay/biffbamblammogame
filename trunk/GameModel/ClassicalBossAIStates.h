@@ -164,7 +164,7 @@ private:
     double GenerateChaseTime() const { return 8.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
     double GenerateTemptAttackTime() const { return 1.0; }
     double GetLaserChargeTime() const { return 1.25; }
-    double GetTimeBetweenLaserBarrageShots() const { return 0.1 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1; }
+    double GetTimeBetweenLaserBarrageShots() const { return 0.08 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1; }
     
     float GetFollowAndAttackHeight() const;
     float GetMaxArmAttackYMovement() const;

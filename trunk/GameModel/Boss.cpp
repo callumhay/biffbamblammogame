@@ -16,6 +16,7 @@
 #include "BossAIState.h"
 #include "ClassicalBoss.h"
 #include "GothicRomanticBoss.h"
+#include "NouveauBoss.h"
 
 const double Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = 1.5;
 const double Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = TOTAL_DEATH_ANIM_TIME / 1.25;
@@ -66,7 +67,8 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
             break;
 
         case GameWorld::Nouveau:
-            // TODO
+            boss = new NouveauBoss();
+            break;
 
         case GameWorld::Deco:
             // TODO
@@ -81,9 +83,6 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
         default:
             assert(false);
             break;
-    }
-    if (boss != NULL) {
-        boss->Init();
     }
 
     return boss;
@@ -145,6 +144,14 @@ bool Boss::CanHurtPaddleWithBody() const {
         return this->currAIState->CanHurtPaddleWithBody();
     }
     return false;
+}
+
+bool Boss::ProjectileIsDestroyedOnCollision(const Projectile* projectile) const {
+    // Mines can land on the boss and are not destroyed by it
+    if (projectile->IsMine()) {
+        return false;
+    }
+    return !this->ProjectilePassesThrough(projectile);
 }
 
 AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim() {
@@ -403,14 +410,22 @@ void Boss::ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart) {
     // Make sure the body part exists as an alive part of this boss,
     // the parent better be the alivePartsRoot too.
     assert(bodyPart != NULL);
-    if (!this->alivePartsRoot->IsOrContainsPart(bodyPart, true) ||
-        this->alivePartsRoot->SearchForParent(bodyPart) != this->alivePartsRoot) {
+    if (!this->alivePartsRoot->IsOrContainsPart(bodyPart, true)) {
         assert(false);
         return;
     }
 
-    // Move it from the alivePartsRoot to the deadPartsRoot
-    this->alivePartsRoot->RemoveBodyPart(bodyPart);
+    AbstractBossBodyPart* parentPart = this->alivePartsRoot->SearchForParent(bodyPart);
+    if (parentPart == NULL) {
+        assert(false);
+        return;
+    }
+
+    assert(dynamic_cast<BossCompositeBodyPart*>(parentPart) != NULL);
+    BossCompositeBodyPart* compositeParentPart = static_cast<BossCompositeBodyPart*>(parentPart);
+
+    // Move it from the parent in the alivePartsRoot tree, and move it to the deadPartsRoot tree
+    compositeParentPart->RemoveBodyPart(bodyPart);
     this->deadPartsRoot->AddBodyPart(bodyPart);
 
     // Find all weakpoints and turn them off

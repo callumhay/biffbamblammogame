@@ -38,6 +38,7 @@
 #include "../GameModel/ElectricitySpasmEffectInfo.h"
 #include "../GameModel/PuffOfSmokeEffectInfo.h"
 #include "../GameModel/ShockwaveEffectInfo.h"
+#include "../GameModel/DebrisEffectInfo.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -4651,6 +4652,44 @@ void GameESPAssets::AddPuffOfSmokeEffect(const PuffOfSmokeEffectInfo& info) {
 void GameESPAssets::AddShockwaveEffect(const ShockwaveEffectInfo& info) {
     ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(Point3D(info.GetPosition()), info.GetSize(), info.GetTime()); 
     this->activeGeneralEmitters.push_back(shockwaveEffect);
+}
+
+void GameESPAssets::AddDebrisEffect(const DebrisEffectInfo& info) {
+
+    Collision::AABB2D partAABB = info.GetPart()->GenerateWorldAABB();
+    float maxSize = std::max<float>(partAABB.GetWidth(), partAABB.GetHeight());
+    float minSize = std::min<float>(partAABB.GetWidth(), partAABB.GetHeight());
+
+    Vector2D explosionDir = info.GetPart()->GetTranslationPt2D() - info.GetExplosionCenter();
+    explosionDir.Normalize();
+
+    ESPPointEmitter* debrisBits = new ESPPointEmitter();
+    debrisBits->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+    debrisBits->SetInitialSpd(ESPInterval(3.0f, 7.0f));
+    debrisBits->SetParticleLife(ESPInterval(static_cast<float>(info.GetMinLifeOfDebrisInSecs()), static_cast<float>(info.GetMaxLifeOfDebrisInSecs())));
+    debrisBits->SetEmitDirection(Vector3D(explosionDir, 0));
+    debrisBits->SetEmitAngleInDegrees(55.0f);
+    debrisBits->SetParticleSize(ESPInterval(0.05f * maxSize, 0.2f * maxSize));
+    debrisBits->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+    debrisBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * minSize), ESPInterval(0.0f, 0.1f * minSize), ESPInterval(0));
+    debrisBits->SetEmitPosition(Point3D(info.GetExplosionCenter(), 0.0f));
+    debrisBits->SetParticleAlignment(ESP::ScreenAligned);
+
+    std::vector<Colour> colourPalette;
+    colourPalette.reserve(5);
+    colourPalette.push_back(1.0f  * info.GetColour());
+    colourPalette.push_back(1.25f * info.GetColour());
+    colourPalette.push_back(1.5f  * info.GetColour());
+    colourPalette.push_back(1.75f * info.GetColour());
+    colourPalette.push_back(2.0f  * info.GetColour());
+
+    debrisBits->SetParticleColourPalette(colourPalette);
+
+    debrisBits->AddEffector(&this->gravity);
+    debrisBits->AddEffector(&this->particleFader);
+    debrisBits->SetRandomTextureParticles(info.GetNumDebrisBits(), this->rockTextures);
+
+    this->activeGeneralEmitters.push_back(debrisBits);
 }
 
 void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& position,

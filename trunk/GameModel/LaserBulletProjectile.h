@@ -22,6 +22,7 @@ public:
 	virtual ~LaserBulletProjectile();
 
     bool IsRocket() const { return false; }
+    bool IsMine() const { return false; }
     bool IsRefractableOrReflectable() const { return true; }
 
 	void Tick(double seconds, const GameModel& model);

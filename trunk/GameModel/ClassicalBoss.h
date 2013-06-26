@@ -104,7 +104,7 @@ private:
     void BuildArm(bool isLeftArm, const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);
 
     // Inherited from Boss
-    void Init();
+    void Init(float startingX, float startingY);
 
     DISALLOW_COPY_AND_ASSIGN(ClassicalBoss);
 };

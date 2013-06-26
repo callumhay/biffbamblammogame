@@ -26,6 +26,7 @@ public:
     BossBodyPart(const BoundingLines& localBounds);
     virtual ~BossBodyPart();
 
+    void SetLocalBounds(const BoundingLines& bounds);
     const BoundingLines& GetLocalBounds() const;
     BoundingLines GetWorldBounds() const;
 
@@ -78,6 +79,11 @@ public:
 
     Vector2D GetCollisionVelocity() const;
 
+    void AttachProjectile(Projectile* projectile); 
+    void DetachProjectile(Projectile* projectile);
+
+    const std::map<Projectile*, Point2D>& GetAttachedProjectilesMap() const;
+
 	// Track the status of the body part, effects its properties and how it works/acts
 	//enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, FrozenStatus = 0x00000002 };
 	//bool HasStatus(const PieceStatus& status) const;
@@ -98,7 +104,13 @@ protected:
     Vector2D collisionVelocity;
     Vector2D externalAnimationVelocity;
 
+
+    std::map<Projectile*, Point2D> attachedProjectiles; // The attached projectiles, mapped to their local position
+
     //int32_t pieceStatus;
+
+    void RemoveAllAttachedProjectiles();
+    void OnTransformUpdate();
 
     //void RemoveAllStatus();
     void GetFrozenReflectionRefractionRays(const Point2D& impactPt, const Vector2D& currDir, 
@@ -107,6 +119,10 @@ protected:
 private:
     DISALLOW_COPY_AND_ASSIGN(BossBodyPart);
 };
+
+inline void BossBodyPart::SetLocalBounds(const BoundingLines& bounds) {
+    this->localBounds = bounds;
+}
 
 inline const BoundingLines& BossBodyPart::GetLocalBounds() const {
     return this->localBounds;
@@ -171,22 +187,27 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Circle2D& c, 
 
 inline void BossBodyPart::Translate(const Vector3D& t) {
     this->worldTransform = Matrix4x4::translationMatrix(t) * this->worldTransform;
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::RotateY(float rotYDegs) {
     this->worldTransform = Matrix4x4::rotationYMatrix(rotYDegs) * this->worldTransform;
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::RotateZ(float rotZDegs) {
     this->worldTransform = Matrix4x4::rotationZMatrix(rotZDegs) * this->worldTransform;
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::Transform(const Matrix4x4& m) {
     this->worldTransform = m * this->worldTransform;
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {
-    // Remove the previous local rotation and translation from the world transform
+    // Remove the previous local rotation and translation from the world transform,
+    // change the translation and then rebuild it
     this->worldTransform = 
         this->worldTransform *
         Matrix4x4::rotationZMatrix(-this->localZRotation) *
@@ -197,6 +218,8 @@ inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {
     
     // Change the local translation
     this->localTranslation = t;
+
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::SetLocalZRotation(float zRotInDegs) {
@@ -208,6 +231,8 @@ inline void BossBodyPart::SetLocalZRotation(float zRotInDegs) {
 
     // Change the local z-axis rotation
     this->localZRotation = zRotInDegs;
+
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::SetLocalYRotation(float yRotInDegs) {
@@ -221,6 +246,8 @@ inline void BossBodyPart::SetLocalYRotation(float yRotInDegs) {
 
     // Change the local y-axis rotation
     this->localYRotation = yRotInDegs;
+
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::SetLocalTransform(const Vector3D& translation, float zRotInDegs) {
@@ -236,6 +263,8 @@ inline void BossBodyPart::SetLocalTransform(const Vector3D& translation, float z
     // Change the local translation and z-axis rotation
     this->localTranslation = translation;
     this->localZRotation   = zRotInDegs;
+
+    this->OnTransformUpdate();
 }
 
 inline void BossBodyPart::SetColour(double animateTimeInSecs, const ColourRGBA& colour) {
@@ -259,6 +288,7 @@ inline bool BossBodyPart::GetIsDestroyed() const {
 
 inline void BossBodyPart::SetAsDestroyed() {
     this->isDestroyed = true;
+    this->RemoveAllAttachedProjectiles();
 }
 
 inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {
@@ -266,7 +296,7 @@ inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {
 }
 
 // Sets the velocity to use when doing collisions with this object - allows the
-// game to accomodate the velocity that this body part is moving with
+// game to accommodate the velocity that this body part is moving with
 inline void BossBodyPart::SetCollisionVelocity(const Vector2D& v) {
     this->collisionVelocity = v;
 }
@@ -276,6 +306,23 @@ inline void BossBodyPart::SetExternalAnimationVelocity(const Vector2D& v) {
 inline Vector2D BossBodyPart::GetCollisionVelocity() const {
     Vector3D translationAnimVec = this->transAnim.GetDxDt();
     return this->collisionVelocity + Vector2D(translationAnimVec[0], translationAnimVec[1]) + this->externalAnimationVelocity;
+}
+
+inline void BossBodyPart::AttachProjectile(Projectile* projectile) {
+    assert(projectile != NULL);
+
+    // Figure out the local space position of the projectile by multiplying its world space position
+    // by the inverse world transform for this body part
+    Point2D projectileLocalPos = this->worldTransform.inverse() * projectile->GetPosition();
+    this->attachedProjectiles.insert(std::make_pair(projectile, projectileLocalPos));
+}
+inline void BossBodyPart::DetachProjectile(Projectile* projectile) {
+    assert(projectile != NULL);
+    this->attachedProjectiles.erase(projectile);
+}
+
+inline const std::map<Projectile*, Point2D>& BossBodyPart::GetAttachedProjectilesMap() const {
+    return this->attachedProjectiles;
 }
 
 #endif // __BOSSBODYPART_H__

@@ -26,6 +26,7 @@ public:
 	~CollateralBlockProjectile();
 
     bool IsRocket() const { return false; }
+    bool IsMine() const { return false; }
     bool IsRefractableOrReflectable() const { return false; }
 
 	void Tick(double seconds, const GameModel& model);

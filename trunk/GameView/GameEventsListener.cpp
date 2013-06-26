@@ -45,6 +45,7 @@
 #include "../GameModel/PuffOfSmokeEffectInfo.h"
 #include "../GameModel/ShockwaveEffectInfo.h"
 #include "../GameModel/FullscreenFlashEffectInfo.h"
+#include "../GameModel/DebrisEffectInfo.h"
 
 // GameControl Includes
 #include "../GameControl/GameControllerManager.h"
@@ -57,6 +58,10 @@
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 100;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS    = 125;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS     = 60;
+
+SoundID GameEventsListener::enterBulletTimeSoundID  = INVALID_SOUND_ID;
+SoundID GameEventsListener::exitBulletTimeSoundID   = INVALID_SOUND_ID;
+SoundID GameEventsListener::inBulletTimeLoopSoundID = INVALID_SOUND_ID;
 
 GameEventsListener::GameEventsListener(GameDisplay* d) : 
 display(d), 
@@ -290,8 +295,13 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
 
 	// Setup the sound to quiet everything else and play the sound of the ball spiralling to its most horrible death
     GameSound* sound = this->display->GetSound();
+    
     // Kill any sound effects that might be active
     sound->StopAllEffects();
+
+    // Stop playing specific loops
+    sound->StopSound(inBulletTimeLoopSoundID);
+
     //sound->SetAllPlayingSoundVolume(0.5f, 0.5);
 	sound->AttachAndPlaySound(&lastBallToDie, GameSound::LastBallSpiralingToDeathLoop, true);
 
@@ -1024,10 +1034,6 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
 
     GameSound* sound = this->display->GetSound();
 
-    static SoundID enterBulletTimeSoundID  = INVALID_SOUND_ID;
-    static SoundID exitBulletTimeSoundID   = INVALID_SOUND_ID;
-    static SoundID inBulletTimeLoopSoundID = INVALID_SOUND_ID;
-    
     switch (boostModel.GetBulletTimeState()) {
 
         case BallBoostModel::BulletTimeFadeIn: {
@@ -1056,6 +1062,8 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
         case BallBoostModel::NotInBulletTime: {
             // Turn off the bullet time sound effects
             sound->ToggleSoundEffect(GameSound::BulletTimeEffect, false);
+            sound->StopSound(enterBulletTimeSoundID);
+            sound->StopSound(inBulletTimeLoopSoundID);
             break;
         }
 
@@ -1514,6 +1522,12 @@ void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
             const FullscreenFlashEffectInfo& flashInfo = 
                 static_cast<const FullscreenFlashEffectInfo&>(effectEvent);
             this->display->GetAssets()->FullscreenFlashExplosion(flashInfo, this->display->GetCamera());
+            break;
+        }
+
+        case BossEffectEventInfo::DebrisInfo: {
+            const DebrisEffectInfo& debrisInfo = static_cast<const DebrisEffectInfo&>(effectEvent);
+            this->display->GetAssets()->GetESPAssets()->AddDebrisEffect(debrisInfo);
             break;
         }
 

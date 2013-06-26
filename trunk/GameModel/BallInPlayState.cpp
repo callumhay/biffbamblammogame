@@ -339,26 +339,27 @@ void BallInPlayState::Tick(double seconds) {
                     // Collide with the boss until there are no more collisions
                     BossBodyPart* collisionBossPart = NULL;
                     double currBallDt = seconds;
-                    while (currBallDt >= 0) {
+                    //while (currBallDt >= 0) {
 
                         // NOTE: For bosses, ghostballs never pass through.
                         // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
                         collisionBossPart = boss->CollisionCheck(*currBall, currBallDt, n, collisionLine, timeUntilCollision);
-                        if (collisionBossPart == NULL) {
-                            break;
+                        if (collisionBossPart != NULL) {
+                            // Make the ball react to the collision...
+                            this->DoBallCollision(*currBall, n, collisionLine, currBallDt, timeUntilCollision,
+                                collisionBossPart->GetCollisionVelocity());
+                            ballPositionChangedByCollision[ballIdx] = true;
+
+                            // Now make the boss react to the collision...
+                            this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
+
+                            // Update the time delta for the ball, up to the time right after the collision
+                            //currBallDt = currBallDt - timeUntilCollision;
                         }
-
-                        // Make the ball react to the collision...
-                        this->DoBallCollision(*currBall, n, collisionLine, currBallDt, timeUntilCollision,
-                            collisionBossPart->GetCollisionVelocity());
-                        ballPositionChangedByCollision[ballIdx] = true;
-
-                        // Now make the boss react to the collision...
-                        this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
-
-                        // Update the time delta for the ball, up to the time right after the collision
-                        currBallDt = currBallDt - timeUntilCollision;
-                    }
+                        else {
+                            //break;
+                        }
+                    //}
                 }
 
 			    // Check for ball collision with level pieces
@@ -505,7 +506,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
 	Vector2D reflVecHat;
 	if (Vector2D::Dot(b.GetDirection(), n) >= 0) {
-		// Somehow the ball is travelling away from the normal but is hitting the line...
+		// Somehow the ball is traveling away from the normal but is hitting the line...
         
         // Position the ball so that it is at the location it was at when it collided...
 	    b.SetCenterPosition(b.GetCenterPosition2D() + timeUntilCollision * -b.GetVelocity());
@@ -580,20 +581,26 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 		}
 	}
 
-	// Reflect the ball off the normal... this will have some dependance on whether there is a velocity for the line...
+    // Reflect the ball off the normal... this will have some dependance on whether there is a velocity for the line...
+    Vector2D moveVel(0,0);
     if (lineVelocity.IsZero()) {
-	    b.SetVelocity(reflSpd, reflVecHat);
+        b.SetVelocity(reflSpd, reflVecHat);
     }
     else {
         Vector2D reflectionVel = reflSpd * reflVecHat;
         Vector2D augmentedReflectionVecHat = Vector2D::Normalize(reflectionVel + lineVelocity);
         b.SetVelocity(reflSpd, augmentedReflectionVecHat);
+        
+        if (Vector2D::Dot(reflVecHat, lineVelocity) < 0) {
+            moveVel += lineVelocity;
+        }
     }
 
-	// Now move the ball in that direction over how ever much time was lost during the collision
-	b.SetCenterPosition(b.GetCenterPosition2D() + timeToMoveInReflectionDir * b.GetVelocity());
-}
+    moveVel += b.GetVelocity();
 
+	// Now move the ball in that direction over how ever much time was lost during the collision
+	b.SetCenterPosition(b.GetCenterPosition2D() + timeToMoveInReflectionDir * moveVel);
+}
 
 /**
  * Private helper function to calculate the new velocities for two balls that just
