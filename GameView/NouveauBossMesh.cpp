@@ -11,6 +11,7 @@
 
 #include "NouveauBossMesh.h"
 #include "GameViewConstants.h"
+#include "CgFxPrism.h"
 
 #include "../BlammoEngine/Mesh.h"
 #include "../GameModel/NouveauBoss.h"
@@ -86,9 +87,11 @@ double NouveauBossMesh::ActivateIntroAnimation() {
 }
 
 void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                               const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                               const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                               const Texture2D* sceneTex) {
 
     UNUSED_PARAMETER(dT);
+
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // worldspace locations...
 
@@ -149,6 +152,10 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
     DRAW_BODY_PART(topGazebo, this->topGazeboMesh);
 
     // Top Dome
+    MaterialGroup* prismMatGrp = this->topDomeMesh->GetMaterialGroups().begin()->second;
+    CgFxPrism* prismMaterial = static_cast<CgFxPrism*>(prismMatGrp->GetMaterial());
+    prismMaterial->SetSceneTexture(sceneTex);
+
     const BossBodyPart* topDome = this->boss->GetTopDome();
     DRAW_BODY_PART(topDome, this->topDomeMesh);
 

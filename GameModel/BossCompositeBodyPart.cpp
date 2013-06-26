@@ -163,6 +163,13 @@ void BossCompositeBodyPart::SetExternalAnimationVelocity(const Vector2D& v) {
     }
 }
 
+void BossCompositeBodyPart::DetachProjectile(Projectile* projectile) {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->DetachProjectile(projectile);      
+    }
+}
+
 void BossCompositeBodyPart::RotateY(float rotYDegs) {
     if (fabs(rotYDegs) < EPSILON) {
         return;

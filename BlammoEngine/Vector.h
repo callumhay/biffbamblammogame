@@ -69,6 +69,11 @@ public:
         v_[1] *= f;
         return (*this);
     }
+    Vector2D& operator+=(const Vector2D& v) {
+        v_[0] += v[0];
+        v_[1] += v[1];
+        return (*this);
+    }
 
     static float Magnitude(const Vector2D& v1) {
         return sqrtf(v1[0]*v1[0] + v1[1]*v1[1]);

@@ -46,6 +46,7 @@ class SparkBurstEffectInfo;
 class ElectricitySpasmEffectInfo;
 class PuffOfSmokeEffectInfo;
 class ShockwaveEffectInfo;
+class DebrisEffectInfo;
 class BossBodyPart;
 
 
@@ -295,6 +296,7 @@ public:
     void AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info);
     void AddPuffOfSmokeEffect(const PuffOfSmokeEffectInfo& info);
     void AddShockwaveEffect(const ShockwaveEffectInfo& info);
+    void AddDebrisEffect(const DebrisEffectInfo& info);
 
     void AddMultiplierComboEffect(int multiplier, const Point2D& position, const PlayerPaddle& paddle);
     //void AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle);

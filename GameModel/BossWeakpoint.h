@@ -45,7 +45,6 @@ private:
 
     double invulnerableTimer;
 
-    
     void SetFlashingColourAnim();
 
     DISALLOW_COPY_AND_ASSIGN(BossWeakpoint);

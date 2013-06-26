@@ -131,7 +131,7 @@ levelAlmostCompleteSignaled(false), boss(boss) {
     this->InitPieces(pieces);
     
     // Place the boss at the center of the level...
-    this->boss->Translate(Vector3D(this->GetLevelUnitWidth() / 2.0f, this->GetLevelUnitHeight() / 2.0f, 0.0f));
+    this->boss->Init(this->GetLevelUnitWidth() / 2.0f, this->GetLevelUnitHeight() / 2.0f);
 
     // Set all of the star reward milestone scores to zero, they aren't used in boss fight levels
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {

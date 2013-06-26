@@ -8,6 +8,11 @@ resources/textures/deco_world_select_256x256.jpg
 # Testing ------------------------------------------
 resources/worlds/testing/see_the_background.lvl
 resources/worlds/testing/an_almost_empty_level.lvl
+resources/worlds/testing/fast_points.lvl
+resources/worlds/testing/block_test.lvl
+resources/worlds/testing/turret_test.lvl
+resources/worlds/testing/block_outer_barrier_test.lvl
+resources/worlds/testing/regen_block_test.lvl
 # End Testing --------------------------------------
 
 # Tesla block intro levels
@@ -20,19 +25,6 @@ resources/worlds/levels/medium/acute_electrocution.lvl
 
 
 
-
-
-
-# Bonus Levels
-resources/worlds/levels/easy/invader.lvl
-
-# Testing Levels
-resources/worlds/testing/fast_points.lvl
-resources/worlds/testing/block_test.lvl
-resources/worlds/testing/turret_test.lvl
-resources/worlds/testing/see_the_background.lvl
-resources/worlds/testing/block_outer_barrier_test.lvl
-resources/worlds/testing/regen_block_test.lvl
 
 
 # FIND A PLACE FOR ALL OF THE BELOW LEVELS!!! **********************************************
@@ -88,3 +80,6 @@ resources/worlds/levels/medium/yours_and_mine.lvl
 
 # ALL of the Turrets
 resources/worlds/levels/hard/shooting_gallery.lvl
+
+# Bonus Levels
+resources/worlds/levels/easy/invader.lvl

@@ -2665,6 +2665,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\DebrisEffectInfo.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\ElectricitySpasmEffectInfo.h"
 						>
 					</File>

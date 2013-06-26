@@ -24,6 +24,7 @@ class GameModel;
 class SafetyNet;
 class PlayerPaddle;
 class Boss;
+class BossBodyPart;
 
 /**
  * An 'abstract class' for representing in-game projectiles.
@@ -41,6 +42,7 @@ public:
 	virtual ProjectileType GetType() const                    = 0;
     virtual float GetDamage() const                           = 0;
     virtual bool IsRocket() const                             = 0;
+    virtual bool IsMine() const                               = 0;
     virtual bool IsRefractableOrReflectable() const           = 0;
 
     virtual float GetZOffset() const { return 0.0f; }
@@ -51,7 +53,7 @@ public:
     virtual void SafetyNetCollisionOccurred(SafetyNet* safetyNet) { this->SetLastThingCollidedWith(safetyNet); };
     virtual void LevelPieceCollisionOccurred(LevelPiece* block)   { UNUSED_PARAMETER(block); };
     virtual void PaddleCollisionOccurred(PlayerPaddle* paddle)    { UNUSED_PARAMETER(paddle); };
-    virtual void BossCollisionOccurred(Boss* boss)                { this->SetLastThingCollidedWith(boss); };
+    virtual void BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart) { UNUSED_PARAMETER(boss); this->SetLastThingCollidedWith(bossPart); };
 
     virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; };
 

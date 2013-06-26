@@ -600,10 +600,11 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 }
 
 void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                         const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                         const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                         const Texture2D* sceneTex) {
 
     assert(this->bossMesh != NULL);
-    this->bossMesh->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->bossMesh->Draw(dT, camera, keyLight, fillLight, ballLight, sceneTex);
 }
 
 /**

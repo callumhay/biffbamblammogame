@@ -119,7 +119,7 @@ void KeyboardSDLController::KeyUp(SDLKey key) {
 void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x, unsigned int y) {
 
     // If the game is not in-play then we do nothing with the boost model...
-    if (this->display->GetCurrentDisplayState() == DisplayState::InGame) {
+    if (DisplayState::IsGameInPlayDisplayState(this->display->GetCurrentDisplayState())) {
 
         const BallBoostModel* boostModel = this->model->GetBallBoostModel();
         if (boostModel == NULL) {
@@ -175,7 +175,7 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
 
 void KeyboardSDLController::MouseButtonUp(unsigned int button) {
 
-    if (this->display->GetCurrentDisplayState() == DisplayState::InGame) {
+    if (DisplayState::IsGameInPlayDisplayState(this->display->GetCurrentDisplayState())) {
         switch (button) {
             case SDL_BUTTON_LEFT:
                 // Release the boost...

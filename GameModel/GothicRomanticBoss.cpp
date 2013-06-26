@@ -82,7 +82,7 @@ Point3D GothicRomanticBoss::GetTopPointTipPos() const {
     return topPt->GetWorldTransform() * Point3D(0.0f, TOP_POINT_TIP_Y, 0.0f);
 }
 
-void GothicRomanticBoss::Init() {
+void GothicRomanticBoss::Init(float startingX, float startingY) {
 
     // Body Layout for the Gothic-Romantic Boss:
     // -----------------------------------
@@ -193,7 +193,7 @@ void GothicRomanticBoss::Init() {
     } // end root
 
     // Move the boss up a bit to start off
-    this->Translate(Vector3D(0.0f, 2*LevelPiece::PIECE_HEIGHT, 0.0f));
+    this->root->Translate(Vector3D(startingX, startingY + 2*LevelPiece::PIECE_HEIGHT, 0.0f));
 
     this->SetNextAIState(new FireBallAI(this));
     // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.

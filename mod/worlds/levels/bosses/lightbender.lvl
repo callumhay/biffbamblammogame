@@ -2,26 +2,14 @@ boss
 Lightbender
 23 32
 E E E D(MineLauncherPaddle){2} S S S S S S S D(MagnetPaddle) S S S S S S S D(LaserBulletPaddle){1} E E E 
-E E T(P,ul) E N E E E E E E E E E E E E E N E C(270) E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
+E E C(90) E F(r) E E E E E E E E E E E E E F(l) E C(270) E E 
+E E E E F(r) E E E E E E E E E E E E E F(l) E E E E 
 E T(P,ul) E E N E E E E E E E E E E E E E N E E T(P,ur) E 
 E E E E N E E E E E E E E E E E E E N E E E E 
 T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
 E E E E N E E E E E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
 E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
 E E E E N E E E E E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E E E E E N E E E E 
 T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
@@ -29,8 +17,20 @@ E E E E N E E E E E E E E E E E E E N E E E E
 E E E E N E E E E E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E S E E E E E E E E E E E E E S E E E E 
-S S E E S E E E E E E E E E E E E E S E E S S 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
+E E E E N E E E P E E E E E P E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E E E N E E E E 
+S E E E S E E E E E E E E E E E E E S E E E S 
 S E E E N E E E E E E E E E E E E E N E E E S 
 W(1) E E E N E E E E E E E E E E E E E N E E E W(2) 
 

@@ -35,7 +35,7 @@ const float GothicRomanticBossAI::MOVE_X_BORDER = LevelPiece::HALF_PIECE_WIDTH;
 const float GothicRomanticBossAI::MOVE_Y_BORDER = LevelPiece::HALF_PIECE_HEIGHT;
 
 const float GothicRomanticBossAI::DEFAULT_LASER_SPIN_DEGREES_PER_SEC  = 360.0f;
-const float GothicRomanticBossAI::DEFAULT_ROCKET_SPIN_DEGREES_PER_SEC = 600.0f;
+const float GothicRomanticBossAI::DEFAULT_ROCKET_SPIN_DEGREES_PER_SEC = 400.0f;
 
 const float GothicRomanticBossAI::DEFAULT_DROP_Y_POS = 10;
 

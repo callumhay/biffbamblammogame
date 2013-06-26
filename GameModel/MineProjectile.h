@@ -30,6 +30,8 @@ public:
     static const double MINE_MIN_COUNTDOWN_TIME;
     static const double MINE_MAX_COUNTDOWN_TIME;
 
+    static const double MAX_TIME_WHEN_LANDED_UNTIL_ARMED;
+
     static const float MAX_VELOCITY;
 
 	MineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height);
@@ -46,6 +48,7 @@ public:
     virtual float GetProximityRadius() const { return MINE_DEFAULT_PROXIMITY_RADIUS * this->GetVisualScaleFactor(); }
 
     bool IsRocket() const { return false; }
+    bool IsMine() const { return true; }
     bool IsRefractableOrReflectable() const { return false; }
 
     bool BlastsThroughSafetyNets() const { return false; }
@@ -56,6 +59,7 @@ public:
     void SafetyNetCollisionOccurred(SafetyNet* safetyNet);
     void LevelPieceCollisionOccurred(LevelPiece* block);
     void PaddleCollisionOccurred(PlayerPaddle* paddle);
+    void BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart);
 
     void DetachFromPaddle();
 
@@ -93,6 +97,8 @@ public:
                this->GetIsAttachedToPaddle();
     }
 
+    void DestroyWithoutExplosion();
+
 protected:
 	static const Vector2D MINE_DEFAULT_VELOCITYDIR;
 	static const Vector2D MINE_DEFAULT_RIGHTDIR;
@@ -110,6 +116,7 @@ private:
     LevelPiece* attachedToPiece;
     SafetyNet* attachedToNet;
     PlayerPaddle* attachedToPaddle;
+    Boss* attachedToBoss;
 
     // Extra Mine kinematics
     float acceleration;
@@ -122,6 +129,10 @@ private:
     bool isFalling;
     bool proximityAlerted;
     float proximityAlertCountdown;
+
+    // Timer that keeps track of how long a mine has been 'landed' for, used
+    // to ensure that mines eventually blow up if they're never triggered by proximity
+    double landedTimeCounter;
 
     void BeginProximityExplosionCountdown();
     void StopAndResetProximityExplosionCountdown();
@@ -137,69 +148,26 @@ inline void MineProjectile::SetAsFalling() {
 
 inline void MineProjectile::Land(const Point2D& landingPt) {
     this->SetVelocity(Vector2D(0, 0), 0.0f);
-    this->acceleration    = 0.0f;
-    this->currRotationSpd = 0.0f;
+    this->acceleration      = 0.0f;
+    this->currRotationSpd   = 0.0f;
+    this->landedTimeCounter = 0.0;
     this->SetPosition(landingPt);
     this->isArmed = true;
     this->isFalling = false;
     this->StopAndResetProximityExplosionCountdown();
 }
 
-inline void MineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNet) {
-    assert(safetyNet != NULL);
+inline void MineProjectile::DestroyWithoutExplosion() {
+    this->SetVelocity(Vector2D(0, 0), 0.0f);
+    this->acceleration      = 0.0f;
+    this->currRotationSpd   = 0.0f;
+    this->isArmed = false;
+    this->isFalling = false;
+    this->proximityAlerted = false;
+    this->proximityAlertCountdown = 0.0;
+    this->DetachFromAnyAttachedObject();
 
-    // If the mine is already attached to the safety net then ignore this
-    if (this->attachedToNet == safetyNet) {
-        return;
-    }
-
-    this->Land(safetyNet->GetBounds().ClosestPoint(this->GetPosition()) + Vector2D(0, SafetyNet::SAFETY_NET_HEIGHT / 2.0f));
-    Projectile::SafetyNetCollisionOccurred(safetyNet);
-    safetyNet->AttachProjectile(this);
-    this->attachedToNet = safetyNet;
-}
-
-inline void MineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
-    assert(block != NULL);
-
-    // If the mine is already attached to a piece then ignore this
-    if (this->attachedToPiece != NULL) {
-        return;
-    }
-
-    // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
-    // or if it just can't collide with the block
-    if (block->GetType() == LevelPiece::Cannon || block->GetType() == LevelPiece::NoEntry || 
-        block->IsNoBoundsPieceType()) {
-
-        return;
-    }
-
-    // We don't land the mine on blocks that mines destroy (turrets)
-    if (block->GetType() == LevelPiece::LaserTurret ||
-        block->GetType() == LevelPiece::RocketTurret ||
-        block->GetType() == LevelPiece::MineTurret) {
-
-        return;
-    }
-
-    this->Land(block->GetBounds().ClosestPoint(this->GetPosition()));
-    this->SetLastThingCollidedWith(block);
-    block->AttachProjectile(this);
-    this->attachedToPiece = block;
-}
-
-inline void MineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
-    assert(paddle != NULL);
-
-    if (this->attachedToPaddle != NULL) {
-        return;
-    }
-
-    this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
-    this->SetLastThingCollidedWith(paddle);
-    paddle->AttachProjectile(this);
-    this->attachedToPaddle = paddle;
+    // The next time that ModifyLevelUpdate is called on this mine it will be removed from the game
 }
 
 #endif // __PADDLEMINEPROJECTILE_H__

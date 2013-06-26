@@ -68,6 +68,8 @@ public:
     void SetExternalAnimationVelocity(const Vector2D& v);
     void SetCollisionAcceleration(const Vector2D& a);
 
+    void DetachProjectile(Projectile* projectile);
+
 #ifdef _DEBUG
     void DebugDraw() const;
 #endif

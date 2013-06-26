@@ -14,6 +14,8 @@
 #include "GameEventManager.h"
 #include "LevelPiece.h"
 #include "GameModel.h"
+#include "Boss.h"
+#include "BossBodyPart.h"
 
 const float MineProjectile::HEIGHT_DEFAULT = 0.8f;
 const float MineProjectile::WIDTH_DEFAULT  = 0.8f;
@@ -29,13 +31,15 @@ const float MineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.33f * LevelPiece::
 const double MineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.75;
 const double MineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.75;
 
+const double MineProjectile::MAX_TIME_WHEN_LANDED_UNTIL_ARMED = 30.0;
+
 const float MineProjectile::MAX_VELOCITY = 13.0f;
 
 MineProjectile::MineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height) :
 Projectile(spawnLoc, width, height), cannonBlock(NULL), acceleration(MineProjectile::MINE_DEFAULT_ACCEL),
 isArmed(false), isFalling(false), proximityAlerted(false),
 proximityAlertCountdown(std::numeric_limits<float>::max()),
-attachedToPiece(NULL), attachedToNet(NULL), attachedToPaddle(NULL) {
+attachedToPiece(NULL), attachedToNet(NULL), attachedToPaddle(NULL), attachedToBoss(NULL), landedTimeCounter(0.0) {
 
     if (velDir.IsZero()) {
         assert(false);
@@ -58,12 +62,14 @@ MineProjectile::MineProjectile(const MineProjectile& copy) : Projectile(copy),
 cannonBlock(copy.cannonBlock), currRotationSpd(copy.currRotationSpd),
 currRotation(copy.currRotation), acceleration(copy.acceleration), isArmed(copy.isArmed), isFalling(copy.isFalling),
 proximityAlerted(copy.proximityAlerted), proximityAlertCountdown(copy.proximityAlertCountdown),
-attachedToNet(copy.attachedToNet), attachedToPiece(copy.attachedToPiece), attachedToPaddle(copy.attachedToPaddle) {
+attachedToNet(copy.attachedToNet), attachedToPiece(copy.attachedToPiece), attachedToPaddle(copy.attachedToPaddle),
+attachedToBoss(copy.attachedToBoss), landedTimeCounter(copy.landedTimeCounter) {
 
     assert(cannonBlock == NULL);
     assert(attachedToPiece == NULL);
     assert(attachedToNet == NULL);
     assert(attachedToPaddle == NULL);
+    assert(attachedToBoss == NULL);
 }
 
 MineProjectile::~MineProjectile() {
@@ -109,10 +115,13 @@ void MineProjectile::Tick(double seconds, const GameModel& model) {
 		    this->currRotation += dV;
             this->currRotation = fmod(this->currRotation, 360.0f);
         }
-        // TODO:
-        //else { 
-        // The mine has landed on something, don't let it sit there forever, have a timer for it to be armed after a particular time period... 
-        //}
+        else if (this->isArmed && !this->proximityAlerted) { 
+            // The mine has landed on something, don't let it sit there forever, have a timer for it to be armed after a particular time period... 
+            this->landedTimeCounter += seconds;
+            if (this->landedTimeCounter >= MineProjectile::MAX_TIME_WHEN_LANDED_UNTIL_ARMED) {
+                this->BeginProximityExplosionCountdown();
+            }
+        }
 	}
 }
 
@@ -152,6 +161,7 @@ void MineProjectile::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 	this->cannonBlock = cannonBlock;
     this->isArmed   = false;
     this->isFalling = false;
+    this->landedTimeCounter = 0.0;
 
 	// EVENT: The mine is officially loaded into the cannon block
 	GameEventManager::Instance()->ActionProjectileEnteredCannon(*this, *cannonBlock);
@@ -164,8 +174,8 @@ void MineProjectile::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 bool MineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
 
     if (this->proximityAlertCountdown <= 0.0) {
-        // This mine has already exploded, this should typically never happen, but just for robustness...
-        assert(false);
+        // This mine has already exploded, this will only happen if the mine was told to
+        // explicitly be removed without exploding via "MineProjectile::DestroyWithoutExplosion()"
         return true;
     }
     
@@ -256,6 +266,76 @@ bool MineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
     return false;
 }
 
+void MineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNet) {
+    assert(safetyNet != NULL);
+
+    // If the mine is already attached to the safety net then ignore this
+    if (this->attachedToNet == safetyNet) {
+        return;
+    }
+
+    this->Land(safetyNet->GetBounds().ClosestPoint(this->GetPosition()) + Vector2D(0, SafetyNet::SAFETY_NET_HEIGHT / 2.0f));
+    Projectile::SafetyNetCollisionOccurred(safetyNet);
+    safetyNet->AttachProjectile(this);
+    this->attachedToNet = safetyNet;
+}
+
+void MineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
+    assert(block != NULL);
+
+    // If the mine is already attached to a piece then ignore this
+    if (this->attachedToPiece != NULL) {
+        return;
+    }
+
+    // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
+    // or if it just can't collide with the block
+    if (block->GetType() == LevelPiece::Cannon || block->GetType() == LevelPiece::NoEntry || 
+        block->IsNoBoundsPieceType()) {
+
+            return;
+    }
+
+    // We don't land the mine on blocks that mines destroy (turrets)
+    if (block->GetType() == LevelPiece::LaserTurret ||
+        block->GetType() == LevelPiece::RocketTurret ||
+        block->GetType() == LevelPiece::MineTurret) {
+
+            return;
+    }
+
+    this->Land(block->GetBounds().ClosestPoint(this->GetPosition()));
+    this->SetLastThingCollidedWith(block);
+    block->AttachProjectile(this);
+    this->attachedToPiece = block;
+}
+
+void MineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
+    assert(paddle != NULL);
+
+    if (this->attachedToPaddle != NULL) {
+        return;
+    }
+
+    this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
+    this->SetLastThingCollidedWith(paddle);
+    paddle->AttachProjectile(this);
+    this->attachedToPaddle = paddle;
+}
+
+void MineProjectile::BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart) {
+    assert(boss != NULL);
+
+    if (this->attachedToBoss != NULL || bossPart->GetIsDestroyed()) {
+        return;
+    }
+
+    this->Land(bossPart->GetWorldBounds().ClosestPoint(this->GetPosition()));
+    this->SetLastThingCollidedWith(bossPart);
+    boss->AttachProjectile(this, bossPart);
+    this->attachedToBoss = boss;
+}
+
 void MineProjectile::BeginProximityExplosionCountdown() {
     this->proximityAlerted = true;
     this->proximityAlertCountdown = MineProjectile::MINE_MIN_COUNTDOWN_TIME + Randomizer::GetInstance()->RandomNumZeroToOne() *
@@ -273,6 +353,7 @@ void MineProjectile::DetachFromPaddle() {
         this->attachedToPaddle = NULL;
         assert(this->attachedToNet == NULL);
         assert(this->attachedToPiece == NULL);
+        assert(this->attachedToBoss == NULL);
     }
 }
 
@@ -292,5 +373,12 @@ void MineProjectile::DetachFromAnyAttachedObject() {
         this->attachedToPaddle = NULL;
         assert(this->attachedToNet == NULL);
         assert(this->attachedToPiece == NULL);
+    }
+    if (this->attachedToBoss != NULL) {
+        this->attachedToBoss->DetachProjectile(this);
+        this->attachedToBoss = NULL;
+        assert(this->attachedToNet == NULL);
+        assert(this->attachedToPiece == NULL);
+        assert(this->attachedToPaddle == NULL);
     }
 }

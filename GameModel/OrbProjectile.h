@@ -22,6 +22,7 @@ public:
 	virtual ~OrbProjectile();
 
     bool IsRocket() const { return false; }
+    bool IsMine() const { return false; }
 
 	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;

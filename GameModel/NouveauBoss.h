@@ -19,6 +19,7 @@ class BossCompositeBodyPart;
 namespace nouveaubossai {
 class NouveauBossAI;
 class SideSphereAI;
+class GlassDomeAI;
 };
 
 #include "Boss.h"
@@ -32,6 +33,7 @@ class NouveauBoss : public Boss {
     friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
     friend class nouveaubossai::NouveauBossAI;
     friend class nouveaubossai::SideSphereAI;
+    friend class nouveaubossai::GlassDomeAI;
 
 public:
     static const int NUM_CURLS = 8;
@@ -48,15 +50,31 @@ public:
 
     static const float ARM_SPHERE_HOLDER_CURL_WIDTH;
 
-    static const float DEFAULT_ACCELERATION;
-
     static const float MIN_X_BOUNDS_WITH_PADDING;
     static const float MAX_X_BOUNDS_WITH_PADDING;
     static const float MIN_Y_BOUNDS_WITH_PADDING;
     static const float MAX_Y_BOUNDS_WITH_PADDING;
 
+    static const float LEFT_SIDE_CURL_SHOOT1_OFFSET_X;
+    static const float LEFT_SIDE_CURL_SHOOT1_OFFSET_Y;
+    static const float LEFT_SIDE_CURL_SHOOT2_OFFSET_X;
+    static const float LEFT_SIDE_CURL_SHOOT2_OFFSET_Y;
+
+    static const float RIGHT_SIDE_CURL_SHOOT1_OFFSET_X;
+    static const float RIGHT_SIDE_CURL_SHOOT1_OFFSET_Y;
+    static const float RIGHT_SIDE_CURL_SHOOT2_OFFSET_X;
+    static const float RIGHT_SIDE_CURL_SHOOT2_OFFSET_Y;
+
+    static const float SIDE_CURL_SHOOT_OFFSET_Z;
+    static const float BOTTOM_SPHERE_SHOOT_OFFSET_Y;
+
     ~NouveauBoss();
 
+    Point2D GetLeftSideCurlShootPt1() const;
+    Point2D GetLeftSideCurlShootPt2() const;
+    Point2D GetRightSideCurlShootPt1() const;
+    Point2D GetRightSideCurlShootPt2() const;
+    Point2D GetBottomSphereShootPt() const;
 
     const BossBodyPart* GetBody() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->bodyIdx]); }
     const BossBodyPart* GetLeftSideCurls() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->leftSideCurlsIdx]); }
@@ -99,33 +117,62 @@ private:
     static float GetMinXOfConfines() { return MIN_X_CONFINES_NUM_PIECES * LevelPiece::PIECE_WIDTH; }
     static float GetMaxXOfConfines() { return (MAX_X_CONFINES_NUM_PIECES - 1) * LevelPiece::PIECE_WIDTH; }
 
-    static const int NUM_SIDE_PRISMS = 17;
+    static const int NUM_LEFT_SIDE_PRISMS  = 5;
+    static const int NUM_RIGHT_SIDE_PRISMS = 5;
+    static const int NUM_SIDE_PRISMS = NUM_LEFT_SIDE_PRISMS + NUM_RIGHT_SIDE_PRISMS;
     static const std::pair<int,int> SIDE_PRISM_IDX_PAIRS[NUM_SIDE_PRISMS]; // Stores the row,col of each of the side prisms in the level
-    static PrismTriangleBlock* GetSidePrism(const GameLevel& level, int idx) {
-        assert(idx >= 0 && idx < NUM_SIDE_PRISMS);
-        assert(LEVEL_NUM_PIECES_HEIGHT == level.GetCurrentLevelLayout().size());
-        assert(LEVEL_NUM_PIECES_WIDTH  == level.GetCurrentLevelLayout()[0].size());
+    static const std::pair<int,int> LEFT_SIDE_PRISM_IDX_PAIRS[NUM_LEFT_SIDE_PRISMS];
+    static const std::pair<int,int> RIGHT_SIDE_PRISM_IDX_PAIRS[NUM_RIGHT_SIDE_PRISMS];
+    static PrismTriangleBlock* GetSidePrism(const GameLevel& level, int idx);
+    static PrismTriangleBlock* GetLeftSidePrism(const GameLevel& level, int idx);
+    static PrismTriangleBlock* GetRightSidePrism(const GameLevel& level, int idx);
+    static std::vector<PrismTriangleBlock*> GetBestSidePrismCandidates(const GameLevel& level, 
+        const PlayerPaddle& paddle, const Point2D& shotOrigin, bool leftSide, bool rightSide);
 
-        const std::pair<int, int>& prismIdxPair = SIDE_PRISM_IDX_PAIRS[idx];
-        LevelPiece* piece = level.GetCurrentLevelLayout()[prismIdxPair.first][prismIdxPair.second];
-        
-        assert(piece != NULL);
-        assert(piece->GetType() == LevelPiece::PrismTriangle);
-        
-        return static_cast<PrismTriangleBlock*>(piece);
-    }
+    static PrismBlock* GetLeftSplitterPrism(const GameLevel& level);
+    static PrismBlock* GetRightSplitterPrism(const GameLevel& level);
 
 
     // Inherited from Boss
-    void Init();
+    void Init(float startingX, float startingY);
    
     void BuildBottomCurl(const Vector3D& translation, float yRotation, size_t& idx);
 
     static BoundingLines BuildSemiCircleBoundingLines(float height, float lowerMidHeight, float upperMidHeight,
-        float halfBottomWidth, float halfLowerMidWidth, float halfUpperMidWidth, float halfTopWidth);
+        float halfBottomWidth, float halfLowerMidWidth, float halfUpperMidWidth, float halfTopWidth, bool doInsideOnSides);
 
     DISALLOW_COPY_AND_ASSIGN(NouveauBoss);
 };
+
+inline Point2D NouveauBoss::GetLeftSideCurlShootPt1() const {
+    Point2D pt = this->GetLeftSideCurls()->GetTranslationPt2D();
+    pt += Vector2D(LEFT_SIDE_CURL_SHOOT1_OFFSET_X, LEFT_SIDE_CURL_SHOOT1_OFFSET_Y);
+    return pt;
+}
+
+inline Point2D NouveauBoss::GetLeftSideCurlShootPt2() const {
+    Point2D pt = this->GetLeftSideCurls()->GetTranslationPt2D();
+    pt += Vector2D(LEFT_SIDE_CURL_SHOOT2_OFFSET_X, LEFT_SIDE_CURL_SHOOT2_OFFSET_Y);
+    return pt;
+}
+
+inline Point2D NouveauBoss::GetRightSideCurlShootPt1() const {
+    Point2D pt = this->GetRightSideCurls()->GetTranslationPt2D();
+    pt += Vector2D(RIGHT_SIDE_CURL_SHOOT1_OFFSET_X, RIGHT_SIDE_CURL_SHOOT1_OFFSET_Y);
+    return pt;
+}
+
+inline Point2D NouveauBoss::GetRightSideCurlShootPt2() const {
+    Point2D pt = this->GetRightSideCurls()->GetTranslationPt2D();
+    pt += Vector2D(RIGHT_SIDE_CURL_SHOOT2_OFFSET_X, RIGHT_SIDE_CURL_SHOOT2_OFFSET_Y);
+    return pt;
+}
+
+inline Point2D NouveauBoss::GetBottomSphereShootPt() const {
+    Point2D pt = this->GetBottomHexSphere()->GetTranslationPt2D();
+    pt[1] += BOTTOM_SPHERE_SHOOT_OFFSET_Y;
+    return pt;
+}
 
 inline Collision::AABB2D NouveauBoss::GetMovementAABB() const {
     Collision::AABB2D bossAABB = this->alivePartsRoot->GenerateWorldAABB();

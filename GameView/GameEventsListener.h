@@ -142,6 +142,10 @@ private:
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
 
+    static SoundID enterBulletTimeSoundID;
+    static SoundID exitBulletTimeSoundID;
+    static SoundID inBulletTimeLoopSoundID;
+
 	void DestroyBallSafetyNet(const Point2D& pt);
 
 	static void GetEffectsForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,

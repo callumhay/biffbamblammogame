@@ -544,6 +544,10 @@ BlockBrokenMultiplierCounterInc9 {
 	file =
 }
 
+// TODO: Event for when a secret is revealed?
+//RevealEvent {
+//	file =
+//}
 
 // ---------------------------------------------------------------------------
 // Non-In-Game State Events ==================================================

@@ -28,6 +28,7 @@ public:
     BoundingLines BuildBoundingLines() const;
 
     bool IsRocket() const { return true; }
+    bool IsMine() const { return false; }
     bool IsRefractableOrReflectable() const { return false; }
 
     float GetYRotation() const;
