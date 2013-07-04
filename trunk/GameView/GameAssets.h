@@ -169,6 +169,8 @@ public:
 	void RemoveProjectile(const Projectile& projectile);
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
+    void PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
+
 	void RocketExplosion(const RocketProjectile& rocket, Camera& camera);
     void MineExplosion(const MineProjectile& mine, Camera& camera);
 

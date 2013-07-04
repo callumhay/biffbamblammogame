@@ -58,7 +58,7 @@ public:
     AbstractBossBodyPart* SearchForParent(AbstractBossBodyPart* part);
 
     bool GetIsDestroyed() const;
-    void SetAsDestroyed();
+    void SetDestroyed(bool isDestroyed);
 
     Collision::AABB2D GenerateWorldAABB() const;
 

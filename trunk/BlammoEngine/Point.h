@@ -237,6 +237,10 @@ public:
         return Point3D((p1[0] + p2[0]) / 2.0f, (p1[1] + p2[1]) / 2.0f, (p1[2] + p2[2]) / 2.0f);
     }
 
+    Point2D ToPoint2D() const {
+        return Point2D(this->v_[0], this->v_[1]);
+    }
+
     friend bool operator<=(const Point3D& a, const Point3D& b);
 };
 

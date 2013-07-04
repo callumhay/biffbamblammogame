@@ -22,6 +22,7 @@
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
 #include "BallSafetyNetMesh.h"
+#include "BossMesh.h"
 
 // GameModel Includes
 #include "../GameModel/GameModel.h"
@@ -46,6 +47,7 @@
 #include "../GameModel/ShockwaveEffectInfo.h"
 #include "../GameModel/FullscreenFlashEffectInfo.h"
 #include "../GameModel/DebrisEffectInfo.h"
+#include "../GameModel/LaserBeamSightsEffectInfo.h"
 
 // GameControl Includes
 #include "../GameControl/GameControllerManager.h"
@@ -278,6 +280,19 @@ void GameEventsListener::ProjectileDeflectedByPaddleShieldEvent(const Projectile
 	debug_output("EVENT: Paddle shield deflected projectile");
 }
 
+void GameEventsListener::PaddleHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment) {
+    this->display->GetAssets()->PaddleHurtByBeam(paddle, beam, beamSegment);
+    debug_output("EVENT: Paddle hit by beam");
+}
+
+void GameEventsListener::PaddleShieldHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment) {
+    UNUSED_PARAMETER(paddle);
+    UNUSED_PARAMETER(beam);
+    UNUSED_PARAMETER(beamSegment);
+    // TODO?
+	debug_output("EVENT: Paddle shield deflected projectile");
+}
+
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);
@@ -372,6 +387,15 @@ void GameEventsListener::ProjectileSafetyNetCollisionEvent(const Projectile& pro
     this->display->GetAssets()->GetESPAssets()->AddSafetyNetHitByProjectileEffect(projectile);
 
     debug_output("EVENT: Projectile-safety net collision");
+}
+
+void GameEventsListener::ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart) {
+    UNUSED_PARAMETER(boss);
+
+    // Add visual effects for the collision
+    this->display->GetAssets()->GetESPAssets()->AddBossHitByProjectileEffect(projectile, collisionPart);
+
+    debug_output("EVENT: Projectile-boss collision");
 }
 
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
@@ -1145,10 +1169,15 @@ void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
 	this->display->GetAssets()->GetESPAssets()->AddBeamEffect(beam);
 
 	// Add the appropriate sounds for the beam
-	switch (beam.GetBeamType()) {
-		case Beam::PaddleLaserBeam:
+	switch (beam.GetType()) {
+		
+        case Beam::PaddleBeam:
 			this->display->GetSound()->AttachAndPlaySound(&beam, GameSound::LaserBeamFiringLoop, true);
 			break;
+        case Beam::BossBeam:
+            // TODO
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -1165,13 +1194,16 @@ void GameEventsListener::BeamChangedEvent(const Beam& beam) {
 
 void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
 	// Remove the effect for the beam...
-	this->display->GetAssets()->GetESPAssets()->RemoveBeamEffect(beam);
+	this->display->GetAssets()->GetESPAssets()->RemoveBeamEffect(beam, true);
 
 	// Removed the appropriate sounds for the beam
-	switch (beam.GetBeamType()) {
-		case Beam::PaddleLaserBeam:
+	switch (beam.GetType()) {
+
+		case Beam::PaddleBeam:
+        case Beam::BossBeam:
 			this->display->GetSound()->DetachAndStopAllSounds(&beam);
 			break;
+        
 		default:
 			assert(false);
 			break;
@@ -1459,6 +1491,10 @@ void GameEventsListener::BossHurtEvent(const BossWeakpoint* hurtPart) {
 
     this->display->GetAssets()->GetESPAssets()->AddBossHurtEffect(hurtPart->GetTranslationPt2D(), 
         partAABB.GetWidth(), partAABB.GetHeight());
+    this->display->GetAssets()->GetCurrentLevelMesh()->BossHurt();
+
+    this->display->GetModel()->ClearSpecificBeams(Beam::BossBeam);
+
     debug_output("EVENT: Boss is hurt.");
 }
 
@@ -1474,33 +1510,36 @@ void GameEventsListener::BossAngryEvent(const Boss* boss, const BossBodyPart* an
 
 
 void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
+    BossMesh* bossMesh = this->display->GetAssets()->GetCurrentLevelMesh()->GetBossMesh();
+    assert(bossMesh != NULL);
+
     switch (effectEvent.GetType()) {
         
         case BossEffectEventInfo::PowerChargeInfo: {
             const PowerChargeEffectInfo& powerChargeInfo =
                 static_cast<const PowerChargeEffectInfo&>(effectEvent);
-            this->display->GetAssets()->GetESPAssets()->AddBossPowerChargeEffect(powerChargeInfo);
+            bossMesh->AddBossPowerChargeEffect(powerChargeInfo);
             break;
         }
 
         case BossEffectEventInfo::ExpandingHaloInfo: {
             const ExpandingHaloEffectInfo& expandingHaloInfo =
                 static_cast<const ExpandingHaloEffectInfo&>(effectEvent);
-            this->display->GetAssets()->GetESPAssets()->AddBossExpandingHaloEffect(expandingHaloInfo);
+            bossMesh->AddBossExpandingHaloEffect(expandingHaloInfo);
             break;
         }
 
         case BossEffectEventInfo::SparkBurstInfo: {
             const SparkBurstEffectInfo& sparkBurstInfo =
                 static_cast<const SparkBurstEffectInfo&>(effectEvent);
-            this->display->GetAssets()->GetESPAssets()->AddBossSparkBurstEffect(sparkBurstInfo);
+            bossMesh->AddBossSparkBurstEffect(sparkBurstInfo);
             break;
         }
 
         case BossEffectEventInfo::ElectricitySpasmInfo: {
             const ElectricitySpasmEffectInfo& electricitySpasmInfo =
                 static_cast<const ElectricitySpasmEffectInfo&>(effectEvent);
-            this->display->GetAssets()->GetESPAssets()->AddElectricitySpasmEffect(electricitySpasmInfo);
+            bossMesh->AddElectricitySpasmEffect(electricitySpasmInfo);
             break;
         }
 
@@ -1528,6 +1567,12 @@ void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
         case BossEffectEventInfo::DebrisInfo: {
             const DebrisEffectInfo& debrisInfo = static_cast<const DebrisEffectInfo&>(effectEvent);
             this->display->GetAssets()->GetESPAssets()->AddDebrisEffect(debrisInfo);
+            break;
+        }
+
+        case BossEffectEventInfo::LaserBeamSightsInfo: {
+            const LaserBeamSightsEffectInfo& beamSightsInfo = static_cast<const LaserBeamSightsEffectInfo&>(effectEvent);
+            bossMesh->AddLaserBeamSightsEffect(beamSightsInfo);
             break;
         }
 

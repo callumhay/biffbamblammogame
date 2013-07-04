@@ -16,8 +16,8 @@
 #include "GameModelConstants.h"
 #include "PaddleLaserProjectile.h"
 #include "PaddleMineProjectile.h"
-#include "Beam.h"
 #include "FireGlobProjectile.h"
+#include "PaddleLaserBeam.h"
 #include "BossBodyPart.h"
 
 // Default values for the size of the paddle
@@ -664,8 +664,10 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 	}
 	// Check for laser beam paddle - this has secondary priority
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
-		// We add the beam to the game model, the rest will be taken care of by the beam and model
-		gameModel->AddBeam(Beam::PaddleLaserBeam);
+		
+        // We add the beam to the game model, the rest will be taken care of by the beam and model
+        PaddleLaserBeam* paddleLaserBeam = new PaddleLaserBeam(this, gameModel);
+		gameModel->AddBeam(paddleLaserBeam);
 
         // EVENT: Paddle just fired a beam
         GameEventManager::Instance()->ActionPaddleWeaponFired();
@@ -882,6 +884,7 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 
 // Called when the paddle is hit by a projectile
 void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& projectile) {
+
 	// The paddle is unaffected if it has a shield active...
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
 		// EVENT: Paddle shield was just hit by a projectile
@@ -932,6 +935,30 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 
 	// EVENT: Paddle was just hit by a projectile
 	GameEventManager::Instance()->ActionPaddleHitByProjectile(*this, projectile);
+}
+
+void PlayerPaddle::HitByBeam(const Beam& beam, const BeamSegment& beamSegment) {
+
+    // The paddle is unaffected if it has a shield active...
+    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+        // EVENT: Paddle shield was just hit by a beam
+        GameEventManager::Instance()->ActionPaddleShieldHitByBeam(*this, beam, beamSegment);
+        return;
+    }
+
+    static const long IMMUNITY_TO_BEAMS_TIME_IN_MS = 2000;
+    static long lastBeamHitTimeInMS = 0;
+
+    long currSysTime = BlammoTime::GetSystemTimeInMillisecs();
+    if (currSysTime - lastBeamHitTimeInMS <= IMMUNITY_TO_BEAMS_TIME_IN_MS) {
+        return;
+    }
+    lastBeamHitTimeInMS = currSysTime;
+
+    this->BeamCollision(beam, beamSegment);
+
+    // EVENT: Paddle was just hit by a beam
+    GameEventManager::Instance()->ActionPaddleHitByBeam(*this, beam, beamSegment);
 }
 
 // Modify the projectile trajectory in certain special cases when the projectile is colliding with the paddle
@@ -1296,6 +1323,21 @@ void PlayerPaddle::FireGlobProjectileCollision(const Projectile& projectile) {
     this->lastEntityThatHurtHitPaddle = &projectile;
 }
 
+void PlayerPaddle::BeamCollision(const Beam& beam, const BeamSegment& beamSegment) {
+    UNUSED_PARAMETER(beam);
+
+    float intensityMultiplier = (beamSegment.GetRadius() / this->GetHalfWidthTotal());
+    assert(intensityMultiplier > 0.0f && intensityMultiplier < 2.0f);
+
+    float currHeight = 2.0f * this->GetHalfHeight();
+
+    this->SetPaddleHitByProjectileAnimation(beamSegment.GetEndPoint(), 
+        intensityMultiplier * 8.0f, intensityMultiplier * 3.5f * currHeight, 
+        intensityMultiplier * 5.0f * currHeight, 80.0f);
+
+    this->lastEntityThatHurtHitPaddle = &beamSegment;
+}
+
 // Get an idea of how close the given projectile is to the center of the paddle as a percentage
 // where 0 is a far away from the center as possible and 1 is at the center. Also returns the value
 // of distFromCenter which is assigned a negative/positive value based on the distance from the center
@@ -1516,8 +1558,7 @@ Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
 /**
  * Check to see if the given set of bounding lines collides with this paddle.
  */
-bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
-                                         bool includeAttachedBallCheck) const {
+bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const {
 	bool didCollide = false;
 	// If the paddle has a shield around it do the collision with the shield
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
@@ -1568,19 +1609,19 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
          }
          else {
 
-             // Don't allow the bottom paddle collision boundry line to factor into the collision if the ball is traveling downward
+             // Don't allow the bottom paddle collision boundary line to factor into the collision if the ball is traveling downward
              // at the paddle or the ball is above the paddle
              assert(this->bounds.GetNumLines() == 4);
 
              if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight())) &&
                  Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
-                     // Ball is travelling upwards at the paddle from below it...
+                     // Ball is traveling upwards at the paddle from below it...
                      return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
              }
              else {
-                 // Ball is travelling downwards/parallel at the paddle
+                 // Ball is traveling downwards/parallel at the paddle
                  Collision::LineSeg2D bottomLine = this->bounds.GetLine(3);
-                 Vector2D bottomNormal           = this->bounds.GetNormal(3);
+                 Vector2D bottomNormal = this->bounds.GetNormal(3);
                  this->bounds.PopLast();
                  bool wasCollision = this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
                  this->bounds.Push(bottomLine, bottomNormal);
@@ -1588,6 +1629,17 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
              }
          }
      }
+}
+
+bool PlayerPaddle::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+    
+    // If the paddle has a shield around it do the collision with the shield
+    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+        Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
+        return Collision::IsCollision(ray, shieldBounds, rayT);
+    }
+
+    return this->bounds.CollisionCheck(ray, rayT);
 }
 
 // Check for a collision with the given projectile

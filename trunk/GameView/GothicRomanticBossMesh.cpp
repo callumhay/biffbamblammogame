@@ -223,6 +223,8 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
 }
 
 void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
+    BossMesh::DrawPostBodyEffects(dT, camera);
+
     this->glowCirclePulseAnim.Tick(dT);
     float pulseScaler = this->glowCirclePulseAnim.GetInterpolantValue();
 

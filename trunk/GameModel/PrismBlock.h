@@ -23,6 +23,8 @@
 class PrismBlock : public LevelPiece {
 
 public:
+    static const float REFLECTION_REFRACTION_SPLIT_ANGLE;
+
     PrismBlock(unsigned int wLoc, unsigned int hLoc);
     virtual ~PrismBlock();
 

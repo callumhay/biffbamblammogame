@@ -2,7 +2,7 @@
  * BossBodyPart.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2012
+ * Callum Hay, 2012-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -54,6 +54,7 @@ public:
     virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile) { UNUSED_PARAMETER(gameModel); UNUSED_PARAMETER(projectile); }
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) { UNUSED_PARAMETER(gameModel); UNUSED_PARAMETER(paddle); }
 
+    virtual bool IsReflectiveRefractive() const { return false; }
     virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	virtual void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
     
@@ -62,7 +63,7 @@ public:
     bool IsOrContainsPart(const AbstractBossBodyPart* part, bool recursiveSearch) const;
 
     bool GetIsDestroyed() const;
-    virtual void SetAsDestroyed();
+    virtual void SetDestroyed(bool isDestroyed);
 
     ColourRGBA GetColour() const { return this->rgbaAnim.GetInterpolantValue(); }
     float GetAlpha() const { return this->rgbaAnim.GetInterpolantValue().A(); }
@@ -73,6 +74,8 @@ public:
     Collision::AABB2D GenerateWorldAABB() const;
 
     virtual void ColourAnimationFinished() {};
+
+    void SetCollisionsDisabled(bool disable) { this->collisionsDisabled = disable; }
 
     void SetCollisionVelocity(const Vector2D& v);
     void SetExternalAnimationVelocity(const Vector2D& v);
@@ -97,13 +100,13 @@ public:
 
 protected:
     bool isDestroyed;
+    bool collisionsDisabled;
     BoundingLines localBounds;
 
     AnimationMultiLerp<ColourRGBA> rgbaAnim;
 
     Vector2D collisionVelocity;
     Vector2D externalAnimationVelocity;
-
 
     std::map<Projectile*, Point2D> attachedProjectiles; // The attached projectiles, mapped to their local position
 
@@ -145,6 +148,10 @@ inline void BossBodyPart::Tick(double dT) {
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                                   Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
 
+    if (this->collisionsDisabled) {
+        return NULL;
+    }
+
     Vector2D bossVelocity = this->GetCollisionVelocity();
 
     if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), 
@@ -155,7 +162,9 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double d
 }
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const PlayerPaddle& paddle) {
-
+    if (this->collisionsDisabled) {
+        return NULL;
+    }
     if (this->GetWorldBounds().CollisionCheck(paddle.GetBounds().GenerateAABBFromLines())) {
         return this;
     }
@@ -163,6 +172,9 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const PlayerPaddle& paddle) {
 }
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Ray2D& ray, float& rayT) {
+    if (this->collisionsDisabled) {
+        return NULL;
+    }
     if (this->GetWorldBounds().CollisionCheck(ray, rayT)) {
         return this;
     }
@@ -171,6 +183,9 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Ray2D& ray, f
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) {
     UNUSED_PARAMETER(velDir);
+    if (this->collisionsDisabled) {
+        return NULL;
+    }
     if (this->GetWorldBounds().CollisionCheck(boundingLines)) {
         return this;
     }
@@ -179,6 +194,9 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const BoundingLines& boundingL
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) {
     UNUSED_PARAMETER(velDir);
+    if (this->collisionsDisabled) {
+        return NULL;
+    }
     if (this->GetWorldBounds().CollisionCheck(c)) {
         return this;
     }
@@ -286,9 +304,11 @@ inline bool BossBodyPart::GetIsDestroyed() const {
     return this->isDestroyed;
 }
 
-inline void BossBodyPart::SetAsDestroyed() {
-    this->isDestroyed = true;
-    this->RemoveAllAttachedProjectiles();
+inline void BossBodyPart::SetDestroyed(bool isDestroyed) {
+    this->isDestroyed = isDestroyed;
+    if (isDestroyed) {
+        this->RemoveAllAttachedProjectiles();
+    }
 }
 
 inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {

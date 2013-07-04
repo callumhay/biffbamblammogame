@@ -406,6 +406,7 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text
 		ESPOnomataParticle* newParticle = new ESPOnomataParticle(text.GetFont());
 		newParticle->SetDropShadow(text.GetDropShadow());
 		newParticle->SetOnomatoplexSound(st, e);
+        
 		this->deadParticles.push_back(newParticle);
 
 		// Assign the number of lives...

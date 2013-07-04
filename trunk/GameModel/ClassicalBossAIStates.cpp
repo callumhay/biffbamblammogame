@@ -55,10 +55,9 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
     static const float ANGLE_BETWEEN_LASERS_IN_DEGS = 15.0f;
 
     // The boss will fire a spray of laser bullets from its eye, in the general direction of the paddle...
-    Point2D eyePos    = this->boss->GetEye()->GetTranslationPt2D();
-    Point2D paddlePos = paddle->GetCenterPosition();
+    Point2D eyePos = this->boss->GetEye()->GetTranslationPt2D();
 
-    Vector2D initLaserDir = Vector2D::Normalize(paddlePos - eyePos);
+    Vector2D initLaserDir = Vector2D::Normalize(paddle->GetCenterPosition() - eyePos);
     Vector2D currLaserDir = initLaserDir;
 
     // Middle laser shot directly towards the paddle...
@@ -1752,13 +1751,10 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
 
         case ClassicalBossAI::HurtEyeAIState:
-            debug_output("Entering HurtEyeAIState");
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
             break;
 
         case ClassicalBossAI::FinalDeathThroesAIState:
-            debug_output("Entering FinalDeathThroesAIState");
-
             // Kill off (fade out) the pediment
             this->boss->ConvertAliveBodyPartToDeadBodyPart(this->pediment);
             this->pediment->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(4.0));

@@ -363,11 +363,10 @@ void BallInPlayState::Tick(double seconds) {
                 }
 
 			    // Check for ball collision with level pieces
-			    // Get the small set of levelpieces based on the position of the ball...
+			    // Get the small set of level pieces based on the position of the ball...
 			    std::vector<LevelPiece*> collisionPieces = 
-                    currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
-                    std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()),
-                    currBall->GetVelocity());
+                    currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(),
+                    currBall->GetBounds().Radius(), currBall->GetVelocity());
 
 			    for (std::vector<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
                     pieceIter != collisionPieces.end(); ++pieceIter) {
@@ -505,19 +504,19 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
 	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
 	Vector2D reflVecHat;
+    bool ignoreSmallReflectionAngle = false;
+
+    // Position the ball so that it is at the location it was at when it collided...
+    b.SetCenterPosition(b.GetCenterPosition2D() + timeUntilCollision * b.GetVelocity());
+
 	if (Vector2D::Dot(b.GetDirection(), n) >= 0) {
 		// Somehow the ball is traveling away from the normal but is hitting the line...
-        
-        // Position the ball so that it is at the location it was at when it collided...
-	    b.SetCenterPosition(b.GetCenterPosition2D() + timeUntilCollision * -b.GetVelocity());
 
         // The ball will reflect off its own direction vector...
         reflVecHat = b.GetDirection();
+        ignoreSmallReflectionAngle = true; // We don't want the ball to be effected by the MIN_BALL_ANGLE_*
 	}
 	else {
-        // Position the ball so that it is at the location it was at when it collided...
-	    b.SetCenterPosition(b.GetCenterPosition2D() + timeUntilCollision * b.GetVelocity());
-
         // Typical bounce off the normal: figure out the reflection vector
         reflVecHat = Vector2D::Normalize(Reflect(b.GetDirection(), n));
 
@@ -541,7 +540,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
 	// Make sure the reflection is big enough to not cause an annoying slow down in the game
 	// or to make a ridiculous gracing angle
-	if (diffAngleInDegs > EPSILON) {
+	if (diffAngleInDegs > EPSILON && !ignoreSmallReflectionAngle) {
 
 		// We need to figure out which way to rotate the velocity
 		// to ensure it's at least the MIN_BALL_ANGLE_IN_RADS
@@ -581,7 +580,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 		}
 	}
 
-    // Reflect the ball off the normal... this will have some dependance on whether there is a velocity for the line...
+    // Reflect the ball off the normal... this will have some dependence on whether there is a velocity for the line...
     Vector2D moveVel(0,0);
     if (lineVelocity.IsZero()) {
         b.SetVelocity(reflSpd, reflVecHat);

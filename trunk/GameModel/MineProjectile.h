@@ -90,11 +90,13 @@ public:
     bool GetIsAttachedToSafetyNet() const { return this->attachedToNet != NULL; }
     bool GetIsAttachedToLevelPiece() const { return this->attachedToPiece != NULL; }
     bool GetIsAttachedToPaddle() const { return this->attachedToPaddle != NULL; }
+    bool GetIsAttachedToBoss() const { return this->attachedToBoss != NULL; }
 
     bool IsAttachedToSomething() const {
         return this->GetIsAttachedToSafetyNet()  ||
                this->GetIsAttachedToLevelPiece() ||
-               this->GetIsAttachedToPaddle();
+               this->GetIsAttachedToPaddle() ||
+               this->GetIsAttachedToBoss();
     }
 
     void DestroyWithoutExplosion();

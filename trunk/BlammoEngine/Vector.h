@@ -254,6 +254,10 @@ public:
         this->v_[2] = fabs(this->v_[2]);
     }
 
+    Vector2D ToVector2D() {
+        return Vector2D(this->v_[0], this->v_[1]);
+    }
+
     void Normalize() {
         float magnitude = this->length();
         if (magnitude < 0.000000001f) {

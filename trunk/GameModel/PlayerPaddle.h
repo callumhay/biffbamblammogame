@@ -31,6 +31,8 @@ class PaddleMineProjectile;
 class MineTurretProjectile;
 class MineProjectile;
 class BossBodyPart;
+class Beam;
+class BeamSegment;
 
 // Represents the player controlled paddle shaped as follows:
 //                -------------
@@ -241,6 +243,7 @@ public:
 
     void HitByBoss(const BossBodyPart& bossPart);
 	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
+    void HitByBeam(const Beam& beam, const BeamSegment& beamSegment);
 	bool ProjectilePassesThrough(const Projectile& projectile);
     bool ProjectileIsDestroyedOnCollision(const Projectile& projectile);
 	void ModifyProjectileTrajectory(Projectile& projectile);
@@ -250,8 +253,10 @@ public:
 	// TODO: Add the parameter: "bool includeAttachedBallCheck" to all paddle collision checks...
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
 	bool CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const;
-	bool CollisionCheckWithProjectile(const Projectile& projectile, const BoundingLines& bounds) const;
+    bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
+    bool CollisionCheckWithProjectile(const Projectile& projectile, const BoundingLines& bounds) const;
 	
+
     bool UpdateForOpposingForceBallCollision(const GameBall& ball, double dT);
 
 	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
@@ -366,6 +371,8 @@ private:
 	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
     void MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile);
 	void FireGlobProjectileCollision(const Projectile& projectile);
+    void BeamCollision(const Beam& beam, const BeamSegment& beamSegment);
+
 	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);
 	void SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
                                            float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs);

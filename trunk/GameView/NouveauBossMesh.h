@@ -41,6 +41,32 @@ private:
     Mesh* topGazeboMesh;
     Mesh* topSphereMesh;
 
+    Texture2D* circleGlowTex;
+
+    ESPPointEmitter* topGazeboSmokeEmitter;
+    ESPPointEmitter* topGazeboFireEmitter;
+    ESPPointEmitter* topGazeboExplodingEmitter;
+    ESPPointEmitter* topDomeExplodingEmitter;
+
+    ESPPointEmitter* bodySmokeEmitter;
+    ESPPointEmitter* bodyFireEmitter;
+    ESPPointEmitter* bodyExplodingEmitter;
+
+    ESPPointEmitter* leftArmExplodingEmitter;
+    ESPPointEmitter* rightArmExplodingEmitter;
+
+    AnimationMultiLerp<float> glowCirclePulseAnim;
+    AnimationMultiLerp<Colour> frillColourAnim;
+
+    // Intro animations and effects
+    double introTimeCountdown;
+    AnimationLerp<float> leftSideTopGlowAnim;
+    AnimationLerp<float> leftSideBottomGlowAnim;
+    AnimationLerp<float> rightSideTopGlowAnim;
+    AnimationLerp<float> rightSideBottomGlowAnim;
+    AnimationLerp<float> bottomGlowAnim;
+
+    //void DrawPreBodyEffects(double dT, const Camera& camera);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
     void DrawPostBodyEffects(double dT, const Camera& camera);

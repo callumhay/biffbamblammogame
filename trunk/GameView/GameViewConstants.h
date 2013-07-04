@@ -164,7 +164,8 @@ public:
 	const char* TEXTURE_STARFIELD;
 	
 	const char* TEXTURE_INKSPLATTER;
-	const char* TEXTURE_BALLTARGET;
+	const char* TEXTURE_CIRCLE_TARGET;
+    const char* TEXTURE_SQUARE_TARGET;
 	const char* TEXTURE_BULLET_CROSSHAIR;
 	const char* TEXTURE_BEAM_CROSSHAIR;
 	const char* TEXTURE_BARREL_OVERLAY;
@@ -264,7 +265,6 @@ public:
 	const Colour STICKYPADDLE_GOO_COLOUR;
 	const Colour STICKYPADDLE_PLUS_BEAM_GOO_COLOUR;
 	const Colour PRISM_BLOCK_COLOUR;
-	const Colour LASER_BEAM_COLOUR;
     const Colour BOSS_ORB_BASE_COLOUR;
     const Colour BOSS_ORB_BRIGHT_COLOUR;
 

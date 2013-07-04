@@ -348,6 +348,8 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
 }
 
 void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
+    BossMesh::DrawPostBodyEffects(dT, camera);
+
     const BossBodyPart* eye = this->boss->GetEye();
 
     // Check to see if we're drawing intro effects

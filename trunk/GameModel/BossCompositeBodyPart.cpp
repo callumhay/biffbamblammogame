@@ -350,10 +350,10 @@ bool BossCompositeBodyPart::GetIsDestroyed() const {
     return true;
 }
 
-void BossCompositeBodyPart::SetAsDestroyed() {
+void BossCompositeBodyPart::SetDestroyed(bool isDestroyed) {
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         AbstractBossBodyPart* part = this->childParts[i];
-        part->SetAsDestroyed();
+        part->SetDestroyed(isDestroyed);
     }
 }
 

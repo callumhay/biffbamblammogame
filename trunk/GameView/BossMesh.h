@@ -19,6 +19,11 @@ class Camera;
 class BasicPointLight;
 class Boss;
 class Texture2D;
+class LaserBeamSightsEffectInfo;
+class PowerChargeEffectInfo;
+class ExpandingHaloEffectInfo;
+class SparkBurstEffectInfo;
+class ElectricitySpasmEffectInfo;
 
 /**
  * The abstract superclass for all meshes/visuals of bosses in the game.
@@ -36,33 +41,57 @@ public:
     virtual double ActivateIntroAnimation() = 0;
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
 
+    void ClearActiveEffects();
+    void AddLaserBeamSightsEffect(const LaserBeamSightsEffectInfo& info);
+    void AddBossPowerChargeEffect(const PowerChargeEffectInfo& info);
+    void AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info);
+    void AddBossSparkBurstEffect(const SparkBurstEffectInfo& info);
+    void AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info);
+
 protected:
     // Shared visual effects and textures for bosses
     std::vector<Texture2D*> smokeTextures;
     Texture2D* explosionAnimTex;
+    Texture2D* squareTargetTex;
+    Texture2D* haloTex;
+    Texture2D* sparkleTex;
+    Texture2D* lightningAnimTex;
 
+    ESPParticleScaleEffector  particleSmallGrowth;
     ESPParticleScaleEffector  particleLargeGrowth;
     ESPParticleScaleEffector  particleMediumGrowth;
+    ESPParticleScaleEffector  particleSuperGrowth;
+    ESPParticleScaleEffector  particleMediumShrink;
+    ESPParticleScaleEffector  particleShrinkToNothing;
+    ESPParticleColourEffector particleFader;
     ESPParticleColourEffector particleFireColourFader;
     ESPParticleColourEffector smokeColourFader;
 	ESPParticleRotateEffector rotateEffectorCW;
     ESPParticleRotateEffector rotateEffectorCCW;
+
+    ESPParticleColourEffector laserSightTargetColourChanger;
+    ESPParticleScaleEffector  laserSightBigToSmallSize;
+    ESPParticleRotateEffector laserSightTargetRotateEffector;
 
     // Final explosion effect members
     bool finalExplosionIsActive;
     AnimationLerp<float> lineAnim;  // Length of each of the two lines that go out from the boss to the sides
     AnimationLerp<float> flashAnim; // The fullscreen flash half-height
 
+    // Boss-specific effects
+    std::list<ESPEmitter*> effectsEmitters;
+    std::map<const BossBodyPart*, std::list<ESPEmitter*> > attachedEffectsEmitters;
+
     virtual void DrawPreBodyEffects(double dT, const Camera& camera);
     virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex) = 0;
-    virtual void DrawPostBodyEffects(double dT, const Camera& camera) = 0;
+    virtual void DrawPostBodyEffects(double dT, const Camera& camera);
 
     virtual Point3D GetBossFinalExplodingEpicenter() const = 0;
 
-    ESPPointEmitter* BuildFireEmitter(float width, float height);
-    ESPPointEmitter* BuildSmokeEmitter(float width, float height);
-    ESPPointEmitter* BuildExplodingEmitter(float width, float height);
+    ESPPointEmitter* BuildFireEmitter(float width, float height, float sizeScaler = 1.0f);
+    ESPPointEmitter* BuildSmokeEmitter(float width, float height, float sizeScaler = 1.0f);
+    ESPPointEmitter* BuildExplodingEmitter(float width, float height, float sizeScaler = 1.0f);
 
 
 private:

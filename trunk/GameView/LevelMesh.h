@@ -85,8 +85,10 @@ public:
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
     void UpdateRegenBlock(const RegenBlock* block, bool gotHurt);
 
+    BossMesh* GetBossMesh() const { return this->bossMesh; }
     double ActivateBossIntro();
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
+    void BossHurt();
 
 private:
 	const GameLevel* currLevel;

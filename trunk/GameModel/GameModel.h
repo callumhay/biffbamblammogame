@@ -30,6 +30,7 @@
 #include "Projectile.h"
 #include "GameTransformMgr.h"
 #include "BallBoostModel.h"
+#include "Beam.h"
 
 class BallInPlayState;
 class CollateralBlock;
@@ -353,6 +354,8 @@ public:
 
 	void WipePieceFromAuxLists(LevelPiece* piece);
 
+    void ClearSpecificBeams(const Beam::BeamType& beamType);
+
 	std::list<GameItem*>& GetLiveItems() {
 		return this->currLiveItems;
 	}
@@ -526,7 +529,7 @@ public:
 	void AddPossibleItemDrop(const LevelPiece& p);
 	void AddItemDrop(const Point2D& p, const GameItem::ItemType& itemType);
 	void AddProjectile(Projectile* projectile);
-	void AddBeam(int beamType);
+	void AddBeam(Beam* beam);
 
 	bool AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status);
 	bool RemoveStatusForLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status);

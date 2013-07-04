@@ -1,38 +1,41 @@
 boss
 Lightbender
-23 32
-E E E D(MineLauncherPaddle){2} S S S S S S S D(MagnetPaddle) S S S S S S S D(LaserBulletPaddle){1} E E E 
-E E C(90) E F(r) E E E E E E E E E E E E E F(l) E C(270) E E 
-E E E E F(r) E E E E E E E E E E E E E F(l) E E E E 
-E T(P,ul) E E N E E E E E E E E E E E E E N E E T(P,ur) E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) 
-E E E E N E E E P E E E E E P E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E E E N E E E E 
-S E E E S E E E E E E E E E E E E E S E E E S 
-S E E E N E E E E E E E E E E E E E N E E E S 
-W(1) E E E N E E E E E E E E E E E E E N E E E W(2) 
+25 35
+E E E E E E E E D(MineLauncherPaddle){2} E E E E E E E D(LaserBulletPaddle){1} E E E E E E E E 
+E E E E E S S S S S S S D(MagnetPaddle) S S S S S S S E E E E E 
+E E E C(90) E F(r) E E E E E E E E E E E E E F(l) E C(270) E E E 
+E E E E E F(r) E E E E E E E E E E E E E F(l) E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E T(P,ul) N E E E E E E E E E E E E E N T(P,ur) E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E T(P,ul) E E N E E E E E E E E E E E E E N E E T(P,ur) E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E T(P,ul) N E E E E E E E E E E E E E N T(P,ur) E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E T(P,ul) E E E N E E E E E E E E E E E E E N E E E T(P,ur) E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E T(P,ul) N E E E E E E E E E E E E E N T(P,ur) E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E T(P,ul) N E E E E E E E E E E E E E N T(P,ur) E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E P E E E E E P E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E E E N E E E E E 
+S F(u) F(u) F(u) F(u) N E E E E E E E E E E E E E N F(u) F(u) F(u) F(u) S 
+S E E E E N E E E E E E E E E E E E E N E E E E S 
+W(1) E E E E N E E E E E E E E E E E E E N E E E E W(2) 
 
 STARS:
 0

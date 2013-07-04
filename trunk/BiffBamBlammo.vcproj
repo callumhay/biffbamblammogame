@@ -1734,10 +1734,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\Beam.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\BoundingLines.h"
 					>
 				</File>
@@ -1782,10 +1778,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\PaddleLaserBeam.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\PlayerPaddle.h"
 					>
 				</File>
@@ -1807,10 +1799,6 @@
 				>
 				<File
 					RelativePath=".\GameModel\BallBoostModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\Beam.cpp"
 					>
 				</File>
 				<File
@@ -1855,10 +1843,6 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\Onomatoplex.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PaddleLaserBeam.cpp"
 					>
 				</File>
 				<File
@@ -2403,13 +2387,21 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="Projectiles"
+				Name="Projectiles and Beams"
 				>
 				<Filter
 					Name="Header Files"
 					>
 					<File
 						RelativePath=".\GameModel\BallLaserProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\Beam.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossLaserBeam.h"
 						>
 					</File>
 					<File
@@ -2453,6 +2445,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleLaserBeam.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleLaserProjectile.h"
 						>
 					</File>
@@ -2482,6 +2478,14 @@
 					>
 					<File
 						RelativePath=".\GameModel\BallLaserProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\Beam.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossLaserBeam.cpp"
 						>
 					</File>
 					<File
@@ -2522,6 +2526,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\OrbProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleLaserBeam.cpp"
 						>
 					</File>
 					<File
@@ -2602,6 +2610,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\NouveauBossAIStates.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TargetedRefractiveBossBodyPart.h"
 						>
 					</File>
 				</Filter>
@@ -2686,6 +2698,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\GameEvents.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserBeamSightsEffectInfo.h"
 						>
 					</File>
 					<File

@@ -622,6 +622,8 @@ FireBallAI::~FireBallAI() {
 void FireBallAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile,
                                    BossBodyPart* collisionPart) {
 
+    UNUSED_PARAMETER(gameModel);
+
     // We only care if the projectile hits the weakpoint on the boss
     if (collisionPart != this->topPointWeakpt) {
         return;
@@ -641,7 +643,7 @@ void FireBallAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile,
     }
 
     static const float FIRE_GLOB_DMG_AMT = FireBallAI::TOP_POINT_LIFE_POINTS / static_cast<float>(FireBallAI::NUM_OF_TOP_POINT_HITS);
-    this->topPointWeakpt->Diminish(FIRE_GLOB_DMG_AMT, gameModel);
+    this->topPointWeakpt->Diminish(FIRE_GLOB_DMG_AMT);
     
     // Make sure we reset the rotation (in case we're in the middle of a state that was manipulating it)!!!
     this->boss->alivePartsRoot->SetLocalYRotation(0.0f);
@@ -1785,11 +1787,10 @@ void FreeMovingAttackAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
         static const GameItem::ItemType REASONABLY_GOOD_ITEMS[] = {
             GameItem::BallSlowDownItem,
             GameItem::BallGrowItem,
-            GameItem::LaserBulletPaddleItem,
             GameItem::BallSafetyNetItem
         };
 
-        gameModel->AddItemDrop(dropPos, REASONABLY_GOOD_ITEMS[Randomizer::GetInstance()->RandomUnsignedInt() % 4]);
+        gameModel->AddItemDrop(dropPos, REASONABLY_GOOD_ITEMS[Randomizer::GetInstance()->RandomUnsignedInt() % 3]);
         
         // EVENT: Effect the item being magically spawned
         GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(dropPos, GameItem::ITEM_WIDTH, 1.0));

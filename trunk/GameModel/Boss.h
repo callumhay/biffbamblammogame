@@ -70,7 +70,7 @@ public:
     bool CanHurtPaddleWithBody() const;
 
     virtual bool ProjectilePassesThrough(const Projectile* projectile) const = 0;
-    virtual bool ProjectileIsDestroyedOnCollision(const Projectile* projectile) const;
+    virtual bool ProjectileIsDestroyedOnCollision(const Projectile* projectile, BossBodyPart* collisionPart) const;
 
     // Builders for various boss animations
     static AnimationMultiLerp<ColourRGBA> BuildBossHurtAndInvulnerableColourAnim();

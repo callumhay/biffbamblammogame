@@ -86,6 +86,7 @@ void BallOnPaddleState::Tick(double seconds) {
 	// Since some piece may have status effects which cause projectiles to spawn and move around (e.g., fire globs)
 	// we still need to tick projectiles in this state... 
 	this->gameModel->UpdateActiveProjectiles(seconds);
+    this->gameModel->UpdateActiveBeams(seconds);
 
 	// Make sure the paddle isn't moving into any blocks along the sides of the level
 	this->DoUpdateToPaddleBoundriesAndCollisions(seconds, true);

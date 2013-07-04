@@ -25,6 +25,8 @@ public:
 
     float GetCurrentLifePercentage() const;
     bool IsCurrentlyInvulnerable() const;
+    void ResetLife(float lifePoints);
+    void ResetDamageOnBallHit(float dmgOnBallHit);
 
     // Inherited functions from BossBodyPart
     AbstractBossBodyPart::Type GetType() const { return AbstractBossBodyPart::WeakpointBodyPart; }
@@ -33,13 +35,13 @@ public:
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
     //void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
     void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
-    void SetAsDestroyed();
+    void SetDestroyed(bool isDestroyed);
 
     void ColourAnimationFinished();
-    void Diminish(float damageAmt, GameModel* gameModel);
+    void Diminish(float damageAmt);
 
 private:
-    const float totalLifePoints;
+    float totalLifePoints;
     float currLifePoints;
     float dmgOnBallHit;
 
@@ -62,9 +64,23 @@ inline bool BossWeakpoint::IsCurrentlyInvulnerable() const {
     return this->invulnerableTimer > 0.0;
 }
 
-inline void BossWeakpoint::SetAsDestroyed() {
-    BossBodyPart::SetAsDestroyed();
-    this->currLifePoints = 0.0f;
+inline void BossWeakpoint::ResetLife(float lifePoints) {
+    assert(lifePoints > 0);
+    this->SetDestroyed(false);
+    this->totalLifePoints = lifePoints;
+    this->currLifePoints  = lifePoints;
+    //this->SetFlashingColourAnim();
+}
+
+inline void BossWeakpoint::ResetDamageOnBallHit(float dmgOnBallHit) {
+    this->dmgOnBallHit = dmgOnBallHit;
+}
+
+inline void BossWeakpoint::SetDestroyed(bool isDestroyed) {
+    BossBodyPart::SetDestroyed(isDestroyed);
+    if (isDestroyed) {
+        this->currLifePoints = 0.0f;
+    }
 }
 
 #endif // __BOSSWEAKPOINT_H__

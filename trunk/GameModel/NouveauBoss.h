@@ -20,6 +20,7 @@ namespace nouveaubossai {
 class NouveauBossAI;
 class SideSphereAI;
 class GlassDomeAI;
+class TopSphereAI;
 };
 
 #include "Boss.h"
@@ -34,6 +35,7 @@ class NouveauBoss : public Boss {
     friend class nouveaubossai::NouveauBossAI;
     friend class nouveaubossai::SideSphereAI;
     friend class nouveaubossai::GlassDomeAI;
+    friend class nouveaubossai::TopSphereAI;
 
 public:
     static const int NUM_CURLS = 8;
@@ -47,8 +49,16 @@ public:
     static const float TOP_ENCLOSURE_GAZEBO_WIDTH;
     static const float TOP_ENCLOSURE_DOME_HEIGHT;
     static const float TOP_ENCLOSURE_DOME_TOP_WIDTH;
+    static const float TOP_ENCLOSURE_DOME_BOTTOM_WIDTH;
+    static const float TOP_SPHERE_WIDTH;
+    static const float TOP_SPHERE_HEIGHT;
 
     static const float ARM_SPHERE_HOLDER_CURL_WIDTH;
+    static const float ARM_SPHERE_HOLDER_CURL_HEIGHT;
+
+    static const float BOTTOM_SPHERE_LASER_BEAM_RADIUS;
+    static const float SIDE_CURL_TOP_LASER_BEAM_RADIUS;
+    static const float SIDE_CURL_BOTTOM_LASER_BEAM_RADIUS;
 
     static const float MIN_X_BOUNDS_WITH_PADDING;
     static const float MAX_X_BOUNDS_WITH_PADDING;
@@ -68,13 +78,29 @@ public:
     static const float SIDE_CURL_SHOOT_OFFSET_Z;
     static const float BOTTOM_SPHERE_SHOOT_OFFSET_Y;
 
+    static const float ARM_CURL_CENTER_X_OFFSET;
+    static const float ARM_CURL_CENTER_Y_OFFSET;
+
+    static const float TOP_SPHERE_CENTER_Y_OFFSET;
+
     ~NouveauBoss();
 
-    Point2D GetLeftSideCurlShootPt1() const;
-    Point2D GetLeftSideCurlShootPt2() const;
-    Point2D GetRightSideCurlShootPt1() const;
-    Point2D GetRightSideCurlShootPt2() const;
-    Point2D GetBottomSphereShootPt() const;
+    Vector3D GetLeftSideCurlShootTopPtOffset() const;
+    Vector3D GetLeftSideCurlShootBottomPtOffset() const;
+    Vector3D GetRightSideCurlShootTopPtOffset() const;
+    Vector3D GetRightSideCurlShootBottomPtOffset() const;
+    Vector3D GetBottomSphereBeamShootPtOffset() const;
+
+    Point3D GetLeftSideCurlShootTopPt() const;
+    Point3D GetLeftSideCurlShootBottomPt() const;
+    Point3D GetRightSideCurlShootTopPt() const;
+    Point3D GetRightSideCurlShootBottomPt() const;
+    Point3D GetBottomSphereShootPt() const;
+    Point3D GetBottomSphereBeamShootPt() const;
+
+    Point2D GetLeftSideCurlHolderExplosionCenter() const;
+    Point2D GetRightSideCurlHolderExplosionCenter() const;
+    Point2D GetTopDomeExplosionCenter() const;
 
     const BossBodyPart* GetBody() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->bodyIdx]); }
     const BossBodyPart* GetLeftSideCurls() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->leftSideCurlsIdx]); }
@@ -99,6 +125,7 @@ public:
 
     // Inherited from Boss
     bool ProjectilePassesThrough(const Projectile* projectile) const;
+    bool ProjectileIsDestroyedOnCollision(const Projectile* projectile, BossBodyPart* collisionPart) const;
 
 private:
     size_t bodyIdx, gazeboIdx, domeIdx, topSphereIdx, leftSideCurlsIdx, rightSideCurlsIdx;
@@ -110,15 +137,17 @@ private:
     NouveauBoss();
 
     // Level attributes made use of by the boss AI
-    static const int LEVEL_NUM_PIECES_WIDTH    = 23;
-    static const int LEVEL_NUM_PIECES_HEIGHT   = 32;
-    static const int MIN_X_CONFINES_NUM_PIECES = 5;
-    static const int MAX_X_CONFINES_NUM_PIECES = 19;
+    static const int LEVEL_NUM_PIECES_WIDTH    = 25;
+    static const int LEVEL_NUM_PIECES_HEIGHT   = 35;
+    static const int MIN_X_CONFINES_NUM_PIECES = 6;
+    static const int MAX_X_CONFINES_NUM_PIECES = 20;
     static float GetMinXOfConfines() { return MIN_X_CONFINES_NUM_PIECES * LevelPiece::PIECE_WIDTH; }
     static float GetMaxXOfConfines() { return (MAX_X_CONFINES_NUM_PIECES - 1) * LevelPiece::PIECE_WIDTH; }
+    static float GetReasonableYForBigAttack() { return MIN_Y_BOUNDS_WITH_PADDING + (MAX_Y_BOUNDS_WITH_PADDING - MIN_Y_BOUNDS_WITH_PADDING) / 2.0f; }
+    static float GetLevelMidX() { return LEVEL_NUM_PIECES_WIDTH * LevelPiece::PIECE_WIDTH / 2.0f; }
 
-    static const int NUM_LEFT_SIDE_PRISMS  = 5;
-    static const int NUM_RIGHT_SIDE_PRISMS = 5;
+    static const int NUM_LEFT_SIDE_PRISMS  = 4;
+    static const int NUM_RIGHT_SIDE_PRISMS = 4;
     static const int NUM_SIDE_PRISMS = NUM_LEFT_SIDE_PRISMS + NUM_RIGHT_SIDE_PRISMS;
     static const std::pair<int,int> SIDE_PRISM_IDX_PAIRS[NUM_SIDE_PRISMS]; // Stores the row,col of each of the side prisms in the level
     static const std::pair<int,int> LEFT_SIDE_PRISM_IDX_PAIRS[NUM_LEFT_SIDE_PRISMS];
@@ -131,7 +160,9 @@ private:
 
     static PrismBlock* GetLeftSplitterPrism(const GameLevel& level);
     static PrismBlock* GetRightSplitterPrism(const GameLevel& level);
-
+    
+    static const float Y_POS_FOR_LASER_BEAMS1;
+    static const float Y_POS_FOR_LASER_BEAMS2;
 
     // Inherited from Boss
     void Init(float startingX, float startingY);
@@ -144,34 +175,63 @@ private:
     DISALLOW_COPY_AND_ASSIGN(NouveauBoss);
 };
 
-inline Point2D NouveauBoss::GetLeftSideCurlShootPt1() const {
-    Point2D pt = this->GetLeftSideCurls()->GetTranslationPt2D();
-    pt += Vector2D(LEFT_SIDE_CURL_SHOOT1_OFFSET_X, LEFT_SIDE_CURL_SHOOT1_OFFSET_Y);
-    return pt;
+inline Vector3D NouveauBoss::GetLeftSideCurlShootTopPtOffset() const {
+    return Vector3D(LEFT_SIDE_CURL_SHOOT1_OFFSET_X, LEFT_SIDE_CURL_SHOOT1_OFFSET_Y, SIDE_CURL_SHOOT_OFFSET_Z);
+}
+inline Vector3D NouveauBoss::GetLeftSideCurlShootBottomPtOffset() const {
+    return Vector3D(LEFT_SIDE_CURL_SHOOT2_OFFSET_X, LEFT_SIDE_CURL_SHOOT2_OFFSET_Y, SIDE_CURL_SHOOT_OFFSET_Z);
+}
+inline Vector3D NouveauBoss::GetRightSideCurlShootTopPtOffset() const {
+    return Vector3D(RIGHT_SIDE_CURL_SHOOT1_OFFSET_X, RIGHT_SIDE_CURL_SHOOT1_OFFSET_Y, SIDE_CURL_SHOOT_OFFSET_Z);
+}
+inline Vector3D NouveauBoss::GetRightSideCurlShootBottomPtOffset() const {
+    return Vector3D(RIGHT_SIDE_CURL_SHOOT2_OFFSET_X, RIGHT_SIDE_CURL_SHOOT2_OFFSET_Y, SIDE_CURL_SHOOT_OFFSET_Z);
+}
+inline Vector3D NouveauBoss::GetBottomSphereBeamShootPtOffset() const {
+    return Vector3D(0, BOTTOM_SPHERE_SHOOT_OFFSET_Y + 1.0f, 0.0f);
 }
 
-inline Point2D NouveauBoss::GetLeftSideCurlShootPt2() const {
-    Point2D pt = this->GetLeftSideCurls()->GetTranslationPt2D();
-    pt += Vector2D(LEFT_SIDE_CURL_SHOOT2_OFFSET_X, LEFT_SIDE_CURL_SHOOT2_OFFSET_Y);
-    return pt;
+inline Point3D NouveauBoss::GetLeftSideCurlShootTopPt() const {
+    return this->GetLeftSideCurls()->GetTranslationPt3D() + this->GetLeftSideCurlShootTopPtOffset();
 }
 
-inline Point2D NouveauBoss::GetRightSideCurlShootPt1() const {
-    Point2D pt = this->GetRightSideCurls()->GetTranslationPt2D();
-    pt += Vector2D(RIGHT_SIDE_CURL_SHOOT1_OFFSET_X, RIGHT_SIDE_CURL_SHOOT1_OFFSET_Y);
-    return pt;
+inline Point3D NouveauBoss::GetLeftSideCurlShootBottomPt() const {
+    return this->GetLeftSideCurls()->GetTranslationPt3D() + this->GetLeftSideCurlShootBottomPtOffset();
 }
 
-inline Point2D NouveauBoss::GetRightSideCurlShootPt2() const {
-    Point2D pt = this->GetRightSideCurls()->GetTranslationPt2D();
-    pt += Vector2D(RIGHT_SIDE_CURL_SHOOT2_OFFSET_X, RIGHT_SIDE_CURL_SHOOT2_OFFSET_Y);
-    return pt;
+inline Point3D NouveauBoss::GetRightSideCurlShootTopPt() const {
+    return this->GetRightSideCurls()->GetTranslationPt3D() + this->GetRightSideCurlShootTopPtOffset();
 }
 
-inline Point2D NouveauBoss::GetBottomSphereShootPt() const {
-    Point2D pt = this->GetBottomHexSphere()->GetTranslationPt2D();
+inline Point3D NouveauBoss::GetRightSideCurlShootBottomPt() const {
+    return this->GetRightSideCurls()->GetTranslationPt3D() + this->GetRightSideCurlShootBottomPtOffset();
+}
+
+inline Point3D NouveauBoss::GetBottomSphereShootPt() const {
+    Point3D pt = this->GetBottomHexSphere()->GetTranslationPt3D();
     pt[1] += BOTTOM_SPHERE_SHOOT_OFFSET_Y;
     return pt;
+}
+
+inline Point3D NouveauBoss::GetBottomSphereBeamShootPt() const {
+    Point3D pt = this->GetBottomHexSphere()->GetTranslationPt3D();
+    pt[1] += BOTTOM_SPHERE_SHOOT_OFFSET_Y + 1.0f;
+    return pt;
+}
+
+inline Point2D NouveauBoss::GetLeftSideCurlHolderExplosionCenter() const {
+    Point2D pt(-ARM_CURL_CENTER_X_OFFSET, ARM_CURL_CENTER_Y_OFFSET);
+    return this->GetLeftSideHolderCurl()->GetWorldTransform() * pt;
+}
+
+inline Point2D NouveauBoss::GetRightSideCurlHolderExplosionCenter() const {
+    Point2D pt(-ARM_CURL_CENTER_X_OFFSET, ARM_CURL_CENTER_Y_OFFSET);
+    return this->GetRightSideHolderCurl()->GetWorldTransform() * pt;
+}
+
+inline Point2D NouveauBoss::GetTopDomeExplosionCenter() const {
+    Point2D pt(0, TOP_SPHERE_CENTER_Y_OFFSET);
+    return this->GetTopDome()->GetWorldTransform() * pt;
 }
 
 inline Collision::AABB2D NouveauBoss::GetMovementAABB() const {

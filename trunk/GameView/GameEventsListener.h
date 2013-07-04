@@ -37,6 +37,8 @@ public:
 	void PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile);
 	void PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ProjectileDeflectedByPaddleShieldEvent(const Projectile& projectile, const PlayerPaddle& paddle);
+    void PaddleHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
+    void PaddleShieldHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
 
 	// Ball/Block related events
 	void BallDiedEvent(const GameBall& deadBall);
@@ -47,6 +49,7 @@ public:
 	void BallShotEvent(const GameBall& shotBall);
 	void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block);
     void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet);
+    void ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);
 	void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);

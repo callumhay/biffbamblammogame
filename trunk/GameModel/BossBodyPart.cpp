@@ -13,7 +13,7 @@
 #include "MineProjectile.h"
 
 BossBodyPart::BossBodyPart(const BoundingLines& localBounds) :
-AbstractBossBodyPart(), localBounds(localBounds), isDestroyed(false),
+AbstractBossBodyPart(), localBounds(localBounds), isDestroyed(false), collisionsDisabled(false),
 collisionVelocity(0,0), externalAnimationVelocity(0,0) {
 
     this->rgbaAnim.SetInterpolantValue(ColourRGBA(1,1,1,1));
@@ -25,8 +25,11 @@ BossBodyPart::~BossBodyPart() {
 }
 
 void BossBodyPart::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
-	/*
-    // TODO:
+	UNUSED_PARAMETER(hitPoint);
+    UNUSED_PARAMETER(impactDir);
+    UNUSED_PARAMETER(rays);
+    /*
+    // TODO?
 
     // If this body part is frozen then there are reflection/refraction rays...
     if (this->HasStatus(BossBodyPart::FrozenStatus)) {
@@ -50,6 +53,7 @@ void BossBodyPart::TickBeamCollision(double dT, const BeamSegment* beamSegment, 
 }
 
 bool BossBodyPart::IsOrContainsPart(const AbstractBossBodyPart* part, bool recursiveSearch) const {
+    UNUSED_PARAMETER(recursiveSearch);
     if (this == part) {
         return true;
     }
@@ -81,9 +85,11 @@ void BossBodyPart::RemoveAllAttachedProjectiles() {
 
 void BossBodyPart::GetFrozenReflectionRefractionRays(const Point2D& impactPt, const Vector2D& currDir,
                                                      std::list<Collision::Ray2D>& rays) const {
+    UNUSED_PARAMETER(impactPt);
+    UNUSED_PARAMETER(currDir);
+    UNUSED_PARAMETER(rays);
 
     // TODO.. do this based on the bounds of the body part...
-    
 }
 
 void BossBodyPart::OnTransformUpdate() {

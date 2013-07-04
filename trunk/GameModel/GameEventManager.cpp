@@ -80,6 +80,20 @@ void GameEventManager::ActionProjectileDeflectedByPaddleShield(const Projectile&
 	}	
 }
 
+void GameEventManager::ActionPaddleHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleHitByBeamEvent(paddle, beam, beamSegment);
+    }	
+}
+
+void GameEventManager::ActionPaddleShieldHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleShieldHitByBeamEvent(paddle, beam, beamSegment);
+    }	
+}
+
 // Action for when a ball has died (gone out of bounds)
 void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
@@ -149,6 +163,14 @@ void GameEventManager::ActionProjectileSafetyNetCollision(const Projectile& proj
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
 		(*listenerIter)->ProjectileSafetyNetCollisionEvent(projectile, safetyNet);
 	}
+}
+
+void GameEventManager::ActionProjectileBossCollision(const Projectile& projectile, const Boss& boss,
+                                                     const BossBodyPart& collisionPart) {
+     std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+     for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+         (*listenerIter)->ProjectileBossCollisionEvent(projectile, boss, collisionPart);
+     }
 }
 
 // Action for when the ball collides with a block in the level

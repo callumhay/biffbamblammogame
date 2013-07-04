@@ -31,7 +31,7 @@ float GameBall::FastestSpeedWithBoost = GameBall::NormalSpeed + 14.0f;
 const float GameBall::DEFAULT_BALL_RADIUS = 0.5f;
 
 // Minimum angle a ball can be to the normal when it comes off something
-const float GameBall::MIN_BALL_ANGLE_IN_DEGS = 8.0f;
+const float GameBall::MIN_BALL_ANGLE_IN_DEGS = 5.0f;
 const float GameBall::MIN_BALL_ANGLE_IN_RADS = Trig::degreesToRadians(MIN_BALL_ANGLE_IN_DEGS);
 
 // Ball size change related constants

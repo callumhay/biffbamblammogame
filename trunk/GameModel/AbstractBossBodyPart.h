@@ -65,7 +65,7 @@ public:
     //virtual void TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses) = 0;
 
     virtual bool GetIsDestroyed() const = 0;
-    virtual void SetAsDestroyed() = 0;
+    virtual void SetDestroyed(bool isDestroyed) = 0;
 
     virtual Collision::AABB2D GenerateWorldAABB() const = 0;
 
