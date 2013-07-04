@@ -21,6 +21,7 @@
 
 #include "BossAIState.h"
 #include "GameLevel.h"
+#include "PrismBlock.h"
 
 class NouveauBoss;
 class BossBodyPart;
@@ -49,32 +50,87 @@ protected:
     AnimationMultiLerp<Vector3D> angryMoveAnim;
 
     // State-related variables
-    enum AIState { MoveToTargetStopAndShootAIState, RapidFireAIState, PrepLaserBeamAttackAIState, LaserBeamAttackAIState,
-                   LostLeftArmAIState, LostRightArmAIState, BothArmsLostAIState, HurtTopAIState };
+    enum AIState { MoveToTargetStopAndShootAIState, ArcSprayFireAIState, RapidFireSweepAIState, 
+                   MoveToLaserTargetableLocationAIState, PrepLaserBeamAttackAIState, LaserBeamAttackAIState,
+                   BrutalMoveAndShootAIState, LostLeftArmAIState, LostRightArmAIState, BothArmsLostAIState, HurtTopAIState,
+                   TopLostAIState, FinalDeathThroesAIState };
     AIState currState;
 
     // State-specific variables
+    
+    // MoveToTargetStopAndShootAIState
     Point2D startPosition;           // The position the boss started in before its current movement
     Point2D targetPosition;          // The position the boss is moving towards
     int numLinearMovements;          // The number of linear movements the boss will make before going to the next state
     double waitingAtTargetCountdown; // Time to wait at the current targetPosition before choosing a new one and moving to it
     double timeUntilNextLaserWhileWaitingAtTarget; // Time until the boss fires the next laser while waiting at it's target
+    
+    // RapidFireSweepAIState
+    double rapidFireSweepLaserFireCountdown; // Time to wait between each laser that fires in rapid succession
+    Vector2D currRapidFireShootDir;          // Used to track the current direction of the lasers being fired
+    double totalRapidFireAngleChange;        // Used to track the total angle of change that has occurred 
+                                             // to currRapidFireShootDir so we know when to stop
+    enum SweepDirection { LeftToRightDir = 0, RightToLeftDir, NumSweepDirections};
+    SweepDirection rapidFireSweepDir; // The direction that the lasers move in when being fired in rapid succession
+
+    // PrepLaserBeamAttackAIState, LaserBeamAttackAIState
+    enum LaserBeamFireLocation { LeftSideTop = 0, LeftSideBottom, CenterBottom, RightSideTop, RightSideBottom, NumLaserBeamFiringLocations };
+    std::list<LaserBeamFireLocation> firingLocations;
+    double timeBetweenLaserBeamPrepsCountdown;
+    std::list<std::pair<LaserBeamFireLocation, Collision::Ray2D> > laserBeamRaysToFire;
+    double timeBetweenLastPrepAndFireCountdown;
+    double countdownToNextLaserBeamFiring;
+    double countdownWaitForLastBeamToFinish;
 
     virtual void SetState(NouveauBossAI::AIState newState) = 0;
 
+    // MoveToTargetStopAndShootAIState template methods
     virtual int GenerateNumMovements() const = 0;
     virtual double GenerateWaitAtTargetTime() const = 0;
-    virtual double GetTimeBetweenLasersWhileWaitingAtTarget() const = 0;
+    virtual double GenerateTimeBetweenLasersWhileWaitingAtTarget() const = 0;
     virtual float GetMaxMoveSpeedBetweenTargets() const = 0;
+
+    // RapidFireSweepAIState template methods
+    virtual double GenerateTimeBetweenRapidFireSweepLasers() const = 0;
+    virtual double GetRapidFireAngleSpeedInDegsPerSec() const = 0;
+
+    // PrepLaserBeamAttackAIState, LaserBeamAttackAIState template methods
+    virtual int GenerateNumLaserBeamsToFire() const { return 1; }
+    virtual double GetTimeBetweenLaserBeamPreps() const { return 0.75; } // This must be constant
+    virtual double GenerateTimeBetweenLaserBeamLastPrepAndFire() const { return 1.5; }
+    virtual double GetTimeBetweenLaserBeamFirings() const { return 0.25f; } // This must be constant
+    
 
     virtual void GoToNextRandomAttackState() = 0;
 
+    void ExecuteLaserArcSpray(const Point2D& originPos, GameModel* gameModel);
+
+    Point2D ChooseBossPositionForPlayerToHitDomeWithLasers(bool inMiddleXOfLevel) const;
     Point2D ChooseTargetPosition(const Point2D& startPos) const;
     void ShootRandomLaserBullet(GameModel* gameModel);
+    void ShootRandomBottomSphereLaserBullet(GameModel* gameModel);
+    void ShootRandomSideLaserBullet(GameModel* gameModel);
+    void ShootRandomLeftSideLaserBullet(GameModel* gameModel);
+    void ShootRandomRightSideLaserBullet(GameModel* gameModel);
+    bool MoveToTargetPosition();
+
+    static bool IsWorthwhileShotAtSplitterPrism(const Vector2D& shootDir) {
+        return Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
+            Vector2D::Dot(shootDir, Vector2D(0,-1)))))) <= PrismBlock::REFLECTION_REFRACTION_SPLIT_ANGLE;
+    }
+
+    void OnSetStateMoveToTargetStopAndShoot();
+    void OnSetRapidFireSweep();
+    void OnSetMoveToLaserTargetableLocation();
+    void OnSetStatePrepLaserBeamAttack();
+    void OnSetStateLaserBeamAttack();
 
     // State-specific methods
-    void OnSetStateMoveToTargetStopAndShoot();
     void ExecuteMoveToTargetStopAndShootState(double dT, GameModel* gameModel);
+    void ExecuteRapidFireSweepState(double dT, GameModel* gameModel);
+    void ExecuteMoveToLaserTargetableLocationState();
+    void ExecutePrepLaserBeamAttackState(double dT, GameModel* gameModel);
+    void ExecuteLaserBeamAttackState(double dT, GameModel* gameModel);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(NouveauBossAI);
@@ -96,6 +152,7 @@ private:
 
     static const float MAX_MOVE_SPEED;
     static const float DEFAULT_ACCELERATION;
+    static const float RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND;
 
     static const double SIDE_FRILL_FADEOUT_TIME;
     static const double ARM_FADE_TIME;
@@ -119,6 +176,16 @@ private:
     // State-specific variables
     AnimationMultiLerp<Vector3D> lostLeftArmAnim;
     AnimationMultiLerp<Vector3D> lostRightArmAnim;
+    double arcLaserSprayFireCountdown;
+
+    int GenerateNumLaserBeamsToFire() const { return 1; }
+    double GetTimeBetweenLaserBeamPreps() const { return 0.5; } // This must be constant
+    double GenerateTimeBetweenLaserBeamLastPrepAndFire() const { return 2.5; }
+    double GetTimeBetweenLaserBeamFirings() const { return 1.0f; } // This must be constant
+
+    double GenerateTimeBetweenArcSprayLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.33) + 0.75; }
+    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2) + 0.085; }
+    double GetRapidFireAngleSpeedInDegsPerSec() const { return RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND; }
 
     void KillLeftArm();
     void KillRightArm();
@@ -127,7 +194,7 @@ private:
 
     int GenerateNumMovements() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 8) + 4; }
     double GenerateWaitAtTargetTime() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 4.0) + 1.0; }
-    double GetTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2) + 0.25; }
+    double GenerateTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.3) + 0.33; }
     float GetMaxMoveSpeedBetweenTargets() const { return MAX_MOVE_SPEED; }
     float GetAccelerationMagnitude() const { return DEFAULT_ACCELERATION; }
 
@@ -139,12 +206,10 @@ private:
     void UpdateState(double dT, GameModel* gameModel);
 
     // State-specific methods
-    void ExecuteRapidFireState(double dT, GameModel* gameModel);
-    void ExecutePrepLaserBeamAttackState(double dT, GameModel* gameModel);
-    void ExecuteLaserBeamAttackState(double dT, GameModel* gameModel);
-    void ExecuteLostLeftArmState(double dT, GameModel* gameModel);
-    void ExecuteLostRightArmState(double dT, GameModel* gameModel);
-    void ExecuteBothArmsLostState(double dT, GameModel* gameModel);
+    void ExecuteArcSprayFireState(double dT, GameModel* gameModel);
+    void ExecuteLostLeftArmState(double dT);
+    void ExecuteLostRightArmState(double dT);
+    void ExecuteBothArmsLostState(double dT);
 
     AnimationMultiLerp<Vector3D> GenerateArmDeathTranslationAnimation(bool isLeftArm) const;
     AnimationMultiLerp<float> GenerateArmDeathRotationAnimation(bool isLeftArm) const;
@@ -167,14 +232,33 @@ private:
     static const float TOP_SPHERE_LIFE_POINTS;
     static const float MAX_MOVE_SPEED;
     static const float DEFAULT_ACCELERATION;
+    static const float RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND;
 
+    static const float TOP_DEATH_FADE_TIME;
+
+    BossBodyPart* topDome;
+    BossBodyPart* gazebo;
     BossWeakpoint* topSphereWeakpt;
+    AnimationMultiLerp<Vector3D> topHurtAnim;
 
     float GetTotalLifePercent() const;
 
+    int GenerateNumLaserBeamsToFire() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 2) + ((this->GetTotalLifePercent() < 1.0) ? 2 : 1); }
+    double GetTimeBetweenLaserBeamPreps() const { return 1.0; } // This must be constant
+    double GenerateTimeBetweenLaserBeamLastPrepAndFire() const { return 1.5; }
+    double GetTimeBetweenLaserBeamFirings() const { return 0.75f; } // This must be constant
+
+    int GenerateNumArcLaserFireMovements() { return (Randomizer::GetInstance()->RandomUnsignedInt() % 2) + 2; }
+    double GenerateArcLaserTimeToWaitAtTarget() { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5) + 0.5; }
+    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.16) + 0.07; }
+    double GetRapidFireAngleSpeedInDegsPerSec() const { return RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND; }
+
+    AnimationMultiLerp<float> GenerateTopDeathRotationAnimation();
+    AnimationMultiLerp<Vector3D> GenerateTopDeathTranslationAnimation(GameModel* gameModel, bool goLeft);
+
     int GenerateNumMovements() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 5) + 4; }
     double GenerateWaitAtTargetTime() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 3.5) + 0.75; }
-    double GetTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2) + 0.2; }
+    double GenerateTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2) + 0.2; }
     float GetMaxMoveSpeedBetweenTargets() const { return MAX_MOVE_SPEED; }
     float GetAccelerationMagnitude() const { return DEFAULT_ACCELERATION; }
 
@@ -183,17 +267,65 @@ private:
     void SetState(NouveauBossAI::AIState newState);
     void UpdateState(double dT, GameModel* gameModel);
 
+    void ExecuteArcSprayFireState(double dT, GameModel* gameModel);
+    void ExecuteHurtTopState(double dT, GameModel* gameModel);
+    void ExecuteTopLostState(double dT, GameModel* gameModel);
+
     DISALLOW_COPY_AND_ASSIGN(GlassDomeAI);
 };
 
-/*
-class TopBottomSphereAI : public NouveauBossAI {
+
+class TopSphereAI : public NouveauBossAI {
 public:
+    TopSphereAI(NouveauBoss* boss);
+    ~TopSphereAI();
+
+    // Inherited from NouveauBossAI/BossAIState
+    void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
+    void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
+    void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
+
 private:
+    static const float TOP_SPHERE_LIFE_POINTS;
+    static const float TOP_SPHERE_DAMAGE_ON_HIT;
+    static const float MAX_MOVE_SPEED;
+    static const float DEFAULT_ACCELERATION;
+    static const float RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND;
+
+    BossWeakpoint* topSphereWeakpt;
+    AnimationMultiLerp<Vector3D> topHurtAnim;
+
+    void TopSphereWasHurt(const Point2D& impactPt);
+
     bool IsStateMachineFinished() const;
+    float GetTotalLifePercent() const;
+
+    int GenerateNumLaserBeamsToFire() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 3) + ((this->GetTotalLifePercent() < 1.0) ? 2 : 1); }
+    double GetTimeBetweenLaserBeamPreps() const { return 0.85; } // This must be constant
+    double GenerateTimeBetweenLaserBeamLastPrepAndFire() const { return 1.2; }
+    double GetTimeBetweenLaserBeamFirings() const { return 0.66f; } // This must be constant
+
+    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.125) + 0.06; }
+    double GetRapidFireAngleSpeedInDegsPerSec() const { return RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND; }
+
+    int GenerateNumMovements() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 5) + 3; }
+    double GenerateWaitAtTargetTime() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 2.5) + 0.75; }
+    double GenerateTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.25) + 0.13; }
+    float GetMaxMoveSpeedBetweenTargets() const { return MAX_MOVE_SPEED; }
+    float GetAccelerationMagnitude() const { return DEFAULT_ACCELERATION; }
+
+    void GoToNextRandomAttackState();
+
+    void SetState(NouveauBossAI::AIState newState);
+    void UpdateState(double dT, GameModel* gameModel);
+
+    void ExecuteBrutalMoveAndShootState(double dT, GameModel* gameModel);
+    void ExecuteHurtTopState(double dT, GameModel* gameModel);
+    void ExecuteFinalDeathThroesState();
+
+    DISALLOW_COPY_AND_ASSIGN(TopSphereAI);
 };
 
-*/
 
 }; // namespace nouveaubossai
 

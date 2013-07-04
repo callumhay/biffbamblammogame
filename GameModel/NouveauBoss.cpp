@@ -11,6 +11,7 @@
 
 #include "NouveauBoss.h"
 #include "NouveauBossAIStates.h"
+#include "TargetedRefractiveBossBodyPart.h"
 
 using namespace nouveaubossai;
 
@@ -23,13 +24,21 @@ const float NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT  = 2.480f;
 const float NouveauBoss::TOP_ENCLOSURE_GAZEBO_WIDTH   = 3.972f;
 const float NouveauBoss::TOP_ENCLOSURE_DOME_HEIGHT    = 1.555f;
 const float NouveauBoss::TOP_ENCLOSURE_DOME_TOP_WIDTH = 1.312f;
+const float NouveauBoss::TOP_ENCLOSURE_DOME_BOTTOM_WIDTH = 3.611f;
+const float NouveauBoss::TOP_SPHERE_WIDTH  = 2.687f;
+const float NouveauBoss::TOP_SPHERE_HEIGHT = 2.780f;
 
 const float NouveauBoss::ARM_SPHERE_HOLDER_CURL_WIDTH = 5.485f;
+const float NouveauBoss::ARM_SPHERE_HOLDER_CURL_HEIGHT = 1.8f;
 
-const float NouveauBoss::MIN_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 5  + 3.75f * GameBall::DEFAULT_BALL_RADIUS;
-const float NouveauBoss::MAX_X_BOUNDS_WITH_PADDING = LevelPiece::PIECE_WIDTH * 18 - 3.75f * GameBall::DEFAULT_BALL_RADIUS;
-const float NouveauBoss::MIN_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 8;
-const float NouveauBoss::MAX_Y_BOUNDS_WITH_PADDING = LevelPiece::PIECE_HEIGHT * 30;
+const float NouveauBoss::BOTTOM_SPHERE_LASER_BEAM_RADIUS    = 1.168f;
+const float NouveauBoss::SIDE_CURL_TOP_LASER_BEAM_RADIUS    = 0.3f;
+const float NouveauBoss::SIDE_CURL_BOTTOM_LASER_BEAM_RADIUS = 0.35f;
+
+const float NouveauBoss::MIN_X_BOUNDS_WITH_PADDING = (LEVEL_NUM_PIECES_WIDTH  - 19) * LevelPiece::PIECE_WIDTH  + 3.75f * GameBall::DEFAULT_BALL_RADIUS;
+const float NouveauBoss::MAX_X_BOUNDS_WITH_PADDING = (LEVEL_NUM_PIECES_WIDTH  - 6)  * LevelPiece::PIECE_WIDTH  - 3.75f * GameBall::DEFAULT_BALL_RADIUS;
+const float NouveauBoss::MIN_Y_BOUNDS_WITH_PADDING = (LEVEL_NUM_PIECES_HEIGHT - 24) * LevelPiece::PIECE_HEIGHT;
+const float NouveauBoss::MAX_Y_BOUNDS_WITH_PADDING = (LEVEL_NUM_PIECES_HEIGHT - 3)  * LevelPiece::PIECE_HEIGHT - 2.5f * GameBall::DEFAULT_BALL_RADIUS;
 
 const float NouveauBoss::LEFT_SIDE_CURL_SHOOT1_OFFSET_X = -2.359f;
 const float NouveauBoss::LEFT_SIDE_CURL_SHOOT1_OFFSET_Y = -0.366f;
@@ -41,33 +50,37 @@ const float NouveauBoss::RIGHT_SIDE_CURL_SHOOT1_OFFSET_Y =  NouveauBoss::LEFT_SI
 const float NouveauBoss::RIGHT_SIDE_CURL_SHOOT2_OFFSET_X = -NouveauBoss::LEFT_SIDE_CURL_SHOOT2_OFFSET_X;
 const float NouveauBoss::RIGHT_SIDE_CURL_SHOOT2_OFFSET_Y =  NouveauBoss::LEFT_SIDE_CURL_SHOOT2_OFFSET_Y;
 
-const float NouveauBoss::SIDE_CURL_SHOOT_OFFSET_Z = 0.805f;
-
+const float NouveauBoss::SIDE_CURL_SHOOT_OFFSET_Z = 1.0f;
 const float NouveauBoss::BOTTOM_SPHERE_SHOOT_OFFSET_Y = -2.250f;
 
+const float NouveauBoss::ARM_CURL_CENTER_X_OFFSET = 2.931f;
+const float NouveauBoss::ARM_CURL_CENTER_Y_OFFSET = 0.995f;
+
+const float NouveauBoss::TOP_SPHERE_CENTER_Y_OFFSET = 0.692f;
+
 const std::pair<int,int> NouveauBoss::SIDE_PRISM_IDX_PAIRS[NUM_SIDE_PRISMS] = {
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  1), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  LEVEL_NUM_PIECES_WIDTH-2),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  LEVEL_NUM_PIECES_WIDTH-1),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, 0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, LEVEL_NUM_PIECES_WIDTH-1),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, 0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, LEVEL_NUM_PIECES_WIDTH-1),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, 0), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, LEVEL_NUM_PIECES_WIDTH-1)
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  4), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  LEVEL_NUM_PIECES_WIDTH-5),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-11, 4), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-11, LEVEL_NUM_PIECES_WIDTH-5),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-16, 4), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-16, LEVEL_NUM_PIECES_WIDTH-5),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-21, 4), std::make_pair(LEVEL_NUM_PIECES_HEIGHT-21, LEVEL_NUM_PIECES_WIDTH-5)
 };
 
 const std::pair<int,int> NouveauBoss::LEFT_SIDE_PRISM_IDX_PAIRS[NUM_LEFT_SIDE_PRISMS] = {
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  1), 
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  0),  
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, 0),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, 0),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, 0)
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  4),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-11, 4),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-16, 4),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-21, 4)
 };
 
 const std::pair<int,int> NouveauBoss::RIGHT_SIDE_PRISM_IDX_PAIRS[NUM_RIGHT_SIDE_PRISMS] = {
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-4,  LEVEL_NUM_PIECES_WIDTH-2),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  LEVEL_NUM_PIECES_WIDTH-1),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-12, LEVEL_NUM_PIECES_WIDTH-1),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-18, LEVEL_NUM_PIECES_WIDTH-1),
-    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-24, LEVEL_NUM_PIECES_WIDTH-1)
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-6,  LEVEL_NUM_PIECES_WIDTH-5),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-11, LEVEL_NUM_PIECES_WIDTH-5),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-16, LEVEL_NUM_PIECES_WIDTH-5),
+    std::make_pair(LEVEL_NUM_PIECES_HEIGHT-21, LEVEL_NUM_PIECES_WIDTH-5)
 };
+
+const float NouveauBoss::Y_POS_FOR_LASER_BEAMS1 = 21.185068f;
+const float NouveauBoss::Y_POS_FOR_LASER_BEAMS2 = 16.909792f;
 
 NouveauBoss::NouveauBoss() {
 }
@@ -86,6 +99,14 @@ bool NouveauBoss::ProjectilePassesThrough(const Projectile* projectile) const {
     }
 
     return false;
+}
+
+bool NouveauBoss::ProjectileIsDestroyedOnCollision(const Projectile* projectile, BossBodyPart* collisionPart) const {
+    // Handle the special case where the player is shooting a laser at the bosses' glass dome
+    if (collisionPart == this->GetTopDome() && projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
+        return false;
+    }
+    return Boss::ProjectileIsDestroyedOnCollision(projectile, collisionPart);
 }
 
 void NouveauBoss::Init(float startingX, float startingY) {
@@ -193,7 +214,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                     BoundingLines domeBounds = BuildSemiCircleBoundingLines(HEIGHT, LOWER_MID_HEIGHT, UPPER_MID_HEIGHT, HALF_BOTTOM_WIDTH,
                         HALF_LOWER_MID_WIDTH, HALF_UPPER_MID_WIDTH, HALF_TOP_WIDTH, false);
 
-                    BossBodyPart* dome = new BossBodyPart(domeBounds);
+                    TargetedRefractiveBossBodyPart* dome = new TargetedRefractiveBossBodyPart(domeBounds, Point2D(0, -2.0f));
                     dome->Translate(Vector3D(0.0f, TOP_ENCLOSURE_GAZEBO_HEIGHT/2.0f, 0.0f));
                     topEnclosure->AddBodyPart(dome);
                     this->domeIdx = this->bodyParts.size();
@@ -320,8 +341,8 @@ void NouveauBoss::Init(float startingX, float startingY) {
                 {
                     Point2D PT0(-2.606f, 0.0f);
                     Point2D PT1(-2.606f, 1.407f);
-                    Point2D PT2(-0.984f, 2.599f);
-                    Point2D PT3(0.984f, 2.599f);
+                    Point2D PT2(-0.528f, 2.599f);
+                    Point2D PT3(0.528f, 2.599f);
                     Point2D PT4(2.606f, 1.407f);
                     Point2D PT5(3.5f, 1.407f);
 
@@ -576,6 +597,10 @@ std::vector<PrismTriangleBlock*> NouveauBoss::GetBestSidePrismCandidates(const G
 
     Vector2D shootPosToPaddleDir = paddle.GetCenterPosition() - shotOrigin;
     shootPosToPaddleDir.Normalize();
+    float rayT;
+
+    // Make a bounding circle around the paddle for aiming rays...
+    Collision::Circle2D paddleTargetCircle(paddle.GetCenterPosition(), 3*PlayerPaddle::PADDLE_WIDTH_TOTAL);
 
     if (leftSide) {
         for (int i = 0; i < NouveauBoss::NUM_LEFT_SIDE_PRISMS; i++) {
@@ -583,16 +608,20 @@ std::vector<PrismTriangleBlock*> NouveauBoss::GetBestSidePrismCandidates(const G
             laserDir = currPrism->GetCenter() - shotOrigin;
             laserDir.Normalize();
 
-            currPrism->GetReflectionRefractionRays(currPrism->GetCenter() - LevelPiece::HALF_PIECE_WIDTH * laserDir, laserDir, collisionRays);
+            Collision::Ray2D ray(shotOrigin, laserDir);
+            if (!currPrism->CollisionCheck(ray, rayT)) {
+                continue;
+            }
+
+            currPrism->GetReflectionRefractionRays(ray.GetPointAlongRayFromOrigin(rayT), laserDir, collisionRays);
             if (collisionRays.empty()) {
                 continue;
             }
 
-            // Make sure the collision ray goes in the general direction of the paddle...
-            if (Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
-                Vector2D::Dot(shootPosToPaddleDir, collisionRays.begin()->GetUnitDirection()))))) <= 15.0f) {
-                    result.push_back(currPrism);
-            }  
+            // Check to see if the collision ray will hit the paddle target circle...
+            if (Collision::IsCollision(*collisionRays.begin(), paddleTargetCircle, rayT)) {
+                result.push_back(currPrism);
+            } 
         }
     }
     if (rightSide) {
@@ -602,16 +631,20 @@ std::vector<PrismTriangleBlock*> NouveauBoss::GetBestSidePrismCandidates(const G
             laserDir = currPrism->GetCenter() - shotOrigin;
             laserDir.Normalize();
 
-            currPrism->GetReflectionRefractionRays(currPrism->GetCenter() - LevelPiece::HALF_PIECE_WIDTH * laserDir, laserDir, collisionRays);
+            Collision::Ray2D ray(shotOrigin, laserDir);
+            if (!currPrism->CollisionCheck(ray, rayT)) {
+                continue;
+            }
+
+            currPrism->GetReflectionRefractionRays(ray.GetPointAlongRayFromOrigin(rayT), laserDir, collisionRays);
             if (collisionRays.empty()) {
                 continue;
             }
 
-            // Make sure the collision ray goes in the general direction of the paddle...
-            if (Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
-                Vector2D::Dot(shootPosToPaddleDir, collisionRays.begin()->GetUnitDirection()))))) <= 15.0f) {
-                    result.push_back(currPrism);
-            }  
+            // Check to see if the collision ray will hit the paddle target circle...
+            if (Collision::IsCollision(*collisionRays.begin(), paddleTargetCircle, rayT)) {
+                result.push_back(currPrism);
+            } 
         }
     }
     
@@ -619,7 +652,7 @@ std::vector<PrismTriangleBlock*> NouveauBoss::GetBestSidePrismCandidates(const G
 }
 
 PrismBlock* NouveauBoss::GetLeftSplitterPrism(const GameLevel& level) {
-    LevelPiece* piece = level.GetCurrentLevelLayout()[7][8];
+    LevelPiece* piece = level.GetCurrentLevelLayout()[9][9];
 
     assert(piece != NULL);
     assert(piece->GetType() == LevelPiece::Prism);
@@ -627,7 +660,7 @@ PrismBlock* NouveauBoss::GetLeftSplitterPrism(const GameLevel& level) {
     return static_cast<PrismBlock*>(piece);
 }
 PrismBlock* NouveauBoss::GetRightSplitterPrism(const GameLevel& level) {
-    LevelPiece* piece = level.GetCurrentLevelLayout()[7][14];
+    LevelPiece* piece = level.GetCurrentLevelLayout()[9][15];
 
     assert(piece != NULL);
     assert(piece->GetType() == LevelPiece::Prism);

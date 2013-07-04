@@ -167,7 +167,7 @@ public:
 	/**
 	 * Event triggered when the ball collides with a level block. Only occurs once as the ball
 	 * collides with the block.
-	 * Arguements: ball				 - The ball as it is colliding with the block.
+	 * Arguments: ball				 - The ball as it is colliding with the block.
 	 *             block       - The block being affected by the ball.
 	 */
     virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) { UNUSED_PARAMETER(ball); UNUSED_PARAMETER(block); }
@@ -175,17 +175,32 @@ public:
 	/**
 	 * Event triggered when a projectile collides with a level block. Only occurs once as the projectile
 	 * collides with the block.
-	 * Arguements: projectile - The projectile as it is colliding with the block.
+	 * Arguments: projectile - The projectile as it is colliding with the block.
 	 *             block      - The block being affected by the projectile.
 	 */
     virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) { UNUSED_PARAMETER(projectile); UNUSED_PARAMETER(block); }
 
     /**
      * Event triggered when a projectile collides with the safety net. Occurs once just as the projectile collides.
-     * Arguements: projectile - The projectile that collided with the safety net.
+     * Arguments: projectile - The projectile that collided with the safety net.
      *             safetyNet  - The safety net that was collided with.
      */
-    virtual void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet) { UNUSED_PARAMETER(projectile); UNUSED_PARAMETER(safetyNet); }
+    virtual void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet) {
+        UNUSED_PARAMETER(projectile);
+        UNUSED_PARAMETER(safetyNet);
+    }
+
+    /**
+     * Event triggered when a projectile collides with a boss. Occurs once just as the projectile collides.
+     * Arguments: projectile    - The projectile that collided with the boss.
+     *            boss          - The boss that was collided with.
+     *            collisionPart - The specific part of the boss that was collided with.
+     */
+    virtual void ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart) {
+        UNUSED_PARAMETER(projectile);
+        UNUSED_PARAMETER(boss);
+        UNUSED_PARAMETER(collisionPart);
+    }
 
 	/**
 	 * Event triggered when a projectile hits the paddle shield and is deflected by it. Occurs once right after
@@ -197,14 +212,41 @@ public:
         UNUSED_PARAMETER(projectile);
         UNUSED_PARAMETER(paddle);
     }
-		
+
+    /**
+	 * Event triggered when a beam hits the paddle . Occurs once right after the hit.
+	 * Arguments: paddle      - The paddle whose shield deflected the projectile.
+     *            beam        - The beam that hit the paddle.
+     *            beamSegment - The beam segment of the beam that hit the paddle.
+	 */
+    virtual void PaddleHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(beam);
+        UNUSED_PARAMETER(beamSegment);
+    }
+
+	/**
+	 * Event triggered when a beam hits the paddle shield. Occurs once right after the hit.
+	 * Arguments: paddle      - The paddle whose shield deflected the projectile.
+     *            beam        - The beam that hit the paddle.
+     *            beamSegment - The beam segment of the beam that hit the paddle.
+	 */
+    virtual void PaddleShieldHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(beam);
+        UNUSED_PARAMETER(beamSegment);
+    }
+
 	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
 	 * collides with the paddle.
-	 * Arguements: ball   - The ball as it is colliding with the player paddle.
+	 * Arguments: ball   - The ball as it is colliding with the player paddle.
 	 *             paddle - The paddle as it is colliding with the ball.
-   */
-    virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) { UNUSED_PARAMETER(ball); UNUSED_PARAMETER(paddle); }
+     */
+    virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
+        UNUSED_PARAMETER(ball);
+        UNUSED_PARAMETER(paddle);
+    }
 
 	/**
 	 * Event triggered when two balls collide. Only occurs once as a ball collides with another.

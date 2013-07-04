@@ -510,14 +510,15 @@ void GameModel::CollisionOccurred(Projectile* projectile, Boss* boss, BossBodyPa
     assert(boss != NULL);
     assert(bossPart != NULL);
 
-	bool alreadyCollided = projectile->IsLastThingCollidedWith(bossPart) || projectile->IsAttachedToSomething();
+    bool alreadyCollided = projectile->IsLastThingCollidedWith(bossPart) || projectile->IsAttachedToSomething();
     if (!alreadyCollided) {
-        projectile->BossCollisionOccurred(boss, bossPart);
-        // EVENT: Projectile-boss collision
-        //GameEventManager::Instance()->ActionProjectileBossCollision(projectile, *boss, *bossPart);
-    }
 
-    boss->CollisionOccurred(this, projectile, bossPart);
+        boss->CollisionOccurred(this, projectile, bossPart);
+        projectile->BossCollisionOccurred(boss, bossPart);
+
+        // EVENT: Projectile-boss collision
+        GameEventManager::Instance()->ActionProjectileBossCollision(*projectile, *boss, *bossPart);
+    }
 }
 
 void GameModel::ToggleAllowPaddleBallLaunching(bool allow) {
@@ -768,7 +769,7 @@ void GameModel::DoProjectileCollisions(double dT) {
 
                     this->CollisionOccurred(currProjectile, boss, hitBodyPart);
                     
-                    if (boss->ProjectileIsDestroyedOnCollision(currProjectile)) {
+                    if (boss->ProjectileIsDestroyedOnCollision(currProjectile, hitBodyPart)) {
                         // Dispose of the projectile...
                         iter = gameProjectiles.erase(iter);
                         PROJECTILE_CLEANUP(currProjectile);
@@ -931,10 +932,8 @@ void GameModel::UpdateActiveProjectiles(double seconds) {
  * active beams (if any) in the game during the current tick.
  */
 void GameModel::UpdateActiveBeams(double seconds) {
-	const GameLevel* currentLevel = this->GetCurrentLevel();
-	std::list<Beam*>& activeBeams = this->GetActiveBeams();
-	bool beamIsDead = false;
 
+	std::list<Beam*>& activeBeams = this->GetActiveBeams();
 	for (std::list<Beam*>::iterator beamIter = activeBeams.begin(); beamIter != activeBeams.end();) {
 		// Get the current beam being iterated on and execute its effect on all the
 		// level pieces it affects...
@@ -943,34 +942,35 @@ void GameModel::UpdateActiveBeams(double seconds) {
 
 		// Update the beam collisions... this needs to be done before anything or there
 		// might be level pieces that were destroyed by the ball that we are trying to access in the beam
-		currentBeam->UpdateCollisions(currentLevel);
+		currentBeam->UpdateCollisions(this);
 
-		std::list<BeamSegment*>& beamParts = currentBeam->GetBeamParts();
-		for (std::list<BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
-			BeamSegment* currentBeamSeg = *segIter;
-			assert(currentBeamSeg != NULL);
+        if (currentBeam->CanDestroyLevelPieces()) {
+		    std::list<BeamSegment*>& beamParts = currentBeam->GetBeamParts();
+		    for (std::list<BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
+			    BeamSegment* currentBeamSeg = *segIter;
+			    assert(currentBeamSeg != NULL);
 
-			// Cause the beam to collide for the given tick with the level piece, find out what
-			// happened to the level piece and act accordingly...
-			LevelPiece* collidingPiece = currentBeamSeg->GetCollidingPiece();
-			if (collidingPiece != NULL) {
-				LevelPiece* resultPiece = collidingPiece->TickBeamCollision(seconds, currentBeamSeg, this);
-				
-				// Check to see if the level is done
-				this->PerformLevelCompletionChecks();
+			    // Cause the beam to collide for the given tick with the level piece, find out what
+			    // happened to the level piece and act accordingly...
+			    LevelPiece* collidingPiece = currentBeamSeg->GetCollidingPiece();
+			    if (collidingPiece != NULL) {
+				    LevelPiece* resultPiece = collidingPiece->TickBeamCollision(seconds, currentBeamSeg, this);
+    				
+				    // Check to see if the level is done
+				    this->PerformLevelCompletionChecks();
 
-				// HACK: If we destroy a piece get out of this loop - so that if the piece is attached to
-				// another beam segment we don't try to access it and we update collisions
-				if (resultPiece != collidingPiece) {
-					break;
-				}
+				    // HACK: If we destroy a piece get out of this loop - so that if the piece is attached to
+				    // another beam segment we don't try to access it and we update collisions
+				    if (resultPiece != collidingPiece) {
+					    break;
+				    }
 
-			}
-		}
+			    }
+		    }
+        }
 
 		// Tick the beam, check for its death and clean up if necessary
-		beamIsDead = currentBeam->Tick(seconds);
-		if (beamIsDead) {
+		if (currentBeam->Tick(seconds)) {
 			beamIter = activeBeams.erase(beamIter);
 
 			// EVENT: Beam removed...
@@ -1353,42 +1353,49 @@ void GameModel::AddProjectile(Projectile* projectile) {
  * Add a beam of the given type to the model - this will be updated and tested appropriate to
  * its execution.
  */
-void GameModel::AddBeam(int beamType) {
+void GameModel::AddBeam(Beam* beam) {
+    assert(beam != NULL);
 
 	// Create the beam based on type...
-	Beam* addedBeam = NULL;
-	switch (beamType) {
-		case Beam::PaddleLaserBeam: {
+    bool success = false;
+	switch (beam->GetType()) {
+		case Beam::PaddleBeam: {
 				
 				bool foundOtherLaserBeam = false;
 				// Reset the time on the previous beam if there is one, otherwise spawn a new beam
 				for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
 					Beam* currBeam = *iter;
-					if (currBeam->GetBeamType() == Beam::PaddleLaserBeam) {
+					if (currBeam->GetType() == Beam::PaddleBeam) {
 						assert(foundOtherLaserBeam == false);
 						foundOtherLaserBeam = true;
 						currBeam->ResetTimeElapsed();
 					}
 				}
-				if (foundOtherLaserBeam) {
-					return;
-				}
-
-				addedBeam = new PaddleLaserBeam(this->GetPlayerPaddle(), this->GetCurrentLevel());
+                success = !foundOtherLaserBeam;
 			}
 			break;
 
+        case Beam::BossBeam:
+            success = true;
+            break;
+
 		default:
+            success = false;
 			assert(false);
 			return;
 	}
-	assert(addedBeam != NULL);
+	
+    if (success) {
+	    // Add the beam to the list of in-game beams
+	    this->beams.push_back(beam);
 
-	// Add the beam to the list of in-game beams
-	this->beams.push_back(addedBeam);
-
-	// EVENT: Beam creation
-	GameEventManager::Instance()->ActionBeamSpawned(*addedBeam);
+	    // EVENT: Beam creation
+	    GameEventManager::Instance()->ActionBeamSpawned(*beam);
+    }
+    else {
+        delete beam;
+        beam = NULL;
+    }
 }
 
 /**
@@ -1457,6 +1464,22 @@ void GameModel::WipePieceFromAuxLists(LevelPiece* piece) {
 			this->statusUpdatePieces.erase(findIter);
 		}
 	}
+}
+
+void GameModel::ClearSpecificBeams(const Beam::BeamType& beamType) {
+    for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end();) {
+        Beam* currBeam = *iter;
+        if (currBeam->GetType() == beamType) {
+            // EVENT: Beam is removed from the game
+            GameEventManager::Instance()->ActionBeamRemoved(*currBeam);
+            delete currBeam;
+            currBeam = NULL;
+            iter = this->beams.erase(iter);
+        }
+        else {
+             ++iter;
+        }
+    }
 }
 
 Point2D GameModel::GetAvgBallLoc() const {

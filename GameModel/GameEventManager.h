@@ -65,6 +65,8 @@ public:
 	void ActionPaddleHitByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ActionPaddleShieldHitByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ActionProjectileDeflectedByPaddleShield(const Projectile& projectile, const PlayerPaddle& paddle);
+    void ActionPaddleHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
+    void ActionPaddleShieldHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
 	void ActionBallDied(const GameBall& deadBall);
 	void ActionLastBallAboutToDie(const GameBall& ballAboutToDie);
 	void ActionLastBallExploded(const GameBall& explodedBall);
@@ -74,6 +76,7 @@ public:
     void ActionPaddleWeaponFired();
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
     void ActionProjectileSafetyNetCollision(const Projectile& projectile, const SafetyNet& safetyNet);
+    void ActionProjectileBossCollision(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
 	void ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal);

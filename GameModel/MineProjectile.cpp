@@ -87,7 +87,7 @@ void MineProjectile::Tick(double seconds, const GameModel& model) {
             this->velocityMag = this->GetMaxVelocityMagnitude();
 			this->velocityDir = this->cannonBlock->GetCurrentCannonDirection();
             this->acceleration = 0.0;
-			this->position = this->position + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
+			this->position = this->cannonBlock->GetCenter() + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
 
 			// EVENT: Mine has officially been fired from the cannon
 			GameEventManager::Instance()->ActionProjectileFiredFromCannon(*this, *this->cannonBlock);
@@ -270,9 +270,10 @@ void MineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNet) {
     assert(safetyNet != NULL);
 
     // If the mine is already attached to the safety net then ignore this
-    if (this->attachedToNet == safetyNet) {
+    if (this->IsAttachedToSomething()) {
         return;
     }
+    assert(this->attachedToNet != safetyNet);
 
     this->Land(safetyNet->GetBounds().ClosestPoint(this->GetPosition()) + Vector2D(0, SafetyNet::SAFETY_NET_HEIGHT / 2.0f));
     Projectile::SafetyNetCollisionOccurred(safetyNet);
@@ -284,9 +285,10 @@ void MineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
     assert(block != NULL);
 
     // If the mine is already attached to a piece then ignore this
-    if (this->attachedToPiece != NULL) {
+    if (this->IsAttachedToSomething()) {
         return;
     }
+    assert(this->attachedToPiece == NULL);
 
     // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
     // or if it just can't collide with the block
@@ -313,9 +315,10 @@ void MineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
 void MineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
     assert(paddle != NULL);
 
-    if (this->attachedToPaddle != NULL) {
+    if (this->IsAttachedToSomething()) {
         return;
     }
+    assert(this->attachedToPaddle == NULL);
 
     this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
     this->SetLastThingCollidedWith(paddle);
@@ -326,9 +329,10 @@ void MineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
 void MineProjectile::BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart) {
     assert(boss != NULL);
 
-    if (this->attachedToBoss != NULL || bossPart->GetIsDestroyed()) {
+    if (this->IsAttachedToSomething() || bossPart->GetIsDestroyed()) {
         return;
     }
+    assert(this->attachedToBoss == NULL);
 
     this->Land(bossPart->GetWorldBounds().ClosestPoint(this->GetPosition()));
     this->SetLastThingCollidedWith(bossPart);

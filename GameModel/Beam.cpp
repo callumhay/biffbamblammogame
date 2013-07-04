@@ -13,14 +13,17 @@
 #include "LevelPiece.h"
 #include "PortalBlock.h"
 #include "PlayerPaddle.h"
+#include "GameModel.h"
 #include "GameLevel.h"
 #include "GameEventManager.h"
 
+const double Beam::MIN_ALLOWED_LIFETIME_IN_SECS = 0.75;
 const float Beam::MIN_BEAM_RADIUS = 0.05f;
 const int   Beam::MIN_DMG_PER_SEC = 25;
 
-Beam::Beam(BeamType type, int dmgPerSec, double lifeTimeInSec) : 
-type(type), baseDamagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(lifeTimeInSec) {
+Beam::Beam(int dmgPerSec, double lifeTimeInSec) : 
+baseDamagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(lifeTimeInSec), beamAlpha(1) {
+    assert(lifeTimeInSec >= MIN_ALLOWED_LIFETIME_IN_SECS);
 };
 
 Beam::~Beam() {
@@ -57,6 +60,139 @@ bool Beam::BeamHasChanged(const std::list<BeamSegment*>& oldBeamSegs, const std:
 	}
 
 	return false;
+}
+
+void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& initialBeamSegs, const GameModel* gameModel) {
+    assert(gameModel != NULL);
+   
+    const GameLevel* level = gameModel->GetCurrentLevel();
+    assert(level != NULL);
+
+    // Keep a temporary list of all the beam segments that we are dealing with in the current
+    // iteration of building all of the beam parts, we start with the provided initial beams segments
+    std::list<BeamSegment*> newBeamSegs;
+    newBeamSegs.insert(newBeamSegs.begin(), initialBeamSegs.begin(), initialBeamSegs.end());
+
+    // Keep a copy of the old beam segments (for comparison afterwards)
+    std::list<BeamSegment*> oldBeamSegments = this->beamParts;
+    this->beamParts.clear();
+
+    // Keep track of the pieces collided with to watch out for bad loops (e.g., infinite loops of beams through prisms)
+    std::set<const LevelPiece*> piecesCollidedWith;
+
+    // Loop as long as there are new beam segments to add to this beam
+    while (newBeamSegs.size() > 0) {
+
+        // Grab the current beam segment from the front of the list of new segments
+        BeamSegment* currBeamSegment = newBeamSegs.front();
+        newBeamSegs.pop_front();
+
+        // Fire the current beam segment into the level in order to figure out what piece it hit
+        // If new beam segments are spawned add them to the list of new beam segments to deal with
+        // IMPORTANT NOTE / TODO: For now this MUST be done before checking for collisions with the paddle... combine all collisions
+        // in a single function in the future!
+        LevelPiece* pieceCollidedWith = currBeamSegment->FireBeamSegmentIntoLevel(level);
+
+        // Check for collisions with the paddle too
+        PlayerPaddle* playerPaddle = gameModel->GetPlayerPaddle();
+        assert(playerPaddle != NULL);
+        float minRayT = std::numeric_limits<float>::max();
+
+        // Note: If the beam is a paddle laser beam and the beam segment is an origin
+        // segment then we don't do collisions with the paddle! 
+        // Also, if the beam has faded-out past a certain point then paddle collisions no longer happen
+        if (this->GetType() == Beam::PaddleBeam && this->beamParts.size() < initialBeamSegs.size() ||
+            this->beamAlpha < 0.33f) {
+            // No paddle collisions for the current beam segment!
+        }
+        else {
+            // Fire multiple rays of the current beam segment...
+            const Collision::Ray2D& beamSegRayMiddle = currBeamSegment->GetBeamSegmentRay();
+            
+            // Create other parallel rays to test for paddle collision...
+            Vector2D perpendicularDir(-beamSegRayMiddle.GetUnitDirection()[1], beamSegRayMiddle.GetUnitDirection()[0]);
+            Collision::Ray2D beamSegRayOuter1(beamSegRayMiddle.GetOrigin() + currBeamSegment->GetRadius() * perpendicularDir, beamSegRayMiddle.GetUnitDirection());
+            Collision::Ray2D beamSegRayOuter2(beamSegRayMiddle.GetOrigin() - currBeamSegment->GetRadius() * perpendicularDir, beamSegRayMiddle.GetUnitDirection());
+
+            float tempRayT;
+            playerPaddle->CollisionCheck(beamSegRayMiddle, minRayT);
+            playerPaddle->CollisionCheck(beamSegRayOuter1, tempRayT);
+            minRayT = std::min<float>(minRayT, tempRayT);
+            playerPaddle->CollisionCheck(beamSegRayOuter2, tempRayT);
+            minRayT = std::min<float>(minRayT, tempRayT);
+        }
+
+        if (minRayT <= currBeamSegment->GetLength()) {
+            // Set the new beam ending point - This MUST be done before telling the paddle it was hit!!
+            currBeamSegment->SetLength(minRayT);
+            // There's a collision with the paddle, stop all collisions here
+            playerPaddle->HitByBeam(*this, *currBeamSegment);
+        }
+        else if (pieceCollidedWith != NULL) {
+            // There was a piece that the beam collided with...
+
+            // Check to see if the piece was already hit by this beam...
+            std::pair<std::set<const LevelPiece*>::iterator, bool> insertResult = piecesCollidedWith.insert(pieceCollidedWith);
+            if (insertResult.second) {
+
+                // First time the level piece was hit by this beam - we are allowed to spawn more beams...
+                // The piece may generate a set of spawned beams based on whether or not it reflects/refracts light
+                const Collision::Ray2D& currBeamRay = currBeamSegment->GetBeamSegmentRay();
+                std::list<Collision::Ray2D> spawnedRays;
+                pieceCollidedWith->GetReflectionRefractionRays(currBeamSegment->GetEndPoint(), currBeamRay.GetUnitDirection(), spawnedRays);
+
+                // In the case where a portal block is collided with then we need to account for its sibling
+                // as a collider for the new beam we spawn
+                if (pieceCollidedWith->GetType() == LevelPiece::Portal) {
+                    PortalBlock* portalBlock = static_cast<PortalBlock*>(pieceCollidedWith);
+                    assert(portalBlock != NULL);
+                    pieceCollidedWith = portalBlock->GetSiblingPortal();
+                    insertResult = piecesCollidedWith.insert(pieceCollidedWith);
+                }
+
+                if (spawnedRays.size() >= 1) {
+                    // The radius of the spawned beams will be a fraction of the current radius based
+                    // on the number of reflection/refraction rays
+                    const float NEW_BEAM_SEGMENT_RADIUS = this->beamAlpha * std::max<float>(currBeamSegment->GetRadius() / static_cast<float>(spawnedRays.size()), Beam::MIN_BEAM_RADIUS);
+                    const int   NEW_BEAM_DMG_PER_SECOND = this->beamAlpha * std::max<int>(Beam::MIN_DMG_PER_SEC, currBeamSegment->GetDamagePerSecond() / spawnedRays.size());
+
+                    // Now add the new beams to the list of beams we need to fire into the level and repeat this whole process with
+                    std::list<BeamSegment*> spawnedBeamSegs;
+                    for (std::list<Collision::Ray2D>::iterator iter = spawnedRays.begin(); iter != spawnedRays.end(); ++iter) {
+                        newBeamSegs.push_back(new BeamSegment(*iter, NEW_BEAM_SEGMENT_RADIUS, NEW_BEAM_DMG_PER_SECOND, pieceCollidedWith));
+                    }
+                }
+            }
+        }
+        else {
+            // In a case where there was no piece colliding it means that the beam shot out of the level
+        }
+
+        // TODO: Bosses... ?
+
+        // The current beam segment has had its collisions taken care of and is now properly
+        // setup, insert it into the list of beam segments associated with this beam
+        this->beamParts.push_back(currBeamSegment);
+    }
+
+    // If there were no old beam segments then this is the first spawn of this beam
+    // and we shouldn't proceed any further (other wise we will update a beam that doesn't exist yet)
+    if (oldBeamSegments.size() == 0) {
+        return;
+    }
+
+    // Check to see if there was any change...
+    if (this->BeamHasChanged(oldBeamSegments, this->beamParts)) {
+        // EVENT: Beam updated/changed
+        GameEventManager::Instance()->ActionBeamChanged(*this);
+
+        // Clean up the old beam
+        this->CleanUpBeam(oldBeamSegments);
+    }
+    else {
+        this->CleanUpBeam(this->beamParts);
+        this->beamParts = oldBeamSegments;
+    }
 }
 
 /**
@@ -97,7 +233,17 @@ bool Beam::Tick(double dT) {
 			(*iter)->Tick(dT);
 		}
 		this->currTimeElapsed += dT;
+        this->currTimeElapsed = std::min<float>(this->currTimeElapsed, this->totalLifeTime);
 	}
+
+    if (this->currTimeElapsed < this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS) {
+        this->beamAlpha = 1.0f;
+    }
+    else {
+        this->beamAlpha = NumberFuncs::LerpOverTime(this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS, this->totalLifeTime, 1.0f, 0.0f, this->currTimeElapsed);
+    }
+    assert(this->beamAlpha >= 0.0f && this->beamAlpha <= 1.0f);
+
 	return false;
 }
 
@@ -110,14 +256,23 @@ ignorePiece(ignorePiece), damagePerSecond(beamDmgPerSec) {
 void BeamSegment::SetRadius(float radius) { 
 	this->radius = radius;  
 
+    static const int NUM_ANIMATION_CHANGES = 5;
+
 	std::vector<double> animationTimes;
-	animationTimes.push_back(0.0);
-	animationTimes.push_back(0.3);
-	animationTimes.push_back(0.6);
+	animationTimes.reserve(1 + 2 * NUM_ANIMATION_CHANGES);
+    animationTimes.push_back(0.0);
+    for (int i = 0; i < NUM_ANIMATION_CHANGES; i++) {
+        animationTimes.push_back(animationTimes.back() + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1f + 0.05f);
+	    animationTimes.push_back(animationTimes.back() + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.125f + 0.1f);
+    }
+
 	std::vector<float> animationRadii;
+    animationRadii.reserve(animationTimes.size());
 	animationRadii.push_back(this->radius);
-	animationRadii.push_back(0.9f * this->radius);
-	animationRadii.push_back(this->radius);
+    for (int i = 0; i < NUM_ANIMATION_CHANGES; i++) {
+	    animationRadii.push_back((Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2f + 0.75f) * this->radius);
+	    animationRadii.push_back(this->radius);
+    }
 
 	radiusPulseAnim = AnimationMultiLerp<float>(&this->radius);
 	radiusPulseAnim.SetLerp(animationTimes, animationRadii);

@@ -24,6 +24,7 @@ private:
 	float rotationSpd;
 	float startRot, numRots;
 	RotationDirection rotDir;
+    bool useRotationSpd;
 
 public:
 	ESPParticleRotateEffector(float rotationSpd, RotationDirection dir);

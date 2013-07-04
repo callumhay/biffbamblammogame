@@ -41,21 +41,25 @@ void PlayerHurtHUD::Activate(PlayerHurtHUD::PainIntensity intensity) {
 			assert(false);
 			return;
 	}
-	
-	std::vector<double> times;
-	times.reserve(2);
-	times.push_back(0.0);
-	times.push_back(totalFadeOutTime);
 
-	std::vector<float> fadeValues;
-	fadeValues.reserve(2);
-	fadeValues.push_back(this->fadeAnimation.GetInterpolantValue() + initialOverlayIntensity);
-	fadeValues.push_back(0.0f);
+	this->Activate(totalFadeOutTime, initialOverlayIntensity);
+}
 
-	this->fadeAnimation.SetLerp(times, fadeValues);
-	this->fadeAnimation.SetRepeat(false);
+void PlayerHurtHUD::Activate(double totalFadeOutTime, float initialIntensity) {
+    std::vector<double> times;
+    times.reserve(2);
+    times.push_back(0.0);
+    times.push_back(totalFadeOutTime);
 
-	this->isActive = true;
+    std::vector<float> fadeValues;
+    fadeValues.reserve(2);
+    fadeValues.push_back(this->fadeAnimation.GetInterpolantValue() + initialIntensity);
+    fadeValues.push_back(0.0f);
+
+    this->fadeAnimation.SetLerp(times, fadeValues);
+    this->fadeAnimation.SetRepeat(false);
+
+    this->isActive = true;
 }
 
 void PlayerHurtHUD::Deactivate() {

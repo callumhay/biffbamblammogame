@@ -39,6 +39,7 @@
 #include "../GameModel/PuffOfSmokeEffectInfo.h"
 #include "../GameModel/ShockwaveEffectInfo.h"
 #include "../GameModel/DebrisEffectInfo.h"
+#include "../GameModel/LaserBeamSightsEffectInfo.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -76,7 +77,9 @@ particleLargeGrowth(1.0f, 2.2f),
 particleSuperGrowth(1.0f, 5.0f),
 particleMediumShrink(1.0f, 0.25f),
 particleLargeVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 4.0f)),
-beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameViewConstants::GetInstance()->LASER_BEAM_COLOUR, 0.8f)),
+particleMedVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 3.0f)),
+
+beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameModelConstants::GetInstance()->PADDLE_LASER_BEAM_COLOUR, 0.8f)),
 slowBallColourFader(ColourRGBA(0.12f, 0.72f, 0.94f, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.15f)),
 fastBallColourFader(ColourRGBA(0.95f, 0.0f, 0.0f, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.15f)),
 
@@ -115,7 +118,7 @@ explosionRayTex(NULL),
 laserBeamTex(NULL),
 upArrowTex(NULL),
 ballTex(NULL),
-targetTex(NULL),
+circleTargetTex(NULL),
 haloTex(NULL),
 lensFlareTex(NULL),
 sparkleTex(NULL),
@@ -131,7 +134,6 @@ vapourTrailTex(NULL),
 heartTex(NULL),
 chevronTex(NULL),
 infinityTex(NULL),
-lightningAnimTex(NULL),
 circleTex(NULL),
 outlinedHoopTex(NULL),
 dropletTex(NULL) {
@@ -222,7 +224,7 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTex);
 	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->targetTex);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleTargetTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
 	assert(removed);
@@ -253,8 +255,6 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->chevronTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->infinityTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleTex);
     assert(removed);
@@ -345,30 +345,25 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
     }
 
 	// Clear beam emitters
-	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamEndEmitters.begin(); iter != this->beamEndEmitters.end(); ++iter) {
-		ESPPointEmitter* currEmitter = *iter;
-		delete currEmitter;
-		currEmitter = NULL;
-	}
-	this->beamEndEmitters.clear();
-	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamBlockOnlyEndEmitters.begin(); iter != this->beamBlockOnlyEndEmitters.end(); ++iter) {
-		ESPPointEmitter* currEmitter = *iter;
-		delete currEmitter;
-		currEmitter = NULL;
-	}
-	this->beamBlockOnlyEndEmitters.clear();
-	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamEndFallingBitsEmitters.begin(); iter != this->beamEndFallingBitsEmitters.end(); ++iter) {
-		ESPPointEmitter* currEmitter = *iter;
-		delete currEmitter;
-		currEmitter = NULL;
-	}	
-	this->beamEndFallingBitsEmitters.clear();
-	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamFlareEmitters.begin(); iter != this->beamFlareEmitters.end(); ++iter) {
-		ESPPointEmitter* currEmitter = *iter;
-		delete currEmitter;
-		currEmitter = NULL;
-	}
-	this->beamFlareEmitters.clear();
+#define BEAM_EMITTER_MAP_DELETE(mapVar) \
+    for (BeamSegEmitterMapIter iter1 = mapVar.begin(); iter1 != mapVar.end(); ++iter1) { \
+        std::vector<ESPPointEmitter*>& emitters = iter1->second; \
+        for (std::vector<ESPPointEmitter*>::iterator iter2 = emitters.begin(); iter2 != emitters.end(); ++iter2) { \
+            ESPPointEmitter* currEmitter = *iter2; \
+            delete currEmitter; \
+            currEmitter = NULL; \
+        } \
+        emitters.clear(); \
+    } \
+    mapVar.clear();
+
+    BEAM_EMITTER_MAP_DELETE(this->beamOriginEmitters);
+    BEAM_EMITTER_MAP_DELETE(this->beamEndEmitters);
+    BEAM_EMITTER_MAP_DELETE(this->beamBlockOnlyEndEmitters);
+    BEAM_EMITTER_MAP_DELETE(this->beamEndFallingBitsEmitters);
+    BEAM_EMITTER_MAP_DELETE(this->beamFlareEmitters);
+
+#undef BEAM_EMITTER_MAP_DELETE
 
 	// Clear all ball emitters
 	for (std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); ++iter1) {
@@ -424,19 +419,6 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
         }
     }
     this->boostBallEmitters.clear();
-
-    // Clear boss effects
-    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->activeBossFGEmitters.begin();
-        iter1 != this->activeBossFGEmitters.end(); ++iter1) {
-
-        std::list<ESPEmitter*>& currEmitters = iter1->second;
-        for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end(); ++iter2) {
-            ESPEmitter* currEmitter = *iter2;
-            delete currEmitter;
-            currEmitter = NULL;
-        }
-    }
-    this->activeBossFGEmitters.clear();
 }
 
 void GameESPAssets::KillAllActiveTeslaLightningArcs() {
@@ -658,9 +640,9 @@ void GameESPAssets::InitESPTextures() {
 		this->ballTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE, Texture::Trilinear));
 		assert(this->ballTex != NULL);
 	}
-	if (this->targetTex == NULL) {
-		this->targetTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALLTARGET, Texture::Trilinear));
-		assert(this->targetTex != NULL);
+	if (this->circleTargetTex == NULL) {
+		this->circleTargetTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_TARGET, Texture::Trilinear));
+		assert(this->circleTargetTex != NULL);
 	}
 	if (this->haloTex == NULL) {
 		this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
@@ -721,10 +703,6 @@ void GameESPAssets::InitESPTextures() {
     if (this->infinityTex == NULL) {
         this->infinityTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR, Texture::Trilinear));
         assert(this->infinityTex != NULL);
-    }
-    if (this->lightningAnimTex == NULL) {
-        this->lightningAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION, Texture::Trilinear));
-        assert(this->lightningAnimTex != NULL);
     }
     if (this->circleTex == NULL) {
         this->circleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE, Texture::Trilinear));
@@ -1063,7 +1041,6 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamBlastBits->SetAsPointSpriteEmitter(false);
 	this->paddleBeamBlastBits->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	this->paddleBeamBlastBits->SetEmitPosition(Point3D(0, 0, 0));
-	//this->paddleBeamBlastBits->SetParticleColour(ESPInterval(0.4f, 0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleBeamBlastBits->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	this->paddleBeamBlastBits->AddEffector(&this->particleLargeVStretch);
 	this->paddleBeamBlastBits->AddEffector(&this->beamBlastColourEffector);
@@ -1090,7 +1067,7 @@ ESPPointEmitter* GameESPAssets::CreateSpinningTargetESPEffect() {
 	spinningTarget->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.5f));
 	spinningTarget->AddEffector(&this->loopRotateEffectorCW);
 
-	bool result = spinningTarget->SetParticles(1, this->targetTex);
+	bool result = spinningTarget->SetParticles(1, this->circleTargetTex);
     UNUSED_VARIABLE(result);
 	assert(result);
 
@@ -1481,6 +1458,35 @@ void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projecti
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
             this->AddPaddleMineAttachedEffects(projectile);
+            break;
+
+        default:
+            break;
+    }
+}
+
+void GameESPAssets::AddBossHitByProjectileEffect(const Projectile& projectile, const BossBodyPart& collisionPart) {
+    switch (projectile.GetType()) {
+        case Projectile::BallLaserBulletProjectile:
+        case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile: {
+            
+            // Check to see if the collision part is reflective/refractive
+            if (collisionPart.IsReflectiveRefractive()) {
+                this->AddLaserHitPrismBlockEffect(projectile.GetPosition());
+            }
+            else {
+                Point2D hitPos = projectile.GetPosition() + 0.9f * projectile.GetHalfHeight() * projectile.GetVelocityDirection();
+                this->AddHitWallEffect(projectile, hitPos);
+            }
+            break;
+        }
+
+        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
+            if (projectile.GetVelocityMagnitude() == 0.0f) {
+                this->AddPaddleMineAttachedEffects(projectile);
+            }
             break;
 
         default:
@@ -2960,8 +2966,8 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.2f, paddle.GetHalfWidthTotal() * 0.5f));
 	starEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
 	starEmitter->SetEmitAngleInDegrees(35);
-	starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, paddle.GetHalfWidthTotal() * 0.25f));
-	starEmitter->SetParticleAlignment(ESP::ViewPlaneAligned);
+	starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	starEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	starEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()));
 	starEmitter->SetEmitPosition(Point3D(paddle.GetCenterPosition()[0] + hitPositionRelativeToPaddleCenter[0],
         paddle.GetCenterPosition()[1] + hitPositionRelativeToPaddleCenter[1], 0.0f));
@@ -3015,6 +3021,88 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 			assert(false);
 			break;
 	}
+}
+
+void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const BeamSegment& beamSegment) {
+   
+    // Choose a random bang texture
+    Texture2D* randomBangTex = this->bangTextures[Randomizer::GetInstance()->RandomUnsignedInt() % this->bangTextures.size()];
+
+    ESPInterval bangLifeInterval    = ESPInterval(2.25f);
+    ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.minValue + 0.3f, bangLifeInterval.maxValue + 0.3f);
+
+    Point3D emitCenter(beamSegment.GetEndPoint(), 0.0f);
+    emitCenter[1] += paddle.GetHalfHeight();
+
+    // Create an emitter for the bang texture
+    ESPPointEmitter* bangEffect = new ESPPointEmitter();
+
+    // Set up the emitter...
+    bangEffect->SetSpawnDelta(ESPInterval(-1, -1));
+    bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    bangEffect->SetParticleLife(bangLifeInterval);
+    bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangEffect->SetEmitPosition(emitCenter);
+
+    // Figure out some random proper orientation...
+    // Two base rotations (for variety) : 180 or 0...
+    float baseBangRotation = 0.0f;
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        baseBangRotation = 180.0f;
+    }
+    bangEffect->SetParticleRotation(ESPInterval(baseBangRotation - 10.0f, baseBangRotation + 10.0f));
+    bangEffect->SetParticleSize(ESPInterval(2.5f * paddle.GetHalfWidthTotal()), ESPInterval(1.25f * paddle.GetHalfWidthTotal()));
+    bangEffect->AddEffector(&this->particleFader);
+    bangEffect->AddEffector(&this->particleMediumGrowth);
+    bangEffect->SetParticles(1, randomBangTex);
+
+    ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
+    bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
+    bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
+    bangOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
+    bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+    bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+    bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangOnoEffect->SetEmitPosition(emitCenter);
+    bangOnoEffect->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+    bangOnoEffect->AddEffector(&this->particleFader);
+    bangOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+    // Add the single text particle to the emitter with the severity of the effect...
+    TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+    bangTextLabel.SetColour(Colour(0, 0, 0));
+    bangTextLabel.SetDropShadow(Colour(1, 1, 1), 0.1f);
+
+    bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::BADSAD, Onomatoplex::AWESOME);
+
+    // Smashy star texture particle
+    ESPPointEmitter* starEmitter = new ESPPointEmitter();
+    starEmitter->SetSpawnDelta(ESPInterval(-1));
+    starEmitter->SetInitialSpd(ESPInterval(3.0f, 5.5f));
+    starEmitter->SetParticleLife(ESPInterval(2.0f, 3.5f));
+    starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.5f, paddle.GetHalfWidthTotal()));
+    starEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
+    starEmitter->SetEmitAngleInDegrees(180);
+    starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    starEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    starEmitter->SetEmitDirection(Vector3D(-beamSegment.GetBeamSegmentRay().GetUnitDirection()));
+    starEmitter->SetEmitPosition(emitCenter);
+
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        starEmitter->AddEffector(&this->explosionRayRotatorCCW);
+    }
+    else {
+        starEmitter->AddEffector(&this->explosionRayRotatorCW);
+    }
+    starEmitter->AddEffector(&this->particleFader);
+    starEmitter->SetParticles(10, this->starTex);
+
+    this->activeGeneralEmitters.push_back(starEmitter);
+    this->activeGeneralEmitters.push_back(bangEffect);
+    this->activeGeneralEmitters.push_back(bangOnoEffect);
 }
 
 /**
@@ -3292,9 +3380,6 @@ void GameESPAssets::RemoveAllProjectileEffects() {
 void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 	assert(this->activeBeamEmitters.find(&beam) == this->activeBeamEmitters.end());
 
-	const std::list<BeamSegment*>& beamSegments = beam.GetBeamParts();
-	assert(beamSegments.size() > 0);
-
 	std::list<ESPEmitter*> beamEmitters;
 
 	// The first laser has a cool blast for where it comes out of the paddle...
@@ -3311,87 +3396,160 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 	this->paddleBeamOriginUp->SetEmitVolume(beamSegOrigin3D - beamDiagonalVec, beamSegOrigin3D + beamDiagonalVec);
 	beamEmitters.push_back(this->paddleBeamOriginUp);
 
-	size_t beamEndCounter      = 0;
-	size_t beamFlareCounter    = 0;
-	size_t beamBlockEndCounter = 0;
-	for (std::list<BeamSegment*>::const_iterator iter = beamSegments.begin(); iter != beamSegments.end(); ++iter) {
-		const BeamSegment* currentBeamSeg = *iter;
-
-		// Each beam segment has a blasty thingying at the end of it, if it ends at a 
-		// prism block then it also has a lens flare...
-		
-		// Make sure there are enough buffered end effects for use...
-		while (this->beamEndEmitters.size() <= beamEndCounter) {
-			this->beamEndEmitters.push_back(this->CreateBeamEndEffect());
-		}
-
-		// Blasty thingy
-		ESPPointEmitter* beamEndEmitter = this->beamEndEmitters[beamEndCounter];
-		assert(beamEndEmitter != NULL);
-		beamEndEmitter->SetParticleSize(2.5 * currentBeamSeg->GetRadius());
-		beamEndEmitter->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
-		beamEndEmitter->Reset();
-		beamEndEmitter->Tick(1.0f);
-		beamEmitters.push_back(beamEndEmitter);
-		beamEndCounter++;
-
-		// Lens flare
-		if (currentBeamSeg->GetCollidingPiece() != NULL) {
-			if (currentBeamSeg->GetCollidingPiece()->IsLightReflectorRefractor()) {
-				while (this->beamFlareEmitters.size() <= beamFlareCounter) {
-					this->beamFlareEmitters.push_back(this->CreateBeamFlareEffect());
-				}
-				ESPPointEmitter* beamStartFlare = this->beamFlareEmitters[beamFlareCounter];
-				assert(beamStartFlare != NULL);
-				beamStartFlare->SetParticleSize(5 * currentBeamSeg->GetRadius());
-				beamStartFlare->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
-				beamStartFlare->Reset();
-				beamStartFlare->Tick(1.0f);
-				beamEmitters.push_back(beamStartFlare);
-				beamFlareCounter++;
-			}
-			else {
-				// Add beam end block emitter
-				while (this->beamBlockOnlyEndEmitters.size() <= beamBlockEndCounter) {
-					this->beamBlockOnlyEndEmitters.push_back(this->CreateBeamEndBlockEffect());	
-				}
-				ESPPointEmitter* beamBlockEndEffect = this->beamBlockOnlyEndEmitters[beamBlockEndCounter];
-				assert(beamBlockEndEffect != NULL);
-				ESPInterval xSize(0.5f * currentBeamSeg->GetRadius(), 1.0f * currentBeamSeg->GetRadius());
-				ESPInterval ySize(xSize.maxValue);
-				beamBlockEndEffect->SetParticleSize(xSize, ySize);
-				beamBlockEndEffect->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
-				beamBlockEndEffect->SetEmitDirection(Vector3D(-currentBeamSeg->GetBeamSegmentRay().GetUnitDirection()));
-				beamBlockEndEffect->Reset();
-				beamBlockEndEffect->Tick(1.0f);
-				beamEmitters.push_back(beamBlockEndEffect);
-
-				while (this->beamEndFallingBitsEmitters.size() <= beamBlockEndCounter) {
-					this->beamEndFallingBitsEmitters.push_back(this->CreateBeamFallingBitEffect());
-				}
-				ESPPointEmitter* beamFallingBitEffect = this->beamEndFallingBitsEmitters[beamBlockEndCounter];
-				assert(beamFallingBitEffect != NULL);
-				beamFallingBitEffect->SetParticleSize(xSize);
-				beamFallingBitEffect->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
-				beamFallingBitEffect->SetEmitDirection(Vector3D(-currentBeamSeg->GetBeamSegmentRay().GetUnitDirection()));
-				beamFallingBitEffect->Reset();
-				beamFallingBitEffect->Tick(1.0f);
-				beamEmitters.push_back(beamFallingBitEffect);
-
-				beamBlockEndCounter++;
-			}
-		}
-	}
+    this->AddTypicalBeamSegmentEffects(beam, beamEmitters);
 
 	// Add all the beams to the active beams, associated with the given beam
 	this->activeBeamEmitters.erase(&beam);
 	this->activeBeamEmitters.insert(std::make_pair(&beam, beamEmitters));
 }
 
+void GameESPAssets::AddBossLaserBeamEffect(const Beam& beam) {
+    assert(this->activeBeamEmitters.find(&beam) == this->activeBeamEmitters.end());
+
+    std::list<ESPEmitter*> beamEmitters;
+    this->AddTypicalBeamSegmentEffects(beam, beamEmitters);
+
+    const BeamSegment* initialBeamSeg = *beam.GetBeamParts().begin();
+    assert(initialBeamSeg != NULL);
+    const Collision::Ray2D& originRay = initialBeamSeg->GetBeamSegmentRay();
+
+    std::vector<ESPPointEmitter*>& beamOriginEmittersVec = this->beamOriginEmitters[&beam];
+    if (beamOriginEmittersVec.empty()) {
+        beamOriginEmittersVec.push_back(this->CreateBeamOriginEffect(beam));
+    }
+
+    const Colour& beamColourBase = beam.GetBeamColour();
+
+    std::vector<Colour> colours;
+    colours.reserve(7);
+    colours.push_back(beamColourBase);
+    colours.push_back(1.5f * beamColourBase);
+    colours.push_back(2.0f * beamColourBase);
+    colours.push_back(2.5f * beamColourBase);
+    colours.push_back(3.0f * beamColourBase);
+    colours.push_back(3.5f * beamColourBase);
+    colours.push_back(Colour(1,1,1));
+
+    ESPPointEmitter* beamOriginEmitter = beamOriginEmittersVec[0];
+    beamOriginEmitter->SetParticleColourPalette(colours);
+    beamOriginEmitter->SetEmitPosition(Point3D(originRay.GetOrigin(), 0));
+    beamOriginEmitter->SetEmitDirection(Vector3D(originRay.GetUnitDirection(), 0));
+    beamEmitters.push_back(beamOriginEmitter);
+
+    // Add all the beams to the active beams, associated with the given beam
+    this->activeBeamEmitters.erase(&beam);
+    this->activeBeamEmitters.insert(std::make_pair(&beam, beamEmitters));
+}
+
+void GameESPAssets::AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESPEmitter*>& beamEmitters) {
+
+    const std::list<BeamSegment*>& beamSegments = beam.GetBeamParts();
+    assert(beamSegments.size() > 0);
+
+    size_t beamEndCounter      = 0;
+    size_t beamFlareCounter    = 0;
+    size_t beamBlockEndCounter = 0;
+
+    std::vector<ESPPointEmitter*>& beamEndEmittersVec   = this->beamEndEmitters[&beam];
+    std::vector<ESPPointEmitter*>& beamFlareEmittersVec = this->beamFlareEmitters[&beam];
+    std::vector<ESPPointEmitter*>& beamBlockOnlyEndEmittersVec = this->beamBlockOnlyEndEmitters[&beam];
+    std::vector<ESPPointEmitter*>& beamEndFallingBitsEmittersVec = this->beamEndFallingBitsEmitters[&beam];
+
+    for (std::list<BeamSegment*>::const_iterator iter = beamSegments.begin(); iter != beamSegments.end(); ++iter) {
+        const BeamSegment* currentBeamSeg = *iter;
+
+        // Each beam segment has a blasty thingy at the end of it, if it ends at a 
+        // prism block then it also has a lens flare...
+
+        // Make sure there are enough buffered end effects for use...
+        while (beamEndEmittersVec.size() <= beamEndCounter) {
+            beamEndEmittersVec.push_back(this->CreateBeamEndEffect(beam));
+        }
+
+        // Blasty thingy
+        ESPPointEmitter* beamEndEmitter = beamEndEmittersVec[beamEndCounter];
+        assert(beamEndEmitter != NULL);
+        beamEndEmitter->SetParticleSize(2.5 * currentBeamSeg->GetRadius());
+        beamEndEmitter->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+        beamEndEmitter->Reset();
+        beamEndEmitter->Tick(1.0f);
+        beamEmitters.push_back(beamEndEmitter);
+        beamEndCounter++;
+
+        // Lens flare
+        if (currentBeamSeg->GetCollidingPiece() != NULL) {
+            if (currentBeamSeg->GetCollidingPiece()->IsLightReflectorRefractor()) {
+                while (beamFlareEmittersVec.size() <= beamFlareCounter) {
+                    beamFlareEmittersVec.push_back(this->CreateBeamFlareEffect(beam));
+                }
+                ESPPointEmitter* beamStartFlare = beamFlareEmittersVec[beamFlareCounter];
+                assert(beamStartFlare != NULL);
+                beamStartFlare->SetParticleSize(5 * currentBeamSeg->GetRadius());
+                beamStartFlare->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+                beamStartFlare->Reset();
+                beamStartFlare->Tick(1.0f);
+                beamEmitters.push_back(beamStartFlare);
+                beamFlareCounter++;
+            }
+            else {
+                // Add beam end block emitter
+                while (beamBlockOnlyEndEmittersVec.size() <= beamBlockEndCounter) {
+                    beamBlockOnlyEndEmittersVec.push_back(this->CreateBeamEndBlockEffect(beam));	
+                }
+                ESPPointEmitter* beamBlockEndEffect = beamBlockOnlyEndEmittersVec[beamBlockEndCounter];
+                assert(beamBlockEndEffect != NULL);
+                ESPInterval xSize(0.5f * currentBeamSeg->GetRadius(), 1.0f * currentBeamSeg->GetRadius());
+                ESPInterval ySize(xSize.maxValue);
+                beamBlockEndEffect->SetParticleSize(xSize, ySize);
+                beamBlockEndEffect->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+                beamBlockEndEffect->SetEmitDirection(Vector3D(-currentBeamSeg->GetBeamSegmentRay().GetUnitDirection()));
+                beamBlockEndEffect->Reset();
+                beamBlockEndEffect->Tick(1.0f);
+                beamEmitters.push_back(beamBlockEndEffect);
+
+                while (beamEndFallingBitsEmittersVec.size() <= beamBlockEndCounter) {
+                    beamEndFallingBitsEmittersVec.push_back(this->CreateBeamFallingBitEffect(beam));
+                }
+                ESPPointEmitter* beamFallingBitEffect = beamEndFallingBitsEmittersVec[beamBlockEndCounter];
+                assert(beamFallingBitEffect != NULL);
+                beamFallingBitEffect->SetParticleSize(xSize);
+                beamFallingBitEffect->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+                beamFallingBitEffect->SetEmitDirection(Vector3D(-currentBeamSeg->GetBeamSegmentRay().GetUnitDirection()));
+                beamFallingBitEffect->Reset();
+                beamFallingBitEffect->Tick(1.0f);
+                beamEmitters.push_back(beamFallingBitEffect);
+
+                beamBlockEndCounter++;
+            }
+        }
+    }
+}
+
+ESPPointEmitter* GameESPAssets::CreateBeamOriginEffect(const Beam&) {
+
+    ESPPointEmitter* beamOriginEffect = new ESPPointEmitter();
+    beamOriginEffect->SetSpawnDelta(ESPInterval(0.005f, 0.015f));
+    beamOriginEffect->SetInitialSpd(ESPInterval(3.0f, 4.5f));
+    beamOriginEffect->SetParticleLife(ESPInterval(0.4f, 0.65f));
+    beamOriginEffect->SetEmitAngleInDegrees(60);
+    beamOriginEffect->SetAsPointSpriteEmitter(false);
+    beamOriginEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+    beamOriginEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    beamOriginEffect->SetParticleAlpha(ESPInterval(0.5f, 0.85f));
+
+    beamOriginEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+    beamOriginEffect->AddEffector(&this->particleMedVStretch);
+    beamOriginEffect->SetParticles(25, this->circleGradientTex);
+
+    return beamOriginEffect;
+}
+
 /**
  * Spawns a new beam end emitter effect.
  */
-ESPPointEmitter* GameESPAssets::CreateBeamEndEffect() {
+ESPPointEmitter* GameESPAssets::CreateBeamEndEffect(const Beam& beam) {
+    Colour beamEndColour = 2.2727f * beam.GetBeamColour();
+
 	ESPPointEmitter* beamEndEffect = new ESPPointEmitter();
 	beamEndEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	beamEndEffect->SetInitialSpd(ESPInterval(0));
@@ -3400,7 +3558,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndEffect() {
 	beamEndEffect->SetParticleAlignment(ESP::ScreenAligned);
 	beamEndEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	beamEndEffect->SetEmitPosition(Point3D(0, 0, 0));
-	beamEndEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	beamEndEffect->SetParticleColour(ESPInterval(beamEndColour.R()), ESPInterval(beamEndColour.G()), ESPInterval(beamEndColour.B()), ESPInterval(1.0f));
 	beamEndEffect->AddEffector(&this->beamEndPulse);
 	bool result = beamEndEffect->SetParticles(1, this->circleGradientTex);
     UNUSED_VARIABLE(result);
@@ -3413,7 +3571,18 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndEffect() {
  * Spawns a new beam end emitter effect for blocks that are not reflecting/refracting the beam -
  * this effect looks like sparky stretched flashing rebounding off the block.
  */
-ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect() {
+ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect(const Beam& beam) {
+
+    const Colour& beamColourBase = beam.GetBeamColour();
+
+    std::vector<Colour> colours;
+    colours.reserve(5);
+    colours.push_back(beamColourBase);
+    colours.push_back(1.5f * beamColourBase);
+    colours.push_back(2.0f * beamColourBase);
+    colours.push_back(2.5f * beamColourBase);
+    colours.push_back(Colour(1,1,1));
+
 	ESPPointEmitter* beamBlockEndEffect = new ESPPointEmitter();
 	beamBlockEndEffect->SetSpawnDelta(ESPInterval(0.005f, 0.015f));
 	beamBlockEndEffect->SetInitialSpd(ESPInterval(2.0f, 3.5f));
@@ -3423,24 +3592,30 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect() {
 	beamBlockEndEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	beamBlockEndEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	beamBlockEndEffect->SetEmitPosition(Point3D(0, 0, 0));
-	beamBlockEndEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	beamBlockEndEffect->SetParticleColourPalette(colours);
+
 	beamBlockEndEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	beamBlockEndEffect->AddEffector(&this->particleLargeVStretch);
-	//beamBlockEndEffect->AddEffector(&this->particleFader);
-	//beamBlockEndEffect->AddEffector(&this->gravity);
-	bool result = beamBlockEndEffect->SetParticles(35, this->circleGradientTex);
-    UNUSED_VARIABLE(result);
-	assert(result);
+	beamBlockEndEffect->SetParticles(30, this->circleGradientTex);
 
 	return beamBlockEndEffect;	
-
 }
 
 /**
  * Spawns a new beam end emitter effect for blocks that are not reflecting/refracting the beam -
  * this effect looks like little bits/sparks falling off the block.
  */
-ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect() {
+ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect(const Beam& beam) {
+
+    const Colour& beamColourBase = beam.GetBeamColour();
+
+    std::vector<Colour> colours;
+    colours.reserve(4);
+    colours.push_back(2.0f * beamColourBase);
+    colours.push_back(2.5f * beamColourBase);
+    colours.push_back(3.0f * beamColourBase);
+    colours.push_back(Colour(1,1,1));
+
 	ESPPointEmitter* beamFallingBitEffect = new ESPPointEmitter();
 	beamFallingBitEffect->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
 	beamFallingBitEffect->SetInitialSpd(ESPInterval(2.0f, 3.5f));
@@ -3449,13 +3624,11 @@ ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect() {
 	beamFallingBitEffect->SetAsPointSpriteEmitter(true);
 	beamFallingBitEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	beamFallingBitEffect->SetEmitPosition(Point3D(0, 0, 0));
-	beamFallingBitEffect->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-	//beamFallingBitEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	beamFallingBitEffect->SetParticleColourPalette(colours);
 	beamFallingBitEffect->AddEffector(&this->particleMediumShrink);
 	beamFallingBitEffect->AddEffector(&this->gravity);
-	bool result = beamFallingBitEffect->SetParticles(25, this->circleGradientTex);
-    UNUSED_VARIABLE(result);
-	assert(result);
+	
+    beamFallingBitEffect->SetParticles(25, this->circleGradientTex);
 
 	return beamFallingBitEffect;	
 }
@@ -3463,7 +3636,9 @@ ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect() {
 /**
  * Spawns a new beam flare emitter for special places on the beam.
  */
-ESPPointEmitter* GameESPAssets::CreateBeamFlareEffect() {
+ESPPointEmitter* GameESPAssets::CreateBeamFlareEffect(const Beam& beam) {
+    Colour flareColour = 2.2727f * beam.GetBeamColour();
+
 	ESPPointEmitter* beamFlareEffect = new ESPPointEmitter();
 	beamFlareEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	beamFlareEffect->SetInitialSpd(ESPInterval(0));
@@ -3472,11 +3647,11 @@ ESPPointEmitter* GameESPAssets::CreateBeamFlareEffect() {
 	beamFlareEffect->SetParticleAlignment(ESP::ScreenAligned);
 	beamFlareEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	beamFlareEffect->SetEmitPosition(Point3D(0, 0, 0));
-	beamFlareEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.8f));
+	beamFlareEffect->SetParticleColour(ESPInterval(flareColour.R()), ESPInterval(flareColour.G()),
+        ESPInterval(flareColour.B()), ESPInterval(0.8f));
 	beamFlareEffect->AddEffector(&this->beamEndPulse);
-	bool result = beamFlareEffect->SetParticles(1, this->lensFlareTex);
-    UNUSED_VARIABLE(result);
-	assert(result);
+	
+    beamFlareEffect->SetParticles(1, this->lensFlareTex);
 
 	return beamFlareEffect;
 }
@@ -3486,11 +3661,17 @@ ESPPointEmitter* GameESPAssets::CreateBeamFlareEffect() {
  * in the game.
  */
 void GameESPAssets::AddBeamEffect(const Beam& beam) {
-	std::list<ESPEmitter*> beamEmitters;
-	switch (beam.GetBeamType()) {
-		case Beam::PaddleLaserBeam:
+
+	switch (beam.GetType()) {
+
+		case Beam::PaddleBeam:
 			this->AddPaddleLaserBeamEffect(beam);
 			break;
+
+        case Beam::BossBeam:
+            this->AddBossLaserBeamEffect(beam);
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -3504,24 +3685,49 @@ void GameESPAssets::AddBeamEffect(const Beam& beam) {
  */
 void GameESPAssets::UpdateBeamEffect(const Beam& beam) {
 	// Clean up the effects and add a new one with the new updated parameters...
-	this->RemoveBeamEffect(beam);
+	this->RemoveBeamEffect(beam, false);
 	this->AddBeamEffect(beam);
 }
 
 /**
  * Remove all effects associated with the given beam if any exist.
  */
-void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
-	std::map<const Beam*, std::list<ESPEmitter*> >::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
-	if (foundBeamIter != this->activeBeamEmitters.end()) {
-		this->activeBeamEmitters.erase(foundBeamIter);	
-	}
-	else {
-		assert(false);
-	}
+void GameESPAssets::RemoveBeamEffect(const Beam& beam, bool removeCachedEffects) {
+    // Remove from the active beam emitters...
+    {
+	    std::map<const Beam*, std::list<ESPEmitter*> >::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
+	    if (foundBeamIter != this->activeBeamEmitters.end()) {
+		    this->activeBeamEmitters.erase(foundBeamIter);
+	    }
+    }
+
+    if (removeCachedEffects) {
+
+    // Remove from the cached beam emitters
+#define FIND_AND_REMOVE_BEAM_EMITTERS(emitterMap) {\
+    BeamSegEmitterMapIter findIter = emitterMap.find(&beam); \
+    if (findIter != emitterMap.end()) { \
+        std::vector<ESPPointEmitter*>& emitters = findIter->second; \
+        for (std::vector<ESPPointEmitter*>::iterator iter = emitters.begin(); iter != emitters.end(); ++iter) { \
+            ESPPointEmitter* currEmitter = *iter; \
+            delete currEmitter; \
+            currEmitter = NULL; \
+        } \
+        emitters.clear(); \
+        emitterMap.erase(findIter); \
+    } }
+
+    FIND_AND_REMOVE_BEAM_EMITTERS(this->beamOriginEmitters);
+    FIND_AND_REMOVE_BEAM_EMITTERS(this->beamEndEmitters);
+    FIND_AND_REMOVE_BEAM_EMITTERS(this->beamBlockOnlyEndEmitters);
+    FIND_AND_REMOVE_BEAM_EMITTERS(this->beamEndFallingBitsEmitters);
+    FIND_AND_REMOVE_BEAM_EMITTERS(this->beamFlareEmitters);
+
+#undef FIND_AND_REMOVE_BEAM_EMITTERS
+    }
 }
 
-// Adds a tesla lightning arc effect
+// Adds a Tesla lightning arc effect
 void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2, const Vector3D& levelTranslation) {
 
 	Point3D startPt = Point3D(block1.GetCenter()) + levelTranslation;
@@ -4467,167 +4673,6 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 
     this->activeGeneralEmitters.push_back(angryBolts);
     this->activeGeneralEmitters.push_back(angryOno);
-}
-
-void GameESPAssets::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
-    
-    const BossBodyPart* bodyPart = info.GetChargingPart();
-    const Colour& colour = info.GetColour();
-
-	ESPPointEmitter* chargeParticles1 = new ESPPointEmitter();
-	chargeParticles1->SetSpawnDelta(ESPInterval(0.025f, 0.05f));
-	chargeParticles1->SetNumParticleLives(1);
-	chargeParticles1->SetInitialSpd(ESPInterval(2.6f, 4.5f));
-    chargeParticles1->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs() * 0.75f, info.GetChargeTimeInSecs()));
-	chargeParticles1->SetParticleSize(ESPInterval(info.GetSizeMultiplier() * 1.5f, info.GetSizeMultiplier() * 3.5f));
-	chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    chargeParticles1->SetParticleAlignment(ESP::ScreenAligned);
-	chargeParticles1->SetEmitPosition(Point3D(0,0,0));
-	chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
-	chargeParticles1->SetEmitAngleInDegrees(180);
-	chargeParticles1->SetIsReversed(true);
-    chargeParticles1->SetParticleColour(
-        ESPInterval(colour.R() * 0.75f, colour.R()), 
-        ESPInterval(colour.G() * 0.75f, colour.G()),
-        ESPInterval(colour.B() * 0.75f, colour.B()), ESPInterval(1.0f));
-	chargeParticles1->AddEffector(&this->particleFader);
-	chargeParticles1->AddEffector(&this->particleMediumShrink);
-    chargeParticles1->SetParticles(13, this->sparkleTex);
-
-
-	ESPPointEmitter* chargeParticles2 = new ESPPointEmitter();
-	chargeParticles2->SetSpawnDelta(ESPInterval(0.025f, 0.05f));
-	chargeParticles2->SetNumParticleLives(1);
-	chargeParticles2->SetInitialSpd(ESPInterval(2.6f, 4.5f));
-    chargeParticles2->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs() * 0.75f, info.GetChargeTimeInSecs()));
-	chargeParticles2->SetParticleSize(ESPInterval(1.25f, 2.8f));
-	chargeParticles2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    chargeParticles2->SetParticleAlignment(ESP::ScreenAligned);
-	chargeParticles2->SetEmitPosition(Point3D(0,0,0));
-	chargeParticles2->SetEmitDirection(Vector3D(0, 1, 0));
-	chargeParticles2->SetEmitAngleInDegrees(180);
-	chargeParticles2->SetIsReversed(true);
-    chargeParticles2->SetParticleColour(ESPInterval(1), ESPInterval(1),ESPInterval(1), ESPInterval(1.0f));
-	chargeParticles2->AddEffector(&this->particleFader);
-	chargeParticles2->AddEffector(&this->particleMediumShrink);
-    chargeParticles2->SetParticles(8, this->sparkleTex);
-
-    static const unsigned int NUM_HALOS = 3;
-    ESPPointEmitter* halo = new ESPPointEmitter();
-    halo->SetSpawnDelta(ESPInterval(0.25f));
-	halo->SetNumParticleLives(1);
-    halo->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs()));
-	halo->SetParticleSize(ESPInterval(5.0f));
-	halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    halo->SetParticleAlignment(ESP::ScreenAligned);
-	halo->SetEmitPosition(Point3D(0,0,0));
-	halo->SetIsReversed(true);
-    halo->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
-	halo->AddEffector(&this->particleShrinkToNothing);
-    halo->SetParticles(NUM_HALOS, this->haloTex);
-
-    this->activeBossFGEmitters[bodyPart].push_back(halo);
-    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles1);
-    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles2);
-}
-
-void GameESPAssets::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
-
-    const BossBodyPart* bodyPart = info.GetPart();
-    const Colour& colour = info.GetColour();
-
-    Collision::AABB2D aabb = bodyPart->GetLocalBounds().GenerateAABBFromLines();
-    float minSize = std::min<float>(aabb.GetHeight(), aabb.GetWidth());
-
-    ESPPointEmitter* halo = new ESPPointEmitter();
-    halo->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	halo->SetNumParticleLives(1);
-    halo->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
-	halo->SetParticleSize(ESPInterval(info.GetSizeMultiplier() * minSize));
-	halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    halo->SetParticleAlignment(ESP::ScreenAligned);
-	halo->SetEmitPosition(Point3D(0,0,0));
-    halo->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(0.8f));
-    halo->AddEffector(&this->particleFader);
-    halo->AddEffector(&this->particleSuperGrowth);
-    halo->SetParticles(1, this->haloTex);
-
-    this->activeBossFGEmitters[bodyPart].push_back(halo);
-}
-
-void GameESPAssets::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
-
-    const BossBodyPart* bodyPart = info.GetPart();
-    const Colour& colour = info.GetColour();
-
-	ESPPointEmitter* chargeParticles1 = new ESPPointEmitter();
-	chargeParticles1->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
-	chargeParticles1->SetNumParticleLives(1);
-	chargeParticles1->SetInitialSpd(ESPInterval(5.0f, 9.0f));
-    chargeParticles1->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
-	chargeParticles1->SetParticleSize(ESPInterval(0.75f, 1.9f));
-	chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    chargeParticles1->SetParticleAlignment(ESP::ScreenAligned);
-	chargeParticles1->SetEmitPosition(Point3D(0,0,0));
-	chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
-	chargeParticles1->SetEmitAngleInDegrees(180);
-    chargeParticles1->SetParticleColour(
-        ESPInterval(colour.R() * 0.75f, colour.R()), 
-        ESPInterval(colour.G() * 0.75f, colour.G()),
-        ESPInterval(colour.B() * 0.75f, colour.B()), ESPInterval(1.0f));
-	chargeParticles1->AddEffector(&this->particleFader);
-    chargeParticles1->AddEffector(&this->particleSmallGrowth);
-    chargeParticles1->SetParticles(8, this->sparkleTex);
-
-	ESPPointEmitter* chargeParticles2 = new ESPPointEmitter();
-	chargeParticles2->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
-	chargeParticles2->SetNumParticleLives(1);
-	chargeParticles2->SetInitialSpd(ESPInterval(4.0f, 8.0f));
-    chargeParticles2->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
-	chargeParticles2->SetParticleSize(ESPInterval(0.5f, 1.5f));
-	chargeParticles2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    chargeParticles2->SetParticleAlignment(ESP::ScreenAligned);
-	chargeParticles2->SetEmitPosition(Point3D(0,0,0));
-	chargeParticles2->SetEmitDirection(Vector3D(0, 1, 0));
-	chargeParticles2->SetEmitAngleInDegrees(180);
-    chargeParticles2->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.8f));
-	chargeParticles2->AddEffector(&this->particleFader);
-    chargeParticles2->AddEffector(&this->particleSmallGrowth);
-    chargeParticles2->SetParticles(5, this->sparkleTex);
-
-    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles1);
-    this->activeBossFGEmitters[bodyPart].push_back(chargeParticles2);
-}
-
-void GameESPAssets::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info) {
-    
-    static const double FPS = 60.0;
-    static const int NUM_PARTICLES = 15;
-
-    const BossBodyPart* bodyPart = info.GetPart();
-    const Colour& colour = info.GetColour();
-    Collision::AABB2D bodyPartAABB = bodyPart->GenerateWorldAABB();
-    
-    float maxSize = std::max<float>(bodyPartAABB.GetHeight(), bodyPartAABB.GetWidth());
-    float minSize = std::min<float>(bodyPartAABB.GetHeight(), bodyPartAABB.GetWidth());
-
-	ESPPointEmitter* electricSpasm = new ESPPointEmitter();
-	electricSpasm->SetSpawnDelta(ESPInterval(0.02f, 0.1f));
-	electricSpasm->SetNumParticleLives(1);
-    electricSpasm->SetParticleLife(ESPInterval(0.5f * info.GetTimeInSecs(), 0.8f * info.GetTimeInSecs()));
-    electricSpasm->SetParticleSize(ESPInterval(0.75f * minSize, 0.75f * maxSize));
-	electricSpasm->SetRadiusDeviationFromCenter(ESPInterval(0.0f, bodyPartAABB.GetWidth()/2.25f),
-        ESPInterval(0.0f, bodyPartAABB.GetHeight()/2.5f), ESPInterval(0.0f));
-    electricSpasm->SetParticleAlignment(ESP::ScreenAligned);
-	electricSpasm->SetEmitPosition(Point3D(0,0,0));
-    electricSpasm->SetEmitDirection(Vector3D(0, 1, 0));
-    electricSpasm->SetInitialSpd(ESPInterval(0.0f));
-    electricSpasm->SetEmitAngleInDegrees(180);
-    electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
-    electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
-    electricSpasm->SetAnimatedParticles(NUM_PARTICLES, this->lightningAnimTex, 64, 64, FPS);
-
-    this->activeBossFGEmitters[bodyPart].push_back(electricSpasm);
 }
 
 void GameESPAssets::AddPuffOfSmokeEffect(const PuffOfSmokeEffectInfo& info) {
@@ -6295,52 +6340,6 @@ void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
 }
 
 /**
- * Draw particle effects associated with the boss, which get drawn infront of the boss.
- */
-void GameESPAssets::DrawForegroundBossEffects(double dT, const Camera& camera) {
-
-	// Go through all the emitters and do book keeping and drawing
-    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->activeBossFGEmitters.begin();
-		iter1 != this->activeBossFGEmitters.end();) {
-	
-        const BossBodyPart* bodyPart = iter1->first;
-        Point3D bodyPartPos = bodyPart->GetTranslationPt3D();
-
-        std::list<ESPEmitter*>& currEmitters = iter1->second;
-
-        glPushMatrix();
-        glTranslatef(bodyPartPos[0], bodyPartPos[1], bodyPartPos[2]);
-
-        for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end();) {
-            ESPEmitter* currEmitter = *iter2;
-
-		    // Check to see if dead, if so erase it...
-		    if (currEmitter->IsDead()) {
-                iter2 = currEmitters.erase(iter2);
-                delete currEmitter;
-                currEmitter = NULL;
-		    }
-		    else {
-
-			    // Not dead yet so we draw and tick - transform to the body part to draw
-			    currEmitter->Tick(dT);
-                currEmitter->Draw(camera);
-                ++iter2;
-		    }
-        }
-
-        glPopMatrix();
-
-        if (currEmitters.empty()) {
-            iter1 = this->activeBossFGEmitters.erase(iter1);
-        }
-        else {
-            ++iter1;
-        }
-	}
-}
-
-/**
  * Draw particle effects associated with the ball, which get drawn behind the ball.
  */
 void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball) {
@@ -6453,6 +6452,7 @@ void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera, const Vecto
 		for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {
 			ESPEmitter* currentEmitter = *emitIter;
 			assert(currentEmitter != NULL);
+            currentEmitter->SetParticleAlpha(ESPInterval(beam->GetBeamAlpha()));
 			currentEmitter->Draw(camera, worldTranslation, false);
 			currentEmitter->Tick(dT);
 		}

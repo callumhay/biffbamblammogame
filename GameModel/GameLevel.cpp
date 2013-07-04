@@ -1655,18 +1655,8 @@ std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNotMoving(co
 std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(double dT, const Point2D& center, 
                                                                      float radius, const Vector2D& velocity) const {
 
-    UNUSED_PARAMETER(dT);
-    UNUSED_PARAMETER(velocity);
-    /*
-    Point2D circleEndCenter = dT * velocity + center;
+    radius += dT * velocity.Magnitude();
 
-	// Get the ball boundry and use it to figure out what level pieces are relevant
-	// Find the non-rounded max and min indices to look at along the x and y axis
-    float slightlyBiggerRadius = 1.25f * radius;
-    Collision::AABB2D searchArea(center, center);
-    searchArea.AddCircle(Collision::Circle2D(center, slightlyBiggerRadius));
-    searchArea.AddCircle(Collision::Circle2D(circleEndCenter, slightlyBiggerRadius));
-    */
 	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
 	float xIndexMax = floorf(xNonAdjustedIndex + radius); 
 	float xIndexMin = floorf(xNonAdjustedIndex - radius);

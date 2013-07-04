@@ -88,6 +88,10 @@ public:
 
 	const Colour SHIELD_PADDLE_COLOUR;
 
+    const Colour PADDLE_LASER_BEAM_COLOUR;
+    const Colour BOSS_LASER_BEAM_COLOUR;
+
+
     double GenerateFireGlobDropTime() const;
 
 private:

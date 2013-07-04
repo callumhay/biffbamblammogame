@@ -2,7 +2,7 @@
  * GameESPAssets.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -47,8 +47,8 @@ class ElectricitySpasmEffectInfo;
 class PuffOfSmokeEffectInfo;
 class ShockwaveEffectInfo;
 class DebrisEffectInfo;
+class LaserBeamSightsEffectInfo;
 class BossBodyPart;
-
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -62,9 +62,6 @@ private:
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
 	std::list<ESPEmitter*> activePaddleEmitters;
-   
-    std::map<const BossBodyPart*, std::list<ESPEmitter*> > activeBossFGEmitters;
-    //std::list<ESPEmitter*> activeBossBGEmitters;
 
 	std::map<const GameBall*, std::list<ESPEmitter*> > activeBallBGEmitters;
     BallEffectsMap boostBallEmitters;
@@ -92,14 +89,14 @@ private:
     ESPParticleColourEffector fastBallColourFader;
     ESPMultiColourEffector starColourFlasher;
 
-	ESPParticleScaleEffector  particlePulseUberballAura;
-	ESPParticleScaleEffector  particlePulseItemDropAura;
-	ESPParticleScaleEffector  particlePulsePaddleLaser;
-	ESPParticleScaleEffector  particlePulseFireGlobAura;
-	ESPParticleScaleEffector  particlePulseIceBallAura;
-    ESPParticleScaleEffector  particlePulseOrb;
-	ESPParticleScaleEffector  beamEndPulse;
-	ESPParticleScaleEffector  particleShrinkToNothing;
+	ESPParticleScaleEffector particlePulseUberballAura;
+	ESPParticleScaleEffector particlePulseItemDropAura;
+	ESPParticleScaleEffector particlePulsePaddleLaser;
+	ESPParticleScaleEffector particlePulseFireGlobAura;
+	ESPParticleScaleEffector particlePulseIceBallAura;
+    ESPParticleScaleEffector particlePulseOrb;
+	ESPParticleScaleEffector beamEndPulse;
+	ESPParticleScaleEffector particleShrinkToNothing;
     ESPParticleScaleEffector particleLargeGrowthSuperFastPulser;
 
 	ESPParticleAccelEffector ghostBallAccel1;
@@ -113,6 +110,7 @@ private:
 	ESPParticleScaleEffector particleSuperGrowth;
 	ESPParticleScaleEffector particleMediumShrink;
 	ESPParticleScaleEffector particleLargeVStretch;
+    ESPParticleScaleEffector particleMedVStretch;
 
 	ESPParticleRotateEffector explosionRayRotatorCW;
 	ESPParticleRotateEffector explosionRayRotatorCCW;
@@ -146,7 +144,7 @@ private:
 	Texture2D* laserBeamTex;
 	Texture2D* upArrowTex;
 	Texture2D* ballTex;
-	Texture2D* targetTex;
+	Texture2D* circleTargetTex;
 	Texture2D* haloTex;
 	Texture2D* lensFlareTex;
 	Texture2D* sparkleTex;
@@ -162,11 +160,10 @@ private:
     Texture2D* heartTex;
     Texture2D* chevronTex;
     Texture2D* infinityTex;
-    Texture2D* lightningAnimTex;
     Texture2D* circleTex;
     Texture2D* outlinedHoopTex;
     Texture2D* dropletTex;
-
+    
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
 	std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > paddleEffects;
@@ -200,10 +197,13 @@ private:
 	ESPVolumeEmitter* paddleBeamOriginUp;
 	ESPPointEmitter*  paddleBeamBlastBits;
 	
-	std::vector<ESPPointEmitter*> beamEndEmitters;
-	std::vector<ESPPointEmitter*> beamBlockOnlyEndEmitters;
-	std::vector<ESPPointEmitter*> beamEndFallingBitsEmitters;
-	std::vector<ESPPointEmitter*> beamFlareEmitters;
+    typedef std::map<const Beam*, std::vector<ESPPointEmitter*> > BeamSegEmitterMap;
+    typedef BeamSegEmitterMap::iterator BeamSegEmitterMapIter;
+    BeamSegEmitterMap beamOriginEmitters;
+    BeamSegEmitterMap beamEndEmitters;
+	BeamSegEmitterMap beamBlockOnlyEndEmitters;
+	BeamSegEmitterMap beamEndFallingBitsEmitters;
+	BeamSegEmitterMap beamFlareEmitters;
 
 	CgFxVolumetricEffect ghostBallSmoke;
 	CgFxVolumetricEffect fireEffect;
@@ -265,10 +265,13 @@ private:
     void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
-	ESPPointEmitter* CreateBeamEndEffect();
-	ESPPointEmitter* CreateBeamEndBlockEffect();
-	ESPPointEmitter* CreateBeamFallingBitEffect();
-	ESPPointEmitter* CreateBeamFlareEffect();
+    void AddBossLaserBeamEffect(const Beam& beam);
+    void AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESPEmitter*>& beamEmitters);
+    ESPPointEmitter* CreateBeamOriginEffect(const Beam& beam);
+	ESPPointEmitter* CreateBeamEndEffect(const Beam& beam);
+	ESPPointEmitter* CreateBeamEndBlockEffect(const Beam& beam);
+	ESPPointEmitter* CreateBeamFallingBitEffect(const Beam& beam);
+	ESPPointEmitter* CreateBeamFlareEffect(const Beam& beam);
 
     ESPPointEmitter* CreateMultiplierComboEffect(int multiplier, const Point2D& position);
     void CreateStarAcquiredEffect(const Point2D& position, std::list<ESPEmitter*>& emitterListToAddTo);
@@ -290,10 +293,6 @@ public:
     void AddBossHurtEffect(const Point2D& pos, float width, float height);
     void AddBossAngryEffect(const Point2D& pos, float width, float height);
 
-    void AddBossPowerChargeEffect(const PowerChargeEffectInfo& info);
-    void AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info);
-    void AddBossSparkBurstEffect(const SparkBurstEffectInfo& info);
-    void AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info);
     void AddPuffOfSmokeEffect(const PuffOfSmokeEffectInfo& info);
     void AddShockwaveEffect(const ShockwaveEffectInfo& info);
     void AddDebrisEffect(const DebrisEffectInfo& info);
@@ -317,6 +316,7 @@ public:
 	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);
 	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
     void AddSafetyNetHitByProjectileEffect(const Projectile& projectile);
+    void AddBossHitByProjectileEffect(const Projectile& projectile, const BossBodyPart& collisionPart); 
 	void AddBallHitLightningArcEffect(const GameBall& ball);
 
 	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
@@ -342,6 +342,8 @@ public:
 	void AddBallExplodedEffect(const GameBall* ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
+    void AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const BeamSegment& beamSegment);
+
 	ESPPointEmitter* CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item);
     void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
@@ -354,7 +356,7 @@ public:
 
 	void AddBeamEffect(const Beam& beam);
 	void UpdateBeamEffect(const Beam& beam);
-	void RemoveBeamEffect(const Beam& beam);
+	void RemoveBeamEffect(const Beam& beam, bool removeCachedEffects);
 
 	void AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2, const Vector3D& levelTranslation);
 	void RemoveTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2);
@@ -390,8 +392,6 @@ public:
     void ResetProjectileEffects(const Projectile& projectile);
     void DrawBulletTimeBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel);
     void DrawBallBoostingEffects(double dT, const Camera& camera);
-
-    void DrawForegroundBossEffects(double dT, const Camera& camera);
 
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera);

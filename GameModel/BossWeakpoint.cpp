@@ -51,40 +51,38 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
     assert(gameModel != NULL);
     UNUSED_PARAMETER(ball);
 
-    if (this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
+    if (this->collisionsDisabled || this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
         return;
     }
-
-    this->Diminish(this->dmgOnBallHit, gameModel);
+    this->Diminish(this->dmgOnBallHit);
 }
 
 void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
     assert(gameModel != NULL);
     assert(projectile != NULL);
 
-    if (this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
+    if (this->collisionsDisabled || this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
         return;
     }
 
     switch (projectile->GetType()) {
 
         case Projectile::LaserTurretBulletProjectile:
-		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::CollateralBlockProjectile:
-
         case Projectile::RocketTurretBulletProjectile:
-
         case Projectile::PaddleRocketBulletProjectile:
-
-        case Projectile::PaddleMineBulletProjectile:
-        case Projectile::MineTurretBulletProjectile:
-
         case Projectile::FireGlobProjectile:
-
-            this->Diminish(projectile->GetDamage(), gameModel);
+            this->Diminish(projectile->GetDamage());
             break;
 
+        // Mines don't hurt bosses directly (they need to explode to do damage)
+        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
+            break;
+
+        // Boss projectiles are ignored (they are for hitting the player only)
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
         case Projectile::BossOrbBulletProjectile:
@@ -96,19 +94,19 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
     }
 }
 
-
 void BossWeakpoint::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
     assert(beamSegment != NULL);
     assert(gameModel != NULL);
 
     UNUSED_PARAMETER(gameModel);
-
-    this->Diminish(static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond())), gameModel);
+    if (this->collisionsDisabled || this->GetIsDestroyed()) {
+        return;
+    }
+    this->Diminish(static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond())));
 }
 
-void BossWeakpoint::Diminish(float damageAmt, GameModel* gameModel) {
-    UNUSED_PARAMETER(gameModel);
-    
+void BossWeakpoint::Diminish(float damageAmt) {
+
     // If the boss is invulnerable then we don't do damage
     if (this->IsCurrentlyInvulnerable() || damageAmt <= 0.0f) {
         return;

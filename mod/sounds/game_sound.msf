@@ -383,6 +383,11 @@ LaserBeamFiringLoop {
 // RocketOrMineDeflectedByShieldEvent {
 // }
 
+// PaddleLaserBulletCollisionEvent {
+// }
+
+// PaddleLaserBeamCollisionEvent {
+// }
 
 
 // Game Item Events **********************************************************
@@ -461,6 +466,8 @@ ItemMovingLoop {
 // ClassicalBossArmShakeLoop?
 // ClassicalBossArmAttackEvent?
 
+// BossCrosshairTargetEvent
+// BossLaserBeamLoop
 
 
 // Bullet-time / Ball Boost Events *******************************************
@@ -545,9 +552,7 @@ BlockBrokenMultiplierCounterInc9 {
 }
 
 // TODO: Event for when a secret is revealed?
-//RevealEvent {
-//	file =
-//}
+// RevealEvent
 
 // ---------------------------------------------------------------------------
 // Non-In-Game State Events ==================================================

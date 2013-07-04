@@ -23,6 +23,7 @@ public:
 	enum PainIntensity { MinorPain, ModeratePain, MajorPain };
 
 	void Activate(PlayerHurtHUD::PainIntensity intensity);
+    void Activate(double totalFadeOutTime, float initialIntensity);
 	void Deactivate();
 
 	void Draw(double dT, int displayWidth, int displayHeight);

@@ -125,8 +125,11 @@ void Boss::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart*
 }
 
 void Boss::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
+    if (projectile->IsLastThingCollidedWith(collisionPart)) {
+        return;
+    }
+
     collisionPart->CollisionOccurred(gameModel, projectile);
-    projectile->SetLastThingCollidedWith(collisionPart);
     this->currAIState->CollisionOccurred(gameModel, projectile, collisionPart);
 }
 
@@ -146,7 +149,9 @@ bool Boss::CanHurtPaddleWithBody() const {
     return false;
 }
 
-bool Boss::ProjectileIsDestroyedOnCollision(const Projectile* projectile) const {
+bool Boss::ProjectileIsDestroyedOnCollision(const Projectile* projectile, BossBodyPart* collisionPart) const {
+    UNUSED_PARAMETER(collisionPart);
+
     // Mines can land on the boss and are not destroyed by it
     if (projectile->IsMine()) {
         return false;
@@ -429,7 +434,7 @@ void Boss::ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart) {
     this->deadPartsRoot->AddBodyPart(bodyPart);
 
     // Find all weakpoints and turn them off
-    bodyPart->SetAsDestroyed();
+    bodyPart->SetDestroyed(true);
 }
 
 void Boss::SetNextAIState(BossAIState* nextState) {

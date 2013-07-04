@@ -22,8 +22,10 @@ class BossBodyPart;
  */
 class PowerChargeEffectInfo : public BossEffectEventInfo {
 public:
-    PowerChargeEffectInfo(const BossBodyPart* chargingPart, double timeInSecs, const Colour& colour, float sizeMultiplier = 1.0f) : 
-      BossEffectEventInfo(), chargingPart(chargingPart), chargeTimeInSecs(timeInSecs), colour(colour), sizeMultiplier(sizeMultiplier) {}
+    PowerChargeEffectInfo(const BossBodyPart* chargingPart, double timeInSecs, const Colour& colour, 
+        float sizeMultiplier = 1.0f, const Vector2D& posOffset = Vector2D(0,0)) : 
+      BossEffectEventInfo(), chargingPart(chargingPart), chargeTimeInSecs(timeInSecs), 
+          colour(colour), sizeMultiplier(sizeMultiplier), posOffset(posOffset) {}
     ~PowerChargeEffectInfo() {}
 
     BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::PowerChargeInfo; }
@@ -32,12 +34,14 @@ public:
     double GetChargeTimeInSecs() const { return this->chargeTimeInSecs; }
     const Colour& GetColour() const { return this->colour; }
     float GetSizeMultiplier() const { return this->sizeMultiplier; }
+    const Vector2D& GetPositionOffset() const { return this->posOffset; }
 
 private:
     const BossBodyPart* chargingPart;
     const double chargeTimeInSecs;
     const Colour colour;
     const float sizeMultiplier;
+    const Vector2D& posOffset;
 
     DISALLOW_COPY_AND_ASSIGN(PowerChargeEffectInfo);
 };

@@ -51,9 +51,6 @@ resources/worlds/levels/easy/bend_it_like_maxwell.lvl
 resources/worlds/levels/medium/work_around.lvl
 
 
-
-# TODO: Insert some more levels somewhere below here (make them a bit less hard)?
-
 # Using the magnet item to redirect mines
 resources/worlds/levels/hard/a_minor_deviation.lvl
 
@@ -75,8 +72,9 @@ resources/worlds/levels/medium/mine_the_gap.lvl
 
 
 # Magnet Item + Cannons (to redirect rockets) + Prisms (to redirect lasers) + Switches
+# Make sure this is the LAST level before the boss:
+# It primes the player so that they know what to expect during the boss fight!
 resources/worlds/levels/hard/lodestone_shootout.lvl
-
 
 
 

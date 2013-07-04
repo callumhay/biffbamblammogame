@@ -777,9 +777,6 @@ void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& c
         this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight, 
             this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 
-        // Draw the foreground effects for the boss, transform them to the boss...
-        this->espAssets->DrawForegroundBossEffects(dT, camera);
-    
         glPopMatrix();
     }
 }
@@ -807,8 +804,8 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 		return;
 	}
 
-	const float TYPICAL_BEAM_ALPHA = 0.4f;
-	const Colour& beamColour = GameViewConstants::GetInstance()->LASER_BEAM_COLOUR;
+    static const float BRIGHT_BEAM_CENTER_MULTIPLER = 2.28f;
+	static const float TYPICAL_BEAM_ALPHA = 0.4f;
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	float quarterPaddleDepth = paddle->GetHalfDepthTotal() / 2.0f;
 
@@ -818,25 +815,28 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// If in paddle cam mode draw a fullscreen quad with the laser colour
-	if (paddle->GetIsPaddleCameraOn()) {
-		GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 0.0, ColourRGBA(beamColour, 0.2f));
-	}
-
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 
 	glBegin(GL_QUADS);
+
 	Point3D temp;
 	Point3D beamSegStart, beamSegEnd;
 	Vector3D beamRightVec;
 	Vector3D beamUpVec;
 	Vector3D beamDepthVec;
-	float currRadius;
+	float currRadius, currAlpha;
 	Vector2D tempRadiusOffset;
 	
+    bool paddleLaserBeamActive = false;
+
 	for (std::list<Beam*>::const_iterator beamIter = beams.begin(); beamIter != beams.end(); ++beamIter) {
 		const Beam* currentBeam = *beamIter;
+        paddleLaserBeamActive |= (currentBeam->GetType() == Beam::PaddleBeam);
+        
+        const Colour& beamColour = currentBeam->GetBeamColour();
+        Colour beamCenterColour  = BRIGHT_BEAM_CENTER_MULTIPLER * beamColour;
+        currAlpha = currentBeam->GetBeamAlpha();
 
 		const std::list<BeamSegment*>& beamSegments = currentBeam->GetBeamParts();
 		std::list<BeamSegment*>::const_iterator segmentIter = beamSegments.begin();
@@ -861,7 +861,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
 			beamDepthVec = Vector3D(0, 0, 0.5f * quarterPaddleDepth);
 
-			glColor4f(0.75f, 1.0f, 1.0f, TYPICAL_BEAM_ALPHA);
+			glColor4f(beamCenterColour.R(), beamCenterColour.G(), beamCenterColour.B(), TYPICAL_BEAM_ALPHA*currAlpha);
 			
 			// Front face
 			temp = beamSegStart - beamRightVec - beamDepthVec;
@@ -908,7 +908,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
 			beamDepthVec = Vector3D(0, 0, quarterPaddleDepth);
 
-			glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_BEAM_ALPHA);
+			glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_BEAM_ALPHA*currAlpha);
 
 			// Front face
 			temp = beamSegStart - beamRightVec - beamDepthVec;
@@ -954,6 +954,12 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	glEnd();
 	glPopMatrix();
 	glPopAttrib();
+
+    // If in paddle cam mode draw a fullscreen quad with the laser colour
+    if (paddle->GetIsPaddleCameraOn() && paddleLaserBeamActive) {
+        GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 0.0, 
+            ColourRGBA(GameModelConstants::GetInstance()->PADDLE_LASER_BEAM_COLOUR, 0.2f));
+    }
 
 	debug_opengl_state();
 }
@@ -1278,8 +1284,7 @@ void GameAssets::FireRocket(const RocketProjectile& rocketProjectile) {
  * occur to show the hurting.
  */
 void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile) {
-	
-	
+
 	// Add the sprite/particle effect
 	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile);
 
@@ -1330,9 +1335,23 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 			return;
 	}
 
-	// Add a fullscreen overlay effect to show pain/badness
+	// Add a full screen overlay effect to show pain/badness
 	this->painHUD->Activate(intensity);
+}
 
+void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment) {
+    UNUSED_PARAMETER(beam);
+
+    // Add the sprite/particle effects
+    this->espAssets->AddPaddleHitByBeamEffect(paddle, beamSegment);
+
+    // Add a full screen overlay effect to show pain/badness
+    this->painHUD->Activate(PlayerHurtHUD::MajorPain);
+
+    // Vibrate the controller
+    float intensityMultiplier = (beamSegment.GetRadius() / paddle.GetHalfWidthTotal());
+    GameControllerManager::GetInstance()->VibrateControllers(intensityMultiplier * 1.5f,
+        BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
 }
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
@@ -1365,9 +1384,9 @@ void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
 
 	// Add a camera/controller shake and flash for when the mine explodes...
     float forcePercentage = mine.GetVisualScaleFactor();
-	camera.SetCameraShake(forcePercentage * 0.5f, forcePercentage * Vector3D(0.2f, 0.5f, 0.3f), 90);
-    GameControllerManager::GetInstance()->VibrateControllers(forcePercentage,
-        BBBGameController::SoftVibration, BBBGameController::SoftVibration);
+	camera.SetCameraShake(forcePercentage * 0.5f, forcePercentage * Vector3D(0.2f, 0.5f, 0.3f), 80);
+    GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 0.75f,
+        BBBGameController::VerySoftVibration, BBBGameController::SoftVibration);
 
 	// Play the explosion sound
 	this->sound->PlaySoundAtPosition(GameSound::MineExplodedEvent, false, Point3D(mine.GetPosition(), 0.0f));

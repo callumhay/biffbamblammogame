@@ -12,7 +12,7 @@
 #include "PaddleMineLauncherItem.h"
 #include "GameModel.h"
 
-const double PaddleMineLauncherItem::MINE_LAUNCHER_PADDLE_TIMER_IN_SECS	= 10.0;
+const double PaddleMineLauncherItem::MINE_LAUNCHER_PADDLE_TIMER_IN_SECS	= 17.0;
 const char* PaddleMineLauncherItem::MINE_LAUNCHER_PADDLE_ITEM_NAME	    = "MineLauncherPaddle";
 
 PaddleMineLauncherItem::PaddleMineLauncherItem(const Point2D &spawnOrigin, GameModel *gameModel) : 

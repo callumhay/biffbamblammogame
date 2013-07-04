@@ -11,7 +11,7 @@
 
 #include "LaserBeamPaddleItem.h"
 #include "GameModel.h"
-#include "Beam.h"
+#include "PaddleLaserBeam.h"
 
 const double LaserBeamPaddleItem::LASER_BEAM_PADDLE_TIMER_IN_SECS	= 0.0; // The laser beam is not a timed power-up, it's activated when shot
 const char* LaserBeamPaddleItem::LASER_BEAM_PADDLE_ITEM_NAME      = "LaserBeamPaddle";
@@ -47,7 +47,8 @@ double LaserBeamPaddleItem::Activate() {
 	if (paddle->GetIsLaserBeamFiring()) {
 		// Just add another beam if the beam is already firing - this will simply
 		// extend the lifetime of the already firing beam
-		this->gameModel->AddBeam(Beam::PaddleLaserBeam);
+        PaddleLaserBeam* paddleLaserBeam = new PaddleLaserBeam(paddle, this->gameModel);
+		this->gameModel->AddBeam(paddleLaserBeam);
 	}
 	else {
 		paddle->AddPaddleType(PlayerPaddle::LaserBeamPaddle);
