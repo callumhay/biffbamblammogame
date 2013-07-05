@@ -89,7 +89,7 @@ public:
     virtual bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
 	virtual bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	virtual bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
+	virtual bool CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const;
 	virtual bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
 
 	// Collision related stuffs
@@ -241,13 +241,12 @@ inline bool LevelPiece::CollisionCheck(const Collision::Ray2D& ray, float& rayT)
  * Check for a collision of a given set of bounding lines with this block.
  * Returns: true on collision, false otherwise.
  */
-inline bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
-    UNUSED_PARAMETER(velDir);
+inline bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
 
-	return this->bounds.CollisionCheck(boundingLines);
+	return this->bounds.CollisionCheck(boundingLines, dT, velocity);
 }
 
 inline bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {

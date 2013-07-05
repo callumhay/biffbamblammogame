@@ -54,10 +54,12 @@ public:
 	bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	bool CollisionCheck(const Collision::Circle2D& c) const;
 	bool CollisionCheck(const BoundingLines& other) const;
+    bool CollisionCheck(const BoundingLines& other, double dT, const Vector2D& velocity) const;
     bool CollisionCheck(const Collision::LineSeg2D& lineSeg) const;
 	int CollisionCheckIndex(const BoundingLines& other) const;
 
 	std::vector<int> CollisionCheckIndices(const BoundingLines& other) const;
+    std::vector<int> CollisionCheckIndices(const Collision::Ray2D& ray) const;
 	std::vector<int> CollisionCheckIndices(const Collision::LineSeg2D& lineSeg) const;
 	std::vector<int> ClosestCollisionIndices(const Point2D& pt, float tolerance) const;
 
@@ -121,6 +123,15 @@ inline bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, cons
 
     int temp;
     return this->Collide(dT, c, velocity, n, collisionLine, temp, timeUntilCollision);
+}
+
+/**
+ * Check to see whether this collided with another set of bounding lines.
+ * Returns: true if any lines in this collided with any lines in the given BoundingLines object,
+ * false otherwise.
+ */
+inline bool BoundingLines::CollisionCheck(const BoundingLines& other) const {
+	return this->CollisionCheckIndex(other) != -1;
 }
 
 #endif

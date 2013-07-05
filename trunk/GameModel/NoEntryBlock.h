@@ -46,7 +46,7 @@ public:
     bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
+	bool CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const;
 	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
 
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
@@ -93,9 +93,8 @@ inline bool NoEntryBlock::CollisionCheck(const Collision::Ray2D& ray, float& ray
     }
 }
 
-inline bool NoEntryBlock::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
-    UNUSED_PARAMETER(velDir);
-	return this->bounds.CollisionCheck(boundingLines);
+inline bool NoEntryBlock::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
+	return this->bounds.CollisionCheck(boundingLines, dT, velocity);
 }
 
 inline bool NoEntryBlock::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {

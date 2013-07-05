@@ -37,7 +37,7 @@ public:
         Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
     BossBodyPart* CollisionCheck(const PlayerPaddle& paddle);
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
-	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir);
+	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity);
 	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir);
 
     void Translate(const Vector3D& t);
@@ -181,12 +181,12 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Ray2D& ray, f
     return NULL;
 }
 
-inline BossBodyPart* BossBodyPart::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) {
-    UNUSED_PARAMETER(velDir);
+inline BossBodyPart* BossBodyPart::CollisionCheck(const BoundingLines& boundingLines, 
+                                                  double dT, const Vector2D& velocity) {
     if (this->collisionsDisabled) {
         return NULL;
     }
-    if (this->GetWorldBounds().CollisionCheck(boundingLines)) {
+    if (this->GetWorldBounds().CollisionCheck(boundingLines, dT, velocity)) {
         return this;
     }
     return NULL;

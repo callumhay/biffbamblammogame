@@ -38,7 +38,7 @@ public:
     bool BallCollisionCheck(const GameBall& b, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
 	bool PaddleCollisionCheck(const PlayerPaddle& p);
-	bool ProjectileCollisionCheck(const BoundingLines& projectileBoundingLines);
+	bool ProjectileCollisionCheck(const BoundingLines& projectileBoundingLines, double dT, const Vector2D& projectileVel);
 
     void AttachProjectile(MineProjectile* p);
     void DetachProjectile(MineProjectile* p);
@@ -62,8 +62,9 @@ inline bool SafetyNet::PaddleCollisionCheck(const PlayerPaddle& p) {
 	return p.CollisionCheck(this->bounds, false);
 }
 
-inline bool SafetyNet::ProjectileCollisionCheck(const BoundingLines& projectileBoundingLines) {
-	return projectileBoundingLines.CollisionCheck(this->bounds);
+inline bool SafetyNet::ProjectileCollisionCheck(const BoundingLines& projectileBoundingLines, 
+                                                double dT, const Vector2D& projectileVel) {
+	return this->bounds.CollisionCheck(projectileBoundingLines, dT, projectileVel);
 }
 
 inline void SafetyNet::AttachProjectile(MineProjectile* p) {

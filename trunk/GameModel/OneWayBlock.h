@@ -84,7 +84,7 @@ public:
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
+	bool CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const;
 	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
 
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
@@ -153,11 +153,11 @@ inline bool OneWayBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT
     return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }
 
-inline bool OneWayBlock::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
-    if (this->IsGoingTheOneWay(velDir) && !this->HasStatus(LevelPiece::IceCubeStatus)) {
+inline bool OneWayBlock::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
+    if (this->IsGoingTheOneWay(velocity) && !this->HasStatus(LevelPiece::IceCubeStatus)) {
         return false;
     }
-    return this->bounds.CollisionCheck(boundingLines);
+    return this->bounds.CollisionCheck(boundingLines, dT, velocity);
 }
 
 inline bool OneWayBlock::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {

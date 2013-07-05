@@ -107,6 +107,9 @@ void BallInPlayState::Tick(double seconds) {
 	// Check for item-paddle collisions
 	this->DoItemCollision();
 	
+    // Check for projectile collisions
+    this->gameModel->DoProjectileCollisions(seconds);
+
 	// Update any timers that are currently active
 	this->gameModel->UpdateActiveTimers(seconds);
 	// Update any item drops that are currently active
@@ -366,7 +369,7 @@ void BallInPlayState::Tick(double seconds) {
 			    // Get the small set of level pieces based on the position of the ball...
 			    std::vector<LevelPiece*> collisionPieces = 
                     currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(),
-                    currBall->GetBounds().Radius(), currBall->GetVelocity());
+                    currBall->GetBounds().Radius(), currBall->GetSpeed());
 
 			    for (std::vector<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
                     pieceIter != collisionPieces.end(); ++pieceIter) {
@@ -428,7 +431,7 @@ void BallInPlayState::Tick(double seconds) {
                         // that collided could be destroyed during this loop by the ball
                         if (currPieceCanChangeSelfOrPiecesAroundIt) {
 			                collisionPieces = currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
-                                std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()), currBall->GetVelocity());
+                                std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()), currBall->GetSpeed());
                             pieceIter = collisionPieces.begin();
                         }
                     }
@@ -469,9 +472,6 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Paddle-block collisions / boundry update (so that the paddle crashes into potential blocks at its sides).
     this->DoUpdateToPaddleBoundriesAndCollisions(seconds, true);
-
-	// Projectile Collisions:
-	this->gameModel->DoProjectileCollisions(seconds);
 	
     // Tick/update any level pieces that require it...
 	this->gameModel->DoPieceStatusUpdates(seconds);

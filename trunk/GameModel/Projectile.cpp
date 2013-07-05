@@ -76,3 +76,10 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
 
 	return NULL;
 }
+
+#ifdef _DEBUG
+void Projectile::DebugDraw() const {
+    BoundingLines bounds = this->BuildBoundingLines();
+    bounds.DebugDraw();
+}
+#endif

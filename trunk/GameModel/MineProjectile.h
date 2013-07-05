@@ -45,7 +45,7 @@ public:
 
     virtual float GetDamage() const = 0;
 
-    virtual float GetProximityRadius() const { return MINE_DEFAULT_PROXIMITY_RADIUS * this->GetVisualScaleFactor(); }
+    virtual float GetProximityRadius() const { return std::min<float>(MINE_DEFAULT_PROXIMITY_RADIUS * this->GetVisualScaleFactor(), 2*LevelPiece::PIECE_WIDTH); }
 
     bool IsRocket() const { return false; }
     bool IsMine() const { return true; }

@@ -97,11 +97,11 @@ BossBodyPart* BossCompositeBodyPart::CollisionCheck(const Collision::Ray2D& ray,
 }
 
 BossBodyPart* BossCompositeBodyPart::CollisionCheck(const BoundingLines& boundingLines,
-                                                    const Vector2D& velDir) {
+                                                    double dT, const Vector2D& velocity) {
 
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         AbstractBossBodyPart* part = this->childParts[i];
-        BossBodyPart* result = part->CollisionCheck(boundingLines, velDir);
+        BossBodyPart* result = part->CollisionCheck(boundingLines, dT, velocity);
         
         if (result != NULL) {
             return result;

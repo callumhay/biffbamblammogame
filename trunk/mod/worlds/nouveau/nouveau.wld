@@ -44,32 +44,32 @@ resources/worlds/levels/medium/a_vicinity_for_proximity.lvl
 resources/worlds/levels/medium/good_shot_bad_shot.lvl
 
 
+
 # Prism block intro levels
 resources/worlds/levels/easy/bend_it_like_maxwell.lvl
 
 # Prism blocks + iceball to freeze a block and combine with the prisms that it exposes
 resources/worlds/levels/medium/work_around.lvl
 
-
-# Using the magnet item to redirect mines
-resources/worlds/levels/hard/a_minor_deviation.lvl
-
-# Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
-resources/worlds/levels/medium/size_matters.lvl
-
-
 # Prism + Switch
 resources/worlds/levels/hard/prismatic_pragmatism.lvl
 
 
-# EASY LEVEL GOES HERE
+
+# Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
+resources/worlds/levels/medium/size_matters.lvl
+
+# Laser beams and prisms are the only way to break the blocks, have to juggle the ball while shooting
+resources/worlds/levels/easy/frikin_laser_beams.lvl
+
+# Using the magnet item to redirect mines
+resources/worlds/levels/hard/a_minor_deviation.lvl
+
+# Paddle grow + mine open a hole for prism + laser use to finish a level
+resources/worlds/levels/medium/embiggening_is_required.lvl
 
 # Mines + Switch + Sticky Paddle + Cannons
 resources/worlds/levels/medium/mine_the_gap.lvl
-
-
-# MEDIUM LEVEL GOES HERE
-
 
 # Magnet Item + Cannons (to redirect rockets) + Prisms (to redirect lasers) + Switches
 # Make sure this is the LAST level before the boss:

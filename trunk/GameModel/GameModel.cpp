@@ -683,6 +683,7 @@ void GameModel::DoProjectileCollisions(double dT) {
 
 	for (std::list<Projectile*>::iterator iter = gameProjectiles.begin(); iter != gameProjectiles.end();) {
 		Projectile* currProjectile = *iter;
+        Vector2D currProjectileVel = currProjectile->GetVelocity();
 		
 		// Grab bounding lines from the projectile to test for collision
 		BoundingLines projectileBoundingLines = currProjectile->BuildBoundingLines();
@@ -707,7 +708,7 @@ void GameModel::DoProjectileCollisions(double dT) {
 
 		// Check to see if the projectile collided with a safety net (if one is active)
         if (this->IsSafetyNetActive()) {
-            if (this->safetyNet->ProjectileCollisionCheck(projectileBoundingLines)) {
+            if (this->safetyNet->ProjectileCollisionCheck(projectileBoundingLines, dT, currProjectileVel)) {
                 
                 currProjectile->SafetyNetCollisionOccurred(this->safetyNet);
                 
@@ -764,7 +765,7 @@ void GameModel::DoProjectileCollisions(double dT) {
         if (currLevel->GetHasBoss()) {
             Boss* boss = currLevel->GetBoss();
             if (!boss->ProjectilePassesThrough(currProjectile)) {
-                BossBodyPart* hitBodyPart = boss->CollisionCheck(projectileBoundingLines, currProjectile->GetVelocityDirection());
+                BossBodyPart* hitBodyPart = boss->CollisionCheck(projectileBoundingLines, dT, currProjectileVel);
                 if (hitBodyPart != NULL) {
 
                     this->CollisionOccurred(currProjectile, boss, hitBodyPart);
@@ -779,14 +780,19 @@ void GameModel::DoProjectileCollisions(double dT) {
             }
         }
 
-		// Find the any level pieces that the current projectile may have collided with and test for collision
-		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currProjectile);
         incIter = true;	// Keep track of whether we need to increment the iterator or not
+
+        // Find the any level pieces that the current projectile may have collided with and test for collision
+        std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(
+            dT, currProjectile->GetPosition(), projectileBoundingLines, currProjectile->GetVelocityMagnitude());
+        std::set<LevelPiece*> alreadyCollidedWithPieces;
+
 		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
 			LevelPiece *currPiece = *pieceIter;
 			
 			// Test for a collision between the projectile and current level piece
-			didCollide = currPiece->CollisionCheck(projectileBoundingLines, currProjectile->GetVelocityDirection());
+			didCollide = currPiece->CollisionCheck(projectileBoundingLines, dT, currProjectileVel) && 
+                alreadyCollidedWithPieces.find(currPiece) == alreadyCollidedWithPieces.end();
 			if (didCollide) {
 
 				// WARNING/IMPORTANT!!!! This needs to be before the call to CollisionOccurred or else the
@@ -797,15 +803,21 @@ void GameModel::DoProjectileCollisions(double dT) {
 
 				// Check to see if the collision is supposed to destroy the projectile
 				if (destroyProjectile) {
-					// Despose of the projectile...
+					// Dispose of the projectile...
 					iter = gameProjectiles.erase(iter);
 					PROJECTILE_CLEANUP(currProjectile);
 					incIter = false;
+                    break;
 				}
-
-				break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
-						// (and we may have destroyed the projectile anyway).
+                else {
+                    // NOTE: We need to be careful since some blocks may no longer exist after a collision at this
+                    // point so we re-populate the set of pieces to check and keep track of the ones we've already collided with
+                    collisionPieces = currLevel->GetLevelPieceCollisionCandidates(
+                        dT, currProjectile->GetPosition(), projectileBoundingLines, currProjectile->GetVelocityMagnitude());
+                    pieceIter = collisionPieces.begin();
+                }
 			}
+            alreadyCollidedWithPieces.insert(currPiece);
 		}
 
         // Lastly we perform a modify level update for the projectile - certain projectiles can act

@@ -10,6 +10,7 @@
  */
 
 #include "BoundingLines.h"
+#include "LevelPiece.h"
 
 BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines,
                              const std::vector<Vector2D>& norms) : 
@@ -190,8 +191,8 @@ Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {
  * Test collision between the bounding lines of this and the given circle c.
  * Return: The average normal for the lines that the given circle collided with in the value n. 
  * Also returns the distance from the center of the circle to the line (negative d means the circle is
- * inside the line, postivie means outside - the outward normal pointing direction).
- * The boolean return value will be true if one or more collisions occured, false otherwise.
+ * inside the line, positive means outside - the outward normal pointing direction).
+ * The boolean return value will be true if one or more collisions occurred, false otherwise.
  */
 bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
 							Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeUntilCollision) const {
@@ -571,8 +572,6 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 
     return true;
 }
- 
-
 
 /**
  * Calculate the closest point out of all the bounding lines in this object
@@ -648,13 +647,36 @@ bool BoundingLines::CollisionCheck(const Collision::AABB2D& aabb) const {
 	return false;
 }
 
-/**
- * Check to see whether this collided with another set of bounding lines.
- * Returns: true if any lines in this collided with any lines in the given BoundingLines object,
- * false otherwise.
- */
-bool BoundingLines::CollisionCheck(const BoundingLines& other) const {
-	return this->CollisionCheckIndex(other) != -1;
+
+
+bool BoundingLines::CollisionCheck(const BoundingLines& other, double dT, const Vector2D& velocity) const {
+    static const float SAMPLE_DISTANCE = LevelPiece::PIECE_HEIGHT / 2.0f;
+
+    int numCollisionSamples;
+    bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
+
+    if (zeroVelocity) {
+        numCollisionSamples = 1;
+    }
+    else {
+        // Calculate the number of samples required to make sure that the increment distance is reasonable
+        numCollisionSamples = static_cast<int>(ceilf(velocity.Magnitude() * dT / SAMPLE_DISTANCE));
+        numCollisionSamples = std::max<int>(1, numCollisionSamples+1);
+        assert(numCollisionSamples < 50);
+    }
+
+    // Figure out the distance along the vector traveled since the last collision to take each sample at...
+    Vector2D sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
+    BoundingLines sampleBounds = other;
+
+    for (int i = 0; i < numCollisionSamples; i++) {
+        if (this->CollisionCheck(sampleBounds)) {
+            return true;
+        }
+        sampleBounds.TranslateBounds(sampleIncDist);
+    }
+
+    return false;
 }
 
 bool BoundingLines::CollisionCheck(const Collision::LineSeg2D& lineSeg) const {
@@ -700,8 +722,8 @@ int BoundingLines::CollisionCheckIndex(const BoundingLines& other) const {
  * Returns: a set of all line indices being collided with in this object.
  */
 std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other) const {
-	std::set<int> indicesCollidedWith;
-	int count = 0;
+	std::vector<int> indicesCollidedWith;
+    indicesCollidedWith.reserve(this->lines.size());
 
 	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
 	for (size_t i = 0; i < this->lines.size(); ++i) {
@@ -711,20 +733,31 @@ std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other
 			const Collision::LineSeg2D& currOtherLine = other.lines[j];
 
 			if (Collision::IsCollision(currThisLine, currOtherLine)) {
-				indicesCollidedWith.insert(count);
+				indicesCollidedWith.push_back(i);
+                break;
 			}
 		}
-
-		count++;
 	}
 
-	std::vector<int> tempVecOfIndices;
-	tempVecOfIndices.reserve(indicesCollidedWith.size());
-	for (std::set<int>::iterator iter = indicesCollidedWith.begin(); iter != indicesCollidedWith.end(); ++iter) {
-		tempVecOfIndices.push_back(*iter);
-	}
+	return indicesCollidedWith;
+}
 
-	return tempVecOfIndices;
+std::vector<int> BoundingLines::CollisionCheckIndices(const Collision::Ray2D& ray) const {
+    std::vector<int> indicesCollidedWith;
+    indicesCollidedWith.reserve(this->lines.size());
+    float temp;
+
+    // Do a line-line collision with every line in this verses every line in the given set of BoundingLines
+    for (size_t i = 0; i < this->lines.size(); ++i) {
+        const Collision::LineSeg2D& currThisLine = this->lines[i];
+
+        if (Collision::IsCollision(ray, currThisLine, temp)) {
+            indicesCollidedWith.push_back(i);
+            break;
+        }
+    }
+
+    return indicesCollidedWith;
 }
 
 /**

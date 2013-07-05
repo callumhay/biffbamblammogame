@@ -44,6 +44,7 @@ public:
 
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
+    bool CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
                       const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
