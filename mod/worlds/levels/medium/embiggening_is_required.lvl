@@ -1,0 +1,69 @@
+Embiggening is Required
+24 28
+E E E E E E E E E S S S S S S E E E E E E E E E 
+E E E E E E S S S T(S,ul) E E E E N S S E E E E E E E 
+E E E E E E S E F(r) E R Q(f) R E N Q(i) Q(i) S E E E E E E 
+E E E E E E S C(90) F(r) E R E R E N S W(1) E S E E D(LaserBeamPaddle){1} E E 
+E E E E E S T(P,ul) E E E E E E E N Q(i) Q(i) E T(P,ur) S E E E E 
+E E E E S T(S,ul) E E R Q(f) R E E S S S N E E S E E E E 
+E E E E S E E E R E R E E T(S,ur) S S N E E S E E E E 
+E E E E S E E E E E E E E E T(S,ur) S N E E S E E E E 
+E E E E S E R Q(f) R E R Q(f) R E E T(S,ur) S E Q(f) S E E E E 
+E E E E S E R E R E R E R E E E S E E S E E E E 
+E E E E S E E E E E E E E E E E S E E S E E E E 
+E E E E S E E E R Q(f) R E R Q(f) R E S S S S E E E E 
+E E E E S E E E R E R E R E R E S D(PaddleGrow) S S E E E E 
+E E E E S E E E E E E E E E E E R E E S E E E E 
+E E D(MineLauncherPaddle){2} E S E E E E E E E E E E R T(R,ul) E E S E E E E 
+E E E E S Y Q(i) Y R Y R Y R Y R Y E E E S E E E E 
+E E E E S Y Y Y Y Y Y Y Y Y Y Y E E E S E E E E 
+E E E E S R O R O R O R O R O R E E E S E E E E 
+E E E E S Y Y Y Y Y Y Y Y Y Y Y E E E S E E E E 
+E E E E S Y R Y R Y R Y R Y R Y E E E S E E E E 
+E E E E S E E E E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E E E E S F(d) F(d) F(d) S 
+E E E E N E E E E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E E E E N E E E S 
+S E E E N E E E E E E E E E E E E E E N E E E W(2) 
+
+STARS:
+10000
+15000
+21000
+27000
+34000
+
+PaddleGrow 3
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+BallGrow 2
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 3
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 0
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+MineLauncherPaddle 3
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

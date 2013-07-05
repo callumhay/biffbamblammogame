@@ -20,9 +20,9 @@
 #include "PaddleRocketProjectile.h"
 #include "PaddleMineProjectile.h"
 
-const float CannonBlock::CANNON_BARREL_LENGTH				= 1.30f;
+const float CannonBlock::CANNON_BARREL_LENGTH       = 1.30f;
 const float CannonBlock::HALF_CANNON_BARREL_LENGTH	= CannonBlock::CANNON_BARREL_LENGTH	/ 2.0f;
-const float CannonBlock::CANNON_BARREL_HEIGHT				= 0.9f;
+const float CannonBlock::CANNON_BARREL_HEIGHT       = 0.9f;
 const float CannonBlock::HALF_CANNON_BARREL_HEIGHT	= CannonBlock::CANNON_BARREL_HEIGHT / 2.0f;
 
 // Rotation will happen for some random period of time in between these values

@@ -641,7 +641,10 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		// Make sure the rocket doesn't explode if it's lying up against a block when launched...
         bool foundPiece = false;
 		const GameLevel* currLevel = gameModel->GetCurrentLevel();
-		std::set<LevelPiece*> levelPieces = currLevel->GetLevelPieceCollisionCandidates(*rocketProjectile);
+		
+        std::set<LevelPiece*> levelPieces = currLevel->GetLevelPieceCollisionCandidates(0.0, 
+            rocketProjectile->GetPosition(), rocketProjectile->BuildBoundingLines(), 0.0);
+
 		for (std::set<LevelPiece*>::const_iterator iter = levelPieces.begin(); iter != levelPieces.end(); ++iter) {
 			const LevelPiece* currPiece = *iter;
 			if (!currPiece->ProjectilePassesThrough(rocketProjectile)) {
@@ -1134,7 +1137,7 @@ void PlayerPaddle::DebugDraw() const {
 }
 
 float PlayerPaddle::GetMineProjectileStartingHeightRelativeToPaddle() const {
-    return this->currHalfHeight + 0.5f * this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;
+    return this->currHalfHeight + 0.25f * this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;
 }
 
 /**

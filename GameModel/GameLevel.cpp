@@ -1653,9 +1653,9 @@ std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNotMoving(co
  * Returns: array of unique LevelPieces that are possibly colliding with b.
  */
 std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(double dT, const Point2D& center, 
-                                                                     float radius, const Vector2D& velocity) const {
+                                                                     float radius, float velocityMagnitude) const {
 
-    radius += dT * velocity.Magnitude();
+    radius += dT * velocityMagnitude;
 
 	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
 	float xIndexMax = floorf(xNonAdjustedIndex + radius); 
@@ -1705,21 +1705,19 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNoSort(const Po
  * in collision with the given projectile.
  * Returns: array of unique LevelPieces that are possibly colliding with p.
  */
-std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projectile& p) const {
-	const Point2D& projectileCenter = p.GetPosition();
-    Collision::AABB2D projectileAABB = p.BuildBoundingLines().GenerateAABBFromLines();
+std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(double dT, const Point2D& center,
+                                                                  const BoundingLines& bounds, float velocityMagnitude) const {
 
+    Collision::AABB2D boundsAABB = bounds.GenerateAABBFromLines();
+    float radius = std::max<float>(boundsAABB.GetWidth(), boundsAABB.GetHeight()) / 2.0f + dT * velocityMagnitude;
 
-	// Find the non-rounded max and min indices to look at along the x and y axis
-	//float xDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[0]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[0]);
-    float xDelta    = projectileAABB.GetWidth() / 2.0f;
-    float xIndexMax = ceilf((projectileCenter[0] + xDelta) / LevelPiece::PIECE_WIDTH); 
-	float xIndexMin = floorf((projectileCenter[0] - xDelta) / LevelPiece::PIECE_WIDTH);
-	
-	//float yDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[1]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[1]);
-    float yDelta    = projectileAABB.GetHeight() / 2.0f;
-    float yIndexMax = ceilf((projectileCenter[1] + yDelta) / LevelPiece::PIECE_HEIGHT);
-	float yIndexMin = floorf((projectileCenter[1] - yDelta) / LevelPiece::PIECE_HEIGHT);
+    float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
+    float xIndexMax = floorf(xNonAdjustedIndex + radius); 
+    float xIndexMin = floorf(xNonAdjustedIndex - radius);
+
+    float yNonAdjustedIndex = center[1] / LevelPiece::PIECE_HEIGHT;
+    float yIndexMax = floorf(yNonAdjustedIndex + radius);
+    float yIndexMin = floorf(yNonAdjustedIndex - radius);
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
 }

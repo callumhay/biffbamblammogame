@@ -103,9 +103,9 @@ public:
 	}
 
     std::vector<LevelPiece*> GetLevelPieceCollisionCandidatesNotMoving(const Point2D& center, float radius) const;
-	std::vector<LevelPiece*> GetLevelPieceCollisionCandidates(double dT, const Point2D& center, float radius, const Vector2D& velocity) const;
+	std::vector<LevelPiece*> GetLevelPieceCollisionCandidates(double dT, const Point2D& center, float radius, float velocityMagnitude) const;
     std::set<LevelPiece*> GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius) const;
-	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
+	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(double dT, const Point2D& center, const BoundingLines& bounds, float velocityMagnitude) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const;
 
     static void BuildCollisionBoundsCombinationAndMap(const std::vector<LevelPiece*>& pieces,

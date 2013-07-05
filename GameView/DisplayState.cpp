@@ -118,6 +118,11 @@ void DisplayState::DebugDrawBounds() {
         boss->DebugDraw();
     }
 
+    // Draw boundaries of all projectiles
+    const std::list<Projectile*>& projectiles = this->display->GetModel()->GetActiveProjectiles();
+    for (std::list<Projectile*>::const_iterator iter = projectiles.begin(); iter != projectiles.end(); ++iter) {
+        (*iter)->DebugDraw();
+    }
 
 	glPopMatrix();
 

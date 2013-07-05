@@ -35,6 +35,10 @@ lifePointsUntilNextToggle(SwitchBlock::TOGGLE_ON_OFF_LIFE_POINTS) {
 SwitchBlock::~SwitchBlock() {
 }
 
+bool SwitchBlock::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
+    return this->bounds.CollisionCheck(boundingLines, dT, velocity);
+}
+
 bool SwitchBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
 	return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }

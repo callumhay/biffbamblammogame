@@ -41,7 +41,7 @@ public:
         Collision::LineSeg2D& collisionLine, double& timeUntilCollision) = 0;
     virtual BossBodyPart* CollisionCheck(const PlayerPaddle& paddle) = 0;
 	virtual BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT) = 0;
-	virtual BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) = 0;
+	virtual BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) = 0;
 	virtual BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) = 0;
 
     virtual void Translate(const Vector3D& t)  = 0;

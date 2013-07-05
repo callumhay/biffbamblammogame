@@ -78,6 +78,7 @@ public:
 
 	const Vector2D& GetVelocityDirection() const { return this->velocityDir; }
 	float GetVelocityMagnitude() const { return this->velocityMag; }
+    Vector2D GetVelocity() const { return this->GetVelocityMagnitude() * this->GetVelocityDirection(); }
 
 	virtual void SetPosition(const Point2D& pos) { this->position = pos; }
 
@@ -110,6 +111,10 @@ public:
 	virtual bool GetIsActive() const {
 		return true;
 	}
+
+#ifdef _DEBUG
+    void DebugDraw() const;
+#endif
 
 protected:
 	Projectile(const Point2D& spawnLoc, float width, float height);

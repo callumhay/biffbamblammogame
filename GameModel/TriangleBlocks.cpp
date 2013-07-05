@@ -148,7 +148,8 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 				if (!projectile->IsLastThingCollidedWith(this)) {
 
 					// Obtain all the normals of the lines that the projectile is colliding with...
-					std::vector<int> collidingIndices = this->reflectRefractBounds.CollisionCheckIndices(projectile->BuildBoundingLines());
+					std::vector<int> collidingIndices = 
+                        this->reflectRefractBounds.CollisionCheckIndices(Collision::Ray2D(projectile->GetPosition(), projectile->GetVelocityDirection()));
 					Vector2D collisionNormal;
 
 					if (collidingIndices.size() == 2) {

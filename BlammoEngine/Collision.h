@@ -326,10 +326,10 @@ namespace Collision {
 		float a1 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P2());
 		float a2 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P1());
 
-		if (a1 * a2 < 0.0f) {
+		if (a1 != 0.0f && a2 != 0.0f && a1 * a2 < 0.0f) {
 			float a3 = Signed2DTriArea(l2.P1(), l2.P2(), l1.P1());
 			float a4 = a3 + a2 - a1;
-			if (a3 * a4 < 0.0f) {
+			if (a3 != 0.0f && a4 != 0.0f && a3 * a4 < 0.0f) {
 				return true;
 			}
 		}

@@ -25,7 +25,7 @@ const Vector2D MineProjectile::MINE_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 
 const float MineProjectile::MINE_DEFAULT_ACCEL = 80.0f;
 
-const float MineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.9f  * LevelPiece::PIECE_HEIGHT;
+const float MineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.99f * LevelPiece::PIECE_HEIGHT;
 const float MineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.33f * LevelPiece::PIECE_WIDTH;
 
 const double MineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.75;
@@ -139,16 +139,33 @@ BoundingLines MineProjectile::BuildBoundingLines() const {
 	Point2D topLeft     = topRight - this->GetWidth()*RIGHT_DIR;
 	Point2D bottomLeft  = topLeft - this->GetHeight()*UP_DIR;
 
-	std::vector<Collision::LineSeg2D> sideBounds;
-	sideBounds.reserve(4);
-	sideBounds.push_back(Collision::LineSeg2D(topLeft, bottomLeft));
-	sideBounds.push_back(Collision::LineSeg2D(topRight, bottomRight));
-	sideBounds.push_back(Collision::LineSeg2D(topRight, topLeft));
-	sideBounds.push_back(Collision::LineSeg2D(bottomRight, bottomLeft));
-	std::vector<Vector2D> normBounds;
-	normBounds.resize(4);
 
-	return BoundingLines(sideBounds, normBounds);
+
+    // Bounds are the outside square around the mine and an X from corner-to-corner
+    // through the middle of it (for more robust collisions)
+	std::vector<Collision::LineSeg2D> bounds;
+	
+    const Vector2D& velDir = this->GetVelocityDirection();
+    if (velDir.IsZero()) {
+        bounds.reserve(4);
+    }
+    else {
+        bounds.reserve(5);
+        Point2D midFront = this->GetPosition() + this->GetHalfHeight() * velDir;
+        Point2D midBack  = midFront - this->GetHeight()*velDir;
+        bounds.push_back(Collision::LineSeg2D(midFront, midBack));
+    }
+    
+	
+    bounds.push_back(Collision::LineSeg2D(topLeft, bottomLeft));
+	bounds.push_back(Collision::LineSeg2D(topRight, bottomRight));
+	bounds.push_back(Collision::LineSeg2D(topRight, topLeft));
+	bounds.push_back(Collision::LineSeg2D(bottomRight, bottomLeft));
+	
+    std::vector<Vector2D> normBounds;
+	normBounds.resize(bounds.size());
+
+	return BoundingLines(bounds, normBounds);
 }
 
 void MineProjectile::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
