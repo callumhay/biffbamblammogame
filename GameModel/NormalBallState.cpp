@@ -54,6 +54,23 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
         currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
     }
+    // The impulse applies a sudden acceleration that diminishes
+    else if (this->gameBall->impulseSpdDecreaseCounter < this->gameBall->impulseAmount) {
+
+        float currImpulseDeceleration   = this->gameBall->impulseDeceleration * seconds;
+        this->gameBall->impulseSpdDecreaseCounter += currImpulseDeceleration;
+
+        if (this->gameBall->impulseSpdDecreaseCounter > this->gameBall->impulseAmount) {
+            float subtractAmt = this->gameBall->impulseSpdDecreaseCounter - this->gameBall->impulseAmount;
+            this->gameBall->impulseSpdDecreaseCounter = this->gameBall->impulseAmount;
+            currImpulseDeceleration -= subtractAmt;
+            assert(currImpulseDeceleration > 0);
+        }
+
+        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currImpulseDeceleration);
+        currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+        this->gameBall->gravitySpeed = this->gameBall->currSpeed;
+    }
     else {
 
         // When the ball has gravity augment the velocity to constantly be accelerating downwards,
@@ -93,23 +110,6 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 	    if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
 		    this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel);
 	    }
-    }
-
-    // The impulse applies a sudden acceleration that diminishes
-    if (this->gameBall->impulseSpdDecreaseCounter < this->gameBall->impulseAmount) {
-        float currImpulseDeceleration   = this->gameBall->impulseDeceleration * seconds;
-        this->gameBall->impulseSpdDecreaseCounter += currImpulseDeceleration;
-        
-        if (this->gameBall->impulseSpdDecreaseCounter > this->gameBall->impulseAmount) {
-            float subtractAmt = this->gameBall->impulseSpdDecreaseCounter - this->gameBall->impulseAmount;
-            this->gameBall->impulseSpdDecreaseCounter = this->gameBall->impulseAmount;
-            currImpulseDeceleration -= subtractAmt;
-            assert(currImpulseDeceleration > 0);
-        }
-
-        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currImpulseDeceleration);
-        currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
-        this->gameBall->gravitySpeed = this->gameBall->currSpeed;
     }
     
     if (simulateMovement) {

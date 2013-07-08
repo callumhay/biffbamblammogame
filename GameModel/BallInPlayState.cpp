@@ -22,6 +22,30 @@
 #include "BallBoostModel.h"
 #include "SafetyNet.h"
 
+struct BallCollisionChangeInfo {
+public:
+    BallCollisionChangeInfo() : posChanged(false), impulseApplied(false), impulseAmt(0), impulseDecel(0) {}
+    BallCollisionChangeInfo(bool posChanged) : posChanged(posChanged), impulseApplied(false), impulseAmt(0), impulseDecel(0) {}
+    BallCollisionChangeInfo(bool posChanged, bool impulseApplied, float impulseAmt, float impulseDecel) :
+      posChanged(posChanged), impulseApplied(impulseApplied), impulseAmt(impulseAmt), impulseDecel(impulseDecel) {}
+    BallCollisionChangeInfo(const BallCollisionChangeInfo& copy) : posChanged(copy.posChanged), 
+        impulseApplied(copy.impulseApplied), impulseAmt(copy.impulseAmt), impulseDecel(copy.impulseDecel) {}
+    ~BallCollisionChangeInfo(){}
+
+    BallCollisionChangeInfo& operator=(const BallCollisionChangeInfo& copy) {
+        this->posChanged = copy.posChanged;
+        this->impulseApplied = copy.impulseApplied;
+        this->impulseAmt = copy.impulseAmt;
+        this->impulseDecel = copy.impulseDecel;
+        return *this;
+    }
+
+    bool posChanged;
+    bool impulseApplied;
+    float impulseAmt;
+    float impulseDecel;
+};
+
 BallInPlayState::BallInPlayState(GameModel* gm) : 
 GameState(gm), timeSinceGhost(DBL_MAX) {
 
@@ -202,7 +226,7 @@ void BallInPlayState::Tick(double seconds) {
             ++iter;
         }
 
-        std::vector<bool> ballPositionChangedByCollision(gameBalls.size(), false);
+        std::vector<BallCollisionChangeInfo> ballChangedByCollision(gameBalls.size(), BallCollisionChangeInfo());
         int ballIdx = 0;
 	    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter, ballIdx++) {
 		    GameBall *currBall = *iter;
@@ -236,37 +260,16 @@ void BallInPlayState::Tick(double seconds) {
 					    }
 				    }
 
-                    // In cases where the paddle doesn't have a shield...
-                    // Augment the direction of the ball in cases where the paddle 'slices' the ball...
-                    // To do this we augment the normal of the collision with the paddle based on the paddle velocity
-                    if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == 0x0) {
-
-                        static const float CUTOFF_PADDLE_AFFECT_BALL_SPD = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
-                        assert(CUTOFF_PADDLE_AFFECT_BALL_SPD < PlayerPaddle::DEFAULT_MAX_SPEED);
-
-                        if (paddle->GetIsMoveButtonDown() &&
-                            fabs(paddle->GetSpeed()) > CUTOFF_PADDLE_AFFECT_BALL_SPD && 
-                            (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
-
-                            float truncPaddleSpd = std::min<float>(PlayerPaddle::DEFAULT_MAX_SPEED, fabs(paddle->GetSpeed()));
-
-                            if (paddle->GetSpeed() < 0) {
-                                // Paddle is moving to the left
-                                n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
-                                    0.0f, PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
-                            }
-                            else {
-                                // Paddle is moving to the right
-                                n.Rotate(NumberFuncs::Lerp<float>(0.0f, PlayerPaddle::DEFAULT_MAX_SPEED,
-                                    0.0f, -PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE, truncPaddleSpd));
-                            }
-                        }
-                    }
-
 				    // Do ball-paddle collision
-				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
-                    ballPositionChangedByCollision[ballIdx] = true;
+				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision, 
+                        GameBall::MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS, paddle->GetVelocity(), true);
                     
+                    BallCollisionChangeInfo& collisionInfo = ballChangedByCollision[ballIdx];                    
+                    collisionInfo.posChanged     = true;
+                    collisionInfo.impulseApplied = true;
+                    collisionInfo.impulseAmt     = (GameBall::GetNormalSpeed() / currBall->GetSpeed()) * fabs(paddle->GetSpeed()) / 5.0f;
+                    collisionInfo.impulseDecel   = collisionInfo.impulseAmt;
+
 				    // Tell the model that a ball collision occurred with the paddle
 				    this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
@@ -310,8 +313,8 @@ void BallInPlayState::Tick(double seconds) {
                     // EVENT: The ball just destroyed the safety net
                     GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currBall);
 
-			        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
-                    ballPositionChangedByCollision[ballIdx] = true;
+                    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision, GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+                    ballChangedByCollision[ballIdx].posChanged = true;
 		        }
             }
 
@@ -322,12 +325,14 @@ void BallInPlayState::Tick(double seconds) {
 			    currBall->SetLastPieceCollidedWith(NULL);
     			
 			    // Calculate the ball position/velocity after collision
-			    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
-                ballPositionChangedByCollision[ballIdx] = true;
+			    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision, 
+                    GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+                ballChangedByCollision[ballIdx].posChanged = true;
     			
 			    // Make for damn sure that the ball is no longer colliding!
 			    while (currLevel->TeslaLightningCollisionCheck(*currBall, 0.0, n, collisionLine, timeUntilCollision)) {
-				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
+				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision,
+                        GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
 			    }
 		    }
 
@@ -349,9 +354,9 @@ void BallInPlayState::Tick(double seconds) {
                         collisionBossPart = boss->CollisionCheck(*currBall, currBallDt, n, collisionLine, timeUntilCollision);
                         if (collisionBossPart != NULL) {
                             // Make the ball react to the collision...
-                            this->DoBallCollision(*currBall, n, collisionLine, currBallDt, timeUntilCollision,
-                                collisionBossPart->GetCollisionVelocity());
-                            ballPositionChangedByCollision[ballIdx] = true;
+                            this->DoBallCollision(*currBall, n, collisionLine, currBallDt, timeUntilCollision, 
+                                GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, collisionBossPart->GetCollisionVelocity());
+                            ballChangedByCollision[ballIdx].posChanged = true;
 
                             // Now make the boss react to the collision...
                             this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
@@ -403,7 +408,7 @@ void BallInPlayState::Tick(double seconds) {
 					        }
 				        }
 
-				        // If the piece doesnt have bounds to bounce off of then don't bounce the ball OR
+				        // If the piece doesn't have bounds to bounce off of then don't bounce the ball OR
 				        // In the case that the ball is uber then we only reflect if the ball is not green OR
 				        // The ball is attached to the paddle (special case)
 				        if (!currPiece->BallBouncesOffWhenHit() ||
@@ -416,12 +421,13 @@ void BallInPlayState::Tick(double seconds) {
 				        }
 				        else {
 					        // Make the ball react to the collision
-					        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision);
-                            ballPositionChangedByCollision[ballIdx] = true;
+					        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision,
+                                GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+                            ballChangedByCollision[ballIdx].posChanged = true;
 				        }
     					
-                        bool currPieceCanChangeSelfOrPiecesAroundIt = currPiece->CanChangeSelfOrOtherPiecesWhenHitByBall() ||
-                                                                      currPiece->CanBeDestroyedByBall();
+                        bool currPieceCanChangeSelfOrPiecesAroundIt = 
+                            currPiece->CanChangeSelfOrOtherPiecesWhenHitByBall() || currPiece->CanBeDestroyedByBall();
 
 				        // Tell the model that a ball collision occurred with currPiece
                         this->gameModel->CollisionOccurred(*currBall, currPiece);
@@ -444,10 +450,14 @@ void BallInPlayState::Tick(double seconds) {
         ballIdx = 0;
 	    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter, ballIdx++) {
 		    GameBall *currBall = *iter;
+            BallCollisionChangeInfo& currCollisionInfo = ballChangedByCollision[ballIdx];
 
 		    // Update the current ball, we don't simulate any ball movement if the ball's position has already
             // been augmented by a previous collision during this frame/tick
-            currBall->Tick(!ballPositionChangedByCollision[ballIdx], seconds, worldGravity2D, this->gameModel);
+            currBall->Tick(!currCollisionInfo.posChanged, seconds, worldGravity2D, this->gameModel);
+            if (currCollisionInfo.impulseApplied) {
+                currBall->ApplyImpulseForce(currCollisionInfo.impulseAmt, currCollisionInfo.impulseDecel);
+            }
 	    }
 
         // NOTE: DO THIS LAST SINCE IT CHANGES THE ORDERING OF THE BALLS!
@@ -487,8 +497,9 @@ void BallInPlayState::Tick(double seconds) {
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, 
                                       Collision::LineSeg2D& collisionLine, 
-                                      double dT, double timeUntilCollision,
-                                      const Vector2D& lineVelocity) {
+                                      double dT, double timeUntilCollision, 
+                                      float minAngleInDegs, const Vector2D& lineVelocity,
+                                      bool paddleReflection) {
 	b.BallCollided();
 
 	// Calculate the time of collision and then the difference up to this point
@@ -534,67 +545,86 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 		return;
 	}
 
-	// Figure out the angle between the normal and the reflection...
-	float angleOfReflInDegs = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat)))));
-	float diffAngleInDegs   = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(angleOfReflInDegs);
+    if (!ignoreSmallReflectionAngle && !paddleReflection) {
+        // Figure out the angle between the normal and the reflection...
+        float angleOfReflInDegs = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat)))));
+        float diffAngleInDegs   = minAngleInDegs - fabs(angleOfReflInDegs);
 
-	// Make sure the reflection is big enough to not cause an annoying slow down in the game
-	// or to make a ridiculous gracing angle
-	if (diffAngleInDegs > EPSILON && !ignoreSmallReflectionAngle) {
+        // Make sure the reflection is big enough to not cause an annoying slow down in the game
+        // or to make a ridiculous gracing angle
+        if (diffAngleInDegs > EPSILON) {
 
-		// We need to figure out which way to rotate the velocity
-		// to ensure it's at least the MIN_BALL_ANGLE_IN_RADS
-		Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
+	        // We need to figure out which way to rotate the velocity
+	        // to ensure it's at least the minAngleInDegs
+	        Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
 
-		// Check to see if it's still the case, if it is then we rotated the wrong way
-		float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, newReflVelHat)))));
-		if (newAngleInDegs < GameBall::MIN_BALL_ANGLE_IN_DEGS) {
-			newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
-		}
-		
-		reflVecHat = newReflVelHat;
-	}
-	else {
-		// Do the same with 90 degrees to the normal
-		Vector2D tangentVec(n[1], -n[0]);
-		float gracingAngle = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, reflVecHat)))));
-		if (gracingAngle > 90) {
-			diffAngleInDegs = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(gracingAngle - 180);
-		}
-		else {
-			diffAngleInDegs = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(gracingAngle);
-		}
+	        // Check to see if it's still the case, if it is then we rotated the wrong way
+	        float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, newReflVelHat)))));
+	        if (newAngleInDegs < minAngleInDegs) {
+		        newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
+	        }
+    		
+	        reflVecHat = newReflVelHat;
+        }
+        else {
+	        // Do the same with 90 degrees to the normal
+	        Vector2D tangentVec(n[1], -n[0]);
+	        float gracingAngle = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, reflVecHat)))));
+	        if (gracingAngle > 90) {
+		        diffAngleInDegs = minAngleInDegs - fabs(gracingAngle - 180);
+	        }
+	        else {
+		        diffAngleInDegs = minAngleInDegs - fabs(gracingAngle);
+	        }
 
-		if (diffAngleInDegs > EPSILON) {
-			// We need to figure out which way to rotate the velocity
-			// to ensure it's at least the MIN_BALL_ANGLE_IN_RADS
-			Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
+	        if (diffAngleInDegs > EPSILON) {
+		        // We need to figure out which way to rotate the velocity
+		        // to ensure it's at least the MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS
+		        Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
 
-			// Check to see if it's still the case, if it is then we rotated the wrong way
-			float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, newReflVelHat)))));
-			if (newAngleInDegs < GameBall::MIN_BALL_ANGLE_IN_DEGS) {
-				newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
-			}
+		        // Check to see if it's still the case, if it is then we rotated the wrong way
+		        float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, newReflVelHat)))));
+		        if (newAngleInDegs < minAngleInDegs) {
+			        newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
+		        }
 
-			reflVecHat = newReflVelHat;
-		}
-	}
+		        reflVecHat = newReflVelHat;
+	        }
+        }
+    }
 
     // Reflect the ball off the normal... this will have some dependence on whether there is a velocity for the line...
     Vector2D moveVel(0,0);
-    if (lineVelocity.IsZero()) {
-        b.SetVelocity(reflSpd, reflVecHat);
-    }
-    else {
+
+    if (!lineVelocity.IsZero()) {
+
         Vector2D reflectionVel = reflSpd * reflVecHat;
         Vector2D augmentedReflectionVecHat = Vector2D::Normalize(reflectionVel + lineVelocity);
-        b.SetVelocity(reflSpd, augmentedReflectionVecHat);
         
         if (Vector2D::Dot(reflVecHat, lineVelocity) < 0) {
             moveVel += lineVelocity;
         }
+        reflVecHat = augmentedReflectionVecHat;
+    }
+    
+    if (paddleReflection) {
+        // Only have to check whether the ball is acceptably far enough away from the +/-x directions
+        float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));
+        debug_output("ANGLE FROM X: " << angleAwayFromX);
+        if (angleAwayFromX < minAngleInDegs) {
+            // Rotate so that its going to fire upwards a bit from the (1,0) direction
+            reflVecHat = Vector2D::Rotate(minAngleInDegs - angleAwayFromX, reflVecHat);
+        }
+        else {
+            float oneEightyMinusMinAngle = 180.0f - minAngleInDegs;
+            if (angleAwayFromX > oneEightyMinusMinAngle) {
+                // Rotate so that its going to fire upwards a bit from the (-1,0) direction
+                reflVecHat = Vector2D::Rotate(oneEightyMinusMinAngle - angleAwayFromX, reflVecHat);
+            }
+        }
     }
 
+    b.SetVelocity(reflSpd, reflVecHat);
     moveVel += b.GetVelocity();
 
 	// Now move the ball in that direction over how ever much time was lost during the collision
@@ -726,7 +756,7 @@ void BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const
 	Vector2D ballDirection = b.GetDirection();
 
 	if (ballDirection[1] < 0) {
-		ballDirection[1] = fabs(ballDirection[0] * tanf(GameBall::MIN_BALL_ANGLE_IN_RADS));
+		ballDirection[1] = fabs(ballDirection[0] * tanf(GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS));
 		ballDirection.Normalize();
 		b.SetDirection(ballDirection);
 	}

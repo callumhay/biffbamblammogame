@@ -44,12 +44,12 @@ const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 const float PlayerPaddle::DEFAULT_MAX_SPEED = 26.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
 const float PlayerPaddle::DEFAULT_ACCELERATION  = 145.0f;
-const float PlayerPaddle::DEFAULT_DECCELERATION = -165.0f;
+const float PlayerPaddle::DEFAULT_DECCELERATION = -170.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
 const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
 
-// The coefficent angle change of the ball when deflected by a moving paddle
+// The coefficient angle change of the ball when deflected by a moving paddle
 const int PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE = 18.0f;
 
 // Delay between shots of the laser
@@ -1596,9 +1596,10 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
                                   Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
 
-     if (ball.IsLastThingCollidedWith(this)) {
-         return false;
-     }
+     //if (ball.IsLastThingCollidedWith(this)) {
+     //    ball.SetLastThingCollidedWith(NULL);
+     //    return false;
+     //}
 
      // If the paddle has a shield around it do the collision with the shield
      if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
@@ -1616,7 +1617,7 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
              // at the paddle or the ball is above the paddle
              assert(this->bounds.GetNumLines() == 4);
 
-             if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight())) &&
+             if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight() - 0.9f*ball.GetBounds().Radius())) &&
                  Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
                      // Ball is traveling upwards at the paddle from below it...
                      return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
