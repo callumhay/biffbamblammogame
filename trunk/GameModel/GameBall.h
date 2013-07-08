@@ -49,8 +49,9 @@ public:
 	static const float DEFAULT_BALL_RADIUS;
 
 	// Minimum angle the ball can be reflected at
-	static const float MIN_BALL_ANGLE_IN_DEGS;
-	static const float MIN_BALL_ANGLE_IN_RADS;
+    static const float MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS;
+	static const float MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS;
+	static const float MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS;
 
 	// The largest possible random angle of release (for the ball) from a still paddle, in degrees
 	static const int STILL_RAND_RELEASE_DEG  = 3;
@@ -455,7 +456,7 @@ inline bool GameBall::ExecuteBallBoost(const Vector2D& dir) {
 
     // Add a temporary boost in speed and reset the boost decceleration counter
     this->boostSpdDecreaseCounter = 0.0f; // This value will need to accumulate back up to BOOST_TEMP_SPD_INCREASE_AMT
-                                          // So that the ball knows to stop deccelerating after being boosted
+                                          // So that the ball knows to stop decelerating after being boosted
     this->SetVelocity(this->GetSpeed() + BOOST_TEMP_SPD_INCREASE_AMT, Vector2D::Normalize(dir));
     return true;
 }

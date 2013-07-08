@@ -49,7 +49,7 @@ private:
 	double timeSinceGhost;		// The time since the ball stopped colliding with blocks
 
 	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine,
-        double dT, double timeUntilCollision, const Vector2D& lineVelocity = Vector2D(0,0));
+        double dT, double timeUntilCollision, float minAngleInDegs, const Vector2D& lineVelocity = Vector2D(0,0), bool paddleReflection = false);
 	void DoBallCollision(GameBall& ball1, GameBall& ball2);
 	void DoItemCollision();
 

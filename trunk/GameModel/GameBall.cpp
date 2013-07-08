@@ -27,12 +27,13 @@ float GameBall::FastSpeed             = GameBall::NormalSpeed + 5.0f;
 float GameBall::FastestSpeed          = GameBall::NormalSpeed + 9.5f;
 float GameBall::FastestSpeedWithBoost = GameBall::NormalSpeed + 14.0f;
 
-// Default radius of the ball - for defining its boundries
+// Default radius of the ball - for defining its boundaries
 const float GameBall::DEFAULT_BALL_RADIUS = 0.5f;
 
 // Minimum angle a ball can be to the normal when it comes off something
-const float GameBall::MIN_BALL_ANGLE_IN_DEGS = 5.0f;
-const float GameBall::MIN_BALL_ANGLE_IN_RADS = Trig::degreesToRadians(MIN_BALL_ANGLE_IN_DEGS);
+const float GameBall::MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS = 12.0f;
+const float GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS  = 5.0f;
+const float GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS  = Trig::degreesToRadians(MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
 
 // Ball size change related constants
 const float GameBall::SECONDS_TO_CHANGE_SIZE = 0.5f;	
