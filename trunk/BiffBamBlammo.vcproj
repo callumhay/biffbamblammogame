@@ -2237,6 +2237,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\RemoteControlRocketItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\RocketPaddleItem.h"
 						>
 					</File>
@@ -2365,6 +2369,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\RemoteControlRocketItem.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\RocketPaddleItem.cpp"
 						>
 					</File>
@@ -2457,6 +2465,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleRemoteControlRocketProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleRocketProjectile.h"
 						>
 					</File>
@@ -2538,6 +2550,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\PaddleMineProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleRemoteControlRocketProjectile.cpp"
 						>
 					</File>
 					<File

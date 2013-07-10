@@ -203,6 +203,7 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);

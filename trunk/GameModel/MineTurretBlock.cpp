@@ -136,7 +136,8 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 
         case Projectile::BossRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
-        case Projectile::PaddleRocketBulletProjectile: {
+        case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile: {
 
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				// EVENT: Ice was shattered
@@ -470,13 +471,20 @@ void MineTurretBlock::GetFiringDirection(Vector2D& unitDir) const {
 }
 
 void MineTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSeePaddle, bool& canFireAtPaddle) const {
+
+    const PlayerPaddle* paddle = model->GetPlayerPaddle();
+    if (paddle->HasBeenPausedAndRemovedFromGame(model->GetPauseState())) {
+        canSeePaddle = canFireAtPaddle = false;
+        return;
+    }
+    
     // Check to see whether the paddle is in view or not...
     Vector2D fireDir;
     this->GetFiringDirection(fireDir);
     Collision::Ray2D rayOfFire(this->GetCenter(), fireDir);
     
     float paddleRayT = 0.0f;
-    bool collidesWithPaddle = model->GetPlayerPaddle()->GetBounds().CollisionCheck(rayOfFire, paddleRayT);
+    bool collidesWithPaddle = paddle->GetBounds().CollisionCheck(rayOfFire, paddleRayT);
 
     // Check to see if the ray collides with the paddle before doing any further calculations...
     if (collidesWithPaddle) {

@@ -1,9 +1,9 @@
 package bbbleveleditor;
 
 import java.awt.event.MouseEvent;
-
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import java.util.*;
@@ -13,6 +13,13 @@ public class ItemDropTable extends JTable {
 
 	public ItemDropTable(ItemDrop.ItemType itemTypes) {
 		super(new ItemDropTableModel(itemTypes));
+		this.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		
+		TableColumn column = null;
+		for (int i = 0; i < this.getColumnCount(); i++) {
+		    column = this.getColumnModel().getColumn(i);
+		    column.setMaxWidth(Integer.MAX_VALUE);
+		}
 	}
 	
 	public void getItemDropSettings(HashMap<String, Integer> settings) {
@@ -39,6 +46,8 @@ public class ItemDropTable extends JTable {
 
 		public ItemDropTableHeader(TableColumnModel tableColumnModel) {
 			super(tableColumnModel);
+			this.setReorderingAllowed(false);
+			this.setResizingAllowed(true);
 		}
 		
 		public String getToolTipText(MouseEvent e) {

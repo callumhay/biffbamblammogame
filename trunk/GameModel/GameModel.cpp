@@ -405,6 +405,7 @@ void GameModel::CleanUpAfterBossDeath() {
     this->ClearActiveTimers();
     this->GetTransformInfo()->Reset();
     this->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RocketPaddle);
+    this->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RemoteControlRocketPaddle);
 }
 
 /**
@@ -669,7 +670,8 @@ void GameModel::DoPieceStatusUpdates(double dT) {
  */
 void GameModel::DoProjectileCollisions(double dT) {
 
-#define PROJECTILE_CLEANUP(p) GameEventManager::Instance()->ActionProjectileRemoved(*p); \
+#define PROJECTILE_CLEANUP(p) p->Teardown(*this); \
+                              GameEventManager::Instance()->ActionProjectileRemoved(*p); \
                               delete p; \
                               p = NULL
 													 
@@ -689,7 +691,8 @@ void GameModel::DoProjectileCollisions(double dT) {
 		BoundingLines projectileBoundingLines = currProjectile->BuildBoundingLines();
 
 		// Check to see if the projectile collided with the player paddle
-		if (this->playerPaddle->CollisionCheckWithProjectile(*currProjectile, projectileBoundingLines)) {
+		if (!this->playerPaddle->HasBeenPausedAndRemovedFromGame(this->pauseBitField) &&
+            this->playerPaddle->CollisionCheckWithProjectile(*currProjectile, projectileBoundingLines)) {
 			
 			this->CollisionOccurred(currProjectile, this->playerPaddle);
 
@@ -860,6 +863,12 @@ bool GameModel::IsOutOfGameBounds(const Point2D& pos) const {
  * all expired timers.
  */
 void GameModel::UpdateActiveTimers(double seconds) {
+
+    // We don't do this if timers are paused
+    if ((this->GetPauseState() & GameModel::PauseTimers) == GameModel::PauseTimers) {
+        return;
+    }
+
 	std::list<GameItemTimer*>& activeTimers = this->GetActiveTimers();
 	std::vector<GameItemTimer*> removeTimers;
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); ++iter) {
@@ -1119,8 +1128,11 @@ void GameModel::ClearProjectiles() {
          iter != this->projectiles.end(); ++iter) {
 
 		Projectile* currProjectile = *iter;
-		// EVENT: Projectile removed from the game
+		currProjectile->Teardown(*this);
+
+        // EVENT: Projectile removed from the game
 		GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
+
 		delete currProjectile;
 		currProjectile = NULL;
 	}
@@ -1356,6 +1368,9 @@ void GameModel::AddProjectile(Projectile* projectile) {
 
 	// Add it to the list of in-game projectiles
 	this->projectiles.push_back(projectile);
+    
+    // Call the setup function so the projectile can do some setup if need be
+    projectile->Setup(*this);
 
 	// EVENT: Projectile creation
 	GameEventManager::Instance()->ActionProjectileSpawned(*projectile);	

@@ -83,6 +83,7 @@ public:
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
+    void DrawNoBloomLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
     void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
 	void DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO);
@@ -91,7 +92,8 @@ public:
 
 	void DrawBeams(const GameModel& gameModel, const Camera& camera);
 	void DrawTeslaLightning(double dT, const Camera& camera);
-	void DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera);
+	void DrawProjectiles(double dT, const Camera& camera);
+    void DrawMeshProjectiles(double dT, const GameModel& gameModel, const Camera& camera);
 
 	void DrawInformativeGameElements(const Camera& camera, double dT, const GameModel& gameModel);
 
@@ -240,7 +242,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };
 
-// Draw any currently active tesla lightning bolts in the game.
+// Draw any currently active Tesla lightning bolts in the game.
 inline void GameAssets::DrawTeslaLightning(double dT, const Camera& camera) {
 	this->espAssets->DrawTeslaLightningArcs(dT, camera);
 }
@@ -252,7 +254,15 @@ inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, c
 	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
 	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight,
-        ballLight, /*this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture()*/ this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+        ballLight, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+}
+
+inline void GameAssets::DrawNoBloomLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
+    Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
+
+    BasicPointLight fgKeyLight, fgFillLight, ballLight;
+    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+    this->GetCurrentLevelMesh()->DrawNoBloomPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight, ballLight);
 }
 
 inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {
@@ -296,6 +306,13 @@ inline void GameAssets::ToggleLights(bool lightsOn, double toggleTime) {
 }
 inline void GameAssets::ToggleLightsForBossDeath(bool lightsOn, double toggleTime) {
     this->lightAssets->ToggleLightsForBossDeath(lightsOn, toggleTime);
+}
+
+/**
+ * Draw the currently active projectiles in the game.
+ */
+inline void GameAssets::DrawProjectiles(double dT, const Camera& camera) {
+    this->espAssets->DrawProjectileEffects(dT, camera);
 }
 
 #endif

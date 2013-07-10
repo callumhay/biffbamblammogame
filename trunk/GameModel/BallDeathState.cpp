@@ -61,6 +61,7 @@ BallDeathState::~BallDeathState() {
 	
     // Remove any rockets attached to the paddle
     this->gameModel->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RocketPaddle);
+    this->gameModel->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RemoteControlRocketPaddle);
 
     // Only clear projectiles if it's game over
     if (this->gameModel->IsGameOver()) {

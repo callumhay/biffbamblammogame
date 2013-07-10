@@ -1006,7 +1006,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 			allowedDropTypes.insert(allowedDropTypes.end(), powerNeutralItemTypes.begin(), powerNeutralItemTypes.end());
 		}
 		else if (itemTypeName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
-			// Add all power-up item types
+			// Add all power-down item types
 			const std::set<GameItem::ItemType>& powerDownItemTypes = GameItemFactory::GetInstance()->GetPowerDownItemTypes();
 			allowedDropTypes.insert(allowedDropTypes.end(), powerDownItemTypes.begin(), powerDownItemTypes.end());
 		}
@@ -2111,6 +2111,7 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
         
         case Projectile::CollateralBlockProjectile:
         case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
         case Projectile::PaddleMineBulletProjectile:

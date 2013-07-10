@@ -228,6 +228,7 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
 			

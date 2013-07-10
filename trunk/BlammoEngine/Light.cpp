@@ -112,6 +112,16 @@ void PointLight::SetLightPositionChange(const Point3D& newPosition, float change
 	this->lightPositionAnim.push_back(positionAnim);
 }
 
+void PointLight::SetLinearAttenuationChange(float newAtten, float changeTime) {
+    this->lightAttenAnim.clear();
+
+    AnimationMultiLerp<float> attenAnim(&this->linearAttenuation);
+    attenAnim.SetLerp(changeTime, newAtten);
+    attenAnim.SetRepeat(false);
+
+    this->lightAttenAnim.push_back(attenAnim);
+}
+
 /**
  * Ticks away at any active aniamtions.
  */
@@ -119,7 +129,9 @@ void PointLight::Tick(double dT) {
 	bool isFinished = false;
 
 	// Tick position animaton
-	for (std::list<AnimationMultiLerp<Point3D> >::iterator animIter = this->lightPositionAnim.begin(); animIter != this->lightPositionAnim.end();) {
+	for (std::list<AnimationMultiLerp<Point3D> >::iterator animIter = this->lightPositionAnim.begin();
+         animIter != this->lightPositionAnim.end();) {
+
 			isFinished = animIter->Tick(dT);
 			if (isFinished) {
 				animIter = this->lightPositionAnim.erase(animIter);
@@ -130,7 +142,9 @@ void PointLight::Tick(double dT) {
 	}
 
 	// Tick the light animations that turn the light on or off (if any)
-	for (std::list<AnimationMultiLerp<float> >::iterator animIter = this->lightIntensityAnim.begin(); animIter != this->lightIntensityAnim.end();) {
+	for (std::list<AnimationMultiLerp<float> >::iterator animIter = this->lightIntensityAnim.begin();
+         animIter != this->lightIntensityAnim.end();) {
+
 			isFinished = animIter->Tick(dT);
 			if (isFinished) {
 				animIter = this->lightIntensityAnim.erase(animIter);
@@ -142,7 +156,9 @@ void PointLight::Tick(double dT) {
 
 	// Tick the light-on/light colour change animations (if any)
 	Colour newDiffuseColourChange = this->onDiffuseColour;
-	for (std::list<AnimationMultiLerp<Colour> >::iterator animIter = this->lightColourChangeAnim.begin(); animIter != this->lightColourChangeAnim.end();) {
+	for (std::list<AnimationMultiLerp<Colour> >::iterator animIter = this->lightColourChangeAnim.begin();
+         animIter != this->lightColourChangeAnim.end();) {
+
 			isFinished = animIter->Tick(dT);
 			newDiffuseColourChange = animIter->GetInterpolantValue();
 			if (isFinished) {
@@ -154,6 +170,19 @@ void PointLight::Tick(double dT) {
 			}
 	}
 
+    // Tick the attenuation change animations (if any)
+    for (std::list<AnimationMultiLerp<float> >::iterator animIter = this->lightAttenAnim.begin(); 
+         animIter != this->lightAttenAnim.end();) {
+
+        isFinished = animIter->Tick(dT);
+        if (isFinished) {
+            animIter = this->lightAttenAnim.erase(animIter);
+        }
+        else {
+            ++animIter;
+        }
+    }
+
 	// Special case: Light is strobing AND changing colour...
 	if (this->lightColourStrobeAnim.size() > 0) {
 		
@@ -161,18 +190,21 @@ void PointLight::Tick(double dT) {
 		// we tick the strobe animation and use its colour
 		this->lightColourStrobeAnim.front().SetInitialInterpolationValue(newDiffuseColourChange);
 		this->lightColourStrobeAnim.front().SetFinalInterpolationValue(newDiffuseColourChange);
-	}
+	
 
-	for (std::list<AnimationMultiLerp<Colour> >::iterator animIter = this->lightColourStrobeAnim.begin(); animIter != this->lightColourStrobeAnim.end();) {
-			isFinished = animIter->Tick(dT);
-			newDiffuseColourChange = animIter->GetInterpolantValue();
-			if (isFinished) {
-				animIter = this->lightColourStrobeAnim.erase(animIter);
-			}
-			else {
-				++animIter;
-			}
-	}		
+	    for (std::list<AnimationMultiLerp<Colour> >::iterator animIter = this->lightColourStrobeAnim.begin(); 
+             animIter != this->lightColourStrobeAnim.end();) {
+
+		    isFinished = animIter->Tick(dT);
+		    newDiffuseColourChange = animIter->GetInterpolantValue();
+		    if (isFinished) {
+			    animIter = this->lightColourStrobeAnim.erase(animIter);
+		    }
+		    else {
+			    ++animIter;
+		    }
+	    }
+    }
 
 	this->currDiffuseColour = this->lightIntensity * newDiffuseColourChange;
 }

@@ -12,8 +12,8 @@
 #include "RocketPaddleItem.h"
 #include "GameModel.h"
 
-const double RocketPaddleItem::ROCKET_PADDLE_TIMER_IN_SECS	= 0.0;						// The rocket is not a timed power-up, it's activated when shot
-const char* RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME			  = "RocketPaddle";
+const double RocketPaddleItem::ROCKET_PADDLE_TIMER_IN_SECS	= 0.0;  // The rocket is not a timed power-up, it's activated when shot
+const char* RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME       = "RocketPaddle";
 
 RocketPaddleItem::RocketPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
@@ -27,6 +27,9 @@ double RocketPaddleItem::Activate() {
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
 
+    // Remove any other type of rocket on the paddle
+    paddle->RemovePaddleType(PlayerPaddle::RemoteControlRocketPaddle);
+    // Add the basic rocket for this item
 	paddle->AddPaddleType(PlayerPaddle::RocketPaddle);
 
 	GameItem::Activate();

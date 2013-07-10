@@ -56,7 +56,7 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->itemEntries.insert(std::make_pair(GameItem::BallCamItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ball_camera.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::LaserBeamPaddleItem,		new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("laser_beam.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::GravityBallItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("gravity_ball.txt"))));
-    this->itemEntries.insert(std::make_pair(GameItem::RocketPaddleItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("missile.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::RocketPaddleItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("rocket.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::CrazyBallItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("crazy_ball.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::ShieldPaddleItem,         new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("shield.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::FireBallItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("fire_ball.txt"))));
@@ -65,6 +65,7 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->itemEntries.insert(std::make_pair(GameItem::InvisiPaddleItem,         new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("invisi_paddle.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::MagnetPaddleItem,         new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_magnet.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::MineLauncherPaddleItem,   new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_mine.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::RemoteCtrlRocketItem,     new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("remote_control_rocket.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::RandomItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("random.txt"))));
     
 	// Block Entry Types...

@@ -560,6 +560,10 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 		emitter->Draw(camera);
     }
 
+    // Special case: item drop block has some sparkles that drop from it, draw these before any of the blocks
+    // so that they get hidden by any blocks in front of them
+    this->itemDropBlock->DrawEffects(worldTranslation, dT, camera);
+
 	// Go through each material and draw all the display lists corresponding to it
 	CgFxMaterialEffect* currEffect = NULL;
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
@@ -576,7 +580,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
 	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
@@ -597,6 +600,14 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 		}
 	}
 
+}
+
+void LevelMesh::DrawNoBloomPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                                  const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    glPushMatrix();
+    glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
+    this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
 }
 
 void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,

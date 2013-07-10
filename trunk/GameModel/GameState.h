@@ -12,9 +12,10 @@
 #ifndef __GAMESTATE_H__
 #define __GAMESTATE_H__
 
-#include "PlayerPaddle.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 class GameModel;
+class GameBall;
 
 class GameState {
 public:
@@ -29,7 +30,7 @@ public:
 	virtual GameState::GameStateType GetType() const = 0;
 	virtual void Tick(double seconds) = 0;
 	virtual void BallReleaseKeyPressed() = 0;
-	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent);
+	virtual void MoveKeyPressed(int dir, float magnitudePercent);
     virtual void BallBoostDirectionPressed(int x, int y);
     virtual void BallBoostDirectionReleased();
     virtual void BallBoostReleasedForBall(const GameBall& ball);
@@ -55,8 +56,7 @@ inline void GameState::BallBoostDirectionReleased() {
     // Do nothing by default
 }
 
-inline void GameState::BallBoostReleasedForBall(const GameBall& ball) {
-    UNUSED_PARAMETER(ball);
+inline void GameState::BallBoostReleasedForBall(const GameBall&) {
     // Do nothing by default
 }
 

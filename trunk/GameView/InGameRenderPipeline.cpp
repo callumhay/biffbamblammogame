@@ -192,21 +192,21 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
     // Special embedded labels...
     this->DrawSpecialEmbeddedLabels(dT);
 
-    // Paddle...
+    // Paddle
 	assets->DrawPaddle(dT, *gameModel->GetPlayerPaddle(), camera);
 	glPopMatrix();
 
-	// Level pieces
+	// Level pieces / blocks and their associated emitter effects
 	assets->DrawLevelPieces(dT, currLevel, camera);
 
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
-	// Balls...
+	// Balls
 	assets->DrawGameBalls(dT, *gameModel, camera, negHalfLevelDim);
 
-	// Projectiles...
-	//assets->DrawProjectiles(dT, *gameModel, camera);
+    // Mesh projectiles (e.g., rockets, mines)
+    assets->DrawMeshProjectiles(dT, *gameModel, camera);
 
 	glPopMatrix();
 
@@ -247,7 +247,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
     fullSceneFBO->BindFBObj();
 
 	// Render any post-processing effects for various items/objects in the game
-	assets->DrawProjectiles(dT, *gameModel, camera); // ?
+	assets->DrawProjectiles(dT, camera);
     assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
 	assets->DrawStatusEffects(dT, camera, colourAndDepthFBO);
 
@@ -286,19 +286,24 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
     initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
 
 	// Render all effects that do not go through all the post-processing filters...
-	Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel->GetLevelUnitDimensions(), 0.0);
-	glPushMatrix();
-	Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
-	glMultMatrixf(gameTransform.begin());
-	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
 
-	// Draw the dropping items if in the last pass
-	if (fboAssets->DrawItemsInLastPass()) {
-		std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
-		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); ++iter) {
-			assets->DrawItem(dT, camera, (**iter));
-		}			
-	}
+    // Item drop blocks (draw them without bloom because otherwise the it's hard to see
+    // what item they're dropping)
+    assets->DrawNoBloomLevelPieces(dT, gameModel->GetCurrentLevel(), camera);
+
+    Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel->GetLevelUnitDimensions(), 0.0);
+    glPushMatrix();
+    Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
+    glMultMatrixf(gameTransform.begin());
+    glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
+
+    // Draw the dropping items if in the last pass
+    if (fboAssets->DrawItemsInLastPass()) {
+        std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
+        for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); ++iter) {
+            assets->DrawItem(dT, camera, (**iter));
+        }
+    }
 
 	// Typical Particle effects...
 	GameESPAssets* espAssets = assets->GetESPAssets();

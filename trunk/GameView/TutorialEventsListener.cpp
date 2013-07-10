@@ -89,6 +89,8 @@ void TutorialEventsListener::ItemActivatedEvent(const GameItem& item) {
         case GameItem::LaserBulletPaddleItem:
         case GameItem::LaserBeamPaddleItem:
         case GameItem::RocketPaddleItem:
+        case GameItem::MineLauncherPaddleItem:
+        case GameItem::RemoteCtrlRocketItem:
             if (!this->fireWeaponAlreadyShown) {
                 this->fireWeaponHint->Show(0.0, 1.0);
                 this->fireWeaponHint->Unshow(6.0, 1.0);

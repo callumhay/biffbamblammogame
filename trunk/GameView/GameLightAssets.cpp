@@ -17,8 +17,8 @@ const float GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME = 1.0f;
 
 GameLightAssets::GameLightAssets() : 
 // Setup the Foreground lights
-fgKeyLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f),
-fgFillLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f),
+fgKeyLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN),
+fgFillLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN),
 ballLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN) {
 
     // Setup the Background lights
@@ -145,7 +145,7 @@ void GameLightAssets::StopStrobeLight(GameLightType lightType) {
  * Moves the given light from its current position to the new position provided
  * in the amount of time given.
  */
-void GameLightAssets::ChangeLightPosition(GameLightType lightType, const Point3D& newPosition, float changeTime) {
+void GameLightAssets::ChangeLightPositionAndAttenuation(GameLightType lightType, const Point3D& newPosition, float newAtten, float changeTime) {
 	assert(changeTime >= 0.0f);
 	assert(lightType != GameLightAssets::FGBallLight);
 
@@ -156,44 +156,49 @@ void GameLightAssets::ChangeLightPosition(GameLightType lightType, const Point3D
 	if (changeTime == 0.0f) {
 		// Just change the position, now
 		light->SetPosition(newPosition);
+        light->SetLinearAttenuation(newAtten);
 	}
 	else {
 		// Change the light position and animate it
 		light->SetLightPositionChange(newPosition, changeTime);
+        light->SetLinearAttenuationChange(newAtten, changeTime);
 	}	
 }
 
 /**
  * Called to restore the lights position to the default when it has been changed.
  */
-void GameLightAssets::RestoreLightPosition(GameLightType lightType, float restoreTime) {
+void GameLightAssets::RestoreLightPositionAndAttenuation(GameLightType lightType, float restoreTime) {
 	assert(restoreTime >= 0.0f);
 
 	switch (lightType) {
 		case FGKeyLight:
 			this->fgKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, restoreTime);
+            this->fgKeyLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN, restoreTime);
 			break;
 		case FGFillLight:
 			this->fgFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, restoreTime);
-			break;
-		case BGKeyLight:
-            this->bgKeyLight.SetLightPositionChange(this->defaultBGKeyLightProperties.GetPosition(), restoreTime);
-			break;
-		case BGFillLight:
-            this->bgFillLight.SetLightPositionChange(this->defaultBGFillLightProperties.GetPosition(), restoreTime);
+            this->fgFillLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN, restoreTime);
 			break;
 		case BallKeyLight:
 			this->ballKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_POSITION, restoreTime);
+            this->ballKeyLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN, restoreTime);
 			break;
 		case BallFillLight:
 			this->ballFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BALL_FILL_LIGHT_POSITION, restoreTime);
+            this->ballFillLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN, restoreTime);
 			break;
 		case PaddleKeyLight:
 			this->paddleKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_POSITION, restoreTime);
+            this->paddleKeyLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN, restoreTime);
 			break;
 		case PaddleFillLight:
 			this->paddleFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_POSITION, restoreTime);
+            this->paddleFillLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN, restoreTime);
 			break;
+
+        case BGKeyLight:
+        case BGFillLight:
 		default:
 			assert(false);
 			break;

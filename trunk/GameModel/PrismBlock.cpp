@@ -236,6 +236,7 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);

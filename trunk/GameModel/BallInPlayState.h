@@ -13,6 +13,7 @@
 #define __BALL_IN_PLAY_STATE_H__
 
 #include <vector>
+#include "../BlammoEngine/Vector.h"
 
 #include "GameState.h"
 
@@ -37,6 +38,7 @@ public:
 	}
 
 	void BallReleaseKeyPressed();
+    void MoveKeyPressed(int dir, float magnitudePercent);
     void BallBoostDirectionPressed(int x, int y);
     void BallBoostDirectionReleased();
     void BallBoostReleasedForBall(const GameBall& ball);

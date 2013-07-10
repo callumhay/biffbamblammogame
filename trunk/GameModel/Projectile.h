@@ -19,6 +19,7 @@
 
 #include "BoundingLines.h"
 
+
 class LevelPiece;
 class GameModel;
 class SafetyNet;
@@ -32,11 +33,15 @@ class BossBodyPart;
 class Projectile : public IPositionObject {
 public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
-                          CollateralBlockProjectile, PaddleRocketBulletProjectile, RocketTurretBulletProjectile,
-                          FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
+                          CollateralBlockProjectile, PaddleRocketBulletProjectile, PaddleRemoteCtrlRocketBulletProjectile,
+                          RocketTurretBulletProjectile, FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
                           BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile };
 
 	virtual ~Projectile();
+
+    virtual void Setup(GameModel&) {};
+    virtual void Teardown(GameModel&) {};
+
 	virtual void Tick(double seconds, const GameModel& model) = 0;
 	virtual BoundingLines BuildBoundingLines() const          = 0;
 	virtual ProjectileType GetType() const                    = 0;

@@ -25,8 +25,7 @@ class ESPPointEmitter;
 class Texture2D;
 
 /**
- * Class that holds the paddle rocket bullet mesh - this will be drawn
- * only when there is a paddle rocket projectile in play.
+ * Class that holds and draws the various rocket bullet meshes.
  */
 class RocketMesh {
 public:
@@ -46,10 +45,11 @@ private:
 	ESPPointEmitter* rocketGlowEmitter;
 
 	Mesh* paddleRocketMesh;
+    Mesh* paddleRemoteControlRocketMesh;
     Mesh* turretRocketMesh;
 	std::set<const RocketProjectile*> rocketProjectiles;
 	
-	void LoadMesh();
+	void LoadMeshes();
 };
 
 // Activates the paddle rocket mesh so that it gets drawn based on the given projectile
