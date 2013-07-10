@@ -79,6 +79,9 @@ public:
 	void SetAlpha(float alpha) {
 		this->colour[3] = alpha;
 	}
+    float GetAlpha() const {
+        return this->colour[3];
+    }
 	void AnimateFade(bool fadeOut, double duration);
 
 	Vector3D GetRotation() const {

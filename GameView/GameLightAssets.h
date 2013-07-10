@@ -47,8 +47,8 @@ public:
 	void StartStrobeLight(GameLightType lightType, const Colour& strobeColour, float strobeTime);
 	void StopStrobeLight(GameLightType lightType);
 	
-	void ChangeLightPosition(GameLightType lightType, const Point3D& newPosition, float changeTime);
-	void RestoreLightPosition(GameLightType lightType, float restoreTime);
+	void ChangeLightPositionAndAttenuation(GameLightType lightType, const Point3D& newPosition, float newAtten, float changeTime);
+	void RestoreLightPositionAndAttenuation(GameLightType lightType, float restoreTime);
 
 	void Tick(double dT);
 

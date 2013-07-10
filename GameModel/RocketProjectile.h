@@ -33,7 +33,7 @@ public:
 
     float GetYRotation() const;
 
-	void Tick(double seconds, const GameModel& model);
+	virtual void Tick(double seconds, const GameModel& model);
 
 	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
 	bool IsLoadedInCannonBlock() const;

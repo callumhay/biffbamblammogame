@@ -64,7 +64,7 @@ public:
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000002, 
                       StickyPaddle = 0x00000004, LaserBeamPaddle = 0x00000008, RocketPaddle = 0x00000010, 
                       ShieldPaddle = 0x00000020, InvisiPaddle = 0x00000040, MagnetPaddle = 0x00000080,
-                      MineLauncherPaddle = 0x00000100 };
+                      MineLauncherPaddle = 0x00000100, RemoteControlRocketPaddle = 0x00000200 };
 
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
@@ -152,6 +152,10 @@ public:
         return this->moveButtonDown;
     }
 
+    void SetRemoveFromGameVisibility(double fadeOutTime);
+    void SetUnremoveFromGameVisibility(double fadeInTime);
+    bool HasBeenPausedAndRemovedFromGame(int pauseBitField) const;
+
 	float GetSpeed() const {
         float tempSpd = this->currSpeed;
         if ((this->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
@@ -183,9 +187,12 @@ public:
 	void SetColour(const Colour& c) {
 		this->colour = ColourRGBA(c, this->colour.A());
 	}
-	void SetVisiblity(float alpha) {
+	void SetAlpha(float alpha) {
 		this->colour[3] = alpha;
 	}
+    float GetAlpha() const {
+        return this->colour[3];
+    }
 	void AnimateFade(bool fadeOut, double duration);
 
 	bool IncreasePaddleSize();
@@ -405,12 +412,6 @@ inline void PlayerPaddle::Animate(double seconds) {
 // the paddle.
 inline Collision::Circle2D PlayerPaddle::CreatePaddleShieldBounds() const {
 	return Collision::Circle2D(this->GetCenterPosition(), this->GetHalfWidthTotal());
-}
-
-inline void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const {
-    height = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-    width  = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
-    spawnPos = this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * height);
 }
 
 #endif

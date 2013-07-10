@@ -22,6 +22,7 @@ public class ItemDropTableModel extends AbstractTableModel {
 	private Integer[] dropLikelihoods;
 	
 	public ItemDropTableModel(ItemDrop.ItemType itemTypes) {
+		
 		if (itemTypes == ItemDrop.ItemType.POWER_UP) {
 			this.buildTableModel(ItemDrop.powerUpItems);
 		}
@@ -31,6 +32,7 @@ public class ItemDropTableModel extends AbstractTableModel {
 		else {
 			this.buildTableModel(ItemDrop.powerDownItems);
 		}
+		
 	}
 	
 	private void buildTableModel(ArrayList<ItemDrop> items) {
@@ -43,7 +45,7 @@ public class ItemDropTableModel extends AbstractTableModel {
 			
 			this.itemNames[i] 			= currItemDrop.getName();
 			this.itemDescriptions[i] 	= currItemDrop.getDescription();
-			this.dropLikelihoods[i] 	= ItemDrop.MEDIUM_LIKELIHOOD;
+			this.dropLikelihoods[i] 	= ItemDrop.NO_LIKELIHOOD;
 		}
 	}
 	

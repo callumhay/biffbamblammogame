@@ -72,6 +72,7 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
         case Projectile::BallLaserBulletProjectile:
         case Projectile::CollateralBlockProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::FireGlobProjectile:
             this->Diminish(projectile->GetDamage());

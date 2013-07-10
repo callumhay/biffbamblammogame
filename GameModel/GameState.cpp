@@ -53,11 +53,10 @@ GameState* GameState::Build(const GameState::GameStateType& stateType, GameModel
 
 }
 
-/**
- * Default action here is to just move the paddle around.
- */
-void GameState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent) {
-	this->gameModel->GetPlayerPaddle()->ControlPaddleMovement(paddleMovement, magnitudePercent);
+void GameState::MoveKeyPressed(int dir, float magnitudePercent) {
+    assert(dir <= 1 && dir >= -1);
+    // Default action here is to just move the paddle around
+    this->gameModel->GetPlayerPaddle()->ControlPaddleMovement(static_cast<PlayerPaddle::PaddleMovement>(dir), magnitudePercent);
 }
 
 /**
@@ -68,6 +67,12 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 	UNUSED_PARAMETER(dT);
 
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+
+    // If the paddle is not in the game then we shouldn't be updating anything
+    if (paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState())) {
+        return false;
+    }
+
 	GameLevel* currentLevel = this->gameModel->GetCurrentLevel();
 	assert(paddle != NULL);
 	assert(currentLevel != NULL);

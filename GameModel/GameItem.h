@@ -57,6 +57,7 @@ public:
                     InvisiPaddleItem,
                     MagnetPaddleItem,
                     MineLauncherPaddleItem,
+                    RemoteCtrlRocketItem,
 
                     RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
 	};

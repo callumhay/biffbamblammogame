@@ -26,18 +26,23 @@ powerNeutralSparkEmitter(NULL), powerDownSparkEmitter(NULL) {
 	this->LoadMesh();
 
 	// Load emitters that come out of the block to indicate that it drops items
-	this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+	this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
 	assert(this->flareTex != NULL);
-	this->sparkTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
+	this->sparkTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
 	assert(this->sparkTex != NULL);
 
 	Point3D minPt(-LevelPiece::PIECE_WIDTH / 2.0f, -LevelPiece::PIECE_HEIGHT / 2.0f, -LevelPiece::PIECE_DEPTH / 2.0f);
 	Point3D maxPt( LevelPiece::PIECE_WIDTH / 2.0f, -LevelPiece::PIECE_HEIGHT / 2.0f,  LevelPiece::PIECE_DEPTH / 2.0f);
 
+    const ESPInterval particleLifeTime(0.45f, 0.65f);
+    const ESPInterval particleSpd(1.33f, 3.0f);
+
 	this->flareParticleEmitter = new ESPVolumeEmitter();
 	this->flareParticleEmitter->SetSpawnDelta(ESPInterval(0.07f));
-	this->flareParticleEmitter->SetInitialSpd(ESPInterval(2.0f, 4.5f));
-	this->flareParticleEmitter->SetParticleLife(ESPInterval(0.65f, 0.85f));
+	this->flareParticleEmitter->SetInitialSpd(particleSpd);
+	this->flareParticleEmitter->SetParticleLife(particleLifeTime);
 	this->flareParticleEmitter->SetParticleSize(ESPInterval(0.5f, 0.9f));
 	this->flareParticleEmitter->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->flareParticleEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -49,10 +54,9 @@ powerNeutralSparkEmitter(NULL), powerDownSparkEmitter(NULL) {
 	UNUSED_VARIABLE(result);
 	assert(result);
 
-	this->powerUpSparkEmitter      = this->InitSparkEmitter(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR);
-	this->powerNeutralSparkEmitter = this->InitSparkEmitter(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR);
-	this->powerDownSparkEmitter    = this->InitSparkEmitter(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR);
-
+	this->powerUpSparkEmitter      = this->InitSparkEmitter(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR, particleLifeTime, particleSpd);
+	this->powerNeutralSparkEmitter = this->InitSparkEmitter(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR, particleLifeTime, particleSpd);
+	this->powerDownSparkEmitter    = this->InitSparkEmitter(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR, particleLifeTime, particleSpd);
 }
 
 ItemDropBlockMesh::~ItemDropBlockMesh() {
@@ -82,6 +86,7 @@ ItemDropBlockMesh::~ItemDropBlockMesh() {
 
 void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    UNUSED_PARAMETER(dT);
 
 	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT);
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -101,36 +106,55 @@ void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLi
 		const Point2D& blockCenter = currItemDropBlock->GetCenter();
 		glPushMatrix();
 		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
-
-		// Draw
-		switch (currItemDropBlock->GetNextDropItemDisposition()) {
-			case GameItem::Good:
-				this->powerUpSparkEmitter->Draw(camera);
-				break;
-			
-			case GameItem::Neutral:
-				this->powerNeutralSparkEmitter->Draw(camera);
-				break;
-			
-			case GameItem::Bad:
-				this->powerDownSparkEmitter->Draw(camera);
-				break;
-
-			default:
-				assert(false);
-				break;
-		}
-
-		this->flareParticleEmitter->Draw(camera);
 		this->itemDropTypeMatGrp->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}
 
 	glPopAttrib();
-	this->flareParticleEmitter->Tick(dT);
-	this->powerUpSparkEmitter->Tick(dT);
-	this->powerNeutralSparkEmitter->Tick(dT);
-	this->powerDownSparkEmitter->Tick(dT);
+}
+
+void ItemDropBlockMesh::DrawEffects(const Vector3D& worldTranslation, double dT, const Camera& camera) {
+    if (this->itemDropBlockToItemTexMap.empty()) {
+        return;
+    }
+
+    glPushMatrix();
+    glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
+    for (std::map<const ItemDropBlock*, Texture*>::const_iterator iter = this->itemDropBlockToItemTexMap.begin(); 
+         iter != this->itemDropBlockToItemTexMap.end(); ++iter) {
+
+        const ItemDropBlock* currItemDropBlock = iter->first;
+        const Point2D& blockCenter = currItemDropBlock->GetCenter();
+        glPushMatrix();
+        glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+
+        switch (currItemDropBlock->GetNextDropItemDisposition()) {
+            case GameItem::Good:
+                this->powerUpSparkEmitter->Draw(camera);
+                break;
+
+            case GameItem::Neutral:
+                this->powerNeutralSparkEmitter->Draw(camera);
+                break;
+
+            case GameItem::Bad:
+                this->powerDownSparkEmitter->Draw(camera);
+                break;
+
+            default:
+                assert(false);
+                break;
+        }
+        this->flareParticleEmitter->Draw(camera);
+
+        glPopMatrix();
+    }
+    glPopMatrix();
+
+    this->flareParticleEmitter->Tick(dT);
+    this->powerUpSparkEmitter->Tick(dT);
+    this->powerNeutralSparkEmitter->Tick(dT);
+    this->powerDownSparkEmitter->Tick(dT);
 }
 
 void ItemDropBlockMesh::SetAlphaMultiplier(float alpha) {
@@ -147,18 +171,21 @@ void ItemDropBlockMesh::SetAlphaMultiplier(float alpha) {
 	this->powerDownSparkEmitter->SetParticleAlpha(ESPInterval(alpha));
 }
 
-ESPVolumeEmitter* ItemDropBlockMesh::InitSparkEmitter(const Colour& colour) {
+ESPVolumeEmitter* ItemDropBlockMesh::InitSparkEmitter(const Colour& colour, const ESPInterval& lifeTime, 
+                                                      const ESPInterval& particleSpd) {
+
 	Point3D minPt(-LevelPiece::PIECE_WIDTH / 2.0f, -LevelPiece::PIECE_HEIGHT / 2.0f, -LevelPiece::PIECE_DEPTH / 2.0f);
 	Point3D maxPt( LevelPiece::PIECE_WIDTH / 2.0f, -LevelPiece::PIECE_HEIGHT / 2.0f,  LevelPiece::PIECE_DEPTH / 2.0f);
 
 	ESPVolumeEmitter* emitter = new ESPVolumeEmitter();
 	emitter->SetSpawnDelta(ESPInterval(0.07f));
-	emitter->SetInitialSpd(ESPInterval(2.0f, 4.5f));
-	emitter->SetParticleLife(ESPInterval(0.65f, 0.85f));
+	emitter->SetInitialSpd(particleSpd);
+	emitter->SetParticleLife(lifeTime);
 	emitter->SetParticleSize(ESPInterval(0.1f, 0.3f));
-	emitter->SetParticleColour(ESPInterval(colour.R(), std::min<float>(1.0f, colour.R() + 0.5f)), 
-														 ESPInterval(colour.G(), std::min<float>(1.0f, colour.G() + 0.5f)), 
-														 ESPInterval(colour.B(), std::min<float>(1.0f, colour.B() + 0.5f)), ESPInterval(1.0f));
+	emitter->SetParticleColour(
+        ESPInterval(colour.R(), std::min<float>(1.0f, colour.R() + 0.5f)), 
+        ESPInterval(colour.G(), std::min<float>(1.0f, colour.G() + 0.5f)), 
+        ESPInterval(colour.B(), std::min<float>(1.0f, colour.B() + 0.5f)), ESPInterval(1.0f));
 	emitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	emitter->SetAsPointSpriteEmitter(true);
 	emitter->SetEmitDirection(Vector3D(0, -1, 0));

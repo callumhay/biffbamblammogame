@@ -10,6 +10,7 @@
  */
 
 #include "DecoWorldAssets.h"
+#include "GameAssets.h"
 #include "GameViewConstants.h"
 #include "CgFxVolumetricEffect.h"
 #include "DecoSkybox.h"
@@ -50,6 +51,34 @@ rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 	this->beamEffect->SetScale(0.05f);
 	this->beamEffect->SetFrequency(4.0f);
 	this->beamEffect->SetAlphaMultiplier(0.55f);
+
+    // Change the positions of the background lights to something that complements the background more
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(Point3D(41.0f, 15.0f, 60.0f), GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.0125f),
+        BasicPointLight(Point3D(-30.0f, 30.0f, 30.0f), GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.02f));
+
+    // Change the default values for drawing outlines
+    this->outlineMinDistance = 0.04f;
+    this->outlineMaxDistance = 28.0f;
+    this->outlineContrast    = 1.9f;
+    this->outlineOffset      = 0.8f;
+
+    // Makes sure the colours are dark enough not to saturate/blanche insanely
+    // Setup the default colour change list
+    std::vector<Colour> colours;
+    colours.reserve(10);
+    colours.push_back(Colour(0.4375f, 0.5f, 0.5647f));             // slate greyish-blue
+    colours.push_back(Colour(0.2745098f, 0.5098039f, 0.70588f));   // steel blue
+    colours.push_back(Colour(0.28235f, 0.2392f, 0.545098f));       // slate purple-blue
+    colours.push_back(Colour(0.51372549f, 0.4352941f, 1.0f));      // slate purple
+    colours.push_back(Colour(0.8588235f, 0.439215686f, 0.57647f)); // pale violet
+    colours.push_back(Colour(0.8f, 0.55686f, 0.55686f));           // rosy brown 
+    colours.push_back(Colour(0.7215686f, 0.52549f, 0.043f));       // goldenrod
+    colours.push_back(Colour(0.4196f, 0.5568627f, 0.1372549f));    // olive
+    colours.push_back(Colour(0.4f, 0.8039215f, 0.666667f));		   // deep aquamarine
+    colours.push_back(Colour(0.3725f, 0.6196078f, 0.62745098f));   // cadet (olive-) blue
+
+    this->UpdateColourChangeList(colours);
 
 	// Setup the background emitters
 	this->InitializeEmitters();

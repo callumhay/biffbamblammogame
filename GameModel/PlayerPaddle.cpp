@@ -2,7 +2,7 @@
  * PlayerPaddle.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,6 +16,8 @@
 #include "GameModelConstants.h"
 #include "PaddleLaserProjectile.h"
 #include "PaddleMineProjectile.h"
+#include "PaddleRocketProjectile.h"
+#include "PaddleRemoteControlRocketProjectile.h"
 #include "FireGlobProjectile.h"
 #include "PaddleLaserBeam.h"
 #include "BossBodyPart.h"
@@ -629,42 +631,56 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         return;
     }
 	
-	// Check for the rocket paddle (this has top priority)
-	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
-		// The rocket immediately is fired from the paddle - create a projectile for it and add it to the model (i.e., fire it!)
-		Point2D rocketSpawnPos;
-		float rocketHeight, rocketWidth;
+	// Check for the paddle rockets (these have top priority)
+    if ((this->GetPaddleType() & (PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) != 0x0) {
+        
+        Point2D rocketSpawnPos;
+        float rocketHeight, rocketWidth;
         this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
-		PaddleRocketProjectile* rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, 
-            Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
+        
+        // The rocket immediately is fired from the paddle - create a projectile for it and add it to the model (i.e., fire it!)...
+        PlayerPaddle::PaddleType rocketType;
+        RocketProjectile* rocketProjectile = NULL;
 
-		// Make sure the rocket doesn't explode if it's lying up against a block when launched...
+	    if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+            rocketType = PlayerPaddle::RocketPaddle;
+		    rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, 
+                Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
+	    }
+        else {
+            assert((this->GetPaddleType() & PlayerPaddle::RemoteControlRocketPaddle) == PlayerPaddle::RemoteControlRocketPaddle);
+            rocketType = PlayerPaddle::RemoteControlRocketPaddle;
+            rocketProjectile = new PaddleRemoteControlRocketProjectile(rocketSpawnPos, 
+                Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
+        }
+
+        // Make sure the rocket doesn't explode if it's lying up against a block when launched...
         bool foundPiece = false;
-		const GameLevel* currLevel = gameModel->GetCurrentLevel();
-		
+        const GameLevel* currLevel = gameModel->GetCurrentLevel();
+
         std::set<LevelPiece*> levelPieces = currLevel->GetLevelPieceCollisionCandidates(0.0, 
             rocketProjectile->GetPosition(), rocketProjectile->BuildBoundingLines(), 0.0);
 
-		for (std::set<LevelPiece*>::const_iterator iter = levelPieces.begin(); iter != levelPieces.end(); ++iter) {
-			const LevelPiece* currPiece = *iter;
-			if (!currPiece->ProjectilePassesThrough(rocketProjectile)) {
-				rocketProjectile->SetLastThingCollidedWith(currPiece);
+        for (std::set<LevelPiece*>::const_iterator iter = levelPieces.begin(); iter != levelPieces.end(); ++iter) {
+            const LevelPiece* currPiece = *iter;
+            if (!currPiece->ProjectilePassesThrough(rocketProjectile)) {
+                rocketProjectile->SetLastThingCollidedWith(currPiece);
                 foundPiece = true;
-				break;
-			}
-		}
+                break;
+            }
+        }
 
         // Make the last thing the rocket collided with the paddle - if there are no pieces to do this with
         if (!foundPiece) {
             rocketProjectile->SetLastThingCollidedWith(this);
         }
 
-		gameModel->AddProjectile(rocketProjectile);
-		this->RemovePaddleType(PlayerPaddle::RocketPaddle);
+        gameModel->AddProjectile(rocketProjectile);
+        this->RemovePaddleType(rocketType);
 
         // EVENT: Paddle just fired a rocket
         GameEventManager::Instance()->ActionPaddleWeaponFired();
-	}
+    }
 	// Check for laser beam paddle - this has secondary priority
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
 		
@@ -735,7 +751,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 
 	}
 
-	// TODO: other paddle shooting abilities go here...
+	// other paddle shooting abilities go here...
 }
 
 /**
@@ -915,6 +931,7 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
@@ -976,6 +993,7 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
+            case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
             case Projectile::RocketTurretBulletProjectile:
             case Projectile::BossRocketBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
@@ -1659,9 +1677,22 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, co
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile: {
-            // These projectiles can only collide with the paddle if it's NOT going upwards into the level
-            float dot = Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector());
-            if (dot <= EPSILON) {
+
+            // These projectiles can only collide with the paddle if they're NOT going upwards from the paddle
+            if (Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector()) <= EPSILON ) {
+                return this->CollisionCheck(bounds, true);
+            }
+            break;
+        }
+
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile: {
+            assert(dynamic_cast<const PaddleRemoteControlRocketProjectile*>(&projectile) != NULL);
+
+            const PaddleRemoteControlRocketProjectile& remoteCtrlRocket = 
+                static_cast<const PaddleRemoteControlRocketProjectile&>(projectile);
+
+            // Special timer on remote control rockets to prevent initial collisions with the paddle...
+            if (!remoteCtrlRocket.GetArePaddleCollisionsDisabled()) {
                 return this->CollisionCheck(bounds, true);
             }
             break;
@@ -1686,6 +1717,7 @@ bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
+            case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
             case Projectile::RocketTurretBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
             case Projectile::PaddleMineBulletProjectile:
@@ -1713,6 +1745,20 @@ bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile
 
 }
 
+void PlayerPaddle::SetRemoveFromGameVisibility(double fadeOutTime) {
+    // This will ensure that the paddle is immediately qualified as removed from the game...
+    this->SetAlpha(std::min<float>(this->GetAlpha(), 1.0f - EPSILON)); 
+    this->AnimateFade(true, fadeOutTime);
+}
+
+void PlayerPaddle::SetUnremoveFromGameVisibility(double fadeInTime) {
+    this->AnimateFade(false, fadeInTime);
+}
+
+bool PlayerPaddle::HasBeenPausedAndRemovedFromGame(int pauseBitField) const {
+    return ((pauseBitField & GameModel::PausePaddle) != 0x0) && (this->GetAlpha() < 1.0f);
+}
+
 void PlayerPaddle::UpdateLevel(const GameLevel& level) {
     this->UpdatePaddleBounds(level.GetPaddleMinBound(), level.GetPaddleMaxBound());
     this->startingXPos = level.GetPaddleStartingXPosition();
@@ -1732,4 +1778,18 @@ void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce, float deaccel) {
 	this->impulse = xDirectionalForce;
     this->impulseDeceleration = fabs(deaccel);
     this->impulseSpdDecreaseCounter = 0.0f;
+}
+
+void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const {
+    if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+        height = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+        width  = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
+    }
+    else {
+        assert((this->GetPaddleType() & PlayerPaddle::RemoteControlRocketPaddle) == PlayerPaddle::RemoteControlRocketPaddle);
+        height = this->currScaleFactor * PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT;
+        width  = this->currScaleFactor * PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT;
+    }
+
+    spawnPos = this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * height);
 }

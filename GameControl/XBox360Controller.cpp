@@ -350,17 +350,17 @@ void XBox360Controller::Sync(size_t frameID, double dT) {
 
 	// Paddle controls (NOTE: the else is to make the feedback more exact)
 	if (this->leftActionOn) {
-		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
-		this->model->MovePaddle(frameID, leftDir, this->directionMagnitudePercent);
+		int leftDir = this->model->AreControlsFlipped() ? 1 : -1;
+		this->model->Move(frameID, leftDir, this->directionMagnitudePercent);
         //debug_output("Left move magnitude: " << this->directionMagnitudePercent);
 	}
 	else if (this->rightActionOn) {
-		PlayerPaddle::PaddleMovement rightDir = this->model->AreControlsFlipped() ? PlayerPaddle::LeftPaddleMovement : PlayerPaddle::RightPaddleMovement;
-		this->model->MovePaddle(frameID, rightDir, this->directionMagnitudePercent);
+		int rightDir = this->model->AreControlsFlipped() ? -1 : 1;
+		this->model->Move(frameID, rightDir, this->directionMagnitudePercent);
         //debug_output("Right move magnitude: " << this->directionMagnitudePercent);
 	}
 	else {
-		this->model->MovePaddle(frameID, PlayerPaddle::NoPaddleMovement, 0.0);
+		this->model->Move(frameID, 0, 0.0);
 	}
 
 	// Check for vibration time expiration...

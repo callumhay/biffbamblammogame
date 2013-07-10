@@ -21,8 +21,10 @@
 #include "../GameModel/PlayerPaddle.h"
 
 RocketMesh::RocketMesh() : 
-paddleRocketMesh(NULL), turretRocketMesh(NULL), rocketGlowEmitter(NULL), pulseEffector(0,0) {
-	this->LoadMesh();
+paddleRocketMesh(NULL), paddleRemoteControlRocketMesh(NULL), turretRocketMesh(NULL),
+rocketGlowEmitter(NULL), pulseEffector(0,0) {
+
+	this->LoadMeshes();
 
 	this->glowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Bilinear));
 	assert(this->glowTex != NULL);
@@ -52,6 +54,8 @@ RocketMesh::~RocketMesh() {
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleRocketMesh);
 	assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleRemoteControlRocketMesh);
+    assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->turretRocketMesh);
     assert(success);
 
@@ -68,26 +72,40 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
                       const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
                       const BasicPointLight& ballLight) {
 
-	this->rocketGlowEmitter->Tick(dT);
-	if ((paddle.GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
-			glPushAttrib(GL_CURRENT_BIT);
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    bool rocketIsOnPaddle = (paddle.GetPaddleType() & (PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) != 0x0;
+    if (rocketIsOnPaddle || !this->rocketProjectiles.empty()) {
+	    this->rocketGlowEmitter->Tick(dT);
+    }
 
-			// Draw the rocket, mounted on the paddle
-			const Point2D& paddleCenter = paddle.GetCenterPosition();
-			
-			glPushMatrix();
-			float rocketHeight = paddle.GetPaddleScaleFactor() * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+    if (rocketIsOnPaddle) {
+        glPushAttrib(GL_CURRENT_BIT);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-			glTranslatef(paddleCenter[0], paddleCenter[1] + paddle.GetHalfHeight() + 0.5f * rocketHeight, 0.0f);
-			glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
-			this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0));
-			this->rocketGlowEmitter->Draw(camera);
-			this->paddleRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
-			glPopMatrix();
+        // Draw the rocket, mounted on the paddle
+        const Point2D& paddleCenter = paddle.GetCenterPosition();
 
-			glPopAttrib();
-			debug_opengl_state();
+        glPushMatrix();
+        float rocketHeight = paddle.GetPaddleScaleFactor() * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+
+        glTranslatef(paddleCenter[0], paddleCenter[1] + paddle.GetHalfHeight() + 0.5f * rocketHeight, 0.0f);
+        glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
+
+        this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0));
+        this->rocketGlowEmitter->Draw(camera);
+
+        // Specifics for drawing the particular type of rocket...
+        if ((paddle.GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+            this->paddleRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
+        else {
+            assert((paddle.GetPaddleType() & PlayerPaddle::RemoteControlRocketPaddle) == PlayerPaddle::RemoteControlRocketPaddle);
+            this->paddleRemoteControlRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
+         
+        glPopMatrix();
+
+        glPopAttrib();
+        debug_opengl_state();
 	}
 
     static float scaleFactor   = 1.0f;
@@ -135,6 +153,9 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
                 case Projectile::PaddleRocketBulletProjectile:
 			        this->paddleRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
                     break;
+                case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
+                    this->paddleRemoteControlRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+                    break;
                 case Projectile::RocketTurretBulletProjectile:
                 case Projectile::BossRocketBulletProjectile:
                     this->turretRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
@@ -153,13 +174,19 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 }
 
 // Private helper method to load the rocket mesh
-void RocketMesh::LoadMesh() {
+void RocketMesh::LoadMeshes() {
 	assert(this->paddleRocketMesh == NULL);
+    assert(this->paddleRemoteControlRocketMesh == NULL);
     assert(this->turretRocketMesh == NULL);
 
-    this->paddleRocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_ROCKET_MESH);
-	assert(this->paddleRocketMesh != NULL);
+    this->paddleRocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(
+        GameViewConstants::GetInstance()->PADDLE_ROCKET_MESH);
+    this->paddleRemoteControlRocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(
+        GameViewConstants::GetInstance()->PADDLE_REMOTE_CONTROL_ROCKET_MESH);
+    this->turretRocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(
+        GameViewConstants::GetInstance()->TURRET_ROCKET_MESH);
 
-    this->turretRocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TURRET_ROCKET_MESH);
+    assert(this->paddleRocketMesh != NULL);
+    assert(this->paddleRemoteControlRocketMesh != NULL);
     assert(this->turretRocketMesh != NULL);
 }

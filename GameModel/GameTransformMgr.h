@@ -25,6 +25,7 @@ class GameLevel;
 class GameBall;
 class PlayerPaddle;
 class Camera;
+class PaddleRemoteControlRocketProjectile;
 
 /**
  * Class for delegating interpolation and transformation work and data
@@ -46,6 +47,8 @@ public:
 	void SetBallDeathCamera(bool turnOnBallDeathCam);
     void SetBulletTimeCamera(bool turnOnBulletTimeCam);
 
+    void SetRemoteControlRocketCamera(bool turnOnRocketCam, PaddleRemoteControlRocketProjectile* rocket);
+
 	// Setup functions for telling the camera/level where it should be by default
 	void SetupLevelCameraDefaultPosition(const GameLevel& level);
 
@@ -64,13 +67,16 @@ private:
                                   FromPaddleCamAnimation, ToBallCamAnimation,
                                   FromBallCamAnimation, ToBallDeathAnimation,
                                   FromBallDeathAnimation, ToBulletTimeCamAnimation,
-                                  FromBulletTimeCamAnimation };
+                                  FromBulletTimeCamAnimation, ToRemoteCtrlRocketCamAnimation,
+                                  FromRemoteCtrlRocketCamAnimation};
 
 	struct TransformAnimation {
-		TransformAnimationType type;
+    public:
+        TransformAnimationType type;
 		bool hasStarted;
+        void* data;
 
-		TransformAnimation(TransformAnimationType type) : type(type), hasStarted(false) {}
+		TransformAnimation(TransformAnimationType type) : type(type), hasStarted(false), data(NULL) {}
 	};
 
 	std::list<TransformAnimation> animationQueue;
@@ -83,6 +89,7 @@ private:
 	// Paddle and ball camera related variables
 	static const double SECONDS_PER_UNIT_PADDLECAM;
 	static const double SECONDS_PER_UNIT_BALLCAM;
+    static const double SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM;
 	static const double SECONDS_PER_UNIT_DEATHCAM;
 	
 	static const float BALL_DEATH_CAM_DIST_TO_BALL;
@@ -91,7 +98,11 @@ private:
 
 	PlayerPaddle* paddleWithCamera;	// Will be the paddle where the camera is in paddle cam mode, NULL otherwise
 	GameBall* ballWithCamera;       // Will be the ball where the camera is in ball cam mode, NULL otherwise
-	
+
+	PaddleRemoteControlRocketProjectile* remoteControlRocketWithCamera; // The rocket where the camera is following it or inside it, NULL otherwise.
+    Orientation3D storedCamOriBeforeRemoteControlRocketCam;
+    float storedCamFOVBeforeRemoteControlRocketCam;
+
 	// Camera transformations
 	float cameraFOVAngle;
 	Orientation3D defaultCamOrientation;
@@ -104,6 +115,8 @@ private:
 	std::list<AnimationMultiLerp<Orientation3D> > ballDeathAnimations;
     AnimationMultiLerp<Orientation3D> bulletTimeCamAnimation;
 	std::list<AnimationMultiLerp<float> > camFOVAnimations;
+
+    std::list<AnimationMultiLerp<Orientation3D> > remoteControlRocketCamAnimations;
 
 	bool TickLevelFlipAnimation(double dT);
 	void StartLevelFlipAnimation(double dT, GameModel& gameModel);
@@ -125,8 +138,14 @@ private:
 	void StartBulletTimeCamAnimation(double dT, GameModel& gameModel);
 	void FinishBulletTimeCamAnimation(double dT, GameModel& gameModel);
 
+    bool TickRemoteControlRocketCamAnimation(double dT, GameModel& gameModel);
+    void StartRemoteControlRocketCamAnimation(double dT, GameModel& gameModel);
+    void FinishRemoteControlRocketCamAnimation(double dT, GameModel& gameModel);
+
 	void GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov);
 	void GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Vector3D& ballCamPos, float& fov); 
+
+    void GetRemoteCtrlRocketPositionAndFOV(const PaddleRemoteControlRocketProjectile& rocket, float levelWidth, float levelHeight, Vector3D& rocketCamPos, float& fov);
 
 	void ClearSpecialCamEffects();
 

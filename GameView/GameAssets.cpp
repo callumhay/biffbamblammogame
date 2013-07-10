@@ -701,7 +701,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		this->paddleStickyAttachment->SetSceneTexture(sceneFBO->GetFBOTexture());
 
 		// In the case where the paddle laser beam is also active then the beam will refract through the goo,
-		// illuminate the goo alot more
+		// illuminate the goo a lot more
 		if ((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && paddle->GetIsLaserBeamFiring()) {
 			this->paddleStickyAttachment->SetPaddleLaserBeamIsActive(true);
 		}
@@ -964,16 +964,13 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	debug_opengl_state();
 }
 
-/**
- * Draw the currently active projectiles in the game.
- */
-void GameAssets::DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera) {
-	// Get lights affecting the foreground meshes...
-	BasicPointLight keyLight, fillLight, ballLight;
-	this->lightAssets->GetPieceAffectingLights(keyLight, fillLight, ballLight);
+void GameAssets::DrawMeshProjectiles(double dT, const GameModel& gameModel, const Camera& camera) {
+    // Get lights affecting the foreground meshes...
+    BasicPointLight keyLight, fillLight, ballLight;
+    this->lightAssets->GetPieceAffectingLights(keyLight, fillLight, ballLight);
 
-    this->espAssets->DrawProjectileEffects(dT, camera);
-	this->rocketMesh->Draw(dT, *gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight);
+    // Draw any rockets that are currently active...
+    this->rocketMesh->Draw(dT, *gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight);
 
     // Draw any mines that are currently active...
     this->mineMeshMgr->Draw(dT, camera, keyLight, fillLight, ballLight);
@@ -1183,6 +1180,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
@@ -1215,6 +1213,7 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 	switch (projectile.GetType()) {
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
@@ -1257,13 +1256,14 @@ void GameAssets::FireRocket(const RocketProjectile& rocketProjectile) {
     switch (rocketProjectile.GetType()) {
 
         case Projectile::BossRocketBulletProjectile:
-            
+            // TODO?
             break;
         
         case Projectile::RocketTurretBulletProjectile:
-
+            // TODO?
             break;
 
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
             // The rocket launch sound
             this->sound->PlaySoundAtPosition(GameSound::PaddleRocketLaunchEvent, false, rocketProjectile.GetPosition3D());
@@ -1308,6 +1308,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
         case Projectile::CollateralBlockProjectile:
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
 			break;
 
@@ -1504,11 +1505,11 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
 			float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
 
-			Point3D newFGKeyLightPos(halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
-			Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
+			Point3D newFGKeyLightPos(halfLevelWidth, -(halfLevelHeight + 10.0f), 10.0f);
+			Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 10.0f), -5.0f);
 			
-			this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
-			this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight, newFGKeyLightPos, 0.08f, 1.5f);
+			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
 
 			// Fade out the background...
 			this->worldAssets->FadeBackground(true, 2.0f);
@@ -1523,11 +1524,11 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			// Change the position of the key light so that it is facing down with the ball
 			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
 
-			Point3D newFGKeyLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
-			Point3D newFGFillLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
+			Point3D newFGKeyLightPos(0.0f, (halfLevelHeight + 10.0f), -5.0f);
+			Point3D newFGFillLightPos(0.0f, -(halfLevelHeight + 10.0f), -10.0f);
 			
-			this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
-			this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight, newFGKeyLightPos, 0.08f, 1.5f);
+			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
 
 			// Fade out the background...
 			this->worldAssets->FadeBackground(true, 2.0f);
@@ -1608,8 +1609,8 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 			this->ballSafetyNet->SetAlpha(1.0f);
 
 			// Move the foreground key and fill lights back to their default positions...
-			this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
-			this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
+			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGKeyLight, 1.5f);
+			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGFillLight, 1.5f);
 
 			// Show the background once again...
 			this->worldAssets->FadeBackground(false, 2.0f);
@@ -1618,8 +1619,8 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 
 		case GameItem::BallCamItem: 
 			// Move the foreground key and fill lights back to their default positions...
-			this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
-			this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
+			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGKeyLight, 1.5f);
+			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGFillLight, 1.5f);
 
 			// Show the background once again...
 			this->worldAssets->FadeBackground(false, 2.0f);

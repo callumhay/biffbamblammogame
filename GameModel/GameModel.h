@@ -48,7 +48,7 @@ public:
 	// AllPause: All possible pauses are active
 	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, 
                      PauseGame = 0x80000000, PauseBall = 0x00000004, PauseAI = 0x00000008, 
-                     PausePaddleControls = 0x00000010, AllPause = 0xFFFFFFFF };
+                     PausePaddleControls = 0x00000010, PauseTimers = 0x00000020, AllPause = 0xFFFFFFFF };
 
     
     // Difficulty of the game:
@@ -426,13 +426,17 @@ public:
 
 	// Paddle and ball related manipulators *********************************
 
-	// Move the paddle a distance in either positive or negative X direction.
-	void MovePaddle(size_t frameID, const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent = 1.0f) {
-		static PlayerPaddle::PaddleMovement lastPaddleMoveThisFrame = PlayerPaddle::NoPaddleMovement;
+	// Move the paddle or some other interactive element that is active in the game...
+	void Move(size_t frameID, int dir, float magnitudePercent = 1.0f) {
+        assert(dir <= 1 && dir >= -1);
+		
+        PlayerPaddle::PaddleMovement paddleMovement = static_cast<PlayerPaddle::PaddleMovement>(dir);
+        static PlayerPaddle::PaddleMovement lastPaddleMoveThisFrame = PlayerPaddle::NoPaddleMovement;
 		static size_t lastFrameID = 0;
 		if (frameID == lastFrameID) {
 			// We ignore 'no movement' in cases where the paddle has been told to move this frame
-			if (lastPaddleMoveThisFrame != PlayerPaddle::NoPaddleMovement && paddleMovement == PlayerPaddle::NoPaddleMovement) {
+            if (lastPaddleMoveThisFrame != PlayerPaddle::NoPaddleMovement && 
+                paddleMovement == PlayerPaddle::NoPaddleMovement) {
 				return;
 			}
 		}
@@ -447,7 +451,7 @@ public:
 		   (this->pauseBitField & GameModel::PauseState) == 0x0  &&
            (this->pauseBitField & GameModel::PauseGame) == 0x0 &&
            (this->pauseBitField & GameModel::PausePaddleControls) == 0x0) {
-				 this->currState->MovePaddleKeyPressed(paddleMovement, magnitudePercent);
+				 this->currState->MoveKeyPressed(dir, magnitudePercent);
 		}
 	}
 

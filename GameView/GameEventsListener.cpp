@@ -532,6 +532,7 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
 		case Projectile::CollateralBlockProjectile: {

@@ -120,6 +120,10 @@ public class ItemDrop {
 		}
 	}
 	
+	/**
+	 * Initialize the likelihoods of any item drop to all be zero!
+	 * @return The mapping of every possible item drop to their initial liklihood (which is zero).
+	 */
 	public static HashMap<String, Integer> populateDefaultItemDropSettings() {
 		int totalSize = ItemDrop.powerUpItems.size() + ItemDrop.powerNeutralItems.size() + ItemDrop.powerDownItems.size();
 		HashMap<String, Integer> settings = new HashMap<String, Integer>(totalSize);
@@ -127,15 +131,15 @@ public class ItemDrop {
 		ItemDrop temp = null;
 		for (int i = 0; i < ItemDrop.powerUpItems.size(); i++) {
 			temp = ItemDrop.powerUpItems.get(i);
-			settings.put(temp.getName(), ItemDrop.MEDIUM_LIKELIHOOD);
+			settings.put(temp.getName(), ItemDrop.NO_LIKELIHOOD);
 		}
 		for (int i = 0; i < ItemDrop.powerNeutralItems.size(); i++) {
 			temp = ItemDrop.powerNeutralItems.get(i);
-			settings.put(temp.getName(), ItemDrop.MEDIUM_LIKELIHOOD);
+			settings.put(temp.getName(), ItemDrop.NO_LIKELIHOOD);
 		}
 		for (int i = 0; i < ItemDrop.powerDownItems.size(); i++) {
 			temp = ItemDrop.powerDownItems.get(i);
-			settings.put(temp.getName(), ItemDrop.MEDIUM_LIKELIHOOD);
+			settings.put(temp.getName(), ItemDrop.NO_LIKELIHOOD);
 		}	
 		return settings;
 	}	

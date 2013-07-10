@@ -21,6 +21,7 @@
 class ItemDropBlock;
 class ESPVolumeEmitter;
 class Texture2D;
+struct ESPInterval;
 
 class ItemDropBlockMesh {
 public:
@@ -35,6 +36,8 @@ public:
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawEffects(const Vector3D& worldTranslation, double dT, const Camera& camera);
+
 	void SetAlphaMultiplier(float alpha);
 
 	void UpdateItemDropBlockTexture(const ItemDropBlock* itemDropBlock, Texture* itemTexture);
@@ -54,7 +57,7 @@ private:
 	std::map<const ItemDropBlock*, Texture*> itemDropBlockToItemTexMap;
 	MaterialGroup* itemDropTypeMatGrp;
 	
-	ESPVolumeEmitter* InitSparkEmitter(const Colour& colour);
+	ESPVolumeEmitter* InitSparkEmitter(const Colour& colour, const ESPInterval& lifeTime, const ESPInterval& particleSpd);
 	void LoadMesh();
 
     DISALLOW_COPY_AND_ASSIGN(ItemDropBlockMesh);

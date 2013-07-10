@@ -1412,6 +1412,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 		
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             // NOTE: THIS IS NOW TAKEN CARE OF BY THE RocketExploded event
@@ -3007,6 +3008,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             // NOTE: THIS IS TAKEN CARE OF BY THE RocketExplodedEvent
@@ -3310,6 +3312,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
             break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
@@ -6171,6 +6174,10 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
  * to make it easier for the player to see the ball.
  */
 void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
+    if (ball.GetAlpha() <= 0.0f) {
+        return;
+    }
+
 	// Check to see if the ball has any associated camera paddle ball effects, if not, then
 	// create the effect and add it to the ball first
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
@@ -6196,7 +6203,7 @@ void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const 
 	
 	// Lerp the colour and alpha between 0 and MAX_DIST_AWAY 
 	Colour targetColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR + distanceToPaddle * (GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR - GameViewConstants::GetInstance()->ITEM_BAD_COLOUR) / MAX_DIST_AWAY;
-	float targetAlpha   = distanceToPaddle * 0.9f  / MAX_DIST_AWAY;
+	float targetAlpha   = ball.GetAlpha() * (distanceToPaddle * 0.9f  / MAX_DIST_AWAY);
 	
 	paddleCamBallEffectList[0]->SetParticleColour(ESPInterval(targetColour.R()), ESPInterval(targetColour.G()), ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
 	paddleCamBallEffectList[0]->SetParticleSize(ESPInterval(ball.GetBallSize()));
@@ -6211,7 +6218,11 @@ void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const 
  * to make it easier for the player to see the paddle.
  */
 void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
-	// Check to see if the paddle has any associated ball cam effects, if not, then create the effect and add it to the paddle first
+    if (paddle.GetAlpha() <= 0.0) {
+        return;
+    }
+    
+    // Check to see if the paddle has any associated ball cam effects, if not, then create the effect and add it to the paddle first
 	if (this->paddleEffects.find(GameItem::BallCamItem) == this->paddleEffects.end()) {
 		// Didn't find an associated ball camera effect, so add one
 		this->AddBallCamPaddleESPEffects(this->paddleEffects[GameItem::BallCamItem]);
@@ -6231,10 +6242,13 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
 	distanceToPaddle = std::min<float>(MAX_DIST_AWAY, distanceToPaddle);
 	
 	// Lerp the colour and alpha between 0 and MAX_DIST_AWAY 
-	Colour targetColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR + distanceToPaddle * (GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR - GameViewConstants::GetInstance()->ITEM_BAD_COLOUR) / MAX_DIST_AWAY;
-	float targetAlpha   = distanceToPaddle * 0.9f  / MAX_DIST_AWAY;
+	Colour targetColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR + distanceToPaddle * 
+        (GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR - GameViewConstants::GetInstance()->ITEM_BAD_COLOUR) / MAX_DIST_AWAY;
+	float targetAlpha   = paddle.GetAlpha() * (distanceToPaddle * 0.9f  / MAX_DIST_AWAY);
 	
-	ballCamPaddleEffectList[0]->SetParticleColour(ESPInterval(targetColour.R()), ESPInterval(targetColour.G()), ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
+	ballCamPaddleEffectList[0]->SetParticleColour(
+        ESPInterval(targetColour.R()), ESPInterval(targetColour.G()),
+        ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
 	ballCamPaddleEffectList[0]->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal()*2));
 	ballCamPaddleEffectList[0]->Draw(camera);
 	ballCamPaddleEffectList[0]->Tick(dT);

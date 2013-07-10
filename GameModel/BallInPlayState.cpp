@@ -88,6 +88,11 @@ void BallInPlayState::BallReleaseKeyPressed() {
 	paddle->Shoot(this->gameModel);
 }
 
+void BallInPlayState::MoveKeyPressed(int dir, float magnitudePercent) {
+    // We need to deal with moving the paddle, and if there's a remote control rocket we move the rocket instead...
+    GameState::MoveKeyPressed(dir, magnitudePercent);
+}
+
 void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
     assert(this->gameModel->boostModel != NULL);
 
@@ -157,7 +162,7 @@ void BallInPlayState::Tick(double seconds) {
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
 
     // Boss collisions with the paddle
-    if (currLevel->GetHasBoss()) {
+    if (currLevel->GetHasBoss() && !paddle->HasBeenPausedAndRemovedFromGame(gameModel->GetPauseState())) {
         Boss* boss = currLevel->GetBoss();
         assert(boss != NULL);
         
@@ -182,7 +187,7 @@ void BallInPlayState::Tick(double seconds) {
     }
 
 	// Pause the ball from moving
-	if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == NULL) {
+	if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == 0x0) {
 
 	    // Gravity vector in world space
 	    Vector3D worldGravityDir = this->gameModel->GetGravityDir();
@@ -471,7 +476,7 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Quick check to see if the paddle collided with the safety net - this will just register necessary
 	// events and destroy the net if it exists and there is a collision
-	if (this->gameModel->IsSafetyNetActive()) {   
+	if (!paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState()) && this->gameModel->IsSafetyNetActive()) {   
         if (this->gameModel->safetyNet->PaddleCollisionCheck(*paddle)) {
             this->gameModel->DestroySafetyNet();
             
@@ -489,8 +494,6 @@ void BallInPlayState::Tick(double seconds) {
     // Update the boost model for the ball(s)
     this->gameModel->boostModel->Tick(seconds);
 }
-
-
 
 // n must be normalized
 // d is the distance from the center of the ball to the line that was collided with
@@ -708,6 +711,14 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
  * the player paddle and carrying out the necessary activity if one did.
  */
 void BallInPlayState::DoItemCollision() {
+
+    PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+
+    // Ignore item collisions if the paddle has been removed from play
+    if (paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState())) {
+        return;
+    }
+
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	std::list<GameItem*>& currLiveItems     = this->gameModel->GetLiveItems();
 	std::vector<GameItem*> removeItems;
@@ -716,9 +727,10 @@ void BallInPlayState::DoItemCollision() {
 	for (std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); ++iter) {
 		GameItem *currItem = *iter;
 		
-		if (currItem->CollisionCheck(*this->gameModel->GetPlayerPaddle())) {
+		if (currItem->CollisionCheck(*paddle)) {
+
 			// EVENT: Item was obtained by the player paddle
-			GameEventManager::Instance()->ActionItemPaddleCollision(*currItem, *this->gameModel->GetPlayerPaddle());
+			GameEventManager::Instance()->ActionItemPaddleCollision(*currItem, *paddle);
             
             // Increment the number of items acquired
             this->gameModel->IncrementNumAcquiredItems(currItem);

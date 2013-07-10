@@ -79,17 +79,17 @@ void KeyboardSDLController::Sync(size_t frameID, double dT) {
 
 	// Paddle controls (NOTE: the else is to make the feedback more exact)
     if (this->keyPressed[SDLK_LEFT] || this->keyPressed[SDLK_a]) {
-		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
-        this->model->MovePaddle(frameID, leftDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
+		int leftDir = this->model->AreControlsFlipped() ? 1 : -1;
+        this->model->Move(frameID, leftDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
         this->dirHeldDownTimeCounter += dT;
 	}
 	else if (this->keyPressed[SDLK_RIGHT] || this->keyPressed[SDLK_d]) {
-		PlayerPaddle::PaddleMovement rightDir = this->model->AreControlsFlipped() ? PlayerPaddle::LeftPaddleMovement : PlayerPaddle::RightPaddleMovement;
-		this->model->MovePaddle(frameID, rightDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
+		int rightDir = this->model->AreControlsFlipped() ? -1 : 1;
+		this->model->Move(frameID, rightDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
         this->dirHeldDownTimeCounter += dT;
 	}
 	else {
-		this->model->MovePaddle(frameID, PlayerPaddle::NoPaddleMovement, 0.0);
+		this->model->Move(frameID, 0, 0.0);
 	}
 
 	// Execute any debug functionality for when a button is held down...
@@ -522,7 +522,7 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                 this->model->DropItem(GameItem::MineLauncherPaddleItem);
                 break;
             case SDLK_7:
-                // ...
+                this->model->DropItem(GameItem::RemoteCtrlRocketItem);
                 break;
             case SDLK_8:
                 // ...
@@ -531,6 +531,14 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                 this->model->DropItem(GameItem::OmniLaserBallItem);
                 break;
             
+            case SDLK_MINUS:
+            case SDLK_UNDERSCORE:
+                // ...
+                break;
+            case SDLK_EQUALS:
+            case SDLK_PLUS:
+                // ...
+                break;
 
             case SDLK_BACKSLASH:
                 this->model->DropItem(GameItem::RandomItem);

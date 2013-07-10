@@ -91,6 +91,7 @@ public:
 	void SetLightStrobeOff();
 	void SetLightColourChange(const Colour& newColour, float changeTime);
 	void SetLightPositionChange(const Point3D& newPosition, float changeTime);
+    void SetLinearAttenuationChange(float newAtten, float changeTime);
 	void Tick(double dT);
 
 	inline void DebugDraw() const {
@@ -122,6 +123,7 @@ private:
 	std::list<AnimationMultiLerp<Colour> > lightColourChangeAnim;
 	std::list<AnimationMultiLerp<Colour> > lightColourStrobeAnim;
 	std::list<AnimationMultiLerp<Point3D> > lightPositionAnim;
+    std::list<AnimationMultiLerp<float> > lightAttenAnim;
 
 	// Disallow copy and assignment
 	PointLight(const PointLight& p);
