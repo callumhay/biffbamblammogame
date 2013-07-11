@@ -2,7 +2,7 @@
  * BallInPlayState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -21,6 +21,7 @@
 #include "Beam.h"
 #include "BallBoostModel.h"
 #include "SafetyNet.h"
+#include "PaddleRemoteControlRocketProjectile.h"
 
 struct BallCollisionChangeInfo {
 public:
@@ -89,14 +90,21 @@ void BallInPlayState::BallReleaseKeyPressed() {
 }
 
 void BallInPlayState::MoveKeyPressed(int dir, float magnitudePercent) {
+
     // We need to deal with moving the paddle, and if there's a remote control rocket we move the rocket instead...
+    PaddleRemoteControlRocketProjectile* remoteControlRocket = this->gameModel->GetActiveRemoteControlRocket();
+    if (remoteControlRocket != NULL) {
+        remoteControlRocket->ControlRocketSteering(static_cast<PaddleRemoteControlRocketProjectile::RocketSteering>(dir), magnitudePercent);
+    }
+
+    // Default functionality (just apply movement to the paddle)
     GameState::MoveKeyPressed(dir, magnitudePercent);
 }
 
 void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
     assert(this->gameModel->boostModel != NULL);
 
-    // Ignore if the ball is paused
+    // Ignore applying the boost direction when the ball is paused
     if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == GameModel::PauseBall) {
         return;
     }

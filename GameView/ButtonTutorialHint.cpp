@@ -331,6 +331,16 @@ void ButtonTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float de
     float buttonLabelDiv2 = 0;
     this->commaLabel.SetAlpha(alpha);
 
+    glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Camera::PushWindowCoords();
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
     // Draw the XBox Button labels, if any exist
     size_t count = 0;
     for (std::vector<ButtonGlyphLabel*>::iterator iter = this->xboxLabels.begin();
@@ -386,6 +396,11 @@ void ButtonTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float de
         currX += this->mouseLabel->GetWidth() / 2.0f;
         this->mouseLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
     }
+
+    glPopMatrix();
+    Camera::PopWindowCoords();
+    glPopAttrib();
+    debug_opengl_state();
 }
 
 ButtonTutorialHint::ButtonGlyphLabel::ButtonGlyphLabel(const Texture* buttonTexture, const std::string& buttonText,

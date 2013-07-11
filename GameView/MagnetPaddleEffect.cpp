@@ -55,10 +55,10 @@ void MagnetPaddleEffect::Reset() {
 
 void MagnetPaddleEffect::Draw(double dT, const PlayerPaddle& p) {
     float scaleFactor = p.GetPaddleScaleFactor();
-    float alphaMultiplier = 1.0f;
+    float alphaMultiplier = p.GetAlpha();
 
     if ((p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle) {
-        alphaMultiplier = 0.2f;
+        alphaMultiplier *= 0.2f;
     }
 
     switch (currState) {

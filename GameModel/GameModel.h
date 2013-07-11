@@ -37,9 +37,28 @@ class CollateralBlock;
 class LevelStartState;
 class PointAward;
 class SafetyNet;
+class PaddleRemoteControlRocketProjectile;
 
 class GameModel {
+
+    // Befriend all state machine classes... I know it's ugly but it's how the pattern works
+    friend class GameState;
+    friend class BallOnPaddleState;
+    friend class BallInPlayState;
+    friend class LevelStartState;
+    friend class LevelCompleteState;
+    friend class WorldCompleteState;
+    friend class BallDeathState;
+    friend class GameOverState;
+
 public:
+    typedef std::list<Projectile*> ProjectileList;
+    typedef ProjectileList::const_iterator ProjectileListConstIter;
+    typedef ProjectileList::iterator ProjectileListIter;
+    typedef std::map<Projectile::ProjectileType, ProjectileList> ProjectileMap;
+    typedef ProjectileMap::const_iterator ProjectileMapConstIter;
+    typedef ProjectileMap::iterator ProjectileMapIter;
+
 	// Pause functionality for the game:
 	// NoPause: no pauses at all in the game model execution.
 	// PauseState: Only the current state is paused - thus if the game is in play no movement of paddle, ball, items, etc. will occur.
@@ -50,7 +69,6 @@ public:
                      PauseGame = 0x80000000, PauseBall = 0x00000004, PauseAI = 0x00000008, 
                      PausePaddleControls = 0x00000010, PauseTimers = 0x00000020, AllPause = 0xFFFFFFFF };
 
-    
     // Difficulty of the game:
     // EasyDifficulty: The game is significantly easier to play - ball moves slower, more boost time, no
     // paddle timer when releasing the ball
@@ -60,126 +78,6 @@ public:
     // there is a paddle timer when releasing the ball
     enum Difficulty { EasyDifficulty = 0, MediumDifficulty = 1, HardDifficulty = 2};
     
-private:
-	GameState* currState;		// The current game state
-	GameState* nextState;
-
-	// Player-controllable game assets
-	PlayerPaddle* playerPaddle;                         // The one and only player paddle
-	std::list<GameBall*> balls;                         // Current set of balls active in the game
-	SafetyNet* safetyNet;                               // The ball safety net
-    std::list<Projectile*> projectiles;                 // Projectiles spawned as the game is played
-	std::list<Beam*> beams;                             // Beams spawned as the game is played
-	std::map<LevelPiece*, int32_t> statusUpdatePieces;  // Pieces that require updating every frame due to status effects
-    BallBoostModel* boostModel;                         // This is only not NULL when the ball is in play - it contains the model/state for ball boosting
-
-	// Current world and level information
-	unsigned int currWorldNum;
-	std::vector<GameWorld*> worlds;
-
-    // Difficulty setting of the game
-    GameModel::Difficulty difficulty;
-
-    // Set Boost mode
-    BallBoostModel::BallBoostMode ballBoostMode;
-
-	// Items that are currently available to be picked up in-game
-	std::list<GameItem*> currLiveItems;
-	// Timers that are currently active
-	std::list<GameItemTimer*> activeTimers;
-
-	// Player score and life information
-	long currPlayerScore;
-    int numStarsAwarded;
-	int numInterimBlocksDestroyed;
-    int maxInterimBlocksDestroyed;
-    int numLivesLostInLevel;
-    bool droppedLifeForMaxMultiplier;
-	
-    int currLivesLeft;        // Number of lives left before the player is officially dead
-    int livesAtStartOfLevel;  // Lives given to the player at the start of a level
-    int maxNumLivesAllowed;   // The maximum container for lives allowed
-
-    int numGoodItemsAcquired, numNeutralItemsAcquired, numBadItemsAcquired;
-    double totalLevelTimeInSeconds;
-
-	// Holds the type of pausing that is currently being used on the game model (see PauseType enum)
-	int pauseBitField;
-
-	bool gameIsEntirelyPaused;
-	bool gameStateIsPaused;
-
-    bool ballBoostIsInverted;
-
-	// Item related tracking variables *******************
-	bool areControlsFlipped;
-	bool isBlackoutActive;										// Is the game currently blacked out?
-	GameTransformMgr* gameTransformInfo;		// The current transform information of the game
-	
-	// ***************************************************
-
-	bool doingPieceStatusListIteration;
-    bool progressLoadedSuccessfully;
-
-	// Private getters and setters ****************************************
-	void SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNewWorldEvent);
-
-	void SetCurrentStateImmediately(GameState* newState) {
-		assert(newState != NULL);
-		if (this->currState != NULL) {
-			delete this->currState;
-		}
-		this->currState = newState;
-	}
-
-	void CollisionOccurred(Projectile* projectile, LevelPiece* p);
-	void CollisionOccurred(GameBall& ball, LevelPiece* p);
-    void CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* bossPart);
-    void CollisionOccurred(Projectile* projectile, Boss* boss, BossBodyPart* bossPart);
-	void CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle);
-
-	void BallPaddleCollisionOccurred(GameBall& ball);
-	void BallDied(GameBall* deadBall, bool& stateChanged);
-	void DoPieceStatusUpdates(double dT);
-	void DoProjectileCollisions(double dT);
-
-	void UpdateActiveTimers(double seconds);
-	void UpdateActiveItemDrops(double seconds);
-	void UpdateActiveProjectiles(double seconds);
-	void UpdateActiveBeams(double seconds);
-
-    void ResetScore();
-	void SetNumInterimBlocksDestroyed(int value, const Point2D& pos = Point2D());
-    int  GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
-    void SetMaxConsecutiveBlocksDestroyed(int value) { this->maxInterimBlocksDestroyed = value; }
-    int  GetCurrentMultiplier() const;
-    
-
-    void ResetLevelTime() { this->totalLevelTimeInSeconds = 0; }
-    void ResetLivesLostCounter() { this->numLivesLostInLevel = 0; }
-
-    void ResetNumAcquiredItems() {
-        this->numGoodItemsAcquired = this->numNeutralItemsAcquired = this->numBadItemsAcquired = 0;
-    }
-    void IncrementNumAcquiredItems(const GameItem* item);
-
-	void ClearProjectiles();
-	void ClearBeams();
-	void ClearLiveItems();
-	void ClearActiveTimers();
-	void ClearStatusUpdatePieces();
-    void ClearBallsToOne();
-
-	bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
-    void RemoveActiveGameItemsForThisBallOnly(const GameBall* ball);
-    
-    void ResetLevelValues(int numLives);
-
-    void LoadWorldsFromFile();
-
-    void PerformLevelCompletionChecks();
-
-public:
     GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
         const BallBoostModel::BallBoostMode& ballBoostMode);
 	~GameModel();
@@ -364,7 +262,7 @@ public:
 		return this->activeTimers;
 	}
 
-	std::list<Projectile*>& GetActiveProjectiles() {
+    GameModel::ProjectileMap& GetActiveProjectiles() {
 		return this->projectiles;
 	}
 
@@ -430,28 +328,28 @@ public:
 	void Move(size_t frameID, int dir, float magnitudePercent = 1.0f) {
         assert(dir <= 1 && dir >= -1);
 		
-        PlayerPaddle::PaddleMovement paddleMovement = static_cast<PlayerPaddle::PaddleMovement>(dir);
-        static PlayerPaddle::PaddleMovement lastPaddleMoveThisFrame = PlayerPaddle::NoPaddleMovement;
+        // NOTE: The following code is used to 'clean-up' movements so that we don't over send
+        // commands to the interactive elements of the game, instead we limit movement commands 
+        // to once per simulated frame/tick of the game.
+        static int lastMoveThisFrame = dir;
 		static size_t lastFrameID = 0;
 		if (frameID == lastFrameID) {
-			// We ignore 'no movement' in cases where the paddle has been told to move this frame
-            if (lastPaddleMoveThisFrame != PlayerPaddle::NoPaddleMovement && 
-                paddleMovement == PlayerPaddle::NoPaddleMovement) {
+			// We ignore 'no movement' in cases where a movement has already been sent this frame
+            if (lastMoveThisFrame != 0 && dir == 0) {
 				return;
 			}
 		}
 		else {
 			lastFrameID = frameID;
 		}
+		lastMoveThisFrame = dir;
 
-		lastPaddleMoveThisFrame = paddleMovement;
-
-		// Can only move the paddle if the state exists and is not paused
-		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
+		// Can only move if the state exists and is not paused
+		if (this->currState != NULL &&
 		   (this->pauseBitField & GameModel::PauseState) == 0x0  &&
-           (this->pauseBitField & GameModel::PauseGame) == 0x0 &&
-           (this->pauseBitField & GameModel::PausePaddleControls) == 0x0) {
-				 this->currState->MoveKeyPressed(dir, magnitudePercent);
+           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
+
+		    this->currState->MoveKeyPressed(dir, magnitudePercent);
 		}
 	}
 
@@ -543,17 +441,127 @@ public:
 	void DropItem(GameItem::ItemType itemType);
 #endif
 
-	// Befriend all state machine classes... 
-	// I know it's ugly but it's how the stupid pattern works
-	friend class GameState;
-	friend class BallOnPaddleState;
-	friend class BallInPlayState;
-    friend class LevelStartState;
-	friend class LevelCompleteState;
-	friend class WorldCompleteState;
+private:
+    GameState* currState;		// The current game state
+    GameState* nextState;
 
-	friend class BallDeathState;
-	friend class GameOverState;
+    // Player-controllable game assets
+    PlayerPaddle* playerPaddle;                         // The one and only player paddle
+    std::list<GameBall*> balls;                         // Current set of balls active in the game
+    SafetyNet* safetyNet;                               // The ball safety net
+    std::list<Beam*> beams;                             // Beams spawned as the game is played
+    std::map<LevelPiece*, int32_t> statusUpdatePieces;  // Pieces that require updating every frame due to status effects
+    BallBoostModel* boostModel;                         // This is only not NULL when the ball is in play - it contains the model/state for ball boosting
+
+    ProjectileMap projectiles;  // Projectiles spawned as the game is played
+
+    // Current world and level information
+    unsigned int currWorldNum;
+    std::vector<GameWorld*> worlds;
+
+    // Difficulty setting of the game
+    GameModel::Difficulty difficulty;
+
+    // Set Boost mode
+    BallBoostModel::BallBoostMode ballBoostMode;
+
+    // Items that are currently available to be picked up in-game
+    std::list<GameItem*> currLiveItems;
+    // Timers that are currently active
+    std::list<GameItemTimer*> activeTimers;
+
+    // Player score and life information
+    long currPlayerScore;
+    int numStarsAwarded;
+    int numInterimBlocksDestroyed;
+    int maxInterimBlocksDestroyed;
+    int numLivesLostInLevel;
+    bool droppedLifeForMaxMultiplier;
+
+    int currLivesLeft;        // Number of lives left before the player is officially dead
+    int livesAtStartOfLevel;  // Lives given to the player at the start of a level
+    int maxNumLivesAllowed;   // The maximum container for lives allowed
+
+    int numGoodItemsAcquired, numNeutralItemsAcquired, numBadItemsAcquired;
+    double totalLevelTimeInSeconds;
+
+    // Holds the type of pausing that is currently being used on the game model (see PauseType enum)
+    int pauseBitField;
+
+    bool gameIsEntirelyPaused;
+    bool gameStateIsPaused;
+
+    bool ballBoostIsInverted;
+
+    // Item related tracking variables *******************
+    bool areControlsFlipped;
+    bool isBlackoutActive;										// Is the game currently blacked out?
+    GameTransformMgr* gameTransformInfo;		// The current transform information of the game
+
+    // ***************************************************
+
+    bool doingPieceStatusListIteration;
+    bool progressLoadedSuccessfully;
+
+    // Private getters and setters ****************************************
+    void SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNewWorldEvent);
+
+    void SetCurrentStateImmediately(GameState* newState) {
+        assert(newState != NULL);
+        if (this->currState != NULL) {
+            delete this->currState;
+        }
+        this->currState = newState;
+    }
+
+    void CollisionOccurred(Projectile* projectile, LevelPiece* p);
+    void CollisionOccurred(GameBall& ball, LevelPiece* p);
+    void CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* bossPart);
+    void CollisionOccurred(Projectile* projectile, Boss* boss, BossBodyPart* bossPart);
+    void CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle);
+
+    void BallPaddleCollisionOccurred(GameBall& ball);
+    void BallDied(GameBall* deadBall, bool& stateChanged);
+    void DoPieceStatusUpdates(double dT);
+    void DoProjectileCollisions(double dT);
+
+    void UpdateActiveTimers(double seconds);
+    void UpdateActiveItemDrops(double seconds);
+    void UpdateActiveProjectiles(double seconds);
+    void UpdateActiveBeams(double seconds);
+
+    void ResetScore();
+    void SetNumInterimBlocksDestroyed(int value, const Point2D& pos = Point2D());
+    int  GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
+    void SetMaxConsecutiveBlocksDestroyed(int value) { this->maxInterimBlocksDestroyed = value; }
+    int  GetCurrentMultiplier() const;
+
+
+    void ResetLevelTime() { this->totalLevelTimeInSeconds = 0; }
+    void ResetLivesLostCounter() { this->numLivesLostInLevel = 0; }
+
+    void ResetNumAcquiredItems() {
+        this->numGoodItemsAcquired = this->numNeutralItemsAcquired = this->numBadItemsAcquired = 0;
+    }
+    void IncrementNumAcquiredItems(const GameItem* item);
+
+    void ClearProjectiles();
+    void ClearBeams();
+    void ClearLiveItems();
+    void ClearActiveTimers();
+    void ClearStatusUpdatePieces();
+    void ClearBallsToOne();
+
+    bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
+    void RemoveActiveGameItemsForThisBallOnly(const GameBall* ball);
+
+    void ResetLevelValues(int numLives);
+
+    void LoadWorldsFromFile();
+
+    void PerformLevelCompletionChecks();
+
+    PaddleRemoteControlRocketProjectile* GetActiveRemoteControlRocket() const;
 };
 
 inline void GameModel::ResetScore() {

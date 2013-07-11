@@ -14,6 +14,7 @@
 #include "LevelPiece.h"
 #include "PortalBlock.h"
 #include "GameEventManager.h"
+#include "GameModel.h"
 
 const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS = 12;  // Length of time for the beam to be firing
 const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND         = 120; // Damage per second that the paddle laser does to blocks and stuff																															// NOTE: a typical block has about 100 life
@@ -45,12 +46,49 @@ int PaddleLaserBeam::GetNumBaseBeamSegments() const {
 	return 1;
 }
 
+bool PaddleLaserBeam::Tick(double dT, const GameModel* gameModel) {
+
+    // Don't tick the beam if the paddle isn't active in the game...
+    if (this->paddle->HasBeenPausedAndRemovedFromGame(gameModel->GetPauseState())) {
+        this->paddle->SetIsLaserBeamFiring(false);
+        this->TickAlpha();
+        return false;
+    }
+    else {
+        this->paddle->SetIsLaserBeamFiring(true);
+    }
+
+    return Beam::Tick(dT, gameModel);
+}
+
+void PaddleLaserBeam::TickAlpha() {
+    Beam::TickAlpha();
+    if (!this->paddle->GetIsPaddleCameraOn()) {
+        this->beamAlpha = std::min<float>(this->paddle->GetAlpha(), this->beamAlpha);
+    }
+}
+
 /**
  * Update the collisions for this beam - this will fire the current beam
  */
 void PaddleLaserBeam::UpdateCollisions(const GameModel* gameModel) {
 	assert(this->paddle != NULL);
     assert(gameModel != NULL);
+
+    // If the paddle is removed from the game then we don't do any updates...
+    if (this->paddle->HasBeenPausedAndRemovedFromGame(gameModel->GetPauseState())) {
+        
+        // Remove all of the beam parts, the beam is not active right now!
+        std::list<BeamSegment*> oldBeamSegments = this->beamParts;
+        this->CleanUpBeam(this->beamParts);
+        
+        if (this->BeamHasChanged(oldBeamSegments, this->beamParts)) {
+            // EVENT: Beam updated/changed
+            GameEventManager::Instance()->ActionBeamChanged(*this);
+        }
+
+        return;
+    }
 
 	// Create the very first beam part that shoots out of the paddle towards the level
 	const float INITIAL_BEAM_RADIUS  = this->beamAlpha * this->paddle->GetHalfFlatTopWidth()/2.0f;

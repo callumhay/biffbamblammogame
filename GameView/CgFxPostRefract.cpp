@@ -33,16 +33,16 @@ timer(0.0), scale(0.05f), freq(1.0f) {
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
 
 	// Transform parameters
-	this->worldITMatrixParam	= cgGetNamedEffectParameter(this->cgEffect, "WorldITXf");
-	this->wvpMatrixParam			= cgGetNamedEffectParameter(this->cgEffect, "WvpXf");
-	this->worldMatrixParam		= cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
-	this->viewInvMatrixParam	= cgGetNamedEffectParameter(this->cgEffect, "ViewIXf");
+	this->worldITMatrixParam  = cgGetNamedEffectParameter(this->cgEffect, "WorldITXf");
+	this->wvpMatrixParam      = cgGetNamedEffectParameter(this->cgEffect, "WvpXf");
+	this->worldMatrixParam    = cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
+	this->viewInvMatrixParam  = cgGetNamedEffectParameter(this->cgEffect, "ViewIXf");
 
 	// Refraction parameters
 	this->indexOfRefactionParam = cgGetNamedEffectParameter(this->cgEffect, "IndexOfRefraction");
-	this->warpAmountParam			  = cgGetNamedEffectParameter(this->cgEffect, "WarpAmount");
-	this->sceneWidthParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
-	this->sceneHeightParam			= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
+	this->warpAmountParam       = cgGetNamedEffectParameter(this->cgEffect, "WarpAmount");
+	this->sceneWidthParam       = cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
+	this->sceneHeightParam      = cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
 
 	// The rendered scene background texture
 	this->sceneSamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
@@ -50,9 +50,9 @@ timer(0.0), scale(0.05f), freq(1.0f) {
 	this->overlaySamplerParam = cgGetNamedEffectParameter(this->cgEffect, "OverlaySampler");
 	this->noiseSamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
 
-	this->noiseScaleParam				= cgGetNamedEffectParameter(this->cgEffect, "Scale");
-	this->noiseFreqParam				= cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->timerParam						= cgGetNamedEffectParameter(this->cgEffect, "Timer");
+	this->noiseScaleParam = cgGetNamedEffectParameter(this->cgEffect, "Scale");
+	this->noiseFreqParam  = cgGetNamedEffectParameter(this->cgEffect, "Freq");
+	this->timerParam      = cgGetNamedEffectParameter(this->cgEffect, "Timer");
 
 	debug_cg_state();
 }
@@ -61,6 +61,7 @@ CgFxPostRefract::~CgFxPostRefract() {
 }
 
 void CgFxPostRefract::SetupBeforePasses(const Camera& camera) {
+
 	// Transform setup
 	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);

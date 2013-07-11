@@ -258,24 +258,29 @@ bool MineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
         }
 
         // Check other projectiles
-        const std::list<Projectile*>& projectiles = model.GetActiveProjectiles();
-        for (std::list<Projectile*>::const_iterator iter = projectiles.begin(); iter != projectiles.end(); ++iter) {
-            const Projectile* projectile = *iter;
+        const GameModel::ProjectileMap& projectileMap = model.GetActiveProjectiles();
+        for (GameModel::ProjectileMapConstIter mapIter = projectileMap.begin(); mapIter != projectileMap.end(); ++mapIter) {
             
-            // Ignore other mines
-            if (projectile->GetType() == Projectile::PaddleMineBulletProjectile ||
-                projectile->GetType() == Projectile::MineTurretBulletProjectile) {
-                continue;
-            }
+            const GameModel::ProjectileList& currProjectiles = mapIter->second;
+            for (GameModel::ProjectileListConstIter iter = currProjectiles.begin(); iter != currProjectiles.end(); ++iter) {
 
-            // Ignore light beams / lasers
-            if (projectile->IsRefractableOrReflectable()) {
-                continue;
-            }
+                const Projectile* projectile = *iter;
+                
+                // Ignore other mines
+                if (projectile->GetType() == Projectile::PaddleMineBulletProjectile ||
+                    projectile->GetType() == Projectile::MineTurretBulletProjectile) {
+                    continue;
+                }
 
-            // Check for a collision with the projectile...
-            if (projectile->BuildBoundingLines().CollisionCheck(proximityBound)) {
-                this->BeginProximityExplosionCountdown();
+                // Ignore light beams / lasers
+                if (projectile->IsRefractableOrReflectable()) {
+                    continue;
+                }
+
+                // Check for a collision with the projectile...
+                if (projectile->BuildBoundingLines().CollisionCheck(proximityBound)) {
+                    this->BeginProximityExplosionCountdown();
+                }
             }
         }
     }

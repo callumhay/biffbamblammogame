@@ -86,7 +86,8 @@ public:
     virtual bool CanDestroyLevelPieces() const = 0;
 
 	virtual void UpdateCollisions(const GameModel* gameModel) = 0;
-	bool Tick(double dT);
+	virtual bool Tick(double dT, const GameModel* gameModel);
+    virtual void TickAlpha();
 
     float GetBeamAlpha() const { return this->beamAlpha; }
 

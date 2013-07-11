@@ -3382,10 +3382,15 @@ void GameESPAssets::RemoveAllProjectileEffects() {
  */
 void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 	assert(this->activeBeamEmitters.find(&beam) == this->activeBeamEmitters.end());
+    
+    this->activeBeamEmitters.erase(&beam);
+    if (beam.GetBeamParts().empty()) {
+        return;
+    }
 
 	std::list<ESPEmitter*> beamEmitters;
 
-	// The first laser has a cool blast for where it comes out of the paddle...
+	// The first laser has a blast for where it comes out of the paddle...
 	BeamSegment* startSegment = *beam.GetBeamParts().begin();
 	Point3D beamSegOrigin3D(startSegment->GetStartPoint());
 
@@ -3402,7 +3407,6 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
     this->AddTypicalBeamSegmentEffects(beam, beamEmitters);
 
 	// Add all the beams to the active beams, associated with the given beam
-	this->activeBeamEmitters.erase(&beam);
 	this->activeBeamEmitters.insert(std::make_pair(&beam, beamEmitters));
 }
 
@@ -6394,7 +6398,7 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
 /**
  * Draw particle effects associated with the paddle, which get drawn behind the paddle.
  */
-void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera) {
+void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	// Go through all the particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
 		iter != this->activePaddleEmitters.end();) {
@@ -6409,6 +6413,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera)
 		}
 		else {
 			// Not dead yet so we draw and tick
+            curr->SetParticleAlpha(ESPInterval(std::min<float>(paddle.GetAlpha(), curr->GetParticleAlpha().maxValue)));
 			curr->Draw(camera);
 			curr->Tick(dT);
             ++iter;
@@ -6454,8 +6459,9 @@ void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
  * Draw all the beams that are currently active in the game.
  */
 void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation) {
-	for (std::map<const Beam*, std::list<ESPEmitter*> >::iterator iter = this->activeBeamEmitters.begin();
-		iter != this->activeBeamEmitters.end(); ++iter) {
+	
+    for (std::map<const Beam*, std::list<ESPEmitter*> >::iterator iter = this->activeBeamEmitters.begin();
+		 iter != this->activeBeamEmitters.end(); ++iter) {
 
 		const Beam* beam = iter->first;
         UNUSED_VARIABLE(beam);

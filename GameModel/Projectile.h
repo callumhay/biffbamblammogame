@@ -96,7 +96,10 @@ public:
 	}
 	void SetVelocity(const Vector2D& velocity) { 
 		this->velocityMag = Vector2D::Magnitude(velocity);
-        assert(this->velocityMag > EPSILON);
+        if (this->velocityMag < EPSILON) {
+            return;
+        }
+        
         this->velocityDir = velocity / this->velocityMag;
         
 		// Set the right vector... (short cut which is a 90 degree rotation about the z axis)

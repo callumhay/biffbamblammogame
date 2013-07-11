@@ -1680,6 +1680,10 @@
 						RelativePath=".\GameView\PointsHUD.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameView\RemoteControlRocketHUD.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -1714,6 +1718,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\PointsHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\RemoteControlRocketHUD.cpp"
 						>
 					</File>
 				</Filter>

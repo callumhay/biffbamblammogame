@@ -45,10 +45,14 @@ public:
 	 */
 	inline void StickyPaddleGoo::Draw(const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, 
 									  const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
-		float paddleScaleFactor = p.GetPaddleScaleFactor();
-		glPushMatrix();
+		
+        float paddleScaleFactor = p.GetPaddleScaleFactor();
+        this->stickyGooMatEffect->SetAlpha(p.GetAlpha());	
+
+        glPushMatrix();
 		glRotatef(p.GetZRotation(), 0.0f, 0.0f, 1.0f);
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
+        glColor4f(1.0f, 1.0f, 1.0f, p.GetAlpha());
 
         if ((p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle) {
             this->paddleGooMesh->Draw(camera, this->invisibleEffect, keyLight, fillLight, ballLight);

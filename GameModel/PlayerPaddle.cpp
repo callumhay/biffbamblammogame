@@ -1614,10 +1614,9 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
                                   Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
 
-     //if (ball.IsLastThingCollidedWith(this)) {
-     //    ball.SetLastThingCollidedWith(NULL);
-     //    return false;
-     //}
+     if (ball.IsLastThingCollidedWith(this)) {
+         return false;
+     }
 
      // If the paddle has a shield around it do the collision with the shield
      if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
@@ -1685,18 +1684,10 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, co
             break;
         }
 
-        case Projectile::PaddleRemoteCtrlRocketBulletProjectile: {
-            assert(dynamic_cast<const PaddleRemoteControlRocketProjectile*>(&projectile) != NULL);
-
-            const PaddleRemoteControlRocketProjectile& remoteCtrlRocket = 
-                static_cast<const PaddleRemoteControlRocketProjectile&>(projectile);
-
-            // Special timer on remote control rockets to prevent initial collisions with the paddle...
-            if (!remoteCtrlRocket.GetArePaddleCollisionsDisabled()) {
-                return this->CollisionCheck(bounds, true);
-            }
-            break;
-        }
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
+            // Paddle shouldn't even be visible/ticking while a remote control rocket is active,
+            // there's no way it could collide with the paddle.
+            return false;
 
         default:
             return this->CollisionCheck(bounds, true);
@@ -1747,7 +1738,7 @@ bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile
 
 void PlayerPaddle::SetRemoveFromGameVisibility(double fadeOutTime) {
     // This will ensure that the paddle is immediately qualified as removed from the game...
-    this->SetAlpha(std::min<float>(this->GetAlpha(), 1.0f - EPSILON)); 
+    this->SetAlpha(std::min<float>(this->GetAlpha(), 1.0f - EPSILON));
     this->AnimateFade(true, fadeOutTime);
 }
 

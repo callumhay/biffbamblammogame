@@ -223,7 +223,9 @@ void Beam::DebugDraw() const {
  * Tick away at the life of this beam.
  * Returns: true if the beam has expired, false otherwise.
  */
-bool Beam::Tick(double dT) {
+bool Beam::Tick(double dT, const GameModel* gameModel) {
+    UNUSED_PARAMETER(gameModel);
+
 	if (this->currTimeElapsed >= this->totalLifeTime) {
 		return true;
 	}
@@ -236,15 +238,20 @@ bool Beam::Tick(double dT) {
         this->currTimeElapsed = std::min<float>(this->currTimeElapsed, this->totalLifeTime);
 	}
 
+    this->TickAlpha();
+
+	return false;
+}
+
+void Beam::TickAlpha() {
     if (this->currTimeElapsed < this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS) {
         this->beamAlpha = 1.0f;
     }
     else {
-        this->beamAlpha = NumberFuncs::LerpOverTime(this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS, this->totalLifeTime, 1.0f, 0.0f, this->currTimeElapsed);
+        this->beamAlpha = NumberFuncs::LerpOverTime(this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS, 
+            this->totalLifeTime, 1.0f, 0.0f, this->currTimeElapsed);
     }
     assert(this->beamAlpha >= 0.0f && this->beamAlpha <= 1.0f);
-
-	return false;
 }
 
 BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, LevelPiece* ignorePiece) :

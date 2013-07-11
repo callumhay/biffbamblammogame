@@ -533,7 +533,7 @@ public:
 	 * Event triggered when a rocket explodes. Only occurs once just as it explodes.
 	 * Arguements: rocket - The rocket do'n the explod'n.
 	 */
-    virtual void RocketExplodedEvent(const PaddleRocketProjectile& rocket) { UNUSED_PARAMETER(rocket); } 
+    virtual void RocketExplodedEvent(const RocketProjectile& rocket) { UNUSED_PARAMETER(rocket); } 
 
 	/**
 	 * Event triggered when a mine explodes. Only occurs once just as it explodes.
