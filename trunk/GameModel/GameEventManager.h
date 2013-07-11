@@ -120,7 +120,7 @@ public:
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);
-	void ActionRocketExploded(const PaddleRocketProjectile& rocket);
+	void ActionRocketExploded(const RocketProjectile& rocket);
     void ActionMineExploded(const MineProjectile& mine);
 
 	void ActionBeamSpawned(const Beam& beam);

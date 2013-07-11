@@ -15,23 +15,20 @@
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT = 1.5f;
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT  = 0.69f;
 
-// Amount of time that collisions are disabled between this rocket and the player paddle 
-// (to accommodate the time it takes for the rocket to take-off away from the paddle).
-const double PaddleRemoteControlRocketProjectile::PADDLE_COLLISIONS_DISABLED_TIME_IN_SECS = 1.5;
+const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_ACCELERATION       = 9.0f; 
+const float PaddleRemoteControlRocketProjectile::DECELLERATION_OF_APPLIED_ACCEL = 16.0f;
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(
     const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height) :
-RocketProjectile(spawnLoc, rocketVelDir, width, height), 
-paddleCollisionsDisabledTimer(PaddleRemoteControlRocketProjectile::PADDLE_COLLISIONS_DISABLED_TIME_IN_SECS) {
+RocketProjectile(spawnLoc, rocketVelDir, width, height), currAppliedAccelDir(0.0f, 0.0f), currAppliedAccelMag(0.0f) {
 }
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy) : 
-RocketProjectile(copy), paddleCollisionsDisabledTimer(copy.paddleCollisionsDisabledTimer) {
+RocketProjectile(copy), currAppliedAccelDir(copy.currAppliedAccelDir), currAppliedAccelMag(copy.currAppliedAccelMag) {
 }
 
 PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
 }
-
 
 /// <summary>
 /// Called by the GameModel when first setting up this projectile. Use this
@@ -63,14 +60,28 @@ void PaddleRemoteControlRocketProjectile::Teardown(GameModel& gameModel) {
     GameTransformMgr* transformMgr = gameModel.GetTransformInfo();
     assert(transformMgr != NULL);
     transformMgr->SetRemoteControlRocketCamera(false, NULL);
+
+    // If the rocket went out of bounds then blow it up...
+    if (gameModel.IsOutOfGameBounds(this->GetPosition())) {
+        GameLevel* currLevel = gameModel.GetCurrentLevel();
+        currLevel->RocketExplosionNoPieces(this);
+    }
 }
 
 void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& model) {
+    
+    // Update the acceleration/velocity/position of the rocket based on the current steering
+    if (this->GetVelocityMagnitude() >= 0.5f * this->GetMaxVelocityMagnitude()) {
+        this->SetVelocity(this->GetVelocity() + seconds * this->GetAppliedAcceleration());
+    }
+    
+    double dA = DECELLERATION_OF_APPLIED_ACCEL * seconds;
+    this->currAppliedAccelMag -= dA;
+    if (this->currAppliedAccelMag <= 0.0f) {
+        this->currAppliedAccelMag = 0.0f;
+        this->currAppliedAccelDir = Vector2D(0,0);
+    }
+
     RocketProjectile::Tick(seconds, model);
-
-    // Tick down the paddle collisions disabled timer (this is so the rocket doesn't collide with
-    // the paddle when it's initially taking off)
-    this->paddleCollisionsDisabledTimer = std::max<double>(0.0, this->paddleCollisionsDisabledTimer - seconds);
-
-
 }
+

@@ -187,7 +187,7 @@ public:
     void UpdateBoundsOnPieceAndSurroundingPieces(LevelPiece* piece);
 	
     LevelPiece* RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece);
-    void RocketExplosionNoPieces(const Projectile* rocket);
+    void RocketExplosionNoPieces(const RocketProjectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 
     LevelPiece* MineExplosion(GameModel* gameModel, const MineProjectile* mine, LevelPiece* hitPiece);

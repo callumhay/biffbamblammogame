@@ -480,7 +480,7 @@ void GameEventManager::ActionProjectileRemoved(const Projectile& projectile) {
 }
 
 // Action for when a rocket explodes
-void GameEventManager::ActionRocketExploded(const PaddleRocketProjectile& rocket) {
+void GameEventManager::ActionRocketExploded(const RocketProjectile& rocket) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
 		(*listenerIter)->RocketExplodedEvent(rocket);

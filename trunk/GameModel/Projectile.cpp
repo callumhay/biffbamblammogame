@@ -43,6 +43,9 @@ void Projectile::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel&
     // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
     // modify the velocity to make it move towards the paddle...
     const PlayerPaddle* paddle = model.GetPlayerPaddle();
+    if (paddle->HasBeenPausedAndRemovedFromGame(model.GetPauseState())) {
+        return;
+    }
     paddle->AugmentDirectionOnPaddleMagnet(seconds, degreesChangePerSec, this->position, this->velocityDir);
 }
 

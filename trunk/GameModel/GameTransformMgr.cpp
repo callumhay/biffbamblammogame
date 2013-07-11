@@ -364,7 +364,14 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
             this->GetRemoteCtrlRocketPositionAndFOV(*this->remoteControlRocketWithCamera, currLevel->GetLevelUnitWidth(), 
                 currLevel->GetLevelUnitHeight(), worldSpaceTranslation, this->cameraFOVAngle);
 
+            // Camera rotates with the rocket...
+            const Vector2D& rocketVelDir = this->remoteControlRocketWithCamera->GetVelocityDirection();
+            assert(!rocketVelDir.IsZero());
+            Vector3D worldSpaceRotation(0, 0, Trig::radiansToDegrees(atan2(rocketVelDir[1], rocketVelDir[0])) - 90);
+            worldSpaceRotation = this->GetGameTransform() * worldSpaceRotation;
+
             this->currCamOrientation.SetTranslation(worldSpaceTranslation);
+            this->currCamOrientation.SetRotation(worldSpaceRotation);
         }
         else {
             if (this->paddleWithCamera != NULL) {
@@ -1195,7 +1202,7 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
            rocketCamAnim.type == GameTransformMgr::FromRemoteCtrlRocketCamAnimation);
 
     // Make sure the game state is paused while we perform the animation...
-    gameModel.SetPause(GameModel::PauseState);
+    //gameModel.SetPause(GameModel::PauseState);
 
     // Clear any previous remote control rocket camera animations
     this->remoteControlRocketCamAnimations.clear();
@@ -1240,18 +1247,13 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
 
         // Add a camera FOV animation so that it's normal...
         AnimationMultiLerp<float> camFOVChangeAnim(&this->cameraFOVAngle);
-        camFOVChangeAnim.SetLerp(totalTimeToAnimate, Camera::FOV_ANGLE_IN_DEGS);
+        camFOVChangeAnim.SetLerp(totalTimeToAnimate, finalFOV);
         this->camFOVAnimations.clear();
         this->camFOVAnimations.push_back(camFOVChangeAnim);
 
-        // Fade out the paddle and balls since they will not be a part of the gameplay for as long as the
+        // Fade out the balls since they will not be a part of the gameplay for as long as the
         // remote control rocket is in play...
         const double fadeTime = totalTimeToAnimate - 0.01;
-
-        PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-        assert(paddle != NULL);
-        paddle->SetRemoveFromGameVisibility(fadeTime);
-        assert(paddle->HasBeenPausedAndRemovedFromGame(gameModel.GetPauseState()));
 
         const std::list<GameBall*>& balls = gameModel.GetGameBalls();
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
@@ -1275,6 +1277,8 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         Vector3D travelVec = this->storedCamOriBeforeRemoteControlRocketCam.GetTranslation() - this->currCamOrientation.GetTranslation();
         float distToTravel = travelVec.length();
         double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM;
+
+        // TODO: ADD MORE TIME ONCE THE CAMERA HAS RECOUPERATED, ALLOW THE PLAYER TO RE-ORIENT THEMSELVES!!!!
 
         toOriginalCamAnim.SetLerp(timeToAnimate, this->storedCamOriBeforeRemoteControlRocketCam);
         this->remoteControlRocketCamAnimations.push_back(toOriginalCamAnim);
@@ -1351,6 +1355,7 @@ bool GameTransformMgr::TickRemoteControlRocketCamAnimation(double dT, GameModel&
 
 void GameTransformMgr::FinishRemoteControlRocketCamAnimation(double dT, GameModel& gameModel) {
     UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(gameModel);
 
     // Grab the current transform animation information from the front of the queue
     TransformAnimation& rocketCamAnim = this->animationQueue.front();
@@ -1359,13 +1364,19 @@ void GameTransformMgr::FinishRemoteControlRocketCamAnimation(double dT, GameMode
 
     // Unpause the game state since the camera should now be either following the rocket or back
     // to its original state before the remote control rocket camera was activated
-    gameModel.UnsetPause(GameModel::PauseState);
+    //gameModel.UnsetPause(GameModel::PauseState);
 
     if (rocketCamAnim.type == GameTransformMgr::ToRemoteCtrlRocketCamAnimation) {
         // Grab the affected rocket and store it...
         assert(reinterpret_cast<PaddleRemoteControlRocketProjectile*>(rocketCamAnim.data) != NULL);
         PaddleRemoteControlRocketProjectile* remoteCtrlRocket = 
             static_cast<PaddleRemoteControlRocketProjectile*>(rocketCamAnim.data);
+
+        // Hide the paddle...
+        PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+        assert(paddle != NULL);
+        paddle->SetAlpha(0.0f);
+        assert(paddle->HasBeenPausedAndRemovedFromGame(gameModel.GetPauseState()));
 
         this->remoteControlRocketWithCamera = remoteCtrlRocket;
     }

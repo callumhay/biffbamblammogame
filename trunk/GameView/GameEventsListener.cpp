@@ -1155,7 +1155,7 @@ void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	this->display->GetAssets()->RemoveProjectile(projectile);
 }
 
-void GameEventsListener::RocketExplodedEvent(const PaddleRocketProjectile& rocket) {
+void GameEventsListener::RocketExplodedEvent(const RocketProjectile& rocket) {
 	this->display->GetAssets()->RocketExplosion(rocket, this->display->GetCamera());
 	debug_output("EVENT: Rocket exploded");
 }

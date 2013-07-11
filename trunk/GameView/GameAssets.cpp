@@ -24,6 +24,7 @@
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
+#include "RemoteControlRocketHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 #include "RocketMesh.h"
@@ -76,6 +77,7 @@ flashHUD(NULL),
 pointsHUD(NULL),
 boostHUD(NULL),
 ballReleaseHUD(NULL),
+remoteControlRocketHUD(NULL),
 
 ball(NULL), 
 spikeyBall(NULL),
@@ -130,6 +132,7 @@ magnetPaddleEffect(NULL)
     this->pointsHUD      = new PointsHUD();
     this->boostHUD       = new BallBoostHUD(screenHeight);
     this->ballReleaseHUD = new BallReleaseHUD();
+    this->remoteControlRocketHUD = new RemoteControlRocketHUD(*this);
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -211,6 +214,8 @@ GameAssets::~GameAssets() {
     this->boostHUD = NULL;
     delete this->ballReleaseHUD;
     this->ballReleaseHUD = NULL;
+    delete this->remoteControlRocketHUD;
+    this->remoteControlRocketHUD = NULL;
 }
 
 /**
@@ -574,7 +579,8 @@ void GameAssets::Tick(double dT) {
  * Draw the player paddle mesh with materials and in correct position.
  */
 void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) {
-	const Point2D& paddleCenter = p.GetCenterPosition();	
+	
+    const Point2D& paddleCenter = p.GetCenterPosition();	
 	float paddleScaleFactor = p.GetPaddleScaleFactor();
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
 	
@@ -591,17 +597,19 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
     CgFxEffectBase* paddleReplacementMat = NULL;
     
     glPushAttrib(GL_DEPTH_BUFFER_BIT);
+    if (paddleIsInvisible || p.GetAlpha() <= 0.0f) {
+        // Disable the depth draw, this will make sure the paddle doesn't get outlined
+        glDepthMask(GL_FALSE);
+    }
+
     if (paddleIsInvisible) {
         paddleReplacementMat = this->invisibleEffect;
         // Just tick the effects on the paddle, no drawing
         this->espAssets->TickButDontDrawBackgroundPaddleEffects(dT);
-
-        // Disable the depth draw, this will make sure the paddle doesn't get outlined
-        glDepthMask(GL_FALSE);
     }
     else {
 	    // Draw any effects on the paddle (e.g., item acquiring effects)
-	    this->espAssets->DrawBackgroundPaddleEffects(dT, camera);
+	    this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
     }
 
     if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::MagnetPaddle) == PlayerPaddle::MagnetPaddle) {
@@ -641,10 +649,10 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	// In the case of a laser bullet paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
-	if (!p.GetIsPaddleCameraOn()) {
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	if (!p.GetIsPaddleCameraOn() && p.GetAlpha() > 0.0f) {
+		glColor4f(1.0f, 1.0f, 1.0f, p.GetAlpha());
 
-        // Draw the various active attachements...
+        // Draw the various active attachments...
         if ((p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 			this->paddleLaserAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
@@ -674,7 +682,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
 	// Do nothing if we are in paddle camera mode
-	if (paddle->GetIsPaddleCameraOn()) {
+	if (paddle->GetIsPaddleCameraOn() || paddle->GetAlpha() <= 0.0f) {
 		return;
 	}
 	
@@ -809,6 +817,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	float quarterPaddleDepth = paddle->GetHalfDepthTotal() / 2.0f;
 
+    
 	glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
@@ -832,12 +841,22 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 
 	for (std::list<Beam*>::const_iterator beamIter = beams.begin(); beamIter != beams.end(); ++beamIter) {
 		const Beam* currentBeam = *beamIter;
-        paddleLaserBeamActive |= (currentBeam->GetType() == Beam::PaddleBeam);
+        currAlpha = currentBeam->GetBeamAlpha();
+
+        // Special cases for paddle laser beams -- if the paddle has been removed from the game then
+        // we don't want to draw its beams either
+        if (currentBeam->GetType() == Beam::PaddleBeam) {
+            if (paddle->HasBeenPausedAndRemovedFromGame(gameModel.GetPauseState())) {
+                continue;
+            }
+            else {
+                paddleLaserBeamActive = true;
+            }
+        }
         
         const Colour& beamColour = currentBeam->GetBeamColour();
         Colour beamCenterColour  = BRIGHT_BEAM_CENTER_MULTIPLER * beamColour;
-        currAlpha = currentBeam->GetBeamAlpha();
-
+        
 		const std::list<BeamSegment*>& beamSegments = currentBeam->GetBeamParts();
 		std::list<BeamSegment*>::const_iterator segmentIter = beamSegments.begin();
 		
@@ -846,7 +865,11 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 
 		for (; segmentIter != beamSegments.end(); ++segmentIter, ++segCounter) {
 
-			if (paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
+            // Don't show the first few segments of the beam if it's a paddle beam and the
+            // paddle camera item is active, otherwise it will fill the screen with beaminess
+            // and just be annoying
+            if (currentBeam->GetType() == Beam::PaddleBeam && 
+                paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
 				continue;
 			}
 
@@ -1180,13 +1203,21 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			// Notify assets of the rocket...
 			this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
 			break;
+
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
+            // Activate the remote control rocket HUD
+            this->remoteControlRocketHUD->Activate();
+
+            assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
+            // Notify assets of the rocket...
+            this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
+            break;
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile: {
@@ -1213,13 +1244,20 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 	switch (projectile.GetType()) {
 
 		case Projectile::PaddleRocketBulletProjectile:
-        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			this->rocketMesh->DeactivateRocket(static_cast<const RocketProjectile*>(&projectile));
 			break;
         
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
+            // Deactivate the rocket HUD
+            this->remoteControlRocketHUD->Deactivate();
+
+            assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
+            this->rocketMesh->DeactivateRocket(static_cast<const RocketProjectile*>(&projectile));
+            break;
+
         case Projectile::FireGlobProjectile:
             this->espAssets->AddFireGlobDestroyedEffect(projectile);
             break;
@@ -1443,6 +1481,7 @@ void GameAssets::ReinitializeAssets() {
     this->pointsHUD->Reinitialize();
     this->boostHUD->Reinitialize();
     this->ballReleaseHUD->Reinitialize();
+    this->remoteControlRocketHUD->Reinitialize();
 }
 
 void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem) {
@@ -1457,7 +1496,8 @@ void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const Gam
  * making pretty eye-candy-particles.
  */
 void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem& item) {
-	// First deal with any particle related effects
+	
+    // First deal with any particle related effects
 	this->espAssets->SetItemEffect(item, gameModel);
 	// Also make the FBO assets aware of a newly active effect
 	this->fboAssets->ActivateItemEffects(item);
@@ -1534,6 +1574,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			this->worldAssets->FadeBackground(true, 2.0f);
             break;
         }
+
+
 
 		case GameItem::ShieldPaddleItem: {
 

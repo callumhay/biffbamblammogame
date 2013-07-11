@@ -24,6 +24,7 @@
 #include "GameProgressIO.h"
 #include "SafetyNet.h"
 #include "PaddleMineProjectile.h"
+#include "PaddleRemoteControlRocketProjectile.h"
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
@@ -676,164 +677,168 @@ void GameModel::DoProjectileCollisions(double dT) {
                               p = NULL
 													 
 	// Grab a list of all paddle-related projectiles and test each one for collisions...
-	std::list<Projectile*>& gameProjectiles = this->GetActiveProjectiles();
 	bool destroyProjectile = false;
 	bool didCollide = false;
 	bool incIter = true;
 
     GameLevel* currLevel = this->GetCurrentLevel();
 
-	for (std::list<Projectile*>::iterator iter = gameProjectiles.begin(); iter != gameProjectiles.end();) {
-		Projectile* currProjectile = *iter;
-        Vector2D currProjectileVel = currProjectile->GetVelocity();
-		
-		// Grab bounding lines from the projectile to test for collision
-		BoundingLines projectileBoundingLines = currProjectile->BuildBoundingLines();
+	for (ProjectileMapIter mapIter = this->projectiles.begin(); mapIter != this->projectiles.end(); ++mapIter) {
+        ProjectileList& currProjectileList = mapIter->second;
 
-		// Check to see if the projectile collided with the player paddle
-		if (!this->playerPaddle->HasBeenPausedAndRemovedFromGame(this->pauseBitField) &&
-            this->playerPaddle->CollisionCheckWithProjectile(*currProjectile, projectileBoundingLines)) {
-			
-			this->CollisionOccurred(currProjectile, this->playerPaddle);
+        for (ProjectileListIter iter = currProjectileList.begin(); iter != currProjectileList.end();) {
 
-			// Destroy the projectile if necessary
-			destroyProjectile = this->playerPaddle->ProjectileIsDestroyedOnCollision(*currProjectile);
-			if (destroyProjectile) {
-				iter = gameProjectiles.erase(iter);
-				PROJECTILE_CLEANUP(currProjectile);
-				continue;
-			}
-			
-			this->playerPaddle->ModifyProjectileTrajectory(*currProjectile);
-			++iter;
-			continue;
-		}
+		    Projectile* currProjectile = *iter;
+            Vector2D currProjectileVel = currProjectile->GetVelocity();
+    		
+		    // Grab bounding lines from the projectile to test for collision
+		    BoundingLines projectileBoundingLines = currProjectile->BuildBoundingLines();
 
-		// Check to see if the projectile collided with a safety net (if one is active)
-        if (this->IsSafetyNetActive()) {
-            if (this->safetyNet->ProjectileCollisionCheck(projectileBoundingLines, dT, currProjectileVel)) {
-                
-                currProjectile->SafetyNetCollisionOccurred(this->safetyNet);
-                
-                // EVENT: The projectile was just destroyed by the safety net
-                GameEventManager::Instance()->ActionProjectileSafetyNetCollision(*currProjectile, *this->safetyNet);
+		    // Check to see if the projectile collided with the player paddle
+		    if (!this->playerPaddle->HasBeenPausedAndRemovedFromGame(this->pauseBitField) &&
+                this->playerPaddle->CollisionCheckWithProjectile(*currProjectile, projectileBoundingLines)) {
+    			
+			    this->CollisionOccurred(currProjectile, this->playerPaddle);
 
-                if (currProjectile->BlastsThroughSafetyNets()) {
-                    this->DestroySafetyNet();
-                    // EVENT: The projectile just destroyed the safety net
-                    GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currProjectile);
-                }
-
-                // Check to see if the projectile will be destroyed due to the collision...
-                if (currProjectile->IsDestroyedBySafetyNets()) {
-                    iter = gameProjectiles.erase(iter);
+			    // Destroy the projectile if necessary
+			    destroyProjectile = this->playerPaddle->ProjectileIsDestroyedOnCollision(*currProjectile);
+			    if (destroyProjectile) {
+				    iter = currProjectileList.erase(iter);
 				    PROJECTILE_CLEANUP(currProjectile);
 				    continue;
-                }
-
+			    }
+    			
+			    this->playerPaddle->ModifyProjectileTrajectory(*currProjectile);
 			    ++iter;
 			    continue;
 		    }
-        }
 
-        // Check if the projectile collided with any tesla lightning arcs...
-        if (currLevel->IsDestroyedByTelsaLightning(*currProjectile)) {
-
-            if (currLevel->TeslaLightningCollisionCheck(projectileBoundingLines)) {
-                
-                // In the special case of a rocket projectile we cause an explosion...
-                if (currProjectile->IsRocket()) {
-                    std::set<LevelPiece*> collisionPieces = 
-                        currLevel->GetLevelPieceCollisionCandidatesNoSort(currProjectile->GetPosition(), EPSILON);
-                    if (!collisionPieces.empty()) {
-                        assert(dynamic_cast<RocketProjectile*>(currProjectile) != NULL);
-                        currLevel->RocketExplosion(this, static_cast<RocketProjectile*>(currProjectile), *collisionPieces.begin());
-                    }
-                }
-                // In the other special case of a mine projectile we cause an explosion...
-                else if (currProjectile->GetType() == Projectile::PaddleMineBulletProjectile ||
-                         currProjectile->GetType() == Projectile::MineTurretBulletProjectile) {
-                    assert(dynamic_cast<MineProjectile*>(currProjectile) != NULL);
-                    currLevel->MineExplosion(this, static_cast<MineProjectile*>(currProjectile));
-                }
-
-			    // Dispose of the projectile...
-                iter = gameProjectiles.erase(iter);
-                PROJECTILE_CLEANUP(currProjectile);
-                continue;    
-            }
-        }
-
-        // Check to see if the projectile collided with a boss
-        if (currLevel->GetHasBoss()) {
-            Boss* boss = currLevel->GetBoss();
-            if (!boss->ProjectilePassesThrough(currProjectile)) {
-                BossBodyPart* hitBodyPart = boss->CollisionCheck(projectileBoundingLines, dT, currProjectileVel);
-                if (hitBodyPart != NULL) {
-
-                    this->CollisionOccurred(currProjectile, boss, hitBodyPart);
+		    // Check to see if the projectile collided with a safety net (if one is active)
+            if (this->IsSafetyNetActive()) {
+                if (this->safetyNet->ProjectileCollisionCheck(projectileBoundingLines, dT, currProjectileVel)) {
                     
-                    if (boss->ProjectileIsDestroyedOnCollision(currProjectile, hitBodyPart)) {
-                        // Dispose of the projectile...
-                        iter = gameProjectiles.erase(iter);
-                        PROJECTILE_CLEANUP(currProjectile);
-                        continue;  
+                    currProjectile->SafetyNetCollisionOccurred(this->safetyNet);
+                    
+                    // EVENT: The projectile was just destroyed by the safety net
+                    GameEventManager::Instance()->ActionProjectileSafetyNetCollision(*currProjectile, *this->safetyNet);
+
+                    if (currProjectile->BlastsThroughSafetyNets()) {
+                        this->DestroySafetyNet();
+                        // EVENT: The projectile just destroyed the safety net
+                        GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currProjectile);
+                    }
+
+                    // Check to see if the projectile will be destroyed due to the collision...
+                    if (currProjectile->IsDestroyedBySafetyNets()) {
+                        iter = currProjectileList.erase(iter);
+				        PROJECTILE_CLEANUP(currProjectile);
+				        continue;
+                    }
+
+			        ++iter;
+			        continue;
+		        }
+            }
+
+            // Check if the projectile collided with any Tesla lightning arcs...
+            if (currLevel->IsDestroyedByTelsaLightning(*currProjectile)) {
+
+                if (currLevel->TeslaLightningCollisionCheck(projectileBoundingLines)) {
+                    
+                    // In the special case of a rocket projectile we cause an explosion...
+                    if (currProjectile->IsRocket()) {
+                        std::set<LevelPiece*> collisionPieces = 
+                            currLevel->GetLevelPieceCollisionCandidatesNoSort(currProjectile->GetPosition(), EPSILON);
+                        if (!collisionPieces.empty()) {
+                            assert(dynamic_cast<RocketProjectile*>(currProjectile) != NULL);
+                            currLevel->RocketExplosion(this, static_cast<RocketProjectile*>(currProjectile), *collisionPieces.begin());
+                        }
+                    }
+                    // In the other special case of a mine projectile we cause an explosion...
+                    else if (currProjectile->GetType() == Projectile::PaddleMineBulletProjectile ||
+                             currProjectile->GetType() == Projectile::MineTurretBulletProjectile) {
+                        assert(dynamic_cast<MineProjectile*>(currProjectile) != NULL);
+                        currLevel->MineExplosion(this, static_cast<MineProjectile*>(currProjectile));
+                    }
+
+			        // Dispose of the projectile...
+                    iter = currProjectileList.erase(iter);
+                    PROJECTILE_CLEANUP(currProjectile);
+                    continue;    
+                }
+            }
+
+            // Check to see if the projectile collided with a boss
+            if (currLevel->GetHasBoss()) {
+                Boss* boss = currLevel->GetBoss();
+                if (!boss->ProjectilePassesThrough(currProjectile)) {
+                    BossBodyPart* hitBodyPart = boss->CollisionCheck(projectileBoundingLines, dT, currProjectileVel);
+                    if (hitBodyPart != NULL) {
+
+                        this->CollisionOccurred(currProjectile, boss, hitBodyPart);
+                        
+                        if (boss->ProjectileIsDestroyedOnCollision(currProjectile, hitBodyPart)) {
+                            // Dispose of the projectile...
+                            iter = currProjectileList.erase(iter);
+                            PROJECTILE_CLEANUP(currProjectile);
+                            continue;  
+                        }
                     }
                 }
             }
+
+            incIter = true;	// Keep track of whether we need to increment the iterator or not
+
+            // Find the any level pieces that the current projectile may have collided with and test for collision
+            std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(
+                dT, currProjectile->GetPosition(), projectileBoundingLines, currProjectile->GetVelocityMagnitude());
+            std::set<LevelPiece*> alreadyCollidedWithPieces;
+
+		    for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
+			    LevelPiece *currPiece = *pieceIter;
+    			
+			    // Test for a collision between the projectile and current level piece
+			    didCollide = currPiece->CollisionCheck(projectileBoundingLines, dT, currProjectileVel) && 
+                    alreadyCollidedWithPieces.find(currPiece) == alreadyCollidedWithPieces.end();
+			    if (didCollide) {
+
+				    // WARNING/IMPORTANT!!!! This needs to be before the call to CollisionOccurred or else the
+                    // currPiece may already be destroyed.
+				    destroyProjectile = currPiece->ProjectileIsDestroyedOnCollision(currProjectile);
+
+                    this->CollisionOccurred(currProjectile, currPiece);	
+
+				    // Check to see if the collision is supposed to destroy the projectile
+				    if (destroyProjectile) {
+					    // Dispose of the projectile...
+					    iter = currProjectileList.erase(iter);
+					    PROJECTILE_CLEANUP(currProjectile);
+					    incIter = false;
+                        break;
+				    }
+                    else {
+                        // NOTE: We need to be careful since some blocks may no longer exist after a collision at this
+                        // point so we re-populate the set of pieces to check and keep track of the ones we've already collided with
+                        collisionPieces = currLevel->GetLevelPieceCollisionCandidates(
+                            dT, currProjectile->GetPosition(), projectileBoundingLines, currProjectile->GetVelocityMagnitude());
+                        pieceIter = collisionPieces.begin();
+                    }
+			    }
+                alreadyCollidedWithPieces.insert(currPiece);
+		    }
+
+            // Lastly we perform a modify level update for the projectile - certain projectiles can act
+            // 'intelligently' based on the level state and cause alteration to it as well
+            if (currProjectile != NULL && currProjectile->ModifyLevelUpdate(dT, *this)) {
+                iter = currProjectileList.erase(iter);
+		        PROJECTILE_CLEANUP(currProjectile);
+		        continue;
+            }
+
+		    if (incIter) {
+			    ++iter;
+		    }
         }
-
-        incIter = true;	// Keep track of whether we need to increment the iterator or not
-
-        // Find the any level pieces that the current projectile may have collided with and test for collision
-        std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(
-            dT, currProjectile->GetPosition(), projectileBoundingLines, currProjectile->GetVelocityMagnitude());
-        std::set<LevelPiece*> alreadyCollidedWithPieces;
-
-		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
-			LevelPiece *currPiece = *pieceIter;
-			
-			// Test for a collision between the projectile and current level piece
-			didCollide = currPiece->CollisionCheck(projectileBoundingLines, dT, currProjectileVel) && 
-                alreadyCollidedWithPieces.find(currPiece) == alreadyCollidedWithPieces.end();
-			if (didCollide) {
-
-				// WARNING/IMPORTANT!!!! This needs to be before the call to CollisionOccurred or else the
-                // currPiece may already be destroyed.
-				destroyProjectile = currPiece->ProjectileIsDestroyedOnCollision(currProjectile);
-
-                this->CollisionOccurred(currProjectile, currPiece);	
-
-				// Check to see if the collision is supposed to destroy the projectile
-				if (destroyProjectile) {
-					// Dispose of the projectile...
-					iter = gameProjectiles.erase(iter);
-					PROJECTILE_CLEANUP(currProjectile);
-					incIter = false;
-                    break;
-				}
-                else {
-                    // NOTE: We need to be careful since some blocks may no longer exist after a collision at this
-                    // point so we re-populate the set of pieces to check and keep track of the ones we've already collided with
-                    collisionPieces = currLevel->GetLevelPieceCollisionCandidates(
-                        dT, currProjectile->GetPosition(), projectileBoundingLines, currProjectile->GetVelocityMagnitude());
-                    pieceIter = collisionPieces.begin();
-                }
-			}
-            alreadyCollidedWithPieces.insert(currPiece);
-		}
-
-        // Lastly we perform a modify level update for the projectile - certain projectiles can act
-        // 'intelligently' based on the level state and cause alteration to it as well
-        if (currProjectile != NULL && currProjectile->ModifyLevelUpdate(dT, *this)) {
-            iter = gameProjectiles.erase(iter);
-		    PROJECTILE_CLEANUP(currProjectile);
-		    continue;
-        }
-
-		if (incIter) {
-			++iter;
-		}
 	}
 
 #undef PROJECTILE_CLEANUP
@@ -925,25 +930,30 @@ void GameModel::UpdateActiveItemDrops(double seconds) {
  */
 void GameModel::UpdateActiveProjectiles(double seconds) {
 	// Tick all the active projectiles and check for ones which are out of bounds
-	std::list<Projectile*>& currProjectiles = this->GetActiveProjectiles();
-	
-	for (std::list<Projectile*>::iterator iter = currProjectiles.begin(); iter != currProjectiles.end();) {
-		Projectile* currProjectile = *iter;
-		currProjectile->Tick(seconds, *this);
+	for (ProjectileMapIter mapIter = this->projectiles.begin(); mapIter != this->projectiles.end(); ++mapIter) {
+		
+        ProjectileList& currProjectiles = mapIter->second;
+        for (ProjectileListIter iter = currProjectiles.begin(); iter != currProjectiles.end();) {
 
-		// If the projectile is out of game bounds, destroy it
-		if (this->IsOutOfGameBounds(currProjectile->GetPosition())) {
-			iter = currProjectiles.erase(iter);
+            Projectile* currProjectile = *iter;
+		    currProjectile->Tick(seconds, *this);
 
-			// EVENT: Projectile is being removed...
-			GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
+		    // If the projectile is out of game bounds, destroy it
+		    if (this->IsOutOfGameBounds(currProjectile->GetPosition())) {
 
-			delete currProjectile;
-			currProjectile = NULL;
-		}
-		else {
-			++iter;
-		}
+			    iter = currProjectiles.erase(iter);
+                currProjectile->Teardown(*this);
+
+			    // EVENT: Projectile is being removed...
+			    GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
+
+			    delete currProjectile;
+			    currProjectile = NULL;
+		    }
+		    else {
+			    ++iter;
+		    }
+        }
 	}
 
 }
@@ -991,7 +1001,7 @@ void GameModel::UpdateActiveBeams(double seconds) {
         }
 
 		// Tick the beam, check for its death and clean up if necessary
-		if (currentBeam->Tick(seconds)) {
+		if (currentBeam->Tick(seconds, this)) {
 			beamIter = activeBeams.erase(beamIter);
 
 			// EVENT: Beam removed...
@@ -1124,17 +1134,20 @@ void GameModel::IncrementNumAcquiredItems(const GameItem* item) {
  */
 void GameModel::ClearProjectiles() {
     
-	for (std::list<Projectile*>::iterator iter = this->projectiles.begin();
-         iter != this->projectiles.end(); ++iter) {
+	for (ProjectileMapIter mapIter = this->projectiles.begin(); mapIter != this->projectiles.end(); ++mapIter) {
+        
+        ProjectileList& currProjectiles = mapIter->second;
+        for (ProjectileListIter listIter = currProjectiles.begin(); listIter != currProjectiles.end(); ++listIter) {
 
-		Projectile* currProjectile = *iter;
-		currProjectile->Teardown(*this);
+		    Projectile* currProjectile = *listIter;
+		    currProjectile->Teardown(*this);
 
-        // EVENT: Projectile removed from the game
-		GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
+            // EVENT: Projectile removed from the game
+		    GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
 
-		delete currProjectile;
-		currProjectile = NULL;
+		    delete currProjectile;
+		    currProjectile = NULL;
+        }
 	}
 	this->projectiles.clear();
 }
@@ -1367,7 +1380,7 @@ void GameModel::AddProjectile(Projectile* projectile) {
 	assert(projectile != NULL);
 
 	// Add it to the list of in-game projectiles
-	this->projectiles.push_back(projectile);
+    this->projectiles[projectile->GetType()].push_back(projectile);
     
     // Call the setup function so the projectile can do some setup if need be
     projectile->Setup(*this);
@@ -1536,6 +1549,23 @@ void GameModel::AddPercentageToBoostMeter(double percent) {
     }
 }
 
+PaddleRemoteControlRocketProjectile* GameModel::GetActiveRemoteControlRocket() const {
+
+    ProjectileMapConstIter findIter = this->projectiles.find(Projectile::PaddleRemoteCtrlRocketBulletProjectile);
+
+    if (findIter != this->projectiles.end()) {
+        const GameModel::ProjectileList& remoteCtrlRocketList = findIter->second;
+        if (!remoteCtrlRocketList.empty()) {
+            // A remote control rocket is active!
+            assert(remoteCtrlRocketList.size() == 1); // There should only, at most, be one remote control rocket active at a time!
+
+            assert(dynamic_cast<PaddleRemoteControlRocketProjectile*>(*remoteCtrlRocketList.begin()) != NULL);
+            return static_cast<PaddleRemoteControlRocketProjectile*>(*remoteCtrlRocketList.begin());
+        }
+    }
+
+    return NULL;
+}
 
 #ifdef _DEBUG
 void GameModel::DropItem(GameItem::ItemType itemType) {

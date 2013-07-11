@@ -17,6 +17,7 @@
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
+#include "RemoteControlRocketHUD.h"
 #include "CgFxCelOutlines.h"
 
 #include "../BlammoEngine/Camera.h"
@@ -366,7 +367,11 @@ void InGameRenderPipeline::RenderHUD(double dT) {
     BallReleaseHUD* ballReleaseHUD = gameAssets->GetBallReleaseHUD();
     ballReleaseHUD->Draw(dT, camera, *gameModel);
 
-    // Draw the timers that are currently in existance
+    // Draw the remote control rocket HUD display
+    RemoteControlRocketHUD* rocketHUD = gameAssets->GetRemoteControlRocketHUD();
+    rocketHUD->Draw(dT, camera);
+
+    // Draw the timers that are currently in existence
 	gameAssets->DrawTimers(dT, camera);
 
 	// Draw any HUD special elements based on currently active items, etc.

@@ -22,7 +22,7 @@ CgFxStickyPaddle::CgFxStickyPaddle(MaterialProperties* properties) :
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_STICKYPADDLE_SHADER, properties),
 timerParam(NULL), displacementParam(NULL), speedParam(NULL), waveScaleParam(NULL), refractScaleParam(NULL),
 sceneWidthParam(NULL), sceneHeightParam(NULL), sceneSamplerParam(NULL),
-timer(0.0f), displacement(0.1f), speed(1.6f), waveScale(3.0f), refractScale(10.0f), noiseScale(3.0f), 
+timer(0.0f), displacement(0.1f), speed(1.6f), waveScale(3.0f), refractScale(10.0f), noiseScale(3.0f), alpha(1.0f),
 sceneTex(NULL) {
 
 	assert(properties->materialType == MaterialProperties::MATERIAL_STICKYGOO_TYPE);
@@ -33,16 +33,16 @@ sceneTex(NULL) {
 	assert(this->currTechnique != NULL);
 	
 	// Initialize all Cg parameters specific to this shader effect
-	this->timerParam					= cgGetNamedEffectParameter(this->cgEffect, "Timer");
-	this->displacementParam		= cgGetNamedEffectParameter(this->cgEffect, "Displacement");
-	this->speedParam					= cgGetNamedEffectParameter(this->cgEffect, "Speed");
-	this->waveScaleParam			= cgGetNamedEffectParameter(this->cgEffect, "WaveScale");
-	this->refractScaleParam		= cgGetNamedEffectParameter(this->cgEffect, "RefractScale");
-	this->noiseScaleParam			= cgGetNamedEffectParameter(this->cgEffect, "NoiseScale");
-	this->sceneWidthParam			= cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
-	this->sceneHeightParam		= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
-
-	this->sceneSamplerParam		= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->timerParam           = cgGetNamedEffectParameter(this->cgEffect, "Timer");
+	this->displacementParam    = cgGetNamedEffectParameter(this->cgEffect, "Displacement");
+	this->speedParam           = cgGetNamedEffectParameter(this->cgEffect, "Speed");
+	this->waveScaleParam       = cgGetNamedEffectParameter(this->cgEffect, "WaveScale");
+	this->refractScaleParam    = cgGetNamedEffectParameter(this->cgEffect, "RefractScale");
+	this->noiseScaleParam      = cgGetNamedEffectParameter(this->cgEffect, "NoiseScale");
+	this->sceneWidthParam      = cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
+	this->sceneHeightParam     = cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
+    this->alphaMultiplierParam = cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
+	this->sceneSamplerParam	   = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
 	
 	debug_cg_state();
 }
@@ -61,6 +61,7 @@ void CgFxStickyPaddle::SetupBeforePasses(const Camera& camera) {
 	cgGLSetParameter1f(this->waveScaleParam, this->waveScale);
 	cgGLSetParameter1f(this->refractScaleParam, this->refractScale);
 	cgGLSetParameter1f(this->noiseScaleParam, this->noiseScale);
+    cgGLSetParameter1f(this->alphaMultiplierParam, this->alpha);
 
 	// Set the scene texture
 	assert(this->sceneTex != NULL);

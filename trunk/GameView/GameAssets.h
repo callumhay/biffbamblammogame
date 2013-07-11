@@ -50,6 +50,7 @@ class FlashHUD;
 class PointsHUD;
 class BallBoostHUD;
 class BallReleaseHUD;
+class RemoteControlRocketHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 class RocketMesh;
@@ -166,6 +167,9 @@ public:
     BallReleaseHUD* GetBallReleaseHUD() const {
         return this->ballReleaseHUD;
     }
+    RemoteControlRocketHUD* GetRemoteControlRocketHUD() const {
+        return this->remoteControlRocketHUD;
+    }
 
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectile(const Projectile& projectile);
@@ -195,6 +199,7 @@ private:
     PointsHUD* pointsHUD;
     BallBoostHUD* boostHUD;
     BallReleaseHUD* ballReleaseHUD;
+    RemoteControlRocketHUD* remoteControlRocketHUD;
 
 	// Level-related meshes
 	LevelMesh* currentLevelMesh;

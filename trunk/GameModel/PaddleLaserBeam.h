@@ -22,6 +22,9 @@ public:
 	PaddleLaserBeam(PlayerPaddle* paddle, const GameModel* gameModel);
 	~PaddleLaserBeam();
 	
+    bool Tick(double dT, const GameModel* gameModel);
+    void TickAlpha();
+
     Beam::BeamType GetType() const { return Beam::PaddleBeam; }
     bool CanDestroyLevelPieces() const { return true; }
     

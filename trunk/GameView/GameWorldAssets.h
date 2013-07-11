@@ -65,7 +65,7 @@ public:
                     const BasicPointLight& ballLight) const {
 
 		const ColourRGBA& paddleColour = p.GetColour();
-		if (paddleColour.A() < EPSILON) {
+		if (paddleColour.A() <= 0.0f) {
 			return;
 		}
 

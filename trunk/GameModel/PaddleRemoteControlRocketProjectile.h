@@ -53,17 +53,34 @@ public:
     float GetDefaultHeight() const { return PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT; }
     float GetDefaultWidth() const  { return PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT;  }
 
-    bool GetArePaddleCollisionsDisabled() const {
-        return this->paddleCollisionsDisabledTimer >= 0.0;
-    }
-    
-    //enum RocketSteering { LeftRocketSteering = -1, NoRocketSteering = 0, RightRocketSteering = 1};
-    //void ControlRocketSteering(const RocketSteering& steering, float magnitudePercent);
+    enum RocketSteering { LeftRocketSteering = -1, NoRocketSteering = 0, RightRocketSteering = 1};
+    void ControlRocketSteering(const RocketSteering& steering, float magnitudePercent);
 
 private:
-    static const double PADDLE_COLLISIONS_DISABLED_TIME_IN_SECS;
-    double paddleCollisionsDisabledTimer;
+    static const float MAX_APPLIED_ACCELERATION;
+    static const float DECELLERATION_OF_APPLIED_ACCEL;
+    
+    //RocketSteering lastSteeringDir;
+    Vector2D currAppliedAccelDir;
+    float currAppliedAccelMag;
 
+    Vector2D GetAppliedAcceleration() const { return this->currAppliedAccelMag * this->currAppliedAccelDir; }
+    void SetAppliedAcceleration(const Vector2D& accel);
 };
+
+inline void PaddleRemoteControlRocketProjectile::ControlRocketSteering(const RocketSteering& steering,
+                                                                       float magnitudePercent) {
+    this->SetAppliedAcceleration(static_cast<int>(steering) * magnitudePercent * MAX_APPLIED_ACCELERATION * this->GetRightVectorDirection());
+}
+
+inline void PaddleRemoteControlRocketProjectile::SetAppliedAcceleration(const Vector2D& accel) {
+    this->currAppliedAccelMag = accel.Magnitude();
+    if (this->currAppliedAccelMag > EPSILON) {
+        this->currAppliedAccelDir = accel / this->currAppliedAccelMag;
+    }
+    else {
+        this->currAppliedAccelDir = Vector2D(0,0);
+    }
+}
 
 #endif // __PADDLEREMOTECONTROLROCKETPROJECTILE_H__

@@ -90,7 +90,7 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
         glTranslatef(paddleCenter[0], paddleCenter[1] + paddle.GetHalfHeight() + 0.5f * rocketHeight, 0.0f);
         glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
 
-        this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0));
+        this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
         this->rocketGlowEmitter->Draw(camera);
 
         // Specifics for drawing the particular type of rocket...
@@ -127,14 +127,22 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 			// Grab positioning / orienting values from the rocket projectile 
 			// so we know where/how to draw the rocket
 			currYRotation = rocketProjectile->GetYRotation();
-			const Vector2D& rocketDir = rocketProjectile->GetVelocityDirection();
-			currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
+            const Vector2D& rocketDir = rocketProjectile->GetVelocityDirection();
+            currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
+
 			const Point2D& rocketPos = rocketProjectile->GetPosition();
 
 			glPushMatrix();
 			glTranslatef(rocketPos[0], rocketPos[1], rocketProjectile->GetZOffset());
 
-			this->rocketGlowEmitter->SetParticleRotation(ESPInterval(-currZRotation));
+            // Special case for the remote control rocket, since the camera rotates with it we
+            // don't need to rotate the glow effect on it
+            if (rocketProjectile->GetType() == Projectile::PaddleRemoteCtrlRocketBulletProjectile) {
+			    this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
+            }
+            else {
+                this->rocketGlowEmitter->SetParticleRotation(ESPInterval(-currZRotation));
+            }
 
             float scaleFactor = rocketProjectile->GetVisualScaleFactor();
             this->rocketGlowEmitter->SetParticleSize(
@@ -142,7 +150,7 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
                 ESPInterval(1.6f*rocketProjectile->GetHeight()));
 
 			this->rocketGlowEmitter->Draw(camera);
-
+            
 			// The rocket may not always be firing upwards, we need to rotate it to suit
 			// its current direction, we also need to spin it on that axis
 			glMultMatrixf(Matrix4x4::rotationMatrix(Trig::degreesToRadians(currYRotation), Vector3D(rocketDir, 0.0f)).begin());

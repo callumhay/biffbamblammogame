@@ -90,7 +90,7 @@ public:
 
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
-	void RocketExplodedEvent(const PaddleRocketProjectile& rocket);
+	void RocketExplodedEvent(const RocketProjectile& rocket);
     void MineExplodedEvent(const MineProjectile& mine);
 	void BeamSpawnedEvent(const Beam& beam);
 	void BeamChangedEvent(const Beam& beam);
