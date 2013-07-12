@@ -54,7 +54,7 @@ public:
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
         glColor4f(1.0f, 1.0f, 1.0f, p.GetAlpha());
 
-        if ((p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle) {
+        if (p.HasPaddleType(PlayerPaddle::InvisiPaddle)) {
             this->paddleGooMesh->Draw(camera, this->invisibleEffect, keyLight, fillLight, ballLight);
         }
         else {

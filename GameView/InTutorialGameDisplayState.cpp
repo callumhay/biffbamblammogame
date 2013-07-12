@@ -23,7 +23,7 @@
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
 DisplayState(display), renderPipeline(display), beforeTutorialDifficulty(display->GetCachedDifficulty()),
-tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD() {
+tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD(BallBoostModel::GetMaxBulletTimeDuration()) {
 
     GameModel* model = this->display->GetModel();
     assert(model != NULL);
@@ -105,7 +105,13 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
         hint->Tick(actualDt);
     }
 
-    this->boostCountdownHUD.Draw(camera, *this->display->GetModel(), actualDt);
+    const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
+    if (boostModel != NULL && boostModel->GetBulletTimeState() == BallBoostModel::BulletTime) {
+        this->boostCountdownHUD.Draw(camera, actualDt, boostModel->GetTotalBulletTimeElapsed());
+    }
+    else {
+        this->boostCountdownHUD.Reset();
+    }
 
     //glPopMatrix();
 

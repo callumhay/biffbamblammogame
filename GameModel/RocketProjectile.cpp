@@ -79,13 +79,15 @@ BoundingLines RocketProjectile::BuildBoundingLines() const {
 void RocketProjectile::Tick(double seconds, const GameModel& model) {
 
 	if (this->cannonBlock != NULL) {
+
 		// 'Tick' the cannon to spin the rocket around inside it... eventually the function will say
 		// it has fired the rocket
 		bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);
-		if (cannonHasFired) {
+        this->velocityDir = this->cannonBlock->GetCurrentCannonDirection();
+		
+        if (cannonHasFired) {
 			// Set the velocity in the direction the cannon has fired in
             this->velocityMag = 0.25f * this->GetMaxVelocityMagnitude();
-			this->velocityDir = this->cannonBlock->GetCurrentCannonDirection();
 			this->position = this->position + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
 
 			// EVENT: Rocket has officially been fired from the cannon

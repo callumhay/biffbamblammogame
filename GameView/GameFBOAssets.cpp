@@ -248,7 +248,8 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	if (paddle->GetIsPaddleCameraOn()) {
 		
-		if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
+
 			// We take inverse of the alpha of the paddle to fade the sticky goo effect properly while in paddle cam mode
 			float stickyGooAlpha = 1.0f - paddle->GetColour().A();
 			this->stickyPaddleCamEffect->SetFadeAlpha(stickyGooAlpha);
@@ -261,7 +262,8 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			outputFBO = swapFBO;
 		}
 		
-		if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		if (paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
+
 			float shieldAlpha = 1.0f - paddle->GetColour().A();
 			this->shieldPaddleCamEffect->SetFadeAlpha(shieldAlpha);
 			this->shieldPaddleCamEffect->SetInputFBO(inputFBO);

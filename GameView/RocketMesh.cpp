@@ -18,6 +18,7 @@
 #include "../ESPEngine/ESPPointEmitter.h"
 
 #include "../GameModel/PaddleRocketProjectile.h"
+#include "../GameModel/PaddleRemoteControlRocketProjectile.h"
 #include "../GameModel/PlayerPaddle.h"
 
 RocketMesh::RocketMesh() : 
@@ -72,7 +73,7 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
                       const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
                       const BasicPointLight& ballLight) {
 
-    bool rocketIsOnPaddle = (paddle.GetPaddleType() & (PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) != 0x0;
+    bool rocketIsOnPaddle = paddle.HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle);
     if (rocketIsOnPaddle || !this->rocketProjectiles.empty()) {
 	    this->rocketGlowEmitter->Tick(dT);
     }
@@ -94,11 +95,11 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
         this->rocketGlowEmitter->Draw(camera);
 
         // Specifics for drawing the particular type of rocket...
-        if ((paddle.GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+        if (paddle.HasPaddleType(PlayerPaddle::RocketPaddle)) {
             this->paddleRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
         }
         else {
-            assert((paddle.GetPaddleType() & PlayerPaddle::RemoteControlRocketPaddle) == PlayerPaddle::RemoteControlRocketPaddle);
+            assert(paddle.HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle));
             this->paddleRemoteControlRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
         }
          
@@ -122,63 +123,101 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 		if (!rocketProjectile->IsLoadedInCannonBlock()) {
 
 			glPushAttrib(GL_CURRENT_BIT);
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-			// Grab positioning / orienting values from the rocket projectile 
-			// so we know where/how to draw the rocket
-			currYRotation = rocketProjectile->GetYRotation();
-            const Vector2D& rocketDir = rocketProjectile->GetVelocityDirection();
-            currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
-
-			const Point2D& rocketPos = rocketProjectile->GetPosition();
-
-			glPushMatrix();
-			glTranslatef(rocketPos[0], rocketPos[1], rocketProjectile->GetZOffset());
-
-            // Special case for the remote control rocket, since the camera rotates with it we
-            // don't need to rotate the glow effect on it
-            if (rocketProjectile->GetType() == Projectile::PaddleRemoteCtrlRocketBulletProjectile) {
-			    this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
-            }
-            else {
-                this->rocketGlowEmitter->SetParticleRotation(ESPInterval(-currZRotation));
-            }
-
-            float scaleFactor = rocketProjectile->GetVisualScaleFactor();
-            this->rocketGlowEmitter->SetParticleSize(
-                ESPInterval(2.0f*rocketProjectile->GetWidth()),
-                ESPInterval(1.6f*rocketProjectile->GetHeight()));
-
-			this->rocketGlowEmitter->Draw(camera);
-            
-			// The rocket may not always be firing upwards, we need to rotate it to suit
-			// its current direction, we also need to spin it on that axis
-			glMultMatrixf(Matrix4x4::rotationMatrix(Trig::degreesToRadians(currYRotation), Vector3D(rocketDir, 0.0f)).begin());
-			glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
-			glScalef(scaleFactor, scaleFactor, scaleFactor);
-            
             switch (rocketProjectile->GetType()) {
                 case Projectile::PaddleRocketBulletProjectile:
-			        this->paddleRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+			        this->DrawBasicRocket(rocketProjectile, this->paddleRocketMesh, camera, keyLight, fillLight, ballLight);
                     break;
                 case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
-                    this->paddleRemoteControlRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+                    assert(dynamic_cast<const PaddleRemoteControlRocketProjectile*>(rocketProjectile) != NULL);
+                    this->DrawRemoteControlRocket(static_cast<const PaddleRemoteControlRocketProjectile*>(rocketProjectile), 
+                        camera, keyLight, fillLight, ballLight);
                     break;
                 case Projectile::RocketTurretBulletProjectile:
                 case Projectile::BossRocketBulletProjectile:
-                    this->turretRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+                    this->DrawBasicRocket(rocketProjectile, this->turretRocketMesh, camera, keyLight, fillLight, ballLight);
                     break;
                 default:
                     assert(false);
                     break;
             }
 
-			glPopMatrix();
-
 			glPopAttrib();
-			debug_opengl_state();
-		}
+        }
 	}
+
+    debug_opengl_state();
+}
+
+void RocketMesh::DrawBasicRocket(const RocketProjectile* rocket, Mesh* rocketMesh, 
+                                 const Camera& camera, const BasicPointLight& keyLight, 
+                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // Grab positioning / orienting values from the rocket projectile 
+    // so we know where/how to draw the rocket
+    const Vector2D& rocketDir = rocket->GetVelocityDirection();
+    float currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
+    this->rocketGlowEmitter->SetParticleRotation(ESPInterval(-currZRotation));
+
+    const Point2D& rocketPos = rocket->GetPosition();
+
+    glPushMatrix();
+    glTranslatef(rocketPos[0], rocketPos[1], rocket->GetZOffset());
+
+    float scaleFactor = rocket->GetVisualScaleFactor();
+    this->rocketGlowEmitter->SetParticleSize(
+       ESPInterval(2.0f*rocket->GetWidth()),
+       ESPInterval(1.6f*rocket->GetHeight()));
+
+    this->rocketGlowEmitter->Draw(camera);
+
+    // The rocket may not always be firing upwards, we need to rotate it to suit
+    // its current direction, we also need to spin it on that axis
+    glMultMatrixf(Matrix4x4::rotationMatrix(Trig::degreesToRadians(rocket->GetYRotation()), Vector3D(rocketDir, 0.0f)).begin());
+    glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
+    glScalef(scaleFactor, scaleFactor, scaleFactor);
+
+    rocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+}
+
+void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjectile* rocket, const Camera& camera, 
+                                         const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+                                         const BasicPointLight& ballLight) {
+
+    float flashingAmt = rocket->GetFlashingAmount();
+    float oneMinusFlashingAmt = 1.0f - flashingAmt;
+    glColor4f(std::min<float>(1.0f, 1.0f + flashingAmt), oneMinusFlashingAmt, oneMinusFlashingAmt, 1.0f);
+
+    // Grab positioning / orienting values from the rocket projectile 
+    // so we know where/how to draw the rocket
+    const Vector2D& rocketDir = rocket->GetVelocityDirection();
+    float currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
+
+    const Point2D& rocketPos = rocket->GetPosition();
+
+    glPushMatrix();
+    glTranslatef(rocketPos[0], rocketPos[1], rocket->GetZOffset());
+
+    // Special case for the remote control rocket, since the camera rotates with it we
+    // don't need to rotate the glow effect on it
+    this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
+
+    float scaleFactor = rocket->GetVisualScaleFactor();
+    this->rocketGlowEmitter->SetParticleSize(ESPInterval(2.0f*rocket->GetWidth()), ESPInterval(1.6f*rocket->GetHeight()));
+    this->rocketGlowEmitter->Draw(camera);
+
+    // The rocket may not always be firing upwards, we need to rotate it to suit
+    // its current direction, we also need to spin it on that axis
+    glMultMatrixf(Matrix4x4::rotationMatrix(Trig::degreesToRadians(rocket->GetYRotation()), Vector3D(rocketDir, 0.0f)).begin());
+    glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
+    glScalef(scaleFactor, scaleFactor, scaleFactor);
+
+    this->paddleRemoteControlRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+
+    glPopMatrix();
 }
 
 // Private helper method to load the rocket mesh

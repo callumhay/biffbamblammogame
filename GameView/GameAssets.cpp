@@ -40,6 +40,7 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
+#include "../GameModel/PaddleRemoteControlRocketProjectile.h"
 #include "../GameModel/FullscreenFlashEffectInfo.h"
 
 // Game Sound Includes
@@ -591,18 +592,16 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 
-    // If the paddle is invisible then we don't draw any of the extraneous effects on it and we make sure
-    // to draw it with an invisible material...
-    bool paddleIsInvisible = (p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle;
-    CgFxEffectBase* paddleReplacementMat = NULL;
-    
     glPushAttrib(GL_DEPTH_BUFFER_BIT);
-    if (paddleIsInvisible || p.GetAlpha() <= 0.0f) {
+    if (p.HasPaddleType(PlayerPaddle::InvisiPaddle) || p.GetAlpha() < 1.0f) {
         // Disable the depth draw, this will make sure the paddle doesn't get outlined
         glDepthMask(GL_FALSE);
     }
 
-    if (paddleIsInvisible) {
+    // If the paddle is invisible then we don't draw any of the extraneous effects on it and we make sure
+    // to draw it with an invisible material...
+    CgFxEffectBase* paddleReplacementMat = NULL;
+    if (p.HasPaddleType(PlayerPaddle::InvisiPaddle)) {
         paddleReplacementMat = this->invisibleEffect;
         // Just tick the effects on the paddle, no drawing
         this->espAssets->TickButDontDrawBackgroundPaddleEffects(dT);
@@ -612,7 +611,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	    this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
     }
 
-    if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::MagnetPaddle) == PlayerPaddle::MagnetPaddle) {
+    if (!p.GetIsPaddleCameraOn() && p.HasPaddleType(PlayerPaddle::MagnetPaddle)) {
         this->magnetPaddleEffect->Draw(dT, p);
     }
 
@@ -621,27 +620,27 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
     glPopAttrib();
 
-	if ((p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+	if (p.HasPaddleType(PlayerPaddle::LaserBeamPaddle)) {
 		if (p.GetIsLaserBeamFiring()) {
-			// Draw paddle blasty stuff when firing
+			// Draw paddle blast-y stuff when firing
 			if (!p.GetIsPaddleCameraOn()) {
 				this->espAssets->DrawPaddleLaserBeamFiringEffects(dT, camera, p);
 			}
 		}
 		// Beam isn't firing yet, if the rocket is on the paddle then don't draw any of the beam effects
 		// coming out of the paddle
-		else if ((p.GetPaddleType() & PlayerPaddle::RocketPaddle) != PlayerPaddle::RocketPaddle){
-			// Draw glowy beam origin when beam is able to fire but not actually firing yet
+		else if (!p.HasPaddleType(PlayerPaddle::RocketPaddle)){
+			// Draw glow-y beam origin when beam is able to fire but not actually firing yet
 			this->espAssets->DrawPaddleLaserBeamBeforeFiringEffects(dT, camera, p);
 		}
 	}
 
     /*
     // TODO:
-    if ((p.GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle) {
+    if (p.HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
         // Draw an effect on the paddle to indicate that there is a mine launcher attachment activated,
         // but we only draw it if there isn't a rocket on the paddle
-		if ((p.GetPaddleType() & PlayerPaddle::RocketPaddle) != PlayerPaddle::RocketPaddle){
+		if (!p.HasPaddleType(PlayerPaddle::RocketPaddle)) {
 			this->espAssets->DrawPaddleMineActiveEffects(dT, camera, p);
 		}
     }
@@ -649,11 +648,19 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	// In the case of a laser bullet paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
-	if (!p.GetIsPaddleCameraOn() && p.GetAlpha() > 0.0f) {
+    if (!p.GetIsPaddleCameraOn() && p.GetAlpha() > 0.0f &&
+         p.HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::LaserBeamPaddle | PlayerPaddle::MineLauncherPaddle)) {
+
 		glColor4f(1.0f, 1.0f, 1.0f, p.GetAlpha());
 
+        glPushAttrib(GL_DEPTH_BUFFER_BIT);
+        if (p.HasPaddleType(PlayerPaddle::InvisiPaddle) || p.GetAlpha() < 1.0f) {
+            // Disable the depth draw, this will make sure the paddle attachments don't get outlined
+            glDepthMask(GL_FALSE);
+        }
+
         // Draw the various active attachments...
-        if ((p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
+        if (p.HasPaddleType(PlayerPaddle::LaserBulletPaddle)) {
 			this->paddleLaserAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
 
@@ -661,14 +668,16 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
         glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
         glRotatef(p.GetZRotation(), 0, 0, 1);
        
-		if ((p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+		if (p.HasPaddleType(PlayerPaddle::LaserBeamPaddle)) {
 			this->paddleBeamAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
-        if ((p.GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle) {
+        if (p.HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
             this->mineMeshMgr->DrawLoadingMine(dT, p, camera, paddleKeyLight, paddleFillLight, ballLight);
 			this->paddleMineAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
+
         glPopMatrix();
+        glPopAttrib();
 	}
 
 	glPopMatrix();
@@ -701,8 +710,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	}
 
 	// When the paddle has the 'sticky' power-up (and doesnt have a shield on) we attach sticky goo to its top
-	if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
-        (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
+	if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle) && !paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 
 		// Set the texture for the refraction in the goo - be careful here, we can't get
 		// the 'post full scene' fbo because we are currently in the middle of drawing to it
@@ -710,7 +718,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 
 		// In the case where the paddle laser beam is also active then the beam will refract through the goo,
 		// illuminate the goo a lot more
-		if ((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && paddle->GetIsLaserBeamFiring()) {
+		if (paddle->HasPaddleType(PlayerPaddle::LaserBeamPaddle) && paddle->GetIsLaserBeamFiring()) {
 			this->paddleStickyAttachment->SetPaddleLaserBeamIsActive(true);
 		}
 		else {
@@ -726,9 +734,8 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	}
 
 	// In order to draw the laser glow effect make sure there isn't a rocket sitting on the paddle
-	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle &&
-		  (paddle->GetPaddleType() & PlayerPaddle::RocketPaddle) != PlayerPaddle::RocketPaddle) {
-		// Draw glowy effects where the laser originates...
+	if (paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle) && !paddle->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+		// Draw glow-y effects where the laser originates...
 		this->espAssets->DrawPaddleLaserBulletEffects(dT, camera, *paddle);
 	}
 
@@ -1210,14 +1217,18 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 			this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
 			break;
 
-        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile: {
+            assert(dynamic_cast<const PaddleRemoteControlRocketProjectile*>(&projectile) != NULL);
+           
+            const PaddleRemoteControlRocketProjectile* remoteCtrlRocket = static_cast<const PaddleRemoteControlRocketProjectile*>(&projectile);
+            
             // Activate the remote control rocket HUD
-            this->remoteControlRocketHUD->Activate();
+            this->remoteControlRocketHUD->Activate(remoteCtrlRocket);
 
-            assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
             // Notify assets of the rocket...
-            this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
+            this->FireRocket(*remoteCtrlRocket);
             break;
+        }
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile: {
@@ -1518,7 +1529,7 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			
 		case GameItem::PoisonPaddleItem: {
 			// The poison item will make the lights turn a sickly green colour
-			assert((gameModel.GetPlayerPaddle()->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle);
+			assert(gameModel.GetPlayerPaddle()->HasPaddleType(PlayerPaddle::PoisonPaddle));
 
 			this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
 			this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);

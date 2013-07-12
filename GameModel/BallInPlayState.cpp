@@ -263,8 +263,7 @@ void BallInPlayState::Tick(double seconds) {
 
 				    // If the sticky paddle power-up is activated then the ball will simply be attached to
 				    // the player paddle (if there are no balls already attached) ... unless the paddle has a shield active as well
-				    if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
-					    (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == 0x0) {
+				    if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle) && !paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 					    bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
 					    if (couldAttach) {
                             // Reset the multiplier
@@ -286,7 +285,7 @@ void BallInPlayState::Tick(double seconds) {
 				    // Tell the model that a ball collision occurred with the paddle
 				    this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
-				    if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
+				    if (!paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 				        // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
 				        // still see it fly into the void. If the shield is active then no help is provided
                         this->AugmentBallDirectionToBeNotTooDownwards(*currBall, *paddle, n);

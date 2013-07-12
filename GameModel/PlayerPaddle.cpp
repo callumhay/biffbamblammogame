@@ -255,7 +255,7 @@ void PlayerPaddle::FireAttachedBall() {
     Vector2D avgPaddleVelDir = this->GetVelocity();
 
 	// Check for the sticky paddle... trajectory will be based on the normal of the surface that the ball is stuck to
-	if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+	if (this->HasPaddleType(PlayerPaddle::StickyPaddle)) {
 		
         std::vector<int> indices = this->bounds.ClosestCollisionIndices(this->attachedBall->GetCenterPosition2D(), 0.01f);
 		assert(indices.size() > 0);
@@ -397,7 +397,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 		
         // If the poison paddle is active then the speed is diminished...
         float tempSpd = this->currSpeed;
-        if ((this->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
+        if (this->HasPaddleType(PlayerPaddle::PoisonPaddle)) {
             tempSpd = std::max<float>(0.0f, tempSpd - PlayerPaddle::POISON_SPEED_DIMINISH);
         }
         
@@ -632,7 +632,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
     }
 	
 	// Check for the paddle rockets (these have top priority)
-    if ((this->GetPaddleType() & (PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) != 0x0) {
+    if (this->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) {
         
         Point2D rocketSpawnPos;
         float rocketHeight, rocketWidth;
@@ -642,13 +642,13 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         PlayerPaddle::PaddleType rocketType;
         RocketProjectile* rocketProjectile = NULL;
 
-	    if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+	    if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
             rocketType = PlayerPaddle::RocketPaddle;
 		    rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, 
                 Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
 	    }
         else {
-            assert((this->GetPaddleType() & PlayerPaddle::RemoteControlRocketPaddle) == PlayerPaddle::RemoteControlRocketPaddle);
+            assert(this->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle));
             rocketType = PlayerPaddle::RemoteControlRocketPaddle;
             rocketProjectile = new PaddleRemoteControlRocketProjectile(rocketSpawnPos, 
                 Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
@@ -682,7 +682,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         GameEventManager::Instance()->ActionPaddleWeaponFired();
     }
 	// Check for laser beam paddle - this has secondary priority
-	else if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
+	else if (this->HasPaddleType(PlayerPaddle::LaserBeamPaddle) && !this->isFiringBeam) {
 		
         // We add the beam to the game model, the rest will be taken care of by the beam and model
         PaddleLaserBeam* paddleLaserBeam = new PaddleLaserBeam(this, gameModel);
@@ -696,7 +696,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         // All of the rest are basic, multiple shot projectiles that should all execute simultaneously
 
         // Check for laser bullet paddle (shoots little laser bullets from the paddle)
-        if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
+        if (this->HasPaddleType(PlayerPaddle::LaserBulletPaddle)) {
 		    // Make sure we are allowed to fire a new laser bullet
 		    if (this->timeSinceLastLaserBlast >= PADDLE_LASER_BULLET_DELAY) {
 
@@ -725,7 +725,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         }
 
         // Check for mine launcher paddle (shoots explosive mines from the paddle)
-        if ((this->GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle) {
+        if (this->HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
             if (this->timeSinceLastMineLaunch >= PADDLE_MINE_LAUNCH_DELAY) {
 
 			    // Calculate the width and height of the mine based on the size of the paddle...
@@ -905,7 +905,7 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& projectile) {
 
 	// The paddle is unaffected if it has a shield active...
-	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+	if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 		// EVENT: Paddle shield was just hit by a projectile
 		GameEventManager::Instance()->ActionPaddleShieldHitByProjectile(*this, projectile);
 		return;
@@ -960,7 +960,7 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 void PlayerPaddle::HitByBeam(const Beam& beam, const BeamSegment& beamSegment) {
 
     // The paddle is unaffected if it has a shield active...
-    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+    if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
         // EVENT: Paddle shield was just hit by a beam
         GameEventManager::Instance()->ActionPaddleShieldHitByBeam(*this, beam, beamSegment);
         return;
@@ -985,7 +985,7 @@ void PlayerPaddle::HitByBeam(const Beam& beam, const BeamSegment& beamSegment) {
 // (or the paddle shield or some component of the paddle)
 void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
 
-	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+	if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
         switch (projectile.GetType()) {
 
             case Projectile::BossOrbBulletProjectile:
@@ -1038,7 +1038,7 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
     if (p.GetType() != LevelPiece::NoEntry) {
 
         std::list<Point2D> collisionPts;
-	    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle &&
+	    if (this->HasPaddleType(PlayerPaddle::ShieldPaddle) &&
             p.GetBounds().GetCollisionPoints(this->CreatePaddleShieldBounds(), collisionPts)) {
 
             // Seperate points into those to the left and right of the paddle center, closest to the paddle center...
@@ -1086,7 +1086,7 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
                 return;
             }
 	        // If there's a rocket attached we need to check its bounds too...
-	        else if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+	        else if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
 		        Point2D rocketSpawnPos;
 		        float rocketHeight, rocketWidth;
 		        this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
@@ -1475,7 +1475,7 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
                                                   const Point2D& currCenter, Vector2D& vectorToAugment) const {
     // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
     // modify the velocity to make it move towards the paddle...
-    if ((this->GetPaddleType() & PlayerPaddle::MagnetPaddle) != PlayerPaddle::MagnetPaddle) {
+    if (!this->HasPaddleType(PlayerPaddle::MagnetPaddle)) {
         return;
     }
         
@@ -1541,7 +1541,7 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
 // Obtain an AABB encompassing the entire paddle's current collision area
 Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
 	Point2D minPt, maxPt;
-	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+	if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 		Vector2D sphereRadiusVec(this->GetHalfWidthTotal(), this->GetHalfWidthTotal());
 		sphereRadiusVec = 1.2f * sphereRadiusVec;
 		minPt = this->GetCenterPosition() - sphereRadiusVec;
@@ -1563,7 +1563,7 @@ Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
 		paddleAABB.AddPoint(ballBounds.Center() - ballRadiusVec);
 	}
 
-	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+	if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
 		Point2D rocketSpawnPos;
 		float rocketHeight, rocketWidth;
 		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
@@ -1582,7 +1582,7 @@ Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
 bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const {
 	bool didCollide = false;
 	// If the paddle has a shield around it do the collision with the shield
-	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+	if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 		didCollide = bounds.CollisionCheck(this->CreatePaddleShieldBounds());
 	}
 	else {
@@ -1595,7 +1595,8 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 
 	// If there's a rocket attached we need to check for collisions with it!
     if (!didCollide) {
-        if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+
+        if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
 		    Point2D rocketSpawnPos;
 		    float rocketHeight, rocketWidth;
 		    this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
@@ -1619,7 +1620,7 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
      }
 
      // If the paddle has a shield around it do the collision with the shield
-     if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+     if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
          Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
          return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
      }
@@ -1655,7 +1656,7 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
 bool PlayerPaddle::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
     
     // If the paddle has a shield around it do the collision with the shield
-    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+    if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
         Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
         return Collision::IsCollision(ray, shieldBounds, rayT);
     }
@@ -1698,8 +1699,9 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, co
 
 // The paddle destroys all projectiles that collide with it, currently
 bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
+
     // Projectiles can pass through when reflected by the paddle shield
-    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+    if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 
         switch (projectile.GetType()) {
 
@@ -1725,7 +1727,7 @@ bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
 
 bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile) {
     // Special case: sticky paddles always attach mines to themselves
-    if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
+    if (this->HasPaddleType(PlayerPaddle::StickyPaddle) &&
         (projectile.GetType() == Projectile::PaddleMineBulletProjectile ||
          projectile.GetType() == Projectile::MineTurretBulletProjectile)) {
 
@@ -1772,12 +1774,12 @@ void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce, float deaccel) {
 }
 
 void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const {
-    if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+    if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
         height = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
         width  = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
     }
     else {
-        assert((this->GetPaddleType() & PlayerPaddle::RemoteControlRocketPaddle) == PlayerPaddle::RemoteControlRocketPaddle);
+        assert(this->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle));
         height = this->currScaleFactor * PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT;
         width  = this->currScaleFactor * PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT;
     }

@@ -74,7 +74,7 @@ void MineMeshManager::DrawLoadingMine(double dT, const PlayerPaddle& paddle, con
                                       const BasicPointLight& ballLight) {
 
     
-    assert((paddle.GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle);
+    assert(paddle.HasPaddleType(PlayerPaddle::MineLauncherPaddle));
 
     // Draw the loaded/loading mine in the attachment on the paddle (if there is one)
     float mineStartHeight  = paddle.GetHalfHeight();

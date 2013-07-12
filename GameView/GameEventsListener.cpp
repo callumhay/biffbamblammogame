@@ -254,7 +254,7 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
 	
     // No hurting effects if paddle has sticky effect and the projectile is a mine...
-    if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
+    if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle) &&
         (projectile.GetType() == Projectile::PaddleMineBulletProjectile ||
          projectile.GetType() == Projectile::MineTurretBulletProjectile)) {
         return;
@@ -457,10 +457,10 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
         Point3D collisionPtEstimate = ball.GetCenterPosition() + ball.GetBounds().Radius() * 
             Vector3D::Normalize(Point3D(paddle.GetCenterPosition()) - ball.GetCenterPosition());
         GameSound* sound = this->display->GetSound();
-        if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+        if (paddle.HasPaddleType(PlayerPaddle::ShieldPaddle)) {
             sound->PlaySoundAtPosition(GameSound::BallShieldPaddleCollisionEvent, false, collisionPtEstimate);
 		}
-		else if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		else if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle)) {
             sound->PlaySoundAtPosition(GameSound::BallStickyPaddleCollisionEvent, false, collisionPtEstimate);
 		}
 		else {
@@ -1176,7 +1176,7 @@ void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
 			this->display->GetSound()->AttachAndPlaySound(&beam, GameSound::LaserBeamFiringLoop, true);
 			break;
         case Beam::BossBeam:
-            // TODO
+            this->display->GetSound()->AttachAndPlaySound(&beam, GameSound::LaserBeamFiringLoop, true);
             break;
 
 		default:
@@ -1190,6 +1190,11 @@ void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
 void GameEventsListener::BeamChangedEvent(const Beam& beam) {
 	// Update the effect for the now changed beam...
 	this->display->GetAssets()->GetESPAssets()->UpdateBeamEffect(beam);
+
+    // Pause/un-pause the beam sound effects/loop based on whether the beam is 'active' or not
+    bool beamIsPaused = (beam.GetBeamParts().empty() || beam.GetBeamAlpha() <= 0.0f);
+    this->display->GetSound()->SetPauseForAllAttachedSounds(&beam, beamIsPaused);
+
 	debug_output("EVENT: Beam changed");
 }
 
@@ -1409,9 +1414,13 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
         else if (newMultiplier == 4) {
             sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo4Event, false);
         }
+        
+        // Don't display the effect if we're in ball or paddle camera mode...
+        if (!this->display->GetModel()->GetPlayerPaddle()->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
 
-        this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(newMultiplier, position, 
-            *this->display->GetModel()->GetPlayerPaddle());
+            this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(newMultiplier, position, 
+                *this->display->GetModel()->GetPlayerPaddle());
+        }
     }
     else if (newMultiplier == 1 && oldMultiplier > 1) {
         // The player lost their multiplier, play a sound for that

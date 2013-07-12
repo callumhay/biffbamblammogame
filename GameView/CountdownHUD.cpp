@@ -1,5 +1,5 @@
 /**
- * BoostCountdownHUD.cpp
+ * CountdownHUD.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011
@@ -9,16 +9,18 @@
  * resulting work only under the same or similar license to this one.
  */
 
-#include "BoostCountdownHUD.h"
+#include "CountdownHUD.h"
 #include "GameFontAssetsManager.h"
 #include "../GameModel/GameModel.h"
 #include "../GameModel/BallBoostModel.h"
 #include "../BlammoEngine/Camera.h"
 
-BoostCountdownHUD::BoostCountdownHUD() :
+CountdownHUD::CountdownHUD(double totalTimeUntilCountdownOver) :
 numLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
 GameFontAssetsManager::Huge), "3"),
-currState(NotOn) {
+currState(NotOn), totalTimeUntilCountdownOver(totalTimeUntilCountdownOver) {
+    
+    assert(totalTimeUntilCountdownOver >= 0.0);
 
     this->numLabel.SetColour(Colour(1,1,1));
     this->numLabel.SetDropShadow(Colour(0,0,0), 0.065f);
@@ -29,72 +31,62 @@ currState(NotOn) {
     this->numScaleAnim.ClearLerp();
     this->numScaleAnim.SetInterpolantValue(1.0f);
     this->numScaleAnim.SetRepeat(false);
+
+    this->Reset();
 }
 
-BoostCountdownHUD::~BoostCountdownHUD() {
+CountdownHUD::~CountdownHUD() {
 }
 
-void BoostCountdownHUD::Draw(const Camera& camera, const GameModel& gameModel, double dT) {
+void CountdownHUD::Draw(const Camera& camera, double dT, double timeElapsed) {
 
-    const BallBoostModel* boostModel = gameModel.GetBallBoostModel();
-    if (boostModel == NULL) {
+    double timeLeft = this->totalTimeUntilCountdownOver - timeElapsed;
+    if (timeLeft > 3.0) {
+        this->SetState(NotOn);
         return;
     }
 
-    // If the boost model is in bullet time we check the countdown towards the end of bullet time
-    // when it reaches 3, 2 and 1 seconds left, we create a text label and display it for each
-    if (boostModel->GetBulletTimeState() == BallBoostModel::BulletTime) {
-        double timeLeft = BallBoostModel::GetMaxBulletTimeDuration() - boostModel->GetTotalBulletTimeElapsed();
+    switch (this->currState) {
+        case NotOn:
+            if (timeLeft <= 3.0) {
+                this->SetState(ThreeSeconds);
+            }
+            break;
+
+        case ThreeSeconds:
+            if (timeLeft <= 2.0) {
+                this->SetState(TwoSeconds);
+            }
+            break;
         
-        if (timeLeft > 3.0) {
-            this->SetState(NotOn);
+        case TwoSeconds:
+            if (timeLeft <= 1.0) {
+                this->SetState(OneSecond);
+            }
+            break;
+
+        case OneSecond:
+            break;
+
+        default:
+            assert(false);
             return;
-        }
+    }
 
-        switch (this->currState) {
-            case NotOn:
-                if (timeLeft <= 3.0) {
-                    this->SetState(ThreeSeconds);
-                }
-                break;
-
-            case ThreeSeconds:
-                if (timeLeft <= 2.0) {
-                    this->SetState(TwoSeconds);
-                }
-                break;
-            
-            case TwoSeconds:
-                if (timeLeft <= 1.0) {
-                    this->SetState(OneSecond);
-                }
-                break;
-
-            case OneSecond:
-                break;
-
-            default:
-                assert(false);
-                return;
-        }
-
-        // Draw the current number label
+    // Draw the current number label
+    if (this->numFadeAnim.GetInterpolantValue() > 0.0f) {
         this->numLabel.SetAlpha(this->numFadeAnim.GetInterpolantValue());
         this->numLabel.SetScale(this->numScaleAnim.GetInterpolantValue());
         this->numLabel.SetTopLeftCorner((camera.GetWindowWidth() - this->numLabel.GetLastRasterWidth()) / 2.0f,
                                         (camera.GetWindowHeight() + this->numLabel.GetHeight()) / 2.0f);
         this->numLabel.Draw();
+    }
 
-        this->numFadeAnim.Tick(dT);
-        this->numScaleAnim.Tick(dT);
-    }
-    else {
-        this->SetState(NotOn);
-    }
+    this->numFadeAnim.Tick(dT);
+    this->numScaleAnim.Tick(dT);
 }
 
-
-void BoostCountdownHUD::SetState(CountdownState state) {
+void CountdownHUD::SetState(CountdownState state) {
     static const float MIN_SCALE_AMOUNT      = 0.2f;
     static const float MAX_SCALE_AMOUNT      = 3.0f;
     static const double LERP_TIME_IN_SECONDS = 0.85;

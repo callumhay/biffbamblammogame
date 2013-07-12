@@ -1657,7 +1657,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameView\BoostCountdownHUD.h"
+						RelativePath=".\GameView\CountdownHUD.h"
 						>
 					</File>
 					<File
@@ -1697,7 +1697,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameView\BoostCountdownHUD.cpp"
+						RelativePath=".\GameView\CountdownHUD.cpp"
 						>
 					</File>
 					<File

@@ -585,7 +585,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->mineTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-    this->alwaysDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->regenBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
@@ -607,6 +606,7 @@ void LevelMesh::DrawNoBloomPieces(const Vector3D& worldTranslation, double dT, c
     glPushMatrix();
     glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
     this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->alwaysDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     glPopMatrix();
 }
 

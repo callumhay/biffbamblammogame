@@ -23,6 +23,7 @@ class BasicPointLight;
 class PlayerPaddle;
 class ESPPointEmitter;
 class Texture2D;
+class PaddleRemoteControlRocketProjectile;
 
 /**
  * Class that holds and draws the various rocket bullet meshes.
@@ -49,6 +50,11 @@ private:
     Mesh* turretRocketMesh;
 	std::set<const RocketProjectile*> rocketProjectiles;
 	
+    void DrawBasicRocket(const RocketProjectile* rocket, Mesh* rocketMesh, const Camera& camera, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawRemoteControlRocket(const PaddleRemoteControlRocketProjectile* rocket, const Camera& camera, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+
 	void LoadMeshes();
 };
 
