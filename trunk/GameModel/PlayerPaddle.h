@@ -158,7 +158,7 @@ public:
 
 	float GetSpeed() const {
         float tempSpd = this->currSpeed;
-        if ((this->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
+        if (this->HasPaddleType(PlayerPaddle::PoisonPaddle)) {
             tempSpd = std::max<float>(0.0f, tempSpd - PlayerPaddle::POISON_SPEED_DIMINISH);
         }
         return this->lastDirection * tempSpd;
@@ -200,6 +200,7 @@ public:
 
 	// Paddle type modifying / querying functions
 	int32_t GetPaddleType() const { return this->currType; }
+    bool HasPaddleType(int32_t type) const { return ((this->currType & type) != 0x0); }
 
 	void AddPaddleType(const PaddleType& type);
 	void RemovePaddleType(const PaddleType& type);
@@ -208,7 +209,7 @@ public:
 	void SetPaddleCamera(bool isPaddleCamOn, double dT) {
 		this->isPaddleCamActive = isPaddleCamOn;
 		
-		// When the paddle camera is on, we change the collision boundries to
+		// When the paddle camera is on, we change the collision boundaries to
 		// be more natural to the vision of the paddle cam
 		this->SetDimensions(this->currSize);
 		if (!isPaddleCamOn) {

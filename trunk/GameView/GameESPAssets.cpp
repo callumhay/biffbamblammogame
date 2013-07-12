@@ -1256,12 +1256,11 @@ void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelP
  */
 void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle) {
 	// Shield takes priority over the sticky paddle
-	if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+	if (paddle.HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 		// The ball hits a energy shield bbzzzap!
 		this->AddEnergyShieldHitEffect(paddle.GetCenterPosition(), ball);
 	}
-	else if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle && 
-		       (paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == NULL) {
+	else if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle) && !paddle.HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 		// The sticky paddle should make a spongy gooey sound when hit by the ball...
 		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::GOO));
 	}

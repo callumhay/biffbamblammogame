@@ -1208,6 +1208,12 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
     this->remoteControlRocketCamAnimations.clear();
 
     if (rocketCamAnim.type == GameTransformMgr::ToRemoteCtrlRocketCamAnimation) {
+        
+        // While the remote control rocket is activated, the player gains control of
+        // it while the paddle and ball are frozen and removed from the game temporarily
+        gameModel.SetPause(GameModel::PausePaddle);
+        gameModel.SetPause(GameModel::PauseBall);
+        gameModel.SetPause(GameModel::PauseTimers);
 
         // Grab the affected rocket position and other info, make sure the relevant values are in world coordinates
         assert(reinterpret_cast<PaddleRemoteControlRocketProjectile*>(rocketCamAnim.data) != NULL);
@@ -1233,7 +1239,7 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         float distToTravel = travelVec.length();
         double totalTimeToAnimate   = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM;
 
-        // Create the animation to get from wherever the camera currently is to the paddle looking at the level
+        // Create the animation to get from wherever the camera currently is to the rocket
         std::vector<double> timeValues;
         timeValues.reserve(orientationValues.size());
         timeValues.push_back(0.0);
@@ -1253,8 +1259,9 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
 
         // Fade out the balls since they will not be a part of the gameplay for as long as the
         // remote control rocket is in play...
-        const double fadeTime = totalTimeToAnimate - 0.01;
+        const double fadeTime = totalTimeToAnimate;
 
+        gameModel.GetPlayerPaddle()->SetRemoveFromGameVisibility(fadeTime);
         const std::list<GameBall*>& balls = gameModel.GetGameBalls();
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
             GameBall* currBall = *iter;
@@ -1278,9 +1285,19 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         float distToTravel = travelVec.length();
         double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM;
 
-        // TODO: ADD MORE TIME ONCE THE CAMERA HAS RECOUPERATED, ALLOW THE PLAYER TO RE-ORIENT THEMSELVES!!!!
+        std::vector<Orientation3D> orientationValues;
+        orientationValues.reserve(3);
+        orientationValues.push_back(this->currCamOrientation);
+        orientationValues.push_back(this->storedCamOriBeforeRemoteControlRocketCam);
+        orientationValues.push_back(this->storedCamOriBeforeRemoteControlRocketCam);
 
-        toOriginalCamAnim.SetLerp(timeToAnimate, this->storedCamOriBeforeRemoteControlRocketCam);
+        std::vector<double> timeVals;
+        timeVals.reserve(orientationValues.size());
+        timeVals.push_back(0.0);
+        timeVals.push_back(timeToAnimate);
+        timeVals.push_back(timeToAnimate + 0.5); // We give the player a little bit of breathing time to re-orient themselves
+
+        toOriginalCamAnim.SetLerp(timeVals, orientationValues);
         this->remoteControlRocketCamAnimations.push_back(toOriginalCamAnim);
 
         // Add a camera FOV animation so that it's restored...
@@ -1290,11 +1307,10 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         this->camFOVAnimations.push_back(camFOVChangeAnim);
 
         // Make the paddle and balls reappear (unless ball or paddle camera is active...)
-        const double reappearTime = timeToAnimate - 0.01;
+        const double reappearTime = timeToAnimate;
         PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
         assert(paddle != NULL);
         paddle->AnimateFade(this->paddleWithCamera != NULL, reappearTime);
-        assert(!paddle->HasBeenPausedAndRemovedFromGame(gameModel.GetPauseState()));
 
         const std::list<GameBall*>& balls = gameModel.GetGameBalls();
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
@@ -1381,6 +1397,11 @@ void GameTransformMgr::FinishRemoteControlRocketCamAnimation(double dT, GameMode
         this->remoteControlRocketWithCamera = remoteCtrlRocket;
     }
     else {
+        // Re-enable the paddle and balls
+        gameModel.UnsetPause(GameModel::PausePaddle);
+        gameModel.UnsetPause(GameModel::PauseBall);
+        gameModel.UnsetPause(GameModel::PauseTimers);
+
         this->remoteControlRocketWithCamera = NULL;
     }
 

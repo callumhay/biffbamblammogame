@@ -88,8 +88,10 @@ void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLi
                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     UNUSED_PARAMETER(dT);
 
-	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT);
-	glColor3f(1.0f, 1.0f, 1.0f);
+	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT);
+	
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glDepthMask(GL_FALSE);
 
 	// Go through all the item drop blocks, set the proper materials and draw
 	for (std::map<const ItemDropBlock*, Texture*>::const_iterator iter = this->itemDropBlockToItemTexMap.begin(); 

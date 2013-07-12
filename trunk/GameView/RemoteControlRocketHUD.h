@@ -13,9 +13,11 @@
 #define __REMOTECONTROLROCKETHUD_H__
 
 #include "ButtonTutorialHint.h"
+#include "CountdownHUD.h"
 
 class GameAssets;
 class Camera;
+class PaddleRemoteControlRocketProjectile;
 
 class RemoteControlRocketHUD {
 public:
@@ -24,14 +26,16 @@ public:
 
     void Draw(double dT, const Camera& camera);
 
-    void Activate();
+    void Activate(const PaddleRemoteControlRocketProjectile* rocket);
     void Deactivate();
     void Reinitialize();
 
 private:
     static const float MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM;
+    const PaddleRemoteControlRocketProjectile* rocket;
     bool isActive;
 
+    CountdownHUD rocketExplodeCountdown;
     ButtonTutorialHint moveHint;
     //ButtonTutorialHint* detonateHint;
 

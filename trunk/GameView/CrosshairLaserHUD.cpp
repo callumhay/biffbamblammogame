@@ -75,10 +75,10 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 	assert(paddle->GetIsPaddleCameraOn());
 
 	// Don't draw anything if there's significant paddle effect active
-	bool beamIsActive   = (paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle;
-	bool bulletIsActive = (paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle;
-	bool rocketIsActive = (paddle->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle;
-    bool mineIsActive   = (paddle->GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle;
+	bool beamIsActive   = paddle->HasPaddleType(PlayerPaddle::LaserBeamPaddle);
+	bool bulletIsActive = paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle);
+    bool rocketIsActive = paddle->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle);
+    bool mineIsActive   = paddle->HasPaddleType(PlayerPaddle::MineLauncherPaddle);
 	if (!beamIsActive && !bulletIsActive && !rocketIsActive && !mineIsActive) {
 	    return;
 	}
@@ -109,7 +109,7 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 			this->DrawBeamBlast(alpha);
 
 			// Handle sticky paddle situation (3 beams)...
-			if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+			if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
 				const float quarterScreenWidth = static_cast<float>(screenWidth) / 4.0f;
 				glPushMatrix();
 				glTranslatef(quarterScreenWidth, 0.0f, 0.0f);

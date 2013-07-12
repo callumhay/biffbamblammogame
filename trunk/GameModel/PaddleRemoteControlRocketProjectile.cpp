@@ -15,16 +15,25 @@
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT = 1.5f;
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT  = 0.69f;
 
+const double PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS = 15.0;
+
 const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_ACCELERATION       = 9.0f; 
 const float PaddleRemoteControlRocketProjectile::DECELLERATION_OF_APPLIED_ACCEL = 16.0f;
 
+const float PaddleRemoteControlRocketProjectile::STARTING_FUEL_AMOUNT          = 100.0f;
+const double PaddleRemoteControlRocketProjectile::RATE_OF_FUEL_CONSUMPTION     = STARTING_FUEL_AMOUNT / TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS;
+const float PaddleRemoteControlRocketProjectile::FUEL_AMOUNT_TO_START_FLASHING = 33.0f;
+
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(
     const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height) :
-RocketProjectile(spawnLoc, rocketVelDir, width, height), currAppliedAccelDir(0.0f, 0.0f), currAppliedAccelMag(0.0f) {
+RocketProjectile(spawnLoc, rocketVelDir, width, height), currAppliedAccelDir(0.0f, 0.0f), currAppliedAccelMag(0.0f),
+currFuelAmt(STARTING_FUEL_AMOUNT), currFlashColourAmt(0.0f), currFlashFreq(0), flashTimeCounter(0) {
 }
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy) : 
-RocketProjectile(copy), currAppliedAccelDir(copy.currAppliedAccelDir), currAppliedAccelMag(copy.currAppliedAccelMag) {
+RocketProjectile(copy), currAppliedAccelDir(copy.currAppliedAccelDir), currAppliedAccelMag(copy.currAppliedAccelMag),
+currFuelAmt(copy.currFuelAmt), currFlashColourAmt(copy.currFlashColourAmt), currFlashFreq(copy.currFlashFreq),
+flashTimeCounter(copy.flashTimeCounter) {
 }
 
 PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
@@ -36,12 +45,8 @@ PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
 /// control over this rocket.
 /// </summary>
 void PaddleRemoteControlRocketProjectile::Setup(GameModel& gameModel) {
-    // While the remote control rocket is activated, the player gains control of
-    // it while the paddle and ball are frozen and removed from the game temporarily
-    gameModel.SetPause(GameModel::PausePaddle);
-    gameModel.SetPause(GameModel::PauseBall);
-    gameModel.SetPause(GameModel::PauseTimers);
-    
+
+    // The transform manager will take care of pausing the game state and doing the transforms...
     GameTransformMgr* transformMgr = gameModel.GetTransformInfo();
     assert(transformMgr != NULL);
     transformMgr->SetRemoteControlRocketCamera(true, this);
@@ -52,11 +57,8 @@ void PaddleRemoteControlRocketProjectile::Setup(GameModel& gameModel) {
 /// Use this function to clean up the game state from when it was frozen for the remote control take-over.
 /// </summary>
 void PaddleRemoteControlRocketProjectile::Teardown(GameModel& gameModel) {
-    // Re-enable the paddle and balls
-    gameModel.UnsetPause(GameModel::PausePaddle);
-    gameModel.UnsetPause(GameModel::PauseBall);
-    gameModel.UnsetPause(GameModel::PauseTimers);
 
+    // The transform manager will take care of un-pausing the game state and doing the transforms...
     GameTransformMgr* transformMgr = gameModel.GetTransformInfo();
     assert(transformMgr != NULL);
     transformMgr->SetRemoteControlRocketCamera(false, NULL);
@@ -70,18 +72,60 @@ void PaddleRemoteControlRocketProjectile::Teardown(GameModel& gameModel) {
 
 void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& model) {
     
-    // Update the acceleration/velocity/position of the rocket based on the current steering
-    if (this->GetVelocityMagnitude() >= 0.5f * this->GetMaxVelocityMagnitude()) {
-        this->SetVelocity(this->GetVelocity() + seconds * this->GetAppliedAcceleration());
+    if (this->IsLoadedInCannonBlock()) {
+        // Remove all applied acceleration if the rocket is inside a cannon block...
+        this->SetAppliedAcceleration(Vector2D(0,0));
     }
-    
-    double dA = DECELLERATION_OF_APPLIED_ACCEL * seconds;
-    this->currAppliedAccelMag -= dA;
-    if (this->currAppliedAccelMag <= 0.0f) {
-        this->currAppliedAccelMag = 0.0f;
-        this->currAppliedAccelDir = Vector2D(0,0);
+    else {
+        // Update the acceleration/velocity/position of the rocket based on the current steering
+        if (this->GetVelocityMagnitude() >= 0.5f * this->GetMaxVelocityMagnitude()) {
+            this->SetVelocity(this->GetVelocity() + seconds * this->GetAppliedAcceleration());
+        }
+        
+        double dA = DECELLERATION_OF_APPLIED_ACCEL * seconds;
+        this->currAppliedAccelMag -= dA;
+        if (this->currAppliedAccelMag <= 0.0f) {
+            this->currAppliedAccelMag = 0.0f;
+            this->currAppliedAccelDir = Vector2D(0,0);
+        }
     }
 
     RocketProjectile::Tick(seconds, model);
 }
 
+
+/// <summary> Update the level based on changes to this projectile that can result in level changes. </summary>
+/// <returns> true if this projectile has been destroyed/removed from the game, false otherwise.</returns>
+bool PaddleRemoteControlRocketProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
+    // If the fuel is already gone then we do nothing: This rocket is already dead/exploded
+    if (this->currFuelAmt <= 0.0f) {
+        return true;
+    }
+
+    // Only do fuel calculations/changes if the rocket isn't inside a cannon block...
+    if (!this->IsLoadedInCannonBlock()) {
+        // Eat up some fuel and check to see whether we should explode yet or not...
+        this->currFuelAmt -= dT * RATE_OF_FUEL_CONSUMPTION;
+        if (this->currFuelAmt <= 0.0f) {
+            // The rocket is out of fuel, explosion time!
+            model.GetCurrentLevel()->RocketExplosionNoPieces(this);
+            return true;
+        }
+
+        // Depending on how close we are to exploding, change the flashing amount...
+        if (this->currFuelAmt <= FUEL_AMOUNT_TO_START_FLASHING) {
+            
+            this->currFlashFreq = NumberFuncs::LerpOverFloat(FUEL_AMOUNT_TO_START_FLASHING, 0.0f, 2.0f, 10.0f, this->currFuelAmt);
+            float currFlashTime = 1.0f / this->currFlashFreq;
+
+            this->flashTimeCounter   = std::min<float>(currFlashTime, this->flashTimeCounter + dT);
+            this->currFlashColourAmt = std::min<float>(1.0f, NumberFuncs::LerpOverFloat(0.0f, 0.8f*currFlashTime, 0.0f, 1.0f, this->flashTimeCounter));
+
+            if (this->flashTimeCounter >= currFlashTime) {
+                this->flashTimeCounter = 0.0;
+            }
+        }
+    }
+
+    return false;
+}

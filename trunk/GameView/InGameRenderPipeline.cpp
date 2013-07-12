@@ -282,15 +282,15 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
    
 	// Final non-fullscreen draw pass - draw the falling items and particles
 	colourAndDepthFBO->BindFBObj();
-
-	glClear(GL_DEPTH_BUFFER_BIT);
     initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
 
 	// Render all effects that do not go through all the post-processing filters...
 
-    // Item drop blocks (draw them without bloom because otherwise the it's hard to see
+    // Item drop blocks (draw them without bloom because otherwise it's hard to see
     // what item they're dropping)
     assets->DrawNoBloomLevelPieces(dT, gameModel->GetCurrentLevel(), camera);
+    
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel->GetLevelUnitDimensions(), 0.0);
     glPushMatrix();

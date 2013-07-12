@@ -12,12 +12,15 @@
 #include "RemoteControlRocketHUD.h"
 #include "GameAssets.h"
 
+#include "../GameModel/PaddleRemoteControlRocketProjectile.h"
+
 #include "../BlammoEngine/Camera.h"
 
 const float RemoteControlRocketHUD::MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM = 150.0f;
 
 RemoteControlRocketHUD::RemoteControlRocketHUD(GameAssets& assets) : 
-moveHint(assets.GetTutorialAssets(), "Rocket Control"), isActive(false) {
+moveHint(assets.GetTutorialAssets(), "Rocket Control"), isActive(false), 
+rocketExplodeCountdown(PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS) {
     
     std::list<GameViewConstants::KeyboardButtonType> keyboardButtonTypes;
     std::list<std::string> buttonTexts;
@@ -42,7 +45,7 @@ RemoteControlRocketHUD::~RemoteControlRocketHUD() {
 }
 
 void RemoteControlRocketHUD::Draw(double dT, const Camera& camera) {
-    if (!this->isActive) {
+    if (!this->isActive || rocket == NULL) {
         return;
     }
 
@@ -51,14 +54,19 @@ void RemoteControlRocketHUD::Draw(double dT, const Camera& camera) {
         this->moveHint.GetHeight() + MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM);
     this->moveHint.Tick(dT);
     this->moveHint.Draw(camera);
+
+    this->rocketExplodeCountdown.Draw(camera, dT, 
+        PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS - this->rocket->GetTimeUntilFuelRunsOut());
 }
 
-void RemoteControlRocketHUD::Activate() {
-    if (this->isActive) {
+void RemoteControlRocketHUD::Activate(const PaddleRemoteControlRocketProjectile* rocket) {
+    if (this->isActive || rocket == NULL) {
         return;
     }
     this->moveHint.Show(0.5, 1.0);
     this->isActive = true;
+    this->rocket = rocket;
+    this->rocketExplodeCountdown.Reset();
 }
 
 void RemoteControlRocketHUD::Deactivate() {
@@ -67,9 +75,12 @@ void RemoteControlRocketHUD::Deactivate() {
     }
     this->moveHint.Unshow(0.0, 0.5);
     this->isActive = false;
+    this->rocket = NULL;
 }
 
 void RemoteControlRocketHUD::Reinitialize() {
     this->moveHint.Unshow(0.0, 0.0, true);
     this->isActive = false;
+    this->rocket   = NULL;
+    this->rocketExplodeCountdown.Reset();
 }

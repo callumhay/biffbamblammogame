@@ -40,7 +40,7 @@ PaddleLaserBeam::~PaddleLaserBeam() {
  * Get the number of base beam segments (i.e., initial beams without any parents) for this beam.
  */
 int PaddleLaserBeam::GetNumBaseBeamSegments() const {
-	if ((this->paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+	if (this->paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
 		return 3;
 	}
 	return 1;
@@ -103,7 +103,8 @@ void PaddleLaserBeam::UpdateCollisions(const GameModel* gameModel) {
 	std::list<BeamSegment*> initialBeamSegs;
 
 	// In the case where there's a sticky paddle the beam refracts through the sticky paddle a bit
-	if ((this->paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+	if (this->paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
+
 		static int rotateBeamCenterBeamAmt;
 		static int rotateBeamRefract1Amt;
 		static int rotateBeamRefract2Amt;

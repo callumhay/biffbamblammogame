@@ -22,6 +22,8 @@ public:
 	static const float PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT;
 	static const float PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT;
 
+    static const double TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS;
+
 	PaddleRemoteControlRocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir, 
         float width, float height);
     PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy);
@@ -31,6 +33,7 @@ public:
     void Teardown(GameModel& gameModel);
 
     void Tick(double seconds, const GameModel& model);
+    bool ModifyLevelUpdate(double dT, GameModel& model);
 
     ProjectileType GetType() const {
         return Projectile::PaddleRemoteCtrlRocketBulletProjectile;
@@ -44,10 +47,10 @@ public:
 
     float GetVisualScaleFactor() const { return this->GetWidth() / this->GetDefaultWidth(); }
     
-    float GetAccelerationMagnitude() const { return 4.0f; }
+    float GetAccelerationMagnitude() const { return 3.0f; }
     float GetRotationAccelerationMagnitude() const { return 60.0f; }
 
-    float GetMaxVelocityMagnitude() const { return 4.0f; }
+    float GetMaxVelocityMagnitude() const { return 5.75f; }
     float GetMaxRotationVelocityMagnitude() const { return 180.0f; }
 
     float GetDefaultHeight() const { return PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT; }
@@ -56,10 +59,24 @@ public:
     enum RocketSteering { LeftRocketSteering = -1, NoRocketSteering = 0, RightRocketSteering = 1};
     void ControlRocketSteering(const RocketSteering& steering, float magnitudePercent);
 
+    double GetTimeUntilFuelRunsOut() const { return NumberFuncs::Lerp<double>(0, STARTING_FUEL_AMOUNT, 0, TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS, this->currFuelAmt); }
+    float GetCurrentFuelAmount() const { return this->currFuelAmt; }
+    float GetFlashingAmount() const { return this->currFlashColourAmt; }
+
 private:
     static const float MAX_APPLIED_ACCELERATION;
     static const float DECELLERATION_OF_APPLIED_ACCEL;
     
+    static const float STARTING_FUEL_AMOUNT;
+    static const double RATE_OF_FUEL_CONSUMPTION;
+    static const float FUEL_AMOUNT_TO_START_FLASHING;
+
+    double fuelTimeCountdown; // Time until fuel runs out
+    float currFuelAmt;        // [0, 100] level of the fuel left in this rocket, when fuel runs out it explodes
+    float currFlashColourAmt; // [0, 1] Amount of colour to apply to flashing
+    float currFlashFreq;      // The frequency in Hz of the flashing
+    double flashTimeCounter;
+
     //RocketSteering lastSteeringDir;
     Vector2D currAppliedAccelDir;
     float currAppliedAccelMag;
@@ -70,6 +87,10 @@ private:
 
 inline void PaddleRemoteControlRocketProjectile::ControlRocketSteering(const RocketSteering& steering,
                                                                        float magnitudePercent) {
+    // Can't control a rocket if it's inside a cannon block
+    if (this->IsLoadedInCannonBlock()) { 
+        return;
+    }
     this->SetAppliedAcceleration(static_cast<int>(steering) * magnitudePercent * MAX_APPLIED_ACCELERATION * this->GetRightVectorDirection());
 }
 

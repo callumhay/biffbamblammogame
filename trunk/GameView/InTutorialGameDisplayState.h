@@ -20,7 +20,7 @@
 
 #include "DisplayState.h"
 #include "TutorialInGameRenderPipeline.h"
-#include "BoostCountdownHUD.h"
+#include "CountdownHUD.h"
 
 class TutorialHint;
 class TutorialEventsListener;
@@ -54,7 +54,7 @@ private:
     TutorialEventsListener* tutorialListener;
     std::vector<TutorialHint*> noDepthTutorialHints;
 
-    BoostCountdownHUD boostCountdownHUD;
+    CountdownHUD boostCountdownHUD;
 
     void InitTutorialHints();
 

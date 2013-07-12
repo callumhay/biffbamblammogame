@@ -1,5 +1,5 @@
 /**
- * BoostCountdownHUD.h
+ * CountdownHUD.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2011
@@ -9,8 +9,8 @@
  * resulting work only under the same or similar license to this one.
  */
 
-#ifndef __BOOSTCOUNTDOWNHUD_H__
-#define __BOOSTCOUNTDOWNHUD_H__
+#ifndef __COUNTDOWNHUD_H__
+#define __COUNTDOWNHUD_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/TextLabel.h"
@@ -19,15 +19,17 @@
 class GameModel;
 class Camera;
 
-class BoostCountdownHUD {
+class CountdownHUD {
 public:
-    BoostCountdownHUD();
-    ~BoostCountdownHUD();
+    CountdownHUD(double totalTimeUntilCountdownOver);
+    ~CountdownHUD();
 
     void Reset() { this->SetState(NotOn); }
-    void Draw(const Camera& camera, const GameModel& gameModel, double dT);
+    void Draw(const Camera& camera, double dT, double timeElapsed);
 
 private:
+    double totalTimeUntilCountdownOver;
+
     AnimationLerp<float> numFadeAnim;
     AnimationLerp<float> numScaleAnim;
     TextLabel2D numLabel;
@@ -37,7 +39,7 @@ private:
 
     void SetState(CountdownState state);
 
-    DISALLOW_COPY_AND_ASSIGN(BoostCountdownHUD);
+    DISALLOW_COPY_AND_ASSIGN(CountdownHUD);
 };
 
-#endif // __BOOSTCOUNTDOWNHUD_H__
+#endif // __COUNTDOWNHUD_H__
