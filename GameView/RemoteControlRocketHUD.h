@@ -37,7 +37,7 @@ private:
 
     CountdownHUD rocketExplodeCountdown;
     ButtonTutorialHint moveHint;
-    //ButtonTutorialHint* detonateHint;
+    ButtonTutorialHint thrustHint;
 
     //RocketFuelGaugeHUD fuelGauge;
 

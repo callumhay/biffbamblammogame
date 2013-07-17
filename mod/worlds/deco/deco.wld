@@ -6,16 +6,15 @@ resources/textures/deco_world_select_256x256.jpg
 
 
 
+# Introduction to remote control rockets
+resources/worlds/levels/medium/a_remote_destination.lvl
 
-# Testing ------------------------------------------
-resources/worlds/testing/see_the_background.lvl
-resources/worlds/testing/an_almost_empty_level.lvl
-resources/worlds/testing/fast_points.lvl
-resources/worlds/testing/block_test.lvl
-resources/worlds/testing/turret_test.lvl
-resources/worlds/testing/block_outer_barrier_test.lvl
-resources/worlds/testing/regen_block_test.lvl
-# End Testing --------------------------------------
+# Bit more complicated and fun with the remote control rockets...
+
+
+# Filler
+
+
 
 # Tesla block intro levels
 resources/worlds/levels/easy/electric_access.lvl
@@ -27,6 +26,21 @@ resources/worlds/levels/medium/acute_electrocution.lvl
 
 
 
+# Tesla blocks and remote control rockets
+
+
+
+
+
+# Testing ------------------------------------------
+resources/worlds/testing/see_the_background.lvl
+resources/worlds/testing/an_almost_empty_level.lvl
+resources/worlds/testing/fast_points.lvl
+resources/worlds/testing/block_test.lvl
+resources/worlds/testing/turret_test.lvl
+resources/worlds/testing/block_outer_barrier_test.lvl
+resources/worlds/testing/regen_block_test.lvl
+# End Testing --------------------------------------
 
 
 # FIND A PLACE FOR ALL OF THE BELOW LEVELS!!! **********************************************

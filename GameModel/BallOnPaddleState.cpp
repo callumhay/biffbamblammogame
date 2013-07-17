@@ -124,7 +124,7 @@ void BallOnPaddleState::Tick(double seconds) {
         }
         // If the timer expires then the ball is automatically released
         else if (this->releaseTimerCounter >= TOTAL_RELEASE_TIMER_TIME_IN_SECS) {
-            this->BallReleaseKeyPressed();
+            this->ShootActionReleaseUse();
         }
     }
 }
@@ -132,8 +132,15 @@ void BallOnPaddleState::Tick(double seconds) {
 /**
  * When the player presses a control to release the ball from the paddle.
  */
-void BallOnPaddleState::BallReleaseKeyPressed() {
-	
+void BallOnPaddleState::ShootActionReleaseUse() {
+
+    // If the button wasn't pressed hard enough or a crucial element of the game is paused then
+    // we don't release the ball from the paddle
+    if ((this->gameModel->GetPauseState() & (GameModel::PausePaddle | GameModel::PausePaddleControls)) != 0x0 ||
+        (this->gameModel->GetPauseState() & GameModel::PauseBall) != 0x0) {
+        return;
+    } 
+
 	// Make sure the ball's position is updated first
 	this->UpdateBallPosition();
 

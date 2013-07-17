@@ -1275,6 +1275,8 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         this->storedCamFOVBeforeRemoteControlRocketCam = this->cameraFOVAngle;
     }
     else {
+        // Re-enable the paddle ASAP
+        gameModel.UnsetPause(GameModel::PausePaddle);
 
         // We are going out of ball camera mode back to the original - take the camera
         // from wherever it is currently and move it back to the default position
@@ -1397,8 +1399,7 @@ void GameTransformMgr::FinishRemoteControlRocketCamAnimation(double dT, GameMode
         this->remoteControlRocketWithCamera = remoteCtrlRocket;
     }
     else {
-        // Re-enable the paddle and balls
-        gameModel.UnsetPause(GameModel::PausePaddle);
+        // Re-enable the balls and timers
         gameModel.UnsetPause(GameModel::PauseBall);
         gameModel.UnsetPause(GameModel::PauseTimers);
 

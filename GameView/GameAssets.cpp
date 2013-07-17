@@ -1733,3 +1733,7 @@ void GameAssets::DeactivateLastBallDeathEffects() {
 	// Bring the world background back into view
 	this->worldAssets->FadeBackground(false, 2.0f);
 }
+
+void GameAssets::ApplyRocketThrust(const PaddleRemoteControlRocketProjectile& rocket) {
+    this->rocketMesh->ApplyRocketThrust(rocket);
+}

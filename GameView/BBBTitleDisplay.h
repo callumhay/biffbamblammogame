@@ -35,12 +35,16 @@ public:
     float GetTotalHeight() const;
 
 private:
+    //static const float OUTLINE_SIZE_MULTIPLIER;
+
     float scale;
     std::vector<Texture*> bangTextures;
     
 	ESPPointEmitter biffEmitter, bamEmitter, blammoEmitter;
 	ESPPointEmitter biffTextEmitter, bamTextEmitter, blammoTextEmitter;
     
+    //ESPPointEmitter biffTextOutlineEmitter;//, bamTextOutlineEmitter, blammoTextOutlineEmitter;
+
     float blammoWidth;
 
     DISALLOW_COPY_AND_ASSIGN(BBBTitleDisplay);

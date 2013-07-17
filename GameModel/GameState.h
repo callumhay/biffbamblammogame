@@ -29,7 +29,8 @@ public:
 
 	virtual GameState::GameStateType GetType() const = 0;
 	virtual void Tick(double seconds) = 0;
-	virtual void BallReleaseKeyPressed() = 0;
+    virtual void ShootActionReleaseUse() = 0;
+    virtual void ShootActionContinuousUse(float magnitudePercent) { UNUSED_PARAMETER(magnitudePercent); }
 	virtual void MoveKeyPressed(int dir, float magnitudePercent);
     virtual void BallBoostDirectionPressed(int x, int y);
     virtual void BallBoostDirectionReleased();

@@ -134,5 +134,49 @@ public:
 	int		 RandomNegativeOrPositive();
 	double RandomNumZeroToOne();
 	double RandomNumNegOneToOne();
+    bool RandomTrueOrFalse();
 };
+
+/**
+ * Get a random unsigned integer.
+ * Returns: Random uint.
+ */
+inline unsigned int Randomizer::RandomUnsignedInt() {
+	return this->randomIntGen();
+}
+
+/**
+ * Get a random negative or postivive unity integer.
+ * Returns: +1 or -1, randomly.
+ */
+inline int Randomizer::RandomNegativeOrPositive() {
+	int randomSign = -1;
+	if (this->randomIntGen() % 2 == 0) {
+		randomSign = 1;
+	}
+	return randomSign;
+}
+
+/**
+ * Get a random number in the interval [0,1]
+ * Returns: double in range [0,1].
+ */
+inline double Randomizer::RandomNumZeroToOne() {
+	return this->randomDoubleGen();
+}
+
+/**
+ * Get a random number in the interval [-1, 1]
+ * Returns: double in range [-1, 1]
+ */
+inline double Randomizer::RandomNumNegOneToOne() {
+	double randNum = this->randomDoubleGen();
+	double randomSign = this->RandomNegativeOrPositive();
+	return randNum * randomSign;
+}
+
+inline bool Randomizer::RandomTrueOrFalse() {
+    return (RandomUnsignedInt() % 2 == 0);
+}
+
 #endif

@@ -5798,12 +5798,17 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
 		// If the projectile is not symetrical then we rotate it so that it doesn't look strange in paddle camera mode
 		if (projectileEmitter->GetParticleSizeX() != projectileEmitter->GetParticleSizeY()) {
 			// Calculate the angle to rotate it about the z-axis
-			float angleToRotate = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))))));
+			float angleToRotate = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
+                std::max<float>(-1.0f, Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))))));
 			if (projectile.GetVelocityDirection()[0] > 0) {
 				angleToRotate *= -1.0;
 			}
 			glRotatef(angleToRotate, 0.0f, 0.0f, 1.0f);
 		}
+
+        projectileEmitter->Draw(camera);
+        projectileEmitter->Tick(dT);
+        glPopMatrix();
 	}
 	else {
 		// We want all the emitting, moving particles attached to the projectile to move with the projectile and
@@ -5811,13 +5816,8 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
         Point3D emitPos = Point3D(projectile.GetPosition() - projectile.GetHalfHeight() * projectile.GetVelocityDirection(), projectile.GetZOffset());
 		projectileEmitter->SetEmitPosition(emitPos);
 		projectileEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()[0], -projectile.GetVelocityDirection()[1], 0.0f));
-	}
-	
-	projectileEmitter->Draw(camera);
-	projectileEmitter->Tick(dT);
-
-	if (movesWithProjectile) {
-		glPopMatrix();
+        projectileEmitter->Draw(camera);
+        projectileEmitter->Tick(dT);
 	}
 }
 

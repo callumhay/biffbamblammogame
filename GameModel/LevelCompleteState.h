@@ -25,7 +25,9 @@ public:
 	}
 
 	void Tick(double seconds);
-	void BallReleaseKeyPressed() { /* does nothing */ } 
+	void ShootActionReleaseUse() {
+        // does nothing
+    } 
 
 private:
     //bool firstTickDone;

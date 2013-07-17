@@ -43,11 +43,12 @@ class BossWeakpoint;
 class AbstractBossBodyPart;
 class Boss;
 class BossEffectEventInfo;
+class PaddleRemoteControlRocketProjectile;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
- * about any types of events that are occuring within the game model.
- * This class will receive occurances of those events and tell all registered
+ * about any types of events that are occurring within the game model.
+ * This class will receive occurrences of those events and tell all registered
  * listeners about them.
  */
 class GameEventManager {
@@ -122,6 +123,8 @@ public:
 	void ActionProjectileRemoved(const Projectile& projectile);
 	void ActionRocketExploded(const RocketProjectile& rocket);
     void ActionMineExploded(const MineProjectile& mine);
+    void ActionRemoteControlRocketFuelWarning(const PaddleRemoteControlRocketProjectile& rocket);
+    void ActionRemoteControlRocketThrustApplied(const PaddleRemoteControlRocketProjectile& rocket);
 
 	void ActionBeamSpawned(const Beam& beam);
 	void ActionBeamChanged(const Beam& beam);

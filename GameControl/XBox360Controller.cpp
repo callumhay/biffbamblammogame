@@ -157,12 +157,18 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
         controllerState.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
 
         if (!this->triggerActionOn) {
-		    this->model->ShootActionReleaseUse();
+            this->model->ShootActionReleaseUse();
             this->triggerActionOn = true;
         }
+
+        this->model->ShootActionContinuousUse(
+            (std::max<float>(controllerState.Gamepad.bLeftTrigger, controllerState.Gamepad.bRightTrigger) - XINPUT_GAMEPAD_TRIGGER_THRESHOLD) / 
+            static_cast<float>(std::numeric_limits<BYTE>::max() - XINPUT_GAMEPAD_TRIGGER_THRESHOLD));
+
     }
     else if (this->triggerActionOn) {
         this->triggerActionOn = false;
+        this->model->ShootActionContinuousUse(0.0f);
     }
 
     // Special stuff (ball bullet time)...

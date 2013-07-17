@@ -129,6 +129,8 @@ public:
 	void ActivateLastBallDeathEffects(const GameBall& lastBall);
 	void DeactivateLastBallDeathEffects();
 
+    void ApplyRocketThrust(const PaddleRemoteControlRocketProjectile& rocket);
+
     void ReinitializeAssets();
 
     GameLightAssets* GetLightAssets() const {

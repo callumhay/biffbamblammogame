@@ -12,12 +12,14 @@
 #include "BBBTitleDisplay.h"
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
-
+#include "../BlammoEngine/Vector.h"
 #include "../ResourceManager.h"
 
 const char* BBBTitleDisplay::TITLE_BIFF_TEXT    = "Biff!";
 const char* BBBTitleDisplay::TITLE_BAM_TEXT     = "Bam!!";
 const char* BBBTitleDisplay::TITLE_BLAMMO_TEXT  = "Blammo!?!";
+
+//const float BBBTitleDisplay::OUTLINE_SIZE_MULTIPLIER = 1.04f;
 
 BBBTitleDisplay::BBBTitleDisplay(float scale) : blammoWidth(0), scale(scale) {
 
@@ -28,6 +30,7 @@ BBBTitleDisplay::BBBTitleDisplay(float scale) : blammoWidth(0), scale(scale) {
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D));
 
     // Setup the full title display...
+    static const float TEXT_DROP_SHADOW_SCALE_COEFF = 0.06f;
 
     // "Biff!" Bang Title Text
 	this->biffEmitter.SetSpawnDelta(ESPInterval(-1, -1));
@@ -47,12 +50,23 @@ BBBTitleDisplay::BBBTitleDisplay(float scale) : blammoWidth(0), scale(scale) {
 	this->biffTextEmitter.SetParticleRotation(ESPInterval(-10));
 	this->biffTextEmitter.SetParticleSize(ESPInterval(scale*1), ESPInterval(scale*1));
 	
+    //this->biffTextOutlineEmitter.SetSpawnDelta(ESPInterval(-1, -1));
+    //this->biffTextOutlineEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    //this->biffTextOutlineEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+    //this->biffTextOutlineEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    //this->biffTextOutlineEmitter.SetParticleAlignment(ESP::ScreenAligned);
+    //this->biffTextOutlineEmitter.SetParticleRotation(ESPInterval(-10));
+    //this->biffTextOutlineEmitter.SetParticleSize(ESPInterval(scale*OUTLINE_SIZE_MULTIPLIER), ESPInterval(scale*OUTLINE_SIZE_MULTIPLIER));
+    //this->biffTextOutlineEmitter.SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+
 	TextLabel2D biffTitleText(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge),
         TITLE_BIFF_TEXT);
-	biffTitleText.SetDropShadow(Colour(0,0,0), 0.1f*scale);
+	biffTitleText.SetDropShadow(Colour(0,0,0), TEXT_DROP_SHADOW_SCALE_COEFF*scale);
     biffTitleText.SetScale(scale);
 	this->biffTextEmitter.SetParticles(1, biffTitleText);
+    //biffTitleText.SetDropShadowAmount(0.0f);
+    //this->biffTextOutlineEmitter.SetParticles(1, biffTitleText);
 
 	// "Bam!!" Bang title text
 	this->bamEmitter.SetSpawnDelta(ESPInterval(-1, -1));
@@ -75,7 +89,7 @@ BBBTitleDisplay::BBBTitleDisplay(float scale) : blammoWidth(0), scale(scale) {
 	TextLabel2D bamTitleText(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge),
         TITLE_BAM_TEXT);
-	bamTitleText.SetDropShadow(Colour(0,0,0), 0.1f*scale);
+	bamTitleText.SetDropShadow(Colour(0,0,0), TEXT_DROP_SHADOW_SCALE_COEFF*scale);
     bamTitleText.SetScale(scale);
 	this->bamTextEmitter.SetParticles(1, bamTitleText);
 
@@ -100,7 +114,7 @@ BBBTitleDisplay::BBBTitleDisplay(float scale) : blammoWidth(0), scale(scale) {
 	TextLabel2D blammoTitleText(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), 
 		TITLE_BLAMMO_TEXT);
-	blammoTitleText.SetDropShadow(Colour(0,0,0), 0.1f*scale);
+	blammoTitleText.SetDropShadow(Colour(0,0,0), TEXT_DROP_SHADOW_SCALE_COEFF*scale);
     blammoTitleText.SetScale(scale);
 	this->blammoWidth = blammoTitleText.GetLastRasterWidth();
 	this->blammoTextEmitter.SetParticles(1, blammoTitleText);
@@ -124,6 +138,10 @@ void BBBTitleDisplay::Draw(float x, float y, const Camera& camera) {
 	this->biffEmitter.Tick(0.1);
 	this->biffEmitter.Draw(camera);
 
+    //this->biffTextOutlineEmitter.OverwriteEmittedPosition(BIFF_EMIT_COORD);
+    //this->biffTextOutlineEmitter.Tick(0.1);
+    //this->biffTextOutlineEmitter.Draw(camera);
+
 	this->biffTextEmitter.OverwriteEmittedPosition(BIFF_EMIT_COORD);
 	this->biffTextEmitter.Tick(0.1);
 	this->biffTextEmitter.Draw(camera);
@@ -140,7 +158,7 @@ void BBBTitleDisplay::Draw(float x, float y, const Camera& camera) {
 	this->bamTextEmitter.Draw(camera);
 
 	// Draw the "Blammo!?!" Text
-	Point3D BLAMMO_EMIT_COORD = Point3D(x + this->scale*11.0f, y - this->scale*6.5f, 0);
+	Point3D BLAMMO_EMIT_COORD = Point3D(x + this->scale*11.5f, y - this->scale*6.75f, 0);
 
 	this->blammoEmitter.OverwriteEmittedPosition(BLAMMO_EMIT_COORD);
 	this->blammoEmitter.Tick(0.1);

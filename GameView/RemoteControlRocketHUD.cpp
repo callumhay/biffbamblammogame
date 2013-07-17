@@ -19,11 +19,14 @@
 const float RemoteControlRocketHUD::MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM = 150.0f;
 
 RemoteControlRocketHUD::RemoteControlRocketHUD(GameAssets& assets) : 
-moveHint(assets.GetTutorialAssets(), "Rocket Control"), isActive(false), 
-rocketExplodeCountdown(PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS) {
+moveHint(assets.GetTutorialAssets(), "Movement"), 
+thrustHint(assets.GetTutorialAssets(), "Thrust"),
+isActive(false), rocketExplodeCountdown(PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS) {
     
+    std::list<GameViewConstants::XBoxButtonType> xboxButtonTypes;
     std::list<GameViewConstants::KeyboardButtonType> keyboardButtonTypes;
     std::list<std::string> buttonTexts;
+    std::list<Colour> buttonColours;
 
     // Initialize the hints...
     
@@ -38,7 +41,19 @@ rocketExplodeCountdown(PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUN
     
     this->moveHint.SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
 
-    // TODO: Rocket detonate hint?
+    // Rocket thrust hint
+    xboxButtonTypes.clear();
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    buttonTexts.clear();
+    buttonTexts.push_back("RT");
+    buttonTexts.push_back("LT");
+    buttonColours.clear();
+    buttonColours.push_back(Colour(1,1,1));
+    buttonColours.push_back(Colour(1,1,1));
+
+    this->thrustHint.SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+    this->thrustHint.SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
 }
 
 RemoteControlRocketHUD::~RemoteControlRocketHUD() {
@@ -50,10 +65,15 @@ void RemoteControlRocketHUD::Draw(double dT, const Camera& camera) {
     }
 
     // Place the hint in the correct location on-screen
-    this->moveHint.SetTopLeftCorner((camera.GetWindowWidth() - this->moveHint.GetWidth()) / 2.0f, 
-        this->moveHint.GetHeight() + MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM);
+    float yPos = this->moveHint.GetHeight() + MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM;
+    this->moveHint.SetTopLeftCorner((camera.GetWindowWidth() - this->moveHint.GetWidth()) / 2.0f, yPos);
     this->moveHint.Tick(dT);
     this->moveHint.Draw(camera);
+
+    yPos -= (this->moveHint.GetHeight() + 50);
+    this->thrustHint.SetTopLeftCorner((camera.GetWindowWidth() - this->moveHint.GetWidth()) / 2.0f, yPos);
+    this->thrustHint.Tick(dT);
+    this->thrustHint.Draw(camera);
 
     this->rocketExplodeCountdown.Draw(camera, dT, 
         PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS - this->rocket->GetTimeUntilFuelRunsOut());
@@ -64,6 +84,7 @@ void RemoteControlRocketHUD::Activate(const PaddleRemoteControlRocketProjectile*
         return;
     }
     this->moveHint.Show(0.5, 1.0);
+    this->thrustHint.Show(0.5, 1.0);
     this->isActive = true;
     this->rocket = rocket;
     this->rocketExplodeCountdown.Reset();
@@ -74,12 +95,14 @@ void RemoteControlRocketHUD::Deactivate() {
         return;
     }
     this->moveHint.Unshow(0.0, 0.5);
+    this->thrustHint.Unshow(0.0, 0.5);
     this->isActive = false;
     this->rocket = NULL;
 }
 
 void RemoteControlRocketHUD::Reinitialize() {
     this->moveHint.Unshow(0.0, 0.0, true);
+    this->thrustHint.Unshow(0.0, 0.0, true);
     this->isActive = false;
     this->rocket   = NULL;
     this->rocketExplodeCountdown.Reset();

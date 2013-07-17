@@ -28,7 +28,7 @@ public:
 		UNUSED_PARAMETER(seconds);
 		// Do nothing, player is dead.
 	}
-	void BallReleaseKeyPressed() {
+	void ShootActionReleaseUse() {
 		// Do nothing, ball is dead as is player.
 	}
 
