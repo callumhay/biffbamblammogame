@@ -36,7 +36,7 @@ mouseLabel(NULL), flashAnim(NULL), alphaWhenShowing(1.0f) {
 
     assert(tutorialAssets != NULL);
 
-    this->SetActionName(action);
+    this->SetActionName(action, ":");
     this->actionLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
     this->actionLabel.SetDropShadow(Colour(0,0,0), 0.10f);
 
@@ -60,6 +60,10 @@ ButtonTutorialHint::~ButtonTutorialHint() {
         delete this->flashAnim;
         this->flashAnim = NULL;
     }
+}
+
+void ButtonTutorialHint::SetActionName(const std::string& action, const std::string& separator) {
+    this->actionLabel.SetText(action + separator + " ");
 }
 
 void ButtonTutorialHint::ClearKeyboardKeyLabels() {

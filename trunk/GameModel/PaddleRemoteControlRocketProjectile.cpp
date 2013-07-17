@@ -23,8 +23,9 @@ const float PaddleRemoteControlRocketProjectile::MAX_VELOCITY_WITH_THRUST   = 14
 const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_ACCELERATION       = 9.0f; 
 const float PaddleRemoteControlRocketProjectile::DECELLERATION_OF_APPLIED_ACCEL = 16.0f;
 
-const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_THRUST   = 50.0f; 
-const float PaddleRemoteControlRocketProjectile::THRUST_DECREASE_RATE = 100.0f;
+const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_THRUST        = 50.0f; 
+const float PaddleRemoteControlRocketProjectile::THRUST_DECREASE_RATE      = 200.0f;
+const double PaddleRemoteControlRocketProjectile::MIN_TIME_BETWEEN_THRUSTS = 1.0;
 
 const float PaddleRemoteControlRocketProjectile::STARTING_FUEL_AMOUNT          = 100.0f;
 const double PaddleRemoteControlRocketProjectile::RATE_OF_FUEL_CONSUMPTION     = STARTING_FUEL_AMOUNT / TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS;
@@ -33,13 +34,14 @@ const float PaddleRemoteControlRocketProjectile::FUEL_AMOUNT_TO_START_FLASHING =
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(
     const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height) :
 RocketProjectile(spawnLoc, rocketVelDir, width, height), currAppliedAccelDir(0.0f, 0.0f), currAppliedAccelMag(0.0f),
-currAppliedThrust(0.0f), currFuelAmt(STARTING_FUEL_AMOUNT), currFlashColourAmt(0.0f), currFlashFreq(0), flashTimeCounter(0) {
+currAppliedThrust(0.0f), currFuelAmt(STARTING_FUEL_AMOUNT), currFlashColourAmt(0.0f), currFlashFreq(0), flashTimeCounter(0),
+timeUntilThrustIsAvailable(0.0) {
 }
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy) : 
 RocketProjectile(copy), currAppliedAccelDir(copy.currAppliedAccelDir), currAppliedAccelMag(copy.currAppliedAccelMag),
 currAppliedThrust(copy.currAppliedThrust), currFuelAmt(copy.currFuelAmt), currFlashColourAmt(copy.currFlashColourAmt), 
-currFlashFreq(copy.currFlashFreq), flashTimeCounter(copy.flashTimeCounter) {
+currFlashFreq(copy.currFlashFreq), flashTimeCounter(copy.flashTimeCounter), timeUntilThrustIsAvailable(copy.timeUntilThrustIsAvailable) {
 }
 
 PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
@@ -100,6 +102,11 @@ void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& 
         if (this->currAppliedThrust < 0.0f) {
             this->currAppliedThrust = 0.0f;
         }
+
+        this->timeUntilThrustIsAvailable -= seconds;
+        if (this->timeUntilThrustIsAvailable < 0.0) {
+            this->timeUntilThrustIsAvailable = 0.0;
+        }
     }
 
     RocketProjectile::Tick(seconds, model);
@@ -150,10 +157,28 @@ void PaddleRemoteControlRocketProjectile::ControlRocketThrust(float magnitudePer
         return;
     }
     float prevThrust = this->currAppliedThrust;
-    this->currAppliedThrust = magnitudePercent * MAX_APPLIED_THRUST;
+    float newThrust  = magnitudePercent * MAX_APPLIED_THRUST;
 
-    if (prevThrust == 0.0f && this->currAppliedThrust > 0.0f) {
-        // EVENT: Thrust was just applied to the rocket...
-        GameEventManager::Instance()->ActionRemoteControlRocketThrustApplied(*this);
+    if (this->timeUntilThrustIsAvailable <= 0.0) {
+        this->currAppliedThrust = newThrust;
+    }
+    else {
+        this->currAppliedThrust = std::max<float>(newThrust, prevThrust);
+    }
+
+    if (prevThrust == 0.0f && this->currAppliedThrust > 0.2f*MAX_APPLIED_THRUST) {
+        if (this->timeUntilThrustIsAvailable <= 0.0) {
+            // EVENT: Thrust was just applied to the rocket...
+            GameEventManager::Instance()->ActionRemoteControlRocketThrustApplied(*this);
+            this->timeUntilThrustIsAvailable = MIN_TIME_BETWEEN_THRUSTS;
+        }
+        else {
+            this->currAppliedThrust = 0.0f;
+        }
+    }
+    else if (this->currAppliedThrust == 0.0f && prevThrust > 0.0f) {
+        // Put a tiny wait in between thrusts, this makes sure that the emitters
+        // don't go haywire and spam particles when the player is pulsing the controls
+        this->timeUntilThrustIsAvailable = 0.1;
     }
 }

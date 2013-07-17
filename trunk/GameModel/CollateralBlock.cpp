@@ -56,6 +56,24 @@ bool CollateralBlock::ProjectilePassesThrough(const Projectile* projectile) cons
 }
 
 LevelPiece* CollateralBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+    
+    // This shouldn't happen, but just to make sure we don't do a infinite loop between this
+    // function and detonate check to make sure that we're in a state that allows this block to be destroyed
+    if (this->currState != CollateralBlock::InitialState) {
+        assert(false);
+        return this;
+    }
+
+    // Check to see what the method of destruction is, in certain cases we don't destroy this block, we instead
+    // detonate it...
+    bool isAllowedMethodOfDestruction = (method == LevelPiece::IceShatterDestruction || 
+                                         method == LevelPiece::CollateralDestruction ||
+                                         method == LevelPiece::DisintegrationDestruction ||
+                                         method == LevelPiece::TeslaDestruction);
+
+    if (!isAllowedMethodOfDestruction) {
+        return this->Detonate(gameModel);
+    }
 
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
@@ -269,9 +287,6 @@ LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 	assert(this->currState == CollateralBlock::InitialState);
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-        // This shouldn't happen...
-        assert(false);
-
 		// EVENT: Ice was shattered
 		GameEventManager::Instance()->ActionBlockIceShattered(*this);
         // Collateral blocks that are frozen DONT detonate, they get destroyed

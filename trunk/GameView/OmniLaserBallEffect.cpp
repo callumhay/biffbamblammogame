@@ -69,7 +69,7 @@ void OmniLaserBallEffect::Draw(double dT, bool doTick, const Camera& camera, con
     glMultMatrixf(screenAlignMatrix.begin());
     glRotatef(this->rotAngleAnim.GetInterpolantValue(), 0, 0, 1);
 
-    glColor4f(omniLaserColour.R(), omniLaserColour.G(), omniLaserColour.B(), 1);
+    glColor4f(omniLaserColour.R(), omniLaserColour.G(), omniLaserColour.B(), ball.GetAlpha());
     this->sentryTexture->BindTexture();
     this->DrawSentries(ball, sentrySize);
 

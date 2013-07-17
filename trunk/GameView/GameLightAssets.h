@@ -60,6 +60,7 @@ public:
 	PointLight& GetBallLight() { return this->ballLight; };
 
     void SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes, const BasicPointLight& bgFillAttributes);
+    void SetForegroundLightDefaults(const BasicPointLight& fgKeyAttributes, const BasicPointLight& fgFillAttributes);
 
 #ifdef _DEBUG
 	void DebugDrawLights() const;
@@ -85,15 +86,10 @@ private:
     BasicPointLight defaultBGKeyLightProperties;
     BasicPointLight defaultBGFillLightProperties;
 
+    BasicPointLight defaultFGKeyLightProperties;
+    BasicPointLight defaultFGFillLightProperties;
+
     DISALLOW_COPY_AND_ASSIGN(GameLightAssets);
 };
-
-inline void GameLightAssets::SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes,
-                                                        const BasicPointLight& bgFillAttributes) {
-    this->defaultBGKeyLightProperties  = bgKeyAttributes;
-    this->defaultBGFillLightProperties = bgFillAttributes;
-    this->bgKeyLight.SetFromBasicPointLight(bgKeyAttributes);
-    this->bgFillLight.SetFromBasicPointLight(bgFillAttributes);
-}
 
 #endif
