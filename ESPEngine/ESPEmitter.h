@@ -86,6 +86,7 @@ public:
 	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);
     void SetParticleColourPalette(const std::vector<Colour>& colours);
 	void SetParticleAlpha(const ESPInterval& alpha);
+    void SetAliveParticleAlphaMax(float alpha);
 	void SetParticleRotation(const ESPInterval& particleRot);
 	void SetNumParticleLives(int lives);
 	void SetIsReversed(bool isReversed);

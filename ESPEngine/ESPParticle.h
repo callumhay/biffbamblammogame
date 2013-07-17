@@ -119,6 +119,9 @@ public:
 	void SetAlpha(float alpha) {
 		this->alpha = alpha;
 	}
+    float GetAlpha() const {
+        return this->alpha;
+    }
 
     void ResetLifespanLength(double secs) {
         this->totalLifespan   = secs;

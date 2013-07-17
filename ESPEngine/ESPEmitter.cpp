@@ -602,6 +602,15 @@ void ESPEmitter::SetParticleAlpha(const ESPInterval& alpha) {
 	}
 }
 
+void ESPEmitter::SetAliveParticleAlphaMax(float alpha) {
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+        iter != this->aliveParticles.end(); ++iter) {
+
+        ESPParticle* currParticle = *iter;
+        currParticle->SetAlpha(std::min<float>(alpha, currParticle->GetAlpha()));
+    }
+}
+
 void ESPEmitter::SetNumParticleLives(int lives) {
 	assert(lives >= ESPParticle::INFINITE_PARTICLE_LIVES);
     

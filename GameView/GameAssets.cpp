@@ -465,15 +465,14 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
             }
 		}
 
-		// Draw the ball model...
-		
-		// Obtain the colour of the ball from the model, if it's completely invisible
-		// then just skip the rest of the draw calls
-		const ColourRGBA& ballColour = currBall->GetColour();
-		if (ballColour.A() < EPSILON) {
-			continue;
-		}
+        // Obtain the colour of the ball from the model, if it's completely invisible
+        // then just skip all of the draw calls
+        const ColourRGBA& ballColour = currBall->GetColour();
+        if (ballColour.A() <= 0.0f) {
+            continue;
+        }
 
+		// Draw the ball model...
 		glPushMatrix();
 		float ballScaleFactor = currBall->GetBallScaleFactor();
 		glTranslatef(ballPos[0], ballPos[1], 0);

@@ -74,6 +74,7 @@ private:
     
     static const float MAX_APPLIED_THRUST;
     static const float THRUST_DECREASE_RATE;
+    static const double MIN_TIME_BETWEEN_THRUSTS;
     
     static const float STARTING_FUEL_AMOUNT;
     static const double RATE_OF_FUEL_CONSUMPTION;
@@ -88,7 +89,8 @@ private:
     Vector2D currAppliedAccelDir; // The current applied acceleration direction vector
     float currAppliedAccelMag;    // The current applied acceleration magnitude scalar
 
-    float currAppliedThrust; // The current applied thrust magnitude
+    float currAppliedThrust;           // The current applied thrust magnitude
+    double timeUntilThrustIsAvailable; // Countdown until when thrust can be used again
 
     Vector2D GetAppliedAcceleration() const { return this->currAppliedAccelMag * this->currAppliedAccelDir; }
     void SetAppliedAcceleration(const Vector2D& accel);

@@ -29,7 +29,7 @@ public:
     float GetWidth() const;
 
     void SetTopLeftCorner(float x, float y);
-    void SetActionName(const std::string& action, bool useEquals = true);
+    void SetActionName(const std::string& action, const std::string& separator = "");
 
     void SetXBoxButton(GameViewConstants::XBoxButtonType buttonType, const std::string& buttonText,
         const Colour& buttonColour);
@@ -109,14 +109,5 @@ private:
 inline void ButtonTutorialHint::SetTopLeftCorner(float x, float y) {
     this->actionLabel.SetTopLeftCorner(x, y);
 }
-
-inline void ButtonTutorialHint::SetActionName(const std::string& action, bool useEquals) {
-    std::string equals("");
-    if (useEquals) { 
-        equals = std::string(" = ");
-    }
-    this->actionLabel.SetText(action + equals);
-}
-
 
 #endif // __BUTTONTUTORIALHINT_H__

@@ -5879,7 +5879,8 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	glTranslatef(loc[0], loc[1], 0);
 
 	uberBallEffectList[1]->SetParticleSize(ESPInterval(3.0f*ball.GetBounds().Radius()));
-	uberBallEffectList[1]->Draw(camera);
+    uberBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    uberBallEffectList[1]->Draw(camera);
 	uberBallEffectList[1]->Tick(dT);
 
 	glPopMatrix();
@@ -5887,7 +5888,8 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	// Draw the trail...
 	uberBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
 	uberBallEffectList[0]->SetEmitPosition(Point3D(ballPos[0], ballPos[1], 0.0f));
-	uberBallEffectList[0]->Draw(camera);
+	uberBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    uberBallEffectList[0]->Draw(camera);
 	uberBallEffectList[0]->Tick(dT);
 }
 
@@ -5920,8 +5922,9 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 	this->ghostBallAccel1.SetAcceleration(Vector3D(accelVec, 0.0f));
 
 	// Draw the ghostly trail for the ball...
-	ghostBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
-	ghostBallEffectList[0]->Draw(camera);
+    ghostBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
+	ghostBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    ghostBallEffectList[0]->Draw(camera);
 	ghostBallEffectList[0]->Tick(dT);
 	
 	glPopMatrix();
@@ -5957,7 +5960,8 @@ void GameESPAssets::DrawFireBallEffects(double dT, const Camera& camera, const G
 		ESPPointEmitter* emitter = *iter;
 
 		emitter->SetParticleSize(ESPInterval(2.33f*ball.GetBounds().Radius(), 3.33f*ball.GetBounds().Radius()));
-		emitter->Draw(camera);
+		emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
+        emitter->Draw(camera);
 		emitter->Tick(dT);
 	}
 
@@ -5998,17 +6002,19 @@ void GameESPAssets::DrawIceBallEffects(double dT, const Camera& camera, const Ga
 	// The aura always needs to be drawn centered on the ball
 	glPushMatrix();
 	glTranslatef(loc[0], loc[1], 0);
+    iceBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
 	iceBallEffectList[0]->Draw(camera);
 	iceBallEffectList[0]->Tick(dT);
+    iceBallEffectList[lastIdx]->SetAliveParticleAlphaMax(ball.GetAlpha());
 	iceBallEffectList[lastIdx]->Draw(camera);
 	iceBallEffectList[lastIdx]->Tick(dT);
 	glPopMatrix();
 
 	for (size_t i = 1; i < lastIdx; i++) {
 		ESPPointEmitter* emitter = iceBallEffectList[i];
-
 		emitter->SetEmitDirection(-Vector3D(dir));
 		emitter->SetEmitPosition(Point3D(loc));
+        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
 		emitter->Draw(camera);
 		emitter->Tick(dT);
 	}
@@ -6042,8 +6048,10 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 			emitter->SetEmitDirection(gravityDir);
 			emitter->Reset();
 		}
-		emitter->Tick(dT);
+
+        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
 		emitter->Draw(camera);
+        emitter->Tick(dT);
 	}
 
 	glPopMatrix();
@@ -6076,8 +6084,9 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 	glTranslatef(loc[0], loc[1], 0);
 
 	this->crazyBallAura->SetParticleSize(ESPInterval(2.75f*ball.GetBounds().Radius()));
-	this->crazyBallAura->Tick(dT);
+    this->crazyBallAura->SetAliveParticleAlphaMax(ball.GetAlpha());
 	this->crazyBallAura->Draw(camera);
+    this->crazyBallAura->Tick(dT);
 	glPopMatrix();
 
 	for (std::vector<ESPPointEmitter*>::iterator iter = crazyBallEffectList.begin();
@@ -6086,8 +6095,9 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 		ESPPointEmitter* emitter = *iter;
 		emitter->SetEmitPosition(ball.GetCenterPosition());
 		emitter->SetEmitDirection(-Vector3D(ball.GetDirection()));
-		emitter->Tick(dT);
+        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
 		emitter->Draw(camera);
+        emitter->Tick(dT);
 	}
 }
 
@@ -6112,7 +6122,8 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
 
     // Draw the aura
 	slowBallEffectList[0]->SetParticleSize(ESPInterval(3.75f * ball.GetBounds().Radius()));
-	slowBallEffectList[0]->Draw(camera);
+	slowBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    slowBallEffectList[0]->Draw(camera);
 	slowBallEffectList[0]->Tick(dT);
 
 	// Draw the tail...
@@ -6121,11 +6132,11 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
         slowBallEffectList[1]->Reset();
     }
 
-
     slowBallEffectList[1]->SetEmitPosition(Point3D(0,0,0) + 0.9f * ball.GetBounds().Radius() * negBallDir);
     slowBallEffectList[1]->SetInitialSpd(ESPInterval(2.0f * ball.GetBounds().Radius() * 3.0f));
     slowBallEffectList[1]->SetEmitDirection(negBallDir);
 	slowBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
+    slowBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
 	slowBallEffectList[1]->Draw(camera);
 	slowBallEffectList[1]->Tick(dT);
 
@@ -6153,7 +6164,8 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
 
     // Draw the aura
 	fastBallEffectList[0]->SetParticleSize(ESPInterval(3.5f * ball.GetBounds().Radius()));
-	fastBallEffectList[0]->Draw(camera);
+	fastBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    fastBallEffectList[0]->Draw(camera);
 	fastBallEffectList[0]->Tick(dT);
 
 	// Draw the tail...
@@ -6166,7 +6178,8 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
     fastBallEffectList[1]->SetInitialSpd(ESPInterval(2.0f * ball.GetBounds().Radius() * 6.0f));
     fastBallEffectList[1]->SetEmitDirection(ballDir);
 	fastBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
-	fastBallEffectList[1]->Draw(camera);
+    fastBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    fastBallEffectList[1]->Draw(camera);
 	fastBallEffectList[1]->Tick(dT);
 
     glPopMatrix();

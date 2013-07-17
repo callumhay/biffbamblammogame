@@ -16,34 +16,17 @@
 const float GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME = 1.0f;
 
 GameLightAssets::GameLightAssets() : 
-// Setup the Foreground lights
-fgKeyLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN),
-fgFillLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN),
 ballLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN) {
 
-    // Setup the Background lights
+    // Setup the Background lights with their default values
     this->SetBackgroundLightDefaults(
         BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.005f),
         BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f));
 
-	// Ball and paddle specific foreground lights
-	this->fgKeyLight.CopyBasicAttributes(this->ballKeyLight);
-	this->ballKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR);
-
-	this->fgFillLight.CopyBasicAttributes(this->ballFillLight);
-	this->ballFillLight.SetDiffuseColour(Colour(0,0,0));
-
-	this->fgKeyLight.CopyBasicAttributes(this->paddleKeyLight);
-	this->paddleKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_COLOUR);
-
-	this->fgFillLight.CopyBasicAttributes(this->paddleFillLight);
-	this->paddleFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_COLOUR);
-
-    this->fgKeyLight.CopyBasicAttributes(this->bossKeyLight);
-    this->bossKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BOSS_KEY_LIGHT_COLOUR);
-
-    this->fgFillLight.CopyBasicAttributes(this->bossFillLight);
-    this->bossFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BOSS_FILL_LIGHT_COLOUR);
+	// Setup the foreground lights (blocks, paddle, ball, bosses, etc.) with their default values
+    this->SetForegroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN));
 }
 
 GameLightAssets::~GameLightAssets() {
@@ -173,32 +156,39 @@ void GameLightAssets::RestoreLightPositionAndAttenuation(GameLightType lightType
 
 	switch (lightType) {
 		case FGKeyLight:
-			this->fgKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, restoreTime);
-            this->fgKeyLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN, restoreTime);
+			this->fgKeyLight.SetLightPositionChange(this->defaultFGKeyLightProperties.GetPosition(), restoreTime);
+            this->fgKeyLight.SetLinearAttenuationChange(this->defaultFGKeyLightProperties.GetLinearAttenuation(), restoreTime);
 			break;
 		case FGFillLight:
-			this->fgFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, restoreTime);
-            this->fgFillLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN, restoreTime);
+			this->fgFillLight.SetLightPositionChange(this->defaultFGFillLightProperties.GetPosition(), restoreTime);
+            this->fgFillLight.SetLinearAttenuationChange(this->defaultFGFillLightProperties.GetLinearAttenuation(), restoreTime);
 			break;
 		case BallKeyLight:
-			this->ballKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_POSITION, restoreTime);
-            this->ballKeyLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN, restoreTime);
+			this->ballKeyLight.SetLightPositionChange(this->defaultFGKeyLightProperties.GetPosition(), restoreTime);
+            this->ballKeyLight.SetLinearAttenuationChange(this->defaultFGKeyLightProperties.GetLinearAttenuation(), restoreTime);
 			break;
 		case BallFillLight:
-			this->ballFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BALL_FILL_LIGHT_POSITION, restoreTime);
-            this->ballFillLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN, restoreTime);
+			this->ballFillLight.SetLightPositionChange(this->defaultFGFillLightProperties.GetPosition(), restoreTime);
+            this->ballFillLight.SetLinearAttenuationChange(this->defaultFGFillLightProperties.GetLinearAttenuation(), restoreTime);
 			break;
 		case PaddleKeyLight:
-			this->paddleKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_POSITION, restoreTime);
-            this->paddleKeyLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN, restoreTime);
+			this->paddleKeyLight.SetLightPositionChange(this->defaultFGKeyLightProperties.GetPosition(), restoreTime);
+            this->paddleKeyLight.SetLinearAttenuationChange(this->defaultFGKeyLightProperties.GetLinearAttenuation(), restoreTime);
 			break;
 		case PaddleFillLight:
-			this->paddleFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_POSITION, restoreTime);
-            this->paddleFillLight.SetLinearAttenuationChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN, restoreTime);
+			this->paddleFillLight.SetLightPositionChange(this->defaultFGFillLightProperties.GetPosition(), restoreTime);
+            this->paddleFillLight.SetLinearAttenuationChange(this->defaultFGFillLightProperties.GetLinearAttenuation(), restoreTime);
 			break;
 
         case BGKeyLight:
+            this->bgKeyLight.SetLightPositionChange(this->defaultBGKeyLightProperties.GetPosition(), restoreTime);
+            this->bgKeyLight.SetLinearAttenuationChange(this->defaultBGKeyLightProperties.GetLinearAttenuation(), restoreTime);
+            break;
         case BGFillLight:
+            this->bgFillLight.SetLightPositionChange(this->defaultBGFillLightProperties.GetPosition(), restoreTime);
+            this->bgFillLight.SetLinearAttenuationChange(this->defaultBGFillLightProperties.GetLinearAttenuation(), restoreTime);
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -266,6 +256,43 @@ void GameLightAssets::GetBossAffectingLights(BasicPointLight& bossKeyLight, Basi
 void GameLightAssets::GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const {
 	this->bgKeyLight.ConvertToBasicPointLight(bgKeyLight);
 	this->bgFillLight.ConvertToBasicPointLight(bgFillLight);
+}
+
+void GameLightAssets::SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes,
+                                                 const BasicPointLight& bgFillAttributes) {
+
+    this->defaultBGKeyLightProperties  = bgKeyAttributes;
+    this->defaultBGFillLightProperties = bgFillAttributes;
+    this->bgKeyLight.SetFromBasicPointLight(bgKeyAttributes);
+    this->bgFillLight.SetFromBasicPointLight(bgFillAttributes);
+}
+
+void GameLightAssets::SetForegroundLightDefaults(const BasicPointLight& fgKeyAttributes,
+                                                 const BasicPointLight& fgFillAttributes) {
+
+    this->defaultFGKeyLightProperties  = fgKeyAttributes;
+    this->defaultFGFillLightProperties = fgFillAttributes;
+
+    this->fgKeyLight.SetFromBasicPointLight(fgKeyAttributes);
+    this->ballKeyLight.SetFromBasicPointLight(fgKeyAttributes);
+    this->paddleKeyLight.SetFromBasicPointLight(fgKeyAttributes);
+    this->bossKeyLight.SetFromBasicPointLight(fgKeyAttributes);
+
+    this->fgFillLight.SetFromBasicPointLight(fgFillAttributes);
+    this->ballFillLight.SetFromBasicPointLight(fgFillAttributes);
+    this->paddleFillLight.SetFromBasicPointLight(fgFillAttributes);
+    this->bossFillLight.SetFromBasicPointLight(fgFillAttributes);
+
+    this->ballKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR);
+    this->ballKeyLight.SetLinearAttenuation(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_ATTEN);
+    this->ballFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BALL_FILL_LIGHT_COLOUR);
+    this->ballFillLight.SetLinearAttenuation(GameViewConstants::GetInstance()->DEFAULT_BALL_FILL_LIGHT_ATTEN);
+
+    this->paddleKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_COLOUR);
+    this->paddleFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_COLOUR);
+
+    this->bossKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BOSS_KEY_LIGHT_COLOUR);
+    this->bossFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BOSS_FILL_LIGHT_COLOUR);
 }
 
 /**

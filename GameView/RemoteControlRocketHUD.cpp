@@ -60,6 +60,9 @@ RemoteControlRocketHUD::~RemoteControlRocketHUD() {
 }
 
 void RemoteControlRocketHUD::Draw(double dT, const Camera& camera) {
+    this->moveHint.Tick(dT);
+    this->thrustHint.Tick(dT);
+
     if (!this->isActive || rocket == NULL) {
         return;
     }
@@ -67,12 +70,10 @@ void RemoteControlRocketHUD::Draw(double dT, const Camera& camera) {
     // Place the hint in the correct location on-screen
     float yPos = this->moveHint.GetHeight() + MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM;
     this->moveHint.SetTopLeftCorner((camera.GetWindowWidth() - this->moveHint.GetWidth()) / 2.0f, yPos);
-    this->moveHint.Tick(dT);
     this->moveHint.Draw(camera);
 
     yPos -= (this->moveHint.GetHeight() + 50);
     this->thrustHint.SetTopLeftCorner((camera.GetWindowWidth() - this->moveHint.GetWidth()) / 2.0f, yPos);
-    this->thrustHint.Tick(dT);
     this->thrustHint.Draw(camera);
 
     this->rocketExplodeCountdown.Draw(camera, dT, 
@@ -83,8 +84,8 @@ void RemoteControlRocketHUD::Activate(const PaddleRemoteControlRocketProjectile*
     if (this->isActive || rocket == NULL) {
         return;
     }
-    this->moveHint.Show(0.5, 1.0);
-    this->thrustHint.Show(0.5, 1.0);
+    this->moveHint.Show(0.5, 2.0);
+    this->thrustHint.Show(0.5, 2.0);
     this->isActive = true;
     this->rocket = rocket;
     this->rocketExplodeCountdown.Reset();
