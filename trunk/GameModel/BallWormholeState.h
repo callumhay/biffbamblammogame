@@ -29,7 +29,7 @@ public:
 
 	void Tick(double seconds);
 	void MoveKeyPressed(int dir, float magnitudePercent);
-	void BallReleaseKeyPressed() {}
+	void ShootActionReleaseUse() {}
 
 private:
 	GameBall* wormholeBall;

@@ -51,7 +51,9 @@ public:
         this->gameModel->SetNextState(GameState::BallOnPaddleStateType);
     }
 
-	void BallReleaseKeyPressed() { /* does nothing */ } 
+	void ShootActionReleaseUse() {
+        // does nothing
+    }
 };
 
 #endif // __LEVELSTARTSTATE_H__

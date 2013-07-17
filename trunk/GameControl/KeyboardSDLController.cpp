@@ -92,6 +92,11 @@ void KeyboardSDLController::Sync(size_t frameID, double dT) {
 		this->model->Move(frameID, 0, 0.0);
 	}
 
+    // Other special actions for hold-down keys...
+    if (this->keyPressed[SDLK_SPACE]) {
+        this->model->ShootActionContinuousUse(1.0f);
+    }
+
 	// Execute any debug functionality for when a button is held down...
 	this->DebugRepeatActions();
 }

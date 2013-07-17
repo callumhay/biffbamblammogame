@@ -37,7 +37,8 @@ public:
 		return GameState::BallInPlayStateType;
 	}
 
-	void BallReleaseKeyPressed();
+	void ShootActionReleaseUse();
+    void ShootActionContinuousUse(float magnitudePercent);
     void MoveKeyPressed(int dir, float magnitudePercent);
     void BallBoostDirectionPressed(int x, int y);
     void BallBoostDirectionReleased();

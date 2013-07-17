@@ -1165,6 +1165,31 @@ void GameEventsListener::MineExplodedEvent(const MineProjectile& mine) {
 	debug_output("EVENT: Mine exploded");
 }
 
+void GameEventsListener::RemoteControlRocketFuelWarningEvent(const PaddleRemoteControlRocketProjectile& rocket) {
+
+    // Vibrate the controller a bit to indicate a dying rocket...
+    if (rocket.GetCurrentFuelAmount() < 10.0f) {
+        GameControllerManager::GetInstance()->VibrateControllers(0.075, 
+            Randomizer::GetInstance()->RandomTrueOrFalse() ? BBBGameController::SoftVibration : BBBGameController::MediumVibration, 
+            Randomizer::GetInstance()->RandomTrueOrFalse() ? BBBGameController::SoftVibration : BBBGameController::MediumVibration);
+    }
+    else {
+        GameControllerManager::GetInstance()->VibrateControllers(0.1, 
+            Randomizer::GetInstance()->RandomTrueOrFalse() ? BBBGameController::SoftVibration : BBBGameController::VerySoftVibration,
+            Randomizer::GetInstance()->RandomTrueOrFalse() ? BBBGameController::SoftVibration : BBBGameController::VerySoftVibration);
+    }
+
+	debug_output("EVENT: Remote controlled rocket warning.");
+}
+
+void GameEventsListener::RemoteControlRocketThrustAppliedEvent(const PaddleRemoteControlRocketProjectile& rocket) {
+    
+    // Let the rocket mesh know about the thrusting...
+    this->display->GetAssets()->ApplyRocketThrust(rocket);
+
+    debug_output("EVENT: Remote controlled rocket thrust applied.");
+}
+
 void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
 	// Add an effect for the new beam...
 	this->display->GetAssets()->GetESPAssets()->AddBeamEffect(beam);

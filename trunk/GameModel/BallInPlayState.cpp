@@ -76,22 +76,41 @@ void BallInPlayState::DebugDropItem(GameItem* item) {
  * The action key was pressed while in play; that could mean several things
  * based on the items currently active for the player.
  */
-void BallInPlayState::BallReleaseKeyPressed() {
+void BallInPlayState::ShootActionReleaseUse() {
 
-    // Always boost the ball when possible (if the player is indicating that they want to)
-    assert(this->gameModel->boostModel != NULL);
-    if (this->gameModel->boostModel->BallBoosterPressed()) {
-        return;
+    // If there's a remote control rocket then we apply thrust to it...
+    PaddleRemoteControlRocketProjectile* remoteControlRocket = this->gameModel->GetActiveRemoteControlRocket();
+    if (remoteControlRocket != NULL) {
+        remoteControlRocket->ControlRocketThrust(1.0f);
     }
 
-	// Check for paddle items that use the action key...
-	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-	paddle->Shoot(this->gameModel);
+    if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == 0x0) {
+        // Always boost the ball when possible (if the player is indicating that they want to),
+        // Regardless, this will be ignored if the boost model isn't in the appropriate state
+        assert(this->gameModel->boostModel != NULL);
+        if (this->gameModel->boostModel->BallBoosterPressed()) {
+            return;
+        }
+    }
+
+    if ((this->gameModel->GetPauseState() & (GameModel::PausePaddle | GameModel::PausePaddleControls)) == 0x0) {
+	    // Check for paddle items that use the action key...
+	    PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+	    paddle->Shoot(this->gameModel);
+    }
+}
+
+void BallInPlayState::ShootActionContinuousUse(float magnitudePercent) {
+    // If there's a remote control rocket then we apply thrust to it...
+    PaddleRemoteControlRocketProjectile* remoteControlRocket = this->gameModel->GetActiveRemoteControlRocket();
+    if (remoteControlRocket != NULL) {
+        remoteControlRocket->ControlRocketThrust(magnitudePercent);
+    }
 }
 
 void BallInPlayState::MoveKeyPressed(int dir, float magnitudePercent) {
 
-    // We need to deal with moving the paddle, and if there's a remote control rocket we move the rocket instead...
+    // If there's a remote control rocket we have to move it...
     PaddleRemoteControlRocketProjectile* remoteControlRocket = this->gameModel->GetActiveRemoteControlRocket();
     if (remoteControlRocket != NULL) {
         remoteControlRocket->ControlRocketSteering(static_cast<PaddleRemoteControlRocketProjectile::RocketSteering>(dir), magnitudePercent);

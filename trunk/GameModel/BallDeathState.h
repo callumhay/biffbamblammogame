@@ -37,7 +37,7 @@ public:
 	}
 
 	void Tick(double seconds);
-	void BallReleaseKeyPressed() {}
+	void ShootActionReleaseUse() {}
 	void MoveKeyPressed(int dir, float magnitudePercent) {
 		UNUSED_PARAMETER(dir);
         UNUSED_PARAMETER(magnitudePercent);

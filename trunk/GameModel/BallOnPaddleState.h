@@ -30,7 +30,7 @@ public:
 		return GameState::BallOnPaddleStateType;
 	}
 	void Tick(double seconds);
-	void BallReleaseKeyPressed();
+	void ShootActionReleaseUse();
 
     void ToggleAllowPaddleBallLaunching(bool allow);
 

@@ -13,8 +13,9 @@
 #define __ROCKETMESH_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../ESPEngine/ESP.h"
 
-#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "CgFxVolumetricEffect.h"
 
 class Mesh;
 class RocketProjectile;
@@ -40,10 +41,27 @@ public:
 	void Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const BasicPointLight& keyLight, 
 	          const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
+    void ApplyRocketThrust(const PaddleRemoteControlRocketProjectile& rocket);
+
 private:
 	ESPParticleScaleEffector pulseEffector;
 	Texture2D* glowTex;
 	ESPPointEmitter* rocketGlowEmitter;
+
+    std::vector<Texture2D*> smokeTextures;
+    Texture2D* sparkTex;
+    ESPParticleColourEffector particleFader;
+    ESPParticleColourEffector particleBurstColourEffector;
+    ESPParticleScaleEffector particleLargeGrowth;
+    ESPParticleRotateEffector loopRotateEffectorCW;
+    ESPParticleRotateEffector loopRotateEffectorCCW;
+    ESPPointEmitter* rocketThrustBurstEmitter;
+    ESPPointEmitter* rocketThrustingSparksEmitter;
+
+    CgFxVolumetricEffect fireEffect;
+    ESPParticleColourEffector hyperBurnColourFader;
+    ESPPointEmitter* rocketThrustHyperBurnEmitter;
+
 
 	Mesh* paddleRocketMesh;
     Mesh* paddleRemoteControlRocketMesh;
@@ -52,7 +70,7 @@ private:
 	
     void DrawBasicRocket(const RocketProjectile* rocket, Mesh* rocketMesh, const Camera& camera, 
         const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
-    void DrawRemoteControlRocket(const PaddleRemoteControlRocketProjectile* rocket, const Camera& camera, 
+    void DrawRemoteControlRocket(const PaddleRemoteControlRocketProjectile* rocket, double dT, const Camera& camera, 
         const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
 	void LoadMeshes();

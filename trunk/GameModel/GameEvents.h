@@ -28,6 +28,7 @@
 #include "BallBoostModel.h"
 #include "SafetyNet.h"
 #include "PaddleMineProjectile.h"
+#include "PaddleRemoteControlRocketProjectile.h"
 #include "BossEffectEventInfo.h"
 
 class Point2D;
@@ -525,25 +526,43 @@ public:
 
 	/**
 	 * Event triggered when a projectile is removed. Only occurs once per removed projectile.
-	 * Arguements: projectile - The projectile that was just removed.
+	 * Arguments: projectile - The projectile that was just removed.
 	 */
     virtual void ProjectileRemovedEvent(const Projectile& projectile) { UNUSED_PARAMETER(projectile); }
 
 	/**
 	 * Event triggered when a rocket explodes. Only occurs once just as it explodes.
-	 * Arguements: rocket - The rocket do'n the explod'n.
+	 * Arguments: rocket - The rocket do'n the explod'n.
 	 */
     virtual void RocketExplodedEvent(const RocketProjectile& rocket) { UNUSED_PARAMETER(rocket); } 
 
 	/**
 	 * Event triggered when a mine explodes. Only occurs once just as it explodes.
-	 * Arguements: mine - The mine that is exploding.
+	 * Arguments: mine - The mine that is exploding.
 	 */
     virtual void MineExplodedEvent(const MineProjectile& mine) { UNUSED_PARAMETER(mine); }
 
 	/**
+	 * Event triggered when a remote controlled rocket is running out of fuel. This occurs multiple times and happens more frequently
+     * as the rocket gets closer to running out of fuel.
+	 * Arguments: rocket - The rocket emitting the warning.
+	 */
+    virtual void RemoteControlRocketFuelWarningEvent(const PaddleRemoteControlRocketProjectile& rocket) {
+        UNUSED_PARAMETER(rocket);
+    }
+
+	/**
+	 * Event triggered when a remote controlled rocket has it's thrust applied. This occurs once every time the
+     * thrust is turned on.
+	 * Arguments: rocket - The rocket that is thrusting.
+	 */
+    virtual void RemoteControlRocketThrustAppliedEvent(const PaddleRemoteControlRocketProjectile& rocket) {
+        UNUSED_PARAMETER(rocket);
+    }
+
+	/**
 	 * Event triggered when a new beam is spawned. Only occurs once per spawned beam.
-	 * Arguements: beam - the beam that was just spawned.
+	 * Arguments: beam - the beam that was just spawned.
 	 */
     virtual void BeamSpawnedEvent(const Beam& beam) { UNUSED_PARAMETER(beam); }
 

@@ -92,6 +92,9 @@ public:
 	void ProjectileRemovedEvent(const Projectile& projectile);
 	void RocketExplodedEvent(const RocketProjectile& rocket);
     void MineExplodedEvent(const MineProjectile& mine);
+    void RemoteControlRocketFuelWarningEvent(const PaddleRemoteControlRocketProjectile& rocket);
+    void RemoteControlRocketThrustAppliedEvent(const PaddleRemoteControlRocketProjectile& rocket);
+
 	void BeamSpawnedEvent(const Beam& beam);
 	void BeamChangedEvent(const Beam& beam);
 	void BeamRemovedEvent(const Beam& beam);

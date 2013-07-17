@@ -24,7 +24,7 @@ public:
 	}
 
 	void Tick(double seconds);
-	void BallReleaseKeyPressed() {
+	void ShootActionReleaseUse() {
 		// Do nothing, the game is over!
 	}
 };

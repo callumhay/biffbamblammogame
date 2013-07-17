@@ -604,7 +604,11 @@ void ESPEmitter::SetParticleAlpha(const ESPInterval& alpha) {
 
 void ESPEmitter::SetNumParticleLives(int lives) {
 	assert(lives >= ESPParticle::INFINITE_PARTICLE_LIVES);
-	
+    
+    if (lives == this->numParticleLives) {
+        return;
+    }
+
 	this->numParticleLives = lives;
 
 	// Go through any already assigned particles and set the lives...

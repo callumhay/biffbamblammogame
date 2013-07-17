@@ -15,10 +15,16 @@
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT = 1.5f;
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT  = 0.69f;
 
-const double PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS = 15.0;
+const double PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS = 20.0;
+
+const float PaddleRemoteControlRocketProjectile::MAX_VELOCITY_BEFORE_THRUST = 4.5f;
+const float PaddleRemoteControlRocketProjectile::MAX_VELOCITY_WITH_THRUST   = 14.0f;
 
 const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_ACCELERATION       = 9.0f; 
 const float PaddleRemoteControlRocketProjectile::DECELLERATION_OF_APPLIED_ACCEL = 16.0f;
+
+const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_THRUST   = 50.0f; 
+const float PaddleRemoteControlRocketProjectile::THRUST_DECREASE_RATE = 100.0f;
 
 const float PaddleRemoteControlRocketProjectile::STARTING_FUEL_AMOUNT          = 100.0f;
 const double PaddleRemoteControlRocketProjectile::RATE_OF_FUEL_CONSUMPTION     = STARTING_FUEL_AMOUNT / TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS;
@@ -27,13 +33,13 @@ const float PaddleRemoteControlRocketProjectile::FUEL_AMOUNT_TO_START_FLASHING =
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(
     const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height) :
 RocketProjectile(spawnLoc, rocketVelDir, width, height), currAppliedAccelDir(0.0f, 0.0f), currAppliedAccelMag(0.0f),
-currFuelAmt(STARTING_FUEL_AMOUNT), currFlashColourAmt(0.0f), currFlashFreq(0), flashTimeCounter(0) {
+currAppliedThrust(0.0f), currFuelAmt(STARTING_FUEL_AMOUNT), currFlashColourAmt(0.0f), currFlashFreq(0), flashTimeCounter(0) {
 }
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy) : 
 RocketProjectile(copy), currAppliedAccelDir(copy.currAppliedAccelDir), currAppliedAccelMag(copy.currAppliedAccelMag),
-currFuelAmt(copy.currFuelAmt), currFlashColourAmt(copy.currFlashColourAmt), currFlashFreq(copy.currFlashFreq),
-flashTimeCounter(copy.flashTimeCounter) {
+currAppliedThrust(copy.currAppliedThrust), currFuelAmt(copy.currFuelAmt), currFlashColourAmt(copy.currFlashColourAmt), 
+currFlashFreq(copy.currFlashFreq), flashTimeCounter(copy.flashTimeCounter) {
 }
 
 PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
@@ -75,18 +81,24 @@ void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& 
     if (this->IsLoadedInCannonBlock()) {
         // Remove all applied acceleration if the rocket is inside a cannon block...
         this->SetAppliedAcceleration(Vector2D(0,0));
+        this->currAppliedThrust = 0.0f;
     }
     else {
         // Update the acceleration/velocity/position of the rocket based on the current steering
-        if (this->GetVelocityMagnitude() >= 0.5f * this->GetMaxVelocityMagnitude()) {
-            this->SetVelocity(this->GetVelocity() + seconds * this->GetAppliedAcceleration());
+        if (!this->IsRocketStillTakingOff()) {
+            this->SetVelocity(this->GetVelocity() + (seconds * this->GetAppliedAcceleration()) + 
+                (seconds * this->currAppliedThrust * this->GetVelocityDirection()));
         }
         
-        double dA = DECELLERATION_OF_APPLIED_ACCEL * seconds;
-        this->currAppliedAccelMag -= dA;
+        this->currAppliedAccelMag -= DECELLERATION_OF_APPLIED_ACCEL * seconds;
         if (this->currAppliedAccelMag <= 0.0f) {
             this->currAppliedAccelMag = 0.0f;
             this->currAppliedAccelDir = Vector2D(0,0);
+        }
+
+        this->currAppliedThrust -= THRUST_DECREASE_RATE * seconds;
+        if (this->currAppliedThrust < 0.0f) {
+            this->currAppliedThrust = 0.0f;
         }
     }
 
@@ -123,9 +135,25 @@ bool PaddleRemoteControlRocketProjectile::ModifyLevelUpdate(double dT, GameModel
 
             if (this->flashTimeCounter >= currFlashTime) {
                 this->flashTimeCounter = 0.0;
+                // EVENT: Fuel is running out pulse event
+                GameEventManager::Instance()->ActionRemoteControlRocketFuelWarning(*this);
             }
         }
     }
 
     return false;
+}
+
+void PaddleRemoteControlRocketProjectile::ControlRocketThrust(float magnitudePercent) {
+    // Can't control a rocket if it's inside a cannon block or if it's very early in take-off
+    if (this->IsLoadedInCannonBlock() || this->IsRocketStillTakingOff()) { 
+        return;
+    }
+    float prevThrust = this->currAppliedThrust;
+    this->currAppliedThrust = magnitudePercent * MAX_APPLIED_THRUST;
+
+    if (prevThrust == 0.0f && this->currAppliedThrust > 0.0f) {
+        // EVENT: Thrust was just applied to the rocket...
+        GameEventManager::Instance()->ActionRemoteControlRocketThrustApplied(*this);
+    }
 }

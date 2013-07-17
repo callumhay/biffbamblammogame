@@ -495,6 +495,20 @@ void GameEventManager::ActionMineExploded(const MineProjectile& mine) {
 	}	
 }
 
+void GameEventManager::ActionRemoteControlRocketFuelWarning(const PaddleRemoteControlRocketProjectile& rocket) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->RemoteControlRocketFuelWarningEvent(rocket);
+    }
+}
+
+void GameEventManager::ActionRemoteControlRocketThrustApplied(const PaddleRemoteControlRocketProjectile& rocket) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->RemoteControlRocketThrustAppliedEvent(rocket);
+    }
+}
+
 // Action for when a beam is fired/spawned
 void GameEventManager::ActionBeamSpawned(const Beam& beam) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

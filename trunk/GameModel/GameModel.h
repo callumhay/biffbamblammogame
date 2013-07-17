@@ -346,8 +346,8 @@ public:
 
 		// Can only move if the state exists and is not paused
 		if (this->currState != NULL &&
-		   (this->pauseBitField & GameModel::PauseState) == 0x0  &&
-           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
+		    (this->pauseBitField & GameModel::PauseState) == 0x0  &&
+            (this->pauseBitField & GameModel::PauseGame) == 0x0) {
 
 		    this->currState->MoveKeyPressed(dir, magnitudePercent);
 		}
@@ -355,14 +355,22 @@ public:
 
 	// Release the ball from the paddle, shoot lasers and activate other power ups
 	void ShootActionReleaseUse() {
-		// Can only release the ball if the state exists and is not paused
-		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
-			 (this->pauseBitField & GameModel::PauseState) == 0x0 &&
-             (this->pauseBitField & GameModel::PauseGame) == 0x0 &&
-             (this->pauseBitField & GameModel::PausePaddleControls) == 0x0) {
-			this->currState->BallReleaseKeyPressed();
+		if (this->currState != NULL &&
+			(this->pauseBitField & GameModel::PauseState) == 0x0 &&
+            (this->pauseBitField & GameModel::PauseGame) == 0x0) {
+
+		    this->currState->ShootActionReleaseUse();
 		}
 	}
+
+    void ShootActionContinuousUse(float magnitudePercent = 1.0f) {
+        if (this->currState != NULL &&
+            (this->pauseBitField & GameModel::PauseState) == 0x0 &&
+            (this->pauseBitField & GameModel::PauseGame) == 0x0) {
+
+            this->currState->ShootActionContinuousUse(magnitudePercent);
+        }
+    }
 
     void ToggleAllowPaddleBallLaunching(bool allow);
 
