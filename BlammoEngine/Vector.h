@@ -230,12 +230,7 @@ public:
         return v_[ idx ];
     }
 
-    // Robust equivalence
-    bool operator==(const Vector3D &other) {
-        return 	fabs(v_[0] - other[0]) < EPSILON &&
-            fabs(v_[1] - other[1]) < EPSILON &&
-            fabs(v_[2] - other[2]) < EPSILON;
-    }
+    bool IsZero() const;
 
     float dot(const Vector3D& other) const {
         return v_[0]*other.v_[0] + v_[1]*other.v_[1] + v_[2]*other.v_[2];
@@ -402,6 +397,11 @@ inline bool operator ==(const Vector3D& a, const Vector3D& b) {
 
 inline bool operator !=(const Vector3D& a, const Vector3D& b) {
     return !(a==b);
+}
+
+inline bool Vector3D::IsZero() const {
+    static Vector3D zeroVec3D(0,0,0);
+    return (*this == zeroVec3D);
 }
 
 Vector3D operator *(const Matrix4x4& M, const Vector3D& v);

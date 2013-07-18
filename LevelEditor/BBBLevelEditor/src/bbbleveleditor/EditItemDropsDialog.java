@@ -375,6 +375,7 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 				itemDropTypeStrs.add("all");
 			}
 			else {
+				/*
 				// Go through the string and eliminate duplicates...
 				Iterator<String> iter = itemDropTypeStrs.iterator();
 				String currStr = "";
@@ -386,6 +387,7 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 					}
 					lastStr = currStr;
 				}
+				*/
 			}
 			
 			this.itemDropPiece.setItemDropTypes(itemDropTypeStrs);

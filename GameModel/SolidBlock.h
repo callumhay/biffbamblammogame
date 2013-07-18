@@ -25,6 +25,10 @@ public:
 		return LevelPiece::Solid;
 	}
 
+    bool IsExplosionStoppedByPiece(const Point2D&) {
+        return true;
+    }
+
     bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
         UNUSED_PARAMETER(b);
         return true;

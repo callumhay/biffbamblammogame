@@ -331,7 +331,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		if (currBall->GetBallType() == GameBall::NormalBall) {
 			// Normal ball with a regular light
 			avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0);
-			avgBallColour = avgBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
+			avgBallColour   = avgBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
 			visibleBallCount++;
 		}
 		else {
@@ -347,12 +347,16 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
                         this->espAssets->DrawSlowBallEffects(dT, camera, *currBall);
 				    }
+                    currBallColour = currBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
+                    numColoursApplied++;
                 }
                 else if ((currBall->GetBallType() & GameBall::FastBall) == GameBall::FastBall) {
 				    // We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
                         this->espAssets->DrawFastBallEffects(dT, camera, *currBall);
 				    }
+                    currBallColour = currBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
+                    numColoursApplied++;
                 }
 
 			    // GHOST BALL CHECK
@@ -492,7 +496,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		// Always make the colour of the invisiball to be plain white - we don't want to affect
 		// the cloaking effect
         glPushAttrib(GL_DEPTH_BUFFER_BIT);
-		if (ballIsInvisible) {
+		if (ballIsInvisible || ballColour.A() < 1.0f) {
 			glColor4f(1.0f, 1.0f, 1.0f, ballColour.A());
 
             // Disable the depth draw, this will make sure the ball doesn't get outlined
@@ -522,7 +526,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		avgBallPosition = avgBallPosition + Vector3D(worldT[0], worldT[1], 0.0f);
 		avgBallColour = avgBallColour / visibleBallCount;
 		
-		// Grab a trasform matrix from the game model to say where the ball light is
+		// Grab a transform matrix from the game model to say where the ball light is
 		// if the level is flipped or some such thing
 		Point3D newAvgBallPos =  gameModel.GetTransformInfo()->GetGameTransform() * avgBallPosition;
 

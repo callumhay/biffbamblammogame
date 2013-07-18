@@ -14,7 +14,10 @@
 
 #include "LevelPiece.h"
 
+class GameLevel;
+
 class TeslaBlock : public LevelPiece {
+    friend class GameLevel;
 public:
 	static const float LIGHTNING_ARC_RADIUS;
 
@@ -24,6 +27,10 @@ public:
 	LevelPieceType GetType() const { 
 		return LevelPiece::Tesla;
 	}
+
+    bool IsExplosionStoppedByPiece(const Point2D&) {
+        return true;
+    }
 
     bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
         UNUSED_PARAMETER(b);    
@@ -106,22 +113,34 @@ public:
 	void SetConnectedTeslaBlockList(const std::list<TeslaBlock*>& teslaBlocks);
 	const std::list<TeslaBlock*>& GetConnectedTeslaBlockList() const;
 
-	void SetElectricityIsActive(bool isActive);
 	bool GetIsElectricityActive() const;
-	void SetIsChangable(bool isChangable);
 	bool GetIsChangable() const;
 	std::list<TeslaBlock*> GetLightningArcTeslaBlocks() const;
 	std::list<TeslaBlock*> GetActiveConnectedTeslaBlocks() const;
 
 	const Point2D& GetLightningOrigin() const;
+    
+    float GetRotationAmount() const;
+    void SetRotationAmount(float rotAmt);
+
+    const Vector3D& GetRotationAxis() const;
 
 private:
-	bool electricityIsActive;											// Whether the lightning/electric current is active on this tesla block
-	bool isChangable;															// Whether the state (on/off) of the tesla block can be changed via game play
-	std::list<TeslaBlock*> connectedTeslaBlocks;	// All tesla blocks that this one can connect to when active (and when they're active)
+	bool electricityIsActive;                     // Whether the lightning/electric current is active on this tesla block
+	bool isChangable;                             // Whether the state (on/off) of the tesla block can be changed via game play
+	std::list<TeslaBlock*> connectedTeslaBlocks;  // All tesla blocks that this one can connect to when active (and when they're active)
 
 	static const int TOGGLE_ON_OFF_LIFE_POINTS;	
-	float lifePointsUntilNextToggle;							// Current life points left of this block before it toggles between on/off
+	float lifePointsUntilNextToggle;              // Current life points left of this block before it toggles between on/off
+
+    Vector3D rotationAxis;
+    float rotationAmt;
+
+    void SetRandomRotationAxis();
+    void SetRandomRotationAmount();
+
+    void SetElectricityIsActive(bool isActive);
+    void SetIsChangable(bool isChangable);
 
 	void ToggleElectricity(GameModel& gameModel, GameLevel& level);
 };
@@ -196,6 +215,33 @@ inline std::list<TeslaBlock*> TeslaBlock::GetActiveConnectedTeslaBlocks() const 
 // Get the point where the lighting shoots into/out of for this tesla block
 inline const Point2D& TeslaBlock::GetLightningOrigin() const {
 	return this->GetCenter();
+}
+
+inline float TeslaBlock::GetRotationAmount() const {
+    return this->rotationAmt;
+}
+inline void TeslaBlock::SetRotationAmount(float rotAmt) {
+    this->rotationAmt = fmod(rotAmt, 360.0f);
+}
+
+inline const Vector3D& TeslaBlock::GetRotationAxis() const {
+    return this->rotationAxis;
+}
+
+inline void TeslaBlock::SetRandomRotationAxis() {
+    this->rotationAxis = Vector3D(
+        Randomizer::GetInstance()->RandomNumNegOneToOne(),
+        Randomizer::GetInstance()->RandomNumNegOneToOne(), 0.0f);
+
+    if (this->rotationAxis.IsZero()) {
+        this->rotationAxis[0] = 1.0f;
+        this->rotationAxis[1] = 1.0f;
+    }
+    this->rotationAxis.Normalize();
+}
+
+inline void TeslaBlock::SetRandomRotationAmount() {
+    this->rotationAmt = static_cast<float>(Randomizer::GetInstance()->RandomNumZeroToOne() * 360.0f);
 }
 
 #endif // __TESLABLOCK_H__

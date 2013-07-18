@@ -32,6 +32,8 @@ public:
 		return LevelPiece::OneWay;
 	}
 
+    bool IsExplosionStoppedByPiece(const Point2D& explosionCenter);
+
     bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
         UNUSED_PARAMETER(b);
         return true;
@@ -114,6 +116,10 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(OneWayBlock);
 };
+
+inline bool OneWayBlock::IsExplosionStoppedByPiece(const Point2D& explosionCenter) {
+    return !this->IsGoingTheOneWay(this->GetCenter() - explosionCenter);
+}
 
 // Whether or not the ball can just blast right through this block.
 // Returns: true if it can, false otherwise.

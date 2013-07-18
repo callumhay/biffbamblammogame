@@ -58,6 +58,7 @@ Matrix4x4 BreakableTriangleBlock::GetPieceToLevelInvTransform() const {
 // Solid Triangle Block Class Functions ---------------------------------------------------------------
 SolidTriangleBlock::SolidTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc) :
 SolidBlock(wLoc, hLoc), orient(orientation) {
+    this->colour = ColourRGBA(0.66f, 0.66f, 0.66f, 1.0f);
 }
 
 SolidTriangleBlock::~SolidTriangleBlock() {

@@ -60,6 +60,7 @@ public:
 
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
+    virtual bool IsExplosionStoppedByPiece(const Point2D& explosionCenter);
 
 	LevelPiece(unsigned int wLoc, unsigned int hLoc);
 	virtual ~LevelPiece();
@@ -190,6 +191,11 @@ protected:
 private:
 	DISALLOW_COPY_AND_ASSIGN(LevelPiece);
 };
+
+inline bool LevelPiece::IsExplosionStoppedByPiece(const Point2D&) {
+    // By default most level pieces will allow an explosion to continue through them
+    return false;
+}
 
 inline Collision::AABB2D LevelPiece::GetAABB() const {
 	return Collision::AABB2D(this->center - Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),

@@ -16,6 +16,7 @@
 #include "GameItemAssets.h"
 #include "ItemDropBlockMesh.h"
 #include "RegenBlockMesh.h"
+#include "TeslaBlockMesh.h"
 
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/ObjReader.h"
@@ -56,6 +57,8 @@ public:
 	
 	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight, 
 	    const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
+    void DrawPiecesPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawNoBloomPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
@@ -155,6 +158,11 @@ private:
 
 inline float LevelMesh::GetLevelAlpha() const {
     return this->levelAlpha;
+}
+
+inline void LevelMesh::DrawPiecesPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                                             const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    this->teslaBlock->DrawPostEffects(dT, camera, keyLight, fillLight, ballLight);
 }
 
 inline void LevelMesh::LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {

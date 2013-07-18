@@ -16,13 +16,16 @@
 
 const float TeslaBlock::LIGHTNING_ARC_RADIUS = LevelPiece::PIECE_HEIGHT * 0.25f;
 
-// Life points that must be diminished in order to toggle the state of the tesla block (on/off
-// (if it's changable)
+// Life points that must be diminished in order to toggle the state of the Tesla block (on/off
+// (if it's changeable)
 const int TeslaBlock::TOGGLE_ON_OFF_LIFE_POINTS = 150;	
 
 TeslaBlock::TeslaBlock(bool isActive, bool isChangable, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), electricityIsActive(isActive), isChangable(isChangable), 
 lifePointsUntilNextToggle(TOGGLE_ON_OFF_LIFE_POINTS) {
+
+    this->SetRandomRotationAxis();
+    this->SetRandomRotationAmount();
 }
 
 TeslaBlock::~TeslaBlock() {
@@ -211,6 +214,11 @@ void TeslaBlock::ToggleElectricity(GameModel& gameModel, GameLevel& level) {
 	// Based on whether the electricity is now active or not, signal the proper events and add/remove
 	// lightning arcs from the current game level
 	if (this->electricityIsActive) {
+
+        // Set a new rotation axis
+        this->SetRandomRotationAxis();
+        
+        // Tell the level to add the electricity between it an its active neighbours/pair-blocks (if there are any)
 		for (std::list<TeslaBlock*>::const_iterator iter = activeNeighbourTeslaBlocks.begin(); iter != activeNeighbourTeslaBlocks.end(); ++iter) {
 			const TeslaBlock* activeNeighbour = *iter;
 			assert(activeNeighbour != NULL);

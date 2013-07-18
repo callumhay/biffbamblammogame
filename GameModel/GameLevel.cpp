@@ -1387,15 +1387,18 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProject
 
 	float rocketSizeFactor = rocket->GetHeight() / rocket->GetDefaultHeight();
 
-	std::vector<LevelPiece*> affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
+	std::vector<LevelPiece*> affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, resultPiece);
+
 	// Go through each affected piece and destroy it if we can
 	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
 		LevelPiece* currAffectedPiece = *iter;
 		if (currAffectedPiece != NULL) {
 			LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
             if (resultPiece != currAffectedPiece) {
-			    // Update all the affected pieces again...
-			    affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
+			    
+                // Update all the affected pieces again...
+			    affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, resultPiece);
+
 			    iter = affectedPieces.begin();
                 continue;
             }
@@ -1416,37 +1419,107 @@ void GameLevel::RocketExplosionNoPieces(const RocketProjectile* rocket) {
 }
 
 
-std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex) {
+std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, LevelPiece* centerPiece) {
+    assert(centerPiece != NULL);
+
+    int hIndex = static_cast<int>(centerPiece->GetHeightIndex());
+    int wIndex = static_cast<int>(centerPiece->GetWidthIndex());
+
 	std::vector<LevelPiece*> affectedPieces;
 	affectedPieces.reserve(18);
 
-	// Start with the base pieces that will get destroyed
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex-1));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex+1));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-1));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+1));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex-1));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex+1));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex));
+    LevelPiece* innerCircleTopLeft  = this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex-1);
+    LevelPiece* innerCircleTop      = this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex);
+    LevelPiece* innerCircleTopRight = this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex+1);
+
+    LevelPiece* innerCircleMidLeft  = this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-1);
+    LevelPiece* innerCircleMidRight = this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+1);
+
+    LevelPiece* innerCircleBottomLeft  = this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex-1);
+    LevelPiece* innerCircleBottom      = this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex);
+    LevelPiece* innerCircleBottomRight = this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex+1);
+
+    // Start with the base pieces that will get destroyed
+    affectedPieces.push_back(innerCircleTopLeft);
+    affectedPieces.push_back(innerCircleTop);
+    affectedPieces.push_back(innerCircleTopRight);
+    affectedPieces.push_back(innerCircleMidLeft);
+    affectedPieces.push_back(innerCircleMidRight);
+    affectedPieces.push_back(innerCircleBottomLeft);
+    affectedPieces.push_back(innerCircleBottom);
+    affectedPieces.push_back(innerCircleBottomRight);
+
+    const Point2D& explosionCenter = centerPiece->GetCenter();
+    bool isCenterStopped = centerPiece->IsExplosionStoppedByPiece(explosionCenter);
+
+    LevelPiece* outerCircleTop = this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex);
+    bool innerCircleTopIsStopped = isCenterStopped || innerCircleTop == NULL || innerCircleTop->IsExplosionStoppedByPiece(explosionCenter);
+    if (!innerCircleTopIsStopped) {
+        affectedPieces.push_back(outerCircleTop);
+    }
+
+    LevelPiece* outerCircleBottom = this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex);
+    bool innerCircleBottomIsStopped = isCenterStopped || innerCircleBottom == NULL || 
+        innerCircleBottom->IsExplosionStoppedByPiece(explosionCenter);
+    if (!innerCircleBottomIsStopped) {
+        affectedPieces.push_back(outerCircleBottom);
+    }
 
 	// If the rocket's at least a normal size then the corner pieces are also destroyed
 	if (rocketSizeFactor >= 1.0f) {
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex+1));
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex-1));
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
-	}
 
-	// If the rocket's a bit bigger than usual then more pieces are destroyed as well...
-	if (rocketSizeFactor > 1.0f + EPSILON) {
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-3, wIndex));
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+3, wIndex));
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+2));
-		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-2));
-	}
+        bool innerCircleTopLeftIsStopped = isCenterStopped || innerCircleTopLeft == NULL || 
+            innerCircleTopLeft->IsExplosionStoppedByPiece(explosionCenter);
+        if (!(innerCircleTopIsStopped && innerCircleTopLeftIsStopped)) {
+            affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
+        }
+        
+        bool innerCircleTopRightIsStopped = isCenterStopped || innerCircleTopRight == NULL || 
+            innerCircleTopRight->IsExplosionStoppedByPiece(explosionCenter);
+        if (!(innerCircleTopIsStopped && innerCircleTopRightIsStopped)) {
+            affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex+1));
+        }
+
+        bool innerCircleBottomLeftIsStopped = isCenterStopped || innerCircleBottomLeft == NULL || 
+            innerCircleBottomLeft->IsExplosionStoppedByPiece(explosionCenter);
+        if (!(innerCircleBottomIsStopped && innerCircleBottomLeftIsStopped)) {
+		    affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex-1));
+        }
+
+        bool innerCircleBottomRightIsStopped = isCenterStopped || innerCircleBottomRight == NULL || 
+            innerCircleBottomRight->IsExplosionStoppedByPiece(explosionCenter);
+        if (!(innerCircleBottomIsStopped && innerCircleBottomRightIsStopped)) {
+            affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
+        }
+		
+	    // If the rocket's a bit bigger than usual then more pieces are destroyed as well...
+	    if (rocketSizeFactor > 1.0f + EPSILON) {
+            
+            bool outerCircleTopIsStopped = outerCircleTop == NULL || 
+                outerCircleTop->IsExplosionStoppedByPiece(explosionCenter);
+            if (!innerCircleTopIsStopped && !outerCircleTopIsStopped) {
+                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+3, wIndex));
+            }
+            
+            bool outerCircleBottomIsStopped = outerCircleBottom == NULL || 
+                outerCircleBottom->IsExplosionStoppedByPiece(explosionCenter);
+            if (!innerCircleBottomIsStopped && !outerCircleBottomIsStopped) {
+                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-3, wIndex));
+            }
+
+            bool innerCircleMidLeftIsStopped = isCenterStopped || innerCircleMidLeft == NULL || 
+                innerCircleMidLeft->IsExplosionStoppedByPiece(explosionCenter);
+            if (!innerCircleMidLeftIsStopped) {
+                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-2));
+            }
+
+            bool innerCircleMidRightIsStopped = isCenterStopped || innerCircleMidRight == NULL || 
+                innerCircleMidRight->IsExplosionStoppedByPiece(explosionCenter);
+            if (!innerCircleMidRightIsStopped) {
+                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+2));
+            }
+	    }
+    }
 
 	return affectedPieces;
 }

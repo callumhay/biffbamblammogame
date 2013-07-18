@@ -24,6 +24,11 @@ public:
 	~SwitchBlock();
 
 	LevelPieceType GetType() const;
+
+    bool IsExplosionStoppedByPiece(const Point2D&) {
+        return true;
+    }
+
     bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const;
 	bool IsNoBoundsPieceType() const;
 	bool BallBouncesOffWhenHit() const;

@@ -63,7 +63,8 @@ teslaCenterFlare(NULL), flareTex(NULL), shieldTex(NULL), shieldAlpha(1.0f) {
 	// ...
 	*/
 
-	this->shieldTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->shieldTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->shieldTex != NULL);
 }
 
@@ -86,15 +87,19 @@ TeslaBlockMesh::~TeslaBlockMesh() {
 
 void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
-	
+
+    UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(keyLight);
+    UNUSED_PARAMETER(fillLight);
+    UNUSED_PARAMETER(ballLight);
+    
     if (this->teslaBlocks.empty()) {
         return;
     }
 
 	glPushAttrib(GL_CURRENT_BIT);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	float rotationAmt = dT * COIL_ROTATION_SPEED_DEGSPERSEC;
-
+	
 	//Vector3D alignNormalVec = -camera.GetNormalizedViewVector();
 	//Vector3D alignUpVec		  = camera.GetNormalizedUpVector();
 	//Vector3D alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
@@ -102,42 +107,65 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 	Matrix4x4 screenAlignMatrix = camera.GenerateScreenAlignMatrix();
 
 	// Go through each tesla block and transform their center's appropriately
-	for (std::set<const TeslaBlock*>::const_iterator iter = this->teslaBlocks.begin(); iter != this->teslaBlocks.end(); ++iter) {
+	for (TeslaBlockSetConstIter iter = this->teslaBlocks.begin(); iter != this->teslaBlocks.end(); ++iter) {
 		const TeslaBlock* currTeslaBlock = *iter;
 		assert(currTeslaBlock != NULL);
 		
-		std::map<const TeslaBlock*, std::pair<Vector3D, float>>::iterator findIter = this->rotations.find(currTeslaBlock);
+        if (!currTeslaBlock->GetIsChangable()) {
+            const Point2D& blockCenter = currTeslaBlock->GetCenter();
 
-		const Vector3D& currRotationAxis = findIter->second.first;
-		float& currRotationAmt = findIter->second.second;
-		const Point2D& blockCenter = currTeslaBlock->GetCenter();
+		    glPushMatrix();
+		    glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
 
-		glPushMatrix();
-		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+		    // Draw a shield around the Tesla block if it cannot be changed
+		    if (!currTeslaBlock->GetIsChangable()) {
+			    this->DrawTeslaShield(screenAlignMatrix);
+            }
 
-		// Draw a shield around the tesla block if it cannot be changed
-		if (!currTeslaBlock->GetIsChangable()) {
-			this->DrawTeslaShield(screenAlignMatrix);
-		}
-
-		glRotatef(currRotationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);	
-		this->teslaCoilMesh->Draw(camera, keyLight, fillLight, ballLight);
-		glPopMatrix();
-
-		// Only draw the flare in the middle and only rotate the center if the tesla block is active
-		if (currTeslaBlock->GetIsElectricityActive()) {
-			glPushMatrix();
-			glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
-			this->teslaCenterFlare->Draw(camera, Vector3D(0,0,0), true);
-			glPopMatrix();
-
-			currRotationAmt += rotationAmt;
-		}
-
+            glPopMatrix();
+        }
 	}
 	glPopAttrib();
+}
 
-	this->teslaCenterFlare->Tick(dT);
+void TeslaBlockMesh::DrawPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                                     const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+    float rotationAmt = dT * COIL_ROTATION_SPEED_DEGSPERSEC;
+
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    for (TeslaBlockSetIter iter = this->teslaBlocks.begin(); iter != this->teslaBlocks.end(); ++iter) {
+        TeslaBlock* currTeslaBlock = *iter;
+        assert(currTeslaBlock != NULL);
+
+        const Vector3D& currRotationAxis = currTeslaBlock->GetRotationAxis();
+        float currRotationAmt = currTeslaBlock->GetRotationAmount();
+        const Point2D& blockCenter = currTeslaBlock->GetCenter();
+
+        glPushMatrix();
+        glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+
+        glPushMatrix();
+        glRotatef(currRotationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);
+        glScalef(1.2f, 1.2f, 1.2f);
+        this->teslaCoilMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+
+        // Only draw the flare in the middle and only rotate the center if the Tesla block is active
+        if (currTeslaBlock->GetIsElectricityActive()) {
+            this->teslaCenterFlare->Draw(camera, Vector3D(0,0,0), true);
+            currRotationAmt += rotationAmt;
+            currTeslaBlock->SetRotationAmount(currRotationAmt);
+        }
+
+        glPopMatrix();
+    }
+
+    glPopAttrib();
+
+    this->teslaCenterFlare->Tick(dT);
 }
 
 void TeslaBlockMesh::SetAlphaMultiplier(float alpha) {

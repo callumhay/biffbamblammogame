@@ -324,13 +324,13 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 			    // 3) Tesla block - similar to the cannon block, we store all of them to draw certain
 			    // parts of the block oriented differently / animating
                 case LevelPiece::Tesla: {
-				    const TeslaBlock* telsaLvlPiece = static_cast<const TeslaBlock*>(currPiece);
+				    TeslaBlock* telsaLvlPiece = static_cast<TeslaBlock*>(currPiece);
 				    this->teslaBlock->AddTeslaBlock(telsaLvlPiece);
                     break;
 			    }
 
 			    // 4) Item drop block - like the above - since we need to set the texture for the item
-			    // each block will drop next, we need to store them in a seperate container object
+			    // each block will drop next, we need to store them in a separate container object
                 case LevelPiece::ItemDrop: {
 				    const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(currPiece);
 
@@ -484,7 +484,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
         }
 
 		case LevelPiece::Tesla: {
-			const TeslaBlock* teslaLvlPiece = static_cast<const TeslaBlock*>(&piece);
+			TeslaBlock* teslaLvlPiece = static_cast<TeslaBlock*>(const_cast<LevelPiece*>(&piece));
 			this->teslaBlock->RemoveTeslaBlock(teslaLvlPiece);
 			break;
         }
@@ -598,7 +598,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 			emitter->Draw(camera);
 		}
 	}
-
 }
 
 void LevelMesh::DrawNoBloomPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight, 
