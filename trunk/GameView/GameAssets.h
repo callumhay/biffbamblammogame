@@ -84,6 +84,7 @@ public:
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
+    void DrawLevelPiecesPostEffects(double dT, const Camera& camera);
     void DrawNoBloomLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
     void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
@@ -262,6 +263,12 @@ inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, c
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
 	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight,
         ballLight, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+}
+
+inline void GameAssets::DrawLevelPiecesPostEffects(double dT, const Camera& camera) {
+    BasicPointLight fgKeyLight, fgFillLight, ballLight;
+    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+    this->GetCurrentLevelMesh()->DrawPiecesPostEffects(dT, camera, fgKeyLight, fgFillLight, ballLight);
 }
 
 inline void GameAssets::DrawNoBloomLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {

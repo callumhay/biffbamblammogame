@@ -34,6 +34,10 @@ public:
 		return LevelPiece::Cannon;
 	}
 
+    bool IsExplosionStoppedByPiece(const Point2D&) {
+        return true;
+    }
+
     bool ProducesBounceEffectsWithBallWhenHit(const GameBall&) const {
         return false; // The ball will NEVER bounce off a cannon
     }

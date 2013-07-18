@@ -29,20 +29,25 @@ public:
 	~TeslaBlockMesh();
 
 	void Flush();
-	void AddTeslaBlock(const TeslaBlock* teslaBlock);
-	void RemoveTeslaBlock(const TeslaBlock* teslaBlock);
+	void AddTeslaBlock(TeslaBlock* teslaBlock);
+	void RemoveTeslaBlock(TeslaBlock* teslaBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void SetAlphaMultiplier(float alpha);
 
 private:
 	static const float COIL_ROTATION_SPEED_DEGSPERSEC;
 
-	std::map<std::string, MaterialGroup*> materialGroups;	// Material groups for the static parts of the tesla block mesh
-	
-	std::set<const TeslaBlock*> teslaBlocks;                            // A list of all the tesla blocks that are currently present in the game
-	std::map<const TeslaBlock*, std::pair<Vector3D, float>> rotations;	// Rotations of the various tesla coils
+    typedef std::set<TeslaBlock*> TeslaBlockSet;
+    typedef TeslaBlockSet::iterator TeslaBlockSetIter;
+    typedef TeslaBlockSet::const_iterator TeslaBlockSetConstIter;
+    
+	std::map<std::string, MaterialGroup*> materialGroups;  // Material groups for the static parts of the tesla block mesh
+	TeslaBlockSet teslaBlocks;                             // A list of all the tesla blocks that are currently present in the game
 
 	Mesh* teslaBaseMesh;
 	Mesh* teslaCoilMesh;
@@ -67,25 +72,16 @@ inline void TeslaBlockMesh::Flush() {
 	this->teslaBlocks.clear();
 }
 
-inline void TeslaBlockMesh::AddTeslaBlock(const TeslaBlock* teslaBlock) {
+inline void TeslaBlockMesh::AddTeslaBlock(TeslaBlock* teslaBlock) {
 	assert(teslaBlock != NULL);
-	std::pair<std::set<const TeslaBlock*>::iterator, bool> insertResult = this->teslaBlocks.insert(teslaBlock);
+	std::pair<TeslaBlockSetIter, bool> insertResult = this->teslaBlocks.insert(teslaBlock);
 	assert(insertResult.second);
-	Vector3D randomRotVec(Randomizer::GetInstance()->RandomNumNegOneToOne(),
-												Randomizer::GetInstance()->RandomNumNegOneToOne(), 0.0f);
-	if (randomRotVec == Vector3D(0,0,0)) {
-		randomRotVec[0] = 1.0f;
-		randomRotVec[1] = 1.0f;
-	}
-	randomRotVec.Normalize();
-	this->rotations.insert(std::make_pair(teslaBlock, std::make_pair(randomRotVec, static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne() * 360.0f))));
 }	
 
-inline void TeslaBlockMesh::RemoveTeslaBlock(const TeslaBlock* teslaBlock) {
+inline void TeslaBlockMesh::RemoveTeslaBlock(TeslaBlock* teslaBlock) {
 	size_t numRemoved = this->teslaBlocks.erase(teslaBlock);
     UNUSED_VARIABLE(numRemoved);
 	assert(numRemoved == 1);
-	this->rotations.erase(teslaBlock);
 }
 
 inline const std::map<std::string, MaterialGroup*>& TeslaBlockMesh::GetMaterialGroups() const {

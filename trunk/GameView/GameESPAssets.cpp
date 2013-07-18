@@ -6455,6 +6455,7 @@ void GameESPAssets::TickButDontDrawBackgroundPaddleEffects(double dT) {
 }
 
 void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
+
 	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter = this->teslaLightningArcs.begin();
 		iter != this->teslaLightningArcs.end(); ++iter) {
 
@@ -6462,7 +6463,7 @@ void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
 		for (std::list<ESPPointToPointBeam*>::iterator arcIter = arcs.begin(); arcIter != arcs.end(); ++arcIter) {
 			ESPPointToPointBeam* currArc = *arcIter;
 			currArc->Tick(dT);
-			currArc->Draw(camera);
+			currArc->Draw(camera, true);
 		}
 	}
 }

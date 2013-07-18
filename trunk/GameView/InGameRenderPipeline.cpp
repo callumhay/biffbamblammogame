@@ -181,9 +181,6 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 
-	// Tesla lightning arcs
-	assets->DrawTeslaLightning(dT, camera);
-
     // Bosses
     assets->DrawBoss(dT, currLevel, camera);
 
@@ -244,19 +241,22 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
         celOutlineEffect.Draw(colourAndDepthFBO, fullSceneFBO);
     }
 
-	// Draw Post-fullscene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
+	// Draw Post-full-scene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
     fullSceneFBO->BindFBObj();
 
 	// Render any post-processing effects for various items/objects in the game
 	assets->DrawProjectiles(dT, camera);
     assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
+    assets->DrawLevelPiecesPostEffects(dT, camera);
 	assets->DrawStatusEffects(dT, camera, colourAndDepthFBO);
+    glPopMatrix();
+
+    // Tesla lightning arcs
+    assets->DrawTeslaLightning(dT, camera);
 
 	FBObj::UnbindFBObj();
 
-	glPopMatrix();
-
-	// Do a gaussian blur for a softer feeling
+	// Do a Gaussian blur for a softer feeling
 	assets->GetFBOAssets()->RenderFullSceneBlur(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
 
 	debug_opengl_state();

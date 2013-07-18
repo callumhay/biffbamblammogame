@@ -57,12 +57,12 @@ void ESPPointToPointBeam::Tick(double dT) {
 	timeSinceLastBeamSpawn += dT;
 }
 
-void ESPPointToPointBeam::Draw(const Camera& camera) {
+void ESPPointToPointBeam::Draw(const Camera& camera, bool enableDepth) {
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
 	
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE);
+    enableDepth ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+	
+    glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
