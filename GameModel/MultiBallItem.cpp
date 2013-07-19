@@ -41,8 +41,18 @@ double MultiBallItem::Activate() {
 
 	// Go through the first game ball making 'numBalls' copies of it and setting that copy with the appropriate characteristics
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
+    std::list<GameBall*>::iterator ballIter = gameBalls.begin();
+
+	GameBall* affectedBall = *ballIter;
 	assert(affectedBall != NULL);
+    ++ballIter;
+
+    // Make sure we pick a ball that isn't below the paddle...
+    const Point2D& paddlePos = this->gameModel->GetPlayerPaddle()->GetCenterPosition();
+    while (ballIter != gameBalls.end() && (affectedBall->GetCenterPosition2D()[1] + affectedBall->GetBounds().Radius()) < paddlePos[1]) {
+        affectedBall = *ballIter;
+        ++ballIter;
+    }
 
 	std::vector<GameBall*> newBalls;
 	newBalls.reserve(this->numNewSpawnedBalls);
