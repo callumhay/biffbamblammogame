@@ -600,13 +600,10 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	}
 }
 
-void LevelMesh::DrawNoBloomPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight, 
+void LevelMesh::DrawNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                   const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
-    glPushMatrix();
-    glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
     this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->alwaysDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-    glPopMatrix();
 }
 
 void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,

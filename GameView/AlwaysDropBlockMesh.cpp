@@ -52,9 +52,7 @@ void AlwaysDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
     UNUSED_PARAMETER(dT);
 
 	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT);
-	
-    glColor3f(1.0f, 1.0f, 1.0f);
-
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	// Go through all the always drop blocks, set the proper materials and draw
 	for (std::map<const AlwaysDropBlock*, Texture*>::const_iterator iter = this->blockToItemTexMap.begin(); 
 		iter != this->blockToItemTexMap.end(); ++iter) {

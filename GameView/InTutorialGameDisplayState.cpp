@@ -107,6 +107,7 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
 
     const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
     if (boostModel != NULL && boostModel->GetBulletTimeState() == BallBoostModel::BulletTime) {
+        this->boostCountdownHUD.SetTotalTimeUntilCountdownIsOver(BallBoostModel::GetMaxBulletTimeDuration());
         this->boostCountdownHUD.Draw(camera, actualDt, boostModel->GetTotalBulletTimeElapsed());
     }
     else {
@@ -228,7 +229,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     // Tutorial hints for boosting
     ButtonTutorialHint* boostAvailableHint = new ButtonTutorialHint(tutorialAssets, "");
-    boostAvailableHint->SetActionName("Boost Available!", false);
+    boostAvailableHint->SetActionName("Boost Available!");
     boostAvailableHint->SetFlashing(true);
     boostAvailableHint->SetTopLeftCorner(BallBoostHUD::H_BORDER_SPACING,
         camera.GetWindowHeight() - (BallBoostHUD::V_BORDER_SPACING + BallBoostHUD::BALL_BOOST_HUD_HEIGHT + 10));
@@ -236,7 +237,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->noDepthTutorialHints.push_back(boostAvailableHint);
 
     ButtonTutorialHint* startingToBoostHint = new ButtonTutorialHint(tutorialAssets, "");
-    startingToBoostHint->SetActionName("Boost Mode = Hold ", false);
+    startingToBoostHint->SetActionName("Boost Mode = Hold ");
     startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     startingToBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
@@ -246,7 +247,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->noDepthTutorialHints.push_back(startingToBoostHint);
 
     ButtonTutorialHint* holdBoostHint = new ButtonTutorialHint(tutorialAssets, "");
-    holdBoostHint->SetActionName("Now, hold and move ", false);
+    holdBoostHint->SetActionName("Now, hold and move ");
     holdBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     holdBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     holdBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - holdBoostHint->GetWidth()) / 2.0f,
@@ -256,7 +257,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->noDepthTutorialHints.push_back(holdBoostHint);
 
     ButtonTutorialHint* doBoostPressToReleaseHint = new ButtonTutorialHint(tutorialAssets, "");
-    doBoostPressToReleaseHint->SetActionName("Perform Boost = ", false);
+    doBoostPressToReleaseHint->SetActionName("Perform Boost = ");
     xboxButtonTypes.clear();
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
@@ -276,7 +277,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->noDepthTutorialHints.push_back(doBoostPressToReleaseHint);
 
     ButtonTutorialHint* doBoostSlingshotHint = new ButtonTutorialHint(tutorialAssets, "");
-    doBoostSlingshotHint->SetActionName("Perform Boost = Release ", false);
+    doBoostSlingshotHint->SetActionName("Perform Boost = Release ");
     doBoostSlingshotHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     doBoostSlingshotHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     doBoostSlingshotHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
@@ -302,7 +303,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     // Add a hint about points...
     /*
     ButtonTutorialHint* pointsHint = new ButtonTutorialHint(tutorialAssets, "");
-    pointsHint->SetActionName("The longer the ball is in play = More points", false);
+    pointsHint->SetActionName("The longer the ball is in play = More points");
     pointsHint->SetAlphaWhenShowing(0.75f);
     pointsHint->SetTopLeftCorner((camera.GetWindowWidth() - pointsHint->GetWidth()) / 2.0f,
         camera.GetWindowHeight() - 200.0f);

@@ -176,6 +176,36 @@ RocketMesh::~RocketMesh() {
     this->rocketThrustHyperBurnEmitter = NULL;
 }
 
+// Activates the paddle rocket mesh so that it gets drawn based on the given projectile
+void RocketMesh::ActivateRocket(const RocketProjectile* rocketProjectile) {
+    std::pair<std::set<const RocketProjectile*>::iterator, bool> insertResult = this->rocketProjectiles.insert(rocketProjectile);
+    assert(insertResult.second);
+
+    if (rocketProjectile->GetType() == Projectile::PaddleRemoteCtrlRocketBulletProjectile) {
+        this->ResetRemoteControlRocketEmitters();
+    }
+}
+
+// Deactivates the rocket projectile - stops it from being drawn until next time it is activated
+void RocketMesh::DeactivateRocket(const RocketProjectile* rocketProjectile) {
+    size_t numErased = this->rocketProjectiles.erase(rocketProjectile);
+    UNUSED_VARIABLE(numErased);
+    assert(numErased == 1);
+
+    if (rocketProjectile->GetType() == Projectile::PaddleRemoteCtrlRocketBulletProjectile) {
+        this->ResetRemoteControlRocketEmitters();
+    }
+}
+
+void RocketMesh::ResetRemoteControlRocketEmitters() {
+    this->rocketThrustBurstEmitter->SetNumParticleLives(0);
+    this->rocketThrustingSparksEmitter->SetNumParticleLives(0);
+    this->rocketThrustHyperBurnEmitter->SetNumParticleLives(0);
+    this->rocketThrustBurstEmitter->Reset();
+    this->rocketThrustingSparksEmitter->Reset();
+    this->rocketThrustHyperBurnEmitter->Reset();
+}
+
 // Draw the rocket - if it's currently activated
 void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, 
                       const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
@@ -328,6 +358,8 @@ void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjecti
     Vector3D oppositeRocketDir(-rocketDir);
     Point3D emitPos = Point3D(0, 0, rocket->GetZOffset()) + (rocket->GetHalfHeight() * oppositeRocketDir);
     if (rocket->GetCurrentAppliedThrustAmount() > 0.0f) {
+        
+        this->rocketThrustBurstEmitter->SetNumParticleLives(1);
 
         this->rocketThrustingSparksEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
         this->rocketThrustingSparksEmitter->SetEmitDirection(oppositeRocketDir);
@@ -342,6 +374,7 @@ void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjecti
         this->rocketThrustHyperBurnEmitter->SetEmitPosition(emitPos);
     }
     else {
+        this->rocketThrustBurstEmitter->SetNumParticleLives(0);
         this->rocketThrustingSparksEmitter->SetNumParticleLives(0);
         this->rocketThrustHyperBurnEmitter->SetNumParticleLives(0);
     }
