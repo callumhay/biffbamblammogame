@@ -42,6 +42,7 @@ public:
 	          const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
     void ApplyRocketThrust(const PaddleRemoteControlRocketProjectile& rocket);
+    void ResetRemoteControlRocketEmitters();
 
 private:
 	ESPParticleScaleEffector pulseEffector;
@@ -75,18 +76,5 @@ private:
 
 	void LoadMeshes();
 };
-
-// Activates the paddle rocket mesh so that it gets drawn based on the given projectile
-inline void RocketMesh::ActivateRocket(const RocketProjectile* rocketProjectile) {
-	std::pair<std::set<const RocketProjectile*>::iterator, bool> insertResult = this->rocketProjectiles.insert(rocketProjectile);
-	assert(insertResult.second);
-}
-
-// Deactivates the rocket projectile - stops it from being drawn until next time it is activated
-inline void RocketMesh::DeactivateRocket(const RocketProjectile* rocketProjectile) {
-	size_t numErased = this->rocketProjectiles.erase(rocketProjectile);
-    UNUSED_VARIABLE(numErased);
-	assert(numErased == 1);
-}
 
 #endif // __ROCKETMESH_H__

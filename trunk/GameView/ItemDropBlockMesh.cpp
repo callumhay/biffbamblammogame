@@ -89,8 +89,6 @@ void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLi
     UNUSED_PARAMETER(dT);
 
 	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT);
-	
-    glColor3f(1.0f, 1.0f, 1.0f);
     glDepthMask(GL_FALSE);
 
 	// Go through all the item drop blocks, set the proper materials and draw
@@ -101,6 +99,13 @@ void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLi
 		const ItemDropBlock* currItemDropBlock = iter->first;
 		Texture* currTex = iter->second;
 
+        float alpha = 1.0f;
+        // If the block is frozen we want the item texture to blend in with the ice since this
+        // will be drawn in the last pass
+        if (currItemDropBlock->HasStatus(LevelPiece::IceCubeStatus)) {
+            alpha = 0.4f;
+        }
+
 		CgFxMaterialEffect* matEffect = this->itemDropTypeMatGrp->GetMaterial();
 		MaterialProperties* matProps  = matEffect->GetProperties();
 		matProps->diffuseTexture = currTex;
@@ -108,6 +113,7 @@ void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLi
 		const Point2D& blockCenter = currItemDropBlock->GetCenter();
 		glPushMatrix();
 		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, alpha);
 		this->itemDropTypeMatGrp->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}

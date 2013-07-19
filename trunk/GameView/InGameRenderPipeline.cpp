@@ -35,12 +35,16 @@ InGameRenderPipeline::~InGameRenderPipeline() {
 }
 	
 void InGameRenderPipeline::RenderFrameWithoutHUD(double dT) {
+
 	this->SetupRenderFrame(dT);
 	this->ApplyInGameCamera(dT);
 
-	FBObj* backgroundFBO = this->RenderBackgroundToFBO(dT);
-	this->RenderForegroundToFBO(backgroundFBO, dT);
-	this->RenderFinalGather(dT);
+    Matrix4x4 gameTransform  = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
+    Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
+
+	FBObj* backgroundFBO = this->RenderBackgroundToFBO(negHalfLevelDim, dT);
+	this->RenderForegroundToFBO(negHalfLevelDim, gameTransform, backgroundFBO, dT);
+	this->RenderFinalGather(negHalfLevelDim, gameTransform, dT);
 }
 
 void InGameRenderPipeline::RenderFrame(double dT) {
@@ -89,11 +93,9 @@ void InGameRenderPipeline::ApplyInGameCamera(double dT) {
 // Render just the background (includes the skybox, background geometry and effects), the rendering
 // will be done to the background FBO in the FBO assets and a pointer to it will be returned
 // NOTE: The caller does NOT assume ownership of the returned memory
-FBObj* InGameRenderPipeline::RenderBackgroundToFBO(double dT) {
+FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelDim, double dT) {
 	UNUSED_PARAMETER(dT);
 
-	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
-	
     GameAssets* assets = this->display->GetAssets();
     GameFBOAssets* fboAssets = assets->GetFBOAssets();
 
@@ -117,9 +119,7 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(double dT) {
 
 	assets->DrawSkybox(camera);
 	assets->DrawBackgroundModel(camera);
-	
-	glPopMatrix();
-    
+ 
     // Render the outlines using the special cel outline effect on what we just rendered...
     {
         const GameWorldAssets* currWorldAssets = assets->GetCurrentWorldAssets();
@@ -139,8 +139,6 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(double dT) {
     // if we include it in the previous pass, the outlines will show through all the effects (which is not so pretty)
     backgroundFBO->BindFBObj();
     
-	glPushMatrix();
-	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
     assets->DrawBackgroundEffects(camera);
     glPopMatrix();
 
@@ -150,15 +148,13 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(double dT) {
 	return backgroundFBO;
 }
 
-FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double dT) {
+FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelDim, const Matrix4x4& gameTransform, FBObj* backgroundFBO, double dT) {
 	assert(backgroundFBO != NULL);
 
 	const Camera& camera = this->display->GetCamera();
     GameModel* gameModel = this->display->GetModel();
 	const GameLevel* currLevel = gameModel->GetCurrentLevel();
 
-    Vector2D negHalfLevelDim = -0.5 * gameModel->GetLevelUnitDimensions();
-	
     GameAssets* assets = this->display->GetAssets();
     GameFBOAssets* fboAssets = assets->GetFBOAssets();
     
@@ -178,7 +174,6 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
     //glClear(GL_DEPTH_BUFFER_BIT);
 
 	glPushMatrix();
-	Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 
     // Bosses
@@ -211,6 +206,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	// Safety net (if active)
 	assets->DrawSafetyNetIfActive(dT, camera, *gameModel);
 
+    glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
 	// Draw the dropping items if not in the last pass
@@ -253,6 +249,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 
     // Tesla lightning arcs
     assets->DrawTeslaLightning(dT, camera);
+    glPopMatrix();
 
 	FBObj::UnbindFBObj();
 
@@ -264,7 +261,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
     return fullSceneFBO;
 }
 
-void InGameRenderPipeline::RenderFinalGather(double dT) {
+void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, const Matrix4x4& gameTransform, double dT) {
 
     GameAssets* assets       = this->display->GetAssets();
 	GameFBOAssets* fboAssets = assets->GetFBOAssets();
@@ -286,17 +283,15 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 
 	// Render all effects that do not go through all the post-processing filters...
 
+    glPushMatrix();
+    glMultMatrixf(gameTransform.begin());
+    glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0);
+
     // Item drop blocks (draw them without bloom because otherwise it's hard to see
     // what item they're dropping)
-    assets->DrawNoBloomLevelPieces(dT, gameModel->GetCurrentLevel(), camera);
+    assets->DrawNoBloomLevelPieces(dT, camera);
     
     glClear(GL_DEPTH_BUFFER_BIT);
-
-    Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel->GetLevelUnitDimensions(), 0.0);
-    glPushMatrix();
-    Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
-    glMultMatrixf(gameTransform.begin());
-    glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
 
     // Draw the dropping items if in the last pass
     if (fboAssets->DrawItemsInLastPass()) {
@@ -308,7 +303,7 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 
 	// Typical Particle effects...
 	GameESPAssets* espAssets = assets->GetESPAssets();
-	espAssets->DrawBeamEffects(dT, camera, negHalfLevelDim);
+	espAssets->DrawBeamEffects(dT, camera, Vector3D(negHalfLevelDim,0));
 	espAssets->DrawParticleEffects(dT, camera);
 
 	// Absolute post effects call for various object effects

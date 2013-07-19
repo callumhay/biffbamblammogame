@@ -188,7 +188,7 @@ public:
 	
     LevelPiece* RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece);
     void RocketExplosionNoPieces(const RocketProjectile* rocket);
-	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, LevelPiece* centerPiece);
+	std::vector<LevelPiece*> GetExplosionAffectedLevelPieces(const Projectile* projectile, float sizeFactor, LevelPiece* centerPiece);
 
     LevelPiece* MineExplosion(GameModel* gameModel, const MineProjectile* mine, LevelPiece* hitPiece);
     void MineExplosion(GameModel* gameModel, const MineProjectile* mine);
@@ -259,7 +259,7 @@ private:
 		const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss, const std::vector<GameItem::ItemType>& allowedDropTypes,
         size_t randomItemProbabilityNum, float paddleStartXPos);
 
-    void InitPieces(const std::vector<std::vector<LevelPiece*> >& pieces);
+    void InitPieces(float paddleStartXPos, const std::vector<std::vector<LevelPiece*> >& pieces);
     void SetPaddleStartXPos(float xPos);
 
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);

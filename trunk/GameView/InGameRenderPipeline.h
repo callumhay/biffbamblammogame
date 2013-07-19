@@ -30,9 +30,9 @@ public:
 	// Helper functions - all of these are called by RenderFrame in the order
 	// provided below...
 	void ApplyInGameCamera(double dT);
-	FBObj* RenderBackgroundToFBO(double dT);
-	FBObj* RenderForegroundToFBO(FBObj* backgroundFBO, double dT);
-	void RenderFinalGather(double dT);
+	FBObj* RenderBackgroundToFBO(const Vector2D& negHalfLevelDim, double dT);
+	FBObj* RenderForegroundToFBO(const Vector2D& negHalfLevelDim, const Matrix4x4& gameTransform, FBObj* backgroundFBO, double dT);
+	void RenderFinalGather(const Vector2D& negHalfLevelDim, const Matrix4x4& gameTransform, double dT);
 	void RenderHUD(double dT);
     void RenderHUDWithAlpha(double dT, float alpha);
 

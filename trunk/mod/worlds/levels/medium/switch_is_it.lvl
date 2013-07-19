@@ -1,25 +1,25 @@
 Switch is it?
 23 27
-S N S E E S S S S S S S S S S S S S E E S N S 
-S E S E E S E E E E E E E E E E E S E E S E S 
-S E S E E S E D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown) D(IceBall) D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown) E Q(f) E D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown) D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,powerdowns) E S E E S E S 
-S E S E E S E E E E E E E E E E E S E E S E S 
-S E S E E S F(d) F(d) F(d) F(d) F(d) D(RemoteControlRocket) F(d) F(d) F(d) F(d) F(d) S E E S E S 
-S E S E E S E E E E E E E E E E E S E E S E S 
-S E S E E S E E E E E E E E E E E S E E S E S 
-S E S S S S E E E E E E E E E E E S S S S E S 
-S E E E E S E E E E E E E E E E E S E E E E S 
-S E E W(0) E S E E E E E E E E E E E S E W(0) E E S 
-S E E E E S E E E E E E E E E E E S E E E E S 
-S T(S,lr) S S S S E E E E E E E E E E E S S S S T(S,ll) S 
-S S E E E S E E E E E E E E E E E S E E E S S 
-N E E W(0) E S E E E E E E E E E E E S E W(0) E E N 
-S S E E E S E E E E E E E E E E E S E E E S S 
-S T(S,ur) S S S S E E E E E E E E E E E S S S S T(S,ul) S 
-S E E E E S E E E E E E E E E E E S E E E E S 
-S E E W(0) E S E E E E E E E E E E E S E W(0) E E S 
-S E E E E S E E E E E E E E E E E S E E E E S 
-S E S S S S E E E E E E E E E E E S S S S E S 
+S N S E S S S S S S S S S S S S S S S E S N S 
+S E S E S E E E E E E E E E E E E E S E S E S 
+S E S E S E Q(f) D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){2} D(IceBall,IceBall,IceBall){5} D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){6} E E E D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){1} D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle){3} D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,powerdowns){4} Q(f) E S E S E S 
+S E S E S E E E E E E E E E E E E E S E S E S 
+S E S E S S F(d) F(d) F(d) F(d) F(d) D(RemoteControlRocket) F(d) F(d) F(d) F(d) F(d) S S E S E S 
+S E S E E S E E E E Q(f) E Q(f) E E E E S E E S E S 
+S E S E E S E E E R Q(f) G Q(f) R E E E S E E S E S 
+S E S S S S E E R R E G E R R E E S S S S E S 
+S E E E E S E R R E Y G Y E R R E S E E E E S 
+S E E W(4) E S R R E O E G E O E R R S E W(3) E E S 
+S E E E E S R E R E Y G Y E R E R S E E E E S 
+S S S S S S E O E O E G E O E O E S S S S S S 
+N E E E E S Y E R E Y G Y E R E Y S E E E E N 
+N E E W(5) E S E O E O E G E O E O E S E W(2) E E N 
+N E E E E S R E R E Y G Y E R E R S E E E E N 
+S S S S S S R R E O E G E O E R R S S S S S S 
+S E E E E S E R R E Y G Y E R R E S E E E E S 
+S E E W(6) E S E E R R E K(UberBall,UberBall,UberBall) E R R E E S E W(1) E E S 
+S E E E E S E E E R Q(f) G Q(f) R E E E S E E E E S 
+S E S S S S E E E E Q(f) E Q(f) E E E E S S S S E S 
 S E S E E S E E E E E E E E E E E S E E S E S 
 S E S E E S E E E E E E E E E E E S E E S E S 
 S E S E E S E E E E E E E E E E E S E E S E S 
@@ -29,18 +29,18 @@ S E S E E N E E E E E E E E E E E N E E S E S
 S N S E E N E E E E E E E E E E E N E E S N S 
 
 STARS:
-100
-500
-1000
-2000
 5000
+10000
+13000
+16000
+20000
 
 PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0
@@ -59,7 +59,7 @@ BallCam 0
 MagnetPaddle 2
 MultiBall3 2
 RemoteControlRocket 2
-IceBall 2
+IceBall 0
 MineLauncherPaddle 2
 SlowBall 2
 GravityBall 2

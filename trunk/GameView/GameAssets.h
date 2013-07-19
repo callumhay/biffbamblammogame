@@ -85,7 +85,7 @@ public:
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
     void DrawLevelPiecesPostEffects(double dT, const Camera& camera);
-    void DrawNoBloomLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
+    void DrawNoBloomLevelPieces(double dT, const Camera& camera);
     void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
 	void DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO);
@@ -271,12 +271,11 @@ inline void GameAssets::DrawLevelPiecesPostEffects(double dT, const Camera& came
     this->GetCurrentLevelMesh()->DrawPiecesPostEffects(dT, camera, fgKeyLight, fgFillLight, ballLight);
 }
 
-inline void GameAssets::DrawNoBloomLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
-    Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
+inline void GameAssets::DrawNoBloomLevelPieces(double dT, const Camera& camera) {
 
     BasicPointLight fgKeyLight, fgFillLight, ballLight;
     this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-    this->GetCurrentLevelMesh()->DrawNoBloomPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight, ballLight);
+    this->GetCurrentLevelMesh()->DrawNoBloomPieces(dT, camera, fgKeyLight, fgFillLight, ballLight);
 }
 
 inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {

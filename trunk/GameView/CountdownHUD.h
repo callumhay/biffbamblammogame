@@ -25,6 +25,8 @@ public:
     ~CountdownHUD();
 
     void Reset() { this->SetState(NotOn); }
+    void SetTotalTimeUntilCountdownIsOver(double totalTime) { this->totalTimeUntilCountdownOver = totalTime; }
+
     void Draw(const Camera& camera, double dT, double timeElapsed);
 
 private:
