@@ -35,14 +35,17 @@ void CgFxInkSplatter::ActivateInkSplat() {
 		std::vector<double> timeVals;
 		timeVals.reserve(3);
 		timeVals.push_back(0.0);
+        timeVals.push_back(0.79);
+        timeVals.push_back(0.8);
 		timeVals.push_back(4.0);
 		timeVals.push_back(9.0);
 
 		std::vector<float> fadeVals;
 		fadeVals.reserve(3);
-		fadeVals.push_back(1.0f);	// Start the full splatter immediately
-		fadeVals.push_back(1.0f); // Keep splatter until here
-		fadeVals.push_back(0.0f); // Fade splatter
+		fadeVals.push_back(this->inkSplatFadeAnim.GetInterpolantValue());
+        fadeVals.push_back(this->inkSplatFadeAnim.GetInterpolantValue());
+		fadeVals.push_back(1.0f);
+		fadeVals.push_back(0.0f);
 
 		this->inkSplatFadeAnim.SetLerp(timeVals, fadeVals);		
 	}

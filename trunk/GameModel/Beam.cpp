@@ -331,15 +331,10 @@ bool BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg
 		return false;
 	}
 
-	if (fabs(beamSeg1.GetLength() - beamSeg2.GetLength()) > EPSILON) {
+	if (fabs(beamSeg1.GetLength() - beamSeg2.GetLength()) > 0.001f) {
 		return false;
 	}
 
-	// Make sure the base radii are the same
-	if (beamSeg1.radiusPulseAnim.GetInterpolationValues()[0] != beamSeg2.radiusPulseAnim.GetInterpolationValues()[0]) {
-		return false;
-	}
-		
 	if (beamSeg1.GetCollidingPiece() != beamSeg2.GetCollidingPiece()) {
 		return false;
 	}

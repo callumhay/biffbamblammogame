@@ -1269,6 +1269,11 @@ void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
 void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
     static bool droppedItemLastTime = false;
 
+    // If this is the last piece in the level then we don't drop anything
+    if (this->GetCurrentLevel()->GetNumPiecesLeft() == 1) {
+        return;
+    }
+
     if (droppedItemLastTime) {
         // Do a test for consecutive item drops -- there's a probability of items not
         // dropping consecutively
