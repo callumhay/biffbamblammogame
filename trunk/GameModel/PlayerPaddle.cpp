@@ -91,6 +91,7 @@ void PlayerPaddle::ResetPaddle() {
 	this->currSize = PlayerPaddle::NormalSize;
 	this->centerPos = this->GetDefaultCenterPosition();
 	this->currType = PlayerPaddle::NormalPaddle;
+    this->currSpecialStatus = PlayerPaddle::NoStatus;
 	this->colour = ColourRGBA(1, 1, 1, 1);
 	this->isFiringBeam = false;
 	this->hitWall = false;
@@ -585,9 +586,9 @@ bool PlayerPaddle::DecreasePaddleSize() {
 	return true;
 }
 
- void PlayerPaddle::AddPaddleType(const PaddleType& type) {
-		this->currType = this->currType | type;
-	}
+void PlayerPaddle::AddPaddleType(const PaddleType& type) {
+    this->currType = this->currType | type;
+}
 
 void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
 	this->currType = this->currType & ~type;
@@ -673,6 +674,13 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         // Make the last thing the rocket collided with the paddle - if there are no pieces to do this with
         if (!foundPiece) {
             rocketProjectile->SetLastThingCollidedWith(this);
+        }
+
+        // Special status condition: if the paddle was invisible when the rocket was acquired then the rocket will
+        // also be invisible...
+        if (this->HasSpecialStatus(PlayerPaddle::InvisibleRocketStatus)) {
+            rocketProjectile->SetIsInvisible(true);
+            this->RemoveSpecialStatus(PlayerPaddle::InvisibleRocketStatus);
         }
 
         gameModel->AddProjectile(rocketProjectile);

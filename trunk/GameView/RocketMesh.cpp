@@ -24,7 +24,7 @@
 RocketMesh::RocketMesh() : 
 paddleRocketMesh(NULL), paddleRemoteControlRocketMesh(NULL), turretRocketMesh(NULL), sparkTex(NULL),
 rocketGlowEmitter(NULL), rocketThrustBurstEmitter(NULL), pulseEffector(0,0), particleFader(1, 0),
-rocketThrustHyperBurnEmitter(NULL),
+rocketThrustHyperBurnEmitter(NULL), cloudNormalTex(NULL),
 hyperBurnColourFader(ColourRGBA(1.0f, 1.0f, 0.9f, 1.0f), ColourRGBA(0.8f, 0.8f, 0.1f, 0.0f)),
 particleBurstColourEffector(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 particleLargeGrowth(1.0f, 2.2f),
@@ -33,8 +33,22 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
 
 	this->LoadMeshes();
 
+    this->invisibleEffect.SetWarpAmountParam(50.0f);
+    this->invisibleEffect.SetIndexOfRefraction(1.33f);
+
+    this->cloudNormalTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_NORMAL_CLOUD, Texture::Trilinear));
+    assert(this->cloudNormalTex != NULL);
+
+    this->invisibleThrustEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME);
+    this->invisibleThrustEffect.SetWarpAmountParam(30.0f);
+    this->invisibleThrustEffect.SetIndexOfRefraction(1.33f);
+    this->invisibleThrustEffect.SetScale(0.02f);
+    this->invisibleThrustEffect.SetFrequency(0.08f);
+    this->invisibleThrustEffect.SetNormalTexture(this->cloudNormalTex);
+
 	this->glowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Bilinear));
+        GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
 	assert(this->glowTex != NULL);
 	
 	ScaleEffect pulseSettings;
@@ -99,6 +113,7 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
     this->rocketThrustBurstEmitter->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
     this->rocketThrustBurstEmitter->SetEmitPosition(Point3D(0, 0, 0));
     this->rocketThrustBurstEmitter->AddEffector(&this->particleBurstColourEffector);
+    this->rocketThrustBurstEmitter->AddEffector(&this->particleLargeGrowth);
     this->rocketThrustBurstEmitter->SetRandomTextureParticles(20, this->smokeTextures);
 
     this->sparkTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
@@ -139,6 +154,25 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
     this->rocketThrustHyperBurnEmitter->AddEffector(&this->hyperBurnColourFader);
     this->rocketThrustHyperBurnEmitter->AddEffector(&this->particleLargeGrowth);
     this->rocketThrustHyperBurnEmitter->SetParticles(25, &this->fireEffect);
+
+    this->invisibleRocketThrustEmitter = new ESPPointEmitter();
+    this->invisibleRocketThrustEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+    this->invisibleRocketThrustEmitter->SetNumParticleLives(0); // Make initial lives zero so the emitter doesn't go off right as the rocket takes off
+    this->invisibleRocketThrustEmitter->SetInitialSpd(ESPInterval(
+        0.9f*PaddleRemoteControlRocketProjectile::MAX_VELOCITY_BEFORE_THRUST,
+        0.9f*PaddleRemoteControlRocketProjectile::MAX_VELOCITY_WITH_THRUST));
+    this->invisibleRocketThrustEmitter->SetParticleLife(ESPInterval(2.0f, 3.0f));
+    this->invisibleRocketThrustEmitter->SetEmitAngleInDegrees(45);
+    this->invisibleRocketThrustEmitter->SetRadiusDeviationFromCenter(
+        ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f),
+        ESPInterval(0.0f), 
+        ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f));
+    this->invisibleRocketThrustEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    this->invisibleRocketThrustEmitter->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+    this->invisibleRocketThrustEmitter->SetEmitPosition(Point3D(0, 0, 0));
+    this->invisibleRocketThrustEmitter->AddEffector(&this->particleFader);
+    this->invisibleRocketThrustEmitter->AddEffector(&this->particleLargeGrowth);
+    this->invisibleRocketThrustEmitter->SetParticles(20, &this->invisibleThrustEffect);
 }
 
 RocketMesh::~RocketMesh() {
@@ -154,6 +188,8 @@ RocketMesh::~RocketMesh() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudNormalTex);
     assert(success);
 
     for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
@@ -174,6 +210,8 @@ RocketMesh::~RocketMesh() {
     this->rocketThrustingSparksEmitter = NULL;
     delete this->rocketThrustHyperBurnEmitter;
     this->rocketThrustHyperBurnEmitter = NULL;
+    delete this->invisibleRocketThrustEmitter;
+    this->invisibleRocketThrustEmitter = NULL;
 }
 
 // Activates the paddle rocket mesh so that it gets drawn based on the given projectile
@@ -204,20 +242,26 @@ void RocketMesh::ResetRemoteControlRocketEmitters() {
     this->rocketThrustBurstEmitter->Reset();
     this->rocketThrustingSparksEmitter->Reset();
     this->rocketThrustHyperBurnEmitter->Reset();
+
+    this->invisibleRocketThrustEmitter->SetNumParticleLives(0);
+    this->invisibleRocketThrustEmitter->Reset();
 }
 
 // Draw the rocket - if it's currently activated
 void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, 
                       const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
-                      const BasicPointLight& ballLight) {
+                      const BasicPointLight& ballLight, const Texture2D* sceneTex) {
     
+    this->invisibleEffect.SetFBOTexture(sceneTex);
+
     bool rocketIsOnPaddle = paddle.HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle);
     if (rocketIsOnPaddle || !this->rocketProjectiles.empty()) {
 	    this->rocketGlowEmitter->Tick(dT);
     }
 
     if (rocketIsOnPaddle) {
-        glPushAttrib(GL_CURRENT_BIT);
+
+        glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         // Draw the rocket, mounted on the paddle
@@ -229,16 +273,24 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
         glTranslatef(paddleCenter[0], paddleCenter[1] + paddle.GetHalfHeight() + 0.5f * rocketHeight, 0.0f);
         glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
 
-        this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
-        this->rocketGlowEmitter->Draw(camera);
+        // The rocket will be invisible under special circumstances...
+        CgFxEffectBase* replacementMat = NULL;
+        if (paddle.HasSpecialStatus(PlayerPaddle::InvisibleRocketStatus)) {
+            replacementMat = &this->invisibleEffect;
+            glDepthMask(GL_FALSE);
+        }
+        else {
+            this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
+            this->rocketGlowEmitter->Draw(camera);
+        }
 
         // Specifics for drawing the particular type of rocket...
         if (paddle.HasPaddleType(PlayerPaddle::RocketPaddle)) {
-            this->paddleRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+            this->paddleRocketMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
         }
         else {
             assert(paddle.HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle));
-            this->paddleRemoteControlRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+            this->paddleRemoteControlRocketMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
         }
          
         glPopMatrix();
@@ -260,20 +312,26 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 		// Draw the rocket if it's not inside a cannon block...
 		if (!rocketProjectile->IsLoadedInCannonBlock()) {
 
-			glPushAttrib(GL_CURRENT_BIT);
+            glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
+
+            CgFxEffectBase* replacementMat = NULL;
+            if (rocketProjectile->GetIsInvisible()) {
+                replacementMat = &this->invisibleEffect;
+                glDepthMask(GL_FALSE);
+            }
 
             switch (rocketProjectile->GetType()) {
                 case Projectile::PaddleRocketBulletProjectile:
-			        this->DrawBasicRocket(rocketProjectile, this->paddleRocketMesh, camera, keyLight, fillLight, ballLight);
+			        this->DrawBasicRocket(rocketProjectile, this->paddleRocketMesh, camera, keyLight, fillLight, ballLight, replacementMat);
                     break;
                 case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
                     assert(dynamic_cast<const PaddleRemoteControlRocketProjectile*>(rocketProjectile) != NULL);
                     this->DrawRemoteControlRocket(static_cast<const PaddleRemoteControlRocketProjectile*>(rocketProjectile), 
-                        dT, camera, keyLight, fillLight, ballLight);
+                        dT, camera, keyLight, fillLight, ballLight, replacementMat);
                     break;
                 case Projectile::RocketTurretBulletProjectile:
                 case Projectile::BossRocketBulletProjectile:
-                    this->DrawBasicRocket(rocketProjectile, this->turretRocketMesh, camera, keyLight, fillLight, ballLight);
+                    this->DrawBasicRocket(rocketProjectile, this->turretRocketMesh, camera, keyLight, fillLight, ballLight, NULL);
                     break;
                 default:
                     assert(false);
@@ -288,16 +346,22 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 }
 
 void RocketMesh::ApplyRocketThrust(const PaddleRemoteControlRocketProjectile& rocket) {
-    UNUSED_PARAMETER(rocket);
-    this->rocketThrustBurstEmitter->SetNumParticleLives(1);
-    this->rocketThrustBurstEmitter->Reset();
-    this->rocketThrustingSparksEmitter->Reset();
-    this->rocketThrustHyperBurnEmitter->Reset();
+    if (rocket.GetIsInvisible()) {
+        this->invisibleRocketThrustEmitter->SetNumParticleLives(1);
+        this->invisibleRocketThrustEmitter->Reset();
+    }
+    else {
+        this->rocketThrustBurstEmitter->SetNumParticleLives(1);
+        this->rocketThrustBurstEmitter->Reset();
+        this->rocketThrustingSparksEmitter->Reset();
+        this->rocketThrustHyperBurnEmitter->Reset();
+    }
 }
 
 void RocketMesh::DrawBasicRocket(const RocketProjectile* rocket, Mesh* rocketMesh, 
                                  const Camera& camera, const BasicPointLight& keyLight, 
-                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                                 CgFxEffectBase* replacementMat) {
     
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -313,11 +377,14 @@ void RocketMesh::DrawBasicRocket(const RocketProjectile* rocket, Mesh* rocketMes
     glTranslatef(rocketPos[0], rocketPos[1], rocket->GetZOffset());
 
     float scaleFactor = rocket->GetVisualScaleFactor();
-    this->rocketGlowEmitter->SetParticleSize(
-       ESPInterval(2.0f*rocket->GetWidth()),
-       ESPInterval(1.6f*rocket->GetHeight()));
 
-    this->rocketGlowEmitter->Draw(camera);
+    if (!rocket->GetIsInvisible()) {
+        this->rocketGlowEmitter->SetParticleSize(
+           ESPInterval(2.0f*rocket->GetWidth()),
+           ESPInterval(1.6f*rocket->GetHeight()));
+
+        this->rocketGlowEmitter->Draw(camera);
+    }
 
     // The rocket may not always be firing upwards, we need to rotate it to suit
     // its current direction, we also need to spin it on that axis
@@ -325,13 +392,13 @@ void RocketMesh::DrawBasicRocket(const RocketProjectile* rocket, Mesh* rocketMes
     glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
     glScalef(scaleFactor, scaleFactor, scaleFactor);
 
-    rocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+    rocketMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
     glPopMatrix();
 }
 
 void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjectile* rocket, double dT, const Camera& camera, 
                                          const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
-                                         const BasicPointLight& ballLight) {
+                                         const BasicPointLight& ballLight, CgFxEffectBase* replacementMat) {
 
     float flashingAmt = rocket->GetCurrentFlashingAmount();
     float oneMinusFlashingAmt = 1.0f - flashingAmt;
@@ -343,53 +410,70 @@ void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjecti
     float currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
 
     const Point2D& rocketPos = rocket->GetPosition();
+    float scaleFactor = rocket->GetVisualScaleFactor();
 
     glPushMatrix();
     glTranslatef(rocketPos[0], rocketPos[1], rocket->GetZOffset());
 
-    // Special case for the remote control rocket, since the camera rotates with it we
-    // don't need to rotate the glow effect on it
-    this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
-
-    float scaleFactor = rocket->GetVisualScaleFactor();
-    this->rocketThrustBurstEmitter->SetParticleSize(ESPInterval(0.75f * rocket->GetWidth(), 2.0f * rocket->GetWidth()));
-    this->rocketGlowEmitter->Draw(camera);
-
     Vector3D oppositeRocketDir(-rocketDir);
     Point3D emitPos = Point3D(0, 0, rocket->GetZOffset()) + (rocket->GetHalfHeight() * oppositeRocketDir);
-    if (rocket->GetCurrentAppliedThrustAmount() > 0.0f) {
-        
-        this->rocketThrustBurstEmitter->SetNumParticleLives(1);
 
-        this->rocketThrustingSparksEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
-        this->rocketThrustingSparksEmitter->SetEmitDirection(oppositeRocketDir);
-        this->rocketThrustingSparksEmitter->SetInitialSpd(ESPInterval(0.33f*rocket->GetVelocityMagnitude(), 0.66f*rocket->GetVelocityMagnitude()));
-        this->rocketThrustingSparksEmitter->SetParticleSize(ESPInterval(0.3f*rocket->GetWidth(), 0.75f*rocket->GetWidth()));
-        this->rocketThrustingSparksEmitter->SetEmitPosition(emitPos);
+    if (rocket->GetIsInvisible()) {
+        if (rocket->GetCurrentAppliedThrustAmount() > 0.0f) {
+            this->invisibleRocketThrustEmitter->SetNumParticleLives(1);
+        }
+        else {
+            this->invisibleRocketThrustEmitter->SetNumParticleLives(0);
+        }
 
-        this->rocketThrustHyperBurnEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
-        this->rocketThrustHyperBurnEmitter->SetEmitDirection(oppositeRocketDir);
-        this->rocketThrustHyperBurnEmitter->SetInitialSpd(ESPInterval(0.3f*rocket->GetVelocityMagnitude(), 0.6f*rocket->GetVelocityMagnitude()));
-        this->rocketThrustHyperBurnEmitter->SetParticleSize(ESPInterval(0.75f*rocket->GetWidth(), 0.95f*rocket->GetWidth()));
-        this->rocketThrustHyperBurnEmitter->SetEmitPosition(emitPos);
+        this->invisibleRocketThrustEmitter->SetParticleSize(ESPInterval(0.75f * rocket->GetWidth(), 2.0f * rocket->GetWidth()));
+        this->invisibleRocketThrustEmitter->SetEmitDirection(oppositeRocketDir);
+        this->invisibleRocketThrustEmitter->SetParticleSize(ESPInterval(rocket->GetWidth() / 1.5f, 1.5f * rocket->GetWidth()));
+        this->invisibleRocketThrustEmitter->SetEmitPosition(emitPos);
+        this->invisibleRocketThrustEmitter->Tick(dT);
+        this->invisibleRocketThrustEmitter->Draw(camera);
     }
     else {
-        this->rocketThrustBurstEmitter->SetNumParticleLives(0);
-        this->rocketThrustingSparksEmitter->SetNumParticleLives(0);
-        this->rocketThrustHyperBurnEmitter->SetNumParticleLives(0);
+        // Special case for the remote control rocket, since the camera rotates with it we
+        // don't need to rotate the glow effect on it
+        this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
+        this->rocketGlowEmitter->Draw(camera);
+
+        if (rocket->GetCurrentAppliedThrustAmount() > 0.0f) {
+            
+            this->rocketThrustBurstEmitter->SetNumParticleLives(1);
+
+            this->rocketThrustingSparksEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+            this->rocketThrustingSparksEmitter->SetEmitDirection(oppositeRocketDir);
+            this->rocketThrustingSparksEmitter->SetInitialSpd(ESPInterval(0.33f*rocket->GetVelocityMagnitude(), 0.66f*rocket->GetVelocityMagnitude()));
+            this->rocketThrustingSparksEmitter->SetParticleSize(ESPInterval(0.3f*rocket->GetWidth(), 0.75f*rocket->GetWidth()));
+            this->rocketThrustingSparksEmitter->SetEmitPosition(emitPos);
+
+            this->rocketThrustHyperBurnEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+            this->rocketThrustHyperBurnEmitter->SetEmitDirection(oppositeRocketDir);
+            this->rocketThrustHyperBurnEmitter->SetInitialSpd(ESPInterval(0.3f*rocket->GetVelocityMagnitude(), 0.6f*rocket->GetVelocityMagnitude()));
+            this->rocketThrustHyperBurnEmitter->SetParticleSize(ESPInterval(0.75f*rocket->GetWidth(), 0.95f*rocket->GetWidth()));
+            this->rocketThrustHyperBurnEmitter->SetEmitPosition(emitPos);
+        }
+        else {
+            this->rocketThrustBurstEmitter->SetNumParticleLives(0);
+            this->rocketThrustingSparksEmitter->SetNumParticleLives(0);
+            this->rocketThrustHyperBurnEmitter->SetNumParticleLives(0);
+        }
+
+        this->rocketThrustHyperBurnEmitter->Tick(dT);
+        this->rocketThrustHyperBurnEmitter->Draw(camera);
+
+        this->rocketThrustingSparksEmitter->Tick(dT);
+        this->rocketThrustingSparksEmitter->Draw(camera);
+
+        this->rocketThrustBurstEmitter->SetParticleSize(ESPInterval(0.75f * rocket->GetWidth(), 2.0f * rocket->GetWidth()));
+        this->rocketThrustBurstEmitter->SetEmitDirection(oppositeRocketDir);
+        this->rocketThrustBurstEmitter->SetParticleSize(ESPInterval(rocket->GetWidth() / 1.5f, 1.5f * rocket->GetWidth()));
+        this->rocketThrustBurstEmitter->SetEmitPosition(emitPos);
+        this->rocketThrustBurstEmitter->Tick(dT);
+        this->rocketThrustBurstEmitter->Draw(camera);
     }
-
-    this->rocketThrustHyperBurnEmitter->Tick(dT);
-    this->rocketThrustHyperBurnEmitter->Draw(camera);
-
-    this->rocketThrustingSparksEmitter->Tick(dT);
-    this->rocketThrustingSparksEmitter->Draw(camera);
-
-    this->rocketThrustBurstEmitter->SetEmitDirection(oppositeRocketDir);
-    this->rocketThrustBurstEmitter->SetParticleSize(ESPInterval(rocket->GetWidth() / 1.5f, 1.5f * rocket->GetWidth()));
-    this->rocketThrustBurstEmitter->SetEmitPosition(emitPos);
-    this->rocketThrustBurstEmitter->Tick(dT);
-    this->rocketThrustBurstEmitter->Draw(camera);
 
     // The rocket may not always be firing upwards, we need to rotate it to suit
     // its current direction, we also need to spin it on that axis
@@ -397,7 +481,7 @@ void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjecti
     glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
     glScalef(scaleFactor, scaleFactor, scaleFactor);
 
-    this->paddleRemoteControlRocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+    this->paddleRemoteControlRocketMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
 
     glPopMatrix();
 }

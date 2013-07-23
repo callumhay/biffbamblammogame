@@ -1297,7 +1297,7 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         timeVals.reserve(orientationValues.size());
         timeVals.push_back(0.0);
         timeVals.push_back(timeToAnimate);
-        timeVals.push_back(timeToAnimate + 0.5); // We give the player a little bit of breathing time to re-orient themselves
+        timeVals.push_back(timeToAnimate + 0.33); // We give the player a little bit of breathing time to re-orient themselves
 
         toOriginalCamAnim.SetLerp(timeVals, orientationValues);
         this->remoteControlRocketCamAnimations.push_back(toOriginalCamAnim);

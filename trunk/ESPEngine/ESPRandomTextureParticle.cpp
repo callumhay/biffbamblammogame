@@ -11,6 +11,7 @@
 
 #include "ESPRandomTextureParticle.h"
 #include "../BlammoEngine/Algebra.h"
+#include "../BlammoEngine/GeometryMaker.h"
 
 ESPRandomTextureParticle::ESPRandomTextureParticle(const std::vector<Texture2D*>& textures) :
 currSelectedTexIdx(0), textures(textures) {
@@ -47,13 +48,7 @@ void ESPRandomTextureParticle::Draw(const Camera& camera, const ESP::ESPAlignmen
     const Texture2D* currTexture = this->textures[this->currSelectedTexIdx];
 
     currTexture->BindTexture();
-	glBegin(GL_QUADS);
-	glNormal3i(0, 0, 1);
-	glTexCoord2i(0, 0); glVertex2f(-0.5f, -0.5f);
-	glTexCoord2i(1, 0); glVertex2f( 0.5f, -0.5f);
-	glTexCoord2i(1, 1);    glVertex2f( 0.5f,  0.5f);
-	glTexCoord2i(0, 1);    glVertex2f(-0.5f,  0.5f);
-	glEnd();
+	GeometryMaker::GetInstance()->DrawQuad();
     currTexture->UnbindTexture();
 
 	glPopMatrix();

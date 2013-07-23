@@ -939,10 +939,10 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	// We don't show the stars coming off the dropping items if it gets in the way of playing
 	// the game - e.g., when in paddle camera mode
 	const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
-	bool showItemDropStars = !paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn();
+	bool showParticles = !paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn();
 
 	// Spawn an item drop effect for the item...
-	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(item, showItemDropStars);
+	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(item, showParticles);
 
 	// Play the item moving loop - plays as the item falls towards the paddle until it leaves play
     SoundID itemMovingSoundID = sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true);

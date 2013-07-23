@@ -23,7 +23,6 @@
 #include "Projectile.h"
 #include "PaddleRocketProjectile.h"
 
-
 class GameModel;
 class GameLevel;
 class GameBall;
@@ -67,6 +66,8 @@ public:
                       MineLauncherPaddle = 0x00000100, RemoteControlRocketPaddle = 0x00000200 };
 
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
+
+    enum PaddleSpecialStatus { NoStatus = 0x00000000, InvisibleRocketStatus = 0x00000001 };
 
     static const float DEFAULT_PADDLE_SCALE;
     static void SetNormalScale(float scale) { assert(scale > 0.0f); PlayerPaddle::NormalSizeScale = scale; };
@@ -205,6 +206,12 @@ public:
 	void AddPaddleType(const PaddleType& type);
 	void RemovePaddleType(const PaddleType& type);
 
+    int32_t GetPaddleSpecialStatus() const { return this->currSpecialStatus; }
+    bool HasSpecialStatus(int32_t status) const { return ((this->currSpecialStatus & status) != 0x0); }
+
+    void AddSpecialStatus(const PaddleSpecialStatus& status) { this->currSpecialStatus = this->currSpecialStatus | status; }
+    void RemoveSpecialStatus(const PaddleSpecialStatus& status) { this->currSpecialStatus = this->currSpecialStatus & ~status; }
+
 	// Paddle camera set/get functions
 	void SetPaddleCamera(bool isPaddleCamOn, double dT) {
 		this->isPaddleCamActive = isPaddleCamOn;
@@ -313,10 +320,12 @@ private:
 
     static float NormalSizeScale;
 
-	bool hitWall;					// True when the paddle hits a wall
+	bool hitWall;  // True when the paddle hits a wall
 
-	int32_t currType;	    // An ORed together current type of this paddle (see PaddleType)
-	PaddleSize currSize;	// The current size (width) of this paddle
+	int32_t currType;	        // An ORed together current type of this paddle (see PaddleType)
+	PaddleSize currSize;	    // The current size (width) of this paddle
+    int32_t currSpecialStatus;  // An ORed together status for various types/attributes of the paddle, usually based on specific
+                                // activation sequences of types
 
 	Point2D centerPos;						// Paddle position (at its center) in the game model
 	float currHalfHeight;					// Half the height of the paddle

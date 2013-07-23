@@ -447,6 +447,7 @@ public:
 	// Debug functions
 #ifdef _DEBUG
 	void DropItem(GameItem::ItemType itemType);
+    void DropThreeItems(GameItem::ItemType itemType1, GameItem::ItemType itemType2, GameItem::ItemType itemType3);
 #endif
 
 private:

@@ -46,9 +46,12 @@ auraEnergyOut(NULL), particleGrowth(1.0f, 1.8f), particleEnergyInAndOut(NULL) {
 	this->particleEnergyInAndOut->SetInitialSpd(ESPInterval(5.5f, 8.0f));
 	this->particleEnergyInAndOut->SetParticleLife(ESPInterval(1.25f, 1.8f));
 	this->particleEnergyInAndOut->SetParticleSize(ESPInterval(2.0f, 4.0f));
-	this->particleEnergyInAndOut->SetParticleColour(ESPInterval(SHIELD_COLOUR.R(), 1.0f), 
-																						 ESPInterval(SHIELD_COLOUR.G(), 1.0f), 
-																						 ESPInterval(SHIELD_COLOUR.B(), 1.0f), ESPInterval(1.0f));
+	this->particleEnergyInAndOut->SetParticleColour(
+        ESPInterval(SHIELD_COLOUR.R(), 1.0f),
+        ESPInterval(SHIELD_COLOUR.G(), 1.0f), 
+        ESPInterval(SHIELD_COLOUR.B(), 1.0f),
+        ESPInterval(1.0f));
+
 	this->particleEnergyInAndOut->SetEmitAngleInDegrees(180);
 	this->particleEnergyInAndOut->SetAsPointSpriteEmitter(true);
 	this->particleEnergyInAndOut->SetParticleAlignment(ESP::ScreenAligned);

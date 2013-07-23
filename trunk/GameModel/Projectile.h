@@ -49,6 +49,8 @@ public:
     virtual bool IsRocket() const                             = 0;
     virtual bool IsMine() const                               = 0;
     virtual bool IsRefractableOrReflectable() const           = 0;
+    
+    
 
     virtual float GetZOffset() const { return 0.0f; }
 
@@ -66,6 +68,9 @@ public:
     virtual bool IsAttachedToSomething() const { return false; };
 
     void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
+
+    bool GetIsInvisible() const { return this->isInvisible; }
+    void SetIsInvisible(bool isInvisible) { this->isInvisible = isInvisible; }
 
 	float GetWidth() const { return this->currWidth; }
 	float GetHeight() const { return  this->currHeight; }
@@ -135,6 +140,8 @@ protected:
 	Vector2D rightVec;		// Unit vector pointing outwards to the right of the particle, perpendicular to the velocity direction
 	float velocityMag;		// Velocity magnitude of the projectile in game units / second
 	const void* lastThingCollidedWith;
+
+    bool isInvisible;
 
 };
 

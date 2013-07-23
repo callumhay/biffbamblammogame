@@ -16,6 +16,7 @@
 #include "../ESPEngine/ESP.h"
 
 #include "CgFxVolumetricEffect.h"
+#include "CgFxPostRefract.h"
 
 class Mesh;
 class RocketProjectile;
@@ -39,7 +40,7 @@ public:
     bool NoActiveRockets() const { return this->rocketProjectiles.empty(); }
 
 	void Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const BasicPointLight& keyLight, 
-	          const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+	          const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
 
     void ApplyRocketThrust(const PaddleRemoteControlRocketProjectile& rocket);
     void ResetRemoteControlRocketEmitters();
@@ -51,6 +52,7 @@ private:
 
     std::vector<Texture2D*> smokeTextures;
     Texture2D* sparkTex;
+    Texture2D* cloudNormalTex;
     ESPParticleColourEffector particleFader;
     ESPParticleColourEffector particleBurstColourEffector;
     ESPParticleScaleEffector particleLargeGrowth;
@@ -63,6 +65,10 @@ private:
     ESPParticleColourEffector hyperBurnColourFader;
     ESPPointEmitter* rocketThrustHyperBurnEmitter;
 
+    CgFxPostRefract invisibleEffect;
+    CgFxPostRefract invisibleThrustEffect;
+
+    ESPPointEmitter* invisibleRocketThrustEmitter;
 
 	Mesh* paddleRocketMesh;
     Mesh* paddleRemoteControlRocketMesh;
@@ -70,9 +76,11 @@ private:
 	std::set<const RocketProjectile*> rocketProjectiles;
 	
     void DrawBasicRocket(const RocketProjectile* rocket, Mesh* rocketMesh, const Camera& camera, 
-        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+        CgFxEffectBase* replacementMat);
     void DrawRemoteControlRocket(const PaddleRemoteControlRocketProjectile* rocket, double dT, const Camera& camera, 
-        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+        CgFxEffectBase* replacementMat);
 
 	void LoadMeshes();
 };

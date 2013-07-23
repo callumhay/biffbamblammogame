@@ -130,13 +130,22 @@ lightningBoltTex(NULL),
 sphereNormalsTex(NULL),
 //rectPrismTexture(NULL),
 cloudTex(NULL),
+cloudNormalTex(NULL),
 vapourTrailTex(NULL),
 heartTex(NULL),
 chevronTex(NULL),
 infinityTex(NULL),
 circleTex(NULL),
 outlinedHoopTex(NULL),
-dropletTex(NULL) {
+dropletTex(NULL),
+happyFaceTex(NULL),
+neutralFaceTex(NULL),
+sadFaceTex(NULL),
+plusTex(NULL),
+plusOutlineTex(NULL),
+xTex(NULL),
+xOutlineTex(NULL)
+{
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -248,6 +257,8 @@ GameESPAssets::~GameESPAssets() {
 	//assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
 	assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudNormalTex);
+    assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->vapourTrailTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->heartTex);
@@ -261,6 +272,22 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->outlinedHoopTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->dropletTex);
+    assert(removed);
+
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->happyFaceTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->neutralFaceTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sadFaceTex);
+    assert(removed);
+
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->plusTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->plusOutlineTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->xTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->xOutlineTex);
     assert(removed);
 
 	// Delete any standalone effects
@@ -597,124 +624,196 @@ void GameESPAssets::InitESPTextures() {
 	}
 
     if (this->cleanCircleGradientTex == NULL) {
-        this->cleanCircleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
+        this->cleanCircleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
 		assert(this->cleanCircleGradientTex != NULL);
     }
 	if (this->circleGradientTex == NULL) {
-		this->circleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
+		this->circleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
 		assert(this->circleGradientTex != NULL);
 	}
 	if (this->starTex == NULL) {
-		this->starTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear));
+		this->starTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear));
 		assert(this->starTex != NULL);	
 	}
 	if (this->starOutlineTex == NULL) {
-		this->starOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear));
+		this->starOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear));
 		assert(this->starOutlineTex != NULL);
 	}
 	if (this->evilStarTex == NULL) {
-		this->evilStarTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR, Texture::Trilinear));
+		this->evilStarTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR, Texture::Trilinear));
 		assert(this->evilStarTex != NULL);	
 	}
 	if (this->evilStarOutlineTex == NULL) {
-		this->evilStarOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR_OUTLINE, Texture::Trilinear));
+		this->evilStarOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR_OUTLINE, Texture::Trilinear));
 		assert(this->evilStarOutlineTex != NULL);		
 	}
 	if (this->explosionTex == NULL) {
-		this->explosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear));
+		this->explosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear));
 		assert(this->explosionTex != NULL);
 	}
 	if (this->explosionRayTex == NULL) {
-		this->explosionRayTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear));
+		this->explosionRayTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear));
 		assert(this->explosionRayTex != NULL);
 	}
 	if (this->laserBeamTex == NULL) {
-		this->laserBeamTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear));
+		this->laserBeamTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear));
 		assert(this->laserBeamTex != NULL);
 	}
 	if (this->upArrowTex == NULL) {
-		this->upArrowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear));
+		this->upArrowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear));
 		assert(this->upArrowTex != NULL);
 	}
 	if (this->ballTex == NULL) {
-		this->ballTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE, Texture::Trilinear));
+		this->ballTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_SPHERE, Texture::Trilinear));
 		assert(this->ballTex != NULL);
 	}
 	if (this->circleTargetTex == NULL) {
-		this->circleTargetTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_TARGET, Texture::Trilinear));
+		this->circleTargetTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CIRCLE_TARGET, Texture::Trilinear));
 		assert(this->circleTargetTex != NULL);
 	}
 	if (this->haloTex == NULL) {
-		this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+		this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 		assert(this->haloTex != NULL);
 	}
 	if (this->lensFlareTex == NULL) {
-		this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
+		this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
 		assert(this->lensFlareTex != NULL);
 	}
 	if (this->sparkleTex == NULL) {
-		this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+		this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
 		assert(this->sparkleTex != NULL);
 	}
 	if (this->spiralTex == NULL) {
-		this->spiralTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL, Texture::Trilinear));
+		this->spiralTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL, Texture::Trilinear));
 		assert(this->spiralTex != NULL);
 	}
 	if (this->sideBlastTex == NULL) {
-		this->sideBlastTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST, Texture::Trilinear));
+		this->sideBlastTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST, Texture::Trilinear));
 		assert(this->sideBlastTex != NULL);
 	}
 	if (this->hugeExplosionTex == NULL) {
-		this->hugeExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
+		this->hugeExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
 		assert(this->hugeExplosionTex != NULL);
 	}
     if (this->bubblyExplosionTex == NULL) {
-        this->bubblyExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BUBBLY_EXPLOSION, Texture::Trilinear));
+        this->bubblyExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_BUBBLY_EXPLOSION, Texture::Trilinear));
 		assert(this->bubblyExplosionTex != NULL);
     }
 	if (this->lightningBoltTex == NULL) {
-		this->lightningBoltTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT, Texture::Trilinear));
+		this->lightningBoltTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT, Texture::Trilinear));
 		assert(this->lightningBoltTex != NULL);
 	}
 	if (this->sphereNormalsTex == NULL) {
-		this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
+		this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
 		assert(this->sphereNormalsTex != NULL);
 	}
 	//if (this->rectPrismTexture != NULL) {
-	//	this->rectPrismTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
+	//	this->rectPrismTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+    //GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
 	//	assert(this->rectPrismTexture != NULL);
 	//}	
 	if (this->cloudTex == NULL) {
-		this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
+		this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
 		assert(this->cloudTex != NULL);
 	}
+    if (this->cloudNormalTex == NULL) {
+        this->cloudNormalTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_NORMAL_CLOUD, Texture::Trilinear));
+        assert(this->cloudNormalTex != NULL);
+    }
     if (this->vapourTrailTex == NULL) {
-        this->vapourTrailTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL, Texture::Trilinear));
+        this->vapourTrailTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL, Texture::Trilinear));
         assert(this->vapourTrailTex != NULL);
     }
     if (this->heartTex == NULL) {
-        this->heartTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HEART, Texture::Trilinear));
+        this->heartTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_HEART, Texture::Trilinear));
         assert(this->heartTex != NULL);
     }
     if (this->chevronTex == NULL) {
-        this->chevronTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CHEVRON, Texture::Trilinear));
+        this->chevronTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CHEVRON, Texture::Trilinear));
         assert(this->chevronTex != NULL);
     }
     if (this->infinityTex == NULL) {
-        this->infinityTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR, Texture::Trilinear));
+        this->infinityTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR, Texture::Trilinear));
         assert(this->infinityTex != NULL);
     }
     if (this->circleTex == NULL) {
-        this->circleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE, Texture::Trilinear));
+        this->circleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CIRCLE, Texture::Trilinear));
         assert(this->circleTex != NULL);
     }
     if (this->outlinedHoopTex == NULL) {
-        this->outlinedHoopTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP, Texture::Trilinear));
+        this->outlinedHoopTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP, Texture::Trilinear));
         assert(this->outlinedHoopTex != NULL);
     }
     if (this->dropletTex == NULL) {
-        this->dropletTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_DROPLET, Texture::Trilinear));
+        this->dropletTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_DROPLET, Texture::Trilinear));
         assert(this->dropletTex != NULL);
+    }
+
+    if (this->happyFaceTex == NULL) {
+        this->happyFaceTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_HAPPY_FACE, Texture::Trilinear));
+        assert(this->happyFaceTex != NULL);
+    }
+    if (this->neutralFaceTex == NULL) {
+        this->neutralFaceTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_NEUTRAL_FACE, Texture::Trilinear));
+        assert(this->neutralFaceTex != NULL);
+    }
+    if (this->sadFaceTex == NULL) {
+        this->sadFaceTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_SAD_FACE, Texture::Trilinear));
+        assert(this->sadFaceTex != NULL);
+    }
+
+    if (this->plusTex == NULL) {
+        this->plusTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_PLUS, Texture::Trilinear));
+        assert(this->plusTex != NULL);
+    }
+    if (this->plusOutlineTex == NULL) {
+        this->plusOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_OUTLINED_PLUS, Texture::Trilinear));
+        assert(this->plusOutlineTex != NULL);
+    }
+    if (this->xTex == NULL) {
+        this->xTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_X, Texture::Trilinear));
+        assert(this->xTex != NULL);
+    }
+    if (this->xOutlineTex == NULL) {
+        this->xOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_OUTLINED_X, Texture::Trilinear));
+        assert(this->xOutlineTex != NULL);
     }
 
 	debug_opengl_state();
@@ -1166,6 +1265,13 @@ void GameESPAssets::InitStandaloneESPEffects() {
 
 	// Setup the post refraction normal effect with the sphere normal - this is for forcefield
 	// and shockwave effects
+    this->refractFireEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME);
+    this->refractFireEffect.SetWarpAmountParam(30.0f);
+    this->refractFireEffect.SetIndexOfRefraction(1.33f);
+    this->refractFireEffect.SetScale(0.02f);
+    this->refractFireEffect.SetFrequency(0.08f);
+    this->refractFireEffect.SetNormalTexture(this->cloudNormalTex);
+
 	this->normalTexRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
 	this->normalTexRefractEffect.SetWarpAmountParam(27.0f);
 	this->normalTexRefractEffect.SetIndexOfRefraction(1.2f);
@@ -3109,7 +3215,8 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
 /**
  * Adds an effect for when an item is dropping and not yet acquired by the player.
  */
-void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showStars) {
+void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) {
+
 	ESPInterval redRandomColour(0.1f, 1.0f);
 	ESPInterval greenRandomColour(0.1f, 1.0f);
 	ESPInterval blueRandomColour(0.1f, 1.0f);
@@ -3117,37 +3224,49 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showStars) {
 	float itemAlpha = item.GetItemColour().A();
 	ESPInterval alpha(itemAlpha*0.75f);
 
-	// We choose a specific kind of sprite graphic based on whether we are dealing with a power-down or not
-	// (evil stars for bad items!!)
-	Texture2D* itemSpecificFillStarTex = this->starTex;
-	Texture2D* itemSpecificOutlineStarTex = this->starOutlineTex;
+	// We choose a specific kind of sprite graphic based on the type of item that's dropping
+	Texture2D* itemSpecificFillShapeTex    = NULL;
+	Texture2D* itemSpecificOutlineShapeTex = NULL;
+    Texture2D* itemSepecificFaceTex        = NULL;
 
 	switch (item.GetItemDisposition()) {
 		case GameItem::Good:
 			greenRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
-			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
-			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+			redColour         = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
+			greenColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
+			blueColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+
+            itemSpecificFillShapeTex    = this->plusTex;
+            itemSpecificOutlineShapeTex = this->plusOutlineTex;
+            itemSepecificFaceTex        = this->happyFaceTex;
+
 			break;
 
 		case GameItem::Bad:
-			redRandomColour		= ESPInterval(0.8f, 1.0f);
+			redRandomColour	  = ESPInterval(0.8f, 1.0f);
 			greenRandomColour = ESPInterval(0.0f, 0.70f);
-			blueRandomColour	= ESPInterval(0.0f, 0.70f);
+			blueRandomColour  = ESPInterval(0.0f, 0.70f);
 
-			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
+			redColour   = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
 			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
-			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
+			blueColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
 
-			itemSpecificFillStarTex		 = this->evilStarTex;
-			itemSpecificOutlineStarTex = this->evilStarOutlineTex;
+            itemSpecificFillShapeTex    = this->xTex;
+            itemSpecificOutlineShapeTex = this->xOutlineTex;
+            itemSepecificFaceTex        = this->sadFaceTex;
+
 			break;
 
 		case GameItem::Neutral:
 			blueRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
-			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
-			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+			redColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
+			greenColour      = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
+			blueColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+
+            itemSpecificFillShapeTex    = this->circleTex;
+            itemSpecificOutlineShapeTex = this->outlinedHoopTex;
+            itemSepecificFaceTex        = this->neutralFaceTex;
+
 			break;
 
 		default:
@@ -3155,17 +3274,17 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showStars) {
 			break;
 	}
 
-	// Aura around the ends of the droping item
+	// Aura around the ends of the dropping item
 	ESPPointEmitter* itemDropEmitterAura1 = new ESPPointEmitter();
 	itemDropEmitterAura1->SetSpawnDelta(ESPInterval(-1));
 	itemDropEmitterAura1->SetInitialSpd(ESPInterval(0));
 	itemDropEmitterAura1->SetParticleLife(ESPInterval(-1));
-	itemDropEmitterAura1->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f), ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
+	itemDropEmitterAura1->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
 	itemDropEmitterAura1->SetEmitAngleInDegrees(0);
 	itemDropEmitterAura1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterAura1->SetAsPointSpriteEmitter(true);
 	itemDropEmitterAura1->SetEmitPosition(Point3D(GameItem::HALF_ITEM_WIDTH, 0, 0));
 	itemDropEmitterAura1->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
+    itemDropEmitterAura1->SetParticleAlignment(ESP::ScreenAligned);
 	itemDropEmitterAura1->AddEffector(&this->particlePulseItemDropAura);
 	itemDropEmitterAura1->SetParticles(1, this->circleGradientTex);
 	
@@ -3173,12 +3292,12 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showStars) {
 	itemDropEmitterAura2->SetSpawnDelta(ESPInterval(-1));
 	itemDropEmitterAura2->SetInitialSpd(ESPInterval(0));
 	itemDropEmitterAura2->SetParticleLife(ESPInterval(-1));
-	itemDropEmitterAura2->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f), ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
+	itemDropEmitterAura2->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
 	itemDropEmitterAura2->SetEmitAngleInDegrees(0);
 	itemDropEmitterAura2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterAura2->SetAsPointSpriteEmitter(true);
 	itemDropEmitterAura2->SetEmitPosition(Point3D(-GameItem::HALF_ITEM_WIDTH, 0, 0));
 	itemDropEmitterAura2->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
+    itemDropEmitterAura2->SetParticleAlignment(ESP::ScreenAligned);
 	itemDropEmitterAura2->AddEffector(&this->particlePulseItemDropAura);
 	itemDropEmitterAura2->SetParticles(1, this->circleGradientTex);
 	
@@ -3186,60 +3305,70 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showStars) {
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura1);
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura2);
 
-	if (showStars) {
-		// Middle emitter emits solid stars
+	if (showParticles) {
+
+        std::vector<Texture2D*> randomItemTextures;
+        randomItemTextures.reserve(3);
+        randomItemTextures.push_back(itemSepecificFaceTex);
+        randomItemTextures.push_back(itemSpecificFillShapeTex);
+        randomItemTextures.push_back(itemSpecificOutlineShapeTex);
+
+        const ESPInterval spdInterval(2.25f, 5.25f);
+        const ESPInterval lifeInterval(1.25f, 2.5f);
+        const ESPInterval sizeInterval(0.25f, 1.25f);
+
+        // Middle emitter...
 		ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
 		itemDropEmitterTrail1->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-		itemDropEmitterTrail1->SetInitialSpd(ESPInterval(3.0f, 5.0f));
-		itemDropEmitterTrail1->SetParticleLife(ESPInterval(1.2f, 2.0f));
-		itemDropEmitterTrail1->SetParticleSize(ESPInterval(0.6f, 1.4f));
+		itemDropEmitterTrail1->SetInitialSpd(spdInterval);
+		itemDropEmitterTrail1->SetParticleLife(lifeInterval);
+		itemDropEmitterTrail1->SetParticleSize(sizeInterval);
 		itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
 		itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
 		itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		itemDropEmitterTrail1->SetAsPointSpriteEmitter(true);
 		itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
 		itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
+        itemDropEmitterTrail1->SetParticleAlignment(ESP::ScreenAligned);
 		itemDropEmitterTrail1->AddEffector(&this->particleFader);
-		//itemDropEmitterTrail1->AddEffector(&this->smokeRotatorCW);
-		itemDropEmitterTrail1->SetParticles(12, itemSpecificFillStarTex);
+		itemDropEmitterTrail1->SetRandomTextureParticles(11, randomItemTextures);
 		
-		// Left emitter emits outlined stars
+		// Left emitters...
 		ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
 		itemDropEmitterTrail2->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-		itemDropEmitterTrail2->SetInitialSpd(ESPInterval(2.5f, 4.0f));
-		itemDropEmitterTrail2->SetParticleLife(ESPInterval(1.5f, 2.2f));
-		itemDropEmitterTrail2->SetParticleSize(ESPInterval(0.4f, 1.1f));
+		itemDropEmitterTrail2->SetInitialSpd(spdInterval);
+		itemDropEmitterTrail2->SetParticleLife(lifeInterval);
+		itemDropEmitterTrail2->SetParticleSize(sizeInterval);
 		itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
 		itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
 		itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		itemDropEmitterTrail2->SetAsPointSpriteEmitter(true);
 		itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
 		itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
+        itemDropEmitterTrail2->SetParticleAlignment(ESP::ScreenAligned);
 		itemDropEmitterTrail2->AddEffector(&this->particleFader);
-		itemDropEmitterTrail2->SetParticles(10, itemSpecificOutlineStarTex);
+		itemDropEmitterTrail2->SetRandomTextureParticles(11, randomItemTextures);
 		
-		// Right emitter emits outlined stars
+		// Right emitters...
 		ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
 		itemDropEmitterTrail3->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-		itemDropEmitterTrail3->SetInitialSpd(ESPInterval(2.5f, 4.0f));
-		itemDropEmitterTrail3->SetParticleLife(ESPInterval(1.5f, 2.2f));
-		itemDropEmitterTrail3->SetParticleSize(ESPInterval(0.4f, 1.1f));
+		itemDropEmitterTrail3->SetInitialSpd(spdInterval);
+		itemDropEmitterTrail3->SetParticleLife(lifeInterval);
+		itemDropEmitterTrail3->SetParticleSize(sizeInterval);
 		itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
 		itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
 		itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		itemDropEmitterTrail3->SetAsPointSpriteEmitter(true);
 		itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
 		itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
+        itemDropEmitterTrail3->SetParticleAlignment(ESP::ScreenAligned);
 		itemDropEmitterTrail3->AddEffector(&this->particleFader);
-		itemDropEmitterTrail3->SetParticles(10, itemSpecificOutlineStarTex);
+		itemDropEmitterTrail3->SetRandomTextureParticles(11, randomItemTextures);
 
 		// Add all the star emitters
 		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
 		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail2);
 		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail3);
 	}
-	
 }
+
 /**
  * Removes an effect associated with a dropping item.
  */
@@ -3829,34 +3958,46 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	ESPInterval blueRandomColour(0.1f, 0.8f);
 	ESPInterval redColour(0), greenColour(0), blueColour(0);
 
-	// We choose a specific kind of sprite graphic based on whether we are dealing with a power-down or not
-	// (evil stars for bad items!!)
-	Texture2D* itemSpecificFillStarTex = this->starTex;
-	Texture2D* itemSpecificOutlineStarTex = this->starOutlineTex;
+	// We choose a specific kind of sprite graphic based on the item type's disposition
+    Texture2D* itemSpecificFillShapeTex    = NULL;
+    Texture2D* itemSpecificOutlineShapeTex = NULL;
+    Texture2D* itemSepecificFaceTex        = NULL;
 
 	switch (disposition) {
 		case GameItem::Good:
 			greenRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
-			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
-			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+			redColour         = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
+			greenColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
+			blueColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+
+            itemSpecificFillShapeTex    = this->plusTex;
+            itemSpecificOutlineShapeTex = this->plusOutlineTex;
+            itemSepecificFaceTex        = this->happyFaceTex;
+
 			break;
 
 		case GameItem::Bad:
-			redRandomColour		= ESPInterval(0.8f, 1.0f);
-			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
-			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
-			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
+			redRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
+			greenColour     = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
+			blueColour      = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
 
-			itemSpecificFillStarTex		 = this->evilStarTex;
-			itemSpecificOutlineStarTex = this->evilStarOutlineTex;
+            itemSpecificFillShapeTex    = this->xTex;
+            itemSpecificOutlineShapeTex = this->xOutlineTex;
+            itemSepecificFaceTex        = this->sadFaceTex;
+
 			break;
 
 		case GameItem::Neutral:
 			blueRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
-			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
-			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+			redColour		 = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
+			greenColour      = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
+			blueColour	     = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+
+            itemSpecificFillShapeTex    = this->circleTex;
+            itemSpecificOutlineShapeTex = this->outlinedHoopTex;
+            itemSepecificFaceTex        = this->neutralFaceTex;
+
 			break;
 
 		default:
@@ -3869,41 +4010,43 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	const ESPInterval starLife(2.0f, 2.5f);
 	const ESPInterval starSize(5.0f, 15.0f); // In pixels on the screen...
 
-	ESPPointEmitter* solidStarEmitter = new ESPPointEmitter();
-	solidStarEmitter->SetSpawnDelta(starSpawnDelta);
-	solidStarEmitter->SetInitialSpd(starInitialSpd);
-	solidStarEmitter->SetParticleLife(starLife);
-	solidStarEmitter->SetNumParticleLives(1);
-	solidStarEmitter->SetParticleSize(starSize);
-	solidStarEmitter->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
-	solidStarEmitter->SetEmitAngleInDegrees(180);
-	solidStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	//solidStarEmitter->SetAsPointSpriteEmitter(true);
-	solidStarEmitter->SetParticleAlignment(ESP::NoAlignment);
-	solidStarEmitter->SetEmitDirection(Vector3D(0, 1, 0));
-	solidStarEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
-	solidStarEmitter->SetEmitPosition(Point3D(0, 0, 0));
-	solidStarEmitter->AddEffector(&this->particleFader);
-	bool result = solidStarEmitter->SetParticles(7, itemSpecificFillStarTex);
-	assert(result);
+    std::vector<Texture2D*> shapeTextures;
+    shapeTextures.reserve(3);
+    shapeTextures.push_back(itemSpecificFillShapeTex);
+    shapeTextures.push_back(itemSpecificOutlineShapeTex);
+    shapeTextures.push_back(itemSepecificFaceTex);
 
-	ESPPointEmitter* outlineStarEmitter = new ESPPointEmitter();
-	outlineStarEmitter->SetSpawnDelta(starSpawnDelta);
-	outlineStarEmitter->SetInitialSpd(starInitialSpd);
-	outlineStarEmitter->SetParticleLife(starLife);
-	outlineStarEmitter->SetNumParticleLives(1);
-	outlineStarEmitter->SetParticleSize(starSize);
-	outlineStarEmitter->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
-	outlineStarEmitter->SetEmitAngleInDegrees(180);
-	outlineStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	//outlineStarEmitter->SetAsPointSpriteEmitter(true);
-	outlineStarEmitter->SetParticleAlignment(ESP::NoAlignment);
-	outlineStarEmitter->SetEmitDirection(Vector3D(0, 1, 0));
-	outlineStarEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
-	outlineStarEmitter->SetEmitPosition(Point3D(0, 0, 0));
-	outlineStarEmitter->AddEffector(&this->particleFader);
-	result = outlineStarEmitter->SetParticles(7, itemSpecificOutlineStarTex);
-	assert(result);
+	ESPPointEmitter* shapeEmitter1 = new ESPPointEmitter();
+	shapeEmitter1->SetSpawnDelta(starSpawnDelta);
+	shapeEmitter1->SetInitialSpd(starInitialSpd);
+	shapeEmitter1->SetParticleLife(starLife);
+	shapeEmitter1->SetNumParticleLives(1);
+	shapeEmitter1->SetParticleSize(starSize);
+	shapeEmitter1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
+	shapeEmitter1->SetEmitAngleInDegrees(180);
+	shapeEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	shapeEmitter1->SetParticleAlignment(ESP::NoAlignment);
+	shapeEmitter1->SetEmitDirection(Vector3D(0, 1, 0));
+	shapeEmitter1->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	shapeEmitter1->SetEmitPosition(Point3D(0, 0, 0));
+	shapeEmitter1->AddEffector(&this->particleFader);
+	shapeEmitter1->SetRandomTextureParticles(7, shapeTextures);
+
+	ESPPointEmitter* shapeEmitter2 = new ESPPointEmitter();
+	shapeEmitter2->SetSpawnDelta(starSpawnDelta);
+	shapeEmitter2->SetInitialSpd(starInitialSpd);
+	shapeEmitter2->SetParticleLife(starLife);
+	shapeEmitter2->SetNumParticleLives(1);
+	shapeEmitter2->SetParticleSize(starSize);
+	shapeEmitter2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
+	shapeEmitter2->SetEmitAngleInDegrees(180);
+	shapeEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	shapeEmitter2->SetParticleAlignment(ESP::NoAlignment);
+	shapeEmitter2->SetEmitDirection(Vector3D(0, 1, 0));
+	shapeEmitter2->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	shapeEmitter2->SetEmitPosition(Point3D(0, 0, 0));
+	shapeEmitter2->AddEffector(&this->particleFader);
+	shapeEmitter2->SetRandomTextureParticles(7, shapeTextures);
 
 	ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
 	haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
@@ -3917,12 +4060,11 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
 	haloExpandingAura->AddEffector(&this->particleLargeGrowth);
 	haloExpandingAura->AddEffector(&this->particleFader);
-	result = haloExpandingAura->SetParticles(1, this->haloTex);
-	assert(result);
+	haloExpandingAura->SetParticles(1, this->haloTex);
 
 	std::list<ESPEmitter*> timerHUDEmitters;
-	timerHUDEmitters.push_back(solidStarEmitter);
-	timerHUDEmitters.push_back(outlineStarEmitter);
+	timerHUDEmitters.push_back(shapeEmitter1);
+	timerHUDEmitters.push_back(shapeEmitter2);
 	timerHUDEmitters.push_back(haloExpandingAura);
 
 	this->activeTimerHUDEmitters.insert(std::make_pair(type, timerHUDEmitters));
@@ -3961,56 +4103,66 @@ void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile)
 // Add effects for the rocket projectile (e.g., fire trail and smoke)
 void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectile) {
 
-	ESPPointEmitter* fireyTrailEmitter = new ESPPointEmitter();
-	fireyTrailEmitter->SetSpawnDelta(ESPInterval(0.01f));
-	fireyTrailEmitter->SetInitialSpd(ESPInterval(0.0f));
-	fireyTrailEmitter->SetParticleLife(ESPInterval(0.5f));
-	fireyTrailEmitter->SetParticleSize(ESPInterval(0.9f*projectile.GetWidth(), projectile.GetWidth()));
-	fireyTrailEmitter->SetEmitAngleInDegrees(15);
-	fireyTrailEmitter->SetEmitDirection(Vector3D(0, -1, 0));
-	fireyTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	fireyTrailEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    CgFxEffectBase* fireTrailEffect = &this->fireEffect;
+    std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
+    
+    ESPPointEmitter* fireyTrailEmitter = new ESPPointEmitter();
+    if (!projectile.GetIsInvisible()) {
+
+	    ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
+	    smokeyTrailEmitter1->SetSpawnDelta(ESPInterval(0.1f));
+	    smokeyTrailEmitter1->SetInitialSpd(ESPInterval(1.0f));
+	    smokeyTrailEmitter1->SetParticleLife(ESPInterval(0.5f, 0.75f));
+	    smokeyTrailEmitter1->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
+	    smokeyTrailEmitter1->SetEmitAngleInDegrees(45);
+	    smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, -1, 0));
+	    smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	    smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
+	    smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
+	    smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
+	    smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
+	    smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
+        smokeyTrailEmitter1->SetRandomTextureParticles(5, this->smokeTextures);
+
+	    ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
+	    smokeyTrailEmitter2->SetSpawnDelta(ESPInterval(0.1f));
+	    smokeyTrailEmitter2->SetInitialSpd(ESPInterval(1.0f));
+	    smokeyTrailEmitter2->SetParticleLife(ESPInterval(0.5f, 0.75f));
+	    smokeyTrailEmitter2->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
+	    smokeyTrailEmitter2->SetEmitAngleInDegrees(45);
+	    smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, -1, 0));
+	    smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	    smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
+	    smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
+	    smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
+	    smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
+	    smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
+        smokeyTrailEmitter2->SetRandomTextureParticles(5, this->smokeTextures);
+
+	    projectileEmitters.push_back(smokeyTrailEmitter1);
+	    projectileEmitters.push_back(smokeyTrailEmitter2);
+
+        fireyTrailEmitter->AddEffector(&this->particleFireColourFader);
+    }
+    else {
+        fireTrailEffect = &this->refractFireEffect;
+
+        fireyTrailEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+        fireyTrailEmitter->AddEffector(&this->particleFader);
+    }
+    
+    fireyTrailEmitter->SetSpawnDelta(ESPInterval(0.01f));
+    fireyTrailEmitter->SetInitialSpd(ESPInterval(0.0f));
+    fireyTrailEmitter->SetParticleLife(ESPInterval(0.5f));
+    fireyTrailEmitter->SetParticleSize(ESPInterval(0.9f*projectile.GetWidth(), projectile.GetWidth()));
+    fireyTrailEmitter->SetEmitAngleInDegrees(15);
+    fireyTrailEmitter->SetEmitDirection(Vector3D(0, -1, 0));
+    fireyTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    fireyTrailEmitter->SetParticleAlignment(ESP::ScreenAligned);
     fireyTrailEmitter->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
-	fireyTrailEmitter->AddEffector(&this->particleFireColourFader);
-	fireyTrailEmitter->AddEffector(&this->particleLargeGrowth);
-	bool result = fireyTrailEmitter->SetParticles(25, &this->fireEffect);
-	assert(result);
+    fireyTrailEmitter->AddEffector(&this->particleLargeGrowth);
+    fireyTrailEmitter->SetParticles(25, fireTrailEffect);
 
-	ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
-	smokeyTrailEmitter1->SetSpawnDelta(ESPInterval(0.1f));
-	smokeyTrailEmitter1->SetInitialSpd(ESPInterval(1.0f));
-	smokeyTrailEmitter1->SetParticleLife(ESPInterval(0.5f, 0.75f));
-	smokeyTrailEmitter1->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
-	smokeyTrailEmitter1->SetEmitAngleInDegrees(45);
-	smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, -1, 0));
-	smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
-	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
-	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
-    result = smokeyTrailEmitter1->SetRandomTextureParticles(5, this->smokeTextures);
-	assert(result);
-
-	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
-	smokeyTrailEmitter2->SetSpawnDelta(ESPInterval(0.1f));
-	smokeyTrailEmitter2->SetInitialSpd(ESPInterval(1.0f));
-	smokeyTrailEmitter2->SetParticleLife(ESPInterval(0.5f, 0.75f));
-	smokeyTrailEmitter2->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
-	smokeyTrailEmitter2->SetEmitAngleInDegrees(45);
-	smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, -1, 0));
-	smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
-	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
-	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
-    result = smokeyTrailEmitter2->SetRandomTextureParticles(5, this->smokeTextures);
-	assert(result);
-
-	std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
-	projectileEmitters.push_back(smokeyTrailEmitter1);
-	projectileEmitters.push_back(smokeyTrailEmitter2);
 	projectileEmitters.push_back(fireyTrailEmitter);
 }
 
