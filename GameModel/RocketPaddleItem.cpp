@@ -32,6 +32,11 @@ double RocketPaddleItem::Activate() {
     // Add the basic rocket for this item
 	paddle->AddPaddleType(PlayerPaddle::RocketPaddle);
 
+    // If the paddle is invisible then the rocket will have a special status of also being invisible...
+    if (paddle->HasPaddleType(PlayerPaddle::InvisiPaddle)) {
+        paddle->AddSpecialStatus(PlayerPaddle::InvisibleRocketStatus);
+    }
+
 	GameItem::Activate();
 	return RocketPaddleItem::ROCKET_PADDLE_TIMER_IN_SECS;
 }
@@ -40,6 +45,13 @@ void RocketPaddleItem::Deactivate() {
 	if (!this->isActive) {
 		return;
 	}
+
+    PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+    assert(paddle != NULL);
+
+    // Remove any invisible rocket status
+    paddle->RemoveSpecialStatus(PlayerPaddle::InvisibleRocketStatus);
+
 	this->isActive = false;
 	GameItem::Deactivate();
 }

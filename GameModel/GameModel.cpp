@@ -1580,4 +1580,19 @@ void GameModel::DropItem(GameItem::ItemType itemType) {
 		state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType, Point2D(0,0) + 0.5f*levelDim, this));
 	}
 }
+
+void GameModel::DropThreeItems(GameItem::ItemType itemType1, GameItem::ItemType itemType2, GameItem::ItemType itemType3) {
+    
+    BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
+    if (state != NULL) {
+        const Vector2D distToOtherItem(1.5f*GameItem::ITEM_WIDTH, 0.0f);
+        Point2D midDropPt   = Point2D(0,0) + 0.5f*this->GetLevelUnitDimensions();
+        Point2D leftDropPt  = midDropPt - distToOtherItem;
+        Point2D rightDropPt = midDropPt + distToOtherItem;
+
+        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType1, leftDropPt,  this));
+        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType2, midDropPt,   this));
+        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType3, rightDropPt, this));
+    }
+}
 #endif

@@ -100,7 +100,6 @@ public:
 	const char* TEXTURE_CIRCLE_GRADIENT;
     const char* TEXTURE_CLEAN_CIRCLE_GRADIENT;
     const char* TEXTURE_HOOP;
-    const char* TEXTURE_OUTLINED_HOOP;
     const char* TEXTURE_SPHERE;
 	const char* TEXTURE_STAR;
 	const char* TEXTURE_STAR_OUTLINE;
@@ -127,6 +126,7 @@ public:
 	const char* TEXTURE_SPHERE_NORMALS;
 	const char* TEXTURE_RECT_PRISM_NORMALS;
 	const char* TEXTURE_CLOUD;
+    const char* TEXTURE_NORMAL_CLOUD;
 	const char* TEXTURE_GRIT;
 	const char* TEXTURE_FROST;
 	const char* TEXTURE_FULLSCREEN_FROST;
@@ -134,10 +134,20 @@ public:
     const char* TEXTURE_FUTURISM_TRIANGLE;
     const char* TEXTURE_BOSS_ICON;
     const char* TEXTURE_PADLOCK;
-    const char* TEXTURE_PLUS;
     const char* TEXTURE_CHEVRON;
-    const char* TEXTURE_CIRCLE;
+    
     const char* TEXTURE_DROPLET;
+
+    const char* TEXTURE_PLUS;
+    const char* TEXTURE_OUTLINED_PLUS;
+    const char* TEXTURE_CIRCLE;
+    const char* TEXTURE_OUTLINED_HOOP;
+    const char* TEXTURE_X;
+    const char* TEXTURE_OUTLINED_X;
+
+    const char* TEXTURE_HAPPY_FACE;
+    const char* TEXTURE_NEUTRAL_FACE;
+    const char* TEXTURE_SAD_FACE;
 
     const char* TEXTURE_EXPLOSION_ANIMATION;
     const char* TEXTURE_LIGHTNING_ANIMATION;

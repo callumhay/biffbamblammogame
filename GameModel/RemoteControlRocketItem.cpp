@@ -33,6 +33,11 @@ double RemoteControlRocketItem::Activate() {
     // Add the rocket for this item
     paddle->AddPaddleType(PlayerPaddle::RemoteControlRocketPaddle);
 
+    // If the paddle is invisible then the rocket will have a special status of also being invisible...
+    if (paddle->HasPaddleType(PlayerPaddle::InvisiPaddle)) {
+        paddle->AddSpecialStatus(PlayerPaddle::InvisibleRocketStatus);
+    }
+
     GameItem::Activate();
     return REMOTE_CONTROL_ROCKET_TIMER_IN_SECS;
 }
@@ -41,6 +46,13 @@ void RemoteControlRocketItem::Deactivate() {
     if (!this->isActive) {
         return;
     }
+
+    PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+    assert(paddle != NULL);
+
+    // Remove any invisible rocket status
+    paddle->RemoveSpecialStatus(PlayerPaddle::InvisibleRocketStatus);
+
     this->isActive = false;
     GameItem::Deactivate();
 }

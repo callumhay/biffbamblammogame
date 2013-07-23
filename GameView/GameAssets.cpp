@@ -1003,7 +1003,8 @@ void GameAssets::DrawMeshProjectiles(double dT, const GameModel& gameModel, cons
     this->lightAssets->GetPieceAffectingLights(keyLight, fillLight, ballLight);
 
     // Draw any rockets that are currently active...
-    this->rocketMesh->Draw(dT, *gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight);
+    this->rocketMesh->Draw(dT, *gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight, 
+        this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 
     // Draw any mines that are currently active...
     this->mineMeshMgr->Draw(dT, camera, keyLight, fillLight, ballLight);

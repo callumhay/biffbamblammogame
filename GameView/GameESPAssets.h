@@ -156,14 +156,24 @@ private:
 	Texture2D* sphereNormalsTex;
 	//Texture2D* rectPrismTexture;
 	Texture2D* cloudTex;
+    Texture2D* cloudNormalTex;
     Texture2D* vapourTrailTex;
     Texture2D* heartTex;
     Texture2D* chevronTex;
     Texture2D* infinityTex;
+    Texture2D* dropletTex;
+
+    Texture2D* happyFaceTex;
+    Texture2D* neutralFaceTex;
+    Texture2D* sadFaceTex;
+
+    Texture2D* plusTex;
+    Texture2D* plusOutlineTex;
     Texture2D* circleTex;
     Texture2D* outlinedHoopTex;
-    Texture2D* dropletTex;
-    
+    Texture2D* xTex;
+    Texture2D* xOutlineTex;
+
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
 	std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > paddleEffects;
@@ -210,6 +220,7 @@ private:
 	CgFxVolumetricEffect fireBallTrailEffect;
 	CgFxVolumetricEffect iceBallTrailEffect;
 
+    CgFxPostRefract refractFireEffect;
 	CgFxPostRefract normalTexRefractEffect;
     CgFxPostRefract vapourTrailRefractEffect;
 
@@ -347,7 +358,7 @@ public:
 	ESPPointEmitter* CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item);
     void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
-	void AddItemDropEffect(const GameItem& item, bool showStars);
+	void AddItemDropEffect(const GameItem& item, bool showParticles);
 	void RemoveItemDropEffect(const GameItem& item);
 
 	void AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile);

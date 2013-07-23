@@ -28,12 +28,12 @@
 // Projectile ====================================================================================================================
 
 Projectile::Projectile(const Point2D& spawnLoc, float width, float height) : 
-position(spawnLoc), lastThingCollidedWith(NULL), currWidth(width), currHeight(height) {
+position(spawnLoc), lastThingCollidedWith(NULL), currWidth(width), currHeight(height), isInvisible(false) {
 }
 
 Projectile::Projectile(const Projectile& copy) : position(copy.position),
 lastThingCollidedWith(copy.lastThingCollidedWith), currWidth(copy.currWidth), currHeight(copy.currHeight),
-velocityDir(copy.velocityDir), velocityMag(copy.velocityMag), rightVec(copy.rightVec) {
+velocityDir(copy.velocityDir), velocityMag(copy.velocityMag), rightVec(copy.rightVec), isInvisible(copy.isInvisible) {
 }
 
 Projectile::~Projectile() {
