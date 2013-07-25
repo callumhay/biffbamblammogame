@@ -741,14 +741,20 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 			    float projectileHeight = this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;
 
 			    // Create the right type of projectile in the right place
-			    Projectile* newProjectile = new PaddleMineProjectile(
+			    Projectile* mineProjectile = new PaddleMineProjectile(
 				    this->GetCenterPosition() + Vector2D(0, this->GetMineProjectileStartingHeightRelativeToPaddle()),
                     Vector2D::Normalize(this->GetUpVector()), projectileWidth, projectileHeight);
                
-                newProjectile->SetLastThingCollidedWith(this);
+                mineProjectile->SetLastThingCollidedWith(this);
+
+                // Special status condition: if the paddle was invisible when the mine was acquired then the mine will
+                // also be invisible...
+                if (this->HasSpecialStatus(PlayerPaddle::InvisibleMineStatus)) {
+                    mineProjectile->SetIsInvisible(true);
+                }
 
 			    // Launch ze mine! - tell the model about it
-			    gameModel->AddProjectile(newProjectile);
+			    gameModel->AddProjectile(mineProjectile);
 
                 this->timeSinceLastMineLaunch = 0.0;
 

@@ -87,6 +87,8 @@ public:
 	void ActionProjectileFiredFromCannon(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
+    void ActionGamePauseStateChanged(int32_t oldPauseState, int32_t newPauseState);
+
     void ActionFireBallCancelledByIceBall(const GameBall& ball);
     void ActionIceBallCancelledByFireBall(const GameBall& ball);
 

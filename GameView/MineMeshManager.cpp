@@ -32,6 +32,9 @@ timeSinceLastMineLaunch(0.0) {
     this->triggeredTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
 	assert(this->pulseTexture != NULL);
+
+    this->invisibleEffect.SetWarpAmountParam(50.0f);
+    this->invisibleEffect.SetIndexOfRefraction(1.33f);
 }
 
 MineMeshManager::~MineMeshManager() {
@@ -57,24 +60,30 @@ MineMeshManager::~MineMeshManager() {
 
 void MineMeshManager::Draw(double dT, const Camera& camera,
                            const BasicPointLight& keyLight, const BasicPointLight& fillLight,
-                           const BasicPointLight& ballLight) {
+                           const BasicPointLight& ballLight, const Texture2D* sceneTex) {
 
-    
+    this->invisibleEffect.SetFBOTexture(sceneTex);
+
     glPushAttrib(GL_COLOR_BUFFER_BIT);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     for (MineInstanceMapConstIter iter = this->mineInstanceMap.begin(); iter != this->mineInstanceMap.end(); ++iter) {
         MineInstance* mineInstance = iter->second;
-        mineInstance->Draw(dT, camera, keyLight, fillLight, ballLight, this->mineMesh);
+        mineInstance->Draw(dT, camera, keyLight, fillLight, ballLight);
     }
     glPopAttrib();
 }
 
 void MineMeshManager::DrawLoadingMine(double dT, const PlayerPaddle& paddle, const Camera& camera,
                                       const BasicPointLight& keyLight, const BasicPointLight& fillLight,
-                                      const BasicPointLight& ballLight) {
+                                      const BasicPointLight& ballLight, const Texture2D* sceneTex) {
 
-    
     assert(paddle.HasPaddleType(PlayerPaddle::MineLauncherPaddle));
+
+    CgFxEffectBase* replacementEffect = NULL;
+    if (paddle.HasSpecialStatus(PlayerPaddle::InvisibleMineStatus)) {
+        this->invisibleEffect.SetFBOTexture(sceneTex);
+        replacementEffect = &this->invisibleEffect; 
+    }
 
     // Draw the loaded/loading mine in the attachment on the paddle (if there is one)
     float mineStartHeight  = paddle.GetHalfHeight();
@@ -84,7 +93,7 @@ void MineMeshManager::DrawLoadingMine(double dT, const PlayerPaddle& paddle, con
 
     glPushMatrix();
     glTranslatef(0.0f, currMineHeight, 0.0f);
-    this->mineMesh->Draw(camera, keyLight, fillLight, ballLight);
+    this->mineMesh->Draw(camera, replacementEffect, keyLight, fillLight, ballLight);
     glPopMatrix();
 
     this->timeSinceLastMineLaunch += dT;
@@ -99,12 +108,13 @@ void MineMeshManager::ClearMines() {
 
 #define TRAIL_EMITTER_DELTA_TIME 0.005f
 
-MineMeshManager::MineInstance::MineInstance(const MineProjectile* mine,
+MineMeshManager::MineInstance::MineInstance(MineMeshManager* manager, const MineProjectile* mine,
                                             Texture2D* trailTexture, Texture2D* pulseTexture,
-                                            Texture2D* triggeredTexture) :
+                                            Texture2D* triggeredTexture) : manager(manager),
 mine(mine), trailFader(Colour(1.0f,1.0f,1.0f), 0.6f, 0), pulseFader(ColourRGBA(0,1,0,1), ColourRGBA(1,0,0,0.1f)),
 particleShrinkToNothing(1, 0), pulseGrower(1.0f, 4.0f), fastPulser(0,0) {
 
+    assert(manager != NULL);
     assert(mine != NULL);
 
     bool result = true;
@@ -157,57 +167,72 @@ MineMeshManager::MineInstance::~MineInstance() {
 }
 
 void MineMeshManager::MineInstance::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                                         const BasicPointLight& fillLight, const BasicPointLight& ballLight,
-                                         Mesh* mineMesh) {
+                                         const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
     const Point2D& position = this->mine->GetPosition();
 
-    // Draw the trail emitter for the mine
-    if (this->mine->IsLoadedInCannonBlock() ||
-        this->mine->GetVelocityMagnitude() <= EPSILON && Vector2D::Dot(this->mine->GetVelocityDirection(), Vector2D(0, 1)) <= 0) {
-        this->trailEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-    }
-    else {
-        this->trailEmitter.SetSpawnDelta(ESPInterval(TRAIL_EMITTER_DELTA_TIME));
-    }
- 
-    this->trailEmitter.SetParticleSpawnSize(ESPInterval(mine->GetWidth()));
-    this->trailEmitter.SetEmitPosition(Point3D(position[0], position[1], 0.0f));
-    this->trailEmitter.Draw(camera);
-	this->trailEmitter.Tick(dT);
-    
+    if (!this->mine->GetIsInvisible()) {
 
+        // Draw the trail emitter for the mine
+        if (this->mine->IsLoadedInCannonBlock() ||
+            this->mine->GetVelocityMagnitude() <= EPSILON && Vector2D::Dot(this->mine->GetVelocityDirection(), Vector2D(0, 1)) <= 0) {
+            this->trailEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+        }
+        else {
+            this->trailEmitter.SetSpawnDelta(ESPInterval(TRAIL_EMITTER_DELTA_TIME));
+        }
+     
+        this->trailEmitter.SetParticleSpawnSize(ESPInterval(mine->GetWidth()));
+        this->trailEmitter.SetEmitPosition(Point3D(position[0], position[1], 0.0f));
+        this->trailEmitter.Draw(camera);
+	    this->trailEmitter.Tick(dT);
+    }
+    
     // Don't draw the mine while it's loaded in a cannon
     if (this->mine->IsLoadedInCannonBlock()) {
         return;
     }
 
     glPushMatrix();
-
     glTranslatef(position[0], position[1], this->mine->GetHalfWidth());
 
-    if (this->mine->GetIsProximityAlerted()) {
-        // The mine has been triggered - show the player that the mine is going to explode soon...
+    glPushAttrib(GL_DEPTH_BUFFER_BIT);
 
-        // Make the mine's trigger aura pulse faster as the countdown time gets closer to zero
-        float pulseRateAndGrowth = NumberFuncs::Lerp<float>(PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME,
-            0.0f, 1.25f, 3.5f, this->mine->GetProximityCountdownInSeconds());
-        this->fastPulseSettings.pulseGrowthScale = pulseRateAndGrowth;
-        this->fastPulseSettings.pulseRate = pulseRateAndGrowth;
-        this->fastPulser.ResetScaleEffect(this->fastPulseSettings);
+    // Special cases for dealing with invisible mines...
+    CgFxEffectBase* replacementEffect = NULL;
+    ESPPointEmitter* currTriggeredPulseEmitter = &this->triggeredPulseEmitter;
+    ESPPointEmitter* currArmedPulseEmitter     = &this->armedPulseEmitter;
 
-        this->triggeredPulseEmitter.Draw(camera);
-	    this->triggeredPulseEmitter.Tick(dT);
+    if (this->mine->GetIsInvisible()) {
+        replacementEffect = &this->manager->invisibleEffect;
+        // TODO: set invisible emitters ?
+        glDepthMask(GL_FALSE);
     }
     else {
-        // Draw any proximity pulse for the mine if it's armed
-        if (this->mine->GetIsArmed()) {
-            this->armedPulseEmitter.SetParticleSpawnSize(ESPInterval(mine->GetWidth()));
-            this->armedPulseEmitter.Draw(camera);
-	        this->armedPulseEmitter.Tick(dT);
+
+        if (this->mine->GetIsProximityAlerted()) {
+            // The mine has been triggered - show the player that the mine is going to explode soon...
+
+            // Make the mine's trigger aura pulse faster as the countdown time gets closer to zero
+            float pulseRateAndGrowth = NumberFuncs::Lerp<float>(PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME,
+                0.0f, 1.25f, 3.5f, this->mine->GetProximityCountdownInSeconds());
+            this->fastPulseSettings.pulseGrowthScale = pulseRateAndGrowth;
+            this->fastPulseSettings.pulseRate = pulseRateAndGrowth;
+            this->fastPulser.ResetScaleEffect(this->fastPulseSettings);
+
+            currTriggeredPulseEmitter->Draw(camera);
+	        currTriggeredPulseEmitter->Tick(dT);
         }
         else {
-            this->armedPulseEmitter.Reset();
+            // Draw any proximity pulse for the mine if it's armed
+            if (this->mine->GetIsArmed()) {
+                currArmedPulseEmitter->SetParticleSpawnSize(ESPInterval(mine->GetWidth()));
+                currArmedPulseEmitter->Draw(camera);
+	            currArmedPulseEmitter->Tick(dT);
+            }
+            else {
+                currArmedPulseEmitter->Reset();
+            }
         }
     }
 
@@ -219,7 +244,9 @@ void MineMeshManager::MineInstance::Draw(double dT, const Camera& camera, const 
     glScalef(visualScale, visualScale, visualScale);
 
     // Draw the actual mine
-    mineMesh->Draw(camera, keyLight, fillLight, ballLight);
+    this->manager->mineMesh->Draw(camera, replacementEffect, keyLight, fillLight, ballLight);
+    
 
+    glPopAttrib();
     glPopMatrix();
 }

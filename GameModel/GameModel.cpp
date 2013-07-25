@@ -1527,6 +1527,17 @@ void GameModel::ClearSpecificBeams(const Beam::BeamType& beamType) {
     }
 }
 
+bool GameModel::GetIsUnusualCameraModeActive() const {
+    bool unusualCamModeIsActive = (this->gameTransformInfo->GetIsPaddleCameraOn() || this->gameTransformInfo->GetIsBallCameraOn() ||
+        this->gameTransformInfo->GetIsRemoteControlRocketCameraOn());
+
+    if (this->boostModel != NULL) {
+        unusualCamModeIsActive |= (this->boostModel->GetBulletTimeState() != BallBoostModel::NotInBulletTime);
+    }
+    
+    return unusualCamModeIsActive;
+}
+
 Point2D GameModel::GetAvgBallLoc() const {
     Point2D avgLoc(0,0);
     for (std::list<GameBall*>::const_iterator iter = this->balls.begin(); iter != this->balls.end(); ++iter) {

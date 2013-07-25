@@ -675,7 +675,8 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 			this->paddleBeamAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
         if (p.HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
-            this->mineMeshMgr->DrawLoadingMine(dT, p, camera, paddleKeyLight, paddleFillLight, ballLight);
+            this->mineMeshMgr->DrawLoadingMine(dT, p, camera, paddleKeyLight, paddleFillLight, ballLight,
+                this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 			this->paddleMineAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
 
@@ -1007,7 +1008,8 @@ void GameAssets::DrawMeshProjectiles(double dT, const GameModel& gameModel, cons
         this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 
     // Draw any mines that are currently active...
-    this->mineMeshMgr->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->mineMeshMgr->Draw(dT, camera, keyLight, fillLight, ballLight,
+        this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 
 /**
@@ -1225,7 +1227,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             assert(dynamic_cast<const PaddleRemoteControlRocketProjectile*>(&projectile) != NULL);
            
             const PaddleRemoteControlRocketProjectile* remoteCtrlRocket = static_cast<const PaddleRemoteControlRocketProjectile*>(&projectile);
-            
+
             // Activate the remote control rocket HUD
             this->remoteControlRocketHUD->Activate(remoteCtrlRocket);
 
@@ -1409,9 +1411,15 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
 }
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
-void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera) {
+void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera, const GameModel* gameModel) {
+
     float forcePercentage = rocket.GetForcePercentageFactor();
     this->espAssets->AddRocketBlastEffect(forcePercentage, rocket.GetPosition());
+
+    float flashMultiplier = 1.0f;
+    if (gameModel->GetIsUnusualCameraModeActive()) {
+        flashMultiplier *= 0.25f;
+    }
 
 	// Add a camera/controller shake and flash for when the rocket explodes...
     
@@ -1420,13 +1428,13 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera)
         camera.SetCameraShake(forcePercentage * 0.75f, forcePercentage * Vector3D(0.7f, 0.6f, 0.1f), 100);
         GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
             BBBGameController::SoftVibration, BBBGameController::MediumVibration);
-        this->flashHUD->Activate(0.33, 0.75f);
+        this->flashHUD->Activate(0.33, 0.75f * flashMultiplier);
     }
     else {
         camera.SetCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 130);
         GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
             BBBGameController::MediumVibration, BBBGameController::HeavyVibration);
-        this->flashHUD->Activate(0.5, 1.0f);
+        this->flashHUD->Activate(0.5, 1.0f * flashMultiplier);
     }
 
 	// Play the explosion sound
@@ -1446,8 +1454,14 @@ void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
 	this->sound->PlaySoundAtPosition(GameSound::MineExplodedEvent, false, Point3D(mine.GetPosition(), 0.0f));
 }
 
-void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera) {
-	// Add a camera/controller shake and fullscreen flash
+void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera, const GameModel* gameModel) {
+	
+    float flashMultiplier = 1.0f;
+    if (gameModel->GetIsUnusualCameraModeActive()) {
+        flashMultiplier *= 0.25f;
+    }
+
+    // Add a camera/controller shake and fullscreen flash
     if (info.GetShakeMultiplier() > 0.0f) {
         double shakeTime = 0.9 * info.GetTime();
         camera.SetCameraShake(shakeTime, info.GetShakeMultiplier() * Vector3D(0.2f, 0.5f, 0.3f), 100);
@@ -1455,7 +1469,7 @@ void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info,
             BBBGameController::MediumVibration, BBBGameController::MediumVibration);
     }
     
-    this->flashHUD->Activate(info.GetTime(), 1.0f);
+    this->flashHUD->Activate(info.GetTime(), 1.0f * flashMultiplier);
 }
 
 /*

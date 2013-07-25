@@ -1,0 +1,72 @@
+three_chances
+18 30
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E 
+E E E E E E S S S E E E E E E E E E 
+E E E E E E S D(MagnetPaddle,MagnetPaddle,MagnetPaddle) S E E E E E E E E S 
+E E E E E S S S S S S S S S F(u) F(u) F(u) S 
+E E E E E S E E E E E E E S E E E E 
+E E E E E S E C(0) E E E C(0) E S E C(0) E E 
+E E E E E S E E E E E E E S E E E E 
+E E E E E S E E E S E E E S E E E E 
+E E E E E S E E E S E E E S S S T(S,ll) E 
+E E E E E S E E E S E E E E E E E E 
+E E E E E S F(u) F(u) F(u) S E C(0) E E E E E E 
+E E E E E S E E E S E E E E E E E E 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 0
+PoisonPaddle 0
+Blackout 0
+BallSafetyNet 0
+BallGrow 0
+UberBall 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+RemoteControlRocket 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 0
+PaddleCam 0

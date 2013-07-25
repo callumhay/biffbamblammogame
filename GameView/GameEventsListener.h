@@ -59,7 +59,8 @@ public:
     void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
 	void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
-	void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
+	void GamePauseStateChangedEvent(int32_t oldPauseState, int32_t newPauseState);
+    void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
     void FireBallCancelledByIceBallEvent(const GameBall& ball);
     void IceBallCancelledByFireBallEvent(const GameBall& ball);
 

@@ -17,6 +17,8 @@
 
 #include "../ESPEngine/ESP.h"
 
+#include "CgFxPostRefract.h"
+
 class MineProjectile;
 class PlayerPaddle;
 
@@ -26,9 +28,9 @@ public:
     ~MineMeshManager();
 
     void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
     void DrawLoadingMine(double dT, const PlayerPaddle& paddle, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
     
     void AddMineProjectile(const MineProjectile* mine);
     void RemoveMineProjectile(const MineProjectile* mine);
@@ -40,19 +42,23 @@ private:
     Texture2D* trailTexture;
     Texture2D* pulseTexture;
     Texture2D* triggeredTexture;
-    
+
+    CgFxPostRefract invisibleEffect;
+
     double timeSinceLastMineLaunch;
 
     class MineInstance {
     public:
-        MineInstance(const MineProjectile* mine, Texture2D* trailTexture,
+        MineInstance(MineMeshManager* manager, const MineProjectile* mine, Texture2D* trailTexture,
             Texture2D* pulseTexture, Texture2D* triggeredTexture);
         ~MineInstance();
 
         void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-            const BasicPointLight& fillLight, const BasicPointLight& ballLight, Mesh* mineMesh);
+            const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
     private:
+        MineMeshManager* manager;
+
         const MineProjectile* mine;
         AnimationMultiLerp<float> glowAnim;
         
@@ -83,7 +89,7 @@ private:
 inline void MineMeshManager::AddMineProjectile(const MineProjectile* mine) {
     assert(this->mineInstanceMap.find(mine) == this->mineInstanceMap.end());
     this->mineInstanceMap.insert(std::make_pair(mine,
-        new MineInstance(mine, this->trailTexture, this->pulseTexture, this->triggeredTexture)));
+        new MineInstance(this, mine, this->trailTexture, this->pulseTexture, this->triggeredTexture)));
     this->timeSinceLastMineLaunch = 0.0;
 }
 

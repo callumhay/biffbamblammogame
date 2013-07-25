@@ -1,0 +1,74 @@
+Daredevil Deblockification
+19 32
+C(90) E E E E E E E E C(180) E E E E E E E E C(270) 
+E E E E E E E E E E E E E E E E E E E 
+E E S S S S S S F(d) F(d) F(d) S S S S S S E E 
+E E S T(P,ul) E E P T(P,ur) E E E T(P,ul) P E E T(P,ur) S E E 
+E E S T(P,ll) E T(P,ur) S N E E E N S T(P,ul) E T(P,lr) S E E 
+E E S E Q(f) T(P,lr) S Q(i) E E E Q(i) S T(P,ll) Q(f) E S E E 
+E E S S S S S N E E E N S S S S S E E 
+E E S E T(P,ul) E P T(P,lr) E E E T(P,ll) P E T(P,ur) E S E E 
+E E S S S S S S F(d) F(d) F(d) S S S S S S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E R Q(f) Q(f) Q(f) Q(f) Q(f) R E E E S E E 
+E E S E E E R O O O O O R E E E S E E 
+E E S E E E R O O O O O R E E E S E E 
+E E S E E E R O Y Y Y O R E E E S E E 
+E E S E E E R O Y G Y O R E E E S E E 
+E E S E E E R R Y G Y R R E E E S E E 
+E E S E E E Q(f) K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) Y D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle,LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Y K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) Q(f) E E E S E E 
+E E S E E E R R Y G Y R R E E E S E E 
+E E S E E E R O Y G Y O R E E E S E E 
+E E S E E E R O Y G Y O R E E E S E E 
+E E S E E E R O Y G Y O R E E E S E E 
+E E S E E E S S S D(IceBall,IceBall,IceBall) S S S E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+C(0) E S E E E E E E E E E E E E E S E C(0) 
+
+STARS:
+8000
+14000
+18000
+25000
+30000
+
+PaddleGrow 0
+PoisonPaddle 0
+Blackout 0
+BallSafetyNet 0
+BallGrow 0
+UberBall 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+RemoteControlRocket 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 0
+PaddleCam 0

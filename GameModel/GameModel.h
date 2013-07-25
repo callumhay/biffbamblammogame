@@ -295,6 +295,8 @@ public:
 		return this->gameTransformInfo;
 	}
 
+    bool GetIsUnusualCameraModeActive() const;
+
 	// Queries as to whether the current level is the last level of the game
 	// Return: true if the model is on the last level of the game, false otherwise.
 	bool IsOnLastLevelOfGame() const {
@@ -394,10 +396,14 @@ public:
 
 	// Pauses the game
 	void SetPause(PauseType pause) {
+        int32_t prevPauseState = this->pauseBitField;
 		this->pauseBitField |= pause;
+        GameEventManager::Instance()->ActionGamePauseStateChanged(prevPauseState, this->pauseBitField);
 	}
 	void UnsetPause(PauseType pause) {
+        int32_t prevPauseState = this->pauseBitField;
 		this->pauseBitField &= ~pause;
+        GameEventManager::Instance()->ActionGamePauseStateChanged(prevPauseState, this->pauseBitField);
 	}
 	void TogglePause(PauseType pause) {
 		if ((this->pauseBitField & pause) == pause) {
@@ -408,7 +414,9 @@ public:
 		}
 	}
 	void SetPauseState(int pauseState) {
+        int32_t prevPauseState = this->pauseBitField;
 		this->pauseBitField = pauseState;
+        GameEventManager::Instance()->ActionGamePauseStateChanged(prevPauseState, this->pauseBitField);
 	}
 	int GetPauseState() const {
 		return this->pauseBitField;

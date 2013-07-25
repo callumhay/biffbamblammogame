@@ -59,6 +59,9 @@ public:
 	float GetCameraFOVAngle() const;
 
     bool GetIsLevelFlipAnimationActive() const;
+    bool GetIsPaddleCameraOn() const;
+    bool GetIsBallCameraOn() const;
+    bool GetIsRemoteControlRocketCameraOn() const;
 
 private:
 	// Each animation operates atomically, so we queue up animations as they are required
@@ -154,6 +157,16 @@ private:
 
 inline bool GameTransformMgr::GetIsLevelFlipAnimationActive() const {
     return !this->levelFlipAnimations.empty();
+}
+
+inline bool GameTransformMgr::GetIsPaddleCameraOn() const {
+    return (this->paddleWithCamera != NULL && this->remoteControlRocketWithCamera == NULL);
+}
+inline bool GameTransformMgr::GetIsBallCameraOn() const {
+    return (this->ballWithCamera != NULL && this->remoteControlRocketWithCamera == NULL);
+}
+inline bool GameTransformMgr::GetIsRemoteControlRocketCameraOn() const {
+    return (this->remoteControlRocketWithCamera != NULL);
 }
 
 #endif
