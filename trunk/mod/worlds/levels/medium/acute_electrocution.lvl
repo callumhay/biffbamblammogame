@@ -3,7 +3,7 @@ Acute Electrocution
 S S S S S S S S S S S S S 
 S E E A(0,1,g,h){1} E E E E E E E E S 
 S G G S G G G G G E E E S 
-S G G S G G G G G E E E S 
+S G G S G G G G G E K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) E S 
 S G G S G G G G G E E E S 
 S G G S A(0,1,d,c) R S S S S S A(0,1,c,d){2} S 
 S G G S G G G G G G G G S 
@@ -12,7 +12,7 @@ S Y Y S O O B O O Y Y Y S
 S G G S Y Y Y Y Y G G G S 
 S G G S G G G G G G G G S 
 S Y Y S Y Y Y Y Y Y Y Y S 
-S Y Y S G G G G G Y Y Y S 
+S Y K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S G G G G K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Y Y Y S 
 S E E A(0,1,h,g) E E E E E E E E S 
 S E E E E E E E E E E E S 
 A(0,1,i,k){5} E E E E S S S S S S A(0,1,k,i) S 
@@ -40,10 +40,10 @@ STARS:
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
-BallGrow 0
+BallSafetyNet 2
 UberBall 2
+BallGrow 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -58,13 +58,15 @@ GhostBall 2
 BallShrink 3
 UpsideDown 2
 MultiBall5 2
-BallCam 2
+BallCam 0
 MagnetPaddle 2
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 2
+MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0

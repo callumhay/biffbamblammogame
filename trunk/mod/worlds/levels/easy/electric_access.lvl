@@ -1,11 +1,11 @@
 Electric Access
 11 29
 S S S S S S S S S S S 
+S E E E E K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E E E E S 
 S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E G G G G G E E S 
-S Y Y B Y Y Y B Y Y S 
-S G E G G G G G E G S 
+S E E R R R R R E E S 
+S G O B O O O B O G S 
+S G O G G G G G O G S 
 S G G G G I G G G G S 
 S G E G E G E G E G S 
 S G E E E E E E E G S 
@@ -18,10 +18,10 @@ S G O G G G G G O G S
 S Y Y B Y Y Y B Y Y S 
 S G O G G G G G O G S 
 S Y G Y Y I Y Y G Y S 
-S G Y O G Y O G Y O S 
-S E G E G E G E G E S 
+S T(O,ur) G O Y O Y O G T(O,ul) S 
+S E R E R E R E R E S 
 S E E E E E E E E E S 
-S E E G E G E G E E S 
+S E E Y E Y E Y E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -39,8 +39,8 @@ STARS:
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
 BallGrow 2
 UberBall 2
 StickyPaddle 2
@@ -57,9 +57,10 @@ GhostBall 2
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
-BallCam 2
+BallCam 0
 MagnetPaddle 2
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 2
 MineLauncherPaddle 2
 SlowBall 2
@@ -67,4 +68,4 @@ GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0

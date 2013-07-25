@@ -236,6 +236,13 @@ void GameEventManager::ActionBallHitTeslaLightningArc(const GameBall& ball, cons
 	}		
 }
 
+void GameEventManager::ActionGamePauseStateChanged(int32_t oldPauseState, int32_t newPauseState) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->GamePauseStateChangedEvent(oldPauseState, newPauseState);
+    }	
+}
+
 // Action for when a fireball is cancelled by the player acquiring an iceball item
 void GameEventManager::ActionFireBallCancelledByIceBall(const GameBall& ball) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

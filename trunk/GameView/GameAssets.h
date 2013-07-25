@@ -180,10 +180,10 @@ public:
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
     void PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
 
-	void RocketExplosion(const RocketProjectile& rocket, Camera& camera);
+	void RocketExplosion(const RocketProjectile& rocket, Camera& camera, const GameModel* gameModel);
     void MineExplosion(const MineProjectile& mine, Camera& camera);
 
-    void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera);
+    void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera, const GameModel* gameModel);
 
 private:
     GameSound* sound; // Sound module for the game

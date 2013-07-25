@@ -322,9 +322,9 @@ public:
 	/**
 	 * Event triggered when the ball hits a tesla block to tesla block lightning arc.
 	 * Occurs right before the the repel of the ball from the arc takes place.
-	 * Arguements: ball         - The ball that hit the lightning arc.
-	 *             teslaBlock1  - One of the tesla blocks responsible for the lightning arc.
-	 *             teslaBlock2  - The other tesla block responsible for the lightning arc.    
+	 * Arguments: ball         - The ball that hit the lightning arc.
+	 *            teslaBlock1  - One of the tesla blocks responsible for the lightning arc.
+	 *            teslaBlock2  - The other tesla block responsible for the lightning arc.    
 	 */
     virtual void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
         UNUSED_PARAMETER(ball);
@@ -332,9 +332,20 @@ public:
         UNUSED_PARAMETER(teslaBlock2);
     }
 
+	/**
+	 * Event triggered when the pause state of the GameModel changes. 
+     * Occurs right after the change in the pause state.
+	 * Arguments: oldPauseState - The previous/old pause state.
+	 *            newPauseState - The current/new pause state.
+	 */
+    virtual void GamePauseStateChangedEvent(int32_t oldPauseState, int32_t newPauseState) {
+        UNUSED_PARAMETER(oldPauseState);
+        UNUSED_PARAMETER(newPauseState);
+    }
+
     /**
      * Event triggered when a ball loses the fireball ability due to the player acquiring the iceball ability.
-	 * Arguements: ball - The ball that lost the fireball ability.
+	 * Arguments: ball - The ball that lost the fireball ability.
      */
     virtual void FireBallCancelledByIceBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
     

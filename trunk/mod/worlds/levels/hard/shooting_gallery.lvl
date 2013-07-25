@@ -1,47 +1,49 @@
 Shooting Gallery
-13 28
-S S S S S S S S S S S S S 
-S E E E E E E E E E E E S 
-S E H E E E J E E E H E S 
-S E E E E E E E E E E E S 
-S R R Y G O R Y G O R R S 
-S E E E E E E E E E E E S 
-S G G G G G G G G G G G S 
-S G G G G G G G G G G G S 
-S E E E E E E E E E E E S 
-S E J E E E J E E E J E S 
-S E E E E E E E E E E E S 
-S R R Y G O R Y G O R R S 
-S E E E E E E E E E E E S 
-S G G G G G G G G G G G S 
-S G G G G G G G G G G G S 
-S E E E E E E E E E E E S 
-S E H E E E H E E E H E S 
-S E E E E E E E E E E E S 
-S R R Y G O R Y G O R R S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
+21 30
+S E S S S S S S S S S S S S S S S S S E S 
+S E E E F(r) E E E E E E E E E E E F(l) E E E S 
+S E E E F(r) E H E E E E E E E H E F(l) E E E S 
+S E E E F(r) E E E E E E E E E E E F(l) E E E S 
+S S S S S F(d) F(d) F(d) G G G G G F(d) F(d) F(d) S S S S S 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S G Y O K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) G G G K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) O Y G S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S G G G G G G G G G G G S E E E E 
+E E E E S G G G K(RocketPaddle,RocketPaddle,RocketPaddle) G G G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G G G S E E E E 
+E E E E F(r) E E E E E E E E E E E F(l) E E E E 
+E E C(90) E F(r) E J E E E M E E E J E F(l) E C(270) E E 
+E E E E F(r) E E E E E E E E E E E F(l) E E E E 
+E E E E S G F(d) Y G O F(d) Y G O F(d) G S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S G G G G G G G G G G G S E E E E 
+E E E E S G G G G G K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) G G G G G S E E E E 
+E E E E F(r) E E E E E E E E E E E F(l) E E E E 
+E T(P,ul) E E F(r) E E H E E E E E H E E F(l) E E T(P,ur) E 
+E E E E F(r) E E E E E E E E E E E F(l) E E E E 
+E E E E S R O F(d) G O R Y G F(d) R R S E E E E 
+E E E E S E E Q(f) E E E E E Q(f) E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E N E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E N E E E E 
+S E E E N E E E E E E E E E E E N E E E S 
 
 STARS:
 15000
 18000
 20000
 25000
-29500
+28000
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
+BallGrow 0
 UberBall 2
-BallGrow 2
 StickyPaddle 2
 ShieldPaddle 3
 LaserBulletPaddle 2
@@ -52,14 +54,16 @@ LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 2
 RocketPaddle 2
-GhostBall 2
+GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
 BallCam 0
 MagnetPaddle 2
 MultiBall3 2
+RemoteControlRocket 2
 IceBall 2
+MineLauncherPaddle 2
 SlowBall 2
 GravityBall 2
 CrazyBall 2

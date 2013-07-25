@@ -44,6 +44,11 @@ double PaddleMineLauncherItem::Activate() {
 
 	// Make the paddle have mine launching abilities
 	paddle->AddPaddleType(PlayerPaddle::MineLauncherPaddle);
+    
+    // If the paddle is invisible then the mine will have a special status of also being invisible...
+    if (paddle->HasPaddleType(PlayerPaddle::InvisiPaddle)) {
+        paddle->AddSpecialStatus(PlayerPaddle::InvisibleMineStatus);
+    }
 
 	GameItem::Activate();
 	return PaddleMineLauncherItem::MINE_LAUNCHER_PADDLE_TIMER_IN_SECS;
@@ -58,6 +63,9 @@ void PaddleMineLauncherItem::Deactivate() {
     assert(paddle != NULL);
     paddle->RemovePaddleType(PlayerPaddle::MineLauncherPaddle);
     
+    // Remove any invisible mine status
+    paddle->RemoveSpecialStatus(PlayerPaddle::InvisibleMineStatus);
+
     this->isActive = false;
 	GameItem::Deactivate();
 }

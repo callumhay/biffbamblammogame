@@ -1,0 +1,70 @@
+Tilt-a-Whirl Gauntlet
+21 28
+S S S S S S D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S N N N N N N N S 
+S E E E S E E E S E E E S E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E S 
+S E R E S E G E S E R E S E C(0) E C(0) E C(0) E S 
+S R B R S G E G S R B R S E E E E E E E S 
+S E O E S E G E S E O E S E E E E E E E S 
+S O E O S G E G S O E O S S S E E E S S S 
+S E Y E S E G E S E Y E S E E E E E E E S 
+S Y E Y S G E G S Y E Y S E E E E E E E S 
+S E C(180) E S E K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket,FireBall,FireBall,FireBall) E S E C(180) E S E E E E E E E S 
+S Y E Y S G E G S Y E Y S C(0-45) E S E C(315-360) E E S 
+S E Y E S E G E S E Y E S E E S E E E E S 
+S O E O S G E G S O E O S E E S S E E E S 
+S E O E S E G E S E O E S E E S S E E E S 
+S R B R S G E G S R B R S E E E S S E E S 
+S E R E S E K(FireBall,FireBall,FireBall) E S E R E S E E E S S E E S 
+S E E E S E E E S E E E S E E E E S E E S 
+S E E E S E E E S E E E S E E C(315) E S E C(0) S 
+S E E E S E E E S E E E S E E E E E E E S 
+S Q(i) Q(i) Q(i) S Q(f) Q(f) Q(f) S Q(i) Q(i) Q(i) S E E E E E E E S 
+S E E E E E E E E E E E S E E E E E E E S 
+S E E E E E E E E E E E S S E S S S S S S 
+S E E E E E E E E E E E S E E E S E E E S 
+S E E E E E E E E E E E S E E E S E E E S 
+S E E E E E E E E E E E S E E E C(270) E R E S 
+S E E E E E E E E E E E S E E E E E E E S 
+S E E E E E E E E E E E S E E E E E E E S 
+S E E E E E E E E E E E S S S S S S S S S 
+
+STARS:
+3000
+5000
+8000
+10000
+12000
+
+PaddleGrow 0
+PoisonPaddle 2
+Blackout 2
+BallSafetyNet 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 1
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+RemoteControlRocket 2
+IceBall 0
+MineLauncherPaddle 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

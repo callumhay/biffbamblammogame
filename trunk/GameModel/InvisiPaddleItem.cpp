@@ -62,6 +62,9 @@ void InvisiPaddleItem::Deactivate() {
 
 	paddle->RemovePaddleType(PlayerPaddle::InvisiPaddle);
 
+    // Remove all special statuses associated with being invisible...
+    paddle->RemoveSpecialStatus(PlayerPaddle::AllInvisibleStatus);
+
 	this->isActive = false;
 	GameItem::Deactivate();
 }

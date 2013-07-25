@@ -608,6 +608,35 @@ void GameEventsListener::ProjectileFiredFromCannonEvent(const Projectile& projec
 	debug_output("EVENT: Projectile fired out of cannon");
 }
 
+void GameEventsListener::GamePauseStateChangedEvent(int32_t oldPauseState, int32_t newPauseState) {
+    
+    GameModel* model = this->display->GetModel();
+    assert(model != NULL);
+    GameSound* sound = this->display->GetSound();
+    assert(sound != NULL);
+
+    // Handle the special case where the ball is paused/un-paused inside a cannon block - 
+    // we should pause/un-pause the sounds for the cannon block rotating
+    bool ballWasJustPaused   = ((oldPauseState & GameModel::PauseBall) == 0x0 && (newPauseState & GameModel::PauseBall) != 0x0);
+    bool ballWasJustUnpaused = ((oldPauseState & GameModel::PauseBall) != 0x0 && (newPauseState & GameModel::PauseBall) == 0x0);
+    if (ballWasJustPaused || ballWasJustUnpaused) {
+
+        assert(ballWasJustPaused != ballWasJustUnpaused);
+
+        const std::list<GameBall*>& balls = model->GetGameBalls();
+        for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+            const GameBall* currBall = *iter;
+            const CannonBlock* cannonWithBallInIt = currBall->GetCannonBlock();
+            if (cannonWithBallInIt != NULL) {
+                // The ball is inside a cannon block, toggle the correct pause state for the cannon block's sounds...
+                sound->SetPauseForAllAttachedSounds(cannonWithBallInIt, ballWasJustPaused);
+            }
+        }
+    }
+
+    debug_output("EVENT: GameModel pause state changed");
+}
+
 void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
 	UNUSED_PARAMETER(teslaBlock1);
 	UNUSED_PARAMETER(teslaBlock2);
@@ -626,17 +655,17 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 	}
 
 	this->timeSinceLastBallTeslaCollisionEventInMS = currSystemTime;
-	debug_output("EVENT: Ball hit tesla lightning arc");
+	debug_output("EVENT: Ball hit Tesla lightning arc");
 }
 
 void GameEventsListener::FireBallCancelledByIceBallEvent(const GameBall& ball) {
     this->display->GetAssets()->GetESPAssets()->AddFireballCancelledEffect(&ball);
-	debug_output("EVENT: Fireball cancelled by Iceball");
+	debug_output("EVENT: Fireball canceled by Iceball");
 }
 
 void GameEventsListener::IceBallCancelledByFireBallEvent(const GameBall& ball) {
     this->display->GetAssets()->GetESPAssets()->AddIceballCancelledEffect(&ball);
-	debug_output("EVENT: Iceball cancelled by Fireball");
+	debug_output("EVENT: Iceball canceled by Fireball");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
@@ -888,7 +917,9 @@ void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
     // Stop all sounds for the piece that has changed...
-    this->display->GetSound()->DetachAndStopAllSounds(&pieceBefore);
+    if (&pieceBefore != &pieceAfter) {
+        this->display->GetSound()->DetachAndStopAllSounds(&pieceBefore);
+    }
 
 	this->display->GetAssets()->GetCurrentLevelMesh()->ChangePiece(pieceBefore, pieceAfter);
 	debug_output("EVENT: LevelPiece changed");
@@ -1156,7 +1187,7 @@ void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 }
 
 void GameEventsListener::RocketExplodedEvent(const RocketProjectile& rocket) {
-	this->display->GetAssets()->RocketExplosion(rocket, this->display->GetCamera());
+	this->display->GetAssets()->RocketExplosion(rocket, this->display->GetCamera(), this->display->GetModel());
 	debug_output("EVENT: Rocket exploded");
 }
 
@@ -1595,7 +1626,8 @@ void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
         case BossEffectEventInfo::FullscreenFlashInfo: {
             const FullscreenFlashEffectInfo& flashInfo = 
                 static_cast<const FullscreenFlashEffectInfo&>(effectEvent);
-            this->display->GetAssets()->FullscreenFlashExplosion(flashInfo, this->display->GetCamera());
+            this->display->GetAssets()->FullscreenFlashExplosion(flashInfo, 
+                this->display->GetCamera(), this->display->GetModel());
             break;
         }
 

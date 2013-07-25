@@ -1,16 +1,15 @@
 Cannon Peek-a-boo
-11 26
-E E E E E R E E E E E 
-S S S S N N N S S S S 
-S E E E N G N E E E S 
-S E E E N G N E E E S 
-S E J E N Y N E J E S 
-S E E E N Y N E E E S 
-S N N N N O N N N N S 
+11 25
+E E E S S S S S E E E 
+S S S S E Q(f) E S S S S 
+S E E E E E E E E E S 
+S E J E E Q(i) E E J E S 
+S E E E E E E E E E S 
+S F(d) F(d) F(d) N N N F(d) F(d) F(d) S 
 S Y R R R O R R R Y S 
 S G G G G B G G G G S 
-S Y Y Y Y E Y Y Y Y S 
-S Y I Y E F(u) E Y I Y S 
+S Y Y Y Y R Y Y Y Y S 
+S Y I Y R R R Y I Y S 
 S G G G E E E G G G S 
 S G G G E E E G G G S 
 S G G G O C(0) O G G G S 
@@ -36,8 +35,8 @@ STARS:
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
 UberBall 2
 BallGrow 1
 StickyPaddle 2
@@ -49,18 +48,20 @@ InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 2
-RocketPaddle 2
+RocketPaddle 0
 GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 0
-BallCam 1
+BallCam 0
 MagnetPaddle 3
 MultiBall3 0
+RemoteControlRocket 0
 IceBall 2
+MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 1
+PaddleCam 0

@@ -67,12 +67,12 @@ public:
 
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
-    enum PaddleSpecialStatus { NoStatus = 0x00000000, InvisibleRocketStatus = 0x00000001 };
+    enum PaddleSpecialStatus { NoStatus = 0x00000000, InvisibleRocketStatus = 0x00000001, InvisibleMineStatus = 0x00000002,
+                               AllInvisibleStatus = InvisibleRocketStatus | InvisibleMineStatus};
 
     static const float DEFAULT_PADDLE_SCALE;
     static void SetNormalScale(float scale) { assert(scale > 0.0f); PlayerPaddle::NormalSizeScale = scale; };
 
-	//PlayerPaddle(float minBound, float maxBound);
 	PlayerPaddle();
 	~PlayerPaddle();
 
@@ -209,8 +209,8 @@ public:
     int32_t GetPaddleSpecialStatus() const { return this->currSpecialStatus; }
     bool HasSpecialStatus(int32_t status) const { return ((this->currSpecialStatus & status) != 0x0); }
 
-    void AddSpecialStatus(const PaddleSpecialStatus& status) { this->currSpecialStatus = this->currSpecialStatus | status; }
-    void RemoveSpecialStatus(const PaddleSpecialStatus& status) { this->currSpecialStatus = this->currSpecialStatus & ~status; }
+    void AddSpecialStatus(int32_t status) { this->currSpecialStatus = this->currSpecialStatus | status; }
+    void RemoveSpecialStatus(int32_t status) { this->currSpecialStatus = this->currSpecialStatus & ~status; }
 
 	// Paddle camera set/get functions
 	void SetPaddleCamera(bool isPaddleCamOn, double dT) {

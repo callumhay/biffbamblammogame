@@ -4,5 +4,46 @@ Futurism
 
 resources/textures/futurism_world_select_256x256.jpg
 
+# Testing ------------------------------------------
 resources/worlds/testing/see_the_background.lvl
+resources/worlds/testing/an_almost_empty_level.lvl
+resources/worlds/testing/fast_points.lvl
+resources/worlds/testing/block_test.lvl
+resources/worlds/testing/turret_test.lvl
+resources/worlds/testing/block_outer_barrier_test.lvl
+resources/worlds/testing/regen_block_test.lvl
+# End Testing --------------------------------------
+
+
+# FIND A PLACE FOR ALL OF THE BELOW LEVELS!!! **********************************************
+
+# Camera Ball/Paddle Item intro level
+resources/worlds/levels/medium/a_change_of_view.lvl
+
+
+# Switch Blocks + Item-drop Blocks + Really nasty items
+resources/worlds/levels/hard/meanest_rain_ever.lvl
+
+
+# Portal block intro levels
+# Rename "checker portals" to "Plinko... but with teleportation"
+resources/worlds/levels/medium/checker_portals.lvl 
+resources/worlds/levels/medium/shutin.lvl
+
+
+# Portal + Cannon
+resources/worlds/levels/medium/center_on_target.lvl
+
+
+# Portals + Tesla + Collateral + One-way
+# Rename this one...
+resources/worlds/levels/hard/portals_and_tesla_coils.lvl
+
+
+# Portal + Prism + One-way + Item-drop
+resources/worlds/levels/medium/obscured_enlightenment.lvl
+
+
+# Portal + Cannon + Tesla... this one looks pretty boring though...
+resources/worlds/levels/medium/electric_fencing.lvl
 
