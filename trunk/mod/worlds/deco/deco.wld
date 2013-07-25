@@ -25,12 +25,8 @@ resources/worlds/levels/medium/ahead_by_a_sentry.lvl
 resources/worlds/levels/medium/cannon_peekaboo.lvl
 
 
-
-
-
-
-
-
+# TODO: More levels here... turrets + other things, or just regular levels featuring previously
+# revealed items and blocks... but put turrets in them too
 
 
 
@@ -53,15 +49,6 @@ resources/worlds/levels/medium/acute_electrocution.lvl
 
 
 
-# ALL of the Turrets + Laser/prism + rocket/mine/cannon + remote control rocket interactions
-resources/worlds/levels/hard/shooting_gallery.lvl
-
-
-
-
-
-
-
 
 # Remote control rocket race-navigation-focused hard level
 resources/worlds/levels/hard/tilt_a_whirl_gauntlet.lvl
@@ -69,3 +56,16 @@ resources/worlds/levels/hard/tilt_a_whirl_gauntlet.lvl
 
 # Mine Turret + Sticky Paddle + Cannon
 resources/worlds/levels/medium/yours_and_mine.lvl
+
+
+
+
+
+# NOTE: This should be one of the very last levels in this movement!!
+# ALL of the Turrets + Laser/prism + rocket/mine/cannon + remote control rocket interactions
+resources/worlds/levels/hard/shooting_gallery.lvl
+
+
+
+# BOSS: ????
+# TODO
