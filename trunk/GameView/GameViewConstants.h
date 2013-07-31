@@ -259,6 +259,8 @@ public:
 
     const float DEFAULT_FG_KEY_LIGHT_ATTEN;
     const float DEFAULT_FG_FILL_LIGHT_ATTEN;
+    const float DEFAULT_BG_KEY_LIGHT_ATTEN;
+    const float DEFAULT_BG_FILL_LIGHT_ATTEN;
 	
     const Colour DEFAULT_PADDLE_KEY_LIGHT_COLOUR;
 	const Colour DEFAULT_PADDLE_FILL_LIGHT_COLOUR;

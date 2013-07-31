@@ -52,7 +52,7 @@ std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& 
 	haloExpandingPulse->SetParticleSize(ESPInterval(LevelPiece::HALF_PIECE_WIDTH), ESPInterval(LevelPiece::HALF_PIECE_HEIGHT));
 	haloExpandingPulse->SetEmitAngleInDegrees(0);
 	haloExpandingPulse->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	haloExpandingPulse->SetParticleAlignment(ESP::ScreenAligned);
+	haloExpandingPulse->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	haloExpandingPulse->SetEmitPosition(worldTranslation);
 	haloExpandingPulse->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
 	haloExpandingPulse->AddEffector(&this->haloExpandPulse);

@@ -24,13 +24,8 @@ GameWorldAssets(assets, new DecoSkybox(),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_PADDLE_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BLOCK_MESH)) {
 
-    // Change the positions of the background lights to something that compliements the background more
-    assets->GetLightAssets()->SetBackgroundLightDefaults(
-        BasicPointLight(Point3D(60.0f, 60.0f, 60.0f), Colour(0.4f, 0.45f, 0.45f), 0.06f),
-        BasicPointLight(Point3D(30.0f, 11.0f, -15.0f), Colour(0.8f, 0.8f, 0.8f),  0.01f));
-
     // Change the default values for drawing outlines
-    this->outlineMinDistance = 0.01f;
+    this->outlineMinDistance = 0.1f;
     this->outlineMaxDistance = 21.0f;
     this->outlineContrast    = 2.25f;
     this->outlineOffset      = 0.8f;
@@ -285,6 +280,19 @@ void NouveauWorldAssets::Tick(double dT) {
     //this->rightGapEmitter.SetParticleAlpha(currBGAlpha);
 
 	GameWorldAssets::Tick(dT);
+}
+
+void NouveauWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset) const {
+    assets->GetLightAssets()->SetForegroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgPosOffset, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0175f), 
+        BasicPointLight(Point3D(10, 10, 50) + fgPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.02f));
+}
+
+void NouveauWorldAssets::LoadBGLighting(GameAssets* assets) const {
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(Point3D(60.0f, 60.0f, 60.0f), Colour(0.4f, 0.45f, 0.45f), 0.06f),
+        BasicPointLight(Point3D(30.0f, 11.0f, -15.0f), Colour(0.8f, 0.8f, 0.8f),  0.01f));
 }
 
 void NouveauWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight,

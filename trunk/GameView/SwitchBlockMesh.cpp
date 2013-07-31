@@ -19,7 +19,8 @@
 SwitchBlockMesh::SwitchBlockMesh() : switchBlockGeometry(NULL), 
 switchOnMaterialGrp(NULL), switchOffMaterialGrp(NULL), switchCurrentMaterialGrp(NULL),
 greenOnSwitchTexture(NULL), redOnSwitchTexture(NULL), offSwitchTexture(NULL), haloTexture(NULL),
-haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f) {
+idlePulseEmitter(NULL), pulseGlowTexture(NULL),
+haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f), pulser(0,0) {
     this->LoadMesh();
 
     this->greenOnSwitchTexture  = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_GREEN_ON_SWITCH, Texture::Trilinear));
@@ -30,8 +31,13 @@ haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f) {
     assert(this->offSwitchTexture != NULL);
 
 	assert(this->haloTexture == NULL);
-	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->haloTexture != NULL);
+
+    this->pulseGlowTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
+    assert(this->pulseGlowTexture != NULL);
 
     this->InitEmitters();
 }
@@ -39,6 +45,8 @@ haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f) {
 SwitchBlockMesh::~SwitchBlockMesh() {
     delete this->onEmitter;
     this->onEmitter = NULL;
+    delete this->idlePulseEmitter;
+    this->idlePulseEmitter = NULL;
 
     // Restore the mesh to its initial state (off) before cleaning up
     MaterialProperties* switchOnMatProperties       = this->switchOnMaterialGrp->GetMaterial()->GetProperties();
@@ -59,6 +67,8 @@ SwitchBlockMesh::~SwitchBlockMesh() {
 
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTexture);
 	assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->pulseGlowTexture);
+    assert(success);
 
     UNUSED_VARIABLE(success);
 
@@ -112,6 +122,9 @@ void SwitchBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
             switchOffMatProperties->diffuseTexture     = this->redOnSwitchTexture;
             switchOnMatProperties->diffuseTexture      = this->offSwitchTexture;
             switchCurrentMatProperties->diffuseTexture = this->redOnSwitchTexture;
+
+            this->idlePulseEmitter->Draw(camera);
+
             this->switchOnMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
             this->switchOffMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
             this->switchCurrentMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
@@ -139,6 +152,7 @@ void SwitchBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
 
     glPopAttrib();
     this->onEmitter->Tick(dT);
+    this->idlePulseEmitter->Tick(dT);
 }
 
 void SwitchBlockMesh::SetAlphaMultiplier(float alpha) {
@@ -147,6 +161,9 @@ void SwitchBlockMesh::SetAlphaMultiplier(float alpha) {
 		MaterialGroup* matGrp = iter->second;
 		matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
 	}
+
+    this->onEmitter->SetParticleAlpha(alpha);
+    this->idlePulseEmitter->SetParticleAlpha(alpha);
 }
 
 void SwitchBlockMesh::LoadMesh() {
@@ -199,14 +216,30 @@ void SwitchBlockMesh::InitEmitters() {
 	this->onEmitter->SetParticleSize(ESPInterval(1.5 * LevelPiece::HALF_PIECE_WIDTH), ESPInterval(1.5 * LevelPiece::HALF_PIECE_HEIGHT));
 	this->onEmitter->SetEmitAngleInDegrees(0);
 	this->onEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->onEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	this->onEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->onEmitter->SetEmitPosition(Point3D(0,0,0));
 	this->onEmitter->SetParticleColour(ESPInterval(0), ESPInterval(1), ESPInterval(0), ESPInterval(1.0f));
 	this->onEmitter->AddEffector(&this->haloExpandPulse);
 	this->onEmitter->AddEffector(&this->haloFader);
-	bool result = this->onEmitter->SetParticles(NUM_HALOS, this->haloTexture);
-    UNUSED_VARIABLE(result);
-	assert(result);
+	this->onEmitter->SetParticles(NUM_HALOS, this->haloTexture);
+
+    ScaleEffect pulseSettings;
+    pulseSettings.pulseGrowthScale = 1.45f;
+    pulseSettings.pulseRate = 0.5f;
+    this->pulser = ESPParticleScaleEffector(pulseSettings);
+
+    this->idlePulseEmitter = new ESPPointEmitter();
+    this->idlePulseEmitter->SetSpawnDelta(ESPInterval(-1));
+    this->idlePulseEmitter->SetInitialSpd(ESPInterval(0));
+    this->idlePulseEmitter->SetParticleLife(ESPInterval(-1));
+    this->idlePulseEmitter->SetParticleSize(ESPInterval(1.2f*LevelPiece::PIECE_WIDTH), ESPInterval(1.2f*LevelPiece::PIECE_HEIGHT));
+    this->idlePulseEmitter->SetEmitAngleInDegrees(0);
+    this->idlePulseEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->idlePulseEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->idlePulseEmitter->SetEmitPosition(Point3D(0, 0, 0));
+    this->idlePulseEmitter->SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.75f));
+    this->idlePulseEmitter->AddEffector(&this->pulser);
+    this->idlePulseEmitter->SetParticles(1, this->pulseGlowTexture);
 }
 
 SwitchBlockMesh::SwitchConnection::SwitchConnection(const SwitchBlock* switchBlock,

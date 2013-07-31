@@ -17,6 +17,7 @@
 #include "../BlammoEngine/Mesh.h"
 
 #include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleColourEffector.h"
 
 class TeslaBlock;
 class ESPPointEmitter;
@@ -33,8 +34,6 @@ public:
 	void RemoveTeslaBlock(TeslaBlock* teslaBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void SetAlphaMultiplier(float alpha);
@@ -58,8 +57,11 @@ private:
 	//ESPPointEmitter* teslaSparks;
 	Texture2D* flareTex;
 	//Texture2D* sparkTex;
-	Texture2D* shieldTex;
-	float shieldAlpha;
+
+    ESPPointEmitter* shieldEmitter;
+    ESPParticleScaleEffector haloExpandPulse;
+    ESPParticleColourEffector haloFader;
+    Texture2D* haloTexture;
 
 	void DrawTeslaShield(const Matrix4x4& screenAlignMatrix);
 

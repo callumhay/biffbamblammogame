@@ -3032,18 +3032,22 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 		Vector3D(Vector2D::Dot(vecToProjectile, positivePaddleAxis) * positivePaddleAxis + 
 		minHeightOfImpact * paddle.GetHalfHeight() * paddle.GetUpVector());
 
+    Point3D worldHitPos(paddle.GetCenterPosition()[0] + hitPositionRelativeToPaddleCenter[0],
+        paddle.GetCenterPosition()[1] + hitPositionRelativeToPaddleCenter[1], 0.0f);
+
 	// Add firey impact at hit location...
-	ESPPointEmitter* impactEmitter = NULL;
     switch (projectile.GetType()) {
 
         case Projectile::BossOrbBulletProjectile: {
             // Impact emitter is a shockwave...
-            impactEmitter = this->CreateShockwaveEffect(hitPositionRelativeToPaddleCenter, projectile.GetWidth(), 0.85f);
+            ESPPointEmitter* impactEmitter = this->CreateShockwaveEffect(hitPositionRelativeToPaddleCenter, projectile.GetWidth(), 0.33f);
+            impactEmitter->SetEmitPosition(worldHitPos);
+            this->activeGeneralEmitters.push_back(impactEmitter);
             break;
         }
 
         default: {
-            impactEmitter = new ESPPointEmitter();
+            ESPPointEmitter* impactEmitter = new ESPPointEmitter();
 	        impactEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	        impactEmitter->SetInitialSpd(ESPInterval(0.001f));
 	        impactEmitter->SetParticleLife(ESPInterval(0.85f));
@@ -3058,11 +3062,11 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	        impactEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	        impactEmitter->AddEffector(&this->particleFader);
 	        impactEmitter->SetParticles(1, this->sideBlastTex);
+            this->activePaddleEmitters.push_back(impactEmitter);
             break;
         }
     }
-    assert(impactEmitter != NULL);
-	this->activePaddleEmitters.push_back(impactEmitter);
+	
 
 	// Smashy star texture particle
 	ESPPointEmitter* starEmitter = new ESPPointEmitter();
@@ -3075,8 +3079,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	starEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	starEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()));
-	starEmitter->SetEmitPosition(Point3D(paddle.GetCenterPosition()[0] + hitPositionRelativeToPaddleCenter[0],
-        paddle.GetCenterPosition()[1] + hitPositionRelativeToPaddleCenter[1], 0.0f));
+	starEmitter->SetEmitPosition(worldHitPos);
 
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		starEmitter->AddEffector(&this->explosionRayRotatorCCW);
@@ -3868,30 +3871,30 @@ void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, con
 	Point3D startPt = Point3D(block1.GetCenter()) + levelTranslation;
 	Point3D endPt   = Point3D(block2.GetCenter()) + levelTranslation;
 
-	// Base the number of segments on the distance between the tesla blocks!!
+	// Base the number of segments on the distance between the Tesla blocks!!
 	float distance = Point2D::Distance(block1.GetCenter(), block2.GetCenter());
 	static const float NUM_SEGMENTS_PER_UNIT_DIST = 1.5f;
 	int totalSegments = NUM_SEGMENTS_PER_UNIT_DIST * distance;
 
-	// Create the large central lightining arc
+	// Create the large central lightning arc
 	ESPPointToPointBeam* bigLightningArc = new ESPPointToPointBeam();
 	bigLightningArc->SetStartAndEndPoints(startPt, endPt);
-	bigLightningArc->SetColour(ColourRGBA(1,1,1,1));
+	bigLightningArc->SetColour(ColourRGBA(0.99f, 0.9f, 1.0f, 1.0f));
 	bigLightningArc->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
 	bigLightningArc->SetNumBeamShots(1);
-	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.0f, 0.7f * LevelPiece::PIECE_HEIGHT));
-	bigLightningArc->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 9.0f, LevelPiece::PIECE_WIDTH / 8.0f));
+	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.0f, 0.8f * LevelPiece::PIECE_HEIGHT));
+	bigLightningArc->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 12.0f, LevelPiece::PIECE_WIDTH / 10.0f));
 	bigLightningArc->SetNumMainESPBeamSegments(totalSegments);
 	
-	// Create some purpleish smaller arcs
+	// Create some purple-ish smaller arcs
 	ESPPointToPointBeam* smallerLightningArcs = new ESPPointToPointBeam();
 	smallerLightningArcs->SetStartAndEndPoints(startPt, endPt);
 	smallerLightningArcs->SetColour(ColourRGBA(0.9f, 0.75f, 1.0f, 1.0f));
 	smallerLightningArcs->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
 	smallerLightningArcs->SetNumBeamShots(2);
-	smallerLightningArcs->SetMainBeamAmplitude(ESPInterval(0.1f * LevelPiece::PIECE_HEIGHT, 0.9f * LevelPiece::PIECE_HEIGHT));
+	smallerLightningArcs->SetMainBeamAmplitude(ESPInterval(0.1f * LevelPiece::PIECE_HEIGHT, 0.75f * LevelPiece::PIECE_HEIGHT));
 	smallerLightningArcs->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 20.0f, LevelPiece::PIECE_WIDTH / 18.0f));
-	smallerLightningArcs->SetNumMainESPBeamSegments(totalSegments);
+	smallerLightningArcs->SetNumMainESPBeamSegments(totalSegments / 1.25f);
 
 	std::list<ESPPointToPointBeam*> lightningArcs;
 	lightningArcs.push_back(bigLightningArc);
@@ -4674,7 +4677,7 @@ void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Poin
     const Point3D EMITTER_LOCATION = Point3D(loc[0], loc[1], 0.0f);
     
     // Shockwave
-    ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(EMITTER_LOCATION, projectile.GetWidth(), 0.75f);
+    ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(EMITTER_LOCATION, projectile.GetWidth(), 0.33f);
     
 	// Create a dispertion of particle bits
 	ESPPointEmitter* particleSparks = new ESPPointEmitter();
@@ -4682,7 +4685,7 @@ void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Poin
 	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	particleSparks->SetInitialSpd(ESPInterval(1.5f, 4.0f));
 	particleSparks->SetParticleLife(ESPInterval(0.5f, 0.75f));
-    particleSparks->SetParticleSize(ESPInterval(projectile.GetWidth() / 3.0f, projectile.GetWidth() / 1.5f));
+    particleSparks->SetParticleSize(ESPInterval(projectile.GetWidth() / 3.0f, projectile.GetWidth() / 1.75f));
     
     Colour brighterBaseColour = 1.5f * baseColour;
     Colour brighterBrightColour = 2.0f * brightColour;
@@ -6615,7 +6618,7 @@ void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
 		for (std::list<ESPPointToPointBeam*>::iterator arcIter = arcs.begin(); arcIter != arcs.end(); ++arcIter) {
 			ESPPointToPointBeam* currArc = *arcIter;
 			currArc->Tick(dT);
-			currArc->Draw(camera, true);
+			currArc->Draw(camera);
 		}
 	}
 }

@@ -207,6 +207,20 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			alignRightVec	 = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
 			break;
 
+        case ESP::ScreenAlignedGlobalUpVec:
+
+            alignNormalVec = -cam.GetNormalizedViewVector();
+            alignUpVec     = Vector3D(0, 1, 0);
+            alignRightVec  = Vector3D::cross(alignUpVec, alignNormalVec);
+            if (alignRightVec.IsZero()) {
+                alignUpVec    = Vector3D(0, 0, 1);
+                alignRightVec = Vector3D::cross(alignUpVec, alignNormalVec);
+                assert(!alignRightVec.IsZero());
+            }
+            alignRightVec.Normalize();
+
+            break;
+
 		case ESP::ViewPlaneAligned:
 			// The particle is aligned to the view plane...
 			// - The normal is the negation of the view plane normal (in world space)

@@ -527,8 +527,10 @@ void LaserTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSe
     if (collidesWithPaddle) {
         // Now make sure the ray isn't colliding with any blocks before the paddle...
         float levelPieceRayT = std::numeric_limits<float>::max();
+        
         std::set<const LevelPiece*> ignorePieces;
         ignorePieces.insert(this);
+
         LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire,
             ignorePieces, levelPieceRayT, 1.05f * BARREL_OFFSET_EXTENT_ALONG_Y);
 

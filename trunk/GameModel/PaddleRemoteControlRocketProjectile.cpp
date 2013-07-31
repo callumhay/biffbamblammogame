@@ -53,6 +53,7 @@ PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
 /// control over this rocket.
 /// </summary>
 void PaddleRemoteControlRocketProjectile::Setup(GameModel& gameModel) {
+    gameModel.ReleaseBulletTime();
 
     // The transform manager will take care of pausing the game state and doing the transforms...
     GameTransformMgr* transformMgr = gameModel.GetTransformInfo();

@@ -1,30 +1,30 @@
 Cannon Peek-a-boo
-11 25
-E E E S S S S S E E E 
-S S S S E Q(f) E S S S S 
-S E E E E E E E E E S 
-S E J E E Q(i) E E J E S 
-S E E E E E E E E E S 
-S F(d) F(d) F(d) N N N F(d) F(d) F(d) S 
-S Y R R R O R R R Y S 
-S G G G G B G G G G S 
-S Y Y Y Y R Y Y Y Y S 
-S Y I Y R R R Y I Y S 
-S G G G E E E G G G S 
-S G G G E E E G G G S 
-S G G G O C(0) O G G G S 
-S Y E Y E R E Y E Y S 
-S G G G O G O G G G S 
-S G G G G G G G G G S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
+13 25
+E E E E S S S S S E E E E 
+E S S S S E Q(f) E S S S S E 
+E S E E E E Q(i) E E E E S E 
+E S E J E E Q(i) E E J E S E 
+E S E E E E E E E E E S E 
+E S F(d) F(d) F(d) N N N F(d) F(d) F(d) S E 
+E S G G G R R R G G G S E 
+E S G G G R B R G G G S E 
+E S Y Y Y R E R Y Y Y S E 
+E S Y I Y R E R Y I Y S E 
+E S Y Y Y E F(u) E Y Y Y S E 
+E S G G G E E E G G G S E 
+E S G G G O C(0) O G G G S E 
+E S R E R E R E R E R S E 
+E S G G G O G O G G G S E 
+E S G G G G G G G G G S E 
+E S E E E E E E E E E S E 
+E S E E E E E E E E E S E 
+E S E E E E E E E E E S E 
+E S E E E E E E E E E S E 
+E S E E E E E E E E E S E 
+E S E E E E E E E E E S E 
+E S E E E E E E E E E S E 
+S S E E E E E E E E E S S 
+S E E E E E E E E E E E S 
 
 STARS:
 6000
@@ -46,7 +46,7 @@ PaddleShrink 2
 InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 2
-OmniLaserBall 2
+OmniLaserBall 0
 FireBall 2
 RocketPaddle 0
 GhostBall 0
@@ -57,7 +57,7 @@ BallCam 0
 MagnetPaddle 3
 MultiBall3 0
 RemoteControlRocket 0
-IceBall 2
+IceBall 0
 MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2

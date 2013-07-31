@@ -19,10 +19,10 @@
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../GameModel/GameModel.h"
 
-const double WorldStartDisplayState::FADE_OUT_TIME							= 1.0;		// Time it takes to fade to white when this state is being exited
-const double WorldStartDisplayState::HEADER_WIPE_TIME						= 1.5;		// Time it takes for the header to wipe fade-in
-const double WorldStartDisplayState::FOOTER_FLASH_TIME					= 0.5;		// Time to switch the footer colour when it's flashing
-const float  WorldStartDisplayState::HEADER_WIPE_FADE_QUAD_SIZE = 110.0f;	// Size of the gradient quad used to wipe in the header
+const double WorldStartDisplayState::FADE_OUT_TIME              = 1.0;     // Time it takes to fade to white when this state is being exited
+const double WorldStartDisplayState::HEADER_WIPE_TIME           = 1.5;     // Time it takes for the header to wipe fade-in
+const double WorldStartDisplayState::FOOTER_FLASH_TIME          = 0.5;     // Time to switch the footer colour when it's flashing
+const float  WorldStartDisplayState::HEADER_WIPE_FADE_QUAD_SIZE = 110.0f;  // Size of the gradient quad used to wipe in the header
 
 WorldStartDisplayState::WorldStartDisplayState(GameDisplay* display) : DisplayState(display),
 waitingForKeyPress(false), starryBG(NULL), lineThicknessInPixels(1.0f),

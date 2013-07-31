@@ -20,13 +20,17 @@ ballLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_C
 
     // Setup the Background lights with their default values
     this->SetBackgroundLightDefaults(
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.005f),
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f));
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 
+        GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_ATTEN),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  
+        GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_ATTEN));
 
 	// Setup the foreground lights (blocks, paddle, ball, bosses, etc.) with their default values
     this->SetForegroundLightDefaults(
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN),
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN));
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN));
 }
 
 GameLightAssets::~GameLightAssets() {

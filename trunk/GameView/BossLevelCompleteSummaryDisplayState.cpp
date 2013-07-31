@@ -402,11 +402,12 @@ void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
         return;
     }
 
-    // TODO: Check to see if all other animations are done...
+    // Check to see if all other animations are done...
     if (this->allAnimationIsDone) {
         // Setup the fade animation
         this->fadeOutAnimation.SetLerp(FADE_TIME, 1.0f);
         waitingForKeyPress = false;
+        return;
     }
 
     // Finish all of the animations...
@@ -422,5 +423,5 @@ void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
     this->glowScaleAnim.SetInterpolantValue(this->glowScaleAnim.GetTargetValue());
     this->glowScaleAnim.ClearLerp();
 
-    this->allAnimationIsDone = true;
+    this->allAnimationIsDone = true;   
 }

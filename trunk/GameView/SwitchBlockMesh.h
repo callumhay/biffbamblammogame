@@ -84,6 +84,10 @@ private:
 	ESPParticleColourEffector haloFader;
 	Texture2D* haloTexture;
 
+    ESPPointEmitter* idlePulseEmitter;
+    ESPParticleScaleEffector pulser;
+    Texture2D* pulseGlowTexture;
+
     void LoadMesh();
     void InitEmitters();
 

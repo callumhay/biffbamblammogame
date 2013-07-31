@@ -63,7 +63,7 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
 	this->rocketGlowEmitter->SetParticleSize(ESPInterval(1), ESPInterval(1));
 	this->rocketGlowEmitter->SetEmitAngleInDegrees(0);
 	this->rocketGlowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->rocketGlowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	this->rocketGlowEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->rocketGlowEmitter->SetEmitPosition(Point3D(0, 0, 0));
 	this->rocketGlowEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.70f));
 	this->rocketGlowEmitter->AddEffector(&this->pulseEffector);
@@ -109,7 +109,7 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
         ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f),
         ESPInterval(0.0f), 
         ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f));
-    this->rocketThrustBurstEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    this->rocketThrustBurstEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->rocketThrustBurstEmitter->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
     this->rocketThrustBurstEmitter->SetEmitPosition(Point3D(0, 0, 0));
     this->rocketThrustBurstEmitter->AddEffector(&this->particleBurstColourEffector);
@@ -131,7 +131,7 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
         ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f),
         ESPInterval(0.0f), 
         ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f));
-    this->rocketThrustingSparksEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    this->rocketThrustingSparksEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->rocketThrustingSparksEmitter->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
     this->rocketThrustingSparksEmitter->SetEmitPosition(Point3D(0, 0, 0));
     this->rocketThrustingSparksEmitter->AddEffector(&this->particleLargeGrowth);
@@ -150,7 +150,7 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
     this->rocketThrustHyperBurnEmitter->SetParticleLife(ESPInterval(0.5f, 0.75f));
     this->rocketThrustHyperBurnEmitter->SetEmitAngleInDegrees(20);
     this->rocketThrustHyperBurnEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    this->rocketThrustHyperBurnEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    this->rocketThrustHyperBurnEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->rocketThrustHyperBurnEmitter->AddEffector(&this->hyperBurnColourFader);
     this->rocketThrustHyperBurnEmitter->AddEffector(&this->particleLargeGrowth);
     this->rocketThrustHyperBurnEmitter->SetParticles(25, &this->fireEffect);
@@ -167,7 +167,7 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
         ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f),
         ESPInterval(0.0f), 
         ESPInterval(0.0f, PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT/2.0f));
-    this->invisibleRocketThrustEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    this->invisibleRocketThrustEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->invisibleRocketThrustEmitter->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
     this->invisibleRocketThrustEmitter->SetEmitPosition(Point3D(0, 0, 0));
     this->invisibleRocketThrustEmitter->AddEffector(&this->particleFader);
@@ -408,6 +408,7 @@ void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjecti
     // so we know where/how to draw the rocket
     const Vector2D& rocketDir = rocket->GetVelocityDirection();
     float currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
+    this->rocketGlowEmitter->SetParticleRotation(ESPInterval(-currZRotation));
 
     const Point2D& rocketPos = rocket->GetPosition();
     float scaleFactor = rocket->GetVisualScaleFactor();
@@ -436,7 +437,6 @@ void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjecti
     else {
         // Special case for the remote control rocket, since the camera rotates with it we
         // don't need to rotate the glow effect on it
-        this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0f));
         this->rocketGlowEmitter->Draw(camera);
 
         if (rocket->GetCurrentAppliedThrustAmount() > 0.0f) {

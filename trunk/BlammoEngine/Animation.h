@@ -264,7 +264,10 @@ public:
 		this->interpolationPts[this->interpolationPts.size()-1] = value;
 	}
     const T& GetFinalInterpolationValue() const {
-        assert(this->interpolationPts.size() > 0);
+        if (this->interpolationPts.empty()) {
+            assert(false);
+            return *this->interpolant;
+        }
         return this->interpolationPts[this->interpolationPts.size()-1];
     }
     void SetInterpolationValue(size_t idx, const T& value) {

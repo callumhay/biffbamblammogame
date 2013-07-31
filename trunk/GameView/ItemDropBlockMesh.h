@@ -35,7 +35,8 @@ public:
 
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+	void DrawNoBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawEffects(const Vector3D& worldTranslation, double dT, const Camera& camera);
 
 	void SetAlphaMultiplier(float alpha);
@@ -57,6 +58,8 @@ private:
 	std::map<const ItemDropBlock*, Texture*> itemDropBlockToItemTexMap;
 	MaterialGroup* itemDropTypeMatGrp;
 	
+    void Draw(const ItemDropBlock* currItemDropBlock, Texture* itemTexture, const Camera& camera, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	ESPVolumeEmitter* InitSparkEmitter(const Colour& colour, const ESPInterval& lifeTime, const ESPInterval& particleSpd);
 	void LoadMesh();
 

@@ -16,8 +16,8 @@
 #include "GameAssets.h"
 
 const char* GameCompleteDisplayState::DEMO_COMPLETE_TITLE_TEXT = "Demo Complete!"; 
-const char* GameCompleteDisplayState::CONGRATS_TEXT = "So yeah, congrats, you made it. Maybe one day, when this game is fully complete, you might buy it and play even more.";
-const char* GameCompleteDisplayState::NOTE_TEXT     = "D4KOT4: Hope this demo provided you with enough of an idea of how the game will play for a bit of initial inspiration.";
+const char* GameCompleteDisplayState::CONGRATS_TEXT = "Congrats, you made it! Maybe one day, when this game is fully complete, you might buy it and play even more.";
+const char* GameCompleteDisplayState::NOTE_TEXT     = "";
 
 const float GameCompleteDisplayState::TITLE_Y_GAP          = 30;
 const float GameCompleteDisplayState::TITLE_CONGRATS_Y_GAP = 60;

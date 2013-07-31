@@ -47,32 +47,48 @@ void AlwaysDropBlockMesh::RemoveAlwaysDropBlock(const AlwaysDropBlock* block) {
 	this->blockToItemTexMap.erase(findIter);
 }
 
-void AlwaysDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-                               const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+void AlwaysDropBlockMesh::DrawBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                                        const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+    UNUSED_PARAMETER(dT);
+
+    glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // Go through all the always drop blocks, set the proper materials and draw
+    for (std::map<const AlwaysDropBlock*, Texture*>::const_iterator iter = this->blockToItemTexMap.begin(); 
+        iter != this->blockToItemTexMap.end(); ++iter) {
+
+            const AlwaysDropBlock* currBlock = iter->first;
+            if (!currBlock->HasStatus(LevelPiece::IceCubeStatus) && !currBlock->HasStatus(LevelPiece::OnFireStatus)) {
+                continue;
+            }
+
+            Texture* currTex = iter->second;
+            this->Draw(currBlock, currTex, camera, keyLight, fillLight, ballLight);
+    }
+
+    glPopAttrib();
+}
+
+void AlwaysDropBlockMesh::DrawNoBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                                          const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     UNUSED_PARAMETER(dT);
 
 	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 	// Go through all the always drop blocks, set the proper materials and draw
 	for (std::map<const AlwaysDropBlock*, Texture*>::const_iterator iter = this->blockToItemTexMap.begin(); 
-		iter != this->blockToItemTexMap.end(); ++iter) {
+		 iter != this->blockToItemTexMap.end(); ++iter) {
         
 		const AlwaysDropBlock* currBlock = iter->first;
+        if (currBlock->HasStatus(LevelPiece::IceCubeStatus) || currBlock->HasStatus(LevelPiece::OnFireStatus)) {
+            continue;
+        }
+
 		Texture* currTex = iter->second;
-
-		CgFxMaterialEffect* itemTexMatEffect = this->dropTypeMatGrp->GetMaterial();
-		MaterialProperties* itemTexMatProps  = itemTexMatEffect->GetProperties();
-		itemTexMatProps->diffuseTexture = currTex;
-
-        CgFxMaterialEffect* itemColourMatEffect = this->dropColourMatGrp->GetMaterial();
-        MaterialProperties* itemColourMatProps  = itemColourMatEffect->GetProperties();
-        itemColourMatProps->diffuse = GameViewConstants::GetInstance()->GetItemColourFromDisposition(currBlock->GetNextDropItemDisposition());
-
-		const Point2D& blockCenter = currBlock->GetCenter();
-		glPushMatrix();
-		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
-        this->blockMesh->Draw(camera, keyLight, fillLight, ballLight);
-        glPopMatrix();
+        this->Draw(currBlock, currTex, camera, keyLight, fillLight, ballLight);
     }
 
 	glPopAttrib();
@@ -81,6 +97,24 @@ void AlwaysDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 void AlwaysDropBlockMesh::SetAlphaMultiplier(float alpha) {
 	this->dropTypeMatGrp->GetMaterial()->GetProperties()->alphaMultiplier   = alpha;
     this->dropColourMatGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
+}
+
+void AlwaysDropBlockMesh::Draw(const AlwaysDropBlock* currBlock, Texture* currTex, const Camera& camera, const BasicPointLight& keyLight,
+                               const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+    CgFxMaterialEffect* itemTexMatEffect = this->dropTypeMatGrp->GetMaterial();
+    MaterialProperties* itemTexMatProps  = itemTexMatEffect->GetProperties();
+    itemTexMatProps->diffuseTexture = currTex;
+
+    CgFxMaterialEffect* itemColourMatEffect = this->dropColourMatGrp->GetMaterial();
+    MaterialProperties* itemColourMatProps  = itemColourMatEffect->GetProperties();
+    itemColourMatProps->diffuse = GameViewConstants::GetInstance()->GetItemColourFromDisposition(currBlock->GetNextDropItemDisposition());
+
+    const Point2D& blockCenter = currBlock->GetCenter();
+    glPushMatrix();
+    glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+    this->blockMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
 }
 
 void AlwaysDropBlockMesh::LoadMesh() {

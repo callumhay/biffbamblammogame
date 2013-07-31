@@ -1098,6 +1098,9 @@ void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
     
     // Setup the ball safety net for the new level...
 	this->ballSafetyNet->Regenerate(currLevel);
+
+    // Load the lighting setup for the current level...
+    this->worldAssets->LoadLightingForLevel(this, currLevel);
 }
 
 void GameAssets::LoadRegularMeshAssets() {
