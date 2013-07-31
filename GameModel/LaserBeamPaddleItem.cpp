@@ -50,9 +50,8 @@ double LaserBeamPaddleItem::Activate() {
         PaddleLaserBeam* paddleLaserBeam = new PaddleLaserBeam(paddle, this->gameModel);
 		this->gameModel->AddBeam(paddleLaserBeam);
 	}
-	else {
-		paddle->AddPaddleType(PlayerPaddle::LaserBeamPaddle);
-	}
+	
+	paddle->AddPaddleType(PlayerPaddle::LaserBeamPaddle);
 
 	GameItem::Activate();
 	return LaserBeamPaddleItem::LASER_BEAM_PADDLE_TIMER_IN_SECS;

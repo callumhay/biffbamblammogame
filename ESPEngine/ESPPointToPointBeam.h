@@ -28,7 +28,7 @@ public:
 	~ESPPointToPointBeam();
 
 	void Tick(double dT);
-	void Draw(const Camera& camera, bool enableDepth);
+	void Draw(const Camera& camera);
 
 	void SetStartAndEndPoints(const Point3D& startPt, const Point3D& endPt);
 	void SetColour(const ColourRGBA& colour);

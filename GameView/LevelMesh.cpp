@@ -580,12 +580,14 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
 	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+	//this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->mineTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->regenBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->itemDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
+    this->alwaysDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
@@ -602,8 +604,8 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 
 void LevelMesh::DrawNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                   const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
-    this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-    this->alwaysDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->itemDropBlock->DrawNoBloomPass(dT, camera, keyLight, fillLight, ballLight);
+    this->alwaysDropBlock->DrawNoBloomPass(dT, camera, keyLight, fillLight, ballLight);
 }
 
 void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
@@ -839,7 +841,7 @@ void LevelMesh::LevelIsAlmostComplete() {
         glowPulseEffect->SetParticleSize(ESPInterval(1.2f*LevelPiece::PIECE_WIDTH), ESPInterval(1.2f*LevelPiece::PIECE_HEIGHT));
 	    glowPulseEffect->SetEmitAngleInDegrees(0);
 	    glowPulseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	    glowPulseEffect->SetParticleAlignment(ESP::ScreenAligned);
+	    glowPulseEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
         glowPulseEffect->SetEmitPosition(Point3D(piece->GetCenter() + levelTransform));
 	    glowPulseEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.75f));
 	    glowPulseEffect->AddEffector(&this->remainingPiecePulser);

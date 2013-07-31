@@ -52,6 +52,7 @@ public:
     static const float MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS;
 	static const float MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS;
 	static const float MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS;
+    static const float MAX_GRACING_ANGLE_ON_HIT_IN_DEGS;
 
 	// The largest possible random angle of release (for the ball) from a still paddle, in degrees
 	static const int STILL_RAND_RELEASE_DEG  = 3;

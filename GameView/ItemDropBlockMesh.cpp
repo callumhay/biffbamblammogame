@@ -83,9 +83,33 @@ ItemDropBlockMesh::~ItemDropBlockMesh() {
 	this->powerDownSparkEmitter = NULL;
 }
 
+void ItemDropBlockMesh::DrawBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                                      const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
-void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-                             const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    UNUSED_PARAMETER(dT);
+
+    glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT);
+    glDepthMask(GL_FALSE);
+
+    // Go through all the item drop blocks, set the proper materials and draw
+    for (std::map<const ItemDropBlock*, Texture*>::const_iterator iter = this->itemDropBlockToItemTexMap.begin(); 
+      iter != this->itemDropBlockToItemTexMap.end(); ++iter) {
+
+          // We draw only the material part of the block that indicates the next item that will be dropped...
+          const ItemDropBlock* currItemDropBlock = iter->first;
+          if (!currItemDropBlock->HasStatus(LevelPiece::IceCubeStatus)) {
+              continue;
+          }
+
+          Texture* currTex = iter->second;
+          this->Draw(currItemDropBlock, currTex, camera, keyLight, fillLight, ballLight);
+    }
+
+    glPopAttrib();
+}
+
+void ItemDropBlockMesh::DrawNoBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                                        const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     UNUSED_PARAMETER(dT);
 
 	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT);
@@ -97,25 +121,12 @@ void ItemDropBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLi
 
 		// We draw only the material part of the block that indicates the next item that will be dropped...
 		const ItemDropBlock* currItemDropBlock = iter->first;
-		Texture* currTex = iter->second;
-
-        float alpha = 1.0f;
-        // If the block is frozen we want the item texture to blend in with the ice since this
-        // will be drawn in the last pass
         if (currItemDropBlock->HasStatus(LevelPiece::IceCubeStatus)) {
-            alpha = 0.4f;
+            continue;
         }
 
-		CgFxMaterialEffect* matEffect = this->itemDropTypeMatGrp->GetMaterial();
-		MaterialProperties* matProps  = matEffect->GetProperties();
-		matProps->diffuseTexture = currTex;
-
-		const Point2D& blockCenter = currItemDropBlock->GetCenter();
-		glPushMatrix();
-		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
-        glColor4f(1.0f, 1.0f, 1.0f, alpha);
-		this->itemDropTypeMatGrp->Draw(camera, keyLight, fillLight, ballLight);
-		glPopMatrix();
+		Texture* currTex = iter->second;
+        this->Draw(currItemDropBlock, currTex, camera, keyLight, fillLight, ballLight);
 	}
 
 	glPopAttrib();
@@ -177,6 +188,22 @@ void ItemDropBlockMesh::SetAlphaMultiplier(float alpha) {
 	this->powerUpSparkEmitter->SetParticleAlpha(ESPInterval(alpha));
 	this->powerNeutralSparkEmitter->SetParticleAlpha(ESPInterval(alpha));
 	this->powerDownSparkEmitter->SetParticleAlpha(ESPInterval(alpha));
+}
+
+void ItemDropBlockMesh::Draw(const ItemDropBlock* currItemDropBlock, Texture* itemTexture,
+                             const Camera& camera, const BasicPointLight& keyLight, 
+                             const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+     CgFxMaterialEffect* matEffect = this->itemDropTypeMatGrp->GetMaterial();
+     MaterialProperties* matProps  = matEffect->GetProperties();
+     matProps->diffuseTexture = itemTexture;
+
+     const Point2D& blockCenter = currItemDropBlock->GetCenter();
+     glPushMatrix();
+     glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+     this->itemDropTypeMatGrp->Draw(camera, keyLight, fillLight, ballLight);
+     glPopMatrix();
 }
 
 ESPVolumeEmitter* ItemDropBlockMesh::InitSparkEmitter(const Colour& colour, const ESPInterval& lifeTime, 

@@ -105,8 +105,6 @@ void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
 	UNUSED_PARAMETER(world);
 
-    this->teslaLightningSoundIDs.clear();
-
 	// Load the level geometry/mesh data for display...
 	this->display->GetAssets()->LoadNewLevelMesh(level);
     this->display->GetAssets()->ReinitializeAssets();
@@ -152,6 +150,9 @@ void GameEventsListener::LevelAlmostCompleteEvent(const GameLevel& level) {
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
 	UNUSED_PARAMETER(world);
 	UNUSED_PARAMETER(level);
+    
+    // Clear all the Tesla lightning sounds that are left playing
+    this->teslaLightningSoundIDs.clear();
 
 	// Queue up the state for ending a level - this will display the level name and do
     // proper animations, fade-outs, etc. In the case of a boss level being completed, we

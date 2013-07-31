@@ -30,7 +30,9 @@ public:
 
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
+    void DrawBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+	void DrawNoBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void SetAlphaMultiplier(float alpha);
 
@@ -41,6 +43,8 @@ private:
 	MaterialGroup* dropTypeMatGrp;
     MaterialGroup* dropColourMatGrp;
     
+    void Draw(const AlwaysDropBlock* currBlock, Texture* currTex, const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void LoadMesh();
 
     DISALLOW_COPY_AND_ASSIGN(AlwaysDropBlockMesh);

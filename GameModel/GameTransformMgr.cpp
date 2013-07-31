@@ -201,6 +201,10 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
 
     GameTransformMgr::TransformAnimationType animType;
     PaddleRemoteControlRocketProjectile* rocketData = NULL;
+    
+    // Get rid of any bullet time animations...
+    this->bulletTimeCamAnimation.ClearLerp();
+
     if (turnOnRocketCam) {
         assert(rocket != NULL);
         rocketData = rocket;
@@ -225,13 +229,28 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
 void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
 	// Calculate the distance along the z axis that the camera needs to be from the origin in order
 	// to see the entire level - this will be the default translation for the camera
-    float distance1, distance2    = 0;
     float levelWidth  = level.GetLevelUnitWidth();
     float levelHeight = level.GetLevelUnitHeight();
     
-    distance1 = (levelHeight + 4 * LevelPiece::PIECE_HEIGHT) / (2.0f * tanf(Trig::degreesToRadians(0.5f * Camera::FOV_ANGLE_IN_DEGS)));
+    static const float MIN_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 13;
+    static const float MAX_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 23;
+
+    static const float MIN_ADD_AMT = 6 * LevelPiece::PIECE_WIDTH;
+    static const float MAX_ADD_AMT = 8 * LevelPiece::PIECE_WIDTH;
+
+    float addToWidth = MIN_ADD_AMT;
+    if (levelWidth > MIN_WIDTH_FOR_LERP) {
+        if (levelWidth > MAX_WIDTH_FOR_LERP) {
+            addToWidth = MAX_ADD_AMT;
+        }
+        else {
+            addToWidth = NumberFuncs::LerpOverFloat(MIN_WIDTH_FOR_LERP, MAX_WIDTH_FOR_LERP, MIN_ADD_AMT, MAX_ADD_AMT, levelWidth);
+        }
+    }
+
+    float distance1     = (levelHeight + 4 * LevelPiece::PIECE_HEIGHT) / (2.0f * tanf(Trig::degreesToRadians(0.5f * Camera::FOV_ANGLE_IN_DEGS)));
     float horizontalFOV = Camera::FOV_ANGLE_IN_DEGS * Camera::GetAspectRatio();
-    distance2 = (levelWidth + 6 * LevelPiece::PIECE_WIDTH) / (2.0f * tanf(Trig::degreesToRadians(0.5f * horizontalFOV)));
+    float distance2     = (levelWidth + addToWidth) / (2.0f * tanf(Trig::degreesToRadians(0.5f * horizontalFOV)));
 
     float distance = std::max<float>(distance1, distance2);
 

@@ -31,7 +31,7 @@ timeSinceLastMineLaunch(0.0) {
 
     this->triggeredTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
-	assert(this->pulseTexture != NULL);
+	assert(this->triggeredTexture != NULL);
 
     this->invisibleEffect.SetWarpAmountParam(50.0f);
     this->invisibleEffect.SetIndexOfRefraction(1.33f);

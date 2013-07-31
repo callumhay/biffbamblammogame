@@ -1,0 +1,73 @@
+The Towering Inferno
+19 31
+S S S S S S S S S S S S S S S S S S S 
+S E E F(r) E R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) S K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R E F(l) E E S 
+S E E F(r) E E E E E E E E E E E F(l) E E S 
+S E E F(r) E E E E E E E E E E E F(l) E E S 
+S E E F(l) E E E E E E E E E E E F(r) E E S 
+S E E F(l) E E E E E E E E E E E F(r) E E S 
+S E E S T(S,ll) R R R R R R R R R T(S,lr) S E E S 
+S E E S S N N N N N N N N N S S E E S 
+S E E S K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E E E E E E E E E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) S E E S 
+S E E S E L E L E L E L E L E S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E S R R R E R R R E R R R S E E S 
+S E E S R J R R R M R R R J R S E E S 
+S E E S R R R K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) R R R K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) R R R S E E S 
+S E E S E E O O O E O O O E E S E E S 
+S E E S O O O Q(f) O O O Q(f) O O O S E E S 
+S E E S K(FireBall,FireBall,FireBall) E O O O E O O O E K(FireBall,FireBall,FireBall) S E E S 
+S E E S Y Y Y E Y Y Y E Y Y Y S E E S 
+S E E S Y H Y Y Y J Y Y Y H Y S E E S 
+S E E S Y Y Y K(FireBall,FireBall,FireBall) Y Y Y K(FireBall,FireBall,FireBall) Y Y Y S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E S E R E R E R E R E R E S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E S E E E E E E E E E E E S E E S 
+S E E N E E E E E E E E E E E N E E S 
+E E E N E E E E E E E E E E E N E E E 
+E E E N E E E E E E E E E E E N E E E 
+
+STARS:
+9000
+15000
+28000
+38000
+48000
+
+PaddleGrow 0
+PoisonPaddle 0
+Blackout 0
+BallSafetyNet 0
+BallGrow 0
+UberBall 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+RemoteControlRocket 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 0
+PaddleCam 0

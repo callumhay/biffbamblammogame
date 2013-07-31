@@ -8,11 +8,11 @@ E G S R R R S R R R S G E
 E T(G,ur) G O O O O O O O G T(G,ul) E 
 E E G Y Y Y Y Y Y Y G E E 
 E E G G G G G G G G G E E 
-E E G G L G G G L G G E E 
+E E G G L G M G L G G E E 
 E E G G S R R R S G G E E 
 E E G G G O O O G G G E E 
 E E G B G Y Y Y G B G E E 
-E E G G G G K(MultiBall5,MultiBall5,MultiBall5) G G G G E E 
+E E G H G G K(MultiBall5,MultiBall5,MultiBall5) G G H G E E 
 E E Y Y Y Y Y Y Y Y Y E E 
 E E T(G,ur) G G G G G G G T(G,ul) E E 
 E E E E E E E E E E E E E 
@@ -37,8 +37,8 @@ PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

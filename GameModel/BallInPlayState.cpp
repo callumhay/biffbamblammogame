@@ -581,7 +581,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
         // Make sure the reflection is big enough to not cause an annoying slow down in the game
         // or to make a ridiculous gracing angle
-        if (diffAngleInDegs > EPSILON) {
+        if (diffAngleInDegs > 0) {
 
 	        // We need to figure out which way to rotate the velocity
 	        // to ensure it's at least the minAngleInDegs
@@ -596,24 +596,16 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 	        reflVecHat = newReflVelHat;
         }
         else {
-	        // Do the same with 90 degrees to the normal
-	        Vector2D tangentVec(n[1], -n[0]);
-	        float gracingAngle = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, reflVecHat)))));
-	        if (gracingAngle > 90) {
-		        diffAngleInDegs = minAngleInDegs - fabs(gracingAngle - 180);
-	        }
-	        else {
-		        diffAngleInDegs = minAngleInDegs - fabs(gracingAngle);
-	        }
+            // We don't want the ball to 'grace' any edges -- we figure this out by checking to see
+            // if the angle difference is too obtuse
+            diffAngleInDegs = fabs(angleOfReflInDegs) - GameBall::MAX_GRACING_ANGLE_ON_HIT_IN_DEGS;
 
-	        if (diffAngleInDegs > EPSILON) {
-		        // We need to figure out which way to rotate the velocity
-		        // to ensure it's at least the MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS
+	        if (diffAngleInDegs > 0) {
 		        Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
 
 		        // Check to see if it's still the case, if it is then we rotated the wrong way
-		        float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, newReflVelHat)))));
-		        if (newAngleInDegs < minAngleInDegs) {
+		        float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, newReflVelHat)))));
+		        if (newAngleInDegs > GameBall::MAX_GRACING_ANGLE_ON_HIT_IN_DEGS) {
 			        newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
 		        }
 

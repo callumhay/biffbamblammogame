@@ -45,6 +45,7 @@ void CgFxInkSplatter::ActivateInkSplat() {
 		fadeVals.push_back(this->inkSplatFadeAnim.GetInterpolantValue());
         fadeVals.push_back(this->inkSplatFadeAnim.GetInterpolantValue());
 		fadeVals.push_back(1.0f);
+        fadeVals.push_back(1.0f);
 		fadeVals.push_back(0.0f);
 
 		this->inkSplatFadeAnim.SetLerp(timeVals, fadeVals);		

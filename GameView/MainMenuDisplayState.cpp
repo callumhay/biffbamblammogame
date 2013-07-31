@@ -597,7 +597,7 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
 	const float MAX_X_COORD = static_cast<float>(displayCam.GetWindowWidth()) / static_cast<float>(displayCam.GetWindowHeight()) * MAX_Y_COORD;
-    const float MENU_WIDTH = 5.0f + (2*0.82f*this->titleDisplay.GetBlammoWidth()*MAX_X_COORD / static_cast<float>(displayCam.GetWindowWidth()));
+    const float MENU_WIDTH = 5.0f + (2*this->titleDisplay.GetBlammoWidth()*MAX_X_COORD / static_cast<float>(displayCam.GetWindowWidth()));
 	const float X_INDENT = -MAX_X_COORD + (2.0f * MAX_X_COORD - MENU_WIDTH) / 2.0f;
 
 	glMatrixMode(GL_MODELVIEW);
@@ -615,10 +615,10 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
 	const Camera& camera = this->display->GetCamera();
 
-	static const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
-	static const float MIN_Z_COORD = -MAX_Z_COORD;
-	static const float MAX_Y_COORD = 0.95f * CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
-	static const float MIN_Y_COORD = -MAX_Y_COORD;
+	const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
+	const float MIN_Z_COORD = -MAX_Z_COORD;
+	const float MAX_Y_COORD = 0.95f * CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
+	const float MIN_Y_COORD = -MAX_Y_COORD;
 	const float MAX_X_COORD = static_cast<float>(camera.GetWindowWidth()) /  static_cast<float>(camera.GetWindowHeight()) * MAX_Y_COORD;
 	const float MIN_X_COORD = -MAX_X_COORD;	
 	
@@ -691,6 +691,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	//new ESPPointEmitter();
 	
 	// Set up the emitter...
+
 	bangEffect->SetSpawnDelta(ESPInterval(randomSpawn));
 	bangEffect->SetNumParticleLives(1);
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));

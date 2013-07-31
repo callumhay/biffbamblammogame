@@ -31,12 +31,6 @@ outlineMinDistance(0.001f), outlineMaxDistance(30.0f), outlineContrast(1.0f), ou
 	assert(bg != NULL);
 	assert(paddle != NULL);
 
-    // Set the background lights to their default positions
-    // Setup the Background lights
-    assets->GetLightAssets()->SetBackgroundLightDefaults(
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.005f),
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f));
-
 	// No animation to start for the background fade (needs to be activated via the appropriate member function)
 	this->bgFadeAnim.SetRepeat(false);
 
@@ -80,6 +74,47 @@ void GameWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
 
 	this->bgFadeAnim.SetLerp(fadeTime, finalAlpha);
 }
+
+void GameWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset) const {
+    // Set the background lights to their default positions, colours and attenuations...
+
+    // Setup the foreground lights
+    assets->GetLightAssets()->SetForegroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION + fgPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN));
+}
+
+void GameWorldAssets::LoadBGLighting(GameAssets* assets) const {
+    // Setup the Background lights
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 
+        GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_ATTEN),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  
+        GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_ATTEN));
+}
+
+void GameWorldAssets::LoadLightingForLevel(GameAssets* assets, const GameLevel& level) const {
+    float levelWidth  = level.GetLevelUnitWidth();
+
+    static const float MIN_WIDTH_BEFORE_Z_CHANGE = 15 * LevelPiece::PIECE_WIDTH;
+    static const float MAX_WIDTH_BEFORE_Z_FIXED  = 23 * LevelPiece::PIECE_WIDTH;
+
+    Vector3D addedFgDist;
+    if (levelWidth > MIN_WIDTH_BEFORE_Z_CHANGE) {
+        if (levelWidth > MAX_WIDTH_BEFORE_Z_FIXED) {
+            addedFgDist[2] = 10.0f;
+        }
+        else {
+            addedFgDist[2] = NumberFuncs::LerpOverFloat(MIN_WIDTH_BEFORE_Z_CHANGE, MAX_WIDTH_BEFORE_Z_FIXED, 0.0f, 10.0f, levelWidth);
+        }
+    }
+
+    this->LoadFGLighting(assets, addedFgDist);
+    this->LoadBGLighting(assets);
+}
+
 void GameWorldAssets::ResetToInitialState() {
 	this->bgFadeAnim.ClearLerp();
 	this->bgFadeAnim.SetInterpolantValue(1.0f);

@@ -52,11 +52,6 @@ rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 	this->beamEffect->SetFrequency(4.0f);
 	this->beamEffect->SetAlphaMultiplier(0.55f);
 
-    // Change the positions of the background lights to something that complements the background more
-    assets->GetLightAssets()->SetBackgroundLightDefaults(
-        BasicPointLight(Point3D(41.0f, 15.0f, 60.0f), GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.0125f),
-        BasicPointLight(Point3D(-30.0f, 30.0f, 30.0f), GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.02f));
-
     // Change the default values for drawing outlines
     this->outlineMinDistance = 0.04f;
     this->outlineMaxDistance = 28.0f;
@@ -205,6 +200,17 @@ void DecoWorldAssets::Tick(double dT) {
 	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
 	
 	GameWorldAssets::Tick(dT);
+}
+
+void DecoWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset) const {
+    GameWorldAssets::LoadFGLighting(assets, fgPosOffset);
+}
+
+void DecoWorldAssets::LoadBGLighting(GameAssets* assets) const {
+    // Change the positions of the background lights to something that complements the background more
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(Point3D(41.0f, 15.0f, 60.0f), GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.0125f),
+        BasicPointLight(Point3D(-30.0f, 30.0f, 30.0f), GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.02f));
 }
 
 /**

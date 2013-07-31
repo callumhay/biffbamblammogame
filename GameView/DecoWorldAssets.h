@@ -38,6 +38,9 @@ public:
 
 	void Tick(double dT);
 
+    void LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset = Vector3D(0,0,0)) const;
+    void LoadBGLighting(GameAssets* assets) const;
+
 private:
 
 	enum RotationState { RotateCW, RotateCCW };		// CCW is moving in postive degrees, CW is negative...

@@ -34,7 +34,7 @@ activeCannonEffectEmitter(NULL) {
 	this->activeCannonEffectEmitter->SetParticleSize(ESPInterval(CannonBlock::CANNON_BARREL_LENGTH), ESPInterval(CannonBlock::CANNON_BARREL_LENGTH));
 	this->activeCannonEffectEmitter->SetEmitAngleInDegrees(0);
 	this->activeCannonEffectEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->activeCannonEffectEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	this->activeCannonEffectEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->activeCannonEffectEmitter->SetEmitPosition(Point3D(0,0,0));
 	this->activeCannonEffectEmitter->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->activeCannonEffectEmitter->AddEffector(&this->haloExpandPulse);

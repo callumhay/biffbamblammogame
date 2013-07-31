@@ -32,7 +32,7 @@ TeslaBlock::~TeslaBlock() {
 }
 
 void TeslaBlock::Triggered(GameModel* gameModel) {
-    this->ToggleElectricity(*gameModel, *gameModel->GetCurrentLevel());
+    this->ToggleElectricity(*gameModel, *gameModel->GetCurrentLevel(), true);
 }
 
 /**
@@ -200,8 +200,8 @@ LevelPiece* TeslaBlock::TickBeamCollision(double dT, const BeamSegment* beamSegm
 	return this;
 }
 
-void TeslaBlock::ToggleElectricity(GameModel& gameModel, GameLevel& level) {
-	if (!this->GetIsChangable()) {
+void TeslaBlock::ToggleElectricity(GameModel& gameModel, GameLevel& level, bool ignoreIsChangable) {
+	if (!this->GetIsChangable() && !ignoreIsChangable) {
 		return;
 	}
 

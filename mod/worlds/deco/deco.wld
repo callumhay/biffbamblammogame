@@ -18,26 +18,29 @@ resources/worlds/levels/hard/daredevil_deblockification.lvl
 # Turret intro level
 resources/worlds/levels/medium/ahead_by_a_sentry.lvl
 
-
 # Turret + Cannon + no-entry + Ink + One-way
 # This level uses rocket-turret + cannon block to fire missles to beat a level
 # Teaches the player that turrets can be used to solve puzzles
 resources/worlds/levels/medium/cannon_peekaboo.lvl
 
+# Fire + Collateral Block Chain-reaction to destroy a bunch of turrets
+resources/worlds/levels/medium/the_towering_inferno.lvl
 
-# TODO: More levels here... turrets + other things, or just regular levels featuring previously
-# revealed items and blocks... but put turrets in them too
+# Tesla blocks gaurd the route for a remote control rocket
+resources/worlds/levels/hard/the_house_that_tesla_built.lvl
 
-
-
-
-# Tesla block intro levels
+# Tesla block intro level
 resources/worlds/levels/easy/electric_access.lvl
-resources/worlds/levels/medium/lightning_round.lvl
 
+# Tesla making up the boundaries of the level + some turrets
+resources/worlds/levels/medium/lightning_round.lvl
 
 # Tesla + Switch
 resources/worlds/levels/medium/acute_electrocution.lvl
+
+
+
+
 
 
 # Tesla + Prisms/Ice/Lasers
