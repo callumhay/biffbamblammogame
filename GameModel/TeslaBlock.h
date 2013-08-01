@@ -53,7 +53,7 @@ public:
 	bool CanBeDestroyedByBall() const {
 		return false;
 	}
-    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+    bool CanChangeSelfOrOtherPiecesWhenHit() const {
         return true;
     }
 
@@ -126,12 +126,17 @@ public:
     const Vector3D& GetRotationAxis() const;
 
 private:
+    
+    static const int MIN_TIME_BETWEEN_TOGGLINGS_IN_MS = 100;
+
 	bool electricityIsActive;                     // Whether the lightning/electric current is active on this tesla block
 	bool isChangable;                             // Whether the state (on/off) of the tesla block can be changed via game play
 	std::list<TeslaBlock*> connectedTeslaBlocks;  // All tesla blocks that this one can connect to when active (and when they're active)
 
 	static const int TOGGLE_ON_OFF_LIFE_POINTS;	
 	float lifePointsUntilNextToggle;              // Current life points left of this block before it toggles between on/off
+
+    unsigned long timeOfLastToggling;
 
     Vector3D rotationAxis;
     float rotationAmt;

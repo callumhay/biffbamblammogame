@@ -51,7 +51,7 @@ public:
 	bool CanBeDestroyedByBall() const {
 		return true;
 	}
-    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+    bool CanChangeSelfOrOtherPiecesWhenHit() const {
         return true;
     }
 

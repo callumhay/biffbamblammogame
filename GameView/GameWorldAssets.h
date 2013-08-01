@@ -60,7 +60,8 @@ public:
 	virtual void FadeBackground(bool fadeout, float fadeTime);
 	virtual void ResetToInitialState();
 
-    virtual void LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset = Vector3D(0,0,0)) const;
+    virtual void LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset = Vector3D(0,0,0), 
+        const Vector3D& fgFillPosOffset = Vector3D(0,0,0)) const;
     virtual void LoadBGLighting(GameAssets* assets) const;
     void LoadLightingForLevel(GameAssets* assets, const GameLevel& level) const;
     

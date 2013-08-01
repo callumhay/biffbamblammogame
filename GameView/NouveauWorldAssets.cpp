@@ -282,11 +282,11 @@ void NouveauWorldAssets::Tick(double dT) {
 	GameWorldAssets::Tick(dT);
 }
 
-void NouveauWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset) const {
+void NouveauWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset, const Vector3D& fgFillPosOffset) const {
     assets->GetLightAssets()->SetForegroundLightDefaults(
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgPosOffset, 
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgKeyPosOffset, 
         GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0175f), 
-        BasicPointLight(Point3D(10, 10, 50) + fgPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.02f));
+        BasicPointLight(Point3D(10, 10, 50) + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.02f));
 }
 
 void NouveauWorldAssets::LoadBGLighting(GameAssets* assets) const {

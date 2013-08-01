@@ -22,7 +22,7 @@ const int TeslaBlock::TOGGLE_ON_OFF_LIFE_POINTS = 150;
 
 TeslaBlock::TeslaBlock(bool isActive, bool isChangable, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), electricityIsActive(isActive), isChangable(isChangable), 
-lifePointsUntilNextToggle(TOGGLE_ON_OFF_LIFE_POINTS) {
+lifePointsUntilNextToggle(TOGGLE_ON_OFF_LIFE_POINTS), timeOfLastToggling(0) {
 
     this->SetRandomRotationAxis();
     this->SetRandomRotationAmount();
@@ -205,7 +205,13 @@ void TeslaBlock::ToggleElectricity(GameModel& gameModel, GameLevel& level, bool 
 		return;
 	}
 
-	// Get the list of active connected tesla blocks
+    // Make sure we've waited long enough since the last toggling
+    unsigned long currTime = BlammoTime::GetSystemTimeInMillisecs(); 
+    if (labs(static_cast<long>(currTime) - static_cast<long>(this->timeOfLastToggling)) < MIN_TIME_BETWEEN_TOGGLINGS_IN_MS) {
+        return;
+    }
+
+	// Get the list of active connected Tesla blocks
 	std::list<TeslaBlock*> activeNeighbourTeslaBlocks = this->GetActiveConnectedTeslaBlocks();
 
 	// Toggle the electricity...
@@ -232,4 +238,6 @@ void TeslaBlock::ToggleElectricity(GameModel& gameModel, GameLevel& level, bool 
 			level.RemoveTeslaLightningBarrier(this, activeNeighbour);
 		}
 	}
+
+    this->timeOfLastToggling = currTime;
 }

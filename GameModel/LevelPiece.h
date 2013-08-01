@@ -117,7 +117,7 @@ public:
 	virtual bool BallBouncesOffWhenHit() const = 0;
 	virtual bool MustBeDestoryedToEndLevel() const = 0;
 	virtual bool CanBeDestroyedByBall() const = 0;
-    virtual bool CanChangeSelfOrOtherPiecesWhenHitByBall() const = 0;
+    virtual bool CanChangeSelfOrOtherPiecesWhenHit() const = 0;
 	virtual bool BallBlastsThrough(const GameBall& b) const = 0;
 	virtual bool GhostballPassesThrough() const = 0;
 	virtual bool ProjectilePassesThrough(const Projectile* projectile) const = 0;

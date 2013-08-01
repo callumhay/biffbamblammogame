@@ -34,7 +34,7 @@ public:
 	bool BallBouncesOffWhenHit() const;
 	bool MustBeDestoryedToEndLevel() const;
 	bool CanBeDestroyedByBall() const;
-    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const;
+    bool CanChangeSelfOrOtherPiecesWhenHit() const;
 	bool BallBlastsThrough(const GameBall& b) const;
 	bool GhostballPassesThrough() const;
 	bool IsLightReflectorRefractor() const;
@@ -98,7 +98,7 @@ inline bool SwitchBlock::MustBeDestoryedToEndLevel() const {
 inline bool SwitchBlock::CanBeDestroyedByBall() const {
 	return false;
 }
-inline bool SwitchBlock::CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+inline bool SwitchBlock::CanChangeSelfOrOtherPiecesWhenHit() const {
     return false;
 }
 inline bool SwitchBlock::BallBlastsThrough(const GameBall& b) const {

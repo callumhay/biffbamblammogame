@@ -142,9 +142,8 @@ LevelPiece* TurretBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruc
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
         // EVENT: Ice was shattered
         GameEventManager::Instance()->ActionBlockIceShattered(*this);
-        bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-        UNUSED_VARIABLE(success);
-        assert(success);
+        // Kill it!
+        this->currLifePoints = 0;
 	}
 
     if ((method == LevelPiece::MineDestruction || method == LevelPiece::RocketDestruction) && !this->IsDead()) {
@@ -180,13 +179,19 @@ LevelPiece* TurretBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	else {
 		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
 		// Unfreeze a frozen turret if it gets hit by a fireball
-        if (isFireBall && this->HasStatus(LevelPiece::IceCubeStatus)) {
-			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-            UNUSED_VARIABLE(success);
-			assert(success);
-            
-            // EVENT: Frozen block cancelled-out by fire
-            GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
+        if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+            if (isFireBall) {
+			    bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
+			    assert(success);
+                
+                // EVENT: Frozen block cancelled-out by fire
+                GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
+            }
+            else {
+                // If the turret is frozen and the ball is neither ice nor fire, then the turret shatters...
+                resultingPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
+            }
 		}
         else {
             // TODO: Set turrets on fire? Have them say "ouch" when they are...?
