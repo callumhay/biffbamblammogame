@@ -24,7 +24,7 @@ public:
 	bool BallBouncesOffWhenHit() const { return true; }
 	bool MustBeDestoryedToEndLevel() const { return false; }
 	bool CanBeDestroyedByBall() const { return true; }
-    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const { return true; }
+    bool CanChangeSelfOrOtherPiecesWhenHit() const { return true; }
     bool BallBlastsThrough(const GameBall& b) const { UNUSED_PARAMETER(b); return false; }
     bool GhostballPassesThrough() const { return false; }
 

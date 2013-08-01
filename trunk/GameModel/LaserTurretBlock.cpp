@@ -525,28 +525,38 @@ void LaserTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSe
 
     // Check to see if the ray collides with the paddle before doing any further calculations...
     if (collidesWithPaddle) {
+
         // Now make sure the ray isn't colliding with any blocks before the paddle...
-        float levelPieceRayT = std::numeric_limits<float>::max();
-        
         std::set<const LevelPiece*> ignorePieces;
         ignorePieces.insert(this);
 
-        LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire,
-            ignorePieces, levelPieceRayT, 1.05f * BARREL_OFFSET_EXTENT_ALONG_Y);
+        static std::set<LevelPiece::LevelPieceType> ignoreTypes;
+        ignoreTypes.insert(LevelPiece::NoEntry);
+        ignoreTypes.insert(LevelPiece::Empty);
+        ignoreTypes.insert(LevelPiece::Portal);
+        ignoreTypes.insert(LevelPiece::OneWay);
+        ignoreTypes.insert(LevelPiece::Switch);
+        ignoreTypes.insert(LevelPiece::Ink);
+        ignoreTypes.insert(LevelPiece::Prism);
+        ignoreTypes.insert(LevelPiece::PrismTriangle);
 
-        if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
+        std::list<LevelPiece*> collisionPieces;
+        model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes, collisionPieces, LaserTurretProjectile::WIDTH_DEFAULT);
+
+        if (collisionPieces.empty()) {
             // The ray is unimpeded, fire ze lasers!
             canSeePaddle    = true;
             canFireAtPaddle = true;
             return;
         }
         else {
+            float levelPieceRayT = std::numeric_limits<float>::max();     
             canFireAtPaddle = false;
 
             // Looks like the ray was impeded - try to find out whether or not the turret can
             // even remotely view the paddle at all, this is difficult since it might be able to see the paddle
-            // through an open space between blocks via some ray in its fov... approximate this
-            LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire, ignorePieces, levelPieceRayT, 0);
+            // through an open space between blocks via some ray in its FOV... approximate this
+            LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire, ignorePieces, levelPieceRayT, 0.0f);
             if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
                 canSeePaddle = true;
                 return;

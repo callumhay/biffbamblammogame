@@ -498,6 +498,7 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
         ignoreTypes.insert(LevelPiece::Portal);
         ignoreTypes.insert(LevelPiece::OneWay);
         ignoreTypes.insert(LevelPiece::Switch);
+        ignoreTypes.insert(LevelPiece::Ink);
 
         std::list<LevelPiece*> collisionPieces;
         model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes,

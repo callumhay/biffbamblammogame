@@ -2512,7 +2512,7 @@ void GameESPAssets::AddIceBitsBreakEffect(const LevelPiece& block) {
 	else {
 		snowflakeBitsEffect->AddEffector(&this->smokeRotatorCW);
 	}
-	result = snowflakeBitsEffect->SetParticles(10, this->snowflakeTextures[Randomizer::GetInstance()->RandomUnsignedInt() % this->snowflakeTextures.size()]);
+	result = snowflakeBitsEffect->SetRandomTextureParticles(10, this->snowflakeTextures);
 	assert(result);
 	this->activeGeneralEmitters.push_back(snowflakeBitsEffect);
 }
@@ -2523,13 +2523,12 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
 	const Point2D& blockCenter = block.GetCenter();
 	Point3D emitCenter(blockCenter, 0.0f);
-	bool result = false;
 
 	// Create the smashy block bits
 	ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
 	smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
 	smashBitsEffect->SetInitialSpd(ESPInterval(2.0f, 5.0f));
-	smashBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
+	smashBitsEffect->SetParticleLife(ESPInterval(1.25f, 2.75f));
 	smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
 	smashBitsEffect->SetEmitAngleInDegrees(180);
 	smashBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 14.0f, LevelPiece::PIECE_WIDTH / 3.0f));
@@ -2541,8 +2540,7 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	    ESPInterval(0.5f * colour.B(), 0.75f * colour.B()), ESPInterval(0.8f, 1.0f));
 	smashBitsEffect->AddEffector(&this->gravity);
 	smashBitsEffect->AddEffector(&this->particleFader);
-    result = smashBitsEffect->SetRandomTextureParticles(6, this->rockTextures);
-	assert(result);
+    smashBitsEffect->SetRandomTextureParticles(7, this->rockTextures);
 	this->activeGeneralEmitters.push_back(smashBitsEffect);
 
 	// Create an emitter for a single large snowflake
@@ -2558,8 +2556,7 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	snowflakeBackingEffect->SetParticleSize(ESPInterval(1.5f * LevelPiece::PIECE_WIDTH));
 	snowflakeBackingEffect->AddEffector(&this->particleFader);
 	snowflakeBackingEffect->AddEffector(&this->particleMediumGrowth);
-    result = snowflakeBackingEffect->SetRandomTextureParticles(1, this->snowflakeTextures);
-	assert(result);
+    snowflakeBackingEffect->SetRandomTextureParticles(1, this->snowflakeTextures);
 	this->activeGeneralEmitters.push_back(snowflakeBackingEffect);
 
 	// Create an emitter for the sound of onomatopeia of shattering block
@@ -2581,12 +2578,13 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	iceSmashOnoEffect->AddEffector(&this->particleSmallGrowth);
 
 	// Set the onomata particle
-	TextLabel2D smashTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+	TextLabel2D smashTextLabel(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
 	smashTextLabel.SetColour(iceColour);
 	smashTextLabel.SetDropShadow(Colour(0, 0, 0), 0.15f);
-	Onomatoplex::Extremeness severity = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::GOOD, Onomatoplex::UBER);
-	result = iceSmashOnoEffect->SetParticles(1, smashTextLabel, Onomatoplex::SHATTER, severity);
-	assert(result);
+	Onomatoplex::Extremeness severity = 
+        Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::GOOD, Onomatoplex::UBER);
+	iceSmashOnoEffect->SetParticles(1, smashTextLabel, Onomatoplex::SHATTER, severity);
 
 	this->activeGeneralEmitters.push_back(iceSmashOnoEffect);
 }

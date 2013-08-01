@@ -47,10 +47,9 @@ resources/worlds/levels/medium/acute_electrocution.lvl
 
 
 
-# Tesla blocks and remote control rockets
 
-
-
+# Turrets + Tesla - use the magnet paddle + rocket turrets to attract rockets to turn on tesla blocks
+resources/worlds/levels/medium/be_coy_decoy.lvl
 
 
 # Remote control rocket race-navigation-focused hard level

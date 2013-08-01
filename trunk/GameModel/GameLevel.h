@@ -188,7 +188,7 @@ public:
 	
     LevelPiece* RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece);
     void RocketExplosionNoPieces(const RocketProjectile* rocket);
-	std::vector<LevelPiece*> GetExplosionAffectedLevelPieces(const Projectile* projectile, float sizeFactor, LevelPiece* centerPiece);
+	std::set<LevelPiece*> GetExplosionAffectedLevelPieces(const Projectile* projectile, float sizeFactor, LevelPiece* centerPiece);
 
     LevelPiece* MineExplosion(GameModel* gameModel, const MineProjectile* mine, LevelPiece* hitPiece);
     void MineExplosion(GameModel* gameModel, const MineProjectile* mine);
@@ -249,6 +249,8 @@ private:
     long prevHighScore;
     long highScore;           // Current high score for this level
     bool hasNewHighScore;     // If a new high score was achieved on the last play through of this level
+
+    float levelHypotenuse;
 
     // Constructor for non-boss levels
 	GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 

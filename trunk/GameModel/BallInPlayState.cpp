@@ -458,7 +458,7 @@ void BallInPlayState::Tick(double seconds) {
 				        }
     					
                         bool currPieceCanChangeSelfOrPiecesAroundIt = 
-                            currPiece->CanChangeSelfOrOtherPiecesWhenHitByBall() || currPiece->CanBeDestroyedByBall();
+                            currPiece->CanChangeSelfOrOtherPiecesWhenHit() || currPiece->CanBeDestroyedByBall();
 
 				        // Tell the model that a ball collision occurred with currPiece
                         this->gameModel->CollisionOccurred(*currBall, currPiece);

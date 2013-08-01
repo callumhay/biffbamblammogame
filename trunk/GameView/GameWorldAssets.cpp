@@ -75,14 +75,14 @@ void GameWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
 	this->bgFadeAnim.SetLerp(fadeTime, finalAlpha);
 }
 
-void GameWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset) const {
-    // Set the background lights to their default positions, colours and attenuations...
+void GameWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset, const Vector3D& fgFillPosOffset) const {
+    // Set the foreground lights to their default positions, colours and attenuations...
 
     // Setup the foreground lights
     assets->GetLightAssets()->SetForegroundLightDefaults(
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgKeyPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 
         GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN),
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION + fgPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 
         GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN));
 }
 
@@ -101,17 +101,24 @@ void GameWorldAssets::LoadLightingForLevel(GameAssets* assets, const GameLevel& 
     static const float MIN_WIDTH_BEFORE_Z_CHANGE = 15 * LevelPiece::PIECE_WIDTH;
     static const float MAX_WIDTH_BEFORE_Z_FIXED  = 23 * LevelPiece::PIECE_WIDTH;
 
-    Vector3D addedFgDist;
+    Vector3D addedFgKeyDist(0,0,0);
+    Vector3D addedFgFillDist(0,0,0);
+
     if (levelWidth > MIN_WIDTH_BEFORE_Z_CHANGE) {
         if (levelWidth > MAX_WIDTH_BEFORE_Z_FIXED) {
-            addedFgDist[2] = 10.0f;
+            addedFgFillDist[2] = addedFgKeyDist[2] = 10.0f;
+            addedFgFillDist[0] = 10.0f;
+            addedFgKeyDist[0]  = -10.0f;
         }
         else {
-            addedFgDist[2] = NumberFuncs::LerpOverFloat(MIN_WIDTH_BEFORE_Z_CHANGE, MAX_WIDTH_BEFORE_Z_FIXED, 0.0f, 10.0f, levelWidth);
+            addedFgFillDist[2] = addedFgKeyDist[2] = 
+                NumberFuncs::LerpOverFloat(MIN_WIDTH_BEFORE_Z_CHANGE, MAX_WIDTH_BEFORE_Z_FIXED, 0.0f, 10.0f, levelWidth);
+            addedFgFillDist[0] = addedFgFillDist[2];
+            addedFgKeyDist[0]  = -addedFgFillDist[0];
         }
     }
 
-    this->LoadFGLighting(assets, addedFgDist);
+    this->LoadFGLighting(assets, addedFgKeyDist, addedFgFillDist);
     this->LoadBGLighting(assets);
 }
 

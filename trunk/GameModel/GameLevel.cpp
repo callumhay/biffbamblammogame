@@ -166,6 +166,10 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
 	this->width = pieces[0].size();
 	this->height = pieces.size();
 
+    float unitWidth  = this->GetLevelUnitWidth();
+    float unitHeight = this->GetLevelUnitHeight();
+    this->levelHypotenuse = sqrt(unitWidth * unitWidth + unitHeight * unitHeight);
+
     // Initialize triggerable and AI pieces...
     for (size_t row = 0; row < this->height; row++) {
         for (size_t col = 0; col < this->width; col++) {
@@ -1417,18 +1421,25 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProject
 	// NOTE: If a piece doesn't exist (i.e., the bounds of the level are hit then the piece
 	// will be populated as NULL and accounted for while iterating through the affected pieces).
 	float rocketSizeFactor = rocket->GetHeight() / rocket->GetDefaultHeight();
-	std::vector<LevelPiece*> affectedPieces = this->GetExplosionAffectedLevelPieces(rocket, rocketSizeFactor, centerPieceAfterDestruction);
+	
+    std::set<LevelPiece*> affectedPieces = this->GetExplosionAffectedLevelPieces(rocket, rocketSizeFactor, centerPieceAfterDestruction);
+    std::set<LevelPiece*> ignorePieces;
+    bool canChangeLevelOnHit = false;
 
 	// Go through each affected piece and destroy it if we can
-	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
+	for (std::set<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end();) {
+
 		LevelPiece* currAffectedPiece = *iter;
-		if (currAffectedPiece != NULL) {
-			LevelPiece* resultPieceTemp = currAffectedPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
-            if (resultPieceTemp != currAffectedPiece) {
+        if (currAffectedPiece != NULL && ignorePieces.find(currAffectedPiece) == ignorePieces.end()) {
+
+			canChangeLevelOnHit = currAffectedPiece->CanChangeSelfOrOtherPiecesWhenHit();
+            LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
+            ignorePieces.insert(resultPiece);
+
+            if (canChangeLevelOnHit || resultPiece != currAffectedPiece) {
 			    
                 // Update all the affected pieces again...
 			    affectedPieces = this->GetExplosionAffectedLevelPieces(rocket, rocketSizeFactor, centerPieceAfterDestruction);
-
 			    iter = affectedPieces.begin();
                 continue;
             }
@@ -1449,25 +1460,24 @@ void GameLevel::RocketExplosionNoPieces(const RocketProjectile* rocket) {
 }
 
 
-std::vector<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projectile* projectile, float sizeFactor, LevelPiece* centerPiece) {
+std::set<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projectile* projectile, float sizeFactor, LevelPiece* centerPiece) {
     assert(centerPiece != NULL);
 
     int hIndex = static_cast<int>(centerPiece->GetHeightIndex());
     int wIndex = static_cast<int>(centerPiece->GetWidthIndex());
 
-	std::vector<LevelPiece*> affectedPieces;
-	affectedPieces.reserve(18);
-    
+	std::set<LevelPiece*> affectedPieces;
+
     LevelPiece* innerCircleTop      = this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex);
     LevelPiece* innerCircleMidLeft  = this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-1);
     LevelPiece* innerCircleMidRight = this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+1);
     LevelPiece* innerCircleBottom   = this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex);
     
     // Start with the base pieces that will get destroyed
-    affectedPieces.push_back(innerCircleTop);
-    affectedPieces.push_back(innerCircleMidLeft);
-    affectedPieces.push_back(innerCircleMidRight);
-    affectedPieces.push_back(innerCircleBottom);
+    affectedPieces.insert(innerCircleTop);
+    affectedPieces.insert(innerCircleMidLeft);
+    affectedPieces.insert(innerCircleMidRight);
+    affectedPieces.insert(innerCircleBottom);
     
     // Mines don't have as large an explosion radius as rockets...
     if (projectile->IsMine() && sizeFactor <= 1.0f) {
@@ -1479,10 +1489,10 @@ std::vector<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projec
     LevelPiece* innerCircleBottomRight = this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex+1);
     LevelPiece* innerCircleBottomLeft  = this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex-1);
 
-    affectedPieces.push_back(innerCircleTopRight);
-    affectedPieces.push_back(innerCircleTopLeft);
-    affectedPieces.push_back(innerCircleBottomRight);
-    affectedPieces.push_back(innerCircleBottomLeft);
+    affectedPieces.insert(innerCircleTopRight);
+    affectedPieces.insert(innerCircleTopLeft);
+    affectedPieces.insert(innerCircleBottomRight);
+    affectedPieces.insert(innerCircleBottomLeft);
 
     const Point2D& explosionCenter = centerPiece->GetCenter();
     bool isCenterStopped = centerPiece->IsExplosionStoppedByPiece(explosionCenter);
@@ -1490,14 +1500,14 @@ std::vector<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projec
     LevelPiece* outerCircleTop = this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex);
     bool innerCircleTopIsStopped = isCenterStopped || innerCircleTop == NULL || innerCircleTop->IsExplosionStoppedByPiece(explosionCenter);
     if (!innerCircleTopIsStopped) {
-        affectedPieces.push_back(outerCircleTop);
+        affectedPieces.insert(outerCircleTop);
     }
 
     LevelPiece* outerCircleBottom = this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex);
     bool innerCircleBottomIsStopped = isCenterStopped || innerCircleBottom == NULL || 
         innerCircleBottom->IsExplosionStoppedByPiece(explosionCenter);
     if (!innerCircleBottomIsStopped) {
-        affectedPieces.push_back(outerCircleBottom);
+        affectedPieces.insert(outerCircleBottom);
     }
 
     // Mines don't have as large an explosion as rockets do, in general
@@ -1511,25 +1521,25 @@ std::vector<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projec
         bool innerCircleTopLeftIsStopped = isCenterStopped || innerCircleTopLeft == NULL || 
             innerCircleTopLeft->IsExplosionStoppedByPiece(explosionCenter);
         if (!(innerCircleTopIsStopped && innerCircleTopLeftIsStopped)) {
-            affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
+            affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
         }
         
         bool innerCircleTopRightIsStopped = isCenterStopped || innerCircleTopRight == NULL || 
             innerCircleTopRight->IsExplosionStoppedByPiece(explosionCenter);
         if (!(innerCircleTopIsStopped && innerCircleTopRightIsStopped)) {
-            affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex+1));
+            affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex+1));
         }
 
         bool innerCircleBottomLeftIsStopped = isCenterStopped || innerCircleBottomLeft == NULL || 
             innerCircleBottomLeft->IsExplosionStoppedByPiece(explosionCenter);
         if (!(innerCircleBottomIsStopped && innerCircleBottomLeftIsStopped)) {
-		    affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex-1));
+		    affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex-1));
         }
 
         bool innerCircleBottomRightIsStopped = isCenterStopped || innerCircleBottomRight == NULL || 
             innerCircleBottomRight->IsExplosionStoppedByPiece(explosionCenter);
         if (!(innerCircleBottomIsStopped && innerCircleBottomRightIsStopped)) {
-            affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
+            affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
         }
 
         
@@ -1543,25 +1553,25 @@ std::vector<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projec
             bool outerCircleTopIsStopped = outerCircleTop == NULL || 
                 outerCircleTop->IsExplosionStoppedByPiece(explosionCenter);
             if (!innerCircleTopIsStopped && !outerCircleTopIsStopped) {
-                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+3, wIndex));
+                affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex+3, wIndex));
             }
             
             bool outerCircleBottomIsStopped = outerCircleBottom == NULL || 
                 outerCircleBottom->IsExplosionStoppedByPiece(explosionCenter);
             if (!innerCircleBottomIsStopped && !outerCircleBottomIsStopped) {
-                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-3, wIndex));
+                affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex-3, wIndex));
             }
 
             bool innerCircleMidLeftIsStopped = isCenterStopped || innerCircleMidLeft == NULL || 
                 innerCircleMidLeft->IsExplosionStoppedByPiece(explosionCenter);
             if (!innerCircleMidLeftIsStopped) {
-                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-2));
+                affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-2));
             }
 
             bool innerCircleMidRightIsStopped = isCenterStopped || innerCircleMidRight == NULL || 
                 innerCircleMidRight->IsExplosionStoppedByPiece(explosionCenter);
             if (!innerCircleMidRightIsStopped) {
-                affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+2));
+                affectedPieces.insert(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+2));
             }
 	    }
     }
@@ -1591,16 +1601,23 @@ void GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine) 
     }
 
     LevelPiece* centerPieceAfterDestruction = closestPieces.front()->Destroy(gameModel, LevelPiece::MineDestruction);
-    std::vector<LevelPiece*> affectedPieces =
+    
+    std::set<LevelPiece*> affectedPieces =
         this->GetExplosionAffectedLevelPieces(mine, mineSizeFactor, centerPieceAfterDestruction);
+    std::set<LevelPiece*> ignorePieces;
+    bool canChangeLevelOnHit = false;
 
 	// Go through each affected piece and destroy it if we can
-	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
-		LevelPiece* currAffectedPiece = *iter;
-		if (currAffectedPiece != NULL) {
+	for (std::set<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
+		
+        LevelPiece* currAffectedPiece = *iter;
+        if (currAffectedPiece != NULL && ignorePieces.find(currAffectedPiece) == ignorePieces.end()) {
+
+            canChangeLevelOnHit = currAffectedPiece->CanChangeSelfOrOtherPiecesWhenHit();
 			LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::MineDestruction);
-            
-            if (resultPiece != currAffectedPiece) {
+            ignorePieces.insert(resultPiece);
+
+            if (canChangeLevelOnHit || resultPiece != currAffectedPiece) {
 			    // Update all the affected pieces again...
 			    affectedPieces = this->GetExplosionAffectedLevelPieces(mine, mineSizeFactor, centerPieceAfterDestruction);
 			    iter = affectedPieces.begin();
@@ -1893,13 +1910,9 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
                                                   float& rayT, float toleranceRadius) const {
 
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
-	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
-	const float LEVEL_HEIGHT				 = this->GetLevelUnitHeight();
-	const float LONGEST_POSSIBLE_RAY = sqrt(LEVEL_WIDTH*LEVEL_WIDTH + LEVEL_HEIGHT*LEVEL_HEIGHT);
-
 	// NOTE: if the step size is too large then the ray might skip over entire sections of blocks - BECAREFUL!
 	const float STEP_SIZE = 0.5f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
-	int NUM_STEPS = static_cast<int>(LONGEST_POSSIBLE_RAY / STEP_SIZE);
+	int NUM_STEPS = static_cast<int>(this->levelHypotenuse / STEP_SIZE);
 
 	LevelPiece* returnPiece = NULL;
 	Collision::Circle2D toleranceCircle(Point2D(0,0), toleranceRadius);
@@ -1953,8 +1966,8 @@ void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::s
     result.clear();
 
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
-	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
-	const float LEVEL_HEIGHT				 = this->GetLevelUnitHeight();
+	const float LEVEL_WIDTH	 = this->GetLevelUnitWidth();
+	const float LEVEL_HEIGHT = this->GetLevelUnitHeight();
 	const float LONGEST_POSSIBLE_RAY = sqrt(LEVEL_WIDTH*LEVEL_WIDTH + LEVEL_HEIGHT*LEVEL_HEIGHT);
 
 	// NOTE: if the step size is too large then the ray might skip over entire sections of blocks - BECAREFUL!

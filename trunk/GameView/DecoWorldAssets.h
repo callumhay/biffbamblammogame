@@ -38,7 +38,8 @@ public:
 
 	void Tick(double dT);
 
-    void LoadFGLighting(GameAssets* assets, const Vector3D& fgPosOffset = Vector3D(0,0,0)) const;
+    void LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset = Vector3D(0,0,0), 
+        const Vector3D& fgFillPosOffset = Vector3D(0,0,0)) const;
     void LoadBGLighting(GameAssets* assets) const;
 
 private:
