@@ -170,6 +170,8 @@ void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight,
                                               const BasicPointLight& bgFillLight) {
 
+    float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+
     // Draw the triangle projectiles...
     this->triangleEmitterSm.Draw(camera);
     this->triangleEmitterMed.Draw(camera);
@@ -179,7 +181,7 @@ void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicP
 
     // Draw the model with the current background colour
 	glPushAttrib(GL_CURRENT_BIT);
-	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), this->bgFadeAnim.GetInterpolantValue());
+	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), currBGAlpha);
 	this->background->Draw(camera, bgKeyLight, bgFillLight);
 	glPopAttrib();
 }

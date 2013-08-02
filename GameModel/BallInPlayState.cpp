@@ -329,9 +329,9 @@ void BallInPlayState::Tick(double seconds) {
 
 			    // Make sure to check if both balls collide with each other
 			    if (currBall->CollisionCheck(*otherBall)) {
+                    this->DoBallCollision(*currBall, *otherBall);
 				    // EVENT: Two balls have collided
 				    GameEventManager::Instance()->ActionBallBallCollision(*currBall, *otherBall);
-				    this->DoBallCollision(*currBall, *otherBall);
 			    }
 		    }
 
@@ -660,29 +660,28 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	ball1.BallCollided();
 	ball2.BallCollided();
 
-	Collision::Circle2D ball1Bounds = ball1.GetBounds();
-	Collision::Circle2D ball2Bounds = ball2.GetBounds();
+	const Collision::Circle2D& ball1Bounds = ball1.GetBounds();
+	const Collision::Circle2D& ball2Bounds = ball2.GetBounds();
 	
 	Vector2D s = ball2Bounds.Center() - ball1Bounds.Center();
 	Vector2D v = ball2.GetVelocity() - ball1.GetVelocity();
-	float r = ball2Bounds.Radius() + ball1Bounds.Radius();
-	float c = Vector2D::Dot(s, s) - (r * r);
+	float r    = ball2Bounds.Radius() + ball1Bounds.Radius();
+	float c    = Vector2D::Dot(s, s) - (r * r);
 
 	assert(c < 0.0f);	// It should always be the case that there is a collision
 	
 	float a = Vector2D::Dot(v, v);
-	if (a < EPSILON) { 
-		return; 
-	}
-
 	float b = Vector2D::Dot(v, s);
 	float d = b * b - a * c;
 	if (d < 0.0f) { 
 		return; 
 	}
 
-	float t = (-b - sqrt(d)) / a;
-	assert(t <= 0.0f);	// Since the collision has already happened, t must be negative
+	float t = 0.0f;
+    if (a > EPSILON) {
+        t = (-b - sqrt(d)) / a;
+    }
+	assert(t <= 0.0f);	// Since the collision has already happened, t must be negative or zero
 
 	// Figure out what the centers of the two balls were at collision
 	Point2D ball1CollisionCenter = ball1Bounds.Center() + t * ball1.GetVelocity();
@@ -691,9 +690,12 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	// Figure out the new velocity after the collision
 	Vector2D ball1CorrectionVec = ball1CollisionCenter - ball2CollisionCenter;
 	if (ball1CorrectionVec == Vector2D(0,0)) {
-		return;
+		// If both balls perfectly overlap then we pick the velocity vector as the correction vec
+        ball1CorrectionVec = ball1.GetDirection();
 	}
-	ball1CorrectionVec.Normalize();
+    else {
+	    ball1CorrectionVec.Normalize();
+    }
 	Vector2D ball2CorrectionVec = -ball1CorrectionVec;
 
 	Vector2D reflectBall1Vec = Vector2D::Normalize(Reflect(ball1.GetDirection(), ball1CorrectionVec));
@@ -701,14 +703,12 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	
 	// Check to see how close the two velocities are to one another, if they're within
 	// some small threshold then make them dramatically different...
-	static const float CLOSE_TRAGECTORY_ANGLE = Trig::degreesToRadians(5.0f);
+	static const float CLOSE_TRAGECTORY_ANGLE = Trig::degreesToRadians(10.0f);
 	if (fabs(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(reflectBall1Vec, reflectBall2Vec))))) < CLOSE_TRAGECTORY_ANGLE) {
 		// Rotate them both 90 degrees away from each other
 		reflectBall1Vec = Vector2D(reflectBall1Vec[1], -reflectBall1Vec[0]);
 		reflectBall2Vec = Vector2D(-reflectBall2Vec[1], reflectBall2Vec[0]);
 	}
-
-	//float positiveT = -NumberFuncs::SignOf(t) * (fabs(t) + 2*EPSILON);
 
 	// NOTE: we need to make sure the new velocities are not zero
 	// Set the new velocities
@@ -720,8 +720,8 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 		ball2.SetVelocity(ball2.GetSpeed(), reflectBall2Vec);
 	}
 
-    ball1.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball1.GetBounds().Radius() / ball1.GetSpeed()));
-    ball2.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball2.GetBounds().Radius() / ball2.GetSpeed()));
+    //ball1.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball1.GetBounds().Radius() / ball1.GetSpeed()));
+    //ball2.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball2.GetBounds().Radius() / ball2.GetSpeed()));
 }
 
 /**

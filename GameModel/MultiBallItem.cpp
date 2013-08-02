@@ -88,7 +88,6 @@ double MultiBallItem::Activate() {
 		// We need to change the moving direction of the copied ball to something random but also reasonable:
 		currRotationInDegs += MultiBallItem::MIN_SPLIT_DEGREES;
 		newBall->SetVelocity(ballSpd, Vector2D::Rotate(currRotationInDegs, ballDir));
-
 		newBalls.push_back(newBall);
 
         // The new ball requires association with all the relevant, active timers whose effects are now
