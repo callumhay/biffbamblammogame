@@ -1,8 +1,8 @@
 Tilt-a-Whirl Gauntlet
 21 28
 S S S S S S D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S N N N N N N N S 
-S E E E S E E E S E E E S E E E E E E E S 
-S E E E S E E E S E E E S E E E E E E E S 
+S E E E N E E E N E E E S E E E E E E E S 
+S E E E N E E E N E E E S E E E E E E E S 
 S E R E S E G E S E R E S E C(0) E C(0) E C(0) E S 
 S R B R S G E G S R B R S E E E E E E E S 
 S E O E S E G E S E O E S E E E E E E E S 
@@ -33,15 +33,15 @@ STARS:
 3000
 5000
 8000
-10000
-12000
+11000
+13400
 
 PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

@@ -3218,62 +3218,22 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
  */
 void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) {
 
-	ESPInterval redRandomColour(0.1f, 1.0f);
-	ESPInterval greenRandomColour(0.1f, 1.0f);
-	ESPInterval blueRandomColour(0.1f, 1.0f);
-	ESPInterval redColour(0), greenColour(0), blueColour(0);
-	float itemAlpha = item.GetItemColour().A();
+    GameItem::ItemDisposition disposition = item.GetItemDisposition();
+    float itemAlpha = item.GetItemColour().A();
 	ESPInterval alpha(itemAlpha*0.75f);
+
+    ESPInterval redRandomColour(0.1f, 1.0f);
+    ESPInterval greenRandomColour(0.1f, 1.0f);
+    ESPInterval blueRandomColour(0.1f, 1.0f);
+    ESPInterval redColour(0), greenColour(0), blueColour(0);
+    GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(disposition, 
+        redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
 
 	// We choose a specific kind of sprite graphic based on the type of item that's dropping
 	Texture2D* itemSpecificFillShapeTex    = NULL;
 	Texture2D* itemSpecificOutlineShapeTex = NULL;
     Texture2D* itemSepecificFaceTex        = NULL;
-
-	switch (item.GetItemDisposition()) {
-		case GameItem::Good:
-			greenRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour         = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
-			greenColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
-			blueColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
-
-            itemSpecificFillShapeTex    = this->plusTex;
-            itemSpecificOutlineShapeTex = this->plusOutlineTex;
-            itemSepecificFaceTex        = this->happyFaceTex;
-
-			break;
-
-		case GameItem::Bad:
-			redRandomColour	  = ESPInterval(0.8f, 1.0f);
-			greenRandomColour = ESPInterval(0.0f, 0.70f);
-			blueRandomColour  = ESPInterval(0.0f, 0.70f);
-
-			redColour   = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
-			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
-			blueColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
-
-            itemSpecificFillShapeTex    = this->xTex;
-            itemSpecificOutlineShapeTex = this->xOutlineTex;
-            itemSepecificFaceTex        = this->sadFaceTex;
-
-			break;
-
-		case GameItem::Neutral:
-			blueRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
-			greenColour      = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
-			blueColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
-
-            itemSpecificFillShapeTex    = this->circleTex;
-            itemSpecificOutlineShapeTex = this->outlinedHoopTex;
-            itemSepecificFaceTex        = this->neutralFaceTex;
-
-			break;
-
-		default:
-			assert(false);
-			break;
-	}
+    this->ChooseDispositionTextures(disposition, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
 
 	// Aura around the ends of the dropping item
 	ESPPointEmitter* itemDropEmitterAura1 = new ESPPointEmitter();
@@ -3306,67 +3266,48 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura1);
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura2);
 
+
 	if (showParticles) {
 
-        std::vector<Texture2D*> randomItemTextures;
-        randomItemTextures.reserve(3);
-        randomItemTextures.push_back(itemSepecificFaceTex);
-        randomItemTextures.push_back(itemSpecificFillShapeTex);
-        randomItemTextures.push_back(itemSpecificOutlineShapeTex);
+        if (item.GetItemType() == GameItem::RandomItem) {
 
-        const ESPInterval spdInterval(2.25f, 5.25f);
-        const ESPInterval lifeInterval(1.25f, 2.5f);
-        const ESPInterval sizeInterval(0.25f, 1.25f);
+            // Neutral...
+            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+                redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
+           
+            // Good...
+            redRandomColour   = ESPInterval(0.1f, 1.0f);
+            greenRandomColour = ESPInterval(0.1f, 1.0f);
+            blueRandomColour  = ESPInterval(0.1f, 1.0f);
+            redColour   = ESPInterval(0);
+            greenColour = ESPInterval(0);
+            blueColour  = ESPInterval(0);
 
-        // Middle emitter...
-		ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
-		itemDropEmitterTrail1->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-		itemDropEmitterTrail1->SetInitialSpd(spdInterval);
-		itemDropEmitterTrail1->SetParticleLife(lifeInterval);
-		itemDropEmitterTrail1->SetParticleSize(sizeInterval);
-		itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
-		itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
-		itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
-		itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
-        itemDropEmitterTrail1->SetParticleAlignment(ESP::ScreenAligned);
-		itemDropEmitterTrail1->AddEffector(&this->particleFader);
-		itemDropEmitterTrail1->SetRandomTextureParticles(11, randomItemTextures);
-		
-		// Left emitters...
-		ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
-		itemDropEmitterTrail2->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-		itemDropEmitterTrail2->SetInitialSpd(spdInterval);
-		itemDropEmitterTrail2->SetParticleLife(lifeInterval);
-		itemDropEmitterTrail2->SetParticleSize(sizeInterval);
-		itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
-		itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
-		itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
-		itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
-        itemDropEmitterTrail2->SetParticleAlignment(ESP::ScreenAligned);
-		itemDropEmitterTrail2->AddEffector(&this->particleFader);
-		itemDropEmitterTrail2->SetRandomTextureParticles(11, randomItemTextures);
-		
-		// Right emitters...
-		ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
-		itemDropEmitterTrail3->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-		itemDropEmitterTrail3->SetInitialSpd(spdInterval);
-		itemDropEmitterTrail3->SetParticleLife(lifeInterval);
-		itemDropEmitterTrail3->SetParticleSize(sizeInterval);
-		itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
-		itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
-		itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
-		itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
-        itemDropEmitterTrail3->SetParticleAlignment(ESP::ScreenAligned);
-		itemDropEmitterTrail3->AddEffector(&this->particleFader);
-		itemDropEmitterTrail3->SetRandomTextureParticles(11, randomItemTextures);
+            GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(GameItem::Good, 
+                redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
+            this->ChooseDispositionTextures(GameItem::Good, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
+            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+                redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
 
-		// Add all the star emitters
-		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
-		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail2);
-		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail3);
+            // Bad...
+            redRandomColour   = ESPInterval(0.1f, 1.0f);
+            greenRandomColour = ESPInterval(0.1f, 1.0f);
+            blueRandomColour  = ESPInterval(0.1f, 1.0f);
+            redColour   = ESPInterval(0);
+            greenColour = ESPInterval(0);
+            blueColour  = ESPInterval(0);
+
+            GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(GameItem::Bad, 
+                redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
+            this->ChooseDispositionTextures(GameItem::Bad, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
+            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+                redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
+
+        }
+        else {
+            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+                redRandomColour, greenRandomColour, blueRandomColour, alpha, 11);
+        }
 	}
 }
 
@@ -3958,53 +3899,14 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	ESPInterval greenRandomColour(0.1f, 0.8f);
 	ESPInterval blueRandomColour(0.1f, 0.8f);
 	ESPInterval redColour(0), greenColour(0), blueColour(0);
-
-	// We choose a specific kind of sprite graphic based on the item type's disposition
+    GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(disposition, 
+        redRandomColour, greenRandomColour, blueRandomColour, redColour, blueColour, greenColour);
+    
+    // We choose a specific kind of sprite graphic based on the item type's disposition
     Texture2D* itemSpecificFillShapeTex    = NULL;
     Texture2D* itemSpecificOutlineShapeTex = NULL;
     Texture2D* itemSepecificFaceTex        = NULL;
-
-	switch (disposition) {
-		case GameItem::Good:
-			greenRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour         = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
-			greenColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
-			blueColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
-
-            itemSpecificFillShapeTex    = this->plusTex;
-            itemSpecificOutlineShapeTex = this->plusOutlineTex;
-            itemSepecificFaceTex        = this->happyFaceTex;
-
-			break;
-
-		case GameItem::Bad:
-			redRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
-			greenColour     = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
-			blueColour      = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
-
-            itemSpecificFillShapeTex    = this->xTex;
-            itemSpecificOutlineShapeTex = this->xOutlineTex;
-            itemSepecificFaceTex        = this->sadFaceTex;
-
-			break;
-
-		case GameItem::Neutral:
-			blueRandomColour = ESPInterval(0.8f, 1.0f);
-			redColour		 = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
-			greenColour      = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
-			blueColour	     = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
-
-            itemSpecificFillShapeTex    = this->circleTex;
-            itemSpecificOutlineShapeTex = this->outlinedHoopTex;
-            itemSepecificFaceTex        = this->neutralFaceTex;
-
-			break;
-
-		default:
-			assert(false);
-			break;
-	}
+    this->ChooseDispositionTextures(disposition, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
 
 	const ESPInterval starSpawnDelta(0.02f, 0.06f);
 	const ESPInterval starInitialSpd(40.0f, 60.0f);
@@ -6008,6 +5910,108 @@ GameESPAssets::EnsureBallEffectsList(const GameBall& ball) {
 	}
 
 	return foundBallEffects;
+}
+
+void GameESPAssets::ChooseDispositionTextures(const GameItem::ItemDisposition& itemDisposition, Texture2D*& itemSpecificFillShapeTex,
+                                              Texture2D*& itemSpecificOutlineShapeTex, Texture2D*& itemSepecificFaceTex) const {
+
+    switch (itemDisposition) {
+        case GameItem::Good:
+            itemSpecificFillShapeTex    = this->plusTex;
+            itemSpecificOutlineShapeTex = this->plusOutlineTex;
+            itemSepecificFaceTex        = this->happyFaceTex;
+
+            break;
+
+        case GameItem::Bad:
+            itemSpecificFillShapeTex    = this->xTex;
+            itemSpecificOutlineShapeTex = this->xOutlineTex;
+            itemSepecificFaceTex        = this->sadFaceTex;
+
+            break;
+
+        case GameItem::Neutral:
+            itemSpecificFillShapeTex    = this->circleTex;
+            itemSpecificOutlineShapeTex = this->outlinedHoopTex;
+            itemSepecificFaceTex        = this->neutralFaceTex;
+
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+}
+
+void GameESPAssets::AddItemDropEmitters(const GameItem& item, Texture2D* itemSpecificFillShapeTex,
+                                        Texture2D* itemSpecificOutlineShapeTex, Texture2D* itemSepecificFaceTex,
+                                        const ESPInterval& redRandomColour, const ESPInterval& greenRandomColour, const ESPInterval& blueRandomColour,
+                                        const ESPInterval& alpha, int numParticlesPerEmitter) {
+
+    const float fractionAmt = static_cast<float>(numParticlesPerEmitter) / 11.0f;
+    const float invFractionAmt = 1.0f / fractionAmt;
+
+    std::vector<Texture2D*> randomItemTextures;
+    randomItemTextures.reserve(3);
+    randomItemTextures.push_back(itemSepecificFaceTex);
+    randomItemTextures.push_back(itemSpecificFillShapeTex);
+    randomItemTextures.push_back(itemSpecificOutlineShapeTex);
+
+    const ESPInterval spdInterval(2.25f, 5.25f);
+    const ESPInterval lifeInterval(1.25f, 2.5f);
+    const ESPInterval sizeInterval(0.25f, 1.25f);
+    const ESPInterval spawnDeltaInterval(invFractionAmt*0.1f, invFractionAmt*0.2f);
+
+    // Middle emitter...
+    ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
+    itemDropEmitterTrail1->SetSpawnDelta(spawnDeltaInterval);
+    itemDropEmitterTrail1->SetInitialSpd(spdInterval);
+    itemDropEmitterTrail1->SetParticleLife(lifeInterval);
+    itemDropEmitterTrail1->SetParticleSize(sizeInterval);
+    itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+    itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
+    itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
+    itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
+    itemDropEmitterTrail1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    itemDropEmitterTrail1->AddEffector(&this->particleFader);
+    itemDropEmitterTrail1->SetRandomTextureParticles(numParticlesPerEmitter, randomItemTextures);
+
+    // Left emitters...
+    ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
+    itemDropEmitterTrail2->SetSpawnDelta(spawnDeltaInterval);
+    itemDropEmitterTrail2->SetInitialSpd(spdInterval);
+    itemDropEmitterTrail2->SetParticleLife(lifeInterval);
+    itemDropEmitterTrail2->SetParticleSize(sizeInterval);
+    itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+    itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
+    itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
+    itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
+    itemDropEmitterTrail2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    itemDropEmitterTrail2->AddEffector(&this->particleFader);
+    itemDropEmitterTrail2->SetRandomTextureParticles(numParticlesPerEmitter, randomItemTextures);
+
+
+    // Right emitters...
+    ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
+    itemDropEmitterTrail3->SetSpawnDelta(spawnDeltaInterval);
+    itemDropEmitterTrail3->SetInitialSpd(spdInterval);
+    itemDropEmitterTrail3->SetParticleLife(lifeInterval);
+    itemDropEmitterTrail3->SetParticleSize(sizeInterval);
+    itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+    itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
+    itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
+    itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
+    itemDropEmitterTrail3->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    itemDropEmitterTrail3->AddEffector(&this->particleFader);
+    itemDropEmitterTrail3->SetRandomTextureParticles(numParticlesPerEmitter, randomItemTextures);
+
+    // Add all the star emitters
+    this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
+    this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail2);
+    this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail3);
 }
 
 /**

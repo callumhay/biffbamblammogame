@@ -32,8 +32,16 @@ public:
 	void Deactivate();
 	GameItem::ItemType GetItemType() const;
 
+    GameItem::ItemType GetBlinkingRandomItemType() const;
+
 private:
+    static const long TIME_BETWEEN_BLINKS_IN_MS;
+
 	GameItem* randomItem;
+    std::vector<GameItem::ItemType> possibleItemDropTypes;
+    
+    mutable int currRandomIdx;
+    mutable unsigned long lastBlinkTime;
 
     DISALLOW_COPY_AND_ASSIGN(RandomItem);
 };
@@ -42,23 +50,8 @@ inline std::set<const GameBall*> RandomItem::GetBallsAffected() const {
 	return this->randomItem->GetBallsAffected();
 }
 
-inline double RandomItem::Activate() {
-	this->isActive = true;
-	this->SetItemDisposition(this->randomItem->GetItemDisposition());
-	this->SetItemName(this->randomItem->GetName());
-	GameEventManager::Instance()->ActionRandomItemActivated(*this, *this->randomItem);
-	return this->randomItem->Activate();
-}
-
 inline void RandomItem::Deactivate() {
 	this->randomItem->Deactivate();
-}
-
-inline GameItem::ItemType RandomItem::GetItemType() const {
-	if (this->isActive) {
-		return this->randomItem->GetItemType();
-	}
-	return GameItem::RandomItem;
 }
 
 #endif
