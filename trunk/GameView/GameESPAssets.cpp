@@ -6568,7 +6568,8 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
  * Draw particle effects associated with the paddle, which get drawn behind the paddle.
  */
 void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
-	// Go through all the particles and do book keeping and drawing
+
+    // Go through all the particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
 		iter != this->activePaddleEmitters.end();) {
 	
@@ -6582,8 +6583,11 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
 		}
 		else {
 			// Not dead yet so we draw and tick
-            curr->SetParticleAlpha(ESPInterval(std::min<float>(paddle.GetAlpha(), curr->GetParticleAlpha().maxValue)));
-			curr->Draw(camera);
+            if (paddle.GetAlpha() < 1.0f) {
+                curr->SetParticleAlpha(ESPInterval(paddle.GetAlpha()));
+            }
+            curr->SetParticleRotation(ESPInterval(-paddle.GetZRotation()));
+            curr->Draw(camera);
 			curr->Tick(dT);
             ++iter;
 		}
