@@ -543,6 +543,43 @@ const Colour& GameViewConstants::GetMultiplierColour(int multiplier) {
     return GameViewConstants::GetInstance()->TWO_TIMES_MULTIPLIER_COLOUR;
 }
 
+void GameViewConstants::GetItemColourRandomnessFromDisposition(const GameItem::ItemDisposition& itemDisposition,
+                                                               ESPInterval& redRandomColour, ESPInterval& greenRandomColour, ESPInterval& blueRandomColour,
+                                                               ESPInterval& redColour, ESPInterval& greenColour, ESPInterval& blueColour) const {
+    redColour   = ESPInterval(0);
+    greenColour = ESPInterval(0);
+    blueColour  = ESPInterval(0);
+
+    switch (itemDisposition) {
+        case GameItem::Good:
+            greenRandomColour = ESPInterval(0.8f, 1.0f);
+            redColour         = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
+            greenColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
+            blueColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+            break;
+
+        case GameItem::Bad:
+            redRandomColour	  = ESPInterval(0.8f, 1.0f);
+            greenRandomColour = ESPInterval(0.0f, 0.70f);
+            blueRandomColour  = ESPInterval(0.0f, 0.70f);
+            redColour         = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
+            greenColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
+            blueColour	      = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
+            break;
+
+        case GameItem::Neutral:
+            blueRandomColour = ESPInterval(0.8f, 1.0f);
+            redColour        = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
+            greenColour      = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
+            blueColour       = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+}
+
 AnimationMultiLerp<Colour> GameViewConstants::BuildFlashingColourAnimation() const {
     static const double FLASH_TIME = 0.5;
 

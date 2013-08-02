@@ -93,15 +93,15 @@ private:
 		GameItemAssets* itemAssets;
 		const GameItemTimer* itemTimer;	// Timer associated with this HUD timer element
 		
-		Colour timerColour;							// Cache of the timer colour to avoid looking it up each frame
-		TimerState currState;						// Current state of the HUD/timer
-		GameItem::ItemType itemType;		// Item type associated with this HUD timer element
+		Colour timerColour;             // Cache of the timer colour to avoid looking it up each frame
+		TimerState currState;           // Current state of the HUD/timer
+		GameItem::ItemType itemType;    // Item type associated with this HUD timer element
 
 		Texture* timerTexture;
 		Texture* fillerTexture;
 
-		AnimationMultiLerp<ColourRGBA> additiveColourAnimation;	// Any active additive colour animation for this
-		AnimationMultiLerp<float> scaleAnimation;								// Any active scale animation for this
+		AnimationMultiLerp<ColourRGBA> additiveColourAnimation;  // Any active additive colour animation for this
+		AnimationMultiLerp<float> scaleAnimation;                // Any active scale animation for this
 
 		void SetState(const TimerState& state);
 		void Tick(double dT);

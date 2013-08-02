@@ -291,6 +291,14 @@ private:
 
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator EnsureBallEffectsList(const GameBall& ball);
 
+    void ChooseDispositionTextures(const GameItem::ItemDisposition& itemDisposition, Texture2D*& itemSpecificFillShapeTex,
+        Texture2D*& itemSpecificOutlineShapeTex, Texture2D*& itemSepecificFaceTex) const;
+
+    void AddItemDropEmitters(const GameItem& item, Texture2D* itemSpecificFillShapeTex,
+        Texture2D* itemSpecificOutlineShapeTex, Texture2D* itemSepecificFaceTex,
+        const ESPInterval& redRandomColour, const ESPInterval& greenRandomColour, const ESPInterval& blueRandomColour,
+        const ESPInterval& alpha, int numParticlesPerEmitter);
+
 public:
 	GameESPAssets();
 	~GameESPAssets();

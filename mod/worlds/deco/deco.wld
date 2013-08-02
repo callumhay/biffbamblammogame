@@ -38,28 +38,23 @@ resources/worlds/levels/medium/lightning_round.lvl
 # Tesla + Switch
 resources/worlds/levels/medium/acute_electrocution.lvl
 
+# Mine Turret + Sticky Paddle + Cannon
+resources/worlds/levels/medium/yours_and_mine.lvl
 
-
-
+# Turrets + Tesla - use the magnet paddle + rocket turrets to attract rockets to turn on tesla blocks
+resources/worlds/levels/medium/be_coy_decoy.lvl
 
 
 # Tesla + Prisms/Ice/Lasers
 
 
 
+# 5 more levels...
 
-# Turrets + Tesla - use the magnet paddle + rocket turrets to attract rockets to turn on tesla blocks
-resources/worlds/levels/medium/be_coy_decoy.lvl
 
 
 # Remote control rocket race-navigation-focused hard level
 resources/worlds/levels/hard/tilt_a_whirl_gauntlet.lvl
-
-
-# Mine Turret + Sticky Paddle + Cannon
-resources/worlds/levels/medium/yours_and_mine.lvl
-
-
 
 
 

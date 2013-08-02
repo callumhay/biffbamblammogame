@@ -148,7 +148,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity, GameModel* gameModel) {
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
-	static const double WAIT_TIME_BETWEEN_COLLISIONS = 1.00;
+	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.75;
 
 	// If the ball has no velocity then just exit, we're not going to be able to change it...
     if (currVelocity == Vector2D(0.0f, 0.0f)) {
@@ -162,7 +162,7 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 
 	TIME_TRACKER += dT;
 
-	// After some accumlated interval of time, do a random velocity change
+	// After some interval of time, do a random velocity change
 	if (TIME_TRACKER >= NEXT_TIME && this->gameBall->GetTimeSinceLastCollision() > WAIT_TIME_BETWEEN_COLLISIONS) {
 
 		TIME_TRACKER = 0.0;

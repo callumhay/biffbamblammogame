@@ -232,11 +232,11 @@ void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
     float levelWidth  = level.GetLevelUnitWidth();
     float levelHeight = level.GetLevelUnitHeight();
     
-    static const float MIN_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 13;
+    static const float MIN_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 14;
     static const float MAX_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 23;
 
-    static const float MIN_ADD_AMT = 6 * LevelPiece::PIECE_WIDTH;
-    static const float MAX_ADD_AMT = 8 * LevelPiece::PIECE_WIDTH;
+    static const float MIN_ADD_AMT = 6.0f * LevelPiece::PIECE_WIDTH;
+    static const float MAX_ADD_AMT = 8.5f * LevelPiece::PIECE_WIDTH;
 
     float addToWidth = MIN_ADD_AMT;
     if (levelWidth > MIN_WIDTH_FOR_LERP) {

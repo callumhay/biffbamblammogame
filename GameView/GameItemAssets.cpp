@@ -20,6 +20,7 @@
 // Game Model Includes
 #include "../GameModel/GameItem.h"
 #include "../GameModel/GameItemTimer.h"
+#include "../GameModel/RandomItem.h"
 
 #include "../ResourceManager.h"
 
@@ -78,12 +79,21 @@ bool GameItemAssets::LoadItemAssets() {
  * Draw the given item as a item drop in-game.
  */
 void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
-															const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, 
-															const BasicPointLight& ballLight) const  {
+                              const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, 
+                              const BasicPointLight& ballLight) const  {
 
 	// Set material for the image based on the item name/type
 	GameItem::ItemType itemType	= gameItem.GetItemType();
-	Texture2D* itemTexture = this->GetItemTexture(itemType);
+    
+    Texture2D* itemTexture = NULL;
+    if (itemType == GameItem::RandomItem) {
+        assert(dynamic_cast<const RandomItem*>(&gameItem) != NULL);
+        const RandomItem& randomItem = static_cast<const RandomItem&>(gameItem);
+        itemTexture = this->GetItemTexture(randomItem.GetBlinkingRandomItemType());
+    }
+    else {
+	    itemTexture = this->GetItemTexture(itemType);
+    }
 	assert(itemTexture != NULL);
 	
 	this->item->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, itemTexture);

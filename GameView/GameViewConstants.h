@@ -16,6 +16,8 @@
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Point.h"
 
+#include "../ESPEngine/ESPUtil.h"
+
 #include "../GameModel/GameItem.h"
 
 class GameViewConstants {
@@ -410,6 +412,10 @@ public:
 
     const Colour& GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const;
     const Colour& GetMultiplierColour(int multiplier);
+    
+    void GetItemColourRandomnessFromDisposition(const GameItem::ItemDisposition& itemDisposition,
+        ESPInterval& redRandomColour, ESPInterval& greenRandomColour, ESPInterval& blueRandomColour,
+        ESPInterval& redColour, ESPInterval& greenColour, ESPInterval& blueColour) const;
 
     AnimationMultiLerp<Colour> BuildFlashingColourAnimation() const;
 
