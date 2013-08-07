@@ -34,7 +34,7 @@ const float GameBall::DEFAULT_BALL_RADIUS = 0.5f;
 const float GameBall::MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS = 12.0f;
 const float GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS  = 5.0f;
 const float GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS  = Trig::degreesToRadians(MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
-const float GameBall::MAX_GRACING_ANGLE_ON_HIT_IN_DEGS     = 80.0f;
+const float GameBall::MAX_GRACING_ANGLE_ON_HIT_IN_DEGS     = 74.0f;
 
 // Ball size change related constants
 const float GameBall::SECONDS_TO_CHANGE_SIZE = 0.5f;	

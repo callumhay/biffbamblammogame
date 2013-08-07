@@ -40,10 +40,10 @@ STARS:
 
 PaddleGrow 1
 PoisonPaddle 3
-BallSafetyNet 1
 Blackout 3
-BallGrow 1
+BallSafetyNet 1
 UberBall 0
+BallGrow 1
 StickyPaddle 1
 ShieldPaddle 2
 LaserBulletPaddle 1
@@ -52,7 +52,7 @@ InvisiPaddle 3
 InvisiBall 3
 LaserBeamPaddle 1
 OmniLaserBall 2
-FireBall 2
+FireBall 0
 RocketPaddle 1
 GhostBall 2
 BallShrink 3
@@ -61,6 +61,7 @@ MultiBall5 1
 BallCam 0
 MagnetPaddle 0
 MultiBall3 1
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 1

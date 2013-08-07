@@ -424,6 +424,7 @@ inGameMenuState(inGameMenuState) {
 }
 
 void InGameMenuState::DifficultyVerifyEventHandler::MenuItemConfirmed() {
+    VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
 
     GameModel* gameModel = this->inGameMenuState->display->GetModel();
     assert(!gameModel->IsCurrentLevelTheTutorialLevel());
@@ -439,4 +440,11 @@ void InGameMenuState::DifficultyVerifyEventHandler::MenuItemConfirmed() {
 
     // Flag to restart the level...
     this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
+}
+
+void InGameMenuState::DifficultyVerifyEventHandler::MenuItemCancelled() {
+    VerifyMenuEventHandlerWithSound::MenuItemCancelled();
+
+    GameModel* gameModel = this->inGameMenuState->display->GetModel();
+    this->inGameMenuState->difficultyMenuItem->SetSelectedItem(static_cast<int>(gameModel->GetDifficulty()));
 }

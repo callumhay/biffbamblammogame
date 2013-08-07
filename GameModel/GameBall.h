@@ -116,7 +116,8 @@ public:
 	 */
 	bool CollisionCheck(const GameBall& otherBall) const {
 		// If the collisions are disabled then we only return false
-		if (!this->CanCollideWithOtherBalls() || !otherBall.CanCollideWithOtherBalls()) {
+		if (!this->CanCollideWithOtherBalls() || !otherBall.CanCollideWithOtherBalls() ||
+            this->IsLastThingCollidedWith(&otherBall)) {
 			return false;
 		}
 
@@ -231,7 +232,7 @@ public:
 		this->contributingCrazyColour		= Colour(1.0f, 1.0f, 1.0f);
 		this->contributingIceColour			= Colour(1.0f, 1.0f, 1.0f);
 	}
-	void AddBallType(const BallType type) {
+	void AddBallType(const BallType& type) {
 		this->currType = this->currType | type;
 		switch (type) {
 			case GameBall::GraviBall:
@@ -247,7 +248,7 @@ public:
 				break;
 		}
 	}
-	void RemoveBallType(const BallType type) {
+	void RemoveBallType(const BallType& type) {
 		this->currType = this->currType & ~type;
 		switch (type) {
 			case GameBall::GraviBall:
@@ -263,6 +264,7 @@ public:
 				break;
 		}
 	}
+    bool HasBallType(int32_t type) const { return ((this->currType & type) != 0x0); }
 
 	// Ball size modifying / querying functions
 	BallSize GetBallSize() const {

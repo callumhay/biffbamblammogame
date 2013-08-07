@@ -339,13 +339,16 @@ void BallInPlayState::Tick(double seconds) {
             if (this->gameModel->IsSafetyNetActive()) {
 		        if (this->gameModel->safetyNet->BallCollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision)) {
                     
+                    bool ballBlastsThroughSafetyNet = this->gameModel->safetyNet->BallBlastsThrough(*currBall);
                     this->gameModel->DestroySafetyNet();
 
                     // EVENT: The ball just destroyed the safety net
                     GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currBall);
 
-                    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision, GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
-                    ballChangedByCollision[ballIdx].posChanged = true;
+                    if (!ballBlastsThroughSafetyNet) {
+                        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision, GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+                        ballChangedByCollision[ballIdx].posChanged = true;
+                    }
 		        }
             }
 
@@ -420,8 +423,7 @@ void BallInPlayState::Tick(double seconds) {
 				        // Check to see if the ball is a ghost ball, if so there's a chance the ball will 
 				        // lose its ability to collide for 1 second, also check to see if we're already in ghost mode
 				        // if so we won't collide with anything (except solid blocks)...
-				        if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && 
-                             currPiece->GhostballPassesThrough()) {
+				        if (currBall->HasBallType(GameBall::GhostBall) && currPiece->GhostballPassesThrough()) {
     						
 					        if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
 						        continue;
@@ -443,8 +445,8 @@ void BallInPlayState::Tick(double seconds) {
 				        // In the case that the ball is uber then we only reflect if the ball is not green OR
 				        // The ball is attached to the paddle (special case)
 				        if (!currPiece->BallBouncesOffWhenHit() ||
-                           (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && 
-                           currPiece->BallBlastsThrough(*currBall))) {
+                            (currBall->HasBallType(GameBall::UberBall) && currPiece->BallBlastsThrough(*currBall))) {
+
 					        // Ignore collision...
 				        }
 				        else if (paddle->GetAttachedBall() == currBall) {
@@ -544,7 +546,6 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
 	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
 	Vector2D reflVecHat;
-    bool ignoreSmallReflectionAngle = false;
 
     // Position the ball so that it is at the location it was at when it collided...
     b.SetCenterPosition(b.GetCenterPosition2D() + timeUntilCollision * b.GetVelocity());
@@ -552,16 +553,15 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 	if (Vector2D::Dot(b.GetDirection(), n) >= 0) {
 		// Somehow the ball is traveling away from the normal but is hitting the line...
 
-        // The ball will reflect off its own direction vector...
+        // The ball will just keep its direction
         reflVecHat = b.GetDirection();
-        ignoreSmallReflectionAngle = true; // We don't want the ball to be effected by the MIN_BALL_ANGLE_*
 	}
 	else {
         // Typical bounce off the normal: figure out the reflection vector
         reflVecHat = Vector2D::Normalize(Reflect(b.GetDirection(), n));
 
         // In the case of gravity we decrease the reflection
-        if ((b.GetBallType() & GameBall::GraviBall) == GameBall::GraviBall) {
+        if (b.HasBallType(GameBall::GraviBall)) {
             reflVecHat = Vector2D::Normalize(0.5f * (reflVecHat + n));
         }
 	}
@@ -574,7 +574,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 		return;
 	}
 
-    if (!ignoreSmallReflectionAngle && !paddleReflection) {
+    if (!paddleReflection) {
         // Figure out the angle between the normal and the reflection...
         float angleOfReflInDegs = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat)))));
         float diffAngleInDegs   = minAngleInDegs - fabs(angleOfReflInDegs);
@@ -658,7 +658,9 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
  */
 void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	ball1.BallCollided();
+    ball1.SetLastThingCollidedWith(&ball2);
 	ball2.BallCollided();
+    ball2.SetLastThingCollidedWith(&ball1);
 
 	const Collision::Circle2D& ball1Bounds = ball1.GetBounds();
 	const Collision::Circle2D& ball2Bounds = ball2.GetBounds();
@@ -719,9 +721,6 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	if (reflectBall2Vec != Vector2D(0, 0)) {
 		ball2.SetVelocity(ball2.GetSpeed(), reflectBall2Vec);
 	}
-
-    //ball1.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball1.GetBounds().Radius() / ball1.GetSpeed()));
-    //ball2.SetBallBallCollisionsDisabled(std::min<double>(0.2, ball2.GetBounds().Radius() / ball2.GetSpeed()));
 }
 
 /**

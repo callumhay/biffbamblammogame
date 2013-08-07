@@ -16,9 +16,9 @@ S E E E E E E E E E E E E E S E E E E E
 S E T(G,lr) T(G,ll) E T(O,lr) T(O,ll) E T(R,lr) T(R,ll) E T(Y,lr) T(Y,ll) E S E E E E E 
 S E T(G,ur) T(G,ul) E T(O,ur) T(O,ul) E T(R,ur) T(R,ul) E T(Y,ur) T(Y,ul) E S E E E E E 
 S E E E E E E E E E E E E E S E E E E E 
-S E T(Y,lr) G T(Y,ll) E T(Y,lr) G T(Y,ll) E T(Y,lr) G T(Y,ll) E S E E E E E 
+S E E G E E E G E E E G E E S E E E E E 
 S E R I R E R I R E R I R E S E E E E E 
-S E T(Y,ur) R T(Y,ul) E T(Y,ur) R T(Y,ul) E T(Y,ur) R T(Y,ul) E S E E E E E 
+S E E R E E E R E E E R E E S E E E E E 
 S E E E E E E E E E E E E E S E E E E E 
 S R Q(f) R Q(f) R Q(f) R Q(f) R Q(f) R Q(f) R S E E E E E 
 S E E E E E E E E E E E E E S E E E E E 
@@ -34,12 +34,12 @@ STARS:
 6000
 9000
 12000
-16000
+15000
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
 BallGrow 2
 UberBall 2
 StickyPaddle 2
@@ -59,6 +59,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 0
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 2
 MineLauncherPaddle 0
 SlowBall 2

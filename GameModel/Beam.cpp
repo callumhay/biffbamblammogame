@@ -101,8 +101,7 @@ void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& i
         // Note: If the beam is a paddle laser beam and the beam segment is an origin
         // segment then we don't do collisions with the paddle! 
         // Also, if the beam has faded-out past a certain point then paddle collisions no longer happen
-        if (this->GetType() == Beam::PaddleBeam && this->beamParts.size() < initialBeamSegs.size() ||
-            this->beamAlpha < 0.33f) {
+        if (this->GetType() == Beam::PaddleBeam && this->beamParts.size() < initialBeamSegs.size() || this->beamAlpha < 0.33f) {
             // No paddle collisions for the current beam segment!
         }
         else {
@@ -122,6 +121,7 @@ void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& i
             minRayT = std::min<float>(minRayT, tempRayT);
         }
 
+        minRayT = std::max<float>(0.0f, minRayT);
         if (minRayT <= currBeamSegment->GetLength()) {
             // Set the new beam ending point - This MUST be done before telling the paddle it was hit!!
             currBeamSegment->SetLength(minRayT);
@@ -159,6 +159,7 @@ void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& i
                     // Now add the new beams to the list of beams we need to fire into the level and repeat this whole process with
                     std::list<BeamSegment*> spawnedBeamSegs;
                     for (std::list<Collision::Ray2D>::iterator iter = spawnedRays.begin(); iter != spawnedRays.end(); ++iter) {
+
                         newBeamSegs.push_back(new BeamSegment(*iter, NEW_BEAM_SEGMENT_RADIUS, NEW_BEAM_DMG_PER_SECOND, pieceCollidedWith));
                     }
                 }
@@ -314,6 +315,11 @@ LevelPiece* BeamSegment::FireBeamSegmentIntoLevel(const GameLevel* level) {
 	if (this->collidingPiece == NULL) {
 		this->endT = std::max<float>(level->GetLevelUnitHeight(), level->GetLevelUnitWidth());
 	}
+    else {
+        if (this->endT < 0.0) {
+            this->endT = 0;
+        }
+    }
 
 	return this->collidingPiece;
 }

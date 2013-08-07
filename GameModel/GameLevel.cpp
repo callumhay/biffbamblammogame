@@ -1480,7 +1480,7 @@ std::set<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projectil
     affectedPieces.insert(innerCircleBottom);
     
     // Mines don't have as large an explosion radius as rockets...
-    if (projectile->IsMine() && sizeFactor <= 1.0f) {
+    if (projectile->IsMine() && sizeFactor < 1.0f) {
         return affectedPieces;
     }
 
@@ -1493,6 +1493,11 @@ std::set<LevelPiece*> GameLevel::GetExplosionAffectedLevelPieces(const Projectil
     affectedPieces.insert(innerCircleTopLeft);
     affectedPieces.insert(innerCircleBottomRight);
     affectedPieces.insert(innerCircleBottomLeft);
+
+    // Mines don't have as large an explosion radius as rockets...
+    if (projectile->IsMine() && sizeFactor <= 1.0f) {
+        return affectedPieces;
+    }
 
     const Point2D& explosionCenter = centerPiece->GetCenter();
     bool isCenterStopped = centerPiece->IsExplosionStoppedByPiece(explosionCenter);
@@ -1773,7 +1778,9 @@ std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNotMoving(co
 
     for (std::set<LevelPiece*>::const_iterator iter = candidateSet.begin(); iter != candidateSet.end(); ++iter) {
         LevelPiece* currPiece = *iter;
-        tempSortVec.push_back(PieceAndSqrDist(currPiece, Point2D::SqDistance(center, currPiece->GetBounds().ClosestPoint(center))));
+        if (!currPiece->IsNoBoundsPieceType()) {
+            tempSortVec.push_back(PieceAndSqrDist(currPiece, Point2D::SqDistance(center, currPiece->GetBounds().ClosestPoint(center))));
+        }
     }
     
     std::sort(tempSortVec.begin(), tempSortVec.end(), ComparePieceAndSqrDist);

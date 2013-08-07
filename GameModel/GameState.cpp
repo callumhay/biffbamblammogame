@@ -74,7 +74,8 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 
     // If the paddle is not in the game then we shouldn't be updating anything
-    if (paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState())) {
+    if (paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState()) ||
+        !paddle->GetIsLevelBoundsCheckingOn()) {
         return false;
     }
 
@@ -105,7 +106,7 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 	}
 
     if (!didCollideWithAnyPiece) {
-	    // Set the paddle boundries to be the innermost solid blocks on the paddle level of blocks
+	    // Set the paddle boundaries to be the innermost solid blocks on the paddle level of blocks
 	    paddle->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
     }
 

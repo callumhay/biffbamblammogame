@@ -1,9 +1,10 @@
 Size Matters
-15 28
+15 29
+E E E E E D(PaddleGrow,PaddleGrow,PaddleGrow){2} E E E E E E E E E 
 E E E S S S S S S S S E R E E 
-S S S S E E D(PaddleGrow) E E E S R R R E 
+S S S S E E E E E E S R R R E 
 S E E N E E E E E E N E R R E 
-S D(RocketPaddle){1} C(90) N E E E E E E N E S R R 
+S D(RocketPaddle){1} C(90) N E E E E E E N E W(2) R R 
 S E E N E E E E E E N E R R E 
 S N N N E E E E E E S R R R E 
 S E E E E E E E E E S E R E E 
@@ -36,12 +37,12 @@ STARS:
 20000
 25000
 
-PaddleGrow 3
+PaddleGrow 0
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
-BallGrow 2
+BallSafetyNet 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2
@@ -59,6 +60,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 0
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 2
 MineLauncherPaddle 0
 SlowBall 2

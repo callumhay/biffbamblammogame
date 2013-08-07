@@ -44,6 +44,11 @@ public:
         return 0;
     };
 
+    void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+        const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+        const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+        const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+
     void Triggered(GameModel* gameModel);
 
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
@@ -58,6 +63,8 @@ public:
 	const GameItem::ItemType& GetNextDropItemType() const;
 	const GameItem::ItemDisposition& GetNextDropItemDisposition() const;
 
+    bool GetHasSparkleEffect() const;
+
 private:
 	static const float DAMAGE_UNTIL_ITEM_DROP;
 	static const unsigned long DISABLE_DROP_TIME;
@@ -69,6 +76,8 @@ private:
 	GameItem::ItemDisposition nextDropDisposition;	// The disposition (good/neutral/bad) of the next item type that will drop from this block
 
 	unsigned long timeOfLastDrop;	// Amount of time since the last item drop
+
+    bool hasSparkleEffect;
 
 	void ChangeToNextItemDropType(bool doEvent);
 
@@ -156,6 +165,10 @@ inline const GameItem::ItemType& ItemDropBlock::GetNextDropItemType() const {
 
 inline const GameItem::ItemDisposition& ItemDropBlock::GetNextDropItemDisposition() const {
 	return this->nextDropDisposition;
+}
+
+inline bool ItemDropBlock::GetHasSparkleEffect() const {
+    return this->hasSparkleEffect;
 }
 
 #endif // __ITEMDROPBLOCK_H__

@@ -29,15 +29,15 @@ S E E E N E E E E E E E E E E E N E E E S
 
 STARS:
 10000
+16000
 25000
-36000
-47000
-55000
+35000
+45000
 
 PaddleGrow 0
 PoisonPaddle 2
-BallSafetyNet 0
 Blackout 2
+BallSafetyNet 0
 BallGrow 0
 UberBall 0
 StickyPaddle 0
@@ -57,6 +57,7 @@ MultiBall5 0
 BallCam 0
 MagnetPaddle 0
 MultiBall3 0
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 0

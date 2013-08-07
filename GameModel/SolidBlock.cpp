@@ -107,18 +107,20 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
     bool shouldGenBounds = false;
 
-	// Left boundry of the piece
+	// Left boundary of the piece
 	if (leftNeighbor != NULL) {
 		if (leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret && 
+            leftNeighbor->GetType() != LevelPiece::Solid &&
+            leftNeighbor->GetType() != LevelPiece::LaserTurret && 
             leftNeighbor->GetType() != LevelPiece::RocketTurret &&
-            leftNeighbor->GetType() != LevelPiece::Tesla && leftNeighbor->GetType() != LevelPiece::Switch &&
+            leftNeighbor->GetType() != LevelPiece::Tesla && 
+            leftNeighbor->GetType() != LevelPiece::Switch &&
             leftNeighbor->GetType() != LevelPiece::MineTurret) {
 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(leftNeighbor, triOrientation)) {
-                shouldGenBounds = triOrientation != TriangleBlock::UpperRight && triOrientation != TriangleBlock::LowerRight;
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight);
             }
 		}
 	}
@@ -137,7 +139,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
     shouldGenBounds = false;
 
 
-	// Bottom boundry of the piece
+	// Bottom boundary of the piece
 	if (bottomNeighbor != NULL) {
 		if (bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret && 
@@ -148,7 +150,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(bottomNeighbor, triOrientation)) {
-                shouldGenBounds = triOrientation != TriangleBlock::UpperRight && triOrientation != TriangleBlock::UpperLeft;
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft);
             }
 		}
 	}
@@ -167,7 +169,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
     shouldGenBounds = false;
 
 
-	// Right boundry of the piece
+	// Right boundary of the piece
 	if (rightNeighbor != NULL) {
 		if (rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret && 
@@ -178,7 +180,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(rightNeighbor, triOrientation)) {
-                shouldGenBounds = triOrientation != TriangleBlock::UpperLeft && triOrientation != TriangleBlock::LowerLeft;
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft);
             }
 		}
 	}
@@ -196,7 +198,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
     }
     shouldGenBounds = false;
 
-	// Top boundry of the piece
+	// Top boundary of the piece
 	if (topNeighbor != NULL) {
 		if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
             topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret && 
@@ -208,7 +210,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(topNeighbor, triOrientation)) {
-                shouldGenBounds = triOrientation != TriangleBlock::LowerRight && triOrientation != TriangleBlock::LowerLeft;
+                shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft);
             }
 		}
 	}

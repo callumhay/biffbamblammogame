@@ -141,6 +141,7 @@ private:
     public:
         DifficultyVerifyEventHandler(InGameMenuState* inGameMenuState);
         void MenuItemConfirmed();
+        void MenuItemCancelled();
 
     private:
 		InGameMenuState* inGameMenuState;

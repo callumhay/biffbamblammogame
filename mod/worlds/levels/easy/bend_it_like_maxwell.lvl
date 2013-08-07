@@ -15,7 +15,7 @@ S E Y E G E G E Y E S
 S Y E O E Y E O E Y S 
 S E R E Y E Y E R E S 
 S G E G E G E G E G S 
-S Y Y Y S P S Y Y Y S 
+S Y Y Y T(S,ll) P T(S,lr) Y Y Y S 
 S E E T(G,ur) G G G T(G,ul) E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -29,14 +29,14 @@ S E E E E E E E E E S
 STARS:
 3000
 6000
-9000
+8000
 12000
 16000
 
 PaddleGrow 1
 PoisonPaddle 0
-BallSafetyNet 1
 Blackout 1
+BallSafetyNet 1
 BallGrow 0
 UberBall 1
 StickyPaddle 0
@@ -56,6 +56,7 @@ MultiBall5 1
 BallCam 0
 MagnetPaddle 2
 MultiBall3 1
+RemoteControlRocket 0
 IceBall 2
 MineLauncherPaddle 2
 SlowBall 1

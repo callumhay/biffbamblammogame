@@ -714,7 +714,9 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 
 			    // Create the right type of projectile in the right place
 			    Projectile* newProjectile = new PaddleLaserProjectile(
-				    this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight));
+				    this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight), 
+                    Vector2D::Normalize(this->GetUpVector()));
+
                 newProjectile->SetLastThingCollidedWith(this);
 
 			    // Modify the fired bullet based on the current paddle's properties...

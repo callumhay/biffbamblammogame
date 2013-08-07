@@ -16,7 +16,7 @@ S R R R R R S E E E E E S R R R R R S
 S R R R R R S Q(f) Q(f) Q(f) Q(f) Q(f) S R R R R R S 
 S E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E S 
-S E E K(MultiBall3) E E E E E K(MultiBall5) E E E E E K(MultiBall3) E E S 
+S E E K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) E E E E E K(MultiBall5,MultiBall5,MultiBall5) E E E E E K(RocketPaddle,RocketPaddle,RocketPaddle) E E S 
 S E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E S 
 S G Y O R R R R R R R R R R R O Y G S 
@@ -31,17 +31,17 @@ S E E E E E E E E E E E E E E E E E S
 
 STARS:
 2000
-5000
-7000
+4000
+6000
 9000
-11000
+12000
 
 PaddleGrow 0
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
-UberBall 2
+BallSafetyNet 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -59,6 +59,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 0
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 2

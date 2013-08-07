@@ -27,9 +27,7 @@ public:
 	}
 
     bool ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
-        return !this->BallBlastsThrough(b) && 
-            ((b.GetBallType() & GameBall::IceBall) == GameBall::IceBall) ||
-            ((b.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+        return !this->BallBlastsThrough(b) && (b.HasBallType(GameBall::IceBall) || b.HasBallType(GameBall::FireBall));
     }
 
 	// Is this piece one without any boundries (i.e., no collision surface/line)?
@@ -55,9 +53,7 @@ public:
 	// Returns: true if it can, false otherwise.
 	bool BallBlastsThrough(const GameBall& b) const {
         // The ball may blast through ONLY IF the piece is green, the ball is uber and NOT on fire / icy
-        return ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) &&
-               ((b.GetBallType() & GameBall::IceBall) != GameBall::IceBall) && 
-               ((b.GetBallType() & GameBall::FireBall) != GameBall::FireBall);
+        return (b.HasBallType(GameBall::UberBall) && !b.HasBallType(GameBall::IceBall) && !b.HasBallType(GameBall::FireBall));
 	}
 
     // Whether or not the ghost ball can just pass through this block.
