@@ -20,7 +20,7 @@ public:
 	static const float WIDTH_DEFAULT;
     static const float DAMAGE_DEFAULT;
 
-    explicit PaddleLaserProjectile(const Point2D& spawnLoc);
+    PaddleLaserProjectile(const Point2D& spawnLoc, const Vector2D& laserVelDir);
     PaddleLaserProjectile(const PaddleLaserProjectile& copy);
     ~PaddleLaserProjectile();
 

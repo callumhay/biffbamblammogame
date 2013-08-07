@@ -16,6 +16,7 @@
 #include "InGameDisplayState.h"
 #include "InGameMenuState.h"
 #include "MainMenuDisplayState.h"
+#include "GameCompleteDisplayState.h"
 #include "LoadingScreen.h"
 
 // Model includes
@@ -55,6 +56,7 @@ gameCamera(initWidth, initHeight) {
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
+    //this->SetCurrentState(new GameCompleteDisplayState(this)); // Testing game complete screen
 	SetInitialRenderOptions();
 }
 

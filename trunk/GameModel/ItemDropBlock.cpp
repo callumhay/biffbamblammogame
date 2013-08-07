@@ -21,7 +21,7 @@ const unsigned long ItemDropBlock::DISABLE_DROP_TIME = 1000;
 
 ItemDropBlock::ItemDropBlock(const std::vector<GameItem::ItemType>& droppableItemTypes, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), allowedItemDropTypes(droppableItemTypes), hitPointsBeforeNextDrop(ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP),
-timeOfLastDrop(0) {
+timeOfLastDrop(0), hasSparkleEffect(true) {
 	assert(!droppableItemTypes.empty());
 
 	// Prepare for the next random item...
@@ -29,6 +29,20 @@ timeOfLastDrop(0) {
 }
 
 ItemDropBlock::~ItemDropBlock() {
+}
+
+void ItemDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+    // Check to see if there's something directly below this piece, if there is then we don't do the sparkle effect
+    if (bottomNeighbor != NULL) {
+        this->hasSparkleEffect = bottomNeighbor->IsNoBoundsPieceType();
+    }
+
+    LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 bool ItemDropBlock::ProjectilePassesThrough(const Projectile* projectile) const {

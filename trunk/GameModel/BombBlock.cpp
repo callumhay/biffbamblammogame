@@ -195,14 +195,17 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
                 UNUSED_VARIABLE(success);
 				assert(success);
-                // EVENT: Frozen block cancelled-out by fire
+                // EVENT: Frozen block canceled-out by fire
                 GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 			}
+            else {
+                resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
+            }
 		}
-		else {
+        else {
             resultingPiece = this->Destroy(gameModel, 
                 this->HasStatus(LevelPiece::IceCubeStatus) ? LevelPiece::IceShatterDestruction : LevelPiece::RegularDestruction);
-		}
+        }
 	}
 
     ball.SetLastPieceCollidedWith(resultingPiece);   

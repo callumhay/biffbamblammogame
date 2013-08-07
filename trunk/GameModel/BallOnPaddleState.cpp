@@ -152,6 +152,11 @@ void BallOnPaddleState::ShootActionReleaseUse() {
         this->gameModel->SetNextState(GameState::BallInPlayStateType);
 
         this->ballWasReleased = true;
+
+        // Update the paddle boundaries
+        PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+        const GameLevel* currLevel = this->gameModel->GetCurrentLevel(); 
+        paddle->UpdatePaddleBounds(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
     }
 }
 

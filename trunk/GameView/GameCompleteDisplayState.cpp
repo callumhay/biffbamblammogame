@@ -2,7 +2,7 @@
  * GameCompleteDisplayState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,7 +16,7 @@
 #include "GameAssets.h"
 
 const char* GameCompleteDisplayState::DEMO_COMPLETE_TITLE_TEXT = "Demo Complete!"; 
-const char* GameCompleteDisplayState::CONGRATS_TEXT = "Congrats, you made it! Maybe one day, when this game is fully complete, you might buy it and play even more.";
+const char* GameCompleteDisplayState::CONGRATS_TEXT = "Thanks for playing! Hope you enjoyed Biff! Bam!! Blammo!?!";
 const char* GameCompleteDisplayState::NOTE_TEXT     = "";
 
 const float GameCompleteDisplayState::TITLE_Y_GAP          = 30;
@@ -35,7 +35,7 @@ creditLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager:
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
              GameViewConstants::GetInstance()->LICENSE_TEXT),
-congratsLabel(NULL), noteLabel(NULL), bbbTitleDisplay(0.70f) {
+congratsLabel(NULL), noteLabel(NULL), bbbTitleDisplay(0.80f) {
     
     const Camera& camera = this->display->GetCamera();
 
@@ -116,7 +116,7 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 	glPushMatrix();
 	glLoadIdentity();
 	menuCamera.ApplyCameraTransform();
-    this->bbbTitleDisplay.Draw(-5, 0, menuCamera);
+    this->bbbTitleDisplay.Draw(-5, 2, menuCamera);
     glPopMatrix();
 
 	// Draw the fade quad overlay

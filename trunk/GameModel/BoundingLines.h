@@ -113,6 +113,9 @@ public:
 	void DebugDraw() const;
 
 private:
+    static const float BALL_INSIDE_OUTSIDE_DIST_DIVISOR;
+    static const float BALL_COLLISION_SAMPLING_INV_AMT;
+
 	std::vector<Collision::LineSeg2D> lines;
 	std::vector<Vector2D> normals;
     std::vector<bool> onInside;

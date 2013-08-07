@@ -2674,10 +2674,10 @@ void GameESPAssets::AddFirePutOutByIceEffect(const LevelPiece& block) {
 	puffOfSmokeEffect2->AddEffector(&this->particleSmokeColourFader);
     puffOfSmokeEffect2->AddEffector(&this->particleMediumGrowth);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-        puffOfSmokeEffect2->AddEffector(&this->fastRotatorCW);
+        puffOfSmokeEffect2->AddEffector(&this->smokeRotatorCW);
     }
     else {
-        puffOfSmokeEffect2->AddEffector(&this->fastRotatorCCW);
+        puffOfSmokeEffect2->AddEffector(&this->smokeRotatorCCW);
     }
     puffOfSmokeEffect2->SetRandomTextureParticles(5, this->smokeTextures);
 

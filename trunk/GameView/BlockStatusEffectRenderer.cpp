@@ -38,8 +38,8 @@ frostTexture(NULL) {
 	this->fireEffect.SetMaskTexture(this->cloudTexture);
 
 	this->iceBlockEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_WITH_OVERLAY_TECHNIQUE_NAME);
-	this->iceBlockEffect.SetWarpAmountParam(50.0f);
-	this->iceBlockEffect.SetIndexOfRefraction(1.33f);
+	this->iceBlockEffect.SetWarpAmountParam(35.0f);
+	this->iceBlockEffect.SetIndexOfRefraction(1.31f);
 	this->iceBlockEffect.SetNormalTexture(this->rectPrismTexture);
 	this->iceBlockEffect.SetOverlayTexture(this->frostTexture);
 }

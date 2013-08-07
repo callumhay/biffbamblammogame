@@ -26,6 +26,7 @@ CgFxEffectBase::~CgFxEffectBase() {
 	// Release the effect resource
 	bool success = ResourceManager::GetInstance()->ReleaseCgFxEffectResource(this->cgEffect);
 	assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 const char* MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";

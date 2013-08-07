@@ -58,6 +58,7 @@ eraseProgVerifyHandler(NULL), volItemHandler(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false),
 menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), starryBG(NULL),
+blammopediaItemIndex(-1),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
@@ -271,6 +272,9 @@ void MainMenuDisplayState::InitializeMainMenu()  {
 	tempLabelLg.SetText(PLAY_LEVEL_MENUITEM);
 	this->playLevelMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
+    // Removing Blammopedia FOR GamerCamp build... put back eventually
+    // TODO
+    /*
     // Place an item for the blammopedia
     tempLabelSm.SetText(BLAMMOPEDIA_MENUITEM);
     tempLabelLg.SetText(BLAMMOPEDIA_MENUITEM);
@@ -287,6 +291,7 @@ void MainMenuDisplayState::InitializeMainMenu()  {
     else {
         this->blammopediaItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
     }
+    */
 
 	// Setup the options item in the main menu and its submenu
 	tempLabelSm.SetText(OPTIONS_MENUITEM);

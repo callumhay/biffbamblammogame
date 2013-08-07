@@ -235,10 +235,11 @@ void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
     static const float MIN_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 14;
     static const float MAX_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 23;
 
-    static const float MIN_ADD_AMT = 6.0f * LevelPiece::PIECE_WIDTH;
-    static const float MAX_ADD_AMT = 8.5f * LevelPiece::PIECE_WIDTH;
+    static const float MIN_ADD_AMT = 6.0f  * LevelPiece::PIECE_WIDTH;
+    static const float MAX_ADD_AMT = 8.25f * LevelPiece::PIECE_WIDTH;
 
     float addToWidth = MIN_ADD_AMT;
+
     if (levelWidth > MIN_WIDTH_FOR_LERP) {
         if (levelWidth > MAX_WIDTH_FOR_LERP) {
             addToWidth = MAX_ADD_AMT;
@@ -1350,9 +1351,8 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
 bool GameTransformMgr::TickRemoteControlRocketCamAnimation(double dT, GameModel& gameModel) {
    
     // Grab the current transform animation information from the front of the queue
-    TransformAnimation& rocketCamAnim = this->animationQueue.front();
-    assert(rocketCamAnim.type == GameTransformMgr::ToRemoteCtrlRocketCamAnimation || 
-           rocketCamAnim.type == GameTransformMgr::FromRemoteCtrlRocketCamAnimation);
+    assert(this->animationQueue.front().type == GameTransformMgr::ToRemoteCtrlRocketCamAnimation || 
+           this->animationQueue.front().type == GameTransformMgr::FromRemoteCtrlRocketCamAnimation);
 
     // Animate the camera for the animation to move to or away from the rocket when
     // going into or out of the remote control rocket camera mode

@@ -143,6 +143,10 @@ void ItemDropBlockMesh::DrawEffects(const Vector3D& worldTranslation, double dT,
          iter != this->itemDropBlockToItemTexMap.end(); ++iter) {
 
         const ItemDropBlock* currItemDropBlock = iter->first;
+        if (!currItemDropBlock->GetHasSparkleEffect()) {
+            continue;
+        }
+
         const Point2D& blockCenter = currItemDropBlock->GetCenter();
         glPushMatrix();
         glTranslatef(blockCenter[0], blockCenter[1], 0.0f);

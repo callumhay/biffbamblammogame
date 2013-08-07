@@ -544,6 +544,7 @@ void GameModel::BallBoostDirectionReleased() {
 void GameModel::BallBoostReleasedForBall(const GameBall& ball) {
 	if (this->currState != NULL) {
 		this->currState->BallBoostReleasedForBall(ball);
+        this->gameTransformInfo->SetBulletTimeCamera(false);
 	}
 }
 

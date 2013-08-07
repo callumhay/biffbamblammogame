@@ -31,6 +31,8 @@ outlineMinDistance(0.001f), outlineMaxDistance(30.0f), outlineContrast(1.0f), ou
 	assert(bg != NULL);
 	assert(paddle != NULL);
 
+    UNUSED_PARAMETER(assets);
+
 	// No animation to start for the background fade (needs to be activated via the appropriate member function)
 	this->bgFadeAnim.SetRepeat(false);
 

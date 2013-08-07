@@ -35,7 +35,7 @@ public:
 	}
 
     bool IsExplosionStoppedByPiece(const Point2D&) {
-        return true;
+        return false;
     }
 
     bool ProducesBounceEffectsWithBallWhenHit(const GameBall&) const {

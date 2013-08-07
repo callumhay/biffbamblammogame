@@ -49,6 +49,7 @@ void BossWeakpoint::Tick(double dT) {
 
 void BossWeakpoint::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
     assert(gameModel != NULL);
+    UNUSED_PARAMETER(gameModel);
     UNUSED_PARAMETER(ball);
 
     if (this->collisionsDisabled || this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
@@ -60,6 +61,7 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
     assert(gameModel != NULL);
     assert(projectile != NULL);
+    UNUSED_PARAMETER(gameModel);
 
     if (this->collisionsDisabled || this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
         return;

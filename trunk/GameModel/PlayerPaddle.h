@@ -303,6 +303,9 @@ public:
 
     float GetMineProjectileStartingHeightRelativeToPaddle() const;
 
+    bool GetIsLevelBoundsCheckingOn() const {
+        return this->levelBoundsCheckingOn;
+    }
     void SetLevelBoundsChecking(bool isOn) {
         this->levelBoundsCheckingOn = isOn;
     }

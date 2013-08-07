@@ -87,7 +87,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
 	if (leftNeighbor != NULL) {
         if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::NoEntry &&
             leftNeighbor->GetType() != LevelPiece::LaserTurret && leftNeighbor->GetType() != LevelPiece::RocketTurret &&
-            leftNeighbor->GetType() != LevelPiece::MineTurret) {
+            leftNeighbor->GetType() != LevelPiece::MineTurret && leftNeighbor->GetType() != LevelPiece::Cannon) {
 
             shouldGenBounds = true;
 		}
@@ -108,7 +108,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
 	if (bottomNeighbor != NULL) {
 		if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::NoEntry &&
             bottomNeighbor->GetType() != LevelPiece::LaserTurret && bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
-            bottomNeighbor->GetType() != LevelPiece::MineTurret) {
+            bottomNeighbor->GetType() != LevelPiece::MineTurret && bottomNeighbor->GetType() != LevelPiece::Cannon) {
             
             shouldGenBounds = true;
 		}
@@ -129,7 +129,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
 	if (rightNeighbor != NULL) {
 		if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::NoEntry &&
             rightNeighbor->GetType() != LevelPiece::LaserTurret && rightNeighbor->GetType() != LevelPiece::RocketTurret &&
-            rightNeighbor->GetType() != LevelPiece::MineTurret) {
+            rightNeighbor->GetType() != LevelPiece::MineTurret && rightNeighbor->GetType() != LevelPiece::Cannon) {
 
             shouldGenBounds = true;
 		}
@@ -150,7 +150,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
 	if (topNeighbor != NULL) {
 		if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::NoEntry &&
             topNeighbor->GetType() != LevelPiece::LaserTurret && topNeighbor->GetType() != LevelPiece::RocketTurret &&
-            topNeighbor->GetType() != LevelPiece::MineTurret) {
+            topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::Cannon) {
 
             shouldGenBounds = true;
 		}

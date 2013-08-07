@@ -2,7 +2,7 @@
  * BreakableBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010-2011
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -11,6 +11,7 @@
 
 #include "BreakableBlock.h"
 #include "EmptySpaceBlock.h"
+#include "TriangleBlocks.h"
 #include "GameModel.h"
 #include "GameLevel.h"
 #include "GameBall.h"
@@ -89,13 +90,26 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
     std::vector<bool> onInside;
+    TriangleBlock::Orientation triOrientation;
 
     bool shouldGenBounds = false;
 
-	// Left boundry of the piece
-    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable &&
-         leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen));
+	// Left boundary of the piece
+    if (leftNeighbor != NULL) {
+        if ((leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable &&
+            leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen))) {
+
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(leftNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight);
+            }
+        }
+    }
+    else {
+        shouldGenBounds = true;
+    }
+
     if (shouldGenBounds) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 								this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -106,10 +120,23 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
             leftNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Bottom boundry of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
-         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
+	// Bottom boundary of the piece
+    shouldGenBounds = false;
+    if (bottomNeighbor != NULL) {
+        if ((bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
+             bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen))) {
+
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(bottomNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft);
+            }
+        }
+    }
+    else {
+        shouldGenBounds = true;
+    }
+
     if (shouldGenBounds) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -120,10 +147,23 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
             bottomNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Right boundry of the piece
-    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
-         rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen));
+	// Right boundary of the piece
+    shouldGenBounds = false;
+    if (rightNeighbor != NULL) {
+        if ((rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+            (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
+             rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen))) {
+
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(rightNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft);
+            }
+        }
+    }
+    else {
+        shouldGenBounds = true;
+    }
+
     if (shouldGenBounds) {
 		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -134,10 +174,23 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
             rightNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
-        (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
-         topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen));
+	// Top boundary of the piece
+    shouldGenBounds = false;
+    if (topNeighbor != NULL) {
+        if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
+            (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
+            topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen)) {
+
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(topNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft);
+            }
+        }
+    }
+    else {
+        shouldGenBounds = true;
+    }
+
     if (shouldGenBounds) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
