@@ -1343,7 +1343,7 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
 		unsigned int wIndex = pieceAfter->GetWidthIndex();
 		this->currentLevelPieces[hIndex][wIndex] = pieceAfter;
 
-		// Update the neighbour's bounds...
+		// Update the neighbor's bounds...
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex-1);   // left
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex);   // bottom
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1);   // right
@@ -1353,7 +1353,7 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex+1); // top-right
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex+1); // top-right
 
-        // Check to see if the piece is inside the list of triggerables...
+        // Check to see if the piece is inside the list of trigger-ables...
         if (pieceBefore->GetHasTriggerID()) {
             // Remove it from the trigger list
             std::map<LevelPiece::TriggerID, LevelPiece*>::iterator findIter =
@@ -1413,7 +1413,10 @@ void GameLevel::UpdateBoundsOnPieceAndSurroundingPieces(LevelPiece* piece) {
  * From the above ('o' is less than normal size, add 'a' for normal, add 'b' for bigger) is the normal scenario .
  */
 LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece) {
-	
+   
+    // EVENT: Rocket exploded!!
+    GameEventManager::Instance()->ActionRocketExploded(*rocket);
+
 	// Destroy the hit piece if we can...
 	LevelPiece* centerPieceAfterDestruction = hitPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
 
@@ -1446,11 +1449,6 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProject
 		}
 		++iter;
 	}
-
-	// EVENT: Rocket exploded!!
-	const PaddleRocketProjectile* rocketProjectile = static_cast<const PaddleRocketProjectile*>(rocket);
-	assert(rocketProjectile != NULL);
-	GameEventManager::Instance()->ActionRocketExploded(*rocketProjectile);
 
 	return centerPieceAfterDestruction;
 }
@@ -1597,9 +1595,19 @@ void GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine) 
     assert(gameModel != NULL);
     assert(mine != NULL);
 
+    // EVENT: Mine exploded!!
+    GameEventManager::Instance()->ActionMineExploded(*mine);
+
     const Point2D& minePosition = mine->GetPosition();
     float mineSizeFactor = mine->GetVisualScaleFactor();
 
+    // If there's a boss then it needs to be informed of the explosion as well, make sure we do this before
+    // any "return" calls since it doesn't depend on whether any blocks were hit
+    if (this->GetHasBoss()) {
+        this->boss->MineExplosionOccurred(gameModel, mine);
+    }
+
+    // Do block testing for collisions with the mine explosion
     std::vector<LevelPiece*> closestPieces = this->GetLevelPieceCollisionCandidatesNotMoving(minePosition, mine->GetWidth());
     if (closestPieces.empty()) {
         return;
@@ -1632,14 +1640,6 @@ void GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine) 
 		}
 		++iter;
 	}
-
-    // If there's a boss then it needs to be informed of the explosion as well
-    if (this->GetHasBoss()) {
-        this->boss->MineExplosionOccurred(gameModel, mine);
-    }
-
-	// EVENT: Mine exploded!!
-	GameEventManager::Instance()->ActionMineExploded(*mine);
 }
 
 /**

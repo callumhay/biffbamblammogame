@@ -66,70 +66,50 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
 	// Obtain the level from the model...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	
-	// If the bomb is incased in ice then we don't blow up, we just shatter
+	// If the bomb is encased in ice then we don't blow up, we just shatter
 	if (!this->HasStatus(LevelPiece::IceCubeStatus)) {
-		// Keep track of the bombs we need to destroy and the pieces we need to destroy.
-		std::set<LevelPiece*> destroyedBombs;
-		destroyedBombs.insert(this);
+		
+        // Grab all the bombs that will be destroyed...
+        std::list<LevelPiece*> destroyedBombStack;
+        std::set<LevelPiece*> destroyedBombSet;
+        std::set<LevelPiece*> destroyedNonBombSet;
+        
+        destroyedBombStack.push_back(this);
+        while (!destroyedBombStack.empty()) {
+            
+            LevelPiece* currDestroyedBomb = destroyedBombStack.front();
+            assert(currDestroyedBomb != NULL);
 
-		std::set<LevelPiece*> destroyedPieces;
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex+1, this->wIndex));
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex+1, this->wIndex-1));
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex+1, this->wIndex+1));
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex-1, this->wIndex));
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex-1, this->wIndex-1));
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex-1, this->wIndex+1));
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex, this->wIndex-1));
-		destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(this->hIndex, this->wIndex+1));
+            destroyedBombStack.pop_front();
+            destroyedBombSet.insert(currDestroyedBomb);
+            
+            // Check all the pieces that the bomb destroyed, if any are bombs that we haven't visited yet,
+            // then we place them on the stack and we keep going
+            
+            #define CHECK_FOR_BOMB_AND_ADD_TO_STACK(hIdxOffset, wIdxOffset) { \
+                LevelPiece* levelPiece = level->GetLevelPieceFromCurrentLayout(currDestroyedBomb->GetHeightIndex() + hIdxOffset, currDestroyedBomb->GetWidthIndex() + wIdxOffset); \
+                if (levelPiece->GetType() == LevelPiece::Bomb) { if (destroyedBombSet.find(levelPiece) == destroyedBombSet.end()) { destroyedBombStack.push_back(levelPiece); } } \
+                else { destroyedNonBombSet.insert(levelPiece); } }
 
-		// When you destroy a bomb block, everything around it goes with it...BOOM!
-		// The idea here is to watch out for chain reactions!!! - We go through all the pieces 
-		// that could possibly be destroyed and when we find bombs that we haven't already found we
-		// add them to the list of bombs, meanwhile keeping a seperate list of all the other pieces we find.
-		bool otherBombsFound = true;
-		while (otherBombsFound) {
-			otherBombsFound = false;
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(1, 0);
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(1, -1);
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(1, 1);
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(0, -1);
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(0, 1);
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(-1, 0);
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(-1, -1);
+            CHECK_FOR_BOMB_AND_ADD_TO_STACK(-1, 1);
 
-			std::list<std::set<LevelPiece*>::iterator> toRemove;
+            #undef CHECK_FOR_BOMB_AND_ADD_TO_STACK
+        }
+        destroyedBombSet.erase(this);
 
-			for (std::set<LevelPiece*>::iterator iter = destroyedPieces.begin(); iter != destroyedPieces.end(); ++iter) {
-				LevelPiece* currDestroyedPiece = *iter;
-			
-				// Avoid destroying non-existant pieces (including this one since we destroy it above).
-				if (currDestroyedPiece != NULL) {
-
-					// Check to see if the piece is a bomb 
-					if (currDestroyedPiece->GetType() == LevelPiece::Bomb) {
-
-						// Make sure the bomb hasn't already been accounted for...
-						if (destroyedBombs.find(currDestroyedPiece) == destroyedBombs.end()) {
-							// Add all the pieces that would be destroyed by the found bomb (currDestroyedPiece) as well
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex()+1, currDestroyedPiece->GetWidthIndex()));
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex()+1, currDestroyedPiece->GetWidthIndex()-1));
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex()+1, currDestroyedPiece->GetWidthIndex()+1));
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex()-1, currDestroyedPiece->GetWidthIndex()));
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex()-1, currDestroyedPiece->GetWidthIndex()-1));
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex()-1, currDestroyedPiece->GetWidthIndex()+1));
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex(), currDestroyedPiece->GetWidthIndex()-1));
-							destroyedPieces.insert(level->GetLevelPieceFromCurrentLayout(currDestroyedPiece->GetHeightIndex(), currDestroyedPiece->GetWidthIndex()+1));
-							destroyedBombs.insert(currDestroyedPiece);
-							otherBombsFound = true;
-						}
-						// Add the bomb to list of pieces to remove...
-						toRemove.push_back(iter);
-					}
-				}
-			}
-			
-			// Remove any unwanted pieces...
-			for (std::list<std::set<LevelPiece*>::iterator>::iterator iter = toRemove.begin(); iter != toRemove.end(); ++iter) {
-				destroyedPieces.erase(*iter);
-			}
-		}
+        // We now have separate sets of all bombs and all the pieces that were affected by the bombs that weren't bombs... 
+        // destroy them all in a nice non-infinitely-recursive way
 
 		// Go through a set of every UNIQUE level piece that was destroyed when the bomb went off
 		// and destroy each of those pieces properly
-		for (std::set<LevelPiece*>::iterator iter = destroyedPieces.begin(); iter != destroyedPieces.end(); ++iter) {
+		for (std::set<LevelPiece*>::iterator iter = destroyedNonBombSet.begin(); iter != destroyedNonBombSet.end(); ++iter) {
 			LevelPiece* currDestroyedPiece = *iter;
 			if (currDestroyedPiece != NULL) {
 				assert(currDestroyedPiece->GetType() != LevelPiece::Bomb);
@@ -143,20 +123,23 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
 		}
 
 		// Go through a set of every UNIQUE bomb that was destroyed and destroy each properly
-		for (std::set<LevelPiece*>::iterator iter = destroyedBombs.begin(); iter != destroyedBombs.end(); ++iter) {
+		for (std::set<LevelPiece*>::iterator iter = destroyedBombSet.begin(); iter != destroyedBombSet.end(); ++iter) {
 			LevelPiece* currDestroyedBomb = *iter;
 			assert(currDestroyedBomb->GetType() == LevelPiece::Bomb);
-			if (currDestroyedBomb != this) {
-                GameEventManager::Instance()->ActionBlockDestroyed(*currDestroyedBomb, LevelPiece::BombDestruction);
-				
-                level->PieceChanged(gameModel, currDestroyedBomb, 
-                    new EmptySpaceBlock(currDestroyedBomb->GetWidthIndex(), currDestroyedBomb->GetHeightIndex()),
-                    LevelPiece::BombDestruction);
+            assert(currDestroyedBomb != NULL);
 
-				delete currDestroyedBomb;
-				currDestroyedBomb = NULL;
-			}
+            GameEventManager::Instance()->ActionBlockDestroyed(*currDestroyedBomb, LevelPiece::BombDestruction);
+			
+            level->PieceChanged(gameModel, currDestroyedBomb, 
+                new EmptySpaceBlock(currDestroyedBomb->GetWidthIndex(), currDestroyedBomb->GetHeightIndex()),
+                LevelPiece::BombDestruction);
+
+			delete currDestroyedBomb;
+			currDestroyedBomb = NULL;
 		}
+
+        // Charge up the boost meter a little bit
+        gameModel->AddPercentageToBoostMeter(0.05);
 	}
 	else {
 		// EVENT: Ice was shattered
@@ -172,9 +155,6 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
 	delete tempThis;
 	tempThis = NULL;
     
-    // Charge up the boost meter a little bit
-    gameModel->AddPercentageToBoostMeter(0.05);
-
 	return emptyPieceForBomb;
 }
 

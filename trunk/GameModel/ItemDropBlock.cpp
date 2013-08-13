@@ -25,6 +25,7 @@ timeOfLastDrop(0), hasSparkleEffect(true) {
 	assert(!droppableItemTypes.empty());
 
 	// Prepare for the next random item...
+    this->SetNextItemDropTypeIndex(static_cast<int>(Randomizer::GetInstance()->RandomUnsignedInt() % this->allowedItemDropTypes.size()));
 	this->ChangeToNextItemDropType(false);
 }
 
@@ -230,7 +231,7 @@ LevelPiece* ItemDropBlock::TickBeamCollision(double dT, const BeamSegment* beamS
 		this->hitPointsBeforeNextDrop = ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP;
 
 		// We now need to drop an item...
-        gameModel->AddItemDrop(this->GetCenter(), this->nextDropItemType);
+        gameModel->AddItemDrop(this->GetCenter(), this->GetNextItemDropType());
 		this->ChangeToNextItemDropType(true);
 	}
 
@@ -250,7 +251,7 @@ LevelPiece* ItemDropBlock::TickPaddleShieldCollision(double dT, const PlayerPadd
 		this->hitPointsBeforeNextDrop = ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP;
 
 		// We now need to drop an item...
-        gameModel->AddItemDrop(this->GetCenter(), this->nextDropItemType);
+        gameModel->AddItemDrop(this->GetCenter(), this->GetNextItemDropType());
 		this->ChangeToNextItemDropType(true);
 	}
 
@@ -259,10 +260,13 @@ LevelPiece* ItemDropBlock::TickPaddleShieldCollision(double dT, const PlayerPadd
 
 // Update the nextDropItemType of this to be some random item type from the list of allowable item drops
 void ItemDropBlock::ChangeToNextItemDropType(bool doEvent) {
-	size_t randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->allowedItemDropTypes.size();
-	this->nextDropItemType = this->allowedItemDropTypes[randomIdx];
-	this->nextDropDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(this->nextDropItemType);
-	this->timeOfLastDrop = BlammoTime::GetSystemTimeInMillisecs();
+   
+    // Choose an item that hasn't dropped yet...
+    int randomIdx = (this->nextDropItemTypeIdx + 1 + (Randomizer::GetInstance()->RandomUnsignedInt() % 
+        static_cast<int>(this->allowedItemDropTypes.size())-1)) % static_cast<int>(this->allowedItemDropTypes.size());
+	this->SetNextItemDropTypeIndex(randomIdx);
+	
+    this->timeOfLastDrop = BlammoTime::GetSystemTimeInMillisecs();
 
 	if (doEvent) {
 		// EVENT: Item drop type changed

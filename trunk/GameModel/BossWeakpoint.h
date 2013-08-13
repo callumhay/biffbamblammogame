@@ -16,7 +16,7 @@
 
 class BossWeakpoint : public BossBodyPart {
 public:
-    static const double INVULNERABLE_TIME_IN_SECS;
+    static const double DEFAULT_INVULNERABLE_TIME_IN_SECS;
 
     BossWeakpoint(float lifePoints, float dmgOnBallHit, const BoundingLines& bounds);
     ~BossWeakpoint();
@@ -25,6 +25,10 @@ public:
 
     float GetCurrentLifePercentage() const;
     bool IsCurrentlyInvulnerable() const;
+    void SetInvulnerableTime(double timeInSecs);
+    double GetInvulnerableTime() const;
+    void SetAsInvulnerable(double timeInSecs);
+
     void ResetLife(float lifePoints);
     void ResetDamageOnBallHit(float dmgOnBallHit);
 
@@ -46,6 +50,7 @@ private:
     float dmgOnBallHit;
 
     double invulnerableTimer;
+    double totalInvulnerableTime;
 
     void SetFlashingColourAnim();
 
@@ -62,6 +67,20 @@ inline float BossWeakpoint::GetCurrentLifePercentage() const {
 
 inline bool BossWeakpoint::IsCurrentlyInvulnerable() const {
     return this->invulnerableTimer > 0.0;
+}
+
+inline void BossWeakpoint::SetInvulnerableTime(double timeInSecs) {
+    assert(timeInSecs >= 0.0);
+    this->totalInvulnerableTime = timeInSecs;
+}
+
+inline double BossWeakpoint::GetInvulnerableTime() const {
+    return this->totalInvulnerableTime;
+}
+
+inline void BossWeakpoint::SetAsInvulnerable(double timeInSecs) {
+    assert(timeInSecs >= 0.0);
+    this->invulnerableTimer = timeInSecs;
 }
 
 inline void BossWeakpoint::ResetLife(float lifePoints) {

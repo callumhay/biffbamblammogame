@@ -2176,31 +2176,14 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	bombExplodeRayEffect->AddEffector(&this->particleFader);
 
 	// Create the explosion cloud and fireyness for the bomb
-	/*
-	// TODO: Use this later for the fireball effect...
-	ESPPointEmitter* bombExplodeFireEffect1 = new ESPPointEmitter();
-	bombExplodeFireEffect1->SetSpawnDelta(ESPInterval(0.005f));
-	bombExplodeFireEffect1->SetNumParticleLives(1);
-	bombExplodeFireEffect1->SetInitialSpd(ESPInterval(3.0f, 3.5f));
-	bombExplodeFireEffect1->SetParticleLife(ESPInterval(0.25f, 4.0f));
-	bombExplodeFireEffect1->SetParticleSize(ESPInterval(1.0f, 3.0f));
-	bombExplodeFireEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	bombExplodeFireEffect1->SetParticleAlignment(ESP::ScreenAligned);
-	bombExplodeFireEffect1->SetEmitPosition(emitCenter);
-	bombExplodeFireEffect1->SetEmitAngleInDegrees(180);
-	bombExplodeFireEffect1->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_SHADER_PARTICLES, &this->fireEffect);
-	bombExplodeFireEffect1->AddEffector(&this->particleFireColourFader);
-	bombExplodeFireEffect1->AddEffector(&this->particleLargeGrowth);
-	*/
-
 	ESPPointEmitter* bombExplodeFireEffect2 = new ESPPointEmitter();
 	bombExplodeFireEffect2->SetSpawnDelta(ESPInterval(0.005f));
 	bombExplodeFireEffect2->SetNumParticleLives(1);
 	bombExplodeFireEffect2->SetInitialSpd(ESPInterval(3.0f, 3.3f));
-	bombExplodeFireEffect2->SetParticleLife(ESPInterval(0.5f, 2.75f));
+	bombExplodeFireEffect2->SetParticleLife(ESPInterval(1.25f, 2.75f));
 	bombExplodeFireEffect2->SetParticleSize(ESPInterval(1.0f, 2.8f));
 	bombExplodeFireEffect2->SetRadiusDeviationFromCenter(ESPInterval(1.0f));
-	bombExplodeFireEffect2->SetParticleAlignment(ESP::ScreenAligned);
+	bombExplodeFireEffect2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	bombExplodeFireEffect2->SetEmitPosition(emitCenter);
 	bombExplodeFireEffect2->SetEmitAngleInDegrees(180);
 	bombExplodeFireEffect2->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_CLOUD_PARTICLES, this->explosionTex);
@@ -2228,7 +2211,8 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	DropShadow dpTemp;
 	dpTemp.colour = Colour(1,1,1);
 	dpTemp.amountPercentage = 0.10f;
-	ESPOnomataParticle* bombOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
+	ESPOnomataParticle* bombOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
 	bombOnoParticle->SetDropShadow(dpTemp);
 
 	// Set the severity of the effect...
@@ -5058,7 +5042,7 @@ void GameESPAssets::AddMineBlastEffect(const MineProjectile& mine, const Point2D
 	explosionEffect->SetParticleRotation(ESPInterval(-180.0f, 179.9999999f));
 
     float mineSizeFactor = mine.GetVisualScaleFactor();
-    float size = 3*mine.GetExplosionRadius(); // We make the size a bit bigger than it should be to make it more noticable
+    float size = 1.5*mine.GetExplosionRadius(); // We make the size a bit bigger than it should be to make it more noticable
 	explosionEffect->SetParticleSize(ESPInterval(size));
 
 	// Add effectors to the bang effect

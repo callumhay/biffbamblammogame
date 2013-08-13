@@ -95,12 +95,12 @@ leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL) {
         std::vector<double> timeVals;
         timeVals.reserve(3);
         timeVals.push_back(0.0);
-        timeVals.push_back(1.0);
-        timeVals.push_back(2.0);
+        timeVals.push_back(0.9);
+        timeVals.push_back(1.8);
         std::vector<Colour> colourVals;
         colourVals.reserve(timeVals.size());
         colourVals.push_back(Colour(1,1,1));
-        colourVals.push_back(Colour(0.5f, 0.5f, 0.5f));
+        colourVals.push_back(Colour(0.33f, 0.33f, 0.33f));
         colourVals.push_back(Colour(1,1,1));
 
         this->frillColourAnim.SetLerp(timeVals, colourVals);

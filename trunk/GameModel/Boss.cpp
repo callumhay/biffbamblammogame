@@ -159,7 +159,7 @@ bool Boss::ProjectileIsDestroyedOnCollision(const Projectile* projectile, BossBo
     return !this->ProjectilePassesThrough(projectile);
 }
 
-AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim() {
+AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim(double invulnerableTimeInSecs) {
     static const int NUM_FLASHES = 20;
     
     std::vector<double> timeValues;
@@ -167,7 +167,7 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim() {
     std::vector<ColourRGBA> colourValues;
     colourValues.reserve(timeValues.size());
     
-    double timeInc = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / static_cast<double>(2*NUM_FLASHES);
+    double timeInc = invulnerableTimeInSecs / static_cast<double>(2*NUM_FLASHES);
     double timeCount = 0.0;
     
     for (int i = 0; i <= 2*NUM_FLASHES; i++) {
@@ -300,12 +300,12 @@ AnimationMultiLerp<Vector3D> Boss::BuildBossFinalDeathShakeAnim(float shakeMagni
     return anim;
 }
 
-AnimationMultiLerp<Vector3D> Boss::BuildBossHurtMoveAnim(const Vector2D& hurtVec, float shakeMagnitude) {
+AnimationMultiLerp<Vector3D> Boss::BuildBossHurtMoveAnim(const Vector2D& hurtVec, float shakeMagnitude, double invulnerableTimeInSecs) {
     AnimationMultiLerp<Vector3D> result;
 
     static const double FINAL_JITTER_TIME = 0.3;
     static const double SHAKE_INC_TIME = 0.075;
-    static const int NUM_SHAKES = (BossWeakpoint::INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+    static const int NUM_SHAKES = (invulnerableTimeInSecs - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
 
     std::vector<double> timeValues;
     timeValues.clear();
@@ -316,7 +316,7 @@ AnimationMultiLerp<Vector3D> Boss::BuildBossHurtMoveAnim(const Vector2D& hurtVec
     for (int i = 0; i <= NUM_SHAKES*2; i++) {
         timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
     }
-    assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
+    assert(timeValues.back() <= invulnerableTimeInSecs);
 
     Vector2D hurtPos2D = shakeMagnitude * hurtVec;
 

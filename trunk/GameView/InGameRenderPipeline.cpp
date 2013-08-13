@@ -179,6 +179,9 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     // Bosses
     assets->DrawBoss(dT, currLevel, camera);
 
+    // Safety net (if active)
+    assets->DrawSafetyNetIfActive(dT, camera, *gameModel);
+
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
@@ -202,9 +205,6 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     assets->DrawMeshProjectiles(dT, *gameModel, camera);
 
 	glPopMatrix();
-
-	// Safety net (if active)
-	assets->DrawSafetyNetIfActive(dT, camera, *gameModel);
 
     glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);

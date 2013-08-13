@@ -605,6 +605,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
     // to draw it with an invisible material...
     CgFxEffectBase* paddleReplacementMat = NULL;
     if (p.HasPaddleType(PlayerPaddle::InvisiPaddle)) {
+        this->invisibleEffect->SetFBOTexture(this->fboAssets->GetFinalFullScreenFBO()->GetFBOTexture());
         paddleReplacementMat = this->invisibleEffect;
         // Just tick the effects on the paddle, no drawing
         this->espAssets->TickButDontDrawBackgroundPaddleEffects(dT);

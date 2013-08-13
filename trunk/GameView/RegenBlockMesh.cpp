@@ -80,7 +80,8 @@ void RegenBlockMesh::AddRegenBlock(RegenBlock* block) {
         data = new RegenBlockFiniteData(this, *block);
     }
 
-    std::pair<BlockCollectionIter, bool> insertResult = this->blocks.insert(std::make_pair(block, data));
+    std::pair<BlockCollectionIter, bool> insertResult = 
+        this->blocks.insert(std::make_pair(block, data));
 	assert(insertResult.second);
 }
 
@@ -107,19 +108,15 @@ void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
     }
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
-    glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);   
 
-	// Go through each block and draw the life info displays and any effects
+	// Draw each regen block
     for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
-    	
+
         RegenBlock* currBlock    = iter->first;
         BlockData* currBlockData = iter->second;
-        
+
         const Point2D& blockCenter = currBlock->GetCenter();
         
-        glPushAttrib(GL_COLOR_BUFFER_BIT);
         glPushMatrix();
         glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
         glColor4f(1,1,1,1);
@@ -127,8 +124,19 @@ void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
             currBlockData->GetCurrBaseMaterialColour(this->initialBaseMetalDiffuseColour);
         this->baseMetalMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
-        glPopAttrib();
 
+    }
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);   
+
+    // Draw the block info (life/infinity symbol)
+    for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
+    	
+        RegenBlock* currBlock    = iter->first;
+        BlockData* currBlockData = iter->second;
+        
         // Draw information on the block (life amount or infinity symbol)
         currBlockData->DrawLifeInfo(camera, keyLight, fillLight, ballLight);
 
@@ -259,8 +267,6 @@ void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo(const Camera& camera, co
     UNUSED_PARAMETER(camera);
     UNUSED_PARAMETER(ballLight);
 
-    glPushAttrib(GL_COLOR_BUFFER_BIT);
-
     const Point2D& blockCenter = this->block.GetCenter();
 
     // Lerp the colour between red (0%) and green (100%)
@@ -275,6 +281,7 @@ void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo(const Camera& camera, co
 
     // Draw the percentage first...
 	glPushMatrix();
+    
     glTranslatef(blockCenter[0] + HALF_LIFE_DISPLAY_WIDTH - X_DISPLAY_BORDER - this->percentCharWidthWithScale,
         blockCenter[1] - (HALF_LIFE_DISPLAY_HEIGHT + (this->textScale*this->regenMesh->font->GetHeight() - LIFE_DISPLAY_HEIGHT) / 2.0f),
         RegenBlockMesh::CENTER_TO_DISPLAY_DEPTH + EPSILON);
@@ -288,7 +295,9 @@ void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo(const Camera& camera, co
     
     // Draw the actual percentage number...
     glPushMatrix();
-    glTranslatef(blockCenter[0] + HALF_LIFE_DISPLAY_WIDTH - X_DISPLAY_BORDER - this->percentCharWidthWithScale - (this->textScale* this->regenMesh->font->GetWidth(this->lifeStringStr.str())), 
+    
+    glTranslatef(blockCenter[0] + HALF_LIFE_DISPLAY_WIDTH - X_DISPLAY_BORDER - this->percentCharWidthWithScale - 
+        (this->textScale* this->regenMesh->font->GetWidth(this->lifeStringStr.str())), 
         blockCenter[1] - (HALF_LIFE_DISPLAY_HEIGHT + (this->textScale*this->regenMesh->font->GetHeight() - LIFE_DISPLAY_HEIGHT) / 2.0f),
         RegenBlockMesh::CENTER_TO_DISPLAY_DEPTH + EPSILON);
     
@@ -297,7 +306,6 @@ void RegenBlockMesh::RegenBlockFiniteData::DrawLifeInfo(const Camera& camera, co
     this->regenMesh->font->BasicPrint(this->lifeStringStr.str());
 
     glPopMatrix();
-    glPopAttrib();
 }
 
 Colour RegenBlockMesh::RegenBlockFiniteData::GetCurrBaseMaterialColour(const Colour& baseColour) const {
@@ -333,7 +341,6 @@ void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo(const Camera& camera, 
     
     const Point2D& blockCenter = this->block.GetCenter();
 
-    glPushAttrib(GL_COLOR_BUFFER_BIT);
     glPushMatrix();
 
     // Translate to the bottom left corner of the display section of the block
@@ -355,10 +362,8 @@ void RegenBlockMesh::RegenBlockInfiniteData::DrawLifeInfo(const Camera& camera, 
 
     this->regenMesh->infinityTex->BindTexture();
     GeometryMaker::GetInstance()->DrawQuad();
-    this->regenMesh->infinityTex->UnbindTexture();
 
     glPopMatrix();
-    glPopAttrib();
 }
 
 Colour RegenBlockMesh::RegenBlockInfiniteData::GetCurrBaseMaterialColour(const Colour& baseColour) const {

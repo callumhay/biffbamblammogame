@@ -335,7 +335,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 				    const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(currPiece);
 
 				    // Figure out what texture is associated with the next item to be dropped from the block
-				    Texture2D* itemTexture = gameItemAssets.GetItemTexture(itemDrpPiece->GetNextDropItemType());
+				    Texture2D* itemTexture = gameItemAssets.GetItemTexture(itemDrpPiece->GetNextItemDropType());
 				    this->itemDropBlock->AddItemDropBlock(itemDrpPiece, itemTexture);
                     break;
 			    }

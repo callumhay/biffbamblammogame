@@ -620,18 +620,25 @@ void PlayerPaddle::ReleaseEverythingAttached() {
  * exist then this function does nothing.
  */
 void PlayerPaddle::Shoot(GameModel* gameModel) {
-	// Check for the various paddle types and react appropriately for each
+    const GameLevel* currentLevel = gameModel->GetCurrentLevel();
+    assert(currentLevel != NULL);
+    
+	
 	
 	// If there's a ball attached to the paddle then we release it and exit
 	if (this->HasBallAttached()) {
 		this->FireAttachedBall();
+        this->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
 		return;
 	}
     else if (this->HasProjectileAttached()) {
         this->FireAttachedProjectile();
+        this->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
         return;
     }
-	
+
+    // Check for the various paddle types and react appropriately for each...
+    bool updateBoundsAfterShooting = false;
 	// Check for the paddle rockets (these have top priority)
     if (this->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) {
         
@@ -688,6 +695,8 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 
         // EVENT: Paddle just fired a rocket
         GameEventManager::Instance()->ActionPaddleWeaponFired();
+        
+        updateBoundsAfterShooting = true;
     }
 	// Check for laser beam paddle - this has secondary priority
 	else if (this->HasPaddleType(PlayerPaddle::LaserBeamPaddle) && !this->isFiringBeam) {
@@ -764,10 +773,12 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
                 GameEventManager::Instance()->ActionPaddleWeaponFired();
             }
         }
+	} // other paddle shooting abilities go here...
 
-	}
 
-	// other paddle shooting abilities go here...
+    if (updateBoundsAfterShooting) {
+        this->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
+    }
 }
 
 /**

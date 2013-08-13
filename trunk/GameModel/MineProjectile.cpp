@@ -25,7 +25,7 @@ const Vector2D MineProjectile::MINE_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 
 const float MineProjectile::MINE_DEFAULT_ACCEL = 80.0f;
 
-const float MineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.99f * LevelPiece::PIECE_HEIGHT;
+const float MineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 1.00f * LevelPiece::PIECE_WIDTH;
 const float MineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.33f * LevelPiece::PIECE_WIDTH;
 
 const double MineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.75;

@@ -290,8 +290,8 @@ bool NouveauBossAI::MoveToTargetPosition() {
     Vector2D startToTargetVec   = this->targetPosition - this->startPosition;
     Vector2D currPosToTargetVec = this->targetPosition - bossPos;
 
-    if (currPosToTargetVec.SqrMagnitude() < EPSILON ||
-        Vector2D::Dot(startToTargetVec, currPosToTargetVec) < 0.0f) {
+    if (currPosToTargetVec.SqrMagnitude() < 0.5f*LevelPiece::PIECE_HEIGHT ||
+        Vector2D::Dot(startToTargetVec, currPosToTargetVec) <= 0.0f) {
 
         // Stop the boss immediately
         this->desiredVel = Vector2D(0,0);
@@ -723,7 +723,7 @@ leftSideSphereHolderCurl(NULL), rightSideSphereHolderCurl(NULL) {
     {
         static const double FINAL_JITTER_TIME = 0.3;
         static const double SHAKE_INC_TIME = 0.075;
-        static const int NUM_SHAKES = (BossWeakpoint::INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+        static const int NUM_SHAKES = (BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
 
         std::vector<double> timeValues;
         timeValues.clear();
@@ -734,7 +734,7 @@ leftSideSphereHolderCurl(NULL), rightSideSphereHolderCurl(NULL) {
         for (int i = 0; i <= NUM_SHAKES*2; i++) {
             timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
         }
-        assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
+        assert(timeValues.back() <= BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
 
         float hurtXPos = NouveauBoss::BODY_CORE_BOTTOM_WIDTH/5.0f;
         std::vector<Vector3D> moveValues;
@@ -912,6 +912,12 @@ void SideSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProject
 void SideSphereAI::KillLeftArm() {
     assert(!this->leftSideSphereHoldingArm->GetIsDestroyed());
 
+    // Tricky bug: Make sure that the other sphere is invulnerable during the time period where the boss
+    // makes itself invulnerable because it got hit, otherwise we can trigger erroneous animations in the view
+    if (!this->rightSideSphereWeakpt->GetIsDestroyed()) {
+        this->rightSideSphereWeakpt->SetAsInvulnerable(this->leftSideSphereWeakpt->GetInvulnerableTime());
+    }
+
     this->boss->ConvertAliveBodyPartToDeadBodyPart(this->leftSideSphereHoldingArm);
 
     // Animate the left arm thingy to fade out and "fall off" the body
@@ -940,6 +946,12 @@ void SideSphereAI::KillLeftArm() {
 
 void SideSphereAI::KillRightArm() {
     assert(!this->rightSideSphereHoldingArm->GetIsDestroyed());
+
+    // Tricky bug: Make sure that the other sphere is invulnerable during the time period where the boss
+    // makes itself invulnerable because it got hit, otherwise we can trigger erroneous animations in the view
+    if (!this->leftSideSphereWeakpt->GetIsDestroyed()) {
+        this->leftSideSphereWeakpt->SetAsInvulnerable(this->rightSideSphereWeakpt->GetInvulnerableTime());
+    }
 
     this->boss->ConvertAliveBodyPartToDeadBodyPart(this->rightSideSphereHoldingArm);
 
@@ -1053,14 +1065,16 @@ void SideSphereAI::SetState(NouveauBossAI::AIState newState) {
         case LostLeftArmAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->lostLeftArmAnim.ResetToStart();
             break;
 
         case LostRightArmAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->lostRightArmAnim.ResetToStart();
             break;
 
@@ -1206,6 +1220,8 @@ AnimationMultiLerp<float> SideSphereAI::GenerateArmDeathRotationAnimation(bool i
 
 // GlassDomeAI Functions *************************************************************************
 
+const double GlassDomeAI::INVULNERABLE_TIME_IN_SECS = BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS + 0.75;
+
 const float GlassDomeAI::TOP_SPHERE_LIFE_POINTS = PaddleLaserProjectile::DAMAGE_DEFAULT * 3;
 const float GlassDomeAI::MAX_MOVE_SPEED = 0.6f * PlayerPaddle::DEFAULT_MAX_SPEED;
 const float GlassDomeAI::DEFAULT_ACCELERATION = 0.35f * PlayerPaddle::DEFAULT_ACCELERATION;
@@ -1227,8 +1243,10 @@ topDome(NULL), gazebo(NULL), topSphereWeakpt(NULL) {
     boss->ConvertAliveBodyPartToWeakpoint(boss->topSphereIdx, GlassDomeAI::TOP_SPHERE_LIFE_POINTS, GlassDomeAI::TOP_SPHERE_LIFE_POINTS / 3.0f);
     assert(dynamic_cast<BossWeakpoint*>(boss->bodyParts[boss->topSphereIdx]) != NULL);
     this->topSphereWeakpt = static_cast<BossWeakpoint*>(boss->bodyParts[boss->topSphereIdx]);
+    this->topSphereWeakpt->SetInvulnerableTime(INVULNERABLE_TIME_IN_SECS);
 
-    this->topHurtAnim = Boss::BuildBossHurtMoveAnim(Vector2D(0,-1), NouveauBoss::BODY_CORE_BOTTOM_WIDTH/7.0f);
+    this->topHurtAnim = Boss::BuildBossHurtMoveAnim(Vector2D(0,-1), NouveauBoss::BODY_CORE_BOTTOM_WIDTH/7.0f,
+        BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
         
     this->SetState(NouveauBossAI::ArcSprayFireAIState);
 }
@@ -1332,10 +1350,10 @@ void GlassDomeAI::GoToNextRandomAttackState() {
             switch (randomNum) {
                 case 0: case 1:
                     this->SetState(NouveauBossAI::MoveToTargetStopAndShootAIState);
-                    break;
+                    return;
                 case 2: case 3: case 4:
                     this->SetState(NouveauBossAI::ArcSprayFireAIState);
-                    break;
+                    return;
                 case 5: case 6: case 7:
                     if (this->currState == NouveauBossAI::RapidFireSweepAIState) {
                         this->SetState(NouveauBossAI::ArcSprayFireAIState);
@@ -1343,7 +1361,7 @@ void GlassDomeAI::GoToNextRandomAttackState() {
                     else {
                         this->SetState(NouveauBossAI::RapidFireSweepAIState);
                     }
-                    break;
+                    return;
                 case 8: case 9: case 10: case 11:
                 default:
                     if (this->currState == MoveToLaserTargetableLocationAIState) {
@@ -1352,7 +1370,7 @@ void GlassDomeAI::GoToNextRandomAttackState() {
                     else {
                         this->SetState(NouveauBossAI::MoveToLaserTargetableLocationAIState);
                     }
-                    break;
+                    return;
             }
         }
         else {
@@ -1360,10 +1378,10 @@ void GlassDomeAI::GoToNextRandomAttackState() {
             switch (randomNum) {
                 case 0: case 1: 
                     this->SetState(NouveauBossAI::MoveToTargetStopAndShootAIState);
-                    break;
+                    return;
                 case 2: case 3: case 4: 
                     this->SetState(NouveauBossAI::ArcSprayFireAIState);
-                    break;
+                    return;
                 case 5: case 6: 
                     if (this->currState == NouveauBossAI::RapidFireSweepAIState) {
                         this->SetState(NouveauBossAI::ArcSprayFireAIState);
@@ -1371,7 +1389,7 @@ void GlassDomeAI::GoToNextRandomAttackState() {
                     else {
                         this->SetState(NouveauBossAI::RapidFireSweepAIState);
                     }
-                    break;
+                    return;
                 case 7: case 8: case 9:
                 default:
                     if (this->currState == MoveToLaserTargetableLocationAIState) {
@@ -1380,7 +1398,7 @@ void GlassDomeAI::GoToNextRandomAttackState() {
                     else {
                         this->SetState(NouveauBossAI::MoveToLaserTargetableLocationAIState);
                     }
-                    break;
+                    return;
             }
         }
     }
@@ -1389,10 +1407,10 @@ void GlassDomeAI::GoToNextRandomAttackState() {
         switch (randomNum) {
             case 0: case 1: case 2: 
                 this->SetState(NouveauBossAI::MoveToTargetStopAndShootAIState);
-                break;
+                return;
             case 3: case 4: case 5: case 6:
                 this->SetState(NouveauBossAI::ArcSprayFireAIState);
-                break;
+                return;
             case 7: case 8: 
                 if (this->currState == NouveauBossAI::RapidFireSweepAIState) {
                     this->SetState(NouveauBossAI::ArcSprayFireAIState);
@@ -1400,7 +1418,7 @@ void GlassDomeAI::GoToNextRandomAttackState() {
                 else {
                     this->SetState(NouveauBossAI::RapidFireSweepAIState);
                 }
-                break;
+                return;
             case 9: case 10:
             default:
                 if (this->currState == MoveToLaserTargetableLocationAIState) {
@@ -1409,9 +1427,13 @@ void GlassDomeAI::GoToNextRandomAttackState() {
                 else {
                     this->SetState(NouveauBossAI::MoveToLaserTargetableLocationAIState);
                 }
-                break;
+                return;
         }
     }
+
+    // Should never get here, but just as a fail safe when modifying code, have the boss go to
+    // the most 'typical' attack state
+    //this->SetState(NouveauBossAI::MoveToTargetStopAndShootAIState);
 }
 
 void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
@@ -1443,7 +1465,8 @@ void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
             break;
 
         case HurtTopAIState:
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(
+                Boss::BuildBossHurtAndInvulnerableColourAnim(INVULNERABLE_TIME_IN_SECS));
             this->topHurtAnim.ResetToStart();
             break;
 
@@ -1659,7 +1682,8 @@ void TopSphereAI::TopSphereWasHurt(const Point2D& impactPt) {
     hurtDir.Normalize();
 
     // Animation for getting hurt...
-    this->topHurtAnim = Boss::BuildBossHurtMoveAnim(hurtDir, NouveauBoss::BODY_CORE_BOTTOM_WIDTH/7.0f);
+    this->topHurtAnim = Boss::BuildBossHurtMoveAnim(hurtDir, NouveauBoss::BODY_CORE_BOTTOM_WIDTH/7.0f,
+        BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
     this->SetState(NouveauBossAI::HurtTopAIState);
 }
 
@@ -1712,7 +1736,8 @@ void TopSphereAI::SetState(NouveauBossAI::AIState newState) {
         case HurtTopAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->topHurtAnim.ResetToStart();
             break;
 

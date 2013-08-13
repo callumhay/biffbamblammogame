@@ -19,13 +19,16 @@
 SwitchBlockMesh::SwitchBlockMesh() : switchBlockGeometry(NULL), 
 switchOnMaterialGrp(NULL), switchOffMaterialGrp(NULL), switchCurrentMaterialGrp(NULL),
 greenOnSwitchTexture(NULL), redOnSwitchTexture(NULL), offSwitchTexture(NULL), haloTexture(NULL),
-idlePulseEmitter(NULL), pulseGlowTexture(NULL),
-haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f), pulser(0,0) {
+idlePulseEmitter(NULL), pulseGlowTexture(NULL), haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f), pulser(0,0) {
+
     this->LoadMesh();
 
-    this->greenOnSwitchTexture  = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_GREEN_ON_SWITCH, Texture::Trilinear));
-    this->redOnSwitchTexture    = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RED_ON_SWITCH, Texture::Trilinear));
-    this->offSwitchTexture      = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_OFF_SWITCH, Texture::Trilinear));
+    this->greenOnSwitchTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_GREEN_ON_SWITCH, Texture::Trilinear));
+    this->redOnSwitchTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_RED_ON_SWITCH, Texture::Trilinear));
+    this->offSwitchTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_OFF_SWITCH, Texture::Trilinear));
     assert(this->greenOnSwitchTexture != NULL);
     assert(this->redOnSwitchTexture != NULL);
     assert(this->offSwitchTexture != NULL);
@@ -49,9 +52,9 @@ SwitchBlockMesh::~SwitchBlockMesh() {
     this->idlePulseEmitter = NULL;
 
     // Restore the mesh to its initial state (off) before cleaning up
-    MaterialProperties* switchOnMatProperties       = this->switchOnMaterialGrp->GetMaterial()->GetProperties();
-    MaterialProperties* switchOffMatProperties      = this->switchOffMaterialGrp->GetMaterial()->GetProperties();
-    MaterialProperties* switchCurrentMatProperties  = this->switchCurrentMaterialGrp->GetMaterial()->GetProperties();
+    MaterialProperties* switchOnMatProperties      = this->switchOnMaterialGrp->GetMaterial()->GetProperties();
+    MaterialProperties* switchOffMatProperties     = this->switchOffMaterialGrp->GetMaterial()->GetProperties();
+    MaterialProperties* switchCurrentMatProperties = this->switchCurrentMaterialGrp->GetMaterial()->GetProperties();
     switchOffMatProperties->diffuseTexture     = this->redOnSwitchTexture;
     switchOnMatProperties->diffuseTexture      = this->offSwitchTexture;
     switchCurrentMatProperties->diffuseTexture = this->redOnSwitchTexture;

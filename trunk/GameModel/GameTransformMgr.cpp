@@ -153,12 +153,18 @@ void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
 	// Add the ball cam transform to the queue
 	TransformAnimation transformAnim(animType);
 	// Make sure we compress the last transform in the animation queue if it is also a ball camera transform
-	if (this->animationQueue.size() > 0) {
-		GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
-		if (previousType == GameTransformMgr::ToBallCamAnimation || previousType == GameTransformMgr::FromBallCamAnimation) {
-			this->animationQueue.pop_back();
-		}
-	}
+    while (!this->animationQueue.empty()) {
+
+        GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
+        if (previousType == GameTransformMgr::ToBallCamAnimation || 
+            previousType == GameTransformMgr::FromBallCamAnimation) {
+
+                this->animationQueue.pop_back();
+        }
+        else {
+            break;
+        } 
+    }
 	this->animationQueue.push_back(transformAnim);
 }
 
@@ -211,7 +217,10 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
         animType = GameTransformMgr::ToRemoteCtrlRocketCamAnimation;
     }
     else {
-        if (this->remoteControlRocketWithCamera == NULL) {
+        // If we're not in the remote control rocket camera or going into it then we don't do anything
+        // since we can't come out of a camera mode that we aren't in
+        if (this->remoteControlRocketWithCamera == NULL && 
+            this->animationQueue.front().type != GameTransformMgr::ToRemoteCtrlRocketCamAnimation) {
             return;
         }
         animType = GameTransformMgr::FromRemoteCtrlRocketCamAnimation;
@@ -219,6 +228,20 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
 
     TransformAnimation transformAnim(animType);
     transformAnim.data = rocketData;
+
+    // Make sure we compress the last transform in the animation queue if it is also a remote-control rocket animation
+    while (!this->animationQueue.empty()) {
+
+        GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
+        if (previousType == GameTransformMgr::ToRemoteCtrlRocketCamAnimation || 
+            previousType == GameTransformMgr::FromRemoteCtrlRocketCamAnimation) {
+
+            this->animationQueue.pop_back();
+        }
+        else {
+            break;
+        } 
+    }
     this->animationQueue.push_front(transformAnim);
 }
 

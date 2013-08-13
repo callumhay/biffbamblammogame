@@ -229,6 +229,7 @@ public:
     void MineExplosionOccurred(GameModel*, const MineProjectile*) {}
 
 private:
+    static const double INVULNERABLE_TIME_IN_SECS;
     static const float TOP_SPHERE_LIFE_POINTS;
     static const float MAX_MOVE_SPEED;
     static const float DEFAULT_ACCELERATION;
