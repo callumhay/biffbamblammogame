@@ -187,7 +187,7 @@ inline void LevelMesh::DrawStatusEffects(double dT, const Camera& camera, const 
  */
 inline void LevelMesh::UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block) {
 	// Figure out what texture is associated with the next item to be dropped from the block
-	Texture2D* itemTexture = gameItemAssets.GetItemTexture(block.GetNextDropItemType());
+	Texture2D* itemTexture = gameItemAssets.GetItemTexture(block.GetNextItemDropType());
 	this->itemDropBlock->UpdateItemDropBlockTexture(&block, itemTexture);
 }
 

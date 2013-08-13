@@ -258,7 +258,7 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
     {
         static const double FINAL_JITTER_TIME = 0.3;
         static const double SHAKE_INC_TIME = 0.075;
-        static const int NUM_SHAKES = (BossWeakpoint::INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+        static const int NUM_SHAKES = (BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
 
         std::vector<double> timeValues;
         timeValues.clear();
@@ -269,7 +269,7 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
         for (int i = 0; i <= NUM_SHAKES*2; i++) {
             timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
         }
-        assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
+        assert(timeValues.back() <= BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
 
         float hurtXPos = BOSS_WIDTH/5.0f;
         std::vector<Vector3D> moveValues;
@@ -310,8 +310,16 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
         return;
     }
 
-    // Check to see if the ball hit one of the weakspots...
+    // Check to see if the ball hit one of the weak spots...
     if (collisionPart == this->rightArmSqrWeakpt) {
+
+        // Tricky bug: Make sure that the other arm's weak spot is invulnerable during the time period where the boss
+        // makes itself invulnerable because it got hit on the opposite arms weak spot, 
+        // otherwise we can trigger erroneous animations in the view
+        if (!this->leftArmSqrWeakpt->GetIsDestroyed()) {
+            this->leftArmSqrWeakpt->SetAsInvulnerable(this->rightArmSqrWeakpt->GetInvulnerableTime());
+        }
+
         this->leftArm->SetLocalTranslation(Vector3D(0,0,0));
         this->rightArm->SetLocalTranslation(Vector3D(0,0,0));
 
@@ -328,6 +336,13 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
         this->SetState(ClassicalBossAI::HurtRightArmAIState);
     }
     else if (collisionPart == this->leftArmSqrWeakpt) {
+
+        // Tricky bug: Make sure that the other arm's weak spot is invulnerable during the time period where the boss
+        // makes itself invulnerable because it got hit on the opposite arms weak spot, 
+        // otherwise we can trigger erroneous animations in the view
+        if (!this->rightArmSqrWeakpt->GetIsDestroyed()) {
+            this->rightArmSqrWeakpt->SetAsInvulnerable(this->leftArmSqrWeakpt->GetInvulnerableTime());
+        }
 
         this->leftArm->SetLocalTranslation(Vector3D(0,0,0));
         this->rightArm->SetLocalTranslation(Vector3D(0,0,0));
@@ -410,14 +425,16 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             //debug_output("Entering HurtLeftArmAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->leftArmHurtMoveAnim.ResetToStart();
             break;
         case ClassicalBossAI::HurtRightArmAIState:
             //debug_output("Entering HurtRightArmAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->rightArmHurtMoveAnim.ResetToStart();
             break;
 
@@ -1062,7 +1079,7 @@ tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL) {
     // Setup the movement animation for when the boss loses a column
     {
         static const double SHAKE_INC_TIME = 0.075;
-        static const int NUM_SHAKES = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+        static const int NUM_SHAKES = BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
 
         std::vector<double> timeValues;
         timeValues.clear();
@@ -1071,7 +1088,7 @@ tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL) {
         for (int i = 0; i <= NUM_SHAKES*2; i++) {
             timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
         }
-        assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
+        assert(timeValues.back() <= BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
 
         std::vector<Vector2D> moveValues;
         moveValues.reserve(timeValues.size());
@@ -1690,10 +1707,12 @@ void HeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPar
         this->eyeHurtMoveAnim.SetInterpolantValue(Vector3D(0.0f, 0.0f, 0.0f));
         
         if (!this->eye->GetIsDestroyed()) {
-            this->eye->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->eye->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             Vector2D ballToEyeVec = this->eye->GetTranslationPt2D() - ball.GetCenterPosition2D();
             ballToEyeVec.Normalize();
-            this->eyeHurtMoveAnim = Boss::BuildBossHurtMoveAnim(ballToEyeVec, ClassicalBoss::EYE_WIDTH);
+            this->eyeHurtMoveAnim = Boss::BuildBossHurtMoveAnim(ballToEyeVec, 
+                ClassicalBoss::EYE_WIDTH, BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
         }
 
         this->SetState(ClassicalBossAI::HurtEyeAIState);
@@ -1751,7 +1770,8 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
 
         case ClassicalBossAI::HurtEyeAIState:
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             break;
 
         case ClassicalBossAI::FinalDeathThroesAIState:

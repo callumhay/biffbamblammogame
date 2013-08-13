@@ -83,6 +83,7 @@ public:
     void UpdateBulletTimeState(const BallBoostModel& boostModel) {
         this->bulletTimeEffect->UpdateBulletTimeState(boostModel);
     }
+
 private:
     GameSound* sound; // Not owned by this
 

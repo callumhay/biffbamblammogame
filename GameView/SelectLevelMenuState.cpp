@@ -691,6 +691,7 @@ void SelectLevelMenuState::SetupLevelPages() {
     bool noScoreEncountered = false;
 
     float standardHeight = 0.0f;
+    this->selectedPage = 0;
 
     for (int row = 0; row < numRows; row++) {
         for (int col = 0; col < numItemsPerRow; col++) {
@@ -712,15 +713,29 @@ void SelectLevelMenuState::SetupLevelPages() {
                 standardHeight = levelItem->GetHeight();
             }
 
-            this->pages[this->pages.size()-1]->AddLevelItem(levelItem);
+            LevelMenuPage* currPage = this->pages[this->pages.size()-1];
+            currPage->AddLevelItem(levelItem);
 
             if (!currLevel->GetIsLevelPassedWithScore()) {
+                
+                if (!noScoreEncountered) {
+                    this->selectedPage = this->pages.size()-1;
+                    currPage->SetSelectedItemIndex(currPage->GetNumLevelItems()-1);
+                }
+
                 noScoreEncountered = true;
             }
 
             itemX += itemWidth + ITEM_X_GAP_SIZE;
         }
- 
+
+        if (!noScoreEncountered) {
+            // If all levels are passed then we set the level select to be the final level of the movement
+            this->selectedPage = this->pages.size()-1;
+            LevelMenuPage* lastPage = this->pages[this->pages.size()-1];
+            lastPage->SetSelectedItemIndex(lastPage->GetNumLevelItems()-1);
+        }
+
         assert(levelItem != NULL);
         itemX  = SIDE_TO_ITEM_GAP_SIZE;
         itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();
@@ -733,7 +748,6 @@ void SelectLevelMenuState::SetupLevelPages() {
     }
 
     assert(!this->pages.empty());
-    this->selectedPage = 0;
 
     // Setup the selection animation
     std::vector<double> timeVals;

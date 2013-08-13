@@ -14,11 +14,11 @@
 #include "Beam.h"
 #include "GameEventManager.h"
 
-const double BossWeakpoint::INVULNERABLE_TIME_IN_SECS = 1.5;
+const double BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS = 1.5;
 
 BossWeakpoint::BossWeakpoint(float lifePoints, float dmgOnBallHit, const BoundingLines& bounds) :
 BossBodyPart(bounds), totalLifePoints(lifePoints), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit),
-invulnerableTimer(0.0) {
+invulnerableTimer(0.0), totalInvulnerableTime(DEFAULT_INVULNERABLE_TIME_IN_SECS) {
 
     this->SetFlashingColourAnim();
 }
@@ -125,7 +125,7 @@ void BossWeakpoint::Diminish(float damageAmt) {
         this->invulnerableTimer = 0.0;
     }
     else {
-        this->invulnerableTimer = BossWeakpoint::INVULNERABLE_TIME_IN_SECS;
+        this->invulnerableTimer = this->totalInvulnerableTime;
     }
 }
 

@@ -124,6 +124,14 @@ inline LevelPiece* SwitchBlock::Destroy(GameModel* gameModel, const LevelPiece::
 	return this;
 }
 
+inline bool SwitchBlock::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
+    return this->bounds.CollisionCheck(boundingLines, dT, velocity);
+}
+
+inline bool SwitchBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+    return Collision::IsCollision(ray, this->GetAABB(), rayT);
+}
+
 inline bool SwitchBlock::GetIsSwitchOn() const {
     unsigned long currSysTime = BlammoTime::GetSystemTimeInMillisecs();
     if (currSysTime - this->timeOfLastSwitchPress < SwitchBlock::RESET_TIME_IN_MS) {

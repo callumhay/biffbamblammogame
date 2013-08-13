@@ -6,11 +6,11 @@ E E E E S E K(RocketPaddle) E E E E E E E K(RocketPaddle) E S E E E E
 E E E E S R R Q(f) R Q(f) R Q(f) R Q(f) R R S E E E E 
 E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
 E E E C(90) F(r) E E Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) E E F(l) C(270) E E E 
-E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
+E E E E F(r) E E R E R E R E R E E F(l) E E E E 
 E E E E S E E Q(f) R Q(f) R Q(f) R Q(f) E E S E E E E 
 E E E E S K(RocketPaddle) I R K(LaserBulletPaddle,LaserBeamPaddle) R K(RocketPaddle) R K(LaserBulletPaddle,LaserBeamPaddle) R I K(RocketPaddle) S E E E E 
 E E E E S E E Q(f) R Q(f) R Q(f) R Q(f) E E S E E E E 
-E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
+E E E E F(r) E E R E R E R E R E E F(l) E E E E 
 E E C(90) E F(r) E E Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) K(LaserBulletPaddle,LaserBeamPaddle) Q(f) E E F(l) E C(270) E E 
 E E E E F(r) E E R Q(f) R Q(f) R Q(f) R E E F(l) E E E E 
 E E E E S R R Q(f) R Q(f) R Q(f) R Q(f) R R S E E E E 
@@ -28,11 +28,11 @@ S E E E N E E E E E E E E E E E N E E E S
 S E E E N E E E E E E E E E E E N E E E S 
 
 STARS:
-10000
-16000
-25000
-35000
-45000
+8000
+15000
+22000
+32000
+42000
 
 PaddleGrow 0
 PoisonPaddle 2

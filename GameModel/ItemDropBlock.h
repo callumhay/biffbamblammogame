@@ -60,7 +60,7 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 	void AttemptToDropAnItem(GameModel* gameModel);
-	const GameItem::ItemType& GetNextDropItemType() const;
+	const GameItem::ItemType& GetNextItemDropType() const;
 	const GameItem::ItemDisposition& GetNextDropItemDisposition() const;
 
     bool GetHasSparkleEffect() const;
@@ -71,8 +71,8 @@ private:
 
 	std::vector<GameItem::ItemType> allowedItemDropTypes;
 
-	float hitPointsBeforeNextDrop;                  // Hit points left that must be deminished (by a laser beam) before the next item drop
-	GameItem::ItemType nextDropItemType;            // The next item type that will drop from this block
+	float hitPointsBeforeNextDrop;                  // Hit points left that must be diminished (by a laser beam) before the next item drop
+	int nextDropItemTypeIdx;                        // The index look-up within allowedItemDropTypes for the next item type that will drop from this block
 	GameItem::ItemDisposition nextDropDisposition;	// The disposition (good/neutral/bad) of the next item type that will drop from this block
 
 	unsigned long timeOfLastDrop;	// Amount of time since the last item drop
@@ -80,6 +80,7 @@ private:
     bool hasSparkleEffect;
 
 	void ChangeToNextItemDropType(bool doEvent);
+    void SetNextItemDropTypeIndex(int index);
 
     DISALLOW_COPY_AND_ASSIGN(ItemDropBlock);
 };
@@ -153,14 +154,14 @@ inline bool ItemDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& 
 inline void ItemDropBlock::AttemptToDropAnItem(GameModel* gameModel) {
 	// Drop an item if the item drop timer allows it...
 	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
-        gameModel->AddItemDrop(this->GetCenter(), this->nextDropItemType);
+        gameModel->AddItemDrop(this->GetCenter(), this->GetNextItemDropType());
 		this->ChangeToNextItemDropType(true);
 	}
 }
 
 // Get what the next item drop will be
-inline const GameItem::ItemType& ItemDropBlock::GetNextDropItemType() const {
-	return this->nextDropItemType;
+inline const GameItem::ItemType& ItemDropBlock::GetNextItemDropType() const {
+	return this->allowedItemDropTypes[this->nextDropItemTypeIdx];
 }
 
 inline const GameItem::ItemDisposition& ItemDropBlock::GetNextDropItemDisposition() const {
@@ -169,6 +170,12 @@ inline const GameItem::ItemDisposition& ItemDropBlock::GetNextDropItemDispositio
 
 inline bool ItemDropBlock::GetHasSparkleEffect() const {
     return this->hasSparkleEffect;
+}
+
+inline void ItemDropBlock::SetNextItemDropTypeIndex(int index) {
+    assert(index >= 0 && index < static_cast<int>(this->allowedItemDropTypes.size()));
+    this->nextDropItemTypeIdx = index;
+    this->nextDropDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(this->GetNextItemDropType());
 }
 
 #endif // __ITEMDROPBLOCK_H__

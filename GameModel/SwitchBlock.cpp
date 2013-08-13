@@ -26,21 +26,13 @@ const int SwitchBlock::TOGGLE_ON_OFF_LIFE_POINTS = 150;
 
 SwitchBlock::SwitchBlock(const LevelPiece::TriggerID& idToTriggerOnSwitch, 
                          unsigned int wLoc, unsigned int hLoc) :
-idToTriggerOnSwitch(idToTriggerOnSwitch),
-LevelPiece(wLoc, hLoc), timeOfLastSwitchPress(0), 
+LevelPiece(wLoc, hLoc), idToTriggerOnSwitch(idToTriggerOnSwitch), timeOfLastSwitchPress(0), 
 lifePointsUntilNextToggle(SwitchBlock::TOGGLE_ON_OFF_LIFE_POINTS) {
+
     assert(idToTriggerOnSwitch != LevelPiece::NO_TRIGGER_ID);
 }
 
 SwitchBlock::~SwitchBlock() {
-}
-
-bool SwitchBlock::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
-    return this->bounds.CollisionCheck(boundingLines, dT, velocity);
-}
-
-bool SwitchBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }
 
 void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,

@@ -593,8 +593,8 @@ topPointWeakpt(NULL) {
         std::vector<double> timeVals;
         timeVals.reserve(3);
         timeVals.push_back(0.0);
-        timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 10.0f);
-        timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 1.25f);
+        timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 10.0f);
+        timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 1.25f);
 
         std::vector<float> moveVals;
         moveVals.reserve(timeVals.size());
@@ -682,8 +682,8 @@ AnimationMultiLerp<float> FireBallAI::GenerateHitOnTopTiltAnim(const Point2D& hi
     std::vector<double> timeVals;
     timeVals.reserve(3);
     timeVals.push_back(0.0);
-    timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 5.0);
-    timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 1.25);
+    timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 5.0);
+    timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 1.25);
 
     std::vector<float> rotVals;
     rotVals.reserve(timeVals.size());
@@ -750,7 +750,8 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
         case HurtTopAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->hitOnTopMoveDownAnim.ResetToStart();
             break;
 
@@ -924,8 +925,8 @@ numRocketsToFireAtPaddle(0) {
         std::vector<double> timeVals;
         timeVals.reserve(3);
         timeVals.push_back(0.0);
-        timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 10.0f);
-        timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 1.25f);
+        timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 10.0f);
+        timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 1.25f);
 
         std::vector<float> moveVals;
         moveVals.reserve(timeVals.size());
@@ -1004,8 +1005,8 @@ AnimationMultiLerp<float> IceBallAI::GenerateHitOnBottomTiltAnim(const Point2D& 
     std::vector<double> timeVals;
     timeVals.reserve(3);
     timeVals.push_back(0.0);
-    timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 5.0);
-    timeVals.push_back(BossWeakpoint::INVULNERABLE_TIME_IN_SECS / 1.25);
+    timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 5.0);
+    timeVals.push_back(BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS / 1.25);
 
     std::vector<float> rotVals;
     rotVals.reserve(timeVals.size());
@@ -1121,7 +1122,8 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
         case HurtBottomAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+                BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->hitOnBottomMoveUpAnim.ResetToStart();
             break;
 
@@ -1561,11 +1563,13 @@ void FreeMovingAttackAI::DoCollisionOccurredStuff(const Point2D& collisionPos) {
 
     // Apply animations if the bosses' body has been hurt but not destroyed
     if (!this->bodyWeakpt->GetIsDestroyed()) {
-        this->bodyWeakpt->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+        this->bodyWeakpt->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+            BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
 
         Vector2D collisionToBodyVec = this->bodyWeakpt->GetTranslationPt2D() - collisionPos;
         collisionToBodyVec.Normalize();
-        this->hurtMoveAnim = Boss::BuildBossHurtMoveAnim(collisionToBodyVec, GothicRomanticBoss::BODY_WIDTH);
+        this->hurtMoveAnim = Boss::BuildBossHurtMoveAnim(collisionToBodyVec, GothicRomanticBoss::BODY_WIDTH,
+            BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
     }
 
     this->SetState(GothicRomanticBossAI::HurtBodyAIState);
