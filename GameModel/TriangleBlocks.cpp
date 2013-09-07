@@ -162,8 +162,10 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 						Vector2D normal0 = this->reflectRefractBounds.GetNormal(collidingIndices[0]);
 						Vector2D normal1 = this->reflectRefractBounds.GetNormal(collidingIndices[1]);
 
-						float angleBetween0 = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal0)))));
-						float angleBetween1 = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal1)))));
+						float angleBetween0 = Trig::radiansToDegrees(
+                            acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal0)))));
+						float angleBetween1 = Trig::radiansToDegrees(
+                            acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal1)))));
 
 						if (angleBetween0 < angleBetween1) {
 							collisionNormal = this->reflectRefractBounds.GetNormal(collidingIndices[0]);
@@ -171,7 +173,6 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 						else {
 							collisionNormal = this->reflectRefractBounds.GetNormal(collidingIndices[1]);
 						}
-
 					}
 					else if (collidingIndices.size() == 1) {
 						// Just one collision line, use it
@@ -180,7 +181,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
                     else {
                         // More than two colliding lines or no colliding lines...
                         // This shouldn't happen but it has happened before... probably a numerical error thing,
-                        // to deal wiht htis we just let the laser keep going through the prism
+                        // to deal with this we just let the laser keep going through the prism
                         doReflectionRefractionCollisions = false;
                     }
 

@@ -342,10 +342,14 @@ void MineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
     }
     assert(this->attachedToPaddle == NULL);
 
-    this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
+    // If the paddle has its shield activated then we don't land the mine
+    if (!paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
+        this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
+        paddle->AttachProjectile(this);
+        this->attachedToPaddle = paddle;
+    }
+
     this->SetLastThingCollidedWith(paddle);
-    paddle->AttachProjectile(this);
-    this->attachedToPaddle = paddle;
 }
 
 void MineProjectile::BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart) {

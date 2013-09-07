@@ -20,7 +20,6 @@ resources/worlds/levels/medium/ahead_by_a_sentry.lvl
 
 # Turret + Cannon + no-entry + Ink + One-way
 # This level uses rocket-turret + cannon block to fire missles to beat a level
-# Teaches the player that turrets can be used to solve puzzles
 resources/worlds/levels/medium/cannon_peekaboo.lvl
 
 # Fire + Collateral Block Chain-reaction to destroy a bunch of turrets
@@ -41,22 +40,28 @@ resources/worlds/levels/medium/acute_electrocution.lvl
 # Mine Turret + Sticky Paddle + Cannon
 resources/worlds/levels/medium/yours_and_mine.lvl
 
-# Turrets + Tesla - use the magnet paddle + rocket turrets to attract rockets to turn on tesla blocks
-resources/worlds/levels/medium/be_coy_decoy.lvl
+
+
+# Level with infinity-regen blocks on its boundaries, player must avoid destroying them
+resources/worlds/levels/hard/safety_third.lvl
+
+
+# Avoiding turrets throughout the level while trying to obtain items to destroy them and the level
+resources/worlds/levels/medium/eyes_on_the_prize.lvl
+
+
+# 2 more levels...
+
 
 
 # Tesla + Prisms/Ice/Lasers
-
-
-
-# 5 more levels...
-
-
+resources/worlds/levels/hard/lighting_the_lightning.lvl
 
 # Remote control rocket race-navigation-focused hard level
 resources/worlds/levels/hard/tilt_a_whirl_gauntlet.lvl
 
-
+# Turrets + Tesla - use the magnet paddle + rocket turrets to attract rockets to turn on tesla blocks
+resources/worlds/levels/medium/be_coy_decoy.lvl
 
 # NOTE: This should be one of the very last levels in this movement!!
 # ALL of the Turrets + Laser/prism + rocket/mine/cannon + remote control rocket interactions
