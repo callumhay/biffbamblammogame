@@ -88,12 +88,7 @@ public:
     }
 
     // Nothing ever destroys a tesla block, but it can be triggered...
-	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-		UNUSED_PARAMETER(gameModel);
-        UNUSED_PARAMETER(method);
-        this->Triggered(gameModel);
-		return this;
-	}
+	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
     void Triggered(GameModel* gameModel);
 

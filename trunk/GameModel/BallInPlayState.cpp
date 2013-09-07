@@ -580,7 +580,6 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
         float diffAngleInDegs   = minAngleInDegs - fabs(angleOfReflInDegs);
 
         // Make sure the reflection is big enough to not cause an annoying slow down in the game
-        // or to make a ridiculous gracing angle
         if (diffAngleInDegs > 0) {
 
 	        // We need to figure out which way to rotate the velocity
@@ -596,7 +595,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 	        reflVecHat = newReflVelHat;
         }
         else {
-            // We don't want the ball to 'grace' any edges -- we figure this out by checking to see
+            // We also don't want the ball to 'grace' any edges too closely -- we figure this out by checking to see
             // if the angle difference is too obtuse
             diffAngleInDegs = fabs(angleOfReflInDegs) - GameBall::MAX_GRACING_ANGLE_ON_HIT_IN_DEGS;
 
@@ -631,7 +630,6 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
     if (paddleReflection) {
         // Only have to check whether the ball is acceptably far enough away from the +/-x directions
         float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));
-        debug_output("ANGLE FROM X: " << angleAwayFromX);
         if (angleAwayFromX < minAngleInDegs) {
             // Rotate so that its going to fire upwards a bit from the (1,0) direction
             reflVecHat = Vector2D::Rotate(minAngleInDegs - angleAwayFromX, reflVecHat);

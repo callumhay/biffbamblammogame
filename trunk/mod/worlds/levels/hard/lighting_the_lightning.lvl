@@ -1,0 +1,73 @@
+Lighting the Lightning
+23 29
+E E E E E E E E S S S S S S S D(IceBall,IceBall,IceBall) S S S E E E E 
+E E E E E E E E S E E E S E E E E E S E E E E 
+E E E E E E E E N E E E Q(i) E Y G Y E N E E E E 
+A(0,0,g,h){3} E Q(f) Q(f) Q(f) E A(0,1,h,g) E S E E E Q(i) E G B G E S E T(P,ur) E E 
+S S S S S S S E N E E E Q(i) E Y G Y E N E E E E 
+S S S W(3) S S S E S E E E S E E E E E S E E E E 
+S E E E E E S E S E E E S G E G E G S E E E E 
+S E E E E E S E S E E E S E G E G E S E E E E 
+S E R S R E S E S E E E S G E G E G S E E E E 
+S Q(f) E Q(f) E Q(f) S E S E E E S E G E G E S E E E E 
+S E R E R E S S S E E E S G E G E G S E E E E 
+S O E O E O S T(S,ul) N E E E N E E E E E N E E E E 
+A(1,0,d,c) E E E E E A(1,0,c,d){2} W(2) S E E E S E R Q(f) R E S T(P,ur) E E E 
+S Y E Y E Y S T(S,ll) N E E E N E E E E E N E E E E 
+S E Y E Y E S D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle){5} S E E E S G E G E G S E E E E 
+S G E G E G E G S E E E S E G E G E S E E E E 
+S E G E G E G E S E E E S G E G E G S E E E E 
+S G E G E G E G S E E E S E G E G E S E E E E 
+S E G E G E G E S S W(1) S S G E G E G S E E E E 
+S G E G E G E G S S S S S E E E E E S E E E E 
+A(1,0,f,e) E E E E E E E A(1,0,e,f){1} S S S S R R R R R S E E E E 
+S E E E E E E E E E E E E E E E E E S E E E E 
+S E E E E E E E E E E E E E E E E E S E E E E 
+S E E E E E E E E E E E E E E E E E S E E E E 
+S E E E E E E E E E E E E E E E E E S E E E E 
+S E E E E E E E E E E E E E E E E E S E E E E 
+S E E E E E E E E E E E E E E E E E N E E E E 
+S E E E E E E E E E E E E E E E E E N E E E E 
+S E E E E E E E E E E E E E E E E E N E E E W(5) 
+
+STARS:
+6000
+9000
+14000
+16000
+18000
+
+PaddleGrow 0
+PoisonPaddle 2
+Blackout 2
+BallSafetyNet 2
+BallGrow 2
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 0
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+RemoteControlRocket 0
+IceBall 2
+MineLauncherPaddle 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0
+
+PADDLESTARTXPOS: 23.75

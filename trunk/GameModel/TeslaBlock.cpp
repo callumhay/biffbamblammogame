@@ -31,13 +31,19 @@ lifePointsUntilNextToggle(TOGGLE_ON_OFF_LIFE_POINTS), timeOfLastToggling(0) {
 TeslaBlock::~TeslaBlock() {
 }
 
+LevelPiece* TeslaBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+    UNUSED_PARAMETER(method);
+    this->ToggleElectricity(*gameModel, *gameModel->GetCurrentLevel());
+    return this;
+}
+
 void TeslaBlock::Triggered(GameModel* gameModel) {
     this->ToggleElectricity(*gameModel, *gameModel->GetCurrentLevel(), true);
 }
 
 /**
- * Update the collision boundries of this tesla block, tesla blocks are special in that they will
- * ALWAYS have all possible collision boundries enabled and created.
+ * Update the collision boundaries of this Tesla block, Tesla blocks are special in that they will
+ * ALWAYS have all possible collision boundaries enabled and created.
  */
 void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
                               const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,

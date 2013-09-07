@@ -60,9 +60,7 @@ int SolidBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
 }
 
 LevelPiece* SolidBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
-
+	
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
         // EVENT: Ice was shattered
         GameEventManager::Instance()->ActionBlockIceShattered(*this);
@@ -75,6 +73,9 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
     if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
         return this;
     }
+
+    // EVENT: Block is being destroyed
+    GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	// Currently, solid blocks don't drop items
 	//gameModel->AddPossibleItemDrop(*this);
