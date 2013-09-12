@@ -223,7 +223,7 @@ void GameBall::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& m
         return;
     }
 
-    // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
+    // If the paddle has the magnet item active and the ball is moving towards the paddle, then we need to
     // modify the velocity to make it move towards the paddle...
     paddle->AugmentDirectionOnPaddleMagnet(seconds, degreesChangePerSec, this->GetBounds().Center(), this->currDir);
 }

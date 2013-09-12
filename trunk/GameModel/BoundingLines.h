@@ -71,7 +71,9 @@ public:
 	
 	void RotateLinesAndNormals(float angleInDegs, const Point2D& rotationCenter);
 	void TranslateBounds(const Vector2D& translation);
+    void ReflectX();
     void Transform(const Matrix4x4& transform);
+
 
 	// Get the line at the given index within this set of bounding lines
 	// Precondition: The given index must be within bounds of the number of lines.

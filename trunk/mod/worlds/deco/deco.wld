@@ -37,25 +37,27 @@ resources/worlds/levels/medium/lightning_round.lvl
 # Tesla + Switch
 resources/worlds/levels/medium/acute_electrocution.lvl
 
+
 # Mine Turret + Sticky Paddle + Cannon
 resources/worlds/levels/medium/yours_and_mine.lvl
 
-
+# Paddle shield + turrets to redirect attacks at blocks that cannot be reached otherwise
+resources/worlds/levels/medium/deflection_redirection.lvl
 
 # Level with infinity-regen blocks on its boundaries, player must avoid destroying them
 resources/worlds/levels/hard/safety_third.lvl
+
+# Tesla + Prisms/Ice/Lasers
+resources/worlds/levels/hard/lighting_the_lightning.lvl
+
+
+# Shield + rocket to redirect to other cannons and destroy turrets
+resources/worlds/levels/hard/upward_not_forward_and_always_twirling.lvl
 
 
 # Avoiding turrets throughout the level while trying to obtain items to destroy them and the level
 resources/worlds/levels/medium/eyes_on_the_prize.lvl
 
-
-# 2 more levels...
-
-
-
-# Tesla + Prisms/Ice/Lasers
-resources/worlds/levels/hard/lighting_the_lightning.lvl
 
 # Remote control rocket race-navigation-focused hard level
 resources/worlds/levels/hard/tilt_a_whirl_gauntlet.lvl

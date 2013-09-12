@@ -27,7 +27,7 @@ const LevelPiece::TriggerID LevelPiece::NO_TRIGGER_ID = -1;
 const float LevelPiece::PIECE_WIDTH = 2.5f;
 const float LevelPiece::PIECE_HEIGHT = 1.0f;
 const float LevelPiece::PIECE_DEPTH  = 1.30f;
-const float LevelPiece::HALF_PIECE_WIDTH = PIECE_WIDTH / 2.0f;
+const float LevelPiece::HALF_PIECE_WIDTH  = PIECE_WIDTH / 2.0f;
 const float LevelPiece::HALF_PIECE_HEIGHT = PIECE_HEIGHT / 2.0f;
 const float LevelPiece::HALF_PIECE_DEPTH  = PIECE_DEPTH / 2.0f;
 
@@ -40,7 +40,7 @@ triggerID(LevelPiece::NO_TRIGGER_ID) {
 }
 
 LevelPiece::~LevelPiece() {
-	// We need to be sure to obliterate any status effects that might be linguring on the level piece -
+	// We need to be sure to obliterate any status effects that might be lingering on the level piece -
 	// this emits an important event to any model listeners to remove those effects as well!
 	this->RemoveAllStatus(NULL);
 

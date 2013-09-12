@@ -106,8 +106,11 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 		    this->gameBall->gravitySpeed = this->gameBall->currSpeed;
 	    }
 
-	    // Crazy ball manipulates the direction and acceleration of the ball... *unless it's attached to a paddle
-	    if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
+	    // Crazy ball manipulates the direction and acceleration of the ball... 
+        // This can be dangerous for the collision framework (which I admit is a hacky piece of awful):
+        // We can't change the direction of the ball if movement is not allowed to be simulated (i.e., there was a
+        // change to the position/velocity of the ball via collisions at some point during this frame/tick)
+	    if (simulateMovement && (this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
 		    this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel);
 	    }
     }
@@ -151,7 +154,7 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.75;
 
 	// If the ball has no velocity then just exit, we're not going to be able to change it...
-    if (currVelocity == Vector2D(0.0f, 0.0f)) {
+    if (currVelocity.IsZero()) {
         // We reset the time tracker and make sure the next time is fairly large so that
         // if the ball is stuck to a sticky paddle or some such thing, that it doesn't go crazy (i.e., out of play)
         // immediately after the player lets the ball go

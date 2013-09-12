@@ -128,7 +128,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 
 		// Unfreeze a frozen item-drop block
 		if (isInIceCube) {
-			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
 			assert(success);
 
@@ -143,7 +143,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 	}
 
 	// Tell the ball that it collided with this block
-	ball.SetLastPieceCollidedWith(NULL);
+	ball.SetLastPieceCollidedWith(this);
 	return this;
 }
 

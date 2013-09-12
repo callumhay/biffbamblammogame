@@ -2621,6 +2621,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\DecoBoss.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\DecoBossAIStates.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\GothicRomanticBoss.h"
 						>
 					</File>
@@ -2670,6 +2678,14 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\ClassicalBossAIStates.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\DecoBoss.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\DecoBossAIStates.cpp"
 						>
 					</File>
 					<File

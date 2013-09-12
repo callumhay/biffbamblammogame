@@ -153,7 +153,6 @@ void Generator::LoadExplosionWords() {
 	uberEndFixExplosion.push_back("oplex");
 	uberEndFixExplosion.push_back("oplast");
 	uberEndFixExplosion.push_back("osity");
-	uberEndFixExplosion.push_back("etric");
 	uberEndFixExplosion.push_back("ation");
 	uberEndFixExplosion.push_back("otron");
     uberEndFixExplosion.push_back("otronic");
@@ -325,6 +324,7 @@ void Generator::LoadElectricWords() {
 	uberEndFixElectric.push_back("aple");
 	uberEndFixElectric.push_back("iple");
 	uberEndFixElectric.push_back("frazz");
+    uberEndFixElectric.push_back("etric");
 
 	for (std::vector<std::string>::iterator iterEnd = uberEndFixElectric.begin(); iterEnd != uberEndFixElectric.end(); ++iterEnd) {
 		for (std::vector<std::string>::iterator iter = goodSingleWordElectric.begin(); iter != goodSingleWordElectric.end(); ++iter) {

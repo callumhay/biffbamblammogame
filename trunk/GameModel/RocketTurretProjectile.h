@@ -38,7 +38,7 @@ public:
     float GetAccelerationMagnitude() const { return 7.0f; }
     float GetRotationAccelerationMagnitude() const { return 100.0f; }
 
-    float GetMaxVelocityMagnitude() const { return 25.0f; }
+    float GetMaxVelocityMagnitude() const { return 20.0f; }
     float GetMaxRotationVelocityMagnitude() const { return 400.0f; }
 
     float GetDefaultHeight() const { return TURRETROCKET_HEIGHT_DEFAULT; }
