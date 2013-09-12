@@ -1,0 +1,69 @@
+Deflection Redirection
+21 27
+E E E E F(d) J F(d) E E E E E E E F(d) J F(d) E E E E 
+E R R E F(d) E F(d) Q(f) Q(f) E E E Q(f) Q(f) F(d) E F(d) E R R E 
+R R R R F(d) F(d) F(d) Q(i) Q(i) E E E Q(i) Q(i) F(d) F(d) F(d) R R R R 
+R R E E E E E E E E E E E E E E E E E R R 
+R R E N N N N N N N D(ShieldPaddle,ShieldPaddle,ShieldPaddle) N N N N N N N E R R 
+R B E N E E E E E R E R E E E E E N E B R 
+R R E N E I E E R E E E R E E I E N E R R 
+R R E N E E E R E E E E E R E E E N E R R 
+R B E N E E R E E E E E E E R E E N E B R 
+R R E N E E R R R E E E R R R E E N E R R 
+R R E N G G G G R G Q(f) G R G G G G N E R R 
+R B E N G G G G R Y G Y R G G G G N E B R 
+R R E N G H G G R O G O R G G H G N E R R 
+R R E N G G G G R G Q(f) G R G G G G N E R R 
+R B E N G K(IceBall,IceBall,IceBall) G G R O G O R G G K(FireBall,FireBall,FireBall) G N E B R 
+R R E N G G G G R Y G Y R G G G G N E R R 
+R R E N G G G G R G Q(f) G R G G G G N E R R 
+R B E N G G G G R E E E R G G G G N E B R 
+R R E N G G G G E E E E E G G G G N E R R 
+R R E N G G G E E E E E E E G G G N E R R 
+R B E N G G E E E E E E E E E G G N E B R 
+R R E N G E E E E E E E E E E E G N E R R 
+E E E N E E E E E E E E E E E E E N E E E 
+E E E N E E E E E E E E E E E E E N E E E 
+E E E N E E E E E E E E E E E E E N E E E 
+E E E S E E E E E E E E E E E E E S E E E 
+E E E S E E E E E E E E E E E E E S E E E 
+
+STARS:
+7000
+12000
+23000
+34000
+44000
+
+PaddleGrow 2
+PoisonPaddle 2
+Blackout 2
+BallSafetyNet 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 0
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+RemoteControlRocket 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

@@ -104,7 +104,7 @@ void GothicRomanticBoss::Init(float startingX, float startingY) {
         // deadPartsRoot
         {
             assert(this->deadPartsRoot == NULL);
-            this->deadPartsRoot  = new BossCompositeBodyPart();
+            this->deadPartsRoot = new BossCompositeBodyPart();
             this->root->AddBodyPart(this->deadPartsRoot);
             this->bodyParts.push_back(this->deadPartsRoot);
         }

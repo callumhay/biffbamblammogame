@@ -321,7 +321,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                     
                     if (fabs(sqrDist - smallestOutsideDist) <= EPSILON && outsideIdx >= 0) {
                         // Really close call... choose the normal that is closest to the opposite of the ball's velocity
-                        const Vector2D& currNormal = this->normals[lineIdx];
+                        const Vector2D& currNormal  = this->normals[lineIdx];
                         const Vector2D& otherNormal = this->normals[outsideIdx];
                         
                         if (acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(velocityDir, currNormal)))) >
@@ -942,6 +942,17 @@ void BoundingLines::TranslateBounds(const Vector2D& translation) {
 		Collision::LineSeg2D& currLineSeg = *iter;
 		currLineSeg.Translate(translation);
 	}
+}
+
+void BoundingLines::ReflectX() {
+    for (std::vector<Collision::LineSeg2D>::iterator iter = this->lines.begin(); iter != this->lines.end(); ++iter) {
+        Collision::LineSeg2D& currLineSeg = *iter;
+        currLineSeg.ReflectX();
+    }
+    for (std::vector<Vector2D>::iterator iter = this->normals.begin(); iter != this->normals.end(); ++iter) {
+        Vector2D& currNormal = *iter;
+        currNormal[0] = -1.0f;
+    }
 }
 
 void BoundingLines::Transform(const Matrix4x4& transform) {

@@ -17,6 +17,7 @@
 #include "ClassicalBoss.h"
 #include "GothicRomanticBoss.h"
 #include "NouveauBoss.h"
+#include "DecoBoss.h"
 
 const double Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = 1.5;
 const double Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = TOTAL_DEATH_ANIM_TIME / 1.25;
@@ -71,7 +72,8 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
             break;
 
         case GameWorld::Deco:
-            // TODO
+            boss = new DecoBoss();
+            break;
 
         case GameWorld::Futurism:
             // TODO

@@ -33,7 +33,7 @@ const double MineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.75;
 
 const double MineProjectile::MAX_TIME_WHEN_LANDED_UNTIL_ARMED = 30.0;
 
-const float MineProjectile::MAX_VELOCITY = 13.0f;
+const float MineProjectile::MAX_VELOCITY = 12.0f;
 
 MineProjectile::MineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height) :
 Projectile(spawnLoc, width, height), cannonBlock(NULL), acceleration(MineProjectile::MINE_DEFAULT_ACCEL),
@@ -347,6 +347,10 @@ void MineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
         this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
         paddle->AttachProjectile(this);
         this->attachedToPaddle = paddle;
+    }
+    else {
+        // We need to make sure the mine isn't falling anymore since it will be reflected off the shield
+        this->isFalling = false;
     }
 
     this->SetLastThingCollidedWith(paddle);

@@ -21,7 +21,7 @@ const float LaserTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC  = 200.0f;
 const float LaserTurretBlock::ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD = 400.0f;
 const float LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT       = -0.25f;
 
-const float LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC = 1.6f;
+const float LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC = 1.3f;
 const float LaserTurretBlock::BARREL_RELOAD_TIME           = 1.0f / (2.0f * LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC);
 const float LaserTurretBlock::BARREL_RECOIL_TIME           = LaserTurretBlock::BARREL_RELOAD_TIME / 4.0f;
 
