@@ -778,6 +778,16 @@ void GameModel::DoProjectileCollisions(double dT) {
 
                         this->CollisionOccurred(currProjectile, boss, hitBodyPart);
                         
+                        // In the special case of a rocket projectile we cause an explosion...
+                        if (currProjectile->IsRocket()) {
+                            std::set<LevelPiece*> collisionPieces = 
+                                currLevel->GetLevelPieceCollisionCandidatesNoSort(currProjectile->GetPosition(), EPSILON);
+                            if (!collisionPieces.empty()) {
+                                assert(dynamic_cast<RocketProjectile*>(currProjectile) != NULL);
+                                currLevel->RocketExplosion(this, static_cast<RocketProjectile*>(currProjectile), *collisionPieces.begin());
+                            }
+                        }
+
                         if (boss->ProjectileIsDestroyedOnCollision(currProjectile, hitBodyPart)) {
                             // Dispose of the projectile...
                             iter = currProjectileList.erase(iter);

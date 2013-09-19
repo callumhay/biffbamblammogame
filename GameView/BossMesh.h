@@ -19,11 +19,13 @@ class Camera;
 class BasicPointLight;
 class Boss;
 class Texture2D;
+class GameAssets;
 class LaserBeamSightsEffectInfo;
 class PowerChargeEffectInfo;
 class ExpandingHaloEffectInfo;
 class SparkBurstEffectInfo;
 class ElectricitySpasmEffectInfo;
+class ElectrifiedEffectInfo;
 
 /**
  * The abstract superclass for all meshes/visuals of bosses in the game.
@@ -35,8 +37,8 @@ public:
 
     static BossMesh* Build(const GameWorld::WorldStyle& style, Boss* boss);
     
-    void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
+    void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+        const BasicPointLight& ballLight, const GameAssets* assets);
 
     virtual double ActivateIntroAnimation() = 0;
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
@@ -47,6 +49,7 @@ public:
     void AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info);
     void AddBossSparkBurstEffect(const SparkBurstEffectInfo& info);
     void AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info);
+    void AddElectrifiedEffect(const ElectrifiedEffectInfo& info);
 
 protected:
     // Shared visual effects and textures for bosses
@@ -79,12 +82,14 @@ protected:
     AnimationLerp<float> flashAnim; // The fullscreen flash half-height
 
     // Boss-specific effects
-    std::list<ESPEmitter*> effectsEmitters;
-    std::map<const BossBodyPart*, std::list<ESPEmitter*> > attachedEffectsEmitters;
+    std::list<ESPEmitter*> fgEffectsEmitters;
+    std::map<const BossBodyPart*, std::list<ESPEmitter*> > fgAttachedEffectsEmitters;
+    std::list<ESPEmitter*> bgEffectsEmitters;
+
 
     virtual void DrawPreBodyEffects(double dT, const Camera& camera);
-    virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex) = 0;
+    virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets) = 0;
     virtual void DrawPostBodyEffects(double dT, const Camera& camera);
 
     virtual Point3D GetBossFinalExplodingEpicenter() const = 0;
@@ -98,12 +103,12 @@ private:
     DISALLOW_COPY_AND_ASSIGN(BossMesh);
 };
 
-inline void BossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight,
-                           const Texture2D* sceneTex) {
+inline void BossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                           const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
+                           const GameAssets* assets) {
 
     this->DrawPreBodyEffects(dT, camera);
-    this->DrawBody(dT, camera, keyLight, fillLight, ballLight, sceneTex);
+    this->DrawBody(dT, camera, keyLight, fillLight, ballLight, assets);
     this->DrawPostBodyEffects(dT, camera);
 }
 

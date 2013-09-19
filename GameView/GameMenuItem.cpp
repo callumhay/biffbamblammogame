@@ -23,7 +23,7 @@ const float GameMenuItem::SUB_MENU_PADDING						= 15.0f;
 // GameMenuItem Functions *******************************************
 
 GameMenuItem::GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu) : 
-smTextLabel(smLabel), lgTextLabel(lgLabel), subMenu(subMenu), eventHandler(NULL) {
+smTextLabel(smLabel), lgTextLabel(lgLabel), subMenu(subMenu), eventHandler(NULL), isActivated(false) {
 	
 	assert(smLabel.GetText() == lgLabel.GetText());
 

@@ -191,10 +191,12 @@ public:
     typedef WorldSoundSourceMap::iterator WorldSoundSourceMapIter;
     typedef WorldSoundSourceMap::const_iterator WorldSoundSourceMapConstIter;
 
+    static const int MENU_CONFIRM_SOUND_DELAY_IN_MS = 1200;
+
     GameSound();
     ~GameSound();
 
-    // Intitialization function (MUST BE CALLED FIRST!)
+    // Initialization function (MUST BE CALLED FIRST!)
     bool Init();
 
     // Tick function (updates the sounds that are attached to moving objects and any sound animations)

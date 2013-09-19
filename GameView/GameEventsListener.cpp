@@ -48,6 +48,8 @@
 #include "../GameModel/FullscreenFlashEffectInfo.h"
 #include "../GameModel/DebrisEffectInfo.h"
 #include "../GameModel/LaserBeamSightsEffectInfo.h"
+#include "../GameModel/ElectrifiedEffectInfo.h"
+#include "../GameModel/ShortCircuitEffectInfo.h"
 
 // GameControl Includes
 #include "../GameControl/GameControllerManager.h"
@@ -523,7 +525,9 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 	
     switch (projectile.GetType()) {
 
+        case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
@@ -1576,7 +1580,7 @@ void GameEventsListener::BossAngryEvent(const Boss* boss, const BossBodyPart* an
 }
 
 
-void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
+void GameEventsListener::BossEffectEvent(const BossEffectEventInfo& effectEvent) {
     BossMesh* bossMesh = this->display->GetAssets()->GetCurrentLevelMesh()->GetBossMesh();
     assert(bossMesh != NULL);
 
@@ -1641,6 +1645,30 @@ void GameEventsListener::EffectEvent(const BossEffectEventInfo& effectEvent) {
         case BossEffectEventInfo::LaserBeamSightsInfo: {
             const LaserBeamSightsEffectInfo& beamSightsInfo = static_cast<const LaserBeamSightsEffectInfo&>(effectEvent);
             bossMesh->AddLaserBeamSightsEffect(beamSightsInfo);
+            break;
+        }
+
+        case BossEffectEventInfo::ElectrifiedInfo: {
+            const ElectrifiedEffectInfo& electrifiedInfo = static_cast<const ElectrifiedEffectInfo&>(effectEvent);
+            bossMesh->AddElectrifiedEffect(electrifiedInfo);
+            break;
+        }
+
+        default:
+            assert(false);
+            break;
+    }
+}
+
+void GameEventsListener::GeneralEffectEvent(const GeneralEffectEventInfo& effectEvent) {
+    GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+
+    switch (effectEvent.GetType()) {
+        
+        case GeneralEffectEventInfo::ShortCircuit: {
+            const ShortCircuitEffectInfo& shortCircuitEffectInfo = 
+                static_cast<const ShortCircuitEffectInfo&>(effectEvent);
+            espAssets->AddShortCircuitEffect(shortCircuitEffectInfo);
             break;
         }
 

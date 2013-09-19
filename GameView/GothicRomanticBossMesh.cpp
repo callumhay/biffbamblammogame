@@ -156,13 +156,13 @@ double GothicRomanticBossMesh::ActivateIntroAnimation() {
 
 void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
                                       const BasicPointLight& fillLight, const BasicPointLight& ballLight,
-                                      const Texture2D* sceneTex) {
+                                      const GameAssets* assets) {
  
     UNUSED_PARAMETER(dT);
-    UNUSED_PARAMETER(sceneTex);
+    UNUSED_PARAMETER(assets);
 
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
-    // worldspace locations...
+    // world space locations...
 
     ColourRGBA currColour;
 

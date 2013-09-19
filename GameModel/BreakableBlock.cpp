@@ -374,10 +374,14 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {	
-				// Laser bullets dimish the piece, but don't necessarily obliterate/destroy it
+				// Laser bullets diminish the piece, but don't necessarily obliterate/destroy it
                 newPiece = this->DiminishPiece(gameModel, LevelPiece::LaserProjectileDestruction);
 			}
 			break;
+
+        case Projectile::BossLightningBoltBulletProjectile:
+            newPiece = this->DiminishPiece(gameModel, LevelPiece::BasicProjectileDestruction);
+            break;
 
 		case Projectile::CollateralBlockProjectile:
 			// Completely destroy the block...

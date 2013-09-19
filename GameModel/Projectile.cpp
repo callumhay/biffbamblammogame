@@ -23,6 +23,7 @@
 #include "BossLaserProjectile.h"
 #include "BossRocketProjectile.h"
 #include "BossOrbProjectile.h"
+#include "BossLightningBoltProjectile.h"
 #include "GameModel.h"
 
 // Projectile ====================================================================================================================
@@ -53,8 +54,6 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
     assert(p != NULL);
 	
     switch (p->GetType()) {
-        case Projectile::BossLaserBulletProjectile:
-            return new BossLaserProjectile(*static_cast<const BossLaserProjectile*>(p));
 		case Projectile::PaddleLaserBulletProjectile:
 			return new PaddleLaserProjectile(*static_cast<const PaddleLaserProjectile*>(p));
         case Projectile::BallLaserBulletProjectile:
@@ -67,14 +66,18 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
             return new PaddleRemoteControlRocketProjectile(*static_cast<const PaddleRemoteControlRocketProjectile*>(p));
         case Projectile::RocketTurretBulletProjectile:
             return new RocketTurretProjectile(*static_cast<const RocketTurretProjectile*>(p));
-        case Projectile::BossRocketBulletProjectile:
-            return new BossRocketProjectile(*static_cast<const BossRocketProjectile*>(p));
         case Projectile::PaddleMineBulletProjectile:
             return new PaddleMineProjectile(*static_cast<const PaddleMineProjectile*>(p));
         case Projectile::MineTurretBulletProjectile:
             return new MineTurretProjectile(*static_cast<const MineTurretProjectile*>(p));
+        case Projectile::BossLaserBulletProjectile:
+            return new BossLaserProjectile(*static_cast<const BossLaserProjectile*>(p));
+        case Projectile::BossRocketBulletProjectile:
+            return new BossRocketProjectile(*static_cast<const BossRocketProjectile*>(p));
         case Projectile::BossOrbBulletProjectile:
             return new BossOrbProjectile(*static_cast<const BossOrbProjectile*>(p));
+        case Projectile::BossLightningBoltBulletProjectile:
+            return new BossLightningBoltProjectile(*static_cast<const BossLightningBoltProjectile*>(p));
         default:
 			assert(false);
 			break;

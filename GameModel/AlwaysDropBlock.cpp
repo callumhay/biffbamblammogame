@@ -189,7 +189,7 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 }
 
 /**
- * Call this when a collision has actually occured with a projectile and this block.
+ * Call this when a collision has actually occurred with a projectile and this block.
  * Returns: The resulting level piece that this has become.
  */
 LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
@@ -211,6 +211,10 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, Projectile*
                 newPiece = this->Destroy(gameModel, LevelPiece::LaserProjectileDestruction);
 			}
 			break;
+        
+        case Projectile::BossLightningBoltBulletProjectile:
+            newPiece = this->Destroy(gameModel, LevelPiece::BasicProjectileDestruction);
+            break;
 
 		case Projectile::CollateralBlockProjectile:
 			// Completely destroy the block...

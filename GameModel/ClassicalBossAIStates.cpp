@@ -81,8 +81,8 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
 
 void ClassicalBossAI::SignalLaserFireEffects() {
     // EVENT: Boss shot a laser out of its eye, add effects for it...
-    GameEventManager::Instance()->ActionEffect(ExpandingHaloEffectInfo(this->boss->GetEye(), 0.5, Colour(1.0f, 0.2f, 0.2f)));
-    GameEventManager::Instance()->ActionEffect(SparkBurstEffectInfo(this->boss->GetEye(), 0.65, Colour(1.0f, 0.2f, 0.2f)));
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetEye(), 0.5, Colour(1.0f, 0.2f, 0.2f)));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetEye(), 0.65, Colour(1.0f, 0.2f, 0.2f)));
 }
 
 float ClassicalBossAI::GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const {
@@ -855,7 +855,7 @@ void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
         else {
             if (this->countdownToLaserBarrage == this->GetLaserChargeTime()) {
                 // EVENT: Charging for laser barrage...
-                GameEventManager::Instance()->ActionEffect(
+                GameEventManager::Instance()->ActionBossEffect(
                     PowerChargeEffectInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
             }
             this->countdownToLaserBarrage -= dT;
@@ -1405,7 +1405,7 @@ void BodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
         else {
             if (this->countdownToLaserBarrage == this->GetLaserChargeTime()) {
                 // EVENT: Charging for laser barrage...
-                GameEventManager::Instance()->ActionEffect(
+                GameEventManager::Instance()->ActionBossEffect(
                     PowerChargeEffectInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
             }
             this->countdownToLaserBarrage -= dT;

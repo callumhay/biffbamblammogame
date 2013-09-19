@@ -2042,9 +2042,14 @@ void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock*
 	// EVENT: Lightning arc/barrier was just added to the level
 	GameEventManager::Instance()->ActionTeslaLightningBarrierSpawned(*block1, *block2);
 
-	// Destroy any destroyable blocks in the arc path...
+	
 	if (gameModel != NULL) {
-		Collision::Ray2D rayFromBlock(block1->GetCenter(), Vector2D::Normalize(block2->GetCenter() - block1->GetCenter()));
+
+        // Destroy any destroyable blocks in the arc path...
+        Vector2D arcVector = block2->GetCenter() - block1->GetCenter();
+        float arcLength = arcVector.Magnitude();
+        assert(arcLength > 0.0);
+		Collision::Ray2D rayFromBlock(block1->GetCenter(), arcVector / arcLength);
 		float rayT;
 		LevelPiece* pieceInArc;
 		std::set<const LevelPiece*> ignorePieces;
@@ -2065,6 +2070,16 @@ void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock*
 			// Reevaluate the next collider using a new ray from the new ignore piece
 			rayFromBlock.SetOrigin(rayFromBlock.GetPointAlongRayFromOrigin(rayT));
 		}
+
+        // Hurt any bosses in the arc path...
+        if (this->GetHasBoss()) {
+            float rayT;
+            if (this->boss->CollisionCheck(rayFromBlock, rayT)) {
+                if (rayT <= arcLength) {
+                    this->boss->TeslaLightningArcHitOccurred(gameModel, block1, block2);
+                }
+            }
+        }
 	}
 
 }
@@ -2245,6 +2260,7 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

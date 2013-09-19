@@ -176,6 +176,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

@@ -58,6 +58,7 @@ public:
 	 * Reset the animation back to the start.
 	 */
 	void ResetToStart() {
+        this->SetInterpolantValue(this->y0);
 		this->x = 0.0;
 	}
 	void SetInterpolantValue(T value) {
@@ -71,6 +72,10 @@ public:
     }
     double GetFinalTime() const {
         return this->x1;
+    }
+
+    bool IsAtStart() const {
+        return this->x == 0.0;
     }
 
 	/**

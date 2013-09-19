@@ -200,8 +200,7 @@ void GameMenu::LeftAction() {
 
     GameMenuItem* highlightedItem = this->menuItems[this->selectedMenuItemIndex];
     assert(highlightedItem != NULL);
-    if (highlightedItem->IsLeftRightScrollable()) {
-        this->ActivateSelectedMenuItem();
+    if (highlightedItem->IsLeftRightScrollable() && highlightedItem->GetIsActivated()) {
         highlightedItem->ButtonPressed(GameControl::LeftButtonAction);
     }
 }
@@ -213,8 +212,7 @@ void GameMenu::RightAction() {
 
     GameMenuItem* highlightedItem = this->menuItems[this->selectedMenuItemIndex];
     assert(highlightedItem != NULL);
-    if (highlightedItem->IsLeftRightScrollable()) {
-        this->ActivateSelectedMenuItem();
+    if (highlightedItem->IsLeftRightScrollable() && highlightedItem->GetIsActivated()) {
         highlightedItem->ButtonPressed(GameControl::RightButtonAction);
     }
 }

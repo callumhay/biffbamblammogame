@@ -70,6 +70,5 @@ resources/worlds/levels/medium/be_coy_decoy.lvl
 resources/worlds/levels/hard/shooting_gallery.lvl
 
 
-
-# BOSS: ????
-# TODO
+# BOSS: Electrocutioner
+resources/worlds/levels/bosses/electrocutioner.lvl

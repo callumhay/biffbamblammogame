@@ -146,7 +146,7 @@ public:
 		return this->espAssets;
 	}
 
-	GameFBOAssets* GetFBOAssets() {
+	GameFBOAssets* GetFBOAssets() const {
 		return this->fboAssets;
 	}
 

@@ -230,6 +230,9 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 		}
 		break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            break;
+
 		case Projectile::CollateralBlockProjectile:
 			// The collateral block projectile will actually completely destroy the prism block
             resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);

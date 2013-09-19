@@ -558,8 +558,8 @@ void ConfinedAI::ExecuteSummonItemsState(double dT, GameModel* gameModel) {
             gameModel->AddItemDrop(itemDropPositions[i], dropTypes[i]);
 
             // EVENT: Effects for each of the items being magically spawned
-            GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(itemDropPositions[i], GameItem::ITEM_WIDTH, 1.0));
-            GameEventManager::Instance()->ActionEffect(PuffOfSmokeEffectInfo(itemDropPositions[i], 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
+            GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(itemDropPositions[i], GameItem::ITEM_WIDTH, 1.0));
+            GameEventManager::Instance()->ActionBossEffect(PuffOfSmokeEffectInfo(itemDropPositions[i], 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
         }
 
         // Go to the next state...
@@ -743,7 +743,7 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
 
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
             // EVENT: Summon items power charge
-            GameEventManager::Instance()->ActionEffect(
+            GameEventManager::Instance()->ActionBossEffect(
                 PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
             break;
 
@@ -1106,7 +1106,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
 
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
             // EVENT: Summon items power charge
-            GameEventManager::Instance()->ActionEffect(
+            GameEventManager::Instance()->ActionBossEffect(
                 PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
             break;
 
@@ -1116,7 +1116,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.5;
             this->glitchShakeAnim.ResetToStart();
             // EVENT: Boss effect for glitch (electricity spasm)
-            GameEventManager::Instance()->ActionEffect(ElectricitySpasmEffectInfo(this->boss->GetBody(), 1.2f * GLITCH_TIME_IN_SECS, Colour(1,1,1)));
+            GameEventManager::Instance()->ActionBossEffect(ElectricitySpasmEffectInfo(this->boss->GetBody(), 1.2f * GLITCH_TIME_IN_SECS, Colour(1,1,1)));
             break;
 
         case HurtBottomAIState:
@@ -1151,7 +1151,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             assert(this->destroyConfinesCountdown <= this->spinningDestroyConfinesAnim.GetFinalTime());
 
             // EVENT: Huge charge-up for the destruction of the confines
-            GameEventManager::Instance()->ActionEffect(
+            GameEventManager::Instance()->ActionBossEffect(
                 PowerChargeEffectInfo(this->boss->GetBody(), TIME_TO_CHARGE_CONFINE_DESTROYER_BLAST, Colour(1.0f, 1.0f, 1.0f), 4.0f));
             
             break;
@@ -1316,8 +1316,8 @@ void IceBallAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
         gameModel->AddItemDrop(dropPos, GameItem::LaserBulletPaddleItem);
         
         // EVENT: Effect the item being magically spawned
-        GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(dropPos, GameItem::ITEM_WIDTH, 1.0));
-        GameEventManager::Instance()->ActionEffect(PuffOfSmokeEffectInfo(dropPos, 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
+        GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(dropPos, GameItem::ITEM_WIDTH, 1.0));
+        GameEventManager::Instance()->ActionBossEffect(PuffOfSmokeEffectInfo(dropPos, 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
 
         this->glitchSummonCountdown = GLITCH_TIME_IN_SECS + 1; // Make sure we only summon once in the glitch state
     }
@@ -1419,10 +1419,10 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
     
     if (this->chargeDestroyerBlastCountdown <= 0.0) {
         // EVENT: Huge energy wave that will disintigrate the confines
-        GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(
+        GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(
             this->boss->alivePartsRoot->GetTranslationPt2D(), 1.75f*GothicRomanticBoss::BODY_HEIGHT, 
             2.0*TIME_BEFORE_DESTROY_CONFINES_FLASH));
-        GameEventManager::Instance()->ActionEffect(ExpandingHaloEffectInfo(
+        GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(
             this->boss->GetBody(), 2.0*TIME_BEFORE_DESTROY_CONFINES_FLASH, Colour(1,1,1), 8));
 
         // Completely blow-off all of the legs...
@@ -1440,7 +1440,7 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
         GameLevel* level = gameModel->GetCurrentLevel();
         
         // EVENT: Big flash for the destruction...
-        GameEventManager::Instance()->ActionEffect(FullscreenFlashEffectInfo(0.75, 1.0f));
+        GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.75, 1.0f));
 
         // Top row of confine blocks
         for (int i = 0; i < 13; i++) {
@@ -1592,7 +1592,7 @@ void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS / 1.5;
 
             // EVENT: Summon items power charge
-            GameEventManager::Instance()->ActionEffect(
+            GameEventManager::Instance()->ActionBossEffect(
                 PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
             break;
 
@@ -1610,7 +1610,7 @@ void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->glitchSummonCountdown = GLITCH_TIME_IN_SECS / 1.5;
             this->glitchShakeAnim.ResetToStart();
             // EVENT: Boss effect for glitch (electricity spasm)
-            GameEventManager::Instance()->ActionEffect(ElectricitySpasmEffectInfo(this->boss->GetBody(), GLITCH_TIME_IN_SECS, Colour(1,1,1)));
+            GameEventManager::Instance()->ActionBossEffect(ElectricitySpasmEffectInfo(this->boss->GetBody(), GLITCH_TIME_IN_SECS, Colour(1,1,1)));
             break;
 
         case HurtBodyAIState:
@@ -1731,8 +1731,8 @@ void FreeMovingAttackAI::ExecuteSummonItemsState(double dT, GameModel* gameModel
             gameModel->AddItemDrop(itemDropPositions[i], dropTypes[i]);
 
             // EVENT: Effects for each of the items being magically spawned
-            GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(itemDropPositions[i], GameItem::ITEM_WIDTH, 1.0));
-            GameEventManager::Instance()->ActionEffect(PuffOfSmokeEffectInfo(itemDropPositions[i], 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
+            GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(itemDropPositions[i], GameItem::ITEM_WIDTH, 1.0));
+            GameEventManager::Instance()->ActionBossEffect(PuffOfSmokeEffectInfo(itemDropPositions[i], 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
         }
 
         // Go to the next state...
@@ -1797,8 +1797,8 @@ void FreeMovingAttackAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
         gameModel->AddItemDrop(dropPos, REASONABLY_GOOD_ITEMS[Randomizer::GetInstance()->RandomUnsignedInt() % 3]);
         
         // EVENT: Effect the item being magically spawned
-        GameEventManager::Instance()->ActionEffect(ShockwaveEffectInfo(dropPos, GameItem::ITEM_WIDTH, 1.0));
-        GameEventManager::Instance()->ActionEffect(PuffOfSmokeEffectInfo(dropPos, 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
+        GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(dropPos, GameItem::ITEM_WIDTH, 1.0));
+        GameEventManager::Instance()->ActionBossEffect(PuffOfSmokeEffectInfo(dropPos, 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
 
         this->glitchSummonCountdown = GLITCH_TIME_IN_SECS + 1; // Make sure we only summon once in the glitch state
     }
@@ -1909,8 +1909,8 @@ void FreeMovingAttackAI::ExecuteOrbSpray(GameModel* gameModel) {
     gameModel->AddProjectile(new BossOrbProjectile(shootPos, currLaserDir));
 
     // EVENT: Boss shot a laser out of its eye, add effects for it...
-    GameEventManager::Instance()->ActionEffect(ExpandingHaloEffectInfo(this->boss->GetBody(), 0.5, Colour(1.0f, 0.2f, 0.2f)));
-    GameEventManager::Instance()->ActionEffect(SparkBurstEffectInfo(this->boss->GetBody(), 0.65, Colour(1.0f, 0.2f, 0.2f)));
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetBody(), 0.5, Colour(1.0f, 0.2f, 0.2f)));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBody(), 0.65, Colour(1.0f, 0.2f, 0.2f)));
 }
 
 // End FreeMovingAttackAI ***********************************************************************

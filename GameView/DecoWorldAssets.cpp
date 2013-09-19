@@ -207,7 +207,7 @@ void DecoWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPo
     // Setup the foreground lights
     assets->GetLightAssets()->SetForegroundLightDefaults(
         BasicPointLight(Point3D(-15.0f, 10.0f, 40.0f) + fgKeyPosOffset, Colour(0.6f, 0.6f, 0.6f), 0.0235f),
-        BasicPointLight(Point3D(15.0f, 10.0f, 40.0f) + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.0215f));
+        BasicPointLight(Point3D(15.0f, 10.0f, 40.0f) + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.025f));
 }
 
 void DecoWorldAssets::LoadBGLighting(GameAssets* assets) const {

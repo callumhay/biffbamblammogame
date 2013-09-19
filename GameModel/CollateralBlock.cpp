@@ -159,6 +159,10 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			}
 			break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            newLevelPiece = this->Detonate(gameModel);
+            break;
+
 		case Projectile::CollateralBlockProjectile:
             newLevelPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;

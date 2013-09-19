@@ -69,7 +69,7 @@ public:
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e);
     
-    bool SetAnimatedParticles(unsigned int numParticles, Texture2D* texture, int spriteSizeX, int spriteSizeY, double animationFPS);
+    bool SetAnimatedParticles(unsigned int numParticles, Texture2D* texture, int spriteSizeX, int spriteSizeY, double animationFPS = 24.0);
     bool SetRandomTextureParticles(unsigned int numParticles, std::vector<Texture2D*>& textures);
     bool SetRandomCurveParticles(unsigned int numParticles, const ESPInterval& lineThickness, 
         const std::vector<Bezier*>& curves, const ESPInterval& animateTimeInSecs);
@@ -84,6 +84,7 @@ public:
     void SetParticleSpawnSize(const ESPInterval& particleSize);
 
 	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);
+    void SetParticleColour(const Colour& c);
     void SetParticleColourPalette(const std::vector<Colour>& colours);
 	void SetParticleAlpha(const ESPInterval& alpha);
     void SetAliveParticleAlphaMax(float alpha);
@@ -176,4 +177,9 @@ private:
 inline bool ESPEmitter::GetHasParticles() const {
 	return !(this->aliveParticles.empty() && this->deadParticles.empty());
 }
+
+inline void ESPEmitter::SetParticleColour(const Colour& c) {
+    this->SetParticleColour(ESPInterval(c.R()), ESPInterval(c.G()), ESPInterval(c.B()), ESPInterval(1.0f));
+}
+
 #endif

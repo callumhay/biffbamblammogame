@@ -250,6 +250,9 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 			}
 			break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            break;
+
 		case Projectile::CollateralBlockProjectile:
             resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;

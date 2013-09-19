@@ -255,24 +255,26 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
             break;
 
         case GameControl::EnterButtonAction: {
-            WorldSelectItem* selectedItem = this->worldItems[this->selectedItemIdx];
-            assert(selectedItem != NULL);
-            if (selectedItem->GetIsLocked()) {
+            if (!this->itemActivated) {
+                WorldSelectItem* selectedItem = this->worldItems[this->selectedItemIdx];
+                assert(selectedItem != NULL);
+                if (selectedItem->GetIsLocked()) {
 
-                sound->PlaySound(GameSound::WorldMenuItemLockedEvent, false);
+                    sound->PlaySound(GameSound::WorldMenuItemLockedEvent, false);
 
-                // The world is locked... do an animation to shake it around a bit
-                selectedItem->ExecuteLockedAnimation();
-            }
-            else {
-                sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
+                    // The world is locked... do an animation to shake it around a bit
+                    selectedItem->ExecuteLockedAnimation();
+                }
+                else {
+                    sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
 
-                const Camera& camera = this->display->GetCamera();
-                this->itemActivated = true;
-                this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
-                this->goToLevelSelectAlphaAnim.SetRepeat(false);
-                this->goToLevelSelectMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
-                this->goToLevelSelectMoveAnim.SetRepeat(false);
+                    const Camera& camera = this->display->GetCamera();
+                    this->itemActivated = true;
+                    this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
+                    this->goToLevelSelectAlphaAnim.SetRepeat(false);
+                    this->goToLevelSelectMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
+                    this->goToLevelSelectMoveAnim.SetRepeat(false);
+                }
             }
             break;
         }

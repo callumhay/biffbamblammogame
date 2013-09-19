@@ -24,7 +24,7 @@
 
 using namespace nouveaubossai;
 
-NouveauBossAI::NouveauBossAI(NouveauBoss* boss) : BossAIState(), boss(boss), currState() {
+NouveauBossAI::NouveauBossAI(NouveauBoss* boss) : BossAIState(), boss(boss) {
     assert(boss != NULL);
     this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(1.0f);
 }
@@ -588,7 +588,6 @@ void NouveauBossAI::ExecutePrepLaserBeamAttackState(double dT, GameModel* gameMo
                 }
             }
 
-
             // Inform the visuals of the beam that is about to be fired...
             double timeUntilFiring = this->timeBetweenLastPrepAndFireCountdown +
                 (this->GetTimeBetweenLaserBeamPreps() * this->firingLocations.size()) + 
@@ -596,11 +595,11 @@ void NouveauBossAI::ExecutePrepLaserBeamAttackState(double dT, GameModel* gameMo
             assert(timeUntilFiring > 0.0);
 
             // EVENT: Boss is setting its sights
-            GameEventManager::Instance()->ActionEffect(
+            GameEventManager::Instance()->ActionBossEffect(
                 LaserBeamSightsEffectInfo(nextFiringPt, nextTargetPt, timeUntilFiring));
 
             // EVENT: Energy gathering until the beam fires
-            GameEventManager::Instance()->ActionEffect(
+            GameEventManager::Instance()->ActionBossEffect(
                 PowerChargeEffectInfo(firingBodyPart, timeUntilFiring, 
                 GameModelConstants::GetInstance()->BOSS_LASER_BEAM_COLOUR, 0.75f, chargeOffset));
 
@@ -663,7 +662,7 @@ void NouveauBossAI::ExecuteLaserBeamAttackState(double dT, GameModel* gameModel)
         gameModel->AddBeam(bossBeam);
         
         // EVENT: Flash for the laser beam
-        GameEventManager::Instance()->ActionEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
+        GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
 
         this->countdownToNextLaserBeamFiring = this->GetTimeBetweenLaserBeamFirings();
     }
@@ -853,9 +852,9 @@ void SideSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProject
             this->leftSideSphereWeakpt->SetCollisionsDisabled(false);
             
             // EVENT: Debris flies off the boss...
-            GameEventManager::Instance()->ActionEffect(DebrisEffectInfo(this->leftSideSphereFrill, mine->GetPosition(), 
+            GameEventManager::Instance()->ActionBossEffect(DebrisEffectInfo(this->leftSideSphereFrill, mine->GetPosition(), 
                 DEBRIS_COLOUR, DEBRIS_MIN_LIFE, DEBRIS_MAX_LIFE, NUM_DEBRIS_BITS));
-            GameEventManager::Instance()->ActionEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
+            GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
 
             return;
         }
@@ -882,9 +881,9 @@ void SideSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProject
             this->rightSideSphereWeakpt->SetCollisionsDisabled(false);
 
             // EVENT: Debris flies off the boss...
-            GameEventManager::Instance()->ActionEffect(DebrisEffectInfo(this->rightSideSphereFrill, mine->GetPosition(), 
+            GameEventManager::Instance()->ActionBossEffect(DebrisEffectInfo(this->rightSideSphereFrill, mine->GetPosition(), 
                 DEBRIS_COLOUR, DEBRIS_MIN_LIFE, DEBRIS_MAX_LIFE, NUM_DEBRIS_BITS));
-            GameEventManager::Instance()->ActionEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
+            GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
 
             return;
         }

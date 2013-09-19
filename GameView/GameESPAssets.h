@@ -40,15 +40,10 @@ class Beam;
 class CgFxFireBallEffect;
 struct ESPInterval;
 
-class PowerChargeEffectInfo;
-class ExpandingHaloEffectInfo;
-class SparkBurstEffectInfo;
-class ElectricitySpasmEffectInfo;
 class PuffOfSmokeEffectInfo;
 class ShockwaveEffectInfo;
+class ShortCircuitEffectInfo;
 class DebrisEffectInfo;
-class LaserBeamSightsEffectInfo;
-class BossBodyPart;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -127,9 +122,8 @@ private:
 	std::vector<Texture2D*> bangTextures;
 	std::vector<Texture2D*> splatTextures;
 	std::vector<Texture2D*> smokeTextures;
-	//std::vector<Texture2D*> fireGlobTextures;
 	std::vector<Texture2D*> snowflakeTextures;
-
+    std::vector<Texture2D*> boltTextures;
 	std::vector<Texture2D*> rockTextures;
 	std::vector<CgFxFireBallEffect*> moltenRockEffects;
 	
@@ -173,6 +167,8 @@ private:
     Texture2D* outlinedHoopTex;
     Texture2D* xTex;
     Texture2D* xOutlineTex;
+
+    Texture2D* lightningAnimTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -269,10 +265,13 @@ private:
     void AddOrbESPEffects(const Projectile& projectile, const Colour& baseColour,
         const Colour& brightColour);
     
+    void AddLightningBoltESPEffects(const GameModel& gameModel, const Projectile& projectile);
+
     void AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 	void AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc, const Colour& baseColour, const Colour& brightColour);
+    void AddLightningBoltHitWallEffect(float width, float height, const Point2D& loc);
     void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
@@ -382,6 +381,9 @@ public:
 	void SetTeslaLightiningAlpha(float alpha);
 
 	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);
+
+    void AddShortCircuitEffect(const ShortCircuitEffectInfo& effectInfo);
+
 
 	void TurnOffCurrentItemDropStars();
 

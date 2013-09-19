@@ -950,6 +950,10 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
             this->OrbProjectileCollision(projectile);
             break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            this->LightningBoltProjectileCollision(projectile);
+            break;
+
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
@@ -1017,6 +1021,7 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
 
             case Projectile::BossOrbBulletProjectile:
             case Projectile::BossLaserBulletProjectile:
+            case Projectile::BossLightningBoltBulletProjectile:
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
@@ -1249,6 +1254,11 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 void PlayerPaddle::OrbProjectileCollision(const Projectile& projectile) {
 	float currHeight = 2.0f * this->GetHalfHeight();
 	this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 1.6f, currHeight, currHeight, 17.0f);
+}
+
+void PlayerPaddle::LightningBoltProjectileCollision(const Projectile& projectile) {
+    float currHeight = 2.0f * this->GetHalfHeight();
+    this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 1.7f, currHeight, currHeight, 19.0f);
 }
 
 // A laser bullet just collided with the paddle...
@@ -1698,6 +1708,7 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, co
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
@@ -1734,6 +1745,7 @@ bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
 
             case Projectile::BossOrbBulletProjectile:
             case Projectile::BossLaserBulletProjectile:
+            case Projectile::BossLightningBoltBulletProjectile:
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:

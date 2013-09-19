@@ -32,14 +32,10 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
-#include "../GameModel/PowerChargeEffectInfo.h"
-#include "../GameModel/ExpandingHaloEffectInfo.h"
-#include "../GameModel/SparkBurstEffectInfo.h"
-#include "../GameModel/ElectricitySpasmEffectInfo.h"
 #include "../GameModel/PuffOfSmokeEffectInfo.h"
 #include "../GameModel/ShockwaveEffectInfo.h"
 #include "../GameModel/DebrisEffectInfo.h"
-#include "../GameModel/LaserBeamSightsEffectInfo.h"
+#include "../GameModel/ShortCircuitEffectInfo.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -144,7 +140,8 @@ sadFaceTex(NULL),
 plusTex(NULL),
 plusOutlineTex(NULL),
 xTex(NULL),
-xOutlineTex(NULL)
+xOutlineTex(NULL),
+lightningAnimTex(NULL)
 {
 
 	this->InitESPTextures();
@@ -191,12 +188,12 @@ GameESPAssets::~GameESPAssets() {
 	}
 	this->snowflakeTextures.clear();
 	
-	//for (std::vector<Texture2D*>::iterator iter = this->fireGlobTextures.begin();
-	//	iter != this->fireGlobTextures.end(); ++iter) {
-	//	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-	//	assert(removed);	
-	//}
-	//this->fireGlobTextures.clear();
+	for (std::vector<Texture2D*>::iterator iter = this->boltTextures.begin();
+		iter != this->boltTextures.end(); ++iter) {
+		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		assert(removed);	
+	}
+	this->boltTextures.clear();
 
 	for (std::vector<Texture2D*>::iterator iter = this->rockTextures.begin(); iter != this->rockTextures.end(); ++iter) {
 		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
@@ -288,6 +285,8 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->xTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->xOutlineTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
     assert(removed);
 
 	// Delete any standalone effects
@@ -589,6 +588,25 @@ void GameESPAssets::InitESPTextures() {
 		this->snowflakeTextures.push_back(temp);
 	}
 
+    if (this->boltTextures.empty()) {
+        this->boltTextures.reserve(5);
+        Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT1, Texture::Trilinear));
+        assert(temp != NULL);
+        this->boltTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT2, Texture::Trilinear));
+        assert(temp != NULL);
+        this->boltTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT3, Texture::Trilinear));
+        assert(temp != NULL);
+        this->boltTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT4, Texture::Trilinear));
+        assert(temp != NULL);
+        this->boltTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT5, Texture::Trilinear));
+        assert(temp != NULL);
+        this->boltTextures.push_back(temp);
+    }
+
 	// Initialize all rock textures
 	if (this->rockTextures.empty()) {
 		this->rockTextures.reserve(5);
@@ -816,6 +834,12 @@ void GameESPAssets::InitESPTextures() {
         assert(this->xOutlineTex != NULL);
     }
 
+    if (this->lightningAnimTex == NULL) {
+        this->lightningAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION, Texture::Trilinear));
+        assert(this->lightningAnimTex != NULL);
+    }
+
 	debug_opengl_state();
 }
 
@@ -927,9 +951,9 @@ void GameESPAssets::AddIceBallESPEffects(const GameBall* ball, std::vector<ESPPo
 	iceBallEmitterAura->SetParticleAlignment(ESP::ScreenAligned);
 	iceBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
 	iceBallEmitterAura->SetParticleColour(ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.R()), 
-																				ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.G()), 
-																				ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.B()), 
-																			  ESPInterval(1.0f));
+	                                      ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.G()), 
+                                          ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.B()), 
+                                          ESPInterval(1.0f));
 	iceBallEmitterAura->AddEffector(&this->particlePulseIceBallAura);
 	iceBallEmitterAura->AddEffector(&this->loopRotateEffectorCW);
 	result = iceBallEmitterAura->SetParticles(1, this->circleGradientTex);
@@ -1474,7 +1498,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 						this->AddLaserHitPrismBlockEffect(midPoint);
 					}
 					else {
-						// A laser just hit a block and was disapated by it... show the particle disintegrate
+						// A laser just hit a block and was dissipated by it... show the particle disintegrate
 						this->AddHitWallEffect(projectile, midPoint);
 					}
 					break;
@@ -1516,6 +1540,27 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			}
 			break;
 		
+        case Projectile::BossLightningBoltBulletProjectile:
+            switch (block.GetType()) {
+                case LevelPiece::Empty:
+                case LevelPiece::Portal:
+                    break;
+                case LevelPiece::NoEntry: {
+                    bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+                    Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+                    if (blockIsFrozen) {
+                        this->AddHitWallEffect(projectile, midPoint);
+                    }
+                    break;
+                }
+                default: {
+                    Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
+                    this->AddHitWallEffect(projectile, midPoint);
+                    break;
+                }
+            }
+            break;
+
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
@@ -1552,6 +1597,10 @@ void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projecti
             this->AddOrbHitWallEffect(projectile, projectile.GetPosition(),
                 GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
                 GameViewConstants::GetInstance()->BOSS_ORB_BRIGHT_COLOUR);
+            break;
+
+        case Projectile::BossLightningBoltBulletProjectile:
+            this->AddLightningBoltHitWallEffect(projectile.GetWidth(), projectile.GetHeight(), projectile.GetPosition());
             break;
 
         case Projectile::BossLaserBulletProjectile:
@@ -2931,6 +2980,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
 			severity = Onomatoplex::GOOD;
@@ -3014,6 +3064,18 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 		Vector3D(Vector2D::Dot(vecToProjectile, positivePaddleAxis) * positivePaddleAxis + 
 		minHeightOfImpact * paddle.GetHalfHeight() * paddle.GetUpVector());
 
+    // Adjust the y coordinate based on where it landed on the paddle
+    {
+        float posXDistFromPaddleCenter = fabs(hitPositionRelativeToPaddleCenter[0]);
+        float halfFlatTopWidth = paddle.GetHalfFlatTopWidth();
+        if (posXDistFromPaddleCenter > halfFlatTopWidth) {
+            hitPositionRelativeToPaddleCenter[1] *= NumberFuncs::LerpOverFloat(halfFlatTopWidth, paddle.GetHalfWidthTotal(), 1.25f, 1.0f, posXDistFromPaddleCenter);
+        }
+        else {
+            hitPositionRelativeToPaddleCenter[1] *= 1.25f;
+        }
+    }
+
     Point3D worldHitPos(paddle.GetCenterPosition()[0] + hitPositionRelativeToPaddleCenter[0],
         paddle.GetCenterPosition()[1] + hitPositionRelativeToPaddleCenter[1], 0.0f);
 
@@ -3028,13 +3090,19 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
             break;
         }
 
+        case Projectile::BossLightningBoltBulletProjectile: {
+            this->AddLightningBoltHitWallEffect(projectile.GetWidth(), projectile.GetHeight(), worldHitPos.ToPoint2D());
+            // Fall through so that we also get the impact emitter
+        }
+
         default: {
             ESPPointEmitter* impactEmitter = new ESPPointEmitter();
 	        impactEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	        impactEmitter->SetInitialSpd(ESPInterval(0.001f));
-	        impactEmitter->SetParticleLife(ESPInterval(0.85f));
-	        impactEmitter->SetParticleSize(ESPInterval(projectile.GetWidth(), 1.5f * projectile.GetWidth()), 
-																			         ESPInterval(minHeightOfImpact, 3.0f * projectile.GetHeight()));
+	        impactEmitter->SetParticleLife(ESPInterval(0.75f));
+	        impactEmitter->SetParticleSize(
+                ESPInterval(projectile.GetWidth(), 1.5f * projectile.GetWidth()),
+                ESPInterval(minHeightOfImpact, 3.0f * projectile.GetHeight()));
 	        impactEmitter->SetEmitAngleInDegrees(0);
 	        impactEmitter->SetAsPointSpriteEmitter(false);
 	        impactEmitter->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
@@ -3089,6 +3157,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
 		case Projectile::CollateralBlockProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -3338,8 +3407,7 @@ void GameESPAssets::TurnOffCurrentItemDropStars() {
 }
 
 /**
- * Adds an effect for a active projectile in-game. This function is called when the projectile is
- * first created (i.e., shot into existance).
+ * Adds an effect for a active projectile in-game. This function is called when the projectile is first created.
  */
 void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile) {
 	switch (projectile.GetType()) {
@@ -3347,6 +3415,10 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
         case Projectile::BossOrbBulletProjectile:
             this->AddOrbESPEffects(projectile, GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
                 GameViewConstants::GetInstance()->BOSS_ORB_BRIGHT_COLOUR);
+            break;
+
+        case Projectile::BossLightningBoltBulletProjectile:
+            this->AddLightningBoltESPEffects(gameModel, projectile);
             break;
 
         case Projectile::BallLaserBulletProjectile:
@@ -3802,7 +3874,7 @@ void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, con
 	// Create the large central lightning arc
 	ESPPointToPointBeam* bigLightningArc = new ESPPointToPointBeam();
 	bigLightningArc->SetStartAndEndPoints(startPt, endPt);
-	bigLightningArc->SetColour(ColourRGBA(0.99f, 0.9f, 1.0f, 1.0f));
+    bigLightningArc->SetColour(ColourRGBA(GameModelConstants::GetInstance()->TESLA_LIGHTNING_BRIGHT_COLOUR, 1.0f));
 	bigLightningArc->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
 	bigLightningArc->SetNumBeamShots(1);
 	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.0f, 0.8f * LevelPiece::PIECE_HEIGHT));
@@ -3812,7 +3884,7 @@ void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, con
 	// Create some purple-ish smaller arcs
 	ESPPointToPointBeam* smallerLightningArcs = new ESPPointToPointBeam();
 	smallerLightningArcs->SetStartAndEndPoints(startPt, endPt);
-	smallerLightningArcs->SetColour(ColourRGBA(0.9f, 0.75f, 1.0f, 1.0f));
+    smallerLightningArcs->SetColour(ColourRGBA(GameModelConstants::GetInstance()->TESLA_LIGHTNING_MEDIUM_COLOUR, 1.0f));
 	smallerLightningArcs->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
 	smallerLightningArcs->SetNumBeamShots(2);
 	smallerLightningArcs->SetMainBeamAmplitude(ESPInterval(0.1f * LevelPiece::PIECE_HEIGHT, 0.75f * LevelPiece::PIECE_HEIGHT));
@@ -3955,6 +4027,59 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	timerHUDEmitters.push_back(haloExpandingAura);
 
 	this->activeTimerHUDEmitters.insert(std::make_pair(type, timerHUDEmitters));
+}
+
+void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectInfo) {
+    
+    Point3D position(effectInfo.GetPosition(), 0.0f);
+    std::vector<Colour> colours;
+    colours.reserve(3);
+    colours.push_back(effectInfo.GetBrightColour());
+    colours.push_back(effectInfo.GetMediumColour());
+    colours.push_back(effectInfo.GetDarkColour());
+
+    std::vector<Texture2D*> sparkTextures;
+    sparkTextures.reserve(3);
+    sparkTextures.push_back(this->circleGradientTex);
+    sparkTextures.push_back(this->sparkleTex);
+    sparkTextures.push_back(this->lensFlareTex);
+
+    // Basic sparks
+    ESPPointEmitter* sparkParticles1 = new ESPPointEmitter();
+    sparkParticles1->SetSpawnDelta(ESPInterval(0.005f, 0.01f));
+    sparkParticles1->SetNumParticleLives(1);
+    sparkParticles1->SetInitialSpd(ESPInterval(3.0f, 8.0f));
+    sparkParticles1->SetParticleLife(ESPInterval(effectInfo.GetTimeInSecs()));
+    sparkParticles1->SetParticleSize(ESPInterval(0.1f * effectInfo.GetSize(), 0.5f * effectInfo.GetSize()));
+    sparkParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * effectInfo.GetSize()));
+    sparkParticles1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    sparkParticles1->SetEmitPosition(position);
+    sparkParticles1->SetEmitDirection(Vector3D(0, 1, 0));
+    sparkParticles1->SetEmitAngleInDegrees(180);
+    sparkParticles1->SetParticleColourPalette(colours);
+    sparkParticles1->AddEffector(&this->particleFader);
+    sparkParticles1->AddEffector(&this->particleSmallGrowth);
+    sparkParticles1->SetRandomTextureParticles(20, sparkTextures);
+
+    // Small, single outburst of bolts
+    ESPPointEmitter* boltParticles = new ESPPointEmitter();
+    boltParticles->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+    boltParticles->SetNumParticleLives(1);
+    boltParticles->SetInitialSpd(ESPInterval(10.0f));
+    boltParticles->SetParticleLife(ESPInterval(0.75f * effectInfo.GetTimeInSecs()));
+    boltParticles->SetParticleSize(ESPInterval(0.25f * effectInfo.GetSize()));
+    boltParticles->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * effectInfo.GetSize()));
+    boltParticles->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    boltParticles->SetEmitPosition(position);
+    boltParticles->SetEmitDirection(Vector3D(0, 1, 0));
+    boltParticles->SetEmitAngleInDegrees(180);
+    boltParticles->SetParticleColour(effectInfo.GetDarkColour());
+    boltParticles->AddEffector(&this->particleFader);
+    boltParticles->AddEffector(&this->particleSmallGrowth);
+    boltParticles->SetRandomTextureParticles(8, this->boltTextures);
+
+    this->activeGeneralEmitters.push_back(boltParticles);
+    this->activeGeneralEmitters.push_back(sparkParticles1);
 }
 
 /**
@@ -4321,7 +4446,6 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	    laserTrailSparks->SetEmitAngleInDegrees(15);
 	    laserTrailSparks->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
 	    laserTrailSparks->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfWidth()));
-	    laserTrailSparks->SetAsPointSpriteEmitter(true);
 	    laserTrailSparks->SetEmitPosition(projectilePos3D);
 	    laserTrailSparks->AddEffector(&this->particleFader);
 	    laserTrailSparks->AddEffector(&this->particleMediumShrink);
@@ -4343,7 +4467,7 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	}
 	laserBeamEmitter->SetEmitAngleInDegrees(0);
 	laserBeamEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserBeamEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	laserBeamEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	laserBeamEmitter->SetEmitPosition(Point3D(0,0,0));
     laserBeamEmitter->SetParticleColour(ESPInterval(baseColour.R()),
         ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
@@ -4363,7 +4487,7 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	
 	laserAuraEmitter->SetEmitAngleInDegrees(0);
 	laserAuraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserAuraEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	laserAuraEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	laserAuraEmitter->SetEmitPosition(Point3D(0,0,0));
 	laserAuraEmitter->SetParticleColour(ESPInterval(1.3f * baseColour.R()), ESPInterval(1.3f * baseColour.G()),
         ESPInterval(1.3f * baseColour.B()), ESPInterval(1.0f));
@@ -4388,7 +4512,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	orbEmitter->SetParticleSize(ESPInterval(projectile.GetWidth()));
 	orbEmitter->SetEmitAngleInDegrees(0);
 	orbEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	orbEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	orbEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	orbEmitter->SetEmitPosition(Point3D(0,0,0));
     orbEmitter->SetParticleColour(ESPInterval(baseColour.R()),
         ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
@@ -4403,7 +4527,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	auraEmitter->SetParticleSize(ESPInterval(1.2f * projectile.GetWidth()));
 	auraEmitter->SetEmitAngleInDegrees(0);
 	auraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	auraEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	auraEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	auraEmitter->SetEmitPosition(Point3D(0,0,0));
 	auraEmitter->SetParticleColour(ESPInterval(brightColour.R()), ESPInterval(brightColour.G()),
         ESPInterval(brightColour.B()), ESPInterval(1.0f));
@@ -4418,7 +4542,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	lensFlareEmitter->SetParticleSize(ESPInterval(3.0f*projectile.GetWidth()));
 	lensFlareEmitter->SetEmitAngleInDegrees(0);
 	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	lensFlareEmitter->SetEmitPosition(Point3D(0,0,0));
 	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.5f));
 	lensFlareEmitter->AddEffector(&this->loopRotateEffectorCW);
@@ -4454,11 +4578,80 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
     this->activeProjectileEmitters[&projectile].push_back(lensFlareEmitter);
 }
 
+void GameESPAssets::AddLightningBoltESPEffects(const GameModel& gameModel, const Projectile& projectile) {
+
+	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+
+    // The lightning bolt itself
+    ESPPointEmitter* boltEmitter = new ESPPointEmitter();
+    boltEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    boltEmitter->SetInitialSpd(ESPInterval(0));
+    boltEmitter->SetParticleLife(ESPInterval(-1));
+    // We multiply the size by a small amount extra because the sprite doesn't fill the entire texture
+    if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
+        boltEmitter->SetParticleSize(ESPInterval(1.15f*std::min<float>(projectile.GetWidth(), projectile.GetHeight())));
+    }
+    else {
+        boltEmitter->SetParticleSize(ESPInterval(1.15f*projectile.GetWidth()), ESPInterval(1.15f*projectile.GetHeight()));
+    }
+    boltEmitter->SetEmitAngleInDegrees(0);
+    boltEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    boltEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    boltEmitter->SetParticleRotation(ESPInterval(Randomizer::GetInstance()->RandomTrueOrFalse() ? 180.0f : 0.0f));
+    boltEmitter->SetEmitPosition(Point3D(0,0,0));
+    boltEmitter->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    boltEmitter->SetParticles(1, this->boltTextures[Randomizer::GetInstance()->RandomUnsignedInt() % this->boltTextures.size()]);
+
+    // Create the slightly-pulsing-sparkle aura
+    ESPPointEmitter* auraEmitter = new ESPPointEmitter();
+    auraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    auraEmitter->SetInitialSpd(ESPInterval(0));
+    auraEmitter->SetParticleLife(ESPInterval(-1));
+    if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
+        auraEmitter->SetParticleSize(ESPInterval(std::min<float>(2*projectile.GetWidth(), 1.8f*projectile.GetHeight())));
+    }
+    else {
+        auraEmitter->SetParticleSize(ESPInterval(2*projectile.GetWidth()), ESPInterval(1.8f*projectile.GetHeight()));
+    }
+    auraEmitter->SetEmitAngleInDegrees(0);
+    auraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    auraEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    auraEmitter->SetEmitPosition(Point3D(0,0,0));
+    auraEmitter->SetParticleColour(ESPInterval(0.5f), ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f));
+    auraEmitter->AddEffector(&this->particlePulsePaddleLaser);
+    auraEmitter->SetParticles(1, this->sparkleTex);
+
+    // Lens flares
+    ESPPointEmitter* lensFlareEmitter = new ESPPointEmitter();
+    lensFlareEmitter->SetSpawnDelta(ESPInterval(0.005f, 0.02f));
+    lensFlareEmitter->SetInitialSpd(ESPInterval(2.0f, 5.0f));
+    lensFlareEmitter->SetParticleLife(ESPInterval(0.2f, 0.6f));
+    lensFlareEmitter->SetParticleSize(ESPInterval(0.2f*projectile.GetWidth(), 1.6f*projectile.GetWidth()));
+    lensFlareEmitter->SetEmitAngleInDegrees(45);
+    lensFlareEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection(), 0.0f));
+    lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    lensFlareEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    lensFlareEmitter->SetEmitPosition(Point3D(0,0,0));
+    lensFlareEmitter->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.75f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    lensFlareEmitter->AddEffector(&this->loopRotateEffectorCW);
+    lensFlareEmitter->AddEffector(&this->particleSmallGrowth);
+    lensFlareEmitter->AddEffector(&this->particleFader);
+    lensFlareEmitter->SetParticles(15, this->lensFlareTex);
+
+    this->activeProjectileEmitters[&projectile].push_back(auraEmitter);
+    this->activeProjectileEmitters[&projectile].push_back(boltEmitter);
+    this->activeProjectileEmitters[&projectile].push_back(lensFlareEmitter);
+}
+
 void GameESPAssets::AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos) {
     switch (projectile.GetType()) {
         case Projectile::BossOrbBulletProjectile:
             this->AddOrbHitWallEffect(projectile, hitPos, GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
                 GameViewConstants::GetInstance()->BOSS_ORB_BRIGHT_COLOUR);
+            break;
+
+        case Projectile::BossLightningBoltBulletProjectile:
+            this->AddLightningBoltHitWallEffect(projectile.GetWidth(), projectile.GetHeight(), hitPos);
             break;
 
         case Projectile::BossLaserBulletProjectile:
@@ -4488,7 +4681,7 @@ void GameESPAssets::AddLaserHitPrismBlockEffect(const Point2D& loc) {
 	shinyGlowEmitter->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));
 	shinyGlowEmitter->SetEmitAngleInDegrees(0);
 	shinyGlowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	shinyGlowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	shinyGlowEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	shinyGlowEmitter->SetEmitPosition(Point3D(loc[0], loc[1], 0.0f));
 	shinyGlowEmitter->SetParticleColour(ESPInterval(0.75f, 0.9f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	shinyGlowEmitter->AddEffector(&this->particleMediumShrink);
@@ -4503,7 +4696,7 @@ void GameESPAssets::AddLaserHitPrismBlockEffect(const Point2D& loc) {
 	lensFlareEmitter->SetParticleSize(ESPInterval(2*LevelPiece::PIECE_WIDTH));
 	lensFlareEmitter->SetEmitAngleInDegrees(0);
 	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	lensFlareEmitter->SetEmitPosition(Point3D(loc[0], loc[1], 0.0f));
 	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	lensFlareEmitter->AddEffector(&this->particleFader);
@@ -4529,7 +4722,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	lensFlareEmitter->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));
 	lensFlareEmitter->SetEmitAngleInDegrees(0);
 	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	lensFlareEmitter->SetEmitPosition(EMITTER_LOCATION);
 	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	lensFlareEmitter->AddEffector(&this->particleFader);
@@ -4537,7 +4730,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	lensFlareEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
 	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
 
-	// Create a dispertion of particle bits
+	// Create a dispersion of particle bits
 	ESPPointEmitter* particleSparks = new ESPPointEmitter();
 	particleSparks->SetSpawnDelta(ESPInterval(0.02f, 0.03f));
 	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
@@ -4588,6 +4781,54 @@ void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Poin
 
     this->activeGeneralEmitters.push_back(shockwaveEffect);
     this->activeGeneralEmitters.push_back(particleSparks);
+}
+
+void GameESPAssets::AddLightningBoltHitWallEffect(float width, float height, const Point2D& loc) {
+    
+    float size = std::max(width, height);
+    Point3D hitPos(loc, 0.0f);
+
+    // Shockwave
+    ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(hitPos, width, 0.33f);
+
+    // Electricity dispersal
+    ESPPointEmitter* electricDisperseEffect1 = new ESPPointEmitter();
+    electricDisperseEffect1->SetSpawnDelta(ESPInterval(0.01f, 0.025f));
+    electricDisperseEffect1->SetNumParticleLives(1);
+    electricDisperseEffect1->SetParticleLife(ESPInterval(0.5f, 0.75f));
+    electricDisperseEffect1->SetParticleSize(ESPInterval(0.5f * size, 1.25f * size));
+    electricDisperseEffect1->SetInitialSpd(ESPInterval(2.0f, 8.0f));
+    electricDisperseEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    electricDisperseEffect1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    electricDisperseEffect1->SetEmitPosition(hitPos);
+    electricDisperseEffect1->SetEmitDirection(Vector3D(0, 1, 0));
+    electricDisperseEffect1->SetEmitAngleInDegrees(180);
+    electricDisperseEffect1->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    electricDisperseEffect1->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    electricDisperseEffect1->AddEffector(&this->particleFader);
+    electricDisperseEffect1->AddEffector(&this->fastRotatorCW);
+    electricDisperseEffect1->SetAnimatedParticles(5, this->lightningAnimTex, 64, 64);
+
+    ESPPointEmitter* electricDisperseEffect2 = new ESPPointEmitter();
+    electricDisperseEffect2->SetSpawnDelta(ESPInterval(0.01f, 0.025f));
+    electricDisperseEffect2->SetNumParticleLives(1);
+    electricDisperseEffect2->SetParticleLife(ESPInterval(0.5f, 0.75f));
+    electricDisperseEffect2->SetParticleSize(ESPInterval(0.5f * size, 1.25f * size));
+    electricDisperseEffect2->SetInitialSpd(ESPInterval(2.0f, 8.0f));
+    electricDisperseEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    electricDisperseEffect2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    electricDisperseEffect2->SetEmitPosition(hitPos);
+    electricDisperseEffect2->SetEmitDirection(Vector3D(0, 1, 0));
+    electricDisperseEffect2->SetEmitAngleInDegrees(180);
+    electricDisperseEffect2->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    electricDisperseEffect2->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    electricDisperseEffect2->AddEffector(&this->particleFader);
+    electricDisperseEffect2->AddEffector(&this->fastRotatorCCW);
+    electricDisperseEffect2->SetAnimatedParticles(5, this->lightningAnimTex, 64, 64);
+
+    this->activeGeneralEmitters.push_back(shockwaveEffect);
+    this->activeGeneralEmitters.push_back(electricDisperseEffect1);
+    this->activeGeneralEmitters.push_back(electricDisperseEffect2);
 }
 
 ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, const Point2D& position) {

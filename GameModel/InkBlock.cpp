@@ -198,6 +198,10 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 			}
 			break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            resultingPiece = this->Destroy(gameModel, LevelPiece::BasicProjectileDestruction);
+            break;
+
 		case Projectile::CollateralBlockProjectile:
             resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;

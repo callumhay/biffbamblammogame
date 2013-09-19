@@ -893,7 +893,7 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEv
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
 	if (itemIndex == this->mainMenuState->optionsBackIndex) {
         GameSound* sound = this->mainMenuState->display->GetSound();
-        sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
+        sound->PlaySound(GameSound::MenuItemCancelEvent, false);
 
 		// Go back to the main menu (deactivate any previously activated menu items)
 		this->mainMenuState->optionsSubMenu->DeactivateSelectedMenuItem();
@@ -1024,7 +1024,7 @@ void MainMenuDisplayState::VolumeItemEventHandler::MenuItemConfirmed() {
 
     // Set the configuration option
 	this->mainMenuState->cfgOptions.SetVolume(volumeLevel);
-	// A configuration option has changed - rewrite the configuration file to accomodate the change
+	// A configuration option has changed - rewrite the configuration file to accommodate the change
 	ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->mainMenuState->cfgOptions);
 }
 
@@ -1035,7 +1035,7 @@ void MainMenuDisplayState::VolumeItemEventHandler::MenuItemCancelled() {
     int volumeLevel = static_cast<int>(this->mainMenuState->soundVolumeMenuItem->GetScrollerValue());
     this->UpdateGameMasterVolume(volumeLevel);
     
-    // Since we cancelled, there should be no change to the configuration
+    // Since we canceled, there should be no change to the configuration
 	assert(volumeLevel == this->mainMenuState->cfgOptions.GetVolume());
 }
 
@@ -1052,7 +1052,7 @@ mainMenuState(mainMenuState) {
 
 void MainMenuDisplayState::QuitVerifyEventHandler::MenuItemConfirmed() {
     VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
-    SDL_Delay(500);
+    SDL_Delay(GameSound::MENU_CONFIRM_SOUND_DELAY_IN_MS);
     this->mainMenuState->display->QuitGame();
 }
 

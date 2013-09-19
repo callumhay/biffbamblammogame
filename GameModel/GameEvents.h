@@ -29,6 +29,7 @@
 #include "SafetyNet.h"
 #include "PaddleMineProjectile.h"
 #include "PaddleRemoteControlRocketProjectile.h"
+#include "GeneralEffectEventInfo.h"
 #include "BossEffectEventInfo.h"
 
 class Point2D;
@@ -821,10 +822,14 @@ public:
 
     // Effect Events *********************************************************************
     
-    virtual void EffectEvent(const BossEffectEventInfo& effectEvent) {
+    virtual void GeneralEffectEvent(const GeneralEffectEventInfo& effectEvent) {
         UNUSED_PARAMETER(effectEvent);
     }
 
+    virtual void BossEffectEvent(const BossEffectEventInfo& effectEvent) {
+        UNUSED_PARAMETER(effectEvent);
+    }
+    
 };
 
 

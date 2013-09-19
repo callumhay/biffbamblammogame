@@ -951,7 +951,7 @@ void BoundingLines::ReflectX() {
     }
     for (std::vector<Vector2D>::iterator iter = this->normals.begin(); iter != this->normals.end(); ++iter) {
         Vector2D& currNormal = *iter;
-        currNormal[0] = -1.0f;
+        currNormal[0] *= -1.0f;
     }
 }
 

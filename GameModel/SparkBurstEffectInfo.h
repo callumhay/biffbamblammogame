@@ -16,8 +16,8 @@
 
 class SparkBurstEffectInfo : public BossEffectEventInfo {
 public:
-    SparkBurstEffectInfo(const BossBodyPart* part, double timeInSecs, const Colour& colour) : 
-      BossEffectEventInfo(), part(part), timeInSecs(timeInSecs), colour(colour) {}
+    SparkBurstEffectInfo(const BossBodyPart* part, double timeInSecs, const Colour& colour, const Vector3D& offset = Vector3D(0,0,0)) : 
+      BossEffectEventInfo(), part(part), timeInSecs(timeInSecs), colour(colour), offset(offset) {}
     ~SparkBurstEffectInfo() {}
 
     BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::SparkBurstInfo; }
@@ -25,11 +25,13 @@ public:
     const BossBodyPart* GetPart() const { return this->part; }
     double GetTimeInSecs() const { return this->timeInSecs; }
     const Colour& GetColour() const { return this->colour; }
+    const Vector3D& GetOffset() const { return this->offset; }
 
 private:
     const BossBodyPart* part;
     const double timeInSecs;
     const Colour colour;
+    const Vector3D offset;
 
     DISALLOW_COPY_AND_ASSIGN(SparkBurstEffectInfo);
 };

@@ -120,6 +120,8 @@ public:
 
     const Vector3D& GetRotationAxis() const;
 
+    void ToggleElectricity(GameModel& gameModel, GameLevel& level, bool ignoreIsChangable = false);
+
 private:
     
     static const int MIN_TIME_BETWEEN_TOGGLINGS_IN_MS = 100;
@@ -141,8 +143,6 @@ private:
 
     void SetElectricityIsActive(bool isActive);
     void SetIsChangable(bool isChangable);
-
-	void ToggleElectricity(GameModel& gameModel, GameLevel& level, bool ignoreIsChangable = false);
 };
 
 inline bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {

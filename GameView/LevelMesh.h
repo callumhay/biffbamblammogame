@@ -46,6 +46,7 @@ class AlwaysDropBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 class BossMesh;
+class GameAssets;
 
 class LevelMesh {
 public:
@@ -63,7 +64,7 @@ public:
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
     void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTex);
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
 
 	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 

@@ -353,13 +353,23 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int item
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
 
-    // Play the sound for item selection/activation
-    GameSound* sound = this->inGameMenuState->display->GetSound();
-    sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
+    //GameSound* sound = this->inGameMenuState->display->GetSound();
 
 	if (itemIndex == this->inGameMenuState->resumeItem) {
 		this->inGameMenuState->nextAction = InGameMenuState::ResumeGame;
 	}
+    else if (itemIndex == this->inGameMenuState->restartItem) {
+
+    }
+    else if (itemIndex == this->inGameMenuState->difficultyItem) {
+
+    }
+    else if (itemIndex == this->inGameMenuState->returnToMainItem) {
+
+    }
+    else if (itemIndex == this->inGameMenuState->exitToDesktopItem) {
+
+    }
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
@@ -387,7 +397,7 @@ inGameMenuState(inGameMenuState) {
 
 void InGameMenuState::RestartVerifyEventHandler::MenuItemConfirmed() {
     VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
-    SDL_Delay(500);
+    SDL_Delay(GameSound::MENU_CONFIRM_SOUND_DELAY_IN_MS);
     this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
 }
 
@@ -398,7 +408,7 @@ inGameMenuState(inGameMenuState) {
 
 void InGameMenuState::ExitGameVerifyEventHandler::MenuItemConfirmed() {
     VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
-    SDL_Delay(500);
+    SDL_Delay(GameSound::MENU_CONFIRM_SOUND_DELAY_IN_MS);
     this->inGameMenuState->nextAction = InGameMenuState::ExitToDesktop;
 }
 
@@ -409,7 +419,7 @@ inGameMenuState(inGameMenuState) {
 
 void InGameMenuState::ReturnToMainMenuVerifyEventHandler::MenuItemConfirmed() {
     VerifyMenuEventHandlerWithSound::MenuItemConfirmed();
-    SDL_Delay(500);
+    SDL_Delay(GameSound::MENU_CONFIRM_SOUND_DELAY_IN_MS);
     this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
 }
 
