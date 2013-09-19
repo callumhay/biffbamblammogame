@@ -91,6 +91,9 @@ public:
     const Colour PADDLE_LASER_BEAM_COLOUR;
     const Colour BOSS_LASER_BEAM_COLOUR;
 
+    const Colour TESLA_LIGHTNING_BRIGHT_COLOUR;
+    const Colour TESLA_LIGHTNING_MEDIUM_COLOUR;
+    const Colour TESLA_LIGHTNING_DARK_COLOUR;
 
     double GenerateFireGlobDropTime() const;
 

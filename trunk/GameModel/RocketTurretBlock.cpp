@@ -130,6 +130,10 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
 			}
 			break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            newPiece = this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::BasicProjectileDestruction);
+            break;
+
 		case Projectile::CollateralBlockProjectile:
 			// Completely destroy the block...
             newPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);

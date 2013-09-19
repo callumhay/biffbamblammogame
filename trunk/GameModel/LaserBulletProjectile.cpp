@@ -15,8 +15,9 @@
 LaserBulletProjectile::LaserBulletProjectile(const Point2D& spawnLoc, float width, float height, 
                                              float velocityMag, const Vector2D& velocityDir) :
 Projectile(spawnLoc, width, height) {
-    this->SetVelocity(velocityMag * velocityDir);
+    this->SetVelocity(velocityDir, velocityMag);
 }
+
 LaserBulletProjectile::LaserBulletProjectile(const LaserBulletProjectile& copy) : Projectile(copy) {
 }
 

@@ -610,10 +610,10 @@ void LevelMesh::DrawNoBloomPieces(double dT, const Camera& camera, const BasicPo
 
 void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
                          const BasicPointLight& fillLight, const BasicPointLight& ballLight,
-                         const Texture2D* sceneTex) {
+                         const GameAssets* assets) {
 
     assert(this->bossMesh != NULL);
-    this->bossMesh->Draw(dT, camera, keyLight, fillLight, ballLight, sceneTex);
+    this->bossMesh->Draw(dT, camera, keyLight, fillLight, ballLight, assets);
 }
 
 /**

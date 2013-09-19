@@ -166,6 +166,12 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 			}
 			break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            if (!this->HasStatus(LevelPiece::IceCubeStatus)) {
+                this->AttemptToDropAnItem(gameModel);
+            }
+            break;
+
 		case Projectile::CollateralBlockProjectile:
 			// Both the collateral block and the item drop block will be destroyed in horrible, 
 			// horrible gory glory

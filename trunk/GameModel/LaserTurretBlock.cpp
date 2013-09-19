@@ -140,6 +140,10 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
 			}
 			break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            newPiece = this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::BasicProjectileDestruction);
+            break;
+
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile: {
 

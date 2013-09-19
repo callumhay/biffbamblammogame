@@ -93,6 +93,7 @@ bool NouveauBoss::ProjectilePassesThrough(const Projectile* projectile) const {
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
         case Projectile::BossOrbBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
             return true;
         default:
             break;

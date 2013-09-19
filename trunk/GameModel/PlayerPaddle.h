@@ -387,6 +387,7 @@ private:
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
     void OrbProjectileCollision(const Projectile& projectile);
+    void LightningBoltProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
     void MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile);

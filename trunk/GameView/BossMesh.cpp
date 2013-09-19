@@ -13,6 +13,7 @@
 #include "ClassicalBossMesh.h"
 #include "GothicRomanticBossMesh.h"
 #include "NouveauBossMesh.h"
+#include "DecoBossMesh.h"
 #include "GameViewConstants.h"
 
 #include "../BlammoEngine/Texture2D.h"
@@ -22,11 +23,13 @@
 #include "../GameModel/ClassicalBoss.h"
 #include "../GameModel/GothicRomanticBoss.h"
 #include "../GameModel/NouveauBoss.h"
+#include "../GameModel/DecoBoss.h"
 #include "../GameModel/LaserBeamSightsEffectInfo.h"
 #include "../GameModel/PowerChargeEffectInfo.h"
 #include "../GameModel/ExpandingHaloEffectInfo.h"
 #include "../GameModel/SparkBurstEffectInfo.h"
 #include "../GameModel/ElectricitySpasmEffectInfo.h"
+#include "../GameModel/ElectrifiedEffectInfo.h"
 
 #include "../ResourceManager.h"
 
@@ -148,8 +151,12 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
             break;
         }
 
-        case GameWorld::Deco:
-            // TODO
+        case GameWorld::Deco: {
+            assert(dynamic_cast<DecoBoss*>(boss) != NULL);
+            DecoBoss* decoBoss = static_cast<DecoBoss*>(boss);
+            result = new DecoBossMesh(decoBoss);
+            break;
+        }
 
         case GameWorld::Futurism:
             // TODO
@@ -192,15 +199,15 @@ double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const Gam
 
 void BossMesh::ClearActiveEffects() {
     
-    for (std::list<ESPEmitter*>::iterator iter = this->effectsEmitters.begin();
-        iter != this->effectsEmitters.end(); ++iter) {
+    for (std::list<ESPEmitter*>::iterator iter = this->fgEffectsEmitters.begin();
+        iter != this->fgEffectsEmitters.end(); ++iter) {
             delete *iter;
             *iter = NULL;
     }
-    this->effectsEmitters.clear();
+    this->fgEffectsEmitters.clear();
 
-    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->attachedEffectsEmitters.begin();
-        iter1 != this->attachedEffectsEmitters.end(); ++iter1) {
+    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->fgAttachedEffectsEmitters.begin();
+        iter1 != this->fgAttachedEffectsEmitters.end(); ++iter1) {
 
             std::list<ESPEmitter*>& currEmitters = iter1->second;
             for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end(); ++iter2) {
@@ -209,7 +216,14 @@ void BossMesh::ClearActiveEffects() {
                 currEmitter = NULL;
             }
     }
-    this->attachedEffectsEmitters.clear();
+    this->fgAttachedEffectsEmitters.clear();
+
+    for (std::list<ESPEmitter*>::iterator iter = this->bgEffectsEmitters.begin();
+        iter != this->bgEffectsEmitters.end(); ++iter) {
+            delete *iter;
+            *iter = NULL;
+    }
+    this->bgEffectsEmitters.clear();
 }
 
 void BossMesh::AddLaserBeamSightsEffect(const LaserBeamSightsEffectInfo& info) {
@@ -229,7 +243,7 @@ void BossMesh::AddLaserBeamSightsEffect(const LaserBeamSightsEffectInfo& info) {
     spinningTarget->AddEffector(&this->laserSightBigToSmallSize);
     spinningTarget->SetParticles(1, this->squareTargetTex);
 
-    this->effectsEmitters.push_back(spinningTarget);
+    this->fgEffectsEmitters.push_back(spinningTarget);
 }
 
 void BossMesh::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
@@ -278,8 +292,8 @@ void BossMesh::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
     halo->AddEffector(&this->particleShrinkToNothing);
     halo->SetParticles(NUM_HALOS, this->haloTex);
 
-    this->attachedEffectsEmitters[bodyPart].push_back(halo);
-    this->attachedEffectsEmitters[bodyPart].push_back(chargeParticles1);
+    this->fgAttachedEffectsEmitters[bodyPart].push_back(halo);
+    this->fgAttachedEffectsEmitters[bodyPart].push_back(chargeParticles1);
 }
 
 void BossMesh::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
@@ -303,56 +317,64 @@ void BossMesh::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
     halo->AddEffector(&this->particleSuperGrowth);
     halo->SetParticles(1, this->haloTex);
 
-    this->attachedEffectsEmitters[bodyPart].push_back(halo);
+    this->fgAttachedEffectsEmitters[bodyPart].push_back(halo);
 }
 
 void BossMesh::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
 
     const BossBodyPart* bodyPart = info.GetPart();
     const Colour& colour = info.GetColour();
+    const Vector3D& offsetVec = info.GetOffset();
+    Point3D offsetPt(offsetVec[0], offsetVec[1], offsetVec[2]);
 
-    ESPPointEmitter* chargeParticles1 = new ESPPointEmitter();
-    chargeParticles1->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
-    chargeParticles1->SetNumParticleLives(1);
-    chargeParticles1->SetInitialSpd(ESPInterval(5.0f, 9.0f));
-    chargeParticles1->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
-    chargeParticles1->SetParticleSize(ESPInterval(0.75f, 1.9f));
-    chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    chargeParticles1->SetParticleAlignment(ESP::ScreenAligned);
-    chargeParticles1->SetEmitPosition(Point3D(0,0,0));
-    chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
-    chargeParticles1->SetEmitAngleInDegrees(180);
-    chargeParticles1->SetParticleColour(
+    ESPPointEmitter* sparkParticles1 = new ESPPointEmitter();
+    sparkParticles1->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+    sparkParticles1->SetNumParticleLives(1);
+    sparkParticles1->SetInitialSpd(ESPInterval(5.0f, 9.0f));
+    sparkParticles1->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+    sparkParticles1->SetParticleSize(ESPInterval(0.75f, 1.9f));
+    sparkParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    sparkParticles1->SetParticleAlignment(ESP::ScreenAligned);
+    sparkParticles1->SetEmitPosition(offsetPt);
+    sparkParticles1->SetEmitDirection(Vector3D(0, 1, 0));
+    sparkParticles1->SetEmitAngleInDegrees(180);
+    sparkParticles1->SetParticleColour(
         ESPInterval(colour.R() * 0.75f, colour.R()), 
         ESPInterval(colour.G() * 0.75f, colour.G()),
         ESPInterval(colour.B() * 0.75f, colour.B()), ESPInterval(1.0f));
-    chargeParticles1->AddEffector(&this->particleFader);
-    chargeParticles1->AddEffector(&this->particleSmallGrowth);
-    chargeParticles1->SetParticles(8, this->sparkleTex);
+    sparkParticles1->AddEffector(&this->particleFader);
+    sparkParticles1->AddEffector(&this->particleSmallGrowth);
+    sparkParticles1->SetParticles(8, this->sparkleTex);
 
-    ESPPointEmitter* chargeParticles2 = new ESPPointEmitter();
-    chargeParticles2->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
-    chargeParticles2->SetNumParticleLives(1);
-    chargeParticles2->SetInitialSpd(ESPInterval(4.0f, 8.0f));
-    chargeParticles2->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
-    chargeParticles2->SetParticleSize(ESPInterval(0.5f, 1.5f));
-    chargeParticles2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    chargeParticles2->SetParticleAlignment(ESP::ScreenAligned);
-    chargeParticles2->SetEmitPosition(Point3D(0,0,0));
-    chargeParticles2->SetEmitDirection(Vector3D(0, 1, 0));
-    chargeParticles2->SetEmitAngleInDegrees(180);
-    chargeParticles2->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.8f));
-    chargeParticles2->AddEffector(&this->particleFader);
-    chargeParticles2->AddEffector(&this->particleSmallGrowth);
-    chargeParticles2->SetParticles(5, this->sparkleTex);
+    ESPPointEmitter* sparkParticles2 = new ESPPointEmitter();
+    sparkParticles2->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+    sparkParticles2->SetNumParticleLives(1);
+    sparkParticles2->SetInitialSpd(ESPInterval(4.0f, 8.0f));
+    sparkParticles2->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+    sparkParticles2->SetParticleSize(ESPInterval(0.5f, 1.5f));
+    sparkParticles2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    sparkParticles2->SetParticleAlignment(ESP::ScreenAligned);
+    sparkParticles2->SetEmitPosition(offsetPt);
+    sparkParticles2->SetEmitDirection(Vector3D(0, 1, 0));
+    sparkParticles2->SetEmitAngleInDegrees(180);
+    sparkParticles2->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.8f));
+    sparkParticles2->AddEffector(&this->particleFader);
+    sparkParticles2->AddEffector(&this->particleSmallGrowth);
+    sparkParticles2->SetParticles(5, this->sparkleTex);
 
-    this->attachedEffectsEmitters[bodyPart].push_back(chargeParticles1);
-    this->attachedEffectsEmitters[bodyPart].push_back(chargeParticles2);
+    if (bodyPart != NULL) {
+        this->fgAttachedEffectsEmitters[bodyPart].push_back(sparkParticles1);
+        this->fgAttachedEffectsEmitters[bodyPart].push_back(sparkParticles2);
+    }
+    else {
+        this->fgEffectsEmitters.push_back(sparkParticles1);
+        this->fgEffectsEmitters.push_back(sparkParticles2);
+    }
 }
 
 void BossMesh::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info) {
 
-    static const double FPS = 60.0;
+    static const double FPS = 24.0;
     static const int NUM_PARTICLES = 15;
 
     const BossBodyPart* bodyPart = info.GetPart();
@@ -376,9 +398,32 @@ void BossMesh::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info)
     electricSpasm->SetEmitAngleInDegrees(180);
     electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
     electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
-    electricSpasm->SetAnimatedParticles(NUM_PARTICLES, this->lightningAnimTex, 64, 64, FPS);
+    electricSpasm->SetAnimatedParticles(NUM_PARTICLES, this->lightningAnimTex, 64, 64);
 
-    this->attachedEffectsEmitters[bodyPart].push_back(electricSpasm);
+    this->fgAttachedEffectsEmitters[bodyPart].push_back(electricSpasm);
+}
+
+void BossMesh::AddElectrifiedEffect(const ElectrifiedEffectInfo& info) {
+
+    const Colour& colour = info.GetColour();
+    
+    ESPPointEmitter* electricSpasm = new ESPPointEmitter();
+    electricSpasm->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+    electricSpasm->SetNumParticleLives(1);
+    electricSpasm->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+    electricSpasm->SetParticleSize(ESPInterval(0.4f * info.GetSize(), 0.8f * info.GetSize()));
+    electricSpasm->SetRadiusDeviationFromCenter(ESPInterval(0.0f, info.GetSize() * 0.5f),
+        ESPInterval(0.0f, info.GetSize() * 0.5f), ESPInterval(0.0f));
+    electricSpasm->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    electricSpasm->SetEmitPosition(info.GetPosition());
+    electricSpasm->SetEmitDirection(Vector3D(0, 1, 0));
+    electricSpasm->SetInitialSpd(ESPInterval(0.0f));
+    electricSpasm->SetEmitAngleInDegrees(180);
+    electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
+    electricSpasm->SetAnimatedParticles(20, this->lightningAnimTex, 64, 64);
+
+    this->bgEffectsEmitters.push_back(electricSpasm);
 }
 
 void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
@@ -416,18 +461,38 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
 
         glPopAttrib();
     }
+    else {
+        // Draw currently active background effects
+        for (std::list<ESPEmitter*>::iterator iter = this->bgEffectsEmitters.begin(); iter != this->bgEffectsEmitters.end();) {
+            ESPEmitter* curr = *iter;
+            assert(curr != NULL);
+
+            // Check to see if dead, if so erase it...
+            if (curr->IsDead()) {
+                iter = this->bgEffectsEmitters.erase(iter);
+                delete curr;
+                curr = NULL;
+            }
+            else {
+                // Not dead yet so we draw and tick
+                curr->Draw(camera);
+                curr->Tick(dT);
+                ++iter;
+            }
+        }
+    }
 }
 
 void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     // Go through all the active effects for the boss, draw each one and clean up dead effects
-    for (std::list<ESPEmitter*>::iterator iter = this->effectsEmitters.begin(); iter != this->effectsEmitters.end();) {
+    for (std::list<ESPEmitter*>::iterator iter = this->fgEffectsEmitters.begin(); iter != this->fgEffectsEmitters.end();) {
 
         ESPEmitter* curr = *iter;
         assert(curr != NULL);
 
         // Check to see if dead, if so erase it...
         if (curr->IsDead()) {
-            iter = this->effectsEmitters.erase(iter);
+            iter = this->fgEffectsEmitters.erase(iter);
             delete curr;
             curr = NULL;
         }
@@ -440,8 +505,8 @@ void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     }
 
     // Go through all the attached effects emitters and do book keeping and drawing
-    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->attachedEffectsEmitters.begin();
-         iter1 != this->attachedEffectsEmitters.end();) {
+    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->fgAttachedEffectsEmitters.begin();
+         iter1 != this->fgAttachedEffectsEmitters.end();) {
 
         const BossBodyPart* bodyPart = iter1->first;
         Point3D bodyPartPos = bodyPart->GetTranslationPt3D();
@@ -472,7 +537,7 @@ void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         glPopMatrix();
 
         if (currEmitters.empty()) {
-            iter1 = this->attachedEffectsEmitters.erase(iter1);
+            iter1 = this->fgAttachedEffectsEmitters.erase(iter1);
         }
         else {
             ++iter1;
@@ -561,7 +626,7 @@ ESPPointEmitter* BossMesh::BuildExplodingEmitter(float width, float height, floa
 	
     int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
     assert(numParticles < 30);
-    bool success = explosionEmitter->SetAnimatedParticles(numParticles, this->explosionAnimTex, 64, 64, FPS);
+    bool success = explosionEmitter->SetAnimatedParticles(numParticles, this->explosionAnimTex, 64, 64);
 	assert(success);
     UNUSED_VARIABLE(success);
 

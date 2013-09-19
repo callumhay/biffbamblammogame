@@ -80,7 +80,7 @@ public:
     virtual void MenuItemDeactivated() { /* Sounds don't really work well here... need an animation to make it work */ }
     virtual void MenuItemScrolled()    { this->sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false); }
     virtual void MenuItemConfirmed()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
-    virtual void MenuItemCancelled()   { this->sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false); }
+    virtual void MenuItemCancelled()   { this->sound->PlaySound(GameSound::MenuItemCancelEvent, false); }
 
 protected:
     GameSound* sound;
@@ -139,8 +139,8 @@ public:
         this->lgTextLabel.SetText(text);
     }
 
-    virtual void Activate() { if (this->eventHandler != NULL) { this->eventHandler->MenuItemActivated(); } };
-    virtual void Deactivate() { if (this->eventHandler != NULL) { this->eventHandler->MenuItemDeactivated(); } };
+    virtual void Activate() { if (this->eventHandler != NULL) { this->eventHandler->MenuItemActivated(); } this->isActivated = true; };
+    virtual void Deactivate() { if (this->eventHandler != NULL) { this->eventHandler->MenuItemDeactivated(); } this->isActivated = false; };
 
 	GameSubMenu* GetSubMenu() { return this->subMenu; }
 
@@ -154,6 +154,10 @@ public:
 		return this->currLabel->GetColour();
 	}
 
+    inline bool GetIsActivated() const {
+        return this->isActivated;
+    }
+
     virtual bool IsLeftRightScrollable() const { return false; }
 
 protected:
@@ -163,6 +167,7 @@ protected:
 	TextLabel2D smTextLabel, lgTextLabel;
 	AnimationMultiLerp<float> wiggleAnimation;
 	GameMenuItemEventHandler* eventHandler;
+    bool isActivated;
 
     virtual void ActivatedMenuItemChanged()  {}
     virtual void DeactivateSelectedMenuItem() {}

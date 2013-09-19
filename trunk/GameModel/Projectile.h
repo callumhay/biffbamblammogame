@@ -35,7 +35,7 @@ public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, PaddleRemoteCtrlRocketBulletProjectile,
                           RocketTurretBulletProjectile, FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
-                          BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile };
+                          BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile, BossLightningBoltBulletProjectile };
 
 	virtual ~Projectile();
 
@@ -50,8 +50,6 @@ public:
     virtual bool IsMine() const                               = 0;
     virtual bool IsRefractableOrReflectable() const           = 0;
     
-    
-
     virtual float GetZOffset() const { return 0.0f; }
 
     virtual bool BlastsThroughSafetyNets() const { return true; }

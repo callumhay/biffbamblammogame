@@ -223,6 +223,9 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
 			}
 			break;
 		
+        case Projectile::BossLightningBoltBulletProjectile:
+            break;
+
 		case Projectile::CollateralBlockProjectile:
             resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;

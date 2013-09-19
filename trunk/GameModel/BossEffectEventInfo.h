@@ -19,7 +19,7 @@ public:
 
     enum Type { 
         PowerChargeInfo, ExpandingHaloInfo, SparkBurstInfo, ElectricitySpasmInfo, PuffOfSmokeInfo,
-        ShockwaveInfo, FullscreenFlashInfo, DebrisInfo, LaserBeamSightsInfo
+        ShockwaveInfo, FullscreenFlashInfo, DebrisInfo, LaserBeamSightsInfo, ElectrifiedInfo
     };
 
     virtual BossEffectEventInfo::Type GetType() const = 0;
@@ -28,4 +28,4 @@ private:
     DISALLOW_COPY_AND_ASSIGN(BossEffectEventInfo);
 };
 
-#endif // __EFFECTEVENTINFO_H__
+#endif // __BOSSEFFECTEVENTINFO_H__

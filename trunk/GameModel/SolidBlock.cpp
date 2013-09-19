@@ -290,6 +290,9 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			break;
+
+        case Projectile::BossLightningBoltBulletProjectile:
+            break;
 		
 		case Projectile::CollateralBlockProjectile:
             resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);

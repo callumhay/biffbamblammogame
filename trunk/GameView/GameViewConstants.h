@@ -88,9 +88,6 @@ public:
 	const char* TEXTURE_SMOKE4;
 	const char* TEXTURE_SMOKE5;
 	const char* TEXTURE_SMOKE6;
-	//const char* TEXTURE_FIRE_GLOB1;
-	//const char* TEXTURE_FIRE_GLOB2;
-	//const char* TEXTURE_FIRE_GLOB3;
 	const char* TEXTURE_SNOWFLAKE1;
 	const char* TEXTURE_SNOWFLAKE2;
 	const char* TEXTURE_SNOWFLAKE3;
@@ -99,6 +96,11 @@ public:
 	const char* TEXTURE_ROCK3;
 	const char* TEXTURE_ROCK4;
 	const char* TEXTURE_ROCK5;
+    const char* TEXTURE_BOLT1;
+    const char* TEXTURE_BOLT2;
+    const char* TEXTURE_BOLT3;
+    const char* TEXTURE_BOLT4;
+    const char* TEXTURE_BOLT5;
 	const char* TEXTURE_CIRCLE_GRADIENT;
     const char* TEXTURE_CLEAN_CIRCLE_GRADIENT;
     const char* TEXTURE_HOOP;
@@ -401,7 +403,14 @@ public:
 	const char* DECO_BACKGROUND_MESH;
 	const char* DECO_BLOCK_MESH;
     // DECO BOSS
-    // TODO
+    const char* DECO_BOSS_CORE_MESH;
+    const char* DECO_BOSS_LIGHTNING_RELAY_MESH;
+    const char* DECO_BOSS_GEAR_MESH;
+    const char* DECO_BOSS_SCOPING_ARM1_MESH;
+    const char* DECO_BOSS_SCOPING_ARM2_MESH;
+    const char* DECO_BOSS_HAND_MESH;
+    const char* DECO_BOSS_LEFT_BODY_MESH;
+    const char* DECO_BOSS_RIGHT_BODY_MESH;
 
     // FUTURISM WORLD
     const char* FUTURISM_PADDLE_MESH;

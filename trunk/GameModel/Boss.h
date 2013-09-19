@@ -23,6 +23,7 @@
 #include "BossCompositeBodyPart.h"
 
 class BossAIState;
+class TeslaBlock;
 
 class Boss {
     friend class BossAIState;
@@ -63,6 +64,7 @@ public:
     void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
     void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
+    void TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 
     void AttachProjectile(Projectile* projectile, BossBodyPart* bodyPart);
     void DetachProjectile(Projectile* projectile);
@@ -74,6 +76,7 @@ public:
 
     // Builders for various boss animations
     static AnimationMultiLerp<ColourRGBA> BuildBossHurtAndInvulnerableColourAnim(double invulnerableTimeInSecs);
+    static AnimationMultiLerp<ColourRGBA> BuildBossElectrifiedColourAnim(double totalAnimTime, const Colour& colour1, const Colour& colour2, const Colour& colour3);
     static AnimationMultiLerp<ColourRGBA> BuildBossHurtFlashAndFadeAnim(double totalAnimTime);
     static AnimationMultiLerp<ColourRGBA> BuildBossFinalDeathFlashAnim();
     static AnimationMultiLerp<ColourRGBA> BuildBossAngryFlashAnim();
@@ -83,6 +86,8 @@ public:
 
     static AnimationMultiLerp<Vector3D> BuildLimbFallOffTranslationAnim(double totalAnimTime, float xDist, float yDist);
     static AnimationMultiLerp<float> BuildLimbFallOffZRotationAnim(double totalAnimTime, float rotAmtInDegs);
+
+    const BossAIState* GetCurrentAIState() const;
 
     // DEBUGGING...
 #ifdef _DEBUG
@@ -170,6 +175,10 @@ inline void Boss::AttachProjectile(Projectile* projectile, BossBodyPart* bodyPar
 inline void Boss::DetachProjectile(Projectile* projectile) {
     // Find the projectile among the various body parts and remove it...
     this->root->DetachProjectile(projectile);
+}
+
+inline const BossAIState* Boss::GetCurrentAIState() const {
+    return this->currAIState;
 }
 
 #endif // __BOSS_H__

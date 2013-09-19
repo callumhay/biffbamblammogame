@@ -15,7 +15,7 @@
 OrbProjectile::OrbProjectile(const Point2D& spawnLoc, float radius,
                              float velocityMag, const Vector2D& velocityDir) :
 Projectile(spawnLoc, 2*radius, 2*radius) {
-    this->SetVelocity(velocityMag * velocityDir);
+    this->SetVelocity(velocityDir, velocityMag);
 }
 OrbProjectile::OrbProjectile(const OrbProjectile& copy) : Projectile(copy) {
 }

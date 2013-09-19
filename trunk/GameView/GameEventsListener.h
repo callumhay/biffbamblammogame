@@ -133,7 +133,8 @@ public:
     void BossHurtEvent(const BossWeakpoint* hurtPart);
     void BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart);
 
-    void EffectEvent(const BossEffectEventInfo& effectEvent);
+    void BossEffectEvent(const BossEffectEventInfo& effectEvent);
+    void GeneralEffectEvent(const GeneralEffectEventInfo& effectEvent);
 
 private:
 	GameDisplay* display;

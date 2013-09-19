@@ -794,8 +794,7 @@ void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& c
 
 	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	    this->lightAssets->GetBossAffectingLights(fgKeyLight, fgFillLight, ballLight);
-        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight, 
-            this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight, this);
 
         glPopMatrix();
     }
@@ -1219,6 +1218,14 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, projectile.GetPosition3D());
             break;
 
+        case Projectile::BossOrbBulletProjectile:
+            // TODO ?
+            break;
+
+        case Projectile::BossLightningBoltBulletProjectile:
+            // TODO ?
+            break;
+
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
@@ -1352,6 +1359,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

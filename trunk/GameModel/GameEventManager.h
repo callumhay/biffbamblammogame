@@ -42,6 +42,7 @@ class PaddleMineProjectile;
 class BossWeakpoint;
 class AbstractBossBodyPart;
 class Boss;
+class GeneralEffectEventInfo;
 class BossEffectEventInfo;
 class PaddleRemoteControlRocketProjectile;
 
@@ -174,7 +175,8 @@ public:
     void ActionBossAngry(const Boss* boss, const BossBodyPart* angryPart);
 
     // Effect Events
-    void ActionEffect(const BossEffectEventInfo& effectEvent);
+    void ActionGeneralEffect(const GeneralEffectEventInfo& effectEvent);
+    void ActionBossEffect(const BossEffectEventInfo& effectEvent);
 
 private:
 	GameEventManager();

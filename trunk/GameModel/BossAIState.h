@@ -23,6 +23,7 @@ class Projectile;
 class PlayerPaddle;
 class Boss;
 class MineProjectile;
+class TeslaBlock;
 
 class BossAIState {
 public:
@@ -38,6 +39,7 @@ public:
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart)   = 0;
     
     virtual void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
+    virtual void TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
     // TODO: Beams!!!
 
     virtual bool CanHurtPaddleWithBody() const = 0;
@@ -68,6 +70,9 @@ inline void BossAIState::Tick(double dT, GameModel* gameModel) {
 }
 
 inline void BossAIState::MineExplosionOccurred(GameModel*, const MineProjectile*) {
+}
+
+inline void BossAIState::TeslaLightningArcHitOccurred(GameModel*, const TeslaBlock*, const TeslaBlock*) {
 }
 
 inline Vector2D BossAIState::GetAcceleration() const {

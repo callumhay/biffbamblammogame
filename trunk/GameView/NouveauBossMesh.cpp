@@ -13,6 +13,7 @@
 #include "GameViewConstants.h"
 #include "CgFxPrism.h"
 #include "InGameBossLevelDisplayState.h"
+#include "GameAssets.h"
 
 #include "../BlammoEngine/Mesh.h"
 #include "../GameModel/NouveauBoss.h"
@@ -185,7 +186,7 @@ double NouveauBossMesh::ActivateIntroAnimation() {
 
 void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
                                const BasicPointLight& fillLight, const BasicPointLight& ballLight,
-                               const Texture2D* sceneTex) {
+                               const GameAssets* assets) {
 
     UNUSED_PARAMETER(dT);
 
@@ -273,12 +274,12 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
     // Top Dome
     MaterialGroup* prismMatGrp = this->topDomeMesh->GetMaterialGroups().begin()->second;
     CgFxPrism* prismMaterial = static_cast<CgFxPrism*>(prismMatGrp->GetMaterial());
-    prismMaterial->SetSceneTexture(sceneTex);
+    prismMaterial->SetSceneTexture(assets->GetFBOAssets()->GetFullSceneFBO()->GetFBOTexture());
 
     const BossBodyPart* topDome = this->boss->GetTopDome();
     DRAW_BODY_PART(topDome, this->topDomeMesh);
 
-#undef BODY_PART_MESH
+#undef DRAW_BODY_PART
 }
 
 void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {

@@ -144,6 +144,10 @@ void Boss::MineExplosionOccurred(GameModel* gameModel, const MineProjectile* min
     this->currAIState->MineExplosionOccurred(gameModel, mine);
 }
 
+void Boss::TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
+    this->currAIState->TeslaLightningArcHitOccurred(gameModel, block1, block2);
+}
+
 bool Boss::CanHurtPaddleWithBody() const {
     if (this->currAIState != NULL) {
         return this->currAIState->CanHurtPaddleWithBody();
@@ -187,6 +191,54 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim(doub
     hurtColourAnim.SetRepeat(false);
 
     return hurtColourAnim;
+}
+
+AnimationMultiLerp<ColourRGBA> Boss::BuildBossElectrifiedColourAnim(double totalAnimTime, 
+                                                                    const Colour& colour1, 
+                                                                    const Colour& colour2, 
+                                                                    const Colour& colour3) {
+    static const double SECS_PER_FLASH = 0.2;
+
+    int numFlashes = static_cast<int>(totalAnimTime / SECS_PER_FLASH);
+
+    std::vector<double> timeValues;
+    timeValues.reserve(2*numFlashes + 1);
+    std::vector<ColourRGBA> colourValues;
+    colourValues.reserve(timeValues.size());
+
+    double timeInc = totalAnimTime / static_cast<double>(2*numFlashes);
+    double timeCount = 0.0;
+
+    for (int i = 0; i <= 2*numFlashes; i++) {
+        timeValues.push_back(timeCount);
+        timeCount += timeInc;
+    }
+    const Colour* currColour;
+    for (int i = 0; i < numFlashes; i++) {
+        colourValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, static_cast<float>(0.5f + 0.25f*Randomizer::GetInstance()->RandomNumZeroToOne())));
+
+        switch (Randomizer::GetInstance()->RandomUnsignedInt() % 3) {
+            case 0:
+                currColour = &colour1;
+                break;
+            case 1:
+                currColour = &colour2;
+                break;
+            case 2:
+            default:
+                currColour = &colour3;
+                break;
+        }
+
+        colourValues.push_back(ColourRGBA(*currColour, static_cast<float>(0.6f + 0.30f*Randomizer::GetInstance()->RandomNumZeroToOne())));
+    }
+    colourValues.push_back(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+
+    AnimationMultiLerp<ColourRGBA> colourAnim;
+    colourAnim.SetLerp(timeValues, colourValues);
+    colourAnim.SetRepeat(false);
+
+    return colourAnim;
 }
 
 AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtFlashAndFadeAnim(double totalAnimTime) {

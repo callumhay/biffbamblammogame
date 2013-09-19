@@ -283,6 +283,10 @@ LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			}
 			break;
 
+        case Projectile::BossLightningBoltBulletProjectile:
+            newPiece = this->HurtPiece(projectile->GetDamage(), gameModel, LevelPiece::BasicProjectileDestruction);
+            break;
+
 		case Projectile::CollateralBlockProjectile:
 			// Completely destroy the block...
             newPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
