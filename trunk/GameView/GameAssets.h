@@ -89,6 +89,7 @@ public:
     void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
 	void DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO);
+    void DrawMiscEffects(const GameModel& gameModel);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(double dT, const Camera& camera);
 
@@ -179,6 +180,7 @@ public:
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
     void PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
+    void PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
 
 	void RocketExplosion(const RocketProjectile& rocket, Camera& camera, const GameModel* gameModel);
     void MineExplosion(const MineProjectile& mine, Camera& camera);

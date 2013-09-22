@@ -90,6 +90,7 @@ public:
 
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
     void UpdateRegenBlock(const RegenBlock* block, bool gotHurt);
+    void UpdateNoEntryBlock(bool remoteControlRocketOn);
 
     BossMesh* GetBossMesh() const { return this->bossMesh; }
     double ActivateBossIntro();

@@ -240,6 +240,16 @@ public:
     }
 
 	/**
+	 * Event triggered when a part of the boss hits the paddle. Occurs once right after the hit.
+	 * Arguments: paddle      - The paddle that got hit.
+     *            bossPart    - The part of the boss that hit the paddle.
+	 */
+    virtual void PaddleHitByBossEvent(const PlayerPaddle& paddle, const BossBodyPart& bossPart) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(bossPart);
+    }
+
+	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
 	 * collides with the paddle.
 	 * Arguments: ball   - The ball as it is colliding with the player paddle.

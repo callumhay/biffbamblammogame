@@ -94,6 +94,13 @@ void GameEventManager::ActionPaddleShieldHitByBeam(const PlayerPaddle& paddle, c
     }	
 }
 
+void GameEventManager::ActionPaddleHitByBoss(const PlayerPaddle& paddle, const BossBodyPart& bossPart) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleHitByBossEvent(paddle, bossPart);
+    }	
+}
+
 // Action for when a ball has died (gone out of bounds)
 void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

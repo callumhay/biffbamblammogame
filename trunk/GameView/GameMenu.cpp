@@ -11,6 +11,7 @@
 
 #include "GameMenu.h"
 #include "GameViewConstants.h"
+#include "GameDisplay.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/Texture.h"
@@ -487,16 +488,16 @@ void GameMenu::DebugDraw() {
 
 // GameSubMenu Functions *************************************************************
 
-const float GameSubMenu::HALF_ARROW_WIDTH		= 20.0f;
-
-const double GameSubMenu::ARROW_ANIM_FREQ		= 0.2;															// Frequency of arrow bouncing and squishing
-const float GameSubMenu::ARROW_BOUNCE_AMT		= GameSubMenu::BACKGROUND_PADDING;	// How far the arrow deviates when bouncing
-const float GameSubMenu::ARROW_SQUISH_AMT		= 0.60f;														// How much the arrow will smoosh
+const float GameSubMenu::HALF_ARROW_WIDTH = 20.0f;
+const double GameSubMenu::ARROW_ANIM_FREQ = 0.2;															// Frequency of arrow bouncing and squishing
+const float GameSubMenu::ARROW_BOUNCE_AMT = GameSubMenu::BACKGROUND_PADDING;	// How far the arrow deviates when bouncing
+const float GameSubMenu::ARROW_SQUISH_AMT = 0.60f;														// How much the arrow will smoosh
 
 GameSubMenu::GameSubMenu() : GameMenu(), arrowTex(NULL) {
 
 	// Obtain the arrow texture briefly from the texture manager
-	this->arrowTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Bilinear, GL_TEXTURE_2D);
+	this->arrowTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear, GL_TEXTURE_2D);
 	assert(this->arrowTex != NULL);
 
 	// Setup the arrow animations
@@ -600,7 +601,7 @@ void GameSubMenu::DrawMenuBackground(double dT) {
 	const float GHOST_MENU_WIDTH_DIV2		= (MENU_WIDTH * this->menuBGOpenGhostScale.GetInterpolantValue()[0]) / 2.0f;
 	const float GHOST_MENU_HEIGHT_DIV2	= (MENU_HEIGHT * this->menuBGOpenGhostScale.GetInterpolantValue()[1]) / 2.0f;
 
-	const Point2D bgTopLeftCorner = this->topLeftCorner + Vector2D(-BACKGROUND_PADDING + MENU_WIDTH_DIV2, BACKGROUND_PADDING - MENU_HEIGHT_DIV2);
+	const Point2D bgTopLeftCorner      = this->topLeftCorner + Vector2D(-BACKGROUND_PADDING + MENU_WIDTH_DIV2, BACKGROUND_PADDING - MENU_HEIGHT_DIV2);
 	const Point2D ghostBGTopLeftCorner = this->topLeftCorner + Vector2D(-BACKGROUND_PADDING + GHOST_MENU_WIDTH_DIV2, BACKGROUND_PADDING - GHOST_MENU_HEIGHT_DIV2);
 
 	glEnable(GL_BLEND);
@@ -612,7 +613,7 @@ void GameSubMenu::DrawMenuBackground(double dT) {
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(bgTopLeftCorner[0], bgTopLeftCorner[1], -0.5f);
-	glLineWidth(4.0f);
+    glLineWidth(std::min<float>(4.0f, std::max<float>(1.0f, GameDisplay::GetTextScalingFactor() * 4.0f)));
 
 	// Draw the outline of the ghost background
 	if (this->menuBGOpenGhostFade.GetInterpolantValue() != 0) {
@@ -632,7 +633,7 @@ void GameSubMenu::DrawMenuBackground(double dT) {
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glPolygonMode(GL_FRONT, GL_POINT);
-	glPointSize(4.0f);
+	glPointSize(std::min<float>(4.0f, std::max<float>(1.0f, GameDisplay::GetTextScalingFactor() * 4.0f)));
 	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
 
 	glPolygonMode(GL_FRONT, GL_FILL);

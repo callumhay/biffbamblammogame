@@ -39,6 +39,7 @@ CountdownHUD::~CountdownHUD() {
 }
 
 void CountdownHUD::Draw(const Camera& camera, double dT, double timeElapsed) {
+    UNUSED_PARAMETER(camera);
 
     double timeLeft = this->totalTimeUntilCountdownOver - timeElapsed;
     if (timeLeft > 3.0) {
@@ -77,8 +78,8 @@ void CountdownHUD::Draw(const Camera& camera, double dT, double timeElapsed) {
     if (this->numFadeAnim.GetInterpolantValue() > 0.0f) {
         this->numLabel.SetAlpha(this->numFadeAnim.GetInterpolantValue());
         this->numLabel.SetScale(this->numScaleAnim.GetInterpolantValue());
-        this->numLabel.SetTopLeftCorner((camera.GetWindowWidth() - this->numLabel.GetLastRasterWidth()) / 2.0f,
-                                        (camera.GetWindowHeight() + this->numLabel.GetHeight()) / 2.0f);
+        this->numLabel.SetTopLeftCorner((Camera::GetWindowWidth() - this->numLabel.GetLastRasterWidth()) / 2.0f,
+                                        (Camera::GetWindowHeight() + this->numLabel.GetHeight()) / 2.0f);
         this->numLabel.Draw();
     }
 

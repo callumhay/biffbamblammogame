@@ -42,7 +42,6 @@ victoryLabel1(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
              "Sweet " + Onomatoplex::Generator::GetInstance()->GenerateVictoryDescriptor()),
 victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "VICTORY!!!")
 { 
-    const Camera& camera = this->display->GetCamera();
 
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
@@ -77,7 +76,6 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     this->victoryLabel2.SetColour(Colour(1,1,1));
     this->victoryLabel2.SetDropShadow(Colour(0,0,0), 0.06f);
     this->victoryLabel2.SetScale(2.0f);
-
 
     // Check to see if the next movement has already been unlocked, if not then we tell the player about it...
     // Special case: the player just completed the very last world... in this case there's nothing left to unlock
@@ -115,7 +113,7 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
 	this->fadeOutAnimation.SetLerp(0.0, 0.0, 0.0f, 0.0f);
 
     // The victory label "Sweet... victory" comes down from the top of the screen and bounces a bit
-    float centerBlockTopYCoord = this->GetCenterTextBlockTopYCoord(camera.GetWindowHeight());
+    float centerBlockTopYCoord = this->GetCenterTextBlockTopYCoord(Camera::GetWindowHeight());
 
     static const double VICTORY_LABEL_ANIM_TIME = 0.70;
     static const double FINAL_VICTORY_LABEL_ANIM_TIME = FADE_TIME + VICTORY_LABEL_ANIM_TIME;
@@ -129,7 +127,7 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     
     std::vector<float> moveVals;
     moveVals.reserve(timeVals.size());
-    moveVals.push_back(camera.GetWindowHeight() + 1.25f * this->GetVictoryLabelBlockHeight());
+    moveVals.push_back(Camera::GetWindowHeight() + 1.25f * this->GetVictoryLabelBlockHeight());
     moveVals.push_back(centerBlockTopYCoord);
     moveVals.push_back(centerBlockTopYCoord + 0.25f * this->GetVictoryLabelBlockHeight());
     moveVals.push_back(centerBlockTopYCoord);
@@ -181,18 +179,16 @@ BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
 }
 
 void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
-    
-    const Camera& camera = this->display->GetCamera();
-
+ 
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // Draw the background...
     this->bgTex->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->bgTex->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->bgTex->GetHeight()));
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->bgTex->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->bgTex->GetHeight()));
     this->bgTex->UnbindTexture();
 
     this->allAnimationIsDone = true;
@@ -212,20 +208,20 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(),
-            camera.GetWindowHeight(), 1.0f, ColourRGBA(1, 1, 1, fadeInAlpha));
+        GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(),
+            Camera::GetWindowHeight(), 1.0f, ColourRGBA(1, 1, 1, fadeInAlpha));
 
 		glPopAttrib();
     }
 
-    float currYPos = this->DrawVictoryLabel(camera.GetWindowWidth());
+    float currYPos = this->DrawVictoryLabel(Camera::GetWindowWidth());
     currYPos -= VICTORY_TO_WORLD_VERTICAL_PADDING;
-    currYPos = this->DrawWorldCompleteLabel(camera.GetWindowWidth(), currYPos);
+    currYPos = this->DrawWorldCompleteLabel(Camera::GetWindowWidth(), currYPos);
     currYPos -= COMPLETE_TO_UNLOCKED_VERTICAL_PADDING;
-    this->DrawUnlockedLabel(dT, camera.GetWindowWidth(), currYPos);
+    this->DrawUnlockedLabel(dT, Camera::GetWindowWidth(), currYPos);
 
     this->footerColourAnimation.Tick(dT);
-    this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
+    this->DrawPressAnyKeyTextFooter(Camera::GetWindowWidth());
 
     if (!this->waitingForKeyPress) {
         // We're no longer waiting for a key press - fade out to white and then switch to the next state
@@ -241,9 +237,9 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         this->bgTex->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->bgTex->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->bgTex->GetHeight()),
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->bgTex->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->bgTex->GetHeight()),
             ColourRGBA(1,1,1, fadeValue));
         this->bgTex->UnbindTexture();
 

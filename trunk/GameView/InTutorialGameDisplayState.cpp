@@ -164,8 +164,6 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     GameTutorialAssets* tutorialAssets = this->display->GetAssets()->GetTutorialAssets();
     assert(tutorialAssets != NULL);
-    //Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
-    const Camera& camera = this->display->GetCamera();
 
     std::list<GameViewConstants::KeyboardButtonType> keyboardButtonTypes;
     std::list<GameViewConstants::XBoxButtonType> xboxButtonTypes;
@@ -185,7 +183,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     movePaddleHint->SetListener(new MovePaddleHintListener());
     movePaddleHint->SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
-    movePaddleHint->SetTopLeftCorner((camera.GetWindowWidth() - movePaddleHint->GetWidth()) / 2.0f, 
+    movePaddleHint->SetTopLeftCorner((Camera::GetWindowWidth() - movePaddleHint->GetWidth()) / 2.0f, 
         movePaddleHint->GetHeight() + 150.0f);
 
     this->tutorialListener->SetMovePaddleHint(movePaddleHint);
@@ -195,7 +193,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     ButtonTutorialHint* shootBallHint = new ButtonTutorialHint(tutorialAssets, "Shoot Ball");
     shootBallHint->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
     shootBallHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
-    shootBallHint->SetTopLeftCorner((camera.GetWindowWidth() - shootBallHint->GetWidth()) / 2.0f, shootBallHint->GetHeight() + 150.0f);
+    shootBallHint->SetTopLeftCorner((Camera::GetWindowWidth() - shootBallHint->GetWidth()) / 2.0f, shootBallHint->GetHeight() + 150.0f);
     
     this->tutorialListener->SetShootBallHint(shootBallHint);
     this->noDepthTutorialHints.push_back(shootBallHint);
@@ -218,7 +216,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     fireWeaponHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
     fireWeaponHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
-    fireWeaponHint->SetTopLeftCorner((camera.GetWindowWidth() - fireWeaponHint->GetWidth()) / 2.0f,
+    fireWeaponHint->SetTopLeftCorner((Camera::GetWindowWidth() - fireWeaponHint->GetWidth()) / 2.0f,
         fireWeaponHint->GetHeight() + 150.0f);
     
     this->tutorialListener->SetFireWeaponHint(fireWeaponHint);
@@ -232,7 +230,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     boostAvailableHint->SetActionName("Boost Available!");
     boostAvailableHint->SetFlashing(true);
     boostAvailableHint->SetTopLeftCorner(BallBoostHUD::H_BORDER_SPACING,
-        camera.GetWindowHeight() - (BallBoostHUD::V_BORDER_SPACING + BallBoostHUD::BALL_BOOST_HUD_HEIGHT + 10));
+        Camera::GetWindowHeight() - (BallBoostHUD::V_BORDER_SPACING + BallBoostHUD::BALL_BOOST_HUD_HEIGHT + 10));
     this->tutorialListener->SetBoostAvailableHint(boostAvailableHint);
     this->noDepthTutorialHints.push_back(boostAvailableHint);
 
@@ -240,7 +238,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     startingToBoostHint->SetActionName("Boost Mode = Hold ");
     startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
-    startingToBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
+    startingToBoostHint->SetTopLeftCorner((Camera::GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
         startingToBoostHint->GetHeight() + 200.0f);
 
     this->tutorialListener->SetStartBoostHint(startingToBoostHint);
@@ -250,8 +248,8 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     holdBoostHint->SetActionName("Now, hold and move ");
     holdBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     holdBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
-    holdBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - holdBoostHint->GetWidth()) / 2.0f,
-        camera.GetWindowHeight()/2.0f + 150.0f);
+    holdBoostHint->SetTopLeftCorner((Camera::GetWindowWidth() - holdBoostHint->GetWidth()) / 2.0f,
+        Camera::GetWindowHeight()/2.0f + 150.0f);
 
     this->tutorialListener->SetHoldBoostHint(holdBoostHint);
     this->noDepthTutorialHints.push_back(holdBoostHint);
@@ -270,8 +268,8 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     doBoostPressToReleaseHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
     doBoostPressToReleaseHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
-    doBoostPressToReleaseHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
-        camera.GetWindowHeight()/2.0f - 150.0f);
+    doBoostPressToReleaseHint->SetTopLeftCorner((Camera::GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
+        Camera::GetWindowHeight()/2.0f - 150.0f);
 
     this->tutorialListener->SetDoBoostPressToReleaseHint(doBoostPressToReleaseHint);
     this->noDepthTutorialHints.push_back(doBoostPressToReleaseHint);
@@ -280,8 +278,8 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     doBoostSlingshotHint->SetActionName("Perform Boost = Release ");
     doBoostSlingshotHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     doBoostSlingshotHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
-    doBoostSlingshotHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
-        camera.GetWindowHeight()/2.0f - 150.0f);
+    doBoostSlingshotHint->SetTopLeftCorner((Camera::GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
+        Camera::GetWindowHeight()/2.0f - 150.0f);
 
     this->tutorialListener->SetDoBoostSlingshotHint(doBoostSlingshotHint);
     this->noDepthTutorialHints.push_back(doBoostSlingshotHint);
@@ -305,8 +303,8 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     ButtonTutorialHint* pointsHint = new ButtonTutorialHint(tutorialAssets, "");
     pointsHint->SetActionName("The longer the ball is in play = More points");
     pointsHint->SetAlphaWhenShowing(0.75f);
-    pointsHint->SetTopLeftCorner((camera.GetWindowWidth() - pointsHint->GetWidth()) / 2.0f,
-        camera.GetWindowHeight() - 200.0f);
+    pointsHint->SetTopLeftCorner((Camera::GetWindowWidth() - pointsHint->GetWidth()) / 2.0f,
+        Camera::GetWindowHeight() - 200.0f);
 
     this->tutorialListener->SetPointsHint(pointsHint);
     this->depthTutorialHints.push_back(pointsHint);

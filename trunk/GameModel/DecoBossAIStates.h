@@ -39,7 +39,7 @@ public:
 
     // Inherited functions
     Boss* GetBoss() const;
-    virtual bool CanHurtPaddleWithBody() const { return false; }
+    bool CanHurtPaddleWithBody() const { return (this->currState == FiringArmsAtPaddleAIState); }
     virtual bool IsStateMachineFinished() const { return false; }
     Collision::AABB2D GenerateDyingAABB() const;
 
@@ -47,7 +47,10 @@ protected:
     static const float DEFAULT_ACCELERATION;
     static const float DEFAULT_MAX_X_SPEED;
     static const float DEFAULT_MAX_Y_SPEED;
+    static const float DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
     static const float SHOOT_AT_PADDLE_RANDOM_ROT_ANGLE_IN_DEGS;
+    static const float DEFAULT_LEVEL_ROTATION_SPEED_DEGS_PER_SEC;
+    static const float DEFAULT_LEVEL_ROTATION_AMT_IN_DEGS;
 
     static const double TOTAL_ELECTRIFIED_TIME_IN_SECS;
     static const double TOTAL_RETALIATION_TIME_IN_SECS;
@@ -63,9 +66,11 @@ protected:
         MoveToFarLeftSideAIState,           // Boss moves to the far left side of the level, prep for LeftToRightItemDropAIState
         MoveToFarRightSideAIState,          // Boss moves to the far right side of the level, prep for RightToLeftItemDropAIState
         MoveToCenterAIState,                // Boss moves to the center of the level, prep for shooting its arms to rotate the level
+        MoveToPaddleArmAttackPosAIState,    // Boss moves to a good location for attacking the paddle with its arms, prep for FiringArmsAtPaddleAIState
         LeftToRightItemDropAIState,         // Boss moves only horizontally left to right, dropping nasty items rapidly as it moves
         RightToLeftItemDropAIState,         // Boss moves only horizontally right to left, dropping nasty items rapidly as it moves
-        FiringArmsAtPaddleAIState, 
+        FiringArmsAtPaddleAIState,
+        FinishedFiringArmsAtPaddleAIState,
         FiringArmsAtLevelAIState,
         RotatingLevelAIState,               // Boss is rotating the entire level with its arm(s)
         FinishRotatingLevelAIState,         // Boss is done rotating the level, it retracts its arms
@@ -76,6 +81,7 @@ protected:
     };
     AIState currState;
 
+    Point2D GeneratePaddleArmAttackPosition(GameModel* gameModel) const;
     Point2D GenerateShotOrigin() const;
     Vector2D GenerateRandomShotDirTowardsPaddle(const Point2D& shotOrigin, GameModel* gameModel) const;
     void ShootLightningBoltAtPaddle(GameModel* gameModel);
@@ -92,7 +98,6 @@ protected:
         return 10 + Randomizer::GetInstance()->RandomUnsignedInt() % 6 + 
             Randomizer::GetInstance()->RandomUnsignedInt() % static_cast<int>(3.0f / this->GetTotalLifePercent());
     }
-
     double GenerateShootCountdownWhileMoving() const {
         return 0.12 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.13 + 
             0.22 * Randomizer::GetInstance()->RandomNumZeroToOne() * this->GetTotalLifePercent(); 
@@ -101,22 +106,29 @@ protected:
         return 20 + Randomizer::GetInstance()->RandomUnsignedInt() % 8 + 
             Randomizer::GetInstance()->RandomUnsignedInt() % static_cast<int>(3.25f / this->GetTotalLifePercent());
     }
-
     double GenerateItemDropCountdown() const {
         return 3.0 + 3.0 * Randomizer::GetInstance()->RandomNumZeroToOne() + 1.0 * this->GetTotalLifePercent();
     }
+    double GenerateTimeToFollowPaddleBeforeShootingArms() const {
+        return 1.5 + Randomizer::GetInstance()->RandomNumZeroToOne() * 2.0;
+    }
+
+    float CalculateSideToSideDropStateVelocity() const;
 
     virtual GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const = 0;
+    virtual int GenerateNumItemsToDropInSideToSideState() const = 0;
 
     bool RemoteControlRocketCheckAndNecessaryStateChange(GameModel* gameModel);
 
     virtual bool IsFinalAIStage() const { return false; }
     virtual void SetState(DecoBossAIState::AIState newState) = 0;
-    virtual void GoToNextRandomAttackState() = 0;
+    virtual void GoToNextRandomAttackState(GameModel* gameModel) = 0;
     virtual DecoBossAIState* BuildNextAIState() const = 0;
 
     void UpdateBossUpDownSideToSideMotion();
     bool UpdateShootAtPaddleWhileMoving(double dT, GameModel* gameModel);
+    bool UpdateArmAnimation(double dT, AnimationMultiLerp<float>& armSeg1Anim, AnimationMultiLerp<float>& armSeg2Anim, 
+        AnimationMultiLerp<float>& armSeg3Anim, AnimationMultiLerp<float>& armSeg4Anim);
     void DropLoadedItem(GameModel* gameModel);
 
     // State Variables and functions
@@ -126,10 +138,48 @@ protected:
     GameItem::ItemType nextDropItemType;
     AnimationMultiLerp<Vector3D> electrifiedHurtAnim;
     AnimationLerp<float> itemLoadingAnim;
+    int sideToSideNumDropCountdown;
+    
+    AnimationMultiLerp<float> armSeg1RotateExtendAnim, armSeg2RotateExtendAnim, armSeg3RotateExtendAnim, armSeg4RotateExtendAnim;
+    AnimationMultiLerp<float> armSeg1RetractAnim,  armSeg2RetractAnim, armSeg3RetractAnim, armSeg4RetractAnim;
+
+    AnimationMultiLerp<float> armSeg1AttackExtendAnim,  armSeg2AttackExtendAnim, armSeg3AttackExtendAnim, armSeg4AttackExtendAnim;
+
+    float currLeftArmRotInDegs;
+    float currRightArmRotInDegs;
+    float currLevelRotationAmtInDegs;
+
+    void InitStationaryAttackState();
+    void InitMovingAttackState();
+    void InitMovingAttackAndItemDropState();
+    void InitMoveToFarLeftSideState();
+    void InitMoveToFarRightSideState();
+    void InitLeftToRightItemDropState();
+    void InitRightToLeftItemDropState();
+    void InitMoveToCenterState();
+    void InitMoveToPaddleArmAttackPosState();
+    void InitFiringArmsAtPaddleState();
+    void InitFinishedFiringArmsAtPaddleState();
+    void InitFiringArmsAtLevelState();
+    void InitRotatingLevelState();
+    void InitFinishRotatingLevelState();
+    void InitElectrifiedState();
+    void InitElectrificationRetaliationState();
+    void InitAngryState();
 
     void ExecuteStationaryAttackState(double dT, GameModel* gameModel);
     void ExecuteMovingAttackState(double dT, GameModel* gameModel);
     void ExecuteMovingAttackAndItemDropState(double dT, GameModel* gameModel);
+    void ExecuteMoveToFarLeftSideState(double dT, GameModel* gameModel);
+    void ExecuteMoveToFarRightSideState(double dT, GameModel* gameModel);
+    void ExecuteSideToSideItemDropState(double dT, GameModel* gameModel);
+    void ExecuteMoveToCenterState();
+    void ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel* gameModel);
+    void ExecuteFiringArmsAtPaddleState(double dT, GameModel* gameModel);
+    void ExecuteFinishedFiringArmsAtPaddleState(double dT, GameModel* gameModel);
+    void ExecuteFiringArmsAtLevelState(double dT, GameModel* gameModel);
+    void ExecuteRotatingLevelState(double dT, GameModel* gameModel);
+    void ExecuteFinishRotatingLevelState(double dT, GameModel* gameModel);
     void ExecuteElectrifiedState(double dT, GameModel* gameModel);
     void ExecuteElectrifiedRetaliationState(double dT, GameModel* gameModel);
     void ExecuteAngryState(double dT);
@@ -139,7 +189,8 @@ protected:
     void CollisionOccurred(GameModel*, Projectile*, BossBodyPart*) {};
     void CollisionOccurred(GameModel*, PlayerPaddle&, BossBodyPart*) {};
     void TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
-    
+    void UpdateState(double dT, GameModel* gameModel);
+
 private:
     DISALLOW_COPY_AND_ASSIGN(DecoBossAIState);
 };
@@ -155,11 +206,11 @@ private:
 
     // Inherited Functions
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
+    int GenerateNumItemsToDropInSideToSideState() const { return 4; } // Must not be random!
     DecoBossAIState* BuildNextAIState() const;
     float GetTotalLifePercent() const { return 1.0f; }
     void SetState(DecoBossAIState::AIState newState);
-    void UpdateState(double dT, GameModel* gameModel);
-    void GoToNextRandomAttackState();
+    void GoToNextRandomAttackState(GameModel* gameModel);
     float GetAccelerationMagnitude() const { return DecoBossAIState::DEFAULT_ACCELERATION; }
 };
 
@@ -177,11 +228,11 @@ private:
 
     // Inherited Functions
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
+    int GenerateNumItemsToDropInSideToSideState() const { return 6; } // Must not be random!
     DecoBossAIState* BuildNextAIState() const;
     float GetTotalLifePercent() const { return 0.666666f; }
     void SetState(DecoBossAIState::AIState newState);
-    void UpdateState(double dT, GameModel* gameModel);
-    void GoToNextRandomAttackState();
+    void GoToNextRandomAttackState(GameModel* gameModel);
     float GetAccelerationMagnitude() const { return 1.2f * DecoBossAIState::DEFAULT_ACCELERATION; }
 };
 
@@ -197,12 +248,12 @@ private:
 
     // Inherited Functions
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
+    int GenerateNumItemsToDropInSideToSideState() const { return 8; } // Must not be random!
     DecoBossAIState* BuildNextAIState() const { assert(false); return NULL; }
     bool IsFinalAIStage() const { return true; }
     float GetTotalLifePercent() const { return 0.33333333f; }
     void SetState(DecoBossAIState::AIState newState);
-    void UpdateState(double dT, GameModel* gameModel);
-    void GoToNextRandomAttackState();
+    void GoToNextRandomAttackState(GameModel* gameModel);
     float GetAccelerationMagnitude() const { return 1.4f * DecoBossAIState::DEFAULT_ACCELERATION; }
 };
 

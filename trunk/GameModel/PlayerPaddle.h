@@ -309,6 +309,7 @@ public:
     void SetLevelBoundsChecking(bool isOn) {
         this->levelBoundsCheckingOn = isOn;
     }
+    void ResetLastEntityThatHurtPaddle() { this->lastEntityThatHurtHitPaddle = NULL; }
 
 private:
 	// Default values for the dimensions of the paddle

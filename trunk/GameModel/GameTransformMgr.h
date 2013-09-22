@@ -19,6 +19,7 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Orientation.h"
+#include "../BlammoEngine/Collision.h"
 
 class GameModel;
 class GameLevel;
@@ -49,12 +50,18 @@ public:
 
     void SetRemoteControlRocketCamera(bool turnOnRocketCam, PaddleRemoteControlRocketProjectile* rocket);
 
+    void SetGameZRotation(float rotInDegs, const GameLevel& level);
+    float GetCameraZDistanceToFitAABB(const Collision::AABB2D& aabb, float addToWidth, float addToHeight) const;
+    static float GetLevelCameraSetupAddToWidth(const GameLevel& level);
+    static float GetLevelCameraSetupAddToHeight(const GameLevel& level);
+
 	// Setup functions for telling the camera/level where it should be by default
 	void SetupLevelCameraDefaultPosition(const GameLevel& level);
 
 	void Tick(double dT, GameModel& gameModel);
 
-	Matrix4x4 GetGameTransform() const;
+	Matrix4x4 GetGameXYZTransform() const;
+    Matrix4x4 GetGameXYTransform() const;
 	Matrix4x4 GetCameraTransform() const;
 	float GetCameraFOVAngle() const;
 
@@ -62,6 +69,7 @@ public:
     bool GetIsPaddleCameraOn() const;
     bool GetIsBallCameraOn() const;
     bool GetIsRemoteControlRocketCameraOn() const;
+    bool GetIsBallDeathCameraOn() const;
 
 private:
 	// Each animation operates atomically, so we queue up animations as they are required
@@ -87,7 +95,7 @@ private:
 	// Level-flip related variables
 	static const double SECONDS_TO_FLIP;
 	bool isFlipped;
-	float currGameDegRotX, currGameDegRotY;
+	float currGameDegRotX, currGameDegRotY, currGameDegRotZ;
 
 	// Paddle and ball camera related variables
 	static const double SECONDS_PER_UNIT_PADDLECAM;
@@ -155,6 +163,19 @@ private:
     DISALLOW_COPY_AND_ASSIGN(GameTransformMgr);
 };
 
+/**
+ * Grab the current transform for the game - this is a composite matrix
+ * of all the transforms that are currently being applied - the transforms
+ * are concatenated in the most sane and consistent way possible.
+ */
+inline Matrix4x4 GameTransformMgr::GetGameXYZTransform() const {
+    return Matrix4x4::rotationXYZMatrix(this->currGameDegRotX, this->currGameDegRotY, this->currGameDegRotZ);
+}
+
+inline Matrix4x4 GameTransformMgr::GetGameXYTransform() const {
+    return Matrix4x4::rotationXYZMatrix(this->currGameDegRotX, this->currGameDegRotY, 0);
+}
+
 inline bool GameTransformMgr::GetIsLevelFlipAnimationActive() const {
     return !this->levelFlipAnimations.empty();
 }
@@ -167,6 +188,9 @@ inline bool GameTransformMgr::GetIsBallCameraOn() const {
 }
 inline bool GameTransformMgr::GetIsRemoteControlRocketCameraOn() const {
     return (this->remoteControlRocketWithCamera != NULL);
+}
+inline bool GameTransformMgr::GetIsBallDeathCameraOn() const {
+    return (this->isBallDeathCamIsOn);
 }
 
 #endif

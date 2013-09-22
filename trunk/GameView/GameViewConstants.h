@@ -408,6 +408,8 @@ public:
     const char* DECO_BOSS_GEAR_MESH;
     const char* DECO_BOSS_SCOPING_ARM1_MESH;
     const char* DECO_BOSS_SCOPING_ARM2_MESH;
+    const char* DECO_BOSS_SCOPING_ARM3_MESH;
+    const char* DECO_BOSS_SCOPING_ARM4_MESH;
     const char* DECO_BOSS_HAND_MESH;
     const char* DECO_BOSS_LEFT_BODY_MESH;
     const char* DECO_BOSS_RIGHT_BODY_MESH;

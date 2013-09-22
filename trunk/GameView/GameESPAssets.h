@@ -361,6 +361,7 @@ public:
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
     void AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const BeamSegment& beamSegment);
+    void AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
 
 	ESPPointEmitter* CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item);
     void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);

@@ -225,7 +225,7 @@ void BallInPlayState::Tick(double seconds) {
 		    GameBall *currBall = *iter;
         
 		    // Check for death (ball went out of bounds)
-		    if (this->gameModel->IsOutOfGameBounds(currBall->GetBounds().Center())) {
+		    if (this->gameModel->IsOutOfGameBoundsForBall(currBall->GetBounds().Center())) {
 			    if (gameBalls.size() == 1) {
                     this->gameModel->SetNextState(new BallDeathState(currBall, this->gameModel));
 				    return;

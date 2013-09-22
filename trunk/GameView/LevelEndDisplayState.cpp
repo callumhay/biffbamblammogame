@@ -56,15 +56,13 @@ void LevelEndDisplayState::RenderFrame(double dT) {
         return;
     }
 
-	const Camera& camera = this->display->GetCamera();
-
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
 	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
 	glDisable(GL_DEPTH_TEST);
 
-	// Draw a fullscreen quad of the last fully rendered frame from the game...
+	// Draw a full-screen quad of the last fully rendered frame from the game...
 	const Texture2D* lastSceneTexture = this->display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()->GetFBOTexture();
 	lastSceneTexture->RenderTextureToFullscreenQuad();
 
@@ -77,13 +75,13 @@ void LevelEndDisplayState::RenderFrame(double dT) {
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 1.0f, 
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 1.0f, 
         ColourRGBA(1, 1, 1, this->fadeToWhiteAnimation.GetInterpolantValue()));
 
 	glPopAttrib();
 
 	if (fadeIsDone) {
-	    // Kill all effects that may have previously been occuring...
+	    // Kill all effects that may have previously been occurring...
 	    this->display->GetAssets()->DeactivateMiscEffects();
         // Kill all particles...
         this->display->GetAssets()->GetESPAssets()->RemoveAllProjectileEffects();

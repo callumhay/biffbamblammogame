@@ -28,7 +28,7 @@ public:
 
     void SetLocalBounds(const BoundingLines& bounds);
     const BoundingLines& GetLocalBounds() const;
-    BoundingLines GetWorldBounds() const;
+    const BoundingLines& GetWorldBounds() const;
 
     virtual AbstractBossBodyPart::Type GetType() const { return AbstractBossBodyPart::BasicBodyPart; }
     virtual void Tick(double dT);
@@ -102,6 +102,9 @@ protected:
     bool isDestroyed;
     bool collisionsDisabled;
     BoundingLines localBounds;
+    mutable BoundingLines worldBounds;
+    mutable bool isWorldBoundsDirty;
+
 
     AnimationMultiLerp<ColourRGBA> rgbaAnim;
 
@@ -125,17 +128,20 @@ private:
 
 inline void BossBodyPart::SetLocalBounds(const BoundingLines& bounds) {
     this->localBounds = bounds;
+    this->isWorldBoundsDirty = true;
 }
 
 inline const BoundingLines& BossBodyPart::GetLocalBounds() const {
     return this->localBounds;
 }
 
-inline BoundingLines BossBodyPart::GetWorldBounds() const {
-    BoundingLines worldBounds(localBounds);
-    worldBounds.RotateLinesAndNormals(this->localZRotation, Point2D(0,0));
-    worldBounds.TranslateBounds(this->worldTransform.getTranslationVec2D());
-    return worldBounds;
+inline const BoundingLines& BossBodyPart::GetWorldBounds() const {
+    if (this->isWorldBoundsDirty) {
+        this->worldBounds = localBounds;
+        this->worldBounds.Transform(this->worldTransform);
+        this->isWorldBoundsDirty = false;
+    }
+    return this->worldBounds;
 }
 
 inline void BossBodyPart::Tick(double dT) {

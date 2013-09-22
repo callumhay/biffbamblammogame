@@ -37,8 +37,6 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
              GameViewConstants::GetInstance()->LICENSE_TEXT),
 congratsLabel(NULL), noteLabel(NULL), bbbTitleDisplay(0.80f) {
     
-    const Camera& camera = this->display->GetCamera();
-
     // Setup any labels/text
 	this->titleLabel.SetColour(Colour(1.0f, 0.6f, 0));
 	this->titleLabel.SetDropShadow(Colour(0, 0, 0), 0.08f);
@@ -46,14 +44,14 @@ congratsLabel(NULL), noteLabel(NULL), bbbTitleDisplay(0.80f) {
 
     this->congratsLabel = 
         new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        camera.GetWindowWidth() - 2 * TEXT_LABEL_X_PADDING, CONGRATS_TEXT);
+        Camera::GetWindowWidth() - 2 * TEXT_LABEL_X_PADDING, CONGRATS_TEXT);
     this->congratsLabel->SetColour(Colour(0,0,0));
     this->congratsLabel->SetAlignment(TextLabel2DFixedWidth::CenterAligned);
     this->congratsLabel->SetScale(this->display->GetTextScalingFactor());
 
     this->noteLabel = 
         new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
-        camera.GetWindowWidth() - 2 * TEXT_LABEL_X_PADDING, NOTE_TEXT);
+        Camera::GetWindowWidth() - 2 * TEXT_LABEL_X_PADDING, NOTE_TEXT);
     this->noteLabel->SetColour(Colour(0,0,0));
     this->noteLabel->SetAlignment(TextLabel2DFixedWidth::CenterAligned);
     this->noteLabel->SetScale(this->display->GetTextScalingFactor());
@@ -83,33 +81,30 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	const Camera& camera = this->display->GetCamera();
-
-
     // Draw all of the text labels
-    float yPos = camera.GetWindowHeight() - TITLE_Y_GAP;
-    this->titleLabel.SetTopLeftCorner((camera.GetWindowWidth() - this->titleLabel.GetLastRasterWidth())/2.0f, yPos);
+    float yPos = Camera::GetWindowHeight() - TITLE_Y_GAP;
+    this->titleLabel.SetTopLeftCorner((Camera::GetWindowWidth() - this->titleLabel.GetLastRasterWidth())/2.0f, yPos);
 	this->titleLabel.Draw();
     yPos -= (this->titleLabel.GetHeight() + TITLE_CONGRATS_Y_GAP);
 
-    this->congratsLabel->SetTopLeftCorner((camera.GetWindowWidth() - this->congratsLabel->GetWidth())/2.0f, yPos);
+    this->congratsLabel->SetTopLeftCorner((Camera::GetWindowWidth() - this->congratsLabel->GetWidth())/2.0f, yPos);
     this->congratsLabel->Draw();
     yPos -= (this->congratsLabel->GetHeight() + CONGRATS_NOTE_Y_GAP);
 
-    this->noteLabel->SetTopLeftCorner((camera.GetWindowWidth() - this->noteLabel->GetWidth())/2.0f, yPos);
+    this->noteLabel->SetTopLeftCorner((Camera::GetWindowWidth() - this->noteLabel->GetWidth())/2.0f, yPos);
     this->noteLabel->Draw();
 
     // Render created by text
     static const int NAME_LICENCE_Y_PADDING = 20;
-    this->creditLabel.SetTopLeftCorner((camera.GetWindowWidth() - this->creditLabel.GetLastRasterWidth()) / 2.0f,
+    this->creditLabel.SetTopLeftCorner((Camera::GetWindowWidth() - this->creditLabel.GetLastRasterWidth()) / 2.0f,
         this->creditLabel.GetHeight() + this->licenseLabel.GetHeight() + NAME_LICENCE_Y_PADDING + 5);
     this->creditLabel.Draw();
-    this->licenseLabel.SetTopLeftCorner((camera.GetWindowWidth() - this->licenseLabel.GetLastRasterWidth()) / 2.0f,
+    this->licenseLabel.SetTopLeftCorner((Camera::GetWindowWidth() - this->licenseLabel.GetLastRasterWidth()) / 2.0f,
         this->licenseLabel.GetHeight() + NAME_LICENCE_Y_PADDING);
     this->licenseLabel.Draw();
 
 
-	Camera menuCamera(camera.GetWindowWidth(), camera.GetWindowHeight());
+	Camera menuCamera;
 	menuCamera.SetPerspective();
 	menuCamera.Move(Vector3D(0, 0, GameCompleteDisplayState::CAM_DIST_FROM_ORIGIN));
     glMatrixMode(GL_MODELVIEW);
@@ -128,7 +123,7 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 	    glDisable(GL_TEXTURE_2D);
 	    glEnable(GL_BLEND);
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	    GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 1.0f, 
+	    GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 1.0f, 
                                                          ColourRGBA(1, 1, 1, fadeValue));
 	    glPopAttrib();
 

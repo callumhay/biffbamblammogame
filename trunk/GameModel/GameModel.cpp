@@ -858,20 +858,15 @@ void GameModel::DoProjectileCollisions(double dT) {
     this->PerformLevelCompletionChecks();
 }
 
-/**
- * Private helper function to determine if the given position is
- * out of game bounds or not.
- * Returns: true if out of bounds, false otherwise.
- */
-bool GameModel::IsOutOfGameBounds(const Point2D& pos) const {
-	const GameLevel* currLevel = this->GetCurrentLevel();
-	float levelWidthBounds	= currLevel->GetLevelUnitWidth()  + GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE;
-	float levelHeightBounds = currLevel->GetLevelUnitHeight() + GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE;
+bool GameModel::IsOutOfPaddedLevelBounds(const Point2D& pos, float padding) const {
+    const GameLevel* currLevel = this->GetCurrentLevel();
+    float levelWidthBounds	= currLevel->GetLevelUnitWidth()  + padding;
+    float levelHeightBounds = currLevel->GetLevelUnitHeight() + padding;
 
-	return pos[1] <= GameLevel::Y_COORD_OF_DEATH || 
-				 pos[1] >= levelHeightBounds ||
-				 pos[0] <= -GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE ||
-				 pos[0] >= levelWidthBounds;
+    return pos[1] <= -padding || 
+        pos[1] >= levelHeightBounds ||
+        pos[0] <= -padding ||
+        pos[0] >= levelWidthBounds;
 }
 
 /**
@@ -920,7 +915,7 @@ void GameModel::UpdateActiveItemDrops(double seconds) {
 		currItem->Tick(seconds, *this);
 		
 		// Check to see if any have left the playing area - if so destroy them
-		if (this->IsOutOfGameBounds(currItem->GetCenter())) {
+		if (this->IsOutOfGameBoundsForBall(currItem->GetCenter())) {
 			removeItems.push_back(currItem);
 		}
 	}
@@ -950,7 +945,7 @@ void GameModel::UpdateActiveProjectiles(double seconds) {
 		    currProjectile->Tick(seconds, *this);
 
 		    // If the projectile is out of game bounds, destroy it
-		    if (this->IsOutOfGameBounds(currProjectile->GetPosition())) {
+		    if (this->IsOutOfGameBoundsForProjectile(currProjectile->GetPosition())) {
 
 			    iter = currProjectiles.erase(iter);
                 currProjectile->Teardown(*this);

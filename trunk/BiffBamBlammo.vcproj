@@ -2800,6 +2800,10 @@
 							>
 						</File>
 						<File
+							RelativePath=".\GameModel\LevelShakeEventInfo.h"
+							>
+						</File>
+						<File
 							RelativePath=".\GameModel\ShortCircuitEffectInfo.h"
 							>
 						</File>

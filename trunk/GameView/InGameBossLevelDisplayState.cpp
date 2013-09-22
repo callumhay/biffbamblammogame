@@ -119,7 +119,7 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             this->paddlePosGetTheHellOutAnim.SetLerp(0.0, Boss::TOTAL_DEATH_ANIM_TIME, 
                 paddle->GetCenterPosition()[0], levelWidthTimes2);
 
-            this->display->GetCamera().SetCameraShake(Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME,
+            this->display->GetCamera().ApplyCameraShake(Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME,
                 Vector3D(0.2f, 0.2f, 0.0), 50);
 
             break;
@@ -242,7 +242,7 @@ void InGameBossLevelDisplayState::ExecuteOutroBossState(double dT) {
     if (this->timeUntilBigFlashyBoom <= 0.0) {
         double shakeTime = this->outroFinishCountdown - this->timeUntilBigFlashyBoom;
         if (shakeTime > 0.0) {
-            this->display->GetCamera().SetCameraShake(shakeTime, Vector3D(0.35f, 0.35f, 0.0), 100);
+            this->display->GetCamera().ApplyCameraShake(shakeTime, Vector3D(0.35f, 0.35f, 0.0), 100);
             GameControllerManager::GetInstance()->VibrateControllers(shakeTime, 
                 BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
         }

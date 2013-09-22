@@ -16,15 +16,15 @@ const float Camera::NEAR_PLANE_DIST		= 0.01f;
 const float Camera::FAR_PLANE_DIST		= 300.0f;
 
 const Vector3D Camera::DEFAULT_FORWARD_VEC	= Vector3D(0, 0, -1);
-const Vector3D Camera::DEFAULT_LEFT_VEC			= Vector3D(-1, 0, 0);
-const Vector3D Camera::DEFAULT_UP_VEC				= Vector3D(0, 1, 0);
+const Vector3D Camera::DEFAULT_LEFT_VEC     = Vector3D(-1, 0, 0);
+const Vector3D Camera::DEFAULT_UP_VEC       = Vector3D(0, 1, 0);
 
 float Camera::aspectRatio = 0.0f;
+int Camera::windowWidth   = 0;
+int Camera::windowHeight  = 0;
 
-Camera::Camera(int width, int height) : 	shakeVar(0.0), shakeTimeElapsed(0.0), shakeTimeTotal(0.0), 
-shakeMagnitude(0,0,0), shakeSpeed(0), fovAngleInDegrees(FOV_ANGLE_IN_DEGS),
-windowWidth(width), windowHeight(height) {
-    aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+Camera::Camera() : shakeVar(0.0), shakeTimeElapsed(0.0), shakeTimeTotal(0.0), 
+shakeMagnitude(0,0,0), shakeSpeed(0), fovAngleInDegrees(FOV_ANGLE_IN_DEGS) {
 }
 
 /**

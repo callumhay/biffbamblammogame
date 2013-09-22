@@ -39,6 +39,7 @@ public:
 	void ProjectileDeflectedByPaddleShieldEvent(const Projectile& projectile, const PlayerPaddle& paddle);
     void PaddleHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
     void PaddleShieldHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
+    void PaddleHitByBossEvent(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
 
 	// Ball/Block related events
 	void BallDiedEvent(const GameBall& deadBall);

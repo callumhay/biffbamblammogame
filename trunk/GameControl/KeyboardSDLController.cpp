@@ -131,9 +131,8 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
             return;
         }
 
-        unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
-        const Camera& camera = this->display->GetCamera();
-        Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
+        unsigned int openGLYCoord = Camera::GetWindowHeight() - y;
+        Vector2D windowCenterPos(Camera::GetWindowWidth()/2, Camera::GetWindowHeight()/2);
         Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
 
         if (boostDir.IsZero()) {
@@ -228,9 +227,7 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
 
                 // Calculate the angular difference from the previous mouse position to the current,
                 // this, added to the previous boost direction, determines the special direction used for ball boosting
-                const Camera& camera = this->display->GetCamera();
-
-                Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
+                Vector2D windowCenterPos(Camera::GetWindowWidth()/2, Camera::GetWindowHeight()/2);
                 Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
                 if (boostDir.IsZero()) {
                     boostDir[0] = 1;

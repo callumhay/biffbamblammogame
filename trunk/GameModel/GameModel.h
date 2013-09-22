@@ -82,7 +82,11 @@ public:
         const BallBoostModel::BallBoostMode& ballBoostMode);
 	~GameModel();
 
-    bool IsOutOfGameBounds(const Point2D& pos) const;
+    bool IsOutOfGameBoundsForBall(const Point2D& pos) const;
+    bool IsOutOfGameBoundsForProjectile(const Point2D& pos) const;
+    bool IsOutOfPaddedLevelBounds(const Point2D& pos, float padding) const;
+    
+    Collision::AABB2D GenerateLevelProjectileBoundaries() const;
 
     void GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) const;
     
@@ -319,7 +323,7 @@ public:
     Point2D GetAvgBallLoc() const;
 
     Vector3D GetGravityDir() {
-        Vector3D gravityDir = this->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
+        Vector3D gravityDir = this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(0, -1, 0);
 	    gravityDir.Normalize();
         return gravityDir;
     }
@@ -631,6 +635,22 @@ inline void GameModel::Tick(double seconds) {
 		}
 	}
 	this->gameTransformInfo->Tick(seconds, *this);
+}
+
+inline bool GameModel::IsOutOfGameBoundsForBall(const Point2D& pos) const {
+    return this->IsOutOfPaddedLevelBounds(pos, GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_BALL);
+}
+
+inline bool GameModel::IsOutOfGameBoundsForProjectile(const Point2D& pos) const {
+    return this->IsOutOfPaddedLevelBounds(pos, GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_PROJECTILE);
+}
+
+inline Collision::AABB2D GameModel::GenerateLevelProjectileBoundaries() const {
+    const GameLevel* currLevel = this->GetCurrentLevel();
+    return Collision::AABB2D(
+        Point2D(-GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_PROJECTILE, -GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_PROJECTILE), 
+        Point2D(currLevel->GetLevelUnitWidth()  + GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_PROJECTILE, 
+        currLevel->GetLevelUnitHeight() + GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_PROJECTILE));
 }
 
 #endif

@@ -75,6 +75,7 @@ void GameTransformMgr::ClearSpecialCamEffects() {
 void GameTransformMgr::Reset() {
 	this->currGameDegRotX = 0.0f;
 	this->currGameDegRotY = 0.0f;
+    this->currGameDegRotZ = 0.0f;
 	this->isFlipped = false;
 	this->isBallDeathCamIsOn = false;
 
@@ -245,6 +246,88 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
     this->animationQueue.push_front(transformAnim);
 }
 
+void GameTransformMgr::SetGameZRotation(float rotInDegs, const GameLevel& level) {
+    this->currGameDegRotZ = rotInDegs;
+    
+    static const float FADE_IN_FRACT_0_180_360 = 1.0f;
+    static const float FADE_IN_FRACT_90_270    = 0.7f;
+
+    float fractAmt   = 1.0f;
+    float absModRotZ = fmod(fabs(this->currGameDegRotZ), 360.0f);
+    if (absModRotZ <= 90.0f) {
+        fractAmt = NumberFuncs::Lerp(0.0f, 90.0f, FADE_IN_FRACT_0_180_360, FADE_IN_FRACT_90_270, absModRotZ);
+    }
+    else if (absModRotZ > 90.0f && absModRotZ <= 180.0f) {
+        fractAmt = NumberFuncs::Lerp(90.0f, 180.0f, FADE_IN_FRACT_90_270, FADE_IN_FRACT_0_180_360, absModRotZ);
+    }
+    else if (absModRotZ > 180.0f && absModRotZ <= 270.0f) {
+        fractAmt = NumberFuncs::Lerp(180.0f, 270.0f, FADE_IN_FRACT_0_180_360, FADE_IN_FRACT_90_270, absModRotZ);
+    }
+    else {
+        fractAmt = NumberFuncs::Lerp(270.0f, 360.0f, FADE_IN_FRACT_90_270, FADE_IN_FRACT_0_180_360, absModRotZ);
+    }
+
+    // Recalculate the camera transform so that it fits the whole level...
+    const float levelWidth  = level.GetLevelUnitWidth();
+    const float levelHeight = level.GetLevelUnitHeight();
+    const float levelHalfWidthFract  = fractAmt * (levelWidth / 2.0f);
+    const float levelHalfHeightFract = fractAmt * (levelHeight / 2.0f);
+    
+    // Create a set of vectors that represent points at the corners of a bounding box 
+    // around the level with origin at the center of the box
+    Vector2D pt0(-levelHalfWidthFract, -levelHalfHeightFract);
+    Vector2D pt1(-levelHalfWidthFract, levelHalfHeightFract);
+    Vector2D pt2(levelHalfWidthFract, levelHalfHeightFract);
+    Vector2D pt3(levelHalfWidthFract, -levelHalfHeightFract);
+
+    // Rotate the box by the current z rotation...
+    pt0.Rotate(this->currGameDegRotZ);
+    pt1.Rotate(this->currGameDegRotZ);
+    pt2.Rotate(this->currGameDegRotZ);
+    pt3.Rotate(this->currGameDegRotZ);
+
+    // Now create a new AABB with the rotated points
+    Collision::AABB2D viewAABB;
+    viewAABB.AddPoint(Point2D(pt0[0], pt0[1]));
+    viewAABB.AddPoint(Point2D(pt1[0], pt1[1]));
+    viewAABB.AddPoint(Point2D(pt2[0], pt2[1]));
+    viewAABB.AddPoint(Point2D(pt3[0], pt3[1]));
+
+    // Using the AABB, figure out the distance that the camera needs to be in order to fit it all into the viewport...
+    float addToWidth  = GameTransformMgr::GetLevelCameraSetupAddToWidth(level);
+    float addToHeight = GameTransformMgr::GetLevelCameraSetupAddToHeight(level);
+    float camZDist    = this->GetCameraZDistanceToFitAABB(viewAABB, addToWidth, addToHeight);
+    
+    this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, camZDist), Vector3D(0,0,0));
+    
+    // Don't mess with the current camera orientation unless we're sure that there are no other
+    // important camera animations going on
+    if (!this->GetIsRemoteControlRocketCameraOn() && !this->GetIsBallCameraOn() && 
+        !this->GetIsPaddleCameraOn() && !this->GetIsBallDeathCameraOn() &&
+        this->animationQueue.empty() && this->remoteControlRocketCamAnimations.empty() &&
+        this->ballDeathAnimations.empty()) {
+
+        this->currCamOrientation.SetTZ(camZDist);
+    }
+}
+
+
+/// <summary>
+/// Gets the distance along the z-axis that the camera must be in to fit the given AABB in the viewport.
+/// </summary>
+/// <returns> The required z distance. </returns>
+float GameTransformMgr::GetCameraZDistanceToFitAABB(const Collision::AABB2D& aabb, 
+                                                    float addToWidth, float addToHeight) const {
+    float width  = aabb.GetWidth();
+    float height = aabb.GetHeight();
+
+    float horizontalFOV = Camera::FOV_ANGLE_IN_DEGS * Camera::GetAspectRatio();
+    float distance1 = (addToHeight + height) / (2.0f * tanf(Trig::degreesToRadians(0.5f * Camera::FOV_ANGLE_IN_DEGS)));
+    float distance2 = (addToWidth + width)   / (2.0f * tanf(Trig::degreesToRadians(0.5f * horizontalFOV)));
+
+    return std::max<float>(distance1, distance2);
+}
+
 /**
  * This needs to be called whenever a new level is being loaded - this will make sure
  * that the default camera position is calculated and made available to the view.
@@ -255,14 +338,32 @@ void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
     float levelWidth  = level.GetLevelUnitWidth();
     float levelHeight = level.GetLevelUnitHeight();
     
+    float addToWidth  = GameTransformMgr::GetLevelCameraSetupAddToWidth(level); 
+    float addToHeight = GameTransformMgr::GetLevelCameraSetupAddToHeight(level); 
+
+    float horizontalFOV = Camera::FOV_ANGLE_IN_DEGS * Camera::GetAspectRatio();
+    float distance1 = (levelHeight + addToHeight) / (2.0f * tanf(Trig::degreesToRadians(0.5f * Camera::FOV_ANGLE_IN_DEGS)));
+    float distance2 = (levelWidth  + addToWidth)  / (2.0f * tanf(Trig::degreesToRadians(0.5f * horizontalFOV)));
+
+    float distance = std::max<float>(distance1, distance2);
+
+	// Telling the world to translate by (0, 0, -distance), telling the camera to translate by (0, 0, distance)
+	this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, distance), Vector3D(0,0,0));
+	this->currCamOrientation	= this->defaultCamOrientation;
+}
+
+float GameTransformMgr::GetLevelCameraSetupAddToWidth(const GameLevel& level) {
+    float levelWidth  = level.GetLevelUnitWidth();
+
     static const float MIN_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 14;
     static const float MAX_WIDTH_FOR_LERP = LevelPiece::PIECE_WIDTH * 23;
 
     static const float MIN_ADD_AMT = 6.0f  * LevelPiece::PIECE_WIDTH;
     static const float MAX_ADD_AMT = 8.25f * LevelPiece::PIECE_WIDTH;
 
-    float addToWidth = MIN_ADD_AMT;
+    static const float WIDTH_RATIO_COEFF  = Camera::GetWindowWidth()  / 1600.0f;
 
+    float addToWidth  = MIN_ADD_AMT;
     if (levelWidth > MIN_WIDTH_FOR_LERP) {
         if (levelWidth > MAX_WIDTH_FOR_LERP) {
             addToWidth = MAX_ADD_AMT;
@@ -272,15 +373,16 @@ void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
         }
     }
 
-    float distance1     = (levelHeight + 4 * LevelPiece::PIECE_HEIGHT) / (2.0f * tanf(Trig::degreesToRadians(0.5f * Camera::FOV_ANGLE_IN_DEGS)));
-    float horizontalFOV = Camera::FOV_ANGLE_IN_DEGS * Camera::GetAspectRatio();
-    float distance2     = (levelWidth + addToWidth) / (2.0f * tanf(Trig::degreesToRadians(0.5f * horizontalFOV)));
+    addToWidth  *= WIDTH_RATIO_COEFF;
+    return addToWidth;
+}
 
-    float distance = std::max<float>(distance1, distance2);
-
-	// Telling the world to translate by (0, 0, -distance), telling the camera to translate by (0, 0, distance)
-	this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, distance), Vector3D(0,0,0));
-	this->currCamOrientation	= this->defaultCamOrientation;
+float GameTransformMgr::GetLevelCameraSetupAddToHeight(const GameLevel& level) {
+    UNUSED_PARAMETER(level);
+    static const float HEIGHT_RATIO_COEFF = Camera::GetWindowHeight() / 900.0f;
+    float addToHeight = 4 * LevelPiece::PIECE_HEIGHT;
+    addToHeight *= HEIGHT_RATIO_COEFF;
+    return addToHeight;
 }
 
 /**
@@ -391,7 +493,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 		// Calculate the distance the ball has moved so far (if it were travelling in a straight line), in worldspace
 		Point3D currCamPosition   = Point3D(currCamTranslation[0], currCamTranslation[1], currCamTranslation[2]);
 		Vector3D ballMoveDistance	= dT * Vector3D(ballVelocity2D[0], ballVelocity2D[1], 0.0f);
-		ballMoveDistance = this->GetGameTransform() * ballMoveDistance; 
+		ballMoveDistance = this->GetGameXYZTransform() * ballMoveDistance; 
 
 		currCamPosition  = currCamPosition + ballMoveDistance;
 		this->currCamOrientation.SetTranslation(Vector3D(currCamPosition[0], currCamPosition[1], currCamPosition[2]));
@@ -410,8 +512,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
             // Camera rotates with the rocket...
             const Vector2D& rocketVelDir = this->remoteControlRocketWithCamera->GetVelocityDirection();
             assert(!rocketVelDir.IsZero());
-            Vector3D worldSpaceRotation(0, 0, Trig::radiansToDegrees(atan2(rocketVelDir[1], rocketVelDir[0])) - 90);
-            worldSpaceRotation = this->GetGameTransform() * worldSpaceRotation;
+            Vector3D worldSpaceRotation(0, 0, Trig::radiansToDegrees(-atan2(rocketVelDir[1], rocketVelDir[0])) + 90 + this->currGameDegRotZ);
 
             this->currCamOrientation.SetTranslation(worldSpaceTranslation);
             this->currCamOrientation.SetRotation(worldSpaceRotation);
@@ -427,7 +528,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 			        currLevel->GetLevelUnitHeight(), worldSpaceTranslation, this->cameraFOVAngle);
 
 		        Vector3D worldRotation(90, this->paddleWithCamera->GetZRotation(), 0);
-		        worldRotation = this->GetGameTransform() * worldRotation;	
+		        worldRotation = this->GetGameXYZTransform() * worldRotation;	
                 
                 // TODO: Make this more versatile based on whether the paddle is being hit/hurt?...
     																															    
@@ -448,7 +549,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 
 		        // TODO: make the rotation a little more creative...
 		        Vector3D worldRotation(-90, 0, 0);
-		        worldRotation = this->GetGameTransform() * worldRotation;
+		        worldRotation = this->GetGameXYZTransform() * worldRotation;
 
 		        // Update the camera position and rotation based on the movement of the ball and the level transform
 		        this->currCamOrientation.SetTranslation(worldSpaceTranslation);
@@ -470,7 +571,7 @@ void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, fl
 	Point2D  worldSpacePaddlePos = paddleCamPosition - halfLevelDim;
 	Vector3D worldSpaceTranslation(worldSpacePaddlePos[0], worldSpacePaddlePos[1], 0.0f);
 	
-	paddleCamPos = this->GetGameTransform() * worldSpaceTranslation;
+	paddleCamPos = this->GetGameXYZTransform() * worldSpaceTranslation;
 	fov = 2.0f * Trig::radiansToDegrees(atan(paddle.GetHalfWidthTotal() / DIST_FROM_PADDLE));
 }
 
@@ -487,7 +588,7 @@ void GameTransformMgr::GetBallCamPositionAndFOV(const GameBall& ball, float leve
 	Point2D  worldSpaceBallPos = ballCamPosition - halfLevelDim;
 	Vector3D worldSpaceTranslation(worldSpaceBallPos[0], worldSpaceBallPos[1], 0.0f);
 
-	ballCamPos = this->GetGameTransform() * worldSpaceTranslation;
+	ballCamPos = this->GetGameXYZTransform() * worldSpaceTranslation;
 	fov = 2.0f * Trig::radiansToDegrees(atan(ballBounds.Radius() / GameBall::DEFAULT_BALL_RADIUS));
 }
 
@@ -502,20 +603,8 @@ void GameTransformMgr::GetRemoteCtrlRocketPositionAndFOV(const PaddleRemoteContr
 
    Point2D rocketWorldSpacePos = rocket.GetPosition() - 0.5 * Vector2D(levelWidth, levelHeight);
 
-   rocketCamPos = this->GetGameTransform() * Vector3D(rocketWorldSpacePos[0], rocketWorldSpacePos[1], zDistanceFromRocket);
+   rocketCamPos = this->GetGameXYZTransform() * Vector3D(rocketWorldSpacePos[0], rocketWorldSpacePos[1], zDistanceFromRocket);
    fov = Camera::FOV_ANGLE_IN_DEGS;
-}
-
-/**
- * Grab the current transform for the game - this is a composite matrix
- * of all the transforms that are currently being applied - the transforms
- * are concatenated in the most sane and consistent way possible.
- */
-Matrix4x4 GameTransformMgr::GetGameTransform() const {
-	Matrix4x4 rotX = Matrix4x4::rotationMatrix('x', this->currGameDegRotX, true);
-	Matrix4x4 rotY = Matrix4x4::rotationMatrix('y', this->currGameDegRotY, true);
-
-	return rotY * rotX;
 }
 
 /**
@@ -646,7 +735,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 	Vector2D halfLevelDim	= 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
 	Point2D paddleWorldSpacePos = paddle->GetCenterPosition() - halfLevelDim;
 	Vector3D worldSpacePaddlePos(paddleWorldSpacePos[0], paddleWorldSpacePos[1], 0.0f);
-	worldSpacePaddlePos = this->GetGameTransform() * worldSpacePaddlePos;
+	worldSpacePaddlePos = this->GetGameXYZTransform() * worldSpacePaddlePos;
 	
 	if (paddleCamAnim.type == GameTransformMgr::ToPaddleCamAnimation) {
 		// We are going into paddle camera mode... animate the camera from whereever
@@ -829,7 +918,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 
 	// This will store the actual world space position that we need to transform the camera to...
 	Vector3D worldSpaceBallPos(ballWorldSpacePos[0], ballWorldSpacePos[1], 0.0f);
-	worldSpaceBallPos = this->GetGameTransform() * worldSpaceBallPos;
+	worldSpaceBallPos = this->GetGameXYZTransform() * worldSpaceBallPos;
 
 	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
 		// We are going into ball camera mode... animate the camera from whereever
@@ -1046,7 +1135,7 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 
 		// This will store the actual world space position that we need to transform the camera to...
 		Vector3D finalCamPosition(ballLevelSpacePos[0], ballLevelSpacePos[1], GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL);
-		finalCamPosition = this->GetGameTransform() * finalCamPosition;
+		finalCamPosition = this->GetGameXYZTransform() * finalCamPosition;
 		Orientation3D finalOrientation(finalCamPosition, Vector3D(0, 0, 0));
 
 		// Figure out the time to travel
@@ -1130,9 +1219,9 @@ bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameMode
 	        Vector2D halfLevelDim	   = 0.5f * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
             Point2D ballsCenter        = ballBounds.GetCenter() - halfLevelDim;
 
-            Vector3D translation1 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], 
+            Vector3D translation1 = this->GetGameXYZTransform() * Vector3D(ballsCenter[0], ballsCenter[1], 
                 this->bulletTimeCamAnimation.GetInterpolationValue(1).GetTranslation()[2]);
-            Vector3D translation2 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], 
+            Vector3D translation2 = this->GetGameXYZTransform() * Vector3D(ballsCenter[0], ballsCenter[1], 
                 this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetTranslation()[2]);
 
             this->bulletTimeCamAnimation.SetInterpolationValue(1, Orientation3D(translation1, 
@@ -1199,8 +1288,8 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
                                (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f)));
         float minCamDistance2 = (std::max<float>(ballBounds.GetHeight(), ballBounds.GetWidth()) + border2) / 
                                (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f)));
-        Vector3D translation1 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance1);
-        Vector3D translation2 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance2);
+        Vector3D translation1 = this->GetGameXYZTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance1);
+        Vector3D translation2 = this->GetGameXYZTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance2);
 
         std::vector<double> timeVals;
         timeVals.push_back(0.0);

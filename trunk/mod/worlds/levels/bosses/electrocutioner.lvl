@@ -3,8 +3,8 @@ Electrocutioner
 25 32
 E E E E E E E D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket){2} E E E E E E E E E D(ShieldPaddle,ShieldPaddle,ShieldPaddle){1} E E E E E E E 
 E S N S S S S S S S S S S S S S S S S S S E E E E 
-E S E E S E E E E E E E E E E E E E E E N E E E E 
-E S E E S E E E E E E E E E E E E E E E N E E E E 
+E S E E S E E E E E E E E E E E E E E E N W(2) E E E 
+E S E E S E E E E E E E E E E E E E E E N E W(2) E E 
 E S S E S E E E E E E E E E E E E E E E N E E W(2) E 
 E S E E S E E E E E E E E E E E E E E E N E E E E 
 E S E E S E E E E E E E E E E E E E E E N E E E E 
@@ -20,19 +20,19 @@ S E E E S E E E E E E E E E E E E E E E S E E E S
 S E W(3) E S E E E E E E E E E E E E E E E S E W(4) E S 
 S E E E S E E E E E E E E E E E E E E E S E E E S 
 S S S S S E E E E E E E E E E E E E E E S E E S S 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E S S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S S E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E W(1) E E F(r) E E E E E E E E E E E E E E E S E S S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S E E S E 
-E E E E F(r) E E E E E E E E E E E E E E E S S N S E 
+E E E E S E E E E E E E E E E E E E E E S E E S E 
+E E E E S E E E E E E E E E E E E E E E S E S S E 
+E E E E S E E E E E E E E E E E E E E E S E E S E 
+E E E E S E E E E E E E E E E E E E E E S E E S E 
+S S S S S E E E E E E E E E E E E E E E S E E S E 
+F(r) E E E F(r) E E E E E E E E E E E E E E E S S E S E 
+F(r) E E E F(r) E E E E E E E E E E E E E E E S E E S E 
+F(r) E E E F(r) E E E E E E E E E E E E E E E S E E S E 
+F(r) E W(1) E F(r) E E E E E E E E E E E E E E E S E E S E 
+F(r) E E E F(r) E E E E E E E E E E E E E E E S E S S E 
+F(r) E E E F(r) E E E E E E E E E E E E E E E S E E S E 
+F(r) E E E F(r) E E E E E E E E E E E E E E E S E E S E 
+S F(u) F(u) F(u) S E E E E E E E E E E E E E E E S S N S E 
 
 STARS:
 0

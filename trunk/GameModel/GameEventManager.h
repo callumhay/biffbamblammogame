@@ -69,6 +69,7 @@ public:
 	void ActionProjectileDeflectedByPaddleShield(const Projectile& projectile, const PlayerPaddle& paddle);
     void ActionPaddleHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
     void ActionPaddleShieldHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
+    void ActionPaddleHitByBoss(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
 	void ActionBallDied(const GameBall& deadBall);
 	void ActionLastBallAboutToDie(const GameBall& ballAboutToDie);
 	void ActionLastBallExploded(const GameBall& explodedBall);

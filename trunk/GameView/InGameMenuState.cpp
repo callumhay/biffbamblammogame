@@ -138,7 +138,6 @@ void InGameMenuState::RenderFrame(double dT) {
 
 	// Render the last frame from the in-game display state, stored in the FBO assets
 	// this will be the 'background' for the menu...
-	const Camera& camera = this->display->GetCamera();
 	FBObj* lastFullscreenRendering = this->display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO();
 	assert(lastFullscreenRendering != NULL);
 
@@ -149,13 +148,13 @@ void InGameMenuState::RenderFrame(double dT) {
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(),
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(),
         -1.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.5f));
 	
 	// Draw the menus...
 	glEnable(GL_DEPTH_TEST);
-	this->topMenu->SetCenteredOnScreen(camera.GetWindowWidth(), camera.GetWindowHeight());
-	this->topMenu->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
+	this->topMenu->SetCenteredOnScreen(Camera::GetWindowWidth(), Camera::GetWindowHeight());
+	this->topMenu->Draw(dT, Camera::GetWindowWidth(), Camera::GetWindowHeight());
 	glPopAttrib();
 }
 
@@ -221,8 +220,7 @@ void InGameMenuState::InitTopMenu() {
 	assert(this->topMenu == NULL);
 	assert(this->topMenuEventHandler == NULL);
 
-	//const Camera& camera = this->display->GetCamera();
-	const float textScaleFactor = this->display->GetTextScalingFactor();
+	float textScaleFactor = this->display->GetTextScalingFactor();
 
 	// Set up the handlers
 	this->topMenuEventHandler    = new TopMenuEventHandler(this);
@@ -254,10 +252,10 @@ void InGameMenuState::InitTopMenu() {
         GameFontAssetsManager::Medium), "Resume");
 	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
         GameFontAssetsManager::Big),    "Resume");
+    tempLabelSm.SetScale(textScaleFactor);
+    tempLabelLg.SetScale(textScaleFactor);
 	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
-	tempLabelSm.SetScale(textScaleFactor);
 	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
-	tempLabelLg.SetScale(textScaleFactor);
 
 	// Add items to the menu in their order (first to last)
 	this->resumeItem = this->topMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
@@ -282,6 +280,7 @@ void InGameMenuState::InitTopMenu() {
         this->difficultyItem = GameMenu::NO_MENU_ITEM_INDEX;
     }
     else {
+
         // Add the difficulty item to the menu...
         static const int POPUP_WIDTH = 750;
         this->initialDifficultySelected = static_cast<int>(this->cfgOptions.GetDifficulty());

@@ -62,7 +62,7 @@ public:
 	}
 
 protected:
-	virtual void SetupBeforePasses(const Camera& camera);
+	void SetupBeforePasses(const Camera& camera);
 
 private:
 	// CG Portal Block parameters

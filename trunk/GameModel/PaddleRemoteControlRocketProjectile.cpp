@@ -73,7 +73,7 @@ void PaddleRemoteControlRocketProjectile::Teardown(GameModel& gameModel) {
     transformMgr->SetRemoteControlRocketCamera(false, NULL);
 
     // If the rocket went out of bounds then blow it up...
-    if (gameModel.IsOutOfGameBounds(this->GetPosition())) {
+    if (gameModel.IsOutOfGameBoundsForProjectile(this->GetPosition())) {
         GameLevel* currLevel = gameModel.GetCurrentLevel();
         currLevel->RocketExplosionNoPieces(this);
     }
