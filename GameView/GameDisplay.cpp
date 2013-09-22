@@ -36,10 +36,12 @@ const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMER
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): 
 gameListener(NULL), currState(NULL), model(model), 
 assets(NULL), sound(NULL),
-gameExited(false), gameReinitialized(false),
-gameCamera(initWidth, initHeight) {
+gameExited(false), gameReinitialized(false), gameCamera() {
 
 	assert(model != NULL);
+
+    // MAKE SURE WE SET THE CAMERA DIMENSIONS!!!!
+    Camera::SetWindowDimensions(initWidth, initHeight);
 
 	// Load basic default in-memory sounds
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
@@ -127,13 +129,13 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 	this->currState->DisplaySizeChanged(w, h);
 }
 
-float GameDisplay::GetTextScalingFactor() const {
+float GameDisplay::GetTextScalingFactor() {
 	// We choose a base resolution to scale from...
 	static const float BASE_X_RESOLUTION = 1152;
 	static const float BASE_Y_RESOLUTION = 864;
 	
-	float currXRes = this->gameCamera.GetWindowWidth();
-	float currYRes = this->gameCamera.GetWindowHeight();
+    float currXRes = Camera::GetWindowWidth();
+	float currYRes = Camera::GetWindowHeight();
 
 	return std::min<float>(currXRes / BASE_X_RESOLUTION, currYRes / BASE_Y_RESOLUTION);
 }

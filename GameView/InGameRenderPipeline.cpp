@@ -39,7 +39,7 @@ void InGameRenderPipeline::RenderFrameWithoutHUD(double dT) {
 	this->SetupRenderFrame(dT);
 	this->ApplyInGameCamera(dT);
 
-    Matrix4x4 gameTransform  = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
+    Matrix4x4 gameTransform  = this->display->GetModel()->GetTransformInfo()->GetGameXYZTransform();
     Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
 
 	FBObj* backgroundFBO = this->RenderBackgroundToFBO(negHalfLevelDim, dT);
@@ -245,6 +245,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
     assets->DrawLevelPiecesPostEffects(dT, camera);
 	assets->DrawStatusEffects(dT, camera, colourAndDepthFBO);
+    assets->DrawMiscEffects(*gameModel);
     glPopMatrix();
 
     // Tesla lightning arcs
@@ -268,7 +269,8 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
 	GameModel* gameModel     = this->display->GetModel();
 	const Camera& camera     = this->display->GetCamera();
 
-	// Render fullscreen effects 
+	// Render full-screen effects
+    // N.B., Bloom is applied here
 	FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
     FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
     FBObj* finalFBO = fboAssets->GetFinalFullScreenFBO();
@@ -277,7 +279,7 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
     assert(colourAndDepthFBO != NULL);
     assert(finalFBO != NULL);
    
-	// Final non-fullscreen draw pass - draw the falling items and particles
+	// Final non-full-screen draw pass - draw the falling items and particles
 	colourAndDepthFBO->BindFBObj();
     initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
 

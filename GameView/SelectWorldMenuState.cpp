@@ -96,9 +96,9 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 
     // Draw the starry background...
     this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
     this->starryBG->UnbindTexture();
 
 	// Draw in window coordinates
@@ -110,7 +110,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
     // Draw the title...
     static const int HORIZONTAL_TITLE_GAP = 60;
     static const int VERTICAL_TITLE_GAP   = 30;
-    this->worldSelectTitleLbl->SetTopLeftCorner(HORIZONTAL_TITLE_GAP, camera.GetWindowHeight() - VERTICAL_TITLE_GAP);
+    this->worldSelectTitleLbl->SetTopLeftCorner(HORIZONTAL_TITLE_GAP, Camera::GetWindowHeight() - VERTICAL_TITLE_GAP);
     this->worldSelectTitleLbl->Draw();
 
     // Draw the "Press esc to go back" stuff
@@ -136,7 +136,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone || this->goBackToMainMenu) {
-        this->DrawFadeOverlay(camera.GetWindowWidth(), camera.GetWindowHeight(), this->fadeAnimation.GetInterpolantValue());
+        this->DrawFadeOverlay(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue());
     }
 
     glPopMatrix();
@@ -145,7 +145,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 	this->menuFBO->UnbindFBObj();
 
 	// Do bloom on the menu and draw it
-	this->bloomEffect->Draw(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
+	this->bloomEffect->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
 	
     if (this->itemActivated) {
         bool animDone = this->goToLevelSelectAlphaAnim.Tick(dT);
@@ -169,8 +169,8 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        float screenWidth = camera.GetWindowWidth();
-        float screenHeight = camera.GetWindowHeight();
+        float screenWidth = Camera::GetWindowWidth();
+        float screenHeight = Camera::GetWindowHeight();
         float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(this->starryBG->GetWidth()));
         float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(this->starryBG->GetHeight()));
 
@@ -180,11 +180,11 @@ void SelectWorldMenuState::RenderFrame(double dT) {
             glTexCoord2f(0, 0);
 	        glVertex2f(-moveAmt, 0);
             glTexCoord2f(2*totalTexU, 0);
-	        glVertex2f(2*camera.GetWindowWidth() - moveAmt, 0);
+	        glVertex2f(2*Camera::GetWindowWidth() - moveAmt, 0);
             glTexCoord2f(2*totalTexU, totalTexV);
-            glVertex2f(2*camera.GetWindowWidth() - moveAmt, camera.GetWindowHeight());
+            glVertex2f(2*Camera::GetWindowWidth() - moveAmt, Camera::GetWindowHeight());
 	        glTexCoord2f(0, totalTexV);
-            glVertex2f(-moveAmt, camera.GetWindowHeight());
+            glVertex2f(-moveAmt, Camera::GetWindowHeight());
         glEnd();
         this->starryBG->UnbindTexture();
 
@@ -192,11 +192,11 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         glColor4f(1,1,1,alphaAmt);
         glBegin(GL_QUADS);
 	        glTexCoord2f(1, 0);
-            glVertex2f(camera.GetWindowWidth() - moveAmt, 0);
+            glVertex2f(Camera::GetWindowWidth() - moveAmt, 0);
 	        glTexCoord2f(1, 1);
-            glVertex2f(camera.GetWindowWidth() - moveAmt, camera.GetWindowHeight());
+            glVertex2f(Camera::GetWindowWidth() - moveAmt, Camera::GetWindowHeight());
 	        glTexCoord2f(0, 1);
-	        glVertex2f(-moveAmt, camera.GetWindowHeight());
+	        glVertex2f(-moveAmt, Camera::GetWindowHeight());
             glTexCoord2f(0, 0);
 	        glVertex2f(-moveAmt, 0);
         glEnd();
@@ -268,11 +268,10 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
                 else {
                     sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
 
-                    const Camera& camera = this->display->GetCamera();
                     this->itemActivated = true;
                     this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
                     this->goToLevelSelectAlphaAnim.SetRepeat(false);
-                    this->goToLevelSelectMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
+                    this->goToLevelSelectMoveAnim.SetLerp(0.5, Camera::GetWindowWidth());
                     this->goToLevelSelectMoveAnim.SetRepeat(false);
                 }
             }
@@ -362,8 +361,7 @@ void SelectWorldMenuState::Init(int selectedIdx) {
     this->selectionAlphaOrangeAnim.SetRepeat(true);
 
     // Build a framebuffer object for the menu
-    const Camera& camera = this->display->GetCamera();
-	this->menuFBO = new FBObj(camera.GetWindowWidth(), camera.GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 
 	// Create the new bloom effect and set its parameters appropriately
 	this->bloomEffect = new CgFxBloom(this->menuFBO);
@@ -534,7 +532,7 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
     }
 
     const float currCenterX = this->GetXPosition(camera, selectedWorldNum);
-    const float currCenterY = camera.GetWindowHeight() / 2.0f;
+    const float currCenterY = Camera::GetWindowHeight() / 2.0f;
 
     glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -642,7 +640,7 @@ void SelectWorldMenuState::WorldSelectItem::DrawSelectionBorder(const Camera& ca
 
     const float currSize = this->sizeAnim.GetInterpolantValue();
     const float currCenterX = this->GetXPosition(camera, this->GetWorld()->GetWorldNumber());
-    const float currCenterY = camera.GetWindowHeight() / 2.0f;
+    const float currCenterY = Camera::GetWindowHeight() / 2.0f;
 
     glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -697,8 +695,10 @@ void SelectWorldMenuState::WorldSelectItem::ExecuteLockedAnimation() {
 }
 
 float SelectWorldMenuState::WorldSelectItem::GetXPosition(const Camera& camera, int selectedWorldNum) const {
+    UNUSED_PARAMETER(camera);
+
     int numWorldsToSelected = this->gameWorld->GetWorldNumber() - selectedWorldNum;
-    const float windowCenterX = camera.GetWindowWidth() / 2.0f;
+    const float windowCenterX = Camera::GetWindowWidth() / 2.0f;
     
     if (numWorldsToSelected == 0) {
         return windowCenterX;

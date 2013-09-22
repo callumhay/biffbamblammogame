@@ -280,43 +280,11 @@ void NouveauBossAI::ShootRandomRightSideLaserBullet(GameModel* gameModel) {
     }
 }
 
-// TODO: GENERALIZE THIS FOR ALL BOSSES SO THAT MOVEMENT WORKS PROPERLY FOR EVERY BOSS!!!!
-/// <summary> Move the boss to the currently set target position. </summary>
-/// <returns> true if the boss made it to the target position, false if the boss is still moving to the target. </returns>
-bool NouveauBossAI::MoveToTargetPosition() {
-
-    Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
-
-    Vector2D startToTargetVec   = this->targetPosition - this->startPosition;
-    Vector2D currPosToTargetVec = this->targetPosition - bossPos;
-
-    if (currPosToTargetVec.SqrMagnitude() < 0.5f*LevelPiece::PIECE_HEIGHT ||
-        Vector2D::Dot(startToTargetVec, currPosToTargetVec) <= 0.0f) {
-
-        // Stop the boss immediately
-        this->desiredVel = Vector2D(0,0);
-        this->currVel    = Vector2D(0,0);
-        return true;
-    }
-
-    // We're not at or near the target position yet, get the velocity to move there
-    // (unless we're getting close then we want to slow down and stop)
-
-    // With a bit of kinematics we figure out when to start stopping...
-    float distToTargetToStartStopping = -this->currVel.SqrMagnitude() / (2 * -this->GetAccelerationMagnitude());
-    assert(distToTargetToStartStopping >= 0.0);
-    if (currPosToTargetVec.SqrMagnitude() <= distToTargetToStartStopping * distToTargetToStartStopping) {
-        this->desiredVel = Vector2D(0,0);
-    }
-    else {
-        this->desiredVel = this->GetMaxMoveSpeedBetweenTargets() * Vector2D::Normalize(currPosToTargetVec);
-    }
-
-    return false;
-}
-
 void NouveauBossAI::OnSetStateMoveToTargetStopAndShoot() {
-    this->startPosition = this->targetPosition = this->boss->alivePartsRoot->GetTranslationPt2D();
+
+    Point2D startAndTargetPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+    this->SetMoveToTargetPosition(startAndTargetPos, startAndTargetPos);
+
     this->numLinearMovements = this->GenerateNumMovements();
     this->waitingAtTargetCountdown = 0.0;
     this->timeUntilNextLaserWhileWaitingAtTarget = 0.0;
@@ -342,8 +310,8 @@ void NouveauBossAI::OnSetRapidFireSweep() {
 }
 
 void NouveauBossAI::OnSetMoveToLaserTargetableLocation() {
-    this->startPosition  = this->boss->alivePartsRoot->GetTranslationPt2D();
-    this->targetPosition = this->ChooseBossPositionForPlayerToHitDomeWithLasers(true);
+    this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(),
+        this->ChooseBossPositionForPlayerToHitDomeWithLasers(true));
 }
 
 void NouveauBossAI::OnSetStatePrepLaserBeamAttack() {
@@ -399,7 +367,7 @@ void NouveauBossAI::OnSetStateLaserBeamAttack() {
 void NouveauBossAI::ExecuteMoveToTargetStopAndShootState(double dT, GameModel* gameModel) {
 
     // Check to see if we're really close to the target or if we've overshot it...
-    if (this->MoveToTargetPosition()) {
+    if (this->MoveToTargetPosition(this->GetMaxMoveSpeedBetweenTargets())) {
 
         // Wait at the target for a bit of time before moving on...
         if (this->waitingAtTargetCountdown <= 0.0) {
@@ -412,14 +380,15 @@ void NouveauBossAI::ExecuteMoveToTargetStopAndShootState(double dT, GameModel* g
             }
             else {
                 // Choose a new target, continue moving between targets
-                this->startPosition = this->boss->alivePartsRoot->GetTranslationPt2D();
-
+                Point2D startPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+                Point2D targetPos;
                 if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-                    this->targetPosition = this->ChooseBossPositionForPlayerToHitDomeWithLasers(false);
+                    targetPos= this->ChooseBossPositionForPlayerToHitDomeWithLasers(false);
                 }
                 else {
-                    this->targetPosition = this->ChooseTargetPosition(this->startPosition);
+                    targetPos = this->ChooseTargetPosition(startPos);
                 }
+                this->SetMoveToTargetPosition(startPos, targetPos);
 
                 this->waitingAtTargetCountdown = this->GenerateWaitAtTargetTime();
                 this->timeUntilNextLaserWhileWaitingAtTarget = 0.0;
@@ -472,7 +441,7 @@ void NouveauBossAI::ExecuteRapidFireSweepState(double dT, GameModel* gameModel) 
 }
 
 void NouveauBossAI::ExecuteMoveToLaserTargetableLocationState() {
-    if (this->MoveToTargetPosition()) {        
+    if (this->MoveToTargetPosition(this->GetMaxMoveSpeedBetweenTargets())) {        
         // Go to the next state!
         this->SetState(NouveauBossAI::PrepLaserBeamAttackAIState);
     }
@@ -1041,11 +1010,12 @@ void SideSphereAI::SetState(NouveauBossAI::AIState newState) {
             this->OnSetStateMoveToTargetStopAndShoot();
             break;
         
-        case ArcSprayFireAIState:
-            this->startPosition  = this->boss->alivePartsRoot->GetTranslationPt2D();
-            this->targetPosition = this->ChooseTargetPosition(this->startPosition); 
+        case ArcSprayFireAIState: {
+            Point2D startPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+            this->SetMoveToTargetPosition(startPos, this->ChooseTargetPosition(startPos));
             this->arcLaserSprayFireCountdown = EPSILON;
             break;
+        }
 
         case RapidFireSweepAIState:
             this->OnSetRapidFireSweep();
@@ -1145,7 +1115,7 @@ void SideSphereAI::ExecuteArcSprayFireState(double dT, GameModel* gameModel) {
         this->arcLaserSprayFireCountdown -= dT;
     }
 
-    if (this->MoveToTargetPosition()) {
+    if (this->MoveToTargetPosition(this->GetMaxMoveSpeedBetweenTargets())) {
         this->GoToNextRandomAttackState();
     }
 }
@@ -1452,12 +1422,14 @@ void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
             this->OnSetStateLaserBeamAttack();
             break;
 
-        case ArcSprayFireAIState:
-            this->startPosition = this->boss->alivePartsRoot->GetTranslationPt2D();
-            this->targetPosition = this->ChooseTargetPosition(this->startPosition);
+        case ArcSprayFireAIState: {
+            Point2D startPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+            this->SetMoveToTargetPosition(startPos, this->ChooseTargetPosition(startPos));
+
             this->numLinearMovements = this->GenerateNumArcLaserFireMovements();
             this->waitingAtTargetCountdown = this->GenerateArcLaserTimeToWaitAtTarget();
             break;
+        }
 
         case RapidFireSweepAIState:
             this->OnSetRapidFireSweep();
@@ -1529,7 +1501,7 @@ void GlassDomeAI::UpdateState(double dT, GameModel* gameModel) {
 void GlassDomeAI::ExecuteArcSprayFireState(double dT, GameModel* gameModel) {
     
     // Check to see if we're really close to the target or if we've overshot it...
-    if (this->MoveToTargetPosition()) {
+    if (this->MoveToTargetPosition(this->GetMaxMoveSpeedBetweenTargets())) {
 
         // Stop the boss immediately
         this->desiredVel = Vector2D(0,0);
@@ -1550,8 +1522,9 @@ void GlassDomeAI::ExecuteArcSprayFireState(double dT, GameModel* gameModel) {
             }
             else {
                 // Choose a new target, continue moving between targets
-                this->startPosition = this->boss->alivePartsRoot->GetTranslationPt2D();
-                this->targetPosition = this->ChooseTargetPosition(this->startPosition);
+                Point2D startPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+                this->SetMoveToTargetPosition(startPos, this->ChooseTargetPosition(startPos));
+
                 this->waitingAtTargetCountdown = this->GenerateArcLaserTimeToWaitAtTarget();
             }
         }
@@ -1792,7 +1765,7 @@ void TopSphereAI::UpdateState(double dT, GameModel* gameModel) {
 void TopSphereAI::ExecuteBrutalMoveAndShootState(double dT, GameModel* gameModel) {
 
     // Check to see if we're really close to the target or if we've overshot it...
-    if (this->MoveToTargetPosition()) {
+    if (this->MoveToTargetPosition(this->GetMaxMoveSpeedBetweenTargets())) {
 
         // Wait at the target for a bit of time before moving on...
         if (this->waitingAtTargetCountdown <= 0.0) {
@@ -1805,8 +1778,9 @@ void TopSphereAI::ExecuteBrutalMoveAndShootState(double dT, GameModel* gameModel
             }
             else {
                 // Choose a new target, continue moving between targets
-                this->startPosition = this->boss->alivePartsRoot->GetTranslationPt2D();
-                this->targetPosition = this->ChooseTargetPosition(this->startPosition);
+                Point2D startPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+                this->SetMoveToTargetPosition(startPos, this->ChooseTargetPosition(startPos));
+
                 this->waitingAtTargetCountdown = this->GenerateWaitAtTargetTime();
                 this->timeUntilNextLaserWhileWaitingAtTarget = 0.0;
 

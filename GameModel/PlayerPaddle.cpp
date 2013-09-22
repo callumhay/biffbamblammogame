@@ -871,7 +871,13 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 	// Find percent distance from edge to center of the paddle
     float percentNearCenter = this->GetPercentNearPaddleCenter(
         Point2D(bossAABB.GetCenter()[0] + NumberFuncs::SignOf(distXToPaddleCenter) * bossAABB.GetWidth()/4, bossAABB.GetCenter()[1]), distFromCenter);
-	float percentNearEdge = 1.0 - percentNearCenter;
+    if (percentNearCenter < 0) {
+        percentNearCenter = std::max<float>(0.1, percentNearCenter);
+    }
+    else {
+        percentNearCenter = std::min<float>(-0.1, percentNearCenter);
+    }
+    float percentNearEdge = 1.0 - percentNearCenter;
 
 	static const float MAX_HIT_ROTATION = 80.0f;
 	
@@ -926,6 +932,9 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
     //this->SetCenterPosition(this->GetCenterPosition() + Vector2D(distFromCenter, 0.0f));
     float impulseAmt = 0.5f * NumberFuncs::SignOf(distXToPaddleCenter) * percentNearEdge * PlayerPaddle::DEFAULT_MAX_SPEED;
     this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);
+
+    // EVENT: The paddle was just hit by the boss
+    GameEventManager::Instance()->ActionPaddleHitByBoss(*this, bossPart);
 }
 
 // Called when the paddle is hit by a projectile

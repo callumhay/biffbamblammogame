@@ -61,7 +61,6 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgPulser(ScaleEffect(1.0f, 1.5f)), starryBG(NULL), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
 flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
     
-    const Camera& camera = this->display->GetCamera();
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
 
@@ -73,7 +72,7 @@ flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
     /*
     this->maxBlocksTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        camera.GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Consecutive blocks destroyed:");
+        Camera::GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Consecutive blocks destroyed:");
     this->maxBlocksTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
     this->maxBlocksTextLabel->SetColour(smallScoreLabelColour);
     this->maxBlocksTextLabel->SetScale(this->display->GetTextScalingFactor() * 0.8f);
@@ -86,7 +85,7 @@ flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
 
     this->itemsAcquiredTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        camera.GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Items acquired:");
+        Camera::GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Items acquired:");
     this->itemsAcquiredTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
     this->itemsAcquiredTextLabel->SetColour(smallScoreLabelColour);
     this->itemsAcquiredTextLabel->SetScale(this->display->GetTextScalingFactor() * 0.8f);
@@ -101,7 +100,7 @@ flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
 
     this->levelTimeTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        camera.GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Time:");
+        Camera::GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Time:");
     this->levelTimeTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
     this->levelTimeTextLabel->SetColour(smallScoreLabelColour);
     this->levelTimeTextLabel->SetScale(this->display->GetTextScalingFactor() * 0.8f);
@@ -243,7 +242,7 @@ flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
     
     const float totalScoreXSize = this->totalScoreLabel.GetLastRasterWidth() +
         TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING + this->maxScoreValueWidth;
-    float totalScoreXPos = (camera.GetWindowWidth() - totalScoreXSize) / 2.0f;
+    float totalScoreXPos = (Camera::GetWindowWidth() - totalScoreXSize) / 2.0f;
     float scoreStartX = -(this->maxScoreValueWidth + this->totalScoreLabel.GetLastRasterWidth() +
         2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING);
     this->totalScoreFlyInAnimation.SetInterpolantValue(scoreStartX);
@@ -387,7 +386,7 @@ flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
     if (gameModel->IsCurrentLevelTheTutorialLevel()) {
         this->difficultyChoiceHandler = new DifficultyPaneEventHandler(this);
         this->difficultyChoicePane = new DecoratorOverlayPane(this->difficultyChoiceHandler,
-            static_cast<size_t>(camera.GetWindowWidth() * 0.65f),
+            static_cast<size_t>(Camera::GetWindowWidth() * 0.65f),
             GameViewConstants::GetInstance()->TUTORIAL_PANE_COLOUR);
 
         // Determine the suggested difficulty level based on how they did in the tutorial...
@@ -508,7 +507,6 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
 }
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
-    const Camera& camera = this->display->GetCamera();
 
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -516,13 +514,13 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 
     // Draw the starry background...
     this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
     this->starryBG->UnbindTexture();
 
     if (this->difficultyChoicePane != NULL) {
-        this->difficultyChoicePane->Draw(camera.GetWindowWidth(), camera.GetWindowHeight());
+        this->difficultyChoicePane->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight());
         this->difficultyChoicePane->Tick(dT);
 
         // If the difficulty pane is done, clean it up
@@ -558,7 +556,7 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
             if (this->starAddAnimationCount == 0) {
                 // Animate and draw the "Press any key..." label
                 this->footerColourAnimation.Tick(dT);
-                this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
+                this->DrawPressAnyKeyTextFooter(Camera::GetWindowWidth());
             }
         }
 
@@ -581,30 +579,30 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
             this->levelTimeTextLabel->GetHeight();
             */
 
-        float yPos = camera.GetWindowHeight() - (camera.GetWindowHeight() - totalHeight) / 3.0f;
-        this->DrawLevelNameLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+        float yPos = Camera::GetWindowHeight() - (Camera::GetWindowHeight() - totalHeight) / 3.0f;
+        this->DrawLevelNameLabel(yPos, Camera::GetWindowWidth(), Camera::GetWindowHeight());
         yPos -= (this->levelCompleteLabel.GetHeight() + 2.0f * HEADER_INBETWEEN_VERTICAL_PADDING);
-        this->DrawLevelCompleteLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+        this->DrawLevelCompleteLabel(yPos, Camera::GetWindowWidth(), Camera::GetWindowHeight());
         yPos -= HEADER_INBETWEEN_VERTICAL_PADDING;
-        this->DrawStars(dT, yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+        this->DrawStars(dT, yPos, Camera::GetWindowWidth(), Camera::GetWindowHeight());
         yPos -= (STAR_SIZE + FINAL_SCORE_INBETWEEN_VERTICAL_PADDING);
 
         // Draw the total score
-        this->DrawTotalScoreLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+        this->DrawTotalScoreLabel(yPos, Camera::GetWindowWidth(), Camera::GetWindowHeight());
 
         /*
         // Draw the various level score statistics
         yPos -= (this->totalScoreLabel.GetHeight() + 2*HEADER_INBETWEEN_VERTICAL_PADDING);
-        this->DrawMaxBlocksLabel(yPos, camera.GetWindowWidth());
+        this->DrawMaxBlocksLabel(yPos, Camera::GetWindowWidth());
         yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
             std::max<size_t>(this->maxBlocksTextLabel->GetHeight(), this->maxBlocksValueLabel.GetHeight()));
-        this->DrawNumItemsLabel(yPos, camera.GetWindowWidth());
+        this->DrawNumItemsLabel(yPos, Camera::GetWindowWidth());
         yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
             std::max<size_t>(this->itemsAcquiredTextLabel->GetHeight(), this->itemsAcquiredValueLabel.GetHeight()));
-        this->DrawTotalTimeLabel(yPos, camera.GetWindowWidth());
+        this->DrawTotalTimeLabel(yPos, Camera::GetWindowWidth());
         */
 
-        this->DrawStarTotalLabel(dT, camera.GetWindowWidth());
+        this->DrawStarTotalLabel(dT, Camera::GetWindowWidth());
 
         Camera::PopWindowCoords();
     }
@@ -623,9 +621,9 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
             ColourRGBA(1, 1, 1, fadeValue));
         this->starryBG->UnbindTexture();
 

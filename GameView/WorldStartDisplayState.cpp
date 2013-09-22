@@ -111,17 +111,16 @@ WorldStartDisplayState::~WorldStartDisplayState() {
 }
 
 void WorldStartDisplayState::RenderFrame(double dT) {
-	const Camera& camera   = this->display->GetCamera();
-	
+
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // Draw the starry background...
     this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
     this->starryBG->UnbindTexture();
 
 	// Draw the splash screen for the current world...
@@ -135,12 +134,12 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 	allAnimationDone &= this->titleFadeIn.Tick(dT);
 	allAnimationDone &= this->titleMoveIn.Tick(dT);
 	this->waitingForKeyPress = allAnimationDone;
-	this->DrawNowEnteringTextHeader(camera.GetWindowWidth(), camera.GetWindowHeight());
+	this->DrawNowEnteringTextHeader(Camera::GetWindowWidth(), Camera::GetWindowHeight());
 
 	// If we're waiting for the user's key press then flash on and off the text telling them to press any key
 	if (this->waitingForKeyPress) {
 		this->footerColourAnimation.Tick(dT);
-		this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
+		this->DrawPressAnyKeyTextFooter(Camera::GetWindowWidth());
 	}
 
 	Camera::PopWindowCoords();
@@ -157,9 +156,9 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
             ColourRGBA(1, 1, 1, fadeValue));
         this->starryBG->UnbindTexture();
 

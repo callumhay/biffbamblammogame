@@ -50,6 +50,7 @@
 #include "../GameModel/LaserBeamSightsEffectInfo.h"
 #include "../GameModel/ElectrifiedEffectInfo.h"
 #include "../GameModel/ShortCircuitEffectInfo.h"
+#include "../GameModel/LevelShakeEventInfo.h"
 
 // GameControl Includes
 #include "../GameControl/GameControllerManager.h"
@@ -88,8 +89,7 @@ void GameEventsListener::GameCompletedEvent() {
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 
     // Load the new movement/world's assets...
-    const Camera& camera = this->display->GetCamera();
-	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), 3);
+	LoadingScreen::GetInstance()->StartShowLoadingScreen(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 3);
 	this->display->GetAssets()->LoadWorldAssets(world);
     LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading movement sounds...");
     this->display->GetSound()->LoadWorldSounds(world.GetStyle());
@@ -230,7 +230,7 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	}
 	
 	// Make the camera shake...
-	this->display->GetCamera().SetCameraShake(shakeLength, Vector3D(shakeMagnitude, 0.0, 0.0), 20);
+	this->display->GetCamera().ApplyCameraShake(shakeLength, Vector3D(shakeMagnitude, 0.0, 0.0), 20);
 	
 	// Make the controller shake (if it can)...
 	BBBGameController::VibrateAmount leftVibeAmt = BBBGameController::VerySoftVibration;
@@ -294,6 +294,11 @@ void GameEventsListener::PaddleShieldHitByBeamEvent(const PlayerPaddle& paddle, 
     UNUSED_PARAMETER(beamSegment);
     // TODO?
 	debug_output("EVENT: Paddle shield deflected projectile");
+}
+
+void GameEventsListener::PaddleHitByBossEvent(const PlayerPaddle& paddle, const BossBodyPart& bossPart) {
+    this->display->GetAssets()->PaddleHurtByBossBodyPart(paddle, bossPart);
+    debug_output("EVENT: Paddle hit by boss");
 }
 
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
@@ -422,7 +427,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 			BBBGameController::VibrateAmount controllerVibeAmt;
 			GameEventsListener::GetEffectsForBallSize(ball.GetBallSize(), shakeMagnitude, shakeLength, controllerVibeAmt);
 			
-			this->display->GetCamera().SetCameraShake(shakeLength, Vector3D(8 * shakeMagnitude, shakeMagnitude, 0.0), 100);
+			this->display->GetCamera().ApplyCameraShake(shakeLength, Vector3D(8 * shakeMagnitude, shakeMagnitude, 0.0), 100);
 			
 			// Make the controller shake by side (based on where the ball is)
 			BBBGameController::VibrateAmount leftVibeAmt = BBBGameController::VerySoftVibration;
@@ -479,7 +484,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 
 		if (ballIsUber) {
             // We shake things up if the ball is uber...
-			this->display->GetCamera().SetCameraShake(0.2f, Vector3D(0.6f, 0.2f, 0.0f), 90);
+			this->display->GetCamera().ApplyCameraShake(0.2f, Vector3D(0.6f, 0.2f, 0.0f), 90);
 			vibrationLeft  = BBBGameController::MediumVibration;
             vibrationRight = BBBGameController::HeavyVibration;
 		}
@@ -655,7 +660,6 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 		this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
 
 		// Add a tiny camera and controller shake
-		//this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
         GameControllerManager::GetInstance()->VibrateControllers(0.08f, BBBGameController::VerySoftVibration, BBBGameController::VerySoftVibration);
 	}
 
@@ -765,7 +769,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    else {
 				    // Bomb effect - big explosion!
 				    this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
-				    this->display->GetCamera().SetCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
+				    this->display->GetCamera().ApplyCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
 				    GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
                     sound->PlaySoundAtPosition(GameSound::BombBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
@@ -816,11 +820,10 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
 			    }
                 else {
-                    
-                    
+
 			        // Don't show any effects / play any sounds if the ball is dead/dying or if the block is off screen...
                     const GameModel* gameModel = this->display->GetModel();
-                    if (!gameModel->IsOutOfGameBounds(block.GetCenter()) && 
+                    if (!gameModel->IsOutOfGameBoundsForBall(block.GetCenter()) && 
                         gameModel->GetCurrentStateType() != GameState::BallDeathStateType) {
 
 				        this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
@@ -1669,6 +1672,14 @@ void GameEventsListener::GeneralEffectEvent(const GeneralEffectEventInfo& effect
             const ShortCircuitEffectInfo& shortCircuitEffectInfo = 
                 static_cast<const ShortCircuitEffectInfo&>(effectEvent);
             espAssets->AddShortCircuitEffect(shortCircuitEffectInfo);
+            break;
+        }
+
+        case GeneralEffectEventInfo::LevelShake: {
+            const LevelShakeEventInfo& shakeEffectInfo = 
+                static_cast<const LevelShakeEventInfo&>(effectEvent);
+            this->display->GetCamera().ApplyCameraShake(shakeEffectInfo.GetTimeInSeconds(), 
+                shakeEffectInfo.GetShakeVector(), shakeEffectInfo.GetShakeSpeed());
             break;
         }
 

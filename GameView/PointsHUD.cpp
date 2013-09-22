@@ -207,6 +207,7 @@ void PointsHUD::DrawQuad(float centerX, float centerY, float size) {
 }
 
 void PointsHUD::SetStarAcquiredAnimation(const Camera& camera, size_t starIdx) {
+    UNUSED_PARAMETER(camera);
     assert(starIdx < this->starSizeAnimators.size());
 
     // Set up animations for size and colour

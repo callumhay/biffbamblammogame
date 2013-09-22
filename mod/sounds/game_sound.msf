@@ -61,7 +61,7 @@ BlammopediaBaseMenuItemChangedSelectionEvent {
 
 // Plays when the user verifies/selects (hits 'enter' on) a base blammopedia menu item
 BlammopediaBaseMenuItemSelectEvent {
-	file = menu/item_confirm.wav
+	file = menu/open_sub_menu_win.wav
 }
 
 // Plays when the user highlights (i.e., changes the selection to) a new item in on of the blammopedia lists

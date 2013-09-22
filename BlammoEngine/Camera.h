@@ -32,11 +32,10 @@ private:
 	double shakeTimeElapsed;
 	double shakeTimeTotal;
 	Vector3D shakeMagnitude;
-	unsigned int shakeSpeed;
+	float shakeSpeed;
 
-	int windowWidth;
-	int windowHeight;
-
+	static int windowWidth;
+	static int windowHeight;
     static float aspectRatio;
         
 public:
@@ -48,7 +47,7 @@ public:
 	static const Vector3D DEFAULT_LEFT_VEC;
 	static const Vector3D DEFAULT_UP_VEC;
 
-	Camera(int width, int height);
+	Camera();
 
 	void ApplyCameraShakeTransform(double dT) {
 		if (this->shakeTimeElapsed < this->shakeTimeTotal) {
@@ -59,7 +58,7 @@ public:
 									 lerpShakeMagMultiplier[1]*sin(this->shakeVar), 
 									 lerpShakeMagMultiplier[2]*sin(this->shakeVar));
 			
-			this->shakeVar += dT * shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
+			this->shakeVar += dT * this->shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
 			if (this->shakeVar > 1.0) {
 				this->shakeVar -= 1.0;
 			}
@@ -68,17 +67,17 @@ public:
 		}
 	}
 
-	void SetWindowDimensions(int w, int h) {
+	static void SetWindowDimensions(int w, int h) {
 		assert(w > 0 && h > 0);
-		this->windowWidth = w;
-		this->windowHeight = h;
+		windowWidth = w;
+		windowHeight = h;
         aspectRatio = static_cast<float>(w) / static_cast<float>(h);
 	}
-	int GetWindowWidth() const {
-		return this->windowWidth;
+	static int GetWindowWidth() {
+		return windowWidth;
 	}
-	int GetWindowHeight() const {
-		return this->windowHeight;
+	static int GetWindowHeight() {
+		return windowHeight;
 	}
     inline static float Camera::GetAspectRatio() {
         return Camera::aspectRatio;
@@ -129,7 +128,7 @@ public:
 	 * Set the camera to shake for some specified period of time at a given
 	 * magnitude (in units) and speed (units/sec).
 	 */
-	void SetCameraShake(double lengthInSeconds, const Vector3D& shakeDirMag, unsigned int speed) {
+	void ApplyCameraShake(double lengthInSeconds, const Vector3D& shakeDirMag, float speed) {
 		// If we're still in the middle of a shake check to see which has the bigger magnitude and go with whichever one does...
 		if (this->shakeTimeElapsed < this->shakeTimeTotal && this->shakeMagnitude.length2() > shakeDirMag.length2()) {
 			return;
@@ -137,7 +136,7 @@ public:
 
 		// Change to the given shake...
 		this->shakeTimeElapsed = 0.0;
-		this->shakeTimeTotal	 = lengthInSeconds;
+		this->shakeTimeTotal   = lengthInSeconds;
 		
 		this->shakeMagnitude = Vector3D(shakeDirMag[0], shakeDirMag[1], shakeDirMag[2]);
 		this->shakeSpeed = speed;
@@ -165,17 +164,17 @@ public:
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glViewport(0, 0, this->windowWidth, this->windowHeight);
-		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / 
-            static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+		glViewport(0, 0, windowWidth, windowHeight);
+		gluPerspective(this->fovAngleInDegrees, static_cast<double>(windowWidth) / 
+            static_cast<double>(windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
 	void SetPerspective() {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glViewport(0, 0, this->windowWidth, this->windowHeight);
-		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / 
-            static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+		glViewport(0, 0, windowWidth, windowHeight);
+		gluPerspective(this->fovAngleInDegrees, static_cast<double>(windowWidth) / 
+            static_cast<double>(windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
 	// Functions for changing the current view transform to a full ortho2D,

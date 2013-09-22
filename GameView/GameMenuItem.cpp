@@ -12,13 +12,14 @@
 #include "GameMenuItem.h"
 #include "GameMenu.h"
 #include "GameViewConstants.h"
+#include "GameDisplay.h"
 
 #include "../BlammoEngine/Camera.h"
 
-const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE	= 8.0f;
-const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_SMALL	= 4.0f;
-const float GameMenuItem::MENU_ITEM_WOBBLE_FREQ				= 0.2f;
-const float GameMenuItem::SUB_MENU_PADDING						= 15.0f;
+const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE = 8.0f;
+const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_SMALL = 4.0f;
+const float GameMenuItem::MENU_ITEM_WOBBLE_FREQ      = 0.2f;
+const float GameMenuItem::SUB_MENU_PADDING           = 15.0f;
 
 // GameMenuItem Functions *******************************************
 
@@ -916,7 +917,7 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	// Draw the outline of the background
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glLineWidth(6.0f);
+	glLineWidth(std::min<float>(6.0f, std::max<float>(1.0f, GameDisplay::GetTextScalingFactor() * 6.0f)));
 	glColor4f(0.0f, 0.0f, 0.0f, this->verifyMenuBGFadeAnim.GetInterpolantValue());
 	GameMenu::DrawBackgroundQuadOutline(HALF_ANIM_WIDTH, HALF_ANIM_HEIGHT);
 	
@@ -924,7 +925,7 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glPolygonMode(GL_FRONT, GL_POINT);
-	glPointSize(5.0f);
+	glPointSize(std::min<float>(5.0f, std::max<float>(1.0f, GameDisplay::GetTextScalingFactor() * 5.0f)));
 	GameMenu::DrawBackgroundQuad(HALF_ANIM_WIDTH, HALF_ANIM_HEIGHT);
 	
 	glPopMatrix();

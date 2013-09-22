@@ -2286,7 +2286,9 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 /**
  * Add the effect for when an Ink block gets hit - splortch!
  */
-void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray) {
+void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, 
+                                           const GameLevel& level, bool shootSpray) {
+
 	Point2D inkBlockCenter  = inkBlock.GetCenter();
 	Point3D emitCenter  = Point3D(inkBlockCenter[0], inkBlockCenter[1], 0.0f);
 	
@@ -3243,8 +3245,8 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
     ESPPointEmitter* starEmitter = new ESPPointEmitter();
     starEmitter->SetSpawnDelta(ESPInterval(-1));
     starEmitter->SetInitialSpd(ESPInterval(3.0f, 5.5f));
-    starEmitter->SetParticleLife(ESPInterval(2.0f, 3.5f));
-    starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.5f, paddle.GetHalfWidthTotal()));
+    starEmitter->SetParticleLife(ESPInterval(1.0f, 2.5f));
+    starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.25f, paddle.GetHalfWidthTotal()));
     starEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
     starEmitter->SetEmitAngleInDegrees(180);
     starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -3260,6 +3262,88 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
     }
     starEmitter->AddEffector(&this->particleFader);
     starEmitter->SetParticles(10, this->starTex);
+
+    this->activeGeneralEmitters.push_back(starEmitter);
+    this->activeGeneralEmitters.push_back(bangEffect);
+    this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
+void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, const BossBodyPart& bossPart) {
+    // Choose a random bang texture
+    Texture2D* randomBangTex = this->bangTextures[Randomizer::GetInstance()->RandomUnsignedInt() % this->bangTextures.size()];
+
+    ESPInterval bangLifeInterval    = ESPInterval(2.25f);
+    ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.minValue + 0.3f, bangLifeInterval.maxValue + 0.3f);
+
+    Point3D emitCenter(paddle.GetCenterPosition(), 0.0f);
+    emitCenter[0] = (emitCenter[0] + bossPart.GetTranslationPt2D()[0]) / 2.0f;
+    emitCenter[1] += paddle.GetHalfHeight();
+
+    // Create an emitter for the bang texture
+    ESPPointEmitter* bangEffect = new ESPPointEmitter();
+
+    // Set up the emitter...
+    bangEffect->SetSpawnDelta(ESPInterval(-1, -1));
+    bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    bangEffect->SetParticleLife(bangLifeInterval);
+    bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    bangEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    bangEffect->SetEmitPosition(emitCenter);
+
+    // Figure out some random proper orientation...
+    // Two base rotations (for variety) : 180 or 0...
+    float baseBangRotation = 0.0f;
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        baseBangRotation = 180.0f;
+    }
+    bangEffect->SetParticleRotation(ESPInterval(baseBangRotation - 10.0f, baseBangRotation + 10.0f));
+    bangEffect->SetParticleSize(ESPInterval(4.0f * paddle.GetHalfWidthTotal()), ESPInterval(2.0f * paddle.GetHalfWidthTotal()));
+    bangEffect->AddEffector(&this->particleFader);
+    bangEffect->AddEffector(&this->particleMediumGrowth);
+    bangEffect->SetParticles(1, randomBangTex);
+
+    ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
+    bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
+    bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
+    bangOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
+    bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+    bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+    bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangOnoEffect->SetEmitPosition(emitCenter);
+    bangOnoEffect->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+    bangOnoEffect->AddEffector(&this->particleFader);
+    bangOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+    // Add the single text particle to the emitter with the severity of the effect...
+    TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+    bangTextLabel.SetColour(Colour(0, 0, 0));
+    bangTextLabel.SetDropShadow(Colour(1, 1, 1), 0.1f);
+
+    bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::BADSAD, Onomatoplex::UBER);
+
+    // Smashy star texture particle
+    ESPPointEmitter* starEmitter = new ESPPointEmitter();
+    starEmitter->SetSpawnDelta(ESPInterval(-1));
+    starEmitter->SetInitialSpd(ESPInterval(3.0f, 5.5f));
+    starEmitter->SetParticleLife(ESPInterval(1.0f, 2.5f));
+    starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.5f, paddle.GetHalfWidthTotal() * 1.0f));
+    starEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
+    starEmitter->SetEmitAngleInDegrees(180);
+    starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    starEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    starEmitter->SetEmitDirection(Vector3D(-bossPart.GetCollisionVelocity(), 0.0f));
+    starEmitter->SetEmitPosition(emitCenter);
+
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        starEmitter->AddEffector(&this->explosionRayRotatorCCW);
+    }
+    else {
+        starEmitter->AddEffector(&this->explosionRayRotatorCW);
+    }
+    starEmitter->AddEffector(&this->particleFader);
+    starEmitter->SetParticles(12, this->starTex);
 
     this->activeGeneralEmitters.push_back(starEmitter);
     this->activeGeneralEmitters.push_back(bangEffect);
@@ -4033,14 +4117,14 @@ void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectIn
     
     Point3D position(effectInfo.GetPosition(), 0.0f);
     std::vector<Colour> colours;
-    colours.reserve(3);
+    colours.reserve(4);
+    colours.push_back(Colour(1,1,1));
     colours.push_back(effectInfo.GetBrightColour());
     colours.push_back(effectInfo.GetMediumColour());
     colours.push_back(effectInfo.GetDarkColour());
 
     std::vector<Texture2D*> sparkTextures;
-    sparkTextures.reserve(3);
-    sparkTextures.push_back(this->circleGradientTex);
+    sparkTextures.reserve(2);
     sparkTextures.push_back(this->sparkleTex);
     sparkTextures.push_back(this->lensFlareTex);
 
@@ -4048,7 +4132,7 @@ void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectIn
     ESPPointEmitter* sparkParticles1 = new ESPPointEmitter();
     sparkParticles1->SetSpawnDelta(ESPInterval(0.005f, 0.01f));
     sparkParticles1->SetNumParticleLives(1);
-    sparkParticles1->SetInitialSpd(ESPInterval(3.0f, 8.0f));
+    sparkParticles1->SetInitialSpd(ESPInterval(2.0f, 6.0f));
     sparkParticles1->SetParticleLife(ESPInterval(effectInfo.GetTimeInSecs()));
     sparkParticles1->SetParticleSize(ESPInterval(0.1f * effectInfo.GetSize(), 0.5f * effectInfo.GetSize()));
     sparkParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * effectInfo.GetSize()));
@@ -4065,11 +4149,11 @@ void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectIn
     ESPPointEmitter* boltParticles = new ESPPointEmitter();
     boltParticles->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
     boltParticles->SetNumParticleLives(1);
-    boltParticles->SetInitialSpd(ESPInterval(10.0f));
-    boltParticles->SetParticleLife(ESPInterval(0.75f * effectInfo.GetTimeInSecs()));
+    boltParticles->SetInitialSpd(ESPInterval(8.0f));
+    boltParticles->SetParticleLife(ESPInterval(0.8f * effectInfo.GetTimeInSecs()));
     boltParticles->SetParticleSize(ESPInterval(0.25f * effectInfo.GetSize()));
     boltParticles->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * effectInfo.GetSize()));
-    boltParticles->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    boltParticles->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     boltParticles->SetEmitPosition(position);
     boltParticles->SetEmitDirection(Vector3D(0, 1, 0));
     boltParticles->SetEmitAngleInDegrees(180);
@@ -4923,14 +5007,14 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryBolts->SetInitialSpd(ESPInterval(4.33f));
 	angryBolts->SetParticleLife(ESPInterval(2.0f));
-	angryBolts->SetParticleSize(ESPInterval(0.15f*maxSize), ESPInterval(0.33f*maxSize));
+	angryBolts->SetParticleSize(ESPInterval(0.15f*maxSize), ESPInterval(0.3f*maxSize));
 	angryBolts->SetEmitAngleInDegrees(45);
 	angryBolts->SetEmitPosition(Point3D(pos, 0));
 	angryBolts->SetEmitDirection(Vector3D(0,1,0));
     angryBolts->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0), ESPInterval(0), ESPInterval(1));
     angryBolts->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     angryBolts->AddEffector(&this->particleFader);
-	angryBolts->SetParticles(10, this->lightningBoltTex);
+	angryBolts->SetParticles(5, this->lightningBoltTex);
 
     // Angry onomatopoeia
 	ESPPointEmitter* angryOno = new ESPPointEmitter();
@@ -5445,6 +5529,8 @@ ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle,
  * depending on the item type we create the effect.
  */
 void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item) {
+    UNUSED_PARAMETER(camera);
+
 	ESPInterval redRandomColour(0.1f, 0.8f);
 	ESPInterval greenRandomColour(0.1f, 0.8f);
 	ESPInterval blueRandomColour(0.1f, 0.8f);
@@ -5473,7 +5559,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 	}
 
 	if (paddle.GetIsPaddleCameraOn()) {
-		const float HEIGHT_TO_WIDTH_RATIO = static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(camera.GetWindowWidth());
+		const float HEIGHT_TO_WIDTH_RATIO = static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(Camera::GetWindowWidth());
 		const float HALO_WIDTH						= 2.5f * paddle.GetHalfWidthTotal();
 		const float HALO_HEIGHT						= HEIGHT_TO_WIDTH_RATIO * HALO_WIDTH;
 

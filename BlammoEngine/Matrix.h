@@ -42,6 +42,18 @@ public:
 		}
 	}
 
+    Matrix4x4(float v00, float v01, float v02, float v03,
+              float v10, float v11, float v12, float v13,
+              float v20, float v21, float v22, float v23,
+              float v30, float v31, float v32, float v33) {
+
+        v_[0]  = v00; v_[1]  = v01; v_[2]  = v02; v_[3]  = v03;
+        v_[4]  = v10; v_[5]  = v11; v_[6]  = v12; v_[7]  = v13;
+        v_[8]  = v20; v_[9]  = v21; v_[10] = v22; v_[11] = v23;
+        v_[12] = v30; v_[13] = v31; v_[14] = v32; v_[15] = v33;
+    }
+
+
   Matrix4x4(const Vector4D& row1, const Vector4D& row2, const Vector4D& row3, const Vector4D& row4) {
     v_[0] = row1[0]; 
     v_[4] = row1[1]; 
@@ -158,7 +170,7 @@ public:
 	static Matrix4x4 rotationMatrix(char axis, float angle, bool inDegrees = true) {
 		float radAngle = angle;
 		if (inDegrees){
-  		radAngle = Trig::degreesToRadians(angle);
+  		    radAngle = Trig::degreesToRadians(angle);
 		}
 		
 		Vector4D row1 = Vector4D(1, 0, 0, 0);
@@ -189,6 +201,44 @@ public:
 		Matrix4x4 r(row1, row2, row3, row4);
 		return r;
 	}
+
+    static Matrix4x4 rotationXYZMatrix(float xAngleInDegs, float yAngleInDegs, float zAngleInDegs) {
+        
+        float xAngleInRads = Trig::degreesToRadians(xAngleInDegs);
+        float yAngleInRads = Trig::degreesToRadians(yAngleInDegs);
+        float zAngleInRads = Trig::degreesToRadians(zAngleInDegs);
+
+        float sinX = sin(xAngleInRads);
+        float sinY = sin(yAngleInRads);
+        float sinZ = sin(zAngleInRads);
+        float cosX = cos(xAngleInRads);
+        float cosY = cos(yAngleInRads);
+        float cosZ = cos(zAngleInRads);
+
+        return Matrix4x4(cosY*cosZ, -cosY*sinZ, sinY, 0.0f,
+                         cosX*sinZ + cosZ*sinX*sinY, cosX*cosZ - sinX*sinY*sinZ, -cosY*sinX, 0.0f,
+                         sinX*sinZ - cosX*cosZ*sinY, cosZ*sinX + cosX*sinY*sinZ, cosX*cosY, 0.0f,
+                         0.0f, 0.0f, 0.0f, 1.0f);
+    }
+
+    static Matrix4x4 rotationZYXMatrix(float xAngleInDegs, float yAngleInDegs, float zAngleInDegs) {
+
+        float xAngleInRads = Trig::degreesToRadians(xAngleInDegs);
+        float yAngleInRads = Trig::degreesToRadians(yAngleInDegs);
+        float zAngleInRads = Trig::degreesToRadians(zAngleInDegs);
+
+        float sinX = sin(xAngleInRads);
+        float sinY = sin(yAngleInRads);
+        float sinZ = sin(zAngleInRads);
+        float cosX = cos(xAngleInRads);
+        float cosY = cos(yAngleInRads);
+        float cosZ = cos(zAngleInRads);
+
+        return Matrix4x4(cosZ*cosY, cosZ*sinY*sinX - cosX*sinZ, sinZ*sinX + cosZ*cosX*sinY, 0.0f,
+                         cosY*sinZ, cosZ*cosX + sinZ*sinY*sinX, cosX*sinZ*sinY - cosZ*sinX, 0.0f,
+                         -sinY, cosY*sinX, cosY*cosX, 0.0f,
+                         0.0f, 0.0f, 0.0f, 1.0f);
+    }
 
 	static Matrix4x4 rotationZMatrix(float angleInDegs) {
 		float radAngle = Trig::degreesToRadians(angleInDegs);

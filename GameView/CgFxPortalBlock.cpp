@@ -32,15 +32,15 @@ timer(0.0), warpAmount(60.0f), sceneTex(NULL), noiseTexID(Noise::GetInstance()->
 
 	// Refraction parameters
 	this->indexOfRefactionParam = cgGetNamedEffectParameter(this->cgEffect, "IndexOfRefraction");
-	this->warpAmountParam			  = cgGetNamedEffectParameter(this->cgEffect, "WarpAmount");
-	this->sceneWidthParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
-	this->sceneHeightParam			= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
+	this->warpAmountParam       = cgGetNamedEffectParameter(this->cgEffect, "WarpAmount");
+	this->sceneWidthParam       = cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
+	this->sceneHeightParam      = cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
 
-	this->noiseScaleParam				= cgGetNamedEffectParameter(this->cgEffect, "Scale");
-	this->noiseFreqParam				= cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->noiseFlowDirParam			= cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
-	this->timerParam						= cgGetNamedEffectParameter(this->cgEffect, "Timer");
-	this->noiseSamplerParam			= cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
+	this->noiseScaleParam   = cgGetNamedEffectParameter(this->cgEffect, "Scale");
+	this->noiseFreqParam    = cgGetNamedEffectParameter(this->cgEffect, "Freq");
+	this->noiseFlowDirParam = cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
+	this->timerParam        = cgGetNamedEffectParameter(this->cgEffect, "Timer");
+	this->noiseSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
 
 	// The rendered scene background texture
 	this->sceneSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");

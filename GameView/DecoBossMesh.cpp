@@ -23,8 +23,9 @@ const double DecoBossMesh::INTRO_TIME_IN_SECS = 4.0;
 
 DecoBossMesh::DecoBossMesh(DecoBoss* boss) : BossMesh(), boss(boss),
 coreMesh(NULL), lightningRelayMesh(NULL), gearMesh(NULL), scopingArm1Mesh(NULL),
-scopingArm2Mesh(NULL), handMesh(NULL), leftBodyMesh(NULL), rightBodyMesh(NULL),
-leftBodyExplodingEmitter(NULL), rightBodyExplodingEmitter(NULL), itemMesh(NULL) {
+scopingArm2Mesh(NULL), scopingArm3Mesh(NULL), scopingArm4Mesh(NULL), handMesh(NULL), 
+leftBodyMesh(NULL), rightBodyMesh(NULL), leftBodyExplodingEmitter(NULL), 
+rightBodyExplodingEmitter(NULL), itemMesh(NULL) {
 
     assert(boss != NULL);
 
@@ -39,6 +40,10 @@ leftBodyExplodingEmitter(NULL), rightBodyExplodingEmitter(NULL), itemMesh(NULL) 
     assert(this->scopingArm1Mesh != NULL);
     this->scopingArm2Mesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BOSS_SCOPING_ARM2_MESH);
     assert(this->scopingArm2Mesh != NULL);
+    this->scopingArm3Mesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BOSS_SCOPING_ARM3_MESH);
+    assert(this->scopingArm3Mesh != NULL);
+    this->scopingArm4Mesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BOSS_SCOPING_ARM4_MESH);
+    assert(this->scopingArm4Mesh != NULL);
     this->handMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BOSS_HAND_MESH);
     assert(this->handMesh != NULL);
     this->leftBodyMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BOSS_LEFT_BODY_MESH);
@@ -48,10 +53,6 @@ leftBodyExplodingEmitter(NULL), rightBodyExplodingEmitter(NULL), itemMesh(NULL) 
 
     this->itemMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ITEM_MESH);
     assert(this->itemMesh != NULL);
-
-    // The boss will only drop bad items...
-    const Colour& itemEndColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(GameItem::Bad);
-    this->itemMesh->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, itemEndColour);
 
     this->leftBodyExplodingEmitter  = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
     this->rightBodyExplodingEmitter = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
@@ -71,6 +72,10 @@ DecoBossMesh::~DecoBossMesh() {
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->scopingArm1Mesh);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->scopingArm2Mesh);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->scopingArm3Mesh);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->scopingArm4Mesh);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->handMesh);
     assert(success);
@@ -141,6 +146,11 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
                 // Set the item mesh texture...
                 Texture2D* itemTexture = assets->GetItemAssets()->GetItemTexture(decoAIState->GetNextItemDropType());
                 this->itemMesh->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, itemTexture);
+               
+                // The boss will only drop bad items...
+                const Colour& itemEndColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(GameItem::Bad);
+                this->itemMesh->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, itemEndColour);
+
                 this->itemMesh->Draw(camera, keyLight, fillLight, ballLight);
             }
         }
@@ -159,6 +169,10 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
     DRAW_BODY_PART(leftArmScopingSeg1, this->scopingArm1Mesh);
     const BossBodyPart* leftArmScopingSeg2 = this->boss->GetLeftArmScopingSeg2();
     DRAW_BODY_PART(leftArmScopingSeg2, this->scopingArm2Mesh);
+    const BossBodyPart* leftArmScopingSeg3 = this->boss->GetLeftArmScopingSeg3();
+    DRAW_BODY_PART(leftArmScopingSeg3, this->scopingArm3Mesh);
+    const BossBodyPart* leftArmScopingSeg4 = this->boss->GetLeftArmScopingSeg4();
+    DRAW_BODY_PART(leftArmScopingSeg4, this->scopingArm4Mesh);
     const BossBodyPart* leftArmHand = this->boss->GetLeftArmHand();
     DRAW_BODY_PART(leftArmHand, this->handMesh);
 
@@ -169,6 +183,10 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
     DRAW_BODY_PART(rightArmScopingSeg1, this->scopingArm1Mesh);
     const BossBodyPart* rightArmScopingSeg2 = this->boss->GetRightArmScopingSeg2();
     DRAW_BODY_PART(rightArmScopingSeg2, this->scopingArm2Mesh);
+    const BossBodyPart* rightArmScopingSeg3 = this->boss->GetRightArmScopingSeg3();
+    DRAW_BODY_PART(rightArmScopingSeg3, this->scopingArm3Mesh);
+    const BossBodyPart* rightArmScopingSeg4 = this->boss->GetRightArmScopingSeg4();
+    DRAW_BODY_PART(rightArmScopingSeg4, this->scopingArm4Mesh);
     const BossBodyPart* rightArmHand = this->boss->GetRightArmHand();
     DRAW_BODY_PART(rightArmHand, this->handMesh);
 

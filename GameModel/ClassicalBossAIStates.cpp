@@ -471,13 +471,13 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case ClassicalBossAI::AttackLeftArmAIState:
-            this->ExecuteArmAttackState(dT, true, false);
+            this->ExecuteArmAttackState(dT, true, false, gameModel);
             break;
         case ClassicalBossAI::AttackRightArmAIState:
-            this->ExecuteArmAttackState(dT, false, true);
+            this->ExecuteArmAttackState(dT, false, true, gameModel);
             break;
         case ClassicalBossAI::AttackBothArmsAIState:
-            this->ExecuteArmAttackState(dT, true, true);
+            this->ExecuteArmAttackState(dT, true, true, gameModel);
             break;
 
         case ClassicalBossAI::PrepLaserAIState:
@@ -756,7 +756,7 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
     }
 }
 
-void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking) {
+void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking, GameModel* gameModel) {
     
     bool armIsDoneShaking = this->armShakeAnim.Tick(dT);
     if (this->temptAttackCountdown > 0 && !armIsDoneShaking) {
@@ -808,6 +808,7 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
             }
 
             this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
+            gameModel->GetPlayerPaddle()->ResetLastEntityThatHurtPaddle();
         }
     }
 }
@@ -1819,8 +1820,8 @@ void HeadAI::UpdateState(double dT, GameModel* gameModel) {
     }
 }
 
-void HeadAI::UpdateMovement(double dT, GameModel* gameModel) {
-    ClassicalBossAI::UpdateMovement(dT, gameModel);
+void HeadAI::UpdateMovement(double dT) {
+    ClassicalBossAI::UpdateMovement(dT);
 
     // Update the pediment movement and the eye movement independently...
     Vector2D dMovement = dT * this->currEyeVel;

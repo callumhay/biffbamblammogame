@@ -69,8 +69,6 @@ void GameOverDisplayState::ButtonPressed(const GameControl::ActionButton& presse
 }
 
 void GameOverDisplayState::UpdateAndDrawState(double dT) {
-	const Camera& camera = this->display->GetCamera();
-	
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -80,15 +78,15 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
 
-    this->deathFSEffect.Draw(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
+    this->deathFSEffect.Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
 
     this->gameOverLabel.SetTopLeftCorner(this->moveLabelAnim.GetInterpolantValue(),
-        camera.GetWindowHeight() - GAME_OVER_LABEL_Y_BORDER);
+        Camera::GetWindowHeight() - GAME_OVER_LABEL_Y_BORDER);
 	this->gameOverLabel.Draw();
 
     this->gameOverMenu->SetTopLeftCorner(this->moveMenuAnim.GetInterpolantValue(),
         this->menuHeight + GAME_OVER_LABEL_Y_BORDER);
-    this->gameOverMenu->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
+    this->gameOverMenu->Draw(dT, Camera::GetWindowWidth(), Camera::GetWindowHeight());
 
     glPopAttrib();
 

@@ -85,7 +85,7 @@ public:
 		return this->gameCamera;
 	}
 
-	float GetTextScalingFactor() const;
+	static float GetTextScalingFactor();
 
 	// Enumeration of the various actions that can be sent to the GameDisplay
 	// to inform it of inputs from the user in a general way

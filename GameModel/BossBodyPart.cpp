@@ -13,8 +13,8 @@
 #include "MineProjectile.h"
 
 BossBodyPart::BossBodyPart(const BoundingLines& localBounds) :
-AbstractBossBodyPart(), localBounds(localBounds), isDestroyed(false), collisionsDisabled(false),
-collisionVelocity(0,0), externalAnimationVelocity(0,0) {
+AbstractBossBodyPart(), localBounds(localBounds), worldBounds(localBounds), 
+isDestroyed(false), collisionsDisabled(false), collisionVelocity(0,0), externalAnimationVelocity(0,0) {
 
     this->rgbaAnim.SetInterpolantValue(ColourRGBA(1,1,1,1));
     this->rgbaAnim.SetRepeat(false);
@@ -102,6 +102,9 @@ void BossBodyPart::OnTransformUpdate() {
         const Point2D& projectileLocalPos = iter->second;
         projectile->SetPosition(this->worldTransform * projectileLocalPos);
     }
+
+    // World-space boundaries of this part are no longer up-to-date
+    this->isWorldBoundsDirty = true;
 }
 
 #ifdef _DEBUG

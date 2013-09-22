@@ -59,8 +59,6 @@ protected:
     // State-specific variables
     
     // MoveToTargetStopAndShootAIState
-    Point2D startPosition;           // The position the boss started in before its current movement
-    Point2D targetPosition;          // The position the boss is moving towards
     int numLinearMovements;          // The number of linear movements the boss will make before going to the next state
     double waitingAtTargetCountdown; // Time to wait at the current targetPosition before choosing a new one and moving to it
     double timeUntilNextLaserWhileWaitingAtTarget; // Time until the boss fires the next laser while waiting at it's target
@@ -112,7 +110,6 @@ protected:
     void ShootRandomSideLaserBullet(GameModel* gameModel);
     void ShootRandomLeftSideLaserBullet(GameModel* gameModel);
     void ShootRandomRightSideLaserBullet(GameModel* gameModel);
-    bool MoveToTargetPosition();
 
     static bool IsWorthwhileShotAtSplitterPrism(const Vector2D& shootDir) {
         return Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 

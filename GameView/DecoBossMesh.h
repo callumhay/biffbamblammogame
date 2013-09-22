@@ -35,6 +35,8 @@ private:
     Mesh* gearMesh;
     Mesh* scopingArm1Mesh;
     Mesh* scopingArm2Mesh;
+    Mesh* scopingArm3Mesh;
+    Mesh* scopingArm4Mesh;
     Mesh* handMesh;
     Mesh* leftBodyMesh;
     Mesh* rightBodyMesh;

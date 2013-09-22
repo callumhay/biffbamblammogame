@@ -393,7 +393,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				    // Draw when gravity ball and not invisiball...
 				    // We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
-					    Vector3D gravityDir = gameModel.GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
+					    Vector3D gravityDir = gameModel.GetTransformInfo()->GetGameXYZTransform() * Vector3D(0, -1, 0);
 					    this->espAssets->DrawGravityBallEffects(dT, camera, *currBall, gravityDir);
 				    }
     				
@@ -528,7 +528,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		
 		// Grab a transform matrix from the game model to say where the ball light is
 		// if the level is flipped or some such thing
-		Point3D newAvgBallPos =  gameModel.GetTransformInfo()->GetGameTransform() * avgBallPosition;
+		Point3D newAvgBallPos =  gameModel.GetTransformInfo()->GetGameXYZTransform() * avgBallPosition;
 
 		// Set the ball light to the correct position
         this->lightAssets->GetBallLight().SetPosition(newAvgBallPos);
@@ -800,6 +800,60 @@ void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& c
     }
 }
 
+void GameAssets::DrawMiscEffects(const GameModel& gameModel) {
+    // If the player is in RC rocket mode, then we draw the level boundaries for where the rocket can't be...
+    if (gameModel.GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
+        
+        Collision::AABB2D boundaries = gameModel.GenerateLevelProjectileBoundaries();
+        const Point2D& min = boundaries.GetMin();
+        const Point2D& max = boundaries.GetMax();
+
+        glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+        
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
+
+        static const float BOUND_WIDTH = 5.0f;
+        static const float BOUND_ALPHA = 0.5f;
+        glBegin(GL_QUADS);
+        
+        // Left bound
+        glColor4f(1.0f, 0.0f, 0.0f, BOUND_ALPHA);
+        glVertex2f(min[0], min[1]);
+        glVertex2f(min[0], max[1]);
+        glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
+        glVertex2f(min[0] - BOUND_WIDTH, max[1] + BOUND_WIDTH);
+        glVertex2f(min[0] - BOUND_WIDTH, min[1] - BOUND_WIDTH);
+
+        // Top bound
+        glColor4f(1.0f, 0.0f, 0.0f, BOUND_ALPHA);
+        glVertex2f(min[0], max[1]);
+        glVertex2f(max[0], max[1]);
+        glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
+        glVertex2f(max[0] + BOUND_WIDTH, max[1] + BOUND_WIDTH);
+        glVertex2f(min[0] - BOUND_WIDTH, max[1] + BOUND_WIDTH);
+
+        // Right bound
+        glColor4f(1.0f, 0.0f, 0.0f, BOUND_ALPHA);
+        glVertex2f(max[0], max[1]);
+        glVertex2f(max[0], min[1]);
+        glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
+        glVertex2f(max[0] + BOUND_WIDTH, min[1] - BOUND_WIDTH);
+        glVertex2f(max[0] + BOUND_WIDTH, max[1] + BOUND_WIDTH);
+        
+        // Bottom bound
+        glColor4f(1.0f, 0.0f, 0.0f, BOUND_ALPHA);
+        glVertex2f(max[0], min[1]);
+        glVertex2f(min[0], min[1]);
+        glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
+        glVertex2f(min[0] - BOUND_WIDTH, min[1] - BOUND_WIDTH);
+        glVertex2f(max[0] + BOUND_WIDTH, min[1] - BOUND_WIDTH);
+
+        glEnd();
+
+        glPopAttrib();
+    }
+}
 
 /**
  * Draw a given item in the world.
@@ -818,6 +872,8 @@ void GameAssets::DrawTimers(double dT, const Camera& camera) {
 }
 
 void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
+    UNUSED_PARAMETER(camera);
+
 	const std::list<Beam*>& beams = gameModel.GetActiveBeams();
 	if (beams.empty()) {
 		return;
@@ -991,7 +1047,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 
     // If in paddle cam mode draw a fullscreen quad with the laser colour
     if (paddle->GetIsPaddleCameraOn() && paddleLaserBeamActive) {
-        GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 0.0, 
+        GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 0.0, 
             ColourRGBA(GameModelConstants::GetInstance()->PADDLE_LASER_BEAM_COLOUR, 0.2f));
     }
 
@@ -1033,7 +1089,7 @@ void GameAssets::DrawInformativeGameElements(const Camera& camera, double dT, co
 
 	Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel.GetLevelUnitDimensions(), 0.0);
 	glPushMatrix();
-	Matrix4x4 gameTransform = gameModel.GetTransformInfo()->GetGameTransform();
+	Matrix4x4 gameTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
 	glMultMatrixf(gameTransform.begin());
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
 
@@ -1244,6 +1300,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 
             // Notify assets of the rocket...
             this->FireRocket(*remoteCtrlRocket);
+            this->currentLevelMesh->UpdateNoEntryBlock(true);
             break;
         }
 
@@ -1284,6 +1341,7 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
             this->rocketMesh->DeactivateRocket(static_cast<const RocketProjectile*>(&projectile));
+            this->currentLevelMesh->UpdateNoEntryBlock(false);
             break;
 
         case Projectile::FireGlobProjectile:
@@ -1422,6 +1480,17 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
         BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
 }
 
+void GameAssets::PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const BossBodyPart& bossPart) {
+
+    // Effects for the collision...
+    this->espAssets->AddPaddleHitByBossPartEffect(paddle, bossPart);
+
+    // Pain overlay and controller vibration
+    this->painHUD->Activate(PlayerHurtHUD::MajorPain);
+    GameControllerManager::GetInstance()->VibrateControllers(0.5,
+        BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+}
+
 // Notifies assets that there was an explosion and there should be a fullscreen flash
 void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera, const GameModel* gameModel) {
 
@@ -1437,13 +1506,13 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera,
     
     // Make boss rockets a bit weaker (interferes a bit less with the gameplay during the boss fight)
     if (rocket.GetType() == Projectile::BossRocketBulletProjectile) {
-        camera.SetCameraShake(forcePercentage * 0.75f, forcePercentage * Vector3D(0.7f, 0.6f, 0.1f), 100);
+        camera.ApplyCameraShake(forcePercentage * 0.75f, forcePercentage * Vector3D(0.7f, 0.6f, 0.1f), 100);
         GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
             BBBGameController::SoftVibration, BBBGameController::MediumVibration);
         this->flashHUD->Activate(0.33, 0.75f * flashMultiplier);
     }
     else {
-        camera.SetCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 130);
+        camera.ApplyCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 130);
         GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
             BBBGameController::MediumVibration, BBBGameController::HeavyVibration);
         this->flashHUD->Activate(0.5, 1.0f * flashMultiplier);
@@ -1458,7 +1527,7 @@ void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
 
 	// Add a camera/controller shake and flash for when the mine explodes...
     float forcePercentage = mine.GetVisualScaleFactor();
-	camera.SetCameraShake(forcePercentage * 0.5f, forcePercentage * Vector3D(0.2f, 0.5f, 0.3f), 80);
+	camera.ApplyCameraShake(forcePercentage * 0.5f, forcePercentage * Vector3D(0.2f, 0.5f, 0.3f), 80);
     GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 0.75f,
         BBBGameController::VerySoftVibration, BBBGameController::SoftVibration);
 
@@ -1476,7 +1545,7 @@ void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info,
     // Add a camera/controller shake and fullscreen flash
     if (info.GetShakeMultiplier() > 0.0f) {
         double shakeTime = 0.9 * info.GetTime();
-        camera.SetCameraShake(shakeTime, info.GetShakeMultiplier() * Vector3D(0.2f, 0.5f, 0.3f), 100);
+        camera.ApplyCameraShake(shakeTime, info.GetShakeMultiplier() * Vector3D(0.2f, 0.5f, 0.3f), 100);
         GameControllerManager::GetInstance()->VibrateControllers(shakeTime,
             BBBGameController::MediumVibration, BBBGameController::MediumVibration);
     }

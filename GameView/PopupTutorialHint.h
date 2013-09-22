@@ -65,7 +65,8 @@ private:
 };
 
 inline void PopupTutorialHint::Draw(const Camera& camera, bool, float) {
-    this->pane->Draw(camera.GetWindowWidth(), camera.GetWindowHeight());
+    UNUSED_PARAMETER(camera);
+    this->pane->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight());
 }
 
 #endif // __POPUPTUTORIALHINT_H__

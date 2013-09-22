@@ -110,6 +110,10 @@ void ESPPointEmitter::SetEmitDirection(const Vector3D& dir) {
 	if (this->emitOnPlane) {
 		assert(Vector3D::cross(this->planeNormal, this->emitDir) != Vector3D(0,0,0));
 	}
+
+    if (this->emitDir.IsZero()) {
+        this->emitDir = Vector3D(0,1,0);
+    }
 }
 
 /**

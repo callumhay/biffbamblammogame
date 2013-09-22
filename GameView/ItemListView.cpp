@@ -207,6 +207,7 @@ void ItemListView::Draw(double dT, const Camera& camera) {
 }
 
 void ItemListView::DrawPost(const Camera& camera) {
+    UNUSED_PARAMETER(camera);
 
     float blackBorderAmt = this->blackBorderAnim.GetInterpolantValue();
     if (blackBorderAmt > 0) {

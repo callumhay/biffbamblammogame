@@ -51,6 +51,7 @@ goBackToMainMenu(false), starryBG(NULL), listEventHandler(NULL) {
     this->itemSelTabAnim.SetRepeat(false);
 
     const Camera& camera = this->display->GetCamera();
+    UNUSED_VARIABLE(camera);
 
     this->fadeAnimation.SetLerp(0.0, 0.5f, 1.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
@@ -455,9 +456,7 @@ void BlammopediaState::BlammopediaListEventHandler::ItemDeactivated() {
 ItemListView* BlammopediaState::BuildGameplayListView() {
 
     GameTutorialAssets* tutorialAssets = this->display->GetAssets()->GetTutorialAssets();
-
-    const Camera& camera = this->display->GetCamera();
-    ItemListView* itemsListView = new ItemListView(camera.GetWindowWidth(), camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    ItemListView* itemsListView = new ItemListView(Camera::GetWindowWidth(), Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
 
     static const float TITLE_TEXT_SCALE = 1.33f;
     static const float BODY_TEXT_SCALE  = 0.75f;
@@ -546,15 +545,15 @@ ItemListView* BlammopediaState::BuildGameplayListView() {
     UNUSED_VARIABLE(multiplierTutorialItem);
     
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
-    itemsListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    itemsListView->AdjustSizeToHeight(Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
     itemsListView->SetEventHandler(this->listEventHandler);
 
 	return itemsListView;
 }
 
 ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia) {
-	const Camera& camera = this->display->GetCamera();
-    ItemListView* itemsListView = new ItemListView(camera.GetWindowWidth(), camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+
+    ItemListView* itemsListView = new ItemListView(Camera::GetWindowWidth(), Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
 	
 	// Add each item in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
@@ -562,6 +561,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
     std::string currName;
     std::string currDesc;
     std::string finePrint;
+    
     const Blammopedia::ItemEntryMap& itemEntries = blammopedia->GetItemEntries();
     for (Blammopedia::ItemEntryMapConstIter iter = itemEntries.begin(); iter != itemEntries.end(); ++iter) {
         Blammopedia::ItemEntry* itemEntry = iter->second;
@@ -588,15 +588,14 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
     }
 
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
-    itemsListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    itemsListView->AdjustSizeToHeight(Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
     itemsListView->SetEventHandler(this->listEventHandler);
 
 	return itemsListView;
 }
 
 ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia) {
-	const Camera& camera = this->display->GetCamera();
-	ItemListView* blockListView = new ItemListView(camera.GetWindowWidth(), camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+	ItemListView* blockListView = new ItemListView(Camera::GetWindowWidth(), Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
 
 	// Add each block in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
@@ -623,7 +622,7 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
-    blockListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    blockListView->AdjustSizeToHeight(Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
     blockListView->SetEventHandler(this->listEventHandler);
 
 	return blockListView;
@@ -671,11 +670,17 @@ void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex, bool play
 }
 
 void BlammopediaState::SetBlammoMenuItemSelection(bool playSound) {
+    bool isBackItemSelected = (this->currMenuItemIndex == BACK_MENU_ITEM_INDEX);
     if (playSound) {
-        this->display->GetSound()->PlaySound(GameSound::BlammopediaBaseMenuItemSelectEvent, false);
+        if (isBackItemSelected) {
+            this->display->GetSound()->PlaySound(GameSound::BlammopediaListDeselectEvent, false);
+        }
+        else {
+            this->display->GetSound()->PlaySound(GameSound::BlammopediaBaseMenuItemSelectEvent, false);
+        }
     }
 
-    if (this->currMenuItemIndex == BACK_MENU_ITEM_INDEX) {
+    if (isBackItemSelected) {
         this->GoBackToMainMenu();
     }
     else {

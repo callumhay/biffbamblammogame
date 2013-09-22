@@ -98,8 +98,7 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
     this->prevPgArrowEmitter->AddEffector(&nextArrowFader);
 
     // Build a framebuffer object for the menu
-    const Camera& camera = this->display->GetCamera();
-	this->menuFBO = new FBObj(camera.GetWindowWidth(), camera.GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 
 	// Create the new bloom effect and set its parameters appropriately
 	this->bloomEffect = new CgFxBloom(this->menuFBO);
@@ -186,9 +185,9 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     // Draw the starry background...
     if (!this->goBackToWorldSelectMenu) {
         this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
         this->starryBG->UnbindTexture();
     }
 
@@ -199,7 +198,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 	glLoadIdentity();
 
     // Draw the title...
-    this->worldLabel->SetTopLeftCorner(HORIZONTAL_TITLE_GAP, camera.GetWindowHeight() - VERTICAL_TITLE_GAP);
+    this->worldLabel->SetTopLeftCorner(HORIZONTAL_TITLE_GAP, Camera::GetWindowHeight() - VERTICAL_TITLE_GAP);
     this->worldLabel->Draw();
 
     // Draw the title strip
@@ -213,7 +212,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     this->menuFBO->UnbindFBObj();
 	// Do bloom on most of the screen then bind the FBO again and draw the stuff we don't
     // want the bloom applied to...
-	this->bloomEffect->Draw(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
+	this->bloomEffect->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
     this->menuFBO->BindFBObj();
     
     // Draw the menu
@@ -228,7 +227,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone) {
-        this->DrawFadeOverlay(camera.GetWindowWidth(), camera.GetWindowHeight(), this->fadeAnimation.GetInterpolantValue());
+        this->DrawFadeOverlay(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue());
     }
 
     glPopMatrix();
@@ -259,8 +258,8 @@ void SelectLevelMenuState::RenderFrame(double dT) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
 
-        float screenWidth = camera.GetWindowWidth();
-        float screenHeight = camera.GetWindowHeight();
+        float screenWidth = Camera::GetWindowWidth();
+        float screenHeight = Camera::GetWindowHeight();
         float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(this->starryBG->GetWidth()));
         float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(this->starryBG->GetHeight()));
 
@@ -268,24 +267,24 @@ void SelectLevelMenuState::RenderFrame(double dT) {
         glColor4f(1,1,1,1);
         glBegin(GL_QUADS);
             glTexCoord2f(0, 0);
-            glVertex2f(-camera.GetWindowWidth() + moveAmt, 0);
+            glVertex2f(-Camera::GetWindowWidth() + moveAmt, 0);
             glTexCoord2f(2*totalTexU, 0);
-	        glVertex2f(camera.GetWindowWidth() + moveAmt, 0);
+	        glVertex2f(Camera::GetWindowWidth() + moveAmt, 0);
             glTexCoord2f(2*totalTexU, totalTexV);
-            glVertex2f(camera.GetWindowWidth() + moveAmt, camera.GetWindowHeight());
+            glVertex2f(Camera::GetWindowWidth() + moveAmt, Camera::GetWindowHeight());
 	        glTexCoord2f(0, totalTexV);
-            glVertex2f(-camera.GetWindowWidth() + moveAmt, camera.GetWindowHeight());
+            glVertex2f(-Camera::GetWindowWidth() + moveAmt, Camera::GetWindowHeight());
         glEnd();
 
         this->menuFBO->GetFBOTexture()->BindTexture();
         glColor4f(1,1,1,alphaAmt);
         glBegin(GL_QUADS);
 	        glTexCoord2i(1, 0);
-            glVertex2i(camera.GetWindowWidth() + moveAmt, 0);
+            glVertex2i(Camera::GetWindowWidth() + moveAmt, 0);
 	        glTexCoord2i(1, 1);
-            glVertex2i(camera.GetWindowWidth() + moveAmt, camera.GetWindowHeight());
+            glVertex2i(Camera::GetWindowWidth() + moveAmt, Camera::GetWindowHeight());
 	        glTexCoord2i(0, 1);
-	        glVertex2i(moveAmt, camera.GetWindowHeight());
+	        glVertex2i(moveAmt, Camera::GetWindowHeight());
             glTexCoord2i(0, 0);
 	        glVertex2i(moveAmt, 0);
         glEnd();
@@ -386,7 +385,9 @@ void SelectLevelMenuState::PageSelectionChanged() {
 }
 
 void SelectLevelMenuState::DrawStarTotalLabel(const Camera& camera) {
-    float labelTopCornerX = camera.GetWindowWidth() - this->totalNumStarsLabel->GetLastRasterWidth() - HORIZONTAL_TITLE_GAP;
+    UNUSED_PARAMETER(camera);
+
+    float labelTopCornerX = Camera::GetWindowWidth() - this->totalNumStarsLabel->GetLastRasterWidth() - HORIZONTAL_TITLE_GAP;
     float labelTopCornerY = this->totalNumStarsLabel->GetHeight() + VERTICAL_TITLE_GAP/2;
 
     this->totalNumStarsLabel->SetTopLeftCorner(labelTopCornerX, labelTopCornerY);
@@ -422,6 +423,7 @@ void SelectLevelMenuState::DrawStarTotalLabel(const Camera& camera) {
 }
 
 void SelectLevelMenuState::DrawTitleStrip(const Camera& camera) const {
+    UNUSED_PARAMETER(camera);
 
     static const float STRIP_HEIGHT      = 10;
     static const float DROP_AMT          = STRIP_HEIGHT / 5.0f;
@@ -439,8 +441,8 @@ void SelectLevelMenuState::DrawTitleStrip(const Camera& camera) const {
     glColor4f(1, 1, 1, 1);
     glVertex3f(stripStartPt[0], stripStartPt[1], 0.0f);
     glVertex3f(stripStartPt[0], stripStartPt[1] - STRIP_HEIGHT, 0.0f);
-    glVertex3f(camera.GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1] - STRIP_HEIGHT, 0.0f);
-    glVertex3f(camera.GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1], 0.0f);
+    glVertex3f(Camera::GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1] - STRIP_HEIGHT, 0.0f);
+    glVertex3f(Camera::GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1], 0.0f);
     glEnd();
     glPopMatrix();
 
@@ -448,12 +450,14 @@ void SelectLevelMenuState::DrawTitleStrip(const Camera& camera) const {
     glColor4f(0.4f, 0.6f, 0.8f, 1.0f);
     glVertex3f(stripStartPt[0], stripStartPt[1], 0.0f);
     glVertex3f(stripStartPt[0], stripStartPt[1] - STRIP_HEIGHT, 0.0f);
-    glVertex3f(camera.GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1] - STRIP_HEIGHT, 0.0f);
-    glVertex3f(camera.GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1], 0.0f);
+    glVertex3f(Camera::GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1] - STRIP_HEIGHT, 0.0f);
+    glVertex3f(Camera::GetWindowWidth()-SIDE_TO_STRIP_GAP, stripStartPt[1], 0.0f);
     glEnd();
 }
 
 void SelectLevelMenuState::DrawPageSelection(const Camera& camera) const {
+    UNUSED_PARAMETER(camera);
+
     // Don't bother drawing anything if there's only one page
     if (this->pages.size() <= 1) {
         return;
@@ -465,7 +469,7 @@ void SelectLevelMenuState::DrawPageSelection(const Camera& camera) const {
     static const int SQUARE_TOP_Y_POS    = SQUARE_BOTTOM_Y_POS + SQUARE_SIZE;
     
     int totalWidth = SQUARE_SIZE * this->pages.size() + SQUARE_GAP_SIZE * (this->pages.size()-1);
-    int currX = (camera.GetWindowWidth() - totalWidth) / 2;
+    int currX = (Camera::GetWindowWidth() - totalWidth) / 2;
 
     glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
     glEnable(GL_CULL_FACE);
@@ -498,7 +502,7 @@ void SelectLevelMenuState::DrawPageSelection(const Camera& camera) const {
     // Draw outlines...
     glLineWidth(1.0f);
     glColor4f(0, 0, 0, 1);
-    currX = (camera.GetWindowWidth() - totalWidth) / 2;
+    currX = (Camera::GetWindowWidth() - totalWidth) / 2;
     for (size_t i = 0; i < this->pages.size(); i++) {
         
         glBegin(GL_LINE_LOOP);
@@ -622,8 +626,7 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
 void SelectLevelMenuState::GoBackToWorldSelectMenu() {
     this->display->GetSound()->StopSound(this->bgSoundLoopID, 0.5);
 
-    const Camera& camera = this->display->GetCamera();
-    this->goBackMenuMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
+    this->goBackMenuMoveAnim.SetLerp(0.5, Camera::GetWindowWidth());
     this->goBackMenuMoveAnim.SetRepeat(false);
     this->goBackMenuAlphaAnim.SetLerp(0.5, 0.0f);
     this->goBackMenuAlphaAnim.SetRepeat(false);
@@ -658,15 +661,13 @@ void SelectLevelMenuState::GoToStartLevel() {
 void SelectLevelMenuState::SetupLevelPages() {
     this->ClearLevelPages();
 
-    const Camera& camera = this->display->GetCamera();
-
     static const int TITLE_TO_ITEM_Y_GAP_SIZE = 40;
     static const int SIDE_TO_ITEM_GAP_SIZE    = HORIZONTAL_TITLE_GAP;
     static const int ITEM_X_GAP_SIZE          = 40;
     static const int ITEM_Y_GAP_SIZE          = 40;
     static const int MIN_ITEM_SIZE            = 180;
 
-    float amtForItems = camera.GetWindowWidth() - 2 * SIDE_TO_ITEM_GAP_SIZE;
+    float amtForItems = Camera::GetWindowWidth() - 2 * SIDE_TO_ITEM_GAP_SIZE;
     
     float itemWidth = 0;
     this->numItemsPerRow = 5; 
@@ -678,7 +679,7 @@ void SelectLevelMenuState::SetupLevelPages() {
     assert(this->numItemsPerRow >= 2);
     
     float itemX = SIDE_TO_ITEM_GAP_SIZE;
-    float itemY = camera.GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
+    float itemY = Camera::GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
 
     // Build the menu items for level selection
     int totalNumStarsCollected = this->world->GetNumStarsCollectedInWorld();
@@ -742,7 +743,7 @@ void SelectLevelMenuState::SetupLevelPages() {
 
         // Check to see if we've exceeded the size of the page so that we make the next page...
         if (row != numRows-1 && (itemY - levelItem->GetHeight()) <= (this->keyEscLabel->GetHeight() + VERTICAL_TITLE_GAP)) {
-            itemY = camera.GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
+            itemY = Camera::GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
             this->pages.push_back(new LevelMenuPage());
         }
     }

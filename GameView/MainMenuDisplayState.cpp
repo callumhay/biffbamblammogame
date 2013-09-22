@@ -109,8 +109,7 @@ titleDisplay(1.0f)
 	this->fadeAnimation.SetInterpolantValue(1.0f);
 
 	// Setup any fullscreen effects
-	const Camera& camera = this->display->GetCamera();
-	this->menuFBO = new FBObj(camera.GetWindowWidth(), camera.GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+    this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 
 	// Allocate memory...
@@ -223,8 +222,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
  */
 void MainMenuDisplayState::InitializeMainMenu()  {
 	// Setup the main menu attributes
-	const Camera& camera = this->display->GetCamera();
-	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, camera.GetWindowHeight() - MENU_Y_INDENT);
+	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, Camera::GetWindowHeight() - MENU_Y_INDENT);
 
 	// Setup the main menu (top-most menu)
 	this->mainMenu = new GameMenu(menuTopLeftCorner);
@@ -272,9 +270,6 @@ void MainMenuDisplayState::InitializeMainMenu()  {
 	tempLabelLg.SetText(PLAY_LEVEL_MENUITEM);
 	this->playLevelMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
-    // Removing Blammopedia FOR GamerCamp build... put back eventually
-    // TODO
-    /*
     // Place an item for the blammopedia
     tempLabelSm.SetText(BLAMMOPEDIA_MENUITEM);
     tempLabelLg.SetText(BLAMMOPEDIA_MENUITEM);
@@ -291,8 +286,7 @@ void MainMenuDisplayState::InitializeMainMenu()  {
     else {
         this->blammopediaItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
     }
-    */
-
+ 
 	// Setup the options item in the main menu and its submenu
 	tempLabelSm.SetText(OPTIONS_MENUITEM);
 	tempLabelLg.SetText(OPTIONS_MENUITEM);
@@ -537,10 +531,9 @@ void MainMenuDisplayState::RenderFrame(double dT) {
             return;
         }
     }
-	
-	const Camera& camera		= this->display->GetCamera();
-	const int DISPLAY_WIDTH		= camera.GetWindowWidth();
-	const int DISPLAY_HEIGHT	= camera.GetWindowHeight();
+
+	const int DISPLAY_WIDTH	 = Camera::GetWindowWidth();
+	const int DISPLAY_HEIGHT = Camera::GetWindowHeight();
 
 	this->menuFBO->BindFBObj();
 
@@ -555,7 +548,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
         GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(DISPLAY_HEIGHT) / static_cast<float>(this->starryBG->GetHeight()));
     this->starryBG->UnbindTexture();
 
-	Camera menuCamera(camera.GetWindowWidth(), camera.GetWindowHeight());
+    Camera menuCamera;
 	menuCamera.SetPerspective();
 	menuCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
 
@@ -598,11 +591,10 @@ void MainMenuDisplayState::RenderFrame(double dT) {
  * Renders the title for the menu screen.
  */
 void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
-	const Camera& displayCam = this->display->GetCamera();
 
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
-	const float MAX_X_COORD = static_cast<float>(displayCam.GetWindowWidth()) / static_cast<float>(displayCam.GetWindowHeight()) * MAX_Y_COORD;
-    const float MENU_WIDTH = 5.0f + (2*this->titleDisplay.GetBlammoWidth()*MAX_X_COORD / static_cast<float>(displayCam.GetWindowWidth()));
+	const float MAX_X_COORD = static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(Camera::GetWindowHeight()) * MAX_Y_COORD;
+    const float MENU_WIDTH = 5.0f + (2*this->titleDisplay.GetBlammoWidth()*MAX_X_COORD / static_cast<float>(Camera::GetWindowWidth()));
 	const float X_INDENT = -MAX_X_COORD + (2.0f * MAX_X_COORD - MENU_WIDTH) / 2.0f;
 
 	glMatrixMode(GL_MODELVIEW);
@@ -618,13 +610,11 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
  * random bangs and booms, etc. going off all over the place.
  */
 void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
-	const Camera& camera = this->display->GetCamera();
-
 	const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
 	const float MIN_Z_COORD = -MAX_Z_COORD;
 	const float MAX_Y_COORD = 0.95f * CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
 	const float MIN_Y_COORD = -MAX_Y_COORD;
-	const float MAX_X_COORD = static_cast<float>(camera.GetWindowWidth()) /  static_cast<float>(camera.GetWindowHeight()) * MAX_Y_COORD;
+	const float MAX_X_COORD = static_cast<float>(Camera::GetWindowWidth()) /  static_cast<float>(Camera::GetWindowHeight()) * MAX_Y_COORD;
 	const float MIN_X_COORD = -MAX_X_COORD;	
 	
 	// Insert a bunch of bang-onomatopiea effects for drawing if we're running low on them
@@ -796,10 +786,9 @@ void MainMenuDisplayState::ButtonReleased(const GameControl::ActionButton& relea
 void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 	UNUSED_PARAMETER(width);
 	UNUSED_PARAMETER(height);
-	const Camera& camera = this->display->GetCamera();
 
 	delete this->menuFBO;
-	this->menuFBO = new FBObj(camera.GetWindowWidth(), camera.GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 }
 

@@ -154,7 +154,7 @@ private:
     void UpdateState(double dT, GameModel* gameModel);
     void ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel);
     void ExecuteChasePaddleState(double dT, GameModel* gameModel);
-    void ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking);
+    void ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking, GameModel* gameModel);
     void ExecutePrepLaserState(double dT, GameModel* gameModel);
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
     void ExecuteHurtArmState(double dT, bool isLeftArm);
@@ -299,7 +299,7 @@ private:
     
     void SetState(ClassicalBossAI::AIState newState);
     void UpdateState(double dT, GameModel* gameModel);
-    void UpdateMovement(double dT, GameModel* gameModel);
+    void UpdateMovement(double dT);
 
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
     void ExecuteSpinningPedimentState(double dT, GameModel* gameModel);

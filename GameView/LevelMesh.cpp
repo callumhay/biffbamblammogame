@@ -919,6 +919,14 @@ void LevelMesh::SetLevelAlpha(float alpha) {
     this->regenBlock->SetAlphaMultiplier(alpha);
 }
 
+void LevelMesh::UpdateNoEntryBlock(bool remoteControlRocketOn) {
+    float alpha = 1.0f;
+    if (remoteControlRocketOn) {
+        alpha = 0.5f;
+    }
+    this->noEntryBlock->SetAlpha(alpha);
+}
+
 double LevelMesh::ActivateBossIntro() {
     assert(this->bossMesh != NULL);
     return this->bossMesh->ActivateIntroAnimation();
