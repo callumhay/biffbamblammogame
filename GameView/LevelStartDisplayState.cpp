@@ -133,9 +133,12 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
     assets->GetBoostHUD()->Reinitialize();
     assets->GetPointsHUD()->Reinitialize();
 
-    // Special case: If the level is a boss level then all the lights start off
+    // Special case: If the level is a boss level then all the lights start off and no music plays...
     if (level->GetHasBoss()) {
         assets->ToggleLights(false, 0.01);
+    }
+    else {
+        this->display->GetSound()->PlaySound(GameSound::WorldBackgroundLoop, true);
     }
 }
 

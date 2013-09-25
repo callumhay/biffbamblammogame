@@ -6,32 +6,36 @@
 
 // Main menu background music (looped)
 MainMenuBackgroundLoop {
-	file = menu/bg_piano.wav
+	file = resources/bg_piano.ogg
 }
 
 // Plays when the user highlights (i.e., changes the selection to) a new item in a menu
 MenuItemChangedSelectionEvent {
-	file = menu/item_select.wav
+	file = resources/MenuItemChangedSelectionEvent.ogg
 }
 
 // Plays when the user selects a scroller or selection list menu item
 MenuItemEnteredEvent {
-	file = menu/item_entered.wav
+	file = resources/MenuItemEnteredEvent.ogg
 }
 
 // Plays when the user cancels out of a scroller or selection list menu item
 MenuItemCancelEvent {
-	file = menu/item_cancel.wav
+	file = resources/MenuItemCancelEvent.ogg
 }
 
+// Plays when the user verifies/selects a button that starts the game / leads to gameplay
+MenuItemVerifyAndSelectStartGameEvent {
+	file = resources/MenuItemVerifyAndSelectStartGameEvent.ogg
+}
 // Plays when the user verifies/selects (hits 'enter' on) a menu item
 MenuItemVerifyAndSelectEvent {
-	file = menu/item_confirm.wav
+	file = resources/MenuItemVerifyAndSelectEvent.ogg
 }
 
 // Plays when a sub-menu or verify menu opens up
 MenuOpenSubMenuWindowEvent {
-	file = menu/open_sub_menu_win.wav
+	file = resources/MenuOpenSubMenuWindowEvent.ogg
 }
 
 // NOTE: No sound for the closing of sub menus: It doesn't feel right when it plays since
@@ -39,54 +43,54 @@ MenuOpenSubMenuWindowEvent {
 
 // Plays when a selection list menu item is scrolled
 MenuSelectionItemScrolledEvent {
-	file = menu/item_selection_list_scrolled.wav
+	file = resources/MenuSelectionItemScrolledEvent.ogg
 }
 
 // Plays when a scroller (e.g., volume control) menu item is scrolled
 MenuScrollerItemScrolledEvent {
-	file = menu/item_scroller_scrolled.wav
+	file = resources/MenuScrollerItemScrolledEvent.ogg
 }
 
 // Blammopedia Sounds ********************************************************
 
 // Blammopedia background music (looped)
 BlammopediaBackgroundLoop {
-	file = menu/bg_blammopedia.wav
+	file = resources/bg_blammopedia.ogg
 }
 
 // Plays when the user highlights (i.e., changes the selection to) a new item in the base blammopedia menu
 BlammopediaBaseMenuItemChangedSelectionEvent {
-	file = menu/item_select.wav
+	file = resources/MenuItemChangedSelectionEvent.ogg
 }
 
 // Plays when the user verifies/selects (hits 'enter' on) a base blammopedia menu item
 BlammopediaBaseMenuItemSelectEvent {
-	file = menu/open_sub_menu_win.wav
+	file = resources/MenuOpenSubMenuWindowEvent.ogg
 }
 
 // Plays when the user highlights (i.e., changes the selection to) a new item in on of the blammopedia lists
 BlammopediaListItemChangedSelectionEvent {
-	file = menu/item_select.wav
+	file = resources/MenuItemChangedSelectionEvent.ogg
 }
 
 // Plays when the user verifies/selects (hits 'enter' on) an item in one of the blammopedia lists
 BlammopediaListItemSelectEvent {
-	file = menu/list_item_open.wav
+	file = resources/BlammopediaListItemSelectEvent.ogg
 }
 
 // Plays when the user cancels-out-of/deselects (hits 'esc' on) a previously activated item in one of the blammopedia lists
 BlammopediaListItemDeselectEvent {
-	file = menu/list_item_close.wav
+	file = resources/BlammopediaListItemDeselectEvent.ogg
 }
 
 // Plays when the user cancels out of a list and goes back to the base-blammopedia menu
 BlammopediaListDeselectEvent {
-	file = menu/item_cancel.wav
+	file = resources/MenuItemCancelEvent.ogg
 }
 
 // Plays when the user attempts to select a blammopedia list item that is locked
 BlammopediaListItemLockedEvent {
-	file = menu/item_locked.wav
+	file = resources/LevelMenuItemLockedEvent.ogg
 }
 
 
@@ -94,61 +98,56 @@ BlammopediaListItemLockedEvent {
 
 // World selection menu background music (looped)
 WorldMenuBackgroundLoop {
-	file = menu/bg_world_select.wav
+	file = resources/bg_world_select.ogg
 }
 
 // Plays when the user changes which world is highlighted/selected in the world selection menu
 WorldMenuItemChangedSelectionEvent {
-	file = menu/item_select.wav
+	file = resources/WorldMenuItemChangedSelectionEvent.ogg
 }
 
 // Plays when the user confirms the selection of a world in the world selection menu
 WorldMenuItemSelectEvent {
-	file = menu/item_confirm.wav
+	file = resources/WorldMenuItemSelectEvent.ogg
 }
 
 // Plays when the user attempts to select a world that is locked in the world selection menu
 WorldMenuItemLockedEvent {
-	file = menu/item_locked.wav
+	file = resources/LevelMenuItemLockedEvent.ogg
 }
 
 // Level Select Menu Sounds **************************************************
 
 // Level selection menu background music (looped)
 LevelMenuBackgroundLoop {
-	file = menu/bg_level_select.wav
+	file = resources/bg_level_select.ogg
 }
 
 // Plays when the user changes which level is highlighted/selected in the level selection menu
 LevelMenuItemChangedSelectionEvent {
-	file = menu/item_select.wav
-}
-
-// Plays when the user changes the page (among the pages of levels) in the level selection menu
-LevelMenuPageChangedSelectionEvent {
-	file = menu/page_changed.wav
+	file = resources/LevelMenuItemChangedSelectionEvent.ogg
 }
 
 // Plays when the user confirms the selection of a level in the level selection menu
 LevelMenuItemSelectEvent {
-	file = menu/item_confirm.wav
+	file = resources/MenuItemVerifyAndSelectStartGameEvent.ogg
 }
 
 // Plays when the user attempts to select a level that is locked in the level selection menu
 LevelMenuItemLockedEvent {
-	file = menu/item_locked.wav
+	file = resources/LevelMenuItemLockedEvent.ogg
 }
 
 // In-Game Menu Sounds *******************************************************
 
 // Plays when the player pauses the game (which opens the in-game menu)
 InGameMenuOpened {
-	file = menu/paused.wav
+	file = resources/InGameMenuOpened.ogg
 }
 
 // Plays when the player unpauses the game (exits the in-game menu and goes back to playing)
 InGameMenuClosed {
-	file = menu/unpaused.wav
+	file = resources/InGameMenuClosed.ogg
 }
 
 // ---------------------------------------------------------------------------
@@ -158,7 +157,7 @@ InGameMenuClosed {
 // Classical *****************************************************************
 WorldBackgroundLoop {
 	world = Classical
-	file  =
+	file  = resources/BlammopediaBackgroundLoop.ogg
 }
 
 // Gothic-Romantic ***********************************************************
@@ -192,50 +191,38 @@ WorldBackgroundLoop {
 // Paddle Events *************************************************************
 
 PaddleHitWallEvent {
-	file = global/paddle_hit_wall.ogg
+	file = resources/PaddleHitWallEvent_01.ogg | resources/PaddleHitWallEvent_02.ogg | resources/PaddleHitWallEvent_03.ogg | resources/PaddleHitWallEvent_04.ogg
 }
 
 
 // Ball Events ***************************************************************
 
 PlayerLostABallButIsStillAliveEvent {
-	file = global/lost_ball.ogg
+	file = resources/lost_ball.ogg
 }
 
 LastBallExplodedEvent {
-	file = global/last_ball_death.ogg
+	file = resources/last_ball_death.ogg
 }
 
-BallSpawnEvent {
-	file = 
-}
 
 BallBallCollisionEvent {
-	file = global/ball_ball_hit.ogg
+	file = resources/ball_ball_hit.ogg
 }
 
 LastBallSpiralingToDeathLoop {
-	file = global/ball_spiral_to_death.ogg
+	file = resources/ball_spiral_to_death.ogg
 }
 
 
 // Ball and Paddle Events ****************************************************
 
-BallPaddleCollision1Event {
-	file = global/ball_paddle_hit_01.wav
-}
-BallPaddleCollision2Event {
-	file = global/ball_paddle_hit_02.wav
-}
-BallPaddleCollision3Event {
-	file = global/ball_paddle_hit_03.wav
-}
-BallPaddleCollision4Event {
-	file = global/ball_paddle_hit_04.wav
+BallPaddleCollisionEvent {
+	file = resources/BallPaddleCollisionEvent_01 ALT.ogg | resources/BallPaddleCollisionEvent_02 ALT.ogg | resources/BallPaddleCollisionEvent_03 ALT.ogg | resources/BallPaddleCollisionEvent_04 ALT.ogg
 }
 
 BallStickyPaddleCollisionEvent {
-	file = global/ball_sticky_paddle_hit.ogg
+	file = resources/BallStickyPaddleCollisionEvent.ogg
 }
 
 BallShieldPaddleCollisionEvent {
@@ -243,31 +230,23 @@ BallShieldPaddleCollisionEvent {
 }
 
 BallOrPaddleGrowEvent {
-	file = global/grow.ogg
+	file = resources/grow.ogg
 }
 
 BallOrPaddleShrinkEvent {
-	file = global/shrink.ogg
+	file = resources/shrink.ogg
 }
 
 
 // Ball and Block Events *****************************************************
 
-BallBlockCollisionEvent {
-	file = global/ball_block_hit.ogg
+BallBlockBasicBounceEvent {
+	file = resources/BallBlockBasicBounceEvent_01.ogg | resources/BallBlockBasicBounceEvent_02.ogg | resources/BallBlockBasicBounceEvent_03.ogg | resources/BallBlockBasicBounceEvent_04.ogg | resources/BallBlockBasicBounceEvent_05.ogg | resources/BallBlockBasicBounceEvent_06.ogg | resources/BallBlockBasicBounceEvent_07.ogg | resources/BallBlockBasicBounceEvent_08.ogg | resources/BallBlockBasicBounceEvent_09.ogg | resources/BallBlockBasicBounceEvent_10.ogg
 }
 
-// TODO: Replace a single collision sound with multiple ones that go off in sequence (or random?)
-// BallBlockBasicBounce1Event
-// BallBlockBasicBounce2Event
-// BallBlockBasicBounce3Event
-// BallBlockBasicBounce4Event
-// BallBlockBasicBounce5Event
-// BallBlockBasicBounce6Event
-// BallBlockBasicBounce7Event
-// BallBlockBasicBounce8Event
-
-
+BallBlockCollisionColourChange {
+	file = resources/BallBlockCollisionColourChange_01.ogg | resources/BallBlockCollisionColourChange_02.ogg | resources/BallBlockCollisionColourChange_03.ogg | resources/BallBlockCollisionColourChange_04.ogg | resources/BallBlockCollisionColourChange_05.ogg | resources/BallBlockCollisionColourChange_06.ogg | resources/BallBlockCollisionColourChange_07.ogg | resources/BallBlockCollisionColourChange_08.ogg
+}
 
 
 // Block Events **************************************************************
@@ -276,29 +255,33 @@ BallBlockCollisionEvent {
 // break... it increases in pitch with each block that gets broken...(see points section)
 
 BombBlockDestroyedEvent {
-	file = global/bomb_explode.ogg
+	file = resources/bomb_explode.ogg
 }
 
 InkBlockDestroyedEvent {
-	file = global/ink_splat.ogg
+	file = resources/ink_splat.ogg
 }
 
 BasicBlockDestroyedEvent {
-	file = global/block_break_basic.ogg
+	file = resources/block_break_basic.ogg
 }
 
+// BasicBlockChangedColourEvent {
+//	file = resources/
+// }
+
 CannonBlockLoadedEvent {
-	file = global/cannon_loaded.ogg
+	file = resources/cannon_loaded.ogg
 }
 
 CannonBlockFiredEvent {
-	file = global/cannon_fired.ogg
+	file = resources/cannon_fired.ogg
 }
 
 // CannonBlockLoadedWithBallCamBallEvent
 
 PortalTeleportEvent {
-	file = global/portal_warp.ogg
+	file = resources/portal_warp.ogg
 }
 
 CollateralBlockFlashingLoop {
@@ -310,30 +293,27 @@ CollateralBlockFallingLoop {
 }
 
 CannonBlockRotatingLoop {
-	file = global/cannon_rotate.ogg
+	file = resources/cannon_rotate.ogg
 }
 
-// TODO? Have a sound for when lightning is first activated
-// and then make the lightning loop be a low hum of electricity
-
 TeslaLightningArcLoop {
-	file = global/electricity.ogg
+	file = resources/electricity.ogg
 }
 
 SwitchBlockActivated {
-	file = global/switch.wav
+	file = resources/switch.ogg
 }
 
 BlockFrozenEvent {
-	file = global/frozen.wav
+	file = resources/frozen.ogg
 }
 
 BlockOnFireLoop {
-	file = global/on_fire.wav
+	file = resources/on_fire.ogg
 }
 
 IceShatterEvent {
-	file = global/shatter.ogg
+	file = resources/shatter.ogg
 }
 
 IceMeltedEvent {
@@ -355,18 +335,18 @@ PaddleRocketLaunchEvent {
 }
 
 PaddleRocketMovingLoop {
-	file = global/rocket.ogg
+	file = resources/rocket.ogg
 }
 
 RocketExplodedEvent {
-	file = global/rocket_explode.ogg
+	file = resources/rocket_explode.ogg
 }
 
 // TurretMineFiredEvent
 // PaddleMineFiredEvent
 
 MineExplodedEvent {
-	file = global/rocket_explode.ogg
+	file = resources/rocket_explode.ogg
 }
 
 LaserBulletShotEvent {
@@ -374,7 +354,7 @@ LaserBulletShotEvent {
 }
 
 LaserBeamFiringLoop {
-	file = global/laser_beam.ogg
+	file = resources/laser_beam.ogg
 }
 
 // LaserDeflectedByShieldEvent {
@@ -393,10 +373,10 @@ LaserBeamFiringLoop {
 // Game Item Events **********************************************************
 
 BallSafetyNetCreatedEvent {
-	file = global/safety_net_created.ogg
+	file = resources/safety_net_created.ogg
 }
 BallSafetyNetDestroyedEvent {
-	file = global/safety_net_destroyed.ogg
+	file = resources/safety_net_destroyed.ogg
 }
 
 LevelFlipEvent {
@@ -414,24 +394,24 @@ PaddleShieldDeactivatedEvent {
 }
 
 MagnetPaddleLoop {
-	file = global/drone.ogg
+	file = resources/drone.ogg
 }
 
 
 ItemSpawnedEvent {
-	file = global/item_spawn.ogg
+	file = resources/item_spawn.ogg
 }
 
 PowerUpItemActivatedEvent {
-	file = global/power_up_item.ogg
+	file = resources/power_up_item.ogg
 }
 
 PowerNeutralItemActivatedEvent {
-	file = global/power_neutral_item.ogg
+	file = resources/power_neutral_item.ogg
 }
 
 PowerDownItemActivatedEvent {
-	file = global/power_down_item.ogg
+	file = resources/power_down_item.ogg
 }
 
 // TODO - hook not implemented yet
@@ -462,9 +442,18 @@ ItemMovingLoop {
 // BossAngryEvent
 // BossBlowingUpLoop
 // BossDeathFlashToFullscreenWhiteoutEvent
+// BossHitPaddleEvent
 
-// ClassicalBossArmShakeLoop?
-// ClassicalBossArmAttackEvent?
+// ClassicalBossArmShakeLoop
+// ClassicalBossArmAttackEvent
+
+// NouveauBossTargetingEvent
+
+// DecoBossArmRotateEvent
+// DecoBossArmExtendEvent
+// DecoBossArmRetractEvent
+// DecoBossArmLevelCollisionEvent
+// DecoBossLevelRotatingLoop
 
 // BossCrosshairTargetEvent
 // BossLaserBeamLoop
@@ -473,37 +462,37 @@ ItemMovingLoop {
 // Bullet-time / Ball Boost Events *******************************************
 
 EnterBulletTimeEvent {
-	file = global/BulletTimeFire.wav
+	file = resources/EnterBulletTimeEvent.ogg
 }
 
 InBulletTimeLoop {
-	file = global/BulletTime.wav
+	file = resources/InBulletTimeLoop.ogg
 }
 
 ExitBulletTimeEvent {
-	file = global/unwoosh.ogg
+	file = resources/ExitBulletTimeEvent.ogg
 }
 
 BallBoostEvent {
-	file = global/boost.ogg
+	file = resources/boost.ogg
 }
 
 BallBoostGainedEvent {
-	file = global/boost_acquired.ogg
+	file = resources/boost_acquired.ogg
 }
 
 // Star, points and life Events **********************************************
 
 LifeUpAcquiredEvent {
-	file = global/one_up.ogg
+	file = resources/one_up.ogg
 }
 
 StarAcquiredEvent {
-	file = global/star_gained.ogg
+	file = resources/star_gained.ogg
 }
 
 FiveStarsAcquiredEvent {
-	file = global/star_gained.ogg
+	file = resources/star_gained.ogg
 }
 
 ScoreMultiplierIncreasedTo2Event {
@@ -580,7 +569,7 @@ BlockBrokenMultiplierCounterInc9 {
 // Game-over state events ****************************************************
 
 GameOverEvent {
-	file = global/game_over.ogg
+	file = resources/game_over.ogg
 }
 
 // TODO
@@ -589,39 +578,86 @@ GameOverEvent {
 // Global Sound Effects ======================================================
 // ---------------------------------------------------------------------------
 
+// type = gargle
+// gargleRate      = 100
+// gargleIsSinWave = 1
+
+// type = reverbWave
+// reverbWaveInputGain = -2.0
+// reverbWaveMix       = -3.0
+// reverbWaveTime      = 2000.0
+// reverbWaveHFR       = 0.001
+
+// type = chorus
+// chorusWetDryMix = 50.0
+// chorusDepth     = 100.0
+// chorusFeedback  = 50.0
+// chorusFrequency = 0.1
+// chorusIsSinWave = 1
+// chorusDelay     = 20.0
+
+// type = flanger
+// flangerWetDryMix      = 20.0
+// flangerDepth          = 10.0
+// flangerFeedback       = 0
+// flangerFrequency      = 0.01
+// flangerIsTriangleWave = 0
+// flangerDelay          = 10
+
+// type = distortion
+// distortionGain             = -15
+// distortionIntensity        = 0.0
+// distortionPostEQCenterFreq = 100
+// distortionPostEQBandwidth  = 100
+// distortionPreLowpassCutoff = 8000
+
 BulletTimeEffect {
 	type  = reverb3D
 	volume = 0.75
-	roomAtten = -1000
-	roomHighFreqAtten = -100
-	roomRolloff = 0
-	decayTime = 1.49
-	decayHighFreqRatio = 0.83
-	reflectionAtten = -2602
-	reflectionDelay = 0.007
-	reverbAtten = 200
-	reverbDelay = 0.011
-	diffusion = 100
-	density = 100
-	highFreqReference = 5000
+	R3DRoomAtten = -1000
+	R3DRoomHighFreqAtten = -100
+	R3DRoomRolloff = 0
+	R3DDecayTime = 1.49
+	R3DDecayHighFreqRatio = 0.83
+	R3DReflectionAtten = -2602
+	R3DReflectionDelay = 0.007
+	R3DReverbAtten = 200
+	R3DReverbDelay = 0.011
+	R3DDiffusion = 100
+	R3DDensity = 100
+	R3DHighFreqReference = 5000
 }
 
-// TODO: Gargle effect sucks, change it
 InkSplatterEffect {
-	type = gargle
-	volume = 1
-	rate = 30
-	isSinWave = 1
+
+	volume = 1.0
+	
+	type  = flanger, chorus
+	
+	flangerWetDryMix      = 80.0
+	flangerDepth          = 100.0
+	flangerFeedback       = 0
+	flangerFrequency      = 2
+	flangerIsTriangleWave = 1
+	flangerDelay          = 20
+	
+	chorusWetDryMix = 50.0
+	chorusDepth     = 50.0
+	chorusFeedback  = 5.0
+	chorusFrequency = 1.5
+	chorusIsSinWave = 1
+	chorusDelay     = 10.0
 }
 
 PoisonEffect {
-	type = distortion
 	volume = 0.8
-	gain = -18
-	intensity = 20.0
-	postEQCenterFreq = 2400
-	postEQBandwidth = 2400
-	preLowpassCutoff = 8000
+	type =  chorus	
+	chorusWetDryMix = 70.0
+	chorusDepth     = 50.0
+	chorusFeedback  = 0.0
+	chorusFrequency = 2
+	chorusIsSinWave = 1
+	chorusDelay     = 20.0
 }
 
 // PaddleCamStickyGooEffect {

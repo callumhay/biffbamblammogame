@@ -804,7 +804,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(in
  * Handle activation events for items in the main menu.
  */
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
-	// Play the sound effect assoicated with menu item selection/activation (i.e., when the user actually presses a button
+	// Play the sound effect associated with menu item selection/activation (i.e., when the user actually presses a button
     // on a selected item to choose it)
 	GameSound* sound = this->mainMenuState->display->GetSound();
 	
@@ -813,7 +813,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
         
 		debug_output("Selected " << this->mainMenuState->mainMenu->GetMenuItemAt(itemIndex)->GetCurrLabel()->GetText() << " from menu");
 		
-        sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
 		
         this->mainMenuState->changeToPlayGameState = true;
 		this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);

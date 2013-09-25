@@ -19,24 +19,28 @@
  * splatter across the screen.
  */
 class CgFxInkSplatter : public CgFxFullscreenGoo {
+public:
+    CgFxInkSplatter(FBObj* outputFBO, const std::string& maskTexFilepath);
+    ~CgFxInkSplatter();
+
+    void ActivateInkSplat();
+    inline void DeactivateInkSplat() {
+        this->isInkSplatActivated = false;
+    }
+    inline bool IsInkSplatActive() const {
+        return this->isInkSplatActivated;
+    }
+    inline bool IsInkSplatVisible() const {
+        return this->isInkSplatVisible;
+    }
+
+    void Draw(int screenWidth, int screenHeight, double dT);
 
 private:
 	bool isInkSplatActivated;
+    bool isInkSplatVisible;
 	AnimationMultiLerp<float> inkSplatFadeAnim;
 
-public:
-	CgFxInkSplatter(FBObj* outputFBO, const std::string& maskTexFilepath);
-	virtual ~CgFxInkSplatter();
-
-	void ActivateInkSplat();
-	inline void DeactivateInkSplat() {
-		this->isInkSplatActivated = false;
-	}
-	inline bool IsInkSplatActive() const {
-		return this->isInkSplatActivated;
-	}
-
-	void Draw(int screenWidth, int screenHeight, double dT);
-
+    DISALLOW_COPY_AND_ASSIGN(CgFxInkSplatter);
 };
 #endif

@@ -237,11 +237,13 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 
         // The ink splatter might no longer be active, in this case we turn off any effects that
         // got toggled when it was activated
-        if (!this->inkSplatterEffect->IsInkSplatActive()) {
+        if (this->inkSplatterEffect->IsInkSplatVisible()) {
+            sound->ToggleSoundEffect(GameSound::InkSplatterEffect, true);
+        }
+        else {
             sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false);
         }
 	}
-
 
     // This is a bit of a hack to make sure that the radial blur doesn't cause strange artifacts
     // around the edges of the screen when bullet time mode is activated...
@@ -476,13 +478,15 @@ void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) 
  * at the end of the engine pipeline.
  */
 void GameFBOAssets::ActivateInkSplatterEffect() {
+    // Activates the inksplat, but there's an animation, so we don't apply the splatter effect just yet
 	this->inkSplatterEffect->ActivateInkSplat();
-    sound->ToggleSoundEffect(GameSound::InkSplatterEffect, true);
+    //sound->ToggleSoundEffect(GameSound::InkSplatterEffect, true);
 }
 /**
  * Deactivates the ink splatter effect.
  */
 void GameFBOAssets::DeactivateInkSplatterEffect() {
+    // Stops the ink splat immediately -- need to kill the sound too
 	this->inkSplatterEffect->DeactivateInkSplat();
     sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false);
 }

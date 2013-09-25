@@ -15,7 +15,8 @@
 #include "MSFReader.h"
 #include "Sound.h"
 #include "SoundEffect.h"
-#include "SoundSource.h"
+#include "SingleSoundSource.h"
+#include "RandomSoundSource.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameView/GameViewConstants.h"
@@ -108,7 +109,7 @@ void GameSound::Tick(double dT) {
 
 void GameSound::LoadGlobalSounds() {
     for (SoundSourceMapIter iter = this->globalSounds.begin(); iter != this->globalSounds.end();) {
-        SoundSource* currSoundSrc = iter->second;
+        AbstractSoundSource* currSoundSrc = iter->second;
         assert(currSoundSrc != NULL);
         if (!currSoundSrc->Load()) {
             delete currSoundSrc;
@@ -128,7 +129,7 @@ void GameSound::LoadWorldSounds(const GameWorld::WorldStyle& world) {
         SoundSourceMap& relevantWorldSoundSourceMap = iter1->second;
         if (iter1->first == world) {
             for (SoundSourceMapIter iter2 = relevantWorldSoundSourceMap.begin(); iter2 != relevantWorldSoundSourceMap.end();) {
-                SoundSource* currSoundSrc = iter2->second;
+                AbstractSoundSource* currSoundSrc = iter2->second;
                 assert(currSoundSrc != NULL);
                 if (!currSoundSrc->Load()) {
                     delete currSoundSrc;
@@ -142,7 +143,7 @@ void GameSound::LoadWorldSounds(const GameWorld::WorldStyle& world) {
         }
         else {
             for (SoundSourceMapIter iter2 = relevantWorldSoundSourceMap.begin(); iter2 != relevantWorldSoundSourceMap.end(); ++iter2) {
-                SoundSource* currSoundSrc = iter2->second;
+                AbstractSoundSource* currSoundSrc = iter2->second;
                 assert(currSoundSrc != NULL);
                 currSoundSrc->Unload();
             }
@@ -386,6 +387,7 @@ void GameSound::SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool
 
 void GameSound::StopAllEffects() {
     this->activeEffects.clear();
+    this->pausedEffects.clear();
 
     std::list<Sound*> allPlayingSounds;
     this->GetAllPlayingSoundsAsList(allPlayingSounds);
@@ -393,6 +395,19 @@ void GameSound::StopAllEffects() {
         Sound* currSound = *iter;
         currSound->StopAllEffects();
     }
+}
+
+void GameSound::PauseAllEffects() {
+    EffectSet previouslyActiveEffects = this->activeEffects;
+    this->StopAllEffects();
+    this->pausedEffects = previouslyActiveEffects;
+}
+
+void GameSound::UnpauseAllEffects() {
+    for (EffectSetConstIter iter = this->pausedEffects.begin(); iter != this->pausedEffects.end(); ++iter) {
+        this->ToggleSoundEffect(*iter, true);
+    }
+    this->pausedEffects.clear();
 }
 
 void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn, 
@@ -469,21 +484,20 @@ void GameSound::SetListenerPosition(const Camera& camera) {
         irrklang::vec3df(upVec[0], upVec[1], upVec[2]));
 }
 
-GameSound::SoundType GameSound::GetRandomBallPaddleCollisionEventSoundType() {
-    static const int NUM_BALL_PADDLE_COLLISION_SOUNDS = 4;
-    int randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % NUM_BALL_PADDLE_COLLISION_SOUNDS;
-    return static_cast<GameSound::SoundType>(GameSound::BallPaddleCollision1Event + randomNum);
-}
+AbstractSoundSource* GameSound::BuildSoundSource(const GameSound::SoundType& soundType,
+                                                 const std::string& soundName, const std::vector<std::string>& filePaths) {
 
-SoundSource* GameSound::BuildSoundSource(const GameSound::SoundType& soundType,
-                                         const std::string& soundName, const std::string& filePath) {
-    if (this->soundEngine == NULL) {
+    if (this->soundEngine == NULL || filePaths.empty()) {
         assert(false);
         return NULL;
     }
 
-    SoundSource* result = new SoundSource(this->soundEngine, soundType, soundName, filePath);
-    return result;
+    if (filePaths.size() == 1) {
+        return new SingleSoundSource(this->soundEngine, soundType, soundName, filePaths.front());
+    }
+    else {
+        return new RandomSoundSource(this->soundEngine, soundType, soundName, filePaths);
+    }
 }
 
 SoundEffect* GameSound::BuildSoundEffect(const GameSound::EffectType& effectType, 
@@ -530,7 +544,7 @@ bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& s
     }
 
     // Try to find the source associated with the given sound type
-    SoundSource* source = this->GetSoundSourceFromType(soundType);
+    AbstractSoundSource* source = this->GetSoundSourceFromType(soundType);
     if (source == NULL) {
         return false;
     }
@@ -565,6 +579,7 @@ void GameSound::ClearEffects() {
     }
     this->globalEffects.clear();
     this->activeEffects.clear();
+    this->pausedEffects.clear();
 }
 
 void GameSound::ClearSounds() {
@@ -596,7 +611,7 @@ void GameSound::ClearSoundSources() {
     
     // Clear all global sounds
     for (SoundSourceMapIter iter = this->globalSounds.begin(); iter != this->globalSounds.end(); ++iter) {
-        SoundSource* currSoundSrc = iter->second;
+        AbstractSoundSource* currSoundSrc = iter->second;
         delete currSoundSrc;
         currSoundSrc = NULL;
     }
@@ -606,7 +621,7 @@ void GameSound::ClearSoundSources() {
     for (WorldSoundSourceMapIter iter1 = this->worldSounds.begin(); iter1 != this->worldSounds.end(); ++iter1) {
         SoundSourceMap& soundMap = iter1->second;
         for (SoundSourceMapIter iter2 = soundMap.begin(); iter2 != soundMap.end(); ++iter2) {
-            SoundSource* currSoundSrc = iter2->second;
+            AbstractSoundSource* currSoundSrc = iter2->second;
             delete currSoundSrc;
             currSoundSrc = NULL;
         }
@@ -623,7 +638,7 @@ void GameSound::ClearSoundSources() {
     this->globalEffects.clear();
 }
 
-SoundSource* GameSound::GetSoundSourceFromType(const GameSound::SoundType& type) const {
+AbstractSoundSource* GameSound::GetSoundSourceFromType(const GameSound::SoundType& type) const {
 
     // Try the global sounds...
     SoundSourceMapConstIter findIter = this->globalSounds.find(type);
@@ -703,7 +718,7 @@ Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLoope
     }
 
     // Try to find the source associated with the given sound type
-    SoundSource* source = this->GetSoundSourceFromType(soundType);
+    AbstractSoundSource* source = this->GetSoundSourceFromType(soundType);
     if (source == NULL) {
         return NULL;
     }

@@ -447,7 +447,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
         if (block.ProducesBounceEffectsWithBallWhenHit(ball)) {
             Point3D approxCollisionPos = ball.GetCenterPosition() + ball.GetBounds().Radius() * 
                 Vector3D::Normalize(block.GetPosition3D() - ball.GetCenterPosition());
-		    this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBlockCollisionEvent, false, approxCollisionPos);
+            this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBlockBasicBounceEvent, false, approxCollisionPos);
         }
 	}
 
@@ -458,7 +458,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
 	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
 	bool doEffect = (currSystemTime - this->timeSinceLastBallPaddleCollisionEventInMS) > 
-									EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
+	    EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 
 	if (doEffect) {
 		// Play the sound for when the ball hits the paddle
@@ -472,7 +472,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
             sound->PlaySoundAtPosition(GameSound::BallStickyPaddleCollisionEvent, false, collisionPtEstimate);
 		}
 		else {
-			sound->PlaySoundAtPosition(GameSound::GetRandomBallPaddleCollisionEventSoundType(), false, collisionPtEstimate);
+            sound->PlaySoundAtPosition(GameSound::BallPaddleCollisionEvent, false, collisionPtEstimate);
 		}
 
 		// Add the visual effect for when the ball hits the paddle
@@ -924,9 +924,17 @@ void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 }
 
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
+    GameSound* sound = this->display->GetSound();
+    
     // Stop all sounds for the piece that has changed...
     if (&pieceBefore != &pieceAfter) {
-        this->display->GetSound()->DetachAndStopAllSounds(&pieceBefore);
+        sound->DetachAndStopAllSounds(&pieceBefore);
+    }
+    else {
+        // Likely a colour change in a breakable, but check anyway
+        if (pieceAfter.GetType() == LevelPiece::Breakable || pieceAfter.GetType() == LevelPiece::BreakableTriangle) {
+            sound->PlaySoundAtPosition(GameSound::BallBlockCollisionColourChange, false, pieceAfter.GetPosition3D());
+        }
     }
 
 	this->display->GetAssets()->GetCurrentLevelMesh()->ChangePiece(pieceBefore, pieceAfter);

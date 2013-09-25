@@ -17,13 +17,18 @@
 #include "Reverb3DSoundEffect.h"
 #include "DistortionSoundEffect.h"
 #include "GargleSoundEffect.h"
+#include "FlangerSoundEffect.h"
+#include "ReverbWaveSoundEffect.h"
+#include "ChorusSoundEffect.h"
 //#include "CompressorSoundEffect.h"
 
 const char* SoundEffect::REVERB3D_STR    = "reverb3D";
 const char* SoundEffect::DISTORTION_STR  = "distortion";
 const char* SoundEffect::GARGLE_STR      = "gargle";
+const char* SoundEffect::FLANGER_STR     = "flanger";
+const char* SoundEffect::REVERB_WAVE_STR = "reverbWave";
+const char* SoundEffect::CHORUS_STR      = "chorus";
 //const char* SoundEffect::COMPRESSOR_STR  = "compressor";
-
 
 const char* SoundEffect::VOLUME_PARAM_NAME = "volume";
 const float SoundEffect::DEFAULT_VOLUME = 1.0f;
@@ -51,7 +56,15 @@ SoundEffect* SoundEffect::Build(size_t typeFlags, const EffectParameterMap& para
     if ((typeFlags & SoundEffect::Gargle) == SoundEffect::Gargle) {
         compositeEffects.push_back(new GargleSoundEffect(parameterMap));
     }
-
+    if ((typeFlags & SoundEffect::Flanger) == SoundEffect::Flanger) {
+        compositeEffects.push_back(new FlangerSoundEffect(parameterMap));
+    }
+    if ((typeFlags & SoundEffect::ReverbWave) == SoundEffect::ReverbWave) {
+        compositeEffects.push_back(new ReverbWaveSoundEffect(parameterMap));
+    }
+    if ((typeFlags & SoundEffect::Chorus) == SoundEffect::Chorus) {
+        compositeEffects.push_back(new ChorusSoundEffect(parameterMap));
+    }
     if (compositeEffects.size() == 1) {
         fullResult = compositeEffects.front();
         assert(fullResult != NULL);
@@ -79,6 +92,15 @@ size_t SoundEffect::GetEffectFlagsFromStrList(const std::vector<std::string>& ef
         }
         else if (currStr.compare(SoundEffect::GARGLE_STR) == 0) {
             flagResult |= SoundEffect::Gargle;
+        }
+        else if (currStr.compare(SoundEffect::FLANGER_STR) == 0) {
+            flagResult |= SoundEffect::Flanger;
+        }
+        else if (currStr.compare(SoundEffect::REVERB_WAVE_STR) == 0) {
+            flagResult |= SoundEffect::ReverbWave;
+        }
+        else if (currStr.compare(SoundEffect::CHORUS_STR) == 0) {
+            flagResult |= SoundEffect::Chorus;
         }
     }
 

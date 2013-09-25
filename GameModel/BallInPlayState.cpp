@@ -199,6 +199,9 @@ void BallInPlayState::Tick(double seconds) {
             boss->CollisionOccurred(this->gameModel, *paddle, collisionBossPart);
             if (boss->CanHurtPaddleWithBody()) {
                 paddle->HitByBoss(*collisionBossPart);
+
+                // Cancel any active paddle shield
+                gameModel->RemoveActiveGameItemsOfGivenType(GameItem::ShieldPaddleItem);
             }
 
             // Make sure the paddle is no longer colliding with the boss

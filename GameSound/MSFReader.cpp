@@ -11,7 +11,7 @@
 
 #include "MSFReader.h"
 #include "GameSound.h"
-#include "SoundSource.h"
+#include "SingleSoundSource.h"
 #include "SoundEffect.h"
 
 #include "../ResourceManager.h"
@@ -20,11 +20,6 @@
 
 const char* MSFReader::OPEN_SOUND_DEFINTION_BLOCK     = "{";
 const char* MSFReader::CLOSE_SOUND_DEFINITION_BLOCK   = "}";
-const char* MSFReader::OPEN_ENCLOSING_PROB_FILE_PAIR	= "(";
-const char* MSFReader::CLOSE_ENCLOSING_PROB_FILE_PAIR	= ")";
-const char* MSFReader::PROB_DEFINITION_SYNTAX         = ":";
-const char* MSFReader::OPEN_TIME_SEQUENCE_DEFINITION  = "[";
-const char* MSFReader::CLOSE_TIME_SEQUENCE_DEFINITION = "]";
 
 const char* MSFReader::IGNORE_KEYWORD = "ignore";
 const char* MSFReader::IGNORE_LINE    = "//";
@@ -65,7 +60,6 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
     GameSound::SoundType lastSoundEnum    = GameSound::NoSound;
 	std::vector<std::string> soundFilePaths;
     std::vector<std::string> effectTypes;
-	std::vector<int> probabilities;
     SoundEffect::EffectParameterMap effectParamMap;
 
 	double resetSequenceTime = -1;
@@ -73,7 +67,7 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 	// Read through the music script file
 	while (*inStream >> currReadStr && !error) {
 
-		// Check for an ignored block defintion...
+		// Check for an ignored block definition...
 		if (currReadStr == MSFReader::IGNORE_KEYWORD) {
 
 			// Read the whole block and just discard it
@@ -97,7 +91,7 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 			std::getline(*inStream, currReadStr);
 			continue;
 		}	
-		// Check for the opening of a sound defintion block...
+		// Check for the opening of a sound definition block...
 		else if (currReadStr == MSFReader::OPEN_SOUND_DEFINTION_BLOCK) {
 			if (soundDefBlockOpen) {
 				error = true;
@@ -109,12 +103,11 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 			// Reinitialize all data that can be contained in a sound/effect definition block...
             worldSoundStyle = GameWorld::None;
 			soundFilePaths.clear();
-			probabilities.clear();
             effectTypes.clear();
             effectParamMap.clear();
 
 		}
-		// Check for the closing of a music defintion block...
+		// Check for the closing of a music definition block...
 		else if (currReadStr == MSFReader::CLOSE_SOUND_DEFINITION_BLOCK) {
 
 			// If there is was no open block to begin with then the file is poorly formatted...
@@ -144,13 +137,13 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
                 gameSound.globalEffects.insert(std::make_pair(lastEffectEnum, newSoundEffect));
             }
             else {
-                // If it's not a sound effect then it must be a sound
+                // If it's not a effect then it must be a sound
 			    
                 // Make sure there is a sound with associated file name to load
                 assert(lastSoundEnum != GameSound::NoSound);
                 assert(!soundFilePaths.empty());
 
-                SoundSource* newSoundSrc = gameSound.BuildSoundSource(lastSoundEnum, lastBlockName, soundFilePaths.front());//probabilities, soundFilePaths);
+                AbstractSoundSource* newSoundSrc = gameSound.BuildSoundSource(lastSoundEnum, lastBlockName, soundFilePaths);
 			    assert(newSoundSrc != NULL);
             
                 if (worldSoundStyle != GameWorld::None) {
@@ -184,104 +177,55 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 						continue;
 					}
 
-					// The rest of the line should contain a set of probabilities and filepaths or just a single filepath
-					//... or it should contain a sequence definition...
 					std::string soundFileLine;
 					std::getline(*inStream, soundFileLine);
 
 					// Clean up extra whitespace
 					soundFileLine = stringhelper::trim(soundFileLine);
-					if (soundFileLine.find("(") == std::string::npos && soundFileLine.find("[") == std::string::npos) {
-						// If we're here then there is just a single file provided...
-						soundFileLine = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + soundFileLine;
-						probabilities.push_back(1);
-						soundFilePaths.push_back(soundFileLine);
-					}
-					else if (soundFileLine.find("[") != std::string::npos) {
-						// If we're here then a time sequence was provided, it takes the form of:
-						// [<time_before_sequence_reset> <relative_filepath_1>  <relative_filepath_2> ...  <relative_filepath_n>]
 
-						std::vector<std::string> tokens;
-						stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_TIME_SEQUENCE_DEFINITION) +
-							std::string(MSFReader::CLOSE_TIME_SEQUENCE_DEFINITION) + std::string("\n\r\t "));
+                    // Check to see if there are any pipes to indicate multiple files...
+                    if (soundFileLine.find("|") == std::string::npos) {
 
+					    // If we're here then there is just a single file provided...
+					    soundFileLine = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + soundFileLine;
+					    soundFilePaths.push_back(soundFileLine);
+                    }
+                    else {
+                        // There's more than one file listed...
+                        std::vector<std::string> tokens;
+                        stringhelper::Tokenize(soundFileLine, tokens, std::string("|\n\r\t"));
+                        
+                        bool failed = false;
+                        std::set<std::string> filesLoaded;
+                        for (size_t i = 0; i < tokens.size(); i++) {
 
-						bool failed = false;
-						for (std::vector<std::string>::iterator iter = tokens.begin(); iter != tokens.end(); ++iter) {
-							std::stringstream currTokenStream(*iter);
-							if (!(currTokenStream >> resetSequenceTime)) {
-								failed = true;
-								errorStr = std::string("Invalid format of time sequence, first parameter must be a time value in seconds. ") +
-									std::string("Error found on line: ") + soundFileLine + std::string(".");
-								break;
-							}
+                            std::string tempFilePath = stringhelper::trim(tokens[i]);
+                            if (tempFilePath.empty()) {
+                                continue;
+                            }
+                            tempFilePath = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + tempFilePath;
 
-							std::string currFilepath;
-							while (currTokenStream >> currFilepath) {
-								soundFilePaths.push_back(currFilepath);
-							}
-						}
+                            // Make sure there are no duplicate files
+                            std::pair<std::set<std::string>::iterator, bool> found = filesLoaded.insert(tempFilePath);
+                            if (!found.second) {
+                                // The file was already part of the list...
+                                errorStr = std::string("Duplicate file name found for game sound (") + lastBlockName + std::string(") : ") + tempFilePath;
+                                failed = true;
+                                break;
+                            }
 
-						if (failed) {
-							resetSequenceTime = -1;
-							soundFilePaths.clear();
-							error = true;
-							continue;
-					 }
-					}
-					else {
-						// Read in the (probability : filepath) pairings:
-						// Split the line up into the probabilities and files
-						std::vector<std::string> tokens;
-						stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_ENCLOSING_PROB_FILE_PAIR) +
-							std::string(MSFReader::CLOSE_ENCLOSING_PROB_FILE_PAIR) + std::string(MSFReader::PROB_DEFINITION_SYNTAX) + std::string("\n\r\t "));
-						// Should be pairs of probabilities and file paths...
-						if (tokens.size() % 2 != 0) {
-							error = true;
-							errorStr = "Invalid format of probabilities to filepaths provided on line: " + soundFileLine + ".";
-							continue;
-						}
+                            soundFilePaths.push_back(tempFilePath);
+                        }
 
-						bool failed = false;
-						std::set<std::string> filesLoaded;
-						for (size_t i = 0; i < tokens.size(); i += 2) {
-							std::stringstream currProb(tokens[i]);
+                        if (failed || soundFilePaths.empty()) {
+                            resetSequenceTime = -1;
+                            soundFilePaths.clear();
+                            error = true;
+                            continue;
+                        }
 
-							int probability = 0;
-							currProb >> probability;
+                    }
 
-							// Make sure the probabilities add up to something sensible
-							if (probability <= 0 || probability > 100) {
-								failed = true;
-								errorStr = "Invalid probability value(s) provided on line: " + soundFileLine + ". Probabilities must be in the range [1, 100].";
-								break;
-							}
-
-							std::string tempFilePath = stringhelper::trim(tokens[i+1]);
-							tempFilePath = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + tempFilePath;
-
-							// Make sure there are no duplicate files
-							std::pair<std::set<std::string>::iterator, bool> found = filesLoaded.insert(tempFilePath);
-							if (!found.second) {
-								// The file was already part of the list...
-								errorStr = std::string("Duplicate file name found for game sound (") + lastBlockName + std::string(") : ") + tempFilePath;
-								failed = true;
-								break;
-							}
-
-							probabilities.push_back(probability);
-							soundFilePaths.push_back(tempFilePath);
-						}
-
-						if (failed) {
-							probabilities.clear();
-							soundFilePaths.clear();
-                            effectTypes.clear();
-							error = true;
-							continue;
-						}
-
-					}
 				}
                 else if (currReadStr == MSFReader::TYPE_KEYWORD) {
                     if (!FoundEqualsSyntax(error, errorStr, inStream)) {
@@ -380,6 +324,7 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemEnteredEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemCancelEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemVerifyAndSelectEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemVerifyAndSelectStartGameEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuSelectionItemScrolledEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuScrollerItemScrolledEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuOpenSubMenuWindowEvent));
@@ -400,36 +345,29 @@ void MSFReader::InitSoundTypeMapping() {
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemChangedSelectionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuPageChangedSelectionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemSelectEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemLockedEvent));
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuOpened));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuClosed));
     
-
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldBackgroundLoop));
-
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleHitWallEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, LastBallExplodedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallSpawnEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBallCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LastBallSpiralingToDeathLoop));
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision1Event));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision2Event));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision3Event));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollision4Event));
-    
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallStickyPaddleCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallShieldPaddleCollisionEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOrPaddleGrowEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOrPaddleShrinkEvent));
     
 
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockCollisionEvent));
+	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockBasicBounceEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockCollisionColourChange));
 	
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BombBlockDestroyedEvent));

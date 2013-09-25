@@ -17,6 +17,9 @@
 #include "ItemDropBlockMesh.h"
 #include "RegenBlockMesh.h"
 #include "TeslaBlockMesh.h"
+#include "LaserTurretBlockMesh.h"
+#include "MineTurretBlockMesh.h"
+#include "RocketTurretBlockMesh.h"
 
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/ObjReader.h"
@@ -164,7 +167,11 @@ inline float LevelMesh::GetLevelAlpha() const {
 
 inline void LevelMesh::DrawPiecesPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
     this->teslaBlock->DrawPostEffects(dT, camera, keyLight, fillLight, ballLight);
+    this->laserTurretBlock->DrawPostEffects(dT, camera);
+    this->mineTurretBlock->DrawPostEffects(dT, camera);
+    this->rocketTurretBlock->DrawPostEffects(dT, camera);
 }
 
 inline void LevelMesh::LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {

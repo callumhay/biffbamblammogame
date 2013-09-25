@@ -26,11 +26,6 @@ private:
 	// Syntax symbols for the MSF
     static const char* OPEN_SOUND_DEFINTION_BLOCK;
 	static const char* CLOSE_SOUND_DEFINITION_BLOCK;
-	static const char* OPEN_ENCLOSING_PROB_FILE_PAIR;
-	static const char* CLOSE_ENCLOSING_PROB_FILE_PAIR;
-	static const char* PROB_DEFINITION_SYNTAX;
-    static const char* OPEN_TIME_SEQUENCE_DEFINITION;
-    static const char* CLOSE_TIME_SEQUENCE_DEFINITION;
 
 	// Other keywords for the MSF
 	static const char* IGNORE_KEYWORD;

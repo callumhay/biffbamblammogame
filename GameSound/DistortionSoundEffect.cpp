@@ -16,11 +16,11 @@
 DistortionSoundEffect::DistortionSoundEffect(const EffectParameterMap& parameterMap) : SoundEffect(parameterMap) {
 
     // Parse the relevant parameters for distortion...
-    SoundEffect::ParseSoundParameter<float>(parameterMap, "gain", -60, 0, -18, this->gain);
-    SoundEffect::ParseSoundParameter<float>(parameterMap, "intensity", 0.0f, 100.0f, 15.0f, this->intensity);
-    SoundEffect::ParseSoundParameter<float>(parameterMap, "postEQCenterFreq", 100.0f, 8000.0f, 2400.0f, this->postEQCenterFreq);
-    SoundEffect::ParseSoundParameter<float>(parameterMap, "postEQBandwidth", 100.0f, 8000.0f, 2400.0f, this->postEQBandwidth);
-    SoundEffect::ParseSoundParameter<float>(parameterMap, "preLowpassCutoff", 100.0f, 8000.0f, 8000.0f, this->preLowpassCutoff);
+    SoundEffect::ParseSoundParameter<float>(parameterMap, "distortionGain", -60, 0, -18, this->gain);
+    SoundEffect::ParseSoundParameter<float>(parameterMap, "distortionIntensity", 0.0f, 100.0f, 15.0f, this->intensity);
+    SoundEffect::ParseSoundParameter<float>(parameterMap, "distortionPostEQCenterFreq", 100.0f, 8000.0f, 2400.0f, this->postEQCenterFreq);
+    SoundEffect::ParseSoundParameter<float>(parameterMap, "distortionPostEQBandwidth", 100.0f, 8000.0f, 2400.0f, this->postEQBandwidth);
+    SoundEffect::ParseSoundParameter<float>(parameterMap, "distortionPreLowpassCutoff", 100.0f, 8000.0f, 8000.0f, this->preLowpassCutoff);
 
 }
 

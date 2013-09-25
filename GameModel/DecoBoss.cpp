@@ -46,7 +46,7 @@ const float DecoBoss::LIGHTNING_FIRE_POS_Z = 0.805f;
 
 const float DecoBoss::MOVEMENT_PADDING_X      = LevelPiece::PIECE_WIDTH;
 const float DecoBoss::MOVEMENT_PADDING_Y      = 1.5f * LevelPiece::PIECE_HEIGHT;
-const float DecoBoss::MOVEMENT_MIN_Y_BOUNDARY = 6.0f * LevelPiece::PIECE_HEIGHT;
+const float DecoBoss::MOVEMENT_MIN_Y_BOUNDARY = 7.0f * LevelPiece::PIECE_HEIGHT;
 
 const float DecoBoss::ROTATION_Y_POSITION = 14.0f * LevelPiece::PIECE_HEIGHT;
 
@@ -55,7 +55,7 @@ const float DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS = 90.0f;
 
 const float DecoBoss::ITEM_LOAD_OFFSET_Y = -5.063f - GameItem::ITEM_HEIGHT / 2.0f;
 
-const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS = ROTATION_Y_POSITION - (3.0f * LevelPiece::PIECE_HEIGHT);
+const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS = ROTATION_Y_POSITION - (2.0f * LevelPiece::PIECE_HEIGHT);
 const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MAX_Y_POS = ROTATION_Y_POSITION + (2.0f * LevelPiece::PIECE_HEIGHT);
 
 using namespace decobossai;

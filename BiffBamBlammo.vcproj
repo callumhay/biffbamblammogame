@@ -3034,11 +3034,23 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameSound\AbstractSoundSource.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\ChorusSoundEffect.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\CompositeSoundEffect.h"
 					>
 				</File>
 				<File
 					RelativePath=".\GameSound\DistortionSoundEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\FlangerSoundEffect.h"
 					>
 				</File>
 				<File
@@ -3054,7 +3066,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameSound\RandomSoundSource.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\Reverb3DSoundEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\ReverbWaveSoundEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\SingleSoundSource.h"
 					>
 				</File>
 				<File
@@ -3069,20 +3093,28 @@
 					RelativePath=".\GameSound\SoundEffect.h"
 					>
 				</File>
-				<File
-					RelativePath=".\GameSound\SoundSource.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
 				>
+				<File
+					RelativePath=".\GameSound\AbstractSoundSource.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\ChorusSoundEffect.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\GameSound\CompositeSoundEffect.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\GameSound\DistortionSoundEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\FlangerSoundEffect.cpp"
 					>
 				</File>
 				<File
@@ -3098,15 +3130,23 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameSound\RandomSoundSource.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\Reverb3DSoundEffect.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\GameSound\SoundEffect.cpp"
+					RelativePath=".\GameSound\ReverbWaveSoundEffect.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\GameSound\SoundSource.cpp"
+					RelativePath=".\GameSound\SingleSoundSource.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\SoundEffect.cpp"
 					>
 				</File>
 			</Filter>
