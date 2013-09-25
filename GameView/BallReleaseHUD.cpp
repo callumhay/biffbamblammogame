@@ -204,6 +204,7 @@ void BallReleaseHUD::DrawReleaseTimer(const Camera& camera, const GameModel& gam
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glPushMatrix();
+    glMultMatrixf(gameModel.GetTransformInfo()->GetGameXYZTransform().begin());
     glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
     glTranslatef(paddlePos[0], paddlePos[1] - (1.2f*paddleHeight + halfBarHeight), 0.0f);
     glMultMatrixf(screenAlignMatrix.begin());

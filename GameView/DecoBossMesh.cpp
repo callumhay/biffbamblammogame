@@ -25,7 +25,8 @@ DecoBossMesh::DecoBossMesh(DecoBoss* boss) : BossMesh(), boss(boss),
 coreMesh(NULL), lightningRelayMesh(NULL), gearMesh(NULL), scopingArm1Mesh(NULL),
 scopingArm2Mesh(NULL), scopingArm3Mesh(NULL), scopingArm4Mesh(NULL), handMesh(NULL), 
 leftBodyMesh(NULL), rightBodyMesh(NULL), leftBodyExplodingEmitter(NULL), 
-rightBodyExplodingEmitter(NULL), itemMesh(NULL) {
+rightBodyExplodingEmitter(NULL), itemMesh(NULL), leftArmExplodingEmitter(NULL),
+rightArmExplodingEmitter(NULL), bodyExplodingEmitter(NULL) {
 
     assert(boss != NULL);
 
@@ -56,6 +57,9 @@ rightBodyExplodingEmitter(NULL), itemMesh(NULL) {
 
     this->leftBodyExplodingEmitter  = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
     this->rightBodyExplodingEmitter = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
+    this->leftArmExplodingEmitter   = this->BuildExplodingEmitter(DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
+    this->rightArmExplodingEmitter  = this->BuildExplodingEmitter(DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
+    this->bodyExplodingEmitter      = this->BuildExplodingEmitter(DecoBoss::CORE_WIDTH, DecoBoss::CORE_HEIGHT);
 }
 
 DecoBossMesh::~DecoBossMesh() {
@@ -93,6 +97,12 @@ DecoBossMesh::~DecoBossMesh() {
     this->leftBodyExplodingEmitter = NULL;
     delete this->rightBodyExplodingEmitter;
     this->rightBodyExplodingEmitter = NULL;
+    delete this->leftArmExplodingEmitter;
+    this->leftArmExplodingEmitter = NULL;
+    delete this->rightArmExplodingEmitter;
+    this->rightArmExplodingEmitter = NULL;
+    delete this->bodyExplodingEmitter;
+    this->bodyExplodingEmitter;
 }
 
 double DecoBossMesh::ActivateIntroAnimation() {
@@ -204,6 +214,13 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
 void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     BossMesh::DrawPostBodyEffects(dT, camera);
 
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+
+    // Left side
     const BossBodyPart* leftBody = this->boss->GetLeftBody();
     if (leftBody->GetAlpha() > 0.0f) {
         if (leftBody->GetIsDestroyed()) {
@@ -218,6 +235,7 @@ void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         }
     }
 
+    // Right side
     const BossBodyPart* rightBody = this->boss->GetRightBody();
     if (rightBody->GetAlpha() > 0.0f) {
         if (rightBody->GetIsDestroyed()) {
@@ -231,6 +249,52 @@ void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
 
         }
     }
+
+    // Left arm
+    const BossBodyPart* leftArmGear = this->boss->GetLeftArmGear();
+    if (leftArmGear->GetAlpha() > 0.0f) {
+        const BossCompositeBodyPart* leftArm = this->boss->GetLeftArm();
+        if (leftArm->GetIsDestroyed()) {
+            Point2D position = leftArm->GetTranslationPt2D();
+            glPushMatrix();
+            glTranslatef(position[0], position[1], 0);
+            this->leftArmExplodingEmitter->Tick(dT);
+            this->leftArmExplodingEmitter->Draw(camera);
+            glPopMatrix();
+        }
+    }
+
+    // Right arm
+    const BossBodyPart* rightArmGear = this->boss->GetRightArmGear();
+    if (rightArmGear->GetAlpha() > 0.0f) {
+        const BossCompositeBodyPart* rightArm = this->boss->GetRightArm();
+        if (rightArm->GetIsDestroyed()) {
+            Point2D position = rightArm->GetTranslationPt2D();
+            glPushMatrix();
+            glTranslatef(position[0], position[1], 0);
+            this->rightArmExplodingEmitter->Tick(dT);
+            this->rightArmExplodingEmitter->Draw(camera);
+            glPopMatrix();
+        }
+    }
+
+    // Core/Body
+    const BossBodyPart* coreBody = this->boss->GetCore();
+    if (coreBody->GetAlpha() > 0.0f) {
+        if (this->boss->GetIsStateMachineFinished()) {
+            
+            // Final body explosion emitter
+            Point3D position = coreBody->GetTranslationPt3D();
+            glPushMatrix();
+            glTranslatef(position[0], position[1], position[2]);
+            this->bodyExplodingEmitter->SetParticleAlpha(coreBody->GetAlpha());
+            this->bodyExplodingEmitter->Tick(dT);
+            this->bodyExplodingEmitter->Draw(camera);
+            glPopMatrix();
+        }
+    }
+
+    glPopAttrib();
 }
 
 Point3D DecoBossMesh::GetBossFinalExplodingEpicenter() const {

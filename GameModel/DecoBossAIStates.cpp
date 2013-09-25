@@ -30,10 +30,10 @@ const float DecoBossAIState::DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC = 90.0f;
 
 const float DecoBossAIState::SHOOT_AT_PADDLE_RANDOM_ROT_ANGLE_IN_DEGS = 13.25f;
 
-const float DecoBossAIState::DEFAULT_LEVEL_ROTATION_SPEED_DEGS_PER_SEC = 12.0f;
+const float DecoBossAIState::DEFAULT_LEVEL_ROTATION_SPEED_DEGS_PER_SEC = 13.0f;
 const float DecoBossAIState::DEFAULT_LEVEL_ROTATION_AMT_IN_DEGS        = 360.0f;
 
-const double DecoBossAIState::TOTAL_ELECTRIFIED_TIME_IN_SECS = 2.5;
+const double DecoBossAIState::TOTAL_ELECTRIFIED_TIME_IN_SECS = 3.1;
 const double DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS = 2.0;
 const double DecoBossAIState::TOTAL_ELECTRIFIED_AND_RETALIATION_TIME_IN_SECS = 
     TOTAL_ELECTRIFIED_TIME_IN_SECS + TOTAL_RETALIATION_TIME_IN_SECS;
@@ -41,7 +41,7 @@ const double DecoBossAIState::TOTAL_ELECTRIFIED_AND_RETALIATION_TIME_IN_SECS =
 DecoBossAIState::DecoBossAIState(DecoBoss* boss) : BossAIState(), boss(boss), shootCountdown(0.0),
 numShotsUntilNextState(0), dropItemCountdown(0.0), nextDropItemType(GameItem::PaddleShrinkItem),
 sideToSideNumDropCountdown(0), currLeftArmRotInDegs(0.0f), currRightArmRotInDegs(0.0f),
-currLevelRotationAmtInDegs(0.0f) {
+currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0) {
 
     assert(boss != NULL);
     
@@ -193,12 +193,33 @@ Point2D DecoBossAIState::GeneratePaddleArmAttackPosition(GameModel* gameModel) c
     PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
     assert(paddle != NULL);
 
-    // Choose a reasonably-close-to-the-paddle-x-position, but make sure we keep 
-    // it in the movement bounds of the boss
-    float xPos = paddle->GetCenterPosition()[0];
-    xPos += Randomizer::GetInstance()->RandomNumNegOneToOne() * 2.0f * paddle->GetHalfWidthTotal();
-
     const float halfBossWidth = this->boss->GetCurrentWidth() / 2.0f;
+    float xPos = paddle->GetCenterPosition()[0];
+
+    // This depends on whether both arms are currently alive or not...
+    bool leftArmIsAlive  = !this->boss->GetLeftArm()->GetIsDestroyed();
+    bool rightArmIsAlive = !this->boss->GetRightArm()->GetIsDestroyed();
+    if (leftArmIsAlive && rightArmIsAlive) {
+        // When both arms are still alive we just try to hover over the paddle and attack straight
+        // downwards simultaneously with both arms 
+
+        // Choose a reasonably-close-to-the-paddle-x-position, but make sure we keep 
+        // it in the movement bounds of the boss
+        xPos += Randomizer::GetInstance()->RandomNumNegOneToOne() * 2.0f * paddle->GetHalfWidthTotal();
+    }
+    else if (leftArmIsAlive) {
+        // If only the left arm is alive we want to keep the paddle to the left side of the boss so that
+        // the boss can attempt to extend its arm directly at the paddle
+        float maxX = DecoBoss::GetMovementMaxXBound() - halfBossWidth;
+        xPos += Randomizer::GetInstance()->RandomNumZeroToOne() * (maxX - xPos);
+    }
+    else if (rightArmIsAlive) {
+        // If only the right arm is alive we want to keep the paddle to the right side of the boss so that
+        // the boss can attempt to extend its arm directly at the paddle
+        float minX = DecoBoss::GetMovementMinXBound() + halfBossWidth;
+        xPos -= Randomizer::GetInstance()->RandomNumZeroToOne() * (xPos - minX);
+    }
+
     if (xPos - halfBossWidth < DecoBoss::GetMovementMinXBound()) {
         xPos = DecoBoss::GetMovementMinXBound() + halfBossWidth;
     }
@@ -241,6 +262,24 @@ void DecoBossAIState::ShootLightningBoltAtPaddle(GameModel* gameModel) {
         std::max<float>(BossLightningBoltProjectile::SPD_DEFAULT, spdMultiplier * this->GetMaxXSpeed())));
 }
 
+AnimationMultiLerp<Vector3D> DecoBossAIState::GenerateArmDeathTranslationAnimation(bool isLeft, double timeInSecs) const {
+    float xDist = (isLeft ? -1 : 1) * 3 * DecoBoss::ARM_WIDTH;
+
+    float yDist = -1.25f * (isLeft ? this->boss->GetLeftArm()->GetTranslationPt2D()[1] : 
+        this->boss->GetRightArm()->GetTranslationPt2D()[1]);
+    yDist -= 2 * DecoBoss::ARM_NOT_EXTENDED_HEIGHT;
+
+    Vector2D animVec(xDist, yDist);
+    animVec.Rotate(this->currLevelRotationAmtInDegs);
+
+    return Boss::BuildLimbFallOffTranslationAnim(timeInSecs, animVec[0], animVec[1]);
+}
+
+AnimationMultiLerp<float> DecoBossAIState::GenerateArmDeathRotationAnimation(bool isLeft, double timeInSecs) const {
+    float randomAngle = Randomizer::GetInstance()->RandomUnsignedInt() % 180;
+    return Boss::BuildLimbFallOffZRotationAnim(timeInSecs, isLeft ? (360.0f + randomAngle) : -(360.0f + randomAngle));
+}
+
 float DecoBossAIState::CalculateSideToSideDropStateVelocity() const {
     float distance   = this->boss->GetSideToSideDropStateDistance();
     int numItemDrops = this->GenerateNumItemsToDropInSideToSideState();
@@ -272,7 +311,10 @@ bool DecoBossAIState::RemoteControlRocketCheckAndNecessaryStateChange(GameModel*
     else {
         // The player is controlling the RC rocket... the boss can't really do much since it hasn't had its arms exposed yet,
         // so if it isn't doing anything important, just move it around and make it look like it's doing stuff
-        if (this->currState == StationaryAttackAIState) {
+        if (this->currState == StationaryAttackAIState || this->currState == MovingAttackAndItemDropAIState ||
+            this->currState == LeftToRightItemDropAIState || this->currState == RightToLeftItemDropAIState ||
+            this->currState == MoveToFarLeftSideAIState || this->currState == MoveToFarRightSideAIState) {
+
             this->SetState(MovingAttackAIState);
         }
     }
@@ -353,60 +395,66 @@ bool DecoBossAIState::UpdateArmAnimation(double dT, AnimationMultiLerp<float>& a
     allDoneArmAnimation &= armSeg4Anim.Tick(dT);
 
     // Update the arms with those translations...
-    BossBodyPart* leftArmScoping1 = this->boss->GetLeftArmScopingSeg1Editable();
-    BossBodyPart* leftArmScoping2 = this->boss->GetLeftArmScopingSeg2Editable();
-    BossBodyPart* leftArmScoping3 = this->boss->GetLeftArmScopingSeg3Editable();
-    BossBodyPart* leftArmScoping4 = this->boss->GetLeftArmScopingSeg4Editable();
-    BossBodyPart* leftHand = this->boss->GetLeftArmHandEditable();
+    if (!this->boss->GetLeftArm()->GetIsDestroyed()) {
+        BossBodyPart* leftArmScoping1 = this->boss->GetLeftArmScopingSeg1Editable();
+        BossBodyPart* leftArmScoping2 = this->boss->GetLeftArmScopingSeg2Editable();
+        BossBodyPart* leftArmScoping3 = this->boss->GetLeftArmScopingSeg3Editable();
+        BossBodyPart* leftArmScoping4 = this->boss->GetLeftArmScopingSeg4Editable();
+        BossBodyPart* leftHand = this->boss->GetLeftArmHandEditable();
 
-    leftArmScoping1->SetLocalTranslation(Vector3D(0, armSeg1Anim.GetInterpolantValue(), 0));
-    float translation2 = armSeg1Anim.GetInterpolantValue() + armSeg2Anim.GetInterpolantValue();
-    leftArmScoping2->SetLocalTranslation(Vector3D(0, translation2, 0));
-    float translation3 = translation2 + armSeg3Anim.GetInterpolantValue();
-    leftArmScoping3->SetLocalTranslation(Vector3D(0, translation3, 0));
-    float translation4 = translation3 + armSeg4Anim.GetInterpolantValue();
-    leftArmScoping4->SetLocalTranslation(Vector3D(0, translation4, 0));
-    leftHand->SetLocalTranslation(Vector3D(0, translation4, 0));
+        leftArmScoping1->SetLocalTranslation(Vector3D(0, armSeg1Anim.GetInterpolantValue(), 0));
+        float translation2 = armSeg1Anim.GetInterpolantValue() + armSeg2Anim.GetInterpolantValue();
+        leftArmScoping2->SetLocalTranslation(Vector3D(0, translation2, 0));
+        float translation3 = translation2 + armSeg3Anim.GetInterpolantValue();
+        leftArmScoping3->SetLocalTranslation(Vector3D(0, translation3, 0));
+        float translation4 = translation3 + armSeg4Anim.GetInterpolantValue();
+        leftArmScoping4->SetLocalTranslation(Vector3D(0, translation4, 0));
+        leftHand->SetLocalTranslation(Vector3D(0, translation4, 0));
 
-    BossBodyPart* rightArmScoping1 = this->boss->GetRightArmScopingSeg1Editable();
-    BossBodyPart* rightArmScoping2 = this->boss->GetRightArmScopingSeg2Editable();
-    BossBodyPart* rightArmScoping3 = this->boss->GetRightArmScopingSeg3Editable();
-    BossBodyPart* rightArmScoping4 = this->boss->GetRightArmScopingSeg4Editable();
-    BossBodyPart* rightHand = this->boss->GetRightArmHandEditable();
+        Vector2D leftArmOriVec(0,-1);
+        leftArmOriVec.Rotate(this->boss->GetLeftArm()->GetLocalZRotation());
 
-    rightArmScoping1->SetLocalTranslation(Vector3D(0, armSeg1Anim.GetInterpolantValue(), 0));
-    translation2 = armSeg1Anim.GetInterpolantValue() + armSeg2Anim.GetInterpolantValue();
-    rightArmScoping2->SetLocalTranslation(Vector3D(0, translation2, 0));
-    translation3 = translation2 + armSeg3Anim.GetInterpolantValue();
-    rightArmScoping3->SetLocalTranslation(Vector3D(0, translation3, 0));
-    translation4 = translation3 + armSeg4Anim.GetInterpolantValue();
-    rightArmScoping4->SetLocalTranslation(Vector3D(0, translation4, 0));
-    rightHand->SetLocalTranslation(Vector3D(0, translation4, 0));
+        float dxDt = armSeg1Anim.GetDxDt();
+        leftArmScoping1->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
+        dxDt += armSeg2Anim.GetDxDt();
+        leftArmScoping2->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
+        dxDt += armSeg3Anim.GetDxDt();
+        leftArmScoping3->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
+        dxDt += armSeg4Anim.GetDxDt();
+        leftArmScoping4->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
+        leftHand->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
+    }
 
-    // Update the animation velocity for all arm pieces (for collision purposes)
-    Vector2D rightArmOriVec(0,-1);
-    rightArmOriVec.Rotate(this->boss->GetRightArm()->GetLocalZRotation());
-    Vector2D leftArmOriVec(0,-1);
-    leftArmOriVec.Rotate(this->boss->GetLeftArm()->GetLocalZRotation());
+    if (!this->boss->GetRightArm()->GetIsDestroyed()) {
+        BossBodyPart* rightArmScoping1 = this->boss->GetRightArmScopingSeg1Editable();
+        BossBodyPart* rightArmScoping2 = this->boss->GetRightArmScopingSeg2Editable();
+        BossBodyPart* rightArmScoping3 = this->boss->GetRightArmScopingSeg3Editable();
+        BossBodyPart* rightArmScoping4 = this->boss->GetRightArmScopingSeg4Editable();
+        BossBodyPart* rightHand = this->boss->GetRightArmHandEditable();
 
-    float dxDt = armSeg1Anim.GetDxDt();
-    rightArmScoping1->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-    leftArmScoping1->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
-    
-    dxDt += armSeg2Anim.GetDxDt();
-    rightArmScoping2->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-    leftArmScoping2->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
-    
-    dxDt += armSeg3Anim.GetDxDt();
-    rightArmScoping3->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-    leftArmScoping3->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
-    
-    dxDt += armSeg4Anim.GetDxDt();
-    rightArmScoping4->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-    leftArmScoping4->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
-    rightHand->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-    leftHand->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
+        rightArmScoping1->SetLocalTranslation(Vector3D(0, armSeg1Anim.GetInterpolantValue(), 0));
+        float translation2 = armSeg1Anim.GetInterpolantValue() + armSeg2Anim.GetInterpolantValue();
+        rightArmScoping2->SetLocalTranslation(Vector3D(0, translation2, 0));
+        float translation3 = translation2 + armSeg3Anim.GetInterpolantValue();
+        rightArmScoping3->SetLocalTranslation(Vector3D(0, translation3, 0));
+        float translation4 = translation3 + armSeg4Anim.GetInterpolantValue();
+        rightArmScoping4->SetLocalTranslation(Vector3D(0, translation4, 0));
+        rightHand->SetLocalTranslation(Vector3D(0, translation4, 0));
 
+        // Update the animation velocity for all arm pieces (for collision purposes)
+        Vector2D rightArmOriVec(0,-1);
+        rightArmOriVec.Rotate(this->boss->GetRightArm()->GetLocalZRotation());
+
+        float dxDt = armSeg1Anim.GetDxDt();
+        rightArmScoping1->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
+        dxDt += armSeg2Anim.GetDxDt();
+        rightArmScoping2->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
+        dxDt += armSeg3Anim.GetDxDt();
+        rightArmScoping3->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
+        dxDt += armSeg4Anim.GetDxDt();
+        rightArmScoping4->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
+        rightHand->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
+    }
 
     return allDoneArmAnimation;
 }
@@ -495,7 +543,7 @@ void DecoBossAIState::InitFiringArmsAtLevelState() {
     this->armSeg4RotateExtendAnim.ResetToStart();
 }
 void DecoBossAIState::InitRotatingLevelState() {
-    this->currLevelRotationAmtInDegs = 0.0f;
+    this->rotateShakeCountdown = this->GenerateRotateShakeCountdown();
 }
 void DecoBossAIState::InitFinishRotatingLevelState() {
     this->armSeg1RetractAnim.ResetToStart();
@@ -596,6 +644,7 @@ void DecoBossAIState::ExecuteMovingAttackState(double dT, GameModel* gameModel) 
 
 void DecoBossAIState::ExecuteMovingAttackAndItemDropState(double dT, GameModel* gameModel) {
     if (this->RemoteControlRocketCheckAndNecessaryStateChange(gameModel)) {
+        this->itemLoadingAnim.ResetToStart();
         return;
     }
 
@@ -638,6 +687,11 @@ void DecoBossAIState::ExecuteMovingAttackAndItemDropState(double dT, GameModel* 
 }
 
 void DecoBossAIState::ExecuteMoveToFarLeftSideState(double dT, GameModel* gameModel) {
+    if (this->RemoteControlRocketCheckAndNecessaryStateChange(gameModel)) {
+        this->itemLoadingAnim.ResetToStart();
+        return;
+    }
+
     // Leave this state immediately if the ball is not in play
     if (gameModel->GetCurrentStateType() != GameState::BallInPlayStateType) {
         this->itemLoadingAnim.ResetToStart();
@@ -653,6 +707,11 @@ void DecoBossAIState::ExecuteMoveToFarLeftSideState(double dT, GameModel* gameMo
 }
 
 void DecoBossAIState::ExecuteMoveToFarRightSideState(double dT, GameModel* gameModel) {
+    if (this->RemoteControlRocketCheckAndNecessaryStateChange(gameModel)) {
+        this->itemLoadingAnim.ResetToStart();
+        return;
+    }
+
     // Leave this state immediately if the ball is not in play
     if (gameModel->GetCurrentStateType() != GameState::BallInPlayStateType) {
         this->itemLoadingAnim.ResetToStart();
@@ -667,10 +726,26 @@ void DecoBossAIState::ExecuteMoveToFarRightSideState(double dT, GameModel* gameM
     }
 }
 
-void DecoBossAIState::ExecuteMoveToCenterForLevelRotState() {
-    if (this->MoveToTargetPosition(0.5f * this->GetMaxXSpeed())) {
+void DecoBossAIState::ExecuteMoveToCenterForLevelRotState(GameModel* gameModel) {
+    if (this->MoveToTargetPosition(0.8f * this->GetMaxXSpeed())) {
         // Done moving to the target, go to the next state
-        this->SetState(FiringArmsAtLevelAIState);
+
+        // If the ball is not in play or in the lower part of the level, then don't fire the arms and just go back to attacking
+        const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
+        assert(paddle != NULL);
+        const GameBall* ball = gameModel->GetGameBalls().front();
+        assert(ball != NULL);
+
+        if ((gameModel->GetCurrentStateType() == GameState::BallInPlayStateType &&
+             ball->GetCenterPosition2D()[1] <= this->boss->GetYBallMaxForLevelRotate()) ||
+             gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn() ||
+             this->currLevelRotationAmtInDegs != 0.0f) {
+
+            this->SetState(FiringArmsAtLevelAIState);
+        }
+        else {
+            this->GoToNextRandomAttackState(gameModel);
+        }
     }
 }
 
@@ -765,6 +840,11 @@ void DecoBossAIState::ExecuteFiringArmsAtLevelState(double dT, GameModel* gameMo
 void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
     
+    // If the ball is dying then we stop rotating for a brief period of time
+    if (gameModel->GetCurrentStateType() == GameState::BallDeathStateType) {
+        return;
+    }
+
     GameTransformMgr* transformMgr = gameModel->GetTransformInfo();
     assert(transformMgr != NULL);
     transformMgr->SetGameZRotation(this->currLevelRotationAmtInDegs, *gameModel->GetCurrentLevel());
@@ -778,10 +858,35 @@ void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel)
         }
         else {
             this->SetState(FinishRotatingLevelAIState);
+            return;
         }
     }
     else {
-        this->currLevelRotationAmtInDegs += dT * DEFAULT_LEVEL_ROTATION_SPEED_DEGS_PER_SEC;
+
+        // If the remote control rocket camera isn't active and the ball is stuck above the boss 
+        // then we speed up the rotation...
+        float currLevelRotSpd = this->GetLevelRotationSpeed();
+        const GameBall* ball = gameModel->GetGameBalls().front();
+        if (!gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn() &&
+            ball->GetCenterPosition2D()[1] > this->boss->GetYBallMaxForLevelRotate()) {
+
+                currLevelRotSpd *= 1.5f;
+        }
+
+        this->currLevelRotationAmtInDegs += dT * currLevelRotSpd;
+    }
+
+    if (this->rotateShakeCountdown <= 0.0) {
+        // Shake the level a little bit while rotating...
+        float xDir = Randomizer::GetInstance()->RandomNegativeOrPositive() * 0.7f;
+        float yDir = Randomizer::GetInstance()->RandomNegativeOrPositive() * 0.15f;
+        float magnitude = 50 + Randomizer::GetInstance()->RandomNumZeroToOne() * 25;
+        GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEventInfo(0.25, Vector3D(xDir, yDir, 0.0f), magnitude));
+
+        this->rotateShakeCountdown = this->GenerateRotateShakeCountdown();
+    }
+    else {
+        this->rotateShakeCountdown -= dT;
     }
 }
 
@@ -824,6 +929,11 @@ void DecoBossAIState::ExecuteFinishRotatingLevelState(double dT, GameModel* game
 }
 
 void DecoBossAIState::ExecuteSideToSideItemDropState(double dT, GameModel* gameModel) {
+
+    if (this->RemoteControlRocketCheckAndNecessaryStateChange(gameModel)) {
+        this->itemLoadingAnim.ResetToStart();
+        return;
+    }
 
     // Leave this state immediately if the ball is not in play
     if (gameModel->GetCurrentStateType() != GameState::BallInPlayStateType) {
@@ -956,6 +1066,13 @@ void DecoBossAIState::ExecuteAngryState(double dT) {
     }
 }
 
+void DecoBossAIState::ExecuteFinalDeathThroesState() {
+    this->desiredVel = Vector2D(0,0);
+    this->currVel    = Vector2D(0,0);
+
+    // The boss is dead dead dead.
+}
+
 void DecoBossAIState::TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
     UNUSED_PARAMETER(gameModel);
     UNUSED_PARAMETER(block1);
@@ -998,7 +1115,7 @@ void DecoBossAIState::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case MoveToCenterForLevelRotAIState:
-            this->ExecuteMoveToCenterForLevelRotState();
+            this->ExecuteMoveToCenterForLevelRotState(gameModel);
             break;
         case RotatingLevelAIState:
             this->ExecuteRotatingLevelState(dT, gameModel);
@@ -1030,6 +1147,10 @@ void DecoBossAIState::UpdateState(double dT, GameModel* gameModel) {
             this->ExecuteAngryState(dT);
             break;
 
+        case FinalDeathThroesAIState:
+            this->ExecuteFinalDeathThroesState();
+            break;
+
         default:
             assert(false);
             return;
@@ -1050,14 +1171,15 @@ GameItem::ItemType Stage1AI::GenerateRandomItemDropType(GameModel* gameModel) co
     assert(gameModel != NULL);
     if (this->nextDropItemType != GameItem::PaddleShrinkItem &&
         gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
-        if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
+        if (Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) {
             return GameItem::PaddleShrinkItem;
         }
     }
 
-    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 6) {
-        case 0: case 1: case 2: default:
-            if (gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
+    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 5) {
+        case 0: case 1: default:
+            if (gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize &&
+                this->nextDropItemType != GameItem::PaddleShrinkItem) {
                 return GameItem::PaddleShrinkItem;
             }
             else {
@@ -1071,11 +1193,11 @@ GameItem::ItemType Stage1AI::GenerateRandomItemDropType(GameModel* gameModel) co
                         return GameItem::InvisiBallItem;
                 }
             }
-        case 3:
+        case 2:
             return GameItem::BallSpeedUpItem;
-        case 4:
+        case 3:
             return GameItem::InvisiPaddleItem;
-        case 5:
+        case 4:
             return GameItem::InvisiBallItem;
     }
 }
@@ -1119,22 +1241,19 @@ void Stage1AI::SetState(DecoBossAIState::AIState newState) {
             boss->GenerateArmAndRemainingBoundingLines();
 
             // Blow off the left and right body parts of the boss...
+            static const double TOTAL_BLOWUP_TIME = DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS + 2.0;
             BossBodyPart* leftBodyPart = this->boss->GetLeftBodyEditable();
             assert(!leftBodyPart->GetIsDestroyed());
-            leftBodyPart->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS));
-            leftBodyPart->AnimateLocalTranslation(this->GenerateSideBodyPartDeathTranslationAnimation(
-                true, DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS));
-            leftBodyPart->AnimateLocalZRotation(this->GenerateSideBodyPartDeathRotationAnimation(
-                true, DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS));
+            leftBodyPart->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(TOTAL_BLOWUP_TIME));
+            leftBodyPart->AnimateLocalTranslation(this->GenerateSideBodyPartDeathTranslationAnimation(true, TOTAL_BLOWUP_TIME));
+            leftBodyPart->AnimateLocalZRotation(this->GenerateSideBodyPartDeathRotationAnimation(true, TOTAL_BLOWUP_TIME));
             this->boss->ConvertAliveBodyPartToDeadBodyPart(leftBodyPart);
 
             BossBodyPart* rightBodyPart = this->boss->GetRightBodyEditable();
             assert(!rightBodyPart->GetIsDestroyed());
-            rightBodyPart->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS));
-            rightBodyPart->AnimateLocalTranslation(this->GenerateSideBodyPartDeathTranslationAnimation(
-                false, DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS));
-            rightBodyPart->AnimateLocalZRotation(this->GenerateSideBodyPartDeathRotationAnimation(
-                false, DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS));
+            rightBodyPart->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(TOTAL_BLOWUP_TIME));
+            rightBodyPart->AnimateLocalTranslation(this->GenerateSideBodyPartDeathTranslationAnimation(false, TOTAL_BLOWUP_TIME));
+            rightBodyPart->AnimateLocalZRotation(this->GenerateSideBodyPartDeathRotationAnimation(false, TOTAL_BLOWUP_TIME));
             this->boss->ConvertAliveBodyPartToDeadBodyPart(rightBodyPart);
             
             break;
@@ -1241,24 +1360,37 @@ void Stage1AI::GoToNextRandomAttackState(GameModel* gameModel) {
 }
 
 AnimationMultiLerp<Vector3D> Stage1AI::GenerateSideBodyPartDeathTranslationAnimation(bool isLeft, double timeInSecs) const {
-    float xDist = (isLeft ? -1 : 1) * 3 * DecoBoss::SIDE_BODY_PART_WIDTH;
+    float xDist = (isLeft ? -1 : 1) * 2.5f * DecoBoss::SIDE_BODY_PART_WIDTH;
 
     float yDist = -(isLeft ? this->boss->GetLeftBody()->GetTranslationPt2D()[1] : 
         this->boss->GetRightBody()->GetTranslationPt2D()[1]);
-    yDist -= 2 * DecoBoss::SIDE_BODY_PART_HEIGHT;
+    yDist -= 2.0f * DecoBoss::SIDE_BODY_PART_HEIGHT;
 
     return Boss::BuildLimbFallOffTranslationAnim(timeInSecs, xDist, yDist);
 }
 
 AnimationMultiLerp<float> Stage1AI::GenerateSideBodyPartDeathRotationAnimation(bool isLeft, double timeInSecs) const {
     float randomAngle = Randomizer::GetInstance()->RandomUnsignedInt() % 51;
-    return Boss::BuildLimbFallOffZRotationAnim(timeInSecs, isLeft ? (100.0f + randomAngle) : -(100.0f + randomAngle));
+    return Boss::BuildLimbFallOffZRotationAnim(timeInSecs, isLeft ? (140.0f + randomAngle) : -(140.0f + randomAngle));
 }
 
 // Stage2AI Functions **********************************************************************************
 const float Stage2AI::SPEED_COEFF = 1.05f;
 
-Stage2AI::Stage2AI(DecoBoss* boss) : DecoBossAIState(boss) {
+Stage2AI::Stage2AI(DecoBoss* boss) : DecoBossAIState(boss), stayAliveArm(NULL), becomeDeadArm(NULL) {
+    
+    // Choose an arm that will stay alive after this state and the other that won't
+    BossCompositeBodyPart* leftArm  = boss->GetLeftArmEditable();
+    BossCompositeBodyPart* rightArm = boss->GetRightArmEditable();
+    if (Randomizer::GetInstance()->RandomTrueOrFalse()) {
+        this->stayAliveArm  = leftArm;
+        this->becomeDeadArm = rightArm;
+    }
+    else {
+        this->stayAliveArm  = rightArm;
+        this->becomeDeadArm = leftArm;
+    }
+
     this->SetState(MoveToCenterForLevelRotAIState);
 }
 
@@ -1270,13 +1402,13 @@ GameItem::ItemType Stage2AI::GenerateRandomItemDropType(GameModel* gameModel) co
     if (this->nextDropItemType != GameItem::PaddleShrinkItem &&
         gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
 
-        if (Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) {
+        if (Randomizer::GetInstance()->RandomUnsignedInt() % 5 == 0) {
             return GameItem::PaddleShrinkItem;
         }
     }
 
-    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 9) {
-        case 0: case 1: case 2: case 3: default:
+    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 8) {
+        case 0: case 1: case 2: default:
             if (gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
                 return GameItem::PaddleShrinkItem;
             }
@@ -1295,21 +1427,23 @@ GameItem::ItemType Stage2AI::GenerateRandomItemDropType(GameModel* gameModel) co
                         return GameItem::BallSpeedUpItem;
                 }
             }
-        case 4:
+        case 3:
             return GameItem::InvisiPaddleItem;
-        case 5:
+        case 4:
             return GameItem::InvisiBallItem;
-        case 6:
+        case 5:
             return GameItem::PoisonPaddleItem;
-        case 7:
+        case 6:
             return GameItem::UpsideDownItem;
-        case 8:
+        case 7:
             return GameItem::BallSpeedUpItem;
     }
 }
 
 DecoBossAIState* Stage2AI::BuildNextAIState() const {
-    return new Stage3AI(this->boss);
+
+    return new Stage3AI(this->boss, this->stayAliveArm, this->currLevelRotationAmtInDegs,
+        (this->stayAliveArm == this->boss->GetLeftArm()) ? this->currLeftArmRotInDegs : this->currRightArmRotInDegs);
 }
 
 void Stage2AI::SetState(DecoBossAIState::AIState newState) {
@@ -1363,9 +1497,21 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
         case ElectrifiedAIState: 
             this->InitElectrifiedState();
             break;
-        case ElectrificationRetaliationAIState:
+        case ElectrificationRetaliationAIState: {
             this->InitElectrificationRetaliationState();
+
+            // Blow off one of the arms...
+            static const float TOTAL_BLOWUP_TIME = DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS + 2.0;
+            bool deathToLeftArm = (this->becomeDeadArm == this->boss->GetLeftArm());
+            assert(!this->becomeDeadArm->GetIsDestroyed());
+            this->becomeDeadArm->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(TOTAL_BLOWUP_TIME));
+            this->becomeDeadArm->AnimateLocalTranslation(this->GenerateArmDeathTranslationAnimation(deathToLeftArm, TOTAL_BLOWUP_TIME));
+            this->becomeDeadArm->AnimateLocalZRotation(this->GenerateArmDeathRotationAnimation(deathToLeftArm, TOTAL_BLOWUP_TIME));
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->becomeDeadArm);
+
             break;
+        }
+
         case AngryAIState:
             this->InitAngryState();
             break;
@@ -1412,9 +1558,19 @@ void Stage2AI::GoToNextRandomAttackState(GameModel* gameModel) {
 
     // If the remote control rocket is active in any capacity then the boss will almost always
     // rotate the level to make it harder for the player to activate the switches
-    if (paddle->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle) ||
-        gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
-    
+    if (paddle->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle) &&
+        this->currState != FinishRotatingLevelAIState) {
+
+        // Check to see if the ball is in the lower part of the level
+        const GameBall* ball = gameModel->GetGameBalls().front();
+        assert(ball != NULL);
+        if (ball->GetCenterPosition2D()[1] <= this->boss->GetYBallMaxForLevelRotate()) {
+            this->SetState(MoveToCenterForLevelRotAIState);
+            return; 
+        }
+
+    }
+    if (gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
         this->SetState(MoveToCenterForLevelRotAIState);
         return; 
     }
@@ -1441,6 +1597,7 @@ void Stage2AI::GoToNextRandomAttackState(GameModel* gameModel) {
             }
             break;
 
+        case MoveToCenterForLevelRotAIState:
         case MovingAttackAIState:
         case MovingAttackAndItemDropAIState:
         case FinishRotatingLevelAIState:
@@ -1519,7 +1676,21 @@ void Stage2AI::GoToNextRandomAttackState(GameModel* gameModel) {
 
 const float Stage3AI::SPEED_COEFF = 1.1f;
 
-Stage3AI::Stage3AI(DecoBoss* boss) : DecoBossAIState(boss) {
+Stage3AI::Stage3AI(DecoBoss* boss, BossCompositeBodyPart* remainingArm, 
+                   float currLevelRotationAmtInDegs, float remainingArmRot) : 
+    DecoBossAIState(boss), remainingArm(remainingArm) {
+
+    assert(remainingArm != NULL);
+
+    if (remainingArm == boss->GetLeftArm()) {
+        this->currLeftArmRotInDegs = remainingArmRot;
+    }
+    else {
+        this->currRightArmRotInDegs = remainingArmRot;
+    }
+
+    this->currLevelRotationAmtInDegs = currLevelRotationAmtInDegs;
+    this->SetState(MoveToCenterForLevelRotAIState);
 }
 
 Stage3AI::~Stage3AI() {
@@ -1578,9 +1749,242 @@ GameItem::ItemType Stage3AI::GenerateRandomItemDropType(GameModel* gameModel) co
 }
 
 void Stage3AI::SetState(DecoBossAIState::AIState newState) {
+    switch (newState) {
+        case StationaryAttackAIState:
+            this->InitStationaryAttackState();
+            break;
+        case MovingAttackAIState:
+            this->InitMovingAttackState();
+            break;
+        case MovingAttackAndItemDropAIState:
+            this->InitMovingAttackAndItemDropState();
+            break;
 
+        case MoveToFarLeftSideAIState:
+            this->InitMoveToFarLeftSideState();
+            break;
+        case MoveToFarRightSideAIState:
+            this->InitMoveToFarRightSideState();
+            break;
+        case LeftToRightItemDropAIState:
+            this->InitLeftToRightItemDropState();
+            break;
+        case RightToLeftItemDropAIState:
+            this->InitRightToLeftItemDropState();
+            break;
+
+        case MoveToCenterForLevelRotAIState:
+            this->InitMoveToCenterForLevelRotState();
+            break;
+        case FiringArmsAtLevelAIState:
+            this->InitFiringArmsAtLevelState();
+            break;
+        case RotatingLevelAIState:
+            this->InitRotatingLevelState();
+            break;
+        case FinishRotatingLevelAIState:
+            this->InitFinishRotatingLevelState();
+            break;
+
+        case MoveToPaddleArmAttackPosAIState:
+            this->InitMoveToPaddleArmAttackPosState();
+            break;
+        case FiringArmsAtPaddleAIState:
+            this->InitFiringArmsAtPaddleState();
+            break;
+        case FinishedFiringArmsAtPaddleAIState:
+            this->InitFinishedFiringArmsAtPaddleState();
+            break;
+
+        case ElectrifiedAIState: 
+            this->InitElectrifiedState();
+            break;
+
+        case FinalDeathThroesAIState: {
+            this->desiredVel = Vector2D(0,0);
+            this->currVel    = Vector2D(0,0);
+
+            // Final fade out for what's left of the boss
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossFinalDeathFlashAnim());
+
+            // Blow off the last remaining arm of the boss
+            bool deathToLeftArm = (this->remainingArm == this->boss->GetLeftArm());
+            assert(!this->remainingArm->GetIsDestroyed());
+            this->remainingArm->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(Boss::TOTAL_DEATH_ANIM_TIME));
+            this->remainingArm->AnimateLocalTranslation(this->GenerateArmDeathTranslationAnimation(
+                deathToLeftArm, Boss::TOTAL_DEATH_ANIM_TIME));
+            this->remainingArm->AnimateLocalZRotation(this->GenerateArmDeathRotationAnimation(
+                deathToLeftArm, Boss::TOTAL_DEATH_ANIM_TIME));
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->remainingArm);
+
+            break;
+        }
+
+        default:
+            assert(false);
+            return;
+    }
+
+    this->currState = newState;
 }
 
 void Stage3AI::GoToNextRandomAttackState(GameModel* gameModel) {
+    DecoBossAIState::AIState nextAIState = this->currState;
 
+    // If the paddle has a shield active but doesn't have a loaded rc rocket,
+    // then we try to stick to attack states that involve shooting reflect-able projectiles...
+    // Or to a state that will cause the boss to attack the paddle with its arms, thereby canceling
+    // the shield effect
+    PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
+    assert(paddle != NULL);
+    if (paddle->HasPaddleType(PlayerPaddle::ShieldPaddle) && 
+        !paddle->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle)) {
+
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 10) {
+                case 0:
+                    nextAIState = StationaryAttackAIState;
+                    break;
+                case 1: case 2: 
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 3: case 4: case 5:
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 6: case 7: case 8: case 9: default:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+            }
+
+            this->SetState(nextAIState);
+            return;
+    }
+
+    // If the remote control rocket is active in any capacity then the boss will almost always
+    // rotate the level to make it harder for the player to activate the switches
+    if (gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn() ||
+        (paddle->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle) && this->currState != FinishRotatingLevelAIState)) {
+        this->SetState(MoveToCenterForLevelRotAIState);
+        return; 
+    }
+
+    switch (this->currState) {
+        case StationaryAttackAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 9) {
+                case 0: 
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 1: case 2: default: 
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 3:
+                    nextAIState = MoveToFarLeftSideAIState;
+                    break;
+                case 4:
+                    nextAIState = MoveToFarRightSideAIState;
+                    break;
+                case 5: case 6: case 7:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+                case 8:
+                    nextAIState = MoveToCenterForLevelRotAIState;
+                    break;
+            }
+            break;
+
+        case MoveToCenterForLevelRotAIState:
+        case FinishRotatingLevelAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 9) {
+                case 0: 
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 1: case 2: default: 
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 3:
+                    nextAIState = MoveToFarLeftSideAIState;
+                    break;
+                case 4:
+                    nextAIState = MoveToFarRightSideAIState;
+                    break;
+                case 5: case 6: case 7:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+                case 8: 
+                    nextAIState = StationaryAttackAIState;
+                    break;
+            }
+            break;
+
+        
+        case MovingAttackAIState:
+        case MovingAttackAndItemDropAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 12) {
+                case 0: 
+                    nextAIState = StationaryAttackAIState;
+                    break;
+                case 1: case 2: case 3:
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 4: case 5: case 6: default:
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 7:
+                    nextAIState = MoveToFarLeftSideAIState;
+                    break;
+                case 8:
+                    nextAIState = MoveToFarRightSideAIState;
+                    break;
+                case 9: case 10: case 11:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+            }
+            break;
+
+        case LeftToRightItemDropAIState:
+        case RightToLeftItemDropAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 10) {
+                case 0: case 1: case 2: case 3: default:
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 4: case 5:
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 6:
+                    nextAIState = StationaryAttackAIState;
+                    break;
+                case 7: case 8: case 9:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+            }
+            break;
+
+        default:
+            // All other states are erroneous -- we shouldn't be trying to attack if we're in them!        
+            assert(false);
+
+        case FinishedFiringArmsAtPaddleAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 11) {
+                case 0: case 10:
+                    nextAIState = StationaryAttackAIState;
+                    break;
+                case 1: case 2: case 3:
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 4: case 5: case 6: default:
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 7:
+                    nextAIState = MoveToFarLeftSideAIState;
+                    break;
+                case 8:
+                    nextAIState = MoveToFarRightSideAIState;
+                    break;
+                case 9:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+            }
+            break;
+    }
+
+    this->SetState(nextAIState);
 }

@@ -38,7 +38,7 @@ public:
 
 	void Tick(double seconds);
 	void ShootActionReleaseUse() {}
-	void MoveKeyPressed(int dir, float magnitudePercent) {
+	void MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
 		UNUSED_PARAMETER(dir);
         UNUSED_PARAMETER(magnitudePercent);
 	}

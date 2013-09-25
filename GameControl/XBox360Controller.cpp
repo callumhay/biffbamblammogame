@@ -20,6 +20,8 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
 
+//const double XBox360Controller::TIME_UNTIL_PADDLE_MOVE_SYNC_RESET_IN_S = 1.25;
+
 int XBox360Controller::sensitivity = XBox360Controller::DEFAULT_SENSITIVITY;
 
 static WORD GetXBoxVibrationAmtFromEnum(const BBBGameController::VibrateAmount& vibeAmt) {
@@ -46,7 +48,8 @@ static WORD GetXBoxVibrationAmtFromEnum(const BBBGameController::VibrateAmount& 
 
 XBox360Controller::XBox360Controller(GameModel* model, GameDisplay* display, int controllerNum) : 
 BBBGameController(model, display), controllerNum(controllerNum), vibrateLengthInSeconds(0.0), vibrateTimeTracker(0.0),
-directionMagnitudePercent(0.0f) {
+directionMagnitudePercentLeftRight(0.0f), directionMagnitudePercentUpDown(0.0) {
+
 	this->enterActionOn = this->leftActionOn = this->rightActionOn =
 	this->upActionOn = this->downActionOn =	this->escapeActionOn = 
     this->pauseActionOn = this->specialDirOn = this->triggerActionOn = false;
@@ -231,7 +234,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP ||
 		(abs(controllerState.Gamepad.sThumbLY) >= sensitivityLeft && controllerState.Gamepad.sThumbLY > 0)) {
 
-		if (!this->upActionOn) {
+		if (!this->upActionOn && !this->downActionOn) {
 
             GameControl::ActionMagnitude magnitude;
             if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
@@ -244,18 +247,29 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 			this->display->ButtonPressed(GameControl::UpButtonAction, magnitude);
 			this->upActionOn = true;
 		}
+
+        if (this->upActionOn) {
+            if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
+                this->directionMagnitudePercentUpDown = 1.0f;
+            }
+            else {
+                this->directionMagnitudePercentUpDown = static_cast<float>(abs(controllerState.Gamepad.sThumbLY) - sensitivityLeft) /
+                    static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
+            }
+        }
 	}
 	else {
 		if (this->upActionOn) {
 			this->display->ButtonReleased(GameControl::UpButtonAction);
 			this->upActionOn = false;
+            this->directionMagnitudePercentUpDown = 0.0f;
 		}
 	}
 
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ||
 		(abs(controllerState.Gamepad.sThumbLY) >= sensitivityLeft && controllerState.Gamepad.sThumbLY < 0)) {
 
-		if (!this->downActionOn) {
+		if (!this->downActionOn && !this->upActionOn) {
 
             GameControl::ActionMagnitude magnitude;
             if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
@@ -268,11 +282,22 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 			this->display->ButtonPressed(GameControl::DownButtonAction, magnitude);
 			this->downActionOn = true;
 		}
+
+        if (this->downActionOn) {
+            if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
+                this->directionMagnitudePercentUpDown = 1.0f;
+            }
+            else {
+                this->directionMagnitudePercentUpDown = static_cast<float>(abs(controllerState.Gamepad.sThumbLY) - sensitivityLeft) /
+                    static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
+            }
+        }
 	}
 	else {
 		if (this->downActionOn) {
 			this->display->ButtonReleased(GameControl::DownButtonAction);
 			this->downActionOn = false;
+            this->directionMagnitudePercentUpDown = 0.0f;
 		}
 	}
 
@@ -297,10 +322,10 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 
         if (this->leftActionOn) {
             if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
-                this->directionMagnitudePercent = 1.0f;
+                this->directionMagnitudePercentLeftRight = 1.0f;
             }
             else {
-                this->directionMagnitudePercent = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
+                this->directionMagnitudePercentLeftRight = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
                     static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
             }
         }
@@ -310,7 +335,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 		if (this->leftActionOn) {
 			this->display->ButtonReleased(GameControl::LeftButtonAction);
 			this->leftActionOn = false;
-            this->directionMagnitudePercent = 0.0f;
+            this->directionMagnitudePercentLeftRight = 0.0f;
 		}
 	}
 
@@ -333,10 +358,10 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 
         if (this->rightActionOn) {
             if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
-                this->directionMagnitudePercent = 1.0f;
+                this->directionMagnitudePercentLeftRight = 1.0f;
             }
             else {
-                this->directionMagnitudePercent = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
+                this->directionMagnitudePercentLeftRight = static_cast<float>(abs(controllerState.Gamepad.sThumbLX) - sensitivityLeft) /
                     static_cast<float>(std::numeric_limits<int16_t>::max() - sensitivityLeft);
             }
         }
@@ -345,28 +370,42 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 		if (this->rightActionOn) {
 			this->display->ButtonReleased(GameControl::RightButtonAction);
 			this->rightActionOn = false;
-            this->directionMagnitudePercent = 0.0f;
+            this->directionMagnitudePercentLeftRight = 0.0f;
 		}
 	}
 
 }
 
 void XBox360Controller::Sync(size_t frameID, double dT) {
-	UNUSED_PARAMETER(dT);
+    
+    //bool allowPaddleMoveReset = false;
+    //this->timeSinceLastSyncPaddleMovement += dT;
+    //if (this->timeSinceLastSyncPaddleMovement >= TIME_UNTIL_PADDLE_MOVE_SYNC_RESET_IN_S) {
+    //    this->timeSinceLastSyncPaddleMovement = TIME_UNTIL_PADDLE_MOVE_SYNC_RESET_IN_S;
+    //    allowPaddleMoveReset = true;
+    //}
+
+    //static const Vector2D DEFAULT_RIGHT(1,0);
+    //static const Vector2D DEFAULT_LEFT = -DEFAULT_RIGHT;
+    //static const Vector2D DEFAULT_UP(0,1);
+    //static const Vector2D DEFAULT_DOWN = -DEFAULT_UP;
+
+    //Vector2D paddleRightUnitVec = this->model->GetGameSpacePaddleRightUnitVec();
 
 	// Paddle controls (NOTE: the else is to make the feedback more exact)
 	if (this->leftActionOn) {
 		int leftDir = this->model->AreControlsFlipped() ? 1 : -1;
-		this->model->Move(frameID, leftDir, this->directionMagnitudePercent);
-        //debug_output("Left move magnitude: " << this->directionMagnitudePercent);
+        this->model->MoveOther(frameID, leftDir, this->directionMagnitudePercentLeftRight);
+		this->model->MovePaddle(frameID, leftDir, this->directionMagnitudePercentLeftRight);
 	}
 	else if (this->rightActionOn) {
 		int rightDir = this->model->AreControlsFlipped() ? -1 : 1;
-		this->model->Move(frameID, rightDir, this->directionMagnitudePercent);
-        //debug_output("Right move magnitude: " << this->directionMagnitudePercent);
+        this->model->MoveOther(frameID, rightDir, this->directionMagnitudePercentLeftRight);
+		this->model->MovePaddle(frameID, rightDir, this->directionMagnitudePercentLeftRight);
 	}
 	else {
-		this->model->Move(frameID, 0, 0.0);
+		this->model->MovePaddle(frameID, 0, 0.0);
+        this->model->MoveOther(frameID, 0, 0.0);
 	}
 
 	// Check for vibration time expiration...
@@ -380,7 +419,6 @@ void XBox360Controller::Sync(size_t frameID, double dT) {
 			this->vibrateTimeTracker += dT;
 		}
 	}
-
 
 	// Execute any debug functionality for when a button is held down...
 	//this->DebugRepeatActions();

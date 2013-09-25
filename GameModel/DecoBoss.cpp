@@ -27,6 +27,9 @@ const float DecoBoss::FULL_BODY_TOTAL_WIDTH  = CORE_WIDTH + 2*SIDE_BODY_PART_WID
 
 const float DecoBoss::CORE_AND_ARMS_WIDTH = 11.264f;
 
+const float DecoBoss::ARM_WIDTH               = 4.334f;
+const float DecoBoss::ARM_NOT_EXTENDED_HEIGHT = 6.382f;
+
 const float DecoBoss::ARM_POS_X_OFFSET = 3.465f;
 const float DecoBoss::ARM_Y_OFFSET     = SCALE_AMT * -0.973f;
 const float DecoBoss::ARM_Z_OFFSET     = SCALE_AMT * 0.148f;
@@ -48,15 +51,15 @@ const float DecoBoss::MOVEMENT_PADDING_X      = LevelPiece::PIECE_WIDTH;
 const float DecoBoss::MOVEMENT_PADDING_Y      = 1.5f * LevelPiece::PIECE_HEIGHT;
 const float DecoBoss::MOVEMENT_MIN_Y_BOUNDARY = 7.0f * LevelPiece::PIECE_HEIGHT;
 
-const float DecoBoss::ROTATION_Y_POSITION = 14.0f * LevelPiece::PIECE_HEIGHT;
+const float DecoBoss::ROTATION_Y_POSITION = 19.0f * LevelPiece::PIECE_HEIGHT;
 
 const float DecoBoss::LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS  = -90.0f;
 const float DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS = 90.0f;
 
 const float DecoBoss::ITEM_LOAD_OFFSET_Y = -5.063f - GameItem::ITEM_HEIGHT / 2.0f;
 
-const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS = ROTATION_Y_POSITION - (2.0f * LevelPiece::PIECE_HEIGHT);
-const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MAX_Y_POS = ROTATION_Y_POSITION + (2.0f * LevelPiece::PIECE_HEIGHT);
+const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT - (2.0f * LevelPiece::PIECE_HEIGHT);
+const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MAX_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT + (2.0f * LevelPiece::PIECE_HEIGHT);
 
 using namespace decobossai;
 

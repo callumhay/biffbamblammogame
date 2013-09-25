@@ -45,6 +45,9 @@ private:
 
     ESPPointEmitter* leftBodyExplodingEmitter;
     ESPPointEmitter* rightBodyExplodingEmitter;
+    ESPPointEmitter* leftArmExplodingEmitter;
+    ESPPointEmitter* rightArmExplodingEmitter;
+    ESPPointEmitter* bodyExplodingEmitter;
 
     // Inherited functions
     //void DrawPreBodyEffects(double dT, const Camera& camera);

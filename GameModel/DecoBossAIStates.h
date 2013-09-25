@@ -40,7 +40,7 @@ public:
     // Inherited functions
     Boss* GetBoss() const;
     bool CanHurtPaddleWithBody() const { return (this->currState == FiringArmsAtPaddleAIState); }
-    virtual bool IsStateMachineFinished() const { return false; }
+    bool IsStateMachineFinished() const { return (this->currState == FinalDeathThroesAIState); }
     Collision::AABB2D GenerateDyingAABB() const;
 
 protected:
@@ -89,6 +89,10 @@ protected:
 
     virtual float GetMaxXSpeed() const { return DEFAULT_MAX_X_SPEED; }
     virtual float GetMaxYSpeed() const { return DEFAULT_MAX_Y_SPEED; }
+    virtual float GetLevelRotationSpeed() const { return DEFAULT_LEVEL_ROTATION_SPEED_DEGS_PER_SEC; }
+
+    AnimationMultiLerp<Vector3D> GenerateArmDeathTranslationAnimation(bool isLeft, double timeInSecs) const;
+    AnimationMultiLerp<float> GenerateArmDeathRotationAnimation(bool isLeft, double timeInSecs) const;
 
     double GenerateShootCountdownWhileStationary() const { 
         return 0.15 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.15 + 
@@ -112,7 +116,9 @@ protected:
     double GenerateTimeToFollowPaddleBeforeShootingArms() const {
         return 1.5 + Randomizer::GetInstance()->RandomNumZeroToOne() * 2.0;
     }
-
+    double GenerateRotateShakeCountdown() const {
+        return 0.4 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.75;
+    }
     float CalculateSideToSideDropStateVelocity() const;
 
     virtual GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const = 0;
@@ -148,6 +154,7 @@ protected:
     float currLeftArmRotInDegs;
     float currRightArmRotInDegs;
     float currLevelRotationAmtInDegs;
+    double rotateShakeCountdown;
 
     void InitStationaryAttackState();
     void InitMovingAttackState();
@@ -173,7 +180,7 @@ protected:
     void ExecuteMoveToFarLeftSideState(double dT, GameModel* gameModel);
     void ExecuteMoveToFarRightSideState(double dT, GameModel* gameModel);
     void ExecuteSideToSideItemDropState(double dT, GameModel* gameModel);
-    void ExecuteMoveToCenterForLevelRotState();
+    void ExecuteMoveToCenterForLevelRotState(GameModel* gameModel);
     void ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel* gameModel);
     void ExecuteFiringArmsAtPaddleState(double dT, GameModel* gameModel);
     void ExecuteFinishedFiringArmsAtPaddleState(double dT, GameModel* gameModel);
@@ -183,6 +190,7 @@ protected:
     void ExecuteElectrifiedState(double dT, GameModel* gameModel);
     void ExecuteElectrifiedRetaliationState(double dT, GameModel* gameModel);
     void ExecuteAngryState(double dT);
+    void ExecuteFinalDeathThroesState();
 
     // Inherited functions
     void CollisionOccurred(GameModel*, GameBall&, BossBodyPart*) {};
@@ -223,6 +231,9 @@ public:
 private:
     static const float SPEED_COEFF;
 
+    BossCompositeBodyPart* stayAliveArm;
+    BossCompositeBodyPart* becomeDeadArm;
+
     float GetMaxXSpeed() const { return SPEED_COEFF * DecoBossAIState::DEFAULT_MAX_X_SPEED; }
     float GetMaxYSpeed() const { return SPEED_COEFF * DecoBossAIState::DEFAULT_MAX_Y_SPEED; }
 
@@ -238,13 +249,18 @@ private:
 
 class Stage3AI : public DecoBossAIState {
 public:
-    Stage3AI(DecoBoss* boss);
+    Stage3AI(DecoBoss* boss, BossCompositeBodyPart* remainingArm, 
+        float currLevelRotationAmtInDegs, float remainingArmRot);
     ~Stage3AI();
 
 private:
     static const float SPEED_COEFF;
+    
+    BossCompositeBodyPart* remainingArm;
+    
     float GetMaxXSpeed() const { return SPEED_COEFF * DecoBossAIState::DEFAULT_MAX_X_SPEED; }
     float GetMaxYSpeed() const { return SPEED_COEFF * DecoBossAIState::DEFAULT_MAX_Y_SPEED; }
+    float GetLevelRotationSpeed() const { return 1.3f * DecoBossAIState::DEFAULT_LEVEL_ROTATION_SPEED_DEGS_PER_SEC; }
 
     // Inherited Functions
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
@@ -255,6 +271,7 @@ private:
     void SetState(DecoBossAIState::AIState newState);
     void GoToNextRandomAttackState(GameModel* gameModel);
     float GetAccelerationMagnitude() const { return 1.4f * DecoBossAIState::DEFAULT_ACCELERATION; }
+
 };
 
 }; // namespace decobossai

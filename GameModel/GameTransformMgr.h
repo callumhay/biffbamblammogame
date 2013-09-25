@@ -51,7 +51,8 @@ public:
     void SetRemoteControlRocketCamera(bool turnOnRocketCam, PaddleRemoteControlRocketProjectile* rocket);
 
     void SetGameZRotation(float rotInDegs, const GameLevel& level);
-    float GetCameraZDistanceToFitAABB(const Collision::AABB2D& aabb, float addToWidth, float addToHeight) const;
+    static float GetCameraZDistance(float rotInDegs, const GameLevel& level);
+    static float GetCameraZDistanceToFitAABB(const Collision::AABB2D& aabb, float addToWidth, float addToHeight);
     static float GetLevelCameraSetupAddToWidth(const GameLevel& level);
     static float GetLevelCameraSetupAddToHeight(const GameLevel& level);
 
@@ -64,6 +65,8 @@ public:
     Matrix4x4 GetGameXYTransform() const;
 	Matrix4x4 GetCameraTransform() const;
 	float GetCameraFOVAngle() const;
+
+    float GetGameZRotationInDegs() const;
 
     bool GetIsLevelFlipAnimationActive() const;
     bool GetIsPaddleCameraOn() const;
@@ -174,6 +177,17 @@ inline Matrix4x4 GameTransformMgr::GetGameXYZTransform() const {
 
 inline Matrix4x4 GameTransformMgr::GetGameXYTransform() const {
     return Matrix4x4::rotationXYZMatrix(this->currGameDegRotX, this->currGameDegRotY, 0);
+}
+
+/**
+ * Get the current camera Field of View angle.
+ */
+inline float GameTransformMgr::GetCameraFOVAngle() const {
+	return this->cameraFOVAngle;
+}
+
+inline float GameTransformMgr::GetGameZRotationInDegs() const {
+    return this->currGameDegRotZ;
 }
 
 inline bool GameTransformMgr::GetIsLevelFlipAnimationActive() const {

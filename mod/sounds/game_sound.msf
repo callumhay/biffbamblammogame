@@ -55,7 +55,7 @@ MenuScrollerItemScrolledEvent {
 
 // Blammopedia background music (looped)
 BlammopediaBackgroundLoop {
-	file = resources/bg_blammopedia.ogg
+	file = resources/BlammopediaBackgroundLoop.ogg
 }
 
 // Plays when the user highlights (i.e., changes the selection to) a new item in the base blammopedia menu
@@ -157,13 +157,13 @@ InGameMenuClosed {
 // Classical *****************************************************************
 WorldBackgroundLoop {
 	world = Classical
-	file  = resources/BlammopediaBackgroundLoop.ogg
+	file  = resources/ClassicalWorldBackgroundLoop.ogg
 }
 
 // Gothic-Romantic ***********************************************************
 WorldBackgroundLoop {
 	world = Gothic and Romantic
-	file  =
+	file  = resources/RomanticWorldBackgroundLoop.ogg
 }
 
 // Nouveau *******************************************************************

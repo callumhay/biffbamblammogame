@@ -28,7 +28,7 @@ public:
 	}
 
 	void Tick(double seconds);
-	void MoveKeyPressed(int dir, float magnitudePercent);
+	void MoveKeyPressedForPaddle(int dir, float magnitudePercent);
 	void ShootActionReleaseUse() {}
 
 private:

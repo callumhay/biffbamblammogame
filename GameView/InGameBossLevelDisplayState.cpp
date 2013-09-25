@@ -51,6 +51,7 @@ InGameBossLevelDisplayState::~InGameBossLevelDisplayState() {
     this->display->GetModel()->GetPlayerPaddle()->SetLevelBoundsChecking(true);
     this->display->GetModel()->ToggleAllowPaddleBallLaunching(true);
     this->display->GetCamera().ClearCameraShake();
+    this->display->GetModel()->GetTransformInfo()->Reset();
 }
 
 void InGameBossLevelDisplayState::RenderFrame(double dT) {
