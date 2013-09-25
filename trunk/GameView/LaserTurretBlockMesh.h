@@ -35,6 +35,7 @@ public:
 
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawPostEffects(double dT, const Camera& camera);
 	void SetAlphaMultiplier(float alpha);
 
     void AIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
@@ -48,7 +49,8 @@ private:
             Texture2D* sparkleTexture, std::vector<Texture2D*>& smokeTextures);
         ~BlockData();
 
-        void DrawBlockEffects(double dT, const Camera& camera, float lightPulseAmt);
+        void DrawBlockEffects(double dT, const Camera& camera);
+        void DrawBlockPostEffects(double dT, const Camera& camera, float lightPulseAmt);
         float GetFlashIntensity() const;
 
         void BlockStateChanged(const LaserTurretBlock::TurretAIState& oldState,

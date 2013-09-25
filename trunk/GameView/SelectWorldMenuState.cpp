@@ -301,6 +301,9 @@ void SelectWorldMenuState::ButtonReleased(const GameControl::ActionButton& relea
 }
 
 void SelectWorldMenuState::GoBackToMainMenu() {
+    GameSound* sound = this->display->GetSound();
+    sound->PlaySound(GameSound::MenuItemCancelEvent, false);
+
     this->fadeAnimation.SetLerp(0.0, 0.5f, 0.0f, 1.0f);
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(0.0f);

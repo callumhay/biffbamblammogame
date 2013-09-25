@@ -98,7 +98,7 @@ void RocketTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoi
 		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
 
         // Draw any effects for the current block...
-        currBlockData->DrawBlockEffects(dT, camera, this->lightPulseAnim.GetInterpolantValue());
+        currBlockData->DrawBlockEffects(dT, camera);
         float invFlashIntensity = 1.0f - currBlockData->GetFlashIntensity();
         glColor4f(1.0f, invFlashIntensity, invFlashIntensity, 1.0f);
 
@@ -124,6 +124,25 @@ void RocketTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoi
     }
 
     glPopAttrib();
+
+}
+
+void RocketTurretBlockMesh::DrawPostEffects(double dT, const Camera& camera) {
+    if (this->blocks.empty()) {
+        return;
+    }
+
+    for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
+
+        const RocketTurretBlock* currBlock = iter->first;
+        BlockData* currBlockData = iter->second;
+        const Point2D& blockCenter = currBlock->GetCenter();
+
+        glPushMatrix();
+        glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+        currBlockData->DrawBlockPostEffects(dT, camera, this->lightPulseAnim.GetInterpolantValue());
+        glPopMatrix();
+    }
 
     this->lightPulseAnim.Tick(dT);
 }
@@ -259,7 +278,7 @@ RocketTurretBlockMesh::BlockData::~BlockData() {
     this->emoteLabel = NULL;
 }
 
-void RocketTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& camera, float lightPulseAmt) {
+void RocketTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& camera) {
 
     if (this->block.GetHealthPercent() <= 0.75f) {
         
@@ -287,7 +306,9 @@ void RocketTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera&
 
         this->smokeySmokeEmitter->Tick(dT);
     }
+}
 
+void RocketTurretBlockMesh::BlockData::DrawBlockPostEffects(double dT, const Camera& camera, float lightPulseAmt) {
     if (this->emoteScaleAnim.GetInterpolantValue() != 0.0f) {
         this->emoteLabel->SetScale(this->emoteScaleAnim.GetInterpolantValue());
         this->emoteLabel->Draw3D(camera, 0.0f, 2*LevelPiece::PIECE_DEPTH);

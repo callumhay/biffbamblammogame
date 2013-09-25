@@ -28,11 +28,15 @@ public:
     static const char* REVERB3D_STR;
     static const char* DISTORTION_STR;
     static const char* GARGLE_STR;
+    static const char* FLANGER_STR;
+    static const char* REVERB_WAVE_STR;
+    static const char* CHORUS_STR;
     //static const char* COMPRESSOR_STR;
     
     typedef std::map<std::string, float> EffectParameterMap;
     typedef EffectParameterMap::const_iterator EffectParameterMapConstIter;
-    enum TypeFlag { None = 0x00000000, Reverb3D = 0x00000001, Distortion = 0x00000002, Gargle = 0x00000004 };
+    enum TypeFlag { None = 0x00000000, Reverb3D = 0x00000001, Distortion = 0x00000002, Gargle = 0x00000004, Flanger = 0x00000008,
+        ReverbWave = 0x00000010, Chorus = 0x00000020 };
     
     static SoundEffect* Build(size_t typeFlags, const EffectParameterMap& parameterMap);
     static size_t GetEffectFlagsFromStrList(const std::vector<std::string>& effectsStrs);

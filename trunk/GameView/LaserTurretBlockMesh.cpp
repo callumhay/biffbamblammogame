@@ -94,7 +94,7 @@ void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoin
 		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
 
         // Draw any effects for the current block...
-        currBlockData->DrawBlockEffects(dT, camera, this->lightPulseAnim.GetInterpolantValue());
+        currBlockData->DrawBlockEffects(dT, camera);
         float invFlashIntensity = 1.0f - currBlockData->GetFlashIntensity();
         glColor4f(1.0f, invFlashIntensity, invFlashIntensity, 1.0f);
 
@@ -116,6 +116,27 @@ void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoin
     }
 
     glPopAttrib();
+}
+
+void LaserTurretBlockMesh::DrawPostEffects(double dT, const Camera& camera) {
+    if (this->blocks.empty()) {
+        return;
+    }
+
+    for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
+
+        const LaserTurretBlock* currBlock = iter->first;
+        BlockData* currBlockData = iter->second;
+
+        const Point2D& blockCenter = currBlock->GetCenter();
+
+        glPushMatrix();
+        glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+
+        // Draw any effects for the current block...
+        currBlockData->DrawBlockPostEffects(dT, camera, this->lightPulseAnim.GetInterpolantValue());
+        glPopMatrix();
+    }
 
     this->lightPulseAnim.Tick(dT);
 }
@@ -265,7 +286,7 @@ LaserTurretBlockMesh::BlockData::~BlockData() {
     this->emoteLabel = NULL;
 }
 
-void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& camera, float lightPulseAmt) {
+void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& camera) {
 
     if (this->block.GetHealthPercent() <= 0.75f) {
         
@@ -294,14 +315,16 @@ void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& 
         this->smokeySmokeEmitter->Tick(dT);
     }
 
+    this->laserAfterGlowEmitter->Draw(camera);
+    this->laserAfterGlowEmitter->Tick(dT);
+}
+
+void LaserTurretBlockMesh::BlockData::DrawBlockPostEffects(double dT, const Camera& camera, float lightPulseAmt) {
     if (this->emoteScaleAnim.GetInterpolantValue() != 0.0f) {
         this->emoteLabel->SetScale(this->emoteScaleAnim.GetInterpolantValue());
         this->emoteLabel->Draw3D(camera, 0.0f, 2*LevelPiece::PIECE_DEPTH);
     }
     this->emoteScaleAnim.Tick(dT);
-
-    this->laserAfterGlowEmitter->Draw(camera);
-    this->laserAfterGlowEmitter->Tick(dT);
 
     this->DrawLights(lightPulseAmt);
 }

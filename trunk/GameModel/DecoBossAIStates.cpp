@@ -22,9 +22,9 @@
 
 using namespace decobossai;
 
-const float DecoBossAIState::DEFAULT_ACCELERATION = 0.25f * PlayerPaddle::DEFAULT_ACCELERATION;
-const float DecoBossAIState::DEFAULT_MAX_X_SPEED = 8.0f;
-const float DecoBossAIState::DEFAULT_MAX_Y_SPEED = 14.0f;
+const float DecoBossAIState::DEFAULT_ACCELERATION = 0.225f * PlayerPaddle::DEFAULT_ACCELERATION;
+const float DecoBossAIState::DEFAULT_MAX_X_SPEED = 7.0f;
+const float DecoBossAIState::DEFAULT_MAX_Y_SPEED = 13.0f;
 
 const float DecoBossAIState::DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC = 90.0f;
 
@@ -238,7 +238,7 @@ void DecoBossAIState::ShootLightningBoltAtPaddle(GameModel* gameModel) {
     // Shoot!
     float spdMultiplier = (1.0f + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.25f);
     gameModel->AddProjectile(new BossLightningBoltProjectile(shotOrigin, attackDir, 
-        std::max<float>(BossLightningBoltProjectile::SPD_DEFAULT, spdMultiplier * this->GetMaxYSpeed())));
+        std::max<float>(BossLightningBoltProjectile::SPD_DEFAULT, spdMultiplier * this->GetMaxXSpeed())));
 }
 
 float DecoBossAIState::CalculateSideToSideDropStateVelocity() const {
@@ -259,14 +259,14 @@ bool DecoBossAIState::RemoteControlRocketCheckAndNecessaryStateChange(GameModel*
     }
 
     // If the boss is already rotating the level then we don't need to do anything more
-    if (this->currState == MoveToCenterAIState || this->currState == RotatingLevelAIState) {
+    if (this->currState == MoveToCenterForLevelRotAIState || this->currState == RotatingLevelAIState) {
         return false;
     }
 
     // Check to see if the player is currently using the remote control rocket, and the boss has the ability to rotate the level
     // then we leave this state immediately...
     if (!this->boss->IsRightBodyStillAlive() && !this->boss->IsLeftBodyStillAlive()) {
-        this->SetState(MoveToCenterAIState);
+        this->SetState(MoveToCenterForLevelRotAIState);
         return true;
     }
     else {
@@ -467,7 +467,7 @@ void DecoBossAIState::InitRightToLeftItemDropState() {
         this->boss->GetFarLeftDropStatePosition());
     this->sideToSideNumDropCountdown = this->GenerateNumItemsToDropInSideToSideState();
 }
-void DecoBossAIState::InitMoveToCenterState() {
+void DecoBossAIState::InitMoveToCenterForLevelRotState() {
     this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
         this->boss->GetBossPositionForLevelRotation(), 0.0001f);
 }
@@ -667,7 +667,7 @@ void DecoBossAIState::ExecuteMoveToFarRightSideState(double dT, GameModel* gameM
     }
 }
 
-void DecoBossAIState::ExecuteMoveToCenterState() {
+void DecoBossAIState::ExecuteMoveToCenterForLevelRotState() {
     if (this->MoveToTargetPosition(0.5f * this->GetMaxXSpeed())) {
         // Done moving to the target, go to the next state
         this->SetState(FiringArmsAtLevelAIState);
@@ -859,11 +859,15 @@ void DecoBossAIState::ExecuteElectrifiedState(double dT, GameModel* gameModel) {
     this->currVel = Vector2D(0,0);
     this->desiredVel = Vector2D(0,0);
 
-    bool isFinished = this->electrifiedHurtAnim.Tick(dT);
-    this->boss->alivePartsRoot->SetLocalTranslation(this->electrifiedHurtAnim.GetInterpolantValue());
-    if (this->electrifiedHurtAnim.GetCurrentTimeValue() >= TOTAL_ELECTRIFIED_TIME_IN_SECS || isFinished) {
+    // Retract the arms (if they're currently extended)
+    bool armAnimIsFinished = this->UpdateArmAnimation(dT, this->armSeg1RetractAnim, this->armSeg1RetractAnim, 
+        this->armSeg1RetractAnim, this->armSeg1RetractAnim);
+    bool isFinishedHurtAnim = this->electrifiedHurtAnim.Tick(dT);
 
-        if (this->IsFinalAIStage() && isFinished) {
+    this->boss->alivePartsRoot->SetLocalTranslation(this->electrifiedHurtAnim.GetInterpolantValue());
+    if (this->electrifiedHurtAnim.GetCurrentTimeValue() >= TOTAL_ELECTRIFIED_TIME_IN_SECS || isFinishedHurtAnim && armAnimIsFinished) {
+
+        if (this->IsFinalAIStage() && isFinishedHurtAnim) {
 
             // Stop any colour animation that was set for this state
             this->boss->alivePartsRoot->ResetColourRGBAAnimation();
@@ -993,8 +997,8 @@ void DecoBossAIState::UpdateState(double dT, GameModel* gameModel) {
             this->ExecuteSideToSideItemDropState(dT, gameModel);
             break;
 
-        case MoveToCenterAIState:
-            this->ExecuteMoveToCenterState();
+        case MoveToCenterForLevelRotAIState:
+            this->ExecuteMoveToCenterForLevelRotState();
             break;
         case RotatingLevelAIState:
             this->ExecuteRotatingLevelState(dT, gameModel);
@@ -1192,6 +1196,10 @@ void Stage1AI::GoToNextRandomAttackState(GameModel* gameModel) {
             }
             break;
 
+        default:
+            // All other states are erroneous -- we shouldn't be trying to attack if we're in them!
+            assert(false);
+
         case MovingAttackAIState:
         case MovingAttackAndItemDropAIState:
             switch (Randomizer::GetInstance()->RandomUnsignedInt() % 9) {
@@ -1227,16 +1235,6 @@ void Stage1AI::GoToNextRandomAttackState(GameModel* gameModel) {
                     break;
             }
             break;
-
-        // All other states are erroneous -- we shouldn't be trying to attack if we're in them!
-        case MoveToFarLeftSideAIState:
-        case MoveToFarRightSideAIState:
-        case ElectrifiedAIState:
-        case ElectrificationRetaliationAIState:
-        case AngryAIState:
-        default:
-            assert(false);
-            return;
     }
 
     this->SetState(nextAIState);
@@ -1258,10 +1256,10 @@ AnimationMultiLerp<float> Stage1AI::GenerateSideBodyPartDeathRotationAnimation(b
 }
 
 // Stage2AI Functions **********************************************************************************
-const float Stage2AI::SPEED_COEFF = 1.15f;
+const float Stage2AI::SPEED_COEFF = 1.05f;
 
 Stage2AI::Stage2AI(DecoBoss* boss) : DecoBossAIState(boss) {
-    this->SetState(MoveToPaddleArmAttackPosAIState);
+    this->SetState(MoveToCenterForLevelRotAIState);
 }
 
 Stage2AI::~Stage2AI() {
@@ -1339,8 +1337,8 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
             this->InitRightToLeftItemDropState();
             break;
 
-        case MoveToCenterAIState:
-            this->InitMoveToCenterState();
+        case MoveToCenterForLevelRotAIState:
+            this->InitMoveToCenterForLevelRotState();
             break;
         case FiringArmsAtLevelAIState:
             this->InitFiringArmsAtLevelState();
@@ -1381,12 +1379,145 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
 }
 
 void Stage2AI::GoToNextRandomAttackState(GameModel* gameModel) {
-    this->SetState(MoveToPaddleArmAttackPosAIState);
+
+    DecoBossAIState::AIState nextAIState = this->currState;
+
+    // If the paddle has a shield active but doesn't have a loaded rc rocket,
+    // then we try to stick to attack states that involve shooting reflect-able projectiles...
+    // Or to a state that will cause the boss to attack the paddle with its arms, thereby canceling
+    // the shield effect
+    PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
+    assert(paddle != NULL);
+    if (paddle->HasPaddleType(PlayerPaddle::ShieldPaddle) && 
+        !paddle->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle)) {
+
+        switch (Randomizer::GetInstance()->RandomUnsignedInt() % 8) {
+            case 0:
+                nextAIState = StationaryAttackAIState;
+                break;
+            case 1: case 2: 
+                nextAIState = MovingAttackAIState;
+                break;
+            case 3: case 4: 
+                nextAIState = MovingAttackAndItemDropAIState;
+                break;
+            case 5: case 6: case 7: default:
+                nextAIState = MoveToPaddleArmAttackPosAIState;
+                break;
+        }
+
+        this->SetState(nextAIState);
+        return;
+    }
+
+    // If the remote control rocket is active in any capacity then the boss will almost always
+    // rotate the level to make it harder for the player to activate the switches
+    if (paddle->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle) ||
+        gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
+    
+        this->SetState(MoveToCenterForLevelRotAIState);
+        return; 
+    }
+
+    switch (this->currState) {
+
+        case StationaryAttackAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 8) {
+                case 0: 
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 1: case 2: default: 
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 3:
+                    nextAIState = MoveToFarLeftSideAIState;
+                    break;
+                case 4:
+                    nextAIState = MoveToFarRightSideAIState;
+                    break;
+                case 5: case 6: case 7:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+            }
+            break;
+
+        case MovingAttackAIState:
+        case MovingAttackAndItemDropAIState:
+        case FinishRotatingLevelAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 12) {
+                case 0: 
+                    nextAIState = StationaryAttackAIState;
+                    break;
+                case 1: case 2: case 3:
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 4: case 5: case 6: default:
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 7:
+                    nextAIState = MoveToFarLeftSideAIState;
+                    break;
+                case 8:
+                    nextAIState = MoveToFarRightSideAIState;
+                    break;
+                case 9: case 10: case 11:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+             }
+             break;
+
+        case LeftToRightItemDropAIState:
+        case RightToLeftItemDropAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 10) {
+                case 0: case 1: case 2: case 3: default:
+                    nextAIState = MovingAttackAIState;
+                    break;
+                 case 4: case 5:
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 6:
+                    nextAIState = StationaryAttackAIState;
+                    break;
+                case 7: case 8: case 9:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+            }
+            break;
+        
+        default:
+            // All other states are erroneous -- we shouldn't be trying to attack if we're in them!        
+            assert(false);
+
+        case FinishedFiringArmsAtPaddleAIState:
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 11) {
+                case 0: case 10:
+                    nextAIState = StationaryAttackAIState;
+                    break;
+                case 1: case 2: case 3:
+                    nextAIState = MovingAttackAIState;
+                    break;
+                case 4: case 5: case 6: default:
+                    nextAIState = MovingAttackAndItemDropAIState;
+                    break;
+                case 7:
+                    nextAIState = MoveToFarLeftSideAIState;
+                    break;
+                case 8:
+                    nextAIState = MoveToFarRightSideAIState;
+                    break;
+                case 9:
+                    nextAIState = MoveToPaddleArmAttackPosAIState;
+                    break;
+            }
+            break;
+    }
+
+    this->SetState(nextAIState);
 }
 
 // Stage3AI Functions **********************************************************************
 
-const float Stage3AI::SPEED_COEFF = 1.3f;
+const float Stage3AI::SPEED_COEFF = 1.1f;
 
 Stage3AI::Stage3AI(DecoBoss* boss) : DecoBossAIState(boss) {
 }

@@ -65,7 +65,7 @@ protected:
         MovingAttackAndItemDropAIState,     // Similar to MovingAttackAIState, but the boss also occasionally drops nasty items
         MoveToFarLeftSideAIState,           // Boss moves to the far left side of the level, prep for LeftToRightItemDropAIState
         MoveToFarRightSideAIState,          // Boss moves to the far right side of the level, prep for RightToLeftItemDropAIState
-        MoveToCenterAIState,                // Boss moves to the center of the level, prep for shooting its arms to rotate the level
+        MoveToCenterForLevelRotAIState,     // Boss moves to the center of the level, prep for shooting its arms to rotate the level
         MoveToPaddleArmAttackPosAIState,    // Boss moves to a good location for attacking the paddle with its arms, prep for FiringArmsAtPaddleAIState
         LeftToRightItemDropAIState,         // Boss moves only horizontally left to right, dropping nasty items rapidly as it moves
         RightToLeftItemDropAIState,         // Boss moves only horizontally right to left, dropping nasty items rapidly as it moves
@@ -156,7 +156,7 @@ protected:
     void InitMoveToFarRightSideState();
     void InitLeftToRightItemDropState();
     void InitRightToLeftItemDropState();
-    void InitMoveToCenterState();
+    void InitMoveToCenterForLevelRotState();
     void InitMoveToPaddleArmAttackPosState();
     void InitFiringArmsAtPaddleState();
     void InitFinishedFiringArmsAtPaddleState();
@@ -173,7 +173,7 @@ protected:
     void ExecuteMoveToFarLeftSideState(double dT, GameModel* gameModel);
     void ExecuteMoveToFarRightSideState(double dT, GameModel* gameModel);
     void ExecuteSideToSideItemDropState(double dT, GameModel* gameModel);
-    void ExecuteMoveToCenterState();
+    void ExecuteMoveToCenterForLevelRotState();
     void ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel* gameModel);
     void ExecuteFiringArmsAtPaddleState(double dT, GameModel* gameModel);
     void ExecuteFinishedFiringArmsAtPaddleState(double dT, GameModel* gameModel);

@@ -44,8 +44,10 @@ returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1) {
 
     GameSound* sound = this->display->GetSound();
         
-	// Pause all world sounds
+	// Pause all sounds and effects
 	sound->PauseAllSounds();
+    sound->PauseAllEffects();
+
     // ... but unpause the looped background music, and set its volume to about half
     // TODO
     // ..and play the paused sound
@@ -161,11 +163,12 @@ void InGameMenuState::RenderFrame(double dT) {
 void InGameMenuState::ResumeTheGame() {
     GameSound* sound = this->display->GetSound();
     
-    // Play unpause sound
+    // Play un-pause all sounds and effects
     sound->PlaySound(GameSound::InGameMenuClosed, false);
 	// Resume world sounds - these are initially paused when coming to this state (in the constructor)
-	sound->UnpauseAllSounds();
-	
+	sound->UnpauseAllEffects();
+    sound->UnpauseAllSounds();
+    
     // Unpause the game
 	this->display->GetModel()->UnsetPause(GameModel::PauseGame);
 

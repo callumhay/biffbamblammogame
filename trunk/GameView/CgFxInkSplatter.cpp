@@ -17,7 +17,7 @@
 #include "../BlammoEngine/FBObj.h"
 
 CgFxInkSplatter::CgFxInkSplatter(FBObj* outputFBO, const std::string& maskTexFilepath) : 
-CgFxFullscreenGoo(outputFBO), isInkSplatActivated(false) {
+CgFxFullscreenGoo(outputFBO), isInkSplatActivated(false), isInkSplatVisible(false) {
 	this->SetMask(maskTexFilepath);
 	this->SetColour(GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
 }
@@ -106,4 +106,5 @@ void CgFxInkSplatter::Draw(int screenWidth, int screenHeight, double dT) {
 	
 	// The effect will be active as long as the timer is not complete
 	this->isInkSplatActivated = !this->inkSplatFadeAnim.Tick(dT);
+    this->isInkSplatVisible   = this->inkSplatFadeAnim.GetInterpolantValue() >= 0.05;
 }

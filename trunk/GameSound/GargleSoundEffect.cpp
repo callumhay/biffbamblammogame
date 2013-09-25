@@ -10,14 +10,13 @@
  */
 
 #include <irrklang.h>
-
 #include "GargleSoundEffect.h"
 
 GargleSoundEffect::GargleSoundEffect(const EffectParameterMap& parameterMap) : SoundEffect(parameterMap) {
 
     // Parse parameters specific to the gargle sound effect
-    SoundEffect::ParseSoundParameter<int>(parameterMap, "rate", 1, 1000, 20, this->rate);
-    SoundEffect::ParseSoundParameter<bool>(parameterMap, "isSinWave", false, true, true, this->isSinWave);
+    SoundEffect::ParseSoundParameter<int>(parameterMap, "gargleRate", 1, 1000, 20, this->rate);
+    SoundEffect::ParseSoundParameter<bool>(parameterMap, "gargleIsSinWave", false, true, true, this->isSinWave);
 }
 
 GargleSoundEffect::~GargleSoundEffect() {

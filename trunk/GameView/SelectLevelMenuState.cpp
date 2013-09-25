@@ -378,8 +378,6 @@ void SelectLevelMenuState::LevelSelectionChanged() {
     this->display->GetSound()->PlaySound(GameSound::LevelMenuItemChangedSelectionEvent, false);
 }
 void SelectLevelMenuState::PageSelectionChanged() {
-    this->display->GetSound()->PlaySound(GameSound::LevelMenuPageChangedSelectionEvent, false);
-
     this->nextPgArrowEmitter->Reset();
     this->prevPgArrowEmitter->Reset();
 }
@@ -624,7 +622,10 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
  * Call this to indicate that we will be going back to the world select menu.
  */
 void SelectLevelMenuState::GoBackToWorldSelectMenu() {
-    this->display->GetSound()->StopSound(this->bgSoundLoopID, 0.5);
+    
+    GameSound* sound = this->display->GetSound();
+    sound->StopSound(this->bgSoundLoopID, 0.5);
+    sound->PlaySound(GameSound::MenuItemCancelEvent, false);
 
     this->goBackMenuMoveAnim.SetLerp(0.5, Camera::GetWindowWidth());
     this->goBackMenuMoveAnim.SetRepeat(false);
@@ -641,9 +642,9 @@ void SelectLevelMenuState::GoToStartLevel() {
     assert(selectedItem != NULL);
     if (selectedItem->GetIsEnabled()) {
 
-        sound->PlaySound(GameSound::LevelMenuItemSelectEvent, false);
         sound->StopSound(this->bgSoundLoopID, 0.5);
-
+        sound->PlaySound(GameSound::LevelMenuItemSelectEvent, false);
+        
         // Finishing animation for starting the level
         this->fadeAnimation.SetLerp(0.5f, 1.0f);
 	    this->fadeAnimation.SetRepeat(false);

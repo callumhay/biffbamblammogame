@@ -25,7 +25,7 @@ namespace irrklang {
 // GameSound forward declarations
 class Sound;
 class SoundEffect;
-class SoundSource;
+class AbstractSoundSource;
 
 // BlammoEngine forward declarations
 class Camera;
@@ -49,7 +49,8 @@ public:
 		MenuItemChangedSelectionEvent, 
 		MenuItemEnteredEvent,
 		MenuItemCancelEvent,
-		MenuItemVerifyAndSelectEvent, 
+		MenuItemVerifyAndSelectEvent,
+        MenuItemVerifyAndSelectStartGameEvent,
 		MenuSelectionItemScrolledEvent,
         MenuScrollerItemScrolledEvent,
         MenuOpenSubMenuWindowEvent,
@@ -73,7 +74,6 @@ public:
         // -> Level select menu sounds
         LevelMenuBackgroundLoop,
         LevelMenuItemChangedSelectionEvent,
-        LevelMenuPageChangedSelectionEvent,
         LevelMenuItemSelectEvent,
         LevelMenuItemLockedEvent,
 
@@ -91,22 +91,19 @@ public:
         // -> Ball-only sounds
         PlayerLostABallButIsStillAliveEvent,
 		LastBallExplodedEvent,
-		BallSpawnEvent,
         BallBallCollisionEvent,
         LastBallSpiralingToDeathLoop,
 
         // -> Paddle/ball sounds
-        BallPaddleCollision1Event,
-        BallPaddleCollision2Event,
-        BallPaddleCollision3Event,
-        BallPaddleCollision4Event,
+        BallPaddleCollisionEvent,
         BallStickyPaddleCollisionEvent,
         BallShieldPaddleCollisionEvent,
 		BallOrPaddleGrowEvent,
 		BallOrPaddleShrinkEvent,
         
         // -> Ball/block sounds
-		BallBlockCollisionEvent,
+		BallBlockBasicBounceEvent,
+        BallBlockCollisionColourChange,
 		
 		// -> Block-only sounds
 		BombBlockDestroyedEvent,
@@ -179,7 +176,7 @@ public:
         GameOverEvent
     };
 
-    typedef std::map<GameSound::SoundType, SoundSource*> SoundSourceMap;
+    typedef std::map<GameSound::SoundType, AbstractSoundSource*> SoundSourceMap;
     typedef SoundSourceMap::iterator SoundSourceMapIter;
     typedef SoundSourceMap::const_iterator SoundSourceMapConstIter;
 
@@ -225,6 +222,8 @@ public:
  
     // Sound effect functions
     void StopAllEffects();
+    void PauseAllEffects();
+    void UnpauseAllEffects();
     void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn);
     void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn, const std::set<SoundID>& ignoreSounds);
 
@@ -239,10 +238,7 @@ public:
     // Query functions
     bool IsSoundPlaying(SoundID soundID) const;
     bool IsEffectActive(GameSound::EffectType type) const;
-
-    // SoundType-specific functions
-    static GameSound::SoundType GetRandomBallPaddleCollisionEventSoundType();
-
+    bool IsEffectPaused(GameSound::EffectType type) const;
 
 private:
     typedef std::map<SoundID, Sound*> SoundMap;
@@ -269,13 +265,14 @@ private:
 
     // Active effects (i.e., effects that are affecting all playing sounds in the game right now)
     EffectSet activeEffects;
+    EffectSet pausedEffects;
 
     // IrrKlang stuff
     irrklang::ISoundEngine* soundEngine;
 
     // Helper functions
-    SoundSource* BuildSoundSource(const GameSound::SoundType& soundType,
-        const std::string& soundName, const std::string& filePath);
+    AbstractSoundSource* BuildSoundSource(const GameSound::SoundType& soundType,
+        const std::string& soundName, const std::vector<std::string>& filePaths);
     SoundEffect* BuildSoundEffect(const GameSound::EffectType& effectType, 
         const std::string& effectName, const std::vector<std::string>& effectsStrs,
         const SoundEffect::EffectParameterMap& parameterMap);
@@ -289,7 +286,7 @@ private:
     void ClearSounds();
     void ClearSoundSources();
 
-    SoundSource* GetSoundSourceFromType(const GameSound::SoundType& type) const;
+    AbstractSoundSource* GetSoundSourceFromType(const GameSound::SoundType& type) const;
     SoundEffect* GetSoundEffectFromType(const GameSound::EffectType& type) const;
     Sound* GetPlayingSound(SoundID soundID) const;
     void GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) const;
@@ -305,7 +302,11 @@ inline bool GameSound::IsSoundPlaying(SoundID soundID) const {
 }
 
 inline bool GameSound::IsEffectActive(GameSound::EffectType type) const {
-    return activeEffects.find(type) != this->activeEffects.end();
+    return this->activeEffects.find(type) != this->activeEffects.end();
+}
+
+inline bool GameSound::IsEffectPaused(GameSound::EffectType type) const {
+    return this->pausedEffects.find(type) != this->pausedEffects.end();
 }
 
 inline void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn) {

@@ -15,6 +15,13 @@ CompositeSoundEffect::CompositeSoundEffect(const EffectParameterMap& parameterMa
 }
 
 CompositeSoundEffect::~CompositeSoundEffect() {
+    // Clean up all contained sound effects
+    for (std::vector<SoundEffect*>::iterator iter = this->soundEffects.begin(); iter != this->soundEffects.end(); ++iter) {
+        SoundEffect* effect = *iter;
+        delete effect;
+        effect = NULL;
+    }
+    this->soundEffects.clear();
 }
 
 CompositeSoundEffect* CompositeSoundEffect::Build(const EffectParameterMap& parameterMap, std::vector<SoundEffect*> soundEffects) {
