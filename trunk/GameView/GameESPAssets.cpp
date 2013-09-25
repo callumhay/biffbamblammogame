@@ -3033,7 +3033,8 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	DropShadow dpTemp;
 	dpTemp.colour = Colour(0,0,0);
 	dpTemp.amountPercentage = 0.125f;
-	ESPOnomataParticle* paddleOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::SadBadGoo, GameFontAssetsManager::Small));
+	ESPOnomataParticle* paddleOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::SadBadGoo, GameFontAssetsManager::Small));
 	paddleOnoParticle->SetDropShadow(dpTemp);
 	paddleOnoParticle->SetOnomatoplexSound(Onomatoplex::BADSAD, severity);
 
@@ -3068,13 +3069,15 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 
     // Adjust the y coordinate based on where it landed on the paddle
     {
+        static const float MAX_Y_MULTIPLIER = 1.4f;
+
         float posXDistFromPaddleCenter = fabs(hitPositionRelativeToPaddleCenter[0]);
         float halfFlatTopWidth = paddle.GetHalfFlatTopWidth();
         if (posXDistFromPaddleCenter > halfFlatTopWidth) {
-            hitPositionRelativeToPaddleCenter[1] *= NumberFuncs::LerpOverFloat(halfFlatTopWidth, paddle.GetHalfWidthTotal(), 1.25f, 1.0f, posXDistFromPaddleCenter);
+            hitPositionRelativeToPaddleCenter[1] *= NumberFuncs::LerpOverFloat(halfFlatTopWidth, paddle.GetHalfWidthTotal(), MAX_Y_MULTIPLIER, 1.0f, posXDistFromPaddleCenter);
         }
         else {
-            hitPositionRelativeToPaddleCenter[1] *= 1.25f;
+            hitPositionRelativeToPaddleCenter[1] *= MAX_Y_MULTIPLIER;
         }
     }
 
@@ -3098,13 +3101,16 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
         }
 
         default: {
+
+            float paddleScaleFactor = paddle.GetPaddleScaleFactor();
+
             ESPPointEmitter* impactEmitter = new ESPPointEmitter();
 	        impactEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	        impactEmitter->SetInitialSpd(ESPInterval(0.001f));
 	        impactEmitter->SetParticleLife(ESPInterval(0.75f));
 	        impactEmitter->SetParticleSize(
-                ESPInterval(projectile.GetWidth(), 1.5f * projectile.GetWidth()),
-                ESPInterval(minHeightOfImpact, 3.0f * projectile.GetHeight()));
+                ESPInterval(paddleScaleFactor * projectile.GetWidth(), paddleScaleFactor * 1.5f * projectile.GetWidth()),
+                ESPInterval(paddleScaleFactor * minHeightOfImpact, paddleScaleFactor * 3.0f * projectile.GetHeight()));
 	        impactEmitter->SetEmitAngleInDegrees(0);
 	        impactEmitter->SetAsPointSpriteEmitter(false);
 	        impactEmitter->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);

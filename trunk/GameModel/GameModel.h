@@ -331,7 +331,7 @@ public:
 	// Paddle and ball related manipulators *********************************
 
 	// Move the paddle or some other interactive element that is active in the game...
-	void Move(size_t frameID, int dir, float magnitudePercent = 1.0f) {
+	void MovePaddle(size_t frameID, int dir, float magnitudePercent = 1.0f) {
         assert(dir <= 1 && dir >= -1);
 		
         // NOTE: The following code is used to 'clean-up' movements so that we don't over send
@@ -355,9 +355,36 @@ public:
 		    (this->pauseBitField & GameModel::PauseState) == 0x0  &&
             (this->pauseBitField & GameModel::PauseGame) == 0x0) {
 
-		    this->currState->MoveKeyPressed(dir, magnitudePercent);
+		    this->currState->MoveKeyPressedForPaddle(dir, magnitudePercent);
 		}
 	}
+    void MoveOther(size_t frameID, int dir, float magnitudePercent = 1.0f) {
+        assert(dir <= 1 && dir >= -1);
+
+        // NOTE: The following code is used to 'clean-up' movements so that we don't over send
+        // commands to the interactive elements of the game, instead we limit movement commands 
+        // to once per simulated frame/tick of the game.
+        static int lastMoveThisFrame = dir;
+        static size_t lastFrameID = 0;
+        if (frameID == lastFrameID) {
+            // We ignore 'no movement' in cases where a movement has already been sent this frame
+            if (lastMoveThisFrame != 0 && dir == 0) {
+                return;
+            }
+        }
+        else {
+            lastFrameID = frameID;
+        }
+        lastMoveThisFrame = dir;
+
+        // Can only move if the state exists and is not paused
+        if (this->currState != NULL &&
+            (this->pauseBitField & GameModel::PauseState) == 0x0  &&
+            (this->pauseBitField & GameModel::PauseGame) == 0x0) {
+
+            this->currState->MoveKeyPressedForOther(dir, magnitudePercent);
+        }
+    }
 
 	// Release the ball from the paddle, shoot lasers and activate other power ups
 	void ShootActionReleaseUse() {
@@ -445,6 +472,12 @@ public:
 	bool AreControlsFlipped() const {
 		return this->areControlsFlipped;
 	}
+
+    Vector2D GetGameSpacePaddleRightUnitVec() const {
+        Vector2D rightVec(1,0);
+        rightVec.Rotate(this->gameTransformInfo->GetGameZRotationInDegs());
+        return rightVec;
+    }
 
 	// *******************************************************************
 

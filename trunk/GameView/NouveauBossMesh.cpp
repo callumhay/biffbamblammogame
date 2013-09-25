@@ -408,6 +408,7 @@ void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
                 Point3D position = body->GetTranslationPt3D();
                 glPushMatrix();
                 glTranslatef(position[0], position[1], position[2]);
+                this->bodyExplodingEmitter->SetParticleAlpha(body->GetAlpha());
                 this->bodyExplodingEmitter->Tick(dT);
                 this->bodyExplodingEmitter->Draw(camera);
                 glPopMatrix();

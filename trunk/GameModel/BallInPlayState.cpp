@@ -108,16 +108,12 @@ void BallInPlayState::ShootActionContinuousUse(float magnitudePercent) {
     }
 }
 
-void BallInPlayState::MoveKeyPressed(int dir, float magnitudePercent) {
-
+void BallInPlayState::MoveKeyPressedForOther(int dir, float magnitudePercent) {
     // If there's a remote control rocket we have to move it...
     PaddleRemoteControlRocketProjectile* remoteControlRocket = this->gameModel->GetActiveRemoteControlRocket();
     if (remoteControlRocket != NULL) {
         remoteControlRocket->ControlRocketSteering(static_cast<PaddleRemoteControlRocketProjectile::RocketSteering>(dir), magnitudePercent);
     }
-
-    // Default functionality (just apply movement to the paddle)
-    GameState::MoveKeyPressed(dir, magnitudePercent);
 }
 
 void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
@@ -128,12 +124,14 @@ void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
         return;
     }
 
+    // Modify the direction of the boost based on the current game transform information
+    Vector2D dir(x,y);
     if (this->gameModel->AreControlsFlipped()) {
-        this->gameModel->boostModel->BallBoostDirectionPressed(-x, -y);
+        dir *= -1;
     }
-    else {
-        this->gameModel->boostModel->BallBoostDirectionPressed(x, y);
-    }
+    dir.Rotate(this->gameModel->GetTransformInfo()->GetGameZRotationInDegs());
+
+    this->gameModel->boostModel->BallBoostDirectionPressed(dir[0], dir[1]);
 }
 
 void BallInPlayState::BallBoostDirectionReleased() {

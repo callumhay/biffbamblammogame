@@ -53,9 +53,8 @@ GameState* GameState::Build(const GameState::GameStateType& stateType, GameModel
 
 }
 
-void GameState::MoveKeyPressed(int dir, float magnitudePercent) {
-    assert(dir <= 1 && dir >= -1);
-    
+void GameState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
+
     if ((this->gameModel->GetPauseState() & (GameModel::PausePaddle | GameModel::PausePaddleControls)) == 0x0) {
 
         // Default action here is to just move the paddle around

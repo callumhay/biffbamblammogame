@@ -248,12 +248,27 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
 
 void GameTransformMgr::SetGameZRotation(float rotInDegs, const GameLevel& level) {
     this->currGameDegRotZ = rotInDegs;
+
+    float camZDist = GameTransformMgr::GetCameraZDistance(rotInDegs, level);
+    this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, camZDist), Vector3D(0,0,0));
     
+    // Don't mess with the current camera orientation unless we're sure that there are no other
+    // important camera animations going on
+    if (!this->GetIsRemoteControlRocketCameraOn() && !this->GetIsBallCameraOn() && 
+        !this->GetIsPaddleCameraOn() && !this->GetIsBallDeathCameraOn() &&
+        this->animationQueue.empty() && this->remoteControlRocketCamAnimations.empty() &&
+        this->ballDeathAnimations.empty()) {
+
+        this->currCamOrientation.SetTZ(camZDist);
+    }
+}
+
+float GameTransformMgr::GetCameraZDistance(float rotInDegs, const GameLevel& level) {
     static const float FADE_IN_FRACT_0_180_360 = 1.0f;
     static const float FADE_IN_FRACT_90_270    = 0.7f;
 
     float fractAmt   = 1.0f;
-    float absModRotZ = fmod(fabs(this->currGameDegRotZ), 360.0f);
+    float absModRotZ = fmod(fabs(rotInDegs), 360.0f);
     if (absModRotZ <= 90.0f) {
         fractAmt = NumberFuncs::Lerp(0.0f, 90.0f, FADE_IN_FRACT_0_180_360, FADE_IN_FRACT_90_270, absModRotZ);
     }
@@ -272,7 +287,7 @@ void GameTransformMgr::SetGameZRotation(float rotInDegs, const GameLevel& level)
     const float levelHeight = level.GetLevelUnitHeight();
     const float levelHalfWidthFract  = fractAmt * (levelWidth / 2.0f);
     const float levelHalfHeightFract = fractAmt * (levelHeight / 2.0f);
-    
+
     // Create a set of vectors that represent points at the corners of a bounding box 
     // around the level with origin at the center of the box
     Vector2D pt0(-levelHalfWidthFract, -levelHalfHeightFract);
@@ -281,10 +296,10 @@ void GameTransformMgr::SetGameZRotation(float rotInDegs, const GameLevel& level)
     Vector2D pt3(levelHalfWidthFract, -levelHalfHeightFract);
 
     // Rotate the box by the current z rotation...
-    pt0.Rotate(this->currGameDegRotZ);
-    pt1.Rotate(this->currGameDegRotZ);
-    pt2.Rotate(this->currGameDegRotZ);
-    pt3.Rotate(this->currGameDegRotZ);
+    pt0.Rotate(rotInDegs);
+    pt1.Rotate(rotInDegs);
+    pt2.Rotate(rotInDegs);
+    pt3.Rotate(rotInDegs);
 
     // Now create a new AABB with the rotated points
     Collision::AABB2D viewAABB;
@@ -296,28 +311,15 @@ void GameTransformMgr::SetGameZRotation(float rotInDegs, const GameLevel& level)
     // Using the AABB, figure out the distance that the camera needs to be in order to fit it all into the viewport...
     float addToWidth  = GameTransformMgr::GetLevelCameraSetupAddToWidth(level);
     float addToHeight = GameTransformMgr::GetLevelCameraSetupAddToHeight(level);
-    float camZDist    = this->GetCameraZDistanceToFitAABB(viewAABB, addToWidth, addToHeight);
-    
-    this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, camZDist), Vector3D(0,0,0));
-    
-    // Don't mess with the current camera orientation unless we're sure that there are no other
-    // important camera animations going on
-    if (!this->GetIsRemoteControlRocketCameraOn() && !this->GetIsBallCameraOn() && 
-        !this->GetIsPaddleCameraOn() && !this->GetIsBallDeathCameraOn() &&
-        this->animationQueue.empty() && this->remoteControlRocketCamAnimations.empty() &&
-        this->ballDeathAnimations.empty()) {
-
-        this->currCamOrientation.SetTZ(camZDist);
-    }
+    return GameTransformMgr::GetCameraZDistanceToFitAABB(viewAABB, addToWidth, addToHeight);
 }
-
 
 /// <summary>
 /// Gets the distance along the z-axis that the camera must be in to fit the given AABB in the viewport.
 /// </summary>
 /// <returns> The required z distance. </returns>
 float GameTransformMgr::GetCameraZDistanceToFitAABB(const Collision::AABB2D& aabb, 
-                                                    float addToWidth, float addToHeight) const {
+                                                    float addToWidth, float addToHeight) {
     float width  = aabb.GetWidth();
     float height = aabb.GetHeight();
 
@@ -486,14 +488,14 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 		assert(gameModel.GetGameBalls().size() == 1);
 		const GameBall* deathBall = *(gameModel.GetGameBalls().begin());
 	
-		// Get the ball velocity and current camera worldspace position/translation
-		Vector2D ballVelocity2D = 0.75f * deathBall->GetVelocity();
-		Vector3D currCamTranslation = this->currCamOrientation.GetTranslation();
+		// Get the ball velocity and current camera world-space position/translation
+		Vector3D ballVelocity(deathBall->GetVelocity(), 0.0f);
+        ballVelocity = 0.75f * (this->GetGameXYZTransform() * ballVelocity);
+		const Vector3D& currCamTranslation = this->currCamOrientation.GetTranslation();
 		
-		// Calculate the distance the ball has moved so far (if it were travelling in a straight line), in worldspace
+		// Calculate the distance the ball has moved so far (if it were traveling in a straight line), in world-space
 		Point3D currCamPosition   = Point3D(currCamTranslation[0], currCamTranslation[1], currCamTranslation[2]);
-		Vector3D ballMoveDistance	= dT * Vector3D(ballVelocity2D[0], ballVelocity2D[1], 0.0f);
-		ballMoveDistance = this->GetGameXYZTransform() * ballMoveDistance; 
+		Vector3D ballMoveDistance	= dT * Vector3D(ballVelocity[0], ballVelocity[1], ballVelocity[2]);
 
 		currCamPosition  = currCamPosition + ballMoveDistance;
 		this->currCamOrientation.SetTranslation(Vector3D(currCamPosition[0], currCamPosition[1], currCamPosition[2]));
@@ -626,13 +628,6 @@ Matrix4x4 GameTransformMgr::GetCameraTransform() const {
 
 	// The inverse is returned because the camera transform is applied to the world matrix
 	return this->currCamOrientation.GetTransform().inverse();
-}
-
-/**
- * Get the current camera Field of View angle.
- */
-float GameTransformMgr::GetCameraFOVAngle() const {
-	return this->cameraFOVAngle;
 }
 
 void GameTransformMgr::StartLevelFlipAnimation(double dT, GameModel& gameModel) {
@@ -1410,6 +1405,10 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         // Re-enable the paddle ASAP
         gameModel.UnsetPause(GameModel::PausePaddle);
 
+        // Make sure we update the z-distance of the stored camera orientation since it may
+        // have changed since
+        this->storedCamOriBeforeRemoteControlRocketCam.SetTZ(this->GetCameraZDistance(this->currGameDegRotZ, *gameModel.GetCurrentLevel()));
+
         // We are going out of ball camera mode back to the original - take the camera
         // from wherever it is currently and move it back to the default position
         AnimationMultiLerp<Orientation3D> toOriginalCamAnim(&this->currCamOrientation);
@@ -1465,6 +1464,15 @@ bool GameTransformMgr::TickRemoteControlRocketCamAnimation(double dT, GameModel&
     // Grab the current transform animation information from the front of the queue
     assert(this->animationQueue.front().type == GameTransformMgr::ToRemoteCtrlRocketCamAnimation || 
            this->animationQueue.front().type == GameTransformMgr::FromRemoteCtrlRocketCamAnimation);
+
+    // Update the orientation so that it keeps up-to-date with the current z distance
+    if (this->animationQueue.front().type == GameTransformMgr::FromRemoteCtrlRocketCamAnimation) {
+        Orientation3D finalOrientation = this->remoteControlRocketCamAnimations.front().GetFinalInterpolationValue();
+        finalOrientation.SetTZ(this->GetCameraZDistance(this->currGameDegRotZ, *gameModel.GetCurrentLevel()));
+        assert(this->remoteControlRocketCamAnimations.size() == 1);
+        this->remoteControlRocketCamAnimations.front().SetInterpolationValue(1, finalOrientation);
+        this->remoteControlRocketCamAnimations.front().SetInterpolationValue(2, finalOrientation);
+    }
 
     // Animate the camera for the animation to move to or away from the rocket when
     // going into or out of the remote control rocket camera mode

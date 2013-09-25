@@ -77,19 +77,32 @@ void KeyboardSDLController::Sync(size_t frameID, double dT) {
 
     static const float ADDED_PADDLE_MOVE_MAG = 0.2f;
 
-	// Paddle controls (NOTE: the else is to make the feedback more exact)
+    //static const Vector2D DEFAULT_RIGHT(1,0);
+    //static const Vector2D DEFAULT_LEFT = -DEFAULT_RIGHT;
+    //static const Vector2D DEFAULT_UP(0,1);
+    //static const Vector2D DEFAULT_DOWN = -DEFAULT_UP;
+    //Vector2D paddleRightUnitVec = this->model->GetGameSpacePaddleRightUnitVec();
+
+    float magnitudePercent = std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED);
+
+	// Movement controls (NOTE: the else is to make the feedback more exact)
     if (this->keyPressed[SDLK_LEFT] || this->keyPressed[SDLK_a]) {
-		int leftDir = this->model->AreControlsFlipped() ? 1 : -1;
-        this->model->Move(frameID, leftDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
+		
+        int leftDir = this->model->AreControlsFlipped() ? 1 : -1;
+        this->model->MoveOther(frameID, leftDir, magnitudePercent);
+        this->model->MovePaddle(frameID, leftDir, magnitudePercent);
         this->dirHeldDownTimeCounter += dT;
 	}
 	else if (this->keyPressed[SDLK_RIGHT] || this->keyPressed[SDLK_d]) {
-		int rightDir = this->model->AreControlsFlipped() ? -1 : 1;
-		this->model->Move(frameID, rightDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
+		
+        int rightDir = this->model->AreControlsFlipped() ? -1 : 1;
+        this->model->MoveOther(frameID, rightDir, magnitudePercent);
+        this->model->MovePaddle(frameID, rightDir, magnitudePercent);
         this->dirHeldDownTimeCounter += dT;
 	}
 	else {
-		this->model->Move(frameID, 0, 0.0);
+		this->model->MovePaddle(frameID, 0, 0.0);
+        this->model->MoveOther(frameID, 0, 0.0);
 	}
 
     // Other special actions for hold-down keys...

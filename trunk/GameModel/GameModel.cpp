@@ -404,7 +404,6 @@ void GameModel::CleanUpAfterBossDeath() {
     this->ClearBeams();
     this->ClearLiveItems();
     this->ClearActiveTimers();
-    this->GetTransformInfo()->Reset();
     this->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RocketPaddle);
     this->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RemoteControlRocketPaddle);
 }

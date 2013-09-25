@@ -45,6 +45,7 @@ public:
 	bool IsConnected() const;
 
 private:
+    //static const double TIME_UNTIL_PADDLE_MOVE_SYNC_RESET_IN_S;
     static int sensitivity;
 
 	int controllerNum;
@@ -62,7 +63,12 @@ private:
 	double vibrateTimeTracker;
 	double vibrateLengthInSeconds;
 
-    float directionMagnitudePercent;
+    //double timeSinceLastSyncPaddleMovement;
+    //int lastPaddleLeftDir;
+    //int lastPaddleRightDir;
+
+    float directionMagnitudePercentLeftRight;
+    float directionMagnitudePercentUpDown;
 
 	void NotInGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState);
 	void InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState);

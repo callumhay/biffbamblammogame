@@ -31,7 +31,8 @@ public:
 	virtual void Tick(double seconds) = 0;
     virtual void ShootActionReleaseUse() = 0;
     virtual void ShootActionContinuousUse(float magnitudePercent) { UNUSED_PARAMETER(magnitudePercent); }
-	virtual void MoveKeyPressed(int dir, float magnitudePercent);
+	virtual void MoveKeyPressedForPaddle(int dir, float magnitudePercent);
+    virtual void MoveKeyPressedForOther(int dir, float magnitudePercent) { UNUSED_PARAMETER(dir); UNUSED_PARAMETER(magnitudePercent); }
     virtual void BallBoostDirectionPressed(int x, int y);
     virtual void BallBoostDirectionReleased();
     virtual void BallBoostReleasedForBall(const GameBall& ball);

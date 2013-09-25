@@ -39,7 +39,8 @@ public:
 
 	void ShootActionReleaseUse();
     void ShootActionContinuousUse(float magnitudePercent);
-    void MoveKeyPressed(int dir, float magnitudePercent);
+    void MoveKeyPressedForPaddle(int dir, float magnitudePercent) { GameState::MoveKeyPressedForPaddle(dir, magnitudePercent); }
+    void MoveKeyPressedForOther(int dir, float magnitudePercent);
     void BallBoostDirectionPressed(int x, int y);
     void BallBoostDirectionReleased();
     void BallBoostReleasedForBall(const GameBall& ball);

@@ -49,6 +49,9 @@ public:
 
     static const float CORE_AND_ARMS_WIDTH;
 
+    static const float ARM_WIDTH;
+    static const float ARM_NOT_EXTENDED_HEIGHT;
+
     static const float ARM_POS_X_OFFSET;
     static const float ARM_Y_OFFSET;
     static const float ARM_Z_OFFSET;
@@ -169,6 +172,7 @@ private:
     BossBodyPart* GetRightArmHandEditable() { return static_cast<BossBodyPart*>(this->bodyParts[this->rightArmHandIdx]); }
 
     float GetSideToSideDropStateDistance() const;
+    float GetYBallMaxForLevelRotate() const;
     Point2D GetFarLeftDropStatePosition() const;
     Point2D GetFarRightDropStatePosition() const;
 
@@ -221,17 +225,20 @@ inline float DecoBoss::GetSideToSideDropStateDistance() const {
     return DecoBoss::GetMaxXOfConfines() - DecoBoss::GetMinXOfConfines() - this->GetCurrentWidth();
 }
 
+inline float DecoBoss::GetYBallMaxForLevelRotate() const {
+    return (DecoBoss::ROTATION_Y_POSITION + this->GetCurrentHeight() / 2.0f);
+}
+
 inline Point2D DecoBoss::GetFarLeftDropStatePosition() const {
-    return Point2D(DecoBoss::GetMinXOfConfines() + this->GetCurrentWidth() / 2.0f, DecoBoss::GetMovementMinYBound() + 0.75f * this->GetCurrentHeight());
+    return Point2D(DecoBoss::GetMovementMinXBound() + this->GetCurrentWidth() / 2.0f, DecoBoss::GetMovementMinYBound() + 0.75f * this->GetCurrentHeight());
 }
 inline Point2D DecoBoss::GetFarRightDropStatePosition() const {
-    return Point2D(DecoBoss::GetMaxXOfConfines() - this->GetCurrentWidth() / 2.0f, DecoBoss::GetMovementMinYBound() + 0.75f * this->GetCurrentHeight());
+    return Point2D(DecoBoss::GetMovementMaxXBound() - this->GetCurrentWidth() / 2.0f, DecoBoss::GetMovementMinYBound() + 0.75f * this->GetCurrentHeight());
 }
 
 inline Point2D DecoBoss::GetBossPositionForLevelRotation() {
     return Point2D(
-        DecoBoss::GetMinXOfConfines() + ((DecoBoss::GetMaxXOfConfines() - DecoBoss::GetMinXOfConfines()) / 2.0f),
-        DecoBoss::ROTATION_Y_POSITION);
+        DecoBoss::GetMinXOfConfines() + ((DecoBoss::GetMaxXOfConfines() - DecoBoss::GetMinXOfConfines()) / 2.0f), DecoBoss::ROTATION_Y_POSITION);
 }
 
 inline TeslaBlock* DecoBoss::GetLeftTeslaBlock(const GameLevel& level) {

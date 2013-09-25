@@ -166,7 +166,7 @@ bool Boss::ProjectileIsDestroyedOnCollision(const Projectile* projectile, BossBo
 }
 
 AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim(double invulnerableTimeInSecs) {
-    static const int NUM_FLASHES = 20;
+    const int NUM_FLASHES = 20;
     
     std::vector<double> timeValues;
     timeValues.reserve(2*NUM_FLASHES + 1);
@@ -197,7 +197,7 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossElectrifiedColourAnim(double total
                                                                     const Colour& colour1, 
                                                                     const Colour& colour2, 
                                                                     const Colour& colour3) {
-    static const double SECS_PER_FLASH = 0.2;
+    const double SECS_PER_FLASH = 0.2;
 
     int numFlashes = static_cast<int>(totalAnimTime / SECS_PER_FLASH);
 
@@ -254,8 +254,8 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtFlashAndFadeAnim(double totalA
         timeValues.push_back(timeValues.back() + FLASH_TIME_INC);
     }
 
-    static const float FIRST_ALPHA_FADE_OUT_VALUE  = 0.5f;
-    static const float SECOND_ALPHA_FADE_OUT_VALUE = 0.25f;
+    const float FIRST_ALPHA_FADE_OUT_VALUE  = 0.5f;
+    const float SECOND_ALPHA_FADE_OUT_VALUE = 0.25f;
     std::vector<ColourRGBA> alphaValues;
     alphaValues.reserve(timeValues.size());
     alphaValues.push_back(ColourRGBA(1,1,1,1));
@@ -296,7 +296,7 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossFinalDeathFlashAnim() {
 }
 
 AnimationMultiLerp<ColourRGBA> Boss::BuildBossAngryFlashAnim() {
-    static const double COLOUR_FLASH_TIME = 0.2;
+    const double COLOUR_FLASH_TIME = 0.2;
     
     std::vector<double> timeVals;
     timeVals.reserve(5);
@@ -321,8 +321,8 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossAngryFlashAnim() {
 }
 
 AnimationMultiLerp<Vector3D> Boss::BuildBossAngryShakeAnim(float shakeMagnitude) {
-    static const int NUM_SHAKES = 15;
-    static const double SHAKE_INC_TIME = 0.03;
+    const int NUM_SHAKES = 15;
+    const double SHAKE_INC_TIME = 0.03;
     
     std::vector<double> timeVals;
     timeVals.reserve(1 + NUM_SHAKES + 1);
@@ -357,9 +357,9 @@ AnimationMultiLerp<Vector3D> Boss::BuildBossFinalDeathShakeAnim(float shakeMagni
 AnimationMultiLerp<Vector3D> Boss::BuildBossHurtMoveAnim(const Vector2D& hurtVec, float shakeMagnitude, double invulnerableTimeInSecs) {
     AnimationMultiLerp<Vector3D> result;
 
-    static const double FINAL_JITTER_TIME = 0.3;
-    static const double SHAKE_INC_TIME = 0.075;
-    static const int NUM_SHAKES = (invulnerableTimeInSecs - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+    const double FINAL_JITTER_TIME = 0.3;
+    const double SHAKE_INC_TIME = 0.075;
+    const int NUM_SHAKES = (invulnerableTimeInSecs - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
 
     std::vector<double> timeValues;
     timeValues.clear();
