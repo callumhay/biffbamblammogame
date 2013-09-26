@@ -12,6 +12,7 @@
 #include "DecoBossMesh.h"
 #include "GameViewConstants.h"
 #include "GameAssets.h"
+#include "InGameBossLevelDisplayState.h"
 
 #include "../BlammoEngine/Mesh.h"
 #include "../GameModel/DecoBoss.h"
@@ -19,14 +20,15 @@
 #include "../GameModel/BossWeakpoint.h"
 #include "../ResourceManager.h"
 
-const double DecoBossMesh::INTRO_TIME_IN_SECS = 4.0;
+const double DecoBossMesh::INTRO_TIME_IN_SECS = 3.5;
 
 DecoBossMesh::DecoBossMesh(DecoBoss* boss) : BossMesh(), boss(boss),
 coreMesh(NULL), lightningRelayMesh(NULL), gearMesh(NULL), scopingArm1Mesh(NULL),
 scopingArm2Mesh(NULL), scopingArm3Mesh(NULL), scopingArm4Mesh(NULL), handMesh(NULL), 
 leftBodyMesh(NULL), rightBodyMesh(NULL), leftBodyExplodingEmitter(NULL), 
 rightBodyExplodingEmitter(NULL), itemMesh(NULL), leftArmExplodingEmitter(NULL),
-rightArmExplodingEmitter(NULL), bodyExplodingEmitter(NULL) {
+rightArmExplodingEmitter(NULL), bodyExplodingEmitter(NULL), glowTex(NULL), introTimeCountdown(0.0),
+flareGlowTex(NULL), lensFlareTex(NULL), lightningRelayEmitter(NULL), flarePulse(0,0) {
 
     assert(boss != NULL);
 
@@ -55,11 +57,50 @@ rightArmExplodingEmitter(NULL), bodyExplodingEmitter(NULL) {
     this->itemMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ITEM_MESH);
     assert(this->itemMesh != NULL);
 
+    this->glowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
+    assert(this->glowTex != NULL);
+
     this->leftBodyExplodingEmitter  = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
     this->rightBodyExplodingEmitter = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
     this->leftArmExplodingEmitter   = this->BuildExplodingEmitter(DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
     this->rightArmExplodingEmitter  = this->BuildExplodingEmitter(DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
     this->bodyExplodingEmitter      = this->BuildExplodingEmitter(DecoBoss::CORE_WIDTH, DecoBoss::CORE_HEIGHT);
+
+    this->eyeGlowAlphaAnims.resize(DecoBoss::NUM_EYES);
+    for (int i = 0; i < static_cast<int>(this->eyeGlowAlphaAnims.size()); i++) {
+        this->eyeGlowAlphaAnims[i].ClearLerp();
+        this->eyeGlowAlphaAnims[i].SetInterpolantValue(0.0f);
+        this->eyeGlowAlphaAnims[i].SetRepeat(false);
+    }
+    this->lightningRelayAlphaAnim.ClearLerp();
+    this->lightningRelayAlphaAnim.SetInterpolantValue(0.0f);
+    this->lightningRelayAlphaAnim.SetRepeat(false);
+
+    this->flareGlowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->flareGlowTex != NULL);
+    this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->lensFlareTex != NULL);
+
+    ScaleEffect flarePulseSettings;
+    flarePulseSettings.pulseGrowthScale = 1.25f;
+    flarePulseSettings.pulseRate        = 5.0f;
+    this->flarePulse = ESPParticleScaleEffector(flarePulseSettings);
+
+    this->lightningRelayEmitter = new ESPPointEmitter();
+    this->lightningRelayEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->lightningRelayEmitter->SetInitialSpd(ESPInterval(0));
+    this->lightningRelayEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    this->lightningRelayEmitter->SetEmitAngleInDegrees(0);
+    this->lightningRelayEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->lightningRelayEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->lightningRelayEmitter->SetEmitPosition(Point3D(0, 0, 0));
+    this->lightningRelayEmitter->SetParticleSize(ESPInterval(DecoBoss::LIGHTNING_RELAY_GLOW_SIZE));
+    this->lightningRelayEmitter->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.78f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->lightningRelayEmitter->AddEffector(&this->flarePulse);
+    this->lightningRelayEmitter->SetParticles(1, this->flareGlowTex);
 }
 
 DecoBossMesh::~DecoBossMesh() {
@@ -91,6 +132,13 @@ DecoBossMesh::~DecoBossMesh() {
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->itemMesh);
     assert(success);
 
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareGlowTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
+    assert(success);
+
     UNUSED_VARIABLE(success);
     
     delete this->leftBodyExplodingEmitter;
@@ -103,10 +151,40 @@ DecoBossMesh::~DecoBossMesh() {
     this->rightArmExplodingEmitter = NULL;
     delete this->bodyExplodingEmitter;
     this->bodyExplodingEmitter;
+
+    delete this->lightningRelayEmitter;
+    this->lightningRelayEmitter = NULL;
 }
 
 double DecoBossMesh::ActivateIntroAnimation() {
-    // TODO
+    static const float MAX_GLOW_ALPHA = 0.75f;
+
+    double nextStartTime = INTRO_TIME_IN_SECS/3.0;
+    const double LIGHTNING_RELAY_GLOW_TIME = 1.0;
+    this->lightningRelayAlphaAnim.SetLerp(nextStartTime, nextStartTime + LIGHTNING_RELAY_GLOW_TIME, 0.0f, 1.0f);
+    nextStartTime += LIGHTNING_RELAY_GLOW_TIME;
+
+    const double TIME_PER_EYE_GLOW = 
+        (INTRO_TIME_IN_SECS - nextStartTime - InGameBossLevelDisplayState::TIME_OF_UNPAUSE_BEFORE_INTRO_END) / static_cast<double>(DecoBoss::NUM_EYES-1);
+    const double HALF_TIME_PER_EYE_GLOW = TIME_PER_EYE_GLOW / 2.0;
+
+    this->eyeGlowAlphaAnims[0].SetLerp(nextStartTime, nextStartTime + TIME_PER_EYE_GLOW, 0.0f, MAX_GLOW_ALPHA);
+    this->eyeGlowAlphaAnims[0].SetInterpolantValue(0.0f);
+    this->eyeGlowAlphaAnims[0].SetRepeat(false);
+    this->eyeGlowAlphaAnims[1].SetLerp(nextStartTime, nextStartTime + TIME_PER_EYE_GLOW, 0.0f, MAX_GLOW_ALPHA);
+    this->eyeGlowAlphaAnims[1].SetInterpolantValue(0.0f);
+    this->eyeGlowAlphaAnims[1].SetRepeat(false);
+    nextStartTime += HALF_TIME_PER_EYE_GLOW;
+
+    for (int i = 2; i < static_cast<int>(this->eyeGlowAlphaAnims.size()); i++) {
+        this->eyeGlowAlphaAnims[i].SetLerp(nextStartTime, nextStartTime + TIME_PER_EYE_GLOW, 0.0f, MAX_GLOW_ALPHA);
+        this->eyeGlowAlphaAnims[i].SetInterpolantValue(0.0f);
+        this->eyeGlowAlphaAnims[i].SetRepeat(false);
+        nextStartTime += HALF_TIME_PER_EYE_GLOW;
+    }
+
+
+    this->introTimeCountdown = INTRO_TIME_IN_SECS;
     return DecoBossMesh::INTRO_TIME_IN_SECS;
 }
 
@@ -214,6 +292,16 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
 void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     BossMesh::DrawPostBodyEffects(dT, camera);
 
+    // Check to see if we're drawing intro effects
+    if (this->introTimeCountdown > 0.0) {
+        this->lightningRelayAlphaAnim.Tick(dT);
+        for (int i = 0; i < static_cast<int>(this->eyeGlowAlphaAnims.size()); i++) {
+            this->eyeGlowAlphaAnims[i].Tick(dT);
+        }
+
+        this->introTimeCountdown -= dT;
+    }
+
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
@@ -281,12 +369,38 @@ void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     // Core/Body
     const BossBodyPart* coreBody = this->boss->GetCore();
     if (coreBody->GetAlpha() > 0.0f) {
+        Point3D coreBodyPos = coreBody->GetTranslationPt3D();
+
+        // Draw the eyes...
+        this->glowTex->BindTexture();
+        glPushMatrix();
+        Point3D eyeClusterCenterPos = this->boss->GetEyeClusterCenterPosition();
+        glTranslatef(eyeClusterCenterPos[0], eyeClusterCenterPos[1], eyeClusterCenterPos[2]);
+
+        for (int i = 0; i < static_cast<int>(this->eyeGlowAlphaAnims.size()); i++) {
+            glColor4f(1.0f, 0.1f, 0.1f, coreBody->GetAlpha() * this->eyeGlowAlphaAnims[i].GetInterpolantValue());
+            const Vector2D& offset = this->boss->GetEyeOffset(i);
+            glTranslatef(offset[0], offset[1], 0.0f);
+            GeometryMaker::GetInstance()->DrawQuad();
+            glTranslatef(-offset[0], -offset[1], 0.0f);
+        }
+ 
+        glPopMatrix();
+        this->glowTex->UnbindTexture();
+
+        // Draw the lightning relay emitters
+        this->lightningRelayEmitter->Tick(dT);
+        this->lightningRelayEmitter->SetParticleAlpha(coreBody->GetAlpha() * this->lightningRelayAlphaAnim.GetInterpolantValue());
+        this->lightningRelayEmitter->OverwriteEmittedPosition(coreBodyPos + this->boss->GetLeftLightningRelayOffset());
+        this->lightningRelayEmitter->Draw(camera);
+        this->lightningRelayEmitter->OverwriteEmittedPosition(coreBodyPos + this->boss->GetRightLightningRelayOffset());
+        this->lightningRelayEmitter->Draw(camera);
+
         if (this->boss->GetIsStateMachineFinished()) {
             
             // Final body explosion emitter
-            Point3D position = coreBody->GetTranslationPt3D();
             glPushMatrix();
-            glTranslatef(position[0], position[1], position[2]);
+            glTranslatef(coreBodyPos[0], coreBodyPos[1], coreBodyPos[2]);
             this->bodyExplodingEmitter->SetParticleAlpha(coreBody->GetAlpha());
             this->bodyExplodingEmitter->Tick(dT);
             this->bodyExplodingEmitter->Draw(camera);

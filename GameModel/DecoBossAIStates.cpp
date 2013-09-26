@@ -19,6 +19,7 @@
 #include "SparkBurstEffectInfo.h"
 #include "ShortCircuitEffectInfo.h"
 #include "LevelShakeEventInfo.h"
+#include "ExpandingHaloEffectInfo.h"
 
 using namespace decobossai;
 
@@ -278,6 +279,14 @@ void DecoBossAIState::ShootLightningBoltAtPaddle(GameModel* gameModel) {
     float spdMultiplier = (1.0f + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.25f);
     gameModel->AddProjectile(new BossLightningBoltProjectile(shotOrigin, attackDir, 
         std::max<float>(BossLightningBoltProjectile::SPD_DEFAULT, spdMultiplier * this->GetMaxXSpeed())));
+
+    // Add an effect for it
+    // EVENT: Boss shot a laser out of its eye, add effects for it...
+    Vector3D offset = this->boss->GetLightningFireVec3D();
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetLightningRelay(), 0.4, 
+        Colour(0.9f, 0.78f, 1.0f), 1.5f, offset));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetLightningRelay(), 0.55, 
+        Colour(0.9f, 0.78f, 1.0f), offset));
 }
 
 AnimationMultiLerp<Vector3D> DecoBossAIState::GenerateArmDeathTranslationAnimation(bool isLeft, double timeInSecs) const {

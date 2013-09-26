@@ -48,7 +48,8 @@ static WORD GetXBoxVibrationAmtFromEnum(const BBBGameController::VibrateAmount& 
 
 XBox360Controller::XBox360Controller(GameModel* model, GameDisplay* display, int controllerNum) : 
 BBBGameController(model, display), controllerNum(controllerNum), vibrateLengthInSeconds(0.0), vibrateTimeTracker(0.0),
-directionMagnitudePercentLeftRight(0.0f), directionMagnitudePercentUpDown(0.0) {
+directionMagnitudePercentLeftRight(0.0f), directionMagnitudePercentUpDown(0.0),
+lastOtherLeftDir(0), lastOtherRightDir(0), lastPaddleLeftDir(0), lastPaddleRightDir(0) {
 
 	this->enterActionOn = this->leftActionOn = this->rightActionOn =
 	this->upActionOn = this->downActionOn =	this->escapeActionOn = 
@@ -378,34 +379,46 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 
 void XBox360Controller::Sync(size_t frameID, double dT) {
     
-    //bool allowPaddleMoveReset = false;
-    //this->timeSinceLastSyncPaddleMovement += dT;
-    //if (this->timeSinceLastSyncPaddleMovement >= TIME_UNTIL_PADDLE_MOVE_SYNC_RESET_IN_S) {
-    //    this->timeSinceLastSyncPaddleMovement = TIME_UNTIL_PADDLE_MOVE_SYNC_RESET_IN_S;
-    //    allowPaddleMoveReset = true;
-    //}
-
-    //static const Vector2D DEFAULT_RIGHT(1,0);
-    //static const Vector2D DEFAULT_LEFT = -DEFAULT_RIGHT;
-    //static const Vector2D DEFAULT_UP(0,1);
-    //static const Vector2D DEFAULT_DOWN = -DEFAULT_UP;
-
-    //Vector2D paddleRightUnitVec = this->model->GetGameSpacePaddleRightUnitVec();
-
 	// Paddle controls (NOTE: the else is to make the feedback more exact)
 	if (this->leftActionOn) {
-		int leftDir = this->model->AreControlsFlipped() ? 1 : -1;
+
+		int leftDir = this->lastPaddleLeftDir;
+        if (leftDir == 0) {
+            leftDir = this->model->AreControlsFlippedForPaddle() ? 1 : -1;
+        }
+        this->model->MovePaddle(frameID, leftDir, this->directionMagnitudePercentLeftRight);
+        this->lastPaddleLeftDir = leftDir;
+
+        leftDir = this->lastOtherLeftDir;
+        if (leftDir == 0) {
+            leftDir = this->model->AreControlsFlippedForOther() ? 1 : -1;
+        }
         this->model->MoveOther(frameID, leftDir, this->directionMagnitudePercentLeftRight);
-		this->model->MovePaddle(frameID, leftDir, this->directionMagnitudePercentLeftRight);
+		this->lastOtherLeftDir = leftDir;
 	}
 	else if (this->rightActionOn) {
-		int rightDir = this->model->AreControlsFlipped() ? -1 : 1;
+
+		int rightDir = this->lastPaddleRightDir;
+        if (rightDir == 0) {
+            rightDir = this->model->AreControlsFlippedForPaddle() ? -1 : 1;
+        }
+        this->model->MovePaddle(frameID, rightDir, this->directionMagnitudePercentLeftRight);
+        this->lastPaddleRightDir = rightDir;
+
+        rightDir = this->lastOtherRightDir;
+        if (rightDir == 0) {
+            rightDir = this->model->AreControlsFlippedForOther() ? -1 : 1;
+        }
         this->model->MoveOther(frameID, rightDir, this->directionMagnitudePercentLeftRight);
-		this->model->MovePaddle(frameID, rightDir, this->directionMagnitudePercentLeftRight);
+		this->lastOtherRightDir = rightDir;
 	}
 	else {
 		this->model->MovePaddle(frameID, 0, 0.0);
         this->model->MoveOther(frameID, 0, 0.0);
+        this->lastPaddleLeftDir  = 0;
+        this->lastPaddleRightDir = 0;
+        this->lastOtherLeftDir   = 0;
+        this->lastOtherRightDir  = 0;
 	}
 
 	// Check for vibration time expiration...

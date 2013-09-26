@@ -335,6 +335,7 @@ void SelectWorldMenuState::Init(int selectedIdx) {
     
     this->keyEscLabel = new KeyboardHelperLabel(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium, "Press", "Esc", "to Return");
     this->keyEscLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
+    this->keyEscLabel->SetScale(this->display->GetTextScalingFactor());
 
     this->fadeAnimation.SetLerp(0.0, 0.5f, 1.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);

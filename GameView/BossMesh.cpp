@@ -300,6 +300,8 @@ void BossMesh::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
 
     const BossBodyPart* bodyPart = info.GetPart();
     const Colour& colour = info.GetColour();
+    const Vector3D& offsetVec = info.GetOffset();
+    Point3D offsetPt(offsetVec[0], offsetVec[1], offsetVec[2]);
 
     Collision::AABB2D aabb = bodyPart->GetLocalBounds().GenerateAABBFromLines();
     float minSize = std::min<float>(aabb.GetHeight(), aabb.GetWidth());
@@ -311,7 +313,7 @@ void BossMesh::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
     halo->SetParticleSize(ESPInterval(info.GetSizeMultiplier() * minSize));
     halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     halo->SetParticleAlignment(ESP::ScreenAligned);
-    halo->SetEmitPosition(Point3D(0,0,0));
+    halo->SetEmitPosition(offsetPt);
     halo->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(0.8f));
     halo->AddEffector(&this->particleFader);
     halo->AddEffector(&this->particleSuperGrowth);

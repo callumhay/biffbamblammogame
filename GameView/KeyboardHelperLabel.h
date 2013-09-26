@@ -44,6 +44,8 @@ public:
     void SetAlpha(float alpha);
     void SetBeforeAndAfterTextColour(const Colour& c);
 
+    void SetScale(float scale);
+
     void ShowXBoxButton(bool show);
 
     void Draw();

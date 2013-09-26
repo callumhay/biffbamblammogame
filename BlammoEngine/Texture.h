@@ -71,6 +71,13 @@ public:
 		glDisable(this->textureType);
 	}
 
+    void SetWrapParams(GLint wrapS, GLint wrapT) const {
+        this->BindTexture();
+        glTexParameteri(this->textureType, GL_TEXTURE_WRAP_S, wrapS);
+        glTexParameteri(this->textureType, GL_TEXTURE_WRAP_T, wrapT);
+        this->UnbindTexture();
+    }
+
 	void GenerateMipmaps() {
 		glGenerateMipmapEXT(this->textureType);
 	}

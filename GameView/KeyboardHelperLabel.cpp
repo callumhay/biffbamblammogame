@@ -66,6 +66,14 @@ KeyboardHelperLabel::~KeyboardHelperLabel() {
     this->afterLbl = NULL;
 }
 
+void KeyboardHelperLabel::SetScale(float scale) {
+    this->keyLbl->SetScale(0.5f*scale);
+    this->buttonLbl->SetScale(0.8f*scale);
+    this->orLbl->SetScale(0.75f*scale);
+    this->beforeLbl->SetScale(scale);
+    this->afterLbl->SetScale(scale);
+}
+
 void KeyboardHelperLabel::Draw() {
     static const float TEXT_KEY_PIC_GAP = 10;
     const float X_TEXT_LOC = this->beforeLbl->GetTopLeftCorner()[0];

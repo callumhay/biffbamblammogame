@@ -35,9 +35,13 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
 
     this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::LevelMenuBackgroundLoop, true);
 
+    float scalingFactor = this->display->GetTextScalingFactor();
+
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starTexture != NULL);
+    this->starTexture->SetWrapParams(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
     this->bossIconTexture = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BOSS_ICON, Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->bossIconTexture != NULL);
@@ -109,14 +113,16 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
 
     Colour titleColour(0.4f, 0.6f, 0.8f); // Steel blue
     std::stringstream worldLabelTxt;
-    worldLabelTxt << "Movement " << this->world->GetWorldNumber() << ": " << this->world->GetName();
+    worldLabelTxt << this->world->GetName();
     this->worldLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), worldLabelTxt.str());
     this->worldLabel->SetColour(titleColour);
     this->worldLabel->SetDropShadow(Colour(1,1,1), 0.05f);
+    this->worldLabel->SetScale(1.4f*scalingFactor);
 
     this->keyEscLabel = new KeyboardHelperLabel(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium, "Press", "Esc", "to Return");
     this->keyEscLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
+    this->keyEscLabel->SetScale(scalingFactor);
 
     std::vector<float> alphaVals;
     alphaVals.push_back(0.15f);
@@ -666,7 +672,7 @@ void SelectLevelMenuState::SetupLevelPages() {
     static const int SIDE_TO_ITEM_GAP_SIZE    = HORIZONTAL_TITLE_GAP;
     static const int ITEM_X_GAP_SIZE          = 40;
     static const int ITEM_Y_GAP_SIZE          = 40;
-    static const int MIN_ITEM_SIZE            = 180;
+    static const int MIN_ITEM_SIZE            = 200;
 
     float amtForItems = Camera::GetWindowWidth() - 2 * SIDE_TO_ITEM_GAP_SIZE;
     
@@ -905,6 +911,8 @@ state(state), level(level), topLeftCorner(topLeftCorner), width(width), isEnable
     assert(level != NULL);
     assert(levelNum > 0);
 
+    float scaleFactor = state->display->GetTextScalingFactor();
+
     std::stringstream levelNumStr;
     levelNumStr << levelNum;
 
@@ -913,6 +921,7 @@ state(state), level(level), topLeftCorner(topLeftCorner), width(width), isEnable
     this->numLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), levelNumStr.str());
     this->numLabel->SetTopLeftCorner(this->topLeftCorner);
+    this->numLabel->SetScale(scaleFactor);
 
     float nameLabelWidth = width - NUM_TO_NAME_GAP - this->numLabel->GetLastRasterWidth();
     
@@ -931,7 +940,7 @@ state(state), level(level), topLeftCorner(topLeftCorner), width(width), isEnable
     float nameXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
     float nameYPos = this->topLeftCorner[1] - std::max<float>(0, ((this->numLabel->GetHeight() - this->nameLabel->GetHeight()) / 2.0f));
     this->nameLabel->SetTopLeftCorner(nameXPos, nameYPos);
-
+   
     if (isEnabled) {
         this->nameLabel->SetColour(Colour(0,0,0));
         this->numLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
@@ -1052,6 +1061,7 @@ AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
     //this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner() - Vector2D(0, NAME_TO_HIGH_SCORE_Y_GAP + this->nameLabel->GetHeight()));
     this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner()[0],
         this->numLabel->GetTopLeftCorner()[1] - (NUM_TO_HIGH_SCORE_Y_GAP + this->numLabel->GetHeight()));
+    this->highScoreLabel->SetScale(0.8f);
 
     Colour starMultiplyColour(1,1,1);
     if (!isEnabled) {
@@ -1172,8 +1182,8 @@ SelectLevelMenuState::BossLevelMenuItem::BossLevelMenuItem(SelectLevelMenuState*
                                                            int levelNum, const GameLevel* level,
                                                            float width, float height, const Point2D& topLeftCorner,
                                                            bool isEnabled, const Texture* bossTexture) :
-AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), height(height), bossTexture(bossTexture),
-bossDeadLabel(NULL) {
+AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
+height(height), bossTexture(bossTexture), bossDeadLabel(NULL) {
 
     assert(bossTexture != NULL);
     
@@ -1184,12 +1194,12 @@ bossDeadLabel(NULL) {
 
     float bossXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
     float bossYPos = this->topLeftCorner[1];
+    float scaleFactor = state->display->GetTextScalingFactor();
 
     this->bossLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "BOSS");
     this->bossLabel->SetTopLeftCorner(bossXPos, bossYPos);
-    this->bossLabel->SetScale(std::min<float>(1.0f, (width - (2*BORDER_GAP + 2*NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetHeight())) / 
-        this->bossLabel->GetLastRasterWidth()));
+    this->bossLabel->SetScale(0.9f*scaleFactor);
 
     this->bossIconSize = this->bossLabel->GetHeight();
     float halfBossIconSize = bossIconSize / 2.0f;
@@ -1202,7 +1212,7 @@ bossDeadLabel(NULL) {
     glPushMatrix();
 
     float iconXPos = this->topLeftCorner[0] + this->width - (this->width - 
-        (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
+        (NUM_TO_NAME_GAP + BORDER_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
     float iconYPos = this->topLeftCorner[1] - halfBossIconSize;
 
     glTranslatef(iconXPos, iconYPos, 0.0f);
@@ -1246,7 +1256,7 @@ bossDeadLabel(NULL) {
         if (level->GetIsLevelPassedWithScore()) {
             this->bossDeadLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
                 GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "X");
-            this->bossDeadLabel->SetScale(1.5f);
+            this->bossDeadLabel->SetScale(1.5f * scaleFactor);
             this->bossDeadLabel->SetTopLeftCorner(
                 (iconXPos - halfBossIconSize) + (this->bossIconSize - this->bossDeadLabel->GetLastRasterWidth()) / 2.0f,
                 (iconYPos + halfBossIconSize) - (this->bossIconSize - this->bossDeadLabel->GetHeight()) / 2.0f);
