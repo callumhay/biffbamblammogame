@@ -41,7 +41,7 @@ const double DecoBossAIState::TOTAL_ELECTRIFIED_AND_RETALIATION_TIME_IN_SECS =
 DecoBossAIState::DecoBossAIState(DecoBoss* boss) : BossAIState(), boss(boss), shootCountdown(0.0),
 numShotsUntilNextState(0), dropItemCountdown(0.0), nextDropItemType(GameItem::PaddleShrinkItem),
 sideToSideNumDropCountdown(0), currLeftArmRotInDegs(0.0f), currRightArmRotInDegs(0.0f),
-currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0) {
+currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0), rotationDir(1) {
 
     assert(boss != NULL);
     
@@ -174,6 +174,9 @@ currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0) {
         this->armSeg4AttackExtendAnim.SetLerp(timeValues, armTranslationValues);
         this->armSeg4AttackExtendAnim.SetRepeat(false);
     }
+
+    this->leftArmShakeAnim  = Boss::BuildLimbShakeAnim(DecoBoss::ARM_WIDTH/4.0f);
+    this->rightArmShakeAnim = Boss::BuildLimbShakeAnim(DecoBoss::ARM_WIDTH/4.0f);
 }
 
 DecoBossAIState::~DecoBossAIState() {
@@ -195,11 +198,13 @@ Point2D DecoBossAIState::GeneratePaddleArmAttackPosition(GameModel* gameModel) c
 
     const float halfBossWidth = this->boss->GetCurrentWidth() / 2.0f;
     float xPos = paddle->GetCenterPosition()[0];
+    Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
     // This depends on whether both arms are currently alive or not...
     bool leftArmIsAlive  = !this->boss->GetLeftArm()->GetIsDestroyed();
     bool rightArmIsAlive = !this->boss->GetRightArm()->GetIsDestroyed();
-    if (leftArmIsAlive && rightArmIsAlive) {
+    bool bothArmsAreAlive = leftArmIsAlive && rightArmIsAlive;
+    if (bothArmsAreAlive) {
         // When both arms are still alive we just try to hover over the paddle and attack straight
         // downwards simultaneously with both arms 
 
@@ -227,7 +232,20 @@ Point2D DecoBossAIState::GeneratePaddleArmAttackPosition(GameModel* gameModel) c
         xPos = DecoBoss::GetMovementMaxXBound() - halfBossWidth;
     }
 
-    return Point2D(xPos, DecoBoss::GetRandomAttackPaddleYPos());
+    float minY = DecoBoss::ATTACK_PADDLE_WITH_BOTH_ARMS_MIN_Y_POS;
+    float maxY = DecoBoss::ATTACK_PADDLE_WITH_BOTH_ARMS_MAX_Y_POS;
+    if (!bothArmsAreAlive) {
+        minY = DecoBoss::ATTACK_PADDLE_WITH_ONE_ARM_MIN_Y_POS;
+        maxY = DecoBoss::ATTACK_PADDLE_WITH_ONE_ARM_MAX_Y_POS;
+    }
+
+    // Check to see if the target position is too close to the current position, if it is then we just
+    // return the current position -- unless the boss hasn't moved to a good y position yet
+    if (fabs(bossPos[0] - xPos) <= 2.0f*paddle->GetHalfWidthTotal() && bossPos[1] <= maxY && bossPos[1] >= minY) {
+        return bossPos;
+    }
+    
+    return Point2D(xPos, this->boss->GetRandomAttackPaddleYPos());
 }
 
 Point2D DecoBossAIState::GenerateShotOrigin() const {
@@ -459,6 +477,36 @@ bool DecoBossAIState::UpdateArmAnimation(double dT, AnimationMultiLerp<float>& a
     return allDoneArmAnimation;
 }
 
+bool DecoBossAIState::RotateArmsToDefaultPosition(double dT) {
+    // Rotate arms back down so that they are facing the paddle again
+    bool leftArmFullyRotated  = false;
+    bool rightArmFullyRotated = false;
+
+    if (this->currLeftArmRotInDegs < 0.0f) {
+        this->currLeftArmRotInDegs += dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+    }
+    else {
+        this->currLeftArmRotInDegs = 0.0f;
+        leftArmFullyRotated = true;
+    }
+    if (this->currRightArmRotInDegs > 0.0f) {
+        this->currRightArmRotInDegs -= dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+    }
+    else {
+        this->currRightArmRotInDegs = 0.0f;
+        rightArmFullyRotated = true;
+    }
+
+    // Update the arms with the rotations
+    BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
+    BossCompositeBodyPart* rightArm = this->boss->GetRightArmEditable();
+    leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
+    rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
+
+    return (leftArmFullyRotated && rightArmFullyRotated);
+}
+
+
 void DecoBossAIState::DropLoadedItem(GameModel* gameModel) {
     assert(gameModel != NULL);
 
@@ -522,7 +570,7 @@ void DecoBossAIState::InitMoveToCenterForLevelRotState() {
 void DecoBossAIState::InitMoveToPaddleArmAttackPosState() {
     this->shootCountdown = this->GenerateTimeToFollowPaddleBeforeShootingArms();
     Point2D currPos = this->boss->alivePartsRoot->GetTranslationPt2D();
-    this->SetMoveToTargetPosition(currPos, currPos);
+    this->SetMoveToTargetPosition(currPos, currPos); 
 }
 void DecoBossAIState::InitFiringArmsAtPaddleState() {
     this->armSeg1AttackExtendAnim.ResetToStart();
@@ -544,6 +592,22 @@ void DecoBossAIState::InitFiringArmsAtLevelState() {
 }
 void DecoBossAIState::InitRotatingLevelState() {
     this->rotateShakeCountdown = this->GenerateRotateShakeCountdown();
+    if (this->currLevelRotationAmtInDegs != 0.0) {
+
+        // When the level is already partially rotated, we pick the rotation direction that will
+        // get us back to the default orientation the fastest
+        if (this->currLevelRotationAmtInDegs < 0) {
+            rotationDir = (this->currLevelRotationAmtInDegs < -180.0f) ? 1 : -1;
+        }
+        else {
+            rotationDir = (this->currLevelRotationAmtInDegs > 180.0f) ? 1 : -1;
+        }
+
+    }
+    else {
+        // ... otherwise just choose a random rotation direction
+        rotationDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
+    }
 }
 void DecoBossAIState::InitFinishRotatingLevelState() {
     this->armSeg1RetractAnim.ResetToStart();
@@ -726,7 +790,9 @@ void DecoBossAIState::ExecuteMoveToFarRightSideState(double dT, GameModel* gameM
     }
 }
 
-void DecoBossAIState::ExecuteMoveToCenterForLevelRotState(GameModel* gameModel) {
+void DecoBossAIState::ExecuteMoveToCenterForLevelRotState(double dT, GameModel* gameModel) {
+    UNUSED_PARAMETER(dT);
+
     if (this->MoveToTargetPosition(0.8f * this->GetMaxXSpeed())) {
         // Done moving to the target, go to the next state
 
@@ -749,11 +815,177 @@ void DecoBossAIState::ExecuteMoveToCenterForLevelRotState(GameModel* gameModel) 
     }
 }
 
+void DecoBossAIState::ExecuteFiringArmsAtLevelState(double dT, GameModel* gameModel) {
+    UNUSED_PARAMETER(gameModel);
+
+    // Shake arms...
+    BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
+    BossCompositeBodyPart* rightArm = this->boss->GetRightArmEditable();
+
+    // Make sure arm(s) are shaking and pointed towards the sides of the level
+    // (left arm -90 degrees, right arm +90 degrees)
+    
+    bool armsFullyRotated = true;
+    bool isLeftArmAlive  = !leftArm->GetIsDestroyed();
+    bool isRightArmAlive = !rightArm->GetIsDestroyed();
+
+    if (isLeftArmAlive) {
+        float shakeAmt = this->leftArmShakeAnim.GetInterpolantValue();
+        this->leftArmShakeAnim.Tick(dT);
+        leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+
+        if (this->currLeftArmRotInDegs > DecoBoss::LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS) {
+            this->currLeftArmRotInDegs -= dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+            armsFullyRotated &= false;
+        }
+        else {
+            // Left arm is now fully rotated
+            this->currLeftArmRotInDegs = DecoBoss::LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
+        }
+
+        leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
+    }
+    if (isRightArmAlive) {
+        float shakeAmt = this->rightArmShakeAnim.GetInterpolantValue();
+        this->rightArmShakeAnim.Tick(dT);
+        rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+
+        if (this->currRightArmRotInDegs < DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS) {
+            this->currRightArmRotInDegs += dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+            armsFullyRotated &= false;
+        }
+        else {
+            // Right arm is now fully rotated
+            this->currRightArmRotInDegs = DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
+        }
+
+        rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
+    }
+
+    // If both arms are now properly rotated to be pointing at the sides of the level,
+    // we can fire both arms at the sides
+    if (armsFullyRotated) {
+
+        bool allDoneArmAnimation = this->UpdateArmAnimation(dT, this->armSeg1RotateExtendAnim, 
+            this->armSeg2RotateExtendAnim, this->armSeg3RotateExtendAnim, this->armSeg4RotateExtendAnim);
+
+        if (allDoneArmAnimation) {
+            // Shake the level (the arms have now reached the sides and are digging into them)
+            GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEventInfo(1.0, Vector3D(0.7f, 0.1f, 0.0f), 100));
+
+            // TODO: Some effect, smoke or stars at the collision point between the boss hands and the wall
+
+            // Start rotating!
+            this->SetState(RotatingLevelAIState);
+        }
+    }
+}
+
 void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel* gameModel) {
+    BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
+    BossCompositeBodyPart* rightArm = this->boss->GetRightArmEditable();
+
     if (this->RemoteControlRocketCheckAndNecessaryStateChange(gameModel)) {
+        // Reset the translations on both arms
+        leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+        rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
         return;
     }
-    
+
+    bool isLeftArmAlive  = !leftArm->GetIsDestroyed();
+    bool isRightArmAlive = !rightArm->GetIsDestroyed();
+
+    if (!isLeftArmAlive || !isRightArmAlive) {
+
+        // Only one of the arms is still alive, it will rotate to try and hit the paddle
+        const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
+        assert(paddle != NULL);
+
+        Point2D rotCenterPt = this->boss->GetLeftArmGear()->GetTranslationPt2D();
+        const Point2D& paddleCenterPt = paddle->GetCenterPosition();
+
+        Vector2D attackVec = paddleCenterPt - rotCenterPt;
+        assert(!attackVec.IsZero());
+
+        float atan2Angle = atan2(attackVec[1], attackVec[0]);
+
+        if (isLeftArmAlive) {
+            // atan2 returns a negative angle when in the half plane of y < 0, in [-pi, 0]. For the left arm,
+            // that angle must be in the [-pi, -pi/2] range for the arm to be able to attack
+            if (atan2Angle <= -M_PI_DIV2 && atan2Angle >= -M_PI) {
+
+                // Add 90 degrees (pi/2 radians) to the angle to get the required rotation of the left arm
+                float targetLeftArmRotAngle = atan2Angle + M_PI_DIV2;
+                // Left arm rotation should be in [-pi/2, 0]
+                assert(targetLeftArmRotAngle <= 0.0f && targetLeftArmRotAngle >= -M_PI_DIV2);
+
+                // Start rotating the left arm towards the target angle
+                targetLeftArmRotAngle = Trig::radiansToDegrees(targetLeftArmRotAngle);
+                float dA = dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+                if (fabs(this->currLeftArmRotInDegs - targetLeftArmRotAngle) < dA) {
+                    // No more rotating needs to be done
+                }
+                else {
+                    if (this->currLeftArmRotInDegs < targetLeftArmRotAngle) {
+                        this->currLeftArmRotInDegs += dA;
+                    }
+                    else {
+                        this->currLeftArmRotInDegs -= dA;
+                    }
+
+                    leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
+                }
+            }
+
+            float shakeAmt = this->leftArmShakeAnim.GetInterpolantValue();
+            this->leftArmShakeAnim.Tick(dT);
+            leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+        }
+        else if (isRightArmAlive) {
+            // atan2 returns a negative angle when in the half plane of y < 0, in [-pi, 0]. For the right arm,
+            // that angle must be in the [-pi/2, 0] range for the arm to be able to attack
+            if (atan2Angle >= -M_PI_DIV2 && atan2Angle <= 0.0f) {
+                // Add 90 degrees (pi/2 radians) to the angle to get the required rotation of the right arm
+                float targetRightArmRotAngle = atan2Angle + M_PI_DIV2;
+                // Left arm rotation should be in [0, pi/2]
+                assert(targetRightArmRotAngle >= 0.0f && targetRightArmRotAngle <= M_PI_DIV2);
+
+                // Start rotating the right arm towards the target angle
+                targetRightArmRotAngle = Trig::radiansToDegrees(targetRightArmRotAngle);
+                float dA = dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+                if (fabs(this->currRightArmRotInDegs - targetRightArmRotAngle) < dA) {
+                    // No more rotating needs to be done
+                }
+                else {
+                    if (this->currRightArmRotInDegs < targetRightArmRotAngle) {
+                        this->currRightArmRotInDegs += dA;
+                    }
+                    else {
+                        this->currRightArmRotInDegs -= dA;
+                    }
+                    rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
+                }
+            }
+            float shakeAmt = this->rightArmShakeAnim.GetInterpolantValue();
+            this->rightArmShakeAnim.Tick(dT);
+            rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+        }
+        else {
+            // This shouldn't happen -- boss will always have at least one arm to attack with
+            assert(false);
+            this->GoToNextRandomAttackState(gameModel);
+            return;
+        }
+    }
+    else {
+        float shakeAmt = this->rightArmShakeAnim.GetInterpolantValue();
+        this->rightArmShakeAnim.Tick(dT);
+        rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+        shakeAmt = this->leftArmShakeAnim.GetInterpolantValue();
+        this->leftArmShakeAnim.Tick(dT);
+        leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+    }
+
     this->shootCountdown -= dT;
     if (this->MoveToTargetPosition(this->GetMaxYSpeed())) {
         // Choose a new attack position near the paddle
@@ -761,6 +993,10 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
             this->GeneratePaddleArmAttackPosition(gameModel));
 
         if (this->shootCountdown <= 0.0) {
+            // Reset the translations on both arms
+            leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+            rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+
             // Attack the paddle with the arms of the boss
             gameModel->GetPlayerPaddle()->ResetLastEntityThatHurtPaddle();
             this->SetState(FiringArmsAtPaddleAIState);
@@ -781,59 +1017,23 @@ void DecoBossAIState::ExecuteFiringArmsAtPaddleState(double dT, GameModel* gameM
 }
 
 void DecoBossAIState::ExecuteFinishedFiringArmsAtPaddleState(double dT, GameModel* gameModel) {
-    bool allDoneArmAnimation = this->UpdateArmAnimation(dT, this->armSeg1RetractAnim, 
+
+    bool doneRetractAnim = this->UpdateArmAnimation(dT, this->armSeg1RetractAnim, 
         this->armSeg2RetractAnim, this->armSeg3RetractAnim, this->armSeg4RetractAnim);
-    if (allDoneArmAnimation) {
-        this->GoToNextRandomAttackState(gameModel);
-    }
-}
 
-void DecoBossAIState::ExecuteFiringArmsAtLevelState(double dT, GameModel* gameModel) {
-    UNUSED_PARAMETER(gameModel);
-
-    bool leftArmFullyRotated  = false;
-    bool rightArmFullyRotated = false;
-
-    // Make sure both arms are pointed towards the sides of the level
-    // (left arm -90 degrees, right arm +90 degrees)
-    if (this->currLeftArmRotInDegs > DecoBoss::LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS) {
-        this->currLeftArmRotInDegs -= dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
-    }
-    else {
-        this->currLeftArmRotInDegs = DecoBoss::LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
-        leftArmFullyRotated = true;
-    }
-    if (this->currRightArmRotInDegs < DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS) {
-        this->currRightArmRotInDegs += dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
-    }
-    else {
-        this->currRightArmRotInDegs = DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
-        rightArmFullyRotated = true;
-    }
-
-    // Update the arms with the rotations
-    BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
-    BossCompositeBodyPart* rightArm = this->boss->GetRightArmEditable();
-
-    leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
-    rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
-
-    // If both arms are now properly rotated to be pointing at the sides of the level,
-    // we can fire both arms at the sides
-    if (leftArmFullyRotated && rightArmFullyRotated) {
-
-        bool allDoneArmAnimation = this->UpdateArmAnimation(dT, this->armSeg1RotateExtendAnim, 
-            this->armSeg2RotateExtendAnim, this->armSeg3RotateExtendAnim, this->armSeg4RotateExtendAnim);
-        
-        if (allDoneArmAnimation) {
-            // Shake the level (the arms have now reached the sides and are digging into them)
-            GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEventInfo(1.0, Vector3D(0.7f, 0.1f, 0.0f), 100));
-
-            // TODO: Some effect, smoke or stars at the collision point between the boss hands and the wall
-
-            // Start rotating!
-            this->SetState(RotatingLevelAIState);
+    // If one of the arms is dead then we need to rotate the arm back to the default position as well
+    bool isLeftArmDead  = this->boss->GetLeftArm()->GetIsDestroyed();
+    bool isRightArmDead = this->boss->GetRightArm()->GetIsDestroyed();
+    if (isLeftArmDead || isRightArmDead) {
+        // If we're done retracting the arms, rotate them to default position
+        if (doneRetractAnim) {
+            if (this->RotateArmsToDefaultPosition(dT)) {
+                this->GoToNextRandomAttackState(gameModel);
+            }
         }
+    }
+    else if (doneRetractAnim) {
+        this->GoToNextRandomAttackState(gameModel);
     }
 }
 
@@ -857,6 +1057,10 @@ void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel)
             // Keep rotating!
         }
         else {
+            // Shake the level to indicate the boss is done with rotating, also the sudden halt is 
+            // emphasized by the shake
+            GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEventInfo(1.0, Vector3D(0.7f, 0.2f, 0.0f), 100));
+
             this->SetState(FinishRotatingLevelAIState);
             return;
         }
@@ -873,7 +1077,7 @@ void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel)
                 currLevelRotSpd *= 1.5f;
         }
 
-        this->currLevelRotationAmtInDegs += dT * currLevelRotSpd;
+        this->currLevelRotationAmtInDegs += dT * this->rotationDir * currLevelRotSpd;
     }
 
     if (this->rotateShakeCountdown <= 0.0) {
@@ -897,32 +1101,7 @@ void DecoBossAIState::ExecuteFinishRotatingLevelState(double dT, GameModel* game
 
     if (allDoneArmAnimation) {
         // Rotate arms back down so that they are facing the paddle again
-        bool leftArmFullyRotated  = false;
-        bool rightArmFullyRotated = false;
-
-        if (this->currLeftArmRotInDegs < 0.0f) {
-            this->currLeftArmRotInDegs += dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
-        }
-        else {
-            this->currLeftArmRotInDegs = 0.0f;
-            leftArmFullyRotated = true;
-        }
-        if (this->currRightArmRotInDegs > 0.0f) {
-            this->currRightArmRotInDegs -= dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
-        }
-        else {
-            this->currRightArmRotInDegs = 0.0f;
-            rightArmFullyRotated = true;
-        }
-
-        // Update the arms with the rotations
-        BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
-        BossCompositeBodyPart* rightArm = this->boss->GetRightArmEditable();
-
-        leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
-        rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
-
-        if (leftArmFullyRotated && rightArmFullyRotated) {
+        if (this->RotateArmsToDefaultPosition(dT)) {
             this->GoToNextRandomAttackState(gameModel);
         }
     }
@@ -1115,7 +1294,7 @@ void DecoBossAIState::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case MoveToCenterForLevelRotAIState:
-            this->ExecuteMoveToCenterForLevelRotState(gameModel);
+            this->ExecuteMoveToCenterForLevelRotState(dT, gameModel);
             break;
         case RotatingLevelAIState:
             this->ExecuteRotatingLevelState(dT, gameModel);
@@ -1840,7 +2019,7 @@ void Stage3AI::GoToNextRandomAttackState(GameModel* gameModel) {
     if (paddle->HasPaddleType(PlayerPaddle::ShieldPaddle) && 
         !paddle->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle)) {
 
-            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 10) {
+            switch (Randomizer::GetInstance()->RandomUnsignedInt() % 11) {
                 case 0:
                     nextAIState = StationaryAttackAIState;
                     break;
@@ -1850,7 +2029,7 @@ void Stage3AI::GoToNextRandomAttackState(GameModel* gameModel) {
                 case 3: case 4: case 5:
                     nextAIState = MovingAttackAndItemDropAIState;
                     break;
-                case 6: case 7: case 8: case 9: default:
+                case 6: case 7: case 8: case 9: case 10: default:
                     nextAIState = MoveToPaddleArmAttackPosAIState;
                     break;
             }

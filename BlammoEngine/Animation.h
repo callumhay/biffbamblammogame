@@ -275,6 +275,14 @@ public:
         }
         return this->interpolationPts[this->interpolationPts.size()-1];
     }
+    T& GetEditableFinalInterpolationValue() {
+        if (this->interpolationPts.empty()) {
+            assert(false);
+            return *this->interpolant;
+        }
+        return this->interpolationPts[this->interpolationPts.size()-1];
+    }
+
     void SetInterpolationValue(size_t idx, const T& value) {
 		assert(idx < this->interpolationPts.size());
 		this->interpolationPts[idx] = value;

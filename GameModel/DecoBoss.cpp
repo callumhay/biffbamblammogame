@@ -58,8 +58,11 @@ const float DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS = 90.0f;
 
 const float DecoBoss::ITEM_LOAD_OFFSET_Y = -5.063f - GameItem::ITEM_HEIGHT / 2.0f;
 
-const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT - (2.0f * LevelPiece::PIECE_HEIGHT);
-const float DecoBoss::ATTACK_PADDLE_WITH_ARMS_MAX_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT + (2.0f * LevelPiece::PIECE_HEIGHT);
+const float DecoBoss::ATTACK_PADDLE_WITH_BOTH_ARMS_MIN_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT - (2.0f * LevelPiece::PIECE_HEIGHT);
+const float DecoBoss::ATTACK_PADDLE_WITH_BOTH_ARMS_MAX_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT + (2.0f * LevelPiece::PIECE_HEIGHT);
+
+const float DecoBoss::ATTACK_PADDLE_WITH_ONE_ARM_MIN_Y_POS = 12.0f * LevelPiece::PIECE_HEIGHT - (2.0f * LevelPiece::PIECE_HEIGHT);;
+const float DecoBoss::ATTACK_PADDLE_WITH_ONE_ARM_MAX_Y_POS = 12.0f * LevelPiece::PIECE_HEIGHT + (1.0f * LevelPiece::PIECE_HEIGHT);
 
 using namespace decobossai;
 
@@ -490,4 +493,19 @@ void DecoBoss::GenerateArmAndRemainingBoundingLines() {
 
         core->SetLocalBounds(coreBoundingLines);
     }
+}
+
+float DecoBoss::GetRandomAttackPaddleYPos() const {
+    // Depends on whether we're attacking with both arms or not...
+    bool isLeftArmAlive  = !this->GetLeftArm()->GetIsDestroyed();
+    bool isRightArmAlive = !this->GetRightArm()->GetIsDestroyed();
+
+    if (isLeftArmAlive && isRightArmAlive) {
+        return ATTACK_PADDLE_WITH_BOTH_ARMS_MIN_Y_POS + Randomizer::GetInstance()->RandomNumZeroToOne() *
+            (ATTACK_PADDLE_WITH_BOTH_ARMS_MAX_Y_POS - ATTACK_PADDLE_WITH_BOTH_ARMS_MIN_Y_POS);
+    }
+    
+    // One of the arms is dead, lower the y position of the attack...
+    return ATTACK_PADDLE_WITH_ONE_ARM_MIN_Y_POS + Randomizer::GetInstance()->RandomNumZeroToOne() *
+        (ATTACK_PADDLE_WITH_ONE_ARM_MAX_Y_POS - ATTACK_PADDLE_WITH_ONE_ARM_MIN_Y_POS);
 }

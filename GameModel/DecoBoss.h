@@ -135,8 +135,10 @@ private:
     static const float LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
     static const float RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
 
-    static const float ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS;
-    static const float ATTACK_PADDLE_WITH_ARMS_MAX_Y_POS;
+    static const float ATTACK_PADDLE_WITH_BOTH_ARMS_MIN_Y_POS;
+    static const float ATTACK_PADDLE_WITH_BOTH_ARMS_MAX_Y_POS;
+    static const float ATTACK_PADDLE_WITH_ONE_ARM_MIN_Y_POS;
+    static const float ATTACK_PADDLE_WITH_ONE_ARM_MAX_Y_POS;
 
     size_t middleBodyIdx, leftBodyIdx, rightBodyIdx;
     size_t coreIdx, lightningRelayIdx;
@@ -185,11 +187,7 @@ private:
     static float GetMovementMinYBound() { return DecoBoss::MOVEMENT_MIN_Y_BOUNDARY; }
     static float GetMovementMaxYBound() { return DecoBoss::GetMaxYOfConfines() - DecoBoss::MOVEMENT_PADDING_Y; }
 
-    static float GetRandomAttackPaddleYPos() { 
-        return ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS + Randomizer::GetInstance()->RandomNumZeroToOne() *
-            (ATTACK_PADDLE_WITH_ARMS_MAX_Y_POS - ATTACK_PADDLE_WITH_ARMS_MIN_Y_POS);
-    }
-
+    float GetRandomAttackPaddleYPos() const;
     static Point2D GetBossPositionForLevelRotation();
 
     static TeslaBlock* GetLeftTeslaBlock(const GameLevel& level);
@@ -226,7 +224,7 @@ inline float DecoBoss::GetSideToSideDropStateDistance() const {
 }
 
 inline float DecoBoss::GetYBallMaxForLevelRotate() const {
-    return (DecoBoss::ROTATION_Y_POSITION + this->GetCurrentHeight() / 2.0f);
+    return (DecoBoss::ROTATION_Y_POSITION - 1.0f);
 }
 
 inline Point2D DecoBoss::GetFarLeftDropStatePosition() const {

@@ -221,7 +221,7 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
         // If we're not in the remote control rocket camera or going into it then we don't do anything
         // since we can't come out of a camera mode that we aren't in
         if (this->remoteControlRocketWithCamera == NULL && 
-            this->animationQueue.front().type != GameTransformMgr::ToRemoteCtrlRocketCamAnimation) {
+            (this->animationQueue.empty() || this->animationQueue.front().type != GameTransformMgr::ToRemoteCtrlRocketCamAnimation)) {
             return;
         }
         animType = GameTransformMgr::FromRemoteCtrlRocketCamAnimation;
@@ -247,9 +247,9 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
 }
 
 void GameTransformMgr::SetGameZRotation(float rotInDegs, const GameLevel& level) {
-    this->currGameDegRotZ = rotInDegs;
+    this->currGameDegRotZ = fmod(rotInDegs, 360.0f);
 
-    float camZDist = GameTransformMgr::GetCameraZDistance(rotInDegs, level);
+    float camZDist = GameTransformMgr::GetCameraZDistance(this->currGameDegRotZ, level);
     this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, camZDist), Vector3D(0,0,0));
     
     // Don't mess with the current camera orientation unless we're sure that there are no other
@@ -508,13 +508,11 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
             assert(currLevel != NULL);
 
             Vector3D worldSpaceTranslation;
-            this->GetRemoteCtrlRocketPositionAndFOV(*this->remoteControlRocketWithCamera, currLevel->GetLevelUnitWidth(), 
-                currLevel->GetLevelUnitHeight(), worldSpaceTranslation, this->cameraFOVAngle);
+            Vector3D worldSpaceRotation;
+            this->GetRemoteCtrlRocketPositionRotationAndFOV(*this->remoteControlRocketWithCamera, currLevel->GetLevelUnitWidth(), 
+                currLevel->GetLevelUnitHeight(), worldSpaceTranslation, worldSpaceRotation, this->cameraFOVAngle);
 
-            // Camera rotates with the rocket...
-            const Vector2D& rocketVelDir = this->remoteControlRocketWithCamera->GetVelocityDirection();
-            assert(!rocketVelDir.IsZero());
-            Vector3D worldSpaceRotation(0, 0, Trig::radiansToDegrees(-atan2(rocketVelDir[1], rocketVelDir[0])) + 90 + this->currGameDegRotZ);
+            
 
             this->currCamOrientation.SetTranslation(worldSpaceTranslation);
             this->currCamOrientation.SetRotation(worldSpaceRotation);
@@ -594,19 +592,26 @@ void GameTransformMgr::GetBallCamPositionAndFOV(const GameBall& ball, float leve
 	fov = 2.0f * Trig::radiansToDegrees(atan(ballBounds.Radius() / GameBall::DEFAULT_BALL_RADIUS));
 }
 
-void GameTransformMgr::GetRemoteCtrlRocketPositionAndFOV(const PaddleRemoteControlRocketProjectile& rocket, 
-                                                         float levelWidth, float levelHeight,
-                                                         Vector3D& rocketCamPos, float& fov) {
+void GameTransformMgr::GetRemoteCtrlRocketPositionRotationAndFOV(const PaddleRemoteControlRocketProjectile& rocket, 
+                                                                 float levelWidth, float levelHeight,
+                                                                 Vector3D& rocketCamPos, Vector3D& rocketCamRotation, float& fov) {
 
-   // Calculate the final camera distance away from the rocket...
-   static const float ROCKET_VIEW_BORDER = 6.0f * LevelPiece::PIECE_WIDTH;
-   float zDistanceFromRocket = (std::max<float>(rocket.GetHeight(), rocket.GetWidth()) + ROCKET_VIEW_BORDER) / 
+    // Calculate the final camera distance away from the rocket...
+    static const float ROCKET_VIEW_BORDER = 6.0f * LevelPiece::PIECE_WIDTH;
+    float zDistanceFromRocket = (std::max<float>(rocket.GetHeight(), rocket.GetWidth()) + ROCKET_VIEW_BORDER) / 
        (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f)));
 
-   Point2D rocketWorldSpacePos = rocket.GetPosition() - 0.5 * Vector2D(levelWidth, levelHeight);
+    Point2D rocketWorldSpacePos  = rocket.GetPosition() - 0.5 * Vector2D(levelWidth, levelHeight);
+    const Vector2D& rocketVelDir = rocket.GetVelocityDirection();
 
-   rocketCamPos = this->GetGameXYZTransform() * Vector3D(rocketWorldSpacePos[0], rocketWorldSpacePos[1], zDistanceFromRocket);
-   fov = Camera::FOV_ANGLE_IN_DEGS;
+    rocketCamPos = this->GetGameXYZTransform() * Vector3D(rocketWorldSpacePos[0], rocketWorldSpacePos[1], zDistanceFromRocket);
+    
+    // Camera rotates with the rocket...
+    rocketCamRotation[0] = 0.0f;
+    rocketCamRotation[1] = 0.0f;
+    rocketCamRotation[2] = fmod(Trig::radiansToDegrees(-atan2(rocketVelDir[1], rocketVelDir[0])) + 90 + this->currGameDegRotZ, 360.0f);
+
+    fov = Camera::FOV_ANGLE_IN_DEGS;
 }
 
 /**
@@ -1351,11 +1356,13 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
 
         // This will store the actual world-space position that we need to transform the camera to...
         Vector3D finalWorldspacePos;
+        Vector3D finalWorldspaceRot;
         float finalFOV;
         const GameLevel* currLevel = gameModel.GetCurrentLevel();
-        this->GetRemoteCtrlRocketPositionAndFOV(*remoteCtrlRocket, currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight(), finalWorldspacePos, finalFOV);
+        this->GetRemoteCtrlRocketPositionRotationAndFOV(*remoteCtrlRocket, currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight(), 
+            finalWorldspacePos, finalWorldspaceRot, finalFOV);
 
-        Orientation3D finalOrientation(finalWorldspacePos, Vector3D(0, 0, 0));
+        Orientation3D finalOrientation(finalWorldspacePos, finalWorldspaceRot);
         std::vector<Orientation3D> orientationValues;
         orientationValues.reserve(2);
         orientationValues.push_back(this->currCamOrientation);
@@ -1467,11 +1474,30 @@ bool GameTransformMgr::TickRemoteControlRocketCamAnimation(double dT, GameModel&
 
     // Update the orientation so that it keeps up-to-date with the current z distance
     if (this->animationQueue.front().type == GameTransformMgr::FromRemoteCtrlRocketCamAnimation) {
+        assert(this->remoteControlRocketCamAnimations.size() == 1);
+
         Orientation3D finalOrientation = this->remoteControlRocketCamAnimations.front().GetFinalInterpolationValue();
         finalOrientation.SetTZ(this->GetCameraZDistance(this->currGameDegRotZ, *gameModel.GetCurrentLevel()));
-        assert(this->remoteControlRocketCamAnimations.size() == 1);
         this->remoteControlRocketCamAnimations.front().SetInterpolationValue(1, finalOrientation);
         this->remoteControlRocketCamAnimations.front().SetInterpolationValue(2, finalOrientation);
+    }
+    else {
+        const GameLevel* currLevel = gameModel.GetCurrentLevel();
+        TransformAnimation& rocketCamAnim = this->animationQueue.front();
+        assert(reinterpret_cast<PaddleRemoteControlRocketProjectile*>(rocketCamAnim.data) != NULL);
+        PaddleRemoteControlRocketProjectile* remoteCtrlRocket = 
+            static_cast<PaddleRemoteControlRocketProjectile*>(rocketCamAnim.data);
+
+        float temp;
+        Vector3D rcRocketPos;
+        Vector3D rcRocketRot;
+        this->GetRemoteCtrlRocketPositionRotationAndFOV(*remoteCtrlRocket, currLevel->GetLevelUnitWidth(),
+            currLevel->GetLevelUnitHeight(), rcRocketPos, rcRocketRot, temp);
+
+        assert(this->remoteControlRocketCamAnimations.size() == 1);
+        Orientation3D& finalOrientation = this->remoteControlRocketCamAnimations.front().GetEditableFinalInterpolationValue();
+        finalOrientation.SetTranslation(rcRocketPos);
+        finalOrientation.SetRotation(rcRocketRot);
     }
 
     // Animate the camera for the animation to move to or away from the rocket when

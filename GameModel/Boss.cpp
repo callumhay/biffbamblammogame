@@ -392,6 +392,34 @@ AnimationMultiLerp<Vector3D> Boss::BuildBossHurtMoveAnim(const Vector2D& hurtVec
     return result;
 }
 
+AnimationMultiLerp<float> Boss::BuildLimbShakeAnim(float limbSize) {
+    AnimationMultiLerp<float> armShakeAnim;
+
+    static const int NUM_ANIM_KEYFRAMES = 32;
+
+    std::vector<double> timeValues;
+    timeValues.reserve(NUM_ANIM_KEYFRAMES);
+    timeValues.push_back(0.0);
+    for (int i = 1; i < NUM_ANIM_KEYFRAMES; i++) {
+        timeValues.push_back(timeValues.back() + 0.0015 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.035);
+    }
+
+    const float MAX_MOVE = 0.15f * limbSize;
+    int neg = Randomizer::GetInstance()->RandomNegativeOrPositive();
+    std::vector<float> movementValues;
+    movementValues.reserve(NUM_ANIM_KEYFRAMES);
+    movementValues.push_back(0.0f);
+    for (int i = 1; i < NUM_ANIM_KEYFRAMES; i++) {
+        movementValues.push_back(neg * (MAX_MOVE * 0.01f + Randomizer::GetInstance()->RandomNumZeroToOne() * MAX_MOVE * 0.99f));
+        neg = -neg;
+    }
+
+    armShakeAnim.SetLerp(timeValues, movementValues);
+    armShakeAnim.SetRepeat(true);
+
+    return armShakeAnim;
+}
+
 AnimationMultiLerp<Vector3D> Boss::BuildLimbFallOffTranslationAnim(double totalAnimTime, float xDist, float yDist) {
     std::vector<double> timeValues;
     timeValues.reserve(2);

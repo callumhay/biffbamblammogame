@@ -5018,6 +5018,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryBolts->SetEmitPosition(Point3D(pos, 0));
 	angryBolts->SetEmitDirection(Vector3D(0,1,0));
     angryBolts->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+    angryBolts->SetRadiusDeviationFromCenter(ESPInterval(0.0f, width/4.0f), ESPInterval(0.0f, std::min<float>(height/3.0f, 1.0f)), ESPInterval(0.0f));
     angryBolts->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     angryBolts->AddEffector(&this->particleFader);
 	angryBolts->SetParticles(5, this->lightningBoltTex);
