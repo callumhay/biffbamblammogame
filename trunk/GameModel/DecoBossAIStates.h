@@ -81,6 +81,8 @@ protected:
     };
     AIState currState;
 
+    //static void DoFirstTimeInit();
+
     Point2D GeneratePaddleArmAttackPosition(GameModel* gameModel) const;
     Point2D GenerateShotOrigin() const;
     Vector2D GenerateRandomShotDirTowardsPaddle(const Point2D& shotOrigin, GameModel* gameModel) const;
@@ -135,6 +137,8 @@ protected:
     bool UpdateShootAtPaddleWhileMoving(double dT, GameModel* gameModel);
     bool UpdateArmAnimation(double dT, AnimationMultiLerp<float>& armSeg1Anim, AnimationMultiLerp<float>& armSeg2Anim, 
         AnimationMultiLerp<float>& armSeg3Anim, AnimationMultiLerp<float>& armSeg4Anim);
+    bool RotateArmsToDefaultPosition(double dT);
+    
     void DropLoadedItem(GameModel* gameModel);
 
     // State Variables and functions
@@ -144,6 +148,8 @@ protected:
     GameItem::ItemType nextDropItemType;
     AnimationMultiLerp<Vector3D> electrifiedHurtAnim;
     AnimationLerp<float> itemLoadingAnim;
+    AnimationMultiLerp<float> leftArmShakeAnim;
+    AnimationMultiLerp<float> rightArmShakeAnim;
     int sideToSideNumDropCountdown;
     
     AnimationMultiLerp<float> armSeg1RotateExtendAnim, armSeg2RotateExtendAnim, armSeg3RotateExtendAnim, armSeg4RotateExtendAnim;
@@ -154,6 +160,7 @@ protected:
     float currLeftArmRotInDegs;
     float currRightArmRotInDegs;
     float currLevelRotationAmtInDegs;
+    int rotationDir;
     double rotateShakeCountdown;
 
     void InitStationaryAttackState();
@@ -180,7 +187,7 @@ protected:
     void ExecuteMoveToFarLeftSideState(double dT, GameModel* gameModel);
     void ExecuteMoveToFarRightSideState(double dT, GameModel* gameModel);
     void ExecuteSideToSideItemDropState(double dT, GameModel* gameModel);
-    void ExecuteMoveToCenterForLevelRotState(GameModel* gameModel);
+    void ExecuteMoveToCenterForLevelRotState(double dT, GameModel* gameModel);
     void ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel* gameModel);
     void ExecuteFiringArmsAtPaddleState(double dT, GameModel* gameModel);
     void ExecuteFinishedFiringArmsAtPaddleState(double dT, GameModel* gameModel);

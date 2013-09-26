@@ -341,13 +341,13 @@ void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 
 	// Front beams...
 	glPushMatrix();
-	glTranslatef(-18.0f, -50.0f, -20.0f);
+	glTranslatef(-18.0f, -70.0f, -20.0f);
 	glRotated(this->beamRotationfg1, 0, 0, 1);
 	this->skybeam->Draw(camera, this->beamEffect);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(18.0f, -50.0f, -20.0f);
+	glTranslatef(18.0f, -70.0f, -20.0f);
 	glRotated(this->beamRotationfg2, 0, 0, 1);
 	this->skybeam->Draw(camera, this->beamEffect);
 	glPopMatrix();

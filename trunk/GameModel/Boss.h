@@ -84,6 +84,8 @@ public:
     static AnimationMultiLerp<Vector3D>   BuildBossFinalDeathShakeAnim(float shakeMagnitude);
     static AnimationMultiLerp<Vector3D>   BuildBossHurtMoveAnim(const Vector2D& hurtDir, float shakeMagnitude, double invulnerableTimeInSecs);
 
+    static AnimationMultiLerp<float> BuildLimbShakeAnim(float limbSize);
+
     static AnimationMultiLerp<Vector3D> BuildLimbFallOffTranslationAnim(double totalAnimTime, float xDist, float yDist);
     static AnimationMultiLerp<float> BuildLimbFallOffZRotationAnim(double totalAnimTime, float rotAmtInDegs);
 

@@ -159,7 +159,8 @@ private:
 	void GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov);
 	void GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Vector3D& ballCamPos, float& fov); 
 
-    void GetRemoteCtrlRocketPositionAndFOV(const PaddleRemoteControlRocketProjectile& rocket, float levelWidth, float levelHeight, Vector3D& rocketCamPos, float& fov);
+    void GetRemoteCtrlRocketPositionRotationAndFOV(const PaddleRemoteControlRocketProjectile& rocket, 
+        float levelWidth, float levelHeight, Vector3D& rocketCamPos, Vector3D& rocketCamRotation, float& fov);
 
 	void ClearSpecialCamEffects();
 
