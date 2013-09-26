@@ -438,7 +438,7 @@ void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         glPushMatrix();
         glTranslatef(currPos[0], currPos[1], currPos[2]);
         glScalef(scale, scale, 1.0f);
-        glColor4f(1.0f, 0.1f, 0.1f, this->leftSideTopGlowAnim.GetInterpolantValue());
+        glColor4f(1.0f, 0.1f, 0.1f, leftSideCurls->GetAlpha() * this->leftSideTopGlowAnim.GetInterpolantValue());
         GeometryMaker::GetInstance()->DrawQuad();
         glPopMatrix();
 
@@ -446,7 +446,7 @@ void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         glPushMatrix();
         glTranslatef(currPos[0], currPos[1], currPos[2]);
         glScalef(scale, scale, 1.0f);
-        glColor4f(1.0f, 0.1f, 0.1f, this->leftSideBottomGlowAnim.GetInterpolantValue());
+        glColor4f(1.0f, 0.1f, 0.1f, leftSideCurls->GetAlpha() * this->leftSideBottomGlowAnim.GetInterpolantValue());
         GeometryMaker::GetInstance()->DrawQuad();
         glPopMatrix();
     }

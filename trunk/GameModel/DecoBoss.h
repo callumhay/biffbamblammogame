@@ -49,6 +49,8 @@ public:
 
     static const float CORE_AND_ARMS_WIDTH;
 
+    static const float LIGHTNING_RELAY_GLOW_SIZE;
+
     static const float ARM_WIDTH;
     static const float ARM_NOT_EXTENDED_HEIGHT;
 
@@ -70,6 +72,15 @@ public:
     static const float LIGHTNING_FIRE_POS_Z;
 
     static const float ITEM_LOAD_OFFSET_Y;
+
+    static const int NUM_EYES = 6;
+    static const float EYE1_OFFSET_X;
+    static const float EYE2_OFFSET_X;
+    static const float EYE1_2_OFFSET_Y;
+    static const float EYE3_OFFSET_Y;
+    static const float EYE4_OFFSET_Y;
+    static const float EYE5_OFFSET_Y;
+    static const float EYE6_OFFSET_Y;
 
     ~DecoBoss();
 
@@ -105,11 +116,17 @@ public:
     Point2D GetItemDropPosition() const;
     static float GetItemDropAnimDisplacement();
 
+    Vector3D GetLeftLightningRelayOffset() const;
+    Vector3D GetRightLightningRelayOffset() const;
+
     static Vector3D GetLightningFireVec3D() { return Vector3D(LIGHTNING_FIRE_POS_X, LIGHTNING_FIRE_POS_Y, LIGHTNING_FIRE_POS_Z); }
     static Vector2D GetLightningFireVec2D() { return Vector2D(LIGHTNING_FIRE_POS_X, LIGHTNING_FIRE_POS_Y); }
 
     bool IsRightBodyStillAlive() const;
     bool IsLeftBodyStillAlive() const;
+
+    Point3D GetEyeClusterCenterPosition() const;
+    const Vector2D& GetEyeOffset(int idx) const;
 
     // Inherited from Boss
     bool ProjectilePassesThrough(const Projectile* projectile) const;
@@ -144,6 +161,8 @@ private:
     size_t coreIdx, lightningRelayIdx;
     size_t leftArmIdx, leftArmGearIdx, leftArmScopingSeg1Idx, leftArmScopingSeg2Idx, leftArmScopingSeg3Idx, leftArmScopingSeg4Idx, leftArmHandIdx;
     size_t rightArmIdx, rightArmGearIdx, rightArmScopingSeg1Idx, rightArmScopingSeg2Idx, rightArmScopingSeg3Idx, rightArmScopingSeg4Idx, rightArmHandIdx;
+
+    std::vector<Vector2D> eyeOffsets;
 
     DecoBoss();
 
@@ -212,11 +231,27 @@ inline float DecoBoss::GetItemDropAnimDisplacement() {
     return GameItem::ITEM_HEIGHT;
 }
 
+inline Vector3D DecoBoss::GetLeftLightningRelayOffset() const {
+    return Vector3D(-1.049f, -6.427f, 0.975f);
+}
+
+inline Vector3D DecoBoss::GetRightLightningRelayOffset() const {
+    return Vector3D(1.049f, -6.427f, 0.975f);
+}
+
 inline bool DecoBoss::IsRightBodyStillAlive() const {
     return !this->GetRightBody()->GetIsDestroyed();
 }
 inline bool DecoBoss::IsLeftBodyStillAlive() const {
     return !this->GetLeftBody()->GetIsDestroyed();
+}
+
+inline Point3D DecoBoss::GetEyeClusterCenterPosition() const {
+    return this->GetCore()->GetTranslationPt3D() + Vector3D(0.0f, 2.844f, 1.2f);
+}
+
+inline const Vector2D& DecoBoss::GetEyeOffset(int idx) const {
+    return this->eyeOffsets[idx];
 }
 
 inline float DecoBoss::GetSideToSideDropStateDistance() const {

@@ -393,7 +393,8 @@ void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera
         else {
             this->circleGlowTex->BindTexture();
             for (int i = 0; i < GothicRomanticBoss::NUM_LEGS; i++) {
-                glColor4f(1.0f, 0.1f, 0.1f, this->legGlowAlphaAnims[i].GetInterpolantValue());
+
+                glColor4f(1.0f, 0.1f, 0.1f, leg->GetAlpha()*this->legGlowAlphaAnims[i].GetInterpolantValue());
 
                 Point3D legPos = this->boss->GetLegPointPos(i);
 

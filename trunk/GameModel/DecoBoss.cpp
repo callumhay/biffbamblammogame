@@ -27,6 +27,8 @@ const float DecoBoss::FULL_BODY_TOTAL_WIDTH  = CORE_WIDTH + 2*SIDE_BODY_PART_WID
 
 const float DecoBoss::CORE_AND_ARMS_WIDTH = 11.264f;
 
+const float DecoBoss::LIGHTNING_RELAY_GLOW_SIZE = 1.6f;
+
 const float DecoBoss::ARM_WIDTH               = 4.334f;
 const float DecoBoss::ARM_NOT_EXTENDED_HEIGHT = 6.382f;
 
@@ -58,6 +60,14 @@ const float DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS = 90.0f;
 
 const float DecoBoss::ITEM_LOAD_OFFSET_Y = -5.063f - GameItem::ITEM_HEIGHT / 2.0f;
 
+const float DecoBoss::EYE1_OFFSET_X   = 0.185f;
+const float DecoBoss::EYE2_OFFSET_X   = -0.185f;
+const float DecoBoss::EYE1_2_OFFSET_Y = 0.8f;
+const float DecoBoss::EYE3_OFFSET_Y   = 0.4f;
+const float DecoBoss::EYE4_OFFSET_Y   = 0.0f;
+const float DecoBoss::EYE5_OFFSET_Y   = -0.4f;
+const float DecoBoss::EYE6_OFFSET_Y   = -0.8f;
+
 const float DecoBoss::ATTACK_PADDLE_WITH_BOTH_ARMS_MIN_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT - (2.0f * LevelPiece::PIECE_HEIGHT);
 const float DecoBoss::ATTACK_PADDLE_WITH_BOTH_ARMS_MAX_Y_POS = 14.0f * LevelPiece::PIECE_HEIGHT + (2.0f * LevelPiece::PIECE_HEIGHT);
 
@@ -67,6 +77,13 @@ const float DecoBoss::ATTACK_PADDLE_WITH_ONE_ARM_MAX_Y_POS = 12.0f * LevelPiece:
 using namespace decobossai;
 
 DecoBoss::DecoBoss() {
+    this->eyeOffsets.reserve(NUM_EYES);
+    this->eyeOffsets.push_back(Vector2D(EYE1_OFFSET_X, EYE1_2_OFFSET_Y));
+    this->eyeOffsets.push_back(Vector2D(EYE2_OFFSET_X, EYE1_2_OFFSET_Y));
+    this->eyeOffsets.push_back(Vector2D(0, EYE3_OFFSET_Y));
+    this->eyeOffsets.push_back(Vector2D(0, EYE4_OFFSET_Y));
+    this->eyeOffsets.push_back(Vector2D(0, EYE5_OFFSET_Y));
+    this->eyeOffsets.push_back(Vector2D(0, EYE6_OFFSET_Y));
 }
 
 DecoBoss::~DecoBoss() {

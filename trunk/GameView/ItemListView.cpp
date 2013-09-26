@@ -14,6 +14,7 @@
 #include "GameViewConstants.h"
 #include "KeyboardHelperLabel.h"
 #include "PopupTutorialHint.h"
+#include "GameDisplay.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Camera.h"
@@ -41,6 +42,7 @@ activatedItemAlphaAnim(0.0f), pressEscAlphaAnim(0.0f) {
 	
     this->keyLabel = new KeyboardHelperLabel(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium, "Press", "Esc", "to Return");
     this->keyLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
+    this->keyLabel->SetScale(GameDisplay::GetTextScalingFactor());
 
 	this->horizontalBorder	= 30;
 	this->verticalBorder	= 30;

@@ -16,8 +16,10 @@
 
 class ExpandingHaloEffectInfo : public BossEffectEventInfo {
 public:
-    ExpandingHaloEffectInfo(const BossBodyPart* part, double timeInSecs, const Colour& colour, float sizeMultiplier = 1.0f) : 
-      BossEffectEventInfo(), part(part), timeInSecs(timeInSecs), colour(colour), sizeMultiplier(sizeMultiplier) {}
+    ExpandingHaloEffectInfo(const BossBodyPart* part, double timeInSecs, const Colour& colour, 
+        float sizeMultiplier = 1.0f, const Vector3D& offset = Vector3D(0,0,0)) : 
+      BossEffectEventInfo(), part(part), timeInSecs(timeInSecs), colour(colour), 
+      sizeMultiplier(sizeMultiplier), offset(offset)  {}
     ~ExpandingHaloEffectInfo() {}
 
     BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::ExpandingHaloInfo; }
@@ -26,12 +28,14 @@ public:
     double GetTimeInSecs() const { return this->timeInSecs; }
     const Colour& GetColour() const { return this->colour; }
     float GetSizeMultiplier() const { return this->sizeMultiplier; }
+    const Vector3D& GetOffset() const { return this->offset; }
 
 private:
     const BossBodyPart* part;
     const double timeInSecs;
     const Colour colour;
     const float sizeMultiplier;
+    const Vector3D offset;
 
     DISALLOW_COPY_AND_ASSIGN(ExpandingHaloEffectInfo);
 };

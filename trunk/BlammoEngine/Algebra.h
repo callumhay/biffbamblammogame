@@ -24,6 +24,10 @@
 #define M_PI_DIV2 M_PI / 2.0f
 #endif
 
+#ifndef M_PI_DIV4
+#define M_PI_DIV4 M_PI / 4.0f
+#endif
+
 #ifndef M_PI_MULT2
 #define M_PI_MULT2 M_PI * 2.0f
 #endif

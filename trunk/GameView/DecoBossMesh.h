@@ -49,6 +49,16 @@ private:
     ESPPointEmitter* rightArmExplodingEmitter;
     ESPPointEmitter* bodyExplodingEmitter;
 
+    Texture2D* glowTex;
+    double introTimeCountdown;
+    std::vector<AnimationLerp<float> > eyeGlowAlphaAnims;
+    AnimationLerp<float> lightningRelayAlphaAnim;
+
+    Texture2D* flareGlowTex;
+    Texture2D* lensFlareTex;
+    ESPPointEmitter* lightningRelayEmitter;
+    ESPParticleScaleEffector flarePulse;
+
     // Inherited functions
     //void DrawPreBodyEffects(double dT, const Camera& camera);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,

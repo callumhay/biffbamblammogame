@@ -469,12 +469,21 @@ public:
 		this->areControlsFlipped = flippedControlsOn;
 	}
 	// Gets whether the controls for the paddle are flipped
-	bool AreControlsFlipped() const {
-		return this->areControlsFlipped;
+	bool AreControlsFlippedForPaddle() const {
+        return this->areControlsFlipped || (acos(std::min<float>(1.0f, std::max<float>(-1.0f, 
+            Vector2D::Dot(this->GetGameSpacePaddleUpUnitVec(), Vector2D(0,-1))))) <= M_PI_DIV4);
 	}
+    bool AreControlsFlippedForOther() const {
+        return this->areControlsFlipped;
+    }
 
     Vector2D GetGameSpacePaddleRightUnitVec() const {
         Vector2D rightVec(1,0);
+        rightVec.Rotate(this->gameTransformInfo->GetGameZRotationInDegs());
+        return rightVec;
+    }
+    Vector2D GetGameSpacePaddleUpUnitVec() const {
+        Vector2D rightVec(0,1);
         rightVec.Rotate(this->gameTransformInfo->GetGameZRotationInDegs());
         return rightVec;
     }

@@ -1,4 +1,4 @@
-There's more than one way to break a block
+More than one way to break a block
 19 26
 S S S S D(StickyPaddle) S S S S D(LaserBeamPaddle) S S S S S S S S S 
 S E E E E E E E E E E E E F(l) E E E E F(l) 
@@ -36,8 +36,8 @@ STARS:
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
 BallGrow 2
 UberBall 1
 StickyPaddle 3
@@ -57,6 +57,7 @@ MultiBall5 1
 BallCam 0
 MagnetPaddle 0
 MultiBall3 1
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 2

@@ -126,7 +126,7 @@ void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
 
     // Modify the direction of the boost based on the current game transform information
     Vector2D dir(x,y);
-    if (this->gameModel->AreControlsFlipped()) {
+    if (this->gameModel->AreControlsFlippedForOther()) {
         dir *= -1;
     }
     dir.Rotate(this->gameModel->GetTransformInfo()->GetGameZRotationInDegs());

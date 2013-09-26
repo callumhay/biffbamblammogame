@@ -335,6 +335,8 @@ flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, 
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starTexture != NULL);
+    this->starTexture->SetWrapParams(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
     this->glowTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, 
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->glowTexture != NULL);
