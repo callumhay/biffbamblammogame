@@ -72,7 +72,7 @@ protected:
     enum ConfinedMovePos { TopLeftCorner = 0, TopRightCorner = 1, BottomLeftCorner = 2, BottomRightCorner = 3, Center = 4 };
     static const ConfinedMovePos CORNER_POSITIONS[];
 
-    Point2D GetConfinedBossCenterMovePosition(float levelWidth, float levelHeight, const ConfinedMovePos& pos) const;
+    Point2D GetConfinedBossCenterMovePosition(const ConfinedMovePos& pos) const;
     static ConfinedMovePos GetRandomConfinedMovePosition(const ConfinedMovePos& currPos) {
         return static_cast<ConfinedMovePos>((currPos + (1 + Randomizer::GetInstance()->RandomUnsignedInt() % 4)) % 5);
     }

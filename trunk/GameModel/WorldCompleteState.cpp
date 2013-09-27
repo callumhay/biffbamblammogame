@@ -15,7 +15,7 @@
 #include "LevelStartState.h"
 #include "GameModel.h"
 
-WorldCompleteState::WorldCompleteState(GameModel* gm) : GameState(gm) {
+WorldCompleteState::WorldCompleteState(GameModel* gm) : GameState(gm), waitingForExternalExit(false) {
 }
 
 WorldCompleteState::~WorldCompleteState() {
@@ -27,6 +27,10 @@ WorldCompleteState::~WorldCompleteState() {
 void WorldCompleteState::Tick(double seconds) {
 	UNUSED_PARAMETER(seconds);
 
+    if (this->waitingForExternalExit) {
+        return;
+    }
+
 	GameWorld* currWorld = this->gameModel->GetCurrentWorld();
 
 	// EVENT: World is complete
@@ -37,13 +41,16 @@ void WorldCompleteState::Tick(double seconds) {
 		// EVENT: Game is complete
 		GameEventManager::Instance()->ActionGameCompleted();
 
-		// No more levels or worlds, end of game!! yay
+		// No more levels or worlds, end of game!!
 		this->gameModel->SetNextState(new GameCompleteState(this->gameModel));
 	}
 	else {
 		// Increment the world...
-		this->gameModel->SetCurrentWorldAndLevel(this->gameModel->currWorldNum + 1, 0, true);
-		// Place the ball back on the paddle, and let the next level/world begin!
-		this->gameModel->SetNextState(new LevelStartState(this->gameModel));
+        this->gameModel->IncrementCurrentWorldNum();
+		//this->gameModel->SetCurrentWorldAndLevel(this->gameModel->currWorldNum + 1, 0, true);
+
+        // NOTE: We don't go to any further state from here -- we wait until a signal to go to the next state
+        // is received from the user
+        this->waitingForExternalExit = true;
 	}
 }

@@ -504,8 +504,9 @@ void MainMenuDisplayState::RenderFrame(double dT) {
             
             // WARNING: We MUST add the world start state to the state queue before calling StartGameAtWorldAndLevel
             // or it will take place AFTER the level start state!!!
-            this->display->AddStateToQueue(DisplayState::WorldStart);
-		    this->display->GetModel()->StartGameAtWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+            //this->display->AddStateToQueue(DisplayState::WorldStart);
+
+            this->display->GetModel()->StartGameAtWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
 
 		    // Place the view into the proper state to play the game
 		    this->display->SetCurrentStateAsNextQueuedState();
@@ -516,18 +517,14 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 		    
             // Turn off the background music...
             sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
-
-            // Change to the blammopedia state
-            this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::BlammopediaMenu, this->display));
+            this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::BlammopediaMenu, DisplayStateInfo(), this->display));
             return;
         }
         else if (this->changeToLevelSelectState) {
 
             // Turn off the background music...
             sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
-
-            // Change to the blammopedia state
-            this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::SelectWorldMenu, this->display));
+            this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::SelectWorldMenu, DisplayStateInfo(), this->display));
             return;
         }
     }
@@ -577,7 +574,8 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     this->eraseFailedPopup->Draw(menuCamera);
 
 	// Fade-in/out overlay
-    this->DrawFadeOverlay(DISPLAY_WIDTH, DISPLAY_HEIGHT, this->fadeAnimation.GetInterpolantValue());
+    this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue(), this->starryBG);
+
 	this->menuFBO->UnbindFBObj();
 
 	// Do bloom on the menu screen and draw it

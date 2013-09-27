@@ -29,10 +29,13 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
     bool success = inFile.is_open();
 
 	if (success) {
+
         // Read in the progress file and set all the values across the model
         std::string nameStr;
+        bool isUnlocked;
         int numWorlds;
         long highScore;
+
         ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> numWorlds);
         std::getline(inFile, nameStr);  // finish reading the line
         
@@ -46,6 +49,10 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
             if (currWorld == NULL) {
                 continue;
             }
+            
+            // Read whether the world has been unlocked or not
+            ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> isUnlocked);
+            currWorld->SetHasBeenUnlocked(isUnlocked);
 
             int numLevels;
             ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> numLevels);
@@ -100,9 +107,11 @@ bool GameProgressIO::SaveGameProgress(const GameModel* model) {
         const GameWorld* currWorld = gameWorlds.at(worldIdx);
         assert(currWorld != NULL);
 
-        // World index followed by scope
+        // World and whether it's been unlocked
         outFile << currWorld->GetName() << std::endl;
+        outFile << currWorld->GetHasBeenUnlocked() << std::endl;
 
+        // World's levels...
         const std::vector<GameLevel*>& worldLevels = currWorld->GetAllLevelsInWorld();
         size_t numLevels = currWorld->GetNumLevels();
         
@@ -159,6 +168,7 @@ bool GameProgressIO::SaveFullProgressOfGame(const GameModel* model) {
 
         // World index followed by scope
         outFile << currWorld->GetName() << std::endl;
+        outFile << true << std::endl; // (The world has been unlocked)
 
         const std::vector<GameLevel*>& worldLevels = currWorld->GetAllLevelsInWorld();
         size_t numLevels = currWorld->GetNumLevels();
@@ -200,6 +210,7 @@ bool GameProgressIO::SaveFullProgressOfWorld(const GameModel* model, const GameW
 
         // World index followed by scope
         outFile << currWorld->GetName() << std::endl;
+        outFile << true << std::endl; // (The world has been unlocked)
 
         const std::vector<GameLevel*>& worldLevels = currWorld->GetAllLevelsInWorld();
         size_t numLevels = currWorld->GetNumLevels();
@@ -213,11 +224,18 @@ bool GameProgressIO::SaveFullProgressOfWorld(const GameModel* model, const GameW
             // Store each unlocked level's high-score
             outFile << currLevel->GetName() << std::endl;
             if (currWorld->GetStyle() == worldStyle) {
-                outFile << std::max<long>(1, currLevel->GetHighScore()) << std::endl;
+                // Beat all levels but the boss
+                if (currLevel->GetHasBoss()) {
+                    outFile << currLevel->GetHighScore() << std::endl;
+                }
+                else {
+                    outFile << std::max<long>(1, currLevel->GetHighScore()) << std::endl;
+                }
             }
             else {
                 outFile << currLevel->GetHighScore() << std::endl;
             }
+
         }
     }
     outFile.close();

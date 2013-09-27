@@ -67,7 +67,7 @@ public:
 	bool SetParticles(unsigned int numParticles, Texture2D* texture);
 	bool SetParticles(unsigned int numParticles, CgFxEffectBase* effect);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text);
-	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e);
+	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e, bool isOrtho = false);
     
     bool SetAnimatedParticles(unsigned int numParticles, Texture2D* texture, int spriteSizeX, int spriteSizeY, double animationFPS = 24.0);
     bool SetRandomTextureParticles(unsigned int numParticles, std::vector<Texture2D*>& textures);

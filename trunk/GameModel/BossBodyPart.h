@@ -26,6 +26,7 @@ public:
     BossBodyPart(const BoundingLines& localBounds);
     virtual ~BossBodyPart();
 
+    void ToggleSimpleBoundingCalc(bool on);
     void SetLocalBounds(const BoundingLines& bounds);
     const BoundingLines& GetLocalBounds() const;
     const BoundingLines& GetWorldBounds() const;
@@ -101,10 +102,10 @@ public:
 protected:
     bool isDestroyed;
     bool collisionsDisabled;
+    bool isSimpleBoundingCalcOn;
     BoundingLines localBounds;
     mutable BoundingLines worldBounds;
     mutable bool isWorldBoundsDirty;
-
 
     AnimationMultiLerp<ColourRGBA> rgbaAnim;
 
@@ -126,6 +127,10 @@ private:
     DISALLOW_COPY_AND_ASSIGN(BossBodyPart);
 };
 
+inline void BossBodyPart::ToggleSimpleBoundingCalc(bool on) {
+    this->isSimpleBoundingCalcOn = on;
+}
+
 inline void BossBodyPart::SetLocalBounds(const BoundingLines& bounds) {
     this->localBounds = bounds;
     this->isWorldBoundsDirty = true;
@@ -138,8 +143,14 @@ inline const BoundingLines& BossBodyPart::GetLocalBounds() const {
 inline const BoundingLines& BossBodyPart::GetWorldBounds() const {
     if (this->isWorldBoundsDirty) {
         this->worldBounds = localBounds;
-        this->worldBounds.Transform(this->worldTransform);
-        this->isWorldBoundsDirty = false;
+        if (this->isSimpleBoundingCalcOn) {
+            this->worldBounds.RotateLinesAndNormals(this->localZRotation, Point2D(0,0));
+            this->worldBounds.TranslateBounds(this->worldTransform.getTranslationVec2D());
+        }
+        else {
+            this->worldBounds.Transform(this->worldTransform);
+        }
+        this->isWorldBoundsDirty = false; 
     }
     return this->worldBounds;
 }

@@ -189,6 +189,11 @@ public:
         return static_cast<int>(this->worlds.size()) - 1;
     }
 	
+    void IncrementCurrentWorldNum() {
+        assert(!this->IsLastWorld());
+        this->currWorldNum++; 
+    }
+
     int GetTotalStarsCollectedInGame() const;
 
 	Vector2D GetLevelUnitDimensions() const {

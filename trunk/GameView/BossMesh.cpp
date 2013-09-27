@@ -267,7 +267,7 @@ void BossMesh::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
     chargeParticles1->SetParticleLife(ESPInterval(info.GetChargeTimeInSecs() * 0.75f, info.GetChargeTimeInSecs()));
     chargeParticles1->SetParticleSize(ESPInterval(info.GetSizeMultiplier() * 1.5f, info.GetSizeMultiplier() * 3.5f));
     chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    chargeParticles1->SetParticleAlignment(ESP::ScreenAligned);
+    chargeParticles1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     chargeParticles1->SetEmitPosition(Point3D(posOffset[0],posOffset[1],0));
     chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
     chargeParticles1->SetEmitAngleInDegrees(180);

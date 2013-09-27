@@ -14,9 +14,10 @@
 
 #include "DisplayState.h"
 #include "CgFxGreyscale.h"
+#include "CgFxPostRefract.h"
 
 #include "../BlammoEngine/Animation.h"
-
+#include "../ESPEngine/ESP.h"
 #include "../GameSound/SoundCommon.h"
 
 class TextLabel2D;
@@ -33,9 +34,8 @@ class TextLabel2DFixedWidth;
  */
 class SelectWorldMenuState : public DisplayState {
 public:
-    SelectWorldMenuState(GameDisplay* display);
-    SelectWorldMenuState(GameDisplay* display, const GameWorld* selectedWorld);
-    ~SelectWorldMenuState();
+    SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info);
+    virtual ~SelectWorldMenuState();
 
     bool AllowsGameModelUpdates() const { return true; }
 
@@ -71,6 +71,7 @@ private:
 
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
+    FBObj* postMenuFBObj;
 
     Texture2D* starryBG;
     Texture2D* padlockTex;
@@ -80,6 +81,8 @@ private:
     // Inner class for representing a selectable world item in the world select menu
     class WorldSelectItem {
     public:
+        static const float PADLOCK_SCALE;
+
         WorldSelectItem(SelectWorldMenuState* state, const GameWorld* world, bool isLocked);
         ~WorldSelectItem();
 
@@ -92,11 +95,15 @@ private:
 
         bool GetIsLocked() const { return this->isLocked; }
         void ExecuteLockedAnimation();
+        void ExecuteUnlockAnimation();
+
+        void SetLockOffset(const Vector2D& offset);
 
     private:
-        static const float PADLOCK_SCALE;
-
         SelectWorldMenuState* state;
+        
+        CgFxGreyscale greyscaleEffect;
+        
         bool isSelected;
         bool isLocked;
         const GameWorld* gameWorld;
@@ -110,10 +117,67 @@ private:
         AnimationLerp<float> sizeAnim;
         AnimationMultiLerp<float> lockedAnim;
 
+        bool unlockAnimActive;
+        AnimationLerp<float> lockFadeAnim;
+        AnimationLerp<float> greyscaleFactorAnim;
+        
+        Vector2D lockOffset;
+
+        void Unlock();
         float GetXPosition(const Camera& camera, int selectedWorldNum) const;
 
         DISALLOW_COPY_AND_ASSIGN(WorldSelectItem);  
     };
+
+    // World unlock animation variables
+    class WorldUnlockAnimationTracker {
+    public:
+        WorldUnlockAnimationTracker(SelectWorldMenuState* state, WorldSelectItem* worldItem);
+        ~WorldUnlockAnimationTracker();
+
+        bool AreControlsLocked() const;
+        void Draw(const Camera& camera, double dT, const Texture2D& bgTexture);
+
+    private:
+        SelectWorldMenuState* state;
+        WorldSelectItem* worldItem;
+
+        double countdownMoveToLockedWorld;
+        double countdownWaitToShake;
+        double countdownWaitToEnergySuck;
+        bool unlockAnimExecuted;
+        AnimationMultiLerp<Vector2D> lockShakeAnim;
+
+        Texture2D* sparkleTex;
+        Texture2D* flareTex;
+        Texture2D* lensFlareTex;
+        Texture2D* hugeExplosionTex;
+        Texture2D* sphereNormalsTex;
+        std::vector<Texture2D*> smokeTextures;
+
+        CgFxPostRefract normalTexRefractEffect;
+
+        ESPParticleColourEffector particleFader;
+        ESPParticleColourEffector particleHalfFader;
+        ESPParticleColourEffector particleFireFastColourFader;
+        ESPParticleScaleEffector particleMediumShrink;
+        ESPParticleScaleEffector particleSmallGrowth;
+        ESPParticleScaleEffector particleMediumGrowth;
+        ESPParticleScaleEffector particleSuperGrowth;
+        ESPParticleRotateEffector smokeRotatorCW;
+        ESPParticleRotateEffector smokeRotatorCCW;
+
+        ESPPointEmitter* energySuckEmitter;
+        ESPPointEmitter* bigExplosionEmitter;
+        ESPPointEmitter* bigExplosionOnoEmitter;
+        ESPPointEmitter* shockwaveEffect;
+        ESPPointEmitter* fireSmokeEmitter1;
+        ESPPointEmitter* fireSmokeEmitter2;
+        ESPPointEmitter* debrisEmitter;
+        
+        DISALLOW_COPY_AND_ASSIGN(WorldUnlockAnimationTracker);
+    };
+    WorldUnlockAnimationTracker* worldUnlockAnim;
 
     std::vector<WorldSelectItem*> worldItems;
     int selectedItemIdx;
@@ -124,11 +188,11 @@ private:
     AnimationLerp<float> goToLevelSelectAlphaAnim;
 
     Texture2D* starTexture;
-    
-    CgFxGreyscale greyscaleEffect;
 
     void GoBackToMainMenu();
-    void Init(int selectedIdx);
+    void MoveToNextWorld();
+    void MoveToPrevWorld();
+    void Init(const DisplayStateInfo& info);
 
 	DISALLOW_COPY_AND_ASSIGN(SelectWorldMenuState);
 };

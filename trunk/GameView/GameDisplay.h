@@ -54,7 +54,7 @@ public:
         this->currState = state;
     }
 
-	void AddStateToQueue(const DisplayState::DisplayStateType& type);
+	void AddStateToQueue(const DisplayState::DisplayStateType& type, const DisplayStateInfo& info = DisplayStateInfo());
 	bool SetCurrentStateAsNextQueuedState();
 	DisplayState::DisplayStateType GetCurrentDisplayState() const {
 		return this->currState->GetType();
@@ -127,7 +127,7 @@ public:
 private:
 	Camera gameCamera;
 
-	std::list<DisplayState::DisplayStateType> stateQueue;
+    std::list<std::pair<DisplayState::DisplayStateType, DisplayStateInfo> > stateQueue;
 	DisplayState* currState;
 
 	GameModel*  model;
@@ -200,8 +200,8 @@ inline void GameDisplay::MouseReleased(const GameControl::MouseButton& releasedB
 	this->currState->MouseReleased(releasedButton);
 }
 
-inline void GameDisplay::AddStateToQueue(const DisplayState::DisplayStateType& type) {
-	stateQueue.push_back(type);
+inline void GameDisplay::AddStateToQueue(const DisplayState::DisplayStateType& type, const DisplayStateInfo& info) {
+    stateQueue.push_back(std::make_pair(type, info));
 }
 
 #endif

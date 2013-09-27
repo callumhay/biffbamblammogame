@@ -42,11 +42,17 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
         }
     }
 
-    // Save game progress!
-    GameProgressIO::SaveGameProgress(this->gameModel);
-
     // EVENT: Level is complete
     GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
+
+    // Check to see if a new world was just unlocked, if it was, unlock it!
+    if (currWorld->GetWorldIndex() != this->gameModel->GetLastWorldIndex()) {
+        GameWorld* nextWorld = this->gameModel->GetWorldByIndex(currWorld->GetWorldIndex()+1);
+        nextWorld->SetHasBeenUnlocked(true);
+    }
+
+    // Save game progress!
+    GameProgressIO::SaveGameProgress(this->gameModel);
 }
 
 LevelCompleteState::~LevelCompleteState() {

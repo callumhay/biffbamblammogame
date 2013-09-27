@@ -150,7 +150,6 @@ void GameEventsListener::LevelAlmostCompleteEvent(const GameLevel& level) {
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
-	UNUSED_PARAMETER(world);
 	UNUSED_PARAMETER(level);
     
     // Clear all the Tesla lightning sounds that are left playing
@@ -160,18 +159,48 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
     // proper animations, fade-outs, etc. In the case of a boss level being completed, we
     // display a "movement complete" state instead.
     if (level.GetHasBoss()) {
+
         // For now, every boss level should be the last level in a world
         assert(world.GetLastLevelIndex() == static_cast<int>(level.GetLevelIndex()));
         this->display->AddStateToQueue(DisplayState::BossLevelCompleteSummary);
 
-        // TODO: Bring the player to the world select screen and unlock the latest world.. unless this was the last level,
-        // in which case we go the state for the end of the game...
-        //this->display->AddStateToQueue(DisplayState::WorldUnlock);
+        // Bring the player to the world select screen and unlock the latest world...
+        // Cases: 
+        // 1. The boss was defeated for the first time and it's a mid-game boss, go to
+        //    the world select screen and unlock the next movement.
+        // 2. The boss was a mid-game boss that has already been defeated before, go to 
+        //    the world select screen with focus on the next movement.
+        // 3. The boss was the final boss in the game, go to the state for the end of the game...
+        
+        GameModel* gameModel = this->display->GetModel();
 
-        // If it's not the last world, then we add a world start screen after the boss level complete summary
-        if (this->display->GetModel()->GetLastWorldIndex() != world.GetWorldIndex()) {
-            this->display->AddStateToQueue(DisplayState::WorldStart);
+        // Check case 3 (last boss in the game): if the world that was just finished is the last
+        // world in the game, then the boss was the last boss in the game
+        int lastWorldIdx = gameModel->GetLastWorldIndex();
+        if (world.GetWorldIndex() == lastWorldIdx) {
+            // TODO? 
+            // NOTE: This is already taken care of by the GameCompletedEvent handler
         }
+        else {
+            //int furthestWorldIdx, furthestLevelIdx;
+            //gameModel->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+
+            // Case 1 and 2 (Mid-game boss, has it been defeated before or not?)
+            // Using the known progress data, figure out whether the boss has already been defeated before...
+            int nextWorldIndex = world.GetWorldIndex() + 1;
+            const GameWorld* nextWorld = gameModel->GetWorldByIndex(nextWorldIndex);
+            assert(nextWorld != NULL);
+
+            if (nextWorld->GetHasBeenUnlocked()) {
+                // The boss has been defeated before
+                this->display->AddStateToQueue(DisplayState::SelectWorldMenu, DisplayStateInfo::BuildWorldUnlockedInfo(nextWorldIndex));
+            }
+            else {
+                // The boss was just defeated for the first time
+                this->display->AddStateToQueue(DisplayState::SelectWorldMenu, DisplayStateInfo::BuildSelectWorldInfo(nextWorldIndex));
+            }
+        }
+
     }
     else {
         this->display->AddStateToQueue(DisplayState::LevelEnd);
@@ -1117,8 +1146,9 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
             ignoreSoundSet.insert(enterBulletTimeSoundID);
             sound->ToggleSoundEffect(GameSound::BulletTimeEffect, true, ignoreSoundSet);
 
+            sound->SetSoundVolume(GameSound::InBulletTimeLoop, 0.3f);
             inBulletTimeLoopSoundID = sound->PlaySound(GameSound::InBulletTimeLoop, true, false);
-
+            
             break;
         }
 

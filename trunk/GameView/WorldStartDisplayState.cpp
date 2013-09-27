@@ -149,20 +149,7 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 	float fadeValue = fadeAnimation.GetInterpolantValue();
 	if (fadeValue != 0.0f) {
 
-		// Draw the fade quad overlay
-		glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
-            ColourRGBA(1, 1, 1, fadeValue));
-        this->starryBG->UnbindTexture();
-
-		glPopAttrib();
+        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), fadeValue, this->starryBG);
 
 		if (isFadeAnimationDone) {
 			// All done our fade, time to go to the next queued state...
@@ -210,6 +197,7 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 	const float nowEnteringTextWidth = this->nowEnteringLabel.GetLastRasterWidth();
 
 	glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT);
+    glDisable(GL_TEXTURE_2D);
 
 	glPushMatrix();
 	// Draw a line that goes from the end of the label to the other side of the screen
@@ -242,7 +230,7 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 	const float currOpaqueQuadWidth	  = screenWidth + HEADER_WIPE_FADE_QUAD_SIZE - this->showHeaderAnimation.GetInterpolantValue();
 
 	// Draw the header fade in quads - 2 quads, one is totally opaque and starts covering the entire
-	// header, the other quad is a gradiant from opaque to transparent and it moves along the header
+	// header, the other quad is a gradient from opaque to transparent and it moves along the header
 	// over time, revealing it as it goes (wipe fade in)
     this->starryBG->BindTexture();
     glBegin(GL_QUADS);
