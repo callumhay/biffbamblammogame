@@ -16,8 +16,7 @@ const float BoundingLines::BALL_INSIDE_OUTSIDE_DIST_DIVISOR = 10.0f;
 const float BoundingLines::BALL_COLLISION_SAMPLING_INV_AMT  = 0.1f;
 
 BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines,
-                             const std::vector<Vector2D>& norms) : 
-	lines(lines), normals(norms) {
+                             const std::vector<Vector2D>& norms) : lines(lines), normals(norms) {
 	assert(lines.size() == norms.size());
     this->onInside.resize(lines.size(), false);
 }

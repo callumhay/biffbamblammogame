@@ -168,8 +168,12 @@ void GameModel::LoadWorldsFromFile() {
             currWorldPath.clear();
         }
     }
+
     delete inFile;
     inFile = NULL;
+
+    // Make sure that the first world is always unlocked
+    this->worlds.front()->SetHasBeenUnlocked(true);
 }
 
 void GameModel::PerformLevelCompletionChecks() {

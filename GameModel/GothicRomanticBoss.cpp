@@ -39,6 +39,10 @@ const float GothicRomanticBoss::DEFAULT_ACCELERATION = PlayerPaddle::DEFAULT_ACC
 
 const double GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS = 2.0;
 
+const float GothicRomanticBoss::LEVEL_WIDTH  = 21 * LevelPiece::PIECE_WIDTH;
+const float GothicRomanticBoss::LEVEL_HEIGHT = 31 * LevelPiece::PIECE_HEIGHT;
+
+
 GothicRomanticBoss::GothicRomanticBoss() : Boss(), bodyIdx(0), topPointIdx(0), bottomPointIdx(0) {
     for (int i = 0; i < NUM_LEGS; i++) {
         this->legIdxs[i] = 0;
@@ -132,6 +136,7 @@ void GothicRomanticBoss::Init(float startingX, float startingY) {
                 bodyBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, Y_NEG)), Vector2D(1, 0));        // Right
 
                 BossBodyPart* body = new BossBodyPart(bodyBounds);
+                body->ToggleSimpleBoundingCalc(true);
 
                 this->alivePartsRoot->AddBodyPart(body);
                 this->bodyIdx = this->bodyParts.size();
@@ -152,6 +157,7 @@ void GothicRomanticBoss::Init(float startingX, float startingY) {
 
                 BossBodyPart* topPt = new BossBodyPart(topPtBounds);
                 topPt->Translate(Vector3D(0, 3.542f, 0));
+                topPt->ToggleSimpleBoundingCalc(true);
 
                 this->alivePartsRoot->AddBodyPart(topPt);
                 this->topPointIdx = this->bodyParts.size();
@@ -172,6 +178,7 @@ void GothicRomanticBoss::Init(float startingX, float startingY) {
 
                 BossBodyPart* bottomPt = new BossBodyPart(bottomPtBounds);
                 bottomPt->Translate(Vector3D(0, -3.431f, 0));
+                bottomPt->ToggleSimpleBoundingCalc(true);
 
                 this->alivePartsRoot->AddBodyPart(bottomPt);
                 this->bottomPointIdx = this->bodyParts.size();
@@ -203,25 +210,6 @@ void GothicRomanticBoss::Init(float startingX, float startingY) {
 void GothicRomanticBoss::BuildLeg(const Vector3D& legTranslation, float legYRotation, size_t& legIdx) {
     // Legs have no bounds unless they are the ones hanging off the sides on the x/y plane
     BoundingLines legBounds;
-
-    /*
-    static const float LEFT_TOP_Y = 1.125f;
-    static const float LEFT_BOTTOM_Y = -1.125f;
-    static const float RIGHT_TOP_Y = 0.175f;
-    static const float RIGHT_BOTTOM_Y = -1.875f;
-    static const float RIGHT_X = LEG_WIDTH;
-
-    if (legYRotation == 90.0f) {
-        legBounds.AddBound(Collision::LineSeg2D(Point2D(RIGHT_X, RIGHT_TOP_Y), Point2D(RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(1, 0), false);
-        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_TOP_Y), Point2D(RIGHT_X, RIGHT_TOP_Y)), Vector2D(LEFT_TOP_Y - RIGHT_TOP_Y, RIGHT_X), false);
-        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_BOTTOM_Y), Point2D(RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(RIGHT_BOTTOM_Y - LEFT_BOTTOM_Y, -RIGHT_X), false);
-    }
-    else if (legYRotation == 270.0f) {
-        legBounds.AddBound(Collision::LineSeg2D(Point2D(-RIGHT_X, RIGHT_TOP_Y), Point2D(-RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(-1, 0), false);
-        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_TOP_Y), Point2D(-RIGHT_X, RIGHT_TOP_Y)), Vector2D(RIGHT_TOP_Y - LEFT_TOP_Y, RIGHT_X), false);
-        legBounds.AddBound(Collision::LineSeg2D(Point2D(0.0, LEFT_BOTTOM_Y), Point2D(-RIGHT_X, RIGHT_BOTTOM_Y)), Vector2D(LEFT_BOTTOM_Y - RIGHT_BOTTOM_Y, -RIGHT_X), false);
-    }
-    */
 
     BossBodyPart* leg = new BossBodyPart(legBounds);
     leg->RotateY(legYRotation);

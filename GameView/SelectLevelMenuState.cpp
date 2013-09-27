@@ -233,7 +233,8 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone) {
-        this->DrawFadeOverlay(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue());
+        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+            this->fadeAnimation.GetInterpolantValue(), this->starryBG);
     }
 
     glPopMatrix();
@@ -301,8 +302,11 @@ void SelectLevelMenuState::RenderFrame(double dT) {
         Camera::PopWindowCoords();
 
         if (animDone) {
+
             // Switch states back to the world select menu...
-            this->display->SetCurrentState(new SelectWorldMenuState(this->display, this->world));
+            this->display->SetCurrentState(new SelectWorldMenuState(this->display, 
+                DisplayStateInfo::BuildSelectWorldInfo(this->world->GetWorldNumber()-1)));
+
             debug_opengl_state();
             return;
         }

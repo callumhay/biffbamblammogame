@@ -71,19 +71,18 @@ Collision::AABB2D GothicRomanticBossAI::GenerateDyingAABB() const {
  * Gets the center position of the boss for a enumerated move position within the confines
  * in the first 2 states of the battle.
  */
-Point2D GothicRomanticBossAI::GetConfinedBossCenterMovePosition(float levelWidth, float levelHeight,
-                                                                const ConfinedMovePos& pos) const {
+Point2D GothicRomanticBossAI::GetConfinedBossCenterMovePosition(const ConfinedMovePos& pos) const {
 
     switch (pos) {
         case TopLeftCorner:
             return Point2D(
                 this->boss->GetMinXOfConfines() + GothicRomanticBossAI::MOVE_X_BORDER + GothicRomanticBoss::TOTAL_WIDTH_WITH_LEGS/2.0f,
-                this->boss->GetMaxYOfConfines(levelHeight) - (GothicRomanticBossAI::MOVE_Y_BORDER + GothicRomanticBoss::TOTAL_HEIGHT / 2.0f));
+                this->boss->GetMaxYOfConfines() - (GothicRomanticBossAI::MOVE_Y_BORDER + GothicRomanticBoss::TOTAL_HEIGHT / 2.0f));
 
         case TopRightCorner:
             return Point2D(
-                this->boss->GetMaxXOfConfines(levelWidth) - (GothicRomanticBossAI::MOVE_X_BORDER + GothicRomanticBoss::TOTAL_WIDTH_WITH_LEGS/2.0f),
-                this->boss->GetMaxYOfConfines(levelHeight) - (GothicRomanticBossAI::MOVE_Y_BORDER + GothicRomanticBoss::TOTAL_HEIGHT / 2.0f));
+                this->boss->GetMaxXOfConfines() - (GothicRomanticBossAI::MOVE_X_BORDER + GothicRomanticBoss::TOTAL_WIDTH_WITH_LEGS/2.0f),
+                this->boss->GetMaxYOfConfines() - (GothicRomanticBossAI::MOVE_Y_BORDER + GothicRomanticBoss::TOTAL_HEIGHT / 2.0f));
 
         case BottomLeftCorner:
             return Point2D(
@@ -92,13 +91,13 @@ Point2D GothicRomanticBossAI::GetConfinedBossCenterMovePosition(float levelWidth
 
         case BottomRightCorner:
             return Point2D(
-                this->boss->GetMaxXOfConfines(levelWidth) - (GothicRomanticBossAI::MOVE_X_BORDER + GothicRomanticBoss::TOTAL_WIDTH_WITH_LEGS/2.0f),
+                this->boss->GetMaxXOfConfines() - (GothicRomanticBossAI::MOVE_X_BORDER + GothicRomanticBoss::TOTAL_WIDTH_WITH_LEGS/2.0f),
                 this->boss->GetMinYOfConfines() + GothicRomanticBossAI::MOVE_Y_BORDER + GothicRomanticBoss::TOTAL_HEIGHT / 2.0f);
 
         case Center:
             return Point2D(
-                this->boss->GetMinXOfConfines() + (this->boss->GetMaxXOfConfines(levelWidth)  - this->boss->GetMinXOfConfines()) / 2.0f,
-                this->boss->GetMinYOfConfines() + (this->boss->GetMaxYOfConfines(levelHeight) - this->boss->GetMinYOfConfines()) / 2.0f);
+                this->boss->GetMinXOfConfines() + (this->boss->GetMaxXOfConfines()  - this->boss->GetMinXOfConfines()) / 2.0f,
+                this->boss->GetMinYOfConfines() + (this->boss->GetMaxYOfConfines() - this->boss->GetMinYOfConfines()) / 2.0f);
             
         default:
             assert(false);
@@ -438,24 +437,10 @@ void ConfinedAI::ExecuteBasicMoveAndShootState(double dT, GameModel* gameModel) 
         this->shootCountdown -= dT;
     }
 
-    const GameLevel* level = gameModel->GetCurrentLevel();
-    assert(level != NULL);
-
-    Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
-    Point2D moveToPos = this->GetConfinedBossCenterMovePosition(
-        level->GetLevelUnitWidth(), level->GetLevelUnitHeight(), this->nextMovePos);
-
-    float dist = Point2D::Distance(bossPos, moveToPos);
-    if (dist < 0.1f) {
-        // Close enough. Go to the appropriate attack state
-        this->desiredVel = Vector2D(0,0);
+    if (this->MoveToTargetPosition(this->GetSlowestConfinedMoveSpeed())) {
         this->SetState(this->nextAtkAIState);
         return;
     }
-
-    Vector2D moveDir = moveToPos - bossPos;
-    moveDir.Normalize();
-    this->desiredVel = this->GetSlowestConfinedMoveSpeed() * moveDir;
 }
 
 void ConfinedAI::ExecuteSpinLaserAttackState(double dT, GameModel* gameModel) {
@@ -712,8 +697,8 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
         case BasicMoveAndShootState:
             // NOTE: nextAtkAIState and nextMovePos must be set
             this->shootCountdown = this->GenerateShootCountdownAmtForMoving();
-            this->desiredVel = Vector2D(0,0);
-            this->currVel    = Vector2D(0,0);
+            this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
+                this->GetConfinedBossCenterMovePosition(this->nextMovePos));
             break;
 
         case SpinLaserAttackAIState: {
@@ -1054,8 +1039,8 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
         case BasicMoveAndShootState:
             // NOTE: nextAtkAIState and nextMovePos must be set
             this->shootCountdown = this->GenerateShootCountdownAmtForMoving();
-            this->desiredVel = Vector2D(0,0);
-            this->currVel    = Vector2D(0,0);
+            this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
+                this->GetConfinedBossCenterMovePosition(this->nextMovePos));
             break;
 
         case SpinLaserAttackAIState: {
@@ -1140,6 +1125,8 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
 
         case MoveToCenterAIState:
             this->nextMovePos = GothicRomanticBossAI::Center;
+            this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
+                this->GetConfinedBossCenterMovePosition(GothicRomanticBossAI::Center));
             break;
 
         case DestroyConfinesAIState:
@@ -1390,35 +1377,21 @@ void IceBallAI::ExecuteVeryHurtAndAngryState(double dT, GameModel* gameModel) {
 
 void IceBallAI::ExecuteMoveToCenterState(double dT, GameModel* gameModel) {
     UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(gameModel);
 
-    const GameLevel* level = gameModel->GetCurrentLevel();
-    assert(level != NULL);
-
-    Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
-    Point2D moveToPos = this->GetConfinedBossCenterMovePosition(
-        level->GetLevelUnitWidth(), level->GetLevelUnitHeight(), GothicRomanticBossAI::Center);
-
-    float dist = Point2D::Distance(bossPos, moveToPos);
-    if (dist < 0.1f) {
-        // TODO: Pause the ball and paddle?
+    if (this->MoveToTargetPosition(this->GetSlowestConfinedMoveSpeed())) {
 
         // The final state for this high-level class state is the one where the boss blows up the
         // its confines (all of the blocks that surround it and keep it 'safe')
-        this->desiredVel = Vector2D(0,0);
-        this->currVel    = Vector2D(0,0);
         this->SetState(GothicRomanticBossAI::DestroyConfinesAIState);
         return;
     }
-
-    Vector2D moveDir = moveToPos - bossPos;
-    moveDir.Normalize();
-    this->desiredVel = this->GetSlowestConfinedMoveSpeed() * moveDir;
 }
 
 void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
     
     if (this->chargeDestroyerBlastCountdown <= 0.0) {
-        // EVENT: Huge energy wave that will disintigrate the confines
+        // EVENT: Huge energy wave that will disintegrate the confines
         GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(
             this->boss->alivePartsRoot->GetTranslationPt2D(), 1.75f*GothicRomanticBoss::BODY_HEIGHT, 
             2.0*TIME_BEFORE_DESTROY_CONFINES_FLASH));

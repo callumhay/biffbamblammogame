@@ -321,14 +321,14 @@ void BlammopediaState::RenderFrame(double dT) {
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone || this->goBackToMainMenu) {
-        this->DrawFadeOverlay(camera.GetWindowWidth(), camera.GetWindowHeight(), this->fadeAnimation.GetInterpolantValue());
+        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue(), this->starryBG);
     }
   
     if (fadeDone && this->goBackToMainMenu) {
         this->display->GetSound()->StopSound(this->bgLoopedSoundID, 0.5);
 
         // Go back to the main menu now
-        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, this->display));
+        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, DisplayStateInfo(), this->display));
         return;
     }
 

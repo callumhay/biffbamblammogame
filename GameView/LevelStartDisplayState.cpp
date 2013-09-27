@@ -197,20 +197,8 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 
 	// Render the fade-in if we haven't already
 	if (!fadeInDone) {
-		glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_POLYGON_BIT);
-		glEnable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 		// Draw the starry background...
-        this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
-            ColourRGBA(1, 1, 1, this->fadeInAnimation.GetInterpolantValue()));
-        this->starryBG->UnbindTexture();
-
-        glPopAttrib();
+        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeInAnimation.GetInterpolantValue(), this->starryBG);
 	}
 
 	if (!levelTextFadeOutDone) {

@@ -32,22 +32,11 @@ const float SelectWorldMenuState::UNSELECTED_TO_UNSELECTED_MENU_ITEM_HORIZ_GAP =
 const float SelectWorldMenuState::SELECTED_MENU_ITEM_SIZE   = 256;
 const float SelectWorldMenuState::UNSELECTED_MENU_ITEM_SIZE = 128;
 
-SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display) : 
-DisplayState(display), pressEscAlphaAnim(0.0f),
-worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
-goBackToMainMenu(false), menuFBO(NULL), 
-bloomEffect(NULL), itemActivated(false), starryBG(NULL), padlockTex(NULL),
-goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL) {
-    this->Init(-1);
-}
-
-SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const GameWorld* selectedWorld) : 
-DisplayState(display), pressEscAlphaAnim(0.0f),
-worldSelectTitleLbl(NULL), keyEscLabel(NULL), starryBG(NULL), padlockTex(NULL),
-goBackToMainMenu(false), menuFBO(NULL), bloomEffect(NULL), itemActivated(false),
-goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL) {
-    assert(selectedWorld != NULL);
-    this->Init(selectedWorld->GetWorldNumber()-1);
+SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info) :
+DisplayState(display), pressEscAlphaAnim(0.0f), worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
+goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), bloomEffect(NULL), itemActivated(false), starryBG(NULL), padlockTex(NULL),
+goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL), worldUnlockAnim(NULL) {
+    this->Init(info);
 }
 
 SelectWorldMenuState::~SelectWorldMenuState() {
@@ -62,6 +51,8 @@ SelectWorldMenuState::~SelectWorldMenuState() {
 
     delete this->menuFBO;
     this->menuFBO = NULL;
+    delete this->postMenuFBObj;
+    this->postMenuFBObj = NULL;
     delete this->bloomEffect;
     this->bloomEffect = NULL;
 
@@ -81,6 +72,11 @@ SelectWorldMenuState::~SelectWorldMenuState() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->padlockTex);
     assert(success);
     UNUSED_VARIABLE(success);
+
+    if (this->worldUnlockAnim != NULL) {
+        delete this->worldUnlockAnim;
+        this->worldUnlockAnim = NULL;
+    }
 }
 
 void SelectWorldMenuState::RenderFrame(double dT) {
@@ -133,10 +129,17 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         worldItem->Draw(camera, dT, selectedWorldNum);
     }
 
-	// Draw a fade overlay if necessary
+    // Perform any necessary world unlocking animation
+    if (this->worldUnlockAnim != NULL) {
+        this->worldUnlockAnim->Draw(camera, dT, *this->postMenuFBObj->GetFBOTexture());
+    }
+    
+    
+    // Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone || this->goBackToMainMenu) {
-        this->DrawFadeOverlay(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue());
+        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+            this->fadeAnimation.GetInterpolantValue(), this->starryBG);
     }
 
     glPopMatrix();
@@ -213,12 +216,15 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         }
     }
     else {
+        this->postMenuFBObj->BindFBObj();
         this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
+        this->postMenuFBObj->UnbindFBObj();
+        this->postMenuFBObj->GetFBOTexture()->RenderTextureToFullscreenQuad();
     }
 
     if (fadeDone && this->goBackToMainMenu) {
         // Go back to the main menu now
-        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, this->display));
+        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, DisplayStateInfo(), this->display));
         return;
     }
 
@@ -230,6 +236,13 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
 
     UNUSED_PARAMETER(magnitude);
 
+    // If there's an animation going on that locks the controls then exit immediately
+    if (this->worldUnlockAnim != NULL) {
+        if (this->worldUnlockAnim->AreControlsLocked()) {
+            return;
+        }
+    }
+
     GameSound* sound = this->display->GetSound();
     int selectedItemIdxBefore = this->selectedItemIdx;
 
@@ -239,19 +252,11 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
             break;
 
         case GameControl::LeftButtonAction:
-            this->worldItems[this->selectedItemIdx]->SetIsSelected(false);
-            this->selectedItemIdx -= 1;
-            if (this->selectedItemIdx < 0) {
-                this->selectedItemIdx = this->worldItems.size()-1;
-            }
-            this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
+            this->MoveToPrevWorld();
             break;
 
         case GameControl::RightButtonAction:
-            this->worldItems[this->selectedItemIdx]->SetIsSelected(false);
-            this->selectedItemIdx += 1;
-            this->selectedItemIdx %= this->worldItems.size();
-            this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
+            this->MoveToNextWorld();
             break;
 
         case GameControl::EnterButtonAction: {
@@ -310,7 +315,24 @@ void SelectWorldMenuState::GoBackToMainMenu() {
     this->goBackToMainMenu = true;
 }
 
-void SelectWorldMenuState::Init(int selectedIdx) {
+void SelectWorldMenuState::MoveToNextWorld() {
+    this->worldItems[this->selectedItemIdx]->SetIsSelected(false);
+    this->selectedItemIdx += 1;
+    this->selectedItemIdx %= this->worldItems.size();
+    this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
+}
+
+void SelectWorldMenuState::MoveToPrevWorld() {
+    this->worldItems[this->selectedItemIdx]->SetIsSelected(false);
+    this->selectedItemIdx -= 1;
+    if (this->selectedItemIdx < 0) {
+        this->selectedItemIdx = this->worldItems.size()-1;
+    }
+    this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
+}
+
+void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
+    
     // Background music...
     this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
 
@@ -366,6 +388,7 @@ void SelectWorldMenuState::Init(int selectedIdx) {
 
     // Build a framebuffer object for the menu
 	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+    this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 
 	// Create the new bloom effect and set its parameters appropriately
 	this->bloomEffect = new CgFxBloom(this->menuFBO);
@@ -382,6 +405,12 @@ void SelectWorldMenuState::Init(int selectedIdx) {
     int furthestWorldIdx, furthestLevelIdx;
     this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
 
+    // Special case: The furthest world hasn't been unlocked yet so we make sure that it's
+    // treated as a locked world
+    if (furthestWorldIdx == info.GetWorldUnlockIndex()) {
+        furthestWorldIdx--;
+    }
+
     this->worldItems.reserve(gameWorlds.size());
     for (int i = 0; i < static_cast<int>(gameWorlds.size()); i++) {
 
@@ -391,14 +420,6 @@ void SelectWorldMenuState::Init(int selectedIdx) {
         WorldSelectItem* menuItem = new WorldSelectItem(this, currGameWorld, isLocked);
         this->worldItems.push_back(menuItem);
     }
-
-    if (selectedIdx < 0) {
-        this->selectedItemIdx = furthestWorldIdx;
-    }
-    else {
-        this->selectedItemIdx = selectedIdx;
-    }
-    this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
 
     timeVals.clear();
     timeVals.push_back(0.0);
@@ -414,7 +435,329 @@ void SelectWorldMenuState::Init(int selectedIdx) {
     alphaVals.push_back(0.0f);
     this->selectionAlphaYellowAnim.SetLerp(timeVals, alphaVals);
     this->selectionAlphaYellowAnim.SetRepeat(true);
+
+    // Setup any animations and selections based on the info that this object was initialized with
+    if (info.GetWorldUnlockIndex() < 0) {
+        // No special animation is necessary
+        if (info.GetWorldSelectionIndex() < 0) {
+            this->selectedItemIdx = furthestWorldIdx;
+        }
+        else {
+            this->selectedItemIdx = info.GetWorldSelectionIndex();
+        }
+    }
+    else {
+        // A world is being unlocked -- we'll need to select the previous world and unlock
+        // the next world...
+        this->selectedItemIdx = info.GetWorldUnlockIndex() - 1;
+        
+        // Setup the animation object for unlocking a world
+        this->worldUnlockAnim = new WorldUnlockAnimationTracker(this, this->worldItems[this->selectedItemIdx+1]);
+    }
+    this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
 }
+
+// WorldUnlockAnimationTracker Functions **********************************************************
+
+SelectWorldMenuState::WorldUnlockAnimationTracker::WorldUnlockAnimationTracker(SelectWorldMenuState* state,
+                                                                               WorldSelectItem* worldItem) : 
+worldItem(worldItem), state(state), energySuckEmitter(NULL), bigExplosionEmitter(NULL), bigExplosionOnoEmitter(NULL),
+debrisEmitter(NULL), fireSmokeEmitter1(NULL), fireSmokeEmitter2(NULL), countdownMoveToLockedWorld(1.0),
+countdownWaitToShake(0.75), countdownWaitToEnergySuck(0.75), sparkleTex(NULL), flareTex(NULL),
+lensFlareTex(NULL), hugeExplosionTex(NULL), sphereNormalsTex(NULL), particleFader(1, 0), particleHalfFader(1, 0.5f), 
+particleMediumGrowth(1.0f, 2.0f), particleMediumShrink(1.0f, 0.25f), particleSmallGrowth(1.0f, 1.5f), unlockAnimExecuted(false),
+particleSuperGrowth(1.0f, 10.0f), particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
+smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
+smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
+    assert(worldItem != NULL);
+
+    this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+    assert(this->sparkleTex != NULL);
+    this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+    assert(this->flareTex != NULL);
+    this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
+    assert(this->lensFlareTex != NULL);
+    this->hugeExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
+    assert(this->hugeExplosionTex != NULL);
+    this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
+    assert(this->sphereNormalsTex != NULL);
+
+    // Initialize the smoke textures...
+    if (this->smokeTextures.empty()) {
+        this->smokeTextures.reserve(6);
+        Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
+        assert(temp != NULL);
+        this->smokeTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
+        assert(temp != NULL);
+        this->smokeTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
+        assert(temp != NULL);
+        this->smokeTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
+        assert(temp != NULL);
+        this->smokeTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
+        assert(temp != NULL);
+        this->smokeTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
+        assert(temp != NULL);
+        this->smokeTextures.push_back(temp);	
+    }
+
+    this->normalTexRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
+    this->normalTexRefractEffect.SetWarpAmountParam(27.0f);
+    this->normalTexRefractEffect.SetIndexOfRefraction(1.2f);
+    this->normalTexRefractEffect.SetNormalTexture(this->sphereNormalsTex);
+
+    std::vector<Texture2D*> energySuckTextures;
+    energySuckTextures.reserve(2);
+    energySuckTextures.push_back(this->sparkleTex);
+    energySuckTextures.push_back(this->lensFlareTex);
+
+    const float MAX_DEVIATION_RADIUS = 0.3f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE;
+
+    this->energySuckEmitter = new ESPPointEmitter();
+    this->energySuckEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->energySuckEmitter->SetNumParticleLives(1);
+    this->energySuckEmitter->SetInitialSpd(ESPInterval(500.0f, 1500.0f));
+    this->energySuckEmitter->SetParticleLife(ESPInterval(0.5f, 1.75f));
+    this->energySuckEmitter->SetParticleSize(ESPInterval(25.0f, 250.0f));
+    this->energySuckEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, MAX_DEVIATION_RADIUS),
+        ESPInterval(0.0f, MAX_DEVIATION_RADIUS), ESPInterval(0.0f));
+    this->energySuckEmitter->SetParticleAlignment(ESP::NoAlignment);
+    this->energySuckEmitter->SetEmitPosition(Point3D(0, 0, 0));
+    this->energySuckEmitter->SetEmitDirection(Vector3D(0,1,0));
+    this->energySuckEmitter->SetToggleEmitOnPlane(true);
+    this->energySuckEmitter->SetEmitAngleInDegrees(180);
+    this->energySuckEmitter->SetIsReversed(true);
+    this->energySuckEmitter->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0.85f, 1.0f), ESPInterval(1.0f), ESPInterval(0.9f, 1.0f));
+    this->energySuckEmitter->AddEffector(&this->particleHalfFader);
+    this->energySuckEmitter->AddEffector(&this->particleMediumShrink);
+    this->energySuckEmitter->SetRandomTextureParticles(200, energySuckTextures);
+
+    static const float EXPLOSION_LIFE = 2.0;
+
+    this->bigExplosionEmitter = new ESPPointEmitter();
+    this->bigExplosionEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->bigExplosionEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    this->bigExplosionEmitter->SetParticleLife(ESPInterval(EXPLOSION_LIFE));
+    this->bigExplosionEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    this->bigExplosionEmitter->SetParticleAlignment(ESP::NoAlignment);
+    this->bigExplosionEmitter->SetEmitPosition(Point3D(0,0,0));
+    this->bigExplosionEmitter->SetEmitDirection(Vector3D(0,1,0));
+    this->bigExplosionEmitter->SetToggleEmitOnPlane(true);
+    this->bigExplosionEmitter->SetParticleRotation(ESPInterval(-10.0f, 10.0f));
+    this->bigExplosionEmitter->SetParticleSize(ESPInterval(2.5f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE),
+        ESPInterval(1.25f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE));
+    this->bigExplosionEmitter->AddEffector(&this->particleFader);
+    this->bigExplosionEmitter->AddEffector(&this->particleMediumGrowth);
+    this->bigExplosionEmitter->SetParticles(1, this->hugeExplosionTex);
+
+    this->bigExplosionOnoEmitter = new ESPPointEmitter();
+    this->bigExplosionOnoEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->bigExplosionOnoEmitter->SetInitialSpd(ESPInterval(0.0f));
+    this->bigExplosionOnoEmitter->SetParticleLife(EXPLOSION_LIFE);
+    this->bigExplosionOnoEmitter->SetParticleSize(ESPInterval(1.0f));
+    this->bigExplosionOnoEmitter->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+    this->bigExplosionOnoEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+    this->bigExplosionOnoEmitter->SetParticleAlignment(ESP::NoAlignment);
+    this->bigExplosionOnoEmitter->SetEmitPosition(Point3D(0,0,0));
+    this->bigExplosionOnoEmitter->SetEmitDirection(Vector3D(0,1,0));
+    this->bigExplosionOnoEmitter->SetToggleEmitOnPlane(true);
+    this->bigExplosionOnoEmitter->AddEffector(&this->particleFader);
+    this->bigExplosionOnoEmitter->AddEffector(&this->particleSmallGrowth);
+    TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "");
+    bangTextLabel.SetColour(Colour(1, 1, 1));
+    bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+    this->bigExplosionOnoEmitter->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, Onomatoplex::UBER, true);
+
+    this->shockwaveEffect = new ESPPointEmitter();
+    this->shockwaveEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->shockwaveEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    this->shockwaveEffect->SetParticleLife(ESPInterval(EXPLOSION_LIFE));
+    this->shockwaveEffect->SetParticleSize(ESPInterval(1.25f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE));
+    this->shockwaveEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    this->shockwaveEffect->SetParticleAlignment(ESP::NoAlignment);
+    this->shockwaveEffect->SetEmitPosition(Point3D(0,0,0));
+    this->shockwaveEffect->SetEmitDirection(Vector3D(0,1,0));
+    this->shockwaveEffect->SetToggleEmitOnPlane(true);
+    this->shockwaveEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->shockwaveEffect->AddEffector(&this->particleFader);
+    this->shockwaveEffect->AddEffector(&this->particleSuperGrowth);
+    this->shockwaveEffect->SetParticles(1, &this->normalTexRefractEffect);
+
+    ESPInterval smokeSize(0.1f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE, 
+        0.75f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE);
+
+    this->fireSmokeEmitter1 = new ESPPointEmitter();
+    this->fireSmokeEmitter1->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->fireSmokeEmitter1->SetNumParticleLives(1);
+    this->fireSmokeEmitter1->SetInitialSpd(ESPInterval(100.0f, 1000.0f));
+    this->fireSmokeEmitter1->SetParticleLife(ESPInterval(1.25f, 2.75f));
+    this->fireSmokeEmitter1->SetParticleSize(smokeSize);
+    this->fireSmokeEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->fireSmokeEmitter1->SetParticleAlignment(ESP::NoAlignment);
+    this->fireSmokeEmitter1->SetEmitPosition(Point3D(0,0,0));
+    this->fireSmokeEmitter1->SetEmitDirection(Vector3D(0,1,0));
+    this->fireSmokeEmitter1->SetToggleEmitOnPlane(true);
+    this->fireSmokeEmitter1->SetEmitAngleInDegrees(180);
+    this->fireSmokeEmitter1->AddEffector(&this->particleFireFastColourFader);
+    this->fireSmokeEmitter1->AddEffector(&this->particleMediumGrowth);
+    this->fireSmokeEmitter1->AddEffector(&this->smokeRotatorCW);
+    this->fireSmokeEmitter1->SetRandomTextureParticles(50, this->smokeTextures);
+
+    this->fireSmokeEmitter2 = new ESPPointEmitter();
+    this->fireSmokeEmitter2->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->fireSmokeEmitter2->SetNumParticleLives(1);
+    this->fireSmokeEmitter2->SetInitialSpd(ESPInterval(100.0f, 1000.0f));
+    this->fireSmokeEmitter2->SetParticleLife(ESPInterval(1.25f, 2.75f));
+    this->fireSmokeEmitter2->SetParticleSize(smokeSize);
+    this->fireSmokeEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->fireSmokeEmitter2->SetParticleAlignment(ESP::NoAlignment);
+    this->fireSmokeEmitter2->SetEmitPosition(Point3D(0,0,0));
+    this->fireSmokeEmitter2->SetEmitDirection(Vector3D(0,1,0));
+    this->fireSmokeEmitter2->SetToggleEmitOnPlane(true);
+    this->fireSmokeEmitter2->SetEmitAngleInDegrees(180);
+    this->fireSmokeEmitter2->AddEffector(&this->particleFireFastColourFader);
+    this->fireSmokeEmitter2->AddEffector(&this->particleMediumGrowth);
+    this->fireSmokeEmitter2->AddEffector(&this->smokeRotatorCCW);
+    this->fireSmokeEmitter2->SetRandomTextureParticles(50, this->smokeTextures);
+
+    // Build the lock shake animation
+    static const float SHAKE_AMT = 0.125f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE;
+    static const int NUM_SHAKES = 31;
+    std::vector<double> timeVals;
+    timeVals.reserve(NUM_SHAKES);
+    std::vector<Vector2D> shakeVals;
+    shakeVals.reserve(NUM_SHAKES);
+
+    timeVals.push_back(0.0);
+    shakeVals.push_back(Vector2D(0.0f, 0.0f));
+    for (int i = 1; i < NUM_SHAKES; i++) {
+        timeVals.push_back(timeVals.back() + 0.005 + 0.01f * Randomizer::GetInstance()->RandomNumZeroToOne());
+        shakeVals.push_back(Vector2D(Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_AMT, Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_AMT));
+    }
+
+    this->lockShakeAnim.SetLerp(timeVals, shakeVals);
+    this->lockShakeAnim.SetInterpolantValue(Vector2D(0.0f, 0.0f));
+    this->lockShakeAnim.SetRepeat(true);
+
+}
+
+SelectWorldMenuState::WorldUnlockAnimationTracker::~WorldUnlockAnimationTracker() {
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->hugeExplosionTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
+    assert(success);
+
+    for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
+        iter != this->smokeTextures.end(); ++iter) {
+
+        success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+        assert(success);	
+    }
+    this->smokeTextures.clear();
+
+    UNUSED_VARIABLE(success);
+
+    delete this->energySuckEmitter;
+    this->energySuckEmitter = NULL;
+    delete this->bigExplosionEmitter;
+    this->bigExplosionEmitter = NULL;
+    delete this->bigExplosionOnoEmitter;
+    this->bigExplosionOnoEmitter = NULL;
+    delete this->shockwaveEffect;
+    this->shockwaveEffect = NULL;
+    delete this->fireSmokeEmitter1;
+    this->fireSmokeEmitter1 = NULL;
+    delete this->fireSmokeEmitter2;
+    this->fireSmokeEmitter2 = NULL;
+}
+
+bool SelectWorldMenuState::WorldUnlockAnimationTracker::AreControlsLocked() const {
+    return this->worldItem->GetIsLocked();
+}
+
+void SelectWorldMenuState::WorldUnlockAnimationTracker::Draw(const Camera& camera, double dT, const Texture2D& bgTexture) {
+
+    // Check for when we automatically move the selection to the previously locked world
+    if (this->countdownMoveToLockedWorld > 0.0) {
+        this->countdownMoveToLockedWorld -= dT;
+        if (this->countdownMoveToLockedWorld <= 0.0) {
+            // Move to the next world
+            this->state->MoveToNextWorld();
+        }
+        return;
+    }
+
+    if (this->countdownWaitToShake > 0.0) {
+        this->countdownWaitToShake -= dT;
+        return;
+    }
+
+    if (this->countdownWaitToEnergySuck > 0.0) {
+        this->countdownWaitToEnergySuck -= dT;
+        this->lockShakeAnim.Tick(dT);
+        this->worldItem->SetLockOffset(this->lockShakeAnim.GetInterpolantValue());
+        return;
+    }
+
+    const float currCenterX = Camera::GetWindowWidth()  / 2.0f;
+    const float currCenterY = Camera::GetWindowHeight() / 2.0f;
+
+    // We've selected the world that will be 'unlocked' / animated, perform the animations
+    glPushMatrix();
+    glTranslatef(currCenterX, currCenterY, 0);
+
+    // Energy suck (flares getting sucked into the lock for the level)
+    this->energySuckEmitter->Tick(dT);
+    this->energySuckEmitter->Draw(camera);
+    if (!this->energySuckEmitter->IsDead()) {
+
+        this->lockShakeAnim.Tick(dT);
+        this->worldItem->SetLockOffset(this->lockShakeAnim.GetInterpolantValue());
+        glPopMatrix();
+        return;
+    }
+    
+    this->worldItem->SetLockOffset(Vector2D(0,0));
+    this->normalTexRefractEffect.SetFBOTexture(&bgTexture);
+    this->shockwaveEffect->Tick(dT);
+    this->shockwaveEffect->Draw(camera);
+    this->fireSmokeEmitter1->Tick(dT);
+    this->fireSmokeEmitter1->Draw(camera);
+    this->fireSmokeEmitter2->Tick(dT);
+    this->fireSmokeEmitter2->Draw(camera);
+    this->bigExplosionEmitter->Tick(dT);
+    this->bigExplosionEmitter->Draw(camera);
+    this->bigExplosionOnoEmitter->Tick(dT);
+    this->bigExplosionOnoEmitter->Draw(camera);
+
+    if (!this->unlockAnimExecuted) {
+        this->worldItem->ExecuteUnlockAnimation();
+        this->unlockAnimExecuted = true;
+    }
+
+    glPopMatrix();
+    
+}
+
+// WorldSelectItem Functions **********************************************************************
+
+#define UNSELECTED_COLOUR Colour(0.8f, 0.8f, 0.8f)
+#define SELECTED_COLOUR Colour(1,1,0)
 
 const float SelectWorldMenuState::WorldSelectItem::PADLOCK_SCALE = 0.6f;
 
@@ -422,22 +765,24 @@ SelectWorldMenuState::WorldSelectItem::WorldSelectItem(SelectWorldMenuState* sta
                                                        const GameWorld* world, bool isLocked) :
 
 state(state), gameWorld(world), image(NULL), unselectedLabel(NULL), 
-unselectedStarTotalLabel(NULL), selectedStarTotalLabel(NULL),
-selectedLabel(NULL), isSelected(false), isLocked(isLocked) {
+unselectedStarTotalLabel(NULL), selectedStarTotalLabel(NULL), unlockAnimActive(false),
+selectedLabel(NULL), isSelected(false), isLocked(isLocked), lockOffset(0,0) {
 
     assert(world != NULL);
     
     std::string labelTextStr;
-    Colour labelUnselectedColour(0.8f, 0.8f, 0.8f);
-    Colour labelSelectedColour(1, 1, 0);
+    Colour labelUnselectedColour = UNSELECTED_COLOUR;
+    Colour labelSelectedColour = SELECTED_COLOUR;
 
     if (this->isLocked) {
         labelTextStr = std::string("???");
         labelUnselectedColour = Colour(0.5f, 0.5f, 0.5f);
         labelSelectedColour   = Colour(0.5f, 0.5f, 0.5f);
+        this->greyscaleEffect.SetGreyscaleFactor(1.0f);
     }
     else {
         labelTextStr = world->GetName();
+        this->greyscaleEffect.SetGreyscaleFactor(0.0f);
     }
 
     float unselectedLabelWidth = SelectWorldMenuState::UNSELECTED_MENU_ITEM_SIZE + 0.75f *
@@ -518,7 +863,22 @@ void SelectWorldMenuState::WorldSelectItem::SetIsSelected(bool isSelected) {
 }
 
 void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT, int selectedWorldNum) {
+    
+    float lockAlpha = 1.0f;
+    if (this->unlockAnimActive) {
+        bool isGreyscaleAnimFinished = this->greyscaleFactorAnim.Tick(dT);
+        this->greyscaleEffect.SetGreyscaleFactor(this->greyscaleFactorAnim.GetInterpolantValue());
 
+        bool isLockFadeAnimFinished = this->lockFadeAnim.Tick(dT);
+        lockAlpha = this->lockFadeAnim.GetInterpolantValue();
+        if (isLockFadeAnimFinished) {
+            this->Unlock();
+
+            if (isGreyscaleAnimFinished) {
+                this->unlockAnimActive = false;
+            }
+        }
+    }
     
     this->sizeAnim.Tick(dT);
     const float currSize = this->sizeAnim.GetInterpolantValue();
@@ -560,14 +920,9 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
 
     if (this->isLocked) {
         outlineColour = Colour(0.2f, 0.2f, 0.2f);
-        this->state->greyscaleEffect.SetColourTexture(this->image);
-        this->state->greyscaleEffect.Draw(camera, GeometryMaker::GetInstance()->GetQuadDL());
     }
-    else {
-        this->image->BindTexture();
-        GeometryMaker::GetInstance()->DrawQuad();
-        this->image->UnbindTexture();
-    }
+    this->greyscaleEffect.SetColourTexture(this->image);
+    this->greyscaleEffect.Draw(camera, GeometryMaker::GetInstance()->GetQuadDL());
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -589,10 +944,10 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
         float currShakeX = this->lockedAnim.GetInterpolantValue();
 
         // When locked, draw the padlock over the world image
-        glColor4f(1,1,1,1);
+        glColor4f(1, 1, 1, lockAlpha);
         glPushMatrix();
         int fractSize = static_cast<int>(PADLOCK_SCALE * currSize);
-        glTranslatef(currShakeX, 0.0f, 0.0f);
+        glTranslatef(currShakeX + this->lockOffset[0], this->lockOffset[1], 0.0f);
         glScalef(fractSize, fractSize, 1);
         this->state->padlockTex->BindTexture();
         GeometryMaker::GetInstance()->DrawQuad();
@@ -696,6 +1051,30 @@ void SelectWorldMenuState::WorldSelectItem::ExecuteLockedAnimation() {
     movementValues.push_back(0.0f);
     this->lockedAnim.SetLerp(timeValues, movementValues);
     this->lockedAnim.SetRepeat(false);
+}
+
+void SelectWorldMenuState::WorldSelectItem::ExecuteUnlockAnimation() {
+    this->unlockAnimActive = true;
+
+    this->lockFadeAnim.SetLerp(0.0, 0.5, 1.0f, 0.0f);
+    this->lockFadeAnim.SetInterpolantValue(1.0f);
+    this->lockFadeAnim.SetRepeat(false);
+
+    this->greyscaleFactorAnim.SetLerp(2.0, 3.5, 1.0f, 0.0f);
+    this->greyscaleFactorAnim.SetInterpolantValue(1.0f);
+    this->greyscaleFactorAnim.SetRepeat(false);
+}
+
+void SelectWorldMenuState::WorldSelectItem::SetLockOffset(const Vector2D& offset) {
+    this->lockOffset = offset;
+}
+
+void SelectWorldMenuState::WorldSelectItem::Unlock() {
+    this->isLocked = false;
+    this->unselectedLabel->SetText(this->gameWorld->GetName());
+    this->selectedLabel->SetText(this->gameWorld->GetName());
+    this->unselectedLabel->SetColour(UNSELECTED_COLOUR);
+    this->selectedLabel->SetColour(SELECTED_COLOUR);
 }
 
 float SelectWorldMenuState::WorldSelectItem::GetXPosition(const Camera& camera, int selectedWorldNum) const {

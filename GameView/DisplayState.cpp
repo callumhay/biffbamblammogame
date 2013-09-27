@@ -32,12 +32,13 @@
 
 // Factory method for building a display state from a given enumerated
 // type. Caller takes ownership of returned memory.
-DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display) {
+DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& type, const DisplayStateInfo& info,
+                                                      GameDisplay* display) {
 	switch (type) {
 		case DisplayState::MainMenu:
 			return new MainMenuDisplayState(display);
         case DisplayState::SelectWorldMenu:
-            return new SelectWorldMenuState(display);
+            return new SelectWorldMenuState(display, info);
 
         case DisplayState::SelectLevelMenu:
             assert(false);

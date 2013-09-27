@@ -82,6 +82,9 @@ public:
     Point3D GetTopPointTipPos() const;
 
 private:
+    static const float LEVEL_WIDTH;
+    static const float LEVEL_HEIGHT;
+
     size_t bodyIdx;
     size_t topPointIdx, bottomPointIdx;
     size_t legIdxs[NUM_LEGS];
@@ -90,9 +93,9 @@ private:
 
     static const int CONFINES_NUM_PIECES_IN_X = 5;
     float GetMinXOfConfines() const { return CONFINES_NUM_PIECES_IN_X*LevelPiece::PIECE_WIDTH; }
-    float GetMaxXOfConfines(float levelWidth) const { return levelWidth - CONFINES_NUM_PIECES_IN_X*LevelPiece::PIECE_WIDTH; }
+    float GetMaxXOfConfines() const { return LEVEL_WIDTH - CONFINES_NUM_PIECES_IN_X*LevelPiece::PIECE_WIDTH; }
     float GetMinYOfConfines() const { return 12*LevelPiece::PIECE_HEIGHT; }
-    float GetMaxYOfConfines(float levelHeight) const { return levelHeight - 6*LevelPiece::PIECE_HEIGHT; }
+    float GetMaxYOfConfines() const { return LEVEL_HEIGHT - 6*LevelPiece::PIECE_HEIGHT; }
 
     void BuildLeg(const Vector3D& legTranslation, float legYRotation, size_t& legIdx);
 

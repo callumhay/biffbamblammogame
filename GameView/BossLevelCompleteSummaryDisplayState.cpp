@@ -229,21 +229,7 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         // Begin fading out the summary screen
         bool fadeIsDone = this->fadeOutAnimation.Tick(dT);
         float fadeValue = this->fadeOutAnimation.GetInterpolantValue();
-
-		// Draw the fade quad overlay
-		glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        this->bgTex->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->bgTex->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->bgTex->GetHeight()),
-            ColourRGBA(1,1,1, fadeValue));
-        this->bgTex->UnbindTexture();
-
-		glPopAttrib();
+        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), fadeValue, this->bgTex);
 
         if (fadeIsDone) {
             // If we're done fading then we can go to the next state

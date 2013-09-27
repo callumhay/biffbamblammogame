@@ -626,6 +626,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPOrthoOnomataParticle.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPParticle.h"
 					>
 				</File>
@@ -683,6 +687,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPOnomataParticle.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPOrthoOnomataParticle.cpp"
 					>
 				</File>
 				<File

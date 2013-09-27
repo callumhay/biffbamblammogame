@@ -28,7 +28,8 @@ public:
 	void ShootActionReleaseUse() { 
         // does nothing
     } 
-
+private:
+    bool waitingForExternalExit;
 };
 
 #endif // __WORLDCOMPLETESTATE_H__

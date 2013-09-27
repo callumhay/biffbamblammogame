@@ -2,7 +2,7 @@
  * GameWorld.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -31,7 +31,7 @@ const char* GameWorld::FUTURISM_WORLD_NAME          = "Futurism";
  */
 GameWorld::GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr) : 
 worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(0),
-lastLevelPassedIndex(GameWorld::NO_LEVEL_PASSED), transformMgr(transformMgr) {
+lastLevelPassedIndex(GameWorld::NO_LEVEL_PASSED), transformMgr(transformMgr), hasBeenUnlocked(false) {
 }
 
 GameWorld::~GameWorld() {
@@ -126,7 +126,7 @@ bool GameWorld::Load() {
 	for (size_t i = 0; i < levelFileList.size(); i++) {
         GameLevel* lvl = GameLevel::CreateGameLevelFromFile(this->GetStyle(), i, levelFileList[i]);
 		if (lvl == NULL) {
-			// Clean up and exit on erroroneous level read
+			// Clean up and exit on erroneous level read
 			this->Unload();
 			debug_output("ERROR: Level file: " << levelFileList[i] << " could not be read properly from world file: " << this->worldFilepath); 
 			return false;				

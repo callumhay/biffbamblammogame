@@ -310,7 +310,7 @@ private:
     void PerformBasicPedimentMovement(const Point2D& pedimentPos, const GameLevel* level);
     void UpdateEyeAndPedimentHeightMovement();
 
-    double GetTimeBetweenLaserBarrageShots() const { return 0.08 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.075; }
+    double GetTimeBetweenLaserBarrageShots() const { return 0.075 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.065; }
     double GetTimeBetweenLaserSprayShots() const { return 1.5; }
     float GetPedimentBasicMoveHeight(const GameLevel* level);
     float GetEyeBasicMoveHeight(const GameLevel* level);

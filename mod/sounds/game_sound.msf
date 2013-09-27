@@ -613,7 +613,7 @@ GameOverEvent {
 
 BulletTimeEffect {
 	type  = reverb3D
-	volume = 0.75
+	volume = 1.0
 	R3DRoomAtten = -1000
 	R3DRoomHighFreqAtten = -100
 	R3DRoomRolloff = 0

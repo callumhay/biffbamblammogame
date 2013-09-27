@@ -12,6 +12,8 @@
 #ifndef __DISPLAYSTATE_H__
 #define __DISPLAYSTATE_H__
 
+#include "GameViewConstants.h"
+
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Texture2D.h"
@@ -20,13 +22,37 @@
 
 class GameDisplay;
 
+class DisplayStateInfo {
+public:
+    DisplayStateInfo() : worldSelectionIdx(-1), worldUnlockIdx(-1) {}
+
+    static DisplayStateInfo BuildSelectWorldInfo(int worldSelectionIdx) {
+        DisplayStateInfo info;
+        info.worldSelectionIdx = worldSelectionIdx;
+        return info;
+    }
+    static DisplayStateInfo BuildWorldUnlockedInfo(int worldUnlockIdx) {
+        DisplayStateInfo info;
+        info.worldUnlockIdx = worldUnlockIdx;
+        return info;
+    }
+
+    int GetWorldSelectionIndex() const { return this->worldSelectionIdx; }
+    int GetWorldUnlockIndex() const { return this->worldUnlockIdx; }
+
+private:
+    int worldSelectionIdx;
+    int worldUnlockIdx;
+};
+
 class DisplayState {
 
 public:
 	enum DisplayStateType { MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart, WorldStart, 
                             InTutorialGame, InGame, InGameBossLevel, InGameMenu, LevelEnd, LevelCompleteSummary,
-                            BossLevelCompleteSummary, GameComplete, GameOver };
-	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display);
+                            BossLevelCompleteSummary, GameComplete, GameOver, /*WorldUnlocked*/ };
+
+	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, const DisplayStateInfo& info, GameDisplay* display);
     static bool IsGameInPlayDisplayState(const DisplayStateType& type);
 
 	DisplayState(GameDisplay* display) : display(display) {}
@@ -48,6 +74,7 @@ protected:
 	GameDisplay* display;
 
     void DrawFadeOverlay(int width, int height, float alpha);
+    void DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture2D* tex);
 
 #ifdef _DEBUG
 	void DebugDrawBounds();
@@ -68,8 +95,21 @@ inline void DisplayState::DrawFadeOverlay(int width, int height, float alpha) {
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 1.0f, 
-                                                     ColourRGBA(0, 0, 0, alpha));
+    GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 1.0f, ColourRGBA(0, 0, 0, alpha));
+    glPopAttrib();
+}
+
+inline void DisplayState::DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture2D* tex) {
+    // Draw the fade quad overlay
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    tex->BindTexture();
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(width, height, 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(width) / static_cast<float>(tex->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(height) / static_cast<float>(tex->GetHeight()),
+        ColourRGBA(1,1,1, alpha));
+    tex->UnbindTexture();
     glPopAttrib();
 }
 

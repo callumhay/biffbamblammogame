@@ -2,7 +2,7 @@
  * GameWorld.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the
@@ -110,15 +110,21 @@ public:
     int GetLastLevelIndexPassed() const;
     int GetLastLevelIndex() const;
 
+    bool GetHasBeenUnlocked() const;
+    void SetHasBeenUnlocked(bool unlocked);
+
 private:
 	bool isLoaded;                          // Has this world been loaded into memory or not?
 	std::string worldFilepath;              // Path to the world defintion file
 	std::vector<GameLevel*> loadedLevels;	// Levels loaded into memory
 	int currentLevelNum;                    // Current level expressed as an index into loaded levels vector
 
-    int lastLevelPassedIndex;                    // Progress indicator - has the number of the last level that was passed by the player,
-                                            // Similar to currentLevelNum, this is an index into the loadedLevels vector, if no progress
-                                            // has been made in this world yet then it will be equal to NO_LEVEL_PASSED
+    int lastLevelPassedIndex;  // Progress indicator - has the number of the last level that was passed by the player,
+                               // Similar to currentLevelNum, this is an index into the loadedLevels vector, if no progress
+                               // has been made in this world yet then it will be equal to NO_LEVEL_PASSED
+    
+    bool hasBeenUnlocked;  // Progress indicator for the world as a whole -- if the boss in the world prior to this one
+                           // has been defeated then the world has been unlocked
 
 	std::string name;						// Human-readable name of the world
 	WorldStyle style;						// Style of the world loaded (None if no world is loaded)
@@ -139,6 +145,13 @@ inline int GameWorld::GetLastLevelIndexPassed() const {
 // Gets the index of the last level in this world
 inline int GameWorld::GetLastLevelIndex() const {
     return static_cast<int>(this->loadedLevels.size()) - 1;
+}
+
+inline bool GameWorld::GetHasBeenUnlocked() const {
+    return this->hasBeenUnlocked;
+}
+inline void GameWorld::SetHasBeenUnlocked(bool unlocked) {
+    this->hasBeenUnlocked = unlocked;
 }
 
 #endif

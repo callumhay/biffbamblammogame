@@ -12,6 +12,7 @@
 #include "ESPEmitter.h"
 #include "ESPShaderParticle.h"
 #include "ESPOnomataParticle.h"
+#include "ESPOrthoOnomataParticle.h"
 #include "ESPAnimatedSpriteParticle.h"
 #include "ESPRandomTextureParticle.h"
 #include "ESPAnimatedCurveParticle.h"
@@ -395,7 +396,8 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text
  * all onomatopoeia particles of the given text label and qualifications.
  * Returns: true on success, false otherwise.
  */
-bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e) {
+bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, 
+                              Onomatoplex::Extremeness e, bool isOrtho) {
 	assert(numParticles > 0);
 	// Clean up previous emitter data
 	this->Flush();
@@ -403,14 +405,22 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text
 	// Create each of the new particles
 	for (unsigned int i = 0; i < numParticles; i++) {
 		// Initialize the particle and its attributes
-		ESPOnomataParticle* newParticle = new ESPOnomataParticle(text.GetFont());
-		newParticle->SetDropShadow(text.GetDropShadow());
-		newParticle->SetOnomatoplexSound(st, e);
-        
-		this->deadParticles.push_back(newParticle);
-
-		// Assign the number of lives...
-		this->particleLivesLeft[newParticle] = this->numParticleLives;
+        if (isOrtho) {
+            ESPOrthoOnomataParticle* newParticle = new ESPOrthoOnomataParticle(text.GetFont());
+            newParticle->SetDropShadow(text.GetDropShadow());
+            newParticle->SetOnomatoplexSound(st, e);
+            this->deadParticles.push_back(newParticle);
+            // Assign the number of lives...
+            this->particleLivesLeft[newParticle] = this->numParticleLives;
+        }
+        else {
+		    ESPOnomataParticle* newParticle = new ESPOnomataParticle(text.GetFont());
+		    newParticle->SetDropShadow(text.GetDropShadow());
+		    newParticle->SetOnomatoplexSound(st, e);
+		    this->deadParticles.push_back(newParticle);
+		    // Assign the number of lives...
+		    this->particleLivesLeft[newParticle] = this->numParticleLives;
+        }
 	}
 
 	return true;

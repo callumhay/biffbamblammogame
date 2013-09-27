@@ -117,9 +117,9 @@ bool GameDisplay::SetCurrentStateAsNextQueuedState() {
         return false;
     }
 
-	DisplayState::DisplayStateType nextStateType = this->stateQueue.front();
+    std::pair<DisplayState::DisplayStateType, DisplayStateInfo> nextStateTypePair = this->stateQueue.front();
 	this->stateQueue.pop_front();
-	this->SetCurrentState(DisplayState::BuildDisplayStateFromType(nextStateType, this));
+	this->SetCurrentState(DisplayState::BuildDisplayStateFromType(nextStateTypePair.first, nextStateTypePair.second, this));
     return true;
 }
 

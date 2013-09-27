@@ -308,7 +308,7 @@ void ClassicalBoss::BuildArm(bool isLeftArm, const Vector3D& armTranslation, siz
     static const float SQUARE_SIZE      = 2.445f;
     static const float HALF_SQUARE_SIZE = SQUARE_SIZE / 2.0f;
 
-    static const float SUPPORT_WIDTH  = 3.097f;
+    static const float SUPPORT_WIDTH  = SQUARE_SIZE - 0.001f;//3.097f;
     static const float SUPPORT_HEIGHT = 0.652f;
     static const float HALF_SUPPORT_WIDTH = SUPPORT_WIDTH / 2.0f;
     static const float HALF_SUPPORT_HEIGHT = SUPPORT_HEIGHT / 2.0f;
