@@ -327,11 +327,11 @@ void ClassicalBoss::BuildArm(bool isLeftArm, const Vector3D& armTranslation, siz
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT)),   Vector2D(0, 1));  // Top
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)), Vector2D(-1, 0)); // Left
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),   translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(1, 0));  // Right
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT), translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(0, -1)); // Bottom
+        //bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT), translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(0, -1)); // Bottom
 
         // Bottom rectangular support piece
         translation[1] = HALF_SUPPORT_HEIGHT;
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT)),   Vector2D(0, 1));  // Top
+        //bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT)),   Vector2D(0, 1));  // Top
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT), translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(0, -1)); // Bottom
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)), Vector2D(-1, 0)); // Left
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),   translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(1, 0));  // Right

@@ -32,6 +32,7 @@
 #include "BallBoostModel.h"
 #include "Beam.h"
 
+class GameSound;
 class BallInPlayState;
 class CollateralBlock;
 class LevelStartState;
@@ -78,7 +79,7 @@ public:
     // there is a paddle timer when releasing the ball
     enum Difficulty { EasyDifficulty = 0, MediumDifficulty = 1, HardDifficulty = 2};
     
-    GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
+    GameModel(GameSound* sound, const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
         const BallBoostModel::BallBoostMode& ballBoostMode);
 	~GameModel();
 
@@ -118,6 +119,10 @@ public:
 	GameWorld* GetCurrentWorld() const {
 		return this->worlds[this->currWorldNum];
 	}
+
+    GameSound* GetSound() const {
+        return this->sound;
+    }
 
 	GameState::GameStateType GetCurrentStateType() const {
 		if (this->currState != NULL) {
@@ -160,7 +165,7 @@ public:
     bool ActivateSafetyNet();
     void DestroySafetyNet();
 
-    void CleanUpAfterBossDeath();
+    void CleanUpAfterLevelEnd();
 
 	// General public methods for the model ********************************
 	void Tick(double seconds);
@@ -475,8 +480,8 @@ public:
 	}
 	// Gets whether the controls for the paddle are flipped
 	bool AreControlsFlippedForPaddle() const {
-        return this->areControlsFlipped || (acos(std::min<float>(1.0f, std::max<float>(-1.0f, 
-            Vector2D::Dot(this->GetGameSpacePaddleUpUnitVec(), Vector2D(0,-1))))) <= M_PI_DIV4);
+        return this->areControlsFlipped;/* || (acos(std::min<float>(1.0f, std::max<float>(-1.0f, 
+            Vector2D::Dot(this->GetGameSpacePaddleUpUnitVec(), Vector2D(0,-1))))) <= M_PI_DIV4); */
 	}
     bool AreControlsFlippedForOther() const {
         return this->areControlsFlipped;
@@ -512,6 +517,8 @@ public:
 private:
     GameState* currState;		// The current game state
     GameState* nextState;
+
+    GameSound* sound;
 
     // Player-controllable game assets
     PlayerPaddle* playerPaddle;                         // The one and only player paddle

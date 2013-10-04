@@ -21,7 +21,7 @@ const char* CgFxGaussianBlur::GAUSSIANBLUR_7x7_TECHNIQUE_NAME = "GaussianBlur7x7
 
 CgFxGaussianBlur::CgFxGaussianBlur(BlurType blurType, FBObj* sceneFBO) : 
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_GAUSSIAN_SHADER, sceneFBO),
-tempFBO(NULL), sigma(0.8f) {
+tempFBO(NULL), sigma(0.8f), isPoisonBlurActive(false) {
 
 	// Set the blur type - this will also set the proper technique for the shader
 	this->SetBlurType(blurType);
@@ -38,6 +38,10 @@ tempFBO(NULL), sigma(0.8f) {
     this->blurSizeVerticalParam   = cgGetNamedEffectParameter(this->cgEffect, "BlurSizeVertical");
 	this->sigmaParam              = cgGetNamedEffectParameter(this->cgEffect, "Sigma");
 	
+    this->poisonBlurAnim.ClearLerp();
+    this->poisonBlurAnim.SetInterpolantValue(0.0f);
+    this->poisonBlurAnim.SetRepeat(false);
+    
 	debug_cg_state();
 }
 
@@ -72,7 +76,7 @@ void CgFxGaussianBlur::SetBlurType(BlurType type) {
 }
 
 /**
- * Gaussian blurs are done as 2 seperable filters, the first horizontal
+ * Gaussian blurs are done as 2 separable filters, the first horizontal
  * and the second vertical (or vice-versa) each filter is a single pass and part of
  * the same technique. Note that the extra parameter is used to add an extra
  * blur effect - kind of like being drunk, if needed.
@@ -83,14 +87,12 @@ void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
 	float revisedHeight = screenHeight;
 	
 	// Check for any animations
-	std::map<BlurAnimations, AnimationMultiLerp<float> >::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
-	if (animWidthFind != this->blurAnims.end()) {
-		revisedWidth = animWidthFind->second.GetInterpolantValue();
-		bool isDone = animWidthFind->second.Tick(dT);
-		if (isDone) {
-			this->blurAnims.erase(animWidthFind);
-		}
-	}
+    if (this->isPoisonBlurActive) {
+        revisedWidth = this->poisonBlurAnim.GetInterpolantValue();
+        if (this->poisonBlurAnim.Tick(dT)) {
+            this->isPoisonBlurActive = false;
+        }
+    }
 
 	// Step 0: Establish uniform parameter(s)
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
@@ -98,7 +100,7 @@ void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
     cgGLSetParameter1f(this->blurSizeVerticalParam,   1.0f / revisedHeight);
     cgGLSetParameter1f(this->sigmaParam, this->sigma);
 
-	// Step 1: Bind the temporary FBO and draw a fullscreen quad with the first pass of the effect.
+	// Step 1: Bind the temporary FBO and draw a full-screen quad with the first pass of the effect.
 	this->tempFBO->BindFBObj();
 	CGpass currPass = cgGetFirstPass(this->currTechnique);
 	cgSetPassState(currPass);
@@ -141,27 +143,25 @@ void CgFxGaussianBlur::SetPoisonBlurAnimation(bool on) {
 		blurVals.push_back(70.0f);
 		blurVals.push_back(150.0f);
 
-		AnimationMultiLerp<float> blurWidthAnim;
-		blurWidthAnim.SetLerp(timeVals, blurVals);
-		blurWidthAnim.SetRepeat(true);
-
-		this->blurAnims[PoisonWidthBlurAnimation] = blurWidthAnim;
+		this->poisonBlurAnim.SetLerp(timeVals, blurVals);
+		this->poisonBlurAnim.SetRepeat(true);
+        this->isPoisonBlurActive = true;
 	}
 	else {
-		// Grab the already existing (previously active) poison animations
-		std::map<BlurAnimations, AnimationMultiLerp<float> >::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
-		assert(animWidthFind  != this->blurAnims.end());
-	
-		// Fade back to normal and take off repeat/looping so that the animation dies when complete
-		timeVals.reserve(2);
-		timeVals.push_back(0.0f);
-		timeVals.push_back(3.0f);
-		
-		blurVals.reserve(2);
-		blurVals.push_back(animWidthFind->second.GetInterpolantValue());
-		blurVals.push_back(this->sceneFBO->GetFBOTexture()->GetWidth());
+        if (this->isPoisonBlurActive) {
+            timeVals.reserve(2);
+            timeVals.push_back(0.0f);
+            timeVals.push_back(3.0f);
 
-		animWidthFind->second.SetLerp(timeVals, blurVals);
-		animWidthFind->second.SetRepeat(false);	
+            blurVals.reserve(2);
+            blurVals.push_back(this->poisonBlurAnim.GetInterpolantValue());
+            blurVals.push_back(this->sceneFBO->GetFBOTexture()->GetWidth());
+            
+            this->poisonBlurAnim.SetLerp(timeVals, blurVals);
+            this->poisonBlurAnim.SetRepeat(false);
+        }
+        else {
+            // Ignore, the poison blur effect is already inactive
+        }
 	}
 }

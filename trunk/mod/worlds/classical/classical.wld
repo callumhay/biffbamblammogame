@@ -21,16 +21,16 @@ resources/worlds/levels/easy/curve_ball.lvl
 
 # One-way block intro levels
 resources/worlds/levels/easy/one_way_street.lvl
-resources/worlds/levels/easy/two_step.lvl
+resources/worlds/levels/easy/side_step.lvl
 
 
 # Ink block intro levels
-resources/worlds/levels/easy/heres_ink_in_ur_eye.lvl
+resources/worlds/levels/easy/heres_ink_in_ur_eye.lvl : 28
 resources/worlds/levels/easy/blow_up_before_gooing.lvl
 
 # Ink + one-way + bomb
 resources/worlds/levels/easy/inky_access.lvl
-resources/worlds/levels/medium/spike_jonze.lvl
+resources/worlds/levels/medium/a_pointed_challenge.lvl
 
 # Collateral block intro levels
 resources/worlds/levels/easy/breaking_barriers.lvl

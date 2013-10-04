@@ -17,6 +17,7 @@
 #include "../BlammoEngine/Collision.h"
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/IPositionObject.h"
 
 class GameBall;
 class BoundingLines;
@@ -26,7 +27,7 @@ class PlayerPaddle;
 class BeamSegment;
 class BossBodyPart;
 
-class AbstractBossBodyPart {
+class AbstractBossBodyPart : public IPositionObject {
 public:
     enum Type { BasicBodyPart, WeakpointBodyPart, CompositeBodyPart };
 
@@ -77,6 +78,8 @@ public:
     Vector2D GetTranslationVec2D() const { return this->worldTransform.getTranslationVec2D(); }
     Point2D GetTranslationPt2D() const { return this->worldTransform.getTranslationPt2D(); }
     Point3D GetTranslationPt3D() const { return this->worldTransform.getTranslationPt3D(); }
+
+    Point3D GetPosition3D() const { return this->GetTranslationPt3D(); }
 
     virtual bool IsOrContainsPart(const AbstractBossBodyPart* part, bool recursiveSearch) const = 0;
 

@@ -32,7 +32,8 @@ const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING            = 80;			// P
 
 LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) : 
 DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL), starryBG(NULL),
-levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "") {
+levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), ""),
+paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
 
     GameModel* gameModel = this->display->GetModel();
     
@@ -109,14 +110,14 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->paddleMoveUpAnimation.SetRepeat(false);
 	this->paddleMoveUpAnimation.SetInterpolantValue(paddleStartPos);
 
-	this->ballFadeInAnimation.SetLerp(endOfPaddleMove, endOfPaddleMove + 0.15, 0.0f, 1.0f);
+	this->ballFadeInAnimation.SetLerp(endOfPaddleMove, endOfPaddleMove + 0.25, 0.0f, 1.0f);
 	this->ballFadeInAnimation.SetRepeat(false);
 	this->ballFadeInAnimation.SetInterpolantValue(0.0f);
 
 	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
 	Point3D emitCenter(ball->GetCenterPosition2D() + negHalfLevelDim, 0.0f);
 
-	this->shockwaveEmitter = this->display->GetAssets()->GetESPAssets()->CreateShockwaveEffect(emitCenter, 4 * ball->GetBounds().Radius(), 1.2f);
+	this->shockwaveEmitter = this->display->GetAssets()->GetESPAssets()->CreateShockwaveEffect(emitCenter, 4 * ball->GetBounds().Radius(), 1.3f);
 	this->starEmitter = this->display->GetAssets()->GetESPAssets()->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
 		ESPInterval(0.5f, 1.0f), ESPInterval(0.0f), false, 20);
 
@@ -138,7 +139,10 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
         assets->ToggleLights(false, 0.01);
     }
     else {
-        this->display->GetSound()->PlaySound(GameSound::WorldBackgroundLoop, true);
+        GameSound* sound = this->display->GetSound();
+        assert(sound != NULL);
+        SoundID bgLoopSoundID = sound->PlaySound(GameSound::WorldBackgroundLoop, true);
+        sound->SetSoundVolume(bgLoopSoundID, 0.75f);
     }
 }
 
@@ -277,12 +281,24 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	}
 	
 	// All done animating the start of the level - go to the official in-game state
-	if (fadeInDone && wipeInDone && levelTextFadeOutDone /*&& dropShadowAnimDone */ && 
-		levelPieceFadeInDone && paddleMoveDone && ballFadeInDone && this->shockwaveEmitter->IsDead() && 
-		this->starEmitter->IsDead()) {
+	if (fadeInDone && wipeInDone && levelTextFadeOutDone && levelPieceFadeInDone) {
+        
+        GameSound* sound = this->display->GetSound();
+        assert(sound != NULL);
 
-		this->display->SetCurrentStateAsNextQueuedState();
-		return;
+        if (this->paddleMoveUpSoundID == INVALID_SOUND_ID) {
+            this->paddleMoveUpSoundID = sound->PlaySound(GameSound::LevelStartPaddleMoveUpEvent, false, false);
+        }
+        if (paddleMoveDone) {
+            if (this->ballSpawnSoundID == INVALID_SOUND_ID) {
+                this->ballSpawnSoundID = sound->PlaySound(GameSound::LevelStartBallSpawnOnPaddleEvent, false, false);
+            }
+
+            if (ballFadeInDone && this->shockwaveEmitter->IsDead() && this->starEmitter->IsDead()) {
+                this->display->SetCurrentStateAsNextQueuedState();
+                return;
+            }
+        }
 	}
 
 	debug_opengl_state();

@@ -102,12 +102,42 @@ bool GameWorld::Load() {
 
 	// Read all the level file names
 	std::vector<std::string> levelFileList;
-	std::string currLvlFile;
-    while (std::getline(*inFile, currLvlFile)) {
-        currLvlFile = stringhelper::trim(currLvlFile);
-        if (!currLvlFile.empty()) {
-            if (currLvlFile[0] != '#') {
-		        levelFileList.push_back(currLvlFile);
+    std::vector<int> levelUnlockStarAmts;
+	std::string currLineStr;
+
+    while (std::getline(*inFile, currLineStr)) {
+        currLineStr = stringhelper::trim(currLineStr);
+        if (!currLineStr.empty()) {
+
+            if (currLineStr[0] != '#') {
+                // Check to see if the level has a milestone star amount associated with it
+                std::vector<std::string> tokens;
+                stringhelper::Tokenize(currLineStr, tokens, ":");
+                
+                int numStarsRequiredForUnlock = 0;
+                std::string levelFilepathStr = currLineStr;
+                if (tokens.size() > 1) {
+                    // There's a milestone star amount...
+                    std::stringstream numStarsStrStream(stringhelper::trim(tokens.back()));
+                    if (!(numStarsStrStream >> numStarsRequiredForUnlock)) {
+                        debug_output("ERROR: Failed to read the number of milestone stars for level: " + levelFilepathStr + " in world " + this->worldFilepath);
+                        delete inFile;
+                        inFile = NULL;
+                        return false;
+                    }
+                    else {
+                        levelFilepathStr = stringhelper::trim(tokens.front());
+                        if (levelFilepathStr.empty()) {
+                            debug_output("ERROR: Failed to read file: " + levelFilepathStr + " from line " + currLineStr + " in world " + this->worldFilepath);
+                            delete inFile;
+                            inFile = NULL;
+                            return false;
+                        }
+                    }
+                }
+
+		        levelFileList.push_back(levelFilepathStr);
+                levelUnlockStarAmts.push_back(numStarsRequiredForUnlock);
             }
         }
 	}
@@ -123,8 +153,9 @@ bool GameWorld::Load() {
 	inFile = NULL;
 
 	// Load each of the levels
+    assert(levelUnlockStarAmts.size() == levelFileList.size());
 	for (size_t i = 0; i < levelFileList.size(); i++) {
-        GameLevel* lvl = GameLevel::CreateGameLevelFromFile(this->GetStyle(), i, levelFileList[i]);
+        GameLevel* lvl = GameLevel::CreateGameLevelFromFile(this->GetStyle(), i, levelUnlockStarAmts[i], levelFileList[i]);
 		if (lvl == NULL) {
 			// Clean up and exit on erroneous level read
 			this->Unload();
@@ -191,7 +222,7 @@ int GameWorld::GetTotalAchievableStarsInWorld() const {
 }
 
 // Get the level with the given name, NULL if no such level exists
-GameLevel* GameWorld::GetLevelByName(const std::string& name) {
+GameLevel* GameWorld::GetLevelByName(const std::string& name) const {
     for (std::vector<GameLevel*>::const_iterator iter = this->loadedLevels.begin();
          iter != this->loadedLevels.end(); ++iter) {
         GameLevel* level = *iter;
@@ -200,6 +231,15 @@ GameLevel* GameWorld::GetLevelByName(const std::string& name) {
         }
     }
     return NULL;
+}
+
+GameLevel* GameWorld::GetLevelByIndex(int idx) const {
+    if (idx < 0 || idx >= static_cast<int>(this->loadedLevels.size())) {
+        assert(false);
+        return NULL;
+    }
+
+    return this->loadedLevels[idx];
 }
 
 /*

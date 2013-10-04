@@ -2,7 +2,7 @@
  * SelectLevelMenuState.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -13,12 +13,12 @@
 #define __SELECTLEVELMENUSTATE_H__
 
 #include "DisplayState.h"
+#include "CgFxPostRefract.h"
+
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Point.h"
 
-#include "../ESPEngine/ESPMultiColourEffector.h"
-#include "../ESPEngine/ESPPointEmitter.h"
-#include "../ESPEngine/ESPVolumeEmitter.h"
+#include "../ESPEngine/ESP.h"
 
 #include "../GameSound/SoundCommon.h"
 
@@ -32,7 +32,7 @@ class GameLevel;
 
 class SelectLevelMenuState : public DisplayState {
 public:
-    SelectLevelMenuState(GameDisplay* display, const GameWorld* world);
+    SelectLevelMenuState(GameDisplay* display, const DisplayStateInfo& info);
     ~SelectLevelMenuState();
 
     bool AllowsGameModelUpdates() const { return true; }
@@ -61,7 +61,7 @@ private:
     KeyboardHelperLabel* keyEscLabel;
     AnimationMultiLerp<float> pressEscAlphaAnim;
 
-    AnimationLerp<float> fadeAnimation;
+    AnimationMultiLerp<float> fadeAnimation;
 
     // Animation of the selection indicator
     AnimationMultiLerp<float> selectionAlphaOrangeAnim;   
@@ -71,10 +71,14 @@ private:
     Texture* arrowTexture;
     Texture* starTexture;
     Texture* bossIconTexture;
+    Texture* starGlowTexture;
+
     Texture2D* starryBG;
     Texture2D* padlockTexture;
 	CgFxBloom* bloomEffect;
-	FBObj* menuFBO;
+	
+    FBObj* menuFBO;
+    FBObj* postMenuFBObj;
 
     SoundID bgSoundLoopID;
 
@@ -83,19 +87,37 @@ private:
     ESPVolumeEmitter* prevPgArrowEmitter;
     ESPMultiColourEffector prevArrowFader;
 
+    Texture2D* explosionTex;
+    Texture2D* sphereNormalsTex;
+    std::vector<Texture2D*> smokeTextures;
+    CgFxPostRefract normalTexRefractEffect;
+    ESPParticleColourEffector particleFader;
+
+    ESPParticleColourEffector particleFireFastColourFader;
+    ESPParticleScaleEffector particleSmallGrowth;
+    ESPParticleScaleEffector particleMediumGrowth;
+    ESPParticleScaleEffector particleSuperGrowth;
+    ESPParticleRotateEffector smokeRotatorCW;
+    ESPParticleRotateEffector smokeRotatorCCW;
+
     bool goBackToWorldSelectMenu;
     AnimationLerp<float> goBackMenuMoveAnim;
     AnimationLerp<float> goBackMenuAlphaAnim;
 
     bool goToStartLevel;    // true when the user has selected a level to play
     
+    bool freezePlayerInput;
+    bool levelWasUnlockedViaStarCost;
+    bool playAutoUnlockAnim;
+    double autoUnlockAnimCountdown;
+
     void DrawStarTotalLabel(const Camera& camera);
     void DrawTitleStrip(const Camera& camera) const;
     void DrawPageSelection(const Camera& camera) const;
     void DrawLevelSelectMenu(const Camera& camera, double dT);
     void GoBackToWorldSelectMenu();
     void GoToStartLevel();
-    void SetupLevelPages();
+    void SetupLevelPages(const DisplayStateInfo& info);
     void ClearLevelPages();
 
     void MoveSelectionX(bool right);
@@ -104,31 +126,34 @@ private:
 
     class AbstractLevelMenuItem {
     public:
-        AbstractLevelMenuItem(SelectLevelMenuState* state, int levelNum, const GameLevel* level,
+        AbstractLevelMenuItem(SelectLevelMenuState* state, int levelNum, GameLevel* level,
             float width, const Point2D& topLeftCorner, bool isEnabled);
         virtual ~AbstractLevelMenuItem();
 
-        const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
-        const float GetWidth() const { return this->width; }
-        const GameLevel* GetLevel() const { return this->level; }
-        bool GetIsEnabled() const { return this->isEnabled; }
+        virtual void RebuildItem(bool enabled, const Point2D& topLeftCorner);
         virtual float GetHeight() const = 0;
-
         virtual void Draw(const Camera& camera, double dT, bool isSelected) = 0;
 
+        const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
+        const float GetWidth() const { return this->width; }
+        GameLevel* GetLevel() const { return this->level; }
+        bool GetIsEnabled() const { return this->isEnabled; }
+
         void ExecuteLockedAnimation();
+        void ExecuteUnlockStarsPaidForAnimation();
 
     protected:
         static const float NUM_TO_NAME_GAP;
         static const float DISABLED_GREY_AMT;
         static const float PADLOCK_SCALE;
+        static const float STAR_LOCKED_PADLOCK_SCALE;
 
         SelectLevelMenuState* state;
 
         Point2D topLeftCorner;
         float width;
 
-        const GameLevel* level;
+        GameLevel* level;
         bool isEnabled;
 
         TextLabel2D* numLabel;
@@ -136,18 +161,43 @@ private:
 
         AnimationMultiLerp<float> lockedAnim;
 
+        TextLabel2D* unlockNumStarsLabel;
+        AnimationMultiLerp<Colour>* unlockStarColourAnim;
+        AnimationMultiLerp<float>* unlockStarGlowPulseAnim;
+        
+        // Animations specific to unlocking the star cost
+        static const double TOTAL_STAR_UNLOCK_TIME;
+        bool isUnlockAnimPlaying;
+        AnimationMultiLerp<float>* starShrinkAnim;
+        AnimationLerp<float>* starAlphaAnim;
+        AnimationMultiLerp<float>* lockShakeRotateAnim;
+        AnimationMultiLerp<Vector2D>* lockShakeTranslateAnim;
+        AnimationLerp<float>* lockShrinkAnim;
+        AnimationLerp<float>* lockFadeAnim;
+
+        ESPPointEmitter* explosionEmitter;
+        ESPPointEmitter* explosionOnoEmitter;
+        ESPPointEmitter* shockwaveEffect;
+        ESPPointEmitter* fireSmokeEmitter1;
+        ESPPointEmitter* fireSmokeEmitter2;
+
+        float GetUnlockStarSize() const;
+        float GetUnlockStarCenterYOffset() const;
+
         void DrawBG(bool isSelected);
-        void DrawPadlock(double dT);
+        void DrawPadlock(double dT, const Camera& camera);
 
         DISALLOW_COPY_AND_ASSIGN(AbstractLevelMenuItem);
     };
 
     class LevelMenuItem : public AbstractLevelMenuItem {
     public:
-        LevelMenuItem(SelectLevelMenuState* state, int levelNum, const GameLevel* level,
-            float width, const Point2D& topLeftCorner, bool isEnabled, const Texture* starTexture);
+        LevelMenuItem(SelectLevelMenuState* state, int levelNum, GameLevel* level,
+            float width, const Point2D& topLeftCorner, bool isEnabled);
         ~LevelMenuItem();
         
+        void RebuildItem(bool enabled, const Point2D& topLeftCorner);
+
         void Draw(const Camera& camera, double dT, bool isSelected);
         float GetHeight() const;
 
@@ -158,18 +208,20 @@ private:
         GLuint starDisplayList;
         float starSize;
 
-        TextLabel2D* highScoreLabel; 
+        TextLabel2D* highScoreLabel;
 
-        const Texture* starTexture;
-        
+        void BuildStarDisplayList();
+
         DISALLOW_COPY_AND_ASSIGN(LevelMenuItem);
     };
 
     class BossLevelMenuItem : public AbstractLevelMenuItem {
     public:
-        BossLevelMenuItem(SelectLevelMenuState* state, int levelNum, const GameLevel* level,
+        BossLevelMenuItem(SelectLevelMenuState* state, int levelNum, GameLevel* level,
             float width, float height, const Point2D& topLeftCorner, bool isEnabled, const Texture* bossTexture);
         ~BossLevelMenuItem();
+
+        void RebuildItem(bool enabled, const Point2D& topLeftCorner);
 
         void Draw(const Camera& camera, double dT, bool isSelected);
         float GetHeight() const;
@@ -187,26 +239,35 @@ private:
         const Texture* bossTexture;
         TextLabel2D* bossDeadLabel;
 
+        void BuildBossIconDisplayList();
+
         DISALLOW_COPY_AND_ASSIGN(BossLevelMenuItem);
     };
 
     class LevelMenuPage {
     public:
-        LevelMenuPage() : selectedItem(0) {}
+        LevelMenuPage() : selectedItem(0), numRows(0) {}
         ~LevelMenuPage();
         
         size_t GetSelectedItemIndex() const { return this->selectedItem; }
         AbstractLevelMenuItem* GetSelectedItem() const { return this->levelItems[this->selectedItem]; }
+        AbstractLevelMenuItem* GetItemAt(size_t idx) { return this->levelItems[idx]; }
         size_t GetNumLevelItems() const { return this->levelItems.size(); }
+        void SetNumRows(int numRows) { this->numRows = numRows; }
+        int GetNumRows() const { return this->numRows; }
 
         void SetSelectedItemIndex(size_t idx) { assert(idx < this->levelItems.size()); this->selectedItem = idx; }
-        void AddLevelItem(AbstractLevelMenuItem* item) { assert(item != NULL); this->levelItems.push_back(item); }
+        void AddLevelItem(AbstractLevelMenuItem* item) { 
+            assert(item != NULL); 
+            this->levelItems.push_back(item); 
+        }
         void Draw(const Camera& camera, double dT);
         
         const AbstractLevelMenuItem* GetFirstItem() const { return this->levelItems.front(); }
         const AbstractLevelMenuItem* GetLastItem() const { return this->levelItems.back(); }
 
     private:
+        int numRows;
         size_t selectedItem;
         std::vector<AbstractLevelMenuItem*> levelItems;
     };

@@ -13,7 +13,7 @@
 #include "GameModel.h"
 
 const char* MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME       = "MagnetPaddle";
-const double MagnetPaddleItem::MAGNET_PADDLE_TIMER_IN_SECS  = 42.0;
+const double MagnetPaddleItem::MAGNET_PADDLE_TIMER_IN_SECS  = 38.0;
 
 MagnetPaddleItem::MagnetPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
 GameItem(MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {

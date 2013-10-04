@@ -80,7 +80,7 @@ protected:
     static AIState GetAIStateForConfinedMovePos(const ConfinedMovePos& pos, 
         float probabilityOfTargetCannonRocket, float probabilityOfTargetPaddleRocket);
 
-    float GetSlowestConfinedMoveSpeed() const { return 1.15f * LevelPiece::PIECE_WIDTH; }
+    float GetSlowestConfinedMoveSpeed() const { return 1.5f * LevelPiece::PIECE_WIDTH; }
     double GetLaserSpinTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 3.5; }
 
     float GenerateSummonProbability() const;

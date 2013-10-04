@@ -1460,6 +1460,7 @@ void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
 }
 
 void GlassDomeAI::UpdateState(double dT, GameModel* gameModel) {
+
     switch (this->currState) {
 
         case MoveToTargetStopAndShootAIState:
@@ -1580,8 +1581,8 @@ void GlassDomeAI::ExecuteTopLostState(double dT, GameModel* gameModel) {
 
 // TopSphereAI Functions ***********************************************************************
 
-const float TopSphereAI::TOP_SPHERE_LIFE_POINTS = PaddleLaserProjectile::DAMAGE_DEFAULT * 5;
-const float TopSphereAI::TOP_SPHERE_DAMAGE_ON_HIT = TOP_SPHERE_LIFE_POINTS / 5.0f;
+const float TopSphereAI::TOP_SPHERE_LIFE_POINTS = PaddleLaserProjectile::DAMAGE_DEFAULT * NUM_HITS_UNTIL_DEAD;
+const float TopSphereAI::TOP_SPHERE_DAMAGE_ON_HIT = TOP_SPHERE_LIFE_POINTS / static_cast<float>(NUM_HITS_UNTIL_DEAD);
 const float TopSphereAI::MAX_MOVE_SPEED = 0.7f * PlayerPaddle::DEFAULT_MAX_SPEED;
 const float TopSphereAI::DEFAULT_ACCELERATION = 0.45f * PlayerPaddle::DEFAULT_ACCELERATION;
 const float TopSphereAI::RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND = 25.0f;
@@ -1607,7 +1608,8 @@ void TopSphereAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBo
     }
     // Do nothing if the we're still animating a previous hurt state
     if (this->currState == NouveauBossAI::HurtTopAIState ||
-        this->currState == NouveauBossAI::FinalDeathThroesAIState) {
+        this->currState == NouveauBossAI::FinalDeathThroesAIState ||
+        this->topSphereWeakpt->IsCurrentlyInvulnerable()) {
         return;
     }
     this->TopSphereWasHurt(ball.GetCenterPosition2D());
@@ -1620,7 +1622,8 @@ void TopSphereAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile
     }
     // Do nothing if the we're still animating a previous hurt state
     if (this->currState == NouveauBossAI::HurtTopAIState ||
-        this->currState == NouveauBossAI::FinalDeathThroesAIState) {
+        this->currState == NouveauBossAI::FinalDeathThroesAIState ||
+        this->topSphereWeakpt->IsCurrentlyInvulnerable()) {
         return;
     }
     this->TopSphereWasHurt(projectile->GetPosition());
@@ -1632,7 +1635,8 @@ void TopSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProjecti
     
     // Do nothing if the we're still animating a previous hurt state
     if (this->currState == NouveauBossAI::HurtTopAIState ||
-        this->currState == NouveauBossAI::FinalDeathThroesAIState) {
+        this->currState == NouveauBossAI::FinalDeathThroesAIState ||
+        this->topSphereWeakpt->IsCurrentlyInvulnerable()) {
         return;
     }
 

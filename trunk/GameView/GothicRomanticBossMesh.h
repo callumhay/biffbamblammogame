@@ -20,7 +20,7 @@ class ESPPointEmitter;
 
 class GothicRomanticBossMesh : public BossMesh {
 public:
-    GothicRomanticBossMesh(GothicRomanticBoss* boss);
+    GothicRomanticBossMesh(GothicRomanticBoss* boss, GameSound* sound);
     ~GothicRomanticBossMesh();
 
     // Inherited from BossMesh
@@ -42,8 +42,6 @@ private:
     ESPPointEmitter* topPointSmokeEmitter;
     ESPPointEmitter* topPointFireEmitter;
     ESPPointEmitter* topPointExplodingEmitter;
-
-    ESPPointEmitter* explodingLegEmitter;
 
     ESPPointEmitter* bottomPointSmokeEmitter;
     ESPPointEmitter* bottomPointFireEmitter;

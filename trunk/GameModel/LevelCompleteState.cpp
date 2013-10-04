@@ -21,17 +21,16 @@
  * set of variable states so it can continue on to the next level and clear
  * all the craziness of the previous level's state...
  */
-LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
+LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm), waitingForExternalExit(false) {
     GameWorld* currWorld = this->gameModel->GetCurrentWorld();
     GameLevel* currLevel = currWorld->GetCurrentLevel();
 
-    // Special case: Boss levels, when completed indicate that they were completed by storing a highscore > 0.
+    // Special case: Boss levels, when completed indicate that they were completed by storing a high-score > 0.
     if (currLevel->GetHasBoss()) {
         currLevel->SetHighScore(std::numeric_limits<long>::max(), false);
     }
     else {
-
-        // Check to see whether the highscore for the level was beaten...
+        // Check to see whether the high-score for the level was beaten...
         if (currLevel->GetHighScore() < gm->GetScore()) {
             // Set the new high score for the level and indicate that the high score was beaten
             currLevel->SetHighScore(gm->GetScore(), false);
@@ -41,6 +40,7 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
             currLevel->SetNewHighScore(false);
         }
     }
+    currWorld->UpdateLastLevelPassedIndex();
 
     // EVENT: Level is complete
     GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
@@ -72,16 +72,9 @@ LevelCompleteState::~LevelCompleteState() {
 void LevelCompleteState::Tick(double seconds) {
 	UNUSED_PARAMETER(seconds);
 
-    /*
-    if (!firstTickDone) {
-	    GameWorld* currWorld = this->gameModel->GetCurrentWorld();
-	    GameLevel* currLevel = currWorld->GetCurrentLevel();
-
-	    // EVENT: Level is complete
-	    GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
-        firstTickDone = true;
+    if (this->waitingForExternalExit) {
+        return;
     }
-    */
 
 	// Clean up all the level-related state stuff in preparation for the next level/world/?
 	
@@ -101,9 +94,11 @@ void LevelCompleteState::Tick(double seconds) {
 		this->gameModel->SetNextState(new WorldCompleteState(this->gameModel));
 	}
 	else {
-		// We are infact going to the next level...
-		currWorld->IncrementLevel(this->gameModel);
-		// Place the ball back on the paddle, and let the next level begin!
-		this->gameModel->SetNextState(new LevelStartState(this->gameModel));
+        // NOTE: We don't go to any further state from here -- we wait until a signal to go to the next state
+        // is received from the user
+        this->waitingForExternalExit = true;
+
+        // Place the ball back on the paddle, and let the next level begin!
+		//this->gameModel->SetNextState(new LevelStartState(this->gameModel));
 	}
 }

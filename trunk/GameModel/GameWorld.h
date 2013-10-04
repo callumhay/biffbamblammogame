@@ -60,7 +60,8 @@ public:
 		assert(this->isLoaded);
 		return this->loadedLevels[this->currentLevelNum];
 	}
-    GameLevel* GetLevelByName(const std::string& name);
+    GameLevel* GetLevelByName(const std::string& name) const;
+    GameLevel* GetLevelByIndex(int idx) const;
 
 	int GetCurrentLevelNum() const {
 		assert(this->isLoaded);

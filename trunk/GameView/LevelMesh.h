@@ -53,7 +53,7 @@ class GameAssets;
 
 class LevelMesh {
 public:
-	LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
+	LevelMesh(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 	~LevelMesh();
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
@@ -69,7 +69,7 @@ public:
     void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
 
-	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
+	void LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 
 	void LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
 	void LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status);

@@ -45,10 +45,10 @@ void GameLightAssets::ToggleLights(bool turnOn, double toggleTime) {
 	
 	// For the fill and key lights of the foreground and background we simply
 	// turn them on or off...
-	this->fgKeyLight.SetLightOn(turnOn,    toggleTime);
-	this->fgFillLight.SetLightOn(turnOn,   toggleTime);
-	this->bgKeyLight.SetLightOn(turnOn,    toggleTime);
-	this->bgFillLight.SetLightOn(turnOn,   toggleTime);
+	this->fgKeyLight.SetLightOn(turnOn, toggleTime);
+	this->fgFillLight.SetLightOn(turnOn, toggleTime);
+	this->bgKeyLight.SetLightOn(turnOn, toggleTime);
+	this->bgFillLight.SetLightOn(turnOn, toggleTime);
 
 	// The ball light needs to change how much/well it illuminates the scene as well...
 	if (turnOn) {

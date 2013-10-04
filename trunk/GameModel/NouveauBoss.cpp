@@ -288,6 +288,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                 // leftSideCurls
                 {
                     BossBodyPart* leftSideCurls = new BossBodyPart(leftCurlBounds);
+                    leftSideCurls->ToggleSimpleBoundingCalc(true);
                     leftSideCurls->Translate(Vector3D(-2.986f, 0.82f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(leftSideCurls);
                     this->leftSideCurlsIdx = this->bodyParts.size();
@@ -297,6 +298,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                 // rightSideCurls
                 {
                     BossBodyPart* rightSideCurls = new BossBodyPart(rightCurlBounds);
+                    rightSideCurls->ToggleSimpleBoundingCalc(true);
                     rightSideCurls->RotateY(180.0f);
                     rightSideCurls->Translate(Vector3D(2.986f, 0.82f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(rightSideCurls);
@@ -379,6 +381,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                     // leftSideSphere
                     {
                         BossBodyPart* leftSideSphere = new BossBodyPart(sideSphereBounds);
+                        leftSideSphere->ToggleSimpleBoundingCalc(true);
                         leftSideSphere->Translate(Vector3D(-3.112f , 1.558f, 0.0f));
                         leftSideSphereHolder->AddBodyPart(leftSideSphere);
                         this->leftSideSphereIdx = this->bodyParts.size();
@@ -388,6 +391,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                     // leftSideSphereFrills
                     {
                         BossBodyPart* leftSideSphereFrills = new BossBodyPart(leftFrillBounds);
+                        leftSideSphereFrills->ToggleSimpleBoundingCalc(true);
                         leftSideSphereFrills->Translate(Vector3D(-3.112f , 1.558f, 0.0f));
                         leftSideSphereHolder->AddBodyPart(leftSideSphereFrills);
                         this->leftSideSphereFrillsIdx = this->bodyParts.size();
@@ -407,6 +411,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                     // rightSideHolderCurl
                     {
                         BossBodyPart* rightSideHolderCurl = new BossBodyPart(rightHolderCurlBounds);
+                        rightSideHolderCurl->ToggleSimpleBoundingCalc(true);
                         rightSideHolderCurl->RotateY(180.0f);
                         rightSideSphereHolder->AddBodyPart(rightSideHolderCurl);
                         this->rightSideHolderCurlIdx = this->bodyParts.size();
@@ -416,6 +421,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                     // rightSideSphere
                     {
                         BossBodyPart* rightSideSphere = new BossBodyPart(sideSphereBounds);
+                        rightSideSphere->ToggleSimpleBoundingCalc(true);
                         rightSideSphere->Translate(Vector3D(3.112f , 1.558f, 0.0f));
                         rightSideSphereHolder->AddBodyPart(rightSideSphere);
                         this->rightSideSphereIdx = this->bodyParts.size();
@@ -426,7 +432,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                     // rightSideSphereFrills
                     {
                         BossBodyPart* rightSideSphereFrills = new BossBodyPart(rightFrillBounds);
-                        
+                        rightSideSphereFrills->ToggleSimpleBoundingCalc(true);
                         rightSideSphereFrills->Translate(Vector3D(3.112f , 1.558f, 0.0f));
                         rightSideSphereHolder->AddBodyPart(rightSideSphereFrills);
                         this->rightSideSphereFrillsIdx = this->bodyParts.size();
@@ -460,6 +466,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
                 hexSphereBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, -1));
 
                 BossBodyPart* bottomHexSphere = new BossBodyPart(hexSphereBounds);
+                bottomHexSphere->ToggleSimpleBoundingCalc(true);
                 bottomHexSphere->Translate(Vector3D(0.0f, -1.680f, 0.0f));
                 this->alivePartsRoot->AddBodyPart(bottomHexSphere);
                 this->bottomHexSphereIdx = this->bodyParts.size();
@@ -500,6 +507,7 @@ void NouveauBoss::BuildBottomCurl(const Vector3D& translation, float yRotation, 
     }
 
     BossBodyPart* bottomCurl = new BossBodyPart(curlBounds);
+    bottomCurl->ToggleSimpleBoundingCalc(true);
     bottomCurl->RotateY(yRotation);
     bottomCurl->Translate(translation);
 

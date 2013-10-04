@@ -25,8 +25,8 @@
 
 const double GothicRomanticBossMesh::INTRO_TIME_IN_SECS = 4.0;
 
-GothicRomanticBossMesh::GothicRomanticBossMesh(GothicRomanticBoss* boss) :
-BossMesh(), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL), legMesh(NULL),
+GothicRomanticBossMesh::GothicRomanticBossMesh(GothicRomanticBoss* boss, GameSound* sound) :
+BossMesh(sound), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL), legMesh(NULL),
 topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(NULL), circleGlowTex(NULL) {
     assert(boss != NULL);
 
@@ -42,17 +42,17 @@ topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(
 
     this->topPointSmokeEmitter  = this->BuildSmokeEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
     this->topPointFireEmitter   = this->BuildFireEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
-    this->topPointExplodingEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT);
-
-    this->explodingLegEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::LEG_WIDTH, GothicRomanticBoss::LEG_HEIGHT);
+    this->topPointExplodingEmitter = this->BuildExplodingEmitter(0.5f, this->boss->GetTopPoint(), 
+        GothicRomanticBoss::TOP_POINT_WIDTH, GothicRomanticBoss::TOP_POINT_HEIGHT, 1.2f);
 
     this->bottomPointSmokeEmitter = this->BuildSmokeEmitter(GothicRomanticBoss::BOTTOM_POINT_WIDTH, GothicRomanticBoss::BOTTOM_POINT_HEIGHT);
     this->bottomPointFireEmitter  = this->BuildFireEmitter(GothicRomanticBoss::BOTTOM_POINT_WIDTH, GothicRomanticBoss::BOTTOM_POINT_HEIGHT);
-    this->bottomPointExplodingEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::BOTTOM_POINT_WIDTH, GothicRomanticBoss::BOTTOM_POINT_HEIGHT);
+    this->bottomPointExplodingEmitter = this->BuildExplodingEmitter(0.75f, this->boss->GetBottomPoint(), 
+        GothicRomanticBoss::BOTTOM_POINT_WIDTH, GothicRomanticBoss::BOTTOM_POINT_HEIGHT, 1.3f);
 
     this->bodySmokeEmitter = this->BuildSmokeEmitter(GothicRomanticBoss::BODY_WIDTH/1.5f, GothicRomanticBoss::BODY_HEIGHT/2.0f);
     this->bodyFireEmitter  = this->BuildFireEmitter(GothicRomanticBoss::BODY_WIDTH/1.5f, GothicRomanticBoss::BODY_HEIGHT/2.0f);
-    this->bodyExplodingEmitter = this->BuildExplodingEmitter(GothicRomanticBoss::BODY_WIDTH, GothicRomanticBoss::BODY_HEIGHT);
+    this->bodyExplodingEmitter = this->BuildExplodingEmitter(1.0f, this->boss->GetBody(), GothicRomanticBoss::BODY_WIDTH, GothicRomanticBoss::BODY_HEIGHT);
 
     this->circleGlowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
@@ -114,8 +114,6 @@ GothicRomanticBossMesh::~GothicRomanticBossMesh() {
     this->topPointFireEmitter = NULL;
     delete this->topPointExplodingEmitter;
     this->topPointExplodingEmitter = NULL;
-    delete this->explodingLegEmitter;
-    this->explodingLegEmitter = NULL;
     delete this->bottomPointExplodingEmitter;
     this->bottomPointExplodingEmitter = NULL;
     delete this->bottomPointFireEmitter;
@@ -376,21 +374,7 @@ void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera
     const BossBodyPart* leg = this->boss->GetLeg(0);
     if (leg->GetAlpha() > 0.0f) {
 
-        if (this->boss->IsBodyPartDead(leg)) {
-            this->explodingLegEmitter->Tick(dT);
-
-            for (int i = 0; i < GothicRomanticBoss::NUM_LEGS; i++) {
-                const BossBodyPart* leg = this->boss->GetLeg(i);
-                assert(leg != NULL);
-                Point3D legPos = leg->GetTranslationPt3D();
-
-                glPushMatrix();
-                glTranslatef(legPos[0], legPos[1], legPos[2]);
-                this->explodingLegEmitter->Draw(camera);
-                glPopMatrix();
-            }
-        }
-        else {
+        if (!this->boss->IsBodyPartDead(leg)) {
             this->circleGlowTex->BindTexture();
             for (int i = 0; i < GothicRomanticBoss::NUM_LEGS; i++) {
 

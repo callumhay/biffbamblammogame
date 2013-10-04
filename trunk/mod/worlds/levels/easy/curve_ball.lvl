@@ -2,7 +2,7 @@ Curve ball
 11 28
 S S S S S S S S S S S 
 S E E E E E E E B G S 
-S G G G G G G G G B S 
+S G G G G G G G B B S 
 S G G G G G G S B G S 
 S Y Y Y Y Y Y S G G S 
 S B O B O B O S S S S 
@@ -31,10 +31,10 @@ S E E E E E E E E E S
 
 STARS:
 6000
-13000
-18000
-25000
-32000
+10000
+14000
+17000
+20000
 
 PaddleGrow 2
 PoisonPaddle 2

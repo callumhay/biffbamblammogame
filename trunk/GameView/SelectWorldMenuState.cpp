@@ -211,7 +211,8 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         
         if (animDone) {
             // Go to the level select for the currently selected world
-            this->display->SetCurrentState(new SelectLevelMenuState(this->display, this->worldItems[this->selectedItemIdx]->GetWorld()));
+            this->display->SetCurrentState(new SelectLevelMenuState(this->display, 
+                DisplayStateInfo::BuildSelectLevelInfo(this->selectedItemIdx)));
             return;
         }
     }
@@ -437,7 +438,8 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     this->selectionAlphaYellowAnim.SetRepeat(true);
 
     // Setup any animations and selections based on the info that this object was initialized with
-    if (info.GetWorldUnlockIndex() < 0) {
+    if (info.GetWorldUnlockIndex() <= furthestWorldIdx) {
+
         // No special animation is necessary
         if (info.GetWorldSelectionIndex() < 0) {
             this->selectedItemIdx = furthestWorldIdx;
@@ -463,7 +465,7 @@ SelectWorldMenuState::WorldUnlockAnimationTracker::WorldUnlockAnimationTracker(S
                                                                                WorldSelectItem* worldItem) : 
 worldItem(worldItem), state(state), energySuckEmitter(NULL), bigExplosionEmitter(NULL), bigExplosionOnoEmitter(NULL),
 debrisEmitter(NULL), fireSmokeEmitter1(NULL), fireSmokeEmitter2(NULL), countdownMoveToLockedWorld(1.0),
-countdownWaitToShake(0.75), countdownWaitToEnergySuck(0.75), sparkleTex(NULL), flareTex(NULL),
+countdownWaitToShake(0.75), countdownWaitToEnergySuck(0.75), sparkleTex(NULL), debrisTex(NULL),
 lensFlareTex(NULL), hugeExplosionTex(NULL), sphereNormalsTex(NULL), particleFader(1, 0), particleHalfFader(1, 0.5f), 
 particleMediumGrowth(1.0f, 2.0f), particleMediumShrink(1.0f, 0.25f), particleSmallGrowth(1.0f, 1.5f), unlockAnimExecuted(false),
 particleSuperGrowth(1.0f, 10.0f), particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
@@ -471,12 +473,12 @@ smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPP
 smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
     assert(worldItem != NULL);
 
+    this->debrisTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
+    assert(this->debrisTex != NULL);
     this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
     assert(this->sparkleTex != NULL);
-    this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
-    assert(this->flareTex != NULL);
     this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
     assert(this->lensFlareTex != NULL);
@@ -629,6 +631,22 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
     this->fireSmokeEmitter2->AddEffector(&this->smokeRotatorCCW);
     this->fireSmokeEmitter2->SetRandomTextureParticles(50, this->smokeTextures);
 
+    this->debrisEmitter = new ESPPointEmitter();
+    this->debrisEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->debrisEmitter->SetNumParticleLives(1);
+    this->debrisEmitter->SetInitialSpd(ESPInterval(200.0f, 1200.0f));
+    this->debrisEmitter->SetParticleLife(ESPInterval(1.25f, 2.75f));
+    this->debrisEmitter->SetParticleSize(0.33f * smokeSize);
+    this->debrisEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->debrisEmitter->SetParticleAlignment(ESP::NoAlignment);
+    this->debrisEmitter->SetEmitPosition(Point3D(0,0,0));
+    this->debrisEmitter->SetEmitDirection(Vector3D(0,1,0));
+    this->debrisEmitter->SetToggleEmitOnPlane(true);
+    this->debrisEmitter->SetEmitAngleInDegrees(180);
+    this->debrisEmitter->AddEffector(&this->particleFireFastColourFader);
+    this->debrisEmitter->AddEffector(&this->particleMediumGrowth);
+    this->debrisEmitter->SetParticles(40, this->debrisTex);
+
     // Build the lock shake animation
     static const float SHAKE_AMT = 0.125f * WorldSelectItem::PADLOCK_SCALE * SELECTED_MENU_ITEM_SIZE;
     static const int NUM_SHAKES = 31;
@@ -651,9 +669,9 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
 }
 
 SelectWorldMenuState::WorldUnlockAnimationTracker::~WorldUnlockAnimationTracker() {
-    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
     assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->debrisTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
     assert(success);
@@ -684,6 +702,8 @@ SelectWorldMenuState::WorldUnlockAnimationTracker::~WorldUnlockAnimationTracker(
     this->fireSmokeEmitter1 = NULL;
     delete this->fireSmokeEmitter2;
     this->fireSmokeEmitter2 = NULL;
+    delete this->debrisEmitter;
+    this->debrisEmitter = NULL;
 }
 
 bool SelectWorldMenuState::WorldUnlockAnimationTracker::AreControlsLocked() const {
@@ -740,6 +760,8 @@ void SelectWorldMenuState::WorldUnlockAnimationTracker::Draw(const Camera& camer
     this->fireSmokeEmitter1->Draw(camera);
     this->fireSmokeEmitter2->Tick(dT);
     this->fireSmokeEmitter2->Draw(camera);
+    this->debrisEmitter->Tick(dT);
+    this->debrisEmitter->Draw(camera);
     this->bigExplosionEmitter->Tick(dT);
     this->bigExplosionEmitter->Draw(camera);
     this->bigExplosionOnoEmitter->Tick(dT);

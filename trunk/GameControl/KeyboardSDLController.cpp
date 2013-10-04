@@ -21,8 +21,7 @@
 const double KeyboardSDLController::TIME_TO_MAX_SPEED = 0.2;
 
 KeyboardSDLController::KeyboardSDLController(GameModel* model, GameDisplay* display) :
-BBBGameController(model, display), dirHeldDownTimeCounter(0.0), windowHasFocus(true),
-lastPaddleLeftDir(0), lastPaddleRightDir(0), lastOtherLeftDir(0), lastOtherRightDir(0) {
+BBBGameController(model, display), dirHeldDownTimeCounter(0.0), windowHasFocus(true) {
 	for (int i = 0; i < SDLK_LAST; i++) {
 		this->keyPressed[i] = false;
 	}
@@ -83,47 +82,27 @@ void KeyboardSDLController::Sync(size_t frameID, double dT) {
 	// Movement controls (NOTE: the else is to make the feedback more exact)
     if (this->keyPressed[SDLK_LEFT] || this->keyPressed[SDLK_a]) {
 		
-        int leftDir = this->lastPaddleLeftDir;
-        if (leftDir == 0) {
-            leftDir = this->model->AreControlsFlippedForPaddle() ? 1 : -1;
-        }
+        int leftDir = this->model->AreControlsFlippedForPaddle() ? 1 : -1;
         this->model->MovePaddle(frameID, leftDir, magnitudePercent);
-        this->lastPaddleLeftDir = leftDir;
 
-        leftDir = this->lastOtherLeftDir;
-        if (leftDir == 0) {
-            leftDir = this->model->AreControlsFlippedForOther() ? 1 : -1;
-        }
+        leftDir = this->model->AreControlsFlippedForOther() ? 1 : -1;
         this->model->MoveOther(frameID, leftDir, magnitudePercent);
-        this->lastOtherLeftDir = leftDir;
 
         this->dirHeldDownTimeCounter += dT;
 	}
 	else if (this->keyPressed[SDLK_RIGHT] || this->keyPressed[SDLK_d]) {
 		
-        int rightDir = this->lastPaddleRightDir;
-        if (rightDir == 0) {
-            rightDir = this->model->AreControlsFlippedForPaddle() ? -1 : 1;
-        }
+        int rightDir = this->model->AreControlsFlippedForPaddle() ? -1 : 1;
         this->model->MovePaddle(frameID, rightDir, magnitudePercent);
-        this->lastPaddleRightDir = rightDir;
 
-        rightDir = this->lastOtherRightDir;
-        if (rightDir == 0) {
-            rightDir = this->model->AreControlsFlippedForOther() ? -1 : 1;
-        }
+        rightDir = this->model->AreControlsFlippedForOther() ? -1 : 1;
         this->model->MoveOther(frameID, rightDir, magnitudePercent);
-        this->lastOtherRightDir = rightDir;
-        
+
         this->dirHeldDownTimeCounter += dT;
 	}
 	else {
 		this->model->MovePaddle(frameID, 0, 0.0);
         this->model->MoveOther(frameID, 0, 0.0);
-        this->lastPaddleLeftDir  = 0;
-        this->lastPaddleRightDir = 0;
-        this->lastOtherLeftDir   = 0;
-        this->lastOtherRightDir  = 0;
 	}
 
     // Other special actions for hold-down keys...

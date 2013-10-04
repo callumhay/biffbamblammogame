@@ -29,15 +29,17 @@
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
 
-GameModel::GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
+GameModel::GameModel(GameSound* sound, const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
                      const BallBoostModel::BallBoostMode& ballBoostMode) : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0),
 livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
 droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty),
-ballBoostMode(ballBoostMode) {
+ballBoostMode(ballBoostMode), sound(sound) {
 	
+    assert(sound != NULL);
+
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     this->LoadWorldsFromFile();
 
@@ -299,7 +301,7 @@ void GameModel::SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNew
 	// EVENT: New Level Started
 	GameEventManager::Instance()->ActionLevelStarted(*world, *currLevel);
 
-	// Tell the paddle what the boundries of the level are and reset the paddle
+	// Tell the paddle what the boundaries of the level are and reset the paddle
 	this->playerPaddle->UpdateLevel(*currLevel); // resets the paddle
 	//this->playerPaddle->ResetPaddle();
 
@@ -402,7 +404,7 @@ void GameModel::DestroySafetyNet() {
     }
 }
 
-void GameModel::CleanUpAfterBossDeath() {
+void GameModel::CleanUpAfterLevelEnd() {
     this->ClearStatusUpdatePieces();
     this->ClearProjectiles();
     this->ClearBeams();

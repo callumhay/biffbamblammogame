@@ -9,7 +9,7 @@ S E E E E E Q(i) E E E Q(i) E E E E E S
 S E G G G E S G G G S E G G G E S 
 S E G G G E S Y Y Y S E G G G E S 
 S E G G G E S O O O S E G G G E S 
-S E G G G E S R K(LaserBeamPaddle) R S E G G G E S 
+S E G G G E S K(OmniLaserBall,OmniLaserBall,OmniLaserBall) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) K(UberBall,UberBall,UberBall) S E G G G E S 
 S E G G G E S E E E S E G G G E S 
 S E G G G E S O O O S E G G G E S 
 S E G G G E S Y Y Y S E G G G E S 
@@ -43,8 +43,8 @@ STARS:
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
 BallGrow 2
 UberBall 2
 StickyPaddle 2
@@ -64,8 +64,8 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 2
 MultiBall3 2
-IceBall 2
 RemoteControlRocket 0
+IceBall 2
 MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2

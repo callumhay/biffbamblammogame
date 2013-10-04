@@ -133,6 +133,9 @@ protected:
     virtual void GoToNextRandomAttackState(GameModel* gameModel) = 0;
     virtual DecoBossAIState* BuildNextAIState() const = 0;
 
+    virtual bool ShutsOffLeftTeslaBlockOnRetaliation() const { return true; }
+    virtual bool ShutsOffRightTeslaBlockOnRetaliation() const { return true; }
+
     void UpdateBossUpDownSideToSideMotion();
     bool UpdateShootAtPaddleWhileMoving(double dT, GameModel* gameModel);
     bool UpdateArmAnimation(double dT, AnimationMultiLerp<float>& armSeg1Anim, AnimationMultiLerp<float>& armSeg2Anim, 
@@ -220,6 +223,8 @@ private:
     AnimationMultiLerp<float> GenerateSideBodyPartDeathRotationAnimation(bool isLeft, double timeInSecs) const;
 
     // Inherited Functions
+    bool ShutsOffLeftTeslaBlockOnRetaliation() const { return true; }
+    bool ShutsOffRightTeslaBlockOnRetaliation() const { return false; }
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
     int GenerateNumItemsToDropInSideToSideState() const { return 4; } // Must not be random!
     DecoBossAIState* BuildNextAIState() const;
@@ -245,6 +250,8 @@ private:
     float GetMaxYSpeed() const { return SPEED_COEFF * DecoBossAIState::DEFAULT_MAX_Y_SPEED; }
 
     // Inherited Functions
+    bool ShutsOffLeftTeslaBlockOnRetaliation() const { return true; }
+    bool ShutsOffRightTeslaBlockOnRetaliation() const { return true; }
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
     int GenerateNumItemsToDropInSideToSideState() const { return 6; } // Must not be random!
     DecoBossAIState* BuildNextAIState() const;

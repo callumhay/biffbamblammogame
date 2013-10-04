@@ -59,7 +59,8 @@ maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL
 starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), 
 starFgPulser(ScaleEffect(1.0f, 1.5f)), starryBG(NULL), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
-flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
+flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
+highScoreSoundID(INVALID_SOUND_ID) {
     
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
@@ -253,8 +254,8 @@ flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE) {
     this->totalScoreFadeInAnimation.SetLerp(nextEndTime, START_TALLEY_TIME, 0.0f, 1.0f);
     this->totalScoreFadeInAnimation.SetRepeat(false);
 
-    this->newHighScoreFade.SetInterpolantValue(0.0f);
     this->newHighScoreFade.SetLerp(START_TALLEY_TIME+totalTime, START_TALLEY_TIME+totalTime+0.5, 0.0f, 1.0f);
+    this->newHighScoreFade.SetInterpolantValue(0.0f);
     this->newHighScoreFade.SetRepeat(false);
 
     {
@@ -550,6 +551,7 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
             this->totalScoreFlyInAnimation.Tick(dT);
             this->totalScoreFadeInAnimation.Tick(dT);
             this->newHighScoreFade.Tick(dT);
+            this->footerColourAnimation.Tick(dT);
 
             //this->maxBlocksFadeIn.Tick(dT);
             //this->numItemsFadeIn.Tick(dT);
@@ -557,7 +559,6 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
             
             if (this->starAddAnimationCount == 0) {
                 // Animate and draw the "Press any key..." label
-                this->footerColourAnimation.Tick(dT);
                 this->DrawPressAnyKeyTextFooter(Camera::GetWindowWidth());
             }
         }
@@ -789,8 +790,16 @@ void LevelCompleteSummaryDisplayState::DrawTotalScoreLabel(float currYPos, float
 
     // Check to see if the player has a new high score
     if (gameLevel->GetHasNewHighScore()) {
+
+        float highScoreAlpha = this->newHighScoreFade.GetInterpolantValue();
+        if (highScoreAlpha > 0.0f) {
+            if (this->highScoreSoundID == INVALID_SOUND_ID) {
+                this->highScoreSoundID = this->display->GetSound()->PlaySound(GameSound::LevelSummaryNewHighScoreEvent, false);
+            }
+        }
+
         this->newHighScoreLabel.SetColour(this->footerColourAnimation.GetInterpolantValue());
-        this->newHighScoreLabel.SetAlpha(this->newHighScoreFade.GetInterpolantValue());
+        this->newHighScoreLabel.SetAlpha(highScoreAlpha);
         this->newHighScoreLabel.SetTopLeftCorner(scoreValueX + 3, currYPos - this->scoreValueLabel.GetHeight() - 10);
         this->newHighScoreLabel.Draw();
     }
@@ -831,8 +840,10 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
     if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
         this->flareEmitter.Tick(dT);
 
-        this->starTotalColourAnim.Tick(dT);
-        this->starTotalScaleAnim.Tick(dT);
+        if (!this->starAddAlphaAnims.empty()) {
+            this->starTotalColourAnim.Tick(dT);
+            this->starTotalScaleAnim.Tick(dT);
+        }
 
         labelColour = this->starTotalColourAnim.GetInterpolantValue();
         starScale   = this->starTotalScaleAnim.GetInterpolantValue();
@@ -904,10 +915,8 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
                 moveAnim = NULL;
 
                 this->currStarTotal++;
-                if (this->starAddAnimationCount > 0) {
-                    this->starTotalScaleAnim.ResetToStart();
-                    this->starTotalColourAnim.ResetToStart();
-                }
+                this->starTotalScaleAnim.ResetToStart();
+                this->starTotalColourAnim.ResetToStart();
                 this->flareEmitter.Reset();
             }
             else {

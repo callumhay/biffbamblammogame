@@ -48,7 +48,7 @@ void ESPEmitter::Flush() {
 	// Delete particles
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
-		delete currParticle;
+        delete currParticle;
 		currParticle = NULL;
 	}
 	this->aliveParticles.clear();
@@ -169,6 +169,10 @@ void ESPEmitter::TickParticles(double dT) {
 		if (currParticle->IsDead() || this->IsParticlePastDeathPlane(*currParticle)) {
 			nowDead.push_back(iter);
 			this->deadParticles.push_back(currParticle);
+
+            for (std::list<ESPEmitterEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
+                (*iter)->ParticleDiedEvent(currParticle);
+            }
 		}
 		else {
 			currParticle->Tick(dT);
@@ -197,7 +201,7 @@ void ESPEmitter::SimulateTicking(double time) {
 	}
 
 	// If the spawn interval is less than or equal to zero then the particle life
-	// is longer thant the given simulation - just tick away.
+	// is longer than the given simulation - just tick away.
 	if (spawnInterval <= 0) {
 		this->Tick(spawnInterval);
 		return;

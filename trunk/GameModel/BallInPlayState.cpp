@@ -353,7 +353,7 @@ void BallInPlayState::Tick(double seconds) {
 		        }
             }
 
-		    // Ball - tesla lightning arc collisions:
+		    // Ball - Tesla lightning arc collisions:
 		    didCollideWithTeslaLightning = currLevel->TeslaLightningCollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision);
 		    if (didCollideWithTeslaLightning) {
 			    // Clear the last piece collided with since the ball is now colliding with a tesla lightning arc
@@ -505,7 +505,7 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Quick check to see if the paddle collided with the safety net - this will just register necessary
 	// events and destroy the net if it exists and there is a collision
-	if (!paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState()) && this->gameModel->IsSafetyNetActive()) {   
+	if (!paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState()) && this->gameModel->IsSafetyNetActive()) {
         if (this->gameModel->safetyNet->PaddleCollisionCheck(*paddle)) {
             this->gameModel->DestroySafetyNet();
             
@@ -514,7 +514,7 @@ void BallInPlayState::Tick(double seconds) {
         }
     }
 
-	// Paddle-block collisions / boundry update (so that the paddle crashes into potential blocks at its sides).
+	// Paddle-block collisions / boundary update (so that the paddle crashes into potential blocks at its sides).
     this->DoUpdateToPaddleBoundriesAndCollisions(seconds, true);
 	
     // Tick/update any level pieces that require it...
@@ -629,6 +629,33 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
     }
     
     if (paddleReflection) {
+
+        // Update the reflection so that it goes a bit more left or a bit more right depending on whether it hit further to
+        // the left or the right of the flat top part of the paddle
+        PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+        if (!paddle->HasPaddleType(PlayerPaddle::ShieldPaddle) && n == paddle->GetUpVector() && 
+            Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat))))) < 30.0f) {
+            
+            const float paddleToBallCenterXDist = b.GetCenterPosition2D()[0] - paddle->GetCenterPosition()[0];
+            const float absPaddleToBallCenterXDist = fabs(paddleToBallCenterXDist);
+            const float paddleFlatTopHalfWidth = paddle->GetHalfFlatTopWidth();
+            const float noEffectGapRadius = paddleFlatTopHalfWidth * 0.1f;
+
+            if (absPaddleToBallCenterXDist <= paddleFlatTopHalfWidth && absPaddleToBallCenterXDist > noEffectGapRadius) {
+                // Based on the distance we reflect the ball more...
+                static const float MIN_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS = 10.0f;
+                static const float MAX_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS = 22.0f;
+                
+                float angleAmt = NumberFuncs::LerpOverFloat(noEffectGapRadius, paddleFlatTopHalfWidth, 
+                    MIN_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS, MAX_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS, absPaddleToBallCenterXDist);
+                angleAmt *= -NumberFuncs::SignOf(paddleToBallCenterXDist);
+
+                // Rotate the reflection...
+                reflVecHat.Rotate(angleAmt);
+            }
+        }
+
+
         // Only have to check whether the ball is acceptably far enough away from the +/-x directions
         float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));
         if (angleAwayFromX < minAngleInDegs) {
@@ -780,6 +807,8 @@ void BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const
     if (b.GetCenterPosition2D()[1] < (p.GetCenterPosition()[1] - p.GetHalfHeight() - 0.9f*b.GetBounds().Radius())) {
         return;
     }
+    // We also don't change the direction if the ball is past one of the paddle boundaries
+
 
 	Vector2D ballDirection = b.GetDirection();
 

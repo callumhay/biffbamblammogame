@@ -22,8 +22,14 @@
 #include "../GameView/GameViewConstants.h"
 #include "../ConfigOptions.h"
 
+const float GameSound::DEFAULT_MIN_3D_SOUND_DIST       = 1000.0f;
+const float GameSound::DEFAULT_3D_SOUND_ROLLOFF_FACTOR = 0.1f;
+
 GameSound::GameSound() : soundEngine(NULL), currLoadedWorldStyle(GameWorld::None) {
     this->soundEngine = irrklang::createIrrKlangDevice();
+    this->soundEngine->setRolloffFactor(DEFAULT_3D_SOUND_ROLLOFF_FACTOR);
+    this->soundEngine->setDefault3DSoundMinDistance(DEFAULT_MIN_3D_SOUND_DIST);
+    
     assert(this->soundEngine != NULL);
 }
 
@@ -199,28 +205,56 @@ void GameSound::ReloadFromMSF() {
     }
 }
 
-void GameSound::StopAllSounds() {
+void GameSound::StopAllSounds(double fadeOutTimeInSecs) {
     if (this->soundEngine == NULL) {
         return;
     }
 
-    this->soundEngine->stopAllSounds();
-    this->ClearSounds();
+    if (fadeOutTimeInSecs == 0.0) {
+        // Simple clean-up of all the sounds
+        this->soundEngine->stopAllSounds();
+        this->ClearSounds();
+    }
+    else {
+        
+        // We have to go though all the sounds and add a fade-out each one...
+        for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
+            Sound* currSound = iter->second;
+            currSound->SetFadeout(fadeOutTimeInSecs);
+        }
+
+        for (AttachedSoundMapIter iter1 = this->attachedPlayingSounds.begin(); iter1 != this->attachedPlayingSounds.end(); ++iter1) {
+            SoundMap& soundMap = iter1->second;
+            for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end(); ++iter2) {
+                Sound* currSound = iter2->second;
+                currSound->SetFadeout(fadeOutTimeInSecs);
+            }
+        }
+    }
 }
 
-void GameSound::StopAllSoundLoops() {
+void GameSound::StopAllSoundLoops(double fadeOutTimeInSecs) {
     if (this->soundEngine == NULL) {
         return;
     }
     
     // Clear all looped non-attached sounds from memory
-    for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
+    for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end();) {
         Sound* currSound = iter->second;
         if (currSound->IsLooped()) {
-            delete currSound;
-            currSound = NULL;
-            iter = this->nonAttachedPlayingSounds.erase(iter);
+            
+            if (fadeOutTimeInSecs > 0.0) {
+                currSound->SetFadeout(fadeOutTimeInSecs);
+            }
+            else {
+                delete currSound;
+                currSound = NULL;
+                iter = this->nonAttachedPlayingSounds.erase(iter);
+                continue;
+            }
         }
+
+        ++iter;
     }
 
     // Clear all looped attached sounds from memory
@@ -229,13 +263,17 @@ void GameSound::StopAllSoundLoops() {
         for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end();) {
             Sound* currSound = iter2->second;
             if (currSound->IsLooped()) {
-                delete currSound;
-                currSound = NULL;
-                iter2 = soundMap.erase(iter2);
+                if (fadeOutTimeInSecs > 0.0) {
+                    currSound->SetFadeout(fadeOutTimeInSecs);
+                }
+                else {
+                    delete currSound;
+                    currSound = NULL;
+                    iter2 = soundMap.erase(iter2);
+                }
             }
-            else {
-                ++iter2;
-            }
+            
+            ++iter2;
         }
         if (soundMap.empty()) {
             iter1 = this->attachedPlayingSounds.erase(iter1);
@@ -277,13 +315,14 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
 // Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
 SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType,
                                        bool isLooped, const Point3D& position, 
-                                       bool applyActiveEffects) {
+                                       bool applyActiveEffects, float minDistance) {
 
     Sound* newSound = this->BuildSound(soundType, isLooped, &position, applyActiveEffects);
     if (newSound == NULL) {
         return INVALID_SOUND_ID;
     }
-    
+    newSound->SetMinimumDistance(minDistance);
+
     this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
     return newSound->GetSoundID();
 }
@@ -308,8 +347,56 @@ void GameSound::StopSound(SoundID soundID, double fadeOutTimeInSecs) {
     }
 }
 
-SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType,
-                                      bool isLooped) {
+void GameSound::StopAllSoundsWithType(const GameSound::SoundType& soundType, double fadeOutTimeInSecs) {
+    if (this->soundEngine == NULL) {
+        return;
+    }
+
+    for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
+        Sound* currSound = iter->second;
+        if (currSound->GetSoundType() == soundType) {
+            if (fadeOutTimeInSecs > 0.0) {
+                currSound->SetFadeout(fadeOutTimeInSecs);
+            }
+            else {
+                currSound->Stop();
+            }
+        }
+    }
+
+    for (AttachedSoundMapIter iter1 = this->attachedPlayingSounds.begin(); iter1 != this->attachedPlayingSounds.end(); ++iter1) {
+        SoundMap& soundMap = iter1->second;
+        for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end(); ++iter2) {
+            Sound* currSound = iter2->second;
+            if (currSound->GetSoundType() == soundType) {
+                if (fadeOutTimeInSecs > 0.0) {
+                    currSound->SetFadeout(fadeOutTimeInSecs);
+                }
+                else {
+                    currSound->Stop();
+                }
+            }
+        }
+    }
+}
+
+SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped) {
+
+    // Check to see if there's already the same position object with the same sound type attached to it, if so
+    // check to see if it's looped, if it is then we don't attach more than one looping sound of the same type to the object!
+    if (isLooped) {
+        AttachedSoundMapIter findIter = this->attachedPlayingSounds.find(posObj);
+        if (findIter != this->attachedPlayingSounds.end()) {
+            const SoundMap& soundMap = findIter->second;
+            // Search through the sound map for the same sound type...
+            for (SoundMapConstIter iter = soundMap.begin(); iter != soundMap.end(); ++iter) {
+                const Sound* sound = iter->second;
+                if (sound->GetSoundType() == soundType && sound->IsLooped()) {
+                    return INVALID_SOUND_ID;
+                }
+            }
+        }
+    }
 
     Point3D position = posObj->GetPosition3D();
     Sound* newSound = this->BuildSound(soundType, isLooped, &position);

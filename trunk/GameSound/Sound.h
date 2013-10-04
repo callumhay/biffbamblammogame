@@ -38,8 +38,10 @@ public:
     void SetPause(bool isPaused);
     void Stop();
     void SetPosition(const Point3D& pos);
+    void SetMinimumDistance(float minDist);
 
     void SetVolume(float volume);
+    float GetVolume() const;
     void SetFadeout(double timeInSecs);
     
     void Visit(SoundEffect& soundEffect, bool effectOn);
@@ -92,8 +94,9 @@ inline void Sound::Tick(double dT) {
     // Perform any fade-out on the sound
     if (this->IsFadingOut()) {
         this->fadeOutTimeCountdown = std::max<double>(0.0, this->fadeOutTimeCountdown - dT);
-        if (this->fadeOutTimeCountdown == 0.0) {
+        if (this->fadeOutTimeCountdown == 0.0 || this->GetVolume() == 0.0f) {
             this->sound->stop();
+            this->totalFadeOutTime = 0;
         }
         else {
             float currVol = NumberFuncs::LerpOverTime<float>(this->totalFadeOutTime, 0.0, 1.0f, 0.0f, this->fadeOutTimeCountdown);
@@ -115,9 +118,17 @@ inline void Sound::SetPosition(const Point3D& pos) {
     this->sound->setPosition(irrklang::vec3df(pos[0], pos[1], pos[2]));
 }
 
+inline void Sound::SetMinimumDistance(float minDist) {
+    this->sound->setMinDistance(minDist);
+}
+
 inline void Sound::SetVolume(float volume) {
     assert(volume >= 0.0f && volume <= 1.0f);
     this->sound->setVolume(volume);
+}
+
+inline float Sound::GetVolume() const {
+    return this->sound->getVolume();
 }
 
 inline void Sound::SetFadeout(double timeInSecs) {

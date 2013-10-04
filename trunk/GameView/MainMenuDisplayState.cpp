@@ -2,7 +2,7 @@
  * MainMenuDisplayState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -10,6 +10,7 @@
  */
 
 #include "MainMenuDisplayState.h"
+#include "SelectLevelMenuState.h"
 #include "InGameDisplayState.h"
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
@@ -249,7 +250,8 @@ void MainMenuDisplayState::InitializeMainMenu()  {
     int furthestWorldIdx, furthestLevelIdx;
     this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
 
-    if (this->display->GetModel()->IsTutorialLevel(furthestWorldIdx, furthestLevelIdx)) {
+    bool isNewGame = this->display->GetModel()->IsTutorialLevel(furthestWorldIdx, furthestLevelIdx);
+    if (isNewGame) {
         tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), NEW_GAME_MENUITEM);
         tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
     }
@@ -266,9 +268,14 @@ void MainMenuDisplayState::InitializeMainMenu()  {
     this->startGameMenuItem = new GameMenuItem(tempLabelSm, tempLabelLg, NULL);
     this->startGameMenuItemIndex = this->mainMenu->AddMenuItem(this->startGameMenuItem);
 
-	tempLabelSm.SetText(PLAY_LEVEL_MENUITEM);
-	tempLabelLg.SetText(PLAY_LEVEL_MENUITEM);
-	this->playLevelMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+    if (!isNewGame) {
+        tempLabelSm.SetText(PLAY_LEVEL_MENUITEM);
+        tempLabelLg.SetText(PLAY_LEVEL_MENUITEM);
+        this->playLevelMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+    }
+    else {
+        this->playLevelMenuItemIndex = -1;
+    }
 
     // Place an item for the blammopedia
     tempLabelSm.SetText(BLAMMOPEDIA_MENUITEM);
@@ -488,7 +495,9 @@ void MainMenuDisplayState::SetupBloomEffect() {
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
 	bool finishFadeAnim = this->fadeAnimation.Tick(dT);
+
     GameSound* sound = this->display->GetSound();
+    GameModel* model = this->display->GetModel();
 
 	// Check to see if we're switching game states...
     if (finishFadeAnim) {
@@ -497,20 +506,44 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     		
 		    // Turn off the background music...
             sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
-
-		    // Start the game at the furthest level of player progress - this will queue up the next states that we need to go to
+		    
+            // Figure out the furthest world and level that the player has progressed to
             int furthestWorldIdx, furthestLevelIdx;
-            this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+            model->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
             
-            // WARNING: We MUST add the world start state to the state queue before calling StartGameAtWorldAndLevel
-            // or it will take place AFTER the level start state!!!
-            //this->display->AddStateToQueue(DisplayState::WorldStart);
+            // Figure out whether the level is locked and requires a certain number of stars to unlock...
+            GameWorld* furthestWorld = model->GetWorldByIndex(furthestWorldIdx);
+            assert(furthestWorld != NULL);
+            GameLevel* furthestLevel = furthestWorld->GetLevelByIndex(furthestLevelIdx);
+            assert(furthestLevel != NULL);
 
-            this->display->GetModel()->StartGameAtWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+            if (furthestLevel->GetAreUnlockStarsPaidFor()) {
+                // Start the game at the furthest level of player progress - this will queue up the next states that we need to go to
+                model->StartGameAtWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+                // Place the view into the proper state to play the game
+                this->display->SetCurrentStateAsNextQueuedState();
+            }
+            else {
+                // Check to see if the player has enough stars to break the lock...
+                int totalStars = model->GetTotalStarsCollectedInGame();
+                if (totalStars >= furthestLevel->GetNumStarsRequiredToUnlock()) {
+                   
+                    model->StartGameAtWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
 
-		    // Place the view into the proper state to play the game
-		    this->display->SetCurrentStateAsNextQueuedState();
+                    // Pay for the stars automatically, start up the new level and save progress
+                    furthestLevel = furthestWorld->GetLevelByIndex(furthestLevelIdx);
+                    furthestLevel->SetAreUnlockStarsPaidFor(true);
+                    GameProgressIO::SaveGameProgress(model);
 
+                    
+                    this->display->SetCurrentStateAsNextQueuedState();
+                }
+                else {
+                    // The next state will need to be the level selection screen since the player can't unlock the level
+                    this->display->SetCurrentState(new SelectLevelMenuState(this->display, 
+                        DisplayStateInfo::BuildSelectLevelInfo(furthestWorldIdx)));
+                }
+            }
 		    return;
 	    }
         else if (this->changeToBlammopediaState) {
@@ -793,7 +826,7 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	UNUSED_PARAMETER(itemIndex);
     
-    // Play the sound effect assoicated with menu item changing/being highlighted by the user
+    // Play the sound effect associated with menu item changing/being highlighted by the user
     GameSound* sound = this->mainMenuState->display->GetSound();
     sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false);
 }
@@ -818,6 +851,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
 	}
 	else if (itemIndex == this->mainMenuState->playLevelMenuItemIndex) {
+
 		debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
 		
         sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);

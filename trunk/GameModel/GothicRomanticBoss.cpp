@@ -35,7 +35,7 @@ const float GothicRomanticBoss::BOTTOM_POINT_TIP_Y  = -1.069f;
 const float GothicRomanticBoss::LEG_WIDTH  = 3.25f;
 const float GothicRomanticBoss::LEG_HEIGHT = 3.0f;
 
-const float GothicRomanticBoss::DEFAULT_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION;
+const float GothicRomanticBoss::DEFAULT_ACCELERATION = 1.5f * PlayerPaddle::DEFAULT_ACCELERATION;
 
 const double GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS = 2.0;
 
@@ -77,14 +77,14 @@ Point3D GothicRomanticBoss::GetBottomPointTipPos() const {
     const BossBodyPart* bottomPt = this->GetBottomPoint();
     assert(bottomPt != NULL);
 
-    return bottomPt->GetWorldTransform() * Point3D(0.0f, BOTTOM_POINT_TIP_Y, 0.0f);
+    return bottomPt->GetTranslationPt3D() + Vector3D(0.0f, BOTTOM_POINT_TIP_Y, 0.0f);
 }
 
 Point3D GothicRomanticBoss::GetTopPointTipPos() const {
     const BossBodyPart* topPt = this->GetTopPoint();
     assert(topPt != NULL);
 
-    return topPt->GetWorldTransform() * Point3D(0.0f, TOP_POINT_TIP_Y, 0.0f);
+    return topPt->GetTranslationPt3D() + Vector3D(0.0f, TOP_POINT_TIP_Y, 0.0f);
 }
 
 void GothicRomanticBoss::Init(float startingX, float startingY) {

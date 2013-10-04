@@ -36,7 +36,7 @@ const double GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM = 0.015;
 const float GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL = 20.0f;
 
 GameTransformMgr::GameTransformMgr() : paddleWithCamera(NULL), ballWithCamera(NULL), 
-remoteControlRocketWithCamera(NULL) {
+remoteControlRocketWithCamera(NULL), currGameDegRotX(0), currGameDegRotY(0), currGameDegRotZ(0) {
 	this->Reset();
 }
 
@@ -61,6 +61,9 @@ void GameTransformMgr::ClearSpecialCamEffects() {
     }
 
 	this->cameraFOVAngle = Camera::FOV_ANGLE_IN_DEGS;
+    this->storedCamFOVBeforeRemoteControlRocketCam = Camera::FOV_ANGLE_IN_DEGS;
+    this->storedCamOriBeforeRemoteControlRocketCam = this->defaultCamOrientation;
+    
 	this->paddleCamAnimations.clear();
 	this->ballCamAnimations.clear();
 	this->camFOVAnimations.clear();
@@ -200,6 +203,19 @@ void GameTransformMgr::SetBulletTimeCamera(bool turnOnBulletTimeCam) {
     else {
         animType = GameTransformMgr::FromBulletTimeCamAnimation;
     }
+
+    // Remove any existing bullet time animations from the animation queue
+    for (std::list<TransformAnimation>::iterator iter = this->animationQueue.begin(); iter != this->animationQueue.end();) {
+        GameTransformMgr::TransformAnimationType type = iter->type;
+        if (type == GameTransformMgr::ToBulletTimeCamAnimation ||
+            type == GameTransformMgr::FromBulletTimeCamAnimation) {
+            iter = this->animationQueue.erase(iter);
+        }
+        else {
+             ++iter;
+        }
+    }
+
 	TransformAnimation transformAnim(animType);
 	this->animationQueue.push_front(transformAnim);
 }
@@ -236,6 +252,12 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
         GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
         if (previousType == GameTransformMgr::ToRemoteCtrlRocketCamAnimation || 
             previousType == GameTransformMgr::FromRemoteCtrlRocketCamAnimation) {
+
+            if (!this->animationQueue.back().hasStarted) {
+                // Make sure the stored orientation and FOV are initialized properly
+                this->storedCamFOVBeforeRemoteControlRocketCam = this->cameraFOVAngle;
+                this->storedCamOriBeforeRemoteControlRocketCam = this->currCamOrientation;
+            }
 
             this->animationQueue.pop_back();
         }
@@ -1208,6 +1230,15 @@ bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameMode
            bulletTimeAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
 
     const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
+
+    // Stop the animation if no balls are available anymore
+    if (bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
+        if (currBoostModel == NULL || currBoostModel->GetNumBallsAllowedToBoost() == 0) {
+            this->SetBulletTimeCamera(false);
+            return false;
+        }
+    }
+
     float invTimeDialation = 1.0f;   
     if (currBoostModel != NULL && currBoostModel->GetBulletTimeState() != BallBoostModel::NotInBulletTime) {
 
@@ -1247,15 +1278,22 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
     const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
     if (currBoostModel == NULL) {
         // Pop the animation off the queue and get out
-	    this->animationQueue.pop_front();
+        this->animationQueue.pop_front();
         return;
     }
 
 	// Clear any previous ball death animations
 	this->bulletTimeCamAnimation = AnimationMultiLerp<Orientation3D>(&this->currCamOrientation);
-
+    
 	// Based on the animation, set the animations for the camera's orientation
     if (bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
+
+        // Make sure there are balls available for boosting
+        if (currBoostModel->GetNumBallsAllowedToBoost() == 0) {
+            // Pop the animation off the queue and get out
+            this->animationQueue.pop_front();
+            return;
+        }
 
         // Calculate the extent to which we should zoom in, this changes based
         // on the number of balls present - with more balls we make the border around them smaller
@@ -1371,7 +1409,7 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         // Calculate the distance that will be traveled by the camera
         Vector3D travelVec = finalOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
         float distToTravel = travelVec.length();
-        double totalTimeToAnimate   = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM;
+        double totalTimeToAnimate = std::max<double>(0.01, distToTravel * GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM);
 
         // Create the animation to get from wherever the camera currently is to the rocket
         std::vector<double> timeValues;
@@ -1423,7 +1461,7 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         // Calculate the distance that will be traveled by the camera
         Vector3D travelVec = this->storedCamOriBeforeRemoteControlRocketCam.GetTranslation() - this->currCamOrientation.GetTranslation();
         float distToTravel = travelVec.length();
-        double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM;
+        double timeToAnimate = std::max<double>(0.01, distToTravel * GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM);
 
         std::vector<Orientation3D> orientationValues;
         orientationValues.reserve(3);

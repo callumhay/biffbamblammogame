@@ -17,7 +17,7 @@
 const char* GameProgressIO::PROGRESS_FILENAME = "bbb_progress.dat";
 
 bool GameProgressIO::LoadGameProgress(GameModel* model) {
-#define ON_ERROR_CLEAN_UP_AND_EXIT(condition) if (!(condition)) { inFile.close(); return false; }
+#define ON_ERROR_CLEAN_UP_AND_EXIT(condition) if (!(condition)) { debug_output("ERROR WHILE LOADING GAME PROGRESS!"); inFile.close(); return false; }
 
     if (model == NULL) {
         assert(false);
@@ -35,6 +35,7 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
         bool isUnlocked;
         int numWorlds;
         long highScore;
+        bool starCostPaidFor;
 
         ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> numWorlds);
         std::getline(inFile, nameStr);  // finish reading the line
@@ -47,6 +48,7 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
             // Look up which world we're dealing with based on the read name
             GameWorld* currWorld = model->GetWorldByName(nameStr);
             if (currWorld == NULL) {
+                worldIdx = std::max<int>(0, worldIdx-1);
                 continue;
             }
             
@@ -64,6 +66,8 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
                 // Look up the level we're dealing with based on the read name
                 GameLevel* currLevel = currWorld->GetLevelByName(nameStr);
                 if (currLevel == NULL) {
+                    
+                    levelIdx = std::max<int>(0, levelIdx-1);
                     continue;
                 }
 
@@ -71,6 +75,11 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
                 ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> highScore);
                 std::getline(inFile, nameStr);  // finish reading the line
                 currLevel->SetHighScore(highScore, true);
+
+                // A flag is stored to indicate whether the unlock star cost of the level has
+                // been paid for (for levels that don't have a cost this will always be true)
+                ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> starCostPaidFor);
+                currLevel->SetAreUnlockStarsPaidFor(starCostPaidFor);
             }
 
             currWorld->UpdateLastLevelPassedIndex();
@@ -124,6 +133,7 @@ bool GameProgressIO::SaveGameProgress(const GameModel* model) {
             // Store each unlocked level's high-score
             outFile << currLevel->GetName() << std::endl;
             outFile << currLevel->GetHighScore() << std::endl;
+            outFile << currLevel->GetAreUnlockStarsPaidFor() << std::endl;
         }
     }
     outFile.close();
@@ -182,6 +192,7 @@ bool GameProgressIO::SaveFullProgressOfGame(const GameModel* model) {
             // Store each unlocked level's high-score
             outFile << currLevel->GetName() << std::endl;
             outFile << std::max<long>(1, currLevel->GetHighScore()) << std::endl;
+            outFile << true << std::endl; // Star cost to unlock is paid for
         }
     }
     outFile.close();
@@ -231,9 +242,11 @@ bool GameProgressIO::SaveFullProgressOfWorld(const GameModel* model, const GameW
                 else {
                     outFile << std::max<long>(1, currLevel->GetHighScore()) << std::endl;
                 }
+                outFile << true << std::endl; // star cost is paid for
             }
             else {
                 outFile << currLevel->GetHighScore() << std::endl;
+                outFile << currLevel->GetAreUnlockStarsPaidFor() << std::endl;
             }
 
         }

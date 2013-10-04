@@ -169,7 +169,7 @@ WorldBackgroundLoop {
 // Nouveau *******************************************************************
 WorldBackgroundLoop {
 	world = Nouveau
-	file  = 
+	file  = resources/NouveauWorldBackgroundLoop.ogg
 }
 
 // Deco **********************************************************************
@@ -221,20 +221,27 @@ BallPaddleCollisionEvent {
 	file = resources/BallPaddleCollisionEvent_01 ALT.ogg | resources/BallPaddleCollisionEvent_02 ALT.ogg | resources/BallPaddleCollisionEvent_03 ALT.ogg | resources/BallPaddleCollisionEvent_04 ALT.ogg
 }
 
-BallStickyPaddleCollisionEvent {
+// Happens when the ball attaches itself to the sticky paddle
+BallStickyPaddleAttachEvent {
 	file = resources/BallStickyPaddleCollisionEvent.ogg
 }
 
+// Happens when there are multiple balls and the sticky paddle already has a ball stuck to it but another
+// ball hits the paddle and bounces off (since there can only be one ball stuck to the paddle at a time)
+BallStickyPaddleBounceEvent {
+	file = 
+}
+
 BallShieldPaddleCollisionEvent {
-	file =
+	file = resources/BallShieldPaddleCollisionEvent.ogg
 }
 
 BallOrPaddleGrowEvent {
-	file = resources/grow.ogg
+	file = resources/BallOrPaddleGrowEvent.ogg
 }
 
 BallOrPaddleShrinkEvent {
-	file = resources/shrink.ogg
+	file = resources/BallOrPaddleShrinkEvent.ogg
 }
 
 
@@ -255,20 +262,23 @@ BallBlockCollisionColourChange {
 // break... it increases in pitch with each block that gets broken...(see points section)
 
 BombBlockDestroyedEvent {
-	file = resources/bomb_explode.ogg
+	file = resources/BombBlockDestroyedEvent.ogg
 }
 
 InkBlockDestroyedEvent {
-	file = resources/ink_splat.ogg
+	file = resources/InkBlockDestroyedEvent.ogg
+}
+
+// Occurs right after an ink block is destroyed (in most situations). 
+// This sound should involve a kind of bubbling/blurbling/? as the gooballs of ink fly at screen and 
+// then a splatting as when they hit the screen an partially blind the player.
+InkSplatterEvent {
+	file = resources/InkSplatterEvent.ogg
 }
 
 BasicBlockDestroyedEvent {
-	file = resources/block_break_basic.ogg
+	file = resources/BasicBlockDestroyedEvent_01.ogg | resources/BasicBlockDestroyedEvent_02.ogg | resources/BasicBlockDestroyedEvent_03.ogg | resources/BasicBlockDestroyedEvent_04.ogg | resources/BasicBlockDestroyedEvent_05.ogg | resources/BasicBlockDestroyedEvent_06.ogg | resources/BasicBlockDestroyedEvent_07.ogg | resources/BasicBlockDestroyedEvent_08.ogg | resources/BasicBlockDestroyedEvent_09.ogg | resources/BasicBlockDestroyedEvent_10.ogg   
 }
-
-// BasicBlockChangedColourEvent {
-//	file = resources/
-// }
 
 CannonBlockLoadedEvent {
 	file = resources/cannon_loaded.ogg
@@ -281,7 +291,7 @@ CannonBlockFiredEvent {
 // CannonBlockLoadedWithBallCamBallEvent
 
 PortalTeleportEvent {
-	file = resources/portal_warp.ogg
+	file = resources/PortalTeleportEvent.ogg
 }
 
 CollateralBlockFlashingLoop {
@@ -297,56 +307,63 @@ CannonBlockRotatingLoop {
 }
 
 TeslaLightningArcLoop {
-	file = resources/electricity.ogg
+	file = resources/TeslaLightningArcLoop.ogg
 }
 
 SwitchBlockActivated {
-	file = resources/switch.ogg
+	file = resources/SwitchBlockActivated.ogg
 }
 
 BlockFrozenEvent {
-	file = resources/frozen.ogg
+	file = resources/BlockFrozenEvent.ogg
 }
 
 BlockOnFireLoop {
-	file = resources/on_fire.ogg
+	file = resources/BlockOnFireLoop.ogg
 }
 
 IceShatterEvent {
-	file = resources/shatter.ogg
+	file = resources/IceShatterEvent.ogg
 }
 
 IceMeltedEvent {
-	file =
+	file = resources/IceMeltedEvent.ogg
 }
 
 // A block that was on fire is hit by the ice ball and the fire 'smokes-out' / gets cancelled by the ice
 FireFrozeEvent {
-	file =
+	file = resources/FireFrozeEvent.ogg
 }
 
 // Projectile and Beam Events ************************************************
 
 // TurretRocketFiredEvent
+// TurretRocketMovingLoop
 // BossRocketFiredEvent
+// BossRocketMovingLoop
 
 PaddleRocketLaunchEvent {
-	file =
+	file = resources/PaddleRocketLaunchEvent.ogg
 }
 
 PaddleRocketMovingLoop {
-	file = resources/rocket.ogg
+	file = resources/PaddleRocketMovingLoop.ogg
 }
 
 RocketExplodedEvent {
-	file = resources/rocket_explode.ogg
+	file = resources/RocketExplodedEvent.ogg
 }
 
-// TurretMineFiredEvent
-// PaddleMineFiredEvent
+TurretMineFiredEvent {
+	file = resources/TurretMineFiredEvent.ogg
+}
+
+PaddleMineFiredEvent {
+	file = resources/PaddleMineFiredEvent.ogg
+}
 
 MineExplodedEvent {
-	file = resources/rocket_explode.ogg
+	file = resources/MineExplodedEvent.ogg
 }
 
 LaserBulletShotEvent {
@@ -354,14 +371,16 @@ LaserBulletShotEvent {
 }
 
 LaserBeamFiringLoop {
-	file = resources/laser_beam.ogg
+	file = resources/LaserBeamFiringLoop.ogg
 }
 
-// LaserDeflectedByShieldEvent {
-// }
+LaserDeflectedByShieldEvent {
+	file = resources/LaserDeflectedByShieldEvent.ogg
+}
 
-// RocketOrMineDeflectedByShieldEvent {
-// }
+RocketOrMineDeflectedByShieldEvent {
+	file = resources/RocketOrMineDeflectedByShieldEvent.ogg
+}
 
 // PaddleLaserBulletCollisionEvent {
 // }
@@ -375,35 +394,37 @@ LaserBeamFiringLoop {
 BallSafetyNetCreatedEvent {
 	file = resources/safety_net_created.ogg
 }
+
 BallSafetyNetDestroyedEvent {
-	file = resources/safety_net_destroyed.ogg
+	file = resources/BallSafetyNetDestroyedEvent.ogg
 }
 
 LevelFlipEvent {
 	file = 
 }
+
 LevelUnflipEvent {
 	file =
 }
 
 PaddleShieldActivatedEvent {
-	file =
+	file = resources/PaddleShieldActivatedEvent.ogg
 }
+
 PaddleShieldDeactivatedEvent {
-	file =
+	file = resources/PaddleShieldDeactivatedEvent.ogg
 }
 
 MagnetPaddleLoop {
-	file = resources/drone.ogg
+	file = resources/MagnetPaddleLoop.ogg
 }
 
-
 ItemSpawnedEvent {
-	file = resources/item_spawn.ogg
+	file = resources/ItemSpawnedEvent.ogg
 }
 
 PowerUpItemActivatedEvent {
-	file = resources/power_up_item.ogg
+	file = resources/PowerUpItemActivatedEvent.ogg
 }
 
 PowerNeutralItemActivatedEvent {
@@ -431,32 +452,72 @@ ItemMovingLoop {
 
 // Boss-specific Events ******************************************************
 
-// BossFadeInIntroEvent
+BossFadeInIntroEvent {
+	file = resources/BossFadeInIntroEvent.ogg
+}
 // BossBackgroundLoop
 // BossSparkleEvent
 // BossGlowEvent
 // BossPowerChargeEvent
-// BossElectricitySpasmLoop
-// BossMassiveShockwaveEvent
-// BossHurtEvent
-// BossAngryEvent
-// BossBlowingUpLoop
-// BossDeathFlashToFullscreenWhiteoutEvent
-// BossHitPaddleEvent
 
-// ClassicalBossArmShakeLoop
-// ClassicalBossArmAttackEvent
+BossElectricitySpasmLoop {
+	file = resources/BossElectricitySpasmLoop.ogg
+}
+BossHurtEvent {
+	file = resources/BossHurtEvent_01.ogg | resources/BossHurtEvent_02.ogg
+}
+BossAngryEvent {
+	file = resources/BossAngryEvent_01.ogg | resources/BossAngryEvent_02.ogg
+}
+BossBlowingUpLoop {
+	file = resources/BossBlowingUpLoop_01.ogg | resources/BossBlowingUpLoop_02.ogg | resources/BossBlowingUpLoop_03.ogg | resources/BossBlowingUpLoop_04.ogg | resources/BossBlowingUpLoop_05.ogg
+}
+BossDeathFlashToFullscreen {
+	file = resources/BossDeathFlashToFullscreen.ogg
+}
 
-// NouveauBossTargetingEvent
+// BossCrosshairTargetingEvent
+BossLaserBeamLoop {
+	file = resources/BossLaserBeamLoop.ogg
+}
+
+
+ClassicalBossArmShakeLoop {
+	file = resources/ClassicalBossArmShakeLoop.ogg
+}
+ClassicalBossArmAttackEvent {
+	file = resources/ClassicalBossArmAttackEvent.ogg
+}
+ClassicalBossArmAttackHitEvent {
+	file = resources/ClassicalBossArmAttackHitEvent.ogg
+}
+// Occurs when the classical boss charges up its laser-shooting eye ball right
+// before its laser barrage attack
+// ClassicalBossPowerChargeEvent {
+// }
+
+// Occurs when the boss is about to unleash a summoning attack, where it summons 
+// a bunch of nasty items to decend upon the paddle
+// GothicBossSummonItemChargeEvent {
+// }
+// Occurs when the boss charges up its shockwave to destroy its confines
+// GothicBossChargeShockwaveEvent {
+// }
+GothicBossMassiveShockwaveEvent {
+	file = resources/GothicBossMassiveShockwaveEvent.ogg
+}
+
+
 
 // DecoBossArmRotateEvent
 // DecoBossArmExtendEvent
 // DecoBossArmRetractEvent
 // DecoBossArmLevelCollisionEvent
+// DecoBossArmPaddleCollisionEvent
 // DecoBossLevelRotatingLoop
 
-// BossCrosshairTargetEvent
-// BossLaserBeamLoop
+
+
 
 
 // Bullet-time / Ball Boost Events *******************************************
@@ -474,25 +535,25 @@ ExitBulletTimeEvent {
 }
 
 BallBoostEvent {
-	file = resources/boost.ogg
+	file = resources/BallBoostEvent.ogg
 }
 
 BallBoostGainedEvent {
-	file = resources/boost_acquired.ogg
+	file = resources/BallBoostGainedEvent.ogg
 }
 
 // Star, points and life Events **********************************************
 
 LifeUpAcquiredEvent {
-	file = resources/one_up.ogg
+	file = resources/LifeUpAcquiredEvent.ogg
 }
 
 StarAcquiredEvent {
-	file = resources/star_gained.ogg
+	file = resources/StarAcquiredEvent.ogg
 }
 
 FiveStarsAcquiredEvent {
-	file = resources/star_gained.ogg
+	file = resources/FiveStarsAcquiredEvent.ogg
 }
 
 ScoreMultiplierIncreasedTo2Event {
@@ -508,7 +569,7 @@ ScoreMultiplierIncreasedTo4Event {
 }
 
 ScoreMultiplierLostEvent {
-	file = multiplier_lost.ogg
+	file = resources/ScoreMultiplierLostEvent.ogg
 }
 
 // TODO... Make the sounds increase in pitch (or something) to indicate that good things are happening...
@@ -549,22 +610,32 @@ BlockBrokenMultiplierCounterInc9 {
 
 // Level Start and End State Events ******************************************
 
-// LevelStartPaddleMoveUpEvent
-// LevelStartBallSpawnOnPaddleEvent
-// LevelEndFadeoutEvent
+LevelStartPaddleMoveUpEvent {
+	file = resources/LevelStartPaddleMoveUpEvent.ogg
+}
 
+LevelStartBallSpawnOnPaddleEvent {
+	file = resources/LevelStartBallSpawnOnPaddleEvent.ogg
+}
+
+LevelEndFadeoutEvent {
+	file = resources/LevelEndFadeoutEvent.ogg
+}
 
 // Level Summary State Events ************************************************
 
 // LevelSummaryBackgroundLoop
 // LevelSummaryPointTallyLoop
-// LevelSummaryNewHighScoreEvent
+
+LevelSummaryNewHighScoreEvent {
+	file = resources/LevelSummaryNewHighScoreEvent.ogg
+}
 
 
 // World Complete State Events ***********************************************
 
 // WorldCompleteBackgroundLoop
-
+// WorldUnlockEvent
 
 // Game-over state events ****************************************************
 

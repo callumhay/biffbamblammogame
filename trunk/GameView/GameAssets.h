@@ -180,7 +180,7 @@ public:
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
     void PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
-    void PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
+    void PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const Boss& boss, const BossBodyPart& bossPart);
 
 	void RocketExplosion(const RocketProjectile& rocket, Camera& camera, const GameModel* gameModel);
     void MineExplosion(const MineProjectile& mine, Camera& camera);
@@ -289,7 +289,7 @@ inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, c
         GameLevel* currLevel = gameModel.GetCurrentLevel();
         
         glPushMatrix();
-		glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + SafetyNet::SAFETY_NET_HALF_HEIGHT), 0.0f);
+		glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + SafetyNet::SAFETY_NET_HALF_HEIGHT + 0.1f), 0.0f);
 		this->ballSafetyNet->Draw(dT, camera, fgKeyLight, fgFillLight, ballLight);
 		glPopMatrix();
 	}

@@ -20,6 +20,8 @@
 
 #include "../ESPEngine/ESP.h"
 
+#include "../GameSound/GameSound.h"
+
 class LevelCompleteSummaryDisplayState : public DisplayState {
 public:
     LevelCompleteSummaryDisplayState(GameDisplay* display);
@@ -87,7 +89,6 @@ private:
     ESPParticleScaleEffector haloGrower;
     ESPParticleColourEffector haloFader;
 
-
     TextLabel2D pressAnyKeyLabel;
     TextLabel2D levelCompleteLabel;
     TextLabel2D newHighScoreLabel;
@@ -124,6 +125,8 @@ private:
     ESPParticleRotateEffector starBgRotator;
     ESPParticleRotateEffector starFgRotator;
     ESPParticleScaleEffector starFgPulser;
+
+    SoundID highScoreSoundID;
 
     class DifficultyPaneEventHandler : public OverlayPaneEventHandler {
     public:

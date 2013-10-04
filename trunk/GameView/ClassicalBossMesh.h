@@ -22,7 +22,7 @@ class ESPPointEmitter;
 
 class ClassicalBossMesh : public BossMesh {
 public:
-    ClassicalBossMesh(ClassicalBoss* boss);
+    ClassicalBossMesh(ClassicalBoss* boss, GameSound* sound);
     ~ClassicalBossMesh();
 
     double ActivateIntroAnimation();

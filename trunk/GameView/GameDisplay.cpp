@@ -33,26 +33,15 @@ bool GameDisplay::detachedCamera            = false;
 const int GameDisplay::MAX_FRAMERATE = 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
-GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): 
+GameDisplay::GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight): 
 gameListener(NULL), currState(NULL), model(model), 
-assets(NULL), sound(NULL),
-gameExited(false), gameReinitialized(false), gameCamera() {
+assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCamera() {
 
 	assert(model != NULL);
+    assert(sound != NULL);
 
     // MAKE SURE WE SET THE CAMERA DIMENSIONS!!!!
     Camera::SetWindowDimensions(initWidth, initHeight);
-
-	// Load basic default in-memory sounds
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
-    this->sound = new GameSound();
-    if (this->sound->Init()) {
-        this->sound->LoadGlobalSounds();
-        std::cout << "Sound initialized successfully." << std::endl;
-    }
-    else {
-        std::cerr << "Failed to load game sound." << std::endl;
-    }
 
     this->assets = new GameAssets(initWidth, initHeight, this->sound);
 
@@ -80,10 +69,6 @@ GameDisplay::~GameDisplay() {
 
 	// Remove any action listeners for the model
 	this->RemoveActionListeners();
-
-    // Delete game sound
-    delete this->sound;
-    this->sound = NULL;
 
 	// Delete game assets LAST!! (If you don't do this last
 	// then all the other things being destroyed in this destructor

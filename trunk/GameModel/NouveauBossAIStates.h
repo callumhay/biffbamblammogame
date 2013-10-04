@@ -181,7 +181,7 @@ private:
     double GetTimeBetweenLaserBeamFirings() const { return 1.0f; } // This must be constant
 
     double GenerateTimeBetweenArcSprayLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.33) + 0.75; }
-    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2) + 0.085; }
+    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2) + 0.09; }
     double GetRapidFireAngleSpeedInDegsPerSec() const { return RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND; }
 
     void KillLeftArm();
@@ -248,15 +248,15 @@ private:
 
     int GenerateNumArcLaserFireMovements() { return (Randomizer::GetInstance()->RandomUnsignedInt() % 2) + 2; }
     double GenerateArcLaserTimeToWaitAtTarget() { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5) + 0.5; }
-    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.16) + 0.07; }
+    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.16) + 0.08; }
     double GetRapidFireAngleSpeedInDegsPerSec() const { return RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND; }
 
     AnimationMultiLerp<float> GenerateTopDeathRotationAnimation();
     AnimationMultiLerp<Vector3D> GenerateTopDeathTranslationAnimation(GameModel* gameModel, bool goLeft);
 
-    int GenerateNumMovements() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 5) + 4; }
+    int GenerateNumMovements() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 4) + 3; }
     double GenerateWaitAtTargetTime() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 3.5) + 0.75; }
-    double GenerateTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.2) + 0.2; }
+    double GenerateTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.275) + 0.275; }
     float GetMaxMoveSpeedBetweenTargets() const { return MAX_MOVE_SPEED; }
     float GetAccelerationMagnitude() const { return DEFAULT_ACCELERATION; }
 
@@ -284,6 +284,7 @@ public:
     void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
 
 private:
+    static const int NUM_HITS_UNTIL_DEAD = 3;
     static const float TOP_SPHERE_LIFE_POINTS;
     static const float TOP_SPHERE_DAMAGE_ON_HIT;
     static const float MAX_MOVE_SPEED;
@@ -303,12 +304,12 @@ private:
     double GenerateTimeBetweenLaserBeamLastPrepAndFire() const { return 1.2; }
     double GetTimeBetweenLaserBeamFirings() const { return 0.66f; } // This must be constant
 
-    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.125) + 0.06; }
+    double GenerateTimeBetweenRapidFireSweepLasers() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.14) + 0.07; }
     double GetRapidFireAngleSpeedInDegsPerSec() const { return RAPID_FIRE_ANGLE_CHANGE_SPEED_DEGS_PER_SECOND; }
 
-    int GenerateNumMovements() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 5) + 3; }
+    int GenerateNumMovements() const { return (Randomizer::GetInstance()->RandomUnsignedInt() % 4) + 3; }
     double GenerateWaitAtTargetTime() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 2.5) + 0.75; }
-    double GenerateTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.25) + 0.13; }
+    double GenerateTimeBetweenLasersWhileWaitingAtTarget() const { return (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.225) + 0.225; }
     float GetMaxMoveSpeedBetweenTargets() const { return MAX_MOVE_SPEED; }
     float GetAccelerationMagnitude() const { return DEFAULT_ACCELERATION; }
 

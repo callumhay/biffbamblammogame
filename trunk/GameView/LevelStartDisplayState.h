@@ -18,6 +18,8 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
 
+#include "../GameSound/SoundCommon.h"
+
 class GameDisplay;
 class ESPPointEmitter;
 
@@ -65,6 +67,10 @@ private:
 	ESPPointEmitter* starEmitter;
 
     Texture2D* starryBG;
+
+    // Sound IDs for tracking level starting sounds
+    SoundID paddleMoveUpSoundID;
+    SoundID ballSpawnSoundID;
 
     DISALLOW_COPY_AND_ASSIGN(LevelStartDisplayState);
 };

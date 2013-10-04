@@ -43,7 +43,7 @@ double ShieldPaddleItem::Activate() {
 			currTimer = NULL;
 	}
 
-	// Activate the sheild paddle
+	// Activate the shield paddle
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	paddle->AddPaddleType(PlayerPaddle::ShieldPaddle);
 	

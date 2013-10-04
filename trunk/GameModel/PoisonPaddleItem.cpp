@@ -11,7 +11,7 @@
 
 #include "PoisonPaddleItem.h"
 
-const char* PoisonPaddleItem::POISON_PADDLE_ITEM_NAME			  = "PoisonPaddle";
+const char* PoisonPaddleItem::POISON_PADDLE_ITEM_NAME       = "PoisonPaddle";
 const double PoisonPaddleItem::POISON_PADDLE_TIMER_IN_SECS	= 18.0f;
 
 PoisonPaddleItem::PoisonPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
@@ -39,25 +39,18 @@ double PoisonPaddleItem::Activate() {
 		}
 	}
 	
-	bool alreadyPoisoned = removeTimers.size() > 0;
-
-	// Remove the uberball timers from the list of active timers
+	// Remove the poison timers from the list of active timers
 	for (unsigned int i = 0; i < removeTimers.size(); i++) {
-			GameItemTimer* currTimer = removeTimers[i];
-			activeTimers.remove(currTimer);
-			delete currTimer;
-			currTimer = NULL;
+	    GameItemTimer* currTimer = removeTimers[i];
+	    activeTimers.remove(currTimer);
+	    delete currTimer;
+	    currTimer = NULL;
 	}
 
 	// Re-poison the paddle
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	paddle->AddPaddleType(PlayerPaddle::PoisonPaddle);
-	
-
-	// If the paddle wasn't already poisoned then we activate the item (signal item activated event)
-	if (!alreadyPoisoned) {
-		GameItem::Activate();
-	}
+	GameItem::Activate();
 
 	return PoisonPaddleItem::POISON_PADDLE_TIMER_IN_SECS;
 }

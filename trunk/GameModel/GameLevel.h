@@ -22,6 +22,7 @@
 #include <vector>
 #include <set>
 
+class GameSound;
 class GameBall;
 class QuadTree;
 class TeslaBlock;
@@ -85,7 +86,7 @@ public:
 	~GameLevel();
 
 	// Used to create a level from file
-	static GameLevel* CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, std::string filepath);
+	static GameLevel* CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, int milestoneStarAmt, std::string filepath);
     static bool ReadItemList(std::stringstream& inFile, std::vector<GameItem::ItemType>& items);
 
 	/**
@@ -198,7 +199,6 @@ public:
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
 
     bool GetIsLevelPassedWithScore() const;
-    
     long GetPrevHighScore() const;
  
     long GetHighScore() const;
@@ -209,6 +209,11 @@ public:
 
     int GetNumStarsForScore(long score) const;
     int GetHighScoreNumStars() const { return this->GetNumStarsForScore(this->highScore); }
+
+    // Get the number of stars required to unlock the level when it isn't already unlocked
+    int GetNumStarsRequiredToUnlock() const;
+    bool GetAreUnlockStarsPaidFor() const;
+    void SetAreUnlockStarsPaidFor(bool paidFor);
 
     Boss* GetBoss() const {
         return this->boss;
@@ -221,7 +226,7 @@ public:
     void TickAIEntities(double dT, GameModel* gameModel);
 
 private:
-	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds
+	// Map of the pairings of Tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D> teslaLightning;
 
@@ -238,6 +243,7 @@ private:
 	size_t width, height;               // Size values for the level
     size_t randomItemProbabilityNum;    // A number >= 0 for random item probability in the level
     float paddleStartXPos;
+    float levelHypotenuse;
 
     bool levelAlmostCompleteSignaled; // Whether or not the event for the level being almost completed has already been signaled
 
@@ -251,15 +257,20 @@ private:
     long highScore;           // Current high score for this level
     bool hasNewHighScore;     // If a new high score was achieved on the last play through of this level
 
-    float levelHypotenuse;
+    // Milestone star lock -- keeps players from entering or going past this level until the level is unlocked
+    // via a given number of stars
+    int numStarsRequiredToUnlock;
+    bool areUnlockStarsPaidFor;
 
     // Constructor for non-boss levels
 	GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
-		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes,
+		const std::vector<std::vector<LevelPiece*> >& pieces, int numStarsToUnlock,
+        const std::vector<GameItem::ItemType>& allowedDropTypes,
         size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos);
 	// Constructor for boss levels
     GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
-		const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss, const std::vector<GameItem::ItemType>& allowedDropTypes,
+		const std::vector<std::vector<LevelPiece*> >& pieces, int numStarsToUnlock,
+        Boss* boss, const std::vector<GameItem::ItemType>& allowedDropTypes,
         size_t randomItemProbabilityNum, float paddleStartXPos);
 
     void InitPieces(float paddleStartXPos, const std::vector<std::vector<LevelPiece*> >& pieces);
@@ -283,7 +294,6 @@ inline const LevelPiece* GameLevel::GetTriggerableLevelPiece(const LevelPiece::T
 inline bool GameLevel::GetIsLevelPassedWithScore() const {
     return this->highScore > 0;
 }
-
 inline long GameLevel::GetPrevHighScore() const {
     return this->prevHighScore;
 }
@@ -316,6 +326,16 @@ inline int GameLevel::GetNumStarsForScore(long score) const {
         starIdx++;
     }
     return starIdx;
+}
+
+inline int GameLevel::GetNumStarsRequiredToUnlock() const {
+    return this->numStarsRequiredToUnlock;
+}
+inline bool GameLevel::GetAreUnlockStarsPaidFor() const {
+    return this->areUnlockStarsPaidFor || this->GetNumStarsRequiredToUnlock() == 0;
+}
+inline void GameLevel::SetAreUnlockStarsPaidFor(bool paidFor) {
+    this->areUnlockStarsPaidFor = paidFor;
 }
 
 #endif

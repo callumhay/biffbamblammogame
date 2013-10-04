@@ -26,6 +26,8 @@
 #include "FullscreenFlashEffectInfo.h"
 #include "SparkBurstEffectInfo.h"
 
+#include "../GameSound/GameSound.h"
+
 using namespace gothicromanticbossai;
 
 // Begin GothicRomanticBossAI *****************************************************
@@ -565,7 +567,7 @@ const float FireBallAI::TOP_POINT_LIFE_POINTS = 300.0f;
 // The time between firing the rockets that destroy the regen blocks (that drop the fire globs)
 const double FireBallAI::TIME_BETWEEN_REGEN_BLOCK_DESTROYING_ROCKETS = 0.35;
 
-const double FireBallAI::TOP_FADE_TIME = 3.0;
+const double FireBallAI::TOP_FADE_TIME = 2.25;
 
 FireBallAI::FireBallAI(GothicRomanticBoss* boss) : ConfinedAI(boss, FireBallAI::NUM_ITEMS_PER_SUMMONING),
 topPointWeakpt(NULL) {
@@ -684,11 +686,11 @@ AnimationMultiLerp<float> FireBallAI::GenerateHitOnTopTiltAnim(const Point2D& hi
 
 AnimationMultiLerp<Vector3D> FireBallAI::GenerateTopDeathTranslationAnimation(bool fallLeft) const {
     return Boss::BuildLimbFallOffTranslationAnim(TOP_FADE_TIME, (fallLeft ? -1 : 1) * 4 * GothicRomanticBoss::TOP_POINT_WIDTH, 
-        -1.5f * this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
+        -3.0f * GothicRomanticBoss::TOP_POINT_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
 }
 
 AnimationMultiLerp<float> FireBallAI::GenerateTopDeathRotationAnimation(bool fallLeft) const {
-    return Boss::BuildLimbFallOffZRotationAnim(TOP_FADE_TIME, fallLeft ? 720.0f : -720.0f);
+    return Boss::BuildLimbFallOffZRotationAnim(TOP_FADE_TIME, fallLeft ? 600.0f : -600.0f);
 }
 
 void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
@@ -767,6 +769,7 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
 }
 
 void FireBallAI::UpdateState(double dT, GameModel* gameModel) {
+
     switch (this->currState) {
 
         case BasicMoveAndShootState:
@@ -888,7 +891,7 @@ void FireBallAI::ExecuteDestroyRegenBlocksState(double dT, GameModel* gameModel)
 // Begin IceBallAI ******************************************************************************
 
 const float IceBallAI::BOTTOM_POINT_LIFE_POINTS = PaddleLaserProjectile::DAMAGE_DEFAULT * IceBallAI::NUM_LASER_HITS;
-const double IceBallAI::BOTTOM_FADE_TIME = 3.0;
+const double IceBallAI::BOTTOM_FADE_TIME = 2.25;
 
 const double IceBallAI::DESTROY_CONFINES_TIME_IN_SECS           = 6.0;
 const float IceBallAI::DESTROY_CONFINES_SPIN_ROT_SPD            = 500.0f;
@@ -1007,11 +1010,11 @@ AnimationMultiLerp<float> IceBallAI::GenerateHitOnBottomTiltAnim(const Point2D& 
 
 AnimationMultiLerp<Vector3D> IceBallAI::GenerateBottomDeathTranslationAnimation(bool fallLeft) const {
     return Boss::BuildLimbFallOffTranslationAnim(BOTTOM_FADE_TIME, (fallLeft ? -1 : 1) * 4 * GothicRomanticBoss::BOTTOM_POINT_WIDTH, 
-        -3.0f * GothicRomanticBoss::BOTTOM_POINT_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
+        -2.0f * GothicRomanticBoss::BOTTOM_POINT_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
 }
 
 AnimationMultiLerp<float> IceBallAI::GenerateBottomDeathRotationAnimation(bool fallLeft) const {
-    return Boss::BuildLimbFallOffZRotationAnim(BOTTOM_FADE_TIME, fallLeft ? 720.0f : -720.0f);
+    return Boss::BuildLimbFallOffZRotationAnim(BOTTOM_FADE_TIME, fallLeft ? 620.0f : -620.0f);
 }
 
 void IceBallAI::BlowUpLegs() {
@@ -1152,6 +1155,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
 }
 
 void IceBallAI::UpdateState(double dT, GameModel* gameModel) {
+
     switch (this->currState) {
         case BasicMoveAndShootState:
             this->ExecuteBasicMoveAndShootState(dT, gameModel);
@@ -1312,8 +1316,15 @@ void IceBallAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
         this->glitchSummonCountdown -= dT;
     }
 
+    // Play the glitch sound at the start of the animation...
+    GameSound* sound = gameModel->GetSound();
+    if (this->glitchShakeAnim.GetCurrentTimeValue() == 0.0) {
+        sound->AttachAndPlaySound(this->boss->GetBody(), GameSound::BossElectricitySpasmLoop, false);
+    }
+
     bool isFinished = this->glitchShakeAnim.Tick(dT);
     if (isFinished) {
+        sound->DetachAndStopSound(this->boss->GetBody(), GameSound::BossElectricitySpasmLoop);
         this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
         this->attacksSinceLastSummon = 0;
         this->SetupNextAttackStateAndMove(gameModel);
@@ -1397,6 +1408,11 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
             2.0*TIME_BEFORE_DESTROY_CONFINES_FLASH));
         GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(
             this->boss->GetBody(), 2.0*TIME_BEFORE_DESTROY_CONFINES_FLASH, Colour(1,1,1), 8));
+
+        // Play a sound for the shockwave
+        GameSound* sound = gameModel->GetSound();
+        assert(sound != NULL);
+        sound->PlaySound(GameSound::GothicBossMassiveShockwaveEvent, false, false);
 
         // Completely blow-off all of the legs...
         this->BlowUpLegs();
@@ -1607,6 +1623,7 @@ void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
 }
 
 void FreeMovingAttackAI::UpdateState(double dT, GameModel* gameModel) {
+
     switch (this->currState) {
 
         case BasicMoveAndShootState:

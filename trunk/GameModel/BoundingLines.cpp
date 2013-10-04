@@ -212,7 +212,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     }
     else {
         // Calculate the number of samples required
-        numCollisionSamples = static_cast<int>(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
+        numCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
         numCollisionSamples = std::max<int>(2, numCollisionSamples + 1);
         assert(numCollisionSamples < 50);
 
@@ -418,14 +418,14 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     if (!zeroBallVelocity) {
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to a fraction of the radius of the circle
-        numBallCollisionSamples = static_cast<int>(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
+        numBallCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
         numBallCollisionSamples = std::max<int>(2, numBallCollisionSamples + 1);
         assert(numBallCollisionSamples < 50);
     }
     if (!zeroLineVelocity) {
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to some reasonable delta distance (a fraction of the radius of the circle)...
-        numLineCollisionSamples = static_cast<int>(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * lineVelocity.Magnitude()));
+        numLineCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * lineVelocity.Magnitude()));
         numLineCollisionSamples = std::max<int>(2, numLineCollisionSamples + 1);
         assert(numLineCollisionSamples < 50);
     }

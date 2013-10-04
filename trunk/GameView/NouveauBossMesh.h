@@ -19,7 +19,7 @@ class Mesh;
 
 class NouveauBossMesh : public BossMesh {
 public:
-    NouveauBossMesh(NouveauBoss* boss);
+    NouveauBossMesh(NouveauBoss* boss, GameSound* sound);
     ~NouveauBossMesh();
 
     // Inherited from BossMesh

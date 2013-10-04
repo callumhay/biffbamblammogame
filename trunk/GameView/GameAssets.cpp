@@ -1146,10 +1146,10 @@ void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
 	if (this->currentLevelMesh != NULL) {
 		// If the level mesh object is already loaded then use it's proper method - this
 		// avoids reloading a whole bunch of common assets
-		this->currentLevelMesh->LoadNewLevel(*this->worldAssets, *this->itemAssets, currLevel);
+		this->currentLevelMesh->LoadNewLevel(this->sound, *this->worldAssets, *this->itemAssets, currLevel);
 	}
 	else {
-		this->currentLevelMesh = new LevelMesh(*this->worldAssets, *this->itemAssets, currLevel);
+		this->currentLevelMesh = new LevelMesh(this->sound, *this->worldAssets, *this->itemAssets, currLevel);
 	}
     
     // Setup the ball safety net for the new level...
@@ -1304,8 +1304,20 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             break;
         }
 
-        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::PaddleMineBulletProjectile: {
+            // Play a sound for the mine firing from the paddle
+            sound->PlaySoundAtPosition(GameSound::PaddleMineFiredEvent, false, projectile.GetPosition3D());
+
+            // Notify the mine manager...
+            const MineProjectile* mine = static_cast<const MineProjectile*>(&projectile);
+            this->mineMeshMgr->AddMineProjectile(mine);
+            break;
+        }
+            
         case Projectile::MineTurretBulletProjectile: {
+            // Play a sound for the mine firing from the turret
+            sound->PlaySoundAtPosition(GameSound::TurretMineFiredEvent, false, projectile.GetPosition3D());
+
             // Notify the mine manager...
             const MineProjectile* mine = static_cast<const MineProjectile*>(&projectile);
             this->mineMeshMgr->AddMineProjectile(mine);
@@ -1480,7 +1492,7 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
         BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
 }
 
-void GameAssets::PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const BossBodyPart& bossPart) {
+void GameAssets::PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const Boss& boss, const BossBodyPart& bossPart) {
 
     // Effects for the collision...
     this->espAssets->AddPaddleHitByBossPartEffect(paddle, bossPart);
@@ -1489,6 +1501,17 @@ void GameAssets::PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const Boss
     this->painHUD->Activate(PlayerHurtHUD::MajorPain);
     GameControllerManager::GetInstance()->VibrateControllers(0.5,
         BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+
+    // Play the sound for the paddle being hurt -- this will depend on the type of boss
+    switch (boss.GetWorldStyle()) {
+        case GameWorld::Classical:
+            this->sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackHitEvent, false, paddle.GetPosition3D());
+            break;
+        case GameWorld::Deco:
+            break;
+        default:
+            break;
+    }
 }
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
@@ -1685,10 +1708,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
             break;
         }
 
-
-
 		case GameItem::ShieldPaddleItem: {
-
+            this->sound->StopAllSoundsWithType(GameSound::PaddleShieldDeactivatedEvent);
             this->sound->PlaySoundAtPosition(GameSound::PaddleShieldActivatedEvent, false, 
                 gameModel.GetPlayerPaddle()->GetPosition3D());
 
@@ -1732,6 +1753,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
  */
 void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameItem& item) {
     UNUSED_PARAMETER(gameModel);
+
+    bool isGameInPlay = GameState::IsGameInPlayState(gameModel);
 
 	// Also make the FBO assets aware of the deactivated effect
 	this->fboAssets->DeactivateItemEffects(item);
@@ -1779,13 +1802,17 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 			break;
 
 		case GameItem::ShieldPaddleItem:
-            this->sound->PlaySoundAtPosition(GameSound::PaddleShieldDeactivatedEvent, false, 
-                gameModel.GetPlayerPaddle()->GetPosition3D());
+            if (isGameInPlay) {
+                this->sound->PlaySoundAtPosition(GameSound::PaddleShieldDeactivatedEvent, false, 
+                    gameModel.GetPlayerPaddle()->GetPosition3D());
+            }
 			this->paddleShield->DeactivateShield();
             break;
 
         case GameItem::UpsideDownItem:
-            this->sound->PlaySound(GameSound::LevelUnflipEvent, false);
+            if (isGameInPlay) {
+                this->sound->PlaySound(GameSound::LevelUnflipEvent, false);
+            }
             break;
 
         case GameItem::MagnetPaddleItem:

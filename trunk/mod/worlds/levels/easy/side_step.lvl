@@ -1,20 +1,20 @@
-Two Step
+Side Step
 17 24
 E E E E E E E E S S S S S S S S S 
 E E E E S S S S S E E E E E E E S 
 E E E E S E E E F(l) E E E E E E E S 
 E E E E S E G E F(l) E E E E E E E S 
-E E E E S E K(MultiBall5) E F(l) R B R E E E E S 
-E E E E S E G E F(l) R R R G E G E S 
-E E E E S E E E F(l) G E G E G E G S 
-E E E E S F(d) F(d) F(d) S E G E G E G E S 
-S S S S S E E E R G E G E G E G S 
-S E E E F(l) E E E R E G E G E G E S 
-S E G E F(l) E E E R G E G E G E G S 
-S E B E F(l) B B B R E G E G E G E S 
-S E G E F(l) R R R R G E G E G E G S 
-S E E E F(l) O O O O E G E G E G E S 
-S F(d) F(d) F(d) S Y Y Y Y G E G E G E G S 
+E E E E S E K(MultiBall5) E F(l) E E E E E E E S 
+E E E E S E G E F(l) R B R G E G E S 
+E E E E S E E E F(l) R R R E G E G S 
+E E E E S F(d) F(d) F(d) S E Y E G E G E S 
+S S S S S E E E R O E G E G E G S 
+S E E E F(l) E E E R E Y E G E G E S 
+S E G E F(l) E E E R O E G E G E G S 
+S E B E F(l) B B B R E Y E G E G E S 
+S E G E F(l) R R R R O E G E G E G S 
+S E E E F(l) O O O O E Y E G E G E S 
+S F(d) F(d) F(d) S Y Y Y Y O E G E G E G S 
 S E E E F(r) E E E E E E E E E E E S 
 S E E E F(r) E E E E E E E E E E E S 
 S E E E F(r) E E E E E E E E E E E S 
@@ -26,11 +26,11 @@ E E E E S E E E E E E E E E E E S
 E E E E S E E E E E E E E E E E S 
 
 STARS:
-4000
-8000
-11000
-19000
-35000
+2000
+4500
+7500
+10000
+12500
 
 PaddleGrow 2
 PoisonPaddle 2

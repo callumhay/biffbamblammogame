@@ -41,7 +41,7 @@
 #include "../GameModel/AlwaysDropBlock.h"
 #include "../GameModel/RegenBlock.h"
 
-LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) :
+LevelMesh::LevelMesh(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) :
 currLevel(NULL), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
@@ -116,7 +116,7 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
 	// Initialize the status renderer
 	this->statusEffectRenderer = new BlockStatusEffectRenderer();
 
-	this->LoadNewLevel(gameWorldAssets, gameItemAssets, level);
+	this->LoadNewLevel(sound, gameWorldAssets, gameItemAssets, level);
 }
 
 LevelMesh::~LevelMesh() {
@@ -261,7 +261,9 @@ void LevelMesh::Flush() {
 /**
  * Load a new level mesh into this object. This will clear out any old loaded level.
  */
-void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) {
+void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldAssets, 
+                             const GameItemAssets& gameItemAssets, const GameLevel& level) {
+
 	// Make sure any previous levels are cleared...
 	this->Flush();
 	
@@ -390,7 +392,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
     // Load the boss, if there is one...
     assert(this->bossMesh == NULL);
     if (currLevel->GetHasBoss()) {
-        this->bossMesh = BossMesh::Build(gameWorldAssets.GetStyle(), currLevel->GetBoss());
+        this->bossMesh = BossMesh::Build(gameWorldAssets.GetStyle(), currLevel->GetBoss(), sound);
         assert(this->bossMesh != NULL);
     }
 

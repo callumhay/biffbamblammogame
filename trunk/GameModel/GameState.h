@@ -27,6 +27,8 @@ public:
 
     static GameState* Build(const GameState::GameStateType& stateType, GameModel* gameModel);
 
+    static bool IsGameInPlayState(const GameModel& gameModel);
+
 	virtual GameState::GameStateType GetType() const = 0;
 	virtual void Tick(double seconds) = 0;
     virtual void ShootActionReleaseUse() = 0;

@@ -15,15 +15,15 @@ E S E E T(S,ur) S E S E E E E E E E E E E S E E E E
 E S E E E S E S G R R R R R R R R R S E J E E 
 E S T(S,ll) E E S E S E K(IceBall,IceBall,IceBall) R R R R R R R R S E E E E 
 E D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket){4} S E E S E S E E E E E E E E E E S E E E E 
-E E S E S S E S E E E E E E E E E E S E E E E 
-E E S E E S E S R R R R R R R R R E S E E W(2) E 
+E E S E S S E S E E E E E E E E E E S E E W(2) E 
+E E S E E S E S R R R R R R R R R E S E E E E 
 E E S E E S E S R R R R R R R R R E S E E E E 
 E E S S E S E S E E E E E E E E E E S E E E E 
-E E S E E S E S E E E E E E E E E E S E E E E 
-E E S E E E E S E E E E E E E E E E S E W(1) E E 
+E E S E E S E S E E E E E E E E E E S E W(1) E E 
+E E S E E E E S E E E E E E E E E E S E E E E 
 E E S T(S,ll) E E T(S,lr) S E E E E E E E E E E S E E E E 
-E E S S S S S S E E E E E E E E E E S E E E E 
-E E E E E E E N E E E E E E E E E E S F(d) F(d) F(d) S 
+E E S S S S S S E E E E E E E E E E S F(d) F(d) F(d) S 
+E E E E E E E N E E E E E E E E E E N E E E S 
 E E E E E E E N E E E E E E E E E E N E E E S 
 W(4) E E E E E E N E E E E E E E E E E N E E E S 
 
@@ -38,8 +38,8 @@ PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

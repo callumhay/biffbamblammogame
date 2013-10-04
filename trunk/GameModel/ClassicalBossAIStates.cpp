@@ -15,10 +15,11 @@
 #include "GameModel.h"
 #include "PlayerPaddle.h"
 #include "BossLaserProjectile.h"
-
 #include "PowerChargeEffectInfo.h"
 #include "ExpandingHaloEffectInfo.h"
 #include "SparkBurstEffectInfo.h"
+
+#include "../GameSound/GameSound.h"
 
 using namespace classicalbossai;
 
@@ -122,18 +123,19 @@ float ClassicalBossAI::GetAccelerationMagnitude() const {
 const float ArmsBodyHeadAI::ARM_HEIGHT = 9.66f;
 const float ArmsBodyHeadAI::ARM_WIDTH  = 3.097f;
 
-const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 200.0f;
+const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 300.0f;
 const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
 
 const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
 
 const double ArmsBodyHeadAI::ARM_ATTACK_DELTA_T = 0.4;
-const double ArmsBodyHeadAI::ARM_FADE_TIME = 3.0;
+const double ArmsBodyHeadAI::ARM_FADE_TIME      = 2.25;
 
 ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss),
 leftArm(NULL), rightArm(NULL), leftArmSqrWeakpt(NULL), rightArmSqrWeakpt(NULL),
 countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0), isAttackingWithArm(false),
-nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.0), countdownToLaserBarrage(0.0), lastRecourceLaserCountdown(0.0) {
+nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.0), countdownToLaserBarrage(0.0), 
+lastRecourceLaserCountdown(0.0) {
     
     // Grab the parts of the boss that matter to this AI state...
     assert(dynamic_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->leftArmIdx]) != NULL);
@@ -225,9 +227,12 @@ ArmsBodyHeadAI::~ArmsBodyHeadAI() {
 
 void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
     UNUSED_PARAMETER(ball);
-    UNUSED_PARAMETER(gameModel);
 
+    assert(gameModel != NULL);
     assert(collisionPart != NULL);
+
+    GameSound* sound = gameModel->GetSound();
+    assert(sound != NULL);
 
     // If the arm is currently animating for being hurt then we can't hurt it again until it's done
     if (this->currState == ClassicalBossAI::HurtRightArmAIState) {
@@ -236,6 +241,9 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
 
     // Check to see if the ball hit one of the weak spots...
     if (collisionPart == this->rightArmSqrWeakpt) {
+
+        // Stop all sounds for the right arm, immediately
+        sound->DetachAndStopAllSounds(this->rightArm);
 
         // Tricky bug: Make sure that the other arm's weak spot is invulnerable during the time period where the boss
         // makes itself invulnerable because it got hit on the opposite arms weak spot, 
@@ -260,6 +268,9 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
         this->SetState(ClassicalBossAI::HurtRightArmAIState);
     }
     else if (collisionPart == this->leftArmSqrWeakpt) {
+
+        // Stop all sounds for the left arm, immediately
+        sound->DetachAndStopAllSounds(this->leftArm);
 
         // Tricky bug: Make sure that the other arm's weak spot is invulnerable during the time period where the boss
         // makes itself invulnerable because it got hit on the opposite arms weak spot, 
@@ -302,8 +313,8 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddl
 }
 
 void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
-
     this->boss->alivePartsRoot->SetExternalAnimationVelocity(Vector2D(0,0));
+
     switch (newState) {
 
         case ClassicalBossAI::BasicMoveAndLaserSprayAIState:
@@ -385,7 +396,6 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
 void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
 
     switch (this->currState) {
-
         case ClassicalBossAI::BasicMoveAndLaserSprayAIState:
             this->ExecuteBasicMoveAndLaserSprayState(dT, gameModel);
             break;
@@ -412,10 +422,10 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case ClassicalBossAI::HurtLeftArmAIState:
-            this->ExecuteHurtArmState(dT, true);
+            this->ExecuteHurtArmState(dT, true, gameModel);
             break;
         case ClassicalBossAI::HurtRightArmAIState:
-            this->ExecuteHurtArmState(dT, false);
+            this->ExecuteHurtArmState(dT, false, gameModel);
             break;
 
         case ClassicalBossAI::LostArmsAngryAIState:
@@ -430,6 +440,10 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
 
 void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
+
+    GameSound* sound = gameModel->GetSound();
+    sound->DetachAndStopAllSounds(this->leftArm);
+    sound->DetachAndStopAllSounds(this->rightArm);
 
     const GameLevel* level = gameModel->GetCurrentLevel();
     assert(level != NULL);
@@ -495,6 +509,9 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
 void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
 
+    GameSound* sound = gameModel->GetSound();
+    assert(sound != NULL);
+
     const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
     assert(paddle != NULL);
     const GameLevel* level = gameModel->GetCurrentLevel();
@@ -536,6 +553,25 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
         ((paddleAABB.GetMin()[0] >= rightArmAABB.GetMin()[0] && paddleAABB.GetMin()[0] <= rightArmAABB.GetMax()[0]) || 
         (paddleAABB.GetMax()[0] <= rightArmAABB.GetMax()[0] && paddleAABB.GetMax()[0] >= rightArmAABB.GetMin()[0]));
 
+    if (allowedToAttack) {
+        // Shake the appropriate arm and set it up as the next attack state...
+        this->nextAttackState = this->DetermineNextArmAttackState(bossToPaddleVec);
+
+        float shakeAmt = this->armShakeAnim.GetInterpolantValue();
+        this->armShakeAnim.Tick(dT);
+
+        if (!this->leftArmSqrWeakpt->GetIsDestroyed() && this->nextAttackState == AttackLeftArmAIState ||
+            this->nextAttackState == AttackBothArmsAIState) {
+                this->leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+                sound->AttachAndPlaySound(this->leftArm, GameSound::ClassicalBossArmShakeLoop, true);
+        }
+        if (!this->rightArmSqrWeakpt->GetIsDestroyed() && this->nextAttackState == AttackRightArmAIState ||
+            this->nextAttackState == AttackBothArmsAIState) {
+                this->rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+                sound->AttachAndPlaySound(this->rightArm, GameSound::ClassicalBossArmShakeLoop, true);
+        }
+    }
+
     if (paddleUnderLeftArm || paddleUnderRightArm) {
 
         this->desiredVel[0] = 0.0f;
@@ -548,42 +584,21 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
                 
                 if (!this->leftArmSqrWeakpt->GetIsDestroyed()) {
                     this->leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+                    sound->DetachAndStopSound(this->leftArm, GameSound::ClassicalBossArmShakeLoop);
                 }
 
                 if (!this->rightArmSqrWeakpt->GetIsDestroyed()) {
                     this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+                    sound->DetachAndStopSound(this->rightArm, GameSound::ClassicalBossArmShakeLoop);
                 }
 
                 this->SetState(this->nextAttackState);
                 return;
             }
-            else {
-                // Shake the appropriate arm and set it up as the next attack state...
-                this->nextAttackState = this->DetermineNextArmAttackState(bossToPaddleVec);
-
-                float shakeAmt = this->armShakeAnim.GetInterpolantValue();
-                this->armShakeAnim.Tick(dT);
-
-                if (!this->leftArmSqrWeakpt->GetIsDestroyed() && this->nextAttackState == AttackLeftArmAIState ||
-                    this->nextAttackState == AttackBothArmsAIState) {
-                    this->leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
-                }
-                if (!this->rightArmSqrWeakpt->GetIsDestroyed() && this->nextAttackState == AttackRightArmAIState ||
-                    this->nextAttackState == AttackBothArmsAIState) {
-                    this->rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
-                }
-            }
             this->temptAttackCountdown -= dT;
         }
     }
     else {
-        if (!leftArmIsDestroyed) {
-            this->leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
-        }
-        if (!rightArmIsDestroyed) {
-            this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
-        }
-        
         float speedMultiplier = NumberFuncs::Lerp<float>(1.0f, 0.0f, 1.0f, 1.33f, totalLifePercent);
 
         // If one of the bosses' arms is destroyed it should be trying to get its last surviving arm to
@@ -687,7 +702,11 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
 }
 
 void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking, GameModel* gameModel) {
-    
+    assert(gameModel != NULL);
+
+    GameSound* sound = gameModel->GetSound();
+    assert(sound != NULL);
+
     bool armIsDoneShaking = this->armShakeAnim.Tick(dT);
     if (this->temptAttackCountdown > 0 && !armIsDoneShaking) {
         float shakingMovement = this->armShakeAnim.GetInterpolantValue();
@@ -695,16 +714,31 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         // Animate the arm we are attacking with -- it's shaking to indicate the incoming attack
         if (!this->leftArmSqrWeakpt->GetIsDestroyed() && isLeftArmAttacking) {
             this->leftArm->SetLocalTranslation(Vector3D(shakingMovement, 0.0f, 0.0f));
+            sound->AttachAndPlaySound(this->leftArm, GameSound::ClassicalBossArmShakeLoop, true);
         }
         if (!this->rightArmSqrWeakpt->GetIsDestroyed() && isRightArmAttacking) {
             this->rightArm->SetLocalTranslation(Vector3D(shakingMovement, 0.0f, 0.0f));
+            sound->AttachAndPlaySound(this->rightArm, GameSound::ClassicalBossArmShakeLoop, true);
         }
     }
     else {
-        bool attackIsDone = this->armAttackYMovementAnim.Tick(dT);
+        // Detach all previous shaking sounds
+        sound->DetachAndStopSound(this->leftArm,  GameSound::ClassicalBossArmShakeLoop);
+        sound->DetachAndStopSound(this->rightArm, GameSound::ClassicalBossArmShakeLoop);
+
+        // If we're at the start of the arm attack animation then we play the arm attack sound
+        if (this->armAttackYMovementAnim.GetCurrentTimeValue() == 0.0) {
+            if (!this->leftArmSqrWeakpt->GetIsDestroyed() && isLeftArmAttacking) {
+                sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackEvent, false, this->leftArm->GetTranslationPt3D());
+            }
+            if (!this->rightArmSqrWeakpt->GetIsDestroyed() && isRightArmAttacking) {
+                sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackEvent, false, this->rightArm->GetTranslationPt3D());
+            }
+        }
 
         // We are attacking with the arm!!!
-        
+        bool attackIsDone = this->armAttackYMovementAnim.Tick(dT);
+
         // Move the arm based on the attack animation
         float armYMovement = this->armAttackYMovementAnim.GetInterpolantValue();
         if (!this->leftArmSqrWeakpt->GetIsDestroyed() && isLeftArmAttacking) {
@@ -745,6 +779,10 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
 
 void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
+
+    GameSound* sound = gameModel->GetSound();
+    sound->DetachAndStopAllSounds(this->leftArm);
+    sound->DetachAndStopAllSounds(this->rightArm);
 
     const GameLevel* level = gameModel->GetCurrentLevel();
     assert(level != NULL);
@@ -798,6 +836,10 @@ void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
 void ArmsBodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
 
+    GameSound* sound = gameModel->GetSound();
+    sound->DetachAndStopAllSounds(this->leftArm);
+    sound->DetachAndStopAllSounds(this->rightArm);
+
     const GameLevel* level = gameModel->GetCurrentLevel();
     assert(level != NULL);
 
@@ -847,7 +889,7 @@ void ArmsBodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* g
 
 }
 
-void ArmsBodyHeadAI::ExecuteHurtArmState(double dT, bool isLeftArm) {
+void ArmsBodyHeadAI::ExecuteHurtArmState(double dT, bool isLeftArm, GameModel* gameModel) {
     this->currVel = Vector2D(0,0);
     this->desiredVel = Vector2D(0,0);
 
@@ -866,6 +908,9 @@ void ArmsBodyHeadAI::ExecuteHurtArmState(double dT, bool isLeftArm) {
 
         // Check to see if both arms are now gone, if they are then we move to a special state
         if (this->leftArm->GetIsDestroyed() && this->rightArm->GetIsDestroyed()) {
+            GameSound* sound = gameModel->GetSound();
+            sound->DetachAndStopAllSounds(this->leftArm);
+            sound->DetachAndStopAllSounds(this->rightArm);
             this->SetState(ClassicalBossAI::LostArmsAngryAIState);
         }
         else {
@@ -952,7 +997,7 @@ AnimationMultiLerp<Vector3D> ArmsBodyHeadAI::GenerateArmDeathTranslationAnimatio
     
     return Boss::BuildLimbFallOffTranslationAnim(ARM_FADE_TIME, 
         (isLeftArm ? -1 : 1) * 5 * ArmsBodyHeadAI::ARM_WIDTH, 
-        -2*ArmsBodyHeadAI::ARM_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
+        -1.25*ArmsBodyHeadAI::ARM_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
 }
 
 AnimationMultiLerp<float> ArmsBodyHeadAI::GenerateArmDeathRotationAnimation(bool isLeftArm) const {
@@ -967,7 +1012,7 @@ AnimationMultiLerp<float> ArmsBodyHeadAI::GenerateArmDeathRotationAnimation(bool
 const float BodyHeadAI::COLUMN_LIFE_POINTS = 100.0f;
 const float BodyHeadAI::COLUMN_BALL_DAMAGE = 100.0f;
 
-const double BodyHeadAI::COLUMN_FADE_TIME = 3.0;
+const double BodyHeadAI::COLUMN_FADE_TIME = 2.0;
 const double BodyHeadAI::BODY_FADE_TIME = COLUMN_FADE_TIME;
 
 const double BodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
@@ -1177,6 +1222,7 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
 }
 
 void BodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
+
     switch (this->currState) {
 
         case ClassicalBossAI::BasicMoveAndLaserSprayAIState:
@@ -1547,7 +1593,7 @@ AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateColumnDeathTranslationAnimation
     moveValues.reserve(timeValues.size());
     moveValues.push_back(Vector3D(0,0,0));
     moveValues.push_back(Vector3D(NumberFuncs::SignOf(xForceDir) * 8 * ClassicalBoss::COLUMN_WIDTH, 
-        -4 * ClassicalBoss::COLUMN_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1], 0.0f));
+        -2 * ClassicalBoss::COLUMN_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1], 0.0f));
 
     AnimationMultiLerp<Vector3D> columnDeathTransAnim;
     columnDeathTransAnim.SetLerp(timeValues, moveValues);
@@ -1567,7 +1613,7 @@ AnimationMultiLerp<float> BodyHeadAI::GenerateColumnDeathRotationAnimation(float
     std::vector<float> rotationValues;
     rotationValues.reserve(timeValues.size());
     rotationValues.push_back(0.0f);
-    rotationValues.push_back(xForceDir < 0 ? 1350.0f : -1350.0f);
+    rotationValues.push_back(xForceDir < 0 ? 900.0f : -900.0f);
 
     AnimationMultiLerp<float> columnDeathRotAnim;
     columnDeathRotAnim.SetLerp(timeValues, rotationValues);
@@ -1721,6 +1767,7 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
 }
 
 void HeadAI::UpdateState(double dT, GameModel* gameModel) {
+
     switch (this->currState) {
 
         case ClassicalBossAI::MoveAndBarrageWithLaserAIState:

@@ -22,7 +22,7 @@
 
 const double DecoBossMesh::INTRO_TIME_IN_SECS = 3.5;
 
-DecoBossMesh::DecoBossMesh(DecoBoss* boss) : BossMesh(), boss(boss),
+DecoBossMesh::DecoBossMesh(DecoBoss* boss, GameSound* sound) : BossMesh(sound), boss(boss),
 coreMesh(NULL), lightningRelayMesh(NULL), gearMesh(NULL), scopingArm1Mesh(NULL),
 scopingArm2Mesh(NULL), scopingArm3Mesh(NULL), scopingArm4Mesh(NULL), handMesh(NULL), 
 leftBodyMesh(NULL), rightBodyMesh(NULL), leftBodyExplodingEmitter(NULL), 
@@ -61,11 +61,11 @@ flareGlowTex(NULL), lensFlareTex(NULL), lightningRelayEmitter(NULL), flarePulse(
         GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
     assert(this->glowTex != NULL);
 
-    this->leftBodyExplodingEmitter  = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
-    this->rightBodyExplodingEmitter = this->BuildExplodingEmitter(DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
-    this->leftArmExplodingEmitter   = this->BuildExplodingEmitter(DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
-    this->rightArmExplodingEmitter  = this->BuildExplodingEmitter(DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
-    this->bodyExplodingEmitter      = this->BuildExplodingEmitter(DecoBoss::CORE_WIDTH, DecoBoss::CORE_HEIGHT);
+    this->leftBodyExplodingEmitter  = this->BuildExplodingEmitter(0.75f, this->boss->GetLeftBody(), DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
+    this->rightBodyExplodingEmitter = this->BuildExplodingEmitter(0.75f, this->boss->GetRightBody(), DecoBoss::SIDE_BODY_PART_WIDTH, DecoBoss::SIDE_BODY_PART_HEIGHT);
+    this->leftArmExplodingEmitter   = this->BuildExplodingEmitter(0.8f,  this->boss->GetLeftArm(), DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
+    this->rightArmExplodingEmitter  = this->BuildExplodingEmitter(0.8f,  this->boss->GetRightArm(), DecoBoss::ARM_WIDTH, DecoBoss::ARM_NOT_EXTENDED_HEIGHT);
+    this->bodyExplodingEmitter      = this->BuildExplodingEmitter(1.0f,  this->boss->GetCore(), DecoBoss::CORE_WIDTH, DecoBoss::CORE_HEIGHT);
 
     this->eyeGlowAlphaAnims.resize(DecoBoss::NUM_EYES);
     for (int i = 0; i < static_cast<int>(this->eyeGlowAlphaAnims.size()); i++) {
@@ -232,11 +232,13 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
                 glTranslatef(0.0f, DecoBoss::ITEM_LOAD_OFFSET_Y - itemLoadOffset, 0.0f);
                 
                 // Set the item mesh texture...
-                Texture2D* itemTexture = assets->GetItemAssets()->GetItemTexture(decoAIState->GetNextItemDropType());
+                GameItem::ItemType nextItemDropType = decoAIState->GetNextItemDropType();
+                Texture2D* itemTexture = assets->GetItemAssets()->GetItemTexture(nextItemDropType);
                 this->itemMesh->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, itemTexture);
                
                 // The boss will only drop bad items...
-                const Colour& itemEndColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(GameItem::Bad);
+                const Colour& itemEndColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(
+                    GameItemFactory::GetInstance()->GetItemTypeDisposition(nextItemDropType));
                 this->itemMesh->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, itemEndColour);
 
                 this->itemMesh->Draw(camera, keyLight, fillLight, ballLight);

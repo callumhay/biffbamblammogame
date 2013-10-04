@@ -29,14 +29,14 @@ fireParticleScaler(1.0f, 0.025f), fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector
 	this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
 	assert(this->cloudTex != NULL);
 
-    // Change the colours for the background mesh from the default to something a bit more washed out ... more classical architectury
+    // Change the colours for the background mesh from the default to something a bit more washed out
+    // (i.e., more classical-architecture-like)
     std::vector<Colour> colours;
     colours.reserve(8);
     colours.push_back(Colour(0.4375f, 0.5f, 0.5647f));             // slate greyish-blue
     colours.push_back(Colour(0.2745098f, 0.5098039f, 0.70588f));   // steel blue
     colours.push_back(Colour(0.51372549f, 0.4352941f, 1.0f));      // slate purple
     colours.push_back(Colour(0.8588235f, 0.439215686f, 0.57647f)); // pale violet
-    colours.push_back(Colour(0.6784f, 0.847f, 0.9019f));           // light steel blue
     colours.push_back(Colour(0.3725f, 0.6196078f, 0.62745098f));   // cadet (olive-) blue
     colours.push_back(Colour(0.4f, 0.8039215f, 0.666667f));		   // deep aquamarine
     colours.push_back(Colour(0.737f, 0.933f, 0.4078f));            // olive
