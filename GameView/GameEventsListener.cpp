@@ -158,11 +158,16 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 	// Queue up the state for ending a level - this will display the level name and do
     // proper animations, fade-outs, etc. In the case of a boss level being completed, we
     // display a "movement complete" state instead.
-    if (level.GetHasBoss()) {
+    if (world.GetLastLevelIndex() == static_cast<int>(level.GetLevelIndex())) {
 
         // For now, every boss level should be the last level in a world
-        assert(world.GetLastLevelIndex() == static_cast<int>(level.GetLevelIndex()));
-        this->display->AddStateToQueue(DisplayState::BossLevelCompleteSummary);
+        if (level.GetHasBoss()) {
+            this->display->AddStateToQueue(DisplayState::BossLevelCompleteSummary);
+        }
+        else {
+            this->display->AddStateToQueue(DisplayState::LevelEnd);
+            this->display->AddStateToQueue(DisplayState::LevelCompleteSummary);
+        }
 
         // Bring the player to the world select screen and unlock the latest world...
         // Cases: 
@@ -182,9 +187,6 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
             // NOTE: This is already taken care of by the GameCompletedEvent handler
         }
         else {
-            //int furthestWorldIdx, furthestLevelIdx;
-            //gameModel->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
-
             // Case 1 and 2 (Mid-game boss, has it been defeated before or not?)
             // Using the known progress data, figure out whether the boss has already been defeated before...
             int nextWorldIndex = world.GetWorldIndex() + 1;
@@ -193,18 +195,19 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 
             if (nextWorld->GetHasBeenUnlocked()) {
                 // The boss has been defeated before
-                this->display->AddStateToQueue(DisplayState::SelectWorldMenu, DisplayStateInfo::BuildWorldUnlockedInfo(nextWorldIndex));
+                this->display->AddStateToQueue(DisplayState::SelectWorldMenu, DisplayStateInfo::BuildSelectWorldInfo(nextWorldIndex));
             }
             else {
                 // The boss was just defeated for the first time
-                this->display->AddStateToQueue(DisplayState::SelectWorldMenu, DisplayStateInfo::BuildSelectWorldInfo(nextWorldIndex));
+                this->display->AddStateToQueue(DisplayState::SelectWorldMenu, DisplayStateInfo::BuildWorldUnlockedInfo(nextWorldIndex));
             }
         }
-
     }
     else {
         this->display->AddStateToQueue(DisplayState::LevelEnd);
 	    this->display->AddStateToQueue(DisplayState::LevelCompleteSummary);
+        this->display->AddStateToQueue(DisplayState::SelectLevelMenu, 
+            DisplayStateInfo::BuildSelectLevelInfo(world.GetWorldIndex()));
     }
 
 	this->display->SetCurrentStateAsNextQueuedState();
@@ -307,8 +310,17 @@ void GameEventsListener::PaddleShieldHitByProjectileEvent(const PlayerPaddle& pa
 
 void GameEventsListener::ProjectileDeflectedByPaddleShieldEvent(const Projectile& projectile, const PlayerPaddle& paddle) {
 	UNUSED_PARAMETER(paddle);
-	UNUSED_PARAMETER(projectile);
-	// TODO ?
+	
+    GameSound* sound = this->display->GetSound();
+    if (projectile.IsMine() || projectile.IsRocket()) {
+        // If it's a mine or rocket we play the deflection sound for it
+        sound->PlaySoundAtPosition(GameSound::RocketOrMineDeflectedByShieldEvent, false, projectile.GetPosition3D());
+    }
+    else if (projectile.IsRefractableOrReflectable()) {
+        // If it's a laser/light projectile we play the deflection sound for it
+        sound->PlaySoundAtPosition(GameSound::LaserDeflectedByShieldEvent, false, projectile.GetPosition3D());
+    }
+
 	debug_output("EVENT: Paddle shield deflected projectile");
 }
 
@@ -326,7 +338,15 @@ void GameEventsListener::PaddleShieldHitByBeamEvent(const PlayerPaddle& paddle, 
 }
 
 void GameEventsListener::PaddleHitByBossEvent(const PlayerPaddle& paddle, const BossBodyPart& bossPart) {
-    this->display->GetAssets()->PaddleHurtByBossBodyPart(paddle, bossPart);
+    
+    Boss* boss = this->display->GetModel()->GetCurrentLevel()->GetBoss();
+    if (boss == NULL) {
+        assert(false);
+        return;
+    }
+
+    this->display->GetAssets()->PaddleHurtByBossBodyPart(paddle, *boss, bossPart);
+    
     debug_output("EVENT: Paddle hit by boss");
 }
 
@@ -498,7 +518,14 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
             sound->PlaySoundAtPosition(GameSound::BallShieldPaddleCollisionEvent, false, collisionPtEstimate);
 		}
 		else if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle)) {
-            sound->PlaySoundAtPosition(GameSound::BallStickyPaddleCollisionEvent, false, collisionPtEstimate);
+            // If there is already a ball attached to the sticky paddle then the ball will bounce off
+            // the sticky goo, resulting in a different sound...
+            if (paddle.HasBallAttached()) {
+                sound->PlaySoundAtPosition(GameSound::BallStickyPaddleBounceEvent, false, collisionPtEstimate);
+            }
+            else {
+                sound->PlaySoundAtPosition(GameSound::BallStickyPaddleAttachEvent, false, collisionPtEstimate);
+            }
 		}
 		else {
             sound->PlaySoundAtPosition(GameSound::BallPaddleCollisionEvent, false, collisionPtEstimate);
@@ -800,6 +827,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				    this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
 				    this->display->GetCamera().ApplyCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
 				    GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+                    //sound->PlaySound(GameSound::BombBlockDestroyedEvent, false);
                     sound->PlaySoundAtPosition(GameSound::BombBlockDestroyedEvent, false, block.GetPosition3D());
 			    }
 			    break;
@@ -1203,7 +1231,7 @@ void GameEventsListener::BallBoostGainedEvent() {
         }
         avgPos /= static_cast<float>(balls.size());
 
-        this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBoostGainedEvent, false, avgPos);
+        this->display->GetSound()->PlaySound(GameSound::BallBoostGainedEvent, false);
     }
     
     // Make the HUD change for indicating the number of boosts that the player has
@@ -1278,7 +1306,7 @@ void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
 			this->display->GetSound()->AttachAndPlaySound(&beam, GameSound::LaserBeamFiringLoop, true);
 			break;
         case Beam::BossBeam:
-            this->display->GetSound()->AttachAndPlaySound(&beam, GameSound::LaserBeamFiringLoop, true);
+            this->display->GetSound()->AttachAndPlaySound(&beam, GameSound::BossLaserBeamLoop, true);
             break;
 
 		default:
@@ -1326,7 +1354,7 @@ void GameEventsListener::TeslaLightningBarrierSpawnedEvent(const TeslaBlock& new
     // Attach a sound for the lightning...
     Point3D midPt = Point3D::GetMidPoint(newlyOnTeslaBlock.GetPosition3D(), previouslyOnTeslaBlock.GetPosition3D());
     SoundID lightningSoundID = sound->PlaySoundAtPosition(GameSound::TeslaLightningArcLoop, true, midPt);
-    sound->SetSoundVolume(lightningSoundID, 0.33f);
+    sound->SetSoundVolume(lightningSoundID, 0.1f);
     this->teslaLightningSoundIDs.insert(std::make_pair(std::make_pair(&newlyOnTeslaBlock, &previouslyOnTeslaBlock), lightningSoundID));
 
 	Vector3D negHalfLevelDim(-0.5 * this->display->GetModel()->GetLevelUnitDimensions(), 0.0f);
@@ -1501,6 +1529,8 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->SetMultiplier(newMultiplier);
 
+    GameModel* gameModel = this->display->GetModel();
+
     // Indicate the change in multiplier where it happens in the level...
     GameSound* sound = this->display->GetSound();
     if (newMultiplier > 1 && oldMultiplier != newMultiplier) {
@@ -1518,15 +1548,16 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
         }
         
         // Don't display the effect if we're in ball or paddle camera mode...
-        if (!this->display->GetModel()->GetPlayerPaddle()->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
-
-            this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(newMultiplier, position, 
-                *this->display->GetModel()->GetPlayerPaddle());
+        if (!gameModel->GetPlayerPaddle()->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
+            this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(
+                newMultiplier, position, *gameModel->GetPlayerPaddle());
         }
     }
     else if (newMultiplier == 1 && oldMultiplier > 1) {
         // The player lost their multiplier, play a sound for that
-        sound->PlaySound(GameSound::ScoreMultiplierLostEvent, false);
+        if (GameState::IsGameInPlayState(*gameModel)) {
+            sound->PlaySound(GameSound::ScoreMultiplierLostEvent, false);
+        }
     }
 
 	debug_output("EVENT: Score Multiplier Change: " << oldMultiplier << " -> " << newMultiplier); 
@@ -1607,6 +1638,10 @@ void GameEventsListener::BossHurtEvent(const BossWeakpoint* hurtPart) {
 
     this->display->GetModel()->ClearSpecificBeams(Beam::BossBeam);
 
+    // Play sound...
+    GameSound* sound = this->display->GetSound();
+    sound->PlaySound(GameSound::BossHurtEvent, false, false);
+
     debug_output("EVENT: Boss is hurt.");
 }
 
@@ -1617,6 +1652,11 @@ void GameEventsListener::BossAngryEvent(const Boss* boss, const BossBodyPart* an
 
     this->display->GetAssets()->GetESPAssets()->AddBossAngryEffect(angryPart->GetTranslationPt2D(),
         partAABB.GetWidth(), partAABB.GetHeight());
+    
+    // Play sound...
+    GameSound* sound = this->display->GetSound();
+    sound->PlaySound(GameSound::BossAngryEvent, false, false);
+    
     debug_output("EVENT: Boss is angry.");
 }
 

@@ -108,7 +108,6 @@ public:
 	const char* TEXTURE_STAR;
 	const char* TEXTURE_STAR_OUTLINE;
 	const char* TEXTURE_EVIL_STAR;
-	const char* TEXTURE_EVIL_STAR_OUTLINE;
 	const char* TEXTURE_EXPLOSION_CLOUD;
 	const char* TEXTURE_EXPLOSION_RAYS;
 	const char* TEXTURE_LASER_BEAM;
@@ -294,6 +293,7 @@ public:
 
     const Colour TUTORIAL_PANE_COLOUR;
 
+    const Colour BRIGHT_POINT_STAR_COLOUR;
     const Colour ACTIVE_POINT_STAR_COLOUR;
     const Colour INACTIVE_POINT_STAR_COLOUR;
 

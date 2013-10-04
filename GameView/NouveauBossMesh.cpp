@@ -22,7 +22,7 @@
 
 const double NouveauBossMesh::INTRO_TIME_IN_SECS = 4.0;
 
-NouveauBossMesh::NouveauBossMesh(NouveauBoss* boss) : BossMesh(), boss(boss),
+NouveauBossMesh::NouveauBossMesh(NouveauBoss* boss, GameSound* sound) : BossMesh(sound), boss(boss),
 bodyMesh(NULL), bottomCurlMesh(NULL), bottomHexSphereMesh(NULL),
 sideCurlsMesh(NULL), sideSphereMesh(NULL), sideSphereFrillsMesh(NULL),
 sideSphereHolderCurlMesh(NULL), topDomeMesh(NULL), topGazeboMesh(NULL),
@@ -58,15 +58,17 @@ leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL) {
 
     this->topGazeboSmokeEmitter     = this->BuildSmokeEmitter(NouveauBoss::TOP_ENCLOSURE_GAZEBO_WIDTH, NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT);
     this->topGazeboFireEmitter      = this->BuildFireEmitter(NouveauBoss::TOP_ENCLOSURE_GAZEBO_WIDTH, NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT);
-    this->topGazeboExplodingEmitter = this->BuildExplodingEmitter(NouveauBoss::TOP_ENCLOSURE_GAZEBO_WIDTH, NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT);
-    this->topDomeExplodingEmitter   = this->BuildExplodingEmitter(NouveauBoss::TOP_ENCLOSURE_DOME_BOTTOM_WIDTH, NouveauBoss::TOP_ENCLOSURE_DOME_HEIGHT);
+    this->topGazeboExplodingEmitter = this->BuildExplodingEmitter(0.33f, this->boss->GetTopGazebo(), 
+        NouveauBoss::TOP_ENCLOSURE_GAZEBO_WIDTH, NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT);
+    this->topDomeExplodingEmitter   = this->BuildExplodingEmitter(0.25f, this->boss->GetTopDome(),
+        NouveauBoss::TOP_ENCLOSURE_DOME_BOTTOM_WIDTH, NouveauBoss::TOP_ENCLOSURE_DOME_HEIGHT);
 
     this->bodySmokeEmitter     = this->BuildSmokeEmitter(NouveauBoss::BODY_CORE_BOTTOM_WIDTH, NouveauBoss::BODY_CORE_HEIGHT, 0.66f);
     this->bodyFireEmitter      = this->BuildFireEmitter(NouveauBoss::BODY_CORE_BOTTOM_WIDTH,  NouveauBoss::BODY_CORE_HEIGHT, 0.66f);
-    this->bodyExplodingEmitter = this->BuildExplodingEmitter(NouveauBoss::BODY_CORE_BOTTOM_WIDTH, NouveauBoss::BODY_CORE_HEIGHT, 0.85f);
+    this->bodyExplodingEmitter = this->BuildExplodingEmitter(1.0f, this->boss->GetBody(), NouveauBoss::BODY_CORE_BOTTOM_WIDTH, NouveauBoss::BODY_CORE_HEIGHT, 0.85f);
 
-    this->leftArmExplodingEmitter  = this->BuildExplodingEmitter(NouveauBoss::ARM_SPHERE_HOLDER_CURL_WIDTH, NouveauBoss::ARM_SPHERE_HOLDER_CURL_HEIGHT);
-    this->rightArmExplodingEmitter = this->BuildExplodingEmitter(NouveauBoss::ARM_SPHERE_HOLDER_CURL_WIDTH, NouveauBoss::ARM_SPHERE_HOLDER_CURL_HEIGHT);
+    this->leftArmExplodingEmitter  = this->BuildExplodingEmitter(0.65f, this->boss->GetLeftSideSphere(), NouveauBoss::ARM_SPHERE_HOLDER_CURL_WIDTH, NouveauBoss::ARM_SPHERE_HOLDER_CURL_HEIGHT);
+    this->rightArmExplodingEmitter = this->BuildExplodingEmitter(0.65f, this->boss->GetRightSideSphere(), NouveauBoss::ARM_SPHERE_HOLDER_CURL_WIDTH, NouveauBoss::ARM_SPHERE_HOLDER_CURL_HEIGHT);
 
 #define INIT_ANIM(anim) anim.ClearLerp(); anim.SetInterpolantValue(0.0f); anim.SetRepeat(false);
     INIT_ANIM(this->leftSideTopGlowAnim);

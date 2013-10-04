@@ -32,7 +32,7 @@ public:
 	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game				
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
 
-	GameDisplay(GameModel* model, int initWidth, int initHeight);
+	GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight);
 	~GameDisplay();
 
 	bool HasGameExited() const { return this->gameExited; }

@@ -39,11 +39,8 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 			return new MainMenuDisplayState(display);
         case DisplayState::SelectWorldMenu:
             return new SelectWorldMenuState(display, info);
-
         case DisplayState::SelectLevelMenu:
-            assert(false);
-            return NULL;
-
+            return new SelectLevelMenuState(display, info);
         case DisplayState::BlammopediaMenu:
             return new BlammopediaState(display);
 		case DisplayState::LevelStart:

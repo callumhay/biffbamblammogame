@@ -63,11 +63,6 @@ private:
 	double vibrateTimeTracker;
 	double vibrateLengthInSeconds;
 
-    int lastPaddleLeftDir;
-    int lastPaddleRightDir;
-    int lastOtherLeftDir;
-    int lastOtherRightDir;
-
     float directionMagnitudePercentLeftRight;
     float directionMagnitudePercentUpDown;
 

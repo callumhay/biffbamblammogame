@@ -20,11 +20,22 @@ class ESPParticle;
  */
 class ESPEmitterEventHandler {
 public:
-	/**
+    virtual ~ESPEmitterEventHandler() {};
+	
+    /**
 	 * Event that occurs when a particle is spawned within the associated emitter.
 	 * particle - The particle that was emitted.
 	 */
 	virtual void ParticleSpawnedEvent(const ESPParticle* particle) = 0;
+
+    /**
+	 * Event that occurs when a particle dies within the associated emitter.
+	 * particle - The particle that died.
+	 */
+    virtual void ParticleDiedEvent(const ESPParticle* particle) = 0;
+
+protected:
+    ESPEmitterEventHandler() {}
 
 };
 #endif // _ESPEMITTEREVENTHANDLER_H_

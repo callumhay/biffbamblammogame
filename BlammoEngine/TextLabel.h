@@ -46,6 +46,10 @@ public:
 	// Set drop shadow for the label - the colour and amount it drops
 	// from the text as a percentage of the text height
 	void SetDropShadow(const Colour& c, float percentAmt) {
+        if (percentAmt == 0.0) {
+            this->dropShadow.isSet = false;
+            return;
+        }
 		this->dropShadow.isSet = true;
 		this->dropShadow.colour = c;
 		this->dropShadow.amountPercentage = percentAmt;
@@ -55,6 +59,9 @@ public:
     }
 	void SetDropShadowAmount(float percentAmt) {
 		this->dropShadow.amountPercentage = percentAmt;
+        if (percentAmt == 0.0) {
+            this->dropShadow.isSet = false;
+        }
 	}
 
 	// Set the font of this label

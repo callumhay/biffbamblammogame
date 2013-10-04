@@ -97,24 +97,24 @@ void BallSafetyNetMesh::DrawSafetyNetMesh(float minXCoord, float maxXCoord, floa
 	// The safety net is just a long rectangular prism that spans the bottom portion
 	// of the current level
 	glBegin(GL_QUADS);
-		glNormal3i(0, 1, 0);
-		glTexCoord2f(maxTexCoordU, 1.0f);
+    glNormal3i(0, 1, 0);
+    glTexCoord2f(maxTexCoordU, 1.0f);
     glVertex3f(maxXCoord, HalfHeight,-HalfDepth);	// Top Right Of The Quad (Top)
-		glTexCoord2f(minTexCoordU, 1.0f);
+    glTexCoord2f(minTexCoordU, 1.0f);
     glVertex3f(minXCoord, HalfHeight,-HalfDepth);	// Top Left Of The Quad (Top)
     glTexCoord2f(minTexCoordU, 0.0f);
-		glVertex3f(minXCoord, HalfHeight, HalfDepth);	// Bottom Left Of The Quad (Top)
+    glVertex3f(minXCoord, HalfHeight, HalfDepth);	// Bottom Left Of The Quad (Top)
     glTexCoord2f(maxTexCoordU, 0.0f);
-		glVertex3f(maxXCoord, HalfHeight, HalfDepth);	// Bottom Right Of The Quad (Top)
+    glVertex3f(maxXCoord, HalfHeight, HalfDepth);	// Bottom Right Of The Quad (Top)
 
-		glNormal3i(0, -1, 0);
-		glTexCoord2f(maxTexCoordU, 1.0f);
+    glNormal3i(0, -1, 0);
+    glTexCoord2f(maxTexCoordU, 1.0f);
     glVertex3f(maxXCoord,-HalfHeight, HalfDepth);	// Top Right Of The Quad (Bottom)
-		glTexCoord2f(minTexCoordU, 1.0f);
+    glTexCoord2f(minTexCoordU, 1.0f);
     glVertex3f(minXCoord,-HalfHeight, HalfDepth);	// Top Left Of The Quad (Bottom)
-		glTexCoord2f(minTexCoordU, 0.0f);
+    glTexCoord2f(minTexCoordU, 0.0f);
     glVertex3f(minXCoord,-HalfHeight,-HalfDepth);	// Bottom Left Of The Quad (Bottom)
-		glTexCoord2f(maxTexCoordU, 0.0f);
+    glTexCoord2f(maxTexCoordU, 0.0f);
     glVertex3f(maxXCoord,-HalfHeight,-HalfDepth);	// Bottom Right Of The Quad (Bottom)
 
 		glNormal3i(0, 0, 1);

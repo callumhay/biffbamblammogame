@@ -17,6 +17,8 @@
 
 #include "../GameModel/BallBoostModel.h"
 
+#include "../GameSound/SoundCommon.h"
+
 #include "CgFxGaussianBlur.h"
 #include "CgFxAfterImage.h"
 #include "CgFxBloom.h"
@@ -86,6 +88,10 @@ public:
 
 private:
     GameSound* sound; // Not owned by this
+    // Sound IDs -- used for tracking the last ink splat sound and other sounds that get activated and modified
+    // in this object
+    SoundID inkSplatterEventSoundID;
+
 
 	// FBO assets for the game pipeline
 	FBObj* bgFBO;			

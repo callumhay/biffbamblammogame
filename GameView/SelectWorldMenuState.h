@@ -148,8 +148,8 @@ private:
         bool unlockAnimExecuted;
         AnimationMultiLerp<Vector2D> lockShakeAnim;
 
+        Texture2D* debrisTex;
         Texture2D* sparkleTex;
-        Texture2D* flareTex;
         Texture2D* lensFlareTex;
         Texture2D* hugeExplosionTex;
         Texture2D* sphereNormalsTex;

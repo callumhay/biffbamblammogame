@@ -14,7 +14,9 @@
 
 #include "../GameModel/GameWorld.h"
 #include "../ESPEngine/ESP.h"
+#include "../GameSound/SoundCommon.h"
 
+class GameSound;
 class Camera;
 class BasicPointLight;
 class Boss;
@@ -32,10 +34,10 @@ class ElectrifiedEffectInfo;
  */
 class BossMesh {
 public:
-    BossMesh();
+    BossMesh(GameSound* sound);
     virtual ~BossMesh();
 
-    static BossMesh* Build(const GameWorld::WorldStyle& style, Boss* boss);
+    static BossMesh* Build(const GameWorld::WorldStyle& style, Boss* boss, GameSound* sound);
     
     void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
         const BasicPointLight& ballLight, const GameAssets* assets);
@@ -52,6 +54,8 @@ public:
     void AddElectrifiedEffect(const ElectrifiedEffectInfo& info);
 
 protected:
+    GameSound* sound;
+
     // Shared visual effects and textures for bosses
     std::vector<Texture2D*> smokeTextures;
     Texture2D* explosionAnimTex;
@@ -79,13 +83,13 @@ protected:
     // Final explosion effect members
     bool finalExplosionIsActive;
     AnimationLerp<float> lineAnim;  // Length of each of the two lines that go out from the boss to the sides
-    AnimationLerp<float> flashAnim; // The fullscreen flash half-height
+    AnimationLerp<float> flashAnim; // The full-screen flash half-height
+    SoundID finalExplosionSoundID;
 
     // Boss-specific effects
     std::list<ESPEmitter*> fgEffectsEmitters;
     std::map<const BossBodyPart*, std::list<ESPEmitter*> > fgAttachedEffectsEmitters;
     std::list<ESPEmitter*> bgEffectsEmitters;
-
 
     virtual void DrawPreBodyEffects(double dT, const Camera& camera);
     virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight, 
@@ -96,10 +100,24 @@ protected:
 
     ESPPointEmitter* BuildFireEmitter(float width, float height, float sizeScaler = 1.0f);
     ESPPointEmitter* BuildSmokeEmitter(float width, float height, float sizeScaler = 1.0f);
-    ESPPointEmitter* BuildExplodingEmitter(float width, float height, float sizeScaler = 1.0f);
-
+    ESPPointEmitter* BuildExplodingEmitter(float volumeAmt, const AbstractBossBodyPart* bossBodyPart, float width, float height, float sizeScaler = 1.0f);
 
 private:
+    class ExplodingEmitterHandler : public ESPEmitterEventHandler {
+    public:
+        ExplodingEmitterHandler(GameSound* sound, const AbstractBossBodyPart* bossBodyPart, float volumeAmt);
+        ~ExplodingEmitterHandler() {};
+
+        void ParticleSpawnedEvent(const ESPParticle* particle);
+        void ParticleDiedEvent(const ESPParticle*) {};
+
+    private:
+        float volumeLevel;
+        GameSound* sound;
+        const AbstractBossBodyPart* bossBodyPart;
+    };
+    std::list<ExplodingEmitterHandler*> explodingEmitterHandlers;
+
     DISALLOW_COPY_AND_ASSIGN(BossMesh);
 };
 

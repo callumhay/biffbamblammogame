@@ -24,7 +24,7 @@ class GameDisplay;
 
 class DisplayStateInfo {
 public:
-    DisplayStateInfo() : worldSelectionIdx(-1), worldUnlockIdx(-1) {}
+    DisplayStateInfo() : worldSelectionIdx(-1), worldUnlockIdx(-1), levelSelectionIdx(-1) {}
 
     static DisplayStateInfo BuildSelectWorldInfo(int worldSelectionIdx) {
         DisplayStateInfo info;
@@ -36,13 +36,21 @@ public:
         info.worldUnlockIdx = worldUnlockIdx;
         return info;
     }
+    static DisplayStateInfo BuildSelectLevelInfo(int worldIdx, int levelSelectIdx = -1) {
+        DisplayStateInfo info;
+        info.worldSelectionIdx = worldIdx;
+        info.levelSelectionIdx = levelSelectIdx;
+        return info;
+    }
 
     int GetWorldSelectionIndex() const { return this->worldSelectionIdx; }
     int GetWorldUnlockIndex() const { return this->worldUnlockIdx; }
+    int GetLevelSelectionIndex() const { return this->levelSelectionIdx; }
 
 private:
     int worldSelectionIdx;
     int worldUnlockIdx;
+    int levelSelectionIdx;
 };
 
 class DisplayState {

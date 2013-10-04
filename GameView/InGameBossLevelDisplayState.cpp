@@ -77,6 +77,10 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             static const double LIGHT_ON_TIME = 1.0;
             this->fadeInCountdown = LIGHT_ON_TIME;
             this->display->GetAssets()->ToggleLights(true, LIGHT_ON_TIME);
+
+            // Play intro sound
+            this->display->GetSound()->PlaySound(GameSound::BossFadeInIntroEvent, false, false);
+
             break;
         }
 
@@ -90,7 +94,7 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             
             // Clean up all the projectiles and assorted in-game stuff from the gamemodel
             GameModel* model = this->display->GetModel();
-            model->CleanUpAfterBossDeath();
+            model->CleanUpAfterLevelEnd();
 
             // Cancel all effects...
             this->display->GetAssets()->GetItemAssets()->ClearTimers();

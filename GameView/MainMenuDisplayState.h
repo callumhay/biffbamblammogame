@@ -244,7 +244,8 @@ public:
 		BangParticleEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		~BangParticleEventHandler() {}
 
-		void ParticleSpawnedEvent(const ESPParticle* particle); 
+		void ParticleSpawnedEvent(const ESPParticle* particle);
+        void ParticleDiedEvent(const ESPParticle*) {}
 	};
 
 private:

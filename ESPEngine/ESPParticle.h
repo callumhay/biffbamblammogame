@@ -12,6 +12,7 @@
 #ifndef __ESPPARTICLE_H__
 #define __ESPPARTICLE_H__
 
+#include "../BlammoEngine/IPositionObject.h"
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Vector.h"
@@ -22,7 +23,7 @@
 
 class Camera;
 
-class ESPParticle {
+class ESPParticle : public IPositionObject {
 public: 
 	static const int INFINITE_PARTICLE_LIFETIME = -1;
 	static const int INFINITE_PARTICLE_LIVES		= -1;
@@ -54,6 +55,8 @@ public:
 		this->currLifeElapsed = this->totalLifespan;
 	}
 
+    
+
 	// Getter and setter functions (mostly used by Effector objects)
 	const Point3D& GetPosition() const {
 		return this->position;
@@ -61,6 +64,11 @@ public:
 	void SetPosition(const Point3D& p) {
 		this->position = p;
 	}
+
+    // Inherited from IPositionObject
+    Point3D GetPosition3D() const {
+        return this->position;
+    }
 
 	const Vector2D& GetScale() const {
 		return this->size;

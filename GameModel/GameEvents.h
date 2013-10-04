@@ -603,10 +603,10 @@ public:
 
 
 	/**
-	 * Event triggered when a tesla block is activated and one of its neighbour/connecting tesla blocks is
+	 * Event triggered when a Tesla block is activated and one of its neighbor/connecting Tesla blocks is
 	 * already active - thus spawning a lightning arc between the two.
-	 * Arguements: newlyOnTeslaBlock      - The tesla block that just got turned on and now has lightning arc shooting out of it
-	 *             previouslyOnTeslaBlock - The previously active connecting tesla block that now has a lightning arc between itself and 'newlyOnTeslaBlock'
+	 * Arguments: newlyOnTeslaBlock      - The Tesla block that just got turned on and now has lightning arc shooting out of it
+	 *            previouslyOnTeslaBlock - The previously active connecting Tesla block that now has a lightning arc between itself and 'newlyOnTeslaBlock'
 	 */
     virtual void TeslaLightningBarrierSpawnedEvent(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock) {
         UNUSED_PARAMETER(newlyOnTeslaBlock);
@@ -614,10 +614,10 @@ public:
     }
 
 	/**
-	 * Event triggered when a tesla block is deactivated and an arc of lightning drops between it and one of its still
-	 * active neighbours.
-	 * Arguements: newlyOffTeslaBlock - The tesla block that was previously turned on but is now off.
-	 *             stillOnTeslaBlock  - The neighbour tesla block that previously had an arc between itself and 'newlyOffTeslaBlock'
+	 * Event triggered when a Tesla block is deactivated and an arc of lightning drops between it and one of its still
+	 * active neighbors.
+	 * Arguments: newlyOffTeslaBlock - The Tesla block that was previously turned on but is now off.
+	 *            stillOnTeslaBlock  - The neighbor Tesla block that previously had an arc between itself and 'newlyOffTeslaBlock'
 	 */
     virtual void TeslaLightningBarrierRemovedEvent(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock) {
         UNUSED_PARAMETER(newlyOffTeslaBlock);
@@ -627,7 +627,7 @@ public:
 	/**
 	 * Event triggered whenever the number of player lives changes. Only occurs once per life or
 	 * set of lives are added or removed.
-	 * Arguements: livesLeftBefore - Number of lives left before the change.
+	 * Arguments: livesLeftBefore - Number of lives left before the change.
 	 *             livesLeftAfter  - Number of lives left after the change.
 	 */
     virtual void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) {
@@ -637,21 +637,21 @@ public:
 
 	/**
 	 * Event triggered when the ice on a block is shattered. Only occurs once just before the ice shatters.
-	 * Arguements: block - The block whose ice shattered.
+	 * Arguments: block - The block whose ice shattered.
 	 */
     virtual void BlockIceShatteredEvent(const LevelPiece& block) { UNUSED_PARAMETER(block); }
 
     /**
-     * Event triggered when a frozen block is cancelled-out by something firey hitting it. Occurs just after
+     * Event triggered when a frozen block is canceled-out by something fiery hitting it. Occurs just after
      * the ice status is removed.
-	 * Arguements: block - The block whose ice was cancelled-out.
+	 * Arguments: block - The block whose ice was canceled-out.
      */
     virtual void BlockIceCancelledWithFireEvent(const LevelPiece& block) { UNUSED_PARAMETER(block); }
 
     /**
-     * Event triggered when a block on fire is cancelled-out by something icy hitting it. Occurs just after
+     * Event triggered when a block on fire is canceled-out by something icy hitting it. Occurs just after
      * the fire status is removed.
-	 * Arguements: block - The block whose fire was cancelled-out.
+	 * Arguments: block - The block whose fire was canceled-out.
      */
     virtual void BlockFireCancelledWithIceEvent(const LevelPiece& block) { UNUSED_PARAMETER(block); }
 
@@ -664,15 +664,15 @@ public:
     // Point related events ****************************************************************
 
     /**
-     * Event tiggered whenever the player earns a fixed point amount, occurs right after the point
+     * Event triggered whenever the player earns a fixed point amount, occurs right after the point
      * amount is added to the score.
-     * Arguements: pointAward - information about the point notification.
+     * Arguments: pointAward - information about the point notification.
      */
     virtual void PointNotificationEvent(const PointAward& pointAward) { UNUSED_PARAMETER(pointAward); }
 
 	/**
 	 * Event triggered when there is a change to the player's score. Only occurs once per change.
-	 * Arguements: newScore - The new score after the change.
+	 * Arguments: newScore - The new score after the change.
 	 */
     virtual void ScoreChangedEvent(int newScore) { UNUSED_PARAMETER(newScore); }
 
@@ -680,7 +680,7 @@ public:
     /**
      * Event triggered whenever a block is destroyed or something happens that causes the multiplier
      * counter to increase or decrease - the counter is what causes the multiplier to change.
-     * Arguements: oldCounterValue - The previous/old counter value (0 to 9).
+     * Arguments: oldCounterValue - The previous/old counter value (0 to 9).
      *             newCounterValue - The new counter value (0 to 9).
      */
     virtual void ScoreMultiplierCounterChangedEvent(int oldCounterValue, int newCounterValue) {
@@ -691,7 +691,7 @@ public:
 	/**
 	 * Event triggered when there is a change to the player's score multiplier. 
 	 * Only occurs once per change.
-	 * Arguements: oldMultiplier - The multiplier before the change.
+	 * Arguments: oldMultiplier - The multiplier before the change.
      *             newMultiplier - The multiplier after the change.
      *             position      - The position in the game where the event occurred that changed the multiplier.
 	 */
@@ -704,7 +704,7 @@ public:
     /**
      * Event triggered when the number of stars awarded to the player has changed
      * Occurs once per change, right after the change occurs.
-     * Arguements: pointAward  - The point award associated with the star amount change, NULL if the number of stars is being reset.
+     * Arguments: pointAward  - The point award associated with the star amount change, NULL if the number of stars is being reset.
      *             oldNumStars - The previous number of stars.
      *             newNumStars - The new number of stars.
      */
@@ -716,7 +716,7 @@ public:
 
     /**
      * Event triggered once right after the difficulty is changed in the gamemodel.
-     * Arguements: newDifficulty - The new difficulty level of the game.
+     * Arguments: newDifficulty - The new difficulty level of the game.
      */
     virtual void DifficultyChangedEvent(const GameModel::Difficulty& newDifficulty) {
         UNUSED_PARAMETER(newDifficulty);
@@ -727,7 +727,7 @@ public:
     /**
      * Event triggered when the laser turret AI state of a particular block changes.
      * Only occurs once per change.
-     * Arguements: block - The block with the changed state.
+     * Arguments: block - The block with the changed state.
      *             oldState - The state that the block used to have.
      *             newState - The state that the block changed to.
      */
@@ -740,7 +740,7 @@ public:
 
     /**
      * Event triggered when a laser is fired by a laser turret.
-     * Arguements: block - The block that fired the laser.
+     * Arguments: block - The block that fired the laser.
      */
     virtual void LaserFiredByTurretEvent(const LaserTurretBlock& block) {
         UNUSED_PARAMETER(block);
@@ -749,7 +749,7 @@ public:
     /**
      * Event triggered when the rocket turret AI state of a particular block changes.
      * Only occurs once per change.
-     * Arguements: block - The block with the changed state.
+     * Arguments: block - The block with the changed state.
      *             oldState - The state that the block used to have.
      *             newState - The state that the block changed to.
      */
@@ -763,7 +763,7 @@ public:
     
     /**
      * Event triggered when the rocket turret fires a rocket.
-     * Arguements: block - the rocket turret block that fired.
+     * Arguments: block - the rocket turret block that fired.
      */
     virtual void RocketFiredByTurretEvent(const RocketTurretBlock& block) {
         UNUSED_PARAMETER(block);
@@ -772,7 +772,7 @@ public:
     /**
      * Event triggered when the mine turret AI state of a particular block changes.
      * Only occurs once per change.
-     * Arguements: block - The block with the changed state.
+     * Arguments: block - The block with the changed state.
      *             oldState - The state that the block used to have.
      *             newState - The state that the block changed to.
      */
@@ -786,7 +786,7 @@ public:
 
     /**
      * Event triggered when the mine turret fires a rocket.
-     * Arguements: block - the mine turret block that fired.
+     * Arguments: block - the mine turret block that fired.
      */
     virtual void MineFiredByTurretEvent(const MineTurretBlock& block) {
         UNUSED_PARAMETER(block);
@@ -794,7 +794,7 @@ public:
 
     /**
      * Event triggered when a regen block's life changes. Event is triggered immediately after the change.
-     * Arguements: block - The regen block that changed.
+     * Arguments: block - The regen block that changed.
      *             lifePercentBefore - The life the block had before its life percent changed.
      */
     virtual void RegenBlockLifeChangedEvent(const RegenBlock& block, float lifePercentBefore) {
@@ -804,7 +804,7 @@ public:
 
     /** 
      * Signals that a regen block was preturbed (hit by something that could have done damage, or affected in some negative way.
-     * Arguements: block - The regen block that was preturbed.
+     * Arguments: block - The regen block that was preturbed.
      */
     virtual void RegenBlockPreturbedEvent(const RegenBlock& block) {
         UNUSED_PARAMETER(block);
@@ -822,7 +822,7 @@ public:
 
     /**
      * Event triggered when the boss gets really angry. Happens once right when the boss is angry.
-     * Arguements: boss - The boss that got angry.
+     * Arguments: boss - The boss that got angry.
      *             angryPart - The part of the boss that thinks / is associated with being angry.
      */
     virtual void BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart) {
@@ -839,7 +839,6 @@ public:
     virtual void BossEffectEvent(const BossEffectEventInfo& effectEvent) {
         UNUSED_PARAMETER(effectEvent);
     }
-    
 };
 
 

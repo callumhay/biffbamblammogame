@@ -19,7 +19,7 @@ class Mesh;
 
 class DecoBossMesh : public BossMesh {
 public:
-    DecoBossMesh(DecoBoss* boss);
+    DecoBossMesh(DecoBoss* boss, GameSound* sound);
     ~DecoBossMesh();
 
     // Inherited from BossMesh

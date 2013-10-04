@@ -36,10 +36,10 @@ private:
     double dirHeldDownTimeCounter;
     bool windowHasFocus;
 
-    int lastPaddleLeftDir;
-    int lastOtherLeftDir;
-    int lastPaddleRightDir;
-    int lastOtherRightDir;
+    //int lastPaddleLeftDir;
+    //int lastOtherLeftDir;
+    //int lastPaddleRightDir;
+    //int lastOtherRightDir;
 
 	bool keyPressed[SDLK_LAST];
 	void SetKeyPress(int key, bool isPressed);

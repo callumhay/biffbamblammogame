@@ -106,15 +106,17 @@ void GameWorldAssets::LoadLightingForLevel(GameAssets* assets, const GameLevel& 
     Vector3D addedFgKeyDist(0,0,0);
     Vector3D addedFgFillDist(0,0,0);
 
+    static const float MAX_DIST_CHANGE = 9.0f;
+
     if (levelWidth > MIN_WIDTH_BEFORE_Z_CHANGE) {
         if (levelWidth > MAX_WIDTH_BEFORE_Z_FIXED) {
             addedFgFillDist[2] = addedFgKeyDist[2] = 10.0f;
-            addedFgFillDist[0] = 10.0f;
-            addedFgKeyDist[0]  = -10.0f;
+            addedFgFillDist[0] = MAX_DIST_CHANGE;
+            addedFgKeyDist[0]  = -MAX_DIST_CHANGE;
         }
         else {
             addedFgFillDist[2] = addedFgKeyDist[2] = 
-                NumberFuncs::LerpOverFloat(MIN_WIDTH_BEFORE_Z_CHANGE, MAX_WIDTH_BEFORE_Z_FIXED, 0.0f, 10.0f, levelWidth);
+                NumberFuncs::LerpOverFloat(MIN_WIDTH_BEFORE_Z_CHANGE, MAX_WIDTH_BEFORE_Z_FIXED, 0.0f, MAX_DIST_CHANGE, levelWidth);
             addedFgFillDist[0] = addedFgFillDist[2];
             addedFgKeyDist[0]  = -addedFgFillDist[0];
         }

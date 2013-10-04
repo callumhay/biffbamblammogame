@@ -25,7 +25,7 @@
 const double ClassicalBossMesh::INTRO_TIME_IN_SECS = 3.0;
 const float ClassicalBossMesh::INTRO_SPARKLE_TIME_IN_SECS = 1.2;
 
-ClassicalBossMesh::ClassicalBossMesh(ClassicalBoss* boss) : BossMesh(), boss(boss),
+ClassicalBossMesh::ClassicalBossMesh(ClassicalBoss* boss, GameSound* sound) : BossMesh(sound), boss(boss),
 sparkleTex(NULL), glowTex(NULL), eyeMesh(NULL), pedimentMesh(NULL), tablatureMesh(NULL), columnMesh(NULL),
 baseMesh(NULL), armSquareMesh(NULL), restOfArmMesh(NULL), leftArmFireEmitter(NULL),
 rightArmFireEmitter(NULL), leftArmSmokeEmitter(NULL), rightArmSmokeEmitter(NULL), 
@@ -70,22 +70,33 @@ eyeGlowPulser(ScaleEffect(1.0f, 1.5f)) {
     this->eyeSmokeEmitter = this->BuildSmokeEmitter(ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
     this->eyeFireEmitter  = this->BuildFireEmitter(ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
 
-    this->leftArmExplodingEmitter  = this->BuildExplodingEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
-    this->rightArmExplodingEmitter = this->BuildExplodingEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->leftArmExplodingEmitter  = this->BuildExplodingEmitter(0.8f, this->boss->GetLeftRestOfArm(), ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->rightArmExplodingEmitter = this->BuildExplodingEmitter(0.8f, this->boss->GetRightRestOfArm(), ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
 
+    std::vector<const BossBodyPart*> columns = this->boss->GetBodyColumns();
     this->columnExplodingEmitters.reserve(6);
     for (int i = 0; i < 6; i++) {
-        this->columnExplodingEmitters.push_back(this->BuildExplodingEmitter(ClassicalBoss::COLUMN_WIDTH, ClassicalBoss::COLUMN_HEIGHT));
+        this->columnExplodingEmitters.push_back(this->BuildExplodingEmitter(0.5f, columns[i], ClassicalBoss::COLUMN_WIDTH, ClassicalBoss::COLUMN_HEIGHT));
     }
 
+    static const float TABLATURE_SOUND_VOL_AMT = 0.75f;
     this->tablatureExplodingEmitters.reserve(4);
-    for (int i = 0; i < 4; i++) {
-        this->tablatureExplodingEmitters.push_back(this->BuildExplodingEmitter(ClassicalBoss::TABLATURE_WIDTH, ClassicalBoss::TABLATURE_HEIGHT));
-    }
+    // top-left
+    this->tablatureExplodingEmitters.push_back(this->BuildExplodingEmitter(TABLATURE_SOUND_VOL_AMT, this->boss->GetTopLeftTablature(), 
+        ClassicalBoss::TABLATURE_WIDTH, ClassicalBoss::TABLATURE_HEIGHT));
+    // top-right
+    this->tablatureExplodingEmitters.push_back(this->BuildExplodingEmitter(TABLATURE_SOUND_VOL_AMT, this->boss->GetTopRightTablature(),
+        ClassicalBoss::TABLATURE_WIDTH, ClassicalBoss::TABLATURE_HEIGHT));
+    // bottom-left
+    this->tablatureExplodingEmitters.push_back(this->BuildExplodingEmitter(TABLATURE_SOUND_VOL_AMT, this->boss->GetBottomLeftTablature(),
+        ClassicalBoss::TABLATURE_WIDTH, ClassicalBoss::TABLATURE_HEIGHT));
+    // bottom-right
+    this->tablatureExplodingEmitters.push_back(this->BuildExplodingEmitter(TABLATURE_SOUND_VOL_AMT, this->boss->GetBottomRightTablature(),
+        ClassicalBoss::TABLATURE_WIDTH, ClassicalBoss::TABLATURE_HEIGHT));
     
-    this->baseExplodingEmitter     = this->BuildExplodingEmitter(ClassicalBoss::BASE_WIDTH, ClassicalBoss::BASE_HEIGHT);
-    this->pedimentExplodingEmitter = this->BuildExplodingEmitter(ClassicalBoss::PEDIMENT_WIDTH, ClassicalBoss::PEDIMENT_HEIGHT);
-    this->eyeExplodingEmitter      = this->BuildExplodingEmitter(1.5f * ClassicalBoss::EYE_WIDTH, 1.5f * ClassicalBoss::EYE_HEIGHT);
+    this->baseExplodingEmitter     = this->BuildExplodingEmitter(0.75f, this->boss->GetBase(), ClassicalBoss::BASE_WIDTH, ClassicalBoss::BASE_HEIGHT);
+    this->pedimentExplodingEmitter = this->BuildExplodingEmitter(0.75f, this->boss->GetPediment(), ClassicalBoss::PEDIMENT_WIDTH, ClassicalBoss::PEDIMENT_HEIGHT);
+    this->eyeExplodingEmitter      = this->BuildExplodingEmitter(1.0f,  this->boss->GetEye(), 1.5f * ClassicalBoss::EYE_WIDTH, 1.5f * ClassicalBoss::EYE_HEIGHT);
 }
 
 ClassicalBossMesh::~ClassicalBossMesh() {

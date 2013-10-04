@@ -23,6 +23,8 @@
 #include "GameView/GameFontAssetsManager.h"
 #include "GameView/LoadingScreen.h"
 
+#include "GameSound/GameSound.h"
+
 #include "GameModel/GameModel.h"
 #include "GameModel/GameEventManager.h"
 #include "GameModel/GameModelConstants.h"
@@ -37,6 +39,7 @@
 // Initialization Constants for the application
 static const char* RESOURCE_ZIP = "BBBResources.zip";
 
+static GameSound* sound     = NULL;
 static GameModel* model     = NULL;
 static GameDisplay* display = NULL;
 
@@ -54,6 +57,11 @@ static void CleanUpMVC() {
 		delete model;
 		model = NULL;
 	}
+
+    if (sound != NULL) {
+        delete sound;
+        sound = NULL;
+    }
 }
 
 /**
@@ -62,7 +70,7 @@ static void CleanUpMVC() {
  */
 static void GameRenderLoop() {
 	double frameTimeDelta = 0.0;
-	const double maxDelta = 1.0 / 15.0;
+	static const double MAX_DELTA = 1.0 / 20.0;
 	bool quitGame = false;
 
 	// Main render loop...
@@ -72,10 +80,8 @@ static void GameRenderLoop() {
 		// Synchronize the controller state with the current game loop
 		GameControllerManager::GetInstance()->SyncControllers(frameTimeDelta);
 
-		// Don't let the game run at less than 30 fps
-		if (frameTimeDelta > maxDelta) {
-			frameTimeDelta = maxDelta;
-		}
+		// Don't let the game run at less than 20 fps (i.e., more than 1/20 of a second per frame)
+        frameTimeDelta = std::min<double>(MAX_DELTA, frameTimeDelta);
 
 		// Render what's currently being displayed by the game
 		display->Render(frameTimeDelta);
@@ -184,8 +190,19 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 
-        model = new GameModel(initCfgOptions.GetDifficulty(), initCfgOptions.GetInvertBallBoost(), initCfgOptions.GetBallBoostMode());
-		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
+        // Load basic default in-memory sounds
+        LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
+        sound = new GameSound();
+        if (sound->Init()) {
+            sound->LoadGlobalSounds();
+            std::cout << "Sound initialized successfully." << std::endl;
+        }
+        else {
+            std::cerr << "Failed to load game sound." << std::endl;
+        }
+
+        model = new GameModel(sound, initCfgOptions.GetDifficulty(), initCfgOptions.GetInvertBallBoost(), initCfgOptions.GetBallBoostMode());
+		display = new GameDisplay(model, sound, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
 
 		// Initialize all controllers that we can...
 		GameControllerManager::GetInstance()->InitAllControllers(model, display);

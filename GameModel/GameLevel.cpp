@@ -93,15 +93,15 @@ const char* GameLevel::PADDLE_STARTING_X_POS = "PADDLESTARTXPOS:";
 
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
-                     unsigned int numBlocks, 
-                     const std::vector<std::vector<LevelPiece*> >& pieces,
-                     const std::vector<GameItem::ItemType>& allowedDropTypes, 
+                     unsigned int numBlocks, const std::vector<std::vector<LevelPiece*> >& pieces, 
+                     int numStarsToUnlock, const std::vector<GameItem::ItemType>& allowedDropTypes, 
                      size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos) :
 
 levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum), piecesLeft(numBlocks),
 filepath(filepath), levelName(levelName), prevHighScore(0), highScore(0),
-levelAlmostCompleteSignaled(false), boss(NULL) {
+levelAlmostCompleteSignaled(false), boss(NULL), numStarsRequiredToUnlock(numStarsToUnlock), 
+areUnlockStarsPaidFor(false) {
 
 	assert(!filepath.empty());
 	
@@ -116,14 +116,15 @@ levelAlmostCompleteSignaled(false), boss(NULL) {
 }
 
 GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName,
-                     const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss,
+                     const std::vector<std::vector<LevelPiece*> >& pieces, int numStarsToUnlock, Boss* boss,
                      const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum,
                      float paddleStartXPos) :
 
 levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
 piecesLeft(0), filepath(filepath), levelName(levelName), highScore(0),
-levelAlmostCompleteSignaled(false), boss(boss) {
+levelAlmostCompleteSignaled(false), boss(boss), numStarsRequiredToUnlock(numStarsToUnlock), 
+areUnlockStarsPaidFor(false) {
 
     assert(!filepath.empty());
 	assert(boss != NULL);
@@ -252,7 +253,9 @@ void GameLevel::SetPaddleStartXPos(float xPos) {
     }
 }
 
-GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, std::string filepath) {
+GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, 
+                                              int milestoneStarAmt, std::string filepath) {
+
 	std::stringstream* inFile = ResourceManager::GetInstance()->FilepathToInOutStream(filepath);
 	if (inFile == NULL) {
 		assert(false);
@@ -1134,11 +1137,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
             return NULL;
         }
     
-        return new GameLevel(levelIdx, filepath, levelName, levelPieces, boss, allowedDropTypes, randomItemProbabilityNum, paddleStartXPos);
+        return new GameLevel(levelIdx, filepath, levelName, levelPieces, milestoneStarAmt, boss, allowedDropTypes, randomItemProbabilityNum, paddleStartXPos);
 
     }
     else {
-	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores, paddleStartXPos);
+	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, milestoneStarAmt, allowedDropTypes, randomItemProbabilityNum, starAwardScores, paddleStartXPos);
     }
 }
 
@@ -1705,8 +1708,10 @@ bool GameLevel::CollideBossWithLevel(const Collision::AABB2D& bossAABB, Vector2D
 
 // Tick any active AI entities in this level
 void GameLevel::TickAIEntities(double dT, GameModel* gameModel) {
+
     for (std::set<LevelPiece*>::const_iterator iter = this->aiEntities.begin();
          iter != this->aiEntities.end(); ++iter) {
+
         LevelPiece* currAIEntity = *iter;
         assert(currAIEntity != NULL);
         currAIEntity->AITick(dT, gameModel);
@@ -1719,9 +1724,9 @@ void GameLevel::TickAIEntities(double dT, GameModel* gameModel) {
 }
 
 /**
- * Private helper function for finding a set of levelpieces within the given range of values
+ * Private helper function for finding a set of level pieces within the given range of values
  * indexing along the x and y axis.
- * Return: Set of levelpieces included in the given bounds.
+ * Return: Set of level pieces included in the given bounds.
  */
 std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float xIndexMax, 
                                                           float yIndexMin, float yIndexMax) const {

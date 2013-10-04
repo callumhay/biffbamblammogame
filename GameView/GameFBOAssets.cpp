@@ -25,7 +25,7 @@ sound(sound), bgFBO(NULL), fgAndBgFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NUL
 fgAndBgBlurEffect(NULL), bloomEffect(NULL), inkSplatterEffect(NULL), 
 stickyPaddleCamEffect(NULL), shieldPaddleCamEffect(NULL), smokeyCamEffect(NULL), icyCamEffect(NULL), 
 uberIntenseCamEffect(NULL), fireBallCamEffect(NULL), bulletTimeEffect(NULL), 
-drawItemsInLastPass(true) {
+drawItemsInLastPass(true), inkSplatterEventSoundID(INVALID_SOUND_ID) {
 	
     assert(sound != NULL);
 
@@ -238,10 +238,10 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
         // The ink splatter might no longer be active, in this case we turn off any effects that
         // got toggled when it was activated
         if (this->inkSplatterEffect->IsInkSplatVisible()) {
-            sound->ToggleSoundEffect(GameSound::InkSplatterEffect, true);
+            sound->ToggleSoundEffect(GameSound::InkSplatterEffect, true, this->inkSplatterEventSoundID);
         }
         else {
-            sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false);
+            sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false, this->inkSplatterEventSoundID);
         }
 	}
 
@@ -478,9 +478,10 @@ void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) 
  * at the end of the engine pipeline.
  */
 void GameFBOAssets::ActivateInkSplatterEffect() {
-    // Activates the inksplat, but there's an animation, so we don't apply the splatter effect just yet
+    // Activates the ink splat, but there's an animation, so we don't apply the splatter effect just yet
 	this->inkSplatterEffect->ActivateInkSplat();
-    //sound->ToggleSoundEffect(GameSound::InkSplatterEffect, true);
+    
+    this->inkSplatterEventSoundID = sound->PlaySound(GameSound::InkSplatterEvent, false, true);
 }
 /**
  * Deactivates the ink splatter effect.
@@ -488,7 +489,8 @@ void GameFBOAssets::ActivateInkSplatterEffect() {
 void GameFBOAssets::DeactivateInkSplatterEffect() {
     // Stops the ink splat immediately -- need to kill the sound too
 	this->inkSplatterEffect->DeactivateInkSplat();
-    sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false);
+    sound->ToggleSoundEffect(GameSound::InkSplatterEffect, false, this->inkSplatterEventSoundID);
+    this->inkSplatterEventSoundID = INVALID_SOUND_ID;
 }
 
 void GameFBOAssets::SetupPaddleShieldEffect() {

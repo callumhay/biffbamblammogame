@@ -16,6 +16,7 @@
 #include "../BlammoEngine/Collision.h"
 #include "../BlammoEngine/Vector.h"
 
+class GameSound;
 class GameModel;
 class BossBodyPart;
 class GameBall;

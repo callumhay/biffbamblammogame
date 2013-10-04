@@ -96,7 +96,8 @@ public:
 
         // -> Paddle/ball sounds
         BallPaddleCollisionEvent,
-        BallStickyPaddleCollisionEvent,
+        BallStickyPaddleAttachEvent,
+        BallStickyPaddleBounceEvent,
         BallShieldPaddleCollisionEvent,
 		BallOrPaddleGrowEvent,
 		BallOrPaddleShrinkEvent,
@@ -108,6 +109,7 @@ public:
 		// -> Block-only sounds
 		BombBlockDestroyedEvent,
 		InkBlockDestroyedEvent,
+        InkSplatterEvent,
 		BasicBlockDestroyedEvent,
 		CannonBlockLoadedEvent,
 		CannonBlockRotatingLoop,
@@ -126,10 +128,16 @@ public:
         // -> Projectile and beam sounds
 		PaddleRocketLaunchEvent,
         PaddleRocketMovingLoop,
+        //BossRocketMovingLoop,
+        //TurretRocketMovingLoop,
         RocketExplodedEvent,
+        TurretMineFiredEvent,
+        PaddleMineFiredEvent,
         MineExplodedEvent,
         LaserBulletShotEvent,
 		LaserBeamFiringLoop,
+        LaserDeflectedByShieldEvent,
+        RocketOrMineDeflectedByShieldEvent,
 
         // -> Item sounds
 		BallSafetyNetCreatedEvent,
@@ -146,6 +154,19 @@ public:
         ItemTimerEndingLoop,
 		ItemTimerEndedEvent,
         ItemMovingLoop,
+
+        // -> Boss-related/specific sounds
+        BossFadeInIntroEvent,
+        BossElectricitySpasmLoop,
+        BossAngryEvent,
+        BossHurtEvent,
+        BossBlowingUpLoop,
+        BossDeathFlashToFullscreen,
+        BossLaserBeamLoop,
+        ClassicalBossArmShakeLoop,
+        ClassicalBossArmAttackEvent,
+        ClassicalBossArmAttackHitEvent,
+        GothicBossMassiveShockwaveEvent,
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,
@@ -173,6 +194,10 @@ public:
         BlockBrokenMultiplierCounterInc9,
 
         // Non-in-game state sounds
+        LevelStartPaddleMoveUpEvent,
+        LevelStartBallSpawnOnPaddleEvent,
+        LevelEndFadeoutEvent,
+        LevelSummaryNewHighScoreEvent,
         GameOverEvent
     };
 
@@ -189,6 +214,9 @@ public:
     typedef WorldSoundSourceMap::const_iterator WorldSoundSourceMapConstIter;
 
     static const int MENU_CONFIRM_SOUND_DELAY_IN_MS = 1200;
+    
+    static const float DEFAULT_MIN_3D_SOUND_DIST;
+    static const float DEFAULT_3D_SOUND_ROLLOFF_FACTOR;
 
     GameSound();
     ~GameSound();
@@ -205,14 +233,15 @@ public:
     void ReloadFromMSF();
 
     // Play/stop functions
-    void StopAllSounds();
-    void StopAllSoundLoops();
+    void StopAllSounds(double fadeOutTimeInSecs = 0.0);
+    void StopAllSoundLoops(double fadeOutTimeInSecs = 0.0);
     void PauseAllSounds();
     void UnpauseAllSounds();
     SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects = true);
     SoundID PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, 
-        const Point3D& position, bool applyActiveEffects = true);
+        const Point3D& position, bool applyActiveEffects = true, float minDistance = DEFAULT_MIN_3D_SOUND_DIST);
     void StopSound(SoundID soundID, double fadeOutTimeInSecs = 0.0);
+    void StopAllSoundsWithType(const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
 
     // Game object positional sound attaching/detaching functions
     SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped);
@@ -225,6 +254,7 @@ public:
     void PauseAllEffects();
     void UnpauseAllEffects();
     void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn);
+    void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn, SoundID ignoreSound);
     void ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn, const std::set<SoundID>& ignoreSounds);
 
     // Volume functions
@@ -311,6 +341,12 @@ inline bool GameSound::IsEffectPaused(GameSound::EffectType type) const {
 
 inline void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn) {
     std::set<SoundID> temp;
+    this->ToggleSoundEffect(effectType, effectOn, temp);
+}
+
+inline void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn, SoundID ignoreSound) {
+    std::set<SoundID> temp;
+    temp.insert(ignoreSound);
     this->ToggleSoundEffect(effectType, effectOn, temp);
 }
 

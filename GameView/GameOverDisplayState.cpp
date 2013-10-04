@@ -69,6 +69,8 @@ void GameOverDisplayState::ButtonPressed(const GameControl::ActionButton& presse
 }
 
 void GameOverDisplayState::UpdateAndDrawState(double dT) {
+    GameSound* sound = this->display->GetSound();
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -101,7 +103,6 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
             if (this->fastFadeAnim.Tick(dT) && this->fadeAnim.Tick(dT) && this->moveLabelAnim.Tick(dT)) {
 
                 // Stop all sounds and play the game over sound...
-                GameSound* sound = this->display->GetSound();
                 sound->StopAllSounds();
                 sound->StopAllEffects();
                 this->gameOverSoundID = sound->PlaySound(GameSound::GameOverEvent, false);
@@ -134,7 +135,7 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
 			        this->display->GetAssets()->DeactivateMiscEffects();
 			        
                     // Kill all sounds
-			        this->display->GetSound()->StopAllSounds();
+			        sound->StopAllSounds();
 
                     // Reset the level
                     this->display->GetModel()->ResetCurrentLevel();

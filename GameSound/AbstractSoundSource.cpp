@@ -75,7 +75,7 @@ Sound* AbstractSoundSource::Spawn2DSoundWithIDAndSource(const SoundID& id, irrkl
     assert(source != NULL);
     
     irrklang::ISound* newSound = this->soundEngine->play3D(source, irrklang::vec3df(pos[0], pos[1], pos[2]), isLooped, false, true, true);
-    newSound->setMinDistance(1000.0f); // Make sure we're playing at max volume everywhere in the game
+    newSound->setMinDistance(GameSound::DEFAULT_MIN_3D_SOUND_DIST); // Make sure we're playing at max volume everywhere in the game
     if (newSound == NULL) {
         assert(false);
         return NULL;

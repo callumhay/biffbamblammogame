@@ -292,7 +292,7 @@ void DecoBossAIState::ShootLightningBoltAtPaddle(GameModel* gameModel) {
 AnimationMultiLerp<Vector3D> DecoBossAIState::GenerateArmDeathTranslationAnimation(bool isLeft, double timeInSecs) const {
     float xDist = (isLeft ? -1 : 1) * 3 * DecoBoss::ARM_WIDTH;
 
-    float yDist = -1.25f * (isLeft ? this->boss->GetLeftArm()->GetTranslationPt2D()[1] : 
+    float yDist = -1.15f * (isLeft ? this->boss->GetLeftArm()->GetTranslationPt2D()[1] : 
         this->boss->GetRightArm()->GetTranslationPt2D()[1]);
     yDist -= 2 * DecoBoss::ARM_NOT_EXTENDED_HEIGHT;
 
@@ -1058,12 +1058,17 @@ void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel)
     assert(transformMgr != NULL);
     transformMgr->SetGameZRotation(this->currLevelRotationAmtInDegs, *gameModel->GetCurrentLevel());
 
-    // Rotate the level...
-    if (this->currLevelRotationAmtInDegs >= DEFAULT_LEVEL_ROTATION_AMT_IN_DEGS) {
+    // The condition for stopping rotation is based on the direction
+    bool rotationComplete = this->rotationDir > 0 ? 
+        (this->currLevelRotationAmtInDegs >= DEFAULT_LEVEL_ROTATION_AMT_IN_DEGS) :
+        (this->currLevelRotationAmtInDegs <= -DEFAULT_LEVEL_ROTATION_AMT_IN_DEGS);
+
+    if (rotationComplete) {
 
         this->currLevelRotationAmtInDegs = 0.0;
         if (gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
-            // Keep rotating!
+            // Keep rotating but maybe switch the direction...
+            this->rotationDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
         }
         else {
             // Shake the level to indicate the boss is done with rotating, also the sudden halt is 
@@ -1083,9 +1088,10 @@ void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel)
         if (!gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn() &&
             ball->GetCenterPosition2D()[1] > this->boss->GetYBallMaxForLevelRotate()) {
 
-                currLevelRotSpd *= 1.5f;
+            currLevelRotSpd *= 1.5f;
         }
 
+        // Rotate the level...
         this->currLevelRotationAmtInDegs += dT * this->rotationDir * currLevelRotSpd;
     }
 
@@ -1211,7 +1217,7 @@ void DecoBossAIState::ExecuteElectrifiedRetaliationState(double dT, GameModel* g
         TeslaBlock* rightTeslaBlock = DecoBoss::GetRightTeslaBlock(*currLevel);
         assert(leftTeslaBlock != NULL && rightTeslaBlock != NULL);
 
-        if (leftTeslaBlock->GetIsElectricityActive()) {
+        if (leftTeslaBlock->GetIsElectricityActive() && this->ShutsOffLeftTeslaBlockOnRetaliation()) {
             const Point2D& center = leftTeslaBlock->GetCenter();
             leftTeslaBlock->ToggleElectricity(*gameModel, *currLevel, true);
             GameEventManager::Instance()->ActionGeneralEffect(ShortCircuitEffectInfo(
@@ -1220,7 +1226,7 @@ void DecoBossAIState::ExecuteElectrifiedRetaliationState(double dT, GameModel* g
                 GameModelConstants::GetInstance()->TESLA_LIGHTNING_DARK_COLOUR,
                 LevelPiece::PIECE_WIDTH, 2.0));
         }
-        if (rightTeslaBlock->GetIsElectricityActive()) {
+        if (rightTeslaBlock->GetIsElectricityActive() && this->ShutsOffRightTeslaBlockOnRetaliation()) {
             const Point2D& center = rightTeslaBlock->GetCenter();
             rightTeslaBlock->ToggleElectricity(*gameModel, *currLevel, true);
             GameEventManager::Instance()->ActionGeneralEffect(ShortCircuitEffectInfo(
@@ -1278,6 +1284,7 @@ void DecoBossAIState::TeslaLightningArcHitOccurred(GameModel* gameModel, const T
 }
 
 void DecoBossAIState::UpdateState(double dT, GameModel* gameModel) {
+
     switch (this->currState) {
         case StationaryAttackAIState:
             this->ExecuteStationaryAttackState(dT, gameModel);
@@ -1689,7 +1696,7 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
             this->InitElectrificationRetaliationState();
 
             // Blow off one of the arms...
-            static const float TOTAL_BLOWUP_TIME = DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS + 2.0;
+            static const float TOTAL_BLOWUP_TIME = DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS + 0.25;
             bool deathToLeftArm = (this->becomeDeadArm == this->boss->GetLeftArm());
             assert(!this->becomeDeadArm->GetIsDestroyed());
             this->becomeDeadArm->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(TOTAL_BLOWUP_TIME));

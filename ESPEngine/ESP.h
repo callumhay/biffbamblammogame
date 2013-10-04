@@ -23,6 +23,9 @@
 #include "ESPParticleRotateEffector.h"
 #include "ESPParticleMagneticEffector.h"
 
+// Event Handlers
+#include "ESPEmitterEventHandler.h"
+
 // Emitters and particles
 #include "ESPEmitter.h"
 #include "ESPPointEmitter.h"

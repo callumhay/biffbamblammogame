@@ -157,7 +157,7 @@ private:
     void ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking, GameModel* gameModel);
     void ExecutePrepLaserState(double dT, GameModel* gameModel);
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
-    void ExecuteHurtArmState(double dT, bool isLeftArm);
+    void ExecuteHurtArmState(double dT, bool isLeftArm, GameModel* gameModel);
     void ExecuteArmsLostAngryState(double dT);
 
     // Helper functions for generating various pieces of data across states

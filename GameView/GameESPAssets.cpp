@@ -2,7 +2,7 @@
  * GameESPAssets.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -108,7 +108,6 @@ circleGradientTex(NULL),
 starTex(NULL), 
 starOutlineTex(NULL),
 evilStarTex(NULL),
-evilStarOutlineTex(NULL),
 explosionTex(NULL),
 explosionRayTex(NULL),
 laserBeamTex(NULL),
@@ -217,8 +216,6 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starOutlineTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->evilStarTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->evilStarOutlineTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->explosionTex);
 	assert(removed);
@@ -665,11 +662,6 @@ void GameESPAssets::InitESPTextures() {
 		this->evilStarTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
             GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR, Texture::Trilinear));
 		assert(this->evilStarTex != NULL);	
-	}
-	if (this->evilStarOutlineTex == NULL) {
-		this->evilStarOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR_OUTLINE, Texture::Trilinear));
-		assert(this->evilStarOutlineTex != NULL);		
 	}
 	if (this->explosionTex == NULL) {
 		this->explosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -4140,7 +4132,7 @@ void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectIn
     sparkParticles1->SetNumParticleLives(1);
     sparkParticles1->SetInitialSpd(ESPInterval(2.0f, 6.0f));
     sparkParticles1->SetParticleLife(ESPInterval(effectInfo.GetTimeInSecs()));
-    sparkParticles1->SetParticleSize(ESPInterval(0.1f * effectInfo.GetSize(), 0.5f * effectInfo.GetSize()));
+    sparkParticles1->SetParticleSize(ESPInterval(0.15f * effectInfo.GetSize(), 0.6f * effectInfo.GetSize()));
     sparkParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * effectInfo.GetSize()));
     sparkParticles1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     sparkParticles1->SetEmitPosition(position);
@@ -4157,11 +4149,12 @@ void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectIn
     boltParticles->SetNumParticleLives(1);
     boltParticles->SetInitialSpd(ESPInterval(8.0f));
     boltParticles->SetParticleLife(ESPInterval(0.8f * effectInfo.GetTimeInSecs()));
-    boltParticles->SetParticleSize(ESPInterval(0.25f * effectInfo.GetSize()));
+    boltParticles->SetParticleSize(ESPInterval(0.33f * effectInfo.GetSize()), ESPInterval(0.66f * effectInfo.GetSize()));
     boltParticles->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * effectInfo.GetSize()));
     boltParticles->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     boltParticles->SetEmitPosition(position);
     boltParticles->SetEmitDirection(Vector3D(0, 1, 0));
+    boltParticles->SetToggleEmitOnPlane(true);
     boltParticles->SetEmitAngleInDegrees(180);
     boltParticles->SetParticleColour(effectInfo.GetDarkColour());
     boltParticles->AddEffector(&this->particleFader);
@@ -5005,7 +4998,7 @@ void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float hei
 }
 
 void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float height) {
-    float maxSize = std::max<float>(width, height);
+    float maxSize = std::max<float>(2.0f * LevelPiece::PIECE_WIDTH, std::max<float>(width, height));
 
     // Angry lightning bolts
 	ESPPointEmitter* angryBolts = new ESPPointEmitter();
@@ -5013,7 +5006,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryBolts->SetInitialSpd(ESPInterval(4.33f));
 	angryBolts->SetParticleLife(ESPInterval(2.0f));
-	angryBolts->SetParticleSize(ESPInterval(0.15f*maxSize), ESPInterval(0.3f*maxSize));
+	angryBolts->SetParticleSize(ESPInterval(0.2f*maxSize), ESPInterval(0.4f*maxSize));
 	angryBolts->SetEmitAngleInDegrees(45);
 	angryBolts->SetEmitPosition(Point3D(pos, 0));
 	angryBolts->SetEmitDirection(Vector3D(0,1,0));

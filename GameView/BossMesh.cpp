@@ -18,6 +18,8 @@
 
 #include "../BlammoEngine/Texture2D.h"
 
+#include "../GameSound/GameSound.h"
+
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/ClassicalBoss.h"
@@ -33,7 +35,9 @@
 
 #include "../ResourceManager.h"
 
-BossMesh::BossMesh() : explosionAnimTex(NULL), finalExplosionIsActive(false),
+BossMesh::BossMesh(GameSound* sound) : 
+sound(sound), explosionAnimTex(NULL), finalExplosionIsActive(false),
+finalExplosionSoundID(INVALID_SOUND_ID),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f), 
 particleLargeGrowth(1.0f, 2.2f),
@@ -49,6 +53,8 @@ laserSightTargetColourChanger(ColourRGBA(0.0f, 1.0f, 0.0f, 0.8f), ColourRGBA(1.0
 laserSightTargetRotateEffector(100.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 particleShrinkToNothing(1, 0)
 {
+    assert(sound != NULL);
+
     // Initialize the smoke textures...
     if (this->smokeTextures.empty()) {
 		this->smokeTextures.reserve(6);
@@ -123,38 +129,46 @@ BossMesh::~BossMesh() {
 
     // Clean up the effects emitters (if there are any)
     this->ClearActiveEffects();
+
+    // Clean up all the handlers
+    for (std::list<ExplodingEmitterHandler*>::iterator iter = this->explodingEmitterHandlers.begin();
+         iter != this->explodingEmitterHandlers.end(); ++iter) {
+        ExplodingEmitterHandler* handler = *iter;
+        delete handler;
+        handler = NULL;
+    }
+    this->explodingEmitterHandlers.clear();
 }
 
-
-BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
+BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss, GameSound* sound) {
     BossMesh* result = NULL;
     switch (style) {
 
         case GameWorld::Classical: {
             assert(dynamic_cast<ClassicalBoss*>(boss) != NULL);
             ClassicalBoss* classicalBoss = static_cast<ClassicalBoss*>(boss);
-            result = new ClassicalBossMesh(classicalBoss);
+            result = new ClassicalBossMesh(classicalBoss, sound);
             break;
         }
 
         case GameWorld::GothicRomantic: {
             assert(dynamic_cast<GothicRomanticBoss*>(boss) != NULL);
             GothicRomanticBoss* gothicBoss = static_cast<GothicRomanticBoss*>(boss);
-            result = new GothicRomanticBossMesh(gothicBoss);
+            result = new GothicRomanticBossMesh(gothicBoss, sound);
             break;
         }
 
         case GameWorld::Nouveau: {
             assert(dynamic_cast<NouveauBoss*>(boss) != NULL);
             NouveauBoss* nouveauBoss = static_cast<NouveauBoss*>(boss);
-            result = new NouveauBossMesh(nouveauBoss);
+            result = new NouveauBossMesh(nouveauBoss, sound);
             break;
         }
 
         case GameWorld::Deco: {
             assert(dynamic_cast<DecoBoss*>(boss) != NULL);
             DecoBoss* decoBoss = static_cast<DecoBoss*>(boss);
-            result = new DecoBossMesh(decoBoss);
+            result = new DecoBossMesh(decoBoss, sound);
             break;
         }
 
@@ -184,15 +198,20 @@ double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const Gam
     assert(!this->finalExplosionIsActive);
 
     assert(delayInSecs < Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME);
-    double lineAnimTime = (Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME - delayInSecs) / 2.5 + delayInSecs;
+    double lineAnimTime = ((Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME - delayInSecs) / 2.5) + delayInSecs; // 2.58
 
     const GameLevel* level = model->GetCurrentLevel();
     assert(level != NULL);
     
     this->lineAnim.SetLerp(delayInSecs, lineAnimTime, 0.0f, 2*level->GetLevelUnitWidth());
     this->flashAnim.SetLerp(lineAnimTime, Boss::TOTAL_DEATH_ANIM_TIME, 0.0f, 2*level->GetLevelUnitHeight());
+    
+    // The play back of the line+flash is as follows (in second intervals):
+    // 1.5  --> 2.58 (total of 1.08 seconds): line expansion
+    // 2.58 --> 5.25 (total of 2.67 seconds): flash expansion
 
     this->finalExplosionIsActive = true;
+    this->finalExplosionSoundID  = INVALID_SOUND_ID;
 
     return lineAnimTime;
 }
@@ -445,6 +464,10 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
         float lineWidth = this->lineAnim.GetInterpolantValue();
         if (lineWidth > 0.0f) {
 
+            if (this->finalExplosionSoundID == INVALID_SOUND_ID) {
+                this->finalExplosionSoundID = this->sound->PlaySound(GameSound::BossDeathFlashToFullscreen, false, false);
+            }
+
             glBegin(GL_LINES);
             glVertex3f(explosionCenter[0] - lineWidth, explosionCenter[1], explosionCenter[2]);
             glVertex3f(explosionCenter[0] + lineWidth, explosionCenter[1], explosionCenter[2]);
@@ -606,7 +629,7 @@ ESPPointEmitter* BossMesh::BuildSmokeEmitter(float width, float height, float si
 }
 
 
-ESPPointEmitter* BossMesh::BuildExplodingEmitter(float width, float height, float sizeScaler) {
+ESPPointEmitter* BossMesh::BuildExplodingEmitter(float volumeAmt, const AbstractBossBodyPart* bossBodyPart, float width, float height, float sizeScaler) {
     float largestDimension = std::max<float>(width, height);
 
     static const float MAX_SPAWN_DELTA = 0.2f;
@@ -625,6 +648,9 @@ ESPPointEmitter* BossMesh::BuildExplodingEmitter(float width, float height, floa
 	explosionEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	explosionEmitter->SetEmitPosition(Point3D(0.0f, 0.0f, 0.0f));
 	explosionEmitter->AddEffector(&this->particleLargeGrowth);
+
+    this->explodingEmitterHandlers.push_back(new ExplodingEmitterHandler(this->sound, bossBodyPart, volumeAmt));
+    explosionEmitter->AddEventHandler(this->explodingEmitterHandlers.back());
 	
     int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
     assert(numParticles < 30);
@@ -633,4 +659,17 @@ ESPPointEmitter* BossMesh::BuildExplodingEmitter(float width, float height, floa
     UNUSED_VARIABLE(success);
 
     return explosionEmitter;
+}
+
+BossMesh::ExplodingEmitterHandler::ExplodingEmitterHandler(GameSound* sound, const AbstractBossBodyPart* bossBodyPart, float volumeAmt) : 
+sound(sound), bossBodyPart(bossBodyPart), volumeLevel(volumeAmt) { 
+    assert(sound != NULL); 
+    assert(bossBodyPart != NULL);
+};
+
+void BossMesh::ExplodingEmitterHandler::ParticleSpawnedEvent(const ESPParticle* particle) {
+    UNUSED_PARAMETER(particle);
+    
+    SoundID soundID = this->sound->PlaySound(GameSound::BossBlowingUpLoop, false, true);
+    this->sound->SetSoundVolume(soundID, this->volumeLevel);
 }

@@ -27,10 +27,11 @@ LevelEndDisplayState::LevelEndDisplayState(GameDisplay* display) : DisplayState(
 renderPipeline(display), renderABitMoreCount(0.0) {
 
     // Stop all sounds...
-    this->display->GetSound()->StopAllSoundLoops();
-    // TODO: Play end-of-level fade out sounds/music or something
+    GameSound* sound = this->display->GetSound();
+    sound->StopAllSounds(LevelEndDisplayState::FADE_TIME);
+    // Play end-of-level fade out
+    sound->PlaySound(GameSound::LevelEndFadeoutEvent, false, true);
     
-
 	// Pause all game play elements in the game model
 	this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
 
@@ -81,6 +82,10 @@ void LevelEndDisplayState::RenderFrame(double dT) {
 	glPopAttrib();
 
 	if (fadeIsDone) {
+        // Clean up remaining sound stuff
+        GameSound* sound = this->display->GetSound();
+        sound->StopAllEffects();
+
 	    // Kill all effects that may have previously been occurring...
 	    this->display->GetAssets()->DeactivateMiscEffects();
         // Kill all particles...

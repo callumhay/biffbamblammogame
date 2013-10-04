@@ -47,7 +47,7 @@ private:
     CGparameter blurSizeVerticalParam;
 	CGparameter sigmaParam;
 
-	enum BlurAnimations { PoisonWidthBlurAnimation };
-	std::map<BlurAnimations, AnimationMultiLerp<float> > blurAnims;
+    bool isPoisonBlurActive;
+	AnimationMultiLerp<float> poisonBlurAnim;
 };
 #endif

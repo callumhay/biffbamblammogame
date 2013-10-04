@@ -22,6 +22,7 @@
 #include "BossBodyPart.h"
 #include "BossCompositeBodyPart.h"
 
+class GameSound;
 class BossAIState;
 class TeslaBlock;
 
@@ -36,6 +37,8 @@ public:
     
     static Boss* BuildStyleBoss(const GameWorld::WorldStyle& style);
     virtual void Init(float startingX, float startingY) = 0;
+
+    GameWorld::WorldStyle GetWorldStyle() const;
 
     Collision::AABB2D GenerateDyingAABB() const;
 
@@ -97,6 +100,8 @@ public:
 #endif
 
 protected:
+    GameWorld::WorldStyle worldStyle;
+
     BossAIState* currAIState;
     BossAIState* nextAIState;
 
@@ -122,6 +127,10 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(Boss);
 };
+
+inline GameWorld::WorldStyle Boss::GetWorldStyle() const {
+    return this->worldStyle;
+}
 
 inline bool Boss::IsBodyPartDead(const AbstractBossBodyPart* bodyPart) const {
     return this->deadPartsRoot->IsOrContainsPart(bodyPart, true);

@@ -1,8 +1,8 @@
 Breaking Barriers
 13 30
-S S S S S S S S S S S S S 
-S S S S S F(d) F(d) E E E E E S 
-S E E E F(d) F(d) F(d) E E E E E S 
+E E E E E E E S S S S S S 
+E E E E S S S T(S,ul) E E E E S 
+S S S S T(S,ul) E E E E E E E S 
 S E E E L L L E E E E E S 
 S E E E S S S E G E G E S 
 S E G E S S S G E G E G S 
@@ -13,7 +13,7 @@ S E G B G E G E G B G E S
 S Y E Y E O E O E Y E Y S 
 S E Y E G E G E G E Y E S 
 S Y B R E G E G E R B Y S 
-S E Y E G E G E G E Y E S 
+S E Y E G E K(UberBall,UberBall,UberBall) E G E Y E S 
 S Y E Y E O E O E Y E Y S 
 S E G E G E G E G E G E S 
 S G E G E G E G E G E G S 
@@ -35,15 +35,15 @@ STARS:
 9000
 16000
 20000
-24000
-28000
+25000
+30000
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
-UberBall 2
+BallSafetyNet 2
 BallGrow 0
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -61,6 +61,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 0
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 2
