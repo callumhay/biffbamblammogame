@@ -634,7 +634,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
         // the left or the right of the flat top part of the paddle
         PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
         if (!paddle->HasPaddleType(PlayerPaddle::ShieldPaddle) && n == paddle->GetUpVector() && 
-            Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat))))) < 30.0f) {
+            Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat))))) <= 45.0f) {
             
             const float paddleToBallCenterXDist = b.GetCenterPosition2D()[0] - paddle->GetCenterPosition()[0];
             const float absPaddleToBallCenterXDist = fabs(paddleToBallCenterXDist);
@@ -643,8 +643,8 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
             if (absPaddleToBallCenterXDist <= paddleFlatTopHalfWidth && absPaddleToBallCenterXDist > noEffectGapRadius) {
                 // Based on the distance we reflect the ball more...
-                static const float MIN_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS = 10.0f;
-                static const float MAX_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS = 22.0f;
+                static const float MIN_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS =  2.0f;
+                static const float MAX_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS = 15.0f;
                 
                 float angleAmt = NumberFuncs::LerpOverFloat(noEffectGapRadius, paddleFlatTopHalfWidth, 
                     MIN_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS, MAX_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS, absPaddleToBallCenterXDist);

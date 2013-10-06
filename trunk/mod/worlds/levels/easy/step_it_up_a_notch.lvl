@@ -10,7 +10,7 @@ S E E E E E E E E L Y Y Y Y S
 S E E E E E E E L O O O O O S 
 S E E E E E E L O O O O O O S 
 S E E E E E L R R R R R R R S 
-S R R R R R R R R R R R R R S 
+S R R R R G R R R R R R R R S 
 S E E E E E E E E E E E E E S 
 S L E E E E E E E E E E E E S 
 S G L E E E E E E E E E E E S 
@@ -20,7 +20,7 @@ S Y Y Y Y L E E E E E E E E S
 S O O O O O L E E E E E E E S 
 S O O O O O O L E E E E E E S 
 S R R R R R R R L E E E E E S 
-S R R R R R R R R R R R R R S 
+S R R R R R R R R G R R R R S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
@@ -34,11 +34,11 @@ S E E E E E E E E E E E E E S
 S E E E E E E E E E E E E E S 
 
 STARS:
-7500
+7000
 15000
-30000
-60000
-100000
+23000
+25000
+28500
 
 PaddleGrow 0
 PoisonPaddle 2

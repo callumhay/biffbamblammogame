@@ -1,7 +1,7 @@
 Breaking Barriers
 13 30
-E E E E E E E S S S S S S 
-E E E E S S S T(S,ul) E E E E S 
+E E E E E S S S S S S S S 
+E E E E S S T(S,ul) E E E E E S 
 S S S S T(S,ul) E E E E E E E S 
 S E E E L L L E E E E E S 
 S E E E S S S E G E G E S 
@@ -13,7 +13,7 @@ S E G B G E G E G B G E S
 S Y E Y E O E O E Y E Y S 
 S E Y E G E G E G E Y E S 
 S Y B R E G E G E R B Y S 
-S E Y E G E K(UberBall,UberBall,UberBall) E G E Y E S 
+S E Y E G E K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) E G E Y E S 
 S Y E Y E O E O E Y E Y S 
 S E G E G E G E G E G E S 
 S G E G E G E G E G E G S 
@@ -32,11 +32,11 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-9000
-16000
-20000
-25000
-30000
+6000
+11000
+16050
+18500
+23000
 
 PaddleGrow 2
 PoisonPaddle 2

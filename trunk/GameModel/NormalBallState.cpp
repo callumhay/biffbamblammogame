@@ -36,6 +36,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
     
     // Update the position of the ball based on its velocity (and if applicable, acceleration)
 	Vector2D currVelocity;
+    bool crazyBallVelChangeAllowed = true;
 
     if (this->gameBall->IsBallBoosting()) {
         // Figure out how much loss of speed there is for the ball
@@ -49,10 +50,12 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
             assert(currBoostDecceleration > 0);
         }
 
-        // Slow the ball down and recalculate velocities
-        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currBoostDecceleration);
+        // IMPORTANT: Gather the current velocity BEFORE we change it based on the current impulse acceleration/deceleration
         currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+        
+        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currBoostDecceleration);
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
+        crazyBallVelChangeAllowed = false;
     }
     // The impulse applies a sudden acceleration that diminishes
     else if (this->gameBall->impulseSpdDecreaseCounter < this->gameBall->impulseAmount) {
@@ -67,9 +70,12 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
             assert(currImpulseDeceleration > 0);
         }
 
-        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currImpulseDeceleration);
+        // IMPORTANT: Gather the current velocity BEFORE we change it based on the current impulse acceleration/deceleration
         currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+
+        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currImpulseDeceleration);
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
+        crazyBallVelChangeAllowed = false;
     }
     else {
 
@@ -105,19 +111,20 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 		    currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
 		    this->gameBall->gravitySpeed = this->gameBall->currSpeed;
 	    }
-
-	    // Crazy ball manipulates the direction and acceleration of the ball... 
-        // This can be dangerous for the collision framework (which I admit is a hacky piece of awful):
-        // We can't change the direction of the ball if movement is not allowed to be simulated (i.e., there was a
-        // change to the position/velocity of the ball via collisions at some point during this frame/tick)
-	    if (simulateMovement && (this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
-		    this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel);
-	    }
     }
     
     if (simulateMovement) {
-	    Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
-	    this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + dDist);
+        // Update the position of the ball based on the current velocity of it
+	    this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + (static_cast<float>(seconds) * currVelocity));
+    
+        // Crazy ball manipulates the direction and acceleration of the ball... 
+        // This can be dangerous for the collision framework (which I admit is a hacky piece of awful):
+        // We can't change the direction of the ball if movement is not allowed to be simulated (i.e., there was a
+        // change to the position/velocity of the ball via collisions at some point during this frame/tick)
+        // IMPORTANT: We do this AFTER changing the position of the ball based on the current velocity
+        if (this->gameBall->HasBallType(GameBall::CrazyBall) && crazyBallVelChangeAllowed) {
+            this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel);
+        }
     }
 
 	// Update the rotation of the ball

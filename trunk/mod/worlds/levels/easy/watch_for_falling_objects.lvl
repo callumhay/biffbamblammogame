@@ -10,12 +10,12 @@ S E G E E E Y E E E G E S
 S G Y G G G Y G G G Y G S 
 S E B G L G B G L G B E S 
 S G Y G S G Y G S G Y G S 
-S E G E E E Y E E E G E S 
+S E G E E E K(UberBall,UberBall,UberBall) E E E G E S 
 S E E E G E E E G E E E S 
 S G Y G G G Y G G G Y G S 
 S G L G E G L G E G L G S 
 S G S G G G S G G G S G S 
-S E Y E E E Y E E E Y E S 
+S E Y E E E K(StickyPaddle,StickyPaddle,StickyPaddle) E E E Y E S 
 S E Y E E E Y E E E Y E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -29,15 +29,15 @@ S E E E E E E E E E E E S
 
 STARS:
 6000
-12000
-15500
-19500
-20500
+13000
+19000
+25000
+29500
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
 BallGrow 2
 UberBall 1
 StickyPaddle 2
@@ -57,6 +57,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 0
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 2

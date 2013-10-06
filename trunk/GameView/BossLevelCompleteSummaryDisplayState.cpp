@@ -80,15 +80,12 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     // Check to see if the next movement has already been unlocked, if not then we tell the player about it...
     // Special case: the player just completed the very last world... in this case there's nothing left to unlock
     // so we don't display that text
-    int furthestWorldIdx, furthestLevelIdx;
-    gameModel->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
-    assert(furthestWorldIdx >= completedWorld->GetWorldIndex());
 
-    if (furthestWorldIdx == completedWorldIdx && completedWorldIdx != gameModel->GetLastWorldIndex()) {
-        // Get the next world/movement...
-        const GameWorld* nextWorld = gameModel->GetWorldByIndex(completedWorldIdx + 1);
-        assert(nextWorld != NULL);
+    // Get the next world/movement...
+    const GameWorld* nextWorld = gameModel->GetWorldByIndex(completedWorldIdx + 1);
+    assert(nextWorld != NULL);
 
+    if (!nextWorld->GetHasBeenUnlocked()) {
         this->unlockedLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
             GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), nextWorld->GetName() + " movement UNLOCKED.");
         this->unlockedLabel->SetColour(Colour(1,1,1));
@@ -99,6 +96,7 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
         this->worldCompleteLabel->SetColour(Colour(1,1,1));
         this->worldCompleteLabel->SetDropShadow(Colour(0,0,0), 0.075f);
     }
+
 
 	// Setup the label for the press any key text...
 	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);

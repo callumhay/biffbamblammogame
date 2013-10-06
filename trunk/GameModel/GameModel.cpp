@@ -90,6 +90,10 @@ void GameModel::GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) c
         const GameWorld* world = this->worlds[i];
         assert(world != NULL);
 
+        if (!world->GetHasBeenUnlocked()) {
+            break;
+        }
+
         int lastLevelPassedIdx = world->GetLastLevelIndexPassed();
 
         // If the last level passed in the world was the last level in that world then
