@@ -1436,7 +1436,7 @@ void Stage1AI::SetState(DecoBossAIState::AIState newState) {
             boss->GenerateArmAndRemainingBoundingLines();
 
             // Blow off the left and right body parts of the boss...
-            static const double TOTAL_BLOWUP_TIME = DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS + 2.0;
+            static const double TOTAL_BLOWUP_TIME = DecoBossAIState::TOTAL_RETALIATION_TIME_IN_SECS + 0.25;
             BossBodyPart* leftBodyPart = this->boss->GetLeftBodyEditable();
             assert(!leftBodyPart->GetIsDestroyed());
             leftBodyPart->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(TOTAL_BLOWUP_TIME));
@@ -1559,7 +1559,7 @@ AnimationMultiLerp<Vector3D> Stage1AI::GenerateSideBodyPartDeathTranslationAnima
 
     float yDist = -(isLeft ? this->boss->GetLeftBody()->GetTranslationPt2D()[1] : 
         this->boss->GetRightBody()->GetTranslationPt2D()[1]);
-    yDist -= 2.0f * DecoBoss::SIDE_BODY_PART_HEIGHT;
+    yDist -= 1.5f * DecoBoss::SIDE_BODY_PART_HEIGHT;
 
     return Boss::BuildLimbFallOffTranslationAnim(timeInSecs, xDist, yDist);
 }

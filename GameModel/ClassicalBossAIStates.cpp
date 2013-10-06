@@ -235,7 +235,9 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
     assert(sound != NULL);
 
     // If the arm is currently animating for being hurt then we can't hurt it again until it's done
-    if (this->currState == ClassicalBossAI::HurtRightArmAIState) {
+    if (this->currState == ClassicalBossAI::HurtLeftArmAIState ||
+        this->currState == ClassicalBossAI::HurtRightArmAIState ||
+        this->currState == ClassicalBossAI::LostArmsAngryAIState) {
         return;
     }
 
@@ -1625,7 +1627,7 @@ AnimationMultiLerp<float> BodyHeadAI::GenerateColumnDeathRotationAnimation(float
 
 AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateBaseDeathTranslationAnimation() const {
     return Boss::BuildLimbFallOffTranslationAnim(BODY_FADE_TIME, 0, 
-        -ClassicalBoss::BASE_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
+        -0.5f*ClassicalBoss::BASE_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
 }
 
 AnimationMultiLerp<float> BodyHeadAI::GenerateBaseDeathRotationAnimation() const {
@@ -1634,11 +1636,11 @@ AnimationMultiLerp<float> BodyHeadAI::GenerateBaseDeathRotationAnimation() const
 
 AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateTablatureDeathTranslationAnimation(bool isLeft, bool isTop) const {
     return Boss::BuildLimbFallOffTranslationAnim(BODY_FADE_TIME, (isLeft ? -1 : 1) * ClassicalBoss::TABLATURE_WIDTH, 
-        (isTop ? -1 : 1) * (-4*ClassicalBoss::TABLATURE_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]));
+        (isTop ? -1 : 1) * (-2*ClassicalBoss::TABLATURE_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]));
 }
 
 AnimationMultiLerp<float> BodyHeadAI::GenerateTablatureDeathRotationAnimation(bool isLeft) const {
-    return Boss::BuildLimbFallOffZRotationAnim(BODY_FADE_TIME, (isLeft ? -1 : 1) * 1440.0f);
+    return Boss::BuildLimbFallOffZRotationAnim(BODY_FADE_TIME, (isLeft ? -1 : 1) * 800.0f);
 }
 
 // END BodyHeadAI ******************************************************************

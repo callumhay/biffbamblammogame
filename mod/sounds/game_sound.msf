@@ -244,6 +244,8 @@ BallOrPaddleShrinkEvent {
 	file = resources/BallOrPaddleShrinkEvent.ogg
 }
 
+// BallOnPaddleTimerRunningOutLoop
+
 
 // Ball and Block Events *****************************************************
 
@@ -630,6 +632,8 @@ LevelEndFadeoutEvent {
 LevelSummaryNewHighScoreEvent {
 	file = resources/LevelSummaryNewHighScoreEvent.ogg
 }
+
+// LevelStarCostPaidUnlockEvent
 
 
 // World Complete State Events ***********************************************

@@ -48,7 +48,7 @@ resources/worlds/levels/medium/downward_spiral.lvl
 
 
 # Levels with all or some elements learned in this movement...
-resources/worlds/levels/easy/step_it_up_a_notch.lvl
+resources/worlds/levels/easy/step_it_up_a_notch.lvl : 70
 resources/worlds/levels/medium/blank_slate.lvl
 resources/worlds/levels/medium/dividing_lines.lvl
 

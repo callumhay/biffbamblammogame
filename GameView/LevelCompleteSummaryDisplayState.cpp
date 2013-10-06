@@ -40,7 +40,7 @@ const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     
 const double LevelCompleteSummaryDisplayState::SHOW_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 const double LevelCompleteSummaryDisplayState::HIDE_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 
-const double LevelCompleteSummaryDisplayState::POINT_SCORE_ANIM_TIME = 0.6;
+const double LevelCompleteSummaryDisplayState::POINT_SCORE_ANIM_TIME = 0.4;
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),

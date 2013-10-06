@@ -438,7 +438,7 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     this->selectionAlphaYellowAnim.SetRepeat(true);
 
     // Setup any animations and selections based on the info that this object was initialized with
-    if (info.GetWorldUnlockIndex() <= furthestWorldIdx) {
+    if (info.GetWorldUnlockIndex() < 0) {
 
         // No special animation is necessary
         if (info.GetWorldSelectionIndex() < 0) {

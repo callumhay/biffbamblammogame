@@ -1,25 +1,25 @@
 A Pointed Challenge
 11 27
 E E E T(S,lr) S S S S T(S,ll) E E 
-E E T(S,lr) T(S,ul) E E E E T(S,ur) T(S,ll) E 
+E E T(S,lr) T(S,ul) E K(UberBall,UberBall,UberBall) E E T(S,ur) T(S,ll) E 
 E T(S,lr) T(S,ul) E E E E E E T(S,ur) T(S,ll) 
 T(S,lr) T(S,ul) E E E E E T(G,ur) T(Y,ll) E S 
 S B T(Y,lr) T(G,ul) E E I E T(G,ur) T(Y,ll) S 
-S T(Y,lr) T(G,ul) E T(G,lr) T(Y,ll) E E E T(G,ur) S 
+S T(Y,lr) T(G,ul) E T(G,lr) T(G,ll) E E E T(G,ur) S 
 S T(G,ul) E T(G,lr) Y T(G,ul) E T(Y,ur) T(G,ll) B S 
 S B T(G,lr) Y T(G,ul) E E E T(Y,ur) T(G,ll) S 
-S T(G,lr) Y T(G,ul) E T(O,ur) Y T(G,ll) E T(Y,ur) S 
+S T(G,lr) Y T(G,ul) E T(G,ur) Y T(G,ll) E T(Y,ur) S 
 S Y T(G,ul) E E E T(O,ur) Y T(G,ll) B S 
 S T(G,ul) E T(Y,lr) T(R,ul) E E T(O,ur) Y T(G,ll) S 
 S E T(Y,lr) T(R,ul) E E E E T(O,ur) Y S 
-S T(Y,lr) T(R,ul) B E E E G E T(O,ur) S 
-S T(R,ul) B T(Y,lr) T(R,ul) E T(G,lr) G E I S 
-S B T(Y,lr) T(R,ul) E T(G,lr) O E E E S 
+S T(Y,lr) T(R,ul) B E E E E E T(O,ur) S 
+S T(R,ul) B T(Y,lr) T(R,ul) E T(Y,lr) E E I S 
+S B T(Y,lr) T(R,ul) E T(Y,lr) O E E E S 
 S T(Y,lr) T(R,ul) E T(G,lr) G E E E E S 
 S T(R,ul) E T(G,lr) O E E G Y E S 
 S E T(G,lr) G E E E Y G E S 
 S T(G,lr) O E E E E E E E S 
-S G E E E Y G E E E S 
+S G E E E Y K(GhostBall,GhostBall,GhostBall) E E E S 
 S E E E E G Y E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -31,9 +31,9 @@ S E E E E E E E E E S
 STARS:
 6000
 10000
-14000
-18000
-26000
+16000
+22000
+28000
 
 PaddleGrow 2
 PoisonPaddle 2
