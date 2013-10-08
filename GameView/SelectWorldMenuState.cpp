@@ -35,7 +35,8 @@ const float SelectWorldMenuState::UNSELECTED_MENU_ITEM_SIZE = 128;
 SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info) :
 DisplayState(display), pressEscAlphaAnim(0.0f), worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
 goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), bloomEffect(NULL), itemActivated(false), starryBG(NULL), padlockTex(NULL),
-goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL), worldUnlockAnim(NULL) {
+goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL), worldUnlockAnim(NULL),
+totalNumGameStarsLabel(NULL), totalLabel(NULL), starGlowTexture(NULL) {
     this->Init(info);
 }
 
@@ -48,6 +49,11 @@ SelectWorldMenuState::~SelectWorldMenuState() {
 
     delete this->keyEscLabel;
     this->keyEscLabel = NULL;
+
+    delete this->totalNumGameStarsLabel;
+    this->totalNumGameStarsLabel = NULL;
+    delete this->totalLabel;
+    this->totalLabel = NULL;
 
     delete this->menuFBO;
     this->menuFBO = NULL;
@@ -70,6 +76,8 @@ SelectWorldMenuState::~SelectWorldMenuState() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->padlockTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starGlowTexture);
     assert(success);
     UNUSED_VARIABLE(success);
 
@@ -104,8 +112,6 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 	glLoadIdentity();
 
     // Draw the title...
-    static const int HORIZONTAL_TITLE_GAP = 60;
-    static const int VERTICAL_TITLE_GAP   = 30;
     this->worldSelectTitleLbl->SetTopLeftCorner(HORIZONTAL_TITLE_GAP, Camera::GetWindowHeight() - VERTICAL_TITLE_GAP);
     this->worldSelectTitleLbl->Draw();
 
@@ -113,6 +119,9 @@ void SelectWorldMenuState::RenderFrame(double dT) {
     this->keyEscLabel->SetAlpha(this->pressEscAlphaAnim.GetInterpolantValue());
     this->keyEscLabel->SetTopLeftCorner(20, this->keyEscLabel->GetHeight()); 
     this->keyEscLabel->Draw();
+
+    // Draw the star total for the game
+    this->DrawStarTotal(dT);
 
     // Draw the menu
     this->selectionAlphaOrangeAnim.Tick(dT);   
@@ -306,6 +315,50 @@ void SelectWorldMenuState::ButtonReleased(const GameControl::ActionButton& relea
     UNUSED_PARAMETER(releasedButton);
 }
 
+void SelectWorldMenuState::DrawStarTotal(double dT) {
+
+    float gameTotalLabelTopCornerX = Camera::GetWindowWidth() - this->totalNumGameStarsLabel->GetLastRasterWidth() - HORIZONTAL_TITLE_GAP;
+    float gameTotalLabelTopCornerY = this->totalNumGameStarsLabel->GetHeight() + VERTICAL_TITLE_GAP/2;
+    this->totalNumGameStarsLabel->SetTopLeftCorner(gameTotalLabelTopCornerX, gameTotalLabelTopCornerY);
+    this->totalNumGameStarsLabel->Draw();
+
+    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+
+    // Star in the game star total
+    float diff     = 0.25f * this->totalNumGameStarsLabel->GetHeight();
+    float starSize = this->totalNumGameStarsLabel->GetHeight() + 2*diff;
+    float centerX  = gameTotalLabelTopCornerX - diff - starSize / 2.0f;
+    float centerY  = gameTotalLabelTopCornerY + 1.5f * diff - starSize / 2.0f;
+
+    glPushMatrix();
+    glTranslatef(centerX, centerY, 0.0f);
+    glScalef(starSize, starSize, 1.0f);
+
+    glPushMatrix();
+    this->totalGameStarGlowPulseAnim.Tick(dT);
+    float pulseScale = this->totalGameStarGlowPulseAnim.GetInterpolantValue();
+    glScalef(pulseScale, pulseScale, 1.0f);
+    glColor4f(starColour.R(), starColour.G(), starColour.B(), 0.5f);
+    this->starGlowTexture->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    this->starTexture->BindTexture();
+    glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();    
+    glPopMatrix();
+
+    glPopAttrib();
+
+    this->totalLabel->SetTopLeftCorner(centerX - starSize / 2.0f - diff - this->totalLabel->GetLastRasterWidth(), gameTotalLabelTopCornerY);
+    this->totalLabel->Draw();
+}
+
 void SelectWorldMenuState::GoBackToMainMenu() {
     GameSound* sound = this->display->GetSound();
     sound->PlaySound(GameSound::MenuItemCancelEvent, false);
@@ -334,6 +387,8 @@ void SelectWorldMenuState::MoveToPrevWorld() {
 
 void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     
+    float scalingFactor = this->display->GetTextScalingFactor();
+
     // Background music...
     this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
 
@@ -349,6 +404,11 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     this->starTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear, GL_TEXTURE_2D));
     assert(this->starTexture != NULL);
+
+    this->starGlowTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->starGlowTexture != NULL);
+    this->starGlowTexture->SetWrapParams(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
     this->worldSelectTitleLbl = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
@@ -386,6 +446,26 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     alphaVals.push_back(0.0f);
     this->selectionAlphaOrangeAnim.SetLerp(timeVals, alphaVals);
     this->selectionAlphaOrangeAnim.SetRepeat(true);
+
+    this->totalLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Total");
+    this->totalLabel->SetColour(Colour(1,1,1));
+    this->totalLabel->SetScale(scalingFactor);
+
+    std::stringstream totalNumGameStarsTxt;
+    totalNumGameStarsTxt << this->display->GetModel()->GetTotalStarsCollectedInGame();
+    this->totalNumGameStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
+        GameFontAssetsManager::Big), totalNumGameStarsTxt.str());
+    this->totalNumGameStarsLabel->SetColour(Colour(1,1,1));
+    this->totalNumGameStarsLabel->SetScale(scalingFactor);
+
+    timeVals.clear();
+    timeVals.reserve(3);
+    timeVals.push_back(0.0); timeVals.push_back(1.0); timeVals.push_back(2.0);
+    std::vector<float> pulseVals;
+    pulseVals.push_back(1.0f); pulseVals.push_back(1.25f); pulseVals.push_back(1.0f);
+    this->totalGameStarGlowPulseAnim.SetLerp(timeVals, pulseVals);
+    this->totalGameStarGlowPulseAnim.SetRepeat(true);
 
     // Build a framebuffer object for the menu
 	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
