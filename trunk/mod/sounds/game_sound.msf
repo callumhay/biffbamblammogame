@@ -478,7 +478,10 @@ BossDeathFlashToFullscreen {
 	file = resources/BossDeathFlashToFullscreen.ogg
 }
 
-// BossCrosshairTargetingEvent
+// BossCrosshairTargetingEvent {
+//	file = resources/BossCrosshairTargetingEvent.ogg
+// }
+
 BossLaserBeamLoop {
 	file = resources/BossLaserBeamLoop.ogg
 }
@@ -501,24 +504,35 @@ ClassicalBossArmAttackHitEvent {
 // Occurs when the boss is about to unleash a summoning attack, where it summons 
 // a bunch of nasty items to decend upon the paddle
 // GothicBossSummonItemChargeEvent {
+//	file = resources/GothicBossSummonItemChargeEvent.ogg
 // }
 // Occurs when the boss charges up its shockwave to destroy its confines
 // GothicBossChargeShockwaveEvent {
+//	file = resources/GothicBossChargeShockwaveEvent.ogg
 // }
 GothicBossMassiveShockwaveEvent {
 	file = resources/GothicBossMassiveShockwaveEvent.ogg
 }
 
 
-
-// DecoBossArmRotateEvent
-// DecoBossArmExtendEvent
-// DecoBossArmRetractEvent
-// DecoBossArmLevelCollisionEvent
-// DecoBossArmPaddleCollisionEvent
-// DecoBossLevelRotatingLoop
-
-
+// DecoBossArmRotateEvent {
+//	file = resources/DecoBossArmRotateEvent.ogg
+// }
+// DecoBossArmExtendEvent {
+//	file = resources/DecoBossArmExtendEvent.ogg
+// }
+// DecoBossArmRetractEvent {
+//	file = resources/DecoBossArmRetractEvent.ogg
+// }
+// DecoBossArmLevelCollisionEvent {
+//	file = resources/DecoBossArmLevelCollisionEvent.ogg
+// }
+// DecoBossArmPaddleCollisionEvent {
+//	file = resources/DecoBossArmPaddleCollisionEvent.ogg
+// }
+// DecoBossLevelRotatingLoop {
+//	file = resources/DecoBossLevelRotatingLoop.ogg
+// }
 
 
 

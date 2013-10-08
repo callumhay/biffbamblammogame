@@ -135,7 +135,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l1);
 	    boundingNorms.push_back(n1);
         onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::NoEntry);
+            leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::NoEntry ||
+            leftNeighbor->GetType() == LevelPiece::Breakable || leftNeighbor->GetType() == LevelPiece::BreakableTriangle);
     }
     shouldGenBounds = false;
 
@@ -165,7 +166,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l2);
 	    boundingNorms.push_back(n2);
         onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry);
+            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry ||
+            bottomNeighbor->GetType() == LevelPiece::Breakable || bottomNeighbor->GetType() == LevelPiece::BreakableTriangle);
     }
     shouldGenBounds = false;
 
@@ -195,7 +197,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingLines.push_back(l3);
 	    boundingNorms.push_back(n3);
         onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry);
+            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry ||
+            rightNeighbor->GetType() == LevelPiece::Breakable || rightNeighbor->GetType() == LevelPiece::BreakableTriangle);
     }
     shouldGenBounds = false;
 
@@ -226,7 +229,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingNorms.push_back(n4);
         onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay ||
-            topNeighbor->GetType() == LevelPiece::NoEntry);
+            topNeighbor->GetType() == LevelPiece::NoEntry || topNeighbor->GetType() == LevelPiece::Breakable ||
+            topNeighbor->GetType() == LevelPiece::BreakableTriangle);
     }
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),

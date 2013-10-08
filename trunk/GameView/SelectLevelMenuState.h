@@ -57,10 +57,12 @@ private:
 
     const GameWorld* world;
     TextLabel2D* worldLabel;
-    TextLabel2D* totalNumStarsLabel;
+    TextLabel2D* totalNumWorldStarsLabel;
+    TextLabel2D* totalNumGameStarsLabel;
+    TextLabel2D* totalLabel;
     KeyboardHelperLabel* keyEscLabel;
     AnimationMultiLerp<float> pressEscAlphaAnim;
-
+    AnimationMultiLerp<float> totalGameStarGlowPulseAnim;
     AnimationMultiLerp<float> fadeAnimation;
 
     // Animation of the selection indicator
@@ -111,7 +113,7 @@ private:
     bool playAutoUnlockAnim;
     double autoUnlockAnimCountdown;
 
-    void DrawStarTotalLabel(const Camera& camera);
+    void DrawStarTotalLabels(const Camera& camera, double dT);
     void DrawTitleStrip(const Camera& camera) const;
     void DrawPageSelection(const Camera& camera) const;
     void DrawLevelSelectMenu(const Camera& camera, double dT);

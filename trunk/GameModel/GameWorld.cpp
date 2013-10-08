@@ -31,7 +31,8 @@ const char* GameWorld::FUTURISM_WORLD_NAME          = "Futurism";
  */
 GameWorld::GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr) : 
 worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(0),
-lastLevelPassedIndex(GameWorld::NO_LEVEL_PASSED), transformMgr(transformMgr), hasBeenUnlocked(false) {
+lastLevelPassedIndex(GameWorld::NO_LEVEL_PASSED), transformMgr(transformMgr), 
+hasBeenUnlocked(false) {
 }
 
 GameWorld::~GameWorld() {

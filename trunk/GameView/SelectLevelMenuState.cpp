@@ -31,9 +31,9 @@ SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const DisplaySt
 DisplayState(display), worldLabel(NULL), world(display->GetModel()->GetWorldByIndex(info.GetWorldSelectionIndex())), pressEscAlphaAnim(0.0f), 
 goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
 bossIconTexture(NULL), starGlowTexture(NULL), arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL), 
-autoUnlockAnimCountdown(0.25), playAutoUnlockAnim(false),
+autoUnlockAnimCountdown(0.25), playAutoUnlockAnim(false), totalNumGameStarsLabel(NULL), totalLabel(NULL),
 starryBG(NULL), padlockTexture(NULL), freezePlayerInput(false), explosionTex(NULL), sphereNormalsTex(NULL), menuFBO(NULL), postMenuFBObj(NULL),
-selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumStarsLabel(NULL),
+selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumWorldStarsLabel(NULL),
 particleFader(1, 0), particleMediumGrowth(1.0f, 2.0f), particleSuperGrowth(1.0f, 10.0f), particleSmallGrowth(1.0f, 1.3f),
 particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)), levelWasUnlockedViaStarCost(false),
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE), 
@@ -171,6 +171,11 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
     this->keyEscLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
     this->keyEscLabel->SetScale(scalingFactor);
 
+    this->totalLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Total");
+    this->totalLabel->SetColour(Colour(1,1,1));
+    this->totalLabel->SetScale(scalingFactor);
+
     {
         std::vector<float> alphaVals;
         alphaVals.push_back(0.15f);
@@ -214,8 +219,14 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     delete this->worldLabel;
     this->worldLabel = NULL;
 
-    delete this->totalNumStarsLabel;
-    this->totalNumStarsLabel = NULL;
+    delete this->totalLabel;
+    this->totalLabel = NULL;
+
+    delete this->totalNumWorldStarsLabel;
+    this->totalNumWorldStarsLabel = NULL;
+
+    delete this->totalNumGameStarsLabel;
+    this->totalNumGameStarsLabel = NULL;
 
     delete this->keyEscLabel;
     this->keyEscLabel = NULL;
@@ -303,7 +314,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     this->DrawLevelSelectMenu(camera, dT);
 
     // Draw the label showing how many stars have been acquired for the world...
-    this->DrawStarTotalLabel(camera);
+    this->DrawStarTotalLabels(camera, dT);
 
     // Draw the page selection squares
     this->DrawPageSelection(camera);
@@ -492,21 +503,25 @@ void SelectLevelMenuState::PageSelectionChanged() {
     this->prevPgArrowEmitter->Reset();
 }
 
-void SelectLevelMenuState::DrawStarTotalLabel(const Camera& camera) {
+void SelectLevelMenuState::DrawStarTotalLabels(const Camera& camera, double dT) {
     UNUSED_PARAMETER(camera);
 
-    float labelTopCornerX = Camera::GetWindowWidth() - this->totalNumStarsLabel->GetLastRasterWidth() - HORIZONTAL_TITLE_GAP;
-    float labelTopCornerY = this->totalNumStarsLabel->GetHeight() + VERTICAL_TITLE_GAP/2;
+    float worldTotalLabelTopCornerX = this->worldLabel->GetTopLeftCorner()[0] + this->worldLabel->GetLastRasterWidth() + HORIZONTAL_TITLE_GAP;
+    float worldTotalLabelTopCornerY = this->worldLabel->GetTopLeftCorner()[1] - 
+        this->worldLabel->GetHeight() + this->totalNumWorldStarsLabel->GetHeight();
 
-    this->totalNumStarsLabel->SetTopLeftCorner(labelTopCornerX, labelTopCornerY);
-    this->totalNumStarsLabel->Draw();
+    this->totalNumWorldStarsLabel->SetTopLeftCorner(worldTotalLabelTopCornerX, worldTotalLabelTopCornerY);
+    this->totalNumWorldStarsLabel->Draw();
 
-    float diff      = 0.25f * this->totalNumStarsLabel->GetHeight();
-    float starSize  = this->totalNumStarsLabel->GetHeight() + 2*diff;
-    float starRightX  = labelTopCornerX - diff;
-    float starLeftX   = starRightX - starSize;
-    float starTopY    = labelTopCornerY + 1.5f * diff;
-    float starBottomY = starTopY - starSize;
+    float gameTotalLabelTopCornerX = Camera::GetWindowWidth() - this->totalNumGameStarsLabel->GetLastRasterWidth() - HORIZONTAL_TITLE_GAP;
+    float gameTotalLabelTopCornerY = this->totalNumGameStarsLabel->GetHeight() + VERTICAL_TITLE_GAP/2;
+    this->totalNumGameStarsLabel->SetTopLeftCorner(gameTotalLabelTopCornerX, gameTotalLabelTopCornerY);
+    this->totalNumGameStarsLabel->Draw();
+
+    float diff     = 0.25f * this->totalNumWorldStarsLabel->GetHeight();
+    float starSize = this->totalNumWorldStarsLabel->GetHeight() + 2*diff;
+    float centerX  = worldTotalLabelTopCornerX - diff - starSize / 2.0f;
+    float centerY  = worldTotalLabelTopCornerY + 1.5f * diff - starSize / 2.0f;
 
     glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT);
     
@@ -514,20 +529,44 @@ void SelectLevelMenuState::DrawStarTotalLabel(const Camera& camera) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    
+    // Star in the world star total
     this->starTexture->BindTexture();
     glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2i(0, 1);
-    glVertex2f(starLeftX,  starTopY);
-    glTexCoord2i(0, 0);
-    glVertex2f(starLeftX,  starBottomY);
-    glTexCoord2i(1, 0);
-    glVertex2f(starRightX, starBottomY);
-    glTexCoord2i(1, 1);
-    glVertex2f(starRightX, starTopY);
-    glEnd();
+    glPushMatrix();
+    glTranslatef(centerX, centerY, 0.0f);
+    glScalef(starSize, starSize, 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+    
+    // Star in the game star total
+    diff     = 0.25f * this->totalNumGameStarsLabel->GetHeight();
+    starSize = this->totalNumGameStarsLabel->GetHeight() + 2*diff;
+    centerX  = gameTotalLabelTopCornerX - diff - starSize / 2.0f;
+    centerY  = gameTotalLabelTopCornerY + 1.5f * diff - starSize / 2.0f;
+    
+    glPushMatrix();
+    glTranslatef(centerX, centerY, 0.0f);
+    glScalef(starSize, starSize, 1.0f);
+
+    glPushMatrix();
+    this->totalGameStarGlowPulseAnim.Tick(dT);
+    float pulseScale = this->totalGameStarGlowPulseAnim.GetInterpolantValue();
+    glScalef(pulseScale, pulseScale, 1.0f);
+    glColor4f(starColour.R(), starColour.G(), starColour.B(), 0.5f);
+    this->starGlowTexture->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    this->starTexture->BindTexture();
+    glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();    
+    glPopMatrix();
 
     glPopAttrib();
+
+    this->totalLabel->SetTopLeftCorner(centerX - starSize / 2.0f - diff - this->totalLabel->GetLastRasterWidth(), gameTotalLabelTopCornerY);
+    this->totalLabel->Draw();
 }
 
 void SelectLevelMenuState::DrawTitleStrip(const Camera& camera) const {
@@ -808,6 +847,7 @@ void SelectLevelMenuState::SetupLevelPages(const DisplayStateInfo& info) {
     static const int ITEM_Y_GAP_SIZE          = 40;
     static const int MIN_ITEM_SIZE            = 200;
 
+    float scalingFactor = this->display->GetTextScalingFactor();
     float amtForItems = Camera::GetWindowWidth() - 2 * SIDE_TO_ITEM_GAP_SIZE;
     
     float itemWidth = 0;
@@ -961,11 +1001,27 @@ void SelectLevelMenuState::SetupLevelPages(const DisplayStateInfo& info) {
     this->selectionBorderAddAnim.SetLerp(timeVals, scaleVals);
     this->selectionBorderAddAnim.SetRepeat(true);
 
-    std::stringstream totalNumStarsTxt;
-    totalNumStarsTxt << totalNumStarsCollected << "/" << totalNumStars;
-    this->totalNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
-        GameFontAssetsManager::Medium), totalNumStarsTxt.str());
-    this->totalNumStarsLabel->SetColour(Colour(1,1,1));
+    std::stringstream totalNumGameStarsTxt;
+    totalNumGameStarsTxt << this->display->GetModel()->GetTotalStarsCollectedInGame();
+    this->totalNumGameStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
+        GameFontAssetsManager::Big), totalNumGameStarsTxt.str());
+    this->totalNumGameStarsLabel->SetColour(Colour(1,1,1));
+    this->totalNumGameStarsLabel->SetScale(scalingFactor);
+
+    timeVals.clear();
+    timeVals.reserve(3);
+    timeVals.push_back(0.0); timeVals.push_back(1.0); timeVals.push_back(2.0);
+    std::vector<float> pulseVals;
+    pulseVals.push_back(1.0f); pulseVals.push_back(1.25f); pulseVals.push_back(1.0f);
+    this->totalGameStarGlowPulseAnim.SetLerp(timeVals, pulseVals);
+    this->totalGameStarGlowPulseAnim.SetRepeat(true);
+
+    std::stringstream totalNumWorldStarsTxt;
+    totalNumWorldStarsTxt << totalNumStarsCollected << "/" << totalNumStars;
+    this->totalNumWorldStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
+        GameFontAssetsManager::Medium), totalNumWorldStarsTxt.str());
+    this->totalNumWorldStarsLabel->SetColour(Colour(1,1,1));
+    this->totalNumWorldStarsLabel->SetScale(0.75f * scalingFactor);
 
     // If we can unlock the currently selected level with stars then we do...
     AbstractLevelMenuItem* selectedItem = this->pages[this->selectedPage]->GetSelectedItem();

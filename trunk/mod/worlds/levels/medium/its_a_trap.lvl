@@ -2,7 +2,7 @@ It's a trap!
 15 30
 S S S S S D(BallShrink,FastBall,Blackout,InvisiBall,PaddleShrink,InvisiPaddle,PoisonPaddle,UpsideDown) S D(BallShrink,FastBall,Blackout,InvisiBall,PaddleShrink,InvisiPaddle,PoisonPaddle,UpsideDown) S D(BallShrink,FastBall,Blackout,InvisiBall,PaddleShrink,InvisiPaddle,PoisonPaddle,UpsideDown) S S S S S 
 S E E E E E E E E E E E E E S 
-S E I E E E E E E E E E I E S 
+S E I E E E E I E E E E I E S 
 S E E E E E E E E E E E E E S 
 S E E L E L E L E L E L E E S 
 S F(u) F(u) S R S R S R S R S F(u) F(u) S 
@@ -35,8 +35,8 @@ STARS:
 6000
 12000
 20000
-27000
-32000
+26000
+33000
 
 PaddleGrow 2
 PoisonPaddle 2

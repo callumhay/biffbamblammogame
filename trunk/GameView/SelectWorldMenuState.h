@@ -50,6 +50,9 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
+    static const int HORIZONTAL_TITLE_GAP = 60;
+    static const int VERTICAL_TITLE_GAP   = 30;
+
     static const char* WORLD_SELECT_TITLE;
 
     static const float SELECTED_TO_UNSELECTED_MENU_ITEM_HORIZ_GAP;
@@ -68,6 +71,13 @@ private:
     AnimationMultiLerp<float> selectionAlphaYellowAnim;   
     // Animation of the scales for the selection indicator
     AnimationMultiLerp<float> selectionBorderAddYellowAnim; 
+
+
+    TextLabel2D* totalNumGameStarsLabel;
+    TextLabel2D* totalLabel;
+    AnimationMultiLerp<float> totalGameStarGlowPulseAnim;
+    Texture2D* starTexture;
+    Texture2D* starGlowTexture;
 
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
@@ -177,6 +187,7 @@ private:
         
         DISALLOW_COPY_AND_ASSIGN(WorldUnlockAnimationTracker);
     };
+
     WorldUnlockAnimationTracker* worldUnlockAnim;
 
     std::vector<WorldSelectItem*> worldItems;
@@ -187,11 +198,12 @@ private:
     AnimationLerp<float> goToLevelSelectMoveAnim;
     AnimationLerp<float> goToLevelSelectAlphaAnim;
 
-    Texture2D* starTexture;
+    void DrawStarTotal(double dT);
 
     void GoBackToMainMenu();
     void MoveToNextWorld();
     void MoveToPrevWorld();
+
     void Init(const DisplayStateInfo& info);
 
 	DISALLOW_COPY_AND_ASSIGN(SelectWorldMenuState);

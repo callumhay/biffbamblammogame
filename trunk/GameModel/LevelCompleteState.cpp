@@ -46,7 +46,9 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm), waitingFo
     GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
 
     // Check to see if a new world was just unlocked, if it was, unlock it!
-    if (currWorld->GetWorldIndex() != this->gameModel->GetLastWorldIndex()) {
+    if (currWorld->GetWorldIndex() != this->gameModel->GetLastWorldIndex() &&
+        static_cast<int>(currLevel->GetLevelIndex()) == currWorld->GetLastLevelIndex()) {
+        
         GameWorld* nextWorld = this->gameModel->GetWorldByIndex(currWorld->GetWorldIndex()+1);
         nextWorld->SetHasBeenUnlocked(true);
     }

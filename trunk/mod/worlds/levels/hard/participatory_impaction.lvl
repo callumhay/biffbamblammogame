@@ -1,0 +1,72 @@
+Participatory Impaction
+21 30
+E E E E S S S S S S S S S S F(d) F(d) S E E E E 
+E E E E S L L L Y Y E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E L L S E E E E 
+E E E E S E E E E E E E L L R R S E E E E 
+E E E E S E E E E E L L O O O O S E E E E 
+E E E E S G G G L L Y Y Y Y Y Y S E E E E 
+E E E E S B G G G G G G G G G G S S S E E 
+E E E E S E E E E E E E E E E E F(l) E T(S,ur) S E 
+E E E E S E E E E E E E E E E E F(l) E E S E 
+E E E E S E E E E E E E E E E E F(l) E E S E 
+E E E E S E L E L E L E L E L E F(l) E E S E 
+E E S S S R S R S R S R S R S R S F(u) F(u) S E 
+E S T(S,ul) E F(r) E E E E E E E E E E E F(r) E E S E 
+E S E E F(r) E E E E E E E E E E E F(r) E E S E 
+E S E E F(r) E E E E E E E E E E E F(r) E E S E 
+E S E E F(r) L E L E L E L E L E L F(r) E T(S,lr) S E 
+E S F(u) F(u) S S R S R S R S R S R S S S S E E 
+E S E E F(l) E E E E E E E E E E E F(l) E T(S,ur) S E 
+E S E E F(l) E E E E E E E E E E E F(l) E E S E 
+E S E E F(l) E E E E E E E E E E E F(l) E E S E 
+E S T(S,ll) E F(l) E L E L E L E L E L E F(l) E E S E 
+E E S S S R S R S R S R S R S R S F(u) F(u) S E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+
+STARS:
+8000
+14500
+16500
+21500
+23500
+
+PaddleGrow 2
+PoisonPaddle 2
+Blackout 2
+BallSafetyNet 2
+BallGrow 0
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 0
+MultiBall3 2
+RemoteControlRocket 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0
