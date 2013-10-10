@@ -2808,11 +2808,15 @@
 							>
 						</File>
 						<File
-							RelativePath=".\GameModel\LevelShakeEventInfo.h"
+							RelativePath=".\GameModel\LevelShakeEffectInfo.h"
 							>
 						</File>
 						<File
 							RelativePath=".\GameModel\ShortCircuitEffectInfo.h"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\StarSmashEffectInfo.h"
 							>
 						</File>
 					</Filter>

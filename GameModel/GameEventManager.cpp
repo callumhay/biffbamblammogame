@@ -349,6 +349,16 @@ void GameEventManager::ActionLevelPieceAllStatusRemoved(const LevelPiece& piece)
 	}	
 }
 
+void GameEventManager::ActionCollateralBlockChangedState(const CollateralBlock& collateralBlock,
+                                                         const CollateralBlockProjectile& projectile,
+                                                         CollateralBlock::CollateralBlockState oldState, 
+                                                         CollateralBlock::CollateralBlockState newState) {
+
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->CollateralBlockChangedStateEvent(collateralBlock, projectile, oldState, newState);
+    }
+}
 
 // Action for when a new item is spawned in the game
 void GameEventManager::ActionItemSpawned(const GameItem& item) {

@@ -7,8 +7,8 @@ S E E E E E E E E E E E E E E E E E S
 S E E E E E E R F(d) F(d) F(d) R E E E E E E S 
 S E E E E E R R E E E R R E E E E E S 
 S E E E E R R O E E E O R R E E E E S 
-S E E R R R O Y E E E Y O R R R E E S 
-S E E R O O O Y E E E Y O O O R E E S 
+S E E E R R O Y E E E Y O R R E E E S 
+S E E R R O O Y E E E Y O O R R E E S 
 S E E R O E E E E K(MultiBall5) E E E E O R E E S 
 S E E R O E G E E E E E G E O R E E S 
 S E E R O E G G G G G G G E O R E E S 
@@ -21,8 +21,8 @@ S E E R O E E E O O O E E E O R E E S
 S E E R O Y Y Y O R O Y Y Y O R E E S 
 S E E R O Y I Y O R O Y I Y O R E E S 
 S E E R O Y Y Y O R O Y Y Y O R E E S 
-S E E R O O O O O I O O O O O R E E S 
-S E E R R R R R R R R R R R R R E E S 
+S E E R R O O O O I O O O O R R E E S 
+S E E E R R R R R R R R R R R E E E S 
 S E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E E S 
@@ -37,7 +37,7 @@ STARS:
 20000
 40000
 50000
-60000
+61000
 
 PaddleGrow 1
 PoisonPaddle 2

@@ -1,17 +1,19 @@
 Balancing Act
-13 29
+13 31
 S S S S S S S S S S S S S 
-S E E F(r) E E D(LaserBulletPaddle,LaserBeamPaddle,RocketPaddle,OmniLaserBall) E E F(r) E E S 
-S C(90) E F(r) E E E E E F(r) E E S 
-S E E F(r) E E E E E F(r) E C(180) S 
-S F(u) N N T(S,ll) E T(S,ll) E T(S,lr) N N F(d) S 
-S E N R N N N N N R N E S 
+S E E F(r) E E D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle,LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle,RocketPaddle,RocketPaddle,RocketPaddle,OmniLaserBall,OmniLaserBall,OmniLaserBall) E E F(r) E E S 
+S C(90) E F(r) E E E E E F(r) E C(180) S 
+S E E F(r) E E E E E F(r) E E S 
+S E E F(r) E E E E E F(r) E E S 
+S E E F(r) E E E E E F(r) E E S 
+S F(u) N N S S S S S N N F(d) S 
+S E N R R R R R R R N E S 
 S E N O O O O O O O N E S 
 S E N Y Y Y Y Y Y Y N E S 
 S E N Y Y Y Y Y Y Y N E S 
 S E N G K(LaserBulletPaddle,LaserBeamPaddle) G G G K(LaserBulletPaddle,LaserBeamPaddle) G N E S 
 S E N G G G G G G G N E S 
-S E N G G G G G G G N E S 
+S E N G G G G G G G N C(180) S 
 S E N G G G G G G G N E S 
 S E N G G G K(LaserBulletPaddle,LaserBeamPaddle) G G G N E S 
 S E N Y Y Y Y Y Y Y N E S 
@@ -41,8 +43,8 @@ PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2

@@ -40,14 +40,14 @@ velocityDir(copy.velocityDir), velocityMag(copy.velocityMag), rightVec(copy.righ
 Projectile::~Projectile() {
 }
 
-void Projectile::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec) {
+bool Projectile::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec) {
     // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
     // modify the velocity to make it move towards the paddle...
     const PlayerPaddle* paddle = model.GetPlayerPaddle();
     if (paddle->HasBeenPausedAndRemovedFromGame(model.GetPauseState())) {
-        return;
+        return false;
     }
-    paddle->AugmentDirectionOnPaddleMagnet(seconds, degreesChangePerSec, this->position, this->velocityDir);
+    return paddle->AugmentDirectionOnPaddleMagnet(seconds, degreesChangePerSec, this->position, this->velocityDir);
 }
 
 Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {

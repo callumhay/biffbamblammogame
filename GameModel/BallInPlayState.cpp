@@ -630,6 +630,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
     
     if (paddleReflection) {
 
+        /*
         // Update the reflection so that it goes a bit more left or a bit more right depending on whether it hit further to
         // the left or the right of the flat top part of the paddle
         PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
@@ -654,7 +655,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
                 reflVecHat.Rotate(angleAmt);
             }
         }
-
+        */
 
         // Only have to check whether the ball is acceptably far enough away from the +/-x directions
         float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));

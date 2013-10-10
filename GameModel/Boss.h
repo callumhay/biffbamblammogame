@@ -35,8 +35,10 @@ public:
 
     virtual ~Boss();
     
-    static Boss* BuildStyleBoss(const GameWorld::WorldStyle& style);
+    static Boss* BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style);
     virtual void Init(float startingX, float startingY) = 0;
+
+    GameModel* GetGameModel();
 
     GameWorld::WorldStyle GetWorldStyle() const;
 
@@ -102,6 +104,8 @@ public:
 protected:
     GameWorld::WorldStyle worldStyle;
 
+    GameModel* gameModel;
+
     BossAIState* currAIState;
     BossAIState* nextAIState;
 
@@ -127,6 +131,10 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(Boss);
 };
+
+inline GameModel* Boss::GetGameModel() {
+    return this->gameModel;
+}
 
 inline GameWorld::WorldStyle Boss::GetWorldStyle() const {
     return this->worldStyle;

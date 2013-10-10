@@ -14,9 +14,9 @@
 
 #include "GeneralEffectEventInfo.h"
 
-class LevelShakeEventInfo : public GeneralEffectEventInfo {
+class LevelShakeEffectInfo : public GeneralEffectEventInfo {
 public:
-    LevelShakeEventInfo(double timeInSecs, const Vector3D& shakeVec, float shakeSpd) :
+    LevelShakeEffectInfo(double timeInSecs, const Vector3D& shakeVec, float shakeSpd) :
       timeInSecs(timeInSecs), shakeVec(shakeVec), shakeSpd(shakeSpd) {}
 
     GeneralEffectEventInfo::Type GetType() const { return GeneralEffectEventInfo::LevelShake; }
@@ -30,7 +30,7 @@ private:
     const Vector3D shakeVec;
     const float shakeSpd;
 
-    DISALLOW_COPY_AND_ASSIGN(LevelShakeEventInfo);
+    DISALLOW_COPY_AND_ASSIGN(LevelShakeEffectInfo);
 };
 
 #endif // __LEVELSHAKEEVENTINFO_H__

@@ -22,6 +22,8 @@
 #include "LaserBeamSightsEffectInfo.h"
 #include "PowerChargeEffectInfo.h"
 
+#include "../GameSound/GameSound.h"
+
 using namespace nouveaubossai;
 
 NouveauBossAI::NouveauBossAI(NouveauBoss* boss) : BossAIState(), boss(boss) {
@@ -280,6 +282,16 @@ void NouveauBossAI::ShootRandomRightSideLaserBullet(GameModel* gameModel) {
     }
 }
 
+void NouveauBossAI::BossWasHurt() {
+    // Cancel any attack sounds
+    for (std::list<SoundID>::iterator iter = this->laserBeamTargetingSoundIDs.begin(); 
+         iter != this->laserBeamTargetingSoundIDs.end(); ++iter) {
+
+        this->boss->GetGameModel()->GetSound()->StopSound(*iter);
+    }
+    this->laserBeamTargetingSoundIDs.clear();
+}
+
 void NouveauBossAI::OnSetStateMoveToTargetStopAndShoot() {
 
     Point2D startAndTargetPos = this->boss->alivePartsRoot->GetTranslationPt2D();
@@ -354,6 +366,8 @@ void NouveauBossAI::OnSetStatePrepLaserBeamAttack() {
     this->timeBetweenLaserBeamPrepsCountdown = this->GetTimeBetweenLaserBeamPreps();
     this->laserBeamRaysToFire.clear();
     this->timeBetweenLastPrepAndFireCountdown = this->GenerateTimeBetweenLaserBeamLastPrepAndFire();
+
+    this->laserBeamTargetingSoundIDs.clear();
 }
 
 void NouveauBossAI::OnSetStateLaserBeamAttack() {
@@ -572,6 +586,10 @@ void NouveauBossAI::ExecutePrepLaserBeamAttackState(double dT, GameModel* gameMo
                 PowerChargeEffectInfo(firingBodyPart, timeUntilFiring, 
                 GameModelConstants::GetInstance()->BOSS_LASER_BEAM_COLOUR, 0.75f, chargeOffset));
 
+            SoundID laserBeamPrepSoundID = gameModel->GetSound()->PlaySoundAtPosition(GameSound::BossCrosshairTargetingEvent, false,
+                Point3D(nextTargetPt, 0.0f), true, true, true);
+            this->laserBeamTargetingSoundIDs.push_back(laserBeamPrepSoundID);
+
             Vector2D nextTargetDir = Vector2D::Normalize(nextTargetPt - nextFiringPt);
             Collision::Ray2D beamRay(nextFiringPt, nextTargetDir);
             this->laserBeamRaysToFire.push_back(std::make_pair(nextFiringLocation, beamRay));
@@ -606,6 +624,12 @@ void NouveauBossAI::ExecuteLaserBeamAttackState(double dT, GameModel* gameModel)
         Collision::Ray2D beamRay = this->laserBeamRaysToFire.begin()->second;
         this->laserBeamRaysToFire.pop_front();
         
+        if (!this->laserBeamTargetingSoundIDs.empty()) {
+            SoundID currSoundID = this->laserBeamTargetingSoundIDs.front();
+            this->laserBeamTargetingSoundIDs.pop_front();
+            gameModel->GetSound()->StopSound(currSoundID);
+        }
+
         float beamRadius = 0.0f;
         switch (beamLoc) {
             case LeftSideTop:
@@ -910,6 +934,7 @@ void SideSphereAI::KillLeftArm() {
     body->SetLocalBounds(bounds);
 
     this->SetState(NouveauBossAI::LostLeftArmAIState);
+    this->BossWasHurt();
 }
 
 void SideSphereAI::KillRightArm() {
@@ -945,6 +970,7 @@ void SideSphereAI::KillRightArm() {
     body->SetLocalBounds(bounds);
 
     this->SetState(NouveauBossAI::LostRightArmAIState);
+    this->BossWasHurt();
 }
 
 float SideSphereAI::GetTotalLifePercent() const {
@@ -1439,6 +1465,8 @@ void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(
                 Boss::BuildBossHurtAndInvulnerableColourAnim(INVULNERABLE_TIME_IN_SECS));
             this->topHurtAnim.ResetToStart();
+            this->BossWasHurt();
+
             break;
 
         case TopLostAIState:
@@ -1715,6 +1743,7 @@ void TopSphereAI::SetState(NouveauBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
                 BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->topHurtAnim.ResetToStart();
+            this->BossWasHurt();
             break;
 
         case FinalDeathThroesAIState:

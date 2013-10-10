@@ -383,7 +383,8 @@ public:
 	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);
 
     void AddShortCircuitEffect(const ShortCircuitEffectInfo& effectInfo);
-
+    void AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, const ESPInterval& size, 
+        const ESPInterval& lifeInSecs, Onomatoplex::Extremeness extremeness);
 
 	void TurnOffCurrentItemDropStars();
 

@@ -22,6 +22,7 @@
 #include "ItemDropBlock.h"
 #include "LaserTurretBlock.h"
 #include "RegenBlock.h"
+#include "CollateralBlock.h"
 #include "RandomItem.h"
 #include "Beam.h"
 #include "PointAward.h"
@@ -29,6 +30,7 @@
 #include "SafetyNet.h"
 #include "PaddleMineProjectile.h"
 #include "PaddleRemoteControlRocketProjectile.h"
+#include "CollateralBlockProjectile.h"
 #include "GeneralEffectEventInfo.h"
 #include "BossEffectEventInfo.h"
 
@@ -56,7 +58,7 @@ public:
 	/**
 	 * Event occurs when a new world is started (i.e., the player enters the new world
 	 * in the game). This event occurs once just as the world starts.
-	 * Arguements: world - The world that is being started.
+	 * Arguments: world - The world that is being started.
 	 */
     virtual void WorldStartedEvent(const GameWorld& world) { UNUSED_PARAMETER(world); }
 	
@@ -69,7 +71,7 @@ public:
 	/**
 	 * Event occurs when a new level is started (i.e., the player enters the new level
 	 * in the game). This event occurs once just as the level starts.
-	 * Arguements: world - The world of the level that just started.
+	 * Arguments: world - The world of the level that just started.
 	 *             level - The level that is being started.
 	 */
     virtual void LevelStartedEvent(const GameWorld& world, const GameLevel& level) { UNUSED_PARAMETER(world); UNUSED_PARAMETER(level); }
@@ -95,7 +97,7 @@ public:
 	 * This event occurs whenever a player smacks the paddle into a wall - it only happens
 	 * ONCE per smack (they then have to remove the paddle and hit the wall again to trigger
 	 * another one of these events).
-	 * Arguements: paddle - The paddle that just hit the wall.
+	 * Arguments: paddle - The paddle that just hit the wall.
 	 *             hitLoc - The central location where the paddle smacked into the wall.
 	 */
     virtual void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc) { UNUSED_PARAMETER(paddle); UNUSED_PARAMETER(hitLoc); }
@@ -121,42 +123,42 @@ public:
 	/**
 	 * Event triggered when all balls have fallen below the death point in the level. This event
 	 * is triggered once per complete ball death.
-	 * Arguements: livesLeft - The number of lives/balls left for the player.
+	 * Arguments: livesLeft - The number of lives/balls left for the player.
 	 */
     virtual void AllBallsDeadEvent(int livesLeft) { UNUSED_PARAMETER(livesLeft); }
 
 	/**
 	 * Event triggered before the last ball dies (i.e., before the camera follows the last ball
 	 * to its tragic death). This event is triggered once just as the last ball dies.
-	 * Arguements: lastBallToDie - The last ball left, which is now about to die.
+	 * Arguments: lastBallToDie - The last ball left, which is now about to die.
 	 */
     virtual void LastBallAboutToDieEvent(const GameBall& lastBallToDie) { UNUSED_PARAMETER(lastBallToDie); }
 
 	/**
 	 * Event triggered when the last ball explodes in a blaze of horrible, horrible glory.
 	 * This event is triggered once just as the ball explodes (but is not officially dead yet).
-	 * Arguements: explodedBall - The ball that is exploding / just exploded.
+	 * Arguments: explodedBall - The ball that is exploding / just exploded.
 	 */
     virtual void LastBallExploded(const GameBall& explodedBall) { UNUSED_PARAMETER(explodedBall); }
 
 	/**
 	 * Event triggered when one of the game balls has died. This event is triggered
 	 * once per ball death.
-	 * Arguements: deadBall - The ball that has died (just before it is deleted).
+	 * Arguments: deadBall - The ball that has died (just before it is deleted).
 	 */
     virtual void BallDiedEvent(const GameBall& deadBall) { UNUSED_PARAMETER(deadBall); }
 
 	/**
-	 * Event triggered whenever the ball respawns on the player paddle. Only occurs once
-	 * per respawn event.
-	 * Arguements: spawnedBall - The ball, just as it respawns.
+	 * Event triggered whenever the ball re-spawns on the player paddle. Only occurs once
+	 * per re-spawn event.
+	 * Arguments: spawnedBall - The ball, just as it re-spawns.
 	 */
     virtual void BallSpawnEvent(const GameBall& spawnedBall) { UNUSED_PARAMETER(spawnedBall); }
 
 	/**
 	 * Event triggered when the ball is shot from the player paddle. Only occurs once
 	 * just as the ball is being shot.
-	 * Arguements: shotBall - The ball with the velocity given to it by the shot and its
+	 * Arguments: shotBall - The ball with the velocity given to it by the shot and its
 	 * initial position as it is being shot.
 	 */
     virtual void BallShotEvent(const GameBall& shotBall) { UNUSED_PARAMETER(shotBall); }
@@ -170,7 +172,7 @@ public:
 	 * Event triggered when the ball collides with a level block. Only occurs once as the ball
 	 * collides with the block.
 	 * Arguments: ball				 - The ball as it is colliding with the block.
-	 *             block       - The block being affected by the ball.
+	 *            block       - The block being affected by the ball.
 	 */
     virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) { UNUSED_PARAMETER(ball); UNUSED_PARAMETER(block); }
 
@@ -178,14 +180,14 @@ public:
 	 * Event triggered when a projectile collides with a level block. Only occurs once as the projectile
 	 * collides with the block.
 	 * Arguments: projectile - The projectile as it is colliding with the block.
-	 *             block      - The block being affected by the projectile.
+	 *            block      - The block being affected by the projectile.
 	 */
     virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) { UNUSED_PARAMETER(projectile); UNUSED_PARAMETER(block); }
 
     /**
      * Event triggered when a projectile collides with the safety net. Occurs once just as the projectile collides.
      * Arguments: projectile - The projectile that collided with the safety net.
-     *             safetyNet  - The safety net that was collided with.
+     *            safetyNet  - The safety net that was collided with.
      */
     virtual void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet) {
         UNUSED_PARAMETER(projectile);
@@ -262,7 +264,7 @@ public:
 
 	/**
 	 * Event triggered when two balls collide. Only occurs once as a ball collides with another.
-	 * Arguements: ball1 - A ball in the collision.
+	 * Arguments: ball1 - A ball in the collision.
 	 *             ball2 - The other ball in the collision.
 	 */
     virtual void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) { UNUSED_PARAMETER(ball1); UNUSED_PARAMETER(ball2); }
@@ -279,7 +281,7 @@ public:
 	/**
 	 * Event triggered when a projectile is teleported by a portal block. Only occurs once per projectile,
 	 * occurs one frame before the projectile is shown coming out of the sibling portal.
-	 * Arguements: projectile  - The projectile teleported.
+	 * Arguments: projectile  - The projectile teleported.
 	 *             enterPortal - The portal entered by the projectile.
 	 */
     virtual void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal) {
@@ -289,7 +291,7 @@ public:
 
     /**
 	 * Event triggered when a ball enters a cannon block. Only occurs once as the ball is JUST entering.
-	 * Arguements: ball        - The ball entering the cannon.
+	 * Arguments: ball        - The ball entering the cannon.
 	 *             cannonBlock - The cannon block that the ball is entering.
 	 */
     virtual void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
@@ -300,7 +302,7 @@ public:
 	/**
 	 * Event triggered when a ball is fired out of a cannon block. Only occurs once as the ball is JUST being
 	 * fired out of the barrel of the cannon.
-	 * Arguements: ball        - The ball being fired out of the cannon.
+	 * Arguments: ball        - The ball being fired out of the cannon.
 	 *             cannonBlock - The cannon block firing the ball.
 	 */
     virtual void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
@@ -311,7 +313,7 @@ public:
 	/**
 	 * Event triggered when a projectile enters a cannon block. Only occurs once as the projectile is JUST being
 	 * loaded into the barrel of the cannon.
-	 * Arguements: projectile  - The projectile being loaded by the cannon.
+	 * Arguments: projectile  - The projectile being loaded by the cannon.
 	 *             cannonBlock - The cannon block loading the rocket. 
 	 */
     virtual void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
@@ -322,7 +324,7 @@ public:
 	/**
 	 * Event triggered when a projectile is fired out of a cannon block. Only occurs once as the projectile is JUST being
 	 * fired out of the barrel of the cannon.
-	 * Arguements: projectile  - The rocket being fired out of the cannon.
+	 * Arguments: projectile  - The rocket being fired out of the cannon.
 	 *             cannonBlock - The cannon block firing the rocket. 
 	 */
     virtual void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
@@ -362,18 +364,16 @@ public:
     
     /**
      * Event triggered when a ball loses the iceball ability due to the player acquiring the fireball ability.
-	 * Arguements: ball - The ball that lost the iceball ability.
+	 * Arguments: ball - The ball that lost the iceball ability.
      */
     virtual void IceBallCancelledByFireBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
 
 	// Misc Events (Destruction, Combos, etc.) ************************************************
 
-	/**
-	 * Event triggered when a typical block is destoryed (turned into an empty space). Only occurs
-	 * once as the block is being destroyed.
-	 * Arguements: block  - The block being destroyed, just before it is destroyed.
-	 *             method - Method of block destruction.
-     */
+    /// <summary> Block destroyed event. </summary>
+    /// <remarks> Beowulf, 08/10/2013. </remarks>
+    /// <param name="block">  The block. </param>
+    /// <param name="method"> The method. </param>
     virtual void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
         UNUSED_PARAMETER(block);
         UNUSED_PARAMETER(method);
@@ -388,7 +388,7 @@ public:
 	/**
 	 * Event triggered when a ball collides with the safety net and the safety net is
 	 * destroyed by it.
-	 * Arguements: ball - The ball that collided and destroyed the safety net.
+	 * Arguments: ball - The ball that collided and destroyed the safety net.
 	 */
     virtual void BallSafetyNetDestroyedEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
 	// Same as above, only the paddle did it.
@@ -398,14 +398,14 @@ public:
 
     /**
      * Event triggered when the bullet time state has changed. Triggered right after the state changed.
-     * Arguements: boostModel - The ball boost model that contains the new bullet time state.
+     * Arguments: boostModel - The ball boost model that contains the new bullet time state.
      */
     virtual void BulletTimeStateChangedEvent(const BallBoostModel& boostModel) { UNUSED_PARAMETER(boostModel); }
  
     /**
      * Event triggered when the ball is boosted. The event is triggered once right after the
      * boost has been applied to the ball.
-     * Arguements: boostModel - The ball boost model.
+     * Arguments: boostModel - The ball boost model.
      */
     virtual void BallBoostExecutedEvent(const BallBoostModel& boostModel) { UNUSED_PARAMETER(boostModel); }
 
@@ -423,7 +423,7 @@ public:
 	 * Event triggered when a level piece / block changes from one type to another either within the same
 	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side
 	 * other similar events e.g., BlockDestroyedEvent, BallBlockCollisionEvent.
-	 * Arguements: pieceBefore - The LevelPiece object before the change.
+	 * Arguments: pieceBefore - The LevelPiece object before the change.
 	 *						 pieceAfter  - The LevelPiece object after the change.
 	 */
     virtual void LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
@@ -435,7 +435,7 @@ public:
 	 * Event triggered when a level piece has a status effect added to it. Only occurs once, just after the status is applied, 
 	 * for a particular status effect. All status effects are eventually removed either via the 
 	 * LevelPieceStatusRemoved or LevelPieceAllStatusRemoved events.
-	 * Arguements: piece       - The level piece that had the status added to it.
+	 * Arguments: piece       - The level piece that had the status added to it.
 	 *             addedStatus - The status added to the piece. 
 	 */
     virtual void LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus) {
@@ -446,7 +446,7 @@ public:
 	/**
 	 * Event triggered when a level piece has a status effect removed from it. Only occurs once, just after the status is removed,
 	 * for a particular status effect. A LevelPieceStatusAdded event for that same status is gaurenteed to have been made before this event.
-	 * Arguements: piece         - The level piece that had the status removed from it.
+	 * Arguments: piece         - The level piece that had the status removed from it.
 	 *             removedStatus - The status removed from the piece. 
 	 */
     virtual void LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus) {
@@ -456,28 +456,39 @@ public:
 
 	/**
 	 * Event triggered when a level piece has all status effects removed from it. Only occurs once just after all status is removed.
-	 * Arguements: piece - The level piece that had all the status removed from it.
+	 * Arguments: piece - The level piece that had all the status removed from it.
 	 */
     virtual void LevelPieceAllStatusRemovedEvent(const LevelPiece& piece) { UNUSED_PARAMETER(piece); }
+
+    
+    virtual void CollateralBlockChangedStateEvent(const CollateralBlock& collateralBlock,
+                                                  const CollateralBlockProjectile& projectile,
+                                                  CollateralBlock::CollateralBlockState oldState, 
+                                                  CollateralBlock::CollateralBlockState newState) { 
+        UNUSED_PARAMETER(collateralBlock);
+        UNUSED_PARAMETER(projectile);
+        UNUSED_PARAMETER(oldState);
+        UNUSED_PARAMETER(newState);
+    }
 
 	/**
 	 * Event triggered when an item is spawned and becomes part of the game.
 	 * Only occurs once per spawn.
-	 * Arguements: item - The newly spawned item.
+	 * Arguments: item - The newly spawned item.
 	 */
     virtual void ItemSpawnedEvent(const GameItem& item) { UNUSED_PARAMETER(item); }
 
 	/**
 	 * Event triggered when an item drop is removed because it has either been
 	 * acquired by the player paddle or has left the game boundries.
-	 * Arguements: item - The removed item.
+	 * Arguments: item - The removed item.
 	 */
     virtual void ItemRemovedEvent(const GameItem& item) { UNUSED_PARAMETER(item); }
 
 	/**
 	 * Event triggered when an item hits the player paddle (i.e., the player gains the item).
 	 * Only occurs once at the happenstance of collision.
-	 * Arguements: item   - The item that has just been 'consumed' by the player.
+	 * Arguments: item   - The item that has just been 'consumed' by the player.
 	 *             paddle - The paddle as it collides with the item.
 	 */
     virtual void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
@@ -488,14 +499,14 @@ public:
 	/**
 	 * Event triggered when an item is activated (begins its timer or just starts its effect).
 	 * Only occurs once per item.
-	 * Arguements: item - The item that was just activated.
+	 * Arguments: item - The item that was just activated.
 	 */
     virtual void ItemActivatedEvent(const GameItem& item) { UNUSED_PARAMETER(item); }
 
 	/**
 	 * Event triggered when an item is deactivated (ends its timer or is just ends its effect).
 	 * Only occurs once per item.
-	 * Arguements: item - The item that was just deactivated.
+	 * Arguments: item - The item that was just deactivated.
 	 */
     virtual void ItemDeactivatedEvent(const GameItem& item)	{ UNUSED_PARAMETER(item); }
 	
@@ -504,7 +515,7 @@ public:
 	 * Event triggered when a random item is activated - this is distinct from a typical item since a
 	 * random item alone has no effect (what it becomes does). This event is triggered just before the random
      * item's actual item is activated.
-	 * Arguements: randomItem - The random item.
+	 * Arguments: randomItem - The random item.
      *             actualItem - The actual item that the random item turns into.
 	 */
     virtual void RandomItemActivatedEvent(const RandomItem& randomItem, const GameItem& actualItem) {
@@ -515,34 +526,34 @@ public:
 	/**
 	 * Event triggered when an item's timer is started for the first time. Only occurs
 	 * once at item activation, when that item has an associated time period of activity.
-	 * Arguements: itemTimer - The item timer that just started.
+	 * Arguments: itemTimer - The item timer that just started.
 	 */
     virtual void ItemTimerStartedEvent(const GameItemTimer& itemTimer) { UNUSED_PARAMETER(itemTimer); }
 
 	/**
 	 * Event triggered when an item's timer stops. Only occurs once when an item runs
 	 * out of its active time and expires.
-	 * Arguements: itemTimer - The item timer that just stopped/expired.
+	 * Arguments: itemTimer - The item timer that just stopped/expired.
 	 */
     virtual void ItemTimerStoppedEvent(const GameItemTimer& itemTimer) { UNUSED_PARAMETER(itemTimer); }
 
 	/**
 	 * Event triggered when an item drop block changes the item type that it will drop next. Occurs
 	 * once right after the item drop block changes the type of item it will drop.
-	 * Arguements: dropBlock - the drop block that changed.
+	 * Arguments: dropBlock - the drop block that changed.
 	 */
     virtual void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock) { UNUSED_PARAMETER(dropBlock); }
 
     /**
      * Event triggered when a switch block is initially activated. Occurs once just after the switch
      * activates its triggers.
-     * Arguements: switchBlock - the switch block that was activated.
+     * Arguments: switchBlock - the switch block that was activated.
      */
     virtual void SwitchBlockActivatedEvent(const SwitchBlock& switchBlock) { UNUSED_PARAMETER(switchBlock); }
         
 	/**
 	 * Event triggered when a projectile is spawned. Only occurs once per spawned projectile.
-	 * Arguements: projectile - The projectile that was just spawned.
+	 * Arguments: projectile - The projectile that was just spawned.
 	 */
     virtual void ProjectileSpawnedEvent(const Projectile& projectile) { UNUSED_PARAMETER(projectile); }
 

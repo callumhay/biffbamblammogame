@@ -891,6 +891,9 @@ void SelectLevelMenuState::SetupLevelPages(const DisplayStateInfo& info) {
 
             GameLevel* currLevel = levels.at(currLevelIdx);
             assert(currLevel != NULL);
+            if (noScoreEncountered) {
+                currLevel->SetAreUnlockStarsPaidFor(false);
+            }
 
             if (currLevel->GetHasBoss()) {
                 levelItem = new BossLevelMenuItem(this, currLevelIdx+1, currLevel, itemWidth, standardHeight,
@@ -1767,14 +1770,13 @@ SelectLevelMenuState::LevelMenuItem::LevelMenuItem(SelectLevelMenuState* state,
                                                    int levelNum, GameLevel* level, 
                                                    float width, const Point2D& topLeftCorner, 
                                                    bool isEnabled) : 
-AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled),
-starDisplayList(0) {
+AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), starDisplayList(0) {
 
     std::string highScoreStr = "High Score: " + stringhelper::AddNumberCommas(this->level->GetHighScore()) ;
     this->highScoreLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Small), highScoreStr);
-    this->highScoreLabel->SetScale(0.8f);
+    this->highScoreLabel->SetScale(state->display->GetTextScalingFactor() * 0.8f);
 
     this->RebuildItem(isEnabled, topLeftCorner);
 }

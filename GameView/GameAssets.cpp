@@ -1265,14 +1265,15 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 
 		case Projectile::PaddleLaserBulletProjectile:
 			// Have the laser gun attachment move downwards in reaction to the laser being shot
-			this->FirePaddleLaser(*gameModel.GetPlayerPaddle());
+			this->FirePaddleLaser(gameModel);
 			break;
 
         case Projectile::BossLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
-        case Projectile::BallLaserBulletProjectile:
-            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, projectile.GetPosition3D());
+        case Projectile::BallLaserBulletProjectile: {
+            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, projectile.GetPosition3D(), true, true, true);
             break;
+        }
 
         case Projectile::BossOrbBulletProjectile:
             // TODO ?
@@ -1287,7 +1288,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			// Notify assets of the rocket...
-			this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
+			this->FireRocket(gameModel, *static_cast<const RocketProjectile*>(&projectile));
 			break;
 
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile: {
@@ -1299,14 +1300,14 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             this->remoteControlRocketHUD->Activate(remoteCtrlRocket);
 
             // Notify assets of the rocket...
-            this->FireRocket(*remoteCtrlRocket);
+            this->FireRocket(gameModel, *remoteCtrlRocket);
             this->currentLevelMesh->UpdateNoEntryBlock(true);
             break;
         }
 
         case Projectile::PaddleMineBulletProjectile: {
             // Play a sound for the mine firing from the paddle
-            sound->PlaySoundAtPosition(GameSound::PaddleMineFiredEvent, false, projectile.GetPosition3D());
+            sound->PlaySoundAtPosition(GameSound::PaddleMineFiredEvent, false, projectile.GetPosition3D(), true, true, true);
 
             // Notify the mine manager...
             const MineProjectile* mine = static_cast<const MineProjectile*>(&projectile);
@@ -1316,7 +1317,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             
         case Projectile::MineTurretBulletProjectile: {
             // Play a sound for the mine firing from the turret
-            sound->PlaySoundAtPosition(GameSound::TurretMineFiredEvent, false, projectile.GetPosition3D());
+            sound->PlaySoundAtPosition(GameSound::TurretMineFiredEvent, false, projectile.GetPosition3D(), true, true, true);
 
             // Notify the mine manager...
             const MineProjectile* mine = static_cast<const MineProjectile*>(&projectile);
@@ -1332,11 +1333,10 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 /** 
  * Remove the given projectile and its effects from the assets.
  */
-void GameAssets::RemoveProjectile(const Projectile& projectile) {
+void GameAssets::RemoveProjectile(const GameModel& gameModel, const Projectile& projectile) {
 	this->espAssets->RemoveProjectileEffect(projectile);
     
-    // Kill all sounds for the projectile
-    this->sound->DetachAndStopAllSounds(&projectile);
+    double soundFadeoutTime = 0.0;
 
 	switch (projectile.GetType()) {
 
@@ -1368,18 +1368,33 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
             break;
         }
 
+        case Projectile::CollateralBlockProjectile: {
+            if (GameState::IsGameInPlayState(gameModel) && 
+                gameModel.IsOutOfGameBoundsForProjectile(projectile.GetPosition())) {
+
+                soundFadeoutTime = 1.0;
+            }
+            break;
+        }
+
 		default:
 			break;
 	}
+
+    // Kill all sounds for the projectile
+    this->sound->DetachAndStopAllSounds(&projectile, soundFadeoutTime);
 }
 
 /**
  * Private helper, cause the laser paddle attachment to animate - like it's reacting to shooting
  * a bullet or something.
  */
-void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
+void GameAssets::FirePaddleLaser(const GameModel& gameModel) {
+    const PlayerPaddle& paddle = *gameModel.GetPlayerPaddle();
+    
     // Add a sound for firing the laser
-    this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, paddle.GetPosition3D());
+    this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, paddle.GetPosition3D(), true, true, true);
+
     // Make the laser attachment animate for firing the gun...
 	this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
 }
@@ -1387,8 +1402,9 @@ void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
 /**
  * Private helper, causes the rocket to be fired and drawn.
  */
-void GameAssets::FireRocket(const RocketProjectile& rocketProjectile) {
-    // Play a sound for a rocket firing and travelling (based off the type)
+void GameAssets::FireRocket(const GameModel& gameModel, const RocketProjectile& rocketProjectile) {
+    
+    // Play a sound for a rocket firing and traveling (based off the type)
     switch (rocketProjectile.GetType()) {
 
         case Projectile::BossRocketBulletProjectile:
@@ -1400,12 +1416,13 @@ void GameAssets::FireRocket(const RocketProjectile& rocketProjectile) {
             break;
 
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
-        case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRocketBulletProjectile: {
             // The rocket launch sound
-            this->sound->PlaySoundAtPosition(GameSound::PaddleRocketLaunchEvent, false, rocketProjectile.GetPosition3D());
+            this->sound->PlaySoundAtPosition(GameSound::PaddleRocketLaunchEvent, false, rocketProjectile.GetPosition3D(), true, true, true);
             // Attach a moving sound loop to the rocket
-            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::PaddleRocketMovingLoop, true);
+            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::PaddleRocketMovingLoop, true, gameModel.GetCurrentLevelTranslation());
             break;
+        }
 
         default:
             assert(false);
@@ -1492,7 +1509,10 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
         BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
 }
 
-void GameAssets::PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const Boss& boss, const BossBodyPart& bossPart) {
+void GameAssets::PaddleHurtByBossBodyPart(const GameModel& gameModel, const PlayerPaddle& paddle, 
+                                          const Boss& boss, const BossBodyPart& bossPart) {
+
+    UNUSED_PARAMETER(gameModel);
 
     // Effects for the collision...
     this->espAssets->AddPaddleHitByBossPartEffect(paddle, bossPart);
@@ -1504,17 +1524,23 @@ void GameAssets::PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const Boss
 
     // Play the sound for the paddle being hurt -- this will depend on the type of boss
     switch (boss.GetWorldStyle()) {
+
         case GameWorld::Classical:
-            this->sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackHitEvent, false, paddle.GetPosition3D());
+            this->sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackHitEvent, false,
+                paddle.GetPosition3D(), true, true, true);
             break;
+
         case GameWorld::Deco:
+            this->sound->PlaySoundAtPosition(GameSound::DecoBossArmPaddleCollisionEvent, false,
+                paddle.GetPosition3D(), true, true, true);
             break;
+
         default:
             break;
     }
 }
 
-// Notifies assets that there was an explosion and there should be a fullscreen flash
+// Notifies assets that there was an explosion and there should be a full-screen flash
 void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera, const GameModel* gameModel) {
 
     float forcePercentage = rocket.GetForcePercentageFactor();
@@ -1542,10 +1568,12 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera,
     }
 
 	// Play the explosion sound
-	this->sound->PlaySoundAtPosition(GameSound::RocketExplodedEvent, false, Point3D(rocket.GetPosition(), 0.0f));
+	this->sound->PlaySoundAtPosition(GameSound::RocketExplodedEvent, false, rocket.GetPosition3D(), true, true, true);
 }
 
-void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
+void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera, const GameModel* gameModel) {
+    UNUSED_PARAMETER(gameModel);
+
     this->espAssets->AddMineBlastEffect(mine, mine.GetPosition());
 
 	// Add a camera/controller shake and flash for when the mine explodes...
@@ -1555,7 +1583,7 @@ void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
         BBBGameController::VerySoftVibration, BBBGameController::SoftVibration);
 
 	// Play the explosion sound
-	this->sound->PlaySoundAtPosition(GameSound::MineExplodedEvent, false, Point3D(mine.GetPosition(), 0.0f));
+	this->sound->PlaySoundAtPosition(GameSound::MineExplodedEvent, false, mine.GetPosition3D(), true, true, true);
 }
 
 void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera, const GameModel* gameModel) {
@@ -1711,7 +1739,7 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		case GameItem::ShieldPaddleItem: {
             this->sound->StopAllSoundsWithType(GameSound::PaddleShieldDeactivatedEvent);
             this->sound->PlaySoundAtPosition(GameSound::PaddleShieldActivatedEvent, false, 
-                gameModel.GetPlayerPaddle()->GetPosition3D());
+                gameModel.GetPlayerPaddle()->GetPosition3D(), true, true, true);
 
             const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetFullSceneFBO()->GetFBOTexture();
 			assert(fullscreenFBOTex != NULL);
@@ -1720,7 +1748,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
         }
 
         case GameItem::MagnetPaddleItem:
-            this->sound->AttachAndPlaySound(gameModel.GetPlayerPaddle(), GameSound::MagnetPaddleLoop, true);
+            this->sound->AttachAndPlaySound(gameModel.GetPlayerPaddle(), GameSound::MagnetPaddleLoop, true,
+                gameModel.GetCurrentLevelTranslation());
             this->magnetPaddleEffect->Reset();
             break;
 
@@ -1804,7 +1833,7 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		case GameItem::ShieldPaddleItem:
             if (isGameInPlay) {
                 this->sound->PlaySoundAtPosition(GameSound::PaddleShieldDeactivatedEvent, false, 
-                    gameModel.GetPlayerPaddle()->GetPosition3D());
+                    gameModel.GetPlayerPaddle()->GetPosition3D(), true, true, true);
             }
 			this->paddleShield->DeactivateShield();
             break;

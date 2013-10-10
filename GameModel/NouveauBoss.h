@@ -31,7 +31,7 @@ class TopSphereAI;
 
 class NouveauBoss : public Boss {
 
-    friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
+    friend Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style);
     friend class nouveaubossai::NouveauBossAI;
     friend class nouveaubossai::SideSphereAI;
     friend class nouveaubossai::GlassDomeAI;

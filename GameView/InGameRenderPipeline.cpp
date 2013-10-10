@@ -42,6 +42,8 @@ void InGameRenderPipeline::RenderFrameWithoutHUD(double dT) {
     Matrix4x4 gameTransform  = this->display->GetModel()->GetTransformInfo()->GetGameXYZTransform();
     Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
 
+    this->display->GetSound()->SetGameFGTransform(gameTransform);
+
 	FBObj* backgroundFBO = this->RenderBackgroundToFBO(negHalfLevelDim, dT);
 	this->RenderForegroundToFBO(negHalfLevelDim, gameTransform, backgroundFBO, dT);
 	this->RenderFinalGather(negHalfLevelDim, gameTransform, dT);

@@ -29,7 +29,7 @@ class Stage3AI;
 
 class DecoBoss : public Boss {
     
-    friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
+    friend Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style);
     friend class decobossai::DecoBossAIState;
     friend class decobossai::Stage1AI;
     friend class decobossai::Stage2AI;
@@ -62,6 +62,9 @@ public:
     static const float ARM_SCOPING_SEG2_Y_RETRACT_TRANSLATION;
     static const float ARM_SCOPING_SEG3_Y_RETRACT_TRANSLATION;
     static const float ARM_SCOPING_SEG4_Y_RETRACT_TRANSLATION;
+
+    static const float ARM_ORIGIN_TO_HAND_END;
+    static const float HAND_WIDTH;
 
     static const float SIDE_POS_X_OFFSET;
     static const float SIDE_Y_OFFSET;

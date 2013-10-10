@@ -21,7 +21,7 @@ const char* CgFxInkBlock::INKBLOCK_TECHNIQUE_NAME = "InkBlock";
 CgFxInkBlock::CgFxInkBlock(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_INKBLOCK_SHADER, properties),
 timerParam(NULL), displacementParam(NULL), sharpnessParam(NULL), speedParam(NULL), turbDensityParam(NULL), 
-timer(0.0f), displacement(1.7f), sharpness(1.5f), speed(0.35f), turbulanceDensity(1.2f) {
+timer(0.0f), displacement(1.6f), sharpness(1.5f), speed(0.35f), turbulanceDensity(1.2f) {
 	
 	assert(properties->materialType == MaterialProperties::MATERIAL_INKBLOCK_TYPE);
 	assert(properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE);

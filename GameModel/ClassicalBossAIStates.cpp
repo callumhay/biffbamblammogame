@@ -565,12 +565,14 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
         if (!this->leftArmSqrWeakpt->GetIsDestroyed() && this->nextAttackState == AttackLeftArmAIState ||
             this->nextAttackState == AttackBothArmsAIState) {
                 this->leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
-                sound->AttachAndPlaySound(this->leftArm, GameSound::ClassicalBossArmShakeLoop, true);
+                sound->AttachAndPlaySound(this->leftArm, GameSound::ClassicalBossArmShakeLoop, true, 
+                    gameModel->GetCurrentLevelTranslation());
         }
         if (!this->rightArmSqrWeakpt->GetIsDestroyed() && this->nextAttackState == AttackRightArmAIState ||
             this->nextAttackState == AttackBothArmsAIState) {
                 this->rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
-                sound->AttachAndPlaySound(this->rightArm, GameSound::ClassicalBossArmShakeLoop, true);
+                sound->AttachAndPlaySound(this->rightArm, GameSound::ClassicalBossArmShakeLoop, true, 
+                    gameModel->GetCurrentLevelTranslation());
         }
     }
 
@@ -716,11 +718,13 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         // Animate the arm we are attacking with -- it's shaking to indicate the incoming attack
         if (!this->leftArmSqrWeakpt->GetIsDestroyed() && isLeftArmAttacking) {
             this->leftArm->SetLocalTranslation(Vector3D(shakingMovement, 0.0f, 0.0f));
-            sound->AttachAndPlaySound(this->leftArm, GameSound::ClassicalBossArmShakeLoop, true);
+            sound->AttachAndPlaySound(this->leftArm, GameSound::ClassicalBossArmShakeLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
         }
         if (!this->rightArmSqrWeakpt->GetIsDestroyed() && isRightArmAttacking) {
             this->rightArm->SetLocalTranslation(Vector3D(shakingMovement, 0.0f, 0.0f));
-            sound->AttachAndPlaySound(this->rightArm, GameSound::ClassicalBossArmShakeLoop, true);
+            sound->AttachAndPlaySound(this->rightArm, GameSound::ClassicalBossArmShakeLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
         }
     }
     else {
@@ -731,10 +735,12 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         // If we're at the start of the arm attack animation then we play the arm attack sound
         if (this->armAttackYMovementAnim.GetCurrentTimeValue() == 0.0) {
             if (!this->leftArmSqrWeakpt->GetIsDestroyed() && isLeftArmAttacking) {
-                sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackEvent, false, this->leftArm->GetTranslationPt3D());
+                sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackEvent, false, 
+                    this->leftArm->GetTranslationPt3D(), true, true, true);
             }
             if (!this->rightArmSqrWeakpt->GetIsDestroyed() && isRightArmAttacking) {
-                sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackEvent, false, this->rightArm->GetTranslationPt3D());
+                sound->PlaySoundAtPosition(GameSound::ClassicalBossArmAttackEvent, false, 
+                    this->rightArm->GetTranslationPt3D(), true, true, true);
             }
         }
 

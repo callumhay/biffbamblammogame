@@ -45,7 +45,7 @@ const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 // Default speed of the paddle (units/sec)
 const float PlayerPaddle::DEFAULT_MAX_SPEED = 26.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
-const float PlayerPaddle::DEFAULT_ACCELERATION  = 145.0f;
+const float PlayerPaddle::DEFAULT_ACCELERATION  = 147.0f;
 const float PlayerPaddle::DEFAULT_DECCELERATION = -170.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
@@ -1517,17 +1517,17 @@ bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, dou
  * with it (as its velocity) and the given center position will start to migrate towards the paddle
  * as if being attracted by it.
  */
-void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesChangePerSec,
+bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesChangePerSec,
                                                   const Point2D& currCenter, Vector2D& vectorToAugment) const {
     // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
     // modify the velocity to make it move towards the paddle...
     if (!this->HasPaddleType(PlayerPaddle::MagnetPaddle)) {
-        return;
+        return false;
     }
         
     // Also, don't keep augmenting the direction if the projectile has passed the paddle going out of bounds...
     if (currCenter[1] < this->GetCenterPosition()[1]) {
-        return;
+        return false;
     }
 
     // Figure out the vector from the projectile to the paddle...
@@ -1536,7 +1536,7 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
 
     if (Vector2D::Dot(vectorToAugment, projectileToPaddleVec) <= 0.01) {
         // The projectile is not within approximately a 90 degree angle of the vector from the projectile to the paddle
-        return;
+        return false;
     }
     
     float currRotAngle = atan2(vectorToAugment[1], vectorToAugment[0]);
@@ -1554,7 +1554,7 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
 
     if (fabs(targetRotAngle - currRotAngle) <= 0.01) {
         // If the direction is already pointing at the paddle then exit immediately
-        return;
+        return false;
     }
 
     // Figure out the shortest way to get there...
@@ -1577,11 +1577,12 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
         float newRotAngle = atan2(newVector[1], newVector[0]);
         if (newRotAngle > Trig::degreesToRadians(-30) || newRotAngle < Trig::degreesToRadians(-150)) {
             // We've gone out of range, don't change anything and exit
-            return;
+            return false;
         }
     }
 
     vectorToAugment = newVector;
+    return true;
 }
 
 // Obtain an AABB encompassing the entire paddle's current collision area

@@ -75,6 +75,8 @@ public:
 	void LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
 	void LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);
 	void LevelPieceAllStatusRemovedEvent(const LevelPiece& piece);
+    void CollateralBlockChangedStateEvent(const CollateralBlock& collateralBlock, const CollateralBlockProjectile& projectile,
+        CollateralBlock::CollateralBlockState oldState, CollateralBlock::CollateralBlockState newState);
 	void ItemSpawnedEvent(const GameItem& item);
 	void ItemRemovedEvent(const GameItem& item);
 	void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle);

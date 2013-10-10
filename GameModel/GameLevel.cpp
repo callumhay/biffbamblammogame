@@ -253,7 +253,7 @@ void GameLevel::SetPaddleStartXPos(float xPos) {
     }
 }
 
-GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, 
+GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWorld::WorldStyle& style, size_t levelIdx, 
                                               int milestoneStarAmt, std::string filepath) {
 
 	std::stringstream* inFile = ResourceManager::GetInstance()->FilepathToInOutStream(filepath);
@@ -1130,18 +1130,20 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
 
     // Build the level based on whether it has a boss or not
     if (levelHasBoss) {
-        Boss* boss = Boss::BuildStyleBoss(style);
+        Boss* boss = Boss::BuildStyleBoss(gameModel, style);
         if (boss == NULL) {
             assert(false);
             GameLevel::CleanUpFileReadData(levelPieces);
             return NULL;
         }
     
-        return new GameLevel(levelIdx, filepath, levelName, levelPieces, milestoneStarAmt, boss, allowedDropTypes, randomItemProbabilityNum, paddleStartXPos);
+        return new GameLevel(levelIdx, filepath, levelName, levelPieces, milestoneStarAmt, boss, 
+            allowedDropTypes, randomItemProbabilityNum, paddleStartXPos);
 
     }
     else {
-	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, milestoneStarAmt, allowedDropTypes, randomItemProbabilityNum, starAwardScores, paddleStartXPos);
+	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, milestoneStarAmt, 
+            allowedDropTypes, randomItemProbabilityNum, starAwardScores, paddleStartXPos);
     }
 }
 

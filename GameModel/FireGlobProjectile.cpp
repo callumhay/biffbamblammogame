@@ -2,7 +2,7 @@
  * FireGlobProjectile.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -11,14 +11,15 @@
 
 #include "FireGlobProjectile.h"
 #include "LevelPiece.h"
+#include "GameModel.h"
 
 const float FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY			= 2.5f;
 const float FireGlobProjectile::FIRE_GLOB_MAX_ADD_VELOCITY	= 1.25f;
 
-FireGlobProjectile::FireGlobProjectile(const Point2D& spawnLoc, float size) : 
+FireGlobProjectile::FireGlobProjectile(const Point2D& spawnLoc, float size, const Vector2D& gravityDir) : 
 Projectile(spawnLoc, size, size), totalTickTime(0.0) {
 
-	this->SetVelocity(Vector2D(0, -1), FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY);
+	this->SetVelocity(gravityDir, FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY);
 	this->xMovementVariation = 0.8f * size;
 
 	if (size >= LevelPiece::HALF_PIECE_WIDTH) {
@@ -36,25 +37,26 @@ FireGlobProjectile::~FireGlobProjectile() {
 }
 
 void FireGlobProjectile::Tick(double seconds, const GameModel& model) {
-    this->AugmentDirectionOnPaddleMagnet(seconds, model, 65.0f);
+    if (!this->AugmentDirectionOnPaddleMagnet(seconds, model, 65.0f)) {
 
-	// The glob just keeps falling down... but it does so in a semi-ossilating firey kinda way
+	    // The glob just keeps falling down with gravity...
+        this->velocityDir[1] = model.GetGravityDir()[1];
+        this->velocityDir.Normalize();
+    }
+
 	Vector2D dDist = seconds * this->velocityMag * this->velocityDir;
 	this->SetPosition(this->GetPosition() + dDist);
-
-	//float randomXDir = sin(this->totalTickTime + Randomizer::GetInstance()->RandomNumZeroToOne()) * this->xMovementVariation;
-	//float randomYDir = FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY + FireGlobProjectile::FIRE_GLOB_MAX_ADD_VELOCITY * Randomizer::GetInstance()->RandomNumZeroToOne();
-	//Vector2D newVelocity(randomXDir, randomYDir);
-	//float velocityMagnitude = newVelocity.Magnitude();
-	//assert(velocityMagnitude > EPSILON);
-	//this->SetVelocity(newVelocity / velocityMagnitude, velocityMagnitude);
-
 	this->totalTickTime += seconds;
+
+    // Keep clearing the last thing this collided with once it's fallen from the block that spawned it
+    if (this->totalTickTime > 1.0) {
+        this->SetLastThingCollidedWith(NULL);
+    }
 }
 
 BoundingLines FireGlobProjectile::BuildBoundingLines() const {
-	const Vector2D& UP_DIR			= this->GetVelocityDirection();
-	const Vector2D& RIGHT_DIR	= this->GetRightVectorDirection();
+	const Vector2D& UP_DIR	  = this->GetVelocityDirection();
+	const Vector2D& RIGHT_DIR = this->GetRightVectorDirection();
 
 	Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + 0.85f*this->GetHalfWidth()*RIGHT_DIR;
 	Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;

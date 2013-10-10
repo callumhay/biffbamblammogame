@@ -1,23 +1,23 @@
 Freezing Hot
 13 27
-E E E E S S D(FireBall,IceBall) S S E E E E 
-E E E S S E R E S S E E E 
-E S S S E E R E E S S S E 
-S S E E E R R R E E E S S 
-S E E I E R R R E I E E S 
-S Q(f) E E R R O R R E E Q(f) S 
+E E E E S S D(FireBall,FireBall,FireBall,IceBall,IceBall,IceBall) S S E E E E 
+E E E S S K(UberBall,UberBall,UberBall) E K(UberBall,UberBall,UberBall) S S E E E 
+E S S S E E E E E S S S E 
+S S E K(IceBall,IceBall,IceBall) E E R E E K(IceBall,IceBall,IceBall) E S S 
+S E E I E E R E E I E E S 
+S Q(f) E E E R R R E E E Q(f) S 
+S E E E E R O R E E E E S 
+S Q(f) E E R O O O R E E Q(f) S 
 S E E E R O Y O R E E E S 
-S Q(f) E T(R,lr) R O Y O R T(R,ll) E Q(f) S 
-S E E R O O Y O O R E E S 
-S Q(f) E R O Y Y Y O R E Q(f) S 
+S Q(f) E R R O Y O R R E Q(f) S 
 S E E R O Y Y Y O R E E S 
 S Q(i) E R O Y Y Y O R E Q(i) S 
 S E E R O Y Y Y O R E E S 
-S K(FireBall) E T(R,ur) R Y Y Y R T(R,ul) E K(FireBall) S 
+S K(FireBall) E R O Y Y Y O R E K(FireBall) S 
 S G E E R O Y O R E E G S 
-S G G E R O O O R E G G S 
-S E G E E R R R E E G E S 
-S E G G E E R E E G G E S 
+S E G E R O O O R E G E S 
+S E E E E R R R E E E E S 
+S E E E E E R E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -29,10 +29,10 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-6000
-12000
-18000
-25000
+5000
+10000
+17000
+24000
 29000
 
 PaddleGrow 0

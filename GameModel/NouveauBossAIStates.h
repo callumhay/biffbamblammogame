@@ -19,6 +19,8 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
 
+#include "../GameSound/SoundCommon.h"
+
 #include "BossAIState.h"
 #include "GameLevel.h"
 #include "PrismBlock.h"
@@ -80,6 +82,8 @@ protected:
     double countdownToNextLaserBeamFiring;
     double countdownWaitForLastBeamToFinish;
 
+    std::list<SoundID> laserBeamTargetingSoundIDs;
+
     virtual void SetState(NouveauBossAI::AIState newState) = 0;
 
     // MoveToTargetStopAndShootAIState template methods
@@ -98,7 +102,6 @@ protected:
     virtual double GenerateTimeBetweenLaserBeamLastPrepAndFire() const { return 1.5; }
     virtual double GetTimeBetweenLaserBeamFirings() const { return 0.25f; } // This must be constant
     
-
     virtual void GoToNextRandomAttackState() = 0;
 
     void ExecuteLaserArcSpray(const Point2D& originPos, GameModel* gameModel);
@@ -115,6 +118,8 @@ protected:
         return Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
             Vector2D::Dot(shootDir, Vector2D(0,-1)))))) <= PrismBlock::REFLECTION_REFRACTION_SPLIT_ANGLE;
     }
+
+    void BossWasHurt();
 
     void OnSetStateMoveToTargetStopAndShoot();
     void OnSetRapidFireSweep();

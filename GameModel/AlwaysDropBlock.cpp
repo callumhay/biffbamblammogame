@@ -69,7 +69,7 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
 
     bool shouldGenBounds = false;
 
-	// Left boundry of the piece
+	// Left boundary of the piece
     shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable &&
         leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen));
@@ -83,8 +83,8 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
             leftNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Bottom boundry of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+	// Bottom boundary of the piece
+    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
@@ -93,11 +93,11 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
 		Vector2D n2(0, -1);
 		boundingLines.push_back(l2);
 		boundingNorms.push_back(n2);
-        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             bottomNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Right boundry of the piece
+	// Right boundary of the piece
     shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
          rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen));
@@ -111,8 +111,8 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
             rightNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
+	// Top boundary of the piece
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
          topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
@@ -121,8 +121,8 @@ void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPi
 		Vector2D n4(0, 1);
 		boundingLines.push_back(l4);
 		boundingNorms.push_back(n4);
-        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay);
+        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
+            topNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),

@@ -2,7 +2,7 @@
  * CollateralBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -252,13 +252,20 @@ void CollateralBlock::Tick(double dT, const GameModel& model, CollateralBlockPro
 			// collateral damage then we move into that state
 			this->currTimeElapsedSinceHit += dT;
 			if (this->currTimeElapsedSinceHit >= this->timeUntilCollateralDmg) {
-				this->currState = CollateralBlock::CollateralDamageState;
+				
+                collateralProjectile.SetVelocity(collateralProjectile.GetVelocityDirection(), CollateralBlock::COLLATERAL_FALL_SPEED);
+                this->currState = CollateralBlock::CollateralDamageState;
+
+                // EVENT: The Collateral Block just changed its state from the warning state to the falling/damage state
+                GameEventManager::Instance()->ActionCollateralBlockChangedState(*this, collateralProjectile, 
+                    CollateralBlock::WarningState, this->currState);
+
 			}
 			break;
 
 		case CollateralBlock::CollateralDamageState: {
 		    // The collateral block moves down the level, rotating along the way 
-		    // (for movement see the collateralblockprojectile)...
+		    // (for movement see the CollateralBlockProjectile class)...
             collateralProjectile.AugmentDirectionOnPaddleMagnet(dT, model, 35.0f); 	
 
 		    Vector2D moveAmt = static_cast<float>(dT) * collateralProjectile.GetVelocityMagnitude() * 
@@ -318,7 +325,12 @@ LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 	 * itself by going into a collateral damage mode where it will barrel down the level destroying
 	 * everything in its path as a bad-ass projectile. This starts the whole process.
 	 */
-	gameModel->AddProjectile(new CollateralBlockProjectile(this));
+    CollateralBlockProjectile* projectile = new CollateralBlockProjectile(this);
+	gameModel->AddProjectile(projectile);
+
+    // EVENT: The Collateral Block just changed its state from the initial state to the warning state
+    GameEventManager::Instance()->ActionCollateralBlockChangedState(*this, *projectile, 
+        CollateralBlock::InitialState, this->currState);
 
 	return emptyPiece;
 }

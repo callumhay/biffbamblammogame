@@ -81,14 +81,15 @@ public:
 
 private:
     static const int INFINITE_LIFE_POINTS = -1;
-
 	static const int POINTS_ON_BLOCK_DESTROYED  = 500;	// Points obtained when you destory a regen block
+    static const float REGEN_LIFE_POINTS_PER_SECOND;    // Number of points this block regenerates per-second
 
-    static const float REGEN_LIFE_POINTS_PER_SECOND; // Number of points this block regenerates per-second
+    static const int MAX_FIREGLOB_COUNTDOWNS_WITHOUT_DROP = 3;
 
     float currLifePoints; // Amount of life that this block currently has
 
-	double fireGlobDropCountdown;	// Used to keep track of when to drop the next fire glob (when the block is on fire)
+	double fireGlobDropCountdown;	       // Used to keep track of when to drop the next fire glob (when the block is on fire)
+    int numFireGlobCountdownsWithoutDrop;  // Tracks the number of times that the fire glob countdown has happened
 
     LevelPiece* HurtPiece(float damage, GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 

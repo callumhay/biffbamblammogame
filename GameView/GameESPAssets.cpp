@@ -2862,36 +2862,6 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 	Vector3D dirOfWallHit3D = Vector3D(dirOfWallHit2D[0], dirOfWallHit2D[1], 0.0f);
 	Point3D hitPos3D = Point3D(hitLoc[0], hitLoc[1], 0.0f);
 
-	// Onomatopeia for the hit...
-	ESPPointEmitter* paddleWallOnoEffect = new ESPPointEmitter();
-	paddleWallOnoEffect->SetSpawnDelta(ESPInterval(-1));
-	paddleWallOnoEffect->SetInitialSpd(ESPInterval(1.0f, 1.75f));
-	paddleWallOnoEffect->SetParticleLife(ESPInterval(1.5f, 2.0f));
-
-	if (dirOfWallHit2D[0] < 0) {
-		paddleWallOnoEffect->SetParticleRotation(ESPInterval(-45.0f, -15.0f));
-	}
-	else {
-		paddleWallOnoEffect->SetParticleRotation(ESPInterval(15.0f, 45.0f));
-	}
-
-	paddleWallOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	paddleWallOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
-	paddleWallOnoEffect->SetEmitPosition(hitPos3D);
-	paddleWallOnoEffect->SetEmitDirection(dirOfWallHit3D);
-	paddleWallOnoEffect->SetEmitAngleInDegrees(40);
-	paddleWallOnoEffect->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(1));
-
-	paddleWallOnoEffect->AddEffector(&this->particleFader);
-	paddleWallOnoEffect->AddEffector(&this->particleSmallGrowth);
-	
-	// Add the single particle to the emitter...
-	DropShadow dpTemp;
-	dpTemp.colour = Colour(0,0,0);
-	dpTemp.amountPercentage = 0.10f;
-	ESPOnomataParticle* paddleWallOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small));
-	paddleWallOnoParticle->SetDropShadow(dpTemp);
-
 	// Set the severity of the effect...
 	Onomatoplex::Extremeness severity;
 	ESPInterval size;
@@ -2928,35 +2898,8 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 			size.minValue = 0.75f;
 			break;
 	}
-	paddleWallOnoEffect->SetParticleSize(size);
-	paddleWallOnoParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, severity);
-	paddleWallOnoEffect->AddParticle(paddleWallOnoParticle);
-
-	// Smashy star texture particle
-	ESPPointEmitter* paddleWallStarEmitter = new ESPPointEmitter();
-	paddleWallStarEmitter->SetSpawnDelta(ESPInterval(-1));
-	paddleWallStarEmitter->SetInitialSpd(ESPInterval(1.5f, 3.0f));
-	paddleWallStarEmitter->SetParticleLife(ESPInterval(1.2f, 2.0f));
-	paddleWallStarEmitter->SetParticleSize(size);
-	paddleWallStarEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
-	paddleWallStarEmitter->SetEmitAngleInDegrees(35);
-	paddleWallStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.25f));
-	paddleWallStarEmitter->SetParticleAlignment(ESP::ViewPlaneAligned);
-	paddleWallStarEmitter->SetEmitDirection(dirOfWallHit3D);
-	paddleWallStarEmitter->SetEmitPosition(hitPos3D);
-
-	if (dirOfWallHit2D[0] < 0) {
-		paddleWallStarEmitter->AddEffector(&this->explosionRayRotatorCCW);
-	}
-	else {
-		paddleWallStarEmitter->AddEffector(&this->explosionRayRotatorCW);
-	}
-
-	paddleWallStarEmitter->AddEffector(&this->particleFader);
-	paddleWallStarEmitter->SetParticles(3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3), this->starTex);
-		
-	this->activeGeneralEmitters.push_back(paddleWallStarEmitter);
-	this->activeGeneralEmitters.push_back(paddleWallOnoEffect);
+	
+    this->AddStarSmashEffect(hitPos3D, dirOfWallHit3D, size, ESPInterval(1.5f, 2.0f), severity);
 }
 
 void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile) {
@@ -4163,6 +4106,69 @@ void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectIn
 
     this->activeGeneralEmitters.push_back(boltParticles);
     this->activeGeneralEmitters.push_back(sparkParticles1);
+}
+
+void GameESPAssets::AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, const ESPInterval& size, 
+                                       const ESPInterval& lifeInSecs, Onomatoplex::Extremeness extremeness) {
+
+    ESPPointEmitter* wallOnoEffect = new ESPPointEmitter();
+    wallOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    wallOnoEffect->SetInitialSpd(ESPInterval(1.0f, 1.75f));
+    wallOnoEffect->SetParticleLife(lifeInSecs);
+
+    if (dir[0] < 0) {
+        wallOnoEffect->SetParticleRotation(ESPInterval(-45.0f, -15.0f));
+    }
+    else {
+        wallOnoEffect->SetParticleRotation(ESPInterval(15.0f, 45.0f));
+    }
+
+    wallOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    wallOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    wallOnoEffect->SetEmitPosition(pos);
+    wallOnoEffect->SetEmitDirection(dir);
+    wallOnoEffect->SetEmitAngleInDegrees(40);
+    wallOnoEffect->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(1));
+    wallOnoEffect->AddEffector(&this->particleFader);
+    wallOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+    // Add the single particle to the emitter...
+    DropShadow dpTemp;
+    dpTemp.colour = Colour(0,0,0);
+    dpTemp.amountPercentage = 0.10f;
+    ESPOnomataParticle* wallOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small));
+    wallOnoParticle->SetDropShadow(dpTemp);
+    wallOnoEffect->SetParticleSize(size);
+    wallOnoParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, extremeness);
+    wallOnoEffect->AddParticle(wallOnoParticle);
+
+    // Smashy star texture particle
+    ESPPointEmitter* wallStarEmitter = new ESPPointEmitter();
+    wallStarEmitter->SetSpawnDelta(ESPInterval(-1));
+    wallStarEmitter->SetInitialSpd(ESPInterval(1.5f, 3.0f));
+    wallStarEmitter->SetParticleLife(lifeInSecs);
+    wallStarEmitter->SetParticleSize(size);
+    wallStarEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
+    wallStarEmitter->SetEmitAngleInDegrees(35);
+    wallStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.25f));
+    wallStarEmitter->SetParticleAlignment(ESP::ViewPlaneAligned);
+    wallStarEmitter->SetEmitDirection(dir);
+    wallStarEmitter->SetEmitPosition(pos);
+
+    if (dir[0] < 0) {
+
+        wallStarEmitter->AddEffector(&this->explosionRayRotatorCCW);
+    }
+    else {
+        wallStarEmitter->AddEffector(&this->explosionRayRotatorCW);
+    }
+
+    wallStarEmitter->AddEffector(&this->particleFader);
+    wallStarEmitter->SetParticles(3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3), this->starTex);
+
+    this->activeGeneralEmitters.push_back(wallStarEmitter);
+    this->activeGeneralEmitters.push_back(wallOnoEffect);
 }
 
 /**

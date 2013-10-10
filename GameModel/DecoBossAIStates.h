@@ -16,6 +16,8 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
 
+#include "../GameSound/SoundCommon.h"
+
 #include "BossAIState.h"
 #include "GameItem.h"
 
@@ -165,6 +167,8 @@ protected:
     float currLevelRotationAmtInDegs;
     int rotationDir;
     double rotateShakeCountdown;
+
+    SoundID rotateLevelSoundID;
 
     void InitStationaryAttackState();
     void InitMovingAttackState();

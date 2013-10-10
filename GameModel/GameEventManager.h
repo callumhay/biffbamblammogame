@@ -17,6 +17,7 @@
 #include "LaserTurretBlock.h"
 #include "RocketTurretBlock.h"
 #include "MineTurretBlock.h"
+#include "CollateralBlock.h"
 
 class GameEvents;
 class GameBall;
@@ -45,6 +46,7 @@ class Boss;
 class GeneralEffectEventInfo;
 class BossEffectEventInfo;
 class PaddleRemoteControlRocketProjectile;
+class CollateralBlockProjectile;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -105,6 +107,8 @@ public:
 	void ActionLevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
 	void ActionLevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);
 	void ActionLevelPieceAllStatusRemoved(const LevelPiece& piece);
+    void ActionCollateralBlockChangedState(const CollateralBlock& collateralBlock, const CollateralBlockProjectile& projectile,
+        CollateralBlock::CollateralBlockState oldState, CollateralBlock::CollateralBlockState newState);
 	void ActionItemSpawned(const GameItem& item);
 	void ActionItemRemoved(const GameItem& item);
 	void ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle);

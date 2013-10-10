@@ -158,7 +158,7 @@ private:
 };
 
 inline void GameDisplay::Render(double dT) {
-    // Dialate time if necessary...
+    // Dilate time if necessary...
     if (this->currState->GetType() == DisplayState::InGame || 
         this->currState->GetType() == DisplayState::InGameBossLevel ||
         this->currState->GetType() == DisplayState::InTutorialGame) {

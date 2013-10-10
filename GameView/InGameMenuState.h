@@ -55,6 +55,14 @@ private:
 
     static const char* VERIFY_MENU_YES;
     static const char* VERIFY_MENU_NO;
+    
+    static const int LEVEL_NAME_LABEL_X_BORDER;
+    static const int MENU_LABEL_GAP;
+    static const int NAME_HS_LABEL_GAP;
+    static const int LABEL_STAR_GAP;
+    static const int STAR_SIZE;
+    static const int STAR_HORIZONTAL_GAP;
+    static const int BOSS_ICON_SIZE;
 
 	enum NextAction { Nothing, ResumeGame, RestartLevel, ReturnToMainMenu, ExitToDesktop };
 	NextAction nextAction;
@@ -65,6 +73,13 @@ private:
 
 	// The configuration options for the game
 	ConfigOptions cfgOptions;
+
+    // Text labels for the level name, stars, and high score
+    TextLabel2DFixedWidth levelNameLabel;
+    TextLabel2D highscoreLabel;
+    Texture* starTexture;
+    Texture* bossTexture;
+    AnimationMultiLerp<Colour> activeStarColourAnim;
 
 	// Top Level Menu variables
 	GameMenu* topMenu; // Main (top-most/parent) menu (features options "Return to Main Menu", etc.)
@@ -78,8 +93,10 @@ private:
 
     SelectionListMenuItemWithVerify* difficultyMenuItem;
 
-	void InitTopMenu();
+    void DrawStars(double dT, float currYPos);
+    void DrawBossIcon(float currYPos);
 
+	void InitTopMenu();
 	void ResumeTheGame();
     
 	// Top Level Menu Handler class

@@ -2,7 +2,7 @@
  * FireGlobProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,7 +16,7 @@
 
 class FireGlobProjectile : public Projectile {
 public:
-	FireGlobProjectile(const Point2D& spawnLoc, float size);
+	FireGlobProjectile(const Point2D& spawnLoc, float size, const Vector2D& gravityDir);
 	~FireGlobProjectile();
 
     bool IsRocket() const { return false; }

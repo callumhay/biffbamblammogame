@@ -13,7 +13,7 @@
 #include "Boss.h"
 #include "GameModel.h"
 
-const float BossAIState::DEFAULT_TARGET_ERROR = 0.5f * LevelPiece::PIECE_HEIGHT;
+const float BossAIState::DEFAULT_TARGET_ERROR = 0.1f * LevelPiece::PIECE_HEIGHT;
 
 BossAIState::BossAIState() : currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f), 
 startPosition(0,0), targetPosition(0,0), targetError(DEFAULT_TARGET_ERROR) {
