@@ -55,7 +55,8 @@ GameState* GameState::Build(const GameState::GameStateType& stateType, GameModel
 bool GameState::IsGameInPlayState(const GameModel& gameModel) {
     return gameModel.GetCurrentStateType() == GameState::BallInPlayStateType ||
         gameModel.GetCurrentStateType() == GameState::BallOnPaddleStateType ||
-        gameModel.GetCurrentStateType() == GameState::BallWormholeStateType;
+        gameModel.GetCurrentStateType() == GameState::BallWormholeStateType &&
+        (gameModel.GetPauseState() & GameModel::PauseGame) != 0x0;
 }
 
 void GameState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {

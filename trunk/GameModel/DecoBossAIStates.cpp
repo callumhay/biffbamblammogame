@@ -18,8 +18,11 @@
 #include "ShockwaveEffectInfo.h"
 #include "SparkBurstEffectInfo.h"
 #include "ShortCircuitEffectInfo.h"
-#include "LevelShakeEventInfo.h"
+#include "LevelShakeEffectInfo.h"
 #include "ExpandingHaloEffectInfo.h"
+#include "StarSmashEffectInfo.h"
+
+#include "../GameSound/GameSound.h"
 
 using namespace decobossai;
 
@@ -42,7 +45,7 @@ const double DecoBossAIState::TOTAL_ELECTRIFIED_AND_RETALIATION_TIME_IN_SECS =
 DecoBossAIState::DecoBossAIState(DecoBoss* boss) : BossAIState(), boss(boss), shootCountdown(0.0),
 numShotsUntilNextState(0), dropItemCountdown(0.0), nextDropItemType(GameItem::PaddleShrinkItem),
 sideToSideNumDropCountdown(0), currLeftArmRotInDegs(0.0f), currRightArmRotInDegs(0.0f),
-currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0), rotationDir(1) {
+currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0), rotationDir(1), rotateLevelSoundID(INVALID_SOUND_ID) {
 
     assert(boss != NULL);
     
@@ -487,30 +490,48 @@ bool DecoBossAIState::UpdateArmAnimation(double dT, AnimationMultiLerp<float>& a
 }
 
 bool DecoBossAIState::RotateArmsToDefaultPosition(double dT) {
+    GameModel* gameModel = this->boss->GetGameModel();
+    GameSound* sound = gameModel->GetSound();
+
     // Rotate arms back down so that they are facing the paddle again
-    bool leftArmFullyRotated  = false;
-    bool rightArmFullyRotated = false;
+    bool leftArmFullyRotated  = true;
+    bool rightArmFullyRotated = true;
 
-    if (this->currLeftArmRotInDegs < 0.0f) {
-        this->currLeftArmRotInDegs += dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
-    }
-    else {
-        this->currLeftArmRotInDegs = 0.0f;
-        leftArmFullyRotated = true;
-    }
-    if (this->currRightArmRotInDegs > 0.0f) {
-        this->currRightArmRotInDegs -= dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
-    }
-    else {
-        this->currRightArmRotInDegs = 0.0f;
-        rightArmFullyRotated = true;
-    }
-
-    // Update the arms with the rotations
     BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
     BossCompositeBodyPart* rightArm = this->boss->GetRightArmEditable();
-    leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
-    rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
+
+    bool isLeftArmAlive  = !leftArm->GetIsDestroyed();
+    bool isRightArmAlive = !rightArm->GetIsDestroyed();
+
+    if (isLeftArmAlive) {
+        if (this->currLeftArmRotInDegs < 0.0f) {
+            this->currLeftArmRotInDegs += dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+            leftArmFullyRotated = false;
+
+            sound->AttachAndPlaySound(leftArm, GameSound::DecoBossArmRotateLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
+        }
+        else {
+            this->currLeftArmRotInDegs = 0.0f;
+            sound->DetachAndStopSound(leftArm, GameSound::DecoBossArmRotateLoop);
+        }
+        leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
+    }
+
+    if (isRightArmAlive) {
+        if (this->currRightArmRotInDegs > 0.0f) {
+            this->currRightArmRotInDegs -= dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
+            rightArmFullyRotated = false;
+
+            sound->AttachAndPlaySound(rightArm, GameSound::DecoBossArmRotateLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
+        }
+        else {
+            this->currRightArmRotInDegs = 0.0f;
+            sound->DetachAndStopSound(rightArm, GameSound::DecoBossArmRotateLoop);
+        }
+        rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
+    }
 
     return (leftArmFullyRotated && rightArmFullyRotated);
 }
@@ -586,12 +607,30 @@ void DecoBossAIState::InitFiringArmsAtPaddleState() {
     this->armSeg2AttackExtendAnim.ResetToStart();
     this->armSeg3AttackExtendAnim.ResetToStart();
     this->armSeg4AttackExtendAnim.ResetToStart();
+
+    // Play sound(s) for arm(s) extending
+    GameSound* sound = this->boss->GetGameModel()->GetSound();
+    if (!this->boss->GetLeftArm()->GetIsDestroyed()) {
+        sound->PlaySoundAtPosition(GameSound::DecoBossArmExtendEvent, false, this->boss->GetLeftArm()->GetTranslationPt3D(), true, true, true);
+    }
+    if (!this->boss->GetRightArm()->GetIsDestroyed()) {
+        sound->PlaySoundAtPosition(GameSound::DecoBossArmExtendEvent, false, this->boss->GetRightArm()->GetTranslationPt3D(), true, true, true);
+    }
 }
 void DecoBossAIState::InitFinishedFiringArmsAtPaddleState() {
     this->armSeg1RetractAnim.ResetToStart();
     this->armSeg2RetractAnim.ResetToStart();
     this->armSeg3RetractAnim.ResetToStart();
     this->armSeg4RetractAnim.ResetToStart();
+
+    // Play sound(s) for arm(s) retracting
+    GameSound* sound = this->boss->GetGameModel()->GetSound();
+    if (!this->boss->GetLeftArm()->GetIsDestroyed()) {
+        sound->PlaySoundAtPosition(GameSound::DecoBossArmRetractEvent, false, this->boss->GetLeftArm()->GetTranslationPt3D(), true, true, true);
+    }
+    if (!this->boss->GetRightArm()->GetIsDestroyed()) {
+        sound->PlaySoundAtPosition(GameSound::DecoBossArmRetractEvent, false, this->boss->GetRightArm()->GetTranslationPt3D(), true, true, true);
+    }
 }
 void DecoBossAIState::InitFiringArmsAtLevelState() {
     this->armSeg1RotateExtendAnim.ResetToStart();
@@ -617,18 +656,41 @@ void DecoBossAIState::InitRotatingLevelState() {
         // ... otherwise just choose a random rotation direction
         rotationDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
     }
+
+    // Play the level rotation sound...
+    GameSound* sound = this->boss->GetGameModel()->GetSound();
+    if (this->rotateLevelSoundID == INVALID_SOUND_ID) {
+        this->rotateLevelSoundID = sound->PlaySound(GameSound::DecoBossLevelRotatingLoop, true, true);
+    }
+
 }
 void DecoBossAIState::InitFinishRotatingLevelState() {
     this->armSeg1RetractAnim.ResetToStart();
     this->armSeg2RetractAnim.ResetToStart();
     this->armSeg3RetractAnim.ResetToStart();
     this->armSeg4RetractAnim.ResetToStart();
+
+    // Play sound(s) for arm(s) retracting
+    GameSound* sound = this->boss->GetGameModel()->GetSound();
+    if (!this->boss->GetLeftArm()->GetIsDestroyed()) {
+        sound->PlaySoundAtPosition(GameSound::DecoBossArmRetractEvent, false, this->boss->GetLeftArm()->GetTranslationPt3D(), true, true, true);
+    }
+    if (!this->boss->GetRightArm()->GetIsDestroyed()) {
+        sound->PlaySoundAtPosition(GameSound::DecoBossArmRetractEvent, false, this->boss->GetRightArm()->GetTranslationPt3D(), true, true, true);
+    }
 }
 
 void DecoBossAIState::InitElectrifiedState() {
     this->itemLoadingAnim.ResetToStart();
     this->desiredVel = Vector2D(0,0);
     this->currVel    = Vector2D(0,0);
+
+    // Stop all arm sounds and other sounds that might be playing/looped
+    static const double SOUND_FADEOUT_TIME = 0.25;
+    GameSound* sound = this->boss->GetGameModel()->GetSound();
+    sound->DetachAndStopAllSounds(this->boss->GetLeftArm(),  SOUND_FADEOUT_TIME);
+    sound->DetachAndStopAllSounds(this->boss->GetRightArm(), SOUND_FADEOUT_TIME);
+    sound->StopSound(this->rotateLevelSoundID, SOUND_FADEOUT_TIME);
 
     // The boss is turned on its side slightly by the sudden jolt
     float rotationAmt = Randomizer::GetInstance()->RandomNegativeOrPositive() * (15.0f + Randomizer::GetInstance()->RandomNumZeroToOne() * 15.0f);
@@ -825,7 +887,8 @@ void DecoBossAIState::ExecuteMoveToCenterForLevelRotState(double dT, GameModel* 
 }
 
 void DecoBossAIState::ExecuteFiringArmsAtLevelState(double dT, GameModel* gameModel) {
-    UNUSED_PARAMETER(gameModel);
+
+    GameSound* sound = gameModel->GetSound();
 
     // Shake arms...
     BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
@@ -839,33 +902,46 @@ void DecoBossAIState::ExecuteFiringArmsAtLevelState(double dT, GameModel* gameMo
     bool isRightArmAlive = !rightArm->GetIsDestroyed();
 
     if (isLeftArmAlive) {
-        float shakeAmt = this->leftArmShakeAnim.GetInterpolantValue();
-        this->leftArmShakeAnim.Tick(dT);
-        leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
 
         if (this->currLeftArmRotInDegs > DecoBoss::LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS) {
             this->currLeftArmRotInDegs -= dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
             armsFullyRotated &= false;
+
+            sound->AttachAndPlaySound(leftArm, GameSound::DecoBossArmRotateLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
+
+            float shakeAmt = this->leftArmShakeAnim.GetInterpolantValue();
+            this->leftArmShakeAnim.Tick(dT);
+            leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
         }
         else {
             // Left arm is now fully rotated
             this->currLeftArmRotInDegs = DecoBoss::LEFT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
+            leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+            sound->DetachAndStopSound(leftArm, GameSound::DecoBossArmRotateLoop);
         }
 
         leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
+
     }
     if (isRightArmAlive) {
-        float shakeAmt = this->rightArmShakeAnim.GetInterpolantValue();
-        this->rightArmShakeAnim.Tick(dT);
-        rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
 
         if (this->currRightArmRotInDegs < DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS) {
             this->currRightArmRotInDegs += dT * DEFAULT_ARM_ROTATION_SPEED_DEGS_PER_SEC;
             armsFullyRotated &= false;
+
+            sound->AttachAndPlaySound(rightArm, GameSound::DecoBossArmRotateLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
+
+            float shakeAmt = this->rightArmShakeAnim.GetInterpolantValue();
+            this->rightArmShakeAnim.Tick(dT);
+            rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
         }
         else {
             // Right arm is now fully rotated
             this->currRightArmRotInDegs = DecoBoss::RIGHT_ARM_HORIZ_ORIENT_ROT_ANGLE_IN_DEGS;
+            rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+            sound->DetachAndStopSound(rightArm, GameSound::DecoBossArmRotateLoop);
         }
 
         rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
@@ -875,14 +951,45 @@ void DecoBossAIState::ExecuteFiringArmsAtLevelState(double dT, GameModel* gameMo
     // we can fire both arms at the sides
     if (armsFullyRotated) {
 
+        sound->DetachAndStopSound(rightArm, GameSound::DecoBossArmRotateLoop);
+        sound->DetachAndStopSound(leftArm, GameSound::DecoBossArmRotateLoop);
+
+        // Play sound for each segment of the arm extending
+        if ((this->armSeg1RotateExtendAnim.GetInterpolantValue() == 0.0f) ||
+            (this->armSeg1RotateExtendAnim.GetInterpolantValue() == this->armSeg1RotateExtendAnim.GetFinalInterpolationValue() && this->armSeg2RotateExtendAnim.GetInterpolantValue() == 0.0f) ||
+            (this->armSeg2RotateExtendAnim.GetInterpolantValue() == this->armSeg2RotateExtendAnim.GetFinalInterpolationValue() && this->armSeg3RotateExtendAnim.GetInterpolantValue() == 0.0f) ||
+            (this->armSeg3RotateExtendAnim.GetInterpolantValue() == this->armSeg3RotateExtendAnim.GetFinalInterpolationValue() && this->armSeg4RotateExtendAnim.GetInterpolantValue() == 0.0f)) {
+            
+            if (isLeftArmAlive) {
+                sound->PlaySoundAtPosition(GameSound::DecoBossArmExtendEvent, false, leftArm->GetPosition3D(), true, true, true);
+            }
+            if (isRightArmAlive) {
+                sound->PlaySoundAtPosition(GameSound::DecoBossArmExtendEvent, false, rightArm->GetPosition3D(), true, true, true);
+            }
+        }
+
         bool allDoneArmAnimation = this->UpdateArmAnimation(dT, this->armSeg1RotateExtendAnim, 
             this->armSeg2RotateExtendAnim, this->armSeg3RotateExtendAnim, this->armSeg4RotateExtendAnim);
 
         if (allDoneArmAnimation) {
             // Shake the level (the arms have now reached the sides and are digging into them)
-            GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEventInfo(1.0, Vector3D(0.7f, 0.1f, 0.0f), 100));
+            GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEffectInfo(1.0, Vector3D(0.7f, 0.1f, 0.0f), 100));
 
-            // TODO: Some effect, smoke or stars at the collision point between the boss hands and the wall
+            // Play a sound for the level getting hit by the arm(s)
+            if (isLeftArmAlive) {
+                Point3D collisionPt = this->boss->GetLeftArmHand()->GetPosition3D();
+                collisionPt[0] -= DecoBoss::ARM_ORIGIN_TO_HAND_END;
+                sound->PlaySoundAtPosition(GameSound::DecoBossArmLevelCollisionEvent, false, collisionPt, true, true, true);
+                GameEventManager::Instance()->ActionGeneralEffect(StarSmashEffectInfo(collisionPt.ToPoint2D(), Vector2D(-1,0), DecoBoss::HAND_WIDTH / 1.75f, 
+                    2.0, Onomatoplex::SUPER_AWESOME));
+            }
+            if (isRightArmAlive) {
+                Point3D collisionPt = this->boss->GetRightArmHand()->GetPosition3D();
+                collisionPt[0] += DecoBoss::ARM_ORIGIN_TO_HAND_END;
+                sound->PlaySoundAtPosition(GameSound::DecoBossArmLevelCollisionEvent, false, collisionPt, true, true, true);
+                GameEventManager::Instance()->ActionGeneralEffect(StarSmashEffectInfo(collisionPt.ToPoint2D(), Vector2D(1,0), DecoBoss::HAND_WIDTH / 1.75f, 
+                    2.0, Onomatoplex::SUPER_AWESOME));
+            }
 
             // Start rotating!
             this->SetState(RotatingLevelAIState);
@@ -891,6 +998,8 @@ void DecoBossAIState::ExecuteFiringArmsAtLevelState(double dT, GameModel* gameMo
 }
 
 void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel* gameModel) {
+    GameSound* sound = gameModel->GetSound();
+
     BossCompositeBodyPart* leftArm = this->boss->GetLeftArmEditable();
     BossCompositeBodyPart* rightArm = this->boss->GetRightArmEditable();
 
@@ -942,6 +1051,9 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
                         this->currLeftArmRotInDegs -= dA;
                     }
 
+                    sound->AttachAndPlaySound(leftArm, GameSound::DecoBossArmRotateLoop, true, 
+                        gameModel->GetCurrentLevelTranslation());
+
                     leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
                 }
             }
@@ -972,6 +1084,10 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
                     else {
                         this->currRightArmRotInDegs -= dA;
                     }
+
+                    sound->AttachAndPlaySound(rightArm, GameSound::DecoBossArmRotateLoop, true, 
+                        gameModel->GetCurrentLevelTranslation());
+
                     rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
                 }
             }
@@ -993,10 +1109,15 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
         shakeAmt = this->leftArmShakeAnim.GetInterpolantValue();
         this->leftArmShakeAnim.Tick(dT);
         leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+
+        Vector3D levelTranslation = gameModel->GetCurrentLevelTranslation();
+        sound->AttachAndPlaySound(leftArm, GameSound::DecoBossArmRotateLoop, true, levelTranslation);
+        sound->AttachAndPlaySound(rightArm, GameSound::DecoBossArmRotateLoop, true, levelTranslation);
     }
 
     this->shootCountdown -= dT;
     if (this->MoveToTargetPosition(this->GetMaxYSpeed())) {
+
         // Choose a new attack position near the paddle
         this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(),
             this->GeneratePaddleArmAttackPosition(gameModel));
@@ -1014,7 +1135,11 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
 }
 
 void DecoBossAIState::ExecuteFiringArmsAtPaddleState(double dT, GameModel* gameModel) {
-    UNUSED_PARAMETER(gameModel);
+
+    // Arm(s) should no longer sound like they're rotating
+    GameSound* sound = gameModel->GetSound();
+    sound->DetachAndStopSound(this->boss->GetLeftArm(),  GameSound::DecoBossArmRotateLoop, 0.5);
+    sound->DetachAndStopSound(this->boss->GetRightArm(), GameSound::DecoBossArmRotateLoop, 0.5);
 
     // Fire the arms downwards
     bool allDoneArmAnimation = this->UpdateArmAnimation(dT, this->armSeg1AttackExtendAnim, 
@@ -1049,6 +1174,8 @@ void DecoBossAIState::ExecuteFinishedFiringArmsAtPaddleState(double dT, GameMode
 void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
     
+    GameSound* sound = gameModel->GetSound();
+
     // If the ball is dying then we stop rotating for a brief period of time
     if (gameModel->GetCurrentStateType() == GameState::BallDeathStateType) {
         return;
@@ -1073,8 +1200,10 @@ void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel)
         else {
             // Shake the level to indicate the boss is done with rotating, also the sudden halt is 
             // emphasized by the shake
-            GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEventInfo(1.0, Vector3D(0.7f, 0.2f, 0.0f), 100));
+            GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEffectInfo(1.0, Vector3D(0.7f, 0.2f, 0.0f), 100));
 
+            // Stop the rotating sound
+            sound->StopSound(this->rotateLevelSoundID, 0.5);
             this->SetState(FinishRotatingLevelAIState);
             return;
         }
@@ -1100,7 +1229,7 @@ void DecoBossAIState::ExecuteRotatingLevelState(double dT, GameModel* gameModel)
         float xDir = Randomizer::GetInstance()->RandomNegativeOrPositive() * 0.7f;
         float yDir = Randomizer::GetInstance()->RandomNegativeOrPositive() * 0.15f;
         float magnitude = 50 + Randomizer::GetInstance()->RandomNumZeroToOne() * 25;
-        GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEventInfo(0.25, Vector3D(xDir, yDir, 0.0f), magnitude));
+        GameEventManager::Instance()->ActionGeneralEffect(LevelShakeEffectInfo(0.25, Vector3D(xDir, yDir, 0.0f), magnitude));
 
         this->rotateShakeCountdown = this->GenerateRotateShakeCountdown();
     }
@@ -1703,6 +1832,10 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
             this->becomeDeadArm->AnimateLocalTranslation(this->GenerateArmDeathTranslationAnimation(deathToLeftArm, TOTAL_BLOWUP_TIME));
             this->becomeDeadArm->AnimateLocalZRotation(this->GenerateArmDeathRotationAnimation(deathToLeftArm, TOTAL_BLOWUP_TIME));
             this->boss->ConvertAliveBodyPartToDeadBodyPart(this->becomeDeadArm);
+            
+            GameSound* sound = this->boss->GetGameModel()->GetSound();
+            sound->DetachAndStopSound(this->becomeDeadArm, GameSound::DecoBossArmRotateLoop);
+            sound->DetachAndStopSound(this->becomeDeadArm, GameSound::DecoBossArmExtendEvent);
 
             break;
         }
@@ -2011,6 +2144,10 @@ void Stage3AI::SetState(DecoBossAIState::AIState newState) {
             this->remainingArm->AnimateLocalZRotation(this->GenerateArmDeathRotationAnimation(
                 deathToLeftArm, Boss::TOTAL_DEATH_ANIM_TIME));
             this->boss->ConvertAliveBodyPartToDeadBodyPart(this->remainingArm);
+
+            GameSound* sound = this->boss->GetGameModel()->GetSound();
+            sound->DetachAndStopSound(this->remainingArm, GameSound::DecoBossArmRotateLoop);
+            sound->DetachAndStopSound(this->remainingArm, GameSound::DecoBossArmExtendEvent);
 
             break;
         }

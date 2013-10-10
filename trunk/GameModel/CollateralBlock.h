@@ -112,6 +112,7 @@ private:
 
 	LevelPiece* Detonate(GameModel* gameModel);
 
+    DISALLOW_COPY_AND_ASSIGN(CollateralBlock);
 };
 
 inline bool CollateralBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {

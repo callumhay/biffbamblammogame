@@ -41,6 +41,9 @@ const float DecoBoss::ARM_SCOPING_SEG2_Y_RETRACT_TRANSLATION = ARM_SCOPING_SEG1_
 const float DecoBoss::ARM_SCOPING_SEG3_Y_RETRACT_TRANSLATION = ARM_SCOPING_SEG1_Y_RETRACT_TRANSLATION;
 const float DecoBoss::ARM_SCOPING_SEG4_Y_RETRACT_TRANSLATION = 2.218f;
 
+const float DecoBoss::ARM_ORIGIN_TO_HAND_END = 15.285f;
+const float DecoBoss::HAND_WIDTH = 3.025f;
+
 const float DecoBoss::SIDE_POS_X_OFFSET = SCALE_AMT * 3.962f;
 const float DecoBoss::SIDE_Y_OFFSET     = -3.283f;
 const float DecoBoss::SIDE_Z_OFFSET     = SCALE_AMT * 0.0f;
@@ -276,7 +279,6 @@ void DecoBoss::Init(float startingX, float startingY) {
     }
 
     // Move the boss to its starting location
-    //this->root->Transform(Matrix4x4::scaleMatrix(Vector3D(1.4f, 1.4f, 1.4f)));
     this->root->Translate(Vector3D(startingX, startingY, 0.0f));
     
     // Retract the bosses' arms so that they initially hidden by the two side parts of the bosses' body

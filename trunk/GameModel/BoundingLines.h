@@ -47,7 +47,6 @@ public:
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
 	    Collision::LineSeg2D& collisionLine, double& timeUntilCollision, const Vector2D& lineVelocity) const;
 
-
 	Point2D ClosestPoint(const Point2D& pt) const;
 	bool IsInside(const Point2D& pt) const;
 

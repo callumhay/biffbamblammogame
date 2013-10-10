@@ -167,7 +167,7 @@ void GameModel::LoadWorldsFromFile() {
             GameWorld* newGameWorld = new GameWorld(GameModelConstants::GetInstance()->GetResourceWorldDir() + 
                                                     std::string("/") + currWorldPath, *this->gameTransformInfo);
 
-            success = newGameWorld->Load();
+            success = newGameWorld->Load(this);
             assert(success);
 
             this->worlds.push_back(newGameWorld);
@@ -208,8 +208,10 @@ void GameModel::PerformLevelCompletionChecks() {
 void GameModel::StartGameAtWorldAndLevel(int worldIdx, int levelIdx) {
 	this->SetNextState(GameState::LevelStartStateType);
     
-    this->SetCurrentWorldAndLevel(worldIdx, levelIdx, true);
+    // IMPORTANT: ORDER MATTERS HERE!! We need to reset the level values to clear out buffers of the current
+    // level's blocks before we set the current world/level which will flush the memory
     this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
+    this->SetCurrentWorldAndLevel(worldIdx, levelIdx, true);
     
     this->UpdateState();
 }
@@ -275,16 +277,13 @@ void GameModel::SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNew
 	
     // NOTE: We don't unload anything since it all gets loaded when the game model is initialized
     // worlds don't take up too much memory so this is fine
-	// Clean up the previous world
-	//GameWorld* prevWorld = this->GetCurrentWorld();
-	//prevWorld->Unload();
 
 	// Get the world we want to set as current
 	GameWorld* world = this->worlds[worldIdx];
 	assert(world != NULL);
 	
 	// Make sure the world loaded properly.
-	if (!world->Load()) {
+	if (!world->Load(this)) {
 		debug_output("ERROR: Could not load world " << worldIdx);
 		assert(false);
 		return;

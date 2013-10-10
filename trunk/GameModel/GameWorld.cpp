@@ -45,7 +45,7 @@ GameWorld::~GameWorld() {
  * Precondition: true.
  * Return: true on a successful load, false otherwise.
  */
-bool GameWorld::Load() {
+bool GameWorld::Load(GameModel* gameModel) {
 	if (this->isLoaded) {
 		this->Unload();
 	}
@@ -156,7 +156,7 @@ bool GameWorld::Load() {
 	// Load each of the levels
     assert(levelUnlockStarAmts.size() == levelFileList.size());
 	for (size_t i = 0; i < levelFileList.size(); i++) {
-        GameLevel* lvl = GameLevel::CreateGameLevelFromFile(this->GetStyle(), i, levelUnlockStarAmts[i], levelFileList[i]);
+        GameLevel* lvl = GameLevel::CreateGameLevelFromFile(gameModel, this->GetStyle(), i, levelUnlockStarAmts[i], levelFileList[i]);
 		if (lvl == NULL) {
 			// Clean up and exit on erroneous level read
 			this->Unload();

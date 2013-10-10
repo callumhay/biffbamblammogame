@@ -79,8 +79,8 @@ const std::pair<int,int> NouveauBoss::RIGHT_SIDE_PRISM_IDX_PAIRS[NUM_RIGHT_SIDE_
     std::make_pair(LEVEL_NUM_PIECES_HEIGHT-21, LEVEL_NUM_PIECES_WIDTH-5)
 };
 
-const float NouveauBoss::Y_POS_FOR_LASER_BEAMS1 = 21.185068f;
-const float NouveauBoss::Y_POS_FOR_LASER_BEAMS2 = 16.909792f;
+const float NouveauBoss::Y_POS_FOR_LASER_BEAMS1 = 22.0f;
+const float NouveauBoss::Y_POS_FOR_LASER_BEAMS2 = 16.0f;
 
 NouveauBoss::NouveauBoss() {
 }

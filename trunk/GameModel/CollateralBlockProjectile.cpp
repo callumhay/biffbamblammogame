@@ -20,7 +20,7 @@
 CollateralBlockProjectile::CollateralBlockProjectile(CollateralBlock* collateralBlock) : 
 Projectile(collateralBlock->GetCenter(), LevelPiece::PIECE_WIDTH - 10*EPSILON, 0.9f*LevelPiece::PIECE_HEIGHT),
 collateralBlock(collateralBlock) {
-	this->SetVelocity(Vector2D(0, -1), CollateralBlock::COLLATERAL_FALL_SPEED);
+	this->SetVelocity(Vector2D(0, -1), 0.0f);
 }
 
 CollateralBlockProjectile::~CollateralBlockProjectile() {

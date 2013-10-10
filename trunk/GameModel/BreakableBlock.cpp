@@ -22,7 +22,8 @@ const double BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS = 17;
 
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS),
-fireGlobDropCountdown(GameModelConstants::GetInstance()->GenerateFireGlobDropTime()), timeOfLastBallCollision() {
+fireGlobDropCountdown(GameModelConstants::GetInstance()->GenerateFireGlobDropTime()), numFireGlobCountdownsWithoutDrop(0),
+timeOfLastBallCollision() {
 	assert(IsValidBreakablePieceType(type));
 
 	this->colour = ColourRGBA(BreakableBlock::GetColourOfBreakableType(this->pieceType), 1.0f);
@@ -117,13 +118,13 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		boundingLines.push_back(l1);
 		boundingNorms.push_back(n1);
         onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            leftNeighbor->GetType() == LevelPiece::OneWay);
+             leftNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	// Bottom boundary of the piece
     shouldGenBounds = false;
     if (bottomNeighbor != NULL) {
-        if ((bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        if ((bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
              bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen))) {
 
@@ -143,7 +144,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		Vector2D n2(0, -1);
 		boundingLines.push_back(l2);
 		boundingNorms.push_back(n2);
-        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             bottomNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
@@ -177,7 +178,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 	// Top boundary of the piece
     shouldGenBounds = false;
     if (topNeighbor != NULL) {
-        if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
+        if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
             topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen)) {
 
@@ -197,8 +198,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		Vector2D n4(0, 1);
 		boundingLines.push_back(l4);
 		boundingNorms.push_back(n4);
-        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay);
+        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
+            topNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
@@ -433,7 +434,13 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 
 		// Blocks on fire have a chance of dropping a glob of flame over some time...
 		if (this->fireGlobDropCountdown <= 0.0) {
-			this->DoPossibleFireGlobDrop(gameModel);
+			bool didDrop = this->DoPossibleFireGlobDrop(gameModel, this->numFireGlobCountdownsWithoutDrop > MAX_FIREGLOB_COUNTDOWNS_WITHOUT_DROP);
+            if (didDrop) {
+                this->numFireGlobCountdownsWithoutDrop = 0;
+            }
+            else {
+                this->numFireGlobCountdownsWithoutDrop++;
+            }
             this->fireGlobDropCountdown = GameModelConstants::GetInstance()->GenerateFireGlobDropTime();
 		}
         else {

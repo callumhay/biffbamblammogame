@@ -19,6 +19,8 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
 
+#include "../GameSound/SoundCommon.h"
+
 #include "BossAIState.h"
 #include "GameLevel.h"
 
@@ -132,7 +134,10 @@ protected:
     int numItemsPerSummoning;
     int summonsSinceLastSpecialItemDrop;
 
+    SoundID itemSummoningSoundID;
+
     virtual float GenerateSpecialItemSummonProbability() const;
+    virtual bool AllowLevelFlipItem() const { return true; }
     double GenerateShootCountdownAmtForMoving()   const { return 0.5 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
     double GenerateShootCountdownAmtForSpinning() const { return 0.3 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.3; }
     double GenerateTimeBetweenRockets() const { return this->rocketSpinRotAnim.GetTimeValues().back() / static_cast<double>(this->numRocketsToFire+1); }
@@ -176,6 +181,7 @@ private:
     AnimationMultiLerp<float> hitOnTopTiltAnim;
     AnimationMultiLerp<float> hitOnTopMoveDownAnim;
 
+    bool AllowLevelFlipItem() const { return false; }
     float GenerateFireballSummonProbability() const;
     int GenerateNumRocketsToFire() const { return 2 + Randomizer::GetInstance()->RandomUnsignedInt() % 2; }
 

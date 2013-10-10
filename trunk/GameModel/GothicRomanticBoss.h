@@ -33,7 +33,7 @@ class FreeMovingAttackAI;
  */
 class GothicRomanticBoss : public Boss {
 
-    friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
+    friend Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style);
     friend class gothicromanticbossai::GothicRomanticBossAI;
     friend class gothicromanticbossai::ConfinedAI;
     friend class gothicromanticbossai::FireBallAI;

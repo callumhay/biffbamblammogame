@@ -207,6 +207,11 @@ public:
 
 		return Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
 	}
+    Vector3D GetCurrentLevelTranslation() const {
+        GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
+        assert(currLevel != NULL);
+        return Vector3D(-0.5f * currLevel->GetLevelUnitWidth(), -0.5f * currLevel->GetLevelUnitHeight(), 0.0f);
+    }
 
 	bool IsLastWorld() const {
 		return this->currWorldNum == this->worlds.size()-1;
@@ -332,10 +337,15 @@ public:
     }
     Point2D GetAvgBallLoc() const;
 
-    Vector3D GetGravityDir() {
+    Vector3D GetGravityDir() const {
         Vector3D gravityDir = this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(0, -1, 0);
 	    gravityDir.Normalize();
         return gravityDir;
+    }
+    Vector3D GetGravityRightDir() const {
+        Vector3D gravityRightDir =  this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(1, 0, 0);
+        gravityRightDir.Normalize();
+        return gravityRightDir;
     }
 
 	// Paddle and ball related manipulators *********************************

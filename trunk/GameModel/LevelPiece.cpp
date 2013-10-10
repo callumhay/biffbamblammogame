@@ -117,7 +117,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
     bool shouldGenBounds = false;
 
-	// Left boundry of the piece
+	// Left boundary of the piece
     shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         leftNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
@@ -129,8 +129,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
     }
 
 
-	// Bottom boundry of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+	// Bottom boundary of the piece
+    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         bottomNeighbor->GetType() != LevelPiece::Solid);
 	if (shouldGenBounds) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
@@ -140,7 +140,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		boundingNorms.push_back(n2);
 	}
 
-	// Right boundry of the piece
+	// Right boundary of the piece
     shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         rightNeighbor->GetType() != LevelPiece::Solid);
 	if (shouldGenBounds) {
@@ -151,9 +151,9 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		boundingNorms.push_back(n3);
 	}
 
-	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() != LevelPiece::Solid);
+	// Top boundary of the piece
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
+        topNeighbor->GetType() != LevelPiece::Solid);
 	if (shouldGenBounds) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -275,6 +275,7 @@ void LevelPiece::LightPieceOnFire(GameModel* gameModel, bool canCatchOnFire) {
 
 // Helper function used to freeze this piece in an ice block (if it is allowed to be frozen).
 void LevelPiece::FreezePieceInIce(GameModel* gameModel, bool canBeFrozen) {
+
 	// If this piece is currently on fire then the ice will cancel with the fire and
 	// the piece will no longer be on fire
 	if (this->HasStatus(LevelPiece::OnFireStatus)) {
@@ -457,21 +458,28 @@ void LevelPiece::GetIceCubeReflectionRefractionRays(const Point2D& currCenter,
 	rays.push_front(defaultRay);
 }
 
-void LevelPiece::DoPossibleFireGlobDrop(GameModel* gameModel) const {
-    int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
-	if (fireGlobDropRandomNum != 0) {
-        return;
+bool LevelPiece::DoPossibleFireGlobDrop(GameModel* gameModel, bool alwaysDrop) const {
+    if (!alwaysDrop) {
+        int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
+        if (fireGlobDropRandomNum != 0) {
+            return false;
+        }
     }
 
 	float globSize  = 0.4f * LevelPiece::HALF_PIECE_WIDTH + 0.9f * Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
 	float edgeDist  = ((LevelPiece::PIECE_WIDTH - globSize) / 2.0f) - 0.01f;
 	assert(edgeDist >= 0.0f);
 
+    Vector2D worldGravityDir = gameModel->GetGravityDir().ToVector2D();
+    Vector2D worldGravityRightDir = gameModel->GetGravityRightDir().ToVector2D();
+
 	// Calculate a place on the block to drop the glob from...
-	Point2D dropPos = this->GetCenter() - Vector2D(Randomizer::GetInstance()->RandomNumNegOneToOne() * edgeDist, globSize / 2.0f);
+	Point2D dropPos = this->GetCenter() + (Randomizer::GetInstance()->RandomNumNegOneToOne() * edgeDist) * worldGravityRightDir + 
+        (globSize / 2.0f) * worldGravityDir;
 
 	// Drop a glob of fire downwards from the block...
-	Projectile* fireGlobProjectile = new FireGlobProjectile(dropPos, globSize);
+	Projectile* fireGlobProjectile = new FireGlobProjectile(dropPos, globSize, worldGravityDir);
 	fireGlobProjectile->SetLastThingCollidedWith(this);
 	gameModel->AddProjectile(fireGlobProjectile);
+    return true;
 }

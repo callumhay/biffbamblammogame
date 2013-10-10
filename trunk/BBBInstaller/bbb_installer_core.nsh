@@ -77,28 +77,16 @@ ShowUninstDetails show
 
 # Prerequisite installations:
 # - C++ Redistributable
-Section -Prerequisites
-    SetOutPath $INSTDIR
+#Section -Prerequisites
+#    SetOutPath $INSTDIR
   
-    IfErrors continue
-    continue:
-    File vcredist_x86.exe
-    #restart_installing_cpp_redist:
-    ExecWait '"$INSTDIR\vcredist_x86.exe"'
+#    IfErrors continue
+#    continue:
+#    File vcredist_x86.exe
+#    ExecWait '"$INSTDIR\vcredist_x86.exe"'
 
-    #IfErrors error_installing_cpp_redist
-    #goto success_installing_cpp_redist
-    
-    #error_installing_cpp_redist:
-    #   MessageBox MB_OKCANCEL "You must install the C++ 2010 Redistributable in order to continue installation." IDOK #restart_installing_cpp_redist IDCANCEL exit_now
-       #exit_now:
-      # Delete "$INSTDIR\vcredist_x86.exe"
-      # Quit
-
-   # success_installing_cpp_redist:
-
-    Delete "$INSTDIR\vcredist_x86.exe"
-SectionEnd
+#    Delete "$INSTDIR\vcredist_x86.exe"
+#SectionEnd
 
 
 # Installation of BBB section
@@ -113,6 +101,7 @@ Section "Biff! Bam!! Blammo!?!" SEC0000
     File ..\lib\SDL.dll
     File ..\lib\SDL_mixer.dll
     File ..\lib\XInput9_1_0.dll
+    File "..\lib\${BBB_MSVCR_FILE}"
     File ..\BBBResources.zip
     File ..\BiffBamBlammoIcon.bmp
     File "..\BiffBamBlammo.ico"
@@ -164,6 +153,7 @@ Section /o "-un.Biff! Bam!! Blammo!?! Install" UNSEC0000
     Delete /REBOOTOK $INSTDIR\cgGL.dll
     Delete /REBOOTOK $INSTDIR\cg.dll
     Delete /REBOOTOK $INSTDIR\XInput9_1_0.dll
+    Delete /REBOOTOK "$INSTDIR\${BBB_MSVCR_FILE}"
 
     MessageBox MB_YESNO "Would you like to keep all game progress and configuration files? (Warning: By clicking 'No' you will delete all game progress you've made in Biff! Bam!! Blammo!?!)." IDNO delete_progress IDYES keep_progress
     delete_progress:

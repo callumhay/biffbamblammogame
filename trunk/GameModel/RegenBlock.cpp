@@ -20,7 +20,8 @@
 const float RegenBlock::REGEN_LIFE_POINTS_PER_SECOND = 6.0f;
 
 RegenBlock::RegenBlock(bool hasInfiniteLife, unsigned int wLoc, unsigned int hLoc) :
-LevelPiece(wLoc, hLoc), currLifePoints(0.0f), fireGlobDropCountdown(GameModelConstants::GetInstance()->GenerateFireGlobDropTime()) {
+LevelPiece(wLoc, hLoc), currLifePoints(0.0f), numFireGlobCountdownsWithoutDrop(0),
+fireGlobDropCountdown(GameModelConstants::GetInstance()->GenerateFireGlobDropTime()) {
     if (hasInfiniteLife) {
         this->currLifePoints = RegenBlock::INFINITE_LIFE_POINTS;
     }
@@ -120,7 +121,7 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
     bool shouldGenBounds = false;
 
-	// Left boundry of the piece
+	// Left boundary of the piece
     shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable &&
         leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen));
@@ -134,8 +135,8 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             leftNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Bottom boundry of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+	// Bottom boundary of the piece
+    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
          bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
@@ -144,11 +145,11 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		Vector2D n2(0, -1);
 		boundingLines.push_back(l2);
 		boundingNorms.push_back(n2);
-        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             bottomNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Right boundry of the piece
+	// Right boundary of the piece
     shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
          rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen));
@@ -162,8 +163,8 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             rightNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
-	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
+	// Top boundary of the piece
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
          topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen));
     if (shouldGenBounds) {
@@ -172,8 +173,8 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		Vector2D n4(0, 1);
 		boundingLines.push_back(l4);
 		boundingNorms.push_back(n4);
-        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            topNeighbor->HasStatus(LevelPiece::OnFireStatus) || topNeighbor->GetType() == LevelPiece::OneWay);
+        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
+            topNeighbor->GetType() == LevelPiece::OneWay);
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
@@ -336,7 +337,13 @@ bool RegenBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedSta
 
 		// Blocks on fire have a chance of dropping a glob of flame over some time...
 		if (this->fireGlobDropCountdown <= 0.0) {
-			this->DoPossibleFireGlobDrop(gameModel);
+            bool didDrop = this->DoPossibleFireGlobDrop(gameModel, this->numFireGlobCountdownsWithoutDrop > MAX_FIREGLOB_COUNTDOWNS_WITHOUT_DROP);
+            if (didDrop) {
+                this->numFireGlobCountdownsWithoutDrop = 0;
+            }
+            else {
+                this->numFireGlobCountdownsWithoutDrop++;
+            }
             this->fireGlobDropCountdown = GameModelConstants::GetInstance()->GenerateFireGlobDropTime();
 		}
         else {

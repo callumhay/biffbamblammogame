@@ -33,7 +33,7 @@ const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
 	Colour(1.0f, 0.3333f, 0.639f),                  // Rose
 	Colour(0.39f, 0.5843f, 0.9294f),                // Cornflower Blue
 	Colour(0.8745f, 0.451f, 1.0f),                  // Pinkish-Purple (Heliotrope)
-	Colour(0.251f, 0.8784f, 0.815686f),             // Turquoise
+	Colour(0.1254f, 0.6980f, 0.666f),               // Sea Green
 	Colour(0.3137f, 0.7843f, 0.47f),                // Emerald Green
 	Colour(1.0f, 0.6f, 0.4f),                       // Grapefruit pink
 	Colour(0.57647f, 0.4392f, 0.8588f),             // Medium Purple

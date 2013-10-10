@@ -378,11 +378,10 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
     Vector2D longSideNorm, shortSideNorm, hypSideNorm;
     Collision::LineSeg2D shortSide, longSide, hypSide;
 
-    bool topNeighborNotSolid = topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
-        topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
+    bool topNeighborNotSolid = topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
          topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen);
-    bool bottomNeighborNotSolid	= bottomNeighbor == NULL  || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+    bool bottomNeighborNotSolid	= bottomNeighbor == NULL  || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
          bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen);
     bool leftNeighborNotSolid = leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 

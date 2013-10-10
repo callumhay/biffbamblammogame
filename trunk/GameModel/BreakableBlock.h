@@ -125,7 +125,10 @@ protected:
 	LevelPiece* EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
 private:
-	double fireGlobDropCountdown;	// Used to keep track of when to drop the next fire glob (when the block is on fire)
+    static const int MAX_FIREGLOB_COUNTDOWNS_WITHOUT_DROP = 2;
+
+	double fireGlobDropCountdown;	           // Used to keep track of when to drop the next fire glob (when the block is on fire)
+    int numFireGlobCountdownsWithoutDrop;      // Tracks the number of times that the fire glob countdown has happened
 
 	DISALLOW_COPY_AND_ASSIGN(BreakableBlock);
 };

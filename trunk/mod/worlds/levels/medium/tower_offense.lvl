@@ -2,10 +2,10 @@ Tower Offense
 17 33
 E E E E E E S D(IceBall) S D(LaserBeamPaddle) S E E E E E E 
 S S S S S S S E E E S S S S S S S 
+S E E E E E Q(f) E E E Q(f) E E E E E S 
+S E E I E E R E E E R E E I E E S 
+S E E K(MultiBall3) E E Q(f) E E E Q(f) E E K(MultiBall3) E E S 
 S E E E E E S E E E S E E E E E S 
-S E E I E E Q(i) E E E Q(i) E E I E E S 
-S E E K(MultiBall3) E E Q(i) E E E Q(i) E E K(MultiBall3) E E S 
-S E E E E E Q(i) E E E Q(i) E E E E E S 
 S E G G G E S G G G S E G G G E S 
 S E G G G E S Y Y Y S E G G G E S 
 S E G G G E S O O O S E G G G E S 
@@ -14,7 +14,7 @@ S E G G G E S E E E S E G G G E S
 S E G G G E S O O O S E G G G E S 
 S E G G G E S Y Y Y S E G G G E S 
 S E G G G E S G K(UberBall) G S E G G G E S 
-S E G K(MagnetPaddle) G E S E E E S E G K(MagnetPaddle) G E S 
+S E G G G E S E E E S E G G G E S 
 S E G G G E S Y Y Y S E G G G E S 
 S E G G G E S G K(UpsideDown) G S E G G G E S 
 S E G G G E S E E E S E G G G E S 
@@ -24,7 +24,7 @@ S E G G G E S G K(UpsideDown) G S E G G G E S
 S E G G G E S E E E S E G G G E S 
 S E G G E E S Q(f) Q(f) Q(f) S E E G G E S 
 S E E E E S E E E E E S E E E E S 
-S S S S S K(RocketPaddle) E E E E E K(LaserBeamPaddle) S S S S S 
+S S F(d) F(d) F(d) K(RocketPaddle) E E E E E K(LaserBeamPaddle) F(d) F(d) F(d) S S 
 S E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E S 
@@ -39,7 +39,7 @@ STARS:
 10000
 20000
 45000
-50000
+49000
 
 PaddleGrow 2
 PoisonPaddle 2

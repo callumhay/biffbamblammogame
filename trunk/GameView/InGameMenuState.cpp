@@ -13,6 +13,7 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/StringHelper.h"
 
 // GameDisplay Includes
 #include "InGameMenuState.h"
@@ -36,28 +37,76 @@ const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f)
 const char* InGameMenuState::VERIFY_MENU_YES  = "Yes!";
 const char* InGameMenuState::VERIFY_MENU_NO   = "NOoo!";
 
+const int InGameMenuState::LEVEL_NAME_LABEL_X_BORDER = 50;
+const int InGameMenuState::MENU_LABEL_GAP = 50;
+const int InGameMenuState::NAME_HS_LABEL_GAP = 20;
+const int InGameMenuState::LABEL_STAR_GAP = 5;
+const int InGameMenuState::STAR_SIZE = 42;
+const int InGameMenuState::STAR_HORIZONTAL_GAP = 3;
+const int InGameMenuState::BOSS_ICON_SIZE = 40;
+
 InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
 DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
 topMenu(NULL), topMenuEventHandler(NULL), difficultyEventHandler(NULL), difficultyVerifyHandler(NULL),
 restartVerifyHandler(NULL), exitGameVerifyHandler(NULL), returnToMainMenuVerifyHandler(NULL),
-returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1) {
+returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1), starTexture(NULL), bossTexture(NULL),
+highscoreLabel(GameFontAssetsManager::GetInstance()->GetFont(
+               GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), ""),
+levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(
+               GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), 
+               Camera::GetWindowWidth() - 2*LEVEL_NAME_LABEL_X_BORDER, "") {
 
+    float scalingFactor = this->display->GetTextScalingFactor();
+
+    GameModel* gameModel = this->display->GetModel();
     GameSound* sound = this->display->GetSound();
         
-	// Pause all sounds and effects
+	// Pause all sounds and effects and play the paused sound
 	sound->PauseAllSounds();
     sound->PauseAllEffects();
-
-    // ... but unpause the looped background music, and set its volume to about half
-    // TODO
-    // ..and play the paused sound
     sound->PlaySound(GameSound::InGameMenuOpened, false);
 
 	// Pause the game itself
-	this->display->GetModel()->SetPause(GameModel::PauseGame);
+	gameModel->SetPause(GameModel::PauseGame);
 
 	// Read the configuration file to figure out how to initialize each of the options
 	this->cfgOptions = ResourceManager::ReadConfigurationOptions(true);
+
+    const GameLevel* currentLevel = gameModel->GetCurrentLevel();
+
+    this->levelNameLabel.SetText(currentLevel->GetName());
+    this->levelNameLabel.SetScale(0.85f * scalingFactor);
+    this->levelNameLabel.SetColour(Colour(0.9f, 0.9f, 0.9f));
+    this->levelNameLabel.SetDropShadow(Colour(0,0,0), scalingFactor * 0.05f);
+
+    std::stringstream highScoreStr;
+    highScoreStr << "High Score: " << stringhelper::AddNumberCommas(currentLevel->GetHighScore());
+
+    this->highscoreLabel.SetText(highScoreStr.str());
+    this->highscoreLabel.SetScale(0.75f*scalingFactor);
+    this->highscoreLabel.SetColour(Colour(0.8f, 0.8f, 0.8f));
+
+    // Grab any required texture resources
+    this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, 
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->starTexture != NULL);
+    this->starTexture->SetWrapParams(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+    this->bossTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOSS_ICON, 
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->bossTexture != NULL);
+    this->bossTexture->SetWrapParams(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+    {
+        std::vector<double> timeVals(3);
+        timeVals[0] = 0.0; timeVals[1] = 1.0f; timeVals[2] = 2.0f;
+        std::vector<Colour> colourVals(timeVals.size());
+        colourVals[0] = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+        colourVals[1] = GameViewConstants::GetInstance()->BRIGHT_POINT_STAR_COLOUR;
+        colourVals[2] = colourVals[0];
+        this->activeStarColourAnim.SetLerp(timeVals, colourVals);
+        this->activeStarColourAnim.SetRepeat(true);
+    }
 
 	this->InitTopMenu();
 }
@@ -77,6 +126,13 @@ InGameMenuState::~InGameMenuState() {
     this->exitGameVerifyHandler = NULL;
     delete this->returnToMainMenuVerifyHandler;
     this->returnToMainMenuVerifyHandler = NULL;
+
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bossTexture);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 /**
@@ -84,6 +140,7 @@ InGameMenuState::~InGameMenuState() {
  * in-game menu in its current state according to interaction with the user.
  */
 void InGameMenuState::RenderFrame(double dT) {
+    
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -104,7 +161,7 @@ void InGameMenuState::RenderFrame(double dT) {
             // Reset the level
             this->display->GetModel()->ResetCurrentLevel();
 
-            // Un-Pause the game and go to the start of level state which will have
+            // Unpause the game and go to the start of level state which will have
             // been queued when we told the model to reset the level
             this->CleanUpReturnToDisplayState();
             
@@ -151,34 +208,39 @@ void InGameMenuState::RenderFrame(double dT) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(),
-        -1.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.5f));
+        -1.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.6f));
 	
-	// Draw the menus...
+	// Draw the label(s) and menu
 	glEnable(GL_DEPTH_TEST);
 	this->topMenu->SetCenteredOnScreen(Camera::GetWindowWidth(), Camera::GetWindowHeight());
-	this->topMenu->Draw(dT, Camera::GetWindowWidth(), Camera::GetWindowHeight());
-	glPopAttrib();
-}
+	
+    float scalingFactor = this->display->GetTextScalingFactor();
+    float prevYPos = this->topMenu->GetTopLeftCorner()[1] + scalingFactor * MENU_LABEL_GAP;
 
-void InGameMenuState::ResumeTheGame() {
-    GameSound* sound = this->display->GetSound();
-    
-    // Play un-pause all sounds and effects
-    sound->PlaySound(GameSound::InGameMenuClosed, false);
-	// Resume world sounds - these are initially paused when coming to this state (in the constructor)
-	sound->UnpauseAllEffects();
-    sound->UnpauseAllSounds();
-    
-    // Unpause the game
-	this->display->GetModel()->UnsetPause(GameModel::PauseGame);
-
-	// Go back to the in-game display state
-    if (this->returnToDisplayState != NULL) {
-	    this->display->SetCurrentState(returnToDisplayState);
+    if (this->display->GetModel()->GetCurrentLevel()->GetHasBoss()) {
+        prevYPos += scalingFactor * BOSS_ICON_SIZE/2.0f;
+        this->DrawBossIcon(prevYPos);
+        prevYPos += scalingFactor * BOSS_ICON_SIZE/2.0f + scalingFactor*LABEL_STAR_GAP;
     }
     else {
-        this->display->SetCurrentState(new InGameDisplayState(this->display));
+        // Only draw high score and stars on non-boss levels
+        Point2D hsTopLeftCorner((Camera::GetWindowWidth() - this->highscoreLabel.GetLastRasterWidth()) / 2.0f,
+            prevYPos + this->highscoreLabel.GetHeight());
+        this->highscoreLabel.SetTopLeftCorner(hsTopLeftCorner);
+        this->highscoreLabel.Draw();
+
+        prevYPos = hsTopLeftCorner[1] + scalingFactor * LABEL_STAR_GAP + scalingFactor * STAR_SIZE;
+        this->DrawStars(dT, prevYPos);
+        prevYPos += scalingFactor * LABEL_STAR_GAP;
     }
+
+    Point2D nameLblTopLeftCorner((Camera::GetWindowWidth() - this->levelNameLabel.GetWidth()) / 2.0f,
+        prevYPos + this->levelNameLabel.GetHeight());
+    this->levelNameLabel.SetTopLeftCorner(nameLblTopLeftCorner);
+    this->levelNameLabel.Draw();
+    
+    this->topMenu->Draw(dT, Camera::GetWindowWidth(), Camera::GetWindowHeight());
+	glPopAttrib();
 }
 
 // Make sure this is called if we aren't going back to the returnToDisplayState
@@ -217,6 +279,105 @@ void InGameMenuState::ButtonReleased(const GameControl::ActionButton& releasedBu
 
 	// Tell the top-most menu about the key released event
 	this->topMenu->ButtonReleased(releasedButton);
+}
+
+void InGameMenuState::DrawStars(double dT, float currYPos) {
+    
+    GameModel* gameModel = this->display->GetModel();
+    GameLevel* currentLevel = gameModel->GetCurrentLevel();
+
+    int maxStarsAwardedForCurrLevel = currentLevel->GetHighScoreNumStars();
+    float scalingFactor = this->display->GetTextScalingFactor();
+
+    const float STAR_SIZE_SCALED = scalingFactor * STAR_SIZE;
+    const float STAR_HORIZONTAL_GAP_SCALED = scalingFactor * STAR_HORIZONTAL_GAP;
+
+    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    this->starTexture->BindTexture();
+
+    float currX = Camera::GetWindowWidth() / 2.0f - ((STAR_SIZE_SCALED*GameLevel::MAX_STARS_PER_LEVEL + STAR_HORIZONTAL_GAP*(GameLevel::MAX_STARS_PER_LEVEL-1))/2.0f);
+    currX += STAR_SIZE_SCALED / 2.0f;
+    currYPos -= STAR_SIZE_SCALED / 2.0f;
+
+    Camera::PushWindowCoords();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    if (maxStarsAwardedForCurrLevel > 0) {
+        this->activeStarColourAnim.Tick(dT);
+    }
+
+    Colour starColour;
+    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+
+        //AnimationLerp<float>* starAnimation = this->starAnimations[i];
+        if (i < maxStarsAwardedForCurrLevel) {
+            starColour = this->activeStarColourAnim.GetInterpolantValue();
+        }
+        else {
+            starColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
+        }
+
+        glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+
+        glPushMatrix();
+        glTranslatef(currX, currYPos, 0);
+        glScalef(STAR_SIZE_SCALED, STAR_SIZE_SCALED, 1.0f);
+        GeometryMaker::GetInstance()->DrawQuad();
+        glPopMatrix();
+        
+        currX += STAR_SIZE_SCALED + STAR_HORIZONTAL_GAP_SCALED;
+    }
+    
+    glPopAttrib();
+
+    glPopMatrix();
+    Camera::PopWindowCoords();
+
+    debug_opengl_state();
+}
+
+void InGameMenuState::DrawBossIcon(float currYPos) {
+
+    float scalingFactor = this->display->GetTextScalingFactor();
+    const float BOSS_ICON_SIZE_SCALED = scalingFactor * BOSS_ICON_SIZE;
+
+    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    this->bossTexture->BindTexture();
+
+    float currXPos = Camera::GetWindowWidth() / 2.0f;
+
+    Camera::PushWindowCoords();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(currXPos, currYPos, 0);
+    glScalef(BOSS_ICON_SIZE_SCALED, BOSS_ICON_SIZE_SCALED, 1.0f);
+    
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();
+
+    glPopMatrix();
+    Camera::PopWindowCoords();
+
+    glPopAttrib();
+
+    debug_opengl_state();
 }
 
 void InGameMenuState::InitTopMenu() {
@@ -341,6 +502,27 @@ void InGameMenuState::InitTopMenu() {
 	this->exitToDesktopItem = this->topMenu->AddMenuItem(exitToDesktopMenuItem);
 
 	this->topMenu->SetSelectedMenuItem(this->resumeItem, false);
+}
+
+void InGameMenuState::ResumeTheGame() {
+    GameSound* sound = this->display->GetSound();
+
+    // Play unpause all sounds and effects
+    sound->PlaySound(GameSound::InGameMenuClosed, false);
+    // Resume world sounds - these are initially paused when coming to this state (in the constructor)
+    sound->UnpauseAllEffects();
+    sound->UnpauseAllSounds();
+
+    // Unpause the game
+    this->display->GetModel()->UnsetPause(GameModel::PauseGame);
+
+    // Go back to the in-game display state
+    if (this->returnToDisplayState != NULL) {
+        this->display->SetCurrentState(returnToDisplayState);
+    }
+    else {
+        this->display->SetCurrentState(new InGameDisplayState(this->display));
+    }
 }
 
 // Top Menu Handler Functions ***********************************************************

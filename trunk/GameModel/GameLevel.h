@@ -86,7 +86,8 @@ public:
 	~GameLevel();
 
 	// Used to create a level from file
-	static GameLevel* CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, int milestoneStarAmt, std::string filepath);
+	static GameLevel* CreateGameLevelFromFile(GameModel* gameModel, const GameWorld::WorldStyle& style, 
+        size_t levelIdx, int milestoneStarAmt, std::string filepath);
     static bool ReadItemList(std::stringstream& inFile, std::vector<GameItem::ItemType>& items);
 
 	/**

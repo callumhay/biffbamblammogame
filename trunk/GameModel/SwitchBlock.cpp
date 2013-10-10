@@ -55,7 +55,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
     bool shouldGenBounds = false;
 
-	// Left boundry of the piece
+	// Left boundary of the piece
     shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         leftNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
@@ -66,8 +66,8 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	    boundingNorms.push_back(n1);
     }
 
-	// Bottom boundry of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
+	// Bottom boundary of the piece
+    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         bottomNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l2(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
@@ -77,7 +77,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	    boundingNorms.push_back(n2);
 	}
 
-	// Right boundry of the piece
+	// Right boundary of the piece
     shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         rightNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
@@ -88,9 +88,8 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	    boundingNorms.push_back(n3);
 	}
 
-	// Top boundry of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        topNeighbor->HasStatus(LevelPiece::OnFireStatus) ||
+	// Top boundary of the piece
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         topNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
 	    Collision::LineSeg2D l4(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND),

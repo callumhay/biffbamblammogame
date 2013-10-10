@@ -36,7 +36,7 @@ class ClassicalBoss : public Boss {
     friend class classicalbossai::ArmsBodyHeadAI;
     friend class classicalbossai::BodyHeadAI;
     friend class classicalbossai::HeadAI;
-    friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
+    friend Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style);
 
 public:
     static const float ARM_WIDTH;

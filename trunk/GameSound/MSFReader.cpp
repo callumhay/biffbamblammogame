@@ -421,11 +421,20 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossHurtEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBlowingUpLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossDeathFlashToFullscreen));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossCrosshairTargetingEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossLaserBeamLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmShakeLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackHitEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossSummonItemChargeEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossChargeShockwaveEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossMassiveShockwaveEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmRotateLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmExtendEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmRetractEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmLevelCollisionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmPaddleCollisionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossLevelRotatingLoop));
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, EnterBulletTimeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, InBulletTimeLoop));

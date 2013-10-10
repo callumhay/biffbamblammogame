@@ -176,14 +176,14 @@ public:
     }
 
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
-	void RemoveProjectile(const Projectile& projectile);
+	void RemoveProjectile(const GameModel& gameModel, const Projectile& projectile);
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
     void PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
-    void PaddleHurtByBossBodyPart(const PlayerPaddle& paddle, const Boss& boss, const BossBodyPart& bossPart);
+    void PaddleHurtByBossBodyPart(const GameModel& gameModel, const PlayerPaddle& paddle, const Boss& boss, const BossBodyPart& bossPart);
 
 	void RocketExplosion(const RocketProjectile& rocket, Camera& camera, const GameModel* gameModel);
-    void MineExplosion(const MineProjectile& mine, Camera& camera);
+    void MineExplosion(const MineProjectile& mine, Camera& camera, const GameModel* gameModel);
 
     void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera, const GameModel* gameModel);
 
@@ -242,8 +242,8 @@ private:
 	void LoadRegularEffectAssets();
 
 	// Projectile specific functionality
-	void FirePaddleLaser(const PlayerPaddle& paddle);
-	void FireRocket(const RocketProjectile& rocketProjectile);
+	void FirePaddleLaser(const GameModel& gameModel);
+	void FireRocket(const GameModel& gameModel, const RocketProjectile& rocketProjectile);
 
     // Private draw functions
     void DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera);

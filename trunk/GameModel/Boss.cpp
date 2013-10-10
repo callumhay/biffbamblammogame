@@ -56,7 +56,9 @@ Boss::~Boss() {
 /**
  * Static factory function for building boss types based on a given world style.
  */
-Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
+Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style) {
+    assert(gameModel != NULL);
+
     Boss* boss = NULL;
     switch (style) {
         case GameWorld::Classical:
@@ -87,6 +89,7 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
             break;
     }
     boss->worldStyle = style;
+    boss->gameModel  = gameModel;
 
     return boss;
 }

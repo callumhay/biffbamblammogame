@@ -207,7 +207,7 @@ LastBallExplodedEvent {
 
 
 BallBallCollisionEvent {
-	file = resources/ball_ball_hit.ogg
+	file = resources/BallBallCollisionEvent.ogg
 }
 
 LastBallSpiralingToDeathLoop {
@@ -283,11 +283,13 @@ BasicBlockDestroyedEvent {
 }
 
 CannonBlockLoadedEvent {
-	file = resources/cannon_loaded.ogg
+	file = resources/CannonBlockLoadedEvent.ogg
 }
-
+CannonBlockRotatingLoop {
+	file = resources/CannonBlockRotatingLoop.ogg
+}
 CannonBlockFiredEvent {
-	file = resources/cannon_fired.ogg
+	file = resources/CannonBlockFiredEvent.ogg
 }
 
 // CannonBlockLoadedWithBallCamBallEvent
@@ -297,16 +299,12 @@ PortalTeleportEvent {
 }
 
 CollateralBlockFlashingLoop {
-	file = 
+	file = resources/CollateralBlockFlashingLoop.ogg
 }
-
 CollateralBlockFallingLoop {
-	file = 
+	file = resources/CollateralBlockFallingLoop.ogg
 }
 
-CannonBlockRotatingLoop {
-	file = resources/cannon_rotate.ogg
-}
 
 TeslaLightningArcLoop {
 	file = resources/TeslaLightningArcLoop.ogg
@@ -390,6 +388,8 @@ RocketOrMineDeflectedByShieldEvent {
 // PaddleLaserBeamCollisionEvent {
 // }
 
+// PaddleCollateralBlockCollisionEvent {
+// }
 
 // Game Item Events **********************************************************
 
@@ -477,11 +477,9 @@ BossBlowingUpLoop {
 BossDeathFlashToFullscreen {
 	file = resources/BossDeathFlashToFullscreen.ogg
 }
-
-// BossCrosshairTargetingEvent {
-//	file = resources/BossCrosshairTargetingEvent.ogg
-// }
-
+BossCrosshairTargetingEvent {
+	file = resources/BossCrosshairTargetingEvent.ogg
+}
 BossLaserBeamLoop {
 	file = resources/BossLaserBeamLoop.ogg
 }
@@ -503,37 +501,36 @@ ClassicalBossArmAttackHitEvent {
 
 // Occurs when the boss is about to unleash a summoning attack, where it summons 
 // a bunch of nasty items to decend upon the paddle
-// GothicBossSummonItemChargeEvent {
-//	file = resources/GothicBossSummonItemChargeEvent.ogg
-// }
+GothicBossSummonItemChargeEvent {
+	file = resources/GothicBossSummonItemChargeEvent.ogg
+}
 // Occurs when the boss charges up its shockwave to destroy its confines
-// GothicBossChargeShockwaveEvent {
-//	file = resources/GothicBossChargeShockwaveEvent.ogg
-// }
+GothicBossChargeShockwaveEvent {
+	file = resources/GothicBossChargeShockwaveEvent.ogg
+}
 GothicBossMassiveShockwaveEvent {
 	file = resources/GothicBossMassiveShockwaveEvent.ogg
 }
 
 
-// DecoBossArmRotateEvent {
-//	file = resources/DecoBossArmRotateEvent.ogg
-// }
-// DecoBossArmExtendEvent {
-//	file = resources/DecoBossArmExtendEvent.ogg
-// }
-// DecoBossArmRetractEvent {
-//	file = resources/DecoBossArmRetractEvent.ogg
-// }
-// DecoBossArmLevelCollisionEvent {
-//	file = resources/DecoBossArmLevelCollisionEvent.ogg
-// }
-// DecoBossArmPaddleCollisionEvent {
-//	file = resources/DecoBossArmPaddleCollisionEvent.ogg
-// }
-// DecoBossLevelRotatingLoop {
-//	file = resources/DecoBossLevelRotatingLoop.ogg
-// }
-
+DecoBossArmRotateLoop {
+	file = resources/DecoBossArmRotateLoop.ogg
+}
+DecoBossArmExtendEvent {
+	file = resources/DecoBossArmExtendEvent.ogg
+}
+DecoBossArmRetractEvent {
+	file = resources/DecoBossArmRetractEvent.ogg
+}
+DecoBossArmLevelCollisionEvent {
+	file = resources/DecoBossArmLevelCollisionEvent.ogg
+}
+DecoBossArmPaddleCollisionEvent {
+	file = resources/DecoBossArmPaddleCollisionEvent.ogg
+}
+DecoBossLevelRotatingLoop {
+	file = resources/DecoBossLevelRotatingLoop.ogg
+}
 
 
 // Bullet-time / Ball Boost Events *******************************************

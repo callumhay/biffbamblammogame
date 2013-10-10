@@ -65,7 +65,7 @@ public:
     virtual void DetachFromPaddle() {};
     virtual bool IsAttachedToSomething() const { return false; };
 
-    void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
+    bool AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
     bool GetIsInvisible() const { return this->isInvisible; }
     void SetIsInvisible(bool isInvisible) { this->isInvisible = isInvisible; }

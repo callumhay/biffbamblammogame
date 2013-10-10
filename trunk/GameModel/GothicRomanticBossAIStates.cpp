@@ -208,6 +208,14 @@ void GothicRomanticBossAI::ShootOrbFromLegPoint(int legIdx, GameModel* gameModel
     toPaddleVec2D.Rotate(Randomizer::GetInstance()->RandomNumNegOneToOne() * 25.0f);
 
     gameModel->AddProjectile(new BossOrbProjectile(Point2D(spawnPos[0], spawnPos[1]), toPaddleVec2D));
+    
+    // Add an effect for the orb being shot...
+    Vector3D offset = spawnPos - this->boss->GetLeg(legIdx)->GetTranslationPt3D();
+
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetLeg(legIdx), 0.4, 
+        Colour(0.8627f, 0.1f, 0.24f), 2.5f, offset));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetLeg(legIdx), 0.3, 
+        Colour(0.8627f, 0.1f, 0.24f), offset));
 }
 
 void GothicRomanticBossAI::ShootOrbFromBody(GameModel* gameModel) const {
@@ -222,6 +230,12 @@ void GothicRomanticBossAI::ShootOrbFromBody(GameModel* gameModel) const {
     toPaddleVec2D.Rotate(Randomizer::GetInstance()->RandomNumNegOneToOne() * 12.0f);
 
     gameModel->AddProjectile(new BossOrbProjectile(Point2D(spawnPos[0], spawnPos[1]), toPaddleVec2D));
+
+    Vector3D offset(0, GothicRomanticBoss::BOTTOM_POINT_TIP_Y, 0);
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetBottomPoint(), 0.5, 
+        Colour(0.8627f, 0.1f, 0.24f), 1.0f, offset));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBottomPoint(), 0.4, 
+        Colour(0.8627f, 0.1f, 0.24f), offset));
 }
 
 void GothicRomanticBossAI::ShootRocket(const Point2D& rocketTarget, GameModel* gameModel) const {
@@ -386,7 +400,7 @@ void GothicRomanticBossAI::GenerateTargetRegenBlockPositions(std::vector<Point2D
 // Begin ConfinedAI **************************************************************
 
 ConfinedAI::ConfinedAI(GothicRomanticBoss* boss, int numItemsPerSummoning) : GothicRomanticBossAI(boss),
-summonsSinceLastSpecialItemDrop(0), numItemsPerSummoning(numItemsPerSummoning) {
+summonsSinceLastSpecialItemDrop(0), numItemsPerSummoning(numItemsPerSummoning), itemSummoningSoundID(INVALID_SOUND_ID) {
     assert(numItemsPerSummoning > 0);
 
     // Setup any animations specific to this state...
@@ -503,6 +517,9 @@ void ConfinedAI::ExecuteSummonItemsState(double dT, GameModel* gameModel) {
 
     // Check to see if the game is in a suitable state for items to be dropped...
     if (gameModel->GetCurrentStateType() != GameState::BallInPlayStateType) {
+        // Cancel the summoning sound(s)
+        gameModel->GetSound()->StopSound(this->itemSummoningSoundID, 0.5);
+        
         // If the ball isn't in play then we go to another state...
         this->SetupNextAttackStateAndMove(gameModel);
         return;
@@ -520,9 +537,18 @@ void ConfinedAI::ExecuteSummonItemsState(double dT, GameModel* gameModel) {
         GothicRomanticBossAI::GetItemDropPositions(this->numItemsPerSummoning, *level, itemDropPositions);
 
         // Generate a random set of items with the possibility of dropping the fireball (which is used to
-        // hurt the boss at this stage) -- the allowable drops have been custom taylored to ensure they are all awful for the player
-        const std::vector<GameItem::ItemType>& allowableItemDrops = level->GetAllowableItemDropTypes();
-        
+        // hurt the boss at this stage) -- the allowable drops have been custom tailored to ensure they are all awful for the player
+        std::vector<GameItem::ItemType> allowableItemDrops = level->GetAllowableItemDropTypes();
+        bool allowLevelFlip = this->AllowLevelFlipItem();
+        if (!allowLevelFlip) {
+            for (std::vector<GameItem::ItemType>::iterator iter = allowableItemDrops.begin(); iter != allowableItemDrops.end(); ++iter) {
+                if (*iter == GameItem::UpsideDownItem) {
+                    allowableItemDrops.erase(iter);
+                    break;
+                }
+            }
+        }
+
         std::vector<GameItem::ItemType> dropTypes;
         dropTypes.reserve(this->numItemsPerSummoning);
         for (int i = 0; i < this->numItemsPerSummoning; i++) {
@@ -548,6 +574,9 @@ void ConfinedAI::ExecuteSummonItemsState(double dT, GameModel* gameModel) {
             GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(itemDropPositions[i], GameItem::ITEM_WIDTH, 1.0));
             GameEventManager::Instance()->ActionBossEffect(PuffOfSmokeEffectInfo(itemDropPositions[i], 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
         }
+
+        // EVENT: Effects for the boss itself
+        GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBody(), 1.0, Colour(1.0f, 1.0f, 1.0f)));
 
         // Go to the next state...
         this->SetupNextAttackStateAndMove(gameModel);
@@ -700,7 +729,7 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             // NOTE: nextAtkAIState and nextMovePos must be set
             this->shootCountdown = this->GenerateShootCountdownAmtForMoving();
             this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
-                this->GetConfinedBossCenterMovePosition(this->nextMovePos));
+                this->GetConfinedBossCenterMovePosition(this->nextMovePos), 0.01f);
             break;
 
         case SpinLaserAttackAIState: {
@@ -731,7 +760,10 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
             // EVENT: Summon items power charge
             GameEventManager::Instance()->ActionBossEffect(
-                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
+                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown - 0.15, Colour(1.0f, 0.1f, 0.1f)));
+
+            this->itemSummoningSoundID = this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossSummonItemChargeEvent, false);
+
             break;
 
         case HurtTopAIState:
@@ -1043,7 +1075,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             // NOTE: nextAtkAIState and nextMovePos must be set
             this->shootCountdown = this->GenerateShootCountdownAmtForMoving();
             this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
-                this->GetConfinedBossCenterMovePosition(this->nextMovePos));
+                this->GetConfinedBossCenterMovePosition(this->nextMovePos), 0.01f);
             break;
 
         case SpinLaserAttackAIState: {
@@ -1095,7 +1127,10 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
             // EVENT: Summon items power charge
             GameEventManager::Instance()->ActionBossEffect(
-                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
+                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown - 0.15, Colour(1.0f, 0.1f, 0.1f)));
+
+            this->itemSummoningSoundID = this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossSummonItemChargeEvent, false);
+
             break;
 
         case GlitchAIState:
@@ -1129,7 +1164,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
         case MoveToCenterAIState:
             this->nextMovePos = GothicRomanticBossAI::Center;
             this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
-                this->GetConfinedBossCenterMovePosition(GothicRomanticBossAI::Center));
+                this->GetConfinedBossCenterMovePosition(GothicRomanticBossAI::Center), 0.01f);
             break;
 
         case DestroyConfinesAIState:
@@ -1144,6 +1179,9 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             GameEventManager::Instance()->ActionBossEffect(
                 PowerChargeEffectInfo(this->boss->GetBody(), TIME_TO_CHARGE_CONFINE_DESTROYER_BLAST, Colour(1.0f, 1.0f, 1.0f), 4.0f));
             
+            // Play sound for charging up to destroy the confines...
+            this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossChargeShockwaveEvent, false);
+
             break;
 
         default:
@@ -1319,7 +1357,8 @@ void IceBallAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
     // Play the glitch sound at the start of the animation...
     GameSound* sound = gameModel->GetSound();
     if (this->glitchShakeAnim.GetCurrentTimeValue() == 0.0) {
-        sound->AttachAndPlaySound(this->boss->GetBody(), GameSound::BossElectricitySpasmLoop, false);
+        sound->AttachAndPlaySound(this->boss->GetBody(), GameSound::BossElectricitySpasmLoop, false, 
+            gameModel->GetCurrentLevelTranslation());
     }
 
     bool isFinished = this->glitchShakeAnim.Tick(dT);
@@ -1706,7 +1745,7 @@ void FreeMovingAttackAI::ExecuteSummonItemsState(double dT, GameModel* gameModel
         GothicRomanticBossAI::GetItemDropPositions(this->numItemsPerSummoning, *level, itemDropPositions);
 
         // Generate a random set of items with the possibility of dropping the fireball (which is used to
-        // hurt the boss at this stage) -- the allowable drops have been custom taylored to ensure they are all awful for the player
+        // hurt the boss at this stage) -- the allowable drops have been custom tailored to ensure they are all awful for the player
         const std::vector<GameItem::ItemType>& allowableItemDrops = level->GetAllowableItemDropTypes();
         std::vector<GameItem::ItemType> dropTypes;
         dropTypes.reserve(this->numItemsPerSummoning);
@@ -1724,6 +1763,9 @@ void FreeMovingAttackAI::ExecuteSummonItemsState(double dT, GameModel* gameModel
             GameEventManager::Instance()->ActionBossEffect(ShockwaveEffectInfo(itemDropPositions[i], GameItem::ITEM_WIDTH, 1.0));
             GameEventManager::Instance()->ActionBossEffect(PuffOfSmokeEffectInfo(itemDropPositions[i], 0.5f*GameItem::ITEM_WIDTH, Colour(1,1,1)));
         }
+
+        // EVENT: Effects for the boss itself
+        GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBody(), 1.0, Colour(1.0f, 1.0f, 1.0f)));
 
         // Go to the next state...
         this->SetNextAttackState();

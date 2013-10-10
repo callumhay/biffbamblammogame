@@ -138,7 +138,7 @@ public:
 	// Track the status of the piece, effects properties of the piece and how it works/acts in a level
 	// NOTE: IF YOU ADD TO THIS DON'T FORGET TO UPDATE LevelPiece::RemoveStatuses !!!!!
 	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, IceCubeStatus = 0x00000002 };
-	bool HasStatus(const PieceStatus& status) const;
+	bool HasStatus(int32_t statusMask) const;
 	void AddStatus(GameLevel* level, const PieceStatus& status);
 	void RemoveStatus(GameLevel* level, const PieceStatus& status);
 	void RemoveStatuses(GameLevel* level, int32_t statusMask);
@@ -186,7 +186,7 @@ protected:
 	void DoIceCubeReflectRefractLaserBullets(Projectile* projectile, GameModel* gameModel) const;
 	void GetIceCubeReflectionRefractionRays(const Point2D& currCenter, const Vector2D& currDir, 
 	    std::list<Collision::Ray2D>& rays) const;
-    void DoPossibleFireGlobDrop(GameModel* gameModel) const;
+    bool DoPossibleFireGlobDrop(GameModel* gameModel, bool alwaysDrop) const;
 
 private:
 	DISALLOW_COPY_AND_ASSIGN(LevelPiece);
@@ -331,8 +331,8 @@ inline void LevelPiece::DebugDraw() const {
 	this->bounds.DebugDraw();
 }
 
-inline bool LevelPiece::HasStatus(const PieceStatus& status) const {
-	return (this->pieceStatus & status) == static_cast<int32_t>(status);
+inline bool LevelPiece::HasStatus(int32_t statusMask) const {
+	return (this->pieceStatus & statusMask) != 0x0;
 }
 
 inline void LevelPiece::SetBounds(const BoundingLines& bounds, const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,

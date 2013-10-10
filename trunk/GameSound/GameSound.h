@@ -162,11 +162,20 @@ public:
         BossHurtEvent,
         BossBlowingUpLoop,
         BossDeathFlashToFullscreen,
+        BossCrosshairTargetingEvent,
         BossLaserBeamLoop,
         ClassicalBossArmShakeLoop,
         ClassicalBossArmAttackEvent,
         ClassicalBossArmAttackHitEvent,
+        GothicBossSummonItemChargeEvent,
+        GothicBossChargeShockwaveEvent,
         GothicBossMassiveShockwaveEvent,
+        DecoBossArmRotateLoop,
+        DecoBossArmExtendEvent,
+        DecoBossArmRetractEvent,
+        DecoBossArmLevelCollisionEvent,
+        DecoBossArmPaddleCollisionEvent,
+        DecoBossLevelRotatingLoop,
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,
@@ -239,14 +248,17 @@ public:
     void UnpauseAllSounds();
     SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects = true);
     SoundID PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, 
-        const Point3D& position, bool applyActiveEffects = true, float minDistance = DEFAULT_MIN_3D_SOUND_DIST);
+        const Point3D& position, bool applyActiveEffects, bool applyLevelTranslation, bool applyGameFGTransform, 
+        float minDistance = DEFAULT_MIN_3D_SOUND_DIST);
+
     void StopSound(SoundID soundID, double fadeOutTimeInSecs = 0.0);
     void StopAllSoundsWithType(const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
 
     // Game object positional sound attaching/detaching functions
-    SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped);
-    void DetachAndStopAllSounds(const IPositionObject* posObj);
-    void DetachAndStopSound(const IPositionObject* posObj, const GameSound::SoundType& soundType);
+    SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped, 
+        const Vector3D& localTranslation = Vector3D(0,0,0));
+    void DetachAndStopAllSounds(const IPositionObject* posObj, double fadeOutTimeInSecs = 0.0);
+    void DetachAndStopSound(const IPositionObject* posObj, const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
     void SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused);
  
     // Sound effect functions
@@ -264,6 +276,8 @@ public:
 
     // 3D/2D Sound functions
     void SetListenerPosition(const Camera& camera);
+    void SetLevelTranslation(const Vector3D& t);
+    void SetGameFGTransform(const Matrix4x4& m);
     
     // Query functions
     bool IsSoundPlaying(SoundID soundID) const;
@@ -275,7 +289,17 @@ private:
     typedef SoundMap::iterator SoundMapIter;
     typedef SoundMap::const_iterator SoundMapConstIter;
 
-    typedef std::map<const IPositionObject*, SoundMap> AttachedSoundMap;
+    struct AttachedSoundInfo {
+        SoundMap soundMap;
+        Vector3D localTranslation;
+
+        AttachedSoundInfo() : localTranslation(0,0,0) {}
+        ~AttachedSoundInfo() {}
+
+        void ClearSoundMap();
+    };
+
+    typedef std::map<const IPositionObject*, AttachedSoundInfo> AttachedSoundMap;
     typedef AttachedSoundMap::iterator AttachedSoundMapIter;
     typedef AttachedSoundMap::const_iterator AttachedSoundMapConstIter;
 
@@ -296,6 +320,10 @@ private:
     // Active effects (i.e., effects that are affecting all playing sounds in the game right now)
     EffectSet activeEffects;
     EffectSet pausedEffects;
+
+    // 3D Transforms
+    Vector3D levelTranslation;
+    Matrix4x4 gameFGTransform;
 
     // IrrKlang stuff
     irrklang::ISoundEngine* soundEngine;
@@ -348,6 +376,14 @@ inline void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType
     std::set<SoundID> temp;
     temp.insert(ignoreSound);
     this->ToggleSoundEffect(effectType, effectOn, temp);
+}
+
+inline void GameSound::SetLevelTranslation(const Vector3D& t) {
+    this->levelTranslation = t;
+}
+
+inline void GameSound::SetGameFGTransform(const Matrix4x4& m) {
+    this->gameFGTransform = m;
 }
 
 #endif // __GAMESOUND_H__
