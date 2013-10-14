@@ -69,7 +69,7 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->itemEntries.insert(std::make_pair(GameItem::RandomItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("random.txt"))));
     
 	// Block Entry Types...
-    this->blockEntries.insert(std::make_pair(LevelPiece::Solid,             new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("solid_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Solid,             new SolidBlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("solid_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::SolidTriangle,     new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("solid_triangle_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::Breakable,         new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("breakable_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::BreakableTriangle, new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("breakable_triangle_block.txt"))));
@@ -108,8 +108,8 @@ Blammopedia::~Blammopedia() {
 	}
 	this->itemEntries.clear();
 	
-    for (std::map<LevelPiece::LevelPieceType, BlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
-		BlockEntry* blockEntry = iter->second;
+    for (std::map<LevelPiece::LevelPieceType, AbstractBlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
+		AbstractBlockEntry* blockEntry = iter->second;
 		delete blockEntry;
 		blockEntry = NULL;
 	}
@@ -195,7 +195,7 @@ Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) 
 	for (std::map<LevelPiece::LevelPieceType, std::pair<bool, bool> >::const_iterator iter = blockStatusMap.begin();
          iter != blockStatusMap.end(); ++iter) {
 
-		BlockEntry* blockEntry = blammopedia->GetBlockEntry(iter->first);
+		AbstractBlockEntry* blockEntry = blammopedia->GetBlockEntry(iter->first);
 		assert(blockEntry != NULL);
         blockEntry->SetIsLocked(iter->second.first);
         blockEntry->SetHasBeenViewed(iter->second.second);
@@ -256,7 +256,7 @@ bool Blammopedia::WriteAsEntryStatusFile() const {
     blockOutData[0] = this->blockEntries.size();
     count = 1;
     for (BlockEntryMapConstIter iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
-        const BlockEntry* blockEntry = iter->second;
+        const AbstractBlockEntry* blockEntry = iter->second;
         const LevelPiece::LevelPieceType& pieceType = iter->first;
 		assert(blockEntry != NULL);
         assert(pieceType <= CHAR_MAX);
@@ -296,8 +296,8 @@ bool Blammopedia::InitializeEntries() {
 
     // Load level piece (block) entries
 	for (std::map<LevelPiece::LevelPieceType,
-		BlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
-		BlockEntry* blockEntry = iter->second;
+		AbstractBlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
+		AbstractBlockEntry* blockEntry = iter->second;
 		success = blockEntry->PopulateFromFile();
 		if (!success) { allSuccess = false; }
 	}
@@ -631,4 +631,54 @@ bool Blammopedia::BlockEntry::PopulateFromFile() {
 	glPopAttrib();
 
 	return success;
+}
+
+Blammopedia::SolidBlockEntry::SolidBlockEntry(const std::string& filename) : AbstractBlockEntry(filename) {
+
+}
+
+Blammopedia::SolidBlockEntry::~SolidBlockEntry() {
+    for (std::map<GameWorld::WorldStyle, Texture2D*>::iterator iter = this->blockTextureMap.begin(); 
+        iter != this->blockTextureMap.end(); ++iter) {
+
+            bool success = ResourceManager::GetInstance()->ReleaseTextureResource(iter->second);
+            UNUSED_VARIABLE(success);
+            assert(success);
+
+    }
+
+    this->blockTextureMap.clear();
+    this->blockTextureFilenameMap.clear();
+}
+
+bool Blammopedia::SolidBlockEntry::PopulateFromFile() {
+    
+    long fileLength;
+    char* fileBuffer = ResourceManager::GetInstance()->FilepathToMemoryBuffer(this->filename, fileLength);
+    if (fileBuffer == NULL || fileLength <= 0) {
+        assert(false);
+        return NULL;
+    }
+
+    std::istringstream strStream(std::string(fileBuffer), std::ios_base::in | std::ios_base::binary);
+    delete[] fileBuffer;
+    fileBuffer = NULL;
+
+    if (!Entry::PopulateBaseValuesFromStream(strStream)) {
+        return false;
+    }
+
+    glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
+    GameViewConstants::GetInstance()->GetWorldTypeBlockTextureNameMap(this->blockTextureFilenameMap);
+    for (std::map<GameWorld::WorldStyle, const char*>::const_iterator iter = this->blockTextureFilenameMap.begin();
+        iter != this->blockTextureFilenameMap.end(); ++iter) {
+
+        this->blockTextureMap.insert(std::make_pair(iter->first, static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            iter->second, Texture::Trilinear, GL_TEXTURE_2D))));
+    }
+
+    glPopAttrib();
+
+    return true;
 }

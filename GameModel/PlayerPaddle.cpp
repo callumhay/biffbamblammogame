@@ -49,7 +49,7 @@ const float PlayerPaddle::DEFAULT_ACCELERATION  = 147.0f;
 const float PlayerPaddle::DEFAULT_DECCELERATION = -170.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
-const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
+const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 6.0f;
 
 // The coefficient angle change of the ball when deflected by a moving paddle
 const int PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE = 18.0f;
@@ -473,7 +473,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
         }
     }
     if (this->levelBoundsCheckingOn) {
-	    if (minNewXPos < this->minBound) {
+	    if (minNewXPos <= this->minBound) {
 		    // The paddle bumped into the left wall
 		    this->centerPos[0] = this->minBound + halfWidthTotalWithAttachedMin;
     		
@@ -493,7 +493,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 
 		    this->hitWall = true;
 	    }
-	    else if (maxNewXPos > this->maxBound) {
+	    else if (maxNewXPos >= this->maxBound) {
 		    // The paddle bumped into the right wall
 		    this->centerPos[0] = this->maxBound - halfWidthTotalWithAttachedMax;
     		

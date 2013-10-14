@@ -294,6 +294,10 @@ public:
     double GetCurrentTimeValue() const {
         return this->x;
     }
+    double GetFinalTimeValue() const {
+        assert(!this->timePts.empty());
+        return this->timePts.back();
+    }
 	const std::vector<double>& GetTimeValues() const {
 		return this->timePts;
 	}

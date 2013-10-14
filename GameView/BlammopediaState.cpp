@@ -30,7 +30,7 @@ const int BlammopediaState::ITEM_NAME_BORDER_SIZE = 10;
 const int BlammopediaState::TOTAL_MENU_HEIGHT     = 60;
 
 const Colour BlammopediaState::SELECTION_COLOUR(1.0f, 1.0f, 0.0f);
-const Colour BlammopediaState::IDLE_COLOUR(0.75f, 0.75f, 0.75f);
+const Colour BlammopediaState::IDLE_COLOUR(0.95f, 0.95f, 0.95f);
 const float BlammopediaState::SELECTION_SCALE = 1.1f;
 
 const float BlammopediaState::NO_SELECTION_DROP_SHADOW_AMT = 0.1f;
@@ -242,7 +242,7 @@ void BlammopediaState::RenderFrame(double dT) {
             glEnd();
 
             animatedBottomY = (1.0f - tabHeightScale) * TOTAL_MENU_HEIGHT + tabHeightScale * bottomY;
-            glColor4f(0.4f, 0.6f, 0.8f, 1.0f);
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             glBegin(GL_LINES);
             glVertex3i(quadLeftX,  animatedBottomY, 1);
             glVertex3i(quadRightX, animatedBottomY, 1);
@@ -264,7 +264,7 @@ void BlammopediaState::RenderFrame(double dT) {
         glVertex3i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT, 0);
         glVertex3i(0, TOTAL_MENU_HEIGHT, 0);
         glEnd();
-        glColor4f(0.4f, 0.6f, 0.8f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         glBegin(GL_LINES);
         glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
         glVertex2i(0, TOTAL_MENU_HEIGHT);
@@ -364,6 +364,11 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
             this->SetBlammoMenuItemDeselection();
         }
         else {
+            // Do nothing if a tutorial item is activated and any button but esc is pressed
+            if (currList->GetIsItemActivated() && this->currListViewIndex == 0 && pressedButton != GameControl::EscapeButtonAction) {
+                return;
+            }
+
             currList->ButtonPressed(pressedButton);
             if (pressedButton == GameControl::EnterButtonAction || currList->GetIsItemActivated()) {
                 ItemListView::ListItem* selectedItem = currList->GetSelectedItem();
@@ -595,7 +600,10 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
 }
 
 ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia) {
-	ItemListView* blockListView = new ItemListView(Camera::GetWindowWidth(), Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
+    int furthestWorldIdx, furthestLevelIdx;
+    this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+    
+    ItemListView* blockListView = new ItemListView(Camera::GetWindowWidth(), Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
 
 	// Add each block in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
@@ -604,10 +612,17 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
     std::string finePrint;
     const Blammopedia::BlockEntryMap& blockEntries = blammopedia->GetBlockEntries();
     for (Blammopedia::BlockEntryMapConstIter iter = blockEntries.begin(); iter != blockEntries.end(); ++iter) {
-        Blammopedia::BlockEntry* blockEntry = iter->second;
+        Blammopedia::AbstractBlockEntry* blockEntry = iter->second;
         const Texture2D* texture = blammopedia->GetLockedItemTexture();
+
+        // SKIP THE PORTAL BLOCK FOR NOW
+        // TODO: REMOVE THIS!!!
+        if (blockEntry->GetName() == "Portal Block") {
+            continue;
+        }
+
         if (!blockEntry->GetIsLocked()) {
-            texture   = blockEntry->GetBlockTexture();
+            texture   = blockEntry->GetBlockTexture(furthestWorldIdx);
             currName  = blockEntry->GetName();
             currDesc  = blockEntry->GetDescription();
             finePrint = blockEntry->GetFinePrint();

@@ -61,9 +61,12 @@ std::vector<std::string> TextureFontSet::ParseTextToWidth(const std::string& s, 
 
     for (size_t i = 0; i < s.size(); i++) {
         char currChar = s.at(i);
+        if (currChar == '’') {
+            currChar = '\'';
+        }
+
 		currCount += scale * this->widthOfChars[currChar];
         
-
         if (currCount <= width && (currChar == ' ' || currChar == '\n' || currChar == '-')) {
             lastSpaceIdx = i;
             countAtSpace = currCount;

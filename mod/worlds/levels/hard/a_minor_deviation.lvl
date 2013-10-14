@@ -10,15 +10,15 @@ C(90) E E E E E E F(r) E E E E E F(l) E E E E E E C(270)
 E E E E E E E F(r) E E G E E F(l) E E E E E E E 
 E E E E E Q(f) E F(r) E G G G E F(l) E Q(f) E E E E E 
 E E E E E E E F(r) E G G G E F(l) E E E E E E E 
-E E E E E E E F(r) E E G E E F(l) E E E E E E E 
+E E E E E E E F(r) E E K(MultiBall5,MultiBall5,MultiBall5) E E F(l) E E E E E E E 
 E E E E E E E F(r) E E E E E F(l) E E E E E E E 
-E E E E T(S,lr) S F(d) T(S,ul) E E E E E T(S,ur) F(d) S T(S,ll) E E E E 
-E E E E T(S,ur) E E E E E E E E E E E T(S,ul) E E E E 
-C(0) E E E C(270) R E E E E R E E E E R C(90) E E E C(0) 
-E E E E T(S,lr) E E E E O G O E E E E T(S,ll) E E E E 
+C(0) E E E E C(270) F(d) T(S,ul) E E E E E T(S,ur) F(d) C(90) E E E E C(0) 
+E E E E T(S,lr) Q(i) E E E E E E E E E Q(i) T(S,ll) E E E E 
+E E E E S Q(i) E E E E R E E E E Q(i) S E E E E 
+E E E E S Q(i) E E E O G O E E E Q(i) S E E E E 
 E E E E S E E E G G Y G G E E E S E E E E 
 E E E E S E E O G G G G G O E E S E E E E 
-E E E E S E R G Y G K(UberBall) G Y G R E S E E E E 
+E E E E S E R G Y G Q(f) G Y G R E S E E E E 
 E E E E S E E O G G G G G O E E S E E E E 
 E E E E S E E E G G Y G G E E E S E E E E 
 E E D(MagnetPaddle){1} E S E E E E O G O E E E E S S D(MineLauncherPaddle) S S 
@@ -30,18 +30,18 @@ S E E E N E E E E E E E E E E E N E E E S
 W(1) E E E N E E E E E E E E E E E N E E E S 
 
 STARS:
-3000
-6000
-9000
-12000
+4500
+8000
+11500
 16000
+18500
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 0
 UberBall 0
+BallGrow 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0
@@ -53,7 +53,7 @@ OmniLaserBall 0
 FireBall 2
 RocketPaddle 0
 GhostBall 2
-BallShrink 2
+BallShrink 0
 UpsideDown 2
 MultiBall5 2
 BallCam 0

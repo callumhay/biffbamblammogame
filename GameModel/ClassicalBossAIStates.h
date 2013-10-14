@@ -18,6 +18,8 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
 
+#include "../GameSound/SoundCommon.h"
+
 #include "BossAIState.h"
 #include "GameLevel.h"
 
@@ -62,6 +64,8 @@ protected:
 
     AnimationMultiLerp<ColourRGBA> angryColourAnim;
     AnimationMultiLerp<Vector3D> angryMoveAnim;
+
+    SoundID laserChargeSoundID;
 
     // Attack routines
     void ExecuteLaserSpray(GameModel* gameModel);

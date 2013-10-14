@@ -71,6 +71,7 @@ void Generator::LoadExplosionWords() {
 	singleWordExplosion.push_back("Boom");
 	singleWordExplosion.push_back("Blam");
     singleWordExplosion.push_back("Blamm");
+    singleWordExplosion.push_back("Blast");
 	singleWordExplosion.push_back("Pow");
 	singleWordExplosion.push_back("Ppfft");
 	singleWordExplosion.push_back("Bam");
@@ -97,6 +98,8 @@ void Generator::LoadExplosionWords() {
 	std::vector<std::string> goodSingleWordExplosion;
 	goodSingleWordExplosion.push_back("Blaam");
     goodSingleWordExplosion.push_back("Blaamy");
+    goodSingleWordExplosion.push_back("Blasty");
+    goodSingleWordExplosion.push_back("Blasto");
 	goodSingleWordExplosion.push_back("Kabloom");
 	goodSingleWordExplosion.push_back("Kaboom");
 	goodSingleWordExplosion.push_back("Floomo");
@@ -128,15 +131,18 @@ void Generator::LoadExplosionWords() {
 	awesomeSingleWordExplosion.push_back("Kaafloom");
 	awesomeSingleWordExplosion.push_back("Kaafloomy");
 	awesomeSingleWordExplosion.push_back("Kaafloomo");
+    awesomeSingleWordExplosion.push_back("Kaablasto");
 	awesomeSingleWordExplosion.push_back("BiffBlammo");
 	awesomeSingleWordExplosion.push_back("BiffBamBlammo");
 	awesomeSingleWordExplosion.push_back("Kabblaamo");
 	awesomeSingleWordExplosion.push_back("Blooommoo");
 	awesomeSingleWordExplosion.push_back("Wablaammy");
+    awesomeSingleWordExplosion.push_back("Wamblasto");
 	awesomeSingleWordExplosion.push_back("Kaaboomy");
 	awesomeSingleWordExplosion.push_back("Kabblaamy");
 	awesomeSingleWordExplosion.push_back("BiffBammy");
 	awesomeSingleWordExplosion.push_back("Flamblam");
+    awesomeSingleWordExplosion.push_back("Flamblasto");
 	awesomeSingleWordExplosion.push_back("Explodey");
     awesomeSingleWordExplosion.push_back("Explosiony");
     awesomeSingleWordExplosion.push_back("Explooosion");

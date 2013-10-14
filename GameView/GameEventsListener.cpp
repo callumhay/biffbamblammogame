@@ -912,7 +912,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 
 			        // Don't show any effects / play any sounds if the ball is dead/dying or if the block is off screen...
                     const GameModel* gameModel = this->display->GetModel();
-                    if (!gameModel->IsOutOfGameBoundsForBall(block.GetCenter()) && 
+                    if (!gameModel->IsOutOfGameBoundsForProjectile(block.GetCenter()) && 
                         gameModel->GetCurrentStateType() != GameState::BallDeathStateType) {
 
 				        this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
@@ -920,10 +920,9 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
                         if ((gameModel->GetCurrentStateType() == GameState::BallInPlayStateType ||
                             gameModel->GetCurrentStateType() == GameState::BallOnPaddleStateType)) {
 
-				            sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, 
+				            sound->PlaySoundAtPosition(GameSound::PaddleCollateralBlockCollisionEvent, false, 
                                 block.GetPosition3D(), true, true, true);
                         }
-
 			        }
                 }
                 break;
@@ -1119,14 +1118,19 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	// Play the item moving loop - plays as the item falls towards the paddle until it leaves play
     SoundID itemMovingSoundID = sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true,
         this->display->GetModel()->GetCurrentLevelTranslation());
-    sound->SetSoundVolume(itemMovingSoundID, 0.5f);
+    sound->SetSoundVolume(itemMovingSoundID, 0.33f);
 
 	debug_output("EVENT: Item Spawned: " << item);
 }
 
 void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
 	// Stop the item moving sounds
-    this->display->GetSound()->DetachAndStopAllSounds(&item);
+    GameSound* sound = this->display->GetSound();
+    double fadeoutTime = 0.0;
+    if (this->display->GetModel()->IsOutOfGameBoundsForItem(item.GetCenter())) {
+        fadeoutTime = 1.0;
+    }
+    sound->DetachAndStopAllSounds(&item, fadeoutTime);
 
 	// Remove any previous item drop effect
 	this->display->GetAssets()->GetESPAssets()->RemoveItemDropEffect(item);
@@ -1203,7 +1207,7 @@ void GameEventsListener::ItemTimerStartedEvent(const GameItemTimer& itemTimer){
 }
 
 void GameEventsListener::ItemTimerStoppedEvent(const GameItemTimer& itemTimer) {
-	this->display->GetAssets()->GetItemAssets()->TimerStopped(&itemTimer);
+	this->display->GetAssets()->GetItemAssets()->TimerStopped(&itemTimer, *this->display->GetModel());
 
 	debug_output("EVENT: Item timer stopped/expired: " << itemTimer);
 }

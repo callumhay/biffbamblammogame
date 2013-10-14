@@ -67,6 +67,7 @@ particlePulseIceBallAura(0, 0),
 particlePulseOrb(0, 0),
 particleLargeGrowthSuperFastPulser(0, 0),
 beamEndPulse(0, 0),
+flarePulse(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
 particleLargeGrowth(1.0f, 2.2f),
@@ -133,6 +134,7 @@ infinityTex(NULL),
 circleTex(NULL),
 outlinedHoopTex(NULL),
 dropletTex(NULL),
+flareTex(NULL),
 happyFaceTex(NULL),
 neutralFaceTex(NULL),
 sadFaceTex(NULL),
@@ -266,6 +268,8 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->outlinedHoopTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->dropletTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
     assert(removed);
 
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->happyFaceTex);
@@ -788,6 +792,11 @@ void GameESPAssets::InitESPTextures() {
             GameViewConstants::GetInstance()->TEXTURE_DROPLET, Texture::Trilinear));
         assert(this->dropletTex != NULL);
     }
+    if (this->flareTex == NULL) {
+        this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE, Texture::Trilinear));
+        assert(this->flareTex != NULL);
+    }
 
     if (this->happyFaceTex == NULL) {
         this->happyFaceTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -1238,6 +1247,10 @@ void GameESPAssets::InitStandaloneESPEffects() {
     orbPulseSettings.pulseRate = 0.75f;
     this->particlePulseOrb = ESPParticleScaleEffector(orbPulseSettings);
 
+    ScaleEffect flarePulseSettings;
+    flarePulseSettings.pulseGrowthScale = 1.2f;
+    flarePulseSettings.pulseRate        = 5.0f;
+    this->flarePulse = ESPParticleScaleEffector(flarePulseSettings);
 
     std::vector<ColourRGBA> starFlashColours;
     starFlashColours.reserve(6);
@@ -3567,32 +3580,12 @@ void GameESPAssets::AddBossLaserBeamEffect(const Beam& beam) {
     std::list<ESPEmitter*> beamEmitters;
     this->AddTypicalBeamSegmentEffects(beam, beamEmitters);
 
-    const BeamSegment* initialBeamSeg = *beam.GetBeamParts().begin();
-    assert(initialBeamSeg != NULL);
-    const Collision::Ray2D& originRay = initialBeamSeg->GetBeamSegmentRay();
-
     std::vector<ESPPointEmitter*>& beamOriginEmittersVec = this->beamOriginEmitters[&beam];
     if (beamOriginEmittersVec.empty()) {
-        beamOriginEmittersVec.push_back(this->CreateBeamOriginEffect(beam));
+        std::list<ESPPointEmitter*> originEffects = this->CreateBeamOriginEffects(beam);
+        beamOriginEmittersVec.insert(beamOriginEmittersVec.end(), originEffects.begin(), originEffects.end());
     }
-
-    const Colour& beamColourBase = beam.GetBeamColour();
-
-    std::vector<Colour> colours;
-    colours.reserve(7);
-    colours.push_back(beamColourBase);
-    colours.push_back(1.5f * beamColourBase);
-    colours.push_back(2.0f * beamColourBase);
-    colours.push_back(2.5f * beamColourBase);
-    colours.push_back(3.0f * beamColourBase);
-    colours.push_back(3.5f * beamColourBase);
-    colours.push_back(Colour(1,1,1));
-
-    ESPPointEmitter* beamOriginEmitter = beamOriginEmittersVec[0];
-    beamOriginEmitter->SetParticleColourPalette(colours);
-    beamOriginEmitter->SetEmitPosition(Point3D(originRay.GetOrigin(), 0));
-    beamOriginEmitter->SetEmitDirection(Vector3D(originRay.GetUnitDirection(), 0));
-    beamEmitters.push_back(beamOriginEmitter);
+    beamEmitters.insert(beamEmitters.end(), beamOriginEmittersVec.begin(), beamOriginEmittersVec.end());
 
     // Add all the beams to the active beams, associated with the given beam
     this->activeBeamEmitters.erase(&beam);
@@ -3683,23 +3676,62 @@ void GameESPAssets::AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESP
     }
 }
 
-ESPPointEmitter* GameESPAssets::CreateBeamOriginEffect(const Beam&) {
+std::list<ESPPointEmitter*> GameESPAssets::CreateBeamOriginEffects(const Beam& beam) {
+    std::list<ESPPointEmitter*> result;
 
-    ESPPointEmitter* beamOriginEffect = new ESPPointEmitter();
-    beamOriginEffect->SetSpawnDelta(ESPInterval(0.005f, 0.015f));
-    beamOriginEffect->SetInitialSpd(ESPInterval(3.0f, 4.5f));
-    beamOriginEffect->SetParticleLife(ESPInterval(0.4f, 0.65f));
-    beamOriginEffect->SetEmitAngleInDegrees(60);
-    beamOriginEffect->SetAsPointSpriteEmitter(false);
-    beamOriginEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
-    beamOriginEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    beamOriginEffect->SetParticleAlpha(ESPInterval(0.5f, 0.85f));
+    const Collision::Ray2D& originRay = beam.GetBeamParts().front()->GetBeamSegmentRay();
+    float originRadius = beam.GetBeamParts().front()->GetRadius();
 
-    beamOriginEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
-    beamOriginEffect->AddEffector(&this->particleMedVStretch);
-    beamOriginEffect->SetParticles(25, this->circleGradientTex);
+    Point3D emitPos(originRay.GetOrigin());
 
-    return beamOriginEffect;
+    ESPPointEmitter* beamOriginSparkles = new ESPPointEmitter();
+    beamOriginSparkles->SetSpawnDelta(ESPInterval(0.005f, 0.015f));
+    beamOriginSparkles->SetInitialSpd(ESPInterval(4.5f, 6.0f));
+    beamOriginSparkles->SetParticleLife(ESPInterval(0.8f, 1.2f));
+    beamOriginSparkles->SetParticleSize(ESPInterval(0.5f * originRadius, 1.0f * originRadius));
+    beamOriginSparkles->SetEmitAngleInDegrees(160);
+    beamOriginSparkles->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    beamOriginSparkles->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.15f * originRadius), ESPInterval(0.0f), ESPInterval(0.0f));
+    beamOriginSparkles->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.9f, 1.0f), ESPInterval(0.9f, 1.0f), ESPInterval(1.0f));
+    beamOriginSparkles->SetEmitPosition(emitPos);
+    beamOriginSparkles->SetEmitDirection(Vector3D(originRay.GetUnitDirection(), 0));
+    beamOriginSparkles->SetParticleRotation(ESPInterval(0.0f, 359.99f));
+    beamOriginSparkles->AddEffector(&this->particleFader);
+    beamOriginSparkles->AddEffector(&this->particleMediumGrowth);
+    beamOriginSparkles->SetParticles(30, this->sparkleTex);
+
+    ESPPointEmitter* beamOriginFlare = new ESPPointEmitter();
+    beamOriginFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    beamOriginFlare->SetInitialSpd(ESPInterval(0));
+    beamOriginFlare->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    beamOriginFlare->SetEmitAngleInDegrees(0);
+    beamOriginFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    beamOriginFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    beamOriginFlare->SetEmitPosition(emitPos);
+    beamOriginFlare->SetParticleSize(ESPInterval(5.2f * originRadius));
+    beamOriginFlare->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.98f), ESPInterval(1.0f), ESPInterval(1.0f));
+    beamOriginFlare->SetParticleRotation(ESPInterval(0.0f, 359.99f));
+    beamOriginFlare->AddEffector(&this->flarePulse);
+    beamOriginFlare->SetParticles(1, this->flareTex);
+
+    ESPPointEmitter* beamOriginRays = new ESPPointEmitter();
+    beamOriginRays->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    beamOriginRays->SetInitialSpd(ESPInterval(0));
+    beamOriginRays->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    beamOriginRays->SetEmitAngleInDegrees(0);
+    beamOriginRays->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    beamOriginRays->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    beamOriginRays->SetEmitPosition(emitPos);
+    beamOriginRays->SetParticleSize(ESPInterval(8.5f * originRadius));
+    beamOriginRays->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    beamOriginRays->SetParticleRotation(ESPInterval(0.0f, 359.99f));
+    beamOriginRays->SetParticles(1, this->explosionRayTex);
+
+    result.push_back(beamOriginSparkles);
+    result.push_back(beamOriginRays);
+    result.push_back(beamOriginFlare);
+
+    return result;
 }
 
 /**
@@ -5004,7 +5036,7 @@ void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float hei
 }
 
 void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float height) {
-    float maxSize = std::max<float>(2.0f * LevelPiece::PIECE_WIDTH, std::max<float>(width, height));
+    float avgSize = std::min<float>(1.5f * LevelPiece::PIECE_WIDTH, std::max<float>(0.75f * LevelPiece::PIECE_WIDTH, (width + height) / 2.0f));
 
     // Angry lightning bolts
 	ESPPointEmitter* angryBolts = new ESPPointEmitter();
@@ -5012,15 +5044,15 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryBolts->SetInitialSpd(ESPInterval(4.33f));
 	angryBolts->SetParticleLife(ESPInterval(2.0f));
-	angryBolts->SetParticleSize(ESPInterval(0.2f*maxSize), ESPInterval(0.4f*maxSize));
+	angryBolts->SetParticleSize(ESPInterval(0.45f*avgSize, 0.6f*avgSize), ESPInterval(0.9f*avgSize, 1.2f*avgSize));
 	angryBolts->SetEmitAngleInDegrees(45);
 	angryBolts->SetEmitPosition(Point3D(pos, 0));
 	angryBolts->SetEmitDirection(Vector3D(0,1,0));
     angryBolts->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0), ESPInterval(0), ESPInterval(1));
-    angryBolts->SetRadiusDeviationFromCenter(ESPInterval(0.0f, width/4.0f), ESPInterval(0.0f, std::min<float>(height/3.0f, 1.0f)), ESPInterval(0.0f));
+    angryBolts->SetRadiusDeviationFromCenter(ESPInterval(0.0f, width/3.0f), ESPInterval(0.0f, std::min<float>(height/3.0f, 1.0f)), ESPInterval(0.0f));
     angryBolts->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     angryBolts->AddEffector(&this->particleFader);
-	angryBolts->SetParticles(5, this->lightningBoltTex);
+	angryBolts->SetParticles(10, this->lightningBoltTex);
 
     // Angry onomatopoeia
 	ESPPointEmitter* angryOno = new ESPPointEmitter();

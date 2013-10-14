@@ -58,7 +58,7 @@ Matrix4x4 BreakableTriangleBlock::GetPieceToLevelInvTransform() const {
 // Solid Triangle Block Class Functions ---------------------------------------------------------------
 SolidTriangleBlock::SolidTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc) :
 SolidBlock(wLoc, hLoc), orient(orientation) {
-    this->colour = ColourRGBA(0.66f, 0.66f, 0.66f, 1.0f);
+    this->colour = ColourRGBA(0.55f, 0.55f, 0.55f, 1.0f);
 }
 
 SolidTriangleBlock::~SolidTriangleBlock() {
@@ -364,7 +364,7 @@ void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint,
 // Triangle Block Namespace Functions ----------------------------------------------------------------
 
 /**
- * Static class for sharing the creation of triangle boundries used by the triangle block classes.
+ * Static class for sharing the creation of triangle boundaries used by the triangle block classes.
  * Returns: bounding lines for the given triangle.
  */
 BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNormals, Orientation triOrient, const Point2D& center, 
@@ -415,15 +415,15 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
             longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::UpperLeft);
             shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::UpperLeft);
 
-            longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+            longSide  = Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
                 center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
             shortSide = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
                 center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 
             if (bottomNeighborNotSolid || rightNeighborNotSolid) {
-                hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::UpperLeft);
-                hypSide				= Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-                    center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+                hypSideNorm = GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::UpperLeft);
+                hypSide     = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+                              center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 
                 boundingLines.push_back(hypSide);
                 boundingNorms.push_back(hypSideNorm);

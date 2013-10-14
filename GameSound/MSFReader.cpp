@@ -388,6 +388,10 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, FireFrozeEvent));
 
 
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, TurretRocketFiredEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, TurretRocketMovingLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossRocketFiredEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossRocketMovingLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketLaunchEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketMovingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketExplodedEvent));
@@ -398,6 +402,8 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBeamFiringLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserDeflectedByShieldEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketOrMineDeflectedByShieldEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleLaserBulletCollisionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleCollateralBlockCollisionEvent));
 
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallSafetyNetCreatedEvent));
@@ -426,6 +432,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmShakeLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackHitEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossPowerChargeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossSummonItemChargeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossChargeShockwaveEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossMassiveShockwaveEvent));

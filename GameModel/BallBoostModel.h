@@ -47,7 +47,7 @@ public:
     BallBoostModel(GameModel* gameModel);
     ~BallBoostModel();
 
-    void Tick(double dT);
+    void Tick(const GameModel& gameModel, double dT);
 
     // Events that indicate changes to the boost model's state - based on input from the player
     void BallBoostDirectionPressed(float x, float y);
@@ -78,7 +78,7 @@ public:
 
     void SetInvertBallBoostDir(bool isInverted);
     
-    void IncrementBoostChargeByPercent(double percent);
+    void IncrementBoostChargeByPercent(const GameModel& gameModel, double percent);
     
     void ReleaseBulletTime();
 
@@ -109,7 +109,7 @@ private:
     void SetCurrentState(const BulletTimeState& newState);
     void RecalculateBallZoomBounds();
     
-    void IncrementBoostChargeByTime(double timeInSecs);
+    void IncrementBoostChargeByTime(const GameModel& gameModel, double timeInSecs);
     bool WasBoostReleasedSoftly();
 
     DISALLOW_COPY_AND_ASSIGN(BallBoostModel);
@@ -186,8 +186,8 @@ inline float BallBoostModel::GetBoostChargePercentage() const {
     return static_cast<float>(this->elapsedBoostChargeTime / this->boostChargeTime);
 }
 
-inline void BallBoostModel::IncrementBoostChargeByPercent(double percent) {
-    this->IncrementBoostChargeByTime(percent * this->boostChargeTime);
+inline void BallBoostModel::IncrementBoostChargeByPercent(const GameModel& gameModel, double percent) {
+    this->IncrementBoostChargeByTime(gameModel, percent * this->boostChargeTime);
 }
 
 /**

@@ -155,6 +155,11 @@ TEXTURE_SAD_FACE(TEXTURE_DIRECTORY     "/sad_face_64x64.png"),
 TEXTURE_EXPLOSION_ANIMATION(TEXTURE_DIRECTORY "/explosion_animation_256x256.png"),
 TEXTURE_LIGHTNING_ANIMATION(TEXTURE_DIRECTORY "/electricity_animation_256x256.png"),
 
+TEXTURE_CLASSICAL_BLOCK_IMG(TEXTURE_DIRECTORY "/classical_block256x128.png"),
+TEXTURE_GOTHIC_ROMANTIC_BLOCK_IMG(TEXTURE_DIRECTORY "/gothic_romantic_block256x128.png"),
+TEXTURE_NOUVEAU_BLOCK_IMG(TEXTURE_DIRECTORY "/nouveau_block256x128.png"),
+TEXTURE_DECO_BLOCK_IMG(TEXTURE_DIRECTORY "/deco_block256x128.png"),
+
 TEXTURE_MULTIPLIER_BANG(TEXTURE_DIRECTORY           "/multipler_bang_128x128.png"),
 TEXTURE_MULTIPLIER_GAGE_OUTLINE(TEXTURE_DIRECTORY   "/multiplier_gage_128x128.png"),
 TEXTURE_MULTIPLIER_GAGE_GRADIENT(TEXTURE_DIRECTORY  "/multiplier_gage_gradient_128x128.png"),
@@ -522,6 +527,14 @@ void GameViewConstants::GetMouseButtonLabelOffset(MouseButtonType buttonType, fl
             assert(false);
             break;
     }
+}
+
+void GameViewConstants::GetWorldTypeBlockTextureNameMap(std::map<GameWorld::WorldStyle, const char*>& styleToTexName) const {
+    styleToTexName.clear();
+    styleToTexName.insert(std::make_pair(GameWorld::Classical, TEXTURE_CLASSICAL_BLOCK_IMG));
+    styleToTexName.insert(std::make_pair(GameWorld::GothicRomantic, TEXTURE_GOTHIC_ROMANTIC_BLOCK_IMG));
+    styleToTexName.insert(std::make_pair(GameWorld::Nouveau, TEXTURE_NOUVEAU_BLOCK_IMG));
+    styleToTexName.insert(std::make_pair(GameWorld::Deco, TEXTURE_DECO_BLOCK_IMG));
 }
 
 /**

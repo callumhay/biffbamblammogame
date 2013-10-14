@@ -6,7 +6,7 @@
 
 // Main menu background music (looped)
 MainMenuBackgroundLoop {
-	file = resources/bg_piano.ogg
+	file = resources/MainMenuBackgroundLoop.ogg
 }
 
 // Plays when the user highlights (i.e., changes the selection to) a new item in a menu
@@ -337,19 +337,24 @@ FireFrozeEvent {
 
 // Projectile and Beam Events ************************************************
 
-// TurretRocketFiredEvent
-// TurretRocketMovingLoop
-// BossRocketFiredEvent
-// BossRocketMovingLoop
-
+TurretRocketFiredEvent {
+	file = resources/TurretRocketFiredEvent.ogg
+}
+TurretRocketMovingLoop {
+	file = resources/TurretRocketMovingLoop.ogg
+}
+BossRocketFiredEvent {
+	file = resources/BossRocketFiredEvent.ogg
+}
+BossRocketMovingLoop {
+	file = resources/BossRocketMovingLoop.ogg
+}
 PaddleRocketLaunchEvent {
 	file = resources/PaddleRocketLaunchEvent.ogg
 }
-
 PaddleRocketMovingLoop {
 	file = resources/PaddleRocketMovingLoop.ogg
 }
-
 RocketExplodedEvent {
 	file = resources/RocketExplodedEvent.ogg
 }
@@ -367,7 +372,7 @@ MineExplodedEvent {
 }
 
 LaserBulletShotEvent {
-	file = 
+	file = resources/LaserBulletShotEvent.ogg
 }
 
 LaserBeamFiringLoop {
@@ -382,37 +387,37 @@ RocketOrMineDeflectedByShieldEvent {
 	file = resources/RocketOrMineDeflectedByShieldEvent.ogg
 }
 
-// PaddleLaserBulletCollisionEvent {
-// }
+PaddleLaserBulletCollisionEvent {
+	file = resources/PaddleLaserBulletCollisionEvent.ogg
+}
 
 // PaddleLaserBeamCollisionEvent {
 // }
 
-// PaddleCollateralBlockCollisionEvent {
-// }
+PaddleCollateralBlockCollisionEvent {
+	file = resources/PaddleCollateralBlockCollisionEvent.ogg
+}
+
 
 // Game Item Events **********************************************************
 
 BallSafetyNetCreatedEvent {
 	file = resources/safety_net_created.ogg
 }
-
 BallSafetyNetDestroyedEvent {
 	file = resources/BallSafetyNetDestroyedEvent.ogg
 }
 
 LevelFlipEvent {
-	file = 
+	file = resources/LevelFlipEvent.ogg
 }
-
 LevelUnflipEvent {
-	file =
+	file = resources/LevelUnflipEvent.ogg
 }
 
 PaddleShieldActivatedEvent {
 	file = resources/PaddleShieldActivatedEvent.ogg
 }
-
 PaddleShieldDeactivatedEvent {
 	file = resources/PaddleShieldDeactivatedEvent.ogg
 }
@@ -428,28 +433,24 @@ ItemSpawnedEvent {
 PowerUpItemActivatedEvent {
 	file = resources/PowerUpItemActivatedEvent.ogg
 }
-
 PowerNeutralItemActivatedEvent {
 	file = resources/power_neutral_item.ogg
 }
-
 PowerDownItemActivatedEvent {
 	file = resources/power_down_item.ogg
 }
 
-// TODO - hook not implemented yet
 ItemTimerEndingLoop {
-	file =
+	file = resources/ItemTimerEndingLoop.ogg
 }
-// TODO - hook not implemented yet
 ItemTimerEndedEvent {
-	file = 
+	file = resources/ItemTimerEndedEvent.ogg
 }
 
 // NOTE: This happens a lot in-game and probably shouldn't have a sound/loop associated with it
 // but I'm leaving it just in case something works
 ItemMovingLoop {
-	file = 
+	file = resources/ItemMovingLoop.ogg
 }
 
 // Boss-specific Events ******************************************************
@@ -496,8 +497,9 @@ ClassicalBossArmAttackHitEvent {
 }
 // Occurs when the classical boss charges up its laser-shooting eye ball right
 // before its laser barrage attack
-// ClassicalBossPowerChargeEvent {
-// }
+ClassicalBossPowerChargeEvent {
+	file = resources/ClassicalBossPowerChargeEvent.ogg
+}
 
 // Occurs when the boss is about to unleash a summoning attack, where it summons 
 // a bunch of nasty items to decend upon the paddle
@@ -570,15 +572,13 @@ FiveStarsAcquiredEvent {
 }
 
 ScoreMultiplierIncreasedTo2Event {
-	file = 
+	file = resources/ScoreMultiplierIncreasedTo2Event.ogg
 }
-
 ScoreMultiplierIncreasedTo3Event {
-	file = 
+	file = resources/ScoreMultiplierIncreasedTo3Event.ogg
 }
-
 ScoreMultiplierIncreasedTo4Event {
-	file = 
+	file = resources/ScoreMultiplierIncreasedTo4Event.ogg
 }
 
 ScoreMultiplierLostEvent {
@@ -587,31 +587,31 @@ ScoreMultiplierLostEvent {
 
 // TODO... Make the sounds increase in pitch (or something) to indicate that good things are happening...
 BlockBrokenMultiplierCounterInc1 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc1.ogg
 }
 BlockBrokenMultiplierCounterInc2 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc2.ogg
 }
 BlockBrokenMultiplierCounterInc3 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc3.ogg
 }
 BlockBrokenMultiplierCounterInc4 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc4.ogg
 }
 BlockBrokenMultiplierCounterInc5 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc5.ogg
 }
 BlockBrokenMultiplierCounterInc6 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc6.ogg
 }
 BlockBrokenMultiplierCounterInc7 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc7.ogg
 }
 BlockBrokenMultiplierCounterInc8 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc8.ogg
 }
 BlockBrokenMultiplierCounterInc9 {
-	file =
+	file = resources/BlockBrokenMultiplierCounterInc9.ogg
 }
 
 // TODO: Event for when a secret is revealed?

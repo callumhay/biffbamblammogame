@@ -126,6 +126,10 @@ public:
         FireFrozeEvent,
 
         // -> Projectile and beam sounds
+        TurretRocketFiredEvent,
+        TurretRocketMovingLoop,
+        BossRocketFiredEvent,
+        BossRocketMovingLoop,
 		PaddleRocketLaunchEvent,
         PaddleRocketMovingLoop,
         //BossRocketMovingLoop,
@@ -138,6 +142,8 @@ public:
 		LaserBeamFiringLoop,
         LaserDeflectedByShieldEvent,
         RocketOrMineDeflectedByShieldEvent,
+        PaddleLaserBulletCollisionEvent,
+        PaddleCollateralBlockCollisionEvent,
 
         // -> Item sounds
 		BallSafetyNetCreatedEvent,
@@ -167,6 +173,7 @@ public:
         ClassicalBossArmShakeLoop,
         ClassicalBossArmAttackEvent,
         ClassicalBossArmAttackHitEvent,
+        ClassicalBossPowerChargeEvent,
         GothicBossSummonItemChargeEvent,
         GothicBossChargeShockwaveEvent,
         GothicBossMassiveShockwaveEvent,

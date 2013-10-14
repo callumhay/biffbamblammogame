@@ -70,7 +70,7 @@ public:
 
 	// Ghost ball may pass through
 	bool GhostballPassesThrough() const {
-		return true;
+		return false;
 	}
 
 	// Light beams will extinguish on contact

@@ -284,7 +284,7 @@ void DecoBossAIState::ShootLightningBoltAtPaddle(GameModel* gameModel) {
         std::max<float>(BossLightningBoltProjectile::SPD_DEFAULT, spdMultiplier * this->GetMaxXSpeed())));
 
     // Add an effect for it
-    // EVENT: Boss shot a laser out of its eye, add effects for it...
+    // EVENT: Boss shot a lightning bolt, add an effect for it
     Vector3D offset = this->boss->GetLightningFireVec3D();
     GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetLightningRelay(), 0.4, 
         Colour(0.9f, 0.78f, 1.0f), 1.5f, offset));

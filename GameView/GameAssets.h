@@ -91,7 +91,7 @@ public:
 	void DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO);
     void DrawMiscEffects(const GameModel& gameModel);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
-	void DrawTimers(double dT, const Camera& camera);
+	void DrawTimers(double dT, const Camera& camera, const GameModel& gameModel);
 
 	void DrawBeams(const GameModel& gameModel, const Camera& camera);
 	void DrawTeslaLightning(double dT, const Camera& camera);
@@ -251,6 +251,22 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };
+
+/**
+ * Draw a given item in the world.
+ */
+inline void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) {
+	BasicPointLight fgKeyLight, fgFillLight, ballLight;
+	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+	this->itemAssets->DrawItem(dT, camera, gameItem, fgKeyLight, fgFillLight, ballLight);
+}
+
+/**
+ * Draw the HUD timer for the given timer type.
+ */
+inline void GameAssets::DrawTimers(double dT, const Camera& camera, const GameModel& gameModel) {
+	this->itemAssets->DrawTimers(dT, camera, gameModel);
+}
 
 // Draw any currently active Tesla lightning bolts in the game.
 inline void GameAssets::DrawTeslaLightning(double dT, const Camera& camera) {

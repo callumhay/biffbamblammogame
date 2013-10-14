@@ -17,7 +17,7 @@
 #include "GameModel.h"
 
 const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS = 12;  // Length of time for the beam to be firing
-const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND         = 120; // Damage per second that the paddle laser does to blocks and stuff																															// NOTE: a typical block has about 100 life
+const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND         = 100; // Damage per second that the paddle laser does to blocks and stuff																															// NOTE: a typical block has about 100 life
 
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameModel* gameModel) : 
 Beam(PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), 

@@ -1,6 +1,7 @@
 Size Matters
-15 29
+15 30
 E E E E E D(PaddleGrow,PaddleGrow,PaddleGrow){2} E E E E E E E E E 
+E E E E E E E E E E E E E E E 
 E E E S S S S S S S S E R E E 
 S S S S E E E E E E S R R R E 
 S E E N E E E E E E N E R R E 
@@ -32,10 +33,10 @@ S E E E E E E E E E N E E E W(1)
 
 STARS:
 8000
-12000
 15000
-20000
+19500
 25000
+29000
 
 PaddleGrow 0
 PoisonPaddle 2
@@ -52,7 +53,7 @@ InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 2
-RocketPaddle 2
+RocketPaddle 0
 GhostBall 2
 BallShrink 2
 UpsideDown 2

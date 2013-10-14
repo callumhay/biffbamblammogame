@@ -23,22 +23,22 @@ S E E E E E E E E E E S G E E
 S E E E E E E E E E E S G E E 
 S E E E E E E E E E E S G E E 
 S E E E E E E E E E E S S S S 
-S E E E E E E E E E E S S S S 
+S E E E E E E E E E E N E E S 
 S E E E E E E E E E E N E E W(0) 
 
 STARS:
-8000
+10000
 15000
 20000
-24000
+25000
 28000
 
 PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -48,7 +48,7 @@ InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 2
-RocketPaddle 2
+RocketPaddle 0
 GhostBall 2
 BallShrink 2
 UpsideDown 2
