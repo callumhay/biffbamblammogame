@@ -18,6 +18,7 @@
 #include "PaddleRemoteControlRocketProjectile.h"
 
 #include "../BlammoEngine/Camera.h"
+#include "../GameSound/GameSound.h"
 
 // Time of level flip transform linear interpolation
 const double GameTransformMgr::SECONDS_TO_FLIP = 0.9;
@@ -659,20 +660,36 @@ Matrix4x4 GameTransformMgr::GetCameraTransform() const {
 
 void GameTransformMgr::StartLevelFlipAnimation(double dT, GameModel& gameModel) {
 	UNUSED_PARAMETER(dT);
-	UNUSED_PARAMETER(gameModel);
 
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& levelFlipAnim = this->animationQueue.front();
 	assert(levelFlipAnim.type == GameTransformMgr::LevelFlipAnimation);
 
-	// Find any existing animations and hault them elegantly
+	// Find any existing animations and halt them elegantly
 	this->levelFlipAnimations.clear();
 
     // Pause the game while we flip the level
     gameModel.SetPause(GameModel::PauseState);
 
+    GameSound* sound = gameModel.GetSound();
+    bool canPlaySound = GameState::IsGameInPlayState(gameModel) || 
+        gameModel.GetCurrentStateType() == GameState::BallDeathStateType;
+    
+    int finalDegRotX = 0;
+    if (this->isFlipped) {
+        finalDegRotX = 0;
+        if (canPlaySound) {
+            sound->PlaySound(GameSound::LevelUnflipEvent, false);
+        }
+    }
+    else {
+        finalDegRotX = 180;
+        if (canPlaySound) {
+            sound->PlaySound(GameSound::LevelFlipEvent, false);
+        }
+    }
+
 	// Setup the animations for flipping
-	int finalDegRotX = this->isFlipped ? 0 : 180;
 	double percentFlippedX = abs(finalDegRotX - this->currGameDegRotX) / 180.0;
 	double timeToFlipX = percentFlippedX * GameTransformMgr::SECONDS_TO_FLIP;
 	AnimationLerp<float> flipAnimationRotX(&this->currGameDegRotX);

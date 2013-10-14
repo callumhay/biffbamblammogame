@@ -32,7 +32,7 @@ intensityParam(NULL), alphaParam(NULL), sceneSamplerParam(NULL), intensity(0.0f)
     this->alphaParam     = cgGetNamedEffectParameter(this->cgEffect, "Alpha");
 
 	// Initialize CG sampler parameters
-	this->sceneSamplerParam		= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->sceneSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
 
 	debug_cg_state();
 }

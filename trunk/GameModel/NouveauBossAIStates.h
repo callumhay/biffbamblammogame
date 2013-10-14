@@ -104,7 +104,7 @@ protected:
     
     virtual void GoToNextRandomAttackState() = 0;
 
-    void ExecuteLaserArcSpray(const Point2D& originPos, GameModel* gameModel);
+    void ExecuteLaserArcSpray(const BossBodyPart* shootingBodyPart, const Point2D& originPos, GameModel* gameModel);
 
     Point2D ChooseBossPositionForPlayerToHitDomeWithLasers(bool inMiddleXOfLevel) const;
     Point2D ChooseTargetPosition(const Point2D& startPos) const;
@@ -289,7 +289,7 @@ public:
     void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
 
 private:
-    static const int NUM_HITS_UNTIL_DEAD = 3;
+    static const int NUM_HITS_UNTIL_DEAD = 5;
     static const float TOP_SPHERE_LIFE_POINTS;
     static const float TOP_SPHERE_DAMAGE_ON_HIT;
     static const float MAX_MOVE_SPEED;

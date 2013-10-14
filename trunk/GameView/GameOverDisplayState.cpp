@@ -26,7 +26,7 @@ const Colour GameOverDisplayState::MENU_ITEM_ACTIVE_COLOUR	= Colour(1.0f, 1.0f, 
 const Colour GameOverDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
 GameOverDisplayState::GameOverDisplayState(GameDisplay* display) :
-DisplayState(display), renderPipeline(display), gameOverMenu(NULL),
+DisplayState(display), renderPipeline(display), gameOverMenu(NULL), starryBG(NULL),
 deathFSEffect(display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()),
 maxMenuItemWidth(0.0f), menuHeight(0.0f), selectedAndActivatedItem(-1), gameOverSoundID(INVALID_SOUND_ID) {
 
@@ -35,6 +35,10 @@ maxMenuItemWidth(0.0f), menuHeight(0.0f), selectedAndActivatedItem(-1), gameOver
 	this->gameOverLabel.SetColour(Colour(1, 0, 0));
 	this->gameOverLabel.SetDropShadow(Colour(0.85f, 0.85f, 0.85f), 0.05f);
     this->gameOverLabel.SetScale(1.25f * this->display->GetTextScalingFactor());
+
+    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+    assert(this->starryBG != NULL);
 
     this->SetupMenu();
     this->SetState(FadeToDeathState);
@@ -49,6 +53,11 @@ GameOverDisplayState::~GameOverDisplayState() {
     this->topMenuEventHandler = NULL;
     delete this->quitSubMenuEventHandler;
     this->quitSubMenuEventHandler = NULL;
+
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
+    UNUSED_VARIABLE(success);
 
     // Make sure the game over sound is stopped
     this->display->GetSound()->StopSound(this->gameOverSoundID, 0.5);
@@ -79,6 +88,13 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
+
+    // Draw the starry background...
+    this->starryBG->BindTexture();
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+    this->starryBG->UnbindTexture();
 
     this->deathFSEffect.Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
 
@@ -134,9 +150,6 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
 			        // Clean up any misc. visual effects
 			        this->display->GetAssets()->DeactivateMiscEffects();
 			        
-                    // Kill all sounds
-			        sound->StopAllSounds();
-
                     // Reset the level
                     this->display->GetModel()->ResetCurrentLevel();
 
@@ -310,13 +323,23 @@ void GameOverDisplayState::SetupMenu() {
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
     UNUSED_PARAMETER(itemIndex);
+
+    // Play the sound effect associated with menu item changing/being highlighted by the user
+    GameSound* sound = this->state->display->GetSound();
+    sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false);
 }
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
-	// Play the sound effect assoicated with menu item selection/activation
-	//GameSound* sound = this->mainMenuState->display->GetSound();
-    //sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, 1);
-    
+
+	GameSound* sound = this->state->display->GetSound();
+
+    if (itemIndex == this->state->retryMenuItem) {
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+    }
+    else if (itemIndex == this->state->backToMainMenuItem) {
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+    }
+
     if (itemIndex != this->state->exitGameItem) {
         this->state->selectedAndActivatedItem = itemIndex;
         this->state->SetState(FadeOutState);

@@ -1,10 +1,11 @@
 Bend it Like Maxwell
-11 25
+11 27
 E E E E E S S S S S S 
-E E E S S T(P,ul) E N E G S 
-S S S T(P,ul) E E E N E G S 
-S T(P,ul) O E R R R S S S S 
-S Y E E R R R E D(LaserBulletPaddle,LaserBeamPaddle) E S 
+E E E S S T(P,ul) E N E Q(f) S 
+S S S T(P,ul) E E E N E Q(f) S 
+S T(P,ul) O E R R R N E Q(f) S 
+S E O E R R R S S S S 
+S Y E E R R R T(S,ur) D(LaserBulletPaddle,LaserBeamPaddle) S S 
 S E O E Y E R E E E S 
 S Y E Y E R E R R R S 
 S E R E Y E K(MineLauncherPaddle) E R E S 
@@ -15,8 +16,9 @@ S E Y E G E G E Y E S
 S Y E O E Y E O E Y S 
 S E R E Y E Y E R E S 
 S G E G E G E G E G S 
-S Y Y Y T(S,ll) P T(S,lr) Y Y Y S 
+S Y Y Y Q(f) P Q(f) Y Y Y S 
 S E E T(G,ur) G G G T(G,ul) E E S 
+S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -29,9 +31,9 @@ S E E E E E E E E E S
 STARS:
 3000
 6000
-8000
+9000
 12000
-16000
+13500
 
 PaddleGrow 1
 PoisonPaddle 0

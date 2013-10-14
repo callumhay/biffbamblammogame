@@ -1,15 +1,15 @@
 The Ol' Switcheroo
 21 26
 E E E E E E E E E E E G E E E E E E E E E 
-E S S S S S S S S S S E S S S S S S S S S 
-E S E L E E E E E E S E S E E E E E E E S 
+E E S S S S S S S S S E S S S S S S S S S 
+E S T(S,ul) L E E E E E T(S,ur) S E S E E E E E E E S 
 E S E E E E E E E E S E S E C(90) E E E W(3) E S 
 E S E E E E E E E E S E S E E E E E E E S 
 E S E E E E E E E G S S S N N N S S S S S 
 E S E E E E E E G T(Y,ul) E E E E E E S E E E S 
 E S E E E E E G T(Y,ul) E E K(MultiBall5) E E Q(f) E S E W(2) E S 
-E S E E E E G T(Y,ul) E E E E E E E E S E E E S 
-E S S S S G T(Y,ul) E E E E R E E E E S N N N S 
+E S T(S,ll) E E E G T(Y,ul) E E E E E E E E S E E E S 
+E E S S S G T(Y,ul) E E E E R E E E E S N N N S 
 E E S W(1) S T(Y,ul) E E E E R Y R E E E E E E E S 
 E E S S S E E E E R Y Y Y R E E E E Q(f) E S 
 E E E E S E E E R Y Y Y Y Y R E K(FireBall) E E E S 
@@ -19,8 +19,8 @@ E E E E S G E G E E R Y R E G E G E G E S
 E E E E S E G E G E R Y R E E O E O E O S 
 S S S S S G E G E E R Y R E Y E Y E Y E S 
 S D(RocketPaddle){2} D(LaserBulletPaddle){1} D(IceBall){3} S E G E G E R R R E E R E R E R S 
-S S S S S E E E E E E E E E E E E E E E S 
 S E E E S E E E E E E E E E E E E E E E S 
+S S S S S E E E E E E E E E E E E E E E S 
 S E E E S E E E E E E E E E E E E E E E S 
 S E E E S E E E E E E E E E E E E E E E S 
 S E E E N E E E E E E E E E E E E E E E S 
@@ -28,18 +28,18 @@ S E E E N E E E E E E E E E E E E E E E S
 S E E E N E E E E E E E E E E E E E E E S 
 
 STARS:
-6000
+5000
 9000
-12000
-15000
-18000
+14000
+17100
+19000
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
-UberBall 2
+BallSafetyNet 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -57,6 +57,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 0
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 2

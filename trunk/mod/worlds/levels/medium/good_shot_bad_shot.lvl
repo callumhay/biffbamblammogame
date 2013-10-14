@@ -6,13 +6,13 @@ C(180) E E E E E C(270) Q(i) C(90) E E E E E C(180)
 E E E E Q(i) E E Q(i) E E Q(i) E E E E 
 E S S D(MineLauncherPaddle) N N N N N N N D(RocketPaddle) S S E 
 E S E E Q(i) E E Q(i) E E Q(i) E E S E 
-E S E K(PaddleShrink,PaddleShrink,PaddleShrink) E K(PaddleShrink,PaddleShrink,PaddleShrink) E E E K(PaddleShrink,PaddleShrink,PaddleShrink) E K(PaddleShrink,PaddleShrink,PaddleShrink) E S E 
+E S E K(PaddleGrow,PaddleGrow,PaddleGrow) E K(PaddleGrow,PaddleGrow,PaddleGrow) E E E K(PaddleGrow,PaddleGrow,PaddleGrow) E K(PaddleGrow,PaddleGrow,PaddleGrow) E S E 
 E S E E E E E I E E E E E S E 
 E S E R Q(f) G E Q(f) E G Q(f) R E S E 
 E S O E G E G E G E G E O S E 
 E S E R E G E G E G E R E S E 
-E S O E G E G E G E G E O S E 
-E S E R E G E G E G E R E S E 
+E S O E K(PaddleGrow,PaddleGrow,PaddleGrow) E K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E K(PaddleGrow,PaddleGrow,PaddleGrow) E O S E 
+E S E R E G E K(PaddleGrow,PaddleGrow,PaddleGrow) E G E R E S E 
 E S O E I E G E G E G E O S E 
 E S E R Q(f) G E Q(f) E G Q(f) R E S E 
 E S Y E G E G E G E G E Y S E 
@@ -37,11 +37,11 @@ C(90) F(r) E E E E E E E E E E E F(l) C(270)
 STARS:
 5000
 10000
-15000
-20000
-26000
+18000
+24000
+28000
 
-PaddleGrow 0
+PaddleGrow 3
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
@@ -50,7 +50,7 @@ BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 1
-PaddleShrink 3
+PaddleShrink 0
 InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 1

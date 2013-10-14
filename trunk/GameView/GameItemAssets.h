@@ -22,6 +22,9 @@
 
 #include "../GameModel/GameItem.h"
 
+#include "../GameSound/SoundCommon.h"
+
+class GameSound;
 class Mesh;
 class GameESPAssets;
 class Camera;
@@ -34,18 +37,18 @@ class BasicPointLight;
  */
 class GameItemAssets {
 public:
-	GameItemAssets(GameESPAssets* espAssets);
+	GameItemAssets(GameESPAssets* espAssets, GameSound* sound);
 	~GameItemAssets();
 	
 	bool LoadItemAssets();
-	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
+	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem,
 		const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, const BasicPointLight& ballLight) const;
 
-	void DrawTimers(double dT, const Camera& camera);
+	void DrawTimers(double dT, const Camera& camera, const GameModel& gameModel);
 
-	// On Event functions for signalling the start/stop of timers
+	// On Event functions for signaling the start/stop of timers
 	void TimerStarted(const GameItemTimer* timer);
-	void TimerStopped(const GameItemTimer* timer);
+	void TimerStopped(const GameItemTimer* timer, const GameModel& gameModel);
 
 	void ClearTimers();
 
@@ -54,8 +57,9 @@ public:
 private:
 	typedef std::map<const GameItemTimer*, AnimationMultiLerp<float> > TimerScaleAnimationMap;
 
-	Mesh* item;	// Item, picked up by the player paddle
+	Mesh* item;	                // Item, picked up by the player paddle
 	GameESPAssets* espAssets;	// Effect assets
+    GameSound* sound;           // Sound module
 
 	// Private helper load and unload functions for item assets
 	bool LoadItemMeshes();
@@ -75,9 +79,10 @@ private:
 		ItemTimerHUDElement(GameItemAssets* itemAssets, const GameItemTimer* itemTimer);
 		~ItemTimerHUDElement();
 
-		void Draw(double dT, const Camera& camera, int x, int y, int width, int height);
+		void Draw(double dT, const Camera& camera, const GameModel& gameModel, 
+            int x, int y, int width, int height);
 	
-		void StopTimer();
+		void StopTimer(const GameModel& gameModel);
 
 		int GetTextureWidth() const { return this->timerTexture->GetWidth(); }
 		int GetTextureHeight() const { return this->timerTexture->GetHeight(); }
@@ -88,7 +93,7 @@ private:
 		const GameItem::ItemType GetItemType() const { return this->itemType; }
 
 	private:
-		static const double TIMER_ALMOST_DONE_PERCENTELAPSED;
+		static const double TIMER_ALMOST_DONE_TIME_LEFT;
 
 		GameItemAssets* itemAssets;
 		const GameItemTimer* itemTimer;	// Timer associated with this HUD timer element
@@ -103,8 +108,10 @@ private:
 		AnimationMultiLerp<ColourRGBA> additiveColourAnimation;  // Any active additive colour animation for this
 		AnimationMultiLerp<float> scaleAnimation;                // Any active scale animation for this
 
+        SoundID timerAlmostDoneSoundID;
+
 		void SetState(const TimerState& state);
-		void Tick(double dT);
+		void Tick(double dT, const GameModel& gameModel);
 	};
 
 	// Mapping of currently active timers to their respective HUD elements

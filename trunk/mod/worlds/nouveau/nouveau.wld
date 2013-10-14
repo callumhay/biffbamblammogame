@@ -24,16 +24,16 @@ resources/worlds/levels/easy/all_balls_no_brains.lvl
 
 # Switch block intro levels
 resources/worlds/levels/easy/on_the_button.lvl
+resources/worlds/levels/hard/meanest_rain_ever.lvl
 
 # Switch + Cannon + rocket + magnet paddle
-resources/worlds/levels/medium/a_little_guidance_is_required.lvl
+resources/worlds/levels/medium/a_little_guidance_is_required.lvl : 190
 
 # Combine rocket/cannon mechanics, collateral blocks, ice balls, and switches...
-resources/worlds/levels/hard/the_ol_switchero.lvl : 190
-
+resources/worlds/levels/hard/the_ol_switchero.lvl 
 
 # Mine Launcher intro level
-resources/worlds/levels/easy/mine_time.lvl
+resources/worlds/levels/easy/mine_time.lvl 
 
 # Mine Launcher + cannon level
 resources/worlds/levels/medium/a_vicinity_for_proximity.lvl
@@ -49,14 +49,14 @@ resources/worlds/levels/easy/bend_it_like_maxwell.lvl
 resources/worlds/levels/medium/work_around.lvl
 
 # Prism + Switch
-resources/worlds/levels/hard/prismatic_pragmatism.lvl
+resources/worlds/levels/hard/prismatic_pragmatism.lvl : 235
 
 
 # Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius
-resources/worlds/levels/medium/size_matters.lvl
+resources/worlds/levels/medium/size_matters.lvl 
 
 # Laser beams and prisms are the only way to break the blocks, have to juggle the ball while shooting
-resources/worlds/levels/easy/frikin_laser_beams.lvl
+resources/worlds/levels/hard/frikin_laser_beams.lvl
 
 # Using the magnet item to redirect mines
 resources/worlds/levels/hard/a_minor_deviation.lvl
@@ -73,8 +73,7 @@ resources/worlds/levels/medium/mine_the_gap.lvl
 resources/worlds/levels/hard/lodestone_shootout.lvl
 
 
-
 # Boss
-resources/worlds/levels/bosses/lightbender.lvl
+resources/worlds/levels/bosses/lightbender.lvl : 255
 
 

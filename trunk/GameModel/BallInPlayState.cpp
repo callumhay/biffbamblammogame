@@ -521,7 +521,7 @@ void BallInPlayState::Tick(double seconds) {
 	this->gameModel->DoPieceStatusUpdates(seconds);
 
     // Update the boost model for the ball(s)
-    this->gameModel->boostModel->Tick(seconds);
+    this->gameModel->boostModel->Tick(*this->gameModel, seconds);
 }
 
 // n must be normalized

@@ -61,7 +61,7 @@ teslaCenterFlare(NULL), flareTex(NULL), haloTexture(NULL), haloExpandPulse(1.0f,
 	this->teslaCenterFlare->SetInitialSpd(ESPInterval(0));
 	this->teslaCenterFlare->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	this->teslaCenterFlare->SetEmitAngleInDegrees(0);
-	this->teslaCenterFlare->SetParticleAlignment(ESP::ScreenAligned);
+	this->teslaCenterFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->teslaCenterFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->teslaCenterFlare->SetEmitPosition(Point3D(0, 0, 0));
 	this->teslaCenterFlare->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));

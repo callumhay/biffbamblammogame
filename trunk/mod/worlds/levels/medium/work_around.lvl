@@ -4,8 +4,8 @@ S S S S S S S S G E G S S S S S S S S
 S T(P,ul) E E E E T(P,ur) S E E E S T(P,ul) E E E E T(P,ur) S 
 S E E E E E E S E E E S E E E E E E S 
 S G E E E E E S E E E S E E E E E G S 
-S S E E S S S S P D(LaserBulletPaddle,LaserBeamPaddle) P S S S S E E S S 
-S D(LaserBulletPaddle,LaserBeamPaddle){1} S S S E E E E E E E E E S S S S S 
+S S E E S S S S P S P S S S S E E S S 
+S D(LaserBulletPaddle,LaserBeamPaddle){1} S S S E E E Q(i) E Q(i) E E E S S S S S 
 E E E E N Y E Y Q(f) E Q(f) Y E Y N E E E S 
 E E T(P,ul) E N E Y E Q(f) E Q(f) E Y E N E D(IceBall) E S 
 E E E E N Y E Y Q(f) E Q(f) Y E Y N E E E S 
@@ -32,9 +32,9 @@ S E E E N E E E E E E E E E N E E E W(1)
 STARS:
 6000
 10000
-14000
-17000
-20000
+14500
+18000
+22000
 
 PaddleGrow 2
 PoisonPaddle 2

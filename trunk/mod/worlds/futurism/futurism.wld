@@ -21,10 +21,6 @@ resources/worlds/testing/regen_block_test.lvl
 resources/worlds/levels/medium/a_change_of_view.lvl
 
 
-# Switch Blocks + Item-drop Blocks + Really nasty items
-resources/worlds/levels/hard/meanest_rain_ever.lvl
-
-
 # Portal block intro levels
 # Rename "checker portals" to "Plinko... but with teleportation"
 resources/worlds/levels/medium/checker_portals.lvl 

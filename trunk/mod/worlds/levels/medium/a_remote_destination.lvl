@@ -30,11 +30,11 @@ S S S E E E E E E E E E E E N E E E E T(S,lr) S E
 W(1) E N E E E E E E E E E E E S S S S S S S E 
 
 STARS:
-8000
-14000
-20000
-28000
-35000
+10000
+18000
+25000
+33000
+40000
 
 PaddleGrow 0
 PoisonPaddle 2

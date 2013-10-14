@@ -1,17 +1,19 @@
 Mine the Gap
-20 27
-S S S S S D(MineLauncherPaddle) S S C(180) S S E E E E D(StickyPaddle){1} E E E E 
-S E E E E E E E E E S E E E E E E E E E 
-S G E E K(MultiBall5) E E G E E S E E E E E E E E E 
-S E G E E E G B G E S E E E E E E E E E 
+20 28
+E E C(90) E E E E E E E E E E E E E E C(180) E E 
+E E E E E E E E E E E E E E E E E E E E 
+S S C(0) S S D(MineLauncherPaddle) S S C(180) S S E E E E D(StickyPaddle){1} E E E E 
+S E Q(i) E E E E E E E F(l) E E E E E E E E E 
+S G E E K(MultiBall5) E E G E E F(l) E E E E E E C(270) E E 
+S E G E E E G B G E F(l) E E E E E E E E E 
 S Y E G E E G I G E S E E E E E E E E E 
 S E Y E G E E Y E E S E E E E E E E E E 
 S O E Y E G E E E E S E E E E E E E E E 
 S E O E Y E G E E E S E E E E E E E E E 
 S R E O E Y E G E E S E E E E E E E E E 
-S E R E O E Y E G E S R E E E E E E E E 
+S E R E O E Y E G E S Q(f) E E E E E E E E 
 S E E R E O E Y E G S E E E E E E E E C(270) 
-S E R E O E Y E G E S R E E E E E E E E 
+S E R E O E Y E G E S Q(f) E E E E E E E E 
 S R E O E Y E G E E S E E E E E E E E E 
 S E O E Y E G E E E S E E E E E E E E E 
 S O E Y E G E E E E S E E E E E E E E E 
@@ -22,25 +24,24 @@ S G E E E E E Y E E S E E E E E E E E E
 S E E E E E E E E E S E E E E E E E E E 
 S E E E E E E E E E S E E E E E E E E E 
 S E E E E E E E E E S E E E E E E E E E 
-S E E E E E E E E E S E E E E E E E E E 
-S E E E E E E E E E S S N N N N N N S S 
+S E E E E E E E E E S S S N N N N N N S 
 S E E E E E E E E E N E E E E E E E E S 
 S E E E E E E E E E N E E E E E E E E S 
-S E E E E E E E E E N E E E E E E E E W(1) 
+S E E E E E E E E E N E E E E E E E E S 
 
 STARS:
-4000
 6000
 8000
 10000
-12500
+13000
+15500
 
 PaddleGrow 2
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
-UberBall 2
+BallSafetyNet 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -58,6 +59,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 2
 MultiBall3 2
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 3
 SlowBall 2

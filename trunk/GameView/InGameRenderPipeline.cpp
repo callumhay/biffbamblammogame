@@ -371,7 +371,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
     rocketHUD->Draw(dT, camera);
 
     // Draw the timers that are currently in existence
-	gameAssets->DrawTimers(dT, camera);
+	gameAssets->DrawTimers(dT, camera, *gameModel);
 
 	// Draw any HUD special elements based on currently active items, etc.
 	gameAssets->DrawActiveItemHUDElements(dT, *gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);

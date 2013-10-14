@@ -3,19 +3,19 @@ Mine Time
 S S S S S S S S S S S S S 
 S E E E E E E E E E E E S 
 S O G G G G G G G G G O S 
-S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
-S G G G G G K(UberBall) G G G G G S 
-S G G R G G G G G R G G S 
-S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
-S G G G G G K(UberBall) G G G G G S 
+S G G G G Q(f) R Q(f) G G G G S 
+S G G G G G G G G G G G S 
+S G Q(f) R Q(f) G K(UberBall,UberBall,UberBall) G Q(f) R Q(f) G S 
+S G G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G Q(f) R Q(f) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G G S 
+S G G G G G G G G G G G S 
 S O G G G G G G G G G O S 
 S E Q(f) E Q(f) E Q(f) E Q(f) E Q(f) E S 
 S O G G G G G G G G G O S 
 S G G G G G K(UberBall) G G G G G S 
-S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
-S G G R G G G G G R G G S 
-S G G G G G K(UberBall) G G G G G S 
-S G G K(MineLauncherPaddle) G G R G G K(MineLauncherPaddle) G G S 
+S G G G G Q(f) R Q(f) G G G G S 
+S G Q(f) R Q(f) G G G Q(f) R Q(f) G S 
+S G G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G G K(UberBall) G G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G G S 
+S G G G G Q(f) R Q(f) G G G G S 
 S O G G G G G G G G G O S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -30,11 +30,11 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-5000
-10000
-20000
-33000
-44000
+15000
+30000
+50000
+75000
+87000
 
 PaddleGrow 2
 PoisonPaddle 2

@@ -727,6 +727,13 @@ void GameModel::DoProjectileCollisions(double dT) {
                 if (this->safetyNet->ProjectileCollisionCheck(projectileBoundingLines, dT, currProjectileVel)) {
                     
                     currProjectile->SafetyNetCollisionOccurred(this->safetyNet);
+                    if (currProjectile->IsMine()) {
+                        MineProjectile* mine = static_cast<MineProjectile*>(currProjectile);
+                        if (mine->GetIsAttachedToSafetyNet()) {
+                            ++iter;
+                            continue;
+                        }
+                    }
                     
                     // EVENT: The projectile was just destroyed by the safety net
                     GameEventManager::Instance()->ActionProjectileSafetyNetCollision(*currProjectile, *this->safetyNet);
@@ -923,7 +930,7 @@ void GameModel::UpdateActiveItemDrops(double seconds) {
 		currItem->Tick(seconds, *this);
 		
 		// Check to see if any have left the playing area - if so destroy them
-		if (this->IsOutOfGameBoundsForBall(currItem->GetCenter())) {
+		if (this->IsOutOfGameBoundsForItem(currItem->GetCenter())) {
 			removeItems.push_back(currItem);
 		}
 	}
@@ -1575,7 +1582,7 @@ float GameModel::GetPercentBallReleaseTimerElapsed() const {
 void GameModel::AddPercentageToBoostMeter(double percent) {
     assert(percent >= 0.0 && percent <= 1.0);
     if (this->boostModel != NULL) {
-        this->boostModel->IncrementBoostChargeByPercent(percent);
+        this->boostModel->IncrementBoostChargeByPercent(*this, percent);
     }
 }
 

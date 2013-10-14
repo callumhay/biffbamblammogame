@@ -48,7 +48,7 @@ public:
 	bool BallBlastsThrough(const GameBall& b) const;
 
 	bool GhostballPassesThrough() const {
-		return true;
+		return !this->HasInfiniteLife();
 	}
 
 	bool IsLightReflectorRefractor() const {

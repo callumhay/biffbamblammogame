@@ -220,7 +220,7 @@ void InGameMenuState::RenderFrame(double dT) {
     if (this->display->GetModel()->GetCurrentLevel()->GetHasBoss()) {
         prevYPos += scalingFactor * BOSS_ICON_SIZE/2.0f;
         this->DrawBossIcon(prevYPos);
-        prevYPos += scalingFactor * BOSS_ICON_SIZE/2.0f + scalingFactor*LABEL_STAR_GAP;
+        prevYPos += scalingFactor * BOSS_ICON_SIZE + scalingFactor*LABEL_STAR_GAP;
     }
     else {
         // Only draw high score and stars on non-boss levels

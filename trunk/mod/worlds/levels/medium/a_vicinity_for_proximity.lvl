@@ -1,7 +1,7 @@
 A Vicinity for Proximity
 18 28
 E E E E E E E S S S S S D(MineLauncherPaddle) S S S S S 
-E E E E E E E S E E E T(R,ur) R T(R,ul) E E E S 
+E E E E E E E S E E E E E E E E E S 
 E E E E E E E S E L E L E L E L E S 
 E E E E E E E S E E E E E E E E E S 
 E E E E E E E S E R L R L R L R E S 
@@ -30,18 +30,18 @@ S E E E E E E N E E E E E E E E E S
 S E E E E E E N E E E E E E E E E S 
 
 STARS:
-5000
-10000
-15000
-20000
-25000
+6000
+12000
+19000
+23000
+26000
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 1
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -50,7 +50,7 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
-FireBall 2
+FireBall 0
 RocketPaddle 2
 GhostBall 2
 BallShrink 2
@@ -60,7 +60,7 @@ BallCam 0
 MagnetPaddle 0
 MultiBall3 2
 RemoteControlRocket 0
-IceBall 2
+IceBall 0
 MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2

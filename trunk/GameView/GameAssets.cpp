@@ -108,7 +108,7 @@ magnetPaddleEffect(NULL)
 
 	// Load item assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading game items...");
-	this->itemAssets = new GameItemAssets(this->espAssets);
+	this->itemAssets = new GameItemAssets(this->espAssets, this->sound);
 	bool didItemAssetsLoad = this->itemAssets->LoadItemAssets();
     UNUSED_VARIABLE(didItemAssetsLoad);
 	assert(didItemAssetsLoad);
@@ -855,22 +855,6 @@ void GameAssets::DrawMiscEffects(const GameModel& gameModel) {
     }
 }
 
-/**
- * Draw a given item in the world.
- */
-void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) {
-	BasicPointLight fgKeyLight, fgFillLight, ballLight;
-	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	this->itemAssets->DrawItem(dT, camera, gameItem, fgKeyLight, fgFillLight, ballLight);
-}
-
-/**
- * Draw the HUD timer for the given timer type.
- */
-void GameAssets::DrawTimers(double dT, const Camera& camera) {
-	this->itemAssets->DrawTimers(dT, camera);
-}
-
 void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
     UNUSED_PARAMETER(camera);
 
@@ -1271,7 +1255,8 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
         case Projectile::BossLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
         case Projectile::BallLaserBulletProjectile: {
-            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, projectile.GetPosition3D(), true, true, true);
+            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, projectile.GetPosition3D(), 
+                true, true, true, 10*LevelPiece::PIECE_WIDTH);
             break;
         }
 
@@ -1408,11 +1393,17 @@ void GameAssets::FireRocket(const GameModel& gameModel, const RocketProjectile& 
     switch (rocketProjectile.GetType()) {
 
         case Projectile::BossRocketBulletProjectile:
-            // TODO?
+            // The rocket shot sound
+            this->sound->PlaySoundAtPosition(GameSound::BossRocketFiredEvent, false, rocketProjectile.GetPosition3D(), true, true, true);
+            // Rocket moving sound loop
+            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::BossRocketMovingLoop, true, gameModel.GetCurrentLevelTranslation());
             break;
         
         case Projectile::RocketTurretBulletProjectile:
-            // TODO?
+            // The rocket shot sound
+            this->sound->PlaySoundAtPosition(GameSound::TurretRocketFiredEvent, false, rocketProjectile.GetPosition3D(), true, true, true);
+            // Rocket moving sound loop
+            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::TurretRocketMovingLoop, true, gameModel.GetCurrentLevelTranslation());
             break;
 
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
@@ -1450,6 +1441,8 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
+            this->sound->PlaySoundAtPosition(GameSound::PaddleLaserBulletCollisionEvent, false, 
+                projectile.GetPosition3D(), true, true, true, 5*PlayerPaddle::PADDLE_WIDTH_TOTAL);
 			intensity = PlayerHurtHUD::MinorPain;
 			break;
 
@@ -1461,6 +1454,12 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
             break;
 
         case Projectile::CollateralBlockProjectile:
+            // Not necessary since it's already played when the collateral block is destroyed
+            //this->sound->PlaySoundAtPosition(GameSound::PaddleCollateralBlockCollisionEvent, false, 
+            //    projectile.GetPosition3D(), true, true, true, 10*PlayerPaddle::PADDLE_WIDTH_TOTAL);
+            intensity = PlayerHurtHUD::MajorPain;
+            break;
+
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
@@ -1754,7 +1753,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
             break;
 
         case GameItem::UpsideDownItem:
-            this->sound->PlaySound(GameSound::LevelFlipEvent, false);
+            // Moved to the GameTransformMgr
+            //this->sound->PlaySound(GameSound::LevelFlipEvent, false);
             break;
 
         case GameItem::BallGrowItem:
@@ -1839,9 +1839,10 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
             break;
 
         case GameItem::UpsideDownItem:
-            if (isGameInPlay) {
-                this->sound->PlaySound(GameSound::LevelUnflipEvent, false);
-            }
+            // Moved to the GameTransformMgr
+            //if (isGameInPlay || gameModel.GetCurrentStateType() == GameState::BallDeathStateType) {
+            //    this->sound->PlaySound(GameSound::LevelUnflipEvent, false);
+            //}
             break;
 
         case GameItem::MagnetPaddleItem:

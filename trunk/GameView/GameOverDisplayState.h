@@ -65,6 +65,8 @@ private:
     AnimationMultiLerp<float> moveMenuAnim;
     AnimationMultiLerp<float> moveLabelAnim;
 
+    Texture2D* starryBG;
+
     float maxMenuItemWidth;
     float menuHeight;
 

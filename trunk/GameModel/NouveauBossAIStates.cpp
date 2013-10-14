@@ -21,8 +21,16 @@
 #include "FullscreenFlashEffectInfo.h"
 #include "LaserBeamSightsEffectInfo.h"
 #include "PowerChargeEffectInfo.h"
+#include "ExpandingHaloEffectInfo.h"
+#include "SparkBurstEffectInfo.h"
 
 #include "../GameSound/GameSound.h"
+
+#define HALO_DISCHARGE_TIME 0.4
+#define SPARK_DISCHARGE_TIME 0.55
+#define DISCHARGE_COLOUR Colour(0.86f, 0.076f, 0.235f)
+#define BOTTOM_PT_DISCHARGE_SIZE_MULTIPLIER 1.5f
+#define SIDE_PT_DISCHARGE_SIZE_MULTIPLIER 0.25f
 
 using namespace nouveaubossai;
 
@@ -42,7 +50,8 @@ Collision::AABB2D NouveauBossAI::GenerateDyingAABB() const {
     return this->boss->GetBody()->GenerateWorldAABB();
 }
 
-void NouveauBossAI::ExecuteLaserArcSpray(const Point2D& originPos, GameModel* gameModel) {
+void NouveauBossAI::ExecuteLaserArcSpray(const BossBodyPart* shootingBodyPart, 
+                                         const Point2D& originPos, GameModel* gameModel) {
     assert(gameModel != NULL);
 
     const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
@@ -69,6 +78,14 @@ void NouveauBossAI::ExecuteLaserArcSpray(const Point2D& originPos, GameModel* ga
     gameModel->AddProjectile(new BossLaserProjectile(originPos, currLaserDir));
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(originPos, currLaserDir));
+
+    // EVENT: Energy discharge from boss
+    Point2D bodyPartPos = shootingBodyPart->GetTranslationPt2D();
+    Vector3D offset(originPos - bodyPartPos, 0.0f);
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(shootingBodyPart, HALO_DISCHARGE_TIME, 
+        DISCHARGE_COLOUR, BOTTOM_PT_DISCHARGE_SIZE_MULTIPLIER, offset));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(shootingBodyPart, SPARK_DISCHARGE_TIME, 
+        DISCHARGE_COLOUR, offset));
 }
 
 Point2D NouveauBossAI::ChooseBossPositionForPlayerToHitDomeWithLasers(bool inMiddleXOfLevel) const {
@@ -201,6 +218,13 @@ void NouveauBossAI::ShootRandomBottomSphereLaserBullet(GameModel* gameModel) {
     }   
 
     gameModel->AddProjectile(new BossLaserProjectile(shotOrigin, laserDir));
+
+    // EVENT: Energy discharge from boss
+    Vector3D offset(0.0f, NouveauBoss::BOTTOM_SPHERE_SHOOT_OFFSET_Y, 0.0f);
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetBottomHexSphere(), HALO_DISCHARGE_TIME, 
+        DISCHARGE_COLOUR, BOTTOM_PT_DISCHARGE_SIZE_MULTIPLIER, offset));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBottomHexSphere(), SPARK_DISCHARGE_TIME, 
+        DISCHARGE_COLOUR, offset));
 }
 
 void NouveauBossAI::ShootRandomSideLaserBullet(GameModel* gameModel) {
@@ -246,6 +270,13 @@ void NouveauBossAI::ShootRandomLeftSideLaserBullet(GameModel* gameModel) {
         laserDir = currPrism->GetCenter() - shootPos;
         laserDir.Normalize();
         gameModel->AddProjectile(new BossLaserProjectile(shootPos, laserDir));
+
+        // EVENT: Energy discharge from boss
+        Vector3D offset(shootPos - this->boss->GetLeftSideCurls()->GetTranslationPt2D(), 0.0f);
+        GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetLeftSideCurls(), HALO_DISCHARGE_TIME, 
+            DISCHARGE_COLOUR, SIDE_PT_DISCHARGE_SIZE_MULTIPLIER, offset));
+        GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetLeftSideCurls(), SPARK_DISCHARGE_TIME, 
+            DISCHARGE_COLOUR, offset));
     }
 }
 
@@ -279,6 +310,13 @@ void NouveauBossAI::ShootRandomRightSideLaserBullet(GameModel* gameModel) {
         laserDir = currPrism->GetCenter() - shootPos;
         laserDir.Normalize();
         gameModel->AddProjectile(new BossLaserProjectile(shootPos, laserDir));
+    
+        // EVENT: Energy discharge from boss
+        Vector3D offset(shootPos - this->boss->GetRightSideCurls()->GetTranslationPt2D(), 0.0f);
+        GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetRightSideCurls(), HALO_DISCHARGE_TIME, 
+            DISCHARGE_COLOUR, SIDE_PT_DISCHARGE_SIZE_MULTIPLIER, offset));
+        GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetRightSideCurls(), SPARK_DISCHARGE_TIME, 
+            DISCHARGE_COLOUR, offset));
     }
 }
 
@@ -438,6 +476,13 @@ void NouveauBossAI::ExecuteRapidFireSweepState(double dT, GameModel* gameModel) 
 
         // Fire the laser
         gameModel->AddProjectile(new BossLaserProjectile(this->boss->GetBottomSphereShootPt().ToPoint2D(), currShootDir));
+
+        // EVENT: Energy discharge effect
+        Vector3D offset(0.0f, NouveauBoss::BOTTOM_SPHERE_SHOOT_OFFSET_Y, 0.0f);
+        GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetBottomHexSphere(), HALO_DISCHARGE_TIME, 
+            DISCHARGE_COLOUR, BOTTOM_PT_DISCHARGE_SIZE_MULTIPLIER, offset));
+        GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBottomHexSphere(), SPARK_DISCHARGE_TIME, 
+            DISCHARGE_COLOUR, offset));
 
         this->rapidFireSweepLaserFireCountdown = this->GenerateTimeBetweenRapidFireSweepLasers();
     }
@@ -1134,7 +1179,7 @@ void SideSphereAI::UpdateState(double dT, GameModel* gameModel) {
 void SideSphereAI::ExecuteArcSprayFireState(double dT, GameModel* gameModel) {
     // Shoot lasers in an arc downward at the paddle...
     if (this->arcLaserSprayFireCountdown <= 0.0) {
-        this->ExecuteLaserArcSpray(this->boss->GetBottomSphereShootPt().ToPoint2D(), gameModel);
+        this->ExecuteLaserArcSpray(this->boss->GetBottomHexSphere(), this->boss->GetBottomSphereShootPt().ToPoint2D(), gameModel);
         this->arcLaserSprayFireCountdown = this->GenerateTimeBetweenArcSprayLasers();
     }
     else {
@@ -1540,7 +1585,8 @@ void GlassDomeAI::ExecuteArcSprayFireState(double dT, GameModel* gameModel) {
         if (this->waitingAtTargetCountdown <= 0.0) {
             
             // Shoot the lasers!
-            this->ExecuteLaserArcSpray(this->boss->GetBottomSphereShootPt().ToPoint2D(), gameModel);
+            this->ExecuteLaserArcSpray(this->boss->GetBottomHexSphere(), 
+                this->boss->GetBottomSphereShootPt().ToPoint2D(), gameModel);
 
             // Decrement the number of movements
             this->numLinearMovements--;
@@ -1636,8 +1682,7 @@ void TopSphereAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBo
     }
     // Do nothing if the we're still animating a previous hurt state
     if (this->currState == NouveauBossAI::HurtTopAIState ||
-        this->currState == NouveauBossAI::FinalDeathThroesAIState ||
-        this->topSphereWeakpt->IsCurrentlyInvulnerable()) {
+        this->currState == NouveauBossAI::FinalDeathThroesAIState) {
         return;
     }
     this->TopSphereWasHurt(ball.GetCenterPosition2D());
@@ -1650,8 +1695,7 @@ void TopSphereAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile
     }
     // Do nothing if the we're still animating a previous hurt state
     if (this->currState == NouveauBossAI::HurtTopAIState ||
-        this->currState == NouveauBossAI::FinalDeathThroesAIState ||
-        this->topSphereWeakpt->IsCurrentlyInvulnerable()) {
+        this->currState == NouveauBossAI::FinalDeathThroesAIState) {
         return;
     }
     this->TopSphereWasHurt(projectile->GetPosition());
@@ -1663,8 +1707,7 @@ void TopSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProjecti
     
     // Do nothing if the we're still animating a previous hurt state
     if (this->currState == NouveauBossAI::HurtTopAIState ||
-        this->currState == NouveauBossAI::FinalDeathThroesAIState ||
-        this->topSphereWeakpt->IsCurrentlyInvulnerable()) {
+        this->currState == NouveauBossAI::FinalDeathThroesAIState) {
         return;
     }
 
@@ -1817,7 +1860,8 @@ void TopSphereAI::ExecuteBrutalMoveAndShootState(double dT, GameModel* gameModel
                 this->waitingAtTargetCountdown = this->GenerateWaitAtTargetTime();
                 this->timeUntilNextLaserWhileWaitingAtTarget = 0.0;
 
-                this->ExecuteLaserArcSpray(this->boss->GetBottomSphereShootPt().ToPoint2D(), gameModel);
+                this->ExecuteLaserArcSpray(this->boss->GetBottomHexSphere(),
+                    this->boss->GetBottomSphereShootPt().ToPoint2D(), gameModel);
             }
         }
         else {

@@ -1,24 +1,24 @@
 Meanest Rain Ever
 13 27
-E E D(powerdowns){0} E D(powerdowns){1} E D(powerdowns){2} E D(powerdowns){3} E D(powerdowns){4} E E 
-S F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) S 
+E E D(GravityBall,GravityBall,CrazyBall,CrazyBall,BallShrink,BallShrink,FastBall,FastBall,Blackout,Blackout,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown){0} E D(GravityBall,GravityBall,CrazyBall,CrazyBall,BallShrink,BallShrink,FastBall,FastBall,Blackout,Blackout,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown){1} E D(GravityBall,GravityBall,CrazyBall,CrazyBall,BallShrink,BallShrink,FastBall,FastBall,Blackout,Blackout,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown){2} E D(GravityBall,GravityBall,CrazyBall,CrazyBall,BallShrink,BallShrink,FastBall,FastBall,Blackout,Blackout,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown){3} E D(GravityBall,GravityBall,CrazyBall,CrazyBall,BallShrink,BallShrink,FastBall,FastBall,Blackout,Blackout,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown){4} E E 
+S S S W(0) S W(1) W(2) W(3) S W(4) S S S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
-S G G G G G G G G G G G S 
+S G G Q(f) G Q(f) G Q(f) G Q(f) G G S 
 W(3) Y G G G G Y G G G G Y W(0) 
-S E E E E G Y G E E E E S 
-S E O Y E G Y G E E I E S 
-S E Y E E O B O E E E E S 
-S E E E G G Y G G E E E S 
+S E E E E G Q(f) G E E E E S 
+S E Q(f) Y E G Y G E E I E S 
+S E Y E E O B O E E E K(MultiBall5,MultiBall5,MultiBall5) S 
+S E E E K(MagnetPaddle,MagnetPaddle,MagnetPaddle) G Y G K(MagnetPaddle,MagnetPaddle,MagnetPaddle) E E E S 
 S G G O G Y R Y G O G G S 
-S G Y B Y R W(1) R Y B Y G S 
+W(1) K(MagnetPaddle,MagnetPaddle,MagnetPaddle) Q(f) B Y R W(1) R Y B Q(f) K(MagnetPaddle,MagnetPaddle,MagnetPaddle) W(3) 
 S G G O G Y R Y G O G G S 
-S E E E G G Y G G E E E S 
-S E E E E O B O E E Y E S 
-S E I E E G Y G E Y O E S 
-S E E E E G Y G E E E E S 
+S E E E K(MagnetPaddle,MagnetPaddle,MagnetPaddle) G Y G K(MagnetPaddle,MagnetPaddle,MagnetPaddle) E E E S 
+S K(MultiBall5,MultiBall5,MultiBall5) E E E O B O E E Y E S 
+S E I E E G Y G E Y Q(f) E S 
+S E E E E G Q(f) G E E E E S 
 W(2) Y G G G G Y G G G G Y W(4) 
-S G G G G G G G G G G G S 
+S G G Q(f) G Q(f) G Q(f) G Q(f) G G S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -29,39 +29,41 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-9000
-13000
-16000
+10000
 20000
-25000
+26000
+31000
+44000
 
-PaddleGrow 2
+PaddleGrow 1
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 1
+UberBall 0
 BallGrow 0
-UberBall 2
-StickyPaddle 2
-ShieldPaddle 2
-LaserBulletPaddle 2
+StickyPaddle 1
+ShieldPaddle 1
+LaserBulletPaddle 0
 PaddleShrink 2
 InvisiPaddle 2
 InvisiBall 2
-LaserBeamPaddle 2
-OmniLaserBall 2
-FireBall 2
-RocketPaddle 2
-GhostBall 2
+LaserBeamPaddle 0
+OmniLaserBall 1
+FireBall 1
+RocketPaddle 0
+GhostBall 0
 BallShrink 2
 UpsideDown 2
-MultiBall5 2
-BallCam 2
-MagnetPaddle 0
-MultiBall3 2
-IceBall 2
-SlowBall 2
-GravityBall 2
-CrazyBall 2
+MultiBall5 3
+BallCam 0
+MagnetPaddle 3
+MultiBall3 3
+RemoteControlRocket 0
+IceBall 1
+MineLauncherPaddle 0
+SlowBall 1
+GravityBall 1
+CrazyBall 0
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0

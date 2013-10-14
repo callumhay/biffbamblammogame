@@ -323,7 +323,7 @@ void BossMesh::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
     Point3D offsetPt(offsetVec[0], offsetVec[1], offsetVec[2]);
 
     Collision::AABB2D aabb = bodyPart->GetLocalBounds().GenerateAABBFromLines();
-    float minSize = std::min<float>(aabb.GetHeight(), aabb.GetWidth());
+    float minSize = std::max<float>(LevelPiece::PIECE_HEIGHT, std::min<float>(aabb.GetHeight(), aabb.GetWidth()));
 
     ESPPointEmitter* halo = new ESPPointEmitter();
     halo->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));

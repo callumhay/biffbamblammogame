@@ -2,7 +2,7 @@
  * BallOnPaddleState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -49,7 +49,7 @@ BallOnPaddleState::~BallOnPaddleState() {
 /**
  * Private helper function - since the model stores the game balls in a list we need to make sure
  * that there is ONLY one ball and retrieve only that ball.
- * Returns: The only game ball currently in existance within the game model.
+ * Returns: The only game ball currently in existence within the game model.
  */
 GameBall* BallOnPaddleState::GetGameBall() {
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();

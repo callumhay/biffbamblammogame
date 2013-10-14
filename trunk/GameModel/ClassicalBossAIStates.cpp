@@ -30,7 +30,7 @@ const float ClassicalBossAI::BOSS_WIDTH = 25.0f;
 const float ClassicalBossAI::HALF_BOSS_WIDTH = ClassicalBossAI::BOSS_WIDTH / 2.0f;
 
 ClassicalBossAI::ClassicalBossAI(ClassicalBoss* boss) : BossAIState(), boss(boss),
-currState(ClassicalBossAI::BasicMoveAndLaserSprayAIState) {
+currState(ClassicalBossAI::BasicMoveAndLaserSprayAIState), laserChargeSoundID(INVALID_SOUND_ID) {
     assert(boss != NULL);
     this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(1.0f);
 }
@@ -347,13 +347,11 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
 
         case ClassicalBossAI::PrepLaserAIState:
-            //debug_output("Entering PrepLaserAIState");
             this->countdownToLaserBarrage = this->GetLaserChargeTime();
             this->movingDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
 
             break;
         case ClassicalBossAI::MoveAndBarrageWithLaserAIState:
-            //debug_output("Entering MoveAndBarrageWithLaserAIState");
             this->laserShootTimer = 0.0;
             this->movingDir = -this->movingDir;
             break;
@@ -365,6 +363,7 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
                 BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->leftArmHurtMoveAnim.ResetToStart();
+            this->boss->GetGameModel()->GetSound()->StopSound(this->laserChargeSoundID, 0.25);
             break;
         case ClassicalBossAI::HurtRightArmAIState:
             //debug_output("Entering HurtRightArmAIState");
@@ -373,6 +372,7 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
                 BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->rightArmHurtMoveAnim.ResetToStart();
+            this->boss->GetGameModel()->GetSound()->StopSound(this->laserChargeSoundID, 0.25);
             break;
 
         case ClassicalBossAI::LostArmsAngryAIState:
@@ -814,11 +814,17 @@ void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
     }
 
     // Make sure the boss is at the correct side of the level
-    if (bossPos[0] > this->GetBossMovementMinXBound(level, BOSS_WIDTH) && 
-        bossPos[0] < this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
-
-        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed();
-        allowedToAttack = false;
+    if (this->movingDir >= 1) {
+        if (bossPos[0] < this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
+            this->desiredVel[0] = this->GetMaxSpeed();
+            allowedToAttack = false;
+        }
+    }
+    else {
+        if (bossPos[0] > this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
+            this->desiredVel[0] = -this->GetMaxSpeed();
+            allowedToAttack = false;
+        }
     }
 
     if (allowedToAttack) {
@@ -834,6 +840,7 @@ void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
                 // EVENT: Charging for laser barrage...
                 GameEventManager::Instance()->ActionBossEffect(
                     PowerChargeEffectInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
+                this->laserChargeSoundID = sound->PlaySound(GameSound::ClassicalBossPowerChargeEvent, false, true);
             }
             this->countdownToLaserBarrage -= dT;
         }
@@ -1155,13 +1162,14 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
 
         case ClassicalBossAI::MoveAndBarrageWithLaserAIState:
             this->numConsecutiveTimesBasicMoveExecuted = 0;
-            this->movingDir = -this->movingDir;
+            this->movingDir *= -1;
             break;
 
         case ClassicalBossAI::LostColumnAIState:
             this->currVel = Vector2D(0,0);
             this->desiredVel = Vector2D(0,0);
             this->columnHurtMoveAnim.ResetToStart();
+            this->boss->GetGameModel()->GetSound()->StopSound(this->laserChargeSoundID, 0.25);
             break;
 
         case ClassicalBossAI::LostAllColumnsAIState: {
@@ -1345,9 +1353,10 @@ void BodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameMo
 void BodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
     assert(gameModel != NULL);
 
+    GameSound* sound = gameModel->GetSound();
     const GameLevel* level = gameModel->GetCurrentLevel();
     assert(level != NULL);
-
+    
     // Make sure the boss is at the proper height in the level for firing the laser
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
@@ -1367,11 +1376,17 @@ void BodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
     }
 
     // Make sure the boss is at the correct side of the level
-    if (bossPos[0] > this->GetBossMovementMinXBound(level, BOSS_WIDTH) && 
-        bossPos[0] < this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
-
-        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed();
-        allowedToAttack = false;
+    if (this->movingDir >= 1) {
+        if (bossPos[0] < this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
+            this->desiredVel[0] = this->GetMaxSpeed();
+            allowedToAttack = false;
+        }
+    }
+    else {
+        if (bossPos[0] > this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
+            this->desiredVel[0] = -this->GetMaxSpeed();
+            allowedToAttack = false;
+        }
     }
 
     if (allowedToAttack) {
@@ -1387,6 +1402,7 @@ void BodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
                 // EVENT: Charging for laser barrage...
                 GameEventManager::Instance()->ActionBossEffect(
                     PowerChargeEffectInfo(this->boss->GetEye(), this->GetLaserChargeTime(), Colour(1.0f, 0.2f, 0.2f)));
+                this->laserChargeSoundID = sound->PlaySound(GameSound::ClassicalBossPowerChargeEvent, false, true);
             }
             this->countdownToLaserBarrage -= dT;
         }

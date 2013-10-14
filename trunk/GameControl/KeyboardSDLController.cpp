@@ -394,18 +394,19 @@ void KeyboardSDLController::ExecuteDisplayKeyReleasedNotifications(SDLKey key) {
 
 void KeyboardSDLController::DebugRepeatActions() {
 #ifdef _DEBUG
+    static const float MOVE_MULTIPLIER = 0.1f;
 	// Camera debug functionality ....
 	if (this->keyPressed[SDLK_KP8]) {
-		this->display->GetCamera().Move(Camera::DEFAULT_FORWARD_VEC);
+		this->display->GetCamera().Move(MOVE_MULTIPLIER*Camera::DEFAULT_FORWARD_VEC);
 	}
 	else if (this->keyPressed[SDLK_KP5]) {
-		this->display->GetCamera().Move(-Camera::DEFAULT_FORWARD_VEC);
+		this->display->GetCamera().Move(-MOVE_MULTIPLIER*Camera::DEFAULT_FORWARD_VEC);
 	}
 	else if (this->keyPressed[SDLK_KP4]) {
-		this->display->GetCamera().Move(Camera::DEFAULT_LEFT_VEC);
+		this->display->GetCamera().Move(MOVE_MULTIPLIER*Camera::DEFAULT_LEFT_VEC);
 	}
 	else if (this->keyPressed[SDLK_KP6]) {
-		this->display->GetCamera().Move(-Camera::DEFAULT_LEFT_VEC);
+		this->display->GetCamera().Move(-MOVE_MULTIPLIER*Camera::DEFAULT_LEFT_VEC);
 	}
 	else if (this->keyPressed[SDLK_KP7]) {
 		this->display->GetCamera().Rotate('y', 1.0f);

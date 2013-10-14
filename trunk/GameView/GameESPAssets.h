@@ -93,6 +93,7 @@ private:
 	ESPParticleScaleEffector beamEndPulse;
 	ESPParticleScaleEffector particleShrinkToNothing;
     ESPParticleScaleEffector particleLargeGrowthSuperFastPulser;
+    ESPParticleScaleEffector flarePulse;
 
 	ESPParticleAccelEffector ghostBallAccel1;
 	ESPParticleAccelEffector gravity;
@@ -155,6 +156,7 @@ private:
     Texture2D* chevronTex;
     Texture2D* infinityTex;
     Texture2D* dropletTex;
+    Texture2D* flareTex;
 
     Texture2D* happyFaceTex;
     Texture2D* neutralFaceTex;
@@ -276,7 +278,7 @@ private:
 	void AddPaddleLaserBeamEffect(const Beam& beam);
     void AddBossLaserBeamEffect(const Beam& beam);
     void AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESPEmitter*>& beamEmitters);
-    ESPPointEmitter* CreateBeamOriginEffect(const Beam& beam);
+    std::list<ESPPointEmitter*> CreateBeamOriginEffects(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndBlockEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamFallingBitEffect(const Beam& beam);

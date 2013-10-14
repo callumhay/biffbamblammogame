@@ -78,6 +78,7 @@ public:
     static const int DEFAULT_PADDLE_START_IDX = -1;
 
 	static const int OUT_OF_BOUNDS_BUFFER_SPACE_FOR_BALL = 10;
+    static const int OUT_OF_BOUNDS_BUFFER_SPACE_FOR_ITEM = 8;
     static const int OUT_OF_BOUNDS_BUFFER_SPACE_FOR_PROJECTILE = 13;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE_FOR_BALL;
 

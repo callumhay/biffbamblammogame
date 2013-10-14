@@ -19,6 +19,7 @@
 #include "../ESPEngine/ESPUtil.h"
 
 #include "../GameModel/GameItem.h"
+#include "../GameModel/GameWorld.h"
 
 class GameViewConstants {
 public:
@@ -155,6 +156,11 @@ public:
     const char* TEXTURE_EXPLOSION_ANIMATION;
     const char* TEXTURE_LIGHTNING_ANIMATION;
 
+    const char* TEXTURE_CLASSICAL_BLOCK_IMG;
+    const char* TEXTURE_GOTHIC_ROMANTIC_BLOCK_IMG;
+    const char* TEXTURE_NOUVEAU_BLOCK_IMG;
+    const char* TEXTURE_DECO_BLOCK_IMG;
+
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;
     const char* TEXTURE_MULTIPLIER_GAGE_GRADIENT;
@@ -227,6 +233,8 @@ public:
         float labelWidth, float labelHeight, float& offsetX, float& offsetY) const;
     void GetMouseButtonLabelOffset(MouseButtonType buttonType, float buttonSize,
         float labelWidth, float labelHeight, float& offsetX, float& offsetY) const;
+
+    void GetWorldTypeBlockTextureNameMap(std::map<GameWorld::WorldStyle, const char*>& styleToTexName) const;
 
 	// Font path constants **********************************
 	const char* FONT_SADBAD;

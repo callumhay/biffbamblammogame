@@ -65,14 +65,14 @@ BallBoostModel::~BallBoostModel() {
     GameEventManager::Instance()->ActionBallBoostLost(true);
 }
 
-void BallBoostModel::Tick(double dT) {
+void BallBoostModel::Tick(const GameModel& gameModel, double dT) {
     static bool animationDone = false;
 
     switch (this->currState) {
 
         case NotInBulletTime:
             this->totalBulletTimeElapsed = 0.0;
-            this->IncrementBoostChargeByTime(dT);
+            this->IncrementBoostChargeByTime(gameModel, dT);
             break;
 
         case BulletTimeFadeIn:
@@ -434,8 +434,16 @@ void BallBoostModel::RecalculateBallZoomBounds() {
 
 // Increments the time counter towards the next boost and add any new boosts if
 // the charge time has been hit/exceeded
-void BallBoostModel::IncrementBoostChargeByTime(double timeInSecs) {
+void BallBoostModel::IncrementBoostChargeByTime(const GameModel& gameModel, double timeInSecs) {
+    
     if (this->numAvailableBoosts >= TOTAL_NUM_BOOSTS) {
+        return;
+    }
+    
+    // If we're in remote control rocket mode we don't increment the ball boost the game also has
+    // to be on hard difficulty
+    if (gameModel.GetTransformInfo()->GetIsRemoteControlRocketCameraOn() &&
+        gameModel.GetDifficulty() == GameModel::HardDifficulty) {
         return;
     }
 

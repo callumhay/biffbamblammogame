@@ -16,6 +16,7 @@
 
 #include "GameModel/GameItem.h"
 #include "GameModel/LevelPiece.h"
+#include "GameModel/GameWorld.h"
 
 #include <string>
 #include <map>
@@ -86,32 +87,63 @@ public:
 		Texture2D* hudFillTexture;
 	};
 
-	class BlockEntry : public Entry {
+
+	class AbstractBlockEntry : public Entry {
 		friend class Blammopedia;
 	public:
-		BlockEntry(const std::string& filename) : Entry(filename), blockTexture(NULL) {}
-		~BlockEntry();
+		AbstractBlockEntry(const std::string& filename) : Entry(filename) {}
+        virtual ~AbstractBlockEntry() {}
 
-        Texture2D* GetBlockTexture() const { return this->blockTexture; }
-
-	protected:
-		bool PopulateFromFile();
-
-    private:
-        std::string blockTextureFilename;
-        Texture2D* blockTexture;
-        //Texture2D* altBlockTexture;
-
+        virtual Texture2D* GetBlockTexture(int furthestWorldIdx) const = 0;
 	};
 
+    class BlockEntry : public AbstractBlockEntry {
+        friend class Blammopedia;
+    public:
+        BlockEntry(const std::string& filename) : AbstractBlockEntry(filename), blockTexture(NULL) {}
+        ~BlockEntry();
+
+        Texture2D* GetBlockTexture(int) const { return this->blockTexture; }
+
+    private:
+        bool PopulateFromFile();
+
+        std::string blockTextureFilename;
+        Texture2D* blockTexture;
+    };
+
+
+    class SolidBlockEntry : public AbstractBlockEntry {
+        friend class Blammopedia;
+    public:
+        SolidBlockEntry(const std::string& filename);
+        ~SolidBlockEntry();
+        
+        Texture2D* GetBlockTexture(int furthestWorldIdx) const {
+            int randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % (furthestWorldIdx+1);
+            assert(randomIdx >= 0 && randomIdx <= furthestWorldIdx);
+            std::map<GameWorld::WorldStyle, Texture2D*>::const_iterator findIter =
+                this->blockTextureMap.find(static_cast<GameWorld::WorldStyle>(randomIdx));
+            assert(findIter != this->blockTextureMap.end());
+            return findIter->second;
+        };
+
+    private:
+        bool PopulateFromFile();
+
+        std::map<GameWorld::WorldStyle, const char*> blockTextureFilenameMap;
+        std::map<GameWorld::WorldStyle, Texture2D*> blockTextureMap;
+    };
+
 	class MiscEntry : public Entry {
+        friend class Blammopedia;
 	public:
 		MiscEntry(const std::string& filename) : Entry(filename) {}
 		~MiscEntry() {};
 	};
 
 	typedef std::map<GameItem::ItemType, Blammopedia::ItemEntry*> ItemEntryMap;
-	typedef std::map<LevelPiece::LevelPieceType, Blammopedia::BlockEntry*> BlockEntryMap;
+	typedef std::map<LevelPiece::LevelPieceType, Blammopedia::AbstractBlockEntry*> BlockEntryMap;
 	typedef std::map<LevelPiece::PieceStatus, Blammopedia::MiscEntry*> MiscEntryMap;
 
 	typedef ItemEntryMap::iterator	ItemEntryMapIter;
@@ -125,7 +157,7 @@ public:
 	~Blammopedia();
 	
 	Blammopedia::ItemEntry*  GetItemEntry(const GameItem::ItemType& itemType) const;
-	Blammopedia::BlockEntry* GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const;
+	Blammopedia::AbstractBlockEntry* GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const;
 	Blammopedia::MiscEntry*  GetMiscEntry(const LevelPiece::PieceStatus& statusType) const;
 
     void UnlockItem(const GameItem::ItemType& itemType);
@@ -173,11 +205,11 @@ inline Blammopedia::ItemEntry* Blammopedia::GetItemEntry(const GameItem::ItemTyp
 	return findIter->second;
 }
 
-inline Blammopedia::BlockEntry* Blammopedia::GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const {
+inline Blammopedia::AbstractBlockEntry* Blammopedia::GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const {
     if (blockType == LevelPiece::Empty) {
         return NULL;
     }
-	std::map<LevelPiece::LevelPieceType, Blammopedia::BlockEntry*>::const_iterator findIter = this->blockEntries.find(blockType);
+	std::map<LevelPiece::LevelPieceType, Blammopedia::AbstractBlockEntry*>::const_iterator findIter = this->blockEntries.find(blockType);
 	if (findIter == this->blockEntries.end()) {
 		assert(false);
 		return NULL;
@@ -203,7 +235,7 @@ inline void Blammopedia::UnlockItem(const GameItem::ItemType& itemType) {
 }
 
 inline void Blammopedia::UnlockBlock(const LevelPiece::LevelPieceType& blockType) {
-    Blammopedia::BlockEntry* blockEntry = this->GetBlockEntry(blockType);
+    Blammopedia::AbstractBlockEntry* blockEntry = this->GetBlockEntry(blockType);
     if (blockEntry == NULL) {
         return;
     }

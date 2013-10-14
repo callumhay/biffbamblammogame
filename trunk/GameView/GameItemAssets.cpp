@@ -22,10 +22,13 @@
 #include "../GameModel/GameItemTimer.h"
 #include "../GameModel/RandomItem.h"
 
+// Game Sound Includes
+#include "../GameSound/GameSound.h"
+
 #include "../ResourceManager.h"
 
-GameItemAssets::GameItemAssets(GameESPAssets* espAssets) : 
-espAssets(espAssets), item(NULL) {
+GameItemAssets::GameItemAssets(GameESPAssets* espAssets, GameSound* sound) : 
+espAssets(espAssets), sound(sound), item(NULL) {
 }
 
 GameItemAssets::~GameItemAssets() {
@@ -78,27 +81,26 @@ bool GameItemAssets::LoadItemAssets() {
 /**
  * Draw the given item as a item drop in-game.
  */
-void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
+void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem,
                               const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, 
                               const BasicPointLight& ballLight) const  {
 
 	// Set material for the image based on the item name/type
 	GameItem::ItemType itemType	= gameItem.GetItemType();
-    
-    Texture2D* itemTexture = NULL;
+    GameItem::ItemDisposition itemDisposition = gameItem.GetItemDisposition();
     if (itemType == GameItem::RandomItem) {
         assert(dynamic_cast<const RandomItem*>(&gameItem) != NULL);
         const RandomItem& randomItem = static_cast<const RandomItem&>(gameItem);
-        itemTexture = this->GetItemTexture(randomItem.GetBlinkingRandomItemType());
+        
+        itemType = randomItem.GetBlinkingRandomItemType();
+        itemDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(itemType);
+
     }
-    else {
-	    itemTexture = this->GetItemTexture(itemType);
-    }
-	assert(itemTexture != NULL);
-	
+
+	Texture2D* itemTexture = this->GetItemTexture(itemType);
 	this->item->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, itemTexture);
 	
-    const Colour& itemEndColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(gameItem.GetItemDisposition());
+    const Colour& itemEndColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(itemDisposition);
 	this->item->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, itemEndColour);
 	
 	glPushMatrix();
@@ -119,7 +121,7 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 /**
  * Draw the HUD timer for the given timer type.
  */
-void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
+void GameItemAssets::DrawTimers(double dT, const Camera& camera, const GameModel& gameModel) {
 
 	// If there are no timers to draw then we don't draw any
 	if (this->activeItemTimers.size() == 0) {
@@ -173,7 +175,7 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
         int halfWidth = width / 2;
 
         currXPos -= halfWidth;
-		currHUDElement->Draw(dT, camera, currXPos, TIMER_BORDER_SPACING, width, height);
+		currHUDElement->Draw(dT, camera, gameModel, currXPos, TIMER_BORDER_SPACING, width, height);
 		currXPos -= halfWidth + ItemTimerHUDElement::BETWEEN_TIMER_SPACING;
 	}
 
@@ -229,7 +231,7 @@ void GameItemAssets::TimerStarted(const GameItemTimer* timer) {
 /**
  * Signal to the item assets that a timer has stopped / is being destroyed.
  */
-void GameItemAssets::TimerStopped(const GameItemTimer* timer) {
+void GameItemAssets::TimerStopped(const GameItemTimer* timer, const GameModel& gameModel) {
 	// Find the timer HUD element based on the stopped timer,
 	// stop the HUD element (this will trigger whatever stop animations, procedures are
 	// required) and remove it from the mapping
@@ -238,7 +240,7 @@ void GameItemAssets::TimerStopped(const GameItemTimer* timer) {
 		GameItem::ItemType itemType = timerHUDElement->GetItemType();
 
 		if (itemType == timer->GetTimerItemType()) {
-			timerHUDElement->StopTimer();
+			timerHUDElement->StopTimer(gameModel);
 		}
 	}
 }
@@ -258,10 +260,11 @@ void GameItemAssets::ClearTimers() {
 // ***************************************************************************************************
 
 // Amount of time in seconds that starts the 'almost done' state of the HUD
-const double GameItemAssets::ItemTimerHUDElement::TIMER_ALMOST_DONE_PERCENTELAPSED = 0.75;	
+const double GameItemAssets::ItemTimerHUDElement::TIMER_ALMOST_DONE_TIME_LEFT = 3.0;	
 
 GameItemAssets::ItemTimerHUDElement::ItemTimerHUDElement(GameItemAssets* itemAssets, const GameItemTimer* itemTimer) : 
-itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAssets) {
+itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAssets), 
+timerAlmostDoneSoundID(INVALID_SOUND_ID) {
 	
 	assert(itemAssets != NULL);
 	assert(itemTimer != NULL);
@@ -289,9 +292,10 @@ itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAs
 }
 
 GameItemAssets::ItemTimerHUDElement::~ItemTimerHUDElement() {
+    this->itemAssets->sound->StopSound(timerAlmostDoneSoundID);
 }
 
-void GameItemAssets::ItemTimerHUDElement::Tick(double dT) {
+void GameItemAssets::ItemTimerHUDElement::Tick(double dT, const GameModel& gameModel) {
 	// Based on the current state of the HUD element we animate and activate various
 	// functionality and visual cues...
 	switch (this->currState) {
@@ -314,8 +318,13 @@ void GameItemAssets::ItemTimerHUDElement::Tick(double dT) {
 				this->additiveColourAnimation.Tick(dT);
 				this->scaleAnimation.Tick(dT);
 
-				if (this->itemTimer->GetPercentTimeElapsed() >= ItemTimerHUDElement::TIMER_ALMOST_DONE_PERCENTELAPSED) {
+				if (this->itemTimer->GetTimeLeft() <= ItemTimerHUDElement::TIMER_ALMOST_DONE_TIME_LEFT) {
 					this->SetState(ItemTimerHUDElement::TimerAlmostDone);
+
+                    if (GameState::IsGameInPlayState(gameModel)) {
+                        // Start playing the loop for the timer almost being done...
+                        this->timerAlmostDoneSoundID = this->itemAssets->sound->PlaySound(GameSound::ItemTimerEndingLoop, true, true);
+                    }
 				}
 			}
 			break;
@@ -352,8 +361,9 @@ void GameItemAssets::ItemTimerHUDElement::Tick(double dT) {
 /**
  * Draw the Item HUD element in its current state.
  */
-void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, int x, int y, int width, int height) {
-	this->Tick(dT);
+void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, const GameModel& gameModel, 
+                                               int x, int y, int width, int height) {
+	this->Tick(dT, gameModel);
 
 	const float& ITEM_SCALE = this->scaleAnimation.GetInterpolantValue();
 	const ColourRGBA& ITEM_ADDITIVE_COLOUR = this->additiveColourAnimation.GetInterpolantValue();
@@ -428,10 +438,18 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
  * disappearing from the HUD. NOTE: The HUD element will live longer than the timer object
  * this is important since the pointer will be discarded while it stops and becomes dead.
  */
-void GameItemAssets::ItemTimerHUDElement::StopTimer() {
+void GameItemAssets::ItemTimerHUDElement::StopTimer(const GameModel& gameModel) {
 	// If the timer is already dead or stopping then we shouldn't tell it to be stopping again
 	if (this->currState != ItemTimerHUDElement::TimerDead || this->currState != ItemTimerHUDElement::TimerStopping) {
 		this->SetState(ItemTimerHUDElement::TimerStopping);
+
+        // End the timer almost done sound loop
+        this->itemAssets->sound->StopSound(this->timerAlmostDoneSoundID);
+        
+        if (GameState::IsGameInPlayState(gameModel)) {
+            // Play the timer end sound -- only play this if the game is in play still...
+            this->itemAssets->sound->PlaySound(GameSound::ItemTimerEndedEvent, false, true);
+        }
 	}
 }
 
@@ -541,11 +559,12 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 			break;
 
 		case ItemTimerHUDElement::TimerStopping: {
+                static const double ANIM_TIME = 0.5;
 
 				std::vector<double> timeValues;
 				timeValues.reserve(2);
 				timeValues.push_back(0.0);
-				timeValues.push_back(0.5);
+				timeValues.push_back(ANIM_TIME);
 
 				std::vector<ColourRGBA> colourValues;
 				colourValues.reserve(2);
@@ -563,7 +582,7 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 				this->scaleAnimation.SetRepeat(false);
 
 				// Since the timer is stopping it means that the item timer object may no longer be valid
-				// (since after it stops it gets destroyed), so clean it up now to avoid hastle...
+				// (since after it stops it gets destroyed), so clean it up now to avoid hassle...
 				assert(this->itemTimer != NULL);
 				this->itemTimer = NULL;
 			}
@@ -572,6 +591,7 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 
 		case ItemTimerHUDElement::TimerDead:
 			assert(this->currState == ItemTimerHUDElement::TimerStopping);
+            this->itemAssets->sound->StopSound(this->timerAlmostDoneSoundID);
 			this->currState = ItemTimerHUDElement::TimerDead;
 			break;
 
