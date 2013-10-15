@@ -42,8 +42,8 @@ private:
 
     irrklang::ISoundSource* source;
 
-    Sound* Spawn2DSoundWithID(const SoundID& id, bool isLooped);
-    Sound* Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos);
+    Sound* Spawn2DSoundWithID(const SoundID& id, bool isLooped, bool startPaused);
+    Sound* Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos, bool startPaused);
 
     DISALLOW_COPY_AND_ASSIGN(SingleSoundSource);
 };

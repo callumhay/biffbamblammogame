@@ -2,7 +2,7 @@
  * GameLevel.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -1725,6 +1725,16 @@ void GameLevel::TickAIEntities(double dT, GameModel* gameModel) {
     }
 }
 
+void GameLevel::RebuildTeslaLightningBoundingLines() {
+    this->teslaLightningBounds.Clear();
+    std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = this->teslaLightning.begin();
+    for (; iter != this->teslaLightning.end(); ++iter) {
+        Vector2D normal = iter->second.GetNormalToLine();
+        this->teslaLightningBounds.AddBound(Collision::LineSeg2D::Translate(iter->second, 0.25f*GameBall::DEFAULT_BALL_RADIUS*normal), normal, false);
+        this->teslaLightningBounds.AddBound(Collision::LineSeg2D::Translate(iter->second, -0.25f*GameBall::DEFAULT_BALL_RADIUS*normal), -normal, false);
+    } 
+}
+
 /**
  * Private helper function for finding a set of level pieces within the given range of values
  * indexing along the x and y axis.
@@ -2031,6 +2041,7 @@ void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::s
 
 // Add a newly activated lightning barrier for the tesla block
 void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
+
 	// Check to see if the barrier already exists, if it does then just exit with no change
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter =
 		this->teslaLightning.find(std::make_pair(block1, block2));
@@ -2042,14 +2053,17 @@ void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock*
 		return;
 	}
 
-	// Build a bounding line for the tesla block lightning arc
+	// Build a bounding line for the Tesla block lightning arc
 	Collision::LineSeg2D teslaBoundry(block1->GetLightningOrigin(), block2->GetLightningOrigin());
 	this->teslaLightning.insert(std::make_pair(std::make_pair(block1, block2), teslaBoundry));
+
+    Vector2D normal = teslaBoundry.GetNormalToLine();
+    this->teslaLightningBounds.AddBound(Collision::LineSeg2D::Translate(teslaBoundry,  0.2f*GameBall::DEFAULT_BALL_RADIUS*normal),  normal, false);
+    this->teslaLightningBounds.AddBound(Collision::LineSeg2D::Translate(teslaBoundry, -0.2f*GameBall::DEFAULT_BALL_RADIUS*normal), -normal, false);
 
 	// EVENT: Lightning arc/barrier was just added to the level
 	GameEventManager::Instance()->ActionTeslaLightningBarrierSpawned(*block1, *block2);
 
-	
 	if (gameModel != NULL) {
 
         // Destroy any destroyable blocks in the arc path...
@@ -2103,6 +2117,7 @@ void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const Tesl
 	}
 
 	this->teslaLightning.erase(findIter);
+    this->RebuildTeslaLightningBoundingLines();
 
 	// EVENT: Lightning arc/barrier was just removed from the level
 	GameEventManager::Instance()->ActionTeslaLightningBarrierRemoved(*block1, *block2);
@@ -2112,121 +2127,22 @@ void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const Tesl
 bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, 
 											 Collision::LineSeg2D& collisionLine, 
                                              double& timeUntilCollision) const {
-	// Fast exit if there's no tesla stuffs
+	// Fast exit if there's no Tesla stuffs
 	if (this->teslaLightning.empty()) {
 		return false;
 	}
 
-    static const int NUM_COLLISON_SAMPLES = 15;
-
-    bool zeroVelocity = (b.GetSpeed() < EPSILON);
-    int numCollisionSamples;
-    if (zeroVelocity) {
-        numCollisionSamples = 1;
-    }
-    else {
-        numCollisionSamples = NUM_COLLISON_SAMPLES;
-    }
-    
-    // Figure out the distance along the vector travelled since the last collision
-    // to take each sample at...
-    Vector2D sampleIncDist = dT * b.GetVelocity() / static_cast<float>(numCollisionSamples+1);
-    double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
-
-    Point2D currSamplePt = b.GetCenterPosition2D() - (dT * b.GetVelocity()) + sampleIncDist;
-    double currTimeUntilCollision = dT - sampleIncTime;
-
-    // Keep track of all the indices collided with and the collision point collided at
-    Point2D collisionPt;
-    bool isCollision = false;
-
-    const TeslaBlock* teslaBlock1 = NULL;
-    const TeslaBlock* teslaBlock2 = NULL;
-
-	const Collision::Circle2D& ballBounds = b.GetBounds();
-    float fullTimeRadius   = (ballBounds.Radius() + ballBounds.Radius() + (dT * b.GetVelocity()).Magnitude()) / 2.0f;
-	float sqfullTimeRadius =  fullTimeRadius * fullTimeRadius;
-	
-	// Find the first collision between the ball and a tesla lightning arc
-	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = this->teslaLightning.begin();
-	for (; iter != this->teslaLightning.end(); ++iter) {
-
-		const Collision::LineSeg2D& currLineSeg = iter->second;
-		float lineToBallCenterSqDist = Collision::SqDistFromPtToLineSeg(currLineSeg, b.GetCenterPosition2D());
-
-		// Collision if the square radius is greater or equal to the sq distance between the line
-		// segment and the ball's center
-		if (lineToBallCenterSqDist <= sqfullTimeRadius) {
-			collisionLine = iter->second;
-			isCollision = true;
-            teslaBlock1 = iter->first.first;
-            teslaBlock2 = iter->first.second;
-            break;
-        }
-    }
-
-	// If there was no collision then just exit
-	if (!isCollision) {
-		return false;
-	}
-
-    // There was a collision...
-
-    // Go through all of the samples starting with the first (which is just a bit off from the previous
-    // tick location) and moving towards the circle's current location, when a collision is found we exit
-    bool stillFindingACollision = false;
-    for (int i = 0; i < numCollisionSamples; i++) {
-
-        if (Collision::GetCollisionPoint(
-            Collision::Circle2D(currSamplePt, b.GetBounds().Radius()),
-            collisionLine, collisionPt)) {
-
-            stillFindingACollision = true;
-		    break;
-        }
-
-        currSamplePt = currSamplePt + sampleIncDist;
-        currTimeUntilCollision -= sampleIncTime;
-    }
-
-    if (!stillFindingACollision) {
+    if (!this->teslaLightningBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeUntilCollision)) {
         return false;
     }
-
-    timeUntilCollision = currTimeUntilCollision;
-
-	// Figure out what the normal of the collision was
-	// and set all the other relevant parameter values
-	
-	// Get the vector from the line to the ball's center (the center of the ball dT time ago)
-	const Point2D previousBallPos = b.GetCenterPosition2D() - dT * b.GetVelocity();
-	const Point2D& linePt1        = collisionLine.P1();
-	const Point2D& linePt2        = collisionLine.P2();
-
-	Vector2D fromLineToBall = previousBallPos - linePt1;
-	if (Vector2D::Dot(fromLineToBall, fromLineToBall) < EPSILON) {
-		fromLineToBall = previousBallPos - linePt2;
-	}
-	assert(Vector2D::Dot(fromLineToBall, fromLineToBall) >= EPSILON);
-
-	// Use the vector from the line to the ball to determine what side of the line
-	// the ball is on and what the normal should be for the collision
-	Vector2D lineVec = linePt2 - linePt1;
-	n[0] = -lineVec[1];
-	n[1] =  lineVec[0];
-	if (Vector2D::Dot(n, fromLineToBall) < 0) {
-		n[0] =  lineVec[1];
-		n[1] = -lineVec[0];
-	}
-	n.Normalize();
 
 	// Change the normal slightly to make the ball reflection a bit random - make it harder on the player...
 	// Tend towards changing the normal to make a bigger reflection not a smaller one...
     static const float MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS = Trig::degreesToRadians(60);	// Angle from the normal that's allowable
-	static const float MAX_ANGLE_LESS_REFLECTION_DEGS = 15.0f;
-	static const float MAX_ANGLE_MORE_REFLECTION_DEGS = 30.0f;
+	static const float MAX_ANGLE_LESS_REFLECTION_DEGS = 5.0f;
+	static const float MAX_ANGLE_MORE_REFLECTION_DEGS = 15.0f;
 	const Vector2D& ballVelocityDir = b.GetDirection();
-	// First make sure the ball velocity direction is reasonably off from the line/ reasonably close to the normal
+	// First make sure the ball velocity direction is reasonably off from the line / reasonably close to the normal
 	// or modification could cause the ball to collide multiple times or worse
     float radiansBetweenNormalAndBall = acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-ballVelocityDir, n))));
 	if (radiansBetweenNormalAndBall <= MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS) {
@@ -2241,24 +2157,10 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 		}
 	}
 
-	// EVENT: Ball hit a tesla lightning arc!
-	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b, *teslaBlock1, *teslaBlock2);
+	// EVENT: Ball hit a Tesla lightning arc!
+	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b);
 
 	return true;
-}
-
-/**
- * Checks if the given bounding lines collide with any tesla lightning arcs currently active in this level.
- */
-bool GameLevel::TeslaLightningCollisionCheck(const BoundingLines& bounds) const {
-	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = this->teslaLightning.begin();
-	for (; iter != this->teslaLightning.end(); ++iter) {
-		const Collision::LineSeg2D& currLineSeg = iter->second;
-        if (bounds.CollisionCheck(currLineSeg)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 // Whether or not the given projectile is destroyed by collision with a tesla lightning arc

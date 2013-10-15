@@ -58,10 +58,10 @@ void AbstractSoundSource::UnloadSoundSource(irrklang::ISoundSource* source) {
 }
 
 Sound* AbstractSoundSource::Spawn2DSoundWithIDAndSource(const SoundID& id, irrklang::ISoundSource* source, 
-                                                        bool isLooped) {
+                                                        bool isLooped, bool startPaused) {
     assert(source != NULL);
 
-    irrklang::ISound* newSound = this->soundEngine->play2D(source, isLooped, false, true, true);
+    irrklang::ISound* newSound = this->soundEngine->play2D(source, isLooped, startPaused, true, true);
     if (newSound == NULL) {
         assert(false);
         return NULL;
@@ -71,10 +71,10 @@ Sound* AbstractSoundSource::Spawn2DSoundWithIDAndSource(const SoundID& id, irrkl
 }
 
 Sound* AbstractSoundSource::Spawn2DSoundWithIDAndSource(const SoundID& id, irrklang::ISoundSource* source, 
-                                                        bool isLooped, const Point3D& pos) {
+                                                        bool isLooped, const Point3D& pos, bool startPaused) {
     assert(source != NULL);
     
-    irrklang::ISound* newSound = this->soundEngine->play3D(source, irrklang::vec3df(pos[0], pos[1], pos[2]), isLooped, false, true, true);
+    irrklang::ISound* newSound = this->soundEngine->play3D(source, irrklang::vec3df(pos[0], pos[1], pos[2]), isLooped, startPaused, true, true);
     newSound->setMinDistance(GameSound::DEFAULT_MIN_3D_SOUND_DIST); // Make sure we're playing at max volume everywhere in the game
     if (newSound == NULL) {
         assert(false);

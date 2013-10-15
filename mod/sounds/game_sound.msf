@@ -98,7 +98,7 @@ BlammopediaListItemLockedEvent {
 
 // World selection menu background music (looped)
 WorldMenuBackgroundLoop {
-	file = resources/bg_world_select.ogg
+	file = resources/WorldMenuBackgroundLoop.ogg
 }
 
 // Plays when the user changes which world is highlighted/selected in the world selection menu
@@ -120,7 +120,7 @@ WorldMenuItemLockedEvent {
 
 // Level selection menu background music (looped)
 LevelMenuBackgroundLoop {
-	file = resources/bg_level_select.ogg
+	file = resources/WorldMenuBackgroundLoop.ogg
 }
 
 // Plays when the user changes which level is highlighted/selected in the level selection menu
@@ -235,6 +235,8 @@ BallStickyPaddleBounceEvent {
 BallShieldPaddleCollisionEvent {
 	file = resources/BallShieldPaddleCollisionEvent.ogg
 }
+
+// BallTeslaLightningCollisionEvent
 
 BallOrPaddleGrowEvent {
 	file = resources/BallOrPaddleGrowEvent.ogg

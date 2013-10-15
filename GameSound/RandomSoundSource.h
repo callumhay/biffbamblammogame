@@ -32,8 +32,8 @@ private:
     std::vector<irrklang::ISoundSource*> sources;
     std::vector<std::string> soundFilePaths;
 
-    Sound* Spawn2DSoundWithID(const SoundID& id, bool isLooped);
-    Sound* Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos);
+    Sound* Spawn2DSoundWithID(const SoundID& id, bool isLooped, bool startPaused);
+    Sound* Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos, bool startPaused);
 
     DISALLOW_COPY_AND_ASSIGN(RandomSoundSource);
 };

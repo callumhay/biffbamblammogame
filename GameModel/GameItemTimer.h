@@ -60,14 +60,14 @@ public:
 	/**
 	 * Stops the timer and the item effect associated with it.
 	 */
-	inline void StopTimer() {
+	inline void StopTimer(bool didExpire) {
 		// In the case of items that have no time associated with their effect, we
 		// don't affect the item or set off any events
 		if ((this->timeLengthInSecs - GameItemTimer::ZERO_TIME_TIMER_IN_SECS) > EPSILON) {
 			if (this->deactivateItemOnStop) {
 				this->assocGameItem->Deactivate();
 			}
-			GameEventManager::Instance()->ActionItemTimerStopped(*this);
+			GameEventManager::Instance()->ActionItemTimerStopped(*this, didExpire);
 		}
 
 		this->timeElapsedInSecs = this->timeLengthInSecs;

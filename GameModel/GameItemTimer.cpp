@@ -31,7 +31,7 @@ GameItemTimer::~GameItemTimer() {
 	//	GameEventManager::Instance()->ActionItemTimerStopped(*this);
 	//}
 	if (!this->wasStopped) {
-		this->StopTimer();
+		this->StopTimer(false);
 	}
 
 	if (this->assocGameItem != NULL) {
@@ -55,6 +55,6 @@ void GameItemTimer::Tick(double seconds) {
 	// This should only happen once - obviously when a timer expires
 	// so must its associated game item's effect!
 	if (this->HasExpired()) {
-		this->StopTimer();
+		this->StopTimer(true);
 	}
 }

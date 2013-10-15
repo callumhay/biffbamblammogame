@@ -48,7 +48,7 @@ public:
 
 	// On Event functions for signaling the start/stop of timers
 	void TimerStarted(const GameItemTimer* timer);
-	void TimerStopped(const GameItemTimer* timer, const GameModel& gameModel);
+	void TimerStopped(const GameItemTimer* timer, const GameModel& gameModel, bool didExpire);
 
 	void ClearTimers();
 
@@ -82,7 +82,7 @@ private:
 		void Draw(double dT, const Camera& camera, const GameModel& gameModel, 
             int x, int y, int width, int height);
 	
-		void StopTimer(const GameModel& gameModel);
+		void StopTimer(const GameModel& gameModel, bool didExpire);
 
 		int GetTextureWidth() const { return this->timerTexture->GetWidth(); }
 		int GetTextureHeight() const { return this->timerTexture->GetHeight(); }

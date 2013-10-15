@@ -236,10 +236,10 @@ void GameEventManager::ActionProjectileFiredFromCannon(const Projectile& project
 }
 
 // Action for when the ball hits a lightning arc between two tesla blocks
-void GameEventManager::ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
+void GameEventManager::ActionBallHitTeslaLightningArc(const GameBall& ball) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->BallHitTeslaLightningArcEvent(ball, teslaBlock1, teslaBlock2);
+		(*listenerIter)->BallHitTeslaLightningArcEvent(ball);
 	}		
 }
 
@@ -417,10 +417,10 @@ void GameEventManager::ActionItemTimerStarted(const GameItemTimer& itemTimer) {
 }
 
 // Action for when an item timer stops/expires
-void GameEventManager::ActionItemTimerStopped(const GameItemTimer& itemTimer) {
+void GameEventManager::ActionItemTimerStopped(const GameItemTimer& itemTimer, bool didExpire) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->ItemTimerStoppedEvent(itemTimer);
+		(*listenerIter)->ItemTimerStoppedEvent(itemTimer, didExpire);
 	}		
 }
 

@@ -41,20 +41,20 @@ void SingleSoundSource::Unload() {
     }
 }
 
-Sound* SingleSoundSource::Spawn2DSoundWithID(const SoundID& id, bool isLooped) {
+Sound* SingleSoundSource::Spawn2DSoundWithID(const SoundID& id, bool isLooped, bool startPaused) {
     if (this->source == NULL) {
         assert(false);
         return NULL;
     }
 
-    return this->Spawn2DSoundWithIDAndSource(id, this->source, isLooped);
+    return this->Spawn2DSoundWithIDAndSource(id, this->source, isLooped, startPaused);
 }
 
-Sound* SingleSoundSource::Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos) {
+Sound* SingleSoundSource::Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos, bool startPaused) {
     if (this->source == NULL) {
         assert(false);
         return NULL;
     }
 
-    return this->Spawn2DSoundWithIDAndSource(id, this->source, isLooped, pos);
+    return this->Spawn2DSoundWithIDAndSource(id, this->source, isLooped, pos, startPaused);
 }

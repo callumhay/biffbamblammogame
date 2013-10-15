@@ -141,8 +141,7 @@ paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
     else {
         GameSound* sound = this->display->GetSound();
         assert(sound != NULL);
-        SoundID bgLoopSoundID = sound->PlaySound(GameSound::WorldBackgroundLoop, true);
-        sound->SetSoundVolume(bgLoopSoundID, 0.75f);
+        sound->PlaySound(GameSound::WorldBackgroundLoop, true);
     }
 }
 

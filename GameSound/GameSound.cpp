@@ -303,12 +303,14 @@ void GameSound::UnpauseAllSounds() {
 
 // Plays a non-positional sound in the game.
 // Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
-SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects) {
+SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects, float volume) {
 
-    Sound* newSound = this->BuildSound(soundType, isLooped, NULL, applyActiveEffects);
+    Sound* newSound = this->BuildSound(soundType, isLooped, NULL, applyActiveEffects, true);
     if (newSound == NULL) {
         return INVALID_SOUND_ID;
     }
+    newSound->SetVolume(volume);
+    newSound->SetPause(false);
     
     this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
     return newSound->GetSoundID();
@@ -318,7 +320,7 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
 // Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
 SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, const Point3D& position, 
                                        bool applyActiveEffects, bool applyLevelTranslation, bool applyGameFGTransform,
-                                       float minDistance) {
+                                       float minDistance, float volume) {
 
     Point3D transformedPos = position;
     if (applyLevelTranslation) {
@@ -328,11 +330,13 @@ SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType, bo
         transformedPos = this->gameFGTransform * transformedPos;
     }
 
-    Sound* newSound = this->BuildSound(soundType, isLooped, &transformedPos, applyActiveEffects);
+    Sound* newSound = this->BuildSound(soundType, isLooped, &transformedPos, applyActiveEffects, true);
     if (newSound == NULL) {
         return INVALID_SOUND_ID;
     }
     newSound->SetMinimumDistance(minDistance);
+    newSound->SetVolume(volume);
+    newSound->SetPause(false);
 
     this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
     return newSound->GetSoundID();
@@ -393,7 +397,7 @@ void GameSound::StopAllSoundsWithType(const GameSound::SoundType& soundType, dou
 
 // NOTE: This is only meant for in-game foreground objects that have sound attached to them!!!
 SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped,
-                                      const Vector3D& localTranslation) {
+                                      const Vector3D& localTranslation, float volume) {
 
     // Check to see if there's already the same position object with the same sound type attached to it, if so
     // check to see if it's looped, if it is then we don't attach more than one looping sound of the same type to the object!
@@ -412,10 +416,13 @@ SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameS
     }
 
     Point3D position = posObj->GetPosition3D();
-    Sound* newSound = this->BuildSound(soundType, isLooped, &position);
+    Sound* newSound = this->BuildSound(soundType, isLooped, &position, true, true);
     if (newSound == NULL) {
         return INVALID_SOUND_ID;
     }
+
+    newSound->SetVolume(volume);
+    newSound->SetPause(false);
 
     // Attach the new sound to the object and return its ID
     AttachedSoundInfo& soundInfo = this->attachedPlayingSounds[posObj];
@@ -658,7 +665,7 @@ bool GameSound::LoadFromMSF() {
     return success;
 }
 
-bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& soundType, bool isLooped) {
+bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& soundType, bool isLooped, bool startPaused) {
     assert(soundType != GameSound::NoSound);
     assert(id != INVALID_SOUND_ID);
 
@@ -677,7 +684,7 @@ bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& s
         return false;
     }
 
-    Sound* newSound = source->Spawn2DSoundWithID(id, isLooped);
+    Sound* newSound = source->Spawn2DSoundWithID(id, isLooped, startPaused);
     if (newSound == NULL) {
         assert(false);
         return false;
@@ -836,7 +843,9 @@ void GameSound::GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) cons
 
 // Private helper function for building 2D and 3D sounds
 // If the sound could not be built it returns NULL.
-Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position, bool applyActiveEffects) {
+Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLooped, const Point3D* position, 
+                             bool applyActiveEffects, bool startPaused) {
+
     assert(soundType != GameSound::NoSound);
 
     if (this->soundEngine == NULL) {
@@ -852,10 +861,10 @@ Sound* GameSound::BuildSound(const GameSound::SoundType& soundType, bool isLoope
     // Build the sound (either 2D or 3D based on whether position was provided or not)
     Sound* newSound = NULL;
     if (position != NULL) {
-        newSound = source->Spawn3DSound(isLooped, *position);
+        newSound = source->Spawn3DSound(isLooped, *position, startPaused);
     }
     else {
-        newSound = source->Spawn2DSound(isLooped);
+        newSound = source->Spawn2DSound(isLooped, startPaused);
     }
 
     // Apply any active effects to the sound

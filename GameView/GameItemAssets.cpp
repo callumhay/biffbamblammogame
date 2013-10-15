@@ -231,7 +231,7 @@ void GameItemAssets::TimerStarted(const GameItemTimer* timer) {
 /**
  * Signal to the item assets that a timer has stopped / is being destroyed.
  */
-void GameItemAssets::TimerStopped(const GameItemTimer* timer, const GameModel& gameModel) {
+void GameItemAssets::TimerStopped(const GameItemTimer* timer, const GameModel& gameModel, bool didExpire) {
 	// Find the timer HUD element based on the stopped timer,
 	// stop the HUD element (this will trigger whatever stop animations, procedures are
 	// required) and remove it from the mapping
@@ -240,7 +240,7 @@ void GameItemAssets::TimerStopped(const GameItemTimer* timer, const GameModel& g
 		GameItem::ItemType itemType = timerHUDElement->GetItemType();
 
 		if (itemType == timer->GetTimerItemType()) {
-			timerHUDElement->StopTimer(gameModel);
+			timerHUDElement->StopTimer(gameModel, didExpire);
 		}
 	}
 }
@@ -438,7 +438,7 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
  * disappearing from the HUD. NOTE: The HUD element will live longer than the timer object
  * this is important since the pointer will be discarded while it stops and becomes dead.
  */
-void GameItemAssets::ItemTimerHUDElement::StopTimer(const GameModel& gameModel) {
+void GameItemAssets::ItemTimerHUDElement::StopTimer(const GameModel& gameModel, bool didExpire) {
 	// If the timer is already dead or stopping then we shouldn't tell it to be stopping again
 	if (this->currState != ItemTimerHUDElement::TimerDead || this->currState != ItemTimerHUDElement::TimerStopping) {
 		this->SetState(ItemTimerHUDElement::TimerStopping);
@@ -446,7 +446,7 @@ void GameItemAssets::ItemTimerHUDElement::StopTimer(const GameModel& gameModel) 
         // End the timer almost done sound loop
         this->itemAssets->sound->StopSound(this->timerAlmostDoneSoundID);
         
-        if (GameState::IsGameInPlayState(gameModel)) {
+        if (GameState::IsGameInPlayState(gameModel) && didExpire) {
             // Play the timer end sound -- only play this if the game is in play still...
             this->itemAssets->sound->PlaySound(GameSound::ItemTimerEndedEvent, false, true);
         }

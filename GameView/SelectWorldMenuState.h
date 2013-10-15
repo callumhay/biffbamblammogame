@@ -34,7 +34,7 @@ class TextLabel2DFixedWidth;
  */
 class SelectWorldMenuState : public DisplayState {
 public:
-    SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info);
+    SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info, SoundID bgSoundLoopID = INVALID_SOUND_ID);
     virtual ~SelectWorldMenuState();
 
     bool AllowsGameModelUpdates() const { return true; }

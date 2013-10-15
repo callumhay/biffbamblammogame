@@ -1,9 +1,11 @@
 Cannon Peek-a-boo
-13 25
-E E E E S S S S S E E E E 
+13 27
+C(180) E E E E E C(270) E E E E E E 
+E E E E E E E E E E E E E 
+E E E E S S F(u) S S E E E E 
 E S S S S E Q(f) E S S S S E 
 E S E E E E Q(i) E E E E S E 
-E S E J E E Q(i) E E J E S E 
+C(90) F(r) E J E E Q(i) E E J E F(r) E 
 E S E E E E E E E E E S E 
 E S F(d) F(d) F(d) N N N F(d) F(d) F(d) S E 
 E S G G G R R R G G G S E 
@@ -28,17 +30,17 @@ S E E E E E E E E E E E S
 
 STARS:
 6000
-8500
-12500
-15000
-20000
+9500
+14500
+19500
+25500
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 1
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

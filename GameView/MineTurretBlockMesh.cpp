@@ -291,31 +291,35 @@ MineTurretBlockMesh::BlockData::~BlockData() {
 
 void MineTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& camera) {
 
-    if (this->block.GetHealthPercent() <= 0.75f) {
-        
-        float percentToDeathFrom75 = (0.75f - this->block.GetHealthPercent()) / 0.75f;
-        this->smokeySmokeEmitter->SetParticleLife(ESPInterval(0.6f + percentToDeathFrom75, 1.2f + percentToDeathFrom75));
-        this->smokeySmokeEmitter->SetParticleSize(ESPInterval(0.25f*percentToDeathFrom75 + 0.1f * LevelPiece::PIECE_WIDTH,
-            0.25f*percentToDeathFrom75 + 0.45f * LevelPiece::PIECE_WIDTH));
-        
-        this->smokeySmokeEmitter->Draw(camera);
+    // If the block is frozen then we don't draw the smoke/fire effects
+    if (!this->block.HasStatus(LevelPiece::IceCubeStatus)) {
 
-        if (this->block.GetHealthPercent() <= 0.5f) {
-            float percentToDeathFrom50 = (0.5f - this->block.GetHealthPercent()) / 0.5f;
-            this->fireySmokeEmitter->SetInitialSpd(ESPInterval(0.4f*percentToDeathFrom50 + 0.8f, 0.4f*percentToDeathFrom50 + 1.5f));
-            this->fireySmokeEmitter->SetParticleLife(ESPInterval(0.5f*percentToDeathFrom50 + 0.6f, 0.5f*percentToDeathFrom50 + 1.2f));
-            this->fireySmokeEmitter->SetParticleSize(ESPInterval(0.2f*percentToDeathFrom50 + 0.1f * LevelPiece::PIECE_WIDTH,
-                0.2f*percentToDeathFrom50 + 0.45f * LevelPiece::PIECE_WIDTH));
+        if (this->block.GetHealthPercent() <= 0.75f) {
+            
+            float percentToDeathFrom75 = (0.75f - this->block.GetHealthPercent()) / 0.75f;
+            this->smokeySmokeEmitter->SetParticleLife(ESPInterval(0.6f + percentToDeathFrom75, 1.2f + percentToDeathFrom75));
+            this->smokeySmokeEmitter->SetParticleSize(ESPInterval(0.25f*percentToDeathFrom75 + 0.1f * LevelPiece::PIECE_WIDTH,
+                0.25f*percentToDeathFrom75 + 0.45f * LevelPiece::PIECE_WIDTH));
+            
+            this->smokeySmokeEmitter->Draw(camera);
 
-            this->fireySmokeEmitter->Draw(camera);
-            this->fireySmokeEmitter->Tick(dT);
+            if (this->block.GetHealthPercent() <= 0.5f) {
+                float percentToDeathFrom50 = (0.5f - this->block.GetHealthPercent()) / 0.5f;
+                this->fireySmokeEmitter->SetInitialSpd(ESPInterval(0.4f*percentToDeathFrom50 + 0.8f, 0.4f*percentToDeathFrom50 + 1.5f));
+                this->fireySmokeEmitter->SetParticleLife(ESPInterval(0.5f*percentToDeathFrom50 + 0.6f, 0.5f*percentToDeathFrom50 + 1.2f));
+                this->fireySmokeEmitter->SetParticleSize(ESPInterval(0.2f*percentToDeathFrom50 + 0.1f * LevelPiece::PIECE_WIDTH,
+                    0.2f*percentToDeathFrom50 + 0.45f * LevelPiece::PIECE_WIDTH));
 
-            if (this->block.GetHealthPercent() <= this->block.GetLifePercentForOneMoreBallHit()) {
-                this->redColourMultiplierAnim.Tick(dT);
+                this->fireySmokeEmitter->Draw(camera);
+                this->fireySmokeEmitter->Tick(dT);
+
+                if (this->block.GetHealthPercent() <= this->block.GetLifePercentForOneMoreBallHit()) {
+                    this->redColourMultiplierAnim.Tick(dT);
+                }
             }
-        }
 
-        this->smokeySmokeEmitter->Tick(dT);
+            this->smokeySmokeEmitter->Tick(dT);
+        }
     }
 }
 

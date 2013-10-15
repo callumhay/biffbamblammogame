@@ -1255,8 +1255,8 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
         case Projectile::BossLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
         case Projectile::BallLaserBulletProjectile: {
-            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, projectile.GetPosition3D(), 
-                true, true, true, 10*LevelPiece::PIECE_WIDTH);
+            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, 
+                projectile.GetPosition3D(), true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.5f);
             break;
         }
 

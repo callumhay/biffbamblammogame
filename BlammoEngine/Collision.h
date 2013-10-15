@@ -116,12 +116,21 @@ namespace Collision {
 			return this->p2;
 		}
 
+        Vector2D GetNormalToLine() const;
 		void Rotate(float angleInDegs, const Point2D& rotationCenter);
 		void Translate(const Vector2D& translation);
+        static LineSeg2D Translate(const LineSeg2D& lineSeg, const Vector2D& translation);
         void ReflectX();
         void Transform(const Matrix4x4& transform);
 
 	};
+
+    inline Vector2D LineSeg2D::GetNormalToLine() const {
+        Vector2D result = this->p1 - this->p2;
+        result.Rotate(90.0f);
+        result.Normalize();
+        return result;
+    }
 
 	inline void LineSeg2D::Rotate(float angleInDegs, const Point2D& rotationCenter) {
 		Vector2D p1Vec = this->p1 - rotationCenter;
@@ -136,6 +145,10 @@ namespace Collision {
 		this->SetP1(this->p1 + translation);
 		this->SetP2(this->p2 + translation);
 	}
+
+    inline LineSeg2D LineSeg2D::Translate(const LineSeg2D& lineSeg, const Vector2D& translation) {
+        return LineSeg2D(lineSeg.p1 + translation, lineSeg.p2 + translation);
+    }
 
     inline void LineSeg2D::ReflectX() {
         this->SetP1(Point2D(-this->p1[0], this->p1[1]));
