@@ -59,7 +59,7 @@ void RandomSoundSource::Unload() {
     this->isInit = false;
 }
 
-Sound* RandomSoundSource::Spawn2DSoundWithID(const SoundID& id, bool isLooped) {
+Sound* RandomSoundSource::Spawn2DSoundWithID(const SoundID& id, bool isLooped, bool startPaused) {
     if (!this->IsLoaded()) {
         assert(false);
         return NULL;
@@ -68,10 +68,10 @@ Sound* RandomSoundSource::Spawn2DSoundWithID(const SoundID& id, bool isLooped) {
     // Choose a random source to spawn...
     irrklang::ISoundSource* randomSource = this->sources[Randomizer::GetInstance()->RandomUnsignedInt() % this->sources.size()];
     assert(randomSource != NULL);
-    return this->Spawn2DSoundWithIDAndSource(id, randomSource, isLooped);
+    return this->Spawn2DSoundWithIDAndSource(id, randomSource, isLooped, startPaused);
 }
 
-Sound* RandomSoundSource::Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos) {
+Sound* RandomSoundSource::Spawn3DSoundWithID(const SoundID& id, bool isLooped, const Point3D& pos, bool startPaused) {
     if (!this->IsLoaded()) {
         assert(false);
         return NULL;
@@ -80,5 +80,5 @@ Sound* RandomSoundSource::Spawn3DSoundWithID(const SoundID& id, bool isLooped, c
     // Choose a random source to spawn...
     irrklang::ISoundSource* randomSource = this->sources[Randomizer::GetInstance()->RandomUnsignedInt() % this->sources.size()];
     assert(randomSource != NULL);
-    return this->Spawn2DSoundWithIDAndSource(id, randomSource, isLooped, pos);
+    return this->Spawn2DSoundWithIDAndSource(id, randomSource, isLooped, pos, startPaused);
 }

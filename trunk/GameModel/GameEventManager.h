@@ -89,7 +89,7 @@ public:
 	void ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock);
 	void ActionProjectileEnteredCannon(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ActionProjectileFiredFromCannon(const Projectile& projectile, const CannonBlock& cannonBlock);
-	void ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
+	void ActionBallHitTeslaLightningArc(const GameBall& ball);
 
     void ActionGamePauseStateChanged(int32_t oldPauseState, int32_t newPauseState);
 
@@ -116,7 +116,7 @@ public:
 	void ActionItemDeactivated(const GameItem& item);
 	void ActionRandomItemActivated(const RandomItem& randomItem, const GameItem& actualItem);
 	void ActionItemTimerStarted(const GameItemTimer& itemTimer);
-	void ActionItemTimerStopped(const GameItemTimer& itemTimer);
+	void ActionItemTimerStopped(const GameItemTimer& itemTimer, bool didExpire);
 	void ActionItemDropBlockItemChange(const ItemDropBlock& dropBlock);
     void ActionSwitchBlockActivated(const SwitchBlock& switchBlock);
     void ActionBulletTimeStateChanged(const BallBoostModel& boostModel);

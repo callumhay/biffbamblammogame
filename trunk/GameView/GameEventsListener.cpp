@@ -729,9 +729,7 @@ void GameEventsListener::GamePauseStateChangedEvent(int32_t oldPauseState, int32
     debug_output("EVENT: GameModel pause state changed");
 }
 
-void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
-	UNUSED_PARAMETER(teslaBlock1);
-	UNUSED_PARAMETER(teslaBlock2);
+void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball) {
 
 	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
 	bool doEffect = (currSystemTime - this->timeSinceLastBallTeslaCollisionEventInMS) > 
@@ -1116,9 +1114,8 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(item, showParticles);
 
 	// Play the item moving loop - plays as the item falls towards the paddle until it leaves play
-    SoundID itemMovingSoundID = sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true,
-        this->display->GetModel()->GetCurrentLevelTranslation());
-    sound->SetSoundVolume(itemMovingSoundID, 0.33f);
+    sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true,
+        this->display->GetModel()->GetCurrentLevelTranslation(), 0.33f);
 
 	debug_output("EVENT: Item Spawned: " << item);
 }
@@ -1206,8 +1203,8 @@ void GameEventsListener::ItemTimerStartedEvent(const GameItemTimer& itemTimer){
 	debug_output("EVENT: Item timer started: " << itemTimer);
 }
 
-void GameEventsListener::ItemTimerStoppedEvent(const GameItemTimer& itemTimer) {
-	this->display->GetAssets()->GetItemAssets()->TimerStopped(&itemTimer, *this->display->GetModel());
+void GameEventsListener::ItemTimerStoppedEvent(const GameItemTimer& itemTimer, bool didExpire) {
+	this->display->GetAssets()->GetItemAssets()->TimerStopped(&itemTimer, *this->display->GetModel(), didExpire);
 
 	debug_output("EVENT: Item timer stopped/expired: " << itemTimer);
 }
@@ -1252,8 +1249,6 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
             std::set<SoundID> ignoreSoundSet;
             ignoreSoundSet.insert(enterBulletTimeSoundID);
             sound->ToggleSoundEffect(GameSound::BulletTimeEffect, true, ignoreSoundSet);
-
-            sound->SetSoundVolume(GameSound::InBulletTimeLoop, 0.3f);
             inBulletTimeLoopSoundID = sound->PlaySound(GameSound::InBulletTimeLoop, true, false);
             
             break;
@@ -1434,9 +1429,10 @@ void GameEventsListener::TeslaLightningBarrierSpawnedEvent(const TeslaBlock& new
 
     // Attach a sound for the lightning...
     Point3D midPt = Point3D::GetMidPoint(newlyOnTeslaBlock.GetPosition3D(), previouslyOnTeslaBlock.GetPosition3D());
-    SoundID lightningSoundID = sound->PlaySoundAtPosition(GameSound::TeslaLightningArcLoop, true, midPt, true, true, true);
-    sound->SetSoundVolume(lightningSoundID, 0.1f);
-    this->teslaLightningSoundIDs.insert(std::make_pair(std::make_pair(&newlyOnTeslaBlock, &previouslyOnTeslaBlock), lightningSoundID));
+    SoundID lightningSoundID = sound->PlaySoundAtPosition(GameSound::TeslaLightningArcLoop, true, midPt, 
+        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.1f);
+    this->teslaLightningSoundIDs.insert(std::make_pair(
+        std::make_pair(&newlyOnTeslaBlock, &previouslyOnTeslaBlock), lightningSoundID));
 
 	Vector3D negHalfLevelDim(-0.5 * this->display->GetModel()->GetLevelUnitDimensions(), 0.0f);
 	this->display->GetAssets()->GetESPAssets()->AddTeslaLightningBarrierEffect(newlyOnTeslaBlock, previouslyOnTeslaBlock, negHalfLevelDim);
@@ -1569,33 +1565,35 @@ void GameEventsListener::ScoreMultiplierCounterChangedEvent(int oldCounterValue,
     if (oldCounterValue < newCounterValue && newCounterValue > 0) {
         // Play sounds as we count up towards higher multipliers by destroying more blocks...
         GameSound* sound = this->display->GetSound();
+        
+        static const float COUNTER_SOUND_VOLUME = 0.33f;
         switch (newCounterValue) {
             case 1:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc1, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc1, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 2:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc2, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc2, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 3:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc3, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc3, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 4:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc4, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc4, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 5:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc5, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc5, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 6:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc6, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc6, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 7:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc7, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc7, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 8:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc8, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc8, false, true, COUNTER_SOUND_VOLUME);
                 break;
             case 9:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc9, false);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc9, false, true, COUNTER_SOUND_VOLUME);
                 break;
 
             default:

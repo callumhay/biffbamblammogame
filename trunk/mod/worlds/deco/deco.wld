@@ -26,7 +26,7 @@ resources/worlds/levels/medium/cannon_peekaboo.lvl
 resources/worlds/levels/medium/the_towering_inferno.lvl
 
 # Tesla blocks gaurd the route for a remote control rocket
-resources/worlds/levels/hard/the_house_that_tesla_built.lvl
+resources/worlds/levels/hard/the_house_that_tesla_built.lvl : 275
 
 # Tesla block intro level
 resources/worlds/levels/easy/electric_access.lvl

@@ -669,7 +669,5 @@ sound(sound), bossBodyPart(bossBodyPart), volumeLevel(volumeAmt) {
 
 void BossMesh::ExplodingEmitterHandler::ParticleSpawnedEvent(const ESPParticle* particle) {
     UNUSED_PARAMETER(particle);
-    
-    SoundID soundID = this->sound->PlaySound(GameSound::BossBlowingUpLoop, false, true);
-    this->sound->SetSoundVolume(soundID, this->volumeLevel);
+    this->sound->PlaySound(GameSound::BossBlowingUpLoop, false, true, this->volumeLevel);
 }

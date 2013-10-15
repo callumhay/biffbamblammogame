@@ -61,7 +61,7 @@ public:
 	void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void GamePauseStateChangedEvent(int32_t oldPauseState, int32_t newPauseState);
-    void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
+    void BallHitTeslaLightningArcEvent(const GameBall& ball);
     void FireBallCancelledByIceBallEvent(const GameBall& ball);
     void IceBallCancelledByFireBallEvent(const GameBall& ball);
 
@@ -84,7 +84,7 @@ public:
 	void ItemDeactivatedEvent(const GameItem& item);
 	void RandomItemActivatedEvent(const RandomItem& randomItem, const GameItem& actualItem);
 	void ItemTimerStartedEvent(const GameItemTimer& itemTimer);
-	void ItemTimerStoppedEvent(const GameItemTimer& itemTimer);
+	void ItemTimerStoppedEvent(const GameItemTimer& itemTimer, bool didExpire);
 	void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock);
     void SwitchBlockActivatedEvent(const SwitchBlock& switchBlock);
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);

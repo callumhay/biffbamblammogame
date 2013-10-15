@@ -27,8 +27,8 @@
 
 static const float BORDER_GAP = 10;
 
-SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const DisplayStateInfo& info) : 
-DisplayState(display), worldLabel(NULL), world(display->GetModel()->GetWorldByIndex(info.GetWorldSelectionIndex())), pressEscAlphaAnim(0.0f), 
+SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const DisplayStateInfo& info, SoundID bgSoundLoopID) : 
+DisplayState(display), worldLabel(NULL), bgSoundLoopID(bgSoundLoopID), world(display->GetModel()->GetWorldByIndex(info.GetWorldSelectionIndex())), pressEscAlphaAnim(0.0f), 
 goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
 bossIconTexture(NULL), starGlowTexture(NULL), arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL), 
 autoUnlockAnimCountdown(0.25), playAutoUnlockAnim(false), totalNumGameStarsLabel(NULL), totalLabel(NULL),
@@ -39,7 +39,9 @@ particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f,
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE), 
 smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
 
-    this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::LevelMenuBackgroundLoop, true);
+    if (this->bgSoundLoopID == INVALID_SOUND_ID) {
+        this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
+    }
 
     float scalingFactor = this->display->GetTextScalingFactor();
 
@@ -406,7 +408,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 
             // Switch states back to the world select menu...
             this->display->SetCurrentState(new SelectWorldMenuState(this->display, 
-                DisplayStateInfo::BuildSelectWorldInfo(this->world->GetWorldNumber()-1)));
+                DisplayStateInfo::BuildSelectWorldInfo(this->world->GetWorldNumber()-1), this->bgSoundLoopID));
 
             debug_opengl_state();
             return;
@@ -772,7 +774,6 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
 void SelectLevelMenuState::GoBackToWorldSelectMenu() {
     
     GameSound* sound = this->display->GetSound();
-    sound->StopSound(this->bgSoundLoopID, 0.5);
     sound->PlaySound(GameSound::MenuItemCancelEvent, false);
 
     this->goBackMenuMoveAnim.SetLerp(0.5, Camera::GetWindowWidth());

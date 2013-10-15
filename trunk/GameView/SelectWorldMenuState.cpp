@@ -32,8 +32,8 @@ const float SelectWorldMenuState::UNSELECTED_TO_UNSELECTED_MENU_ITEM_HORIZ_GAP =
 const float SelectWorldMenuState::SELECTED_MENU_ITEM_SIZE   = 256;
 const float SelectWorldMenuState::UNSELECTED_MENU_ITEM_SIZE = 128;
 
-SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info) :
-DisplayState(display), pressEscAlphaAnim(0.0f), worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
+SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info, SoundID bgSoundLoopID) :
+DisplayState(display), bgSoundLoopID(bgSoundLoopID), pressEscAlphaAnim(0.0f), worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
 goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), bloomEffect(NULL), itemActivated(false), starryBG(NULL), padlockTex(NULL),
 goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL), worldUnlockAnim(NULL),
 totalNumGameStarsLabel(NULL), totalLabel(NULL), starGlowTexture(NULL) {
@@ -41,8 +41,6 @@ totalNumGameStarsLabel(NULL), totalLabel(NULL), starGlowTexture(NULL) {
 }
 
 SelectWorldMenuState::~SelectWorldMenuState() {
-    // Fade out background music
-    this->display->GetSound()->StopSound(this->bgSoundLoopID, 0.5);
 
     delete this->worldSelectTitleLbl;
     this->worldSelectTitleLbl = NULL;
@@ -221,7 +219,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         if (animDone) {
             // Go to the level select for the currently selected world
             this->display->SetCurrentState(new SelectLevelMenuState(this->display, 
-                DisplayStateInfo::BuildSelectLevelInfo(this->selectedItemIdx)));
+                DisplayStateInfo::BuildSelectLevelInfo(this->selectedItemIdx), this->bgSoundLoopID));
             return;
         }
     }
@@ -363,6 +361,9 @@ void SelectWorldMenuState::GoBackToMainMenu() {
     GameSound* sound = this->display->GetSound();
     sound->PlaySound(GameSound::MenuItemCancelEvent, false);
 
+    // Fade out background music
+    sound->StopSound(this->bgSoundLoopID, 0.5);
+
     this->fadeAnimation.SetLerp(0.0, 0.5f, 0.0f, 1.0f);
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(0.0f);
@@ -390,7 +391,9 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     float scalingFactor = this->display->GetTextScalingFactor();
 
     // Background music...
-    this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
+    if (this->bgSoundLoopID == INVALID_SOUND_ID) {
+        this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
+    }
 
     // Load background texture
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(

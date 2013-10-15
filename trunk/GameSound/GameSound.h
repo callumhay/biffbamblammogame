@@ -253,17 +253,17 @@ public:
     void StopAllSoundLoops(double fadeOutTimeInSecs = 0.0);
     void PauseAllSounds();
     void UnpauseAllSounds();
-    SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects = true);
+    SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects = true, float volume = 1.0f);
     SoundID PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, 
         const Point3D& position, bool applyActiveEffects, bool applyLevelTranslation, bool applyGameFGTransform, 
-        float minDistance = DEFAULT_MIN_3D_SOUND_DIST);
+        float minDistance = DEFAULT_MIN_3D_SOUND_DIST, float volume = 1.0f);
 
     void StopSound(SoundID soundID, double fadeOutTimeInSecs = 0.0);
     void StopAllSoundsWithType(const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
 
     // Game object positional sound attaching/detaching functions
     SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped, 
-        const Vector3D& localTranslation = Vector3D(0,0,0));
+        const Vector3D& localTranslation = Vector3D(0,0,0), float volume = 1.0f);
     void DetachAndStopAllSounds(const IPositionObject* posObj, double fadeOutTimeInSecs = 0.0);
     void DetachAndStopSound(const IPositionObject* posObj, const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
     void SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused);
@@ -344,7 +344,7 @@ private:
 
     bool LoadFromMSF();
 
-    bool PlaySoundWithID(const SoundID& id, const GameSound::SoundType& soundType, bool isLooped);
+    bool PlaySoundWithID(const SoundID& id, const GameSound::SoundType& soundType, bool isLooped, bool startPaused = false);
 
     void ClearAll();
     void ClearEffects();
@@ -357,7 +357,7 @@ private:
     void GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) const;
 
     Sound* BuildSound(const GameSound::SoundType& soundType, bool isLooped, 
-        const Point3D* position = NULL, bool applyActiveEffects = true);
+        const Point3D* position = NULL, bool applyActiveEffects = true, bool startPaused = false);
 
     DISALLOW_COPY_AND_ASSIGN(GameSound);
 };

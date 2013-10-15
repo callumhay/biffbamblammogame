@@ -1210,7 +1210,7 @@ void GameModel::ClearLiveItems() {
 void GameModel::ClearActiveTimers() {
 	for(std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end(); ++iter) {
 		GameItemTimer* currTimer = *iter;
-		currTimer->StopTimer();
+		currTimer->StopTimer(false);
 		delete currTimer;
 		currTimer = NULL;
 	}

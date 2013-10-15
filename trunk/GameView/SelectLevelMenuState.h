@@ -32,7 +32,7 @@ class GameLevel;
 
 class SelectLevelMenuState : public DisplayState {
 public:
-    SelectLevelMenuState(GameDisplay* display, const DisplayStateInfo& info);
+    SelectLevelMenuState(GameDisplay* display, const DisplayStateInfo& info, SoundID bgSoundLoopID = INVALID_SOUND_ID);
     ~SelectLevelMenuState();
 
     bool AllowsGameModelUpdates() const { return true; }

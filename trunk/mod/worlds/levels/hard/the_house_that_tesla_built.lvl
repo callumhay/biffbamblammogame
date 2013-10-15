@@ -10,11 +10,11 @@ A(1,0,d,e){2} E E E A(1,0,e,d,f) E E E A(1,1,f,e) E E E E E E E E E S E E E J
 S E E E S E E E S E E E E E E E E E S E E E E 
 A(1,0,g,h){3} E E E A(1,0,h,g,i) E E E A(1,1,i,h) R R R R R R R R G S W(3) E E E 
 S E E E S E E E S R R R R R R R K(MultiBall5,MultiBall5,MultiBall5) E S E E E E 
-S S E S S S E S T(S,ul) E E E E E E E E E S E E E E 
+S S E S S E E T(S,lr) T(S,ul) E E E E E E E E E S E E E E 
 E S E E T(S,ur) S E S E E E E E E E E E E S E E E E 
 E S E E E S E S G R R R R R R R R R S E J E E 
-E S T(S,ll) E E S E S E K(IceBall,IceBall,IceBall) R R R R R R R R S E E E E 
-E D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket){4} S E E S E S E E E E E E E E E E S E E E E 
+E D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket){4} T(S,ll) E E S E S E K(IceBall,IceBall,IceBall) R R R R R R R R S E E E E 
+E E S E E S E S E E E E E E E E E E S E E E E 
 E E S E S S E S E E E E E E E E E E S E E W(2) E 
 E E S E E S E S R R R R R R R R R E S E E E E 
 E E S E E S E S R R R R R R R R R E S E E E E 
@@ -28,18 +28,18 @@ E E E E E E E N E E E E E E E E E E N E E E S
 W(4) E E E E E E N E E E E E E E E E E N E E E S 
 
 STARS:
-5000
-10000
-14000
-17000
-21000
+5500
+11000
+14500
+18000
+22000
 
 PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -57,7 +57,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 2
 MultiBall3 2
-RemoteControlRocket 2
+RemoteControlRocket 0
 IceBall 2
 MineLauncherPaddle 2
 SlowBall 2

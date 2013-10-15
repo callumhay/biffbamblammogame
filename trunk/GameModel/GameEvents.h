@@ -336,13 +336,9 @@ public:
 	 * Event triggered when the ball hits a tesla block to tesla block lightning arc.
 	 * Occurs right before the the repel of the ball from the arc takes place.
 	 * Arguments: ball         - The ball that hit the lightning arc.
-	 *            teslaBlock1  - One of the tesla blocks responsible for the lightning arc.
-	 *            teslaBlock2  - The other tesla block responsible for the lightning arc.    
 	 */
-    virtual void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
+    virtual void BallHitTeslaLightningArcEvent(const GameBall& ball) {
         UNUSED_PARAMETER(ball);
-        UNUSED_PARAMETER(teslaBlock1);
-        UNUSED_PARAMETER(teslaBlock2);
     }
 
 	/**
@@ -534,8 +530,12 @@ public:
 	 * Event triggered when an item's timer stops. Only occurs once when an item runs
 	 * out of its active time and expires.
 	 * Arguments: itemTimer - The item timer that just stopped/expired.
+     *            didExpire - Whether the timer expired (true) or whether it was forced to stop (false)
 	 */
-    virtual void ItemTimerStoppedEvent(const GameItemTimer& itemTimer) { UNUSED_PARAMETER(itemTimer); }
+    virtual void ItemTimerStoppedEvent(const GameItemTimer& itemTimer, bool didExpire) { 
+        UNUSED_PARAMETER(itemTimer); 
+        UNUSED_PARAMETER(didExpire);
+    }
 
 	/**
 	 * Event triggered when an item drop block changes the item type that it will drop next. Occurs
