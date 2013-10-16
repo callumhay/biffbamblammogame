@@ -118,7 +118,7 @@ public:
 
 	void ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem);
 	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item);
-	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);
+	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item, bool gameIsInPlay);
 	void DeactivateMiscEffects();
 
     double ActivateBossIntro();

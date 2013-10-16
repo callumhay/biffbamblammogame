@@ -1035,7 +1035,7 @@ const double BodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
 BodyHeadAI::BodyHeadAI(ClassicalBoss* boss) : 
 ClassicalBossAI(boss), countdownToNextState(0.0), laserSprayCountdown(0.0), numConsecutiveTimesBasicMoveExecuted(0),
 numConsecutiveBarrages(0), laserShootTimer(0), lostAllColumnsWaitCountdown(0.0), base(NULL), tabBottomLeft(NULL),
-tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL) {
+tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL), transitionSoundID(INVALID_SOUND_ID) {
 
     // Make all of the body columns into weakpoints on the boss
     boss->ConvertAliveBodyPartToWeakpoint(boss->leftCol1Idx,  BodyHeadAI::COLUMN_LIFE_POINTS, BodyHeadAI::COLUMN_BALL_DAMAGE);
@@ -1095,6 +1095,7 @@ tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL) {
 }
 
 BodyHeadAI::~BodyHeadAI() {
+    this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
 }
 
 void BodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
@@ -1224,10 +1225,18 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
         }
 
-        case ClassicalBossAI::EyeRisesFromPedimentAIState:
+        case ClassicalBossAI::EyeRisesFromPedimentAIState: {
             this->currVel = Vector2D(0,0);
             this->desiredVel = Vector2D(0,0);
+
+            GameSound* sound = this->boss->GetGameModel()->GetSound();
+            // Stop the current boss background music
+            sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
+            // ... and play the transition sound in a loop
+            this->transitionSoundID = sound->PlaySound(GameSound::BossBackgroundLoopTransition, true, false);
+            
             break;
+        }
 
         default:
             assert(false);
@@ -1591,6 +1600,8 @@ void BodyHeadAI::ExecuteEyeRisesFromPedimentState(double dT) {
         this->eye->Translate(Vector3D(0, this->GetEyeRiseHeight(), 0));
 
         // Go to the next high-level AI state
+        this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
+        this->transitionSoundID = INVALID_SOUND_ID;
         this->boss->SetNextAIState(new HeadAI(this->boss));
     }
 }
@@ -1673,13 +1684,15 @@ AnimationMultiLerp<float> BodyHeadAI::GenerateTablatureDeathRotationAnimation(bo
 const float HeadAI::EYE_LIFE_POINTS = 300;
 const float HeadAI::EYE_BALL_DAMAGE = 100;
 
-HeadAI::HeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), eye(NULL), laserShootTimer(0.0), moveToNextStateCountdown(0.0) {
+HeadAI::HeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), eye(NULL), laserShootTimer(0.0), 
+moveToNextStateCountdown(0.0) {
+
     this->currVel         = Vector2D(0,0);
     this->desiredVel      = Vector2D(0,0);
     this->currPedimentVel = Vector2D(0,0);
     this->currEyeVel      = Vector2D(0,0);
 
-    // The eye is the last weakpoint before the boss is dead
+    // The eye is the last weak point before the boss is dead
     this->boss->ConvertAliveBodyPartToWeakpoint(this->boss->eyeIdx, EYE_LIFE_POINTS, EYE_BALL_DAMAGE);
     this->eye = static_cast<BossWeakpoint*>(this->boss->bodyParts[this->boss->eyeIdx]);
 
@@ -1687,6 +1700,9 @@ HeadAI::HeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), eye(NULL), laserSho
     this->pediment = static_cast<BossBodyPart*>(this->boss->bodyParts[this->boss->pedimentIdx]);
 
     this->SetState(ClassicalBossAI::MoveAndBarrageWithLaserAIState);
+
+    // Play the faster background music
+    boss->GetGameModel()->GetSound()->PlaySound(GameSound::BossAngryBackgroundLoop, true);
 }
 
 HeadAI::~HeadAI() {

@@ -1,9 +1,9 @@
 Deflection Redirection
 21 27
 E E E E F(d) J F(d) E E E E E E E F(d) J F(d) E E E E 
-E R R E F(d) E F(d) Q(f) Q(f) E E E Q(f) Q(f) F(d) E F(d) E R R E 
-R R R R F(d) F(d) F(d) Q(i) Q(i) E E E Q(i) Q(i) F(d) F(d) F(d) R R R R 
-R R E E E E E E E E E E E E E E E E E R R 
+E E E E F(d) E F(d) Q(f) B E E E B Q(f) F(d) E F(d) E E E E 
+E E E E F(d) F(d) F(d) Q(i) Q(i) E E E Q(i) Q(i) F(d) F(d) F(d) E E E E 
+E E E E E E E E E E E E E E E E E E E E E 
 R R E N N N N N N N D(ShieldPaddle,ShieldPaddle,ShieldPaddle) N N N N N N N E R R 
 R B E N E E E E E R E R E E E E E N E B R 
 R R E N E I E E R E E E R E E I E N E R R 
@@ -19,9 +19,9 @@ R R E N G G G G R Y G Y R G G G G N E R R
 R R E N G G G G R G Q(f) G R G G G G N E R R 
 R B E N G G G G R E E E R G G G G N E B R 
 R R E N G G G G E E E E E G G G G N E R R 
-R R E N G G G E E E E E E E G G G N E R R 
-R B E N G G E E E E E E E E E G G N E B R 
-R R E N G E E E E E E E E E E E G N E R R 
+E E E N G G G E E E E E E E G G G N E E E 
+E E E N G G E E E E E E E E E G G N E E E 
+E E E N G E E E E E E E E E E E G N E E E 
 E E E N E E E E E E E E E E E E E N E E E 
 E E E N E E E E E E E E E E E E E N E E E 
 E E E N E E E E E E E E E E E E E N E E E 
@@ -29,18 +29,18 @@ E E E S E E E E E E E E E E E E E S E E E
 E E E S E E E E E E E E E E E E E S E E E 
 
 STARS:
-7000
-12000
-23000
-34000
+10000
+25000
+38000
 44000
+48000
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2

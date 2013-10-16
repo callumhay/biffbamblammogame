@@ -15,10 +15,11 @@
 #include "InGameDisplayState.h"
 
 #include "../BlammoEngine/Animation.h"
+#include "../GameSound/GameSound.h"
 
 /**
  * This class is used as the in-game state instead of the "InGameDisplayState"
- * when the level has a boss in it. This state is intended to accomodate all of
+ * when the level has a boss in it. This state is intended to accommodate all of
  * the special/added effects for boss intro/outro and victory.
  */
 class InGameBossLevelDisplayState : public InGameDisplayState {
@@ -51,6 +52,8 @@ private:
 
     AnimationLerp<float> fadeObjectsAnim;
     AnimationLerp<float> paddlePosGetTheHellOutAnim;
+
+    SoundID bossIntroFadeInSoundID;
 
     void SetBossState(BossState newState);
     void RenderBossState(double dT);

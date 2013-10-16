@@ -238,7 +238,7 @@ private:
     
     // EyeRisesFromPedimentAIState
     AnimationLerp<Vector2D> eyeRiseAnim;
-
+    SoundID transitionSoundID;
     // --------------------------------------------------------------------------------------------
 
     void SetState(ClassicalBossAI::AIState newState);

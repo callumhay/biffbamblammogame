@@ -6,43 +6,43 @@ E E E E E E E E E E E E E E E E E E E
 E E E E N N N N Q(i) Q(i) Q(i) N N N N E E E E 
 E E E E N Y Y Y E E E Y Y Y N E E E E 
 E E E E Q(i) Y G G G G G G G Y Q(i) E E E E 
-E E E E Q(i) E G K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) G E Q(i) E E E E 
+E E E E Q(i) E G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G K(RocketPaddle,RocketPaddle,RocketPaddle) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G E Q(i) E E E E 
 E E E E Q(i) E K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) E Q(i) E E E E 
 E E E Q(i) S G G G G G G G G G S Q(i) E E E 
 E E E E S G G G G G G G G G S E E E E 
 E E E E S Y G G G G G G G Y S E E E E 
-E E E E Q(i) E G E G G G E G E Q(i) E E E E 
-E E E E Q(i) K(RocketPaddle,RocketPaddle,RocketPaddle) E K(RocketPaddle,RocketPaddle,RocketPaddle) E C(0-359) E K(RocketPaddle,RocketPaddle,RocketPaddle) E K(RocketPaddle,RocketPaddle,RocketPaddle) Q(i) E E E E 
+E E Q(i) E Q(i) E G E G G G E G E Q(i) E Q(i) E E 
+E E E E Q(i) K(RocketPaddle,RocketPaddle,RocketPaddle) E R E C(0-359) E R E K(RocketPaddle,RocketPaddle,RocketPaddle) Q(i) E E E E 
 E E E E Q(i) E G E G G G E G E Q(i) E E E E 
 E E E Q(i) S G G G G G G G G G S Q(i) E E E 
 E E E E S G G G G G G G G G S E E E E 
 E E E E S O G G G G G G G O S E E E E 
-E E E E Q(i) E K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E Q(i) E E E E 
-E E E E Q(i) E G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G E Q(i) E E E E 
+E E E E Q(i) E K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) G K(IceBall,IceBall,IceBall) E Q(i) E E E E 
+E E E E Q(i) E G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G K(RocketPaddle,RocketPaddle,RocketPaddle) G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G E Q(i) E E E E 
 E E E E Q(i) E G G G G G G G E Q(i) E E E E 
 E E E Q(i) S E E E E E E E E E S Q(i) E E E 
 E E E E S E E E E E E E E E S E E E E 
 E E E E S E E E E E E E E E S E E E E 
-E E E E N E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E N E E E E 
+E E E E Q(i) E E E E E E E E E Q(i) E E E E 
+E E E E Q(i) E E E E E E E E E Q(i) E E E E 
+E E E E Q(i) E E E E E E E E E Q(i) E E E E 
 E E E E N E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E N E E E E 
 S E E E N E E E E E E E E E N E E E S 
 
 STARS:
 8000
-12000
-16000
-22000
-25000
+13000
+19000
+26000
+35000
 
 PaddleGrow 3
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -60,7 +60,7 @@ MultiBall5 2
 BallCam 0
 MagnetPaddle 2
 MultiBall3 2
-RemoteControlRocket 1
+RemoteControlRocket 0
 IceBall 3
 MineLauncherPaddle 3
 SlowBall 2

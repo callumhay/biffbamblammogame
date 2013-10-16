@@ -5,19 +5,19 @@ S E E A(0,1,g,h){1} E E E E E E E E S
 S G G S G G G G G E E E S 
 S G G S G G G G G E K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) E S 
 S G G S G G G G G E E E S 
-S G G S A(0,1,d,c) R S S S S S A(0,1,c,d){2} S 
+S G G S A(0,1,d,c) T(R,ur) R T(S,ur) S S S A(0,1,c,d){2} S 
 S G G S G G G G G G G G S 
 S Y Y S G G G G G Y Y Y S 
-S Y Y S O O B O O Y Y Y S 
+S Y Y S T(O,ur) O B O T(O,ul) Y Y Y S 
 S G G S Y Y Y Y Y G G G S 
 S G G S G G G G G G G G S 
 S Y Y S Y Y Y Y Y Y Y Y S 
-S Y K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S G G G G K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Y Y Y S 
+S T(Y,ur) K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S G G G G K(MagnetPaddle,MagnetPaddle,MagnetPaddle) Y Y T(Y,ul) S 
 S E E A(0,1,h,g) E E E E E E E E S 
 S E E E E E E E E E E E S 
-A(0,1,i,k){5} E E E E S S S S S S A(0,1,k,i) S 
-S O O O O Y Y Y Y Y Y R S 
-S G G G G G G G G G G G S 
+A(0,1,i,k){5} E E E E T(S,ur) S S S S S A(0,1,k,i) S 
+S T(O,ur) O O O Y Y Y Y Y Y T(R,ul) S 
+S T(G,ur) G G G G G G G G G T(G,ul) S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -32,18 +32,18 @@ S E E E E E E E E E E E S
 W(5) E E E E E E E E E E E W(1) 
 
 STARS:
-25000
+10000
+20000
 30000
-40000
-50000
-64100
+37000
+42000
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

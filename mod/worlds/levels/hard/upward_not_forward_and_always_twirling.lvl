@@ -1,13 +1,12 @@
 Upward and Always Twirling
-21 29
-S S S S S S S S S S S S S S S S S S S S S 
-S E E E F(r) E E E E E S E E E E E F(l) E E E S 
-S E C(90) E F(r) E E H E E S E E H E E F(l) E C(270) E S 
-S E Q(f) E F(r) E E E E E S E E E E E F(l) E Q(f) E S 
-S E E E S F(d) F(d) F(d) F(d) F(d) S F(d) F(d) F(d) F(d) F(d) S E E E S 
-S N N N S E E E E E C(170-190) E E E E E S N N N S 
-E E E E S E E E E E Q(i) E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
+21 28
+S S S S S E E E E E E E E E E E S S S S S 
+S E E E S E E H E E E E E H E E S E E E S 
+S E Q(f) E S E E E E E E E E E E E S E Q(f) E S 
+S E E E S S N N N S S S N N N S S E E E S 
+S N N N S C(145-170) E E E E E E E E E C(190-215) S N N N S 
+E E E E N E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E N E E E E 
 E E C(0) E N G G G G G Y G G G G G N E C(0) E E 
 E E E E N G G G G Y Y Y G G G G N E E E E 
 E E E E N G G G Y Y O Y Y G G G N E E E E 
@@ -17,8 +16,10 @@ E E E E N Y Y O O R Q(f) R O O Y Y N E E E E
 E E C(0) E N G Y Y O Q(f) R Q(f) O Y Y G N E C(0) E E 
 E E E E N G G Y Y O O O Y Y G G N E E E E 
 E E E E N G G G Y Y O Y Y G G G N E E E E 
-E E E E N G G G G Y Y Y G G G G N E E E E 
+E E C(0) E N G G G G Y Y Y G G G G N E C(0) E E 
 E E E E N G G G G G Y G G G G G N E E E E 
+E E E E N E E E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E E E N E E E E 
 E S D(RocketPaddle,RocketPaddle,RocketPaddle){1} S S E E E E E E E E E E E S S D(ShieldPaddle,ShieldPaddle,ShieldPaddle){2} S E 
 E E E E S E E E E E E E E E E E S E E E E 
 E E E E S E E E E E E E E E E E S E E E E 
@@ -26,16 +27,14 @@ E E E E S E E E E E E E E E E E S E E E E
 E E E E S E E E E E E E E E E E S E E E E 
 E E E E N E E E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E N E E E E 
 W(2) E E E N E E E E E E E E E E E N E E E W(1) 
 
 STARS:
-5000
-9000
-14000
-20000
+6000
+13000
+18000
 25000
+32000
 
 PaddleGrow 2
 PoisonPaddle 2

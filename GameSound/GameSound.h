@@ -163,6 +163,9 @@ public:
 
         // -> Boss-related/specific sounds
         BossFadeInIntroEvent,
+        BossBackgroundLoop,
+        BossBackgroundLoopTransition,
+        BossAngryBackgroundLoop,
         BossElectricitySpasmLoop,
         BossAngryEvent,
         BossHurtEvent,
@@ -251,6 +254,7 @@ public:
     // Play/stop functions
     void StopAllSounds(double fadeOutTimeInSecs = 0.0);
     void StopAllSoundLoops(double fadeOutTimeInSecs = 0.0);
+    void StopAllSoundsExcept(const std::set<GameSound::SoundType>& exceptSounds, double fadeOutTimeInSecs = 0.0);
     void PauseAllSounds();
     void UnpauseAllSounds();
     SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects = true, float volume = 1.0f);
@@ -261,13 +265,15 @@ public:
     void StopSound(SoundID soundID, double fadeOutTimeInSecs = 0.0);
     void StopAllSoundsWithType(const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
 
+    void SetIgnorePlaySound(bool ignore);
+
     // Game object positional sound attaching/detaching functions
     SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped, 
         const Vector3D& localTranslation = Vector3D(0,0,0), float volume = 1.0f);
     void DetachAndStopAllSounds(const IPositionObject* posObj, double fadeOutTimeInSecs = 0.0);
     void DetachAndStopSound(const IPositionObject* posObj, const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
     void SetPauseForAllAttachedSounds(const IPositionObject* posObj, bool isPaused);
- 
+
     // Sound effect functions
     void StopAllEffects();
     void PauseAllEffects();
@@ -279,6 +285,7 @@ public:
     // Volume functions
     void SetMasterVolume(float volume);
     void SetSoundVolume(const SoundID& soundID, float volume);
+    void SetSoundTypeVolume(const GameSound::SoundType& soundType, float volume);
     //void SetAllPlayingSoundsVolume(float volume, double lerpTimeInSecs = 0.0);
 
     // 3D/2D Sound functions
@@ -332,6 +339,8 @@ private:
     Vector3D levelTranslation;
     Matrix4x4 gameFGTransform;
 
+    bool ignorePlaySounds;
+
     // IrrKlang stuff
     irrklang::ISoundEngine* soundEngine;
 
@@ -361,6 +370,10 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(GameSound);
 };
+
+inline void GameSound::SetIgnorePlaySound(bool ignore) {
+    this->ignorePlaySounds = ignore;
+}
 
 inline bool GameSound::IsSoundPlaying(SoundID soundID) const {
     return this->GetPlayingSound(soundID) != NULL;

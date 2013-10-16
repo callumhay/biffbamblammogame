@@ -1394,24 +1394,30 @@ void GameAssets::FireRocket(const GameModel& gameModel, const RocketProjectile& 
 
         case Projectile::BossRocketBulletProjectile:
             // The rocket shot sound
-            this->sound->PlaySoundAtPosition(GameSound::BossRocketFiredEvent, false, rocketProjectile.GetPosition3D(), true, true, true);
+            this->sound->PlaySoundAtPosition(GameSound::BossRocketFiredEvent, false, 
+                rocketProjectile.GetPosition3D(), true, true, true);
             // Rocket moving sound loop
-            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::BossRocketMovingLoop, true, gameModel.GetCurrentLevelTranslation());
+            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::BossRocketMovingLoop, 
+                true, gameModel.GetCurrentLevelTranslation());
             break;
         
         case Projectile::RocketTurretBulletProjectile:
             // The rocket shot sound
-            this->sound->PlaySoundAtPosition(GameSound::TurretRocketFiredEvent, false, rocketProjectile.GetPosition3D(), true, true, true);
+            this->sound->PlaySoundAtPosition(GameSound::TurretRocketFiredEvent, false, rocketProjectile.GetPosition3D(), 
+                true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.5f);
             // Rocket moving sound loop
-            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::TurretRocketMovingLoop, true, gameModel.GetCurrentLevelTranslation());
+            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::TurretRocketMovingLoop, 
+                true, gameModel.GetCurrentLevelTranslation(), 0.5f);
             break;
 
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile: {
             // The rocket launch sound
-            this->sound->PlaySoundAtPosition(GameSound::PaddleRocketLaunchEvent, false, rocketProjectile.GetPosition3D(), true, true, true);
+            this->sound->PlaySoundAtPosition(GameSound::PaddleRocketLaunchEvent, false, 
+                rocketProjectile.GetPosition3D(), true, true, true);
             // Attach a moving sound loop to the rocket
-            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::PaddleRocketMovingLoop, true, gameModel.GetCurrentLevelTranslation());
+            this->sound->AttachAndPlaySound(&rocketProjectile, GameSound::PaddleRocketMovingLoop, 
+                true, gameModel.GetCurrentLevelTranslation());
             break;
         }
 
@@ -1780,10 +1786,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
  * Deactivate the effect for a particular item - this will clean up anything that was activated
  * which needs manual clean up.
  */
-void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameItem& item) {
+void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameItem& item, bool gameIsInPlay) {
     UNUSED_PARAMETER(gameModel);
-
-    bool isGameInPlay = GameState::IsGameInPlayState(gameModel);
 
 	// Also make the FBO assets aware of the deactivated effect
 	this->fboAssets->DeactivateItemEffects(item);
@@ -1831,7 +1835,7 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 			break;
 
 		case GameItem::ShieldPaddleItem:
-            if (isGameInPlay) {
+            if (gameIsInPlay) {
                 this->sound->PlaySoundAtPosition(GameSound::PaddleShieldDeactivatedEvent, false, 
                     gameModel.GetPlayerPaddle()->GetPosition3D(), true, true, true);
             }
@@ -1840,7 +1844,7 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 
         case GameItem::UpsideDownItem:
             // Moved to the GameTransformMgr
-            //if (isGameInPlay || gameModel.GetCurrentStateType() == GameState::BallDeathStateType) {
+            //if (gameIsInPlay || gameModel.GetCurrentStateType() == GameState::BallDeathStateType) {
             //    this->sound->PlaySound(GameSound::LevelUnflipEvent, false);
             //}
             break;

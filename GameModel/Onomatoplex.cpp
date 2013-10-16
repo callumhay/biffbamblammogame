@@ -875,7 +875,7 @@ std::string Generator::JoinEndfixes(const std::string &endFix1, const std::strin
 			return endFix2;
 		}
 
-		result = endFix1.substr(0, indexOfNonVowel1) + endFix2;
+		result = endFix1.substr(0, indexOfNonVowel1 + 1) + endFix2;
 	}
 
 	return result;

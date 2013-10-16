@@ -11,7 +11,7 @@ E E E E E E E E S S S S S S S E E E E E E E E
 E E E E E E E A(0,1,a,b) S R R R R R S A(0,1,b,a) E E E E E E E 
 E E E E E E E S S S S S S S S S E E E E E E E 
 S F(d) F(d) F(d) F(d) S S S S S S D(MagnetPaddle,MagnetPaddle,MagnetPaddle){1} S S S S S S F(d) F(d) F(d) F(d) S 
-S E E E E E E E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E E E E E K(MultiBall5,MultiBall5,MultiBall5) E E E E E E E S 
+S E E E E E E E K(UberBall,UberBall,UberBall) E E E E E K(MultiBall5,MultiBall5,MultiBall5) E E E E E E E S 
 S E E E E E E E E E E E E E E E E E E E E E S 
 S G G G E G G G G G G E G G G G G G E G G G S 
 S G G E G E G G G G E G E G G G G E G E G G S 
@@ -32,18 +32,18 @@ S E E E E E E E E E E E E E E E E E E E E E S
 W(1) E E E E E E E E E E E E E E E E E E E E E W(1) 
 
 STARS:
-6000
-10000
-14000
-18000
-22000
+8000
+15000
+20000
+26500
+35000
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
 BallGrow 2
-UberBall 2
+UberBall 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

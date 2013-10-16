@@ -21,6 +21,7 @@
 #include "../GameControl/GameControl.h"
 
 class GameDisplay;
+class GameModel;
 
 class DisplayStateInfo {
 public:
