@@ -1,14 +1,14 @@
 Shooting Gallery
 21 30
-S E S S S S S S S S S S S S S S S S S E S 
-S E E E F(r) E E E E E E E E E E E F(l) E E E S 
-S E E E F(r) E H E E E E E E E H E F(l) E E E S 
-S E E E F(r) E E E E E E E E E E E F(l) E E E S 
-S S S S S F(d) F(d) F(d) G G G G G F(d) F(d) F(d) S S S S S 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S G Y O K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) G G G K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) O Y G S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S G G G G G G G G G G G S E E E E 
+S E T(S,lr) S S S S S S S S S S S S S S S T(S,ll) E S 
+S E S E F(r) E E E E E S E E E E E F(l) E S E S 
+S E S E F(r) E H E E E S E E E H E F(l) E S E S 
+S E S E F(r) E E E E E S E E E E E F(l) E S E S 
+S E S E S F(d) F(d) F(d) O I S I O F(d) F(d) F(d) S E S E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E S G Y O K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) G G G K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) O Y G S E E E S 
+S T(S,ll) E T(S,lr) S E E E E E E E E E E E S T(S,ll) E T(S,lr) S 
+E S S S S G G G G G G G G G G G S S S S E 
 E E E E S G G G K(RocketPaddle,RocketPaddle,RocketPaddle) G G G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G G G S E E E E 
 E E E E F(r) E E E E E E E E E E E F(l) E E E E 
 E E C(90) E F(r) E J E E E M E E E J E F(l) E C(270) E E 
@@ -32,11 +32,11 @@ E E E E N E E E E E E E E E E E N E E E E
 S E E E N E E E E E E E E E E E N E E E S 
 
 STARS:
+10000
 15000
-18000
 20000
-25000
-28000
+24000
+26500
 
 PaddleGrow 2
 PoisonPaddle 2

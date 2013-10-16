@@ -150,13 +150,16 @@ void InGameMenuState::RenderFrame(double dT) {
 			this->ResumeTheGame();
 			return;
 
-        case InGameMenuState::RestartLevel:
+        case InGameMenuState::RestartLevel: {
+            GameSound* sound = this->display->GetSound();
+            sound->SetIgnorePlaySound(true);
+
             // Clean up any misc. visual effects
 			this->display->GetAssets()->DeactivateMiscEffects();
 			
             // Kill all sounds
-			this->display->GetSound()->StopAllSounds();
-            this->display->GetSound()->StopAllEffects();
+			sound->StopAllSounds();
+            sound->StopAllEffects();
 
             // Reset the level
             this->display->GetModel()->ResetCurrentLevel();
@@ -164,23 +167,29 @@ void InGameMenuState::RenderFrame(double dT) {
             // Unpause the game and go to the start of level state which will have
             // been queued when we told the model to reset the level
             this->CleanUpReturnToDisplayState();
-            
+            sound->SetIgnorePlaySound(false);
             this->display->SetCurrentStateAsNextQueuedState();
 
             return;
+        }
 
-		case InGameMenuState::ReturnToMainMenu:
+        case InGameMenuState::ReturnToMainMenu: {
+            GameSound* sound = this->display->GetSound();
+            sound->SetIgnorePlaySound(true);
+
             // Clean up any misc. visual effects
 			this->display->GetAssets()->DeactivateMiscEffects();
 			
             // Kill all sounds
-			this->display->GetSound()->StopAllSounds();
-            this->display->GetSound()->StopAllEffects();
+			sound->StopAllSounds();
+            sound->StopAllEffects();
             
 			// Go back to the main menu state
             this->CleanUpReturnToDisplayState();
+            sound->SetIgnorePlaySound(false);
 			this->display->SetCurrentState(new MainMenuDisplayState(this->display));
 			return;
+        }
 
 		case InGameMenuState::ExitToDesktop:
             this->CleanUpReturnToDisplayState();

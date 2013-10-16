@@ -1374,7 +1374,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 
 /**
  * Adds a ball bouncing ESP - the effect that occurs when a ball typically
- * bounces off a levelpiece/block.
+ * bounces off a level-piece/block.
  */
 void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block) {
 	// We don't do the effect for certain types of blocks...
@@ -1384,6 +1384,25 @@ void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelP
 
 	// Add the new emitter to the list of active emitters
 	this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::BOUNCE));
+}
+
+void GameESPAssets::AddMiscBallPieceCollisionEffect(const GameBall& ball, const LevelPiece& block) {
+    switch (block.GetType()) {
+        case LevelPiece::RocketTurret:
+        case LevelPiece::MineTurret:
+        case LevelPiece::LaserTurret: {
+            const TurretBlock& turretBlock = static_cast<const TurretBlock&>(block);
+            if (turretBlock.GetHealthPercent() > turretBlock.GetLifePercentForOneMoreBallHit() &&
+                !(turretBlock.HasStatus(LevelPiece::IceCubeStatus) && ball.HasBallType(GameBall::IceBall))) {
+                this->AddBallHitTurretEffect(ball, block);
+            }
+            break;
+        }
+
+        default:
+            break;
+    }
+
 }
 
 /**
@@ -4961,7 +4980,7 @@ ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, cons
 	comboEffect->SetParticleLife(ESPInterval(2.25f));
 	comboEffect->SetParticleSize(ESPInterval(0.75f));
 	comboEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	comboEffect->SetParticleAlignment(ESP::ScreenAligned);
+	comboEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	comboEffect->SetEmitPosition(Point3D(position));
 
     comboEffect->AddEffector(&this->particleLargeGrowth);
@@ -5512,6 +5531,42 @@ void GameESPAssets::AddEnergyShieldHitEffect(const Point2D& shieldCenter, const 
 	this->activeGeneralEmitters.push_back(solidEnergyBits);
 	this->activeGeneralEmitters.push_back(sparkleEnergyBits);
 	this->activeGeneralEmitters.push_back(onomataEffect);
+}
+
+void GameESPAssets::AddBallHitTurretEffect(const GameBall& ball, const LevelPiece& block) {
+    
+    Vector2D blockToBall = ball.GetCenterPosition2D() - block.GetCenter();
+
+    ESPPointEmitter* fallingSparkEffect = new ESPPointEmitter();
+    fallingSparkEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    fallingSparkEffect->SetInitialSpd(ESPInterval(3.0f, 6.0f));
+    fallingSparkEffect->SetParticleLife(ESPInterval(0.44f, 0.77f));
+    fallingSparkEffect->SetParticleSize(ESPInterval(0.15f*LevelPiece::PIECE_WIDTH, 0.35f*LevelPiece::PIECE_WIDTH));
+    fallingSparkEffect->SetEmitAngleInDegrees(180);
+    fallingSparkEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    fallingSparkEffect->SetEmitPosition(Point3D(block.GetCenter(), 0.0f));
+    fallingSparkEffect->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+    fallingSparkEffect->AddEffector(&this->particleFader);
+    fallingSparkEffect->AddEffector(&this->gravity);
+    fallingSparkEffect->SetParticles(8, this->sparkleTex);
+
+    ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
+    smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+    smashBitsEffect->SetInitialSpd(ESPInterval(3.0f, 6.5f));
+    smashBitsEffect->SetParticleLife(ESPInterval(0.75f, 1.0f));
+    smashBitsEffect->SetEmitDirection(Vector3D(blockToBall, 0));
+    smashBitsEffect->SetEmitAngleInDegrees(30);
+    smashBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 10.0f, LevelPiece::PIECE_WIDTH / 6.0f));
+    smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+    smashBitsEffect->SetEmitPosition(Point3D(0.5f * (block.GetCenter() + ball.GetCenterPosition2D()), 0.0f));
+    smashBitsEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    smashBitsEffect->SetParticleColour(ESPInterval(0.33f, 0.55f), ESPInterval(0.33f, 0.55f), ESPInterval(0.33f, 0.55f), ESPInterval(1.0f));
+    smashBitsEffect->AddEffector(&this->gravity);
+    smashBitsEffect->AddEffector(&this->particleFader);
+    smashBitsEffect->SetRandomTextureParticles(4, this->rockTextures);
+
+    this->activeGeneralEmitters.push_back(fallingSparkEffect);
+    this->activeGeneralEmitters.push_back(smashBitsEffect);
 }
 
 ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item) {

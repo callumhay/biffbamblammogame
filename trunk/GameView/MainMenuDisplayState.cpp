@@ -505,7 +505,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	    if (this->changeToPlayGameState) {
     		
 		    // Turn off the background music...
-            sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
+            sound->StopSound(this->bgLoopedSoundID);
 		    
             // Figure out the furthest world and level that the player has progressed to
             int furthestWorldIdx, furthestLevelIdx;

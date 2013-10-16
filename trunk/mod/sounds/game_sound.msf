@@ -175,7 +175,7 @@ WorldBackgroundLoop {
 // Deco **********************************************************************
 WorldBackgroundLoop {
 	world = Deco
-	file  =
+	file  = resources/DecoWorldBackgroundLoop.ogg
 }
 
 // Futurism ******************************************************************
@@ -183,6 +183,10 @@ WorldBackgroundLoop {
 	world = Futurism
 	file  =
 }
+
+// TODO: Dada-Surrealism
+// TODO: Postmodernism
+
 
 // ---------------------------------------------------------------------------
 // In-Game Events ============================================================
@@ -201,9 +205,6 @@ PlayerLostABallButIsStillAliveEvent {
 	file = resources/lost_ball.ogg
 }
 
-LastBallExplodedEvent {
-	file = resources/last_ball_death.ogg
-}
 
 
 BallBallCollisionEvent {
@@ -211,7 +212,10 @@ BallBallCollisionEvent {
 }
 
 LastBallSpiralingToDeathLoop {
-	file = resources/ball_spiral_to_death.ogg
+	file = resources/LastBallSpiralingToDeathLoop.ogg
+}
+LastBallExplodedEvent {
+	file = resources/LastBallExplodedEvent.ogg
 }
 
 
@@ -460,7 +464,46 @@ ItemMovingLoop {
 BossFadeInIntroEvent {
 	file = resources/BossFadeInIntroEvent.ogg
 }
-// BossBackgroundLoop
+
+BossBackgroundLoop {
+	world = Classical
+	file = resources/BossClassicalWorldBackgroundLoop.ogg	
+}
+BossBackgroundLoop {
+	world = Gothic and Romantic
+	file = resources/BossGothicWorldBackgroundLoop.ogg	
+}
+BossBackgroundLoop {
+	world = Nouveau
+	file = resources/BossNouveauWorldBackgroundLoop.ogg	
+}
+BossBackgroundLoop {
+	world = Deco
+	file = resources/BossDecoWorldBackgroundLoop.ogg	
+}
+
+BossBackgroundLoopTransition {
+	file = resources/BossBackgroundLoopTransition.ogg
+}
+
+BossAngryBackgroundLoop {
+	world = Classical
+	file = resources/BossAngryClassicalWorldBackgroundLoop.ogg
+}
+BossAngryBackgroundLoop {
+	world = Gothic and Romantic
+	file = resources/BossAngryGothicWorldBackgroundLoop.ogg
+}
+BossAngryBackgroundLoop {
+	world = Nouveau
+	file = resources/BossAngryNouveauWorldBackgroundLoop.ogg
+}
+BossAngryBackgroundLoop {
+	world = Deco
+	file = resources/BossAngryDecoWorldBackgroundLoop.ogg
+}
+
+
 // BossSparkleEvent
 // BossGlowEvent
 // BossPowerChargeEvent

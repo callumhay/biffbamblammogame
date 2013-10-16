@@ -97,6 +97,10 @@ public:
     void SpecialDirectionPressed(int x, int y);
     void SpecialDirectionReleased();
 
+    static bool IsGameInPlay(const GameModel& gameModel, const DisplayState::DisplayStateType& type) {
+        return GameState::IsGameInPlayState(gameModel) && DisplayState::IsGameInPlayDisplayState(type);
+    }
+
 #ifdef _DEBUG
 
 	static void ToggleDrawDebugBounds() {

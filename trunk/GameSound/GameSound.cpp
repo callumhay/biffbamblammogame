@@ -26,7 +26,7 @@ const float GameSound::DEFAULT_MIN_3D_SOUND_DIST       = 1000.0f;
 const float GameSound::DEFAULT_3D_SOUND_ROLLOFF_FACTOR = 0.1f;
 
 GameSound::GameSound() : soundEngine(NULL), currLoadedWorldStyle(GameWorld::None), 
-levelTranslation(0,0,0), gameFGTransform()
+levelTranslation(0,0,0), gameFGTransform(), ignorePlaySounds(false)
 {
     this->soundEngine = irrklang::createIrrKlangDevice();
     this->soundEngine->setRolloffFactor(DEFAULT_3D_SOUND_ROLLOFF_FACTOR);
@@ -287,6 +287,62 @@ void GameSound::StopAllSoundLoops(double fadeOutTimeInSecs) {
     }
 }
 
+void GameSound::StopAllSoundsExcept(const std::set<GameSound::SoundType>& exceptSounds, double fadeOutTimeInSecs) {
+    if (this->soundEngine == NULL) {
+        return;
+    }
+
+    // Clear all looped non-attached sounds from memory
+    for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end();) {
+        Sound* currSound = iter->second;
+        if (exceptSounds.find(currSound->GetSoundType()) != exceptSounds.end()) {
+            ++iter;
+            continue;
+        }
+
+        if (fadeOutTimeInSecs > 0.0) {
+            currSound->SetFadeout(fadeOutTimeInSecs);
+        }
+        else {
+            delete currSound;
+            currSound = NULL;
+            iter = this->nonAttachedPlayingSounds.erase(iter);
+            continue;
+        }
+ 
+        ++iter;
+    }
+
+    // Clear all attached sounds from memory
+    for (AttachedSoundMapIter iter1 = this->attachedPlayingSounds.begin(); iter1 != this->attachedPlayingSounds.end();) {
+        SoundMap& soundMap = iter1->second.soundMap;
+        for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end();) {
+            Sound* currSound = iter2->second;
+            if (exceptSounds.find(currSound->GetSoundType()) != exceptSounds.end()) {
+                ++iter2;
+                continue;
+            }
+
+            if (fadeOutTimeInSecs > 0.0) {
+                currSound->SetFadeout(fadeOutTimeInSecs);
+            }
+            else {
+                delete currSound;
+                currSound = NULL;
+                iter2 = soundMap.erase(iter2);
+            }
+
+            ++iter2;
+        }
+        if (soundMap.empty()) {
+            iter1 = this->attachedPlayingSounds.erase(iter1);
+        }
+        else {
+            ++iter1;
+        }
+    }
+}
+
 void GameSound::PauseAllSounds() {
     if (this->soundEngine == NULL) {
         return;
@@ -304,6 +360,9 @@ void GameSound::UnpauseAllSounds() {
 // Plays a non-positional sound in the game.
 // Returns: The ID of the sound that was created, INVALID_SOUND_ID if it failed to create a sound.
 SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects, float volume) {
+    if (this->ignorePlaySounds) {
+        return INVALID_SOUND_ID;
+    }
 
     Sound* newSound = this->BuildSound(soundType, isLooped, NULL, applyActiveEffects, true);
     if (newSound == NULL) {
@@ -321,6 +380,10 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
 SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, const Point3D& position, 
                                        bool applyActiveEffects, bool applyLevelTranslation, bool applyGameFGTransform,
                                        float minDistance, float volume) {
+
+    if (this->ignorePlaySounds) {
+        return INVALID_SOUND_ID;
+    }
 
     Point3D transformedPos = position;
     if (applyLevelTranslation) {
@@ -398,6 +461,9 @@ void GameSound::StopAllSoundsWithType(const GameSound::SoundType& soundType, dou
 // NOTE: This is only meant for in-game foreground objects that have sound attached to them!!!
 SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped,
                                       const Vector3D& localTranslation, float volume) {
+    if (this->ignorePlaySounds) {
+        return INVALID_SOUND_ID;
+    }
 
     // Check to see if there's already the same position object with the same sound type attached to it, if so
     // check to see if it's looped, if it is then we don't attach more than one looping sound of the same type to the object!
@@ -602,6 +668,17 @@ void GameSound::SetSoundVolume(const SoundID& soundID, float volume) {
         return;
     }
     sound->SetVolume(volume);
+}
+
+void GameSound::SetSoundTypeVolume(const GameSound::SoundType& soundType, float volume) {
+    std::list<Sound*> allPlayingSounds;
+    this->GetAllPlayingSoundsAsList(allPlayingSounds);
+    for (std::list<Sound*>::iterator iter = allPlayingSounds.begin(); iter != allPlayingSounds.end(); ++iter) {
+        Sound* currSound = *iter;
+        if (currSound->GetSoundType() == soundType) {
+            currSound->SetVolume(volume);
+        }
+    } 
 }
 
 void GameSound::SetListenerPosition(const Camera& camera) {

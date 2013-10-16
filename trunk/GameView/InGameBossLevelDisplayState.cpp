@@ -31,7 +31,8 @@ const double InGameBossLevelDisplayState::WAIT_TIME_AT_END_OF_OUTRO_IN_SECS = 1.
 const double InGameBossLevelDisplayState::CONTROLLER_VIBE_PULSE_TIME = 0.2;
 
 InGameBossLevelDisplayState::InGameBossLevelDisplayState(GameDisplay* display) :
-InGameDisplayState(display), timeUntilBigFlashyBoom(0.0), pulseTimeCounter(0.0) {
+InGameDisplayState(display), timeUntilBigFlashyBoom(0.0), pulseTimeCounter(0.0), 
+bossIntroFadeInSoundID(INVALID_SOUND_ID) {
 
     // Don't allow the player to launch the ball just yet, the boss has a dramatic intro that
     // needs to be animated first...
@@ -78,8 +79,8 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             this->fadeInCountdown = LIGHT_ON_TIME;
             this->display->GetAssets()->ToggleLights(true, LIGHT_ON_TIME);
 
-            // Play intro sound
-            this->display->GetSound()->PlaySound(GameSound::BossFadeInIntroEvent, false, false);
+            // Start playing the boss background music
+            this->display->GetSound()->PlaySound(GameSound::BossBackgroundLoop, true);
 
             break;
         }
@@ -102,7 +103,7 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             this->display->GetAssets()->DeactivateMiscEffects();
 
 		    // Stop world background music (if it's still going)
-		    //this->display->GetSound()->StopSound(GameSound::BackgroundMusicLoop, 0.5, /*seconds fade-out*/); ??
+            this->display->GetSound()->StopAllSoundsWithType(GameSound::BossAngryBackgroundLoop);
 
             // The outro consists of 'explosive' white lines emitting from the boss
             // and then an animation to the whole screen going white...
@@ -180,6 +181,10 @@ void InGameBossLevelDisplayState::ExecuteIntroBossState(double dT) {
             this->display->GetModel()->SetPauseState(GameModel::NoPause);
             this->display->GetModel()->ToggleAllowPaddleBallLaunching(true);
         }
+        if (this->bossIntroFadeInSoundID == INVALID_SOUND_ID && this->introCountdown <= 1.0) {
+            this->bossIntroFadeInSoundID = this->display->GetSound()->PlaySound(GameSound::BossFadeInIntroEvent, false, false, 1.0f);
+        }
+
         this->introCountdown -= dT;
     }
 }

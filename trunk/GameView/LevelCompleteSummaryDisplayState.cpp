@@ -385,63 +385,69 @@ highScoreSoundID(INVALID_SOUND_ID) {
         this->starBgEmitters.push_back(starBgEmitter);
     }
 
-    // Depending on whether the level was the tutorial level or not, we create the difficulty choice pane
+    // Depending on whether the level was the tutorial level or not and whether the player has 
+    // already passed the tutorial before, we create the difficulty choice pane
     if (gameModel->IsCurrentLevelTheTutorialLevel()) {
-        this->difficultyChoiceHandler = new DifficultyPaneEventHandler(this);
-        this->difficultyChoicePane = new DecoratorOverlayPane(this->difficultyChoiceHandler,
-            static_cast<size_t>(Camera::GetWindowWidth() * 0.65f),
-            GameViewConstants::GetInstance()->TUTORIAL_PANE_COLOUR);
+ 
+        GameLevel* tutorialLevel = gameModel->GetCurrentLevel();
+        if (tutorialLevel->GetPrevHighScore() == 0) {
 
-        // Determine the suggested difficulty level based on how they did in the tutorial...
-        int numStars             = gameModel->GetNumStarsAwarded();
-        int numLivesLost         = gameModel->GetNumLivesLostInCurrentLevel();
-        int maxConsecutiveBlocks = gameModel->GetMaxConsecutiveBlocksDestroyed();
+            this->difficultyChoiceHandler = new DifficultyPaneEventHandler(this);
+            this->difficultyChoicePane = new DecoratorOverlayPane(this->difficultyChoiceHandler,
+                static_cast<size_t>(Camera::GetWindowWidth() * 0.65f),
+                GameViewConstants::GetInstance()->TUTORIAL_PANE_COLOUR);
 
-        GameModel::Difficulty difficulty = GameModel::MediumDifficulty;
-        if (numLivesLost <= 2) {
-            if (numStars >= 4) {
-                if (maxConsecutiveBlocks >= GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS) {
-                    if (numLivesLost <= 1) {
-                        difficulty = GameModel::HardDifficulty;
+            // Determine the suggested difficulty level based on how they did in the tutorial...
+            int numStars             = gameModel->GetNumStarsAwarded();
+            int numLivesLost         = gameModel->GetNumLivesLostInCurrentLevel();
+            int maxConsecutiveBlocks = gameModel->GetMaxConsecutiveBlocksDestroyed();
+
+            GameModel::Difficulty difficulty = GameModel::MediumDifficulty;
+            if (numLivesLost <= 2) {
+                if (numStars >= 4) {
+                    if (maxConsecutiveBlocks >= GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS) {
+                        if (numLivesLost <= 1) {
+                            difficulty = GameModel::HardDifficulty;
+                        }
+                        else {
+                            difficulty = GameModel::MediumDifficulty;
+                        }
                     }
                     else {
-                        difficulty = GameModel::MediumDifficulty;
+                        if (numLivesLost == 2) {
+                            difficulty = GameModel::EasyDifficulty;
+                        }
+                        else {
+                            difficulty = GameModel::MediumDifficulty;
+                        }
                     }
                 }
                 else {
-                    if (numLivesLost == 2) {
-                        difficulty = GameModel::EasyDifficulty;
+                    if (numLivesLost == 0) {
+                        difficulty = GameModel::HardDifficulty;
+                    }
+                    else if (numLivesLost == 1) {
+                        difficulty = GameModel::MediumDifficulty;
                     }
                     else {
-                        difficulty = GameModel::MediumDifficulty;
+                        difficulty = GameModel::EasyDifficulty;
                     }
                 }
             }
             else {
-                if (numLivesLost == 0) {
-                    difficulty = GameModel::HardDifficulty;
-                }
-                else if (numLivesLost == 1) {
-                    difficulty = GameModel::MediumDifficulty;
-                }
-                else {
-                    difficulty = GameModel::EasyDifficulty;
-                }
+                // They lost more than 2 lives... that's pretty bad
+                difficulty = GameModel::EasyDifficulty;
             }
-        }
-        else {
-            // They lost more than 2 lives... that's pretty bad
-            difficulty = GameModel::EasyDifficulty;
-        }
-        std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
-        
-        this->difficultyChoicePane->AddText("Based on your performance, you should try playing on a difficulty setting of...");
-        this->difficultyChoicePane->AddText(difficultyOptions[static_cast<int>(difficulty)], Colour(1, 0.75f, 0.0f), 1.2f);
-        this->difficultyChoicePane->AddText("You may select any difficulty you wish if you think this recommendation is lame:");
+            std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
+            
+            this->difficultyChoicePane->AddText("Based on your performance, you should try playing on a difficulty setting of...");
+            this->difficultyChoicePane->AddText(difficultyOptions[static_cast<int>(difficulty)], Colour(1, 0.75f, 0.0f), 1.2f);
+            this->difficultyChoicePane->AddText("You may select any difficulty you wish if you think this recommendation is lame:");
 
-        this->difficultyChoicePane->SetSelectableOptions(difficultyOptions, static_cast<int>(difficulty));
+            this->difficultyChoicePane->SetSelectableOptions(difficultyOptions, static_cast<int>(difficulty));
 
-        this->difficultyChoicePane->Show(0.0, SHOW_DIFFICULTY_CHOICE_PANE_TIME);
+            this->difficultyChoicePane->Show(0.0, SHOW_DIFFICULTY_CHOICE_PANE_TIME);
+        }
     }
 }
 
@@ -1017,12 +1023,29 @@ void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionBu
     UNUSED_PARAMETER(magnitude);
 
     if (this->difficultyChoicePane != NULL) {
-        this->difficultyChoicePane->ButtonPressed(pressedButton);
         
+        if (!this->difficultyChoicePane->IsOptionSelectedAndActive()) {
+            // Play the appropriate sound for the difficult choice menu
+            GameSound* sound = this->display->GetSound();
+            switch (pressedButton) {
+                case GameControl::LeftButtonAction:
+                case GameControl::RightButtonAction:
+                    sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false, false);
+                    break;
+                case GameControl::EnterButtonAction:
+                    sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false, false);
+                    break;
+
+                default:
+                    break;
+            }
+
+            this->difficultyChoicePane->ButtonPressed(pressedButton);
+        }
+
         if (this->difficultyChoicePane->IsOptionSelectedAndActive()) {
             this->difficultyChoicePane->Hide(0.0, HIDE_DIFFICULTY_CHOICE_PANE_TIME);
         }
-
     }
     else {
         this->AnyKeyWasPressed();

@@ -231,6 +231,9 @@ private:
 	// Map of the pairings of Tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D> teslaLightning;
+    BoundingLines teslaLightningBounds;
+
+    void RebuildTeslaLightningBoundingLines();
 
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
     std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
@@ -312,6 +315,13 @@ inline void GameLevel::SetHighScore(long highScore, bool setPrevAsWell) {
         this->prevHighScore = this->highScore;
     }
     this->highScore = highScore;
+}
+
+/**
+ * Checks if the given bounding lines collide with any Tesla lightning arcs currently active in this level.
+ */
+inline bool GameLevel::TeslaLightningCollisionCheck(const BoundingLines& bounds) const {
+    return this->teslaLightningBounds.CollisionCheck(bounds);
 }
 
 // Get whether this level has a new high score due to its most recent play-through this game

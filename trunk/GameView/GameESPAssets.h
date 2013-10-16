@@ -275,6 +275,8 @@ private:
     void AddLightningBoltHitWallEffect(float width, float height, const Point2D& loc);
     void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
+    void AddBallHitTurretEffect(const GameBall& ball, const LevelPiece& block);
+
 	void AddPaddleLaserBeamEffect(const Beam& beam);
     void AddBossLaserBeamEffect(const Beam& beam);
     void AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESPEmitter*>& beamEmitters);
@@ -331,6 +333,7 @@ public:
 
 	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
 	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);
+    void AddMiscBallPieceCollisionEffect(const GameBall& ball, const LevelPiece& block);
 	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle);
 	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);
 	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);

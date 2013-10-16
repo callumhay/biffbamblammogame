@@ -363,12 +363,6 @@ void BallInPlayState::Tick(double seconds) {
 			    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision, 
                     GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
                 ballChangedByCollision[ballIdx].posChanged = true;
-    			
-			    // Make for damn sure that the ball is no longer colliding!
-			    while (currLevel->TeslaLightningCollisionCheck(*currBall, 0.0, n, collisionLine, timeUntilCollision)) {
-				    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision,
-                        GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
-			    }
 		    }
 
 		    // Make sure the ball can collide with level pieces (blocks) before running the block collision simulation
@@ -532,18 +526,12 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
                                       double dT, double timeUntilCollision, 
                                       float minAngleInDegs, const Vector2D& lineVelocity,
                                       bool paddleReflection) {
+    UNUSED_PARAMETER(collisionLine);
 	b.BallCollided();
 
 	// Calculate the time of collision and then the difference up to this point
 	// based on the velocity and then move it to that position...
 	double timeToMoveInReflectionDir = std::max<double>(0.0, dT - timeUntilCollision);
-
-	// Make sure the ball is on the correct side of the collision line (i.e., the side that the normal is pointing in)
-	Vector2D fromLineToBall = b.GetCenterPosition2D() - collisionLine.P1();
-	if (fromLineToBall == Vector2D(0, 0)) {
-		fromLineToBall = b.GetCenterPosition2D() - collisionLine.P2();
-		assert(fromLineToBall != Vector2D(0, 0));
-	}
 
 	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
 	Vector2D reflVecHat;
@@ -629,34 +617,6 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
     }
     
     if (paddleReflection) {
-
-        /*
-        // Update the reflection so that it goes a bit more left or a bit more right depending on whether it hit further to
-        // the left or the right of the flat top part of the paddle
-        PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-        if (!paddle->HasPaddleType(PlayerPaddle::ShieldPaddle) && n == paddle->GetUpVector() && 
-            Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat))))) <= 45.0f) {
-            
-            const float paddleToBallCenterXDist = b.GetCenterPosition2D()[0] - paddle->GetCenterPosition()[0];
-            const float absPaddleToBallCenterXDist = fabs(paddleToBallCenterXDist);
-            const float paddleFlatTopHalfWidth = paddle->GetHalfFlatTopWidth();
-            const float noEffectGapRadius = paddleFlatTopHalfWidth * 0.1f;
-
-            if (absPaddleToBallCenterXDist <= paddleFlatTopHalfWidth && absPaddleToBallCenterXDist > noEffectGapRadius) {
-                // Based on the distance we reflect the ball more...
-                static const float MIN_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS =  2.0f;
-                static const float MAX_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS = 15.0f;
-                
-                float angleAmt = NumberFuncs::LerpOverFloat(noEffectGapRadius, paddleFlatTopHalfWidth, 
-                    MIN_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS, MAX_DIST_FROM_CENTER_INFLUENCE_ANGLE_IN_DEGS, absPaddleToBallCenterXDist);
-                angleAmt *= -NumberFuncs::SignOf(paddleToBallCenterXDist);
-
-                // Rotate the reflection...
-                reflVecHat.Rotate(angleAmt);
-            }
-        }
-        */
-
         // Only have to check whether the ball is acceptably far enough away from the +/-x directions
         float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));
         if (angleAwayFromX < minAngleInDegs) {

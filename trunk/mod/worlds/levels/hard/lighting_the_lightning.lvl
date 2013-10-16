@@ -1,7 +1,7 @@
 Lighting the Lightning
 23 29
 E E E E E E E E S S S S S S S D(IceBall,IceBall,IceBall) S S S E E E E 
-E E E E E E E E S E E E S E E E E E S E E E E 
+E E E E E E E E S E E E Q(i) E E E E E S E E E E 
 E E E E E E E E N E E E Q(i) E Y G Y E N E E E E 
 A(0,0,g,h){3} E Q(f) Q(f) Q(f) E A(0,1,h,g) E S E E E Q(i) E G B G E S E T(P,ur) E E 
 S S S S S S S E N E E E Q(i) E Y G Y E N E E E E 
@@ -32,17 +32,17 @@ S E E E E E E E E E E E E E E E E E N E E E W(5)
 
 STARS:
 6000
-9000
-14000
+11000
 16000
-18000
+23000
+25000
 
 PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

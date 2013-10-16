@@ -371,7 +371,7 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
 
 	this->display->GetAssets()->ActivateLastBallDeathEffects(lastBallToDie);
 
-	// Setup the sound to quiet everything else and play the sound of the ball spiralling to its most horrible death
+	// Setup the sound to quiet everything else and play the sound of the ball spiraling to its most horrible death
     GameSound* sound = this->display->GetSound();
     
     // Kill any sound effects that might be active
@@ -380,9 +380,20 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
     // Stop playing specific loops
     sound->StopSound(inBulletTimeLoopSoundID);
 
-    //sound->SetAllPlayingSoundVolume(0.5f, 0.5);
-	sound->AttachAndPlaySound(&lastBallToDie, GameSound::LastBallSpiralingToDeathLoop, true, 
-        this->display->GetModel()->GetCurrentLevelTranslation());
+    // Fade out all playing sounds (except the background loop, which we make quiet) while we play the ball death sounds
+    std::set<GameSound::SoundType> exceptTypes;
+    exceptTypes.insert(GameSound::WorldBackgroundLoop);
+    exceptTypes.insert(GameSound::BossBackgroundLoop);
+    exceptTypes.insert(GameSound::BossAngryBackgroundLoop);
+    exceptTypes.insert(GameSound::BossBackgroundLoopTransition);
+
+    sound->StopAllSoundsExcept(exceptTypes, 0.5f);
+    sound->SetSoundTypeVolume(GameSound::WorldBackgroundLoop, 0.5f);
+    sound->SetSoundTypeVolume(GameSound::BossBackgroundLoop, 0.5f);
+    sound->SetSoundTypeVolume(GameSound::BossAngryBackgroundLoop, 0.5f);
+    sound->SetSoundTypeVolume(GameSound::BossBackgroundLoopTransition, 0.5f);
+
+	sound->PlaySound(GameSound::LastBallSpiralingToDeathLoop, false, true, true);
 
 	// Clear out the timers - they no longer matter since the ball is doomed
 	this->display->GetAssets()->GetItemAssets()->ClearTimers();
@@ -398,15 +409,20 @@ void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
     GameSound* sound = this->display->GetSound();
     sound->StopAllEffects();
     sound->DetachAndStopAllSounds(&explodedBall);
-
-    sound->PlaySoundAtPosition(GameSound::LastBallExplodedEvent, false, explodedBall.GetCenterPosition(), true, true, true);
+    sound->PlaySound(GameSound::LastBallExplodedEvent, false);
+    
+    // Set the background loop back to full volume
+    sound->SetSoundTypeVolume(GameSound::WorldBackgroundLoop, 1.0f);
+    sound->SetSoundTypeVolume(GameSound::BossBackgroundLoop, 1.0f);
+    sound->SetSoundTypeVolume(GameSound::BossAngryBackgroundLoop, 1.0f);
+    sound->SetSoundTypeVolume(GameSound::BossBackgroundLoopTransition, 1.0f);
 }
 
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
     UNUSED_PARAMETER(livesLeft);
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
 
-	// Kill all effects that may have previously been occuring...
+	// Kill all effects that may have previously been occurring...
 	this->display->GetAssets()->DeactivateLastBallDeathEffects();
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects(false);
 		
@@ -427,7 +443,12 @@ void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
 
 void GameEventsListener::BallSpawnEvent(const GameBall& spawnedBall) {
 	UNUSED_PARAMETER(spawnedBall);
-	debug_output("EVENT: Ball respawning");
+
+    // Make sure the world loop volume is at full
+    GameSound* sound = this->display->GetSound();
+    sound->SetSoundTypeVolume(GameSound::WorldBackgroundLoop, 1.0f);
+	
+    debug_output("EVENT: Ball respawning");
 }
 
 void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
@@ -463,8 +484,10 @@ void GameEventsListener::ProjectileBossCollisionEvent(const Projectile& projecti
 }
 
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
-	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-	bool doEffects = (currSystemTime - this->timeSinceLastBallBlockCollisionEventInMS) > GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
+	
+    long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+	bool doEffects = (currSystemTime - this->timeSinceLastBallBlockCollisionEventInMS) > 
+        GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
 
 	if (doEffects) {
 
@@ -472,7 +495,9 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 		// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
 		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
 			((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.BallBlastsThrough(ball))) {
-				this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(ball, block);
+                GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+				espAssets->AddBounceLevelPieceEffect(ball, block);
+                espAssets->AddMiscBallPieceCollisionEffect(ball, block);
 		}
 
 		// We shake things up if the ball is uber and the block is indestructible...
@@ -1184,7 +1209,8 @@ void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 void GameEventsListener::ItemDeactivatedEvent(const GameItem& item) {
 
 	// Deactivate the item's effects (if any)
-	this->display->GetAssets()->DeactivateItemEffects(*this->display->GetModel(), item);
+    this->display->GetAssets()->DeactivateItemEffects(*this->display->GetModel(), item, 
+        GameDisplay::IsGameInPlay(*this->display->GetModel(), this->display->GetCurrentDisplayState()));
 
 	debug_output("EVENT: Item deactivated: " << item);
 }
