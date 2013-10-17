@@ -12,6 +12,7 @@
 #include "MainMenuDisplayState.h"
 #include "SelectLevelMenuState.h"
 #include "InGameDisplayState.h"
+#include "CreditsDisplayState.h"
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameMenu.h"
@@ -38,6 +39,7 @@ const char* MainMenuDisplayState::CONTINUE_MENUITEM     = "Continue";
 const char* MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Level Select";
 const char* MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
 const char* MainMenuDisplayState::BLAMMOPEDIA_MENUITEM  = "Blammopedia";
+const char* MainMenuDisplayState::CREDITS_MENUITEM      = "Credits";
 const char* MainMenuDisplayState::EXIT_MENUITEM			= "Exit Game";
 
 const Colour MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR		= Colour(1, 0.65f, 0);
@@ -56,10 +58,10 @@ MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) :
 DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
 eraseProgVerifyHandler(NULL), volItemHandler(NULL),
-changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false),
+changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
 menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), starryBG(NULL),
-blammopediaItemIndex(-1),
+blammopediaItemIndex(-1), creditsItemIndex(-1),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
@@ -298,6 +300,11 @@ void MainMenuDisplayState::InitializeMainMenu()  {
 	tempLabelSm.SetText(OPTIONS_MENUITEM);
 	tempLabelLg.SetText(OPTIONS_MENUITEM);
 	this->optionsMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, this->optionsSubMenu);
+
+    // Add the credits item to the main menu
+    tempLabelSm.SetText(CREDITS_MENUITEM);
+    tempLabelLg.SetText(CREDITS_MENUITEM);
+    this->creditsItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
 	tempLabelSm.SetText(EXIT_MENUITEM);
 	tempLabelLg.SetText(EXIT_MENUITEM);
@@ -551,6 +558,12 @@ void MainMenuDisplayState::RenderFrame(double dT) {
             // Turn off the background music...
             sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
             this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::BlammopediaMenu, DisplayStateInfo(), this->display));
+            return;
+        }
+        else if (this->changeToCreditsState) {
+            // Turn off the background music...
+            sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
+            this->display->SetCurrentState(new CreditsDisplayState(this->display));
             return;
         }
         else if (this->changeToLevelSelectState) {
@@ -861,18 +874,22 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
 	}
 	else if (itemIndex == this->mainMenuState->optionsMenuItemIndex) {
-		debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
-
 		sound->PlaySound(GameSound::MenuOpenSubMenuWindowEvent, false);
 	}
     else if (itemIndex == this->mainMenuState->blammopediaItemIndex) {
-        debug_output("Selected " << BLAMMOPEDIA_MENUITEM << " from menu");
 
         sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
 
         this->mainMenuState->changeToBlammopediaState = true;
 		this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
+    }
+    else if (itemIndex == this->mainMenuState->creditsItemIndex) {
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
+
+        this->mainMenuState->changeToCreditsState = true;
+        this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
+        this->mainMenuState->fadeAnimation.SetRepeat(false);
     }
 	else if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
 		// We don't do anything since the user is currently being asked

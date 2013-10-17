@@ -101,6 +101,29 @@ flareGlowTex(NULL), lensFlareTex(NULL), lightningRelayEmitter(NULL), flarePulse(
     this->lightningRelayEmitter->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.78f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->lightningRelayEmitter->AddEffector(&this->flarePulse);
     this->lightningRelayEmitter->SetParticles(1, this->flareGlowTex);
+
+    {
+        static const int NUM_CYCLES = 5;
+        std::vector<double> timeVals;
+        timeVals.reserve(1 + 2*NUM_CYCLES);
+        timeVals.push_back(0.0);
+        for (int i = 0; i < NUM_CYCLES; i++) {
+            timeVals.push_back(timeVals.back() + 0.01 + 0.05*Randomizer::GetInstance()->RandomNumZeroToOne());
+            timeVals.push_back(timeVals.back() + 0.01 + 0.05*Randomizer::GetInstance()->RandomNumZeroToOne());
+        }
+
+        std::vector<float> alphaVals;
+        alphaVals.reserve(timeVals.size());
+        alphaVals.push_back(1.0f);
+        for (int i = 0; i < NUM_CYCLES; i++) {
+            alphaVals.push_back(0.0f);
+            alphaVals.push_back(1.0f);
+        }
+
+        this->eyeFlashingAlphaAnim.SetLerp(timeVals, alphaVals);
+        this->eyeFlashingAlphaAnim.SetRepeat(true);
+    }
+
 }
 
 DecoBossMesh::~DecoBossMesh() {
@@ -377,10 +400,19 @@ void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         this->glowTex->BindTexture();
         glPushMatrix();
         Point3D eyeClusterCenterPos = this->boss->GetEyeClusterCenterPosition();
-        glTranslatef(eyeClusterCenterPos[0], eyeClusterCenterPos[1], eyeClusterCenterPos[2]);
+        glTranslatef(eyeClusterCenterPos[0], eyeClusterCenterPos[1], eyeClusterCenterPos[2]+0.1f);
+
+        using namespace decobossai;
+
+        float eyeBaseAlpha = coreBody->GetAlpha();
+        DecoBossAIState::AIState currBossState = static_cast<const DecoBossAIState*>(this->boss->GetCurrentAIState())->GetCurrentAIState();
+        if (currBossState == DecoBossAIState::RotatingLevelAIState) {
+            this->eyeFlashingAlphaAnim.Tick(dT);
+            eyeBaseAlpha *= this->eyeFlashingAlphaAnim.GetInterpolantValue();
+        }
 
         for (int i = 0; i < static_cast<int>(this->eyeGlowAlphaAnims.size()); i++) {
-            glColor4f(1.0f, 0.1f, 0.1f, coreBody->GetAlpha() * this->eyeGlowAlphaAnims[i].GetInterpolantValue());
+            glColor4f(1.0f, 0.1f, 0.1f, eyeBaseAlpha * this->eyeGlowAlphaAnims[i].GetInterpolantValue());
             const Vector2D& offset = this->boss->GetEyeOffset(i);
             glTranslatef(offset[0], offset[1], 0.0f);
             GeometryMaker::GetInstance()->DrawQuad();
@@ -391,12 +423,18 @@ void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
         this->glowTex->UnbindTexture();
 
         // Draw the lightning relay emitters
+        glPushMatrix();
+        
+        glTranslatef(coreBodyPos[0], coreBodyPos[1], coreBodyPos[2]);
+        glRotatef(this->boss->GetAlivePartsRoot()->GetLocalZRotation(), 0, 0, 1);
+
         this->lightningRelayEmitter->Tick(dT);
         this->lightningRelayEmitter->SetParticleAlpha(coreBody->GetAlpha() * this->lightningRelayAlphaAnim.GetInterpolantValue());
-        this->lightningRelayEmitter->OverwriteEmittedPosition(coreBodyPos + this->boss->GetLeftLightningRelayOffset());
+        this->lightningRelayEmitter->OverwriteEmittedPosition(this->boss->GetLeftLightningRelayOffset());
         this->lightningRelayEmitter->Draw(camera);
-        this->lightningRelayEmitter->OverwriteEmittedPosition(coreBodyPos + this->boss->GetRightLightningRelayOffset());
+        this->lightningRelayEmitter->OverwriteEmittedPosition(this->boss->GetRightLightningRelayOffset());
         this->lightningRelayEmitter->Draw(camera);
+        glPopMatrix();
 
         if (this->boss->GetIsStateMachineFinished()) {
             

@@ -59,7 +59,7 @@ class DisplayState {
 public:
 	enum DisplayStateType { MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart, WorldStart, 
                             InTutorialGame, InGame, InGameBossLevel, InGameMenu, LevelEnd, LevelCompleteSummary,
-                            BossLevelCompleteSummary, GameComplete, GameOver, /*WorldUnlocked*/ };
+                            BossLevelCompleteSummary, GameComplete, GameOver, Credits };
 
 	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, const DisplayStateInfo& info, GameDisplay* display);
     static bool IsGameInPlayDisplayState(const DisplayStateType& type);

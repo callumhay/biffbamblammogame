@@ -169,7 +169,6 @@ void WorldStartDisplayState::ButtonPressed(const GameControl::ActionButton& pres
 
 void WorldStartDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {
 	UNUSED_PARAMETER(pressedButton);
-    this->AnyKeyWasPressed();
 }
 
 void WorldStartDisplayState::AnyKeyWasPressed() {

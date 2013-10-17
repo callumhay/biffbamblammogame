@@ -1051,10 +1051,3 @@ void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionBu
         this->AnyKeyWasPressed();
     }
 }
-
-void LevelCompleteSummaryDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {
-	UNUSED_PARAMETER(pressedButton);
-    if (this->difficultyChoicePane == NULL) {
-        this->AnyKeyWasPressed();
-    }
-}

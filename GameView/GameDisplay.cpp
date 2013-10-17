@@ -17,6 +17,7 @@
 #include "InGameMenuState.h"
 #include "MainMenuDisplayState.h"
 #include "GameCompleteDisplayState.h"
+#include "CreditsDisplayState.h"
 #include "LoadingScreen.h"
 
 // Model includes

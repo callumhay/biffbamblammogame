@@ -36,6 +36,29 @@ public:
     DecoBossAIState(DecoBoss* boss);
     virtual ~DecoBossAIState();
 
+    enum AIState {
+        StationaryAttackAIState,            // Boss stays still and attacks player with lightning bursts and static orbs
+        MovingAttackAIState,                // Boss moves around and attacks player with lightning bursts and static orbs
+        MovingAttackAndItemDropAIState,     // Similar to MovingAttackAIState, but the boss also occasionally drops nasty items
+        MoveToFarLeftSideAIState,           // Boss moves to the far left side of the level, prep for LeftToRightItemDropAIState
+        MoveToFarRightSideAIState,          // Boss moves to the far right side of the level, prep for RightToLeftItemDropAIState
+        MoveToCenterForLevelRotAIState,     // Boss moves to the center of the level, prep for shooting its arms to rotate the level
+        MoveToPaddleArmAttackPosAIState,    // Boss moves to a good location for attacking the paddle with its arms, prep for FiringArmsAtPaddleAIState
+        LeftToRightItemDropAIState,         // Boss moves only horizontally left to right, dropping nasty items rapidly as it moves
+        RightToLeftItemDropAIState,         // Boss moves only horizontally right to left, dropping nasty items rapidly as it moves
+        FiringArmsAtPaddleAIState,
+        FinishedFiringArmsAtPaddleAIState,
+        FiringArmsAtLevelAIState,
+        RotatingLevelAIState,               // Boss is rotating the entire level with its arm(s)
+        FinishRotatingLevelAIState,         // Boss is done rotating the level, it retracts its arms
+        ElectrifiedAIState,                 // Boss is damaged by the Tesla block's lightning arc
+        ElectrificationRetaliationAIState,  // Boss retaliates to being damaged by short-circuiting the Tesla blocks
+        AngryAIState,                       // Boss is angry (after being hurt and retaliating)... Rawr.
+        FinalDeathThroesAIState             // Boss is dying/exploding, this is the last state before the end of the battle
+    };
+
+    AIState GetCurrentAIState() const { return this->currState; }
+
     float GetItemLoadOffset() const { return this->itemLoadingAnim.GetInterpolantValue(); }
     GameItem::ItemType GetNextItemDropType() const { return this->nextDropItemType; }
 
@@ -60,27 +83,6 @@ protected:
 
     DecoBoss* boss;
     AnimationMultiLerp<Vector3D> angryMoveAnim;
-
-    enum AIState {
-        StationaryAttackAIState,            // Boss stays still and attacks player with lightning bursts and static orbs
-        MovingAttackAIState,                // Boss moves around and attacks player with lightning bursts and static orbs
-        MovingAttackAndItemDropAIState,     // Similar to MovingAttackAIState, but the boss also occasionally drops nasty items
-        MoveToFarLeftSideAIState,           // Boss moves to the far left side of the level, prep for LeftToRightItemDropAIState
-        MoveToFarRightSideAIState,          // Boss moves to the far right side of the level, prep for RightToLeftItemDropAIState
-        MoveToCenterForLevelRotAIState,     // Boss moves to the center of the level, prep for shooting its arms to rotate the level
-        MoveToPaddleArmAttackPosAIState,    // Boss moves to a good location for attacking the paddle with its arms, prep for FiringArmsAtPaddleAIState
-        LeftToRightItemDropAIState,         // Boss moves only horizontally left to right, dropping nasty items rapidly as it moves
-        RightToLeftItemDropAIState,         // Boss moves only horizontally right to left, dropping nasty items rapidly as it moves
-        FiringArmsAtPaddleAIState,
-        FinishedFiringArmsAtPaddleAIState,
-        FiringArmsAtLevelAIState,
-        RotatingLevelAIState,               // Boss is rotating the entire level with its arm(s)
-        FinishRotatingLevelAIState,         // Boss is done rotating the level, it retracts its arms
-        ElectrifiedAIState,                 // Boss is damaged by the Tesla block's lightning arc
-        ElectrificationRetaliationAIState,  // Boss retaliates to being damaged by short-circuiting the Tesla blocks
-        AngryAIState,                       // Boss is angry (after being hurt and retaliating)... Rawr.
-        FinalDeathThroesAIState             // Boss is dying/exploding, this is the last state before the end of the battle
-    };
     AIState currState;
 
     //static void DoFirstTimeInit();
@@ -169,6 +171,7 @@ protected:
     double rotateShakeCountdown;
 
     SoundID rotateLevelSoundID;
+    SoundID electricShockSoundID;
 
     void InitStationaryAttackState();
     void InitMovingAttackState();
@@ -237,7 +240,6 @@ private:
     void GoToNextRandomAttackState(GameModel* gameModel);
     float GetAccelerationMagnitude() const { return DecoBossAIState::DEFAULT_ACCELERATION; }
 };
-
 
 class Stage2AI : public DecoBossAIState {
 public:

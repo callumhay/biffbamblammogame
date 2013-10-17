@@ -46,6 +46,7 @@ private:
 	static const char* PLAY_LEVEL_MENUITEM;
     static const char* BLAMMOPEDIA_MENUITEM;
 	static const char* OPTIONS_MENUITEM;
+    static const char* CREDITS_MENUITEM;
 	static const char* EXIT_MENUITEM;
 
 	static const Colour MENU_ITEM_IDLE_COLOUR;
@@ -74,6 +75,7 @@ private:
 	int playLevelMenuItemIndex;
 	int optionsMenuItemIndex;
     int blammopediaItemIndex;
+    int creditsItemIndex;
 	int exitGameMenuItemIndex;
 
 	// Indices for the options submenu
@@ -130,6 +132,7 @@ private:
 	bool changeToPlayGameState;
     bool changeToBlammopediaState;
     bool changeToLevelSelectState;
+    bool changeToCreditsState;
 
     //TODO? static const int BG_SOUND_FADEOUT_IN_MILLISECS = 1000;
     SoundID bgLoopedSoundID;

@@ -45,7 +45,8 @@ const double DecoBossAIState::TOTAL_ELECTRIFIED_AND_RETALIATION_TIME_IN_SECS =
 DecoBossAIState::DecoBossAIState(DecoBoss* boss) : BossAIState(), boss(boss), shootCountdown(0.0),
 numShotsUntilNextState(0), dropItemCountdown(0.0), nextDropItemType(GameItem::PaddleShrinkItem),
 sideToSideNumDropCountdown(0), currLeftArmRotInDegs(0.0f), currRightArmRotInDegs(0.0f),
-currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0), rotationDir(1), rotateLevelSoundID(INVALID_SOUND_ID) {
+currLevelRotationAmtInDegs(0.0f), rotateShakeCountdown(0.0), rotationDir(1), 
+rotateLevelSoundID(INVALID_SOUND_ID), electricShockSoundID(INVALID_SOUND_ID) {
 
     assert(boss != NULL);
     
@@ -692,6 +693,11 @@ void DecoBossAIState::InitElectrifiedState() {
     sound->DetachAndStopAllSounds(this->boss->GetRightArm(), SOUND_FADEOUT_TIME);
     sound->StopSound(this->rotateLevelSoundID, SOUND_FADEOUT_TIME);
 
+    // Play the electrified sound
+    if (this->electricShockSoundID == INVALID_SOUND_ID) {
+        this->electricShockSoundID = sound->PlaySound(GameSound::DecoBossElectricShockLoop, true);
+    }
+
     // The boss is turned on its side slightly by the sudden jolt
     float rotationAmt = Randomizer::GetInstance()->RandomNegativeOrPositive() * (15.0f + Randomizer::GetInstance()->RandomNumZeroToOne() * 15.0f);
     this->boss->alivePartsRoot->SetLocalZRotation(rotationAmt);
@@ -1307,6 +1313,10 @@ void DecoBossAIState::ExecuteElectrifiedState(double dT, GameModel* gameModel) {
             // Clean up all the translations and rotations on the body of the boss for this state
             this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
 
+            // Stop the sound of being electrified
+            this->boss->GetGameModel()->GetSound()->StopSound(this->electricShockSoundID, 0.5);
+            this->electricShockSoundID = INVALID_SOUND_ID;
+
             this->SetState(FinalDeathThroesAIState);
         }
         else {
@@ -1364,6 +1374,10 @@ void DecoBossAIState::ExecuteElectrifiedRetaliationState(double dT, GameModel* g
                 GameModelConstants::GetInstance()->TESLA_LIGHTNING_DARK_COLOUR,
                 LevelPiece::PIECE_WIDTH, 2.0));
         }
+
+        // Stop the sound of being electrified
+        this->boss->GetGameModel()->GetSound()->StopSound(this->electricShockSoundID, 0.5);
+        this->electricShockSoundID = INVALID_SOUND_ID;
 
         this->SetState(AngryAIState);
     }
@@ -1818,9 +1832,10 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
             this->InitFinishedFiringArmsAtPaddleState();
             break;
 
-        case ElectrifiedAIState: 
+        case ElectrifiedAIState:
             this->InitElectrifiedState();
             break;
+
         case ElectrificationRetaliationAIState: {
             this->InitElectrificationRetaliationState();
 
@@ -1840,9 +1855,18 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
             break;
         }
 
-        case AngryAIState:
+        case AngryAIState: {
             this->InitAngryState();
+
+            // Modify the music...
+            GameSound* sound = this->boss->GetGameModel()->GetSound();
+            // Stop the current boss background music
+            sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
+            // ... and play the transition sound just once
+            sound->PlaySound(GameSound::BossBackgroundLoopTransition, false, false);
+
             break;
+        }
 
         default:
             assert(false);
@@ -2019,6 +2043,9 @@ Stage3AI::Stage3AI(DecoBoss* boss, BossCompositeBodyPart* remainingArm,
 
     this->currLevelRotationAmtInDegs = currLevelRotationAmtInDegs;
     this->SetState(MoveToCenterForLevelRotAIState);
+
+    // Play the faster background music
+    boss->GetGameModel()->GetSound()->PlaySound(GameSound::BossAngryBackgroundLoop, true);
 }
 
 Stage3AI::~Stage3AI() {

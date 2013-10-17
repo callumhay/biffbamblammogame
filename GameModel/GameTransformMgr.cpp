@@ -1619,7 +1619,7 @@ void GameTransformMgr::FinishRemoteControlRocketCamAnimation(double dT, GameMode
         this->remoteControlRocketWithCamera = remoteCtrlRocket;
     }
     else {
-        // Re-enable the balls and timers
+        // Re-enable the ball
         gameModel.UnsetPause(GameModel::PauseBall);
         gameModel.UnsetPause(GameModel::PauseTimers);
 

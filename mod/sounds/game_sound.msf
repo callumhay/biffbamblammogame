@@ -580,9 +580,12 @@ DecoBossArmPaddleCollisionEvent {
 DecoBossLevelRotatingLoop {
 	file = resources/DecoBossLevelRotatingLoop.ogg
 }
-// DecoBossLightningAttackEvent
-
-
+DecoBossLightningBoltAttackEvent {
+	file = resources/DecoBossLightningBoltAttackEvent.ogg
+}
+DecoBossElectricShockLoop {
+	file = resources/DecoBossElectricShockLoop.ogg
+}
 
 // Bullet-time / Ball Boost Events *******************************************
 

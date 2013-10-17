@@ -129,6 +129,16 @@ BBBTitleDisplay::~BBBTitleDisplay() {
 	}
 }
 
+void BBBTitleDisplay::SetAlpha(float alpha) {
+    this->biffEmitter.SetParticleAlpha(ESPInterval(alpha));
+    this->bamEmitter.SetParticleAlpha(ESPInterval(alpha));
+    this->blammoEmitter.SetParticleAlpha(ESPInterval(alpha));
+
+    this->biffTextEmitter.SetParticleAlpha(ESPInterval(alpha));
+    this->bamTextEmitter.SetParticleAlpha(ESPInterval(alpha));
+    this->blammoTextEmitter.SetParticleAlpha(ESPInterval(alpha));
+}
+
 void BBBTitleDisplay::Draw(float x, float y, const Camera& camera) {
 
 	// Draw the "Biff!" Text

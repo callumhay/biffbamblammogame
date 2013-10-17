@@ -54,6 +54,8 @@ private:
     std::vector<AnimationLerp<float> > eyeGlowAlphaAnims;
     AnimationLerp<float> lightningRelayAlphaAnim;
 
+    AnimationMultiLerp<float> eyeFlashingAlphaAnim;
+
     Texture2D* flareGlowTex;
     Texture2D* lensFlareTex;
     ESPPointEmitter* lightningRelayEmitter;

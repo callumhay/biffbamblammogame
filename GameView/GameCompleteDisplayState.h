@@ -2,7 +2,7 @@
  * GameCompleteDisplayState.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -65,9 +65,11 @@ private:
 
     BBBTitleDisplay bbbTitleDisplay;
 
+    Texture2D* starryBG;
+
 	float gameCompleteLabelRasterWidth;
    
-    bool goBackToMainMenu;
+    bool goToCredits;
     AnimationLerp<float> fadeAnim;
 
     DISALLOW_COPY_AND_ASSIGN(GameCompleteDisplayState);

@@ -96,6 +96,8 @@ public:
 
     const BossAIState* GetCurrentAIState() const;
 
+    const BossCompositeBodyPart* GetAlivePartsRoot() const { return this->alivePartsRoot; }
+
     // DEBUGGING...
 #ifdef _DEBUG
     void DebugDraw() const;
