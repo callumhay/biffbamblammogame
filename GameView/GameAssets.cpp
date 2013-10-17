@@ -1261,7 +1261,8 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
         }
 
         case Projectile::BossOrbBulletProjectile:
-            // TODO ?
+            this->sound->PlaySoundAtPosition(GameSound::GothicBossOrbAttackEvent, false,
+                projectile.GetPosition3D(), true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 1.0f);
             break;
 
         case Projectile::BossLightningBoltBulletProjectile:

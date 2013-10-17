@@ -932,9 +932,9 @@ const double IceBallAI::TIME_BEFORE_DESTROY_CONFINES_FLASH      = 0.5;
 
 IceBallAI::IceBallAI(GothicRomanticBoss* boss, ConfinedMovePos prevMovePos) : 
 ConfinedAI(boss, IceBallAI::NUM_ITEMS_PER_SUMMONING), bottomPointWeakpt(NULL),
-numRocketsToFireAtPaddle(0) {
+numRocketsToFireAtPaddle(0), transitionSoundID(INVALID_SOUND_ID) {
 
-    // Make the bottom point of the boss the new weakpoint...
+    // Make the bottom point of the boss the new weak point...
     boss->ConvertAliveBodyPartToWeakpoint(boss->bottomPointIdx, IceBallAI::BOTTOM_POINT_LIFE_POINTS, 0);
     assert(dynamic_cast<BossWeakpoint*>(boss->bodyParts[this->boss->bottomPointIdx]) != NULL);
     this->bottomPointWeakpt = static_cast<BossWeakpoint*>(boss->bodyParts[this->boss->bottomPointIdx]);
@@ -970,6 +970,7 @@ numRocketsToFireAtPaddle(0) {
 }
 
 IceBallAI::~IceBallAI() {
+    this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
 }
 
 void IceBallAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
@@ -1161,11 +1162,19 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetBody());
             break;
 
-        case MoveToCenterAIState:
+        case MoveToCenterAIState: {
             this->nextMovePos = GothicRomanticBossAI::Center;
             this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
                 this->GetConfinedBossCenterMovePosition(GothicRomanticBossAI::Center), 0.01f);
+
+            GameSound* sound = this->boss->GetGameModel()->GetSound();
+            // Stop the current boss background music
+            sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
+            // ... and play the transition sound in a loop
+            this->transitionSoundID = sound->PlaySound(GameSound::BossBackgroundLoopTransition, true, false);
+
             break;
+        }
 
         case DestroyConfinesAIState:
             this->spinningDestroyConfinesAnim.ResetToStart();
@@ -1509,6 +1518,10 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
     bool isFinished = this->spinningDestroyConfinesAnim.Tick(dT);
     if (isFinished) {
         this->boss->alivePartsRoot->SetLocalYRotation(0.0);
+        
+        this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
+        this->transitionSoundID = INVALID_SOUND_ID;
+
         // Go to the next high-level AI state
         this->boss->SetNextAIState(new FreeMovingAttackAI(this->boss));
     }
@@ -1546,6 +1559,9 @@ GothicRomanticBossAI(boss), bodyWeakpt(NULL), numItemsPerSummoning(6), glitchCou
 
     // Start by just moving and shooting
     this->SetState(GothicRomanticBossAI::BasicMoveAndShootState);
+
+    // Play the faster background music
+    boss->GetGameModel()->GetSound()->PlaySound(GameSound::BossAngryBackgroundLoop, true);
 }
 
 FreeMovingAttackAI::~FreeMovingAttackAI() {

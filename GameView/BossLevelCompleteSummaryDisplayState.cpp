@@ -80,23 +80,24 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     // Check to see if the next movement has already been unlocked, if not then we tell the player about it...
     // Special case: the player just completed the very last world... in this case there's nothing left to unlock
     // so we don't display that text
+    if (gameModel->GetLastWorldIndex() != completedWorldIdx) {
+        
+        // Get the next world/movement...
+        const GameWorld* nextWorld = gameModel->GetWorldByIndex(completedWorldIdx + 1);
+        assert(nextWorld != NULL);
 
-    // Get the next world/movement...
-    const GameWorld* nextWorld = gameModel->GetWorldByIndex(completedWorldIdx + 1);
-    assert(nextWorld != NULL);
+        if (!nextWorld->GetHasBeenUnlocked()) {
+            this->unlockedLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+                GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), nextWorld->GetName() + " movement UNLOCKED.");
+            this->unlockedLabel->SetColour(Colour(1,1,1));
+            this->unlockedLabel->SetDropShadow(Colour(0,0,0), 0.075f);
 
-    if (!nextWorld->GetHasBeenUnlocked()) {
-        this->unlockedLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
-            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), nextWorld->GetName() + " movement UNLOCKED.");
-        this->unlockedLabel->SetColour(Colour(1,1,1));
-        this->unlockedLabel->SetDropShadow(Colour(0,0,0), 0.075f);
-
-        this->worldCompleteLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
-            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), completedWorld->GetName() + " movement COMPLETE.");
-        this->worldCompleteLabel->SetColour(Colour(1,1,1));
-        this->worldCompleteLabel->SetDropShadow(Colour(0,0,0), 0.075f);
+            this->worldCompleteLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+                GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), completedWorld->GetName() + " movement COMPLETE.");
+            this->worldCompleteLabel->SetColour(Colour(1,1,1));
+            this->worldCompleteLabel->SetDropShadow(Colour(0,0,0), 0.075f);
+        }
     }
-
 
 	// Setup the label for the press any key text...
 	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);

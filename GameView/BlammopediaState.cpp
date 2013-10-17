@@ -571,6 +571,13 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
     for (Blammopedia::ItemEntryMapConstIter iter = itemEntries.begin(); iter != itemEntries.end(); ++iter) {
         Blammopedia::ItemEntry* itemEntry = iter->second;
         const Texture2D* texture = blammopedia->GetLockedItemTexture();
+
+        // SKIP BALL AND PADDLE CAM FOR NOW
+        // TODO: REMOVE THIS!!!
+        if (itemEntry->GetName() == "Ball Camera" || itemEntry->GetName() == "Paddle Camera") {
+            continue;
+        }
+
         if (!itemEntry->GetIsLocked()) {
 
             texture   = itemEntry->GetItemTexture();

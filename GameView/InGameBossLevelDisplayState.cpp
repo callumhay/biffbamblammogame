@@ -93,7 +93,7 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
 
         case InGameBossLevelDisplayState::OutroBossState: {
             
-            // Clean up all the projectiles and assorted in-game stuff from the gamemodel
+            // Clean up all the projectiles and assorted in-game stuff from the GameModel
             GameModel* model = this->display->GetModel();
             model->CleanUpAfterLevelEnd();
 
@@ -102,10 +102,10 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects(false);
             this->display->GetAssets()->DeactivateMiscEffects();
 
-		    // Stop world background music (if it's still going)
-            this->display->GetSound()->StopAllSoundsWithType(GameSound::BossAngryBackgroundLoop);
+		    // Stop all looping sounds (including background music)
+            this->display->GetSound()->StopAllSoundLoops();
 
-            // The outro consists of 'explosive' white lines emitting from the boss
+            // The "outro" consists of 'explosive' white lines emitting from the boss
             // and then an animation to the whole screen going white...
             this->outroFinishCountdown = Boss::TOTAL_DEATH_ANIM_TIME + WAIT_TIME_AT_END_OF_OUTRO_IN_SECS;
             this->timeUntilBigFlashyBoom = this->display->GetAssets()->ActivateBossExplodingFlashEffects(

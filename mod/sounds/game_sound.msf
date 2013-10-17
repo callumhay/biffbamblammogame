@@ -558,7 +558,9 @@ GothicBossChargeShockwaveEvent {
 GothicBossMassiveShockwaveEvent {
 	file = resources/GothicBossMassiveShockwaveEvent.ogg
 }
-
+GothicBossOrbAttackEvent {
+	file = resources/GothicBossOrbAttackEvent_01.ogg
+}
 
 DecoBossArmRotateLoop {
 	file = resources/DecoBossArmRotateLoop.ogg
@@ -578,6 +580,8 @@ DecoBossArmPaddleCollisionEvent {
 DecoBossLevelRotatingLoop {
 	file = resources/DecoBossLevelRotatingLoop.ogg
 }
+// DecoBossLightningAttackEvent
+
 
 
 // Bullet-time / Ball Boost Events *******************************************

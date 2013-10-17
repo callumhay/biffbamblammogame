@@ -686,6 +686,8 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
                 // Fire ze lazor!!
                 Point2D eyePos = boss->GetEye()->GetTranslationPt2D();
                 gameModel->AddProjectile(new BossLaserProjectile(eyePos, Vector2D::Normalize(paddlePos - eyePos)));
+                this->SignalLaserFireEffects();
+
                 this->lastRecourceLaserCountdown = this->GetTimeBetweenLaserBarrageShots();
             }
             else {
