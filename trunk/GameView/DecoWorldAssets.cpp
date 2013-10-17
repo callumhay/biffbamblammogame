@@ -132,7 +132,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	this->spiralEmitterSm.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->spiralEmitterSm.SetEmitVolume(spiralMinPt, spiralMaxPt);
 	this->spiralEmitterSm.SetEmitDirection(Vector3D(0, 1, 0));
-	this->spiralEmitterSm.SetParticleAlignment(ESP::ScreenAligned);
+	this->spiralEmitterSm.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->spiralEmitterSm.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		this->spiralEmitterSm.AddEffector(&this->rotateEffectorCW);
@@ -149,7 +149,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	this->spiralEmitterMed.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->spiralEmitterMed.SetEmitVolume(spiralMinPt, spiralMaxPt);
 	this->spiralEmitterMed.SetEmitDirection(Vector3D(0, 1, 0));
-	this->spiralEmitterMed.SetParticleAlignment(ESP::ScreenAligned);
+	this->spiralEmitterMed.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->spiralEmitterMed.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		this->spiralEmitterMed.AddEffector(&this->rotateEffectorCW);
@@ -166,7 +166,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	this->spiralEmitterLg.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->spiralEmitterLg.SetEmitVolume(spiralMinPt, spiralMaxPt);
 	this->spiralEmitterLg.SetEmitDirection(Vector3D(0, 1, 0));
-	this->spiralEmitterLg.SetParticleAlignment(ESP::ScreenAligned);
+	this->spiralEmitterLg.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		this->spiralEmitterLg.AddEffector(&this->rotateEffectorCW);

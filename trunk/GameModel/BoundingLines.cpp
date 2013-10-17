@@ -12,7 +12,7 @@
 #include "BoundingLines.h"
 #include "LevelPiece.h"
 
-const float BoundingLines::BALL_INSIDE_OUTSIDE_DIST_DIVISOR = 9.0f;
+const float BoundingLines::BALL_INSIDE_OUTSIDE_DIST_DIVISOR = 7.0f;
 const float BoundingLines::BALL_COLLISION_SAMPLING_INV_AMT  = 0.1f;
 
 BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines,
@@ -213,8 +213,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     else {
         // Calculate the number of samples required
         numCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
-        numCollisionSamples = std::max<int>(2, numCollisionSamples + 1);
-        assert(numCollisionSamples < 50);
+        numCollisionSamples = std::min<int>(40, std::max<int>(2, numCollisionSamples + 1));
 
         // Figure out the distance along the vector traveled since the last collision
         // to take each sample at...
@@ -264,18 +263,17 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                                                                     this->lines[lineIdx], collisionPt);
                 if (tempIsCollision) {
 
-                    Point2D closestPt = Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]);
-
                     // If the velocity is not heading towards the normal within some reasonable capacity then we don't allow for a collision
                     if (Vector2D::Dot(velocity, this->normals[lineIdx]) > 0) {
                         if (!this->onInside[lineIdx] && !outsideEliminated) {
+                            Point2D closestPt = Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]);
                             outsideEliminatedIndices.push_back(lineIdx);
                             outsideEliminatedClosestPts.push_back(closestPt);
                         }
-
                         continue;
                     }
 
+                    Point2D closestPt = Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]);
                     collisionLineIdxs.push_back(lineIdx);
                     closestPts.push_back(closestPt);
                     isCollision = true;
@@ -468,15 +466,13 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to a fraction of the radius of the circle
         numBallCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
-        numBallCollisionSamples = std::max<int>(2, numBallCollisionSamples + 1);
-        assert(numBallCollisionSamples < 50);
+        numBallCollisionSamples = std::min<int>(40, std::max<int>(2, numBallCollisionSamples + 1));
     }
     if (!zeroLineVelocity) {
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to some reasonable delta distance (a fraction of the radius of the circle)...
         numLineCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * lineVelocity.Magnitude()));
-        numLineCollisionSamples = std::max<int>(2, numLineCollisionSamples + 1);
-        assert(numLineCollisionSamples < 50);
+        numLineCollisionSamples = std::min<int>(40, std::max<int>(2, numLineCollisionSamples + 1));
     }
     
     int maxCollisionSamples = std::max<int>(numBallCollisionSamples, numLineCollisionSamples);
@@ -757,8 +753,7 @@ bool BoundingLines::CollisionCheck(const BoundingLines& other, double dT, const 
     else {
         // Calculate the number of samples required to make sure that the increment distance is reasonable
         numCollisionSamples = static_cast<int>(ceilf(velocity.Magnitude() * dT / SAMPLE_DISTANCE));
-        numCollisionSamples = std::max<int>(1, numCollisionSamples+1);
-        assert(numCollisionSamples < 50);
+        numCollisionSamples = std::min<int>(40, std::max<int>(1, numCollisionSamples+1));
     }
 
     // Figure out the distance along the vector traveled since the last collision to take each sample at...

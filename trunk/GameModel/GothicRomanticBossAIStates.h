@@ -237,6 +237,8 @@ private:
     double destroyConfinesCountdown;
     double chargeDestroyerBlastCountdown;
 
+    SoundID transitionSoundID;
+
     int GenerateNumRocketsToFire() const { return 3 + Randomizer::GetInstance()->RandomUnsignedInt() % 3; }
     
     AnimationMultiLerp<float> GenerateHitOnBottomTiltAnim(const Point2D& hitPos) const;

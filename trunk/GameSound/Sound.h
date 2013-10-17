@@ -52,6 +52,7 @@ private:
     const GameSound::SoundType soundType;
     irrklang::ISound* sound;
 
+    float volumeAtStartOfFadeout;
     double fadeOutTimeCountdown;
     double totalFadeOutTime;
 
@@ -99,11 +100,11 @@ inline void Sound::Tick(double dT) {
             this->totalFadeOutTime = 0;
         }
         else {
-            float currVol = NumberFuncs::LerpOverTime<float>(this->totalFadeOutTime, 0.0, 1.0f, 0.0f, this->fadeOutTimeCountdown);
+            float currVol = NumberFuncs::LerpOverTime<float>(this->totalFadeOutTime, 0.0, 
+                this->volumeAtStartOfFadeout, 0.0f, this->fadeOutTimeCountdown);
             this->sound->setVolume(currVol);
         }
     }
-
 }
 
 inline void Sound::SetPause(bool isPaused) {
@@ -137,6 +138,7 @@ inline void Sound::SetFadeout(double timeInSecs) {
         return;
     }
     this->totalFadeOutTime = this->fadeOutTimeCountdown = timeInSecs;
+    this->volumeAtStartOfFadeout = this->GetVolume();
 }
 
 inline void Sound::Visit(SoundEffect& soundEffect, bool effectOn) {

@@ -1150,7 +1150,7 @@ void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
     GameSound* sound = this->display->GetSound();
     double fadeoutTime = 0.0;
     if (this->display->GetModel()->IsOutOfGameBoundsForItem(item.GetCenter())) {
-        fadeoutTime = 1.0;
+        fadeoutTime = 0.5;
     }
     sound->DetachAndStopAllSounds(&item, fadeoutTime);
 

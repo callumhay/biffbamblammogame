@@ -13,6 +13,8 @@
 
 using namespace Collision;
 
+#define BALL_COLLISION_SAMPLING_INV_AMT 0.1f
+
 bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
                        Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const {
 
@@ -30,12 +32,11 @@ bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& 
     else {
        // Calculate the number of samples required to make sure that the increment distance is
        // less than a reasonable fraction of the radius of the circle
-       numCollisionSamples = static_cast<int>(ceil(dT / (0.25f * c.Radius()) * velocity.Magnitude()));
-       numCollisionSamples = std::max<int>(1, numCollisionSamples + 1);
-       assert(numCollisionSamples < 50);
+       numCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
+       numCollisionSamples = std::min<int>(40, std::max<int>(1, numCollisionSamples + 1));
     }
 
-    // Figure out the distance along the vector travelled since the last collision
+    // Figure out the distance along the vector traveled since the last collision
     // to take each sample at...
     sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
     sampleIncTime = dT / static_cast<double>(numCollisionSamples);
@@ -89,16 +90,14 @@ bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& 
     if (!zeroBallVelocity) {
        // Calculate the number of samples required to make sure that the increment distance
        // less than or equal to a fraction of the radius of the circle
-       numBallCollisionSamples = static_cast<int>(ceil(dT / (0.25f * minimumRadius) * velocity.Magnitude()));
-       numBallCollisionSamples = std::max<int>(1, numBallCollisionSamples + 1);
-       assert(numBallCollisionSamples < 50);
+       numBallCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * minimumRadius) * velocity.Magnitude()));
+       numBallCollisionSamples = std::min<int>(40, std::max<int>(1, numBallCollisionSamples + 1));
     }
     if (!zeroThisCircleVelocity) {
        // Calculate the number of samples required to make sure that the increment distance
        // less than or equal to some reasonable delta distance (a fraction of the radius of the circle)...
-       numLineCollisionSamples = static_cast<int>(ceil(dT / (0.25f * minimumRadius) * thisCircleVelocity.Magnitude()));
-       numLineCollisionSamples = std::max<int>(1, numLineCollisionSamples + 1);
-       assert(numLineCollisionSamples < 50);
+       numLineCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * minimumRadius) * thisCircleVelocity.Magnitude()));
+       numLineCollisionSamples = std::min<int>(40, std::max<int>(1, numLineCollisionSamples + 1));
     }
 
     int maxCollisionSamples = std::max<int>(numBallCollisionSamples, numLineCollisionSamples);

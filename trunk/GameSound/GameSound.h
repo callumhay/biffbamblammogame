@@ -177,6 +177,7 @@ public:
         ClassicalBossArmAttackEvent,
         ClassicalBossArmAttackHitEvent,
         ClassicalBossPowerChargeEvent,
+        GothicBossOrbAttackEvent,
         GothicBossSummonItemChargeEvent,
         GothicBossChargeShockwaveEvent,
         GothicBossMassiveShockwaveEvent,

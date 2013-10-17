@@ -5045,6 +5045,7 @@ void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float hei
 	hurtStars->SetParticleLife(ESPInterval(1.5f, 2.75f));
 	hurtStars->SetParticleSize(ESPInterval(0.1f * avgSize, 0.5f * avgSize));
 	hurtStars->SetEmitAngleInDegrees(180);
+    hurtStars->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	hurtStars->SetRadiusDeviationFromCenter(ESPInterval(0.35f * width), ESPInterval(0.35f * height), ESPInterval(0.0f));
 	hurtStars->SetEmitPosition(Point3D(pos, 0));
 	hurtStars->SetEmitDirection(Vector3D(0,1,0));
@@ -5078,7 +5079,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryOno->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryOno->SetParticleLife(ESPInterval(2.0f));
 	angryOno->SetRadiusDeviationFromCenter(ESPInterval(0.4f * width), ESPInterval(0.4f * height), ESPInterval(0.0f));
-	angryOno->SetParticleAlignment(ESP::ScreenAligned);
+	angryOno->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	angryOno->SetEmitPosition(Point3D(pos));
     angryOno->SetParticleColour(ESPInterval(0.75f, 0.9f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(1.0f));
     angryOno->SetParticleRotation(ESPInterval(-20.0f, 20.0f));

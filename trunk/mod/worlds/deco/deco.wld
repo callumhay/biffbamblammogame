@@ -50,14 +50,11 @@ resources/worlds/levels/hard/safety_third.lvl
 # Tesla + Prisms/Ice/Lasers
 resources/worlds/levels/hard/lighting_the_lightning.lvl : 300
 
-
 # Shield + rocket to redirect to other cannons and destroy turrets
 resources/worlds/levels/hard/upward_not_forward_and_always_twirling.lvl
 
-
 # Avoiding turrets throughout the level while trying to obtain items to destroy them and the level
 resources/worlds/levels/medium/eyes_on_the_prize.lvl
-
 
 # Remote control rocket race-navigation-focused hard level
 resources/worlds/levels/hard/tilt_a_whirl_gauntlet.lvl
@@ -65,12 +62,12 @@ resources/worlds/levels/hard/tilt_a_whirl_gauntlet.lvl
 # Turrets + Tesla - use the magnet paddle + rocket turrets to attract rockets to turn on tesla blocks
 resources/worlds/levels/medium/be_coy_decoy.lvl
 
-# No turrets, using various elements from throughout the game up to this point
-# TODO
+# Mine + sticky paddle and rocket + shield to turn on two switches
+resources/worlds/levels/medium/a_tale_of_two_projectiles.lvl
 
 # NOTE: This should be one of the very last levels in this movement!!
 # ALL of the Turrets + Laser/prism + rocket/mine/cannon + remote control rocket interactions
 resources/worlds/levels/hard/shooting_gallery.lvl
 
 # BOSS: Electrocutioner
-resources/worlds/levels/bosses/electrocutioner.lvl
+resources/worlds/levels/bosses/electrocutioner.lvl : 335
