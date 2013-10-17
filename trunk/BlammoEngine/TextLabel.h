@@ -188,10 +188,15 @@ public:
         this->SetText(this->GetText());
     }
 
-    void SetScale(float scale) {
+    void SetScale(float scale, bool reformatText = true) {
 	    assert(scale != 0.0f);
 	    this->scale = scale;
-        this->SetText(this->GetText());
+        if (reformatText) {
+            this->SetText(this->GetText());
+        }
+        else {
+            this->currTextWidth *= this->scale;
+        }
 	}
 
 	void SetFont(const TextureFontSet* font) {
@@ -200,6 +205,7 @@ public:
 	}
 
     void SetText(const std::string& text);
+
     void SetLineSpacing(float spacing) {
         this->lineSpacing = spacing;
     }

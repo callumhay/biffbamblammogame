@@ -1514,16 +1514,25 @@ void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
 
             break;
 
-        case TopLostAIState:
+        case TopLostAIState: {
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossAngryFlashAnim());
             this->angryMoveAnim.ResetToStart();
 
+            // Modify the music...
+            GameSound* sound = this->boss->GetGameModel()->GetSound();
+            // Stop the current boss background music
+            sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
+            // ... and play the transition sound just once
+            sound->PlaySound(GameSound::BossBackgroundLoopTransition, false, false);
+
+
             // EVENT: Boss is angry! Rawr.
             GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetBody());
             break;
-        
+        }
+
         default:
             assert(false);
             return;
@@ -1669,6 +1678,9 @@ TopSphereAI::TopSphereAI(NouveauBoss* boss) : NouveauBossAI(boss) {
     this->topSphereWeakpt->ResetDamageOnBallHit(TOP_SPHERE_DAMAGE_ON_HIT);
 
     this->SetState(NouveauBossAI::BrutalMoveAndShootAIState);
+
+    // Play the faster background music
+    boss->GetGameModel()->GetSound()->PlaySound(GameSound::BossAngryBackgroundLoop, true);
 }
 
 TopSphereAI::~TopSphereAI() {

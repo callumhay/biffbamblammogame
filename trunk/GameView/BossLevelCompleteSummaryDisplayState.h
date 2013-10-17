@@ -103,7 +103,6 @@ inline void BossLevelCompleteSummaryDisplayState::ButtonReleased(const GameContr
 
 inline void BossLevelCompleteSummaryDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {
     UNUSED_PARAMETER(pressedButton);
-    this->AnyKeyWasPressed();
 }
 
 inline void BossLevelCompleteSummaryDisplayState::MouseReleased(const GameControl::MouseButton& releasedButton) {

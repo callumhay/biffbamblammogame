@@ -1137,6 +1137,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CreditsDisplayState.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\DisplayState.h"
 						>
 					</File>
@@ -1202,6 +1206,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\BossLevelCompleteSummaryDisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CreditsDisplayState.cpp"
 						>
 					</File>
 					<File

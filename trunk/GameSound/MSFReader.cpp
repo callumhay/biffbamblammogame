@@ -446,6 +446,8 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmLevelCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmPaddleCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossLevelRotatingLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossLightningBoltAttackEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossElectricShockLoop));
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, EnterBulletTimeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, InBulletTimeLoop));

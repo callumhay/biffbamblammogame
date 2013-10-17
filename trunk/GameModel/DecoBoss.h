@@ -119,8 +119,8 @@ public:
     Point2D GetItemDropPosition() const;
     static float GetItemDropAnimDisplacement();
 
-    Vector3D GetLeftLightningRelayOffset() const;
-    Vector3D GetRightLightningRelayOffset() const;
+    Point3D GetLeftLightningRelayOffset() const;
+    Point3D GetRightLightningRelayOffset() const;
 
     static Vector3D GetLightningFireVec3D() { return Vector3D(LIGHTNING_FIRE_POS_X, LIGHTNING_FIRE_POS_Y, LIGHTNING_FIRE_POS_Z); }
     static Vector2D GetLightningFireVec2D() { return Vector2D(LIGHTNING_FIRE_POS_X, LIGHTNING_FIRE_POS_Y); }
@@ -234,12 +234,12 @@ inline float DecoBoss::GetItemDropAnimDisplacement() {
     return GameItem::ITEM_HEIGHT;
 }
 
-inline Vector3D DecoBoss::GetLeftLightningRelayOffset() const {
-    return Vector3D(-1.049f, -6.427f, 0.975f);
+inline Point3D DecoBoss::GetLeftLightningRelayOffset() const {
+    return Point3D(-1.049f, -6.427f, 0.975f);
 }
 
-inline Vector3D DecoBoss::GetRightLightningRelayOffset() const {
-    return Vector3D(1.049f, -6.427f, 0.975f);
+inline Point3D DecoBoss::GetRightLightningRelayOffset() const {
+    return Point3D(1.049f, -6.427f, 0.975f);
 }
 
 inline bool DecoBoss::IsRightBodyStillAlive() const {

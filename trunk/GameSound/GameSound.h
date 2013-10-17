@@ -187,6 +187,8 @@ public:
         DecoBossArmLevelCollisionEvent,
         DecoBossArmPaddleCollisionEvent,
         DecoBossLevelRotatingLoop,
+        DecoBossLightningBoltAttackEvent,
+        DecoBossElectricShockLoop,
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,

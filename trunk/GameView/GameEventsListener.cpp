@@ -1353,11 +1353,22 @@ void GameEventsListener::BallBoostLostEvent(bool allBoostsLost) {
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 	// Tell the assets - this will spawn the appropriate sprites/projectiles and effects
 	this->display->GetAssets()->AddProjectile(*this->display->GetModel(), projectile);
+
+    // Special case: If the remote control rocket was just activated then we turn down the volume on
+    // any diminishing timers or other relevant effects loops...
+    if (projectile.GetType() == Projectile::PaddleRemoteCtrlRocketBulletProjectile) {
+        this->display->GetSound()->SetSoundTypeVolume(GameSound::ItemTimerEndingLoop, 0.0f);
+    }
 }
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
 	this->display->GetAssets()->RemoveProjectile(*this->display->GetModel(), projectile);
+
+    // Special case: Set back any changes we made when the remote control rocket was activated
+    if (projectile.GetType() == Projectile::PaddleRemoteCtrlRocketBulletProjectile) {
+        this->display->GetSound()->SetSoundTypeVolume(GameSound::ItemTimerEndingLoop, 1.0f);
+    }
 }
 
 void GameEventsListener::RocketExplodedEvent(const RocketProjectile& rocket) {

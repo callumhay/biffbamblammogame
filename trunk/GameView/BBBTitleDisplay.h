@@ -28,6 +28,8 @@ public:
     BBBTitleDisplay(float scale);
     ~BBBTitleDisplay();
 
+    void SetAlpha(float alpha);
+
     void Draw(float x, float y, const Camera& camera);
     float GetBlammoWidth() const { return this->blammoWidth; }
 
