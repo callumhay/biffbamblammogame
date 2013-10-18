@@ -294,30 +294,6 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 	return ret;
 }
 
-/** 
- * Increments the current level in this world - this should be called whenever the
- * player progresses to the next level of the game.
- */
-void GameWorld::IncrementLevel(GameModel* model) {
-	assert(this->isLoaded);
-	this->SetCurrentLevel(model, this->currentLevelNum + 1);
-
-    // Make sure we keep track of the greatest level number that was
-    // passed by the player (so we can save their progress later)
-    if (this->currentLevelNum > 0) {
-        this->lastLevelPassedIndex = std::max<int>(this->lastLevelPassedIndex, this->currentLevelNum-1);
-    }
-    else if (this->currentLevelNum == 0) {
-        this->lastLevelPassedIndex = GameWorld::NO_LEVEL_PASSED;
-    }
-    else {
-        assert(false);
-    }
-
-	// EVENT: New Level Started
-	GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
-}
-
 /**
  * Set the current level to the one given. This will also establish
  * various other properties required for the level - including making sure the

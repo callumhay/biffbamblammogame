@@ -98,7 +98,6 @@ public:
         return this->worldFilepath;
     }
 
-	void IncrementLevel(GameModel* model);
 	void SetCurrentLevel(GameModel* model, int levelNum);
 
 	// Returns whether the current level is the last level in this world.
