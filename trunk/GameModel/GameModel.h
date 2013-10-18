@@ -211,7 +211,7 @@ public:
     Vector3D GetCurrentLevelTranslation() const {
         GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
         assert(currLevel != NULL);
-        return Vector3D(-0.5f * currLevel->GetLevelUnitWidth(), -0.5f * currLevel->GetLevelUnitHeight(), 0.0f);
+        return currLevel->GetTranslationToMiddle();
     }
 
 	bool IsLastWorld() const {

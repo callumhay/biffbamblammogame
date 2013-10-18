@@ -27,6 +27,7 @@
 #include "PaddleRemoteControlRocketProjectile.h"
 
 #include "../BlammoEngine/StringHelper.h"
+#include "../GameSound/GameSound.h"
 #include "../ResourceManager.h"
 
 GameModel::GameModel(GameSound* sound, const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
@@ -292,6 +293,11 @@ void GameModel::SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNew
 	// Setup the world for this object and make sure the world has its zeroth (i.e., first) level set for play
 	this->currWorldNum = worldIdx;
     assert(levelIdx >= 0 && levelIdx < static_cast<int>(world->GetNumLevels()));
+    
+    // IMPORTANT: The sound needs to be updated to the next level's translation so that it properly
+    // transforms all sounds that get made between now and the next time the sound module is updated
+    this->sound->SetLevelTranslation(world->GetLevelByIndex(levelIdx)->GetTranslationToMiddle());
+
 	world->SetCurrentLevel(this, levelIdx);
 	GameLevel* currLevel = world->GetCurrentLevel();
 	assert(currLevel != NULL);

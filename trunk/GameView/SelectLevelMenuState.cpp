@@ -942,13 +942,16 @@ void SelectLevelMenuState::SetupLevelPages(const DisplayStateInfo& info) {
     }
 
     if (info.GetLevelSelectionIndex() >= 0) {
-        int count = 0;
-        for (int i = 0; i < static_cast<int>(this->pages.size()); i++) {
+        int selectionIdx = info.GetLevelSelectionIndex();
+        for (int i = 0; i < static_cast<int>(this->pages.size()) && selectionIdx >= 0; i++) {
             LevelMenuPage* currPage = this->pages[i];
-            count += currPage->GetNumLevelItems();
-            if (info.GetLevelSelectionIndex() < count) {
-                currPage->SetSelectedItemIndex(info.GetLevelSelectionIndex() - (count - currPage->GetNumLevelItems()));
+            if (selectionIdx < static_cast<int>(currPage->GetNumLevelItems())) {
+                assert(selectionIdx >= 0);
+                currPage->SetSelectedItemIndex(selectionIdx);
+                this->selectedPage = i;
+                break;
             }
+            selectionIdx -= currPage->GetNumLevelItems();
         }
     }
 

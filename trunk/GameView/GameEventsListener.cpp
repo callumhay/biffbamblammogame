@@ -61,7 +61,7 @@
 
 // Wait times before showing the same effect - these prevent the game view from displaying a whole ton
 // of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 100;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 50;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS    = 125;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS     = 60;
 
@@ -73,7 +73,8 @@ GameEventsListener::GameEventsListener(GameDisplay* d) :
 display(d), 
 timeSinceLastBallBlockCollisionEventInMS(0),
 timeSinceLastBallPaddleCollisionEventInMS(0),
-timeSinceLastBallTeslaCollisionEventInMS(0) {
+timeSinceLastBallTeslaCollisionEventInMS(0),
+numFallingItemsInPlay(0), fallingItemSoundID(INVALID_SOUND_ID){
 	assert(d != NULL);
 }
 
@@ -153,8 +154,8 @@ void GameEventsListener::LevelAlmostCompleteEvent(const GameLevel& level) {
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
-	UNUSED_PARAMETER(level);
-    
+    GameModel* gameModel = this->display->GetModel();
+
     // Clear all the Tesla lightning sounds that are left playing
     this->teslaLightningSoundIDs.clear();
 
@@ -180,8 +181,6 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
         //    the world select screen with focus on the next movement.
         // 3. The boss was the final boss in the game, go to the state for the end of the game...
         
-        GameModel* gameModel = this->display->GetModel();
-
         // Check case 3 (last boss in the game): if the world that was just finished is the last
         // world in the game, then the boss was the last boss in the game
         int lastWorldIdx = gameModel->GetLastWorldIndex();
@@ -209,8 +208,18 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
     else {
         this->display->AddStateToQueue(DisplayState::LevelEnd);
 	    this->display->AddStateToQueue(DisplayState::LevelCompleteSummary);
+
+        // Handle special animations in the level selection state -- we only select the next level if
+        // it doesn't have a star lock or if its star lock has been paid for
+        int levelSelectionIdx = -1;
+        int nextLevelIdx = level.GetLevelIndex()+1;
+        GameLevel* nextLevel = world.GetLevelByIndex(nextLevelIdx);
+        if (nextLevel->GetAreUnlockStarsPaidFor()) {
+            levelSelectionIdx = nextLevelIdx;
+        }
+
         this->display->AddStateToQueue(DisplayState::SelectLevelMenu, 
-            DisplayStateInfo::BuildSelectLevelInfo(world.GetWorldIndex()));
+            DisplayStateInfo::BuildSelectLevelInfo(world.GetWorldIndex(), levelSelectionIdx));
     }
 
 	this->display->SetCurrentStateAsNextQueuedState();
@@ -1139,8 +1148,13 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(item, showParticles);
 
 	// Play the item moving loop - plays as the item falls towards the paddle until it leaves play
-    sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true,
-        this->display->GetModel()->GetCurrentLevelTranslation(), 0.33f);
+    if (this->fallingItemSoundID == INVALID_SOUND_ID) {
+        this->fallingItemSoundID = sound->PlaySound(GameSound::ItemMovingLoop, true, true, 0.25f);
+    }
+    this->numFallingItemsInPlay++;
+
+    //sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true,
+    //    this->display->GetModel()->GetCurrentLevelTranslation(), 0.33f);
 
 	debug_output("EVENT: Item Spawned: " << item);
 }
@@ -1156,6 +1170,13 @@ void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
 
 	// Remove any previous item drop effect
 	this->display->GetAssets()->GetESPAssets()->RemoveItemDropEffect(item);
+
+    this->numFallingItemsInPlay--;
+    assert(this->numFallingItemsInPlay >= 0);
+    if (this->numFallingItemsInPlay == 0) {
+        sound->StopSound(this->fallingItemSoundID, fadeoutTime);
+        this->fallingItemSoundID = INVALID_SOUND_ID;
+    }
 
 	debug_output("EVENT: Item Removed: " << item);
 }
@@ -1467,7 +1488,7 @@ void GameEventsListener::TeslaLightningBarrierSpawnedEvent(const TeslaBlock& new
     // Attach a sound for the lightning...
     Point3D midPt = Point3D::GetMidPoint(newlyOnTeslaBlock.GetPosition3D(), previouslyOnTeslaBlock.GetPosition3D());
     SoundID lightningSoundID = sound->PlaySoundAtPosition(GameSound::TeslaLightningArcLoop, true, midPt, 
-        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.1f);
+        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.25f);
     this->teslaLightningSoundIDs.insert(std::make_pair(
         std::make_pair(&newlyOnTeslaBlock, &previouslyOnTeslaBlock), lightningSoundID));
 

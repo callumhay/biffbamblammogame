@@ -227,6 +227,10 @@ public:
 
     void TickAIEntities(double dT, GameModel* gameModel);
 
+    Vector3D GetTranslationToMiddle() const {
+        return Vector3D(-0.5f * this->GetLevelUnitWidth(), -0.5f * this->GetLevelUnitHeight(), 0.0f);
+    }
+
 private:
 	// Map of the pairings of Tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active
