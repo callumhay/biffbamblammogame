@@ -874,8 +874,6 @@ void DecoBossAIState::ExecuteMoveToCenterForLevelRotState(double dT, GameModel* 
         // Done moving to the target, go to the next state
 
         // If the ball is not in play or in the lower part of the level, then don't fire the arms and just go back to attacking
-        const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
-        assert(paddle != NULL);
         const GameBall* ball = gameModel->GetGameBalls().front();
         assert(ball != NULL);
 
@@ -1698,11 +1696,11 @@ void Stage1AI::GoToNextRandomAttackState(GameModel* gameModel) {
 }
 
 AnimationMultiLerp<Vector3D> Stage1AI::GenerateSideBodyPartDeathTranslationAnimation(bool isLeft, double timeInSecs) const {
-    float xDist = (isLeft ? -1 : 1) * 2.5f * DecoBoss::SIDE_BODY_PART_WIDTH;
+    float xDist = (isLeft ? -1 : 1) * 3.5f * DecoBoss::SIDE_BODY_PART_WIDTH;
 
     float yDist = -(isLeft ? this->boss->GetLeftBody()->GetTranslationPt2D()[1] : 
         this->boss->GetRightBody()->GetTranslationPt2D()[1]);
-    yDist -= 1.5f * DecoBoss::SIDE_BODY_PART_HEIGHT;
+    yDist -= 2.0f * DecoBoss::SIDE_BODY_PART_HEIGHT;
 
     return Boss::BuildLimbFallOffTranslationAnim(timeInSecs, xDist, yDist);
 }

@@ -118,8 +118,10 @@ void GameSound::Tick(double dT) {
 
 void GameSound::LoadGlobalSounds() {
     for (SoundSourceMapIter iter = this->globalSounds.begin(); iter != this->globalSounds.end();) {
+        
         AbstractSoundSource* currSoundSrc = iter->second;
         assert(currSoundSrc != NULL);
+
         if (!currSoundSrc->Load()) {
             delete currSoundSrc;
             currSoundSrc = NULL;
@@ -136,6 +138,7 @@ void GameSound::LoadWorldSounds(const GameWorld::WorldStyle& world) {
     // Go through all world sounds, make sure we load the given world's sounds and unload all other world's sounds
     for (WorldSoundSourceMapIter iter1 = this->worldSounds.begin(); iter1 != this->worldSounds.end(); ++iter1) {
         SoundSourceMap& relevantWorldSoundSourceMap = iter1->second;
+        
         if (iter1->first == world) {
             for (SoundSourceMapIter iter2 = relevantWorldSoundSourceMap.begin(); iter2 != relevantWorldSoundSourceMap.end();) {
                 AbstractSoundSource* currSoundSrc = iter2->second;
@@ -273,6 +276,7 @@ void GameSound::StopAllSoundLoops(double fadeOutTimeInSecs) {
                     delete currSound;
                     currSound = NULL;
                     iter2 = soundMap.erase(iter2);
+                    continue;
                 }
             }
             
@@ -330,6 +334,7 @@ void GameSound::StopAllSoundsExcept(const std::set<GameSound::SoundType>& except
                 delete currSound;
                 currSound = NULL;
                 iter2 = soundMap.erase(iter2);
+                continue;
             }
 
             ++iter2;

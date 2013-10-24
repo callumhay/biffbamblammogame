@@ -211,6 +211,8 @@ public:
     const char* TEXTURE_MULTIPLIER_TUTORIAL_ITEM;
     const char* TEXTURE_LIFE_TUTORIAL_ITEM;
 
+    const char* TEXTURE_BBB_LOGO;
+
     enum XBoxButtonType { XBoxPushButton, XBoxAnalogStick, XBoxTrigger };
     enum KeyboardButtonType { KeyboardChar, KeyboardSpaceBar };
     enum MouseButtonType { LeftMouseButton, RightMouseButton };

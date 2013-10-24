@@ -1764,6 +1764,9 @@ void SelectLevelMenuState::AbstractLevelMenuItem::ExecuteUnlockStarsPaidForAnima
         this->fireSmokeEmitter2->Reset();
     }
 
+    // Play the sound for the unlock event
+    this->state->display->GetSound()->PlaySound(GameSound::LevelStarCostPaidUnlockEvent, false, false);
+
     this->isUnlockAnimPlaying = true;
 }
 

@@ -61,7 +61,9 @@
 
 // Wait times before showing the same effect - these prevent the game view from displaying a whole ton
 // of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 50;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS      = 125;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS       = 60;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 80;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS    = 125;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS     = 60;
 
@@ -71,6 +73,7 @@ SoundID GameEventsListener::inBulletTimeLoopSoundID = INVALID_SOUND_ID;
 
 GameEventsListener::GameEventsListener(GameDisplay* d) : 
 display(d), 
+timeSinceLastBallBossCollisionEventInMS(0),
 timeSinceLastBallBlockCollisionEventInMS(0),
 timeSinceLastBallPaddleCollisionEventInMS(0),
 timeSinceLastBallTeslaCollisionEventInMS(0),
@@ -497,13 +500,14 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
     long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
 	bool doEffects = (currSystemTime - this->timeSinceLastBallBlockCollisionEventInMS) > 
         GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
+    bool isBallVelocityZero = ball.GetVelocity().IsZero();
 
 	if (doEffects) {
 
 		// Add the visual effect for when the ball hits a block
 		// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
 		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-			((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.BallBlastsThrough(ball))) {
+			((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.BallBlastsThrough(ball)) && !isBallVelocityZero) {
                 GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
 				espAssets->AddBounceLevelPieceEffect(ball, block);
                 espAssets->AddMiscBallPieceCollisionEffect(ball, block);
@@ -533,16 +537,12 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 
 			GameControllerManager::GetInstance()->VibrateControllers(shakeLength, leftVibeAmt, rightVibeAmt);
 		}
-
-        if (block.ProducesBounceEffectsWithBallWhenHit(ball)) {
-
-            Point3D approxCollisionPos = ball.GetCenterPosition() + ball.GetBounds().Radius() * 
-                Vector3D::Normalize(block.GetPosition3D() - ball.GetCenterPosition());
-
-            this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBlockBasicBounceEvent, false, 
-                approxCollisionPos, true, true, true);
-        }
 	}
+
+    if (block.ProducesBounceEffectsWithBallWhenHit(ball) && !isBallVelocityZero) {
+        this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBlockBasicBounceEvent, false, 
+            ball.GetPosition3D(), true, true, true);
+    }
 
 	this->timeSinceLastBallBlockCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball-block collision");
@@ -605,6 +605,36 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 
 	this->timeSinceLastBallPaddleCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball-paddle collision");
+}
+
+void GameEventsListener::BallBossCollisionEvent(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart) {
+    UNUSED_PARAMETER(boss);
+    UNUSED_PARAMETER(bossPart);
+
+    long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+    bool doEffects = (currSystemTime - this->timeSinceLastBallBossCollisionEventInMS) > 
+        GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
+    bool isBallVelocityZero = ball.GetVelocity().IsZero();
+
+    if (doEffects) {
+
+        // Add the visual effect for when the ball hits a block
+        // We don't do bounce effects for the invisiball... cause then the player would know where it is easier
+        if (!ball.HasBallType(GameBall::InvisiBall) && !ball.HasBallType(GameBall::UberBall) && !isBallVelocityZero) {
+
+            GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+            espAssets->AddBounceBossEffect(ball);
+        }
+    }
+
+    bool doSound = (currSystemTime - this->timeSinceLastBallBossCollisionEventInMS) >
+        GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
+    if (doSound && !isBallVelocityZero) {
+        this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBossCollisionEvent, false, ball.GetPosition3D(), true, true, true);
+    }
+
+    this->timeSinceLastBallBossCollisionEventInMS = currSystemTime;
+	debug_output("EVENT: Ball-boss collision");
 }
 
 void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) {
@@ -952,8 +982,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
                         if ((gameModel->GetCurrentStateType() == GameState::BallInPlayStateType ||
                             gameModel->GetCurrentStateType() == GameState::BallOnPaddleStateType)) {
 
-				            sound->PlaySoundAtPosition(GameSound::PaddleCollateralBlockCollisionEvent, false, 
-                                block.GetPosition3D(), true, true, true);
+				            sound->PlaySound(GameSound::PaddleCollateralBlockCollisionEvent, false);
                         }
 			        }
                 }
@@ -1193,6 +1222,8 @@ void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const Pla
 
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 
+    static const float ITEM_ACTIVATED_SOUND_VOL = 0.85f;
+
     bool playItemActivateGeneralSound = (item.GetItemType() != GameItem::LifeUpItem);
     if (playItemActivateGeneralSound) {
 
@@ -1201,18 +1232,15 @@ void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 	    switch (item.GetItemDisposition()) {
 
 		    case GameItem::Good:
-                sound->PlaySoundAtPosition(GameSound::PowerUpItemActivatedEvent, false, 
-                    item.GetPosition3D(), true, true, true);
+                sound->PlaySound(GameSound::PowerUpItemActivatedEvent, false, true, ITEM_ACTIVATED_SOUND_VOL);
 			    break;
 
 		    case GameItem::Neutral:
-			    sound->PlaySoundAtPosition(GameSound::PowerNeutralItemActivatedEvent, false, 
-                    item.GetPosition3D(), true, true, true);
+			    sound->PlaySound(GameSound::PowerNeutralItemActivatedEvent, false, true, ITEM_ACTIVATED_SOUND_VOL);
 			    break;
 
 		    case GameItem::Bad:
-			    sound->PlaySoundAtPosition(GameSound::PowerDownItemActivatedEvent, false, 
-                    item.GetPosition3D(), true, true, true);
+			    sound->PlaySound(GameSound::PowerDownItemActivatedEvent, false, true, ITEM_ACTIVATED_SOUND_VOL);
 			    break;
 
 		    default:
@@ -1423,6 +1451,10 @@ void GameEventsListener::RemoteControlRocketThrustAppliedEvent(const PaddleRemot
     
     // Let the rocket mesh know about the thrusting...
     this->display->GetAssets()->ApplyRocketThrust(rocket);
+
+    // Play the rocket thruster sound
+    GameSound* sound = this->display->GetSound();
+    sound->PlaySound(GameSound::RemoteControlRocketThrustEvent, false, true, 0.75f);
 
     debug_output("EVENT: Remote controlled rocket thrust applied.");
 }
@@ -1677,17 +1709,18 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
     // Indicate the change in multiplier where it happens in the level...
     GameSound* sound = this->display->GetSound();
     if (newMultiplier > 1 && oldMultiplier != newMultiplier) {
+        static const float SCORE_MULTIPLIER_VOLUME = 0.8f;
 
         // Play a sound for the increase in multiplier
         if (newMultiplier == 2) {
-            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo2Event, false);
+            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo2Event, false, true, SCORE_MULTIPLIER_VOLUME);
         }
         else if (newMultiplier == 3) {
-            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo3Event, false);
+            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo3Event, false, true, SCORE_MULTIPLIER_VOLUME);
 
         }
         else if (newMultiplier == 4) {
-            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo4Event, false);
+            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo4Event, false, true, SCORE_MULTIPLIER_VOLUME);
         }
         
         // Don't display the effect if we're in ball or paddle camera mode...

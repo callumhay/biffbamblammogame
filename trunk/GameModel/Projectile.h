@@ -2,7 +2,7 @@
  * Projectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2012
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -115,7 +115,7 @@ public:
 	void SetLastThingCollidedWith(const void* p) { this->lastThingCollidedWith = p; }
 	bool IsLastThingCollidedWith(const void* p) const { return this->lastThingCollidedWith == p; }
 
-    static Projectile* CreateProjectileFromCopy(const Projectile* p);
+    static Projectile* CreateProjectileFromCopy(const Projectile* p, bool createdByReflectionOrRefraction);
 
     static float GetProjectileSplitScaleFactor(int numSplits);
 

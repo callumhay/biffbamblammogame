@@ -104,7 +104,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
             shouldGenBounds = true;
             if (TriangleBlock::GetOrientation(leftNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight);
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight) ||
+                    leftNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
         }
     }
@@ -119,7 +120,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		boundingLines.push_back(l1);
 		boundingNorms.push_back(n1);
         onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-             leftNeighbor->GetType() == LevelPiece::OneWay);
+            leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::PrismTriangle);
 	}
 
 	// Bottom boundary of the piece
@@ -132,7 +133,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
             shouldGenBounds = true;
             if (TriangleBlock::GetOrientation(bottomNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft);
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft) ||
+                    bottomNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
         }
     }
@@ -147,7 +149,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		boundingLines.push_back(l2);
 		boundingNorms.push_back(n2);
         onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            bottomNeighbor->GetType() == LevelPiece::OneWay);
+            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::PrismTriangle);
 	}
 
 	// Right boundary of the piece
@@ -160,7 +162,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
             shouldGenBounds = true;
             if (TriangleBlock::GetOrientation(rightNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft);
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft) ||
+                    rightNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
         }
     }
@@ -175,7 +178,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		boundingLines.push_back(l3);
 		boundingNorms.push_back(n3);
         onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            rightNeighbor->GetType() == LevelPiece::OneWay);
+            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::PrismTriangle);
 	}
 
 	// Top boundary of the piece
@@ -188,7 +191,8 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
             shouldGenBounds = true;
             if (TriangleBlock::GetOrientation(topNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft);
+                shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft) ||
+                    topNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
         }
     }
@@ -203,7 +207,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		boundingLines.push_back(l4);
 		boundingNorms.push_back(n4);
         onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            topNeighbor->GetType() == LevelPiece::OneWay);
+            topNeighbor->GetType() == LevelPiece::OneWay || topNeighbor->GetType() == LevelPiece::PrismTriangle);
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),

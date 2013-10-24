@@ -92,6 +92,7 @@ public:
         PlayerLostABallButIsStillAliveEvent,
 		LastBallExplodedEvent,
         BallBallCollisionEvent,
+        BallBossCollisionEvent,
         LastBallSpiralingToDeathLoop,
 
         // -> Paddle/ball sounds
@@ -132,9 +133,8 @@ public:
         BossRocketMovingLoop,
 		PaddleRocketLaunchEvent,
         PaddleRocketMovingLoop,
-        //BossRocketMovingLoop,
-        //TurretRocketMovingLoop,
         RocketExplodedEvent,
+        RemoteControlRocketThrustEvent,
         TurretMineFiredEvent,
         PaddleMineFiredEvent,
         MineExplodedEvent,
@@ -143,6 +143,7 @@ public:
         LaserDeflectedByShieldEvent,
         RocketOrMineDeflectedByShieldEvent,
         PaddleLaserBulletCollisionEvent,
+        PaddleLaserBeamCollisionEvent,
         PaddleCollateralBlockCollisionEvent,
 
         // -> Item sounds
@@ -219,7 +220,14 @@ public:
         LevelStartPaddleMoveUpEvent,
         LevelStartBallSpawnOnPaddleEvent,
         LevelEndFadeoutEvent,
+        LevelSummaryBackgroundLoop,
         LevelSummaryNewHighScoreEvent,
+        LevelSummaryPointTallyLoop,
+        LevelSummaryStarTallyEvent,
+        LevelStarCostPaidUnlockEvent,
+        WorldCompleteBackgroundLoop,
+        WorldCompleteVictoryMessageEvent,
+        WorldUnlockEvent,
         GameOverEvent
     };
 

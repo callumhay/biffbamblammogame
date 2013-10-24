@@ -270,9 +270,6 @@ public:
 	bool CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const;
     bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
     bool CollisionCheckWithProjectile(const Projectile& projectile, const BoundingLines& bounds) const;
-	
-
-    bool UpdateForOpposingForceBallCollision(const GameBall& ball, double dT);
 
 	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
     //std::list<PointAward> GetPointsForHittingBall(const GameBall& ball) const;

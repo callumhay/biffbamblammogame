@@ -30,7 +30,7 @@ const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 1.0f;
 const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.0f;
 
 // Rotation will occur at some random speed in between these values
-const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC = 180.0f;
+const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC = 360.0f;
 const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 500.0f;
 
 // When the rotation angle is fixed, we can still spin the cannon a whole bunch of times...

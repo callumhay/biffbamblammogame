@@ -333,6 +333,7 @@ public:
 
 	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
 	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);
+    void AddBounceBossEffect(const GameBall& ball);
     void AddMiscBallPieceCollisionEffect(const GameBall& ball, const LevelPiece& block);
 	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle);
 	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);

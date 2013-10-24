@@ -7,7 +7,7 @@ S G E E E E E S E E E S E E E E E G S
 S S E E S S S S P S P S S S S E E S S 
 S D(LaserBulletPaddle,LaserBeamPaddle){1} S S S E E E Q(i) E Q(i) E E E S S S S S 
 E E E E N Y E Y Q(f) E Q(f) Y E Y N E E E S 
-E E T(P,ul) E N E Y E Q(f) E Q(f) E Y E N E D(IceBall) E S 
+E E T(P,ul) E N O K(RocketPaddle,RocketPaddle,RocketPaddle) R Q(f) Q(f) Q(f) R K(MultiBall5,MultiBall5,MultiBall5) O N E D(IceBall) E S 
 E E E E N Y E Y Q(f) E Q(f) Y E Y N E E E S 
 E E E E S E E E E E E E E E S E E E S 
 E E E E S E R E E R E E R E S E E E S 
@@ -40,8 +40,8 @@ PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -52,7 +52,7 @@ LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 2
 RocketPaddle 0
-GhostBall 2
+GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 2

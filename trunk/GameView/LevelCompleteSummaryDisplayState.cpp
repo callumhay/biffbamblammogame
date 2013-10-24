@@ -18,6 +18,7 @@
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameProgressIO.h"
+#include "../GameSound/GameSound.h"
 #include "../ConfigOptions.h"
 #include "../ResourceManager.h"
 
@@ -60,7 +61,7 @@ starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), 
 starFgPulser(ScaleEffect(1.0f, 1.5f)), starryBG(NULL), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
 flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
-highScoreSoundID(INVALID_SOUND_ID) {
+highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallySoundID(INVALID_SOUND_ID) {
     
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
@@ -449,6 +450,10 @@ highScoreSoundID(INVALID_SOUND_ID) {
             this->difficultyChoicePane->Show(0.0, SHOW_DIFFICULTY_CHOICE_PANE_TIME);
         }
     }
+
+    GameSound* sound = this->display->GetSound();
+    // Play the background music
+    this->bgLoopSoundID = sound->PlaySound(GameSound::LevelSummaryBackgroundLoop, true, false);
 }
 
 LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
@@ -517,6 +522,8 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 
+    GameSound* sound = this->display->GetSound();
+
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -544,8 +551,12 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 
         if (this->waitingForKeyPress) {
 
-            // Set the score animation value
-            this->scoreValueAnimation.Tick(dT);
+            bool isFinishedTallyingScore = this->scoreValueAnimation.Tick(dT);
+
+            // Play the point tallying sound loop as soon as the points start to tally above zero
+            if (!isFinishedTallyingScore && this->pointTallySoundID == INVALID_SOUND_ID && this->scoreValueAnimation.GetInterpolantValue() > 0) {
+                this->pointTallySoundID = sound->PlaySound(GameSound::LevelSummaryPointTallyLoop, true, false);
+            }
 
             this->levelCompleteTextScaleAnimation.Tick(dT);
             this->levelCompleteLabel.SetScale(this->levelCompleteTextScaleAnimation.GetInterpolantValue());
@@ -572,6 +583,14 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         long currScoreTally = static_cast<long>(this->scoreValueAnimation.GetInterpolantValue());
         std::string scoreStr = stringhelper::AddNumberCommas(currScoreTally);
         this->scoreValueLabel.SetText(scoreStr);
+
+        // Check to see if we're done tallying the score, if so stop the tally sound...
+        if (this->pointTallySoundID != INVALID_SOUND_ID &&
+            currScoreTally == static_cast<long>(this->scoreValueAnimation.GetTargetValue())) {
+
+            sound->StopSound(this->pointTallySoundID);
+            this->pointTallySoundID = INVALID_SOUND_ID;
+        }
 
         Camera::PushWindowCoords();
 	    glMatrixMode(GL_MODELVIEW);
@@ -639,6 +658,15 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 		glPopAttrib();
 
         if (fadeIsDone) {
+
+            // Stop the background music with a slower fade out time than the typical
+            sound->StopSound(this->bgLoopSoundID, 1.0);
+            this->bgLoopSoundID = INVALID_SOUND_ID;
+            
+            // Stop all other looped sounds
+            sound->StopSound(this->pointTallySoundID);
+            this->pointTallySoundID = INVALID_SOUND_ID;
+
             // If we're done fading then we can go to the next state
             // Update the game model until there's a new queued state
             while (!this->display->SetCurrentStateAsNextQueuedState()) {
@@ -910,6 +938,9 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
             }
 
             if (isFinished) {
+                // Play a sound for the star being tallied
+                this->display->GetSound()->PlaySound(GameSound::LevelSummaryStarTallyEvent, false, false);
+
                 alphaAnimIter = this->starAddAlphaAnims.erase(alphaAnimIter);
                 moveAnimIter  = this->starAddMoveAnims.erase(moveAnimIter);
                 

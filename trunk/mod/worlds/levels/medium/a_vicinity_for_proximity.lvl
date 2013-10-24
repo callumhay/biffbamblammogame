@@ -33,15 +33,15 @@ STARS:
 6000
 12000
 19000
-23000
-26000
+23500
+28000
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 1
 BallGrow 2
+UberBall 1
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

@@ -82,6 +82,8 @@ private:
         const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight,
         CgFxEffectBase* replacementMat);
 
+    void TickAndDrawExtraneousRocketEffects(const RocketProjectile* rocket, double dT, const Camera& camera);
+        
 	void LoadMeshes();
 };
 

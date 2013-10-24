@@ -60,14 +60,12 @@ mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NUL
 eraseProgVerifyHandler(NULL), volItemHandler(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
 menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
-particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), starryBG(NULL),
+particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), starryBG(NULL), bbbLogoTex(NULL),
 blammopediaItemIndex(-1), creditsItemIndex(-1),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
-             GameViewConstants::GetInstance()->LICENSE_TEXT),
-titleDisplay(1.0f)
-{
+             GameViewConstants::GetInstance()->LICENSE_TEXT) {
 
     // Play the main menu background music...
     this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::MainMenuBackgroundLoop, true);
@@ -90,6 +88,10 @@ titleDisplay(1.0f)
         GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
     assert(this->starryBG != NULL);
 
+    this->bbbLogoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BBB_LOGO, Texture::Trilinear));
+    assert(this->bbbLogoTex != NULL);
+
 	// Setup any emitter/sprite/particle effects
 	this->InitializeESPEffects();
 
@@ -111,7 +113,7 @@ titleDisplay(1.0f)
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(1.0f);
 
-	// Setup any fullscreen effects
+	// Setup any full-screen effects
     this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 
@@ -177,6 +179,8 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	}
 
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bbbLogoTex);
     assert(success);
     UNUSED_VARIABLE(success);
 
@@ -596,7 +600,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	menuCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
 
 	this->RenderBackgroundEffects(dT, menuCamera);
-	this->RenderTitle(menuCamera);
+	this->RenderTitle();
 
     // Figure out where the menu needs to be to ensure it doesn't clip with the bottom of the screen...
     this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT * this->display->GetTextScalingFactor());
@@ -632,25 +636,41 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 }
 
 /**
- * Renders the title for the menu screen.
+ * Render the title for the menu screen.
  */
-void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
+void MainMenuDisplayState::RenderTitle() {
+    float scaleFactor = GameDisplay::GetTextScalingFactor();
 
-	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
-	const float MAX_X_COORD = static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(Camera::GetWindowHeight()) * MAX_Y_COORD;
-    const float MENU_WIDTH = 5.0f + (2*this->titleDisplay.GetBlammoWidth()*MAX_X_COORD / static_cast<float>(Camera::GetWindowWidth()));
-	const float X_INDENT = -MAX_X_COORD + (2.0f * MAX_X_COORD - MENU_WIDTH) / 2.0f;
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1,1,1,1);
 
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	menuCam.ApplyCameraTransform();
-    this->titleDisplay.Draw(X_INDENT, MAX_Y_COORD, menuCam);
-	glPopMatrix();
+    Camera::PushWindowCoords();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    float xSize = 1.05f*scaleFactor*1024.0f;
+    float xSizeDiv2 = xSize/2.0f;
+    float ySize = 1.05f*scaleFactor*512.0f;
+    float ySizeDiv2 = ySize/2.0f;
+
+    const float VERT_DIST_FROM_EDGE  = scaleFactor * -25;
+
+    glTranslatef((Camera::GetWindowWidth() - xSize) / 2.0f + xSizeDiv2, Camera::GetWindowHeight() - ySizeDiv2 - VERT_DIST_FROM_EDGE, 0);
+    glScalef(xSize, ySize, 1.0f);
+    this->bbbLogoTex->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    this->bbbLogoTex->UnbindTexture();
+    glPopMatrix();
+    Camera::PopWindowCoords();
+
+    glPopAttrib();
 }
 
 /**
- * Renders the background effects for the menu screen. These include
+ * Render the background effects for the menu screen. These include
  * random bangs and booms, etc. going off all over the place.
  */
 void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {

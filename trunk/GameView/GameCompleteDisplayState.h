@@ -17,7 +17,6 @@
 #include "../BlammoEngine/TextLabel.h"
 
 #include "DisplayState.h"
-#include "BBBTitleDisplay.h"
 
 /**
  * State for displaying the completion of the game animation and
@@ -63,9 +62,8 @@ private:
     TextLabel2D creditLabel;
     TextLabel2D licenseLabel;
 
-    BBBTitleDisplay bbbTitleDisplay;
-
     Texture2D* starryBG;
+    Texture2D* bbbLogoTex;
 
 	float gameCompleteLabelRasterWidth;
    

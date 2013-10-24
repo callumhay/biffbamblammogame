@@ -1,7 +1,7 @@
 Rocket like a hurricane
 13 30
 S S S E E E E E E E S S S 
-S C(120-160) T(S,ur) S S E E E S S T(S,ul) C(200-240) S 
+S C(130-170) T(S,ur) S S E E E S S T(S,ul) C(190-230) S 
 S E E T(S,ur) S S S S S T(S,ul) E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -36,7 +36,7 @@ STARS:
 20000
 28000
 33000
-37000
+35500
 
 PaddleGrow 0
 PoisonPaddle 3

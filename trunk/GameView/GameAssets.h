@@ -242,7 +242,6 @@ private:
 	void LoadRegularEffectAssets();
 
 	// Projectile specific functionality
-	void FirePaddleLaser(const GameModel& gameModel);
 	void FireRocket(const GameModel& gameModel, const RocketProjectile& rocketProjectile);
 
     // Private draw functions

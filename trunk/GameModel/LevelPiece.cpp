@@ -330,7 +330,7 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
 	// All the other rays were created via refraction or some such thing, so spawn new particles for them
 	++rayIter;
 	for (; rayIter != rays.end(); ++rayIter) {
-        Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile);
+        Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile, true);
 		
         newProjectile->SetWidth(scaleFactor * newProjectile->GetWidth());
         newProjectile->SetHeight(scaleFactor * newProjectile->GetHeight());

@@ -357,6 +357,7 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, LastBallExplodedEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBallCollisionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBossCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LastBallSpiralingToDeathLoop));
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollisionEvent));
@@ -395,6 +396,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketLaunchEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketMovingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketExplodedEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, RemoteControlRocketThrustEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, TurretMineFiredEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleMineFiredEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, MineExplodedEvent));
@@ -403,6 +405,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserDeflectedByShieldEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketOrMineDeflectedByShieldEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleLaserBulletCollisionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleLaserBeamCollisionEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleCollateralBlockCollisionEvent));
 
 
@@ -475,7 +478,14 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStartPaddleMoveUpEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStartBallSpawnOnPaddleEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelEndFadeoutEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryNewHighScoreEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryPointTallyLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryStarTallyEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStarCostPaidUnlockEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldCompleteBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldCompleteVictoryMessageEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldUnlockEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GameOverEvent));
 }
 

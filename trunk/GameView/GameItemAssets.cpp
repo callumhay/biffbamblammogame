@@ -28,7 +28,7 @@
 #include "../ResourceManager.h"
 
 GameItemAssets::GameItemAssets(GameESPAssets* espAssets, GameSound* sound) : 
-espAssets(espAssets), sound(sound), item(NULL) {
+espAssets(espAssets), sound(sound), item(NULL), timerAlmostDoneSoundID(INVALID_SOUND_ID) {
 }
 
 GameItemAssets::~GameItemAssets() {
@@ -198,7 +198,6 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera, const GameModel
 			++iter;
 		}
 	}
-
 }
 
 /**
@@ -262,9 +261,9 @@ void GameItemAssets::ClearTimers() {
 // Amount of time in seconds that starts the 'almost done' state of the HUD
 const double GameItemAssets::ItemTimerHUDElement::TIMER_ALMOST_DONE_TIME_LEFT = 3.0;	
 
-GameItemAssets::ItemTimerHUDElement::ItemTimerHUDElement(GameItemAssets* itemAssets, const GameItemTimer* itemTimer) : 
-itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAssets), 
-timerAlmostDoneSoundID(INVALID_SOUND_ID) {
+GameItemAssets::ItemTimerHUDElement::ItemTimerHUDElement(GameItemAssets* itemAssets, 
+                                                         const GameItemTimer* itemTimer) : 
+itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAssets) {
 	
 	assert(itemAssets != NULL);
 	assert(itemTimer != NULL);
@@ -292,7 +291,7 @@ timerAlmostDoneSoundID(INVALID_SOUND_ID) {
 }
 
 GameItemAssets::ItemTimerHUDElement::~ItemTimerHUDElement() {
-    this->itemAssets->sound->StopSound(timerAlmostDoneSoundID);
+    this->itemAssets->RemoveTimerAlmostDone(this);
 }
 
 void GameItemAssets::ItemTimerHUDElement::Tick(double dT, const GameModel& gameModel) {
@@ -323,7 +322,7 @@ void GameItemAssets::ItemTimerHUDElement::Tick(double dT, const GameModel& gameM
 
                     if (GameState::IsGameInPlayState(gameModel)) {
                         // Start playing the loop for the timer almost being done...
-                        this->timerAlmostDoneSoundID = this->itemAssets->sound->PlaySound(GameSound::ItemTimerEndingLoop, true, true);
+                        this->itemAssets->AddTimerAlmostDone(this);
                     }
 				}
 			}
@@ -444,7 +443,7 @@ void GameItemAssets::ItemTimerHUDElement::StopTimer(const GameModel& gameModel, 
 		this->SetState(ItemTimerHUDElement::TimerStopping);
 
         // End the timer almost done sound loop
-        this->itemAssets->sound->StopSound(this->timerAlmostDoneSoundID);
+        this->itemAssets->RemoveTimerAlmostDone(this);
         
         if (GameState::IsGameInPlayState(gameModel) && didExpire) {
             // Play the timer end sound -- only play this if the game is in play still...
@@ -591,7 +590,7 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 
 		case ItemTimerHUDElement::TimerDead:
 			assert(this->currState == ItemTimerHUDElement::TimerStopping);
-            this->itemAssets->sound->StopSound(this->timerAlmostDoneSoundID);
+            this->itemAssets->RemoveTimerAlmostDone(this);
 			this->currState = ItemTimerHUDElement::TimerDead;
 			break;
 
@@ -599,4 +598,19 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 			assert(false);
 			break;
 	}
+}
+
+void GameItemAssets::AddTimerAlmostDone(const ItemTimerHUDElement* timer) {
+    if (this->timerAlmostDoneSoundID == INVALID_SOUND_ID) {
+        assert(this->timersAlmostDone.empty());
+        this->timerAlmostDoneSoundID = this->sound->PlaySound(GameSound::ItemTimerEndingLoop, true);
+    }
+    this->timersAlmostDone.insert(timer);
+}
+
+void GameItemAssets::RemoveTimerAlmostDone(const ItemTimerHUDElement* timer) {
+    if (this->timersAlmostDone.erase(timer) == 1 && this->timersAlmostDone.empty()) {
+        this->sound->StopSound(this->timerAlmostDoneSoundID);
+        this->timerAlmostDoneSoundID = INVALID_SOUND_ID;
+    }
 }

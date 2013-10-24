@@ -205,10 +205,12 @@ PlayerLostABallButIsStillAliveEvent {
 	file = resources/lost_ball.ogg
 }
 
-
-
 BallBallCollisionEvent {
 	file = resources/BallBallCollisionEvent.ogg
+}
+
+BallBossCollisionEvent {
+	file = resources/BallBossBasicBounceEvent_01.ogg | resources/BallBossBasicBounceEvent_02.ogg | resources/BallBossBasicBounceEvent_03.ogg | resources/BallBossBasicBounceEvent_04.ogg | resources/BallBossBasicBounceEvent_05.ogg | resources/BallBossBasicBounceEvent_06.ogg | resources/BallBossBasicBounceEvent_07.ogg | resources/BallBossBasicBounceEvent_08.ogg | resources/BallBossBasicBounceEvent_09.ogg | resources/BallBossBasicBounceEvent_10.ogg
 }
 
 LastBallSpiralingToDeathLoop {
@@ -364,6 +366,9 @@ PaddleRocketMovingLoop {
 RocketExplodedEvent {
 	file = resources/RocketExplodedEvent.ogg
 }
+RemoteControlRocketThrustEvent {
+	file = resources/RemoteControlRocketThrustEvent.ogg
+}
 
 TurretMineFiredEvent {
 	file = resources/TurretMineFiredEvent.ogg
@@ -397,8 +402,9 @@ PaddleLaserBulletCollisionEvent {
 	file = resources/PaddleLaserBulletCollisionEvent.ogg
 }
 
-// PaddleLaserBeamCollisionEvent {
-// }
+PaddleLaserBeamCollisionEvent {
+	file = resources/PaddleLaserBeamCollisionEvent.ogg
+}
 
 PaddleCollateralBlockCollisionEvent {
 	file = resources/PaddleCollateralBlockCollisionEvent.ogg
@@ -440,10 +446,10 @@ PowerUpItemActivatedEvent {
 	file = resources/PowerUpItemActivatedEvent.ogg
 }
 PowerNeutralItemActivatedEvent {
-	file = resources/power_neutral_item.ogg
+	file = resources/PowerNeutralItemActivatedEvent.ogg
 }
 PowerDownItemActivatedEvent {
-	file = resources/power_down_item.ogg
+	file = resources/PowerDownItemActivatedEvent.ogg
 }
 
 ItemTimerEndingLoop {
@@ -689,28 +695,48 @@ LevelEndFadeoutEvent {
 
 // Level Summary State Events ************************************************
 
-// LevelSummaryBackgroundLoop
-// LevelSummaryPointTallyLoop
+LevelSummaryBackgroundLoop {
+	file = resources/LevelSummaryBackgroundLoop.ogg
+}
 
 LevelSummaryNewHighScoreEvent {
 	file = resources/LevelSummaryNewHighScoreEvent.ogg
 }
 
-// LevelStarCostPaidUnlockEvent
+LevelSummaryPointTallyLoop {
+	file = resources/LevelSummaryPointTallyLoop.ogg
+}
+
+LevelSummaryStarTallyEvent {
+	file = resources/LevelSummaryStarTallyEvent.ogg
+}
+
+LevelStarCostPaidUnlockEvent {
+	file = resources/LevelStarCostPaidUnlockEvent.ogg
+}
+
 
 
 // World Complete State Events ***********************************************
 
-// WorldCompleteBackgroundLoop
-// WorldUnlockEvent
+WorldCompleteBackgroundLoop {
+	file = resources/WorldCompleteBackgroundLoop.ogg
+}
+
+WorldCompleteVictoryMessageEvent {
+	file = resources/WorldCompleteVictoryMessageEvent.ogg
+}
+
+WorldUnlockEvent {
+	file = resources/WorldUnlockEvent.ogg
+}
 
 // Game-over state events ****************************************************
 
 GameOverEvent {
-	file = resources/game_over.ogg
+	file = resources/GameOverEvent.ogg
 }
 
-// TODO
 
 // ---------------------------------------------------------------------------
 // Global Sound Effects ======================================================

@@ -36,11 +36,15 @@ creditLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager:
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
              GameViewConstants::GetInstance()->LICENSE_TEXT),
-congratsLabel(NULL), noteLabel(NULL), bbbTitleDisplay(0.80f), starryBG(NULL) {
+congratsLabel(NULL), noteLabel(NULL), starryBG(NULL), bbbLogoTex(NULL) {
     
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
     assert(this->starryBG != NULL);
+
+    this->bbbLogoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BBB_LOGO, Texture::Trilinear));
+    assert(this->bbbLogoTex != NULL);
 
     // Setup any labels/text
 	this->titleLabel.SetColour(Colour(1.0f, 0.6f, 0));
@@ -81,6 +85,8 @@ GameCompleteDisplayState::~GameCompleteDisplayState() {
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bbbLogoTex);
+    assert(success);
     UNUSED_VARIABLE(success);
 }
 
@@ -118,15 +124,34 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
         this->licenseLabel.GetHeight() + NAME_LICENCE_Y_PADDING);
     this->licenseLabel.Draw();
 
-	Camera menuCamera;
-	menuCamera.SetPerspective();
-	menuCamera.Move(Vector3D(0, 0, GameCompleteDisplayState::CAM_DIST_FROM_ORIGIN));
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Camera::PushWindowCoords();
     glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	menuCamera.ApplyCameraTransform();
-    this->bbbTitleDisplay.Draw(-5, 2, menuCamera);
+    glPushMatrix();
+    glLoadIdentity();
+
+    float scaleFactor = GameDisplay::GetTextScalingFactor();
+
+    float logoXSize = 1.5f * 512.0f * scaleFactor;
+    float logoYSize = 1.5f * 256.0f * scaleFactor;
+    float logoXSizeDiv2 = logoXSize / 2.0f;
+
+    glTranslatef((Camera::GetWindowWidth() - logoXSize) / 2.0f + logoXSizeDiv2, 0.70f*logoYSize, 0);
+    glScalef(logoXSize, logoYSize, 1.0f);
+
+    glColor4f(1,1,1,1);
+    this->bbbLogoTex->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    this->bbbLogoTex->UnbindTexture();
+
     glPopMatrix();
+    Camera::PopWindowCoords();
+
+    glPopAttrib();
+
 
 	// Draw the fade quad overlay
     this->fadeAnim.Tick(dT);

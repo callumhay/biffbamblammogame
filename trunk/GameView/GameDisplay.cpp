@@ -24,7 +24,6 @@
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameEventManager.h"
 
-
 #ifdef _DEBUG
 bool GameDisplay::drawDebugBounds           = false;
 bool GameDisplay::drawDebugLightGeometry    = false;

@@ -252,8 +252,6 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
     }
 
     GameSound* sound = this->display->GetSound();
-    int selectedItemIdxBefore = this->selectedItemIdx;
-
     switch (pressedButton) {
         case GameControl::EscapeButtonAction:
             this->GoBackToMainMenu();
@@ -301,11 +299,6 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
 
         default:
             break;
-    }
-
-    // If the selection changed then we play a sound for it
-    if (selectedItemIdxBefore != this->selectedItemIdx) {
-        sound->PlaySound(GameSound::WorldMenuItemChangedSelectionEvent, false);
     }
 }
 
@@ -375,6 +368,8 @@ void SelectWorldMenuState::MoveToNextWorld() {
     this->selectedItemIdx += 1;
     this->selectedItemIdx %= this->worldItems.size();
     this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
+
+    this->display->GetSound()->PlaySound(GameSound::WorldMenuItemChangedSelectionEvent, false);
 }
 
 void SelectWorldMenuState::MoveToPrevWorld() {
@@ -384,6 +379,8 @@ void SelectWorldMenuState::MoveToPrevWorld() {
         this->selectedItemIdx = this->worldItems.size()-1;
     }
     this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
+
+    this->display->GetSound()->PlaySound(GameSound::WorldMenuItemChangedSelectionEvent, false);
 }
 
 void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
@@ -548,12 +545,13 @@ SelectWorldMenuState::WorldUnlockAnimationTracker::WorldUnlockAnimationTracker(S
                                                                                WorldSelectItem* worldItem) : 
 worldItem(worldItem), state(state), energySuckEmitter(NULL), bigExplosionEmitter(NULL), bigExplosionOnoEmitter(NULL),
 debrisEmitter(NULL), fireSmokeEmitter1(NULL), fireSmokeEmitter2(NULL), countdownMoveToLockedWorld(1.0),
-countdownWaitToShake(0.75), countdownWaitToEnergySuck(0.75), sparkleTex(NULL), debrisTex(NULL),
+countdownWaitToShake(0.75), countdownWaitToEnergySuck(0.75), sparkleTex(NULL), debrisTex(NULL), worldUnlockSoundID(INVALID_SOUND_ID),
 lensFlareTex(NULL), hugeExplosionTex(NULL), sphereNormalsTex(NULL), particleFader(1, 0), particleHalfFader(1, 0.5f), 
 particleMediumGrowth(1.0f, 2.0f), particleMediumShrink(1.0f, 0.25f), particleSmallGrowth(1.0f, 1.5f), unlockAnimExecuted(false),
 particleSuperGrowth(1.0f, 10.0f), particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
 smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
+
     assert(worldItem != NULL);
 
     this->debrisTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -748,7 +746,6 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
     this->lockShakeAnim.SetLerp(timeVals, shakeVals);
     this->lockShakeAnim.SetInterpolantValue(Vector2D(0.0f, 0.0f));
     this->lockShakeAnim.SetRepeat(true);
-
 }
 
 SelectWorldMenuState::WorldUnlockAnimationTracker::~WorldUnlockAnimationTracker() {
@@ -787,6 +784,9 @@ SelectWorldMenuState::WorldUnlockAnimationTracker::~WorldUnlockAnimationTracker(
     this->fireSmokeEmitter2 = NULL;
     delete this->debrisEmitter;
     this->debrisEmitter = NULL;
+
+    this->state->display->GetSound()->StopSound(this->worldUnlockSoundID);
+    this->worldUnlockSoundID = INVALID_SOUND_ID;
 }
 
 bool SelectWorldMenuState::WorldUnlockAnimationTracker::AreControlsLocked() const {
@@ -807,6 +807,10 @@ void SelectWorldMenuState::WorldUnlockAnimationTracker::Draw(const Camera& camer
 
     if (this->countdownWaitToShake > 0.0) {
         this->countdownWaitToShake -= dT;
+        if (this->countdownWaitToShake <= 0.0 && this->worldUnlockSoundID == INVALID_SOUND_ID) {
+            // Play the sound for the world unlock
+            this->worldUnlockSoundID = this->state->display->GetSound()->PlaySound(GameSound::WorldUnlockEvent, false, false);
+        }
         return;
     }
 
@@ -856,7 +860,6 @@ void SelectWorldMenuState::WorldUnlockAnimationTracker::Draw(const Camera& camer
     }
 
     glPopMatrix();
-    
 }
 
 // WorldSelectItem Functions **********************************************************************

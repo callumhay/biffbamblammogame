@@ -13,12 +13,14 @@
 #include "GameModel.h"
 
 LaserBulletProjectile::LaserBulletProjectile(const Point2D& spawnLoc, float width, float height, 
-                                             float velocityMag, const Vector2D& velocityDir) :
-Projectile(spawnLoc, width, height) {
+                                             float velocityMag, const Vector2D& velocityDir, 
+                                             bool createdByReflectionOrRefraction) :
+Projectile(spawnLoc, width, height), isReflectedOrRefractedDerivative(createdByReflectionOrRefraction) {
     this->SetVelocity(velocityDir, velocityMag);
 }
 
-LaserBulletProjectile::LaserBulletProjectile(const LaserBulletProjectile& copy) : Projectile(copy) {
+LaserBulletProjectile::LaserBulletProjectile(const LaserBulletProjectile& copy) : Projectile(copy),
+isReflectedOrRefractedDerivative(copy.isReflectedOrRefractedDerivative) {
 }
 
 LaserBulletProjectile::~LaserBulletProjectile() {

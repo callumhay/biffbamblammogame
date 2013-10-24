@@ -53,6 +53,7 @@ public:
     void ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);
 	void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
+    void BallBossCollisionEvent(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart);
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
 	void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal);
@@ -144,11 +145,14 @@ private:
 	long timeSinceLastBallBlockCollisionEventInMS;
 	long timeSinceLastBallPaddleCollisionEventInMS;
 	long timeSinceLastBallTeslaCollisionEventInMS;
+    long timeSinceLastBallBossCollisionEventInMS;
 
     typedef std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, SoundID> TeslaLightningSoundIDMap;
     typedef TeslaLightningSoundIDMap::iterator TeslaLightningSoundIDMapIter;
     TeslaLightningSoundIDMap teslaLightningSoundIDs;
 
+    static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
+    static const long SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;

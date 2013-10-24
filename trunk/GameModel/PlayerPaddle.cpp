@@ -267,8 +267,8 @@ void PlayerPaddle::FireAttachedBall() {
     // Check to see if the paddle has crashed into a wall or is touching it, in this case we reduce
     // the paddle velocity to zero
     float absPaddleSpd = fabs(avgPaddleVelDir[0]);
-    if (this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal() - EPSILON) ||
-        this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal() + EPSILON) ||
+    if (this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal()) ||
+        this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal()) ||
         !this->GetIsMoveButtonDown()) {
 
         avgPaddleVelDir[0] = 0.0f;
@@ -1082,7 +1082,7 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
 	    if (this->HasPaddleType(PlayerPaddle::ShieldPaddle) &&
             p.GetBounds().GetCollisionPoints(this->CreatePaddleShieldBounds(), collisionPts)) {
 
-            // Seperate points into those to the left and right of the paddle center, closest to the paddle center...
+            // Separate points into those to the left and right of the paddle center, closest to the paddle center...
 	        bool collisionOnLeft  = false;
 	        bool collisionOnRight = false;
 
@@ -1469,47 +1469,6 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 	rotationValues.push_back(0.0f);
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
-}
-
-/**
- * Used to detect and react to situations where the ball is forced up against a wall by the paddle.
- */
-bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, double dT) {
-    static Vector2D normal;
-    static Collision::LineSeg2D collisionLine;
-    static double timeUntilCollision;
-    
-    // Check to see if the ball is hitting the bounds of the level...
-    float ballMinX = ball.GetCenterPosition2D()[0] - ball.GetBounds().Radius();
-    float ballMaxX = ball.GetCenterPosition2D()[0] + ball.GetBounds().Radius();
-
-    if (ballMinX <= this->minBound) {
-        // The ball is currently intersecting the line that defines the 
-        // minimum X position for the paddle to move to
-
-        // Check for the paddle collision...
-        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeUntilCollision)) {
-            // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
-            float impulseAmt = std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed());
-            this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);
-            return true;
-        }
-        
-    }
-    else if (ballMaxX >= this->maxBound) {
-        // The ball is currently intersecting the line that defines the
-        // maximum X position for the paddle to move to
-
-        // Check for the paddle collision...
-        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeUntilCollision)) {
-            // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
-            float impulseAmt = std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed());
-            this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);
-            return true;
-        }
-    }
-
-    return false;
 }
 
 /**

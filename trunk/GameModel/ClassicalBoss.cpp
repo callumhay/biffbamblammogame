@@ -157,19 +157,14 @@ void ClassicalBoss::Init(float startingX, float startingY) {
                 static const float HALF_BOTTOM_WIDTH  = BOTTOM_WIDTH  / 2.0f;
                 static const float HALF_TOP_WIDTH = TOP_WIDTH / 2.0f;
                 
-                BoundingLines topTablatureBounds;
-                topTablatureBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_BOTTOM_WIDTH, -HALF_HEIGHT), Point2D(HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(0, -1));  // Bottom
-                topTablatureBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(-HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(-HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH)); // Left diagonal
-                topTablatureBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH));    // Right diagonal
-
-                BoundingLines bottomTablatureBounds;
-                bottomTablatureBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(HALF_TOP_WIDTH, HALF_HEIGHT)), Vector2D(0, 1)); // Top
-                bottomTablatureBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(-HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(-HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH)); // Left diagonal
-                bottomTablatureBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH));    // Right diagonal
+                BoundingLines tablatureBounds;
+                tablatureBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(HALF_TOP_WIDTH, HALF_HEIGHT)), Vector2D(0, 1)); // Top
+                tablatureBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(-HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(-HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH)); // Left diagonal
+                tablatureBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_TOP_WIDTH, HALF_HEIGHT), Point2D(HALF_BOTTOM_WIDTH, -HALF_HEIGHT)), Vector2D(HEIGHT, HALF_BOTTOM_WIDTH - HALF_TOP_WIDTH));    // Right diagonal
 
                 // topLeftTablature
                 {
-                    BossBodyPart* topLeftTablature = new BossBodyPart(topTablatureBounds);
+                    BossBodyPart* topLeftTablature = new BossBodyPart(tablatureBounds);
                     topLeftTablature->RotateZ(180);
                     topLeftTablature->Translate(Vector3D(-5.101f, 2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(topLeftTablature);
@@ -179,7 +174,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
 
                 // topRightTablature
                 {
-                    BossBodyPart* topRightTablature = new BossBodyPart(topTablatureBounds);
+                    BossBodyPart* topRightTablature = new BossBodyPart(tablatureBounds);
                     topRightTablature->RotateZ(180);
                     topRightTablature->Translate(Vector3D(5.101f, 2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(topRightTablature);
@@ -189,7 +184,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
 
                 // bottomLeftTablature
                 {
-                    BossBodyPart* bottomLeftTablature = new BossBodyPart(bottomTablatureBounds);
+                    BossBodyPart* bottomLeftTablature = new BossBodyPart(tablatureBounds);
                     bottomLeftTablature->Translate(Vector3D(-5.101f, -2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(bottomLeftTablature);
                     this->bottomLeftTablatureIdx = this->bodyParts.size();
@@ -198,7 +193,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
 
                 // bottomRightTablature
                 {
-                    BossBodyPart* bottomRightTablature = new BossBodyPart(bottomTablatureBounds);
+                    BossBodyPart* bottomRightTablature = new BossBodyPart(tablatureBounds);
                     bottomRightTablature->Translate(Vector3D(5.101f, -2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(bottomRightTablature);
                     this->bottomRightTablatureIdx = this->bodyParts.size();
@@ -305,11 +300,13 @@ void ClassicalBoss::Init(float startingX, float startingY) {
 
 void ClassicalBoss::BuildArm(bool isLeftArm, const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx) {
 
-    static const float SQUARE_SIZE      = 2.445f;
+    static const float FAVOUR_SQUARE_SIZE = 0.25f;
+
+    static const float SQUARE_SIZE      = 2.445f + FAVOUR_SQUARE_SIZE;
     static const float HALF_SQUARE_SIZE = SQUARE_SIZE / 2.0f;
 
-    static const float SUPPORT_WIDTH  = SQUARE_SIZE - 0.001f;//3.097f;
-    static const float SUPPORT_HEIGHT = 0.652f;
+    static const float SUPPORT_WIDTH  = SQUARE_SIZE;
+    static const float SUPPORT_HEIGHT = 0.652f - FAVOUR_SQUARE_SIZE;
     static const float HALF_SUPPORT_WIDTH = SUPPORT_WIDTH / 2.0f;
     static const float HALF_SUPPORT_HEIGHT = SUPPORT_HEIGHT / 2.0f;
 
@@ -333,8 +330,8 @@ void ClassicalBoss::BuildArm(bool isLeftArm, const Vector3D& armTranslation, siz
         translation[1] = HALF_SUPPORT_HEIGHT;
         //bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT)),   Vector2D(0, 1));  // Top
         //bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT), translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(0, -1)); // Bottom
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)), Vector2D(-1, 0)); // Left
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),   translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(1, 0));  // Right
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),  translation + Point2D(-HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)), Vector2D(-1, 0), !isLeftArm); // Left
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),   translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(1, 0), isLeftArm);  // Right
     
         // Column
         static const float COLUMN_TOP_BASE_WIDTH = 2.375f;
@@ -363,18 +360,18 @@ void ClassicalBoss::BuildArm(bool isLeftArm, const Vector3D& armTranslation, siz
         
         // Top part of the column
         translation[1] = -HALF_COLUMN_TOP_BASE_HEIGHT;
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT),  translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT)), Vector2D(-1, 0), !isLeftArm); // Left
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT),   translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT)),  Vector2D(1, 0), isLeftArm);  // Right
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT), translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT)), Vector2D(-1, 0), !isLeftArm); // Left
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT),  translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT)),  Vector2D(1, 0), isLeftArm);  // Right
     
         // Tapered part of the column
         translation[1] = -(COLUMN_TOP_BASE_HEIGHT + HALF_COLUMN_TAPERED_TOP_HEIGHT);
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT),     translation + Point2D(-HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT)), Vector2D(-COLUMN_TAPERED_TOP_HEIGHT, HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH - HALF_COLUMN_TAPERED_TOP_TOP_WIDTH), !isLeftArm); // Left diagonal
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT),      translation + Point2D(HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT)),  Vector2D(COLUMN_TAPERED_TOP_HEIGHT, HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH - HALF_COLUMN_TAPERED_TOP_TOP_WIDTH), isLeftArm);    // Right diagonal
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT), translation + Point2D(-HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT)), Vector2D(-COLUMN_TAPERED_TOP_HEIGHT, HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH - HALF_COLUMN_TAPERED_TOP_TOP_WIDTH), !isLeftArm); // Left diagonal
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT),  translation + Point2D(HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT)),  Vector2D(COLUMN_TAPERED_TOP_HEIGHT, HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH - HALF_COLUMN_TAPERED_TOP_TOP_WIDTH), isLeftArm);    // Right diagonal
 
         // Middle part of the column
         translation[1] = -(COLUMN_TOP_BASE_HEIGHT + COLUMN_TAPERED_TOP_HEIGHT + HALF_COLUMN_HEIGHT);
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT),     translation + Point2D(-HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT)), Vector2D(-COLUMN_HEIGHT, HALF_COLUMN_BOTTOM_WIDTH - HALF_COLUMN_TOP_WIDTH), !isLeftArm); // Left diagonal
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT),      translation + Point2D(HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT)),  Vector2D(COLUMN_HEIGHT, HALF_COLUMN_BOTTOM_WIDTH - HALF_COLUMN_TOP_WIDTH), isLeftArm);    // Right diagonal
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT), translation + Point2D(-HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT)), Vector2D(-COLUMN_HEIGHT, HALF_COLUMN_BOTTOM_WIDTH - HALF_COLUMN_TOP_WIDTH), !isLeftArm); // Left diagonal
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT),  translation + Point2D(HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT)),  Vector2D(COLUMN_HEIGHT, HALF_COLUMN_BOTTOM_WIDTH - HALF_COLUMN_TOP_WIDTH), isLeftArm);    // Right diagonal
 
         // Bottom part of the column
         translation[1] = -(COLUMN_TOP_BASE_HEIGHT + COLUMN_TAPERED_TOP_HEIGHT + COLUMN_HEIGHT + HALF_COLUMN_BOTTOM_BASE_HEIGHT);
@@ -391,8 +388,8 @@ void ClassicalBoss::BuildArm(bool isLeftArm, const Vector3D& armTranslation, siz
     // square
     {
         BoundingLines bounds;
-        bounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_SQUARE_SIZE, HALF_SQUARE_SIZE),  Point2D(-HALF_SQUARE_SIZE, -HALF_SQUARE_SIZE)), Vector2D(-1, 0)); // Left
-        bounds.AddBound(Collision::LineSeg2D(Point2D(HALF_SQUARE_SIZE, HALF_SQUARE_SIZE),   Point2D(HALF_SQUARE_SIZE, -HALF_SQUARE_SIZE)),  Vector2D(1, 0));  // Right
+        bounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_SQUARE_SIZE, HALF_SQUARE_SIZE),  Point2D(-HALF_SQUARE_SIZE, -HALF_SQUARE_SIZE)), Vector2D(-1, 0), !isLeftArm); // Left
+        bounds.AddBound(Collision::LineSeg2D(Point2D(HALF_SQUARE_SIZE, HALF_SQUARE_SIZE),   Point2D(HALF_SQUARE_SIZE, -HALF_SQUARE_SIZE)),  Vector2D(1, 0), isLeftArm);  // Right
     
         BossBodyPart* square = new BossBodyPart(bounds);
         square->Translate(Vector3D(0.0f, SUPPORT_HEIGHT + HALF_SQUARE_SIZE, 0.0f));

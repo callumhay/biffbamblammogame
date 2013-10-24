@@ -37,14 +37,14 @@ STARS:
 20000
 40000
 50000
-61000
+61700
 
 PaddleGrow 1
 PoisonPaddle 2
 Blackout 3
 BallSafetyNet 0
-BallGrow 1
 UberBall 1
+BallGrow 1
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 1
@@ -58,10 +58,10 @@ RocketPaddle 0
 GhostBall 3
 BallShrink 2
 UpsideDown 3
-MultiBall5 3
+MultiBall5 0
 BallCam 0
 MagnetPaddle 3
-MultiBall3 2
+MultiBall3 0
 RemoteControlRocket 0
 IceBall 2
 MineLauncherPaddle 0
