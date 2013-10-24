@@ -98,7 +98,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
                               const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
                               const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-	// We ALWAYS create boundries unless the neighbour does not exist (NULL) 
+	// We ALWAYS create boundaries unless the neighbor does not exist (NULL) 
 	// or is another solid block.
 
 	// Set the bounding lines for a rectangular block
@@ -121,7 +121,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(leftNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight);
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight) ||
+                    leftNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
 		}
 	}
@@ -136,7 +137,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingNorms.push_back(n1);
         onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::NoEntry ||
-            leftNeighbor->GetType() == LevelPiece::Breakable || leftNeighbor->GetType() == LevelPiece::BreakableTriangle);
+            leftNeighbor->GetType() == LevelPiece::Breakable || leftNeighbor->GetType() == LevelPiece::BreakableTriangle ||
+            leftNeighbor->GetType() == LevelPiece::Bomb || leftNeighbor->GetType() == LevelPiece::PrismTriangle);
     }
     shouldGenBounds = false;
 
@@ -152,7 +154,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(bottomNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft);
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft) ||
+                    bottomNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
 		}
 	}
@@ -167,7 +170,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingNorms.push_back(n2);
         onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry ||
-            bottomNeighbor->GetType() == LevelPiece::Breakable || bottomNeighbor->GetType() == LevelPiece::BreakableTriangle);
+            bottomNeighbor->GetType() == LevelPiece::Breakable || bottomNeighbor->GetType() == LevelPiece::BreakableTriangle ||
+            bottomNeighbor->GetType() == LevelPiece::Bomb || bottomNeighbor->GetType() == LevelPiece::PrismTriangle);
     }
     shouldGenBounds = false;
 
@@ -183,7 +187,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(rightNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft);
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft) ||
+                    rightNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
 		}
 	}
@@ -198,7 +203,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	    boundingNorms.push_back(n3);
         onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry ||
-            rightNeighbor->GetType() == LevelPiece::Breakable || rightNeighbor->GetType() == LevelPiece::BreakableTriangle);
+            rightNeighbor->GetType() == LevelPiece::Breakable || rightNeighbor->GetType() == LevelPiece::BreakableTriangle ||
+            rightNeighbor->GetType() == LevelPiece::Bomb || rightNeighbor->GetType() == LevelPiece::PrismTriangle);
     }
     shouldGenBounds = false;
 
@@ -214,7 +220,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
             if (TriangleBlock::GetOrientation(topNeighbor, triOrientation)) {
-                shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft);
+                shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft) ||
+                    topNeighbor->GetType() == LevelPiece::PrismTriangle;
             }
 		}
 	}
@@ -230,7 +237,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             topNeighbor->GetType() == LevelPiece::OneWay ||
             topNeighbor->GetType() == LevelPiece::NoEntry || topNeighbor->GetType() == LevelPiece::Breakable ||
-            topNeighbor->GetType() == LevelPiece::BreakableTriangle);
+            topNeighbor->GetType() == LevelPiece::BreakableTriangle || topNeighbor->GetType() == LevelPiece::Bomb ||
+            topNeighbor->GetType() == LevelPiece::PrismTriangle);
     }
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),

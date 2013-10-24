@@ -23,7 +23,6 @@
 
 #include "GameMenu.h"
 #include "DisplayState.h"
-#include "BBBTitleDisplay.h"
 #include "DecoratorOverlayPane.h"
 #include "PopupTutorialHint.h"
 
@@ -67,9 +66,6 @@ private:
 	// The configuration options for the game
 	ConfigOptions cfgOptions;
 
-    // Title display
-    BBBTitleDisplay titleDisplay;
-
 	// Indices for the main menu
 	int startGameMenuItemIndex;
 	int playLevelMenuItemIndex;
@@ -111,6 +107,7 @@ private:
 	std::vector<Texture*> bangTextures;
 	
     Texture2D* starryBG;
+    Texture2D* bbbLogoTex;
 
 	GameMenu* mainMenu;             // Main (top-most/parent) menu
 	GameSubMenu* optionsSubMenu;    // Options sub-menu
@@ -143,7 +140,7 @@ private:
 
 	void SetupBloomEffect();
 
-	void RenderTitle(Camera& menuCam);
+	void RenderTitle();
 	void RenderBackgroundEffects(double dT, Camera& menuCam);
 
 	void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);

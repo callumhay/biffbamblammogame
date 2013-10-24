@@ -6,11 +6,11 @@ E E E S T(P,ul) E E E G E G E G E E E E N T(P,ur) D(GravityBall,BallShrink,FastB
 E E E S E T(P,ul) E G E G Q(f) G E G E E T(P,lr) S E E E 
 E E E S T(P,ll) E E E G E G E G E E E T(P,ur) S E E E 
 E E E S E T(P,ll) E G E G E G E G E T(P,ur) E S E E E 
-E E E S T(P,ul) E E G G G G G G G E E T(P,lr) S E E E 
+E E E S T(P,ul) E E G G G Q(f) G G G E E T(P,lr) S E E E 
 E E E S E T(P,ul) E G G G G G G G E T(P,lr) E S E E E 
 E E E S T(P,ll) E E G B G I G B G E E T(P,ur) S E E E 
 E E E S E T(P,ll) E G G G G G G G E T(P,ur) E S E E E 
-E E E S T(P,ul) E E G G G G G G G E E T(P,lr) S E E E 
+E E E S T(P,ul) E E G G G Q(f) G G G E E T(P,lr) S E E E 
 E E E S E T(P,ul) E G E G E G E G E T(P,lr) E S E E E 
 E E E S T(P,ll) E E E G E G E G E E E T(P,ur) S E E E 
 E E E S E T(P,ll) E G E G Q(f) G E G E T(P,ur) E S E E E 
@@ -30,10 +30,10 @@ S E E N E E E E E E E E E E E E E N E E S
 
 STARS:
 4000
-6000
+7000
 9000
-10200
-11000
+10700
+12500
 
 PaddleGrow 0
 PoisonPaddle 3

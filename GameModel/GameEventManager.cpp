@@ -282,6 +282,13 @@ void GameEventManager::ActionBallBallCollision(const GameBall& ball1, const Game
 	}	
 }
 
+void GameEventManager::ActionBallBossCollision(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->BallBossCollisionEvent(ball, boss, bossPart);
+    }
+}
+
 // Action for when a block is destroyed
 void GameEventManager::ActionBlockDestroyed(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

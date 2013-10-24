@@ -215,7 +215,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 
 							        // Send the current projectile out the long side, spawn a new one for the short side
                                     float scaleFactor = Projectile::GetProjectileSplitScaleFactor(2);
-                                    Projectile* newProjectile  = Projectile::CreateProjectileFromCopy(projectile); 
+                                    Projectile* newProjectile  = Projectile::CreateProjectileFromCopy(projectile, true); 
                                     
                                     newProjectile->SetWidth(scaleFactor * newProjectile->GetWidth());
                                     newProjectile->SetHeight(scaleFactor * newProjectile->GetHeight());
@@ -499,7 +499,7 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
             break;
     }
 
-	// We only create boundries for breakables in cases where neighbours exist AND they are empty 
+	// We only create boundaries for breakables in cases where neighbors exist AND they are empty 
 	// (i.e., the ball can actually get to them).
     if (topNeighborNotSolid && (triOrient == TriangleBlock::UpperRight || triOrient == TriangleBlock::UpperLeft)) {
 		boundingLines.push_back(longSide);

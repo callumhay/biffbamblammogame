@@ -17,7 +17,6 @@
 #include "../BlammoEngine/TextLabel.h"
 
 #include "DisplayState.h"
-#include "BBBTitleDisplay.h"
 
 class CreditsDisplayState : public DisplayState {
 public:
@@ -69,8 +68,7 @@ private:
     static const char* SPECIAL_THANKS_NAMES_TEXT;
 
     Texture2D* starryBG;
-
-    BBBTitleDisplay bbbTitleDisplay;
+    Texture2D* bbbLogoTex;
 
     CreditLabel creditLabel1;
     CreditLabel creditLabel2;

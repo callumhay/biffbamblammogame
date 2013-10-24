@@ -52,7 +52,7 @@ const GothicRomanticBossAI::ConfinedMovePos GothicRomanticBossAI::CORNER_POSITIO
 };
 
 GothicRomanticBossAI::GothicRomanticBossAI(GothicRomanticBoss* boss) :
-BossAIState(), boss(boss), attacksSinceLastSummon(0) {
+BossAIState(), boss(boss), attacksSinceLastSummon(0), itemSummoningSoundID(INVALID_SOUND_ID) {
 
     assert(boss != NULL);
     this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(1.0f);
@@ -400,7 +400,7 @@ void GothicRomanticBossAI::GenerateTargetRegenBlockPositions(std::vector<Point2D
 // Begin ConfinedAI **************************************************************
 
 ConfinedAI::ConfinedAI(GothicRomanticBoss* boss, int numItemsPerSummoning) : GothicRomanticBossAI(boss),
-summonsSinceLastSpecialItemDrop(0), numItemsPerSummoning(numItemsPerSummoning), itemSummoningSoundID(INVALID_SOUND_ID) {
+summonsSinceLastSpecialItemDrop(0), numItemsPerSummoning(numItemsPerSummoning) {
     assert(numItemsPerSummoning > 0);
 
     // Setup any animations specific to this state...
@@ -772,6 +772,11 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
                 BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->hitOnTopMoveDownAnim.ResetToStart();
+            
+            // Stop any summoning sound that might be happening
+            this->boss->GetGameModel()->GetSound()->StopSound(this->itemSummoningSoundID, 0.25);
+            this->itemSummoningSoundID = INVALID_SOUND_ID;
+
             break;
 
         case VeryHurtAndAngryAIState:
@@ -1149,6 +1154,11 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
                 BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
             this->hitOnBottomMoveUpAnim.ResetToStart();
+
+            // Stop any summoning sound that might be happening
+            this->boss->GetGameModel()->GetSound()->StopSound(this->itemSummoningSoundID, 0.25);
+            this->itemSummoningSoundID = INVALID_SOUND_ID;
+
             break;
 
         case VeryHurtAndAngryAIState:
@@ -1638,6 +1648,8 @@ void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
             // EVENT: Summon items power charge
             GameEventManager::Instance()->ActionBossEffect(
                 PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
+
+            this->itemSummoningSoundID = this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossSummonItemChargeEvent, false);
             break;
 
         case RocketToCannonAndPaddleAttackAIState:
@@ -1660,6 +1672,10 @@ void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
         case HurtBodyAIState:
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
+
+            // Stop any summoning sound that might be happening
+            this->boss->GetGameModel()->GetSound()->StopSound(this->itemSummoningSoundID, 0.25);
+            this->itemSummoningSoundID = INVALID_SOUND_ID;
 
             break;
 
@@ -1746,6 +1762,10 @@ void FreeMovingAttackAI::ExecuteSummonItemsState(double dT, GameModel* gameModel
 
     // Check to see if the game is in a suitable state for items to be dropped...
     if (gameModel->GetCurrentStateType() != GameState::BallInPlayStateType) {
+        
+        // Cancel the summoning sound(s)
+        gameModel->GetSound()->StopSound(this->itemSummoningSoundID, 0.5);
+
         // If the ball isn't in play then we go to another state...
         this->SetNextAttackState();
         return;

@@ -167,6 +167,8 @@ private:
 
         CgFxPostRefract normalTexRefractEffect;
 
+        SoundID worldUnlockSoundID;
+
         ESPParticleColourEffector particleFader;
         ESPParticleColourEffector particleHalfFader;
         ESPParticleColourEffector particleFireFastColourFader;

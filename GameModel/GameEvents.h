@@ -267,8 +267,22 @@ public:
 	 * Arguments: ball1 - A ball in the collision.
 	 *             ball2 - The other ball in the collision.
 	 */
-    virtual void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) { UNUSED_PARAMETER(ball1); UNUSED_PARAMETER(ball2); }
+    virtual void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) { 
+        UNUSED_PARAMETER(ball1);
+        UNUSED_PARAMETER(ball2);
+    }
 
+	/**
+	 * Event triggered when a ball collides with a part of a boss. Only occurs once as the ball collides.
+	 * Arguments: ball - The ball in the collision.
+	 *            boss - The boss in the collision.
+     *            bossPart - The body part of the boss that was collided with.
+	 */
+    virtual void BallBossCollisionEvent(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart) {
+        UNUSED_PARAMETER(ball);
+        UNUSED_PARAMETER(boss);
+        UNUSED_PARAMETER(bossPart);
+    }
 
 	/** 
 	 * Event triggered when a ball is teleported by a portal block. Only occurs once as the ball enters

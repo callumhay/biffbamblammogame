@@ -108,14 +108,18 @@ private:
 		AnimationMultiLerp<ColourRGBA> additiveColourAnimation;  // Any active additive colour animation for this
 		AnimationMultiLerp<float> scaleAnimation;                // Any active scale animation for this
 
-        SoundID timerAlmostDoneSoundID;
-
 		void SetState(const TimerState& state);
 		void Tick(double dT, const GameModel& gameModel);
 	};
 
 	// Mapping of currently active timers to their respective HUD elements
 	std::list<ItemTimerHUDElement*> activeItemTimers;
+    
+    // Used to limit the number of "timer almost done" sound loops playing to one
+    SoundID timerAlmostDoneSoundID;
+    std::set<const ItemTimerHUDElement*> timersAlmostDone;
+    void AddTimerAlmostDone(const ItemTimerHUDElement* timer);
+    void RemoveTimerAlmostDone(const ItemTimerHUDElement* timer);
 
 	DISALLOW_COPY_AND_ASSIGN(GameItemAssets);
 };

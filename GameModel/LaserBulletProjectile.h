@@ -18,6 +18,7 @@
  * Projectile representing laser shots/bullets fired by the player paddle.
  */
 class LaserBulletProjectile : public Projectile {
+    friend class Projectile;
 public:
 	virtual ~LaserBulletProjectile();
 
@@ -25,15 +26,22 @@ public:
     bool IsMine() const { return false; }
     bool IsRefractableOrReflectable() const { return true; }
 
+    bool GetWasCreatedByReflectionOrRefraction() const { return this->isReflectedOrRefractedDerivative; }
+
 	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
 
 protected:
     LaserBulletProjectile(const Point2D& spawnLoc, float width, float height, 
-                          float velocityMag, const Vector2D& velocityDir);
+                          float velocityMag, const Vector2D& velocityDir, 
+                          bool createdByReflectionOrRefraction = false);
 	LaserBulletProjectile(const LaserBulletProjectile& copy);
 
+    bool isReflectedOrRefractedDerivative;
+
 private:
+    void SetWasCreatedByReflectionOrRefraction(bool wasCreatedByRR) { this->isReflectedOrRefractedDerivative = wasCreatedByRR; }
+
     // Disallow assignment
     void operator=(const LaserBulletProjectile& copy);
 };

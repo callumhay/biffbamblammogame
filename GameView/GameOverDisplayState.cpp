@@ -117,12 +117,6 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
             this->gameOverLabel.SetAlpha(this->fadeAnim.GetInterpolantValue());
 
             if (this->fastFadeAnim.Tick(dT) && this->fadeAnim.Tick(dT) && this->moveLabelAnim.Tick(dT)) {
-
-                // Stop all sounds and play the game over sound...
-                sound->StopAllSounds();
-                sound->StopAllEffects();
-                this->gameOverSoundID = sound->PlaySound(GameSound::GameOverEvent, false);
-
                 this->SetState(ShowingTextState);
             }
             break;
@@ -143,6 +137,7 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
             this->gameOverLabel.SetAlpha(this->fadeAnim.GetInterpolantValue());
 
             if (this->moveMenuAnim.Tick(dT) && this->fadeAnim.Tick(dT)) {
+                sound->StopAllEffects();
 
                 assert(this->selectedAndActivatedItem >= 0);
                 if (this->selectedAndActivatedItem == this->retryMenuItem) {
@@ -221,6 +216,10 @@ void GameOverDisplayState::SetState(const AnimationState& state) {
             this->moveLabelAnim.SetInterpolantValue(startXPos);
             this->moveLabelAnim.SetRepeat(false);
 
+            // Fade out all sounds and play the game over event sound
+            GameSound* sound = this->display->GetSound();
+            sound->StopAllSounds(0.5);
+            this->gameOverSoundID = sound->PlaySound(GameSound::GameOverEvent, false, false);
             break;
         }
 

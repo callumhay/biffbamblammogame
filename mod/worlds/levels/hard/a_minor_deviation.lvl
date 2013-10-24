@@ -30,11 +30,11 @@ S E E E N E E E E E E E E E E E N E E E S
 W(1) E E E N E E E E E E E E E E E N E E E S 
 
 STARS:
-4500
-8000
-11500
-16000
-18500
+6000
+10000
+14500
+19000
+24000
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -55,10 +55,10 @@ RocketPaddle 0
 GhostBall 2
 BallShrink 0
 UpsideDown 2
-MultiBall5 2
+MultiBall5 0
 BallCam 0
 MagnetPaddle 2
-MultiBall3 2
+MultiBall3 1
 RemoteControlRocket 0
 IceBall 2
 MineLauncherPaddle 0

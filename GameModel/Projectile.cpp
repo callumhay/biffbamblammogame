@@ -2,7 +2,7 @@
  * Projectile.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -50,16 +50,35 @@ bool Projectile::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel&
     return paddle->AugmentDirectionOnPaddleMagnet(seconds, degreesChangePerSec, this->position, this->velocityDir);
 }
 
-Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
+Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p, bool createdByReflectionOrRefraction) {
     assert(p != NULL);
 	
     switch (p->GetType()) {
-		case Projectile::PaddleLaserBulletProjectile:
-			return new PaddleLaserProjectile(*static_cast<const PaddleLaserProjectile*>(p));
-        case Projectile::BallLaserBulletProjectile:
-            return new BallLaserProjectile(*static_cast<const BallLaserProjectile*>(p));
-        case Projectile::LaserTurretBulletProjectile:
-            return new LaserTurretProjectile(*static_cast<const LaserTurretProjectile*>(p));
+
+        case Projectile::PaddleLaserBulletProjectile: {
+			PaddleLaserProjectile* result = new PaddleLaserProjectile(*static_cast<const PaddleLaserProjectile*>(p));
+            result->SetWasCreatedByReflectionOrRefraction(createdByReflectionOrRefraction);
+            return result;
+        }
+
+        case Projectile::BallLaserBulletProjectile: {
+            BallLaserProjectile* result = new BallLaserProjectile(*static_cast<const BallLaserProjectile*>(p));
+            result->SetWasCreatedByReflectionOrRefraction(createdByReflectionOrRefraction);
+            return result;
+        }
+
+        case Projectile::LaserTurretBulletProjectile: {
+            LaserTurretProjectile* result = new LaserTurretProjectile(*static_cast<const LaserTurretProjectile*>(p));
+            result->SetWasCreatedByReflectionOrRefraction(createdByReflectionOrRefraction);
+            return result;
+        }
+
+        case Projectile::BossLaserBulletProjectile: {
+            BossLaserProjectile* result = new BossLaserProjectile(*static_cast<const BossLaserProjectile*>(p));
+            result->SetWasCreatedByReflectionOrRefraction(createdByReflectionOrRefraction);
+            return result;
+        }
+
         case Projectile::PaddleRocketBulletProjectile:
             return new PaddleRocketProjectile(*static_cast<const PaddleRocketProjectile*>(p));
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
@@ -70,8 +89,6 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
             return new PaddleMineProjectile(*static_cast<const PaddleMineProjectile*>(p));
         case Projectile::MineTurretBulletProjectile:
             return new MineTurretProjectile(*static_cast<const MineTurretProjectile*>(p));
-        case Projectile::BossLaserBulletProjectile:
-            return new BossLaserProjectile(*static_cast<const BossLaserProjectile*>(p));
         case Projectile::BossRocketBulletProjectile:
             return new BossRocketProjectile(*static_cast<const BossRocketProjectile*>(p));
         case Projectile::BossOrbBulletProjectile:

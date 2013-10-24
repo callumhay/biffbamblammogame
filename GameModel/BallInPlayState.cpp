@@ -375,28 +375,21 @@ void BallInPlayState::Tick(double seconds) {
                     
                     // Collide with the boss until there are no more collisions
                     BossBodyPart* collisionBossPart = NULL;
-                    double currBallDt = seconds;
-                    //while (currBallDt >= 0) {
 
-                        // NOTE: For bosses, ghostballs never pass through.
-                        // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
-                        collisionBossPart = boss->CollisionCheck(*currBall, currBallDt, n, collisionLine, timeUntilCollision);
-                        if (collisionBossPart != NULL) {
-                            // Make the ball react to the collision...
-                            this->DoBallCollision(*currBall, n, collisionLine, currBallDt, timeUntilCollision, 
-                                GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, collisionBossPart->GetCollisionVelocity());
-                            ballChangedByCollision[ballIdx].posChanged = true;
+                    // NOTE: For bosses, ghost-balls never pass through.
+                    // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
+                    collisionBossPart = boss->CollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision);
+                    if (collisionBossPart != NULL) {
+                        // Make the ball react to the collision...
+                        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision, 
+                            GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, collisionBossPart->GetCollisionVelocity());
+                        
+                        BallCollisionChangeInfo& collisionInfo = ballChangedByCollision[ballIdx];   
+                        collisionInfo.posChanged = true;
 
-                            // Now make the boss react to the collision...
-                            this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
-
-                            // Update the time delta for the ball, up to the time right after the collision
-                            //currBallDt = currBallDt - timeUntilCollision;
-                        }
-                        else {
-                            //break;
-                        }
-                    //}
+                        // Now make the boss react to the collision...
+                        this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
+                    }
                 }
 
 			    // Check for ball collision with level pieces
@@ -452,22 +445,24 @@ void BallInPlayState::Tick(double seconds) {
 					        this->DoBallCollision(*currBall, n, collisionLine, seconds, timeUntilCollision,
                                 GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
                             ballChangedByCollision[ballIdx].posChanged = true;
+                            this->gameModel->CollisionOccurred(*currBall, currPiece);
+                            break;
 				        }
     					
-                        bool currPieceCanChangeSelfOrPiecesAroundIt = 
-                            currPiece->CanChangeSelfOrOtherPiecesWhenHit() || currPiece->CanBeDestroyedByBall();
-
-				        // Tell the model that a ball collision occurred with currPiece
+                        //bool currPieceCanChangeSelfOrPiecesAroundIt = 
+                        //    currPiece->CanChangeSelfOrOtherPiecesWhenHit() || currPiece->CanBeDestroyedByBall();
+				        
+                        // Tell the model that a ball collision occurred with currPiece
                         this->gameModel->CollisionOccurred(*currBall, currPiece);
                         
                         // Recalculate the blocks we're dealing with in this loop since 
                         // some blocks may no longer exist after a collision - of course this would only happen if the piece
                         // that collided could be destroyed during this loop by the ball
-                        if (currPieceCanChangeSelfOrPiecesAroundIt) {
-			                collisionPieces = currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
-                                std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()), currBall->GetSpeed());
-                            pieceIter = collisionPieces.begin();
-                        }
+                        //if (currPieceCanChangeSelfOrPiecesAroundIt) {
+			            //    collisionPieces = currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
+                        //        std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()), currBall->GetSpeed());
+                        //    pieceIter = collisionPieces.begin();
+                        //}
                     }
                 }
             }
@@ -609,13 +604,13 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
         Vector2D reflectionVel = reflSpd * reflVecHat;
         Vector2D augmentedReflectionVecHat = Vector2D::Normalize(reflectionVel + lineVelocity);
+        reflVecHat = augmentedReflectionVecHat;
         
-        if (Vector2D::Dot(reflVecHat, lineVelocity) < 0) {
+        if (Vector2D::Dot(reflVecHat, lineVelocity) > 0.0f) {
             moveVel += lineVelocity;
         }
-        reflVecHat = augmentedReflectionVecHat;
+
     }
-    
     if (paddleReflection) {
         // Only have to check whether the ball is acceptably far enough away from the +/-x directions
         float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));

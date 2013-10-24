@@ -502,7 +502,7 @@ void GameModel::CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* boss
     assert(bossPart != NULL);
 
     // EVENT: Ball-Boss Collision
-    //GameEventManager::Instance()->ActionBallBossCollision(ball, *boss, *bossPart);
+    GameEventManager::Instance()->ActionBallBossCollision(ball, *boss, *bossPart);
 
     // Collide the ball with the boss
     boss->CollisionOccurred(this, ball, bossPart);

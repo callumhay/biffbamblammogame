@@ -29,11 +29,15 @@ CreditsDisplayState::CreditsDisplayState(GameDisplay* display) : DisplayState(di
 creditLabel1(CREDITS_1_TITLE_TEXT, CREDITS_1_NAMES_TEXT, Camera::GetWindowWidth()*0.75f), 
 creditLabel2(CREDITS_2_TITLE_TEXT, CREDITS_2_NAMES_TEXT, Camera::GetWindowWidth()*0.75f),
 specialThanksLabel(SPECIAL_THANKS_TITLE_TEXT, SPECIAL_THANKS_NAMES_TEXT, Camera::GetWindowWidth()*0.75f),
-bbbTitleDisplay(0.5f), exitState(false) {
+exitState(false), bbbLogoTex(NULL) {
     
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
     assert(this->starryBG != NULL);
+
+    this->bbbLogoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BBB_LOGO, Texture::Trilinear));
+    assert(this->bbbLogoTex != NULL);
 
     static const double TIME_BETWEEN_LABEL_FADEINS = 1.0;
     double lastFadeInTime = 0.0;
@@ -71,6 +75,8 @@ bbbTitleDisplay(0.5f), exitState(false) {
 CreditsDisplayState::~CreditsDisplayState() {
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bbbLogoTex);
     assert(success);
     UNUSED_VARIABLE(success);
 }
@@ -114,16 +120,35 @@ void CreditsDisplayState::RenderFrame(double dT) {
         logoAlpha = this->logoFadeinAnim.GetInterpolantValue();
     }
 
-    Camera menuCamera;
-    menuCamera.SetPerspective();
-    menuCamera.Move(Vector3D(0, 0, 20));
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Camera::PushWindowCoords();
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    menuCamera.ApplyCameraTransform();
-    this->bbbTitleDisplay.SetAlpha(logoAlpha);
-    this->bbbTitleDisplay.Draw(-3.5, 9, menuCamera);
+
+    float scaleFactor = GameDisplay::GetTextScalingFactor();
+    const float VERT_DIST_FROM_EDGE = 20 * scaleFactor;
+    
+    float logoXSize = 512.0f * scaleFactor;
+    float logoYSize = 256.0f * scaleFactor;
+    float logoXSizeDiv2 = logoXSize / 2.0f;
+    float logoYSizeDiv2 = logoYSize / 2.0f;
+
+    glTranslatef((Camera::GetWindowWidth() - logoXSize) / 2.0f + logoXSizeDiv2, Camera::GetWindowHeight() - logoYSizeDiv2 - VERT_DIST_FROM_EDGE, 0);
+    glScalef(logoXSize, logoYSize, 1.0f);
+    
+    glColor4f(1,1,1,logoAlpha);
+    this->bbbLogoTex->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    this->bbbLogoTex->UnbindTexture();
+
     glPopMatrix();
+    Camera::PopWindowCoords();
+
+    glPopAttrib();
 
     this->creditLabel1.SetAlpha(credit1LabelAlpha);
     this->creditLabel2.SetAlpha(credit2LabelAlpha);

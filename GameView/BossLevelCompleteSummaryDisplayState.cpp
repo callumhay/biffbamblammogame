@@ -17,6 +17,8 @@
 #include "../GameModel/Onomatoplex.h"
 #include "../GameModel/GameProgressIO.h"
 
+#include "../GameSound/GameSound.h"
+
 #include "../ResourceManager.h"
 
 const double BossLevelCompleteSummaryDisplayState::FADE_TIME              = 1.5;
@@ -35,7 +37,7 @@ const float BossLevelCompleteSummaryDisplayState::MAX_COMPLETE_TEXT_SCALE = 1.3f
 
 BossLevelCompleteSummaryDisplayState::BossLevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), allAnimationIsDone(false), waitingForKeyPress(true), unlockedLabel(NULL), worldCompleteLabel(NULL),
-bgTex(NULL), spinGlowTex(NULL),
+bgTex(NULL), spinGlowTex(NULL), bgMusicSoundID(INVALID_SOUND_ID), victoryMessageSoundID(INVALID_SOUND_ID),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
                  GameFontAssetsManager::Medium), "- Press Any Key to Continue -"),
 victoryLabel1(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big),
@@ -52,6 +54,9 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     this->display->GetCamera().ClearCameraShake();
     // Pause all game play elements in the game model
 	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
+
+    GameSound* sound = this->display->GetSound();
+    this->bgMusicSoundID = sound->PlaySound(GameSound::WorldCompleteBackgroundLoop, true, false);
 
     this->bgTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
@@ -179,6 +184,8 @@ BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
 
 void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
  
+    GameSound* sound = this->display->GetSound();
+
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -231,6 +238,11 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), fadeValue, this->bgTex);
 
         if (fadeIsDone) {
+
+            // Stop the background music by fading it out...
+            sound->StopSound(this->bgMusicSoundID, 1.0);
+            this->bgMusicSoundID = INVALID_SOUND_ID;
+
             // If we're done fading then we can go to the next state
             // Update the game model until there's a new queued state
             while (!this->display->SetCurrentStateAsNextQueuedState()) {
@@ -284,6 +296,10 @@ float BossLevelCompleteSummaryDisplayState::DrawVictoryLabel(float screenWidth) 
     float glowScale = this->glowScaleAnim.GetInterpolantValue();
     if (glowScale > 0.0) {
         
+        if (this->victoryMessageSoundID == INVALID_SOUND_ID) {
+            this->victoryMessageSoundID = this->display->GetSound()->PlaySound(GameSound::WorldCompleteVictoryMessageEvent, false, false);
+        }
+
         float rotAmt = this->glowRotationAnim.GetInterpolantValue();
 
         glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);

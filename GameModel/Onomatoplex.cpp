@@ -164,6 +164,10 @@ void Generator::LoadExplosionWords() {
     uberEndFixExplosion.push_back("otronic");
 	uberEndFixExplosion.push_back("atron");
     uberEndFixExplosion.push_back("atronic");
+    uberEndFixExplosion.push_back("aphon");
+    uberEndFixExplosion.push_back("ophon");
+    uberEndFixExplosion.push_back("aphonic");
+    uberEndFixExplosion.push_back("ophonic");
 	uberEndFixExplosion.push_back("inator");
 	uberEndFixExplosion.push_back("plosion");
 	uberEndFixExplosion.push_back("afrazz");

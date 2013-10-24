@@ -1386,6 +1386,11 @@ void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelP
 	this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::BOUNCE));
 }
 
+void GameESPAssets::AddBounceBossEffect(const GameBall& ball) {
+    // Add the new emitter to the list of active emitters
+    this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::BOUNCE));
+}
+
 void GameESPAssets::AddMiscBallPieceCollisionEffect(const GameBall& ball, const LevelPiece& block) {
     switch (block.GetType()) {
         case LevelPiece::RocketTurret:
@@ -5207,7 +5212,7 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
 
 	    ESPPointEmitter* glowEmitterTrail = new ESPPointEmitter();
         glowEmitterTrail->SetNumParticleLives(1);
-	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.00575f));
+	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.005f));
 	    glowEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
 	    glowEmitterTrail->SetParticleLife(ESPInterval(ballRadius*2.5f));
 	    glowEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
@@ -5218,7 +5223,7 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         glowEmitterTrail->SetParticleColour(ESPInterval(0.70f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
         glowEmitterTrail->AddEffector(&this->particleBoostFader);
 	    glowEmitterTrail->AddEffector(&this->particleShrinkToNothing);
-	    result = glowEmitterTrail->SetParticles(30, this->circleGradientTex);
+	    result = glowEmitterTrail->SetParticles(40, this->circleGradientTex);
 	    assert(result);
 
         ESPPointEmitter* vapourTrailEffect = new ESPPointEmitter();

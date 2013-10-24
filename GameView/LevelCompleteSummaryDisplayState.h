@@ -20,7 +20,7 @@
 
 #include "../ESPEngine/ESP.h"
 
-#include "../GameSound/GameSound.h"
+#include "../GameSound/SoundCommon.h"
 
 class LevelCompleteSummaryDisplayState : public DisplayState {
 public:
@@ -126,7 +126,9 @@ private:
     ESPParticleRotateEffector starFgRotator;
     ESPParticleScaleEffector starFgPulser;
 
+    SoundID bgLoopSoundID;
     SoundID highScoreSoundID;
+    SoundID pointTallySoundID;
 
     class DifficultyPaneEventHandler : public OverlayPaneEventHandler {
     public:

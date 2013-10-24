@@ -6,13 +6,13 @@ S E E O E N E G E G E G R N G E S
 S E O R E N G E G E G E R C(270) E G S 
 S E E O E N E G E G E G R N G E S 
 S E E E E N E E E E E E E E E E S 
-S E E E E N E E E E E E E E E E S 
+S E E E E N E E E E E E E E K(MultiBall5,MultiBall5,MultiBall5) E S 
 S E E E E N E E E E E E E E E E S 
 S E E O E N E Y E Y R N R Y E Y S 
 S E O R E N Y E Y E R C(270) R E Y E S 
 S E E O E N E Y E Y R N R Y E Y S 
 S E E E E N E E E E E E E E E E S 
-S E E E E N E E E E E E E E E E S 
+S E E E E N E E E E E E E E K(StickyPaddle,StickyPaddle,StickyPaddle) E S 
 S E E E E N E E E E E E E E E E S 
 S E E O E N E O R N R O E O E O S 
 S E O R E N O E R C(270) R E O E O E S 
@@ -35,8 +35,8 @@ STARS:
 5000
 8000
 11000
-17500
-22000
+14500
+17600
 
 PaddleGrow 2
 PoisonPaddle 1

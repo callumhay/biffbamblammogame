@@ -17,6 +17,8 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
 
+#include "../GameSound/SoundCommon.h"
+
 class BossLevelCompleteSummaryDisplayState : public DisplayState {
 public:
     BossLevelCompleteSummaryDisplayState(GameDisplay* display);
@@ -69,6 +71,9 @@ private:
     Texture2D* spinGlowTex;
     Texture2D* flareTex;
     Texture2D* bangStarTex;
+
+    SoundID bgMusicSoundID;
+    SoundID victoryMessageSoundID;
 
     float GetCenterTextBlockTopYCoord(float screenHeight) const;
     float GetCenterTextBlockHeight() const;

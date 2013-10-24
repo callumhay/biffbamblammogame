@@ -5,8 +5,8 @@ S T(P,ul) O E E O R P O E T(P,ur) S E D(LaserBulletPaddle,LaserBeamPaddle){0} E
 S R O G G O O O O G G S E E E 
 S T(P,ul) O G G G G G G G G S E E E 
 S O O G G G G G G G G S E E E 
-S G G G G G G E E E E S E E E 
 S G G G G G E E E E E S E E E 
+S G G G G E E E E E E S E E E 
 S E E E E E E E G G G S E E E 
 S E E E E E E G G O O N E E E 
 S G G G G G G G G O O N E E E 
@@ -37,7 +37,7 @@ PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
+UberBall 0
 BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
@@ -49,7 +49,7 @@ LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 2
 RocketPaddle 0
-GhostBall 2
+GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
@@ -58,7 +58,7 @@ MagnetPaddle 2
 MultiBall3 2
 RemoteControlRocket 0
 IceBall 2
-MineLauncherPaddle 2
+MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2
 CrazyBall 2

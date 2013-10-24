@@ -165,7 +165,7 @@ private:
     void ExecuteArmsLostAngryState(double dT);
 
     // Helper functions for generating various pieces of data across states
-    double GenerateChaseTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 4.0; }
+    double GenerateChaseTime() const { return 4.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 3.5; }
     double GenerateTemptAttackTime() const { return 1.0; }
     double GetLaserChargeTime() const { return 1.25; }
     double GetTimeBetweenLaserBarrageShots() const { return 0.08 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1; }
@@ -315,7 +315,7 @@ private:
     void UpdateEyeAndPedimentHeightMovement();
 
     double GetTimeBetweenLaserBarrageShots() const { return 0.075 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.065; }
-    double GetTimeBetweenLaserSprayShots() const { return 1.5; }
+    double GetTimeBetweenLaserSprayShots() const { return 0.75 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
     float GetPedimentBasicMoveHeight(const GameLevel* level);
     float GetEyeBasicMoveHeight(const GameLevel* level);
 

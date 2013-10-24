@@ -37,6 +37,7 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
 #include "../GameModel/Beam.h"
+#include "../GameModel/LaserBulletProjectile.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
@@ -714,8 +715,8 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		this->paddleShield->DrawAndTick(*paddle, camera, dT);
 	}
 
-	// When the paddle has the 'sticky' power-up (and doesnt have a shield on) we attach sticky goo to its top
-	if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle) && !paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
+	// When the paddle has the 'sticky' power-up we attach sticky goo to its top
+	if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
 
 		// Set the texture for the refraction in the goo - be careful here, we can't get
 		// the 'post full scene' fbo because we are currently in the middle of drawing to it
@@ -1247,16 +1248,30 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 	// Add any other view-related effects for the given projectile
 	switch (projectile.GetType()) {
 
-		case Projectile::PaddleLaserBulletProjectile:
-			// Have the laser gun attachment move downwards in reaction to the laser being shot
-			this->FirePaddleLaser(gameModel);
+        case Projectile::PaddleLaserBulletProjectile: {
+            const LaserBulletProjectile& laserBullet = static_cast<const LaserBulletProjectile&>(projectile);
+            if (!laserBullet.GetWasCreatedByReflectionOrRefraction()) {
+
+                const PlayerPaddle& paddle = *gameModel.GetPlayerPaddle();
+
+                // Add a sound for firing the laser
+                this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, paddle.GetPosition3D(), true, true, true);
+                // Make the laser attachment animate for firing the gun...
+                this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
+            }
+
 			break;
+        }
 
         case Projectile::BossLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
         case Projectile::BallLaserBulletProjectile: {
-            this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, 
-                projectile.GetPosition3D(), true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.5f);
+
+            const LaserBulletProjectile& laserBullet = static_cast<const LaserBulletProjectile&>(projectile);
+            if (!laserBullet.GetWasCreatedByReflectionOrRefraction()) {
+                this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, 
+                    projectile.GetPosition3D(), true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.5f);
+            }
             break;
         }
 
@@ -1370,20 +1385,6 @@ void GameAssets::RemoveProjectile(const GameModel& gameModel, const Projectile& 
 
     // Kill all sounds for the projectile
     this->sound->DetachAndStopAllSounds(&projectile, soundFadeoutTime);
-}
-
-/**
- * Private helper, cause the laser paddle attachment to animate - like it's reacting to shooting
- * a bullet or something.
- */
-void GameAssets::FirePaddleLaser(const GameModel& gameModel) {
-    const PlayerPaddle& paddle = *gameModel.GetPlayerPaddle();
-    
-    // Add a sound for firing the laser
-    this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, paddle.GetPosition3D(), true, true, true);
-
-    // Make the laser attachment animate for firing the gun...
-	this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
 }
 
 /**
@@ -1509,6 +1510,9 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
 
     // Add a full screen overlay effect to show pain/badness
     this->painHUD->Activate(PlayerHurtHUD::MajorPain);
+
+    // Play sound
+    this->sound->PlaySoundAtPosition(GameSound::PaddleLaserBeamCollisionEvent, false, paddle.GetPosition3D(), true, true, true);
 
     // Vibrate the controller
     float intensityMultiplier = (beamSegment.GetRadius() / paddle.GetHalfWidthTotal());

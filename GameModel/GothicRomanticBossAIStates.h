@@ -70,6 +70,8 @@ protected:
 
     AIState currState;
 
+    SoundID itemSummoningSoundID;
+
     // Movement positions while confined
     enum ConfinedMovePos { TopLeftCorner = 0, TopRightCorner = 1, BottomLeftCorner = 2, BottomRightCorner = 3, Center = 4 };
     static const ConfinedMovePos CORNER_POSITIONS[];
@@ -133,8 +135,6 @@ protected:
     
     int numItemsPerSummoning;
     int summonsSinceLastSpecialItemDrop;
-
-    SoundID itemSummoningSoundID;
 
     virtual float GenerateSpecialItemSummonProbability() const;
     virtual bool AllowLevelFlipItem() const { return true; }

@@ -310,17 +310,20 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 		const RocketProjectile* rocketProjectile = *iter;
 		assert(rocketProjectile != NULL);
 
-		// Draw the rocket if it's not inside a cannon block...
-		if (!rocketProjectile->IsLoadedInCannonBlock()) {
+        glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
+        CgFxEffectBase* replacementMat = NULL;
+        if (rocketProjectile->GetIsInvisible()) {
+            replacementMat = &this->invisibleEffect;
+            glDepthMask(GL_FALSE);
+        }
 
-            CgFxEffectBase* replacementMat = NULL;
-            if (rocketProjectile->GetIsInvisible()) {
-                replacementMat = &this->invisibleEffect;
-                glDepthMask(GL_FALSE);
-            }
-
+		if (rocketProjectile->IsLoadedInCannonBlock()) {
+            // Keep ticking and drawing certain rocket effects, even if it's inside a cannon
+            this->TickAndDrawExtraneousRocketEffects(rocketProjectile, dT, camera);
+        }
+        else {
+            // Draw the rocket if it's not inside a cannon block...
             switch (rocketProjectile->GetType()) {
                 case Projectile::PaddleRocketBulletProjectile:
 			        this->DrawBasicRocket(rocketProjectile, this->paddleRocketMesh, camera, keyLight, fillLight, ballLight, replacementMat);
@@ -338,9 +341,9 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
                     assert(false);
                     break;
             }
-
-			glPopAttrib();
         }
+
+        glPopAttrib();
 	}
 
     debug_opengl_state();
@@ -485,6 +488,35 @@ void RocketMesh::DrawRemoteControlRocket(const PaddleRemoteControlRocketProjecti
     this->paddleRemoteControlRocketMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
 
     glPopMatrix();
+}
+
+void RocketMesh::TickAndDrawExtraneousRocketEffects(const RocketProjectile* rocket, double dT, const Camera& camera) {
+    switch (rocket->GetType()) {
+
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile: {
+            const Point2D& rocketPos = rocket->GetPosition();
+
+            glPushMatrix();
+            glTranslatef(rocketPos[0], rocketPos[1], rocket->GetZOffset());
+
+            if (rocket->GetIsInvisible()) {
+                this->invisibleRocketThrustEmitter->Tick(dT);
+                this->invisibleRocketThrustEmitter->Draw(camera);
+            }
+            else {
+                this->rocketThrustBurstEmitter->Tick(dT);
+                this->rocketThrustBurstEmitter->Draw(camera);
+                this->rocketThrustingSparksEmitter->Tick(dT);
+                this->rocketThrustingSparksEmitter->Draw(camera);
+            }
+
+            glPopMatrix();
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 // Private helper method to load the rocket mesh
