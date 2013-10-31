@@ -132,6 +132,7 @@ public:
 	void ActionProjectileRemoved(const Projectile& projectile);
 	void ActionRocketExploded(const RocketProjectile& rocket);
     void ActionMineExploded(const MineProjectile& mine);
+    void ActionMineLanded(const MineProjectile& mine);
     void ActionRemoteControlRocketFuelWarning(const PaddleRemoteControlRocketProjectile& rocket);
     void ActionRemoteControlRocketThrustApplied(const PaddleRemoteControlRocketProjectile& rocket);
 

@@ -175,6 +175,10 @@ public:
         return this->remoteControlRocketHUD;
     }
 
+    GameSound* GetSound() const {
+        return this->sound;
+    }
+
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectile(const GameModel& gameModel, const Projectile& projectile);
 

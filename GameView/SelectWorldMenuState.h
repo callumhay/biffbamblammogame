@@ -179,6 +179,7 @@ private:
         ESPParticleRotateEffector smokeRotatorCW;
         ESPParticleRotateEffector smokeRotatorCCW;
 
+        ESPPointEmitter* timedEnergySuckEmitter;
         ESPPointEmitter* energySuckEmitter;
         ESPPointEmitter* bigExplosionEmitter;
         ESPPointEmitter* bigExplosionOnoEmitter;

@@ -76,6 +76,20 @@ MineProjectile::~MineProjectile() {
     this->DetachFromAnyAttachedObject();
 }
 
+void MineProjectile::Land(const Point2D& landingPt) {
+    this->SetVelocity(Vector2D(0, 0), 0.0f);
+    this->acceleration      = 0.0f;
+    this->currRotationSpd   = 0.0f;
+    this->landedTimeCounter = 0.0;
+    this->SetPosition(landingPt);
+    this->isArmed = true;
+    this->isFalling = false;
+    this->StopAndResetProximityExplosionCountdown();
+
+    // EVENT: Mine landed on something
+    GameEventManager::Instance()->ActionMineLanded(*this);
+}
+
 void MineProjectile::Tick(double seconds, const GameModel& model) {
 
 	if (this->cannonBlock != NULL) {

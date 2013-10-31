@@ -364,8 +364,10 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallStickyPaddleAttachEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallStickyPaddleBounceEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallShieldPaddleCollisionEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallTeslaLightningCollisionEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOrPaddleGrowEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOrPaddleShrinkEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOnPaddleTimerRunningOutLoop));
     
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockBasicBounceEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockCollisionColourChange));
@@ -400,6 +402,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, TurretMineFiredEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleMineFiredEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, MineExplodedEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MineLatchedOnEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBulletShotEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBeamFiringLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserDeflectedByShieldEvent));
@@ -428,13 +431,15 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoopTransition));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossAngryBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossGlowEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossElectricitySpasmLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossAngryEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossHurtEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBlowingUpLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossDeathFlashToFullscreen));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossDeathFlashToFullscreenWhiteoutEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossCrosshairTargetingEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossLaserBeamLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossSparkleEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmShakeLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackHitEvent));
@@ -443,6 +448,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossSummonItemChargeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossChargeShockwaveEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossMassiveShockwaveEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossLightningRelayTurnOnEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmRotateLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmExtendEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmRetractEvent));
@@ -482,6 +488,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryNewHighScoreEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryPointTallyLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryStarTallyEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryConfirmEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStarCostPaidUnlockEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldCompleteBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldCompleteVictoryMessageEvent));

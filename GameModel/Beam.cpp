@@ -22,7 +22,7 @@ const float Beam::MIN_BEAM_RADIUS = 0.05f;
 const int   Beam::MIN_DMG_PER_SEC = 25;
 
 Beam::Beam(int dmgPerSec, double lifeTimeInSec) : 
-baseDamagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(lifeTimeInSec), beamAlpha(1) {
+baseDamagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(lifeTimeInSec), beamAlpha(1), beamAlphaDirty(true) {
     assert(lifeTimeInSec >= MIN_ALLOWED_LIFETIME_IN_SECS);
 };
 
@@ -45,10 +45,14 @@ void Beam::CleanUpBeam(std::list<BeamSegment*>& beamSegs) {
  * Returns: true if they are different, false otherwise.
  */
 bool Beam::BeamHasChanged(const std::list<BeamSegment*>& oldBeamSegs, const std::list<BeamSegment*>& newBeamSegs) {
-	// First test is easy - just see if there are the same number of segments...
-	if (oldBeamSegs.size() != newBeamSegs.size()) {
+	// See if there are the same number of segments...
+    if (oldBeamSegs.size() != newBeamSegs.size()) {
 		return true;
 	}
+    // See if the alpha has changed
+    if (this->beamAlphaDirty) {
+        return true;
+    }
 
 	// Now go through each segment in the old and new and compare...
 	std::list<BeamSegment*>::const_iterator oldIter = oldBeamSegs.begin();
@@ -153,14 +157,19 @@ void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& i
                 if (spawnedRays.size() >= 1) {
                     // The radius of the spawned beams will be a fraction of the current radius based
                     // on the number of reflection/refraction rays
-                    const float NEW_BEAM_SEGMENT_RADIUS = this->beamAlpha * std::max<float>(currBeamSegment->GetRadius() / static_cast<float>(spawnedRays.size()), Beam::MIN_BEAM_RADIUS);
-                    const int   NEW_BEAM_DMG_PER_SECOND = this->beamAlpha * std::max<int>(Beam::MIN_DMG_PER_SEC, currBeamSegment->GetDamagePerSecond() / spawnedRays.size());
+                    const float NEW_BEAM_SEGMENT_RADIUS = this->beamAlpha * std::max<float>(currBeamSegment->GetRadius() / 
+                        static_cast<float>(spawnedRays.size()), Beam::MIN_BEAM_RADIUS);
 
-                    // Now add the new beams to the list of beams we need to fire into the level and repeat this whole process with
-                    std::list<BeamSegment*> spawnedBeamSegs;
-                    for (std::list<Collision::Ray2D>::iterator iter = spawnedRays.begin(); iter != spawnedRays.end(); ++iter) {
+                    if (NEW_BEAM_SEGMENT_RADIUS > 0.0f) {
+                        const int NEW_BEAM_DMG_PER_SECOND = this->beamAlpha * std::max<int>(Beam::MIN_DMG_PER_SEC, 
+                            currBeamSegment->GetDamagePerSecond() / spawnedRays.size());
 
-                        newBeamSegs.push_back(new BeamSegment(*iter, NEW_BEAM_SEGMENT_RADIUS, NEW_BEAM_DMG_PER_SECOND, pieceCollidedWith));
+                        // Now add the new beams to the list of beams we need to fire into the level and repeat this whole process with
+                        std::list<BeamSegment*> spawnedBeamSegs;
+                        for (std::list<Collision::Ray2D>::iterator iter = spawnedRays.begin(); iter != spawnedRays.end(); ++iter) {
+
+                            newBeamSegs.push_back(new BeamSegment(*iter, NEW_BEAM_SEGMENT_RADIUS, NEW_BEAM_DMG_PER_SECOND, pieceCollidedWith));
+                        }
                     }
                 }
             }
@@ -194,6 +203,8 @@ void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& i
         this->CleanUpBeam(this->beamParts);
         this->beamParts = oldBeamSegments;
     }
+
+    this->beamAlphaDirty = false;
 }
 
 /**
@@ -245,6 +256,7 @@ bool Beam::Tick(double dT, const GameModel* gameModel) {
 }
 
 void Beam::TickAlpha() {
+    float prevAlpha = this->beamAlpha;
     if (this->currTimeElapsed < this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS) {
         this->beamAlpha = 1.0f;
     }
@@ -253,6 +265,10 @@ void Beam::TickAlpha() {
             this->totalLifeTime, 1.0f, 0.0f, this->currTimeElapsed);
     }
     assert(this->beamAlpha >= 0.0f && this->beamAlpha <= 1.0f);
+
+    if (prevAlpha != this->beamAlpha) {
+        this->beamAlphaDirty = true;
+    }
 }
 
 BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, LevelPiece* ignorePiece) :
@@ -344,6 +360,7 @@ bool BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg
 	if (beamSeg1.GetCollidingPiece() != beamSeg2.GetCollidingPiece()) {
 		return false;
 	}
+
 
 	return true;
 }

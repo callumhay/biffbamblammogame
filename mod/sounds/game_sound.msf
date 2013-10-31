@@ -229,20 +229,22 @@ BallPaddleCollisionEvent {
 
 // Happens when the ball attaches itself to the sticky paddle
 BallStickyPaddleAttachEvent {
-	file = resources/BallStickyPaddleCollisionEvent.ogg
+	file = resources/BallStickyPaddleAttachEvent.ogg
 }
 
 // Happens when there are multiple balls and the sticky paddle already has a ball stuck to it but another
 // ball hits the paddle and bounces off (since there can only be one ball stuck to the paddle at a time)
 BallStickyPaddleBounceEvent {
-	file = 
+	file = TODO
 }
 
 BallShieldPaddleCollisionEvent {
 	file = resources/BallShieldPaddleCollisionEvent.ogg
 }
 
-// BallTeslaLightningCollisionEvent
+BallTeslaLightningCollisionEvent {
+	file = resources/BallTeslaLightningCollisionEvent_01.ogg | resources/BallTeslaLightningCollisionEvent_02.ogg | resources/BallTeslaLightningCollisionEvent_03.ogg | resources/BallTeslaLightningCollisionEvent_04.ogg | resources/BallTeslaLightningCollisionEvent_05.ogg | resources/BallTeslaLightningCollisionEvent_06.ogg | resources/BallTeslaLightningCollisionEvent_07.ogg
+}
 
 BallOrPaddleGrowEvent {
 	file = resources/BallOrPaddleGrowEvent.ogg
@@ -252,7 +254,9 @@ BallOrPaddleShrinkEvent {
 	file = resources/BallOrPaddleShrinkEvent.ogg
 }
 
-// BallOnPaddleTimerRunningOutLoop
+BallOnPaddleTimerRunningOutLoop {
+	file = resources/BallOnPaddleTimerRunningOutLoop.ogg
+}
 
 
 // Ball and Block Events *****************************************************
@@ -373,13 +377,14 @@ RemoteControlRocketThrustEvent {
 TurretMineFiredEvent {
 	file = resources/TurretMineFiredEvent.ogg
 }
-
 PaddleMineFiredEvent {
 	file = resources/PaddleMineFiredEvent.ogg
 }
-
 MineExplodedEvent {
 	file = resources/MineExplodedEvent.ogg
+}
+MineLatchedOnEvent {
+	file = resources/MineLatchedOnEvent.ogg
 }
 
 LaserBulletShotEvent {
@@ -414,7 +419,7 @@ PaddleCollateralBlockCollisionEvent {
 // Game Item Events **********************************************************
 
 BallSafetyNetCreatedEvent {
-	file = resources/safety_net_created.ogg
+	file = resources/BallSafetyNetCreatedEvent.ogg
 }
 BallSafetyNetDestroyedEvent {
 	file = resources/BallSafetyNetDestroyedEvent.ogg
@@ -508,12 +513,9 @@ BossAngryBackgroundLoop {
 	world = Deco
 	file = resources/BossAngryDecoWorldBackgroundLoop.ogg
 }
-
-
-// BossSparkleEvent
-// BossGlowEvent
-// BossPowerChargeEvent
-
+BossGlowEvent {
+	file = resources/BossGlowEvent.ogg
+}
 BossElectricitySpasmLoop {
 	file = resources/BossElectricitySpasmLoop.ogg
 }
@@ -526,8 +528,8 @@ BossAngryEvent {
 BossBlowingUpLoop {
 	file = resources/BossBlowingUpLoop_01.ogg | resources/BossBlowingUpLoop_02.ogg | resources/BossBlowingUpLoop_03.ogg | resources/BossBlowingUpLoop_04.ogg | resources/BossBlowingUpLoop_05.ogg
 }
-BossDeathFlashToFullscreen {
-	file = resources/BossDeathFlashToFullscreen.ogg
+BossDeathFlashToFullscreenWhiteoutEvent {
+	file = resources/BossDeathFlashToFullscreenWhiteoutEvent.ogg
 }
 BossCrosshairTargetingEvent {
 	file = resources/BossCrosshairTargetingEvent.ogg
@@ -536,7 +538,9 @@ BossLaserBeamLoop {
 	file = resources/BossLaserBeamLoop.ogg
 }
 
-
+ClassicalBossSparkleEvent {
+	file = resources/ClassicalBossSparkleEvent.ogg
+}
 ClassicalBossArmShakeLoop {
 	file = resources/ClassicalBossArmShakeLoop.ogg
 }
@@ -568,6 +572,9 @@ GothicBossOrbAttackEvent {
 	file = resources/GothicBossOrbAttackEvent_01.ogg
 }
 
+DecoBossLightningRelayTurnOnEvent {
+	file = resources/DecoBossLightningRelayTurnOnEvent.ogg
+}
 DecoBossArmRotateLoop {
 	file = resources/DecoBossArmRotateLoop.ogg
 }
@@ -709,6 +716,10 @@ LevelSummaryPointTallyLoop {
 
 LevelSummaryStarTallyEvent {
 	file = resources/LevelSummaryStarTallyEvent.ogg
+}
+
+LevelSummaryConfirmEvent {
+	file = resources/LevelSummaryConfirmEvent.ogg
 }
 
 LevelStarCostPaidUnlockEvent {

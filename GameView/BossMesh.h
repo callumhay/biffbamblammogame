@@ -94,7 +94,7 @@ protected:
     virtual void DrawPreBodyEffects(double dT, const Camera& camera);
     virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets) = 0;
-    virtual void DrawPostBodyEffects(double dT, const Camera& camera);
+    virtual void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
 
     virtual Point3D GetBossFinalExplodingEpicenter() const = 0;
 
@@ -127,7 +127,7 @@ inline void BossMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
 
     this->DrawPreBodyEffects(dT, camera);
     this->DrawBody(dT, camera, keyLight, fillLight, ballLight, assets);
-    this->DrawPostBodyEffects(dT, camera);
+    this->DrawPostBodyEffects(dT, camera, assets);
 }
 
 #endif // __BOSSMESH_H__

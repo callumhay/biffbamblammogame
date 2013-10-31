@@ -589,6 +589,12 @@ public:
 	 */
     virtual void MineExplodedEvent(const MineProjectile& mine) { UNUSED_PARAMETER(mine); }
 
+    /**
+     * Event triggered when a mine lands on something but doesn't explode.
+     * Arguments: mine - The mine that just landed on something.
+     */
+    virtual void MineLandedEvent(const MineProjectile& mine) { UNUSED_PARAMETER(mine); }
+
 	/**
 	 * Event triggered when a remote controlled rocket is running out of fuel. This occurs multiple times and happens more frequently
      * as the rocket gets closer to running out of fuel.

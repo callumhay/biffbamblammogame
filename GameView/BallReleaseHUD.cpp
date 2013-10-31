@@ -2,7 +2,7 @@
  * BallReleaseHUD.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -13,8 +13,11 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../GameModel/GameModel.h"
+#include "../GameSound/GameSound.h"
 
-BallReleaseHUD::BallReleaseHUD() : lastKnownPercentElapsedAmt(1.0f) {
+BallReleaseHUD::BallReleaseHUD(GameSound* sound) : sound(sound), 
+lastKnownPercentElapsedAmt(1.0f), runningOutOfTimeSoundID(INVALID_SOUND_ID) {
+    assert(sound != NULL);
     this->SetState(BallReleaseHUD::NOT_STARTED);
 }
 
@@ -48,7 +51,7 @@ void BallReleaseHUD::Draw(double dT, const Camera& camera, const GameModel& game
                 if (gameModel.GetCurrentStateType() != GameState::BallOnPaddleStateType) {
                     this->SetState(BallReleaseHUD::RELEASED);
                 }
-                else if (gameModel.GetPercentBallReleaseTimerElapsed() > 0.8f) {
+                else if (gameModel.GetPercentBallReleaseTimerElapsed() > 0.6f) {
                     this->SetState(BallReleaseHUD::ENDING);
                 }
             }
@@ -66,8 +69,7 @@ void BallReleaseHUD::Draw(double dT, const Camera& camera, const GameModel& game
 
             break;
 
-        case BallReleaseHUD::RELEASED:
-            {
+        case BallReleaseHUD::RELEASED: {
                 bool finished = this->fadeAnim.Tick(dT);
                 this->scaleAnim.Tick(dT);
                 this->DrawReleaseTimer(camera, gameModel, this->lastKnownPaddlePos, this->scaleAnim.GetInterpolantValue(), 
@@ -92,6 +94,12 @@ void BallReleaseHUD::SetState(const BallReleaseHUD::State& state) {
     switch (state) {
         case BallReleaseHUD::NOT_STARTED:
 
+            // Stop any sound loops...
+            if (this->runningOutOfTimeSoundID != INVALID_SOUND_ID) {
+                this->sound->StopSound(this->runningOutOfTimeSoundID, 0.0);
+                this->runningOutOfTimeSoundID = INVALID_SOUND_ID;
+            }
+
             // Clean up everything...
             this->fadeAnim.ClearLerp();
             this->fadeAnim.SetInterpolantValue(0.0f);
@@ -104,6 +112,12 @@ void BallReleaseHUD::SetState(const BallReleaseHUD::State& state) {
             break;
 
         case BallReleaseHUD::STARTING:
+            // Stop any sound loops...
+            if (this->runningOutOfTimeSoundID != INVALID_SOUND_ID) {
+                this->sound->StopSound(this->runningOutOfTimeSoundID, 0.0);
+                this->runningOutOfTimeSoundID = INVALID_SOUND_ID;
+            }
+
             // The timer will fade in from a larger size...
             this->fadeAnim.SetLerp(0.5, 1.0f);
             this->fadeAnim.SetRepeat(false);
@@ -114,6 +128,12 @@ void BallReleaseHUD::SetState(const BallReleaseHUD::State& state) {
             break;
 
         case BallReleaseHUD::TICKING:
+            // Stop any sound loops...
+            if (this->runningOutOfTimeSoundID != INVALID_SOUND_ID) {
+                this->sound->StopSound(this->runningOutOfTimeSoundID, 0.0);
+                this->runningOutOfTimeSoundID = INVALID_SOUND_ID;
+            }
+
             // The timer will stay the same size and tick away until it's close to ending
             this->fadeAnim.ClearLerp();
             this->fadeAnim.SetInterpolantValue(1.0f);
@@ -123,45 +143,49 @@ void BallReleaseHUD::SetState(const BallReleaseHUD::State& state) {
             this->scaleAnim.SetRepeat(false);
             break;
         
-        case BallReleaseHUD::ENDING:
-            {
-                // The timer will start to flash and pulse until it expires
-                std::vector<double> timeValues;
-                timeValues.reserve(3);
-                timeValues.push_back(0.0);
-                timeValues.push_back(0.4);
-                timeValues.push_back(0.8);
+        case BallReleaseHUD::ENDING: {
+            // Play the sound to indicate that the timer is about to end...
+            this->runningOutOfTimeSoundID = this->sound->PlaySound(GameSound::BallOnPaddleTimerRunningOutLoop, true);
 
-                std::vector<float> scaleValues;
-                scaleValues.reserve(3);
-                scaleValues.push_back(1.0f);
-                scaleValues.push_back(1.1f);
-                scaleValues.push_back(1.0f);
+            // The timer will start to flash and pulse until it expires
+            std::vector<double> timeValues;
+            timeValues.reserve(3);
+            timeValues.push_back(0.0);
+            timeValues.push_back(0.56);
+            timeValues.push_back(1.12);
 
-                this->scaleAnim.SetInterpolantValue(1.0f);
-                this->scaleAnim.SetLerp(timeValues, scaleValues);
-                this->scaleAnim.SetRepeat(true);
+            std::vector<float> scaleValues;
+            scaleValues.reserve(3);
+            scaleValues.push_back(1.0f);
+            scaleValues.push_back(1.1f);
+            scaleValues.push_back(1.0f);
 
-                timeValues.clear();
-                timeValues.reserve(3);
-                timeValues.push_back(0.0);
-                timeValues.push_back(0.1);
-                timeValues.push_back(0.2);
+            this->scaleAnim.SetInterpolantValue(1.0f);
+            this->scaleAnim.SetLerp(timeValues, scaleValues);
+            this->scaleAnim.SetRepeat(true);
 
-                std::vector<float> flashValues;
-                flashValues.reserve(3);
-                flashValues.push_back(0.0f);
-                flashValues.push_back(0.75f);
-                flashValues.push_back(0.0f);
+            timeValues.clear();
+            timeValues.reserve(3);
+            timeValues.push_back(0.0);
+            timeValues.push_back(0.28);
+            timeValues.push_back(0.56);
 
-                this->flashAnim.SetInterpolantValue(0.0f);
-                this->flashAnim.SetLerp(timeValues, flashValues);
-                this->flashAnim.SetRepeat(true);
-            }
+            std::vector<float> flashValues;
+            flashValues.reserve(3);
+            flashValues.push_back(0.0f);
+            flashValues.push_back(0.75f);
+            flashValues.push_back(0.0f);
 
+            this->flashAnim.SetInterpolantValue(0.0f);
+            this->flashAnim.SetLerp(timeValues, flashValues);
+            this->flashAnim.SetRepeat(true);
             break;
+        }
 
         case BallReleaseHUD::RELEASED:
+            this->sound->StopSound(this->runningOutOfTimeSoundID, 0.5);
+            this->runningOutOfTimeSoundID = INVALID_SOUND_ID;
+
             // The timer will fade out and grow larger in size as it fades...
             this->fadeAnim.SetLerp(0.35, 0.0f);
             this->fadeAnim.SetRepeat(false);

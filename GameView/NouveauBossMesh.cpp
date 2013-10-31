@@ -27,7 +27,13 @@ bodyMesh(NULL), bottomCurlMesh(NULL), bottomHexSphereMesh(NULL),
 sideCurlsMesh(NULL), sideSphereMesh(NULL), sideSphereFrillsMesh(NULL),
 sideSphereHolderCurlMesh(NULL), topDomeMesh(NULL), topGazeboMesh(NULL),
 topSphereMesh(NULL), circleGlowTex(NULL), 
-leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL) {
+leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL),
+leftSideTopGlowSoundID(INVALID_SOUND_ID),
+leftSideBottomGlowSoundID(INVALID_SOUND_ID),
+rightSideTopGlowSoundID(INVALID_SOUND_ID),
+rightSideBottomGlowSoundID(INVALID_SOUND_ID),
+bottomGlowSoundID(INVALID_SOUND_ID)
+{
 
     assert(boss != NULL);
 
@@ -284,8 +290,8 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
 #undef DRAW_BODY_PART
 }
 
-void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
-    BossMesh::DrawPostBodyEffects(dT, camera);
+void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
+    BossMesh::DrawPostBodyEffects(dT, camera, assets);
 
     this->glowCirclePulseAnim.Tick(dT);
     float pulseScaler = this->glowCirclePulseAnim.GetInterpolantValue();
@@ -293,10 +299,30 @@ void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     // Check to see if we're drawing intro effects
     if (this->introTimeCountdown > 0.0) {
         this->leftSideTopGlowAnim.Tick(dT);
+        if (this->leftSideTopGlowSoundID == INVALID_SOUND_ID && this->leftSideTopGlowAnim.GetInterpolantValue() > 0.0) {
+            this->leftSideTopGlowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+        }
+
         this->leftSideBottomGlowAnim.Tick(dT);
+        if (this->leftSideBottomGlowSoundID == INVALID_SOUND_ID && this->leftSideBottomGlowAnim.GetInterpolantValue() > 0.0) {
+            this->leftSideBottomGlowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+        }
+
         this->rightSideTopGlowAnim.Tick(dT);
+        if (this->rightSideTopGlowSoundID == INVALID_SOUND_ID && this->rightSideTopGlowAnim.GetInterpolantValue() > 0.0) {
+            this->rightSideTopGlowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+        }
+
         this->rightSideBottomGlowAnim.Tick(dT);
+        if (this->rightSideBottomGlowSoundID == INVALID_SOUND_ID && this->rightSideBottomGlowAnim.GetInterpolantValue() > 0.0) {
+            this->rightSideBottomGlowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+        }
+
         this->bottomGlowAnim.Tick(dT);
+        if (this->bottomGlowSoundID == INVALID_SOUND_ID && this->bottomGlowAnim.GetInterpolantValue() > 0.0) {
+            this->bottomGlowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+        }
+
         this->introTimeCountdown -= dT;
     }
 

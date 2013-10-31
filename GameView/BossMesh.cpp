@@ -465,7 +465,7 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
         if (lineWidth > 0.0f) {
 
             if (this->finalExplosionSoundID == INVALID_SOUND_ID) {
-                this->finalExplosionSoundID = this->sound->PlaySound(GameSound::BossDeathFlashToFullscreen, false, false);
+                this->finalExplosionSoundID = this->sound->PlaySound(GameSound::BossDeathFlashToFullscreenWhiteoutEvent, false, false);
             }
 
             glBegin(GL_LINES);
@@ -508,7 +508,9 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
     }
 }
 
-void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
+void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
+    UNUSED_PARAMETER(assets);
+
     // Go through all the active effects for the boss, draw each one and clean up dead effects
     for (std::list<ESPEmitter*>::iterator iter = this->fgEffectsEmitters.begin(); iter != this->fgEffectsEmitters.end();) {
 

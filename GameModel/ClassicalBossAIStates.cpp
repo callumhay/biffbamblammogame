@@ -88,7 +88,7 @@ void ClassicalBossAI::SignalLaserFireEffects() {
 
 float ClassicalBossAI::GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const {
     UNUSED_PARAMETER(level);
-    return bossWidth / 1.4f + LevelPiece::PIECE_WIDTH;
+    return (bossWidth / 2.0f) + (2.0f * LevelPiece::PIECE_WIDTH);
 }
 
 float ClassicalBossAI::GetBossMovementMaxXBound(const GameLevel* level, float bossWidth) const {

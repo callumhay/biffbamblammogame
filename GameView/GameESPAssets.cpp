@@ -1487,6 +1487,11 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
  * Add effects based on what happens when a given projectile hits a given level piece.
  */
 void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block) {
+
+#define BUILD_PROJECTILE_POS() \
+    projectile.GetPosition() + 0.25f*projectile.GetHeight() * projectile.GetVelocityDirection() + \
+    0.25f*(block.GetCenter() - projectile.GetPosition())
+
 	switch (projectile.GetType()) {
 
         case Projectile::BossOrbBulletProjectile:
@@ -1500,7 +1505,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::PrismTriangle:
 				case LevelPiece::Prism: {
 					// A laser bullet just hit a prism block... cause the proper effect
-					Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+					Point2D midPoint = BUILD_PROJECTILE_POS();
 					this->AddLaserHitPrismBlockEffect(midPoint);
 					break;
                 }
@@ -1521,7 +1526,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
                 case LevelPiece::AlwaysDrop:
                 case LevelPiece::Regen: {
 					bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
-					Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+					Point2D midPoint = BUILD_PROJECTILE_POS();
 					if (blockIsFrozen) {
 						// Frozen blocks reflect/refract laser beams...
 						this->AddLaserHitPrismBlockEffect(midPoint);
@@ -1535,8 +1540,8 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 
                 case LevelPiece::NoEntry: {
                     bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
-					Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
 					if (blockIsFrozen) {
+                        Point2D midPoint = BUILD_PROJECTILE_POS();
 						// Frozen blocks reflect/refract laser beams...
 						this->AddLaserHitPrismBlockEffect(midPoint);
 					}
@@ -1549,7 +1554,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 					bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 					if (blockIsFrozen) {
 						// Frozen blocks reflect/refract laser beams...
-						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+						Point2D midPoint = BUILD_PROJECTILE_POS();
 						this->AddLaserHitPrismBlockEffect(midPoint);
 					}
 					break;
@@ -1576,14 +1581,14 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
                     break;
                 case LevelPiece::NoEntry: {
                     bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
-                    Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
                     if (blockIsFrozen) {
+                        Point2D midPoint = BUILD_PROJECTILE_POS();
                         this->AddHitWallEffect(projectile, midPoint);
                     }
                     break;
                 }
                 default: {
-                    Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
+                    Point2D midPoint = BUILD_PROJECTILE_POS();
                     this->AddHitWallEffect(projectile, midPoint);
                     break;
                 }
@@ -1601,7 +1606,6 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
         case Projectile::MineTurretBulletProjectile:
             if (!block.ProjectileIsDestroyedOnCollision(&projectile) && 
                 projectile.GetVelocityMagnitude() == 0.0f) {
-
                 this->AddPaddleMineAttachedEffects(projectile);
             }
             break;
@@ -1617,6 +1621,8 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			assert(false);
 			break;
 	}
+
+#undef BUILD_PROJECTILE_POS
 }
 
 void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projectile) {
@@ -5061,7 +5067,7 @@ void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float hei
 }
 
 void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float height) {
-    float avgSize = std::min<float>(1.5f * LevelPiece::PIECE_WIDTH, std::max<float>(0.75f * LevelPiece::PIECE_WIDTH, (width + height) / 2.0f));
+    float avgSize = std::min<float>(1.2f * LevelPiece::PIECE_WIDTH, std::max<float>(0.75f * LevelPiece::PIECE_WIDTH, (width + height) / 2.0f));
 
     // Angry lightning bolts
 	ESPPointEmitter* angryBolts = new ESPPointEmitter();
@@ -5069,7 +5075,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryBolts->SetInitialSpd(ESPInterval(4.33f));
 	angryBolts->SetParticleLife(ESPInterval(2.0f));
-	angryBolts->SetParticleSize(ESPInterval(0.45f*avgSize, 0.6f*avgSize), ESPInterval(0.9f*avgSize, 1.2f*avgSize));
+	angryBolts->SetParticleSize(ESPInterval(0.425f*avgSize, 0.55f*avgSize), ESPInterval(0.85f*avgSize, 1.1f*avgSize));
 	angryBolts->SetEmitAngleInDegrees(45);
 	angryBolts->SetEmitPosition(Point3D(pos, 0));
 	angryBolts->SetEmitDirection(Vector3D(0,1,0));
@@ -6994,7 +7000,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
 		else {
 			// Not dead yet so we draw and tick
             if (paddle.GetAlpha() < 1.0f) {
-                curr->SetParticleAlpha(ESPInterval(paddle.GetAlpha()));
+                curr->SetAliveParticleAlphaMax(paddle.GetAlpha());
             }
             curr->SetParticleRotation(ESPInterval(-paddle.GetZRotation()));
             curr->Draw(camera);

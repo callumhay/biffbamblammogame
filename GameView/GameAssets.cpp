@@ -133,7 +133,7 @@ magnetPaddleEffect(NULL)
 	this->flashHUD       = new FlashHUD();
     this->pointsHUD      = new PointsHUD();
     this->boostHUD       = new BallBoostHUD(screenHeight);
-    this->ballReleaseHUD = new BallReleaseHUD();
+    this->ballReleaseHUD = new BallReleaseHUD(sound);
     this->remoteControlRocketHUD = new RemoteControlRocketHUD(*this);
 
 	// Initialize the light assets
