@@ -28,7 +28,8 @@ scopingArm2Mesh(NULL), scopingArm3Mesh(NULL), scopingArm4Mesh(NULL), handMesh(NU
 leftBodyMesh(NULL), rightBodyMesh(NULL), leftBodyExplodingEmitter(NULL), 
 rightBodyExplodingEmitter(NULL), itemMesh(NULL), leftArmExplodingEmitter(NULL),
 rightArmExplodingEmitter(NULL), bodyExplodingEmitter(NULL), glowTex(NULL), introTimeCountdown(0.0),
-flareGlowTex(NULL), lensFlareTex(NULL), lightningRelayEmitter(NULL), flarePulse(0,0) {
+flareGlowTex(NULL), lensFlareTex(NULL), lightningRelayEmitter(NULL), flarePulse(0,0), 
+eyeGlowSoundID(INVALID_SOUND_ID), lightningRelaySoundID(INVALID_SOUND_ID) {
 
     assert(boss != NULL);
 
@@ -314,14 +315,23 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
 #undef DRAW_BODY_PART
 }
 
-void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
-    BossMesh::DrawPostBodyEffects(dT, camera);
+void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
+    BossMesh::DrawPostBodyEffects(dT, camera, assets);
 
     // Check to see if we're drawing intro effects
     if (this->introTimeCountdown > 0.0) {
         this->lightningRelayAlphaAnim.Tick(dT);
+
         for (int i = 0; i < static_cast<int>(this->eyeGlowAlphaAnims.size()); i++) {
             this->eyeGlowAlphaAnims[i].Tick(dT);
+        }
+
+        if (this->lightningRelaySoundID == INVALID_SOUND_ID && this->lightningRelayAlphaAnim.GetInterpolantValue() > 0.0f) {
+            this->lightningRelaySoundID = assets->GetSound()->PlaySound(GameSound::DecoBossLightningRelayTurnOnEvent, false, false);
+        }
+
+        if (this->eyeGlowSoundID == INVALID_SOUND_ID && this->eyeGlowAlphaAnims[0].GetInterpolantValue() > 0.0f) {
+            this->eyeGlowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
         }
 
         this->introTimeCountdown -= dT;

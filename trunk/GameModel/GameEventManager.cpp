@@ -523,7 +523,14 @@ void GameEventManager::ActionMineExploded(const MineProjectile& mine) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
 		(*listenerIter)->MineExplodedEvent(mine);
-	}	
+	}
+}
+
+void GameEventManager::ActionMineLanded(const MineProjectile& mine) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->MineLandedEvent(mine);
+    }
 }
 
 void GameEventManager::ActionRemoteControlRocketFuelWarning(const PaddleRemoteControlRocketProjectile& rocket) {

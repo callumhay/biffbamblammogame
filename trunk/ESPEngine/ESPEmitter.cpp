@@ -622,7 +622,12 @@ void ESPEmitter::SetAliveParticleAlphaMax(float alpha) {
         iter != this->aliveParticles.end(); ++iter) {
 
         ESPParticle* currParticle = *iter;
-        currParticle->SetAlpha(std::min<float>(alpha, currParticle->GetAlpha()));
+        if (alpha < currParticle->GetAlpha()) {
+            currParticle->SetAlpha(alpha);
+        }
+        else if (currParticle->GetLifespanLength() == ESPParticle::INFINITE_PARTICLE_LIFETIME) {
+            currParticle->SetAlpha(std::min<float>(alpha, this->particleAlpha.RandomValueInInterval()));
+        }
     }
 }
 

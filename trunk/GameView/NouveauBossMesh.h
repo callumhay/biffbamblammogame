@@ -66,10 +66,16 @@ private:
     AnimationLerp<float> rightSideBottomGlowAnim;
     AnimationLerp<float> bottomGlowAnim;
 
+    SoundID leftSideTopGlowSoundID;
+    SoundID leftSideBottomGlowSoundID;
+    SoundID rightSideTopGlowSoundID;
+    SoundID rightSideBottomGlowSoundID;
+    SoundID bottomGlowSoundID;
+
     //void DrawPreBodyEffects(double dT, const Camera& camera);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawPostBodyEffects(double dT, const Camera& camera);
+    void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
 
     Point3D GetBossFinalExplodingEpicenter() const;
 

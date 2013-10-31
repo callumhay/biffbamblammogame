@@ -2,7 +2,7 @@
  * CgFxVolumetricEffect.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -19,9 +19,6 @@
 class Camera;
 class Texture2D;
 
-/**
- * Represents CgFx CelShader material.
- */
 class CgFxVolumetricEffect : public CgFxEffectBase {
 public:
 	// Constants used for loading the CelShading effect
@@ -69,10 +66,10 @@ private:
 	CGparameter noiseSamplerParam;	// Noise texture sampler param
 	CGparameter maskSamplerParam;		// Mask texture
 
-	// Timer paramter
+	// Timer parameter
 	CGparameter timerParam;
 
-	// Tweakable params
+	// Tweak-able params
 	CGparameter scaleParam;
 	CGparameter freqParam;
 	CGparameter flowDirectionParam;

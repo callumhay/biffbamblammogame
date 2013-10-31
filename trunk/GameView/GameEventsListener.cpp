@@ -67,6 +67,8 @@ const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS    = 125;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS     = 60;
 
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS = 250;
+
 SoundID GameEventsListener::enterBulletTimeSoundID  = INVALID_SOUND_ID;
 SoundID GameEventsListener::exitBulletTimeSoundID   = INVALID_SOUND_ID;
 SoundID GameEventsListener::inBulletTimeLoopSoundID = INVALID_SOUND_ID;
@@ -161,6 +163,7 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 
     // Clear all the Tesla lightning sounds that are left playing
     this->teslaLightningSoundIDs.clear();
+    this->projectileEffectTSMap.clear();
 
 	// Queue up the state for ending a level - this will display the level name and do
     // proper animations, fade-outs, etc. In the case of a boss level being completed, we
@@ -471,10 +474,41 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 
 void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) {
 
-	// Add any visual effects required for when a projectile hits the block
-	this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
+    long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+    bool doEffect = true;
 
-	debug_output("EVENT: Projectile-block collision");
+    ProjectileEffectTimestampMapIter projectileFindIter = this->projectileEffectTSMap.find(&projectile);
+    if (projectileFindIter == this->projectileEffectTSMap.end()) {
+        doEffect = true;
+        this->projectileEffectTSMap[&projectile].insert(std::make_pair(&block, currSystemTime));
+    }
+    else {
+        // Check to see if the block is part of the projectile's map
+        BlockTimestampMap& blockTSMap = projectileFindIter->second;
+        BlockTimestampMapIter blockFindIter = blockTSMap.find(&block);
+        if (blockFindIter == blockTSMap.end()) {
+            blockTSMap.insert(std::make_pair(&block, currSystemTime));
+        }
+        else {
+
+            // Check the last timestamp for the projectile, if it doesn't exceed the wait time then we
+            // don't do the effect
+            if (currSystemTime - blockFindIter->second > GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS) {
+                blockFindIter->second = currSystemTime;
+                doEffect = true;
+            }
+            else {
+                doEffect = false;
+            }
+        }
+    }
+
+    if (doEffect) {
+	    // Add any visual effects required for when a projectile hits the block
+	    this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
+
+        debug_output("EVENT: Projectile-block collision");
+    }
 }
 
 void GameEventsListener::ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet) {
@@ -806,6 +840,9 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball) {
 		// Add a tiny camera and controller shake
         GameControllerManager::GetInstance()->VibrateControllers(0.08f, BBBGameController::VerySoftVibration, BBBGameController::VerySoftVibration);
 	}
+
+    // Play the sound for the ball hitting the lightning
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::BallTeslaLightningCollisionEvent, false, ball.GetPosition3D(), true, true, true);
 
 	this->timeSinceLastBallTeslaCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball hit Tesla lightning arc");
@@ -1418,6 +1455,9 @@ void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
     if (projectile.GetType() == Projectile::PaddleRemoteCtrlRocketBulletProjectile) {
         this->display->GetSound()->SetSoundTypeVolume(GameSound::ItemTimerEndingLoop, 1.0f);
     }
+
+    // Remove the projectile from the effect-timestamp map
+    this->projectileEffectTSMap.erase(&projectile);
 }
 
 void GameEventsListener::RocketExplodedEvent(const RocketProjectile& rocket) {
@@ -1428,6 +1468,11 @@ void GameEventsListener::RocketExplodedEvent(const RocketProjectile& rocket) {
 void GameEventsListener::MineExplodedEvent(const MineProjectile& mine) {
     this->display->GetAssets()->MineExplosion(mine, this->display->GetCamera(), this->display->GetModel());
 	debug_output("EVENT: Mine exploded");
+}
+
+void GameEventsListener::MineLandedEvent(const MineProjectile& mine) {
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::MineLatchedOnEvent, false, mine.GetPosition3D(), true, true, true);
+    debug_output("EVENT: Mine Landed");
 }
 
 void GameEventsListener::RemoteControlRocketFuelWarningEvent(const PaddleRemoteControlRocketProjectile& rocket) {
@@ -1454,7 +1499,8 @@ void GameEventsListener::RemoteControlRocketThrustAppliedEvent(const PaddleRemot
 
     // Play the rocket thruster sound
     GameSound* sound = this->display->GetSound();
-    sound->PlaySound(GameSound::RemoteControlRocketThrustEvent, false, true, 0.75f);
+    sound->AttachAndPlaySound(&rocket, GameSound::RemoteControlRocketThrustEvent, false, 
+        this->display->GetModel()->GetCurrentLevelTranslation());
 
     debug_output("EVENT: Remote controlled rocket thrust applied.");
 }

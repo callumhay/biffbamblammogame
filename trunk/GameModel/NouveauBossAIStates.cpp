@@ -1371,8 +1371,8 @@ AnimationMultiLerp<Vector3D> GlassDomeAI::GenerateTopDeathTranslationAnimation(G
     std::vector<Vector3D> moveValues;
     moveValues.reserve(timeValues.size());
     moveValues.push_back(Vector3D(0,0,0));
-    moveValues.push_back(Vector3D((randomDir ? 1.0f : -1.0f) * currLevel->GetLevelUnitWidth(), 
-        -this->boss->GetTopDome()->GetTranslationPt2D()[1] - 10.0f, 0.0f));
+    moveValues.push_back(Vector3D((randomDir ? 0.5f : -0.5f) * currLevel->GetLevelUnitWidth(), 
+        -1.5f*this->boss->GetTopDome()->GetTranslationPt2D()[1] - (NouveauBoss::TOP_ENCLOSURE_GAZEBO_HEIGHT + NouveauBoss::TOP_ENCLOSURE_DOME_HEIGHT), 0.0f));
 
     AnimationMultiLerp<Vector3D> topDeathTransAnim;
     topDeathTransAnim.SetLerp(timeValues, moveValues);

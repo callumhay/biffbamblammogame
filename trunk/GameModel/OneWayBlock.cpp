@@ -161,68 +161,124 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	// Left boundary of the piece
 	if (leftNeighbor != NULL) {
         if (leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::OneWay &&
+            leftNeighbor->GetType() != LevelPiece::Solid &&
             leftNeighbor->GetType() != LevelPiece::LaserTurret && leftNeighbor->GetType() != LevelPiece::RocketTurret &&
             leftNeighbor->GetType() != LevelPiece::MineTurret && leftNeighbor->GetType() != LevelPiece::Breakable &&
             leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen) {
 
-			Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(-1, 0);
-			boundingLines.push_back(l1);
-			boundingNorms.push_back(n1);
-            onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus));
+            bool hasBound = true;
+            bool isOnInside = leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus);
+
+            if (leftNeighbor->GetType() == LevelPiece::OneWay && !leftNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
+                if (static_cast<const OneWayBlock*>(leftNeighbor)->GetDirType() != this->GetDirType()) {
+                    isOnInside = true;
+                }
+                else {
+                    hasBound = false;
+                }
+            }
+
+            if (hasBound) {
+			    Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+									     this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n1(-1, 0);
+			    boundingLines.push_back(l1);
+			    boundingNorms.push_back(n1);
+                onInside.push_back(isOnInside);
+            }
 		}
 	}
 
 	// Bottom boundary of the piece
 	if (bottomNeighbor != NULL) {
 		if (bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::OneWay &&
+            bottomNeighbor->GetType() != LevelPiece::Solid &&
             bottomNeighbor->GetType() != LevelPiece::LaserTurret && bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
             bottomNeighbor->GetType() != LevelPiece::MineTurret && bottomNeighbor->GetType() != LevelPiece::Breakable &&
             bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen) {
 
-			Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n2(0, -1);
-			boundingLines.push_back(l2);
-			boundingNorms.push_back(n2);
-            onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
+            bool hasBound = true;
+            bool isOnInside = bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus);
+
+            if (bottomNeighbor->GetType() == LevelPiece::OneWay && !bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
+                if (static_cast<const OneWayBlock*>(bottomNeighbor)->GetDirType() != this->GetDirType()) {
+                    isOnInside = true;
+                }
+                else {
+                    hasBound = false;
+                }
+            }
+
+            if (hasBound) {
+			    Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+									     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n2(0, -1);
+			    boundingLines.push_back(l2);
+			    boundingNorms.push_back(n2);
+                onInside.push_back(isOnInside);
+            }
 		}
 	}
 
 	// Right boundary of the piece
 	if (rightNeighbor != NULL) {
 		if (rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::OneWay &&
+            rightNeighbor->GetType() != LevelPiece::Solid && 
             rightNeighbor->GetType() != LevelPiece::LaserTurret && rightNeighbor->GetType() != LevelPiece::RocketTurret &&
             rightNeighbor->GetType() != LevelPiece::MineTurret && rightNeighbor->GetType() != LevelPiece::Breakable &&
             rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen) {
 
-			Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n3(1, 0);
-			boundingLines.push_back(l3);
-			boundingNorms.push_back(n3);
-            onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus));
+            bool hasBound = true;
+            bool isOnInside = rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus);
+
+            if (rightNeighbor->GetType() == LevelPiece::OneWay && !rightNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
+                if (static_cast<const OneWayBlock*>(rightNeighbor)->GetDirType() != this->GetDirType()) {
+                    isOnInside = true;
+                }
+                else {
+                    hasBound = false;
+                }
+            }
+
+            if (hasBound) {
+			    Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+									     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n3(1, 0);
+			    boundingLines.push_back(l3);
+			    boundingNorms.push_back(n3);
+                onInside.push_back(isOnInside);
+            }
 		}
 	}
 
 	// Top boundary of the piece
 	if (topNeighbor != NULL) {
 		if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::OneWay &&
+            topNeighbor->GetType() != LevelPiece::Solid && 
             topNeighbor->GetType() != LevelPiece::LaserTurret && topNeighbor->GetType() != LevelPiece::RocketTurret &&
             topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::Breakable &&
             topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen) {
 
-			Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-								    this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n4(0, 1);
-			boundingLines.push_back(l4);
-			boundingNorms.push_back(n4);
-            onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
+            bool hasBound = true;
+            bool isOnInside = topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus);
+
+            if (topNeighbor->GetType() == LevelPiece::OneWay && !topNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
+                if (static_cast<const OneWayBlock*>(topNeighbor)->GetDirType() != this->GetDirType()) {
+                    isOnInside = true;
+                }
+                else {
+                    hasBound = false;
+                }
+            }
+
+            if (hasBound) {
+			    Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+								        this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n4(0, 1);
+			    boundingLines.push_back(l4);
+			    boundingNorms.push_back(n4);
+                onInside.push_back(isOnInside);
+            }
 		}
 	}
 

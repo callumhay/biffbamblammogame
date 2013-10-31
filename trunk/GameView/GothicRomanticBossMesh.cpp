@@ -11,15 +11,13 @@
 
 #include "GothicRomanticBossMesh.h"
 #include "GameViewConstants.h"
+#include "GameAssets.h"
 #include "GameLightAssets.h"
 #include "InGameBossLevelDisplayState.h"
 
 #include "../ResourceManager.h"
-
 #include "../BlammoEngine/Mesh.h"
-
 #include "../ESPEngine/ESP.h"
-
 #include "../GameModel/GothicRomanticBoss.h"
 #include "../GameModel/BossWeakpoint.h"
 
@@ -27,7 +25,8 @@ const double GothicRomanticBossMesh::INTRO_TIME_IN_SECS = 4.0;
 
 GothicRomanticBossMesh::GothicRomanticBossMesh(GothicRomanticBoss* boss, GameSound* sound) :
 BossMesh(sound), boss(boss), bodyMesh(NULL), topPointMesh(NULL), bottomPointMesh(NULL), legMesh(NULL),
-topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(NULL), circleGlowTex(NULL) {
+topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(NULL), 
+circleGlowTex(NULL), bottomGlowSoundID(INVALID_SOUND_ID) {
     assert(boss != NULL);
 
     // Load the mesh assets...
@@ -80,7 +79,9 @@ topPointSmokeEmitter(NULL), topPointFireEmitter(NULL), topPointExplodingEmitter(
     this->bottomPtGlowAlphaAnim.SetRepeat(false);
 
     this->legGlowAlphaAnims.resize(GothicRomanticBoss::NUM_LEGS);
+    this->legGlowSoundIDs.resize(GothicRomanticBoss::NUM_LEGS, INVALID_SOUND_ID);
     for (int i = 0; i < static_cast<int>(this->legGlowAlphaAnims.size()); i++) {
+        
         this->legGlowAlphaAnims[i].ClearLerp();
         this->legGlowAlphaAnims[i].SetInterpolantValue(0.0f);
         this->legGlowAlphaAnims[i].SetRepeat(false);
@@ -220,17 +221,25 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
 
 }
 
-void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
-    BossMesh::DrawPostBodyEffects(dT, camera);
+void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
+    BossMesh::DrawPostBodyEffects(dT, camera, assets);
 
     this->glowCirclePulseAnim.Tick(dT);
     float pulseScaler = this->glowCirclePulseAnim.GetInterpolantValue();
 
     // Check to see if we're drawing intro effects
     if (this->introTimeCountdown > 0.0) {
+
+        if (this->bottomGlowSoundID == INVALID_SOUND_ID && this->bottomPtGlowAlphaAnim.GetInterpolantValue() > 0.0f) {
+            this->bottomGlowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+        }
+
         this->bottomPtGlowAlphaAnim.Tick(dT);
         for (int i = 0; i < static_cast<int>(this->legGlowAlphaAnims.size()); i++) {
             this->legGlowAlphaAnims[i].Tick(dT);
+            if (this->legGlowSoundIDs[i] == INVALID_SOUND_ID && this->legGlowAlphaAnims[i].GetInterpolantValue() > 0.0f) {
+                this->legGlowSoundIDs[i] = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+            }
         }
 
         this->introTimeCountdown -= dT;

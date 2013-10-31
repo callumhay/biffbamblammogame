@@ -11,14 +11,13 @@
 
 #include "ClassicalBossMesh.h"
 #include "GameViewConstants.h"
+#include "GameAssets.h"
 #include "GameLightAssets.h"
 
 #include "../ResourceManager.h"
-
 #include "../BlammoEngine/Mesh.h"
-
 #include "../ESPEngine/ESP.h"
-
+#include "../GameSound/GameSound.h"
 #include "../GameModel/ClassicalBoss.h"
 #include "../GameModel/BossWeakpoint.h"
 
@@ -33,7 +32,7 @@ leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL), pedimentExploding
 eyeExplodingEmitter(NULL), eyeSmokeEmitter(NULL), eyeFireEmitter(NULL),
 particleGrowToSize(0.001f, 1.0f), particleFader(1.0f, 0.0f),
 particleTwirl(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 1, ESPParticleRotateEffector::CLOCKWISE),
-eyeGlowPulser(ScaleEffect(1.0f, 1.5f)) {
+eyeGlowPulser(ScaleEffect(1.0f, 1.5f)), sparkleSoundID(INVALID_SOUND_ID), glowSoundID(INVALID_SOUND_ID) {
 
     assert(boss != NULL);
 
@@ -358,19 +357,27 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     }
 }
 
-void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
-    BossMesh::DrawPostBodyEffects(dT, camera);
+void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
+    BossMesh::DrawPostBodyEffects(dT, camera, assets);
 
     const BossBodyPart* eye = this->boss->GetEye();
 
     // Check to see if we're drawing intro effects
     if (this->introTimeCountdown > 0.0) {
         static const double START_GLOW_TIME = INTRO_TIME_IN_SECS - INTRO_SPARKLE_TIME_IN_SECS/1.5f;
+        
+        if (this->sparkleSoundID == INVALID_SOUND_ID) {
+            this->sparkleSoundID = assets->GetSound()->PlaySound(GameSound::ClassicalBossSparkleEvent, false, false);
+        }
 
         this->introSparkle.Tick(dT);
         this->introSparkle.Draw(camera);
 
         if (this->introTimeCountdown < START_GLOW_TIME) {
+            if (this->introTimeCountdown < INTRO_TIME_IN_SECS - INTRO_SPARKLE_TIME_IN_SECS &&
+                this->glowSoundID == INVALID_SOUND_ID) {
+                this->glowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+            }
             glPushMatrix();
             glMultMatrixf(eye->GetWorldTransform().begin());
             this->eyePulseGlow.SetParticleAlpha(

@@ -2,7 +2,7 @@
  * BallReleaseHUD.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,12 +16,15 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Point.h"
 
+#include "../GameSound/SoundCommon.h"
+
 class Camera;
 class GameModel;
+class GameSound;
 
 class BallReleaseHUD {
 public:
-    BallReleaseHUD();
+    BallReleaseHUD(GameSound* sound);
     ~BallReleaseHUD();
 
     void Draw(double dT, const Camera& camera, const GameModel& gameModel);
@@ -41,6 +44,9 @@ private:
 
     float lastKnownPercentElapsedAmt;
     Point2D lastKnownPaddlePos;
+
+    GameSound* sound;
+    SoundID runningOutOfTimeSoundID;
 
     void SetState(const BallReleaseHUD::State& state);
     void DrawReleaseTimer(const Camera& camera, const GameModel& gameModel, const Point2D& paddlePos,

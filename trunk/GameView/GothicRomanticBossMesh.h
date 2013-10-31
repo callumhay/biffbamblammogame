@@ -56,10 +56,13 @@ private:
     AnimationLerp<float> bottomPtGlowAlphaAnim;
     std::vector<AnimationLerp<float> > legGlowAlphaAnims;
 
+    SoundID bottomGlowSoundID;
+    std::vector<SoundID> legGlowSoundIDs;
+
     // Inherited from BossMesh;
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawPostBodyEffects(double dT, const Camera& camera);
+    void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
 
     Point3D GetBossFinalExplodingEpicenter() const;
 

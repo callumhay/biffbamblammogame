@@ -2,7 +2,7 @@
  * MineProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2012
+ * Callum Hay, 2012-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -93,10 +93,8 @@ public:
     bool GetIsAttachedToBoss() const { return this->attachedToBoss != NULL; }
 
     bool IsAttachedToSomething() const {
-        return this->GetIsAttachedToSafetyNet()  ||
-               this->GetIsAttachedToLevelPiece() ||
-               this->GetIsAttachedToPaddle() ||
-               this->GetIsAttachedToBoss();
+        return this->GetIsAttachedToSafetyNet() || this->GetIsAttachedToLevelPiece() ||
+            this->GetIsAttachedToPaddle() || this->GetIsAttachedToBoss();
     }
 
     void DestroyWithoutExplosion();
@@ -146,17 +144,6 @@ inline void MineProjectile::SetAsFalling() {
     this->acceleration = 9.8f;
     this->isFalling = true;
     this->DetachFromAnyAttachedObject();
-}
-
-inline void MineProjectile::Land(const Point2D& landingPt) {
-    this->SetVelocity(Vector2D(0, 0), 0.0f);
-    this->acceleration      = 0.0f;
-    this->currRotationSpd   = 0.0f;
-    this->landedTimeCounter = 0.0;
-    this->SetPosition(landingPt);
-    this->isArmed = true;
-    this->isFalling = false;
-    this->StopAndResetProximityExplosionCountdown();
 }
 
 inline void MineProjectile::DestroyWithoutExplosion() {

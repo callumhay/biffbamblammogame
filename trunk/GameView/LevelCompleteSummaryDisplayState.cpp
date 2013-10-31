@@ -972,10 +972,15 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
         return;
     }
 
-    if (this->starAddAnimationCount == 0) {
+    if (this->starAddAnimationCount == 0 && 
+        this->scoreValueAnimation.GetInterpolantValue() == this->scoreValueAnimation.GetTargetValue()) {
+
         // Start the fade out animation - the user wants to start playing!
 	    this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
-        waitingForKeyPress = false;
+        this->waitingForKeyPress = false;
+        
+        // Play confirm sound
+        this->display->GetSound()->PlaySound(GameSound::LevelSummaryConfirmEvent, false, false);
     }
 
     // Automatically finish the score tally and other animations

@@ -1,12 +1,12 @@
 The Towering Inferno
 19 31
 S S S S S S S S S S S S S S S S S S S 
-S E E F(r) E R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) S K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R E F(l) E E S 
-S E E F(r) E E E E E E E E E E E F(l) E E S 
-S E E F(r) E E E E E E E E E E E F(l) E E S 
+S E E F(r) E R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R E F(l) E E S 
+S E E F(r) E E E R E R E R E E E F(l) E E S 
+S E E S E E E E E E E E E E E S E E S 
 S E E F(l) E E E E E E E E E E E F(r) E E S 
-S E E F(l) E E E E E E E E E E E F(r) E E S 
-S E E S T(S,ll) R R R R R R R R R T(S,lr) S E E S 
+S E E F(l) E R R E R E R E R R E F(r) E E S 
+S E E S S Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) S S E E S 
 S E E S S N N N N N N N N N S S E E S 
 S E E S K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E E E E E E E E E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) S E E S 
 S E E S E L E L E L E L E L E S E E S 
@@ -33,11 +33,11 @@ E E E N E E E E E E E E E E E N E E E
 E E E N E E E E E E E E E E E N E E E 
 
 STARS:
-9000
-15000
-28000
-38000
+12000
+20000
+34000
 45000
+53000
 
 PaddleGrow 0
 PoisonPaddle 0

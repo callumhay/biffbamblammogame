@@ -1,18 +1,18 @@
 Yours and Mine
 17 22
-E E S S S S S S S S S S S S S S S 
-E E S E E E E E E E E E S E E E S 
-E E S E E D(StickyPaddle) E E E M E E S E E E S 
+E E S S S S S S S S S S S E E E E 
+E E S E E E E E E E E E S E E E E 
+E E S E E D(StickyPaddle) E E E M E E S S S S S 
 S S S E E E E E E E E E S E E E S 
 S D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) S F(d) F(d) N F(d) F(d) F(d) F(d) F(d) F(d) S C(90) E C(180) S 
-S G Y O G Y Y Y G O Y G S E E E S 
+S G Y O G G G G G O Y G S E E E S 
 S G Y O O R R R O O Y G S E E E S 
-S E E E E B R E E E E E S E E E S 
+S E E E E B R B E E E E S E E E S 
 S E I E E E E E E E I E S E E E S 
 S Y Y Y Y Y Y Y Y Y Y Y S E E E S 
 S Y R Y R Y Y Y R Y R Y S E E E S 
 S G G G G R G R G G G G S E E E S 
-S Y Y Y Y Y J Y Y Y Y Y S E E E S 
+S Y Y Y Y Y M Y Y Y Y Y S E E E S 
 S G G G G R G R G G G G S E E E S 
 S G Y G O G R G O G Y G S E E E S 
 S E E E E E E E E E E E S E E E S 
@@ -45,7 +45,7 @@ InvisiBall 2
 LaserBeamPaddle 1
 OmniLaserBall 0
 FireBall 2
-RocketPaddle 2
+RocketPaddle 0
 GhostBall 1
 BallShrink 2
 UpsideDown 2

@@ -74,9 +74,12 @@ private:
     ESPPointEmitter* pedimentExplodingEmitter;
     ESPPointEmitter* eyeExplodingEmitter;
 
+    SoundID sparkleSoundID;
+    SoundID glowSoundID;
+
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawPostBodyEffects(double dT, const Camera& camera);
+    void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
 
     Point3D GetBossFinalExplodingEpicenter() const;
 

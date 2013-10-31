@@ -11,34 +11,34 @@ E E S E T(P,ul) E P T(P,lr) E E E T(P,ll) P E T(P,ur) E S E E
 E E S S S S S S F(d) F(d) F(d) S S S S S S E E 
 E E S E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
-E E S E E E R Q(f) Q(f) Q(f) Q(f) Q(f) R E E E S E E 
-E E S E E E R O O O O O R E E E S E E 
-E E S E E E R O O O O O R E E E S E E 
-E E S E E E R O Y Y Y O R E E E S E E 
-E E S E E E R O Y G Y O R E E E S E E 
+E E S E E E Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) Q(f) E E E S E E 
+E E S E E E O O O O O O O E E E S E E 
+E E S E E E O Y Y Y Y Y O E E E S E E 
+E E S E E E O Y Y Y Y Y O E E E S E E 
+E E S E E E O Y Y G Y Y O E E E S E E 
 E E S E E E R R Y G Y R R E E E S E E 
-E E S E E E Q(f) K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) Y D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle,LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Y K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) Q(f) E E E S E E 
+E E S E E E Q(f) K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) Y D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Y K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) Q(f) E E E S E E 
 E E S E E E R R Y G Y R R E E E S E E 
-E E S E E E R O Y G Y O R E E E S E E 
-E E S E E E R O Y G Y O R E E E S E E 
-E E S E E E R O Y G Y O R E E E S E E 
+E E S E E E O O Y G Y O O E E E S E E 
+E E S E E E O O Y G Y O O E E E S E E 
+E E S E E E O O Y G Y O O E E E S E E 
 E E S E E E S S S D(IceBall,IceBall,IceBall) S S S E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
-E E S E E E E E E E E E E E E E S E E 
-E E S E E E E E E E E E E E E E S E E 
-E E S E E E E E E E E E E E E E S E E 
-E E S E E E E E E E E E E E E E S E E 
 C(0) E S E E E E E E E E E E E E E S E C(0) 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+E E S E E E E E E E E E E E E E S E E 
+S S S E E E E E E E E E E E E E S S S 
 
 STARS:
 8000
-14000
-18000
-25000
-28000
+14300
+19500
+27000
+32000
 
 PaddleGrow 0
 PoisonPaddle 0

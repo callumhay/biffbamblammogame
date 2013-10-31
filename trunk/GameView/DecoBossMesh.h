@@ -52,6 +52,8 @@ private:
     Texture2D* glowTex;
     double introTimeCountdown;
     std::vector<AnimationLerp<float> > eyeGlowAlphaAnims;
+    SoundID lightningRelaySoundID;
+    SoundID eyeGlowSoundID;
     AnimationLerp<float> lightningRelayAlphaAnim;
 
     AnimationMultiLerp<float> eyeFlashingAlphaAnim;
@@ -65,7 +67,7 @@ private:
     //void DrawPreBodyEffects(double dT, const Camera& camera);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawPostBodyEffects(double dT, const Camera& camera);
+    void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
     Point3D GetBossFinalExplodingEpicenter() const;
 
     DISALLOW_COPY_AND_ASSIGN(DecoBossMesh);

@@ -543,7 +543,7 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
 
 SelectWorldMenuState::WorldUnlockAnimationTracker::WorldUnlockAnimationTracker(SelectWorldMenuState* state,
                                                                                WorldSelectItem* worldItem) : 
-worldItem(worldItem), state(state), energySuckEmitter(NULL), bigExplosionEmitter(NULL), bigExplosionOnoEmitter(NULL),
+worldItem(worldItem), state(state), timedEnergySuckEmitter(NULL), energySuckEmitter(NULL), bigExplosionEmitter(NULL), bigExplosionOnoEmitter(NULL),
 debrisEmitter(NULL), fireSmokeEmitter1(NULL), fireSmokeEmitter2(NULL), countdownMoveToLockedWorld(1.0),
 countdownWaitToShake(0.75), countdownWaitToEnergySuck(0.75), sparkleTex(NULL), debrisTex(NULL), worldUnlockSoundID(INVALID_SOUND_ID),
 lensFlareTex(NULL), hugeExplosionTex(NULL), sphereNormalsTex(NULL), particleFader(1, 0), particleHalfFader(1, 0.5f), 
@@ -623,6 +623,26 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
     this->energySuckEmitter->AddEffector(&this->particleHalfFader);
     this->energySuckEmitter->AddEffector(&this->particleMediumShrink);
     this->energySuckEmitter->SetRandomTextureParticles(200, energySuckTextures);
+
+
+    this->timedEnergySuckEmitter = new ESPPointEmitter();
+    this->timedEnergySuckEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->timedEnergySuckEmitter->SetNumParticleLives(1);
+    this->timedEnergySuckEmitter->SetInitialSpd(ESPInterval(500.0f, 1500.0f));
+    this->timedEnergySuckEmitter->SetParticleLife(ESPInterval(1.75f));
+    this->timedEnergySuckEmitter->SetParticleSize(ESPInterval(25.0f, 250.0f));
+    this->timedEnergySuckEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, MAX_DEVIATION_RADIUS),
+        ESPInterval(0.0f, MAX_DEVIATION_RADIUS), ESPInterval(0.0f));
+    this->timedEnergySuckEmitter->SetParticleAlignment(ESP::NoAlignment);
+    this->timedEnergySuckEmitter->SetEmitPosition(Point3D(0, 0, 0));
+    this->timedEnergySuckEmitter->SetEmitDirection(Vector3D(0,1,0));
+    this->timedEnergySuckEmitter->SetToggleEmitOnPlane(true);
+    this->timedEnergySuckEmitter->SetEmitAngleInDegrees(180);
+    this->timedEnergySuckEmitter->SetIsReversed(true);
+    this->timedEnergySuckEmitter->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0.85f, 1.0f), ESPInterval(1.0f), ESPInterval(0.9f, 1.0f));
+    this->timedEnergySuckEmitter->AddEffector(&this->particleHalfFader);
+    this->timedEnergySuckEmitter->AddEffector(&this->particleMediumShrink);
+    this->timedEnergySuckEmitter->SetRandomTextureParticles(30, energySuckTextures);
 
     static const float EXPLOSION_LIFE = 2.0;
 
@@ -770,6 +790,8 @@ SelectWorldMenuState::WorldUnlockAnimationTracker::~WorldUnlockAnimationTracker(
 
     UNUSED_VARIABLE(success);
 
+    delete this->timedEnergySuckEmitter;
+    this->timedEnergySuckEmitter = NULL;
     delete this->energySuckEmitter;
     this->energySuckEmitter = NULL;
     delete this->bigExplosionEmitter;
@@ -831,7 +853,9 @@ void SelectWorldMenuState::WorldUnlockAnimationTracker::Draw(const Camera& camer
     // Energy suck (flares getting sucked into the lock for the level)
     this->energySuckEmitter->Tick(dT);
     this->energySuckEmitter->Draw(camera);
-    if (!this->energySuckEmitter->IsDead()) {
+    this->timedEnergySuckEmitter->Tick(dT);
+    this->timedEnergySuckEmitter->Draw(camera);
+    if (!this->timedEnergySuckEmitter->IsDead()) {
 
         this->lockShakeAnim.Tick(dT);
         this->worldItem->SetLockOffset(this->lockShakeAnim.GetInterpolantValue());

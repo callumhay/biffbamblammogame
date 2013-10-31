@@ -97,6 +97,7 @@ public:
 	void ProjectileRemovedEvent(const Projectile& projectile);
 	void RocketExplodedEvent(const RocketProjectile& rocket);
     void MineExplodedEvent(const MineProjectile& mine);
+    void MineLandedEvent(const MineProjectile& mine);
     void RemoteControlRocketFuelWarningEvent(const PaddleRemoteControlRocketProjectile& rocket);
     void RemoteControlRocketThrustAppliedEvent(const PaddleRemoteControlRocketProjectile& rocket);
 
@@ -150,6 +151,15 @@ private:
     typedef std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, SoundID> TeslaLightningSoundIDMap;
     typedef TeslaLightningSoundIDMap::iterator TeslaLightningSoundIDMapIter;
     TeslaLightningSoundIDMap teslaLightningSoundIDs;
+
+    typedef std::map<const LevelPiece*, long> BlockTimestampMap;
+    typedef BlockTimestampMap::iterator BlockTimestampMapIter;
+    typedef std::map<const Projectile*, BlockTimestampMap> ProjectileEffectTimestampMap;
+    typedef ProjectileEffectTimestampMap::iterator ProjectileEffectTimestampMapIter;
+    ProjectileEffectTimestampMap projectileEffectTSMap;
+    
+    static const long EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS;
+
 
     static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
     static const long SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;

@@ -448,8 +448,8 @@ inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera&
     this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, effectPos, 0));
 	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, effectPos, 0));
 
-    this->paddleLaserGlowAura->SetParticleAlpha(std::min<float>(paddle.GetAlpha(), this->paddleLaserGlowAura->GetParticleAlpha().maxValue));
-    this->paddleLaserGlowSparks->SetParticleAlpha(std::min<float>(paddle.GetAlpha(), this->paddleLaserGlowAura->GetParticleAlpha().maxValue));
+    this->paddleLaserGlowAura->SetAliveParticleAlphaMax(paddle.GetAlpha());
+    this->paddleLaserGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
 
 	this->paddleLaserGlowAura->Draw(camera);
 	this->paddleLaserGlowAura->Tick(dT);
@@ -470,7 +470,7 @@ inline void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, con
 
 	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, tempYBound, -tempZBound), Point3D(tempXBound, tempYBound, tempZBound));
 	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
-    this->paddleBeamGlowSparks->SetParticleAlpha(std::min<float>(paddle.GetAlpha(), this->paddleBeamGlowSparks->GetParticleAlpha().maxValue));
+    this->paddleBeamGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
 
 	this->paddleBeamGlowSparks->Draw(camera);
 	this->paddleBeamGlowSparks->Tick(dT);
@@ -481,7 +481,7 @@ inline void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Cam
 
 	this->paddleBeamBlastBits->SetEmitPosition(Point3D(0, 0, -paddle.GetHalfHeight()));
 	this->paddleBeamBlastBits->SetParticleSize(xSize);
-    this->paddleBeamBlastBits->SetParticleAlpha(std::min<float>(paddle.GetAlpha(), this->paddleBeamBlastBits->GetParticleAlpha().maxValue));
+    this->paddleBeamBlastBits->SetAliveParticleAlphaMax(paddle.GetAlpha());
 
 	this->paddleBeamBlastBits->Draw(camera);
 	this->paddleBeamBlastBits->Tick(dT);

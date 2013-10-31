@@ -119,6 +119,7 @@ protected:
 	double totalLifeTime;    // Total amount of time that the beam lives for in seconds
 	double currTimeElapsed;  // The amount of time elapsed for the beam so far in seconds
 
+    bool beamAlphaDirty;
     float beamAlpha; // As the beam nears the end of its life it's alpha diminishes and so does its power/damage
 
 	void CleanUpBeam(std::list<BeamSegment*>& beamSegs);
