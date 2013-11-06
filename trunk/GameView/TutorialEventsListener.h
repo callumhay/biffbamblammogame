@@ -2,7 +2,7 @@
  * TutorialEventsListener.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -18,6 +18,7 @@
 #include "../ESPEngine/ESP.h"
 
 #include "ButtonTutorialHint.h"
+#include "BasicMultiTutorialHint.h"
 #include "PopupTutorialHint.h"
 
 class GameDisplay;
@@ -60,6 +61,9 @@ public:
     
     void SetPointsHintEmitter(ESPPointEmitter* hint) { this->pointsTutorialHintEmitter = hint; }
 
+    void SetMultiplierHints(BasicMultiTutorialHint* hints) { this->multiplierHints = hints; }
+    void SetMultiplierLostHint(BasicTutorialHint* hint) { this->multiplierLostHint = hint; }
+
 private:
     GameDisplay* display;
 
@@ -86,6 +90,9 @@ private:
     ButtonTutorialHint* doBoostSlingshotHint;
     ButtonTutorialHint* holdBoostHint;
     ButtonTutorialHint* boostAvailableHint;
+
+    BasicTutorialHint* multiplierLostHint;
+    BasicMultiTutorialHint* multiplierHints;
 
     ESPPointEmitter* pointsTutorialHintEmitter;
     ESPParticleColourEffector fadeEffector;

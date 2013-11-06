@@ -2,7 +2,7 @@
  * InTutorialGameDisplayState.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -21,6 +21,8 @@
 #include "CountdownHUD.h"
 #include "GameDisplay.h"
 #include "MouseRenderer.h"
+#include "CgFxPostTutorialAttention.h"
+#include "TutorialHintListeners.h"
 
 class TutorialHint;
 class TutorialEventsListener;
@@ -53,11 +55,53 @@ private:
 
 	TutorialInGameRenderPipeline renderPipeline;
     TutorialEventsListener* tutorialListener;
-    std::vector<TutorialHint*> noDepthTutorialHints;
+
+    typedef std::vector<EmbededTutorialHint*> HintList;
+    typedef HintList::iterator HintListIter;
+
+    HintList noDepthTutorialHints;
+    HintList ballFollowTutorialHints;
 
     CountdownHUD boostCountdownHUD;
+    CgFxPostTutorialAttention tutorialAttentionEffect;
 
     void InitTutorialHints();
+
+    class HintListener : public TutorialHintListener  {
+    public:
+        HintListener(InTutorialGameDisplayState* state) : TutorialHintListener(), state(state) {
+            assert(state != NULL);
+        }
+        virtual ~HintListener() {}
+
+        void OnTutorialHintShown();
+        void OnTutorialHintUnshown();
+    protected:
+        InTutorialGameDisplayState* state;
+    };
+
+    class MovePaddleHintListener : public HintListener {
+    public:
+        MovePaddleHintListener(InTutorialGameDisplayState* state) : HintListener(state) {}
+        ~MovePaddleHintListener() {
+            PlayerPaddle::SetEnablePaddleRelease(true);
+        }
+
+        void OnTutorialHintShown();
+        void OnTutorialHintUnshown();
+    };
+
+    class SlowBallHintListener : public HintListener {
+    public:
+        SlowBallHintListener(InTutorialGameDisplayState* state) : HintListener(state) {}
+        ~SlowBallHintListener() {}
+
+        void OnTutorialHintShown();
+        void OnTutorialHintUnshown();
+
+    private:
+        void SetBallSpeed(float speed);
+    };
 
     DISALLOW_COPY_AND_ASSIGN(InTutorialGameDisplayState);
 };

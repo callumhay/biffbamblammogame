@@ -1013,6 +1013,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxPostTutorialAttention.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxPostUberIntense.h"
 						>
 					</File>
@@ -1102,6 +1106,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPostSmokey.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostTutorialAttention.cpp"
 						>
 					</File>
 					<File
@@ -1577,6 +1585,14 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameView\BasicMultiTutorialHint.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BasicTutorialHint.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\BBBTitleDisplay.h"
 						>
 					</File>
@@ -1586,6 +1602,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\DecoratorOverlayPane.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\EmbededTutorialHint.h"
 						>
 					</File>
 					<File
@@ -1629,6 +1649,14 @@
 					Name="Source Files"
 					>
 					<File
+						RelativePath=".\GameView\BasicMultiTutorialHint.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BasicTutorialHint.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\BBBTitleDisplay.cpp"
 						>
 					</File>
@@ -1638,6 +1666,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\DecoratorOverlayPane.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\EmbededTutorialHint.cpp"
 						>
 					</File>
 					<File

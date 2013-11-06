@@ -1,5 +1,5 @@
 /**
- * CgFxGaussianBlur.h
+ * CgFxPostTutorialAttention.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2010-2013
@@ -9,8 +9,8 @@
  * resulting work only under the same or similar license to this one.
  */
 
-#ifndef __CGFXGAUSSIANBLUR_H__
-#define __CGFXGAUSSIANBLUR_H__
+#ifndef __CGFXPOSTTUTORIALATTENTION_H__
+#define __CGFXPOSTTUTORIALATTENTION_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Animation.h"
@@ -18,36 +18,31 @@
 
 class FBObj;
 
-class CgFxGaussianBlur : public CgFxPostProcessingEffect {
+class CgFxPostTutorialAttention : public CgFxPostProcessingEffect {
 public:
-	enum BlurType { Kernel3x3, Kernel5x5, Kernel7x7 };
+	CgFxPostTutorialAttention(FBObj* sceneFBO);
+	~CgFxPostTutorialAttention();
 
-	CgFxGaussianBlur(BlurType blurType, FBObj* sceneFBO);
-	~CgFxGaussianBlur();
+    void SetAlpha(float alpha);
+    void CrossFadeIn(double fadeInTime);
+    void CrossFadeOut(double fadeOutTime);
 
-	void SetPoisonBlurAnimation(bool on);
-
-	void SetBlurType(BlurType type);
 	void Draw(int screenWidth, int screenHeight, double dT);
 
-    void SetSigma(float sigma) { this->sigma = sigma; }
-
 private:
-	static const char* GAUSSIANBLUR_3x3_TECHNIQUE_NAME;
-	static const char* GAUSSIANBLUR_5x5_TECHNIQUE_NAME;
-	static const char* GAUSSIANBLUR_7x7_TECHNIQUE_NAME;
+	static const char* TECHNIQUE_NAME;
 	
 	FBObj* tempFBO;
-	BlurType blurType;
-    double sigma;
+    AnimationLerp<float> fadeAnim;
 
 	// CG parameters
     CGparameter sceneSamplerParam;
 	CGparameter blurSizeHorizontalParam;
     CGparameter blurSizeVerticalParam;
 	CGparameter sigmaParam;
+    CGparameter greyscaleFactorParam;
 
-    bool isPoisonBlurActive;
-	AnimationMultiLerp<float> poisonBlurAnim;
+    DISALLOW_COPY_AND_ASSIGN(CgFxPostTutorialAttention);
 };
-#endif
+
+#endif // __CGFXPOSTTUTORIALATTENTION_H__

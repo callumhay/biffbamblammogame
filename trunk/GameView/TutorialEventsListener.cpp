@@ -2,7 +2,7 @@
  * TutorialEventsListener.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -19,13 +19,12 @@ TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(d
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
 finishedPointsHint(false), keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
 doBoostPressToReleaseHint(NULL), doBoostSlingshotHint(NULL), holdBoostHint(NULL), hasShownBoostHint(false),
-boostAvailableHint(NULL), fadeEffector(1, 0) {
+boostAvailableHint(NULL), multiplierHints(NULL), multiplierLostHint(NULL), fadeEffector(1, 0) {
     assert(display != NULL);
 }
 
 TutorialEventsListener::~TutorialEventsListener() {
 }
-
 
 void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pressedButton) {
     
@@ -56,6 +55,8 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
 
     this->numBlocksDestroyed++;
 
+    const GameLevel* level = this->display->GetModel()->GetCurrentLevel();
+
     // Check to see whether the points tutorial hint has already been faded...
     if (!this->finishedPointsHint) {
         // Figure out when to fade the points hint...
@@ -63,10 +64,9 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
         // The following block indices must be empty to make the points hint disappear:
         // row idx 14 - 16
         // col idx 1 - 8
-        const GameLevel* level = this->display->GetModel()->GetCurrentLevel();
+        
         const std::vector<std::vector<LevelPiece*> >& levelPieces = level->GetCurrentLevelLayout();
         bool blockIndicesAllEmpty = true;
-
         for (int row = 14; row <= 16 && blockIndicesAllEmpty; row++) {
             for (int col = 1; col <= 8 && blockIndicesAllEmpty; col++) {
                 if (levelPieces[row][col]->GetType() != LevelPiece::Empty) {
@@ -81,6 +81,16 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
             this->pointsTutorialHintEmitter->AddEffector(&this->fadeEffector);
             this->finishedPointsHint = true;
         }
+    }
+
+    GameBall* ball = this->display->GetModel()->GetGameBalls().front();
+    assert(ball != NULL);
+    if (!this->multiplierHints->IsDoneShowingAllHints() &&
+        !level->IsLevelAlmostComplete() && this->hasShownBoostHint && 
+        ball->GetCenterPosition2D()[1] >= 18 * LevelPiece::PIECE_HEIGHT) {
+
+        // Start showing the multiplier hints...
+        this->multiplierHints->Show(0.0, 1.0);
     }
 }
 

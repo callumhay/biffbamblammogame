@@ -364,18 +364,21 @@ inline Vector3D operator*(const Matrix4x4& m, const Vector3D& v) {
 	return ret;
 }
 
+inline Vector4D operator*(const Matrix4x4& m, const Vector4D& v) {
+    Vector4D ret;
+    for (int i = 0; i < 4; i++) {
+        ret[i] = Vector4D::Dot(v, m.getRow(i));
+    }
+
+    return ret;
+}
+
 inline Point3D operator*(const Matrix4x4& m, const Point3D& p) {
 	Point3D ret;
 	Vector4D temp = Vector4D(p[0], p[1], p[2], 1);
 	
 	for (int i = 0; i < 3; i++) {
-		Vector4D currRow = m.getRow(i);
-		float sum = 0.0f;
-
-		for (int j = 0; j < 4; j++) {
-			sum += temp[j] * currRow[j];
-		}
-		ret[i] = sum;
+        ret[i] = Vector4D::Dot(temp, m.getRow(i));
 	}
 
 	return ret;
@@ -386,13 +389,7 @@ inline Point2D operator*(const Matrix4x4& m, const Point2D& p) {
     Vector4D temp = Vector4D(p[0], p[1], 0, 1);
 
     for (int i = 0; i < 2; i++) {
-        Vector4D currRow = m.getRow(i);
-        float sum = 0.0f;
-
-        for (int j = 0; j < 4; j++) {
-            sum += temp[j] * currRow[j];
-        }
-        ret[i] = sum;
+        ret[i] = Vector4D::Dot(temp, m.getRow(i)); 
     }
 
     return ret;

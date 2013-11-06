@@ -47,6 +47,7 @@ public:
 	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
 	inline FBObj* GetFinalFullScreenFBO()	{ return this->finalFSEffectFBO; }
     inline FBObj* GetColourAndDepthTexFBO() { return this->colourAndDepthTexFBO; }
+    inline FBObj* GetTempFBO() { return this->tempFBO; }
 
     inline CgFxCelOutlines& GetCelOutlineEffect() { return this->celOutlineEffect; }
 

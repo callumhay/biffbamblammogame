@@ -2,7 +2,7 @@
  * ButtonTutorialHint.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -12,7 +12,7 @@
 #ifndef __BUTTONTUTORIALHINT_H__
 #define __BUTTONTUTORIALHINT_H__
 
-#include "TutorialHint.h"
+#include "BasicTutorialHint.h"
 #include "GameViewConstants.h"
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/TextLabel.h"
@@ -20,7 +20,7 @@
 class Texture;
 class GameTutorialAssets;
 
-class ButtonTutorialHint : public TutorialHint {
+class ButtonTutorialHint : public BasicTutorialHint {
 public:
     ButtonTutorialHint(const GameTutorialAssets* tutorialAssets, const std::string& action);
     ~ButtonTutorialHint();
@@ -28,8 +28,7 @@ public:
     float GetHeight() const;
     float GetWidth() const;
 
-    void SetTopLeftCorner(float x, float y);
-    void SetActionName(const std::string& action, const std::string& separator = "");
+    void SetActionNameWithSeparator(const std::string& action, const std::string& separator = "");
 
     void SetXBoxButton(GameViewConstants::XBoxButtonType buttonType, const std::string& buttonText,
         const Colour& buttonColour);
@@ -42,13 +41,6 @@ public:
 
     void SetMouseButton(GameViewConstants::MouseButtonType buttonType, const std::string& buttonText);
 
-    void SetFlashing(bool on);
-    void SetAlphaWhenShowing(float alpha) { this->alphaWhenShowing = alpha; };
-
-    void Show(double delayInSeconds, double fadeInTimeInSeconds);
-    void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
-
-    void Tick(double dT);
     void Draw(const Camera& camera, bool drawWithDepth = false, float depth = 0.0f);
 
 private:
@@ -84,19 +76,12 @@ private:
 
     const GameTutorialAssets* tutorialAssets;
 
-    AnimationLerp<float> fadeAnim;
-    AnimationMultiLerp<Colour>* flashAnim;
-
-    float alphaWhenShowing;
-
     std::vector<ButtonGlyphLabel*> keyboardKeyLabels;
     std::vector<ButtonGlyphLabel*> xboxLabels;
     ButtonGlyphLabel* mouseLabel;
 
-    TextLabel2D actionLabel;
     TextLabel2D orLabel;
     TextLabel2D commaLabel;
-    //TextLabel2D postTextLabel;
 
     void ClearKeyboardKeyLabels();
     void ClearXBoxLabels();
@@ -105,9 +90,8 @@ private:
     DISALLOW_COPY_AND_ASSIGN(ButtonTutorialHint);
 };
 
-
-inline void ButtonTutorialHint::SetTopLeftCorner(float x, float y) {
-    this->actionLabel.SetTopLeftCorner(x, y);
+inline float ButtonTutorialHint::GetHeight() const {
+    return this->actionLabel.GetHeight() * BUTTON_SCALE_MULTIPLIER;
 }
 
 #endif // __BUTTONTUTORIALHINT_H__
