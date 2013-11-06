@@ -29,41 +29,4 @@ protected:
     TutorialHintListener() {}
 };
 
-class MovePaddleHintListener : public TutorialHintListener {
-public:
-    MovePaddleHintListener() {}
-    ~MovePaddleHintListener() {
-        PlayerPaddle::SetEnablePaddleRelease(true);
-    }
-
-    void OnTutorialHintShown() {
-        // Disable the paddle's ability to release the ball until the player has moved
-        PlayerPaddle::SetEnablePaddleRelease(false);
-    }
-    void OnTutorialHintUnshown() {
-        PlayerPaddle::SetEnablePaddleRelease(true);
-    }
-};
-
-class BoostPopupHintListener : public TutorialHintListener {
-public:
-    BoostPopupHintListener(ButtonTutorialHint* startBoostHint) : startBoostHint(startBoostHint) {
-        assert(startBoostHint != NULL);
-    }
-
-    ~BoostPopupHintListener() {}
-
-    void OnTutorialHintShown() {
-    }
-
-    void OnTutorialHintUnshown() {
-        this->startBoostHint->Show(0.0, 0.5);
-    }
-
-private:
-    ButtonTutorialHint* startBoostHint;
-
-};
-
-
 #endif // __TUTORIALHINTLISTENERS_H__

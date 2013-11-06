@@ -104,7 +104,7 @@ void MouseRenderer::SetState(MouseState newState) {
             // Do a cross fade if we were fading out...
             double fadeInTime = MouseRenderer::FADE_IN_TIME;
             if (this->currState == FadingOut) {
-                fadeInTime = NumberFuncs::LerpOverFloat(0.0f, 1.0f, 0.0f, static_cast<float>(FADE_IN_TIME), this->mouseAlphaAnim.GetInterpolantValue());
+                fadeInTime = NumberFuncs::LerpOverFloat<double>(0.0f, 1.0f, FADE_IN_TIME, 0.0, this->mouseAlphaAnim.GetInterpolantValue());
             }
 
             this->mouseAlphaAnim.SetLerp(fadeInTime, 1.0f);
@@ -126,7 +126,7 @@ void MouseRenderer::SetState(MouseState newState) {
             // Do a cross fade if we were fading in...
             double fadeOutTime = MouseRenderer::FADE_OUT_TIME;
             if (this->currState == FadingIn) {
-                fadeOutTime = NumberFuncs::LerpOverFloat(1.0f, 0.0f, 0.0f, static_cast<float>(FADE_OUT_TIME), this->mouseAlphaAnim.GetInterpolantValue());
+                fadeOutTime = NumberFuncs::LerpOverFloat<double>(1.0f, 0.0f, FADE_OUT_TIME, 0.0, this->mouseAlphaAnim.GetInterpolantValue());
             }
 
             this->mouseAlphaAnim.SetLerp(fadeOutTime, 0.0f);

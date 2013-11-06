@@ -86,11 +86,12 @@ public:
 		assert(success);
 	}
 
-	
-
 	inline void SetInputFBO(FBObj* sceneFBO) {
 		this->sceneFBO = sceneFBO;
 	}
+    FBObj* GetSceneFBO() {
+        return this->sceneFBO;
+    }
 
 	/**
 	 * Obtain the current technique for this effect.

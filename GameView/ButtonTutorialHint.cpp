@@ -2,7 +2,7 @@
  * ButtonTutorialHint.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -25,18 +25,16 @@ const float ButtonTutorialHint::BUTTON_SCALE_MULTIPLIER = 2.0f;
 
 ButtonTutorialHint::ButtonTutorialHint(const GameTutorialAssets* tutorialAssets,
                                        const std::string& action) : 
-TutorialHint(), tutorialAssets(tutorialAssets),
-actionLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
-GameFontAssetsManager::Medium), ""),
+BasicTutorialHint(""), tutorialAssets(tutorialAssets),
 orLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
 GameFontAssetsManager::Medium), " or  "),
 commaLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
 GameFontAssetsManager::Medium), ","),
-mouseLabel(NULL), flashAnim(NULL), alphaWhenShowing(1.0f) {
+mouseLabel(NULL) {
 
     assert(tutorialAssets != NULL);
 
-    this->SetActionName(action, ":");
+    this->SetActionNameWithSeparator(action, ":");
     this->actionLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
     this->actionLabel.SetDropShadow(Colour(0,0,0), 0.10f);
 
@@ -55,14 +53,9 @@ ButtonTutorialHint::~ButtonTutorialHint() {
     this->ClearKeyboardKeyLabels();
     this->ClearXBoxLabels();
     this->ClearMouseLabel();
-
-    if (this->flashAnim != NULL) {
-        delete this->flashAnim;
-        this->flashAnim = NULL;
-    }
 }
 
-void ButtonTutorialHint::SetActionName(const std::string& action, const std::string& separator) {
+void ButtonTutorialHint::SetActionNameWithSeparator(const std::string& action, const std::string& separator) {
     this->actionLabel.SetText(action + separator + " ");
 }
 
@@ -222,27 +215,8 @@ void ButtonTutorialHint::SetMouseButton(GameViewConstants::MouseButtonType butto
 #endif
 }
 
-void ButtonTutorialHint::SetFlashing(bool on) {
-    if (on) {
-        if (this->flashAnim == NULL) {
-            this->flashAnim = new AnimationMultiLerp<Colour>(
-                GameViewConstants::GetInstance()->BuildFlashingColourAnimation());
-        }
-    }
-    else {
-        if (this->flashAnim != NULL) {
-            delete this->flashAnim;
-            this->flashAnim = NULL;
-        }
-    }
-}
-
-float ButtonTutorialHint::GetHeight() const {
-    return this->actionLabel.GetHeight() * BUTTON_SCALE_MULTIPLIER;
-}
-
 float ButtonTutorialHint::GetWidth() const {
-    float width = this->actionLabel.GetLastRasterWidth();
+    float width = this->actionLabel.GetWidth();
     for (std::vector<ButtonGlyphLabel*>::const_iterator iter = this->xboxLabels.begin();
          iter != this->xboxLabels.end(); ++iter) {
 
@@ -274,41 +248,10 @@ float ButtonTutorialHint::GetWidth() const {
     return width;
 }
 
-void ButtonTutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) {
-    if (this->isShown) { return; }
-
-    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, this->fadeAnim.GetInterpolantValue(), this->alphaWhenShowing);
-    this->fadeAnim.SetRepeat(false);
-
-    if (this->listener != NULL) {
-        this->listener->OnTutorialHintShown();
-    }
-
-    this->isShown = true;
-}
-
-void ButtonTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow) {
-    if (!this->isShown && !overridePrevUnshow) { return; }
-
-    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeOutTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 0.0f);
-    this->fadeAnim.SetRepeat(false);
-
-    if (this->listener != NULL) {
-        this->listener->OnTutorialHintUnshown();
-    }
-
-    this->isShown = false;
-}
-
-void ButtonTutorialHint::Tick(double dT) {
-    this->fadeAnim.Tick(dT);
-    if (this->flashAnim != NULL) {
-        this->flashAnim->Tick(dT);
-    }
-}
-
 void ButtonTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float depth) {
     UNUSED_PARAMETER(camera);
+    UNUSED_PARAMETER(drawWithDepth);
+    UNUSED_PARAMETER(depth);
 
     float alpha = this->fadeAnim.GetInterpolantValue();
     if (alpha <= 0) {
@@ -324,12 +267,12 @@ void ButtonTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float de
 
     float scale = 1.0f;
     const Point2D& topLeftCorner = this->actionLabel.GetTopLeftCorner();
-    float currX = topLeftCorner[0] + this->actionLabel.GetLastRasterWidth();
+    float currX = topLeftCorner[0] + this->actionLabel.GetWidth();
     const float actualCenterY = topLeftCorner[1] - this->actionLabel.GetHeight()/2.0f;
 
     // Draw the action label...
     this->actionLabel.SetAlpha(alpha);
-    this->actionLabel.Draw(drawWithDepth, depth);
+    this->actionLabel.Draw();
 
     float commaHeightDiv2 = this->commaLabel.GetHeight()/2.0f;
     float buttonLabelDiv2 = 0;
