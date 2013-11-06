@@ -43,14 +43,8 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
         return false;
     }
 	
-	// Don't show the mouse cursor unless we're in debug mode
-#ifdef _DEBUG
-	SDL_ShowCursor(1);
-#else
-    // TODO: Show the cursor as a graphic/effect of some sort in the menu and game
-    // and hide the normal one...
-    SDL_ShowCursor(0);
-#endif
+	// Don't show the mouse cursor, we render it ourselves when it's needed
+	this->ShowCursor(false);
 
     SDL_WM_SetCaption(WindowManager::WINDOW_TITLE, WindowManager::WINDOW_TITLE);
 

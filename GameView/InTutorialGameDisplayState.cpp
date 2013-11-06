@@ -84,20 +84,8 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
 	double actualDt = dT / gameModel->GetTimeDialationFactor();
     Camera& camera = this->display->GetCamera();
 
-    this->renderPipeline.RenderFrame(dT);
+    this->renderPipeline.RenderFrameWithoutHUD(dT);
 
-    // Update and draw tutorial graphics hints
-    //glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
-
-    //glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
-
-    //Camera::PushWindowCoords();
-
-	//glMatrixMode(GL_MODELVIEW);
-	//glPushMatrix();
-	//glLoadIdentity();
-    
     for (std::vector<TutorialHint*>::iterator iter = this->noDepthTutorialHints.begin();
          iter != this->noDepthTutorialHints.end(); ++iter) {
         TutorialHint* hint = *iter;
@@ -114,14 +102,9 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
         this->boostCountdownHUD.Reset();
     }
 
-    //glPopMatrix();
+    this->renderPipeline.RenderHUD(dT);
 
-    //Camera::PopWindowCoords();
-
-    //glPopAttrib();
     debug_opengl_state();
-
-    //this->tutorialListener->Tick(dT);
 
 #ifdef _DEBUG
 	this->DebugDrawBounds();

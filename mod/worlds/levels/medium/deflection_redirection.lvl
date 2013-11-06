@@ -4,7 +4,7 @@ E E E E F(d) J F(d) E E E E E E E F(d) J F(d) E E E E
 E E E E F(d) E F(d) Q(f) B E E E B Q(f) F(d) E F(d) E E E E 
 E E E E F(d) F(d) F(d) Q(i) Q(i) E E E Q(i) Q(i) F(d) F(d) F(d) E E E E 
 E E E E E E E E E E E E E E E E E E E E E 
-R R E N N N N N N N D(ShieldPaddle,ShieldPaddle,ShieldPaddle) N N N N N N N E R R 
+R E E N N N N N N N D(ShieldPaddle,ShieldPaddle,ShieldPaddle) N N N N N N N E E R 
 R B E N E E E E E R E R E E E E E N E B R 
 R R E N E I E E R E E E R E E I E N E R R 
 R R E N E E E R E E E E E R E E E N E R R 
@@ -18,7 +18,7 @@ R B E N G K(IceBall,IceBall,IceBall) G G R O G O R G G K(FireBall,FireBall,FireB
 R R E N G G G G R Y G Y R G G G G N E R R 
 R R E N G G G G R G Q(f) G R G G G G N E R R 
 R B E N G G G G R E E E R G G G G N E B R 
-R R E N G G G G E E E E E G G G G N E R R 
+R E E N G G G G E E E E E G G G G N E E R 
 E E E N G G G E E E E E E E G G G N E E E 
 E E E N G G E E E E E E E E E G G N E E E 
 E E E N G E E E E E E E E E E E G N E E E 

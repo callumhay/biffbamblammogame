@@ -3,7 +3,7 @@ Lighting the Lightning
 E E E E E E E E S S S S S S S D(IceBall,IceBall,IceBall) S S S E E E E 
 E E E E E E E E S E E E Q(i) E E E E E S E E E E 
 E E E E E E E E N E E E Q(i) E Y G Y E N E E E E 
-A(0,0,g,h){3} E Q(f) Q(f) Q(f) E A(0,1,h,g) E S E E E Q(i) E G B G E S E T(P,ur) E E 
+A(0,0,g,h){3} E Q(f) Q(f) Q(f) E A(0,1,h,g) E N E E E Q(i) E G B G E S E T(P,ur) E E 
 S S S S S S S E N E E E Q(i) E Y G Y E N E E E E 
 S S S W(3) S S S E S E E E S E E E E E S E E E E 
 S E E E E E S E S E E E S G E G E G S E E E E 
@@ -12,7 +12,7 @@ S E R S R E S E S E E E S G E G E G S E E E E
 S Q(f) E Q(f) E Q(f) S E S E E E S E G E G E S E E E E 
 S E R E R E S S S E E E S G E G E G S E E E E 
 S O E O E O S T(S,ul) N E E E N E E E E E N E E E E 
-A(1,0,d,c) E E E E E A(1,0,c,d){2} W(2) S E E E S E R Q(f) R E S T(P,ur) E E E 
+A(1,0,d,c) E E E E E A(1,0,c,d){2} W(2) N E E E S E R Q(f) R E S T(P,ur) E E E 
 S Y E Y E Y S T(S,ll) N E E E N E E E E E N E E E E 
 S E Y E Y E S D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle){5} S E E E S G E G E G S E E E E 
 S G E G E G E G S E E E S E G E G E S E E E E 
@@ -41,8 +41,8 @@ PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

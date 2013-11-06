@@ -46,6 +46,9 @@ currAnimationState(BallDeathState::SpiralingToDeath) {
 	this->spiralAnimation.SetRepeat(false);
 	this->spiralAnimation.SetLerp(0.0, BallDeathState::SPIRAL_ANIMATION_TIME_TOTAL, 0.5, 3.0);
 
+    // Remove any mine that might be attached to something that is being removed
+    this->gameModel->RemoveBallDeathMineProjectiles();
+
 	// Clear all the falling items out of the level - makes sure all their sounds/effects
 	// are eliminated so the player only sees and hears his/her death animation
 	this->gameModel->ClearLiveItems();

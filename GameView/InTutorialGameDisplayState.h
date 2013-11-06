@@ -13,14 +13,14 @@
 #define __INTUTORIALGAMEDISPLAYSTATE_H__
 
 #include "../BlammoEngine/TextLabel.h"
-
 #include "../ESPEngine/ESP.h"
-
 #include "../GameModel/GameModel.h"
 
 #include "DisplayState.h"
 #include "TutorialInGameRenderPipeline.h"
 #include "CountdownHUD.h"
+#include "GameDisplay.h"
+#include "MouseRenderer.h"
 
 class TutorialHint;
 class TutorialEventsListener;
@@ -42,7 +42,8 @@ public:
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     void MousePressed(const GameControl::MouseButton& pressedButton);
     void MouseReleased(const GameControl::MouseButton& releasedButton);
-
+    void MouseMoved(int oglWindowCoordX, int oglWindowCoordY);
+    void WindowFocus(bool windowHasFocus);
 	void DisplaySizeChanged(int width, int height);
 
 	DisplayState::DisplayStateType GetType() const;
@@ -61,6 +62,13 @@ private:
     DISALLOW_COPY_AND_ASSIGN(InTutorialGameDisplayState);
 };
 
+inline void InTutorialGameDisplayState::MouseMoved(int oglWindowCoordX, int oglWindowCoordY) {
+    this->display->GetMouse()->ShowMouse(oglWindowCoordX, oglWindowCoordY);
+}
+
+inline void InTutorialGameDisplayState::WindowFocus(bool windowHasFocus) {
+    this->display->GetMouse()->SetWindowHasFocus(windowHasFocus);
+}
 
 inline DisplayState::DisplayStateType InTutorialGameDisplayState::GetType() const {
     return DisplayState::InTutorialGame;

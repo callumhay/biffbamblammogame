@@ -32,17 +32,17 @@ S E E E N E E E E E E E E E N E E E S
 
 STARS:
 8000
-13000
-19000
-26000
-35000
+15000
+20000
+27000
+35500
 
 PaddleGrow 3
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

@@ -544,7 +544,7 @@ void GameModel::ToggleAllowPaddleBallLaunching(bool allow) {
     }
 }
 
-void GameModel::BallBoostDirectionPressed(int x, int y) {
+void GameModel::BallBoostDirectionPressed(float x, float y) {
 	if (this->currState != NULL) {
 		this->currState->BallBoostDirectionPressed(x, y);
 	}
@@ -1287,6 +1287,34 @@ void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
             }
         }
         ++iter;
+    }
+}
+
+void GameModel::RemoveBallDeathMineProjectiles() {
+    for (ProjectileMapIter mapIter = this->projectiles.begin(); mapIter != this->projectiles.end(); ++mapIter) {
+
+        ProjectileList& currProjectiles = mapIter->second;
+        for (ProjectileListIter listIter = currProjectiles.begin(); listIter != currProjectiles.end();) {
+
+            Projectile* currProjectile = *listIter;
+            if (currProjectile->IsMine()) {
+                MineProjectile* currMine = static_cast<MineProjectile*>(currProjectile);
+                if (currMine->GetIsAttachedToPaddle() || currMine->GetIsAttachedToSafetyNet()) {
+                    currMine->Teardown(*this);
+
+                    // EVENT: Projectile removed from the game
+                    GameEventManager::Instance()->ActionProjectileRemoved(*currMine);
+
+                    delete currMine;
+                    currMine = NULL;
+
+                    listIter = currProjectiles.erase(listIter);
+                    continue;
+                }
+            }
+
+            ++listIter;
+        }
     }
 }
 

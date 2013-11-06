@@ -146,7 +146,7 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		boundingLines.push_back(l2);
 		boundingNorms.push_back(n2);
         onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            bottomNeighbor->GetType() == LevelPiece::OneWay);
+            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry);
 	}
 
 	// Right boundary of the piece
@@ -160,7 +160,7 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		boundingLines.push_back(l3);
 		boundingNorms.push_back(n3);
         onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            rightNeighbor->GetType() == LevelPiece::OneWay);
+            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry);
 	}
 
 	// Top boundary of the piece
@@ -174,7 +174,7 @@ void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		boundingLines.push_back(l4);
 		boundingNorms.push_back(n4);
         onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            topNeighbor->GetType() == LevelPiece::OneWay);
+            topNeighbor->GetType() == LevelPiece::OneWay || topNeighbor->GetType() == LevelPiece::NoEntry);
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),

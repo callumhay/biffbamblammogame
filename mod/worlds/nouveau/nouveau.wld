@@ -27,7 +27,7 @@ resources/worlds/levels/easy/on_the_button.lvl
 resources/worlds/levels/hard/meanest_rain_ever.lvl
 
 # Switch + Cannon + rocket + magnet paddle
-resources/worlds/levels/medium/a_little_guidance_is_required.lvl : 190
+resources/worlds/levels/medium/a_little_guidance_is_required.lvl : 180
 
 # Combine rocket/cannon mechanics, collateral blocks, ice balls, and switches...
 resources/worlds/levels/hard/the_ol_switchero.lvl 
@@ -49,7 +49,7 @@ resources/worlds/levels/easy/bend_it_like_maxwell.lvl
 resources/worlds/levels/medium/work_around.lvl
 
 # Prism + Switch
-resources/worlds/levels/hard/prismatic_pragmatism.lvl : 225
+resources/worlds/levels/hard/prismatic_pragmatism.lvl : 208
 
 
 # Switch block + Cannon + rocket + paddle size to increase rocket size and blast radius

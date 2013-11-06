@@ -109,6 +109,8 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(
     }
 
 	this->InitTopMenu();
+
+    this->display->GetMouse()->HideMouse();
 }
 
 InGameMenuState::~InGameMenuState() {

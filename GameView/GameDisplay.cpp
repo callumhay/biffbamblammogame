@@ -19,6 +19,7 @@
 #include "GameCompleteDisplayState.h"
 #include "CreditsDisplayState.h"
 #include "LoadingScreen.h"
+#include "MouseRenderer.h"
 
 // Model includes
 #include "../GameModel/GameWorld.h"
@@ -34,7 +35,7 @@ const int GameDisplay::MAX_FRAMERATE = 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight): 
-gameListener(NULL), currState(NULL), model(model), 
+gameListener(NULL), currState(NULL), mouseRenderer(NULL), model(model), 
 assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCamera() {
 
 	assert(model != NULL);
@@ -44,6 +45,7 @@ assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCam
     Camera::SetWindowDimensions(initWidth, initHeight);
 
     this->assets = new GameAssets(initWidth, initHeight, this->sound);
+    this->mouseRenderer = new MouseRenderer();
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
@@ -70,11 +72,14 @@ GameDisplay::~GameDisplay() {
 	// Remove any action listeners for the model
 	this->RemoveActionListeners();
 
+    delete this->mouseRenderer;
+    this->mouseRenderer = NULL;
+
 	// Delete game assets LAST!! (If you don't do this last
 	// then all the other things being destroyed in this destructor
 	// will try to access the assets that no longer exist).
 	delete this->assets;
-	this->assets = NULL; 
+	this->assets = NULL;
 }
 
 // RENDER FUNCTIONS ****************************************************
@@ -125,7 +130,7 @@ float GameDisplay::GetTextScalingFactor() {
 	return std::min<float>(currXRes / BASE_X_RESOLUTION, currYRes / BASE_Y_RESOLUTION);
 }
 
-void GameDisplay::SpecialDirectionPressed(int x, int y) {
+void GameDisplay::SpecialDirectionPressed(float x, float y) {
     this->model->BallBoostDirectionPressed(-x, -y);
 }
 
