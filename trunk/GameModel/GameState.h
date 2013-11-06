@@ -35,7 +35,7 @@ public:
     virtual void ShootActionContinuousUse(float magnitudePercent) { UNUSED_PARAMETER(magnitudePercent); }
 	virtual void MoveKeyPressedForPaddle(int dir, float magnitudePercent);
     virtual void MoveKeyPressedForOther(int dir, float magnitudePercent) { UNUSED_PARAMETER(dir); UNUSED_PARAMETER(magnitudePercent); }
-    virtual void BallBoostDirectionPressed(int x, int y);
+    virtual void BallBoostDirectionPressed(float x, float y);
     virtual void BallBoostDirectionReleased();
     virtual void BallBoostReleasedForBall(const GameBall& ball);
 
@@ -50,7 +50,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(GameState);
 };
 
-inline void GameState::BallBoostDirectionPressed(int x, int y) {
+inline void GameState::BallBoostDirectionPressed(float x, float y) {
     UNUSED_PARAMETER(x);
     UNUSED_PARAMETER(y);
     // Do nothing by default

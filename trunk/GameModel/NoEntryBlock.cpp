@@ -83,11 +83,12 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
 
     bool shouldGenBounds = false;
 
-	// Left boundry of the piece
+	// Left boundary of the piece
 	if (leftNeighbor != NULL) {
         if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::NoEntry &&
             leftNeighbor->GetType() != LevelPiece::LaserTurret && leftNeighbor->GetType() != LevelPiece::RocketTurret &&
-            leftNeighbor->GetType() != LevelPiece::MineTurret && leftNeighbor->GetType() != LevelPiece::Cannon) {
+            leftNeighbor->GetType() != LevelPiece::MineTurret && leftNeighbor->GetType() != LevelPiece::Cannon &&
+            leftNeighbor->GetType() != LevelPiece::Regen) {
 
             shouldGenBounds = true;
 		}
@@ -104,11 +105,12 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
     }
     shouldGenBounds = false;
 
-	// Bottom boundry of the piece
+	// Bottom boundary of the piece
 	if (bottomNeighbor != NULL) {
 		if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::NoEntry &&
             bottomNeighbor->GetType() != LevelPiece::LaserTurret && bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
-            bottomNeighbor->GetType() != LevelPiece::MineTurret && bottomNeighbor->GetType() != LevelPiece::Cannon) {
+            bottomNeighbor->GetType() != LevelPiece::MineTurret && bottomNeighbor->GetType() != LevelPiece::Cannon &&
+            bottomNeighbor->GetType() != LevelPiece::Regen) {
             
             shouldGenBounds = true;
 		}
@@ -125,11 +127,12 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
     }
     shouldGenBounds = false;
 
-	// Right boundry of the piece
+	// Right boundary of the piece
 	if (rightNeighbor != NULL) {
 		if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::NoEntry &&
             rightNeighbor->GetType() != LevelPiece::LaserTurret && rightNeighbor->GetType() != LevelPiece::RocketTurret &&
-            rightNeighbor->GetType() != LevelPiece::MineTurret && rightNeighbor->GetType() != LevelPiece::Cannon) {
+            rightNeighbor->GetType() != LevelPiece::MineTurret && rightNeighbor->GetType() != LevelPiece::Cannon &&
+            rightNeighbor->GetType() != LevelPiece::Regen) {
 
             shouldGenBounds = true;
 		}
@@ -146,11 +149,12 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
     }
     shouldGenBounds = false;
 
-	// Top boundry of the piece
+	// Top boundary of the piece
 	if (topNeighbor != NULL) {
 		if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::NoEntry &&
             topNeighbor->GetType() != LevelPiece::LaserTurret && topNeighbor->GetType() != LevelPiece::RocketTurret &&
-            topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::Cannon) {
+            topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::Cannon &&
+            topNeighbor->GetType() != LevelPiece::Regen) {
 
             shouldGenBounds = true;
 		}

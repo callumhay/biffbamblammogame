@@ -2,7 +2,7 @@
  * DisplayState.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -74,6 +74,13 @@ public:
 	virtual void ButtonReleased(const GameControl::ActionButton& releasedButton) = 0;
     virtual void MousePressed(const GameControl::MouseButton& pressedButton)     = 0;
     virtual void MouseReleased(const GameControl::MouseButton& releasedButton)    = 0;
+    virtual void MouseMoved(int oglWindowCoordX, int oglWindowCoordY) {
+        UNUSED_PARAMETER(oglWindowCoordX);
+        UNUSED_PARAMETER(oglWindowCoordY);
+    }
+    virtual void WindowFocus(bool windowHasFocus) {
+        UNUSED_PARAMETER(windowHasFocus);
+    }
 
 	virtual void DisplaySizeChanged(int width, int height) = 0;
 

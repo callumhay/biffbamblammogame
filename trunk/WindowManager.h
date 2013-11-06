@@ -41,6 +41,8 @@ public:
 	void Shutdown();
 
 	bool ToggleFullscreen();
+    void ShowCursor(bool show);
+
 
 	std::vector<std::string> GetPossibleResolutionsList();
 
@@ -58,6 +60,10 @@ private:
 
 	WindowManager();
 	~WindowManager();
-
 };
+
+inline void WindowManager::ShowCursor(bool show) {
+    SDL_ShowCursor(show ? 1 : 0);
+}
+
 #endif

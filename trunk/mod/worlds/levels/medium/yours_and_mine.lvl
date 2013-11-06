@@ -1,41 +1,42 @@
 Yours and Mine
-17 22
-E E S S S S S S S S S S S E E E E 
-E E S E E E E E E E E E S E E E E 
-E E S E E D(StickyPaddle) E E E M E E S S S S S 
-S S S E E E E E E E E E S E E E S 
-S D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) S F(d) F(d) N F(d) F(d) F(d) F(d) F(d) F(d) S C(90) E C(180) S 
-S G Y O G G G G G O Y G S E E E S 
-S G Y O O R R R O O Y G S E E E S 
-S E E E E B R B E E E E S E E E S 
-S E I E E E E E E E I E S E E E S 
-S Y Y Y Y Y Y Y Y Y Y Y S E E E S 
-S Y R Y R Y Y Y R Y R Y S E E E S 
-S G G G G R G R G G G G S E E E S 
-S Y Y Y Y Y M Y Y Y Y Y S E E E S 
-S G G G G R G R G G G G S E E E S 
-S G Y G O G R G O G Y G S E E E S 
-S E E E E E E E E E E E S E E E S 
-S E E E E E E E E E E E S E E E S 
-S E E E E E E E E E E E S E E E S 
-S E E E E E E E E E E E S N S E S 
-S E E E E E E E E E E E N E S E S 
-S E E E E E E E E E E E N E T(S,ur) R S 
-S E E E E E E E E E E E N E E S S 
+21 23
+E E E E S S S S S S S S S S S S S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E M E E E E E E E M E S S S S S 
+E E E E S E E E E E E E E E E E S E E E S 
+S S D(StickyPaddle,StickyPaddle,StickyPaddle){1} S S F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) S C(90) E C(180) S 
+S E E E S G Y O G G G G G O Y G S E E E S 
+S E E E S G Y O O R R R O O Y G S E E E S 
+S E M E S E E E O R B R O E E E S E E E S 
+S E E E S B I E E E R E E E I B S E E E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E S G R G R G G G R G R G S E E E S 
+S E E E S R G Q(f) G R G R G Q(f) G R S E E E S 
+S E E E S Y Y Y Y Y Q(f) Y Y Y Y Y S E E E S 
+S E E E S R G Q(f) G R G R G Q(f) G R S E E E S 
+S E E E S G R G R G R G R G R G S E E E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E S E E E E E E E E E E E S E E E S 
+S E E E S E E E E E E E E E E E S N S E S 
+S E E E N E E E E E E E E E E E N E S Q(i) S 
+S E E E N E E E E E E E E E E E N E T(S,ur) R S 
+S E E E N E E E E E E E E E E E N E E W(1) S 
 
 STARS:
 6000
-10000
-16000
-19000
-21000
+12000
+18000
+22000
+26500
 
 PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 0
 ShieldPaddle 2
 LaserBulletPaddle 1
@@ -62,3 +63,5 @@ CrazyBall 2
 Random 2
 FastBall 2
 PaddleCam 0
+
+PADDLESTARTXPOS: 26.25

@@ -14,10 +14,11 @@
 
 #include "DisplayState.h"
 #include "InGameRenderPipeline.h"
+#include "GameDisplay.h"
+#include "MouseRenderer.h"
 
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
-
 #include "../GameSound/SoundCommon.h"
 
 class GameDisplay;
@@ -36,8 +37,10 @@ public:
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     void MousePressed(const GameControl::MouseButton& pressedButton) { UNUSED_PARAMETER(pressedButton); };
     void MouseReleased(const GameControl::MouseButton& releasedButton) { UNUSED_PARAMETER(releasedButton); };
-
+    void MouseMoved(int oglWindowCoordX, int oglWindowCoordY);
+    void WindowFocus(bool windowHasFocus);
 	void DisplaySizeChanged(int width, int height);
+
 	DisplayState::DisplayStateType GetType() const;
 
 private:
@@ -83,6 +86,14 @@ inline void LevelStartDisplayState::ButtonPressed(const GameControl::ActionButto
 
 inline void LevelStartDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	UNUSED_PARAMETER(releasedButton);
+}
+
+inline void LevelStartDisplayState::MouseMoved(int oglWindowCoordX, int oglWindowCoordY) {
+    this->display->GetMouse()->ShowMouse(oglWindowCoordX, oglWindowCoordY);
+}
+
+inline void LevelStartDisplayState::WindowFocus(bool windowHasFocus) {
+    this->display->GetMouse()->SetWindowHasFocus(windowHasFocus);
 }
 
 inline DisplayState::DisplayStateType LevelStartDisplayState::GetType() const {

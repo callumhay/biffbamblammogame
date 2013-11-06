@@ -1266,7 +1266,6 @@ void SelectLevelMenuState::AbstractLevelMenuItem::RebuildItem(bool enabled, cons
 
     this->numLabel->SetTopLeftCorner(this->topLeftCorner);
 
-
     float scaleFactor = this->state->display->GetTextScalingFactor();
     float nameLabelWidth = this->width - NUM_TO_NAME_GAP - this->numLabel->GetLastRasterWidth();
 
@@ -1286,6 +1285,7 @@ void SelectLevelMenuState::AbstractLevelMenuItem::RebuildItem(bool enabled, cons
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Small), nameLabelWidth, levelName);
     this->nameLabel->SetLineSpacing(4.0f);
+    this->nameLabel->SetScale(scaleFactor);
 
     float nameXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
     float nameYPos = this->topLeftCorner[1] - std::max<float>(0, ((this->numLabel->GetHeight() - this->nameLabel->GetHeight()) / 2.0f));
@@ -1779,11 +1779,13 @@ SelectLevelMenuState::LevelMenuItem::LevelMenuItem(SelectLevelMenuState* state,
                                                    bool isEnabled) : 
 AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), starDisplayList(0) {
 
+    float scaleFactor = state->display->GetTextScalingFactor();
+
     std::string highScoreStr = "High Score: " + stringhelper::AddNumberCommas(this->level->GetHighScore()) ;
     this->highScoreLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Small), highScoreStr);
-    this->highScoreLabel->SetScale(state->display->GetTextScalingFactor() * 0.8f);
+    this->highScoreLabel->SetScale(scaleFactor * 0.8f);
 
     this->RebuildItem(isEnabled, topLeftCorner);
 }

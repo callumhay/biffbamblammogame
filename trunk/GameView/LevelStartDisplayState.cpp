@@ -189,14 +189,16 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	renderPipeline.RenderFrameWithoutHUD(dT);
     // Render the HUD with alpha...
     renderPipeline.RenderHUDWithAlpha(0.0, this->blockFadeInAnimation.GetInterpolantValue());
-
-	// If the ball is appearing, draw the emitters around the ball for a cool, flashy enterance
+    
+	// If the ball is appearing, draw the emitters around the ball for a cool, flashy entrance
 	if (ballAlpha > 0.0f) {
 		this->shockwaveEmitter->Tick(dT);
 		this->starEmitter->Tick(dT);
 		this->shockwaveEmitter->Draw(camera);
 		this->starEmitter->Draw(camera);
 	}
+
+    this->display->GetMouse()->Draw(dT, *this->display->GetModel());
 
 	// Render the fade-in if we haven't already
 	if (!fadeInDone) {

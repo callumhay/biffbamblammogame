@@ -77,6 +77,9 @@ public:
     bool IsAtStart() const {
         return this->x == 0.0;
     }
+    double GetTimeValue() const {
+        return this->x;
+    }
 
 	/**
 	 * Set whether the animation is on repeat or not.

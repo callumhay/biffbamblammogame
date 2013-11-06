@@ -138,7 +138,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::NoEntry ||
             leftNeighbor->GetType() == LevelPiece::Breakable || leftNeighbor->GetType() == LevelPiece::BreakableTriangle ||
-            leftNeighbor->GetType() == LevelPiece::Bomb || leftNeighbor->GetType() == LevelPiece::PrismTriangle);
+            leftNeighbor->GetType() == LevelPiece::Bomb || leftNeighbor->GetType() == LevelPiece::PrismTriangle ||
+            leftNeighbor->GetType() == LevelPiece::Regen);
     }
     shouldGenBounds = false;
 
@@ -171,7 +172,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry ||
             bottomNeighbor->GetType() == LevelPiece::Breakable || bottomNeighbor->GetType() == LevelPiece::BreakableTriangle ||
-            bottomNeighbor->GetType() == LevelPiece::Bomb || bottomNeighbor->GetType() == LevelPiece::PrismTriangle);
+            bottomNeighbor->GetType() == LevelPiece::Bomb || bottomNeighbor->GetType() == LevelPiece::PrismTriangle ||
+            bottomNeighbor->GetType() == LevelPiece::Regen);
     }
     shouldGenBounds = false;
 
@@ -204,7 +206,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry ||
             rightNeighbor->GetType() == LevelPiece::Breakable || rightNeighbor->GetType() == LevelPiece::BreakableTriangle ||
-            rightNeighbor->GetType() == LevelPiece::Bomb || rightNeighbor->GetType() == LevelPiece::PrismTriangle);
+            rightNeighbor->GetType() == LevelPiece::Bomb || rightNeighbor->GetType() == LevelPiece::PrismTriangle ||
+            rightNeighbor->GetType() == LevelPiece::Regen);
     }
     shouldGenBounds = false;
 
@@ -238,7 +241,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
             topNeighbor->GetType() == LevelPiece::OneWay ||
             topNeighbor->GetType() == LevelPiece::NoEntry || topNeighbor->GetType() == LevelPiece::Breakable ||
             topNeighbor->GetType() == LevelPiece::BreakableTriangle || topNeighbor->GetType() == LevelPiece::Bomb ||
-            topNeighbor->GetType() == LevelPiece::PrismTriangle);
+            topNeighbor->GetType() == LevelPiece::PrismTriangle || topNeighbor->GetType() == LevelPiece::Regen);
     }
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),

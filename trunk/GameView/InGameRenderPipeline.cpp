@@ -19,6 +19,7 @@
 #include "BallReleaseHUD.h"
 #include "RemoteControlRocketHUD.h"
 #include "CgFxCelOutlines.h"
+#include "MouseRenderer.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
@@ -376,9 +377,12 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	// Draw any HUD special elements based on currently active items, etc.
 	gameAssets->DrawActiveItemHUDElements(dT, *gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
-	// The very last thing we do is draw the 'informative' game elements (e.g., tutorial stuff, or important information for the player)
+	// Draw the 'informative' game elements (e.g., tutorial stuff, or important information for the player)
 	// this stuff should always be on the top
 	gameAssets->DrawInformativeGameElements(camera, dT, *gameModel);
+
+    // The mouse is the very last thing to draw, this should be on top of everything
+    display->GetMouse()->Draw(dT, *gameModel);
 
     debug_opengl_state();
 }

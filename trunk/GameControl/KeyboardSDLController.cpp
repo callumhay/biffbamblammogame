@@ -2,7 +2,7 @@
  * KeyboardSDLController.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the
@@ -60,6 +60,7 @@ bool KeyboardSDLController::ProcessState() {
                 this->MouseMotion(keyEvent.motion.x, keyEvent.motion.y,
                     keyEvent.motion.xrel, keyEvent.motion.yrel);
                 break;
+
 
 			case SDL_QUIT:
 				return true;
@@ -224,10 +225,10 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
     UNUSED_PARAMETER(relX);
     UNUSED_PARAMETER(relY);
 
-    if (this->windowHasFocus) {
+    // Convert to OpenGL screen-space coordinates system (origin in lower-left corner)...
+    unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
 
-        // Convert to OpenGL screen-space coordinates system (origin in lower-left corner)...
-        unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
+    if (this->windowHasFocus) {
 
         if (this->model->GetCurrentStateType() == GameState::BallInPlayStateType) {
             const BallBoostModel* boostModel = this->model->GetBallBoostModel();
@@ -236,11 +237,10 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
             }
 
             if (boostModel->IsInBulletTime()) {
-                Vector2D previousBoostDir = boostModel->GetBallBoostDirection();
+                Vector2D windowCenterPos(Camera::GetWindowWidth()/2, Camera::GetWindowHeight()/2);
 
                 // Calculate the angular difference from the previous mouse position to the current,
                 // this, added to the previous boost direction, determines the special direction used for ball boosting
-                Vector2D windowCenterPos(Camera::GetWindowWidth()/2, Camera::GetWindowHeight()/2);
                 Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
                 if (boostDir.IsZero()) {
                     boostDir[0] = 1;
@@ -250,6 +250,9 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
             }
         }
     }
+
+    // Tell the display that there was mouse motion...
+    this->display->MouseMoved(x, openGLYCoord);
 }
 
 void KeyboardSDLController::WindowActiveEvent(const SDL_ActiveEvent& sdlActiveEvent) {
@@ -302,6 +305,7 @@ void KeyboardSDLController::WindowActiveEvent(const SDL_ActiveEvent& sdlActiveEv
         }
     }
 
+    this->display->WindowFocus(windowHasFocus);
 }
 
 /**

@@ -2,7 +2,7 @@
  * SafetyNet.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2012
+ * Callum Hay, 2012-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -23,15 +23,20 @@ SafetyNet::SafetyNet(const GameLevel& currLevel) {
 
 	// Create the safety net bounding line for this level
 	std::vector<Collision::LineSeg2D> lines;
-	lines.reserve(1);
-    Collision::LineSeg2D safetyNetLine(
+	lines.reserve(2);
+    Collision::LineSeg2D safetyNetLine1(
         Point2D(minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
         Point2D(maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-	lines.push_back(safetyNetLine);
+    Collision::LineSeg2D safetyNetLine2(
+        Point2D(minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH, -1.5f*LevelPiece::HALF_PIECE_HEIGHT),
+        Point2D(maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH, -1.5f*LevelPiece::HALF_PIECE_HEIGHT));
+	lines.push_back(safetyNetLine1);
+    lines.push_back(safetyNetLine2);
 
 	std::vector<Vector2D> normals;
-	normals.reserve(1);
+	normals.reserve(2);
 	normals.push_back(Vector2D(0, 1));
+    normals.push_back(Vector2D(0, -1));
 	
 	this->bounds = BoundingLines(lines, normals);
 }

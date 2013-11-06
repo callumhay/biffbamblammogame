@@ -116,7 +116,7 @@ void BallInPlayState::MoveKeyPressedForOther(int dir, float magnitudePercent) {
     }
 }
 
-void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
+void BallInPlayState::BallBoostDirectionPressed(float x, float y) {
     assert(this->gameModel->boostModel != NULL);
 
     // Ignore applying the boost direction when the ball is paused

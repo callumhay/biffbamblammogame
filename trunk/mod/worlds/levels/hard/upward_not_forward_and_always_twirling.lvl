@@ -4,7 +4,7 @@ S S S S S E E E E E E E E E E E S S S S S
 S E E E S E E H E E E E E H E E S E E E S 
 S E Q(f) E S E E E E E E E E E E E S E Q(f) E S 
 S E E E S S N N N S S S N N N S S E E E S 
-S N N N S C(145-170) E E E E E E E E E C(190-215) S N N N S 
+S N N N S C(150-170) E E E E E E E E E C(190-210) S N N N S 
 E E E E N E E E E E E E E E E E N E E E E 
 E E E E N E E E E E E E E E E E N E E E E 
 E E C(0) E N G G G G G Y G G G G G N E C(0) E E 
@@ -30,10 +30,10 @@ E E E E N E E E E E E E E E E E N E E E E
 W(2) E E E N E E E E E E E E E E E N E E E W(1) 
 
 STARS:
-6000
-13000
-18000
-25000
+7000
+14000
+20000
+26000
 32000
 
 PaddleGrow 2

@@ -235,7 +235,7 @@ BallStickyPaddleAttachEvent {
 // Happens when there are multiple balls and the sticky paddle already has a ball stuck to it but another
 // ball hits the paddle and bounces off (since there can only be one ball stuck to the paddle at a time)
 BallStickyPaddleBounceEvent {
-	file = TODO
+	file = resources/BallStickyPaddleBounceEvent.ogg
 }
 
 BallShieldPaddleCollisionEvent {

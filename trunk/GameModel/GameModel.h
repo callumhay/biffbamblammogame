@@ -431,7 +431,7 @@ public:
     const BallBoostModel::BallBoostMode& GetBallBoostMode() const { return this->ballBoostMode; }
     void SetBallBoostMode(const BallBoostModel::BallBoostMode& mode) { this->ballBoostMode = mode; }
 
-    void BallBoostDirectionPressed(int x, int y);
+    void BallBoostDirectionPressed(float x, float y);
     void BallBoostDirectionReleased();
     void BallBoostReleasedForBall(const GameBall& ball);
     void ReleaseBulletTime();
@@ -640,6 +640,8 @@ private:
 
     bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
     void RemoveActiveGameItemsForThisBallOnly(const GameBall* ball);
+
+    void RemoveBallDeathMineProjectiles();
 
     void ResetLevelValues(int numLives);
 

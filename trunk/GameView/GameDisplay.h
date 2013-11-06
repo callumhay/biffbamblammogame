@@ -14,22 +14,22 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Camera.h"
-#include "DisplayState.h"
-
 #include "../GameModel/GameModel.h"
-
 #include "../GameSound/GameSound.h"
+
+#include "DisplayState.h"
 
 class GameModel;
 class GameAssets;
 class GameSound;
 class GameEventsListener;
+class MouseRenderer;
 
 // The main display class, used to execute the main rendering loop
 // and adjust size, etc.
 class GameDisplay {
 public:
-	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game				
+	static const int MAX_FRAMERATE;             // The maximum framerate possible for the game				
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
 
 	GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight);
@@ -85,6 +85,10 @@ public:
 		return this->gameCamera;
 	}
 
+    MouseRenderer* GetMouse() {
+        return this->mouseRenderer;
+    }
+
 	static float GetTextScalingFactor();
 
 	// Enumeration of the various actions that can be sent to the GameDisplay
@@ -93,8 +97,10 @@ public:
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     void MousePressed(const GameControl::MouseButton& pressedButton);
     void MouseReleased(const GameControl::MouseButton& releasedButton);
+    void MouseMoved(int oglWindowCoordX, int oglWindowCoordY);
+    void WindowFocus(bool windowHasFocus);
 
-    void SpecialDirectionPressed(int x, int y);
+    void SpecialDirectionPressed(float x, float y);
     void SpecialDirectionReleased();
 
     static bool IsGameInPlay(const GameModel& gameModel, const DisplayState::DisplayStateType& type) {
@@ -137,6 +143,8 @@ private:
 	GameModel*  model;
     GameSound*  sound;
 	GameAssets* assets;
+
+    MouseRenderer* mouseRenderer;
 
 	GameEventsListener* gameListener;
 
@@ -202,6 +210,14 @@ inline void GameDisplay::MousePressed(const GameControl::MouseButton& pressedBut
 
 inline void GameDisplay::MouseReleased(const GameControl::MouseButton& releasedButton) {
 	this->currState->MouseReleased(releasedButton);
+}
+
+inline void GameDisplay::MouseMoved(int oglWindowCoordX, int oglWindowCoordY) {
+    this->currState->MouseMoved(oglWindowCoordX, oglWindowCoordY);
+}
+
+inline void GameDisplay::WindowFocus(bool windowHasFocus) {
+    this->currState->WindowFocus(windowHasFocus);
 }
 
 inline void GameDisplay::AddStateToQueue(const DisplayState::DisplayStateType& type, const DisplayStateInfo& info) {
