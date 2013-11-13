@@ -17,7 +17,7 @@ const char* WindowManager::WINDOW_TITLE								= "Biff! Bam!! Blammo!?!";
 const char* WindowManager::ICON_FILEPATH							= "BiffBamBlammoIcon.bmp";
 const unsigned int WindowManager::DEFAULT_VIDEO_FLAGS = SDL_OPENGL | SDL_SWSURFACE;
 
-WindowManager::WindowManager() : videoSurface(NULL), bitsPerPixel(16) {
+WindowManager::WindowManager() : videoSurface(NULL), bitsPerPixel(16), inFullscreenMode(false) {
 }
 
 WindowManager::~WindowManager() {
@@ -43,8 +43,8 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
         return false;
     }
 	
-	// Don't show the mouse cursor, we render it ourselves when it's needed
-	this->ShowCursor(false);
+	// Don't show the mouse cursor if we're in full screen mode
+    this->ShowCursor(!isFullscreen);
 
     SDL_WM_SetCaption(WindowManager::WINDOW_TITLE, WindowManager::WINDOW_TITLE);
 
@@ -83,6 +83,7 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 		std::cerr << "Unable to set video mode: " << SDL_GetError();
         return false;
     }
+    this->inFullscreenMode = isFullscreen;
 	
     // Draw black
     glViewport(0, 0, width, height);
@@ -116,11 +117,13 @@ bool WindowManager::ToggleFullscreen() {
 	}
 	
 	int success = SDL_WM_ToggleFullScreen(this->videoSurface);
-	return (success == 1);
+    if (success > 0) {
+        this->inFullscreenMode = !this->inFullscreenMode;
+        return true;
+    }
+
+	return false;
 }
-
-
-
 
 /**
  * Obtain a list of possible resolutions for the display device

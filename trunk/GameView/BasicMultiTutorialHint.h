@@ -20,11 +20,15 @@ public:
     ~BasicMultiTutorialHint();
 
     void Reset();
+    void Pause(double pauseFadeOutTime);
+    void Resume(double pauseFadeInTime);
     void PushHint(const std::string& hintStr, float scale, float width);
     bool IsDoneShowingAllHints() const;
 
     float GetHeight() const;
     float GetWidth() const;
+
+    void SetColour(const Colour& colour);
 
     void SetTopLeftCorner(float x, float y);
     void SetAlphaWhenShowing(float alpha);
@@ -40,6 +44,9 @@ private:
     double fadeOutTime;
     double fadeInTime;
 
+    bool isPaused;
+    Colour labelColour;
+
     std::vector<BasicTutorialHint*> labels;
     int currLabelIdx;
     double labelCountdown;
@@ -48,24 +55,14 @@ private:
 };
 
 inline void BasicMultiTutorialHint::PushHint(const std::string& hintStr, float scale, float width) {
-    this->labels.push_back(new BasicTutorialHint(hintStr, scale, width));
+    BasicTutorialHint* newHint = new BasicTutorialHint(hintStr, scale, width);
+    newHint->SetColour(this->labelColour);
+    this->labels.push_back(newHint);
 }
 
 inline bool BasicMultiTutorialHint::IsDoneShowingAllHints() const {
-    return this->currLabelIdx >= static_cast<int>(this->labels.size())-1;
-}
-
-inline float BasicMultiTutorialHint::GetHeight() const {
-    if (this->currLabelIdx >= 0 && this->currLabelIdx < static_cast<int>(this->labels.size())) {
-        return this->labels[this->currLabelIdx]->GetHeight();
-    }
-    return 0.0f;
-}
-inline float BasicMultiTutorialHint::GetWidth() const {
-    if (this->currLabelIdx >= 0 && this->currLabelIdx < static_cast<int>(this->labels.size())) {
-        return this->labels[this->currLabelIdx]->GetWidth();
-    }
-    return 0.0f;
+    bool lastLabelNotShowing = !this->labels.empty() && (this->labels.back()->GetAlpha() <= 0.0f);
+    return this->currLabelIdx >= static_cast<int>(this->labels.size())-1 && !this->isShown && lastLabelNotShowing;
 }
 
 inline void BasicMultiTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float depth) {

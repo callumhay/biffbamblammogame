@@ -89,8 +89,8 @@ void CgFxPostTutorialAttention::Draw(int screenWidth, int screenHeight, double d
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
     cgGLSetParameter1f(this->blurSizeHorizontalParam, 1.0f / static_cast<float>(screenWidth));
     cgGLSetParameter1f(this->blurSizeVerticalParam,   1.0f / static_cast<float>(screenHeight));
-    cgGLSetParameter1f(this->sigmaParam, std::max<float>(0.001f, fadeAmt));
-    cgGLSetParameter1f(this->greyscaleFactorParam, fadeAmt);
+    cgGLSetParameter1f(this->sigmaParam, NumberFuncs::LerpOverFloat(0.0f, 1.0f, 0.001f, 2.0f, fadeAmt));
+    cgGLSetParameter1f(this->greyscaleFactorParam, NumberFuncs::LerpOverFloat(0.0f, 1.0f, 0.0f, 0.55f, fadeAmt));
 
 	// Step 1: Bind the temporary FBO and draw a full-screen quad with the first pass of the effect.
 	this->tempFBO->BindFBObj();

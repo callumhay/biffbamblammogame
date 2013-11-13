@@ -44,7 +44,8 @@ public:
     static const int MIN_ITEM_WIDTH;
     static const int MAX_ITEMS_PER_ROW;
     static const int HORIZ_ITEM_ACTIVATED_BORDER;
-    static const int BLACK_BORDER_HEIGHT;
+
+    static const float MIN_VERT_BORDER;
 
 	class ListItem {
 	public:
@@ -68,55 +69,73 @@ public:
 		void DrawItem(const Camera& camera, size_t width, size_t height, float alpha, float scale);
         void DrawItem(const Camera& camera, size_t width, size_t height, float alpha);
 
-        void SetSelected(bool isSelected);
+        virtual void SetSelected(bool isSelected);
 
         size_t GetIndex() const { return this->index; }
-        TextLabel2D* GetNameLbl() const { return this->nameLbl; }
+        const std::string& GetName() const { return this->name; }
         bool GetIsLocked() const { return this->isLocked; }
 
 	protected:
         const ItemListView* parent;
         size_t index;
         bool isLocked;
+        std::string name;
 		const Texture* texture;
-        TextLabel2D* nameLbl;
         float halfSelectionBorderSize;
 
         AnimationLerp<float> sizeAnimation;
         
         void DrawItemQuadBottomLeft(size_t width, size_t height);
         void DrawItemQuadCenter(float width, float height);
+        void DrawNextArrows();
 
 		DISALLOW_COPY_AND_ASSIGN(ListItem);
 	};
 
     class BlammopediaListItem : public ListItem {
 	public:
-        BlammopediaListItem(const ItemListView* parent, size_t index, const std::string& name,
-                 const std::string& description, const std::string& finePrint, const Colour& colour,
-                 const Texture* itemTexture, bool isLocked, bool hasBeenViewed);
+        BlammopediaListItem(const ItemListView* parent, size_t index, const std::string& name, 
+            const Texture* itemTexture, PopupTutorialHint* item, bool isLocked, bool hasBeenViewed);
 		~BlammopediaListItem();
+
+        void Activated();
+        void Deactivated();
 
         void Tick(double dT);
         void DrawAsActivated(const Camera& camera);
         void TurnOffNewLabel();
         void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
-        bool DrawBorderOnActivation() const { return true; }
+        bool DrawBorderOnActivation() const { return false; }
+        Colour GetColour() const { return Colour(1.0f, 1.0f, 1.0f); }
 
-        Colour GetColour() const { return this->colour; }
-        TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
-        TextLabel2DFixedWidth* GetFinePrintLbl() const { return this->finePrintLbl; }
+        void SetSelected(bool isSelected);
 
 	private:
-        Colour colour;
-        TextLabel2DFixedWidth* descriptionLbl;
-        TextLabel2DFixedWidth* finePrintLbl;
+        PopupTutorialHint* popup;
+        bool isActivated;
         TextLabel2D* newLbl;
 
         AnimationMultiLerp<Colour> newColourFlashAnimation;
 
 		DISALLOW_COPY_AND_ASSIGN(BlammopediaListItem);
 	};
+
+    class BlammopediaListLockedItem : public ListItem {
+    public:
+        BlammopediaListLockedItem(const ItemListView* parent, size_t index, const Texture* lockedTexture) : 
+          ListItem(parent, index, "Locked!", lockedTexture, true) {}
+        ~BlammopediaListLockedItem() {}
+
+        void Tick(double dT) { ListItem::Tick(dT); }
+        void DrawAsActivated(const Camera&) {}
+        bool DrawBorderOnActivation() const { return false; }
+
+        Colour GetColour() const { return Colour(0.5f, 0.5f, 0.5f); }
+
+    private:
+        DISALLOW_COPY_AND_ASSIGN(BlammopediaListLockedItem);
+    };
+
 
     class TutorialListItem : public ListItem {
     public:
@@ -131,10 +150,13 @@ public:
         void DrawAsActivated(const Camera& camera);
         bool DrawBorderOnActivation() const { return false; }
 
+        void SetSelected(bool isSelected);
+
         Colour GetColour() const { return Colour(1.0f, 1.0f, 1.0f); }
 
     private:
         PopupTutorialHint* tutorialPopup;
+        bool isActivated;
 
         DISALLOW_COPY_AND_ASSIGN(TutorialListItem);
     };
@@ -148,8 +170,9 @@ public:
 	void Draw(double dT, const Camera& camera);
     void DrawPost(const Camera& camera);
 
-    ItemListView::ListItem* AddBlammopediaItem(const std::string& name, const std::string& description, const std::string& finePrint,
-                                    const Colour& colour, const Texture* itemTexture, bool isLocked, bool hasBeenViewed);
+    ItemListView::ListItem* AddBlammopediaItem(const std::string& name, const Texture* itemTexture,
+        PopupTutorialHint* item, bool hasBeenViewed);
+    ItemListView::ListItem* AddLockedBlammopediaItem(const Texture* lockedTexture);
     ItemListView::ListItem* AddTutorialItem(const std::string& name, const Texture* itemTexture, PopupTutorialHint* item);
 
     void SetSelectedItemIndex(int index);
@@ -198,8 +221,6 @@ private:
     AnimationLerp<float> activatedItemGrowAnim;
     AnimationLerp<float> activatedItemFadeAnim;
     AnimationLerp<float> nonActivatedItemsFadeAnim;
-    AnimationLerp<float> blackBorderAnim;
-    //AnimationLerp<float> revealAnim;
     AnimationLerp<float> activatedItemXPicAnim;
     AnimationLerp<float> activatedItemAlphaAnim;
     AnimationMultiLerp<float> pressEscAlphaAnim;

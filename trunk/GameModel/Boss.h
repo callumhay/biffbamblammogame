@@ -124,13 +124,12 @@ protected:
     void ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart);
 
     void SetNextAIState(BossAIState* nextState);
+    void SetCurrentAIStateImmediately(BossAIState* newState);
 
 private:
     bool isBossDeadAndLevelCompleted;
-
     void UpdateAIState();
-    void SetCurrentAIStateImmediately(BossAIState* newState);
-
+    
     DISALLOW_COPY_AND_ASSIGN(Boss);
 };
 

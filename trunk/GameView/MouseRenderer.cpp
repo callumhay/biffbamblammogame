@@ -18,6 +18,7 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/BallBoostModel.h"
 #include "../ResourceManager.h"
+#include "../WindowManager.h"
 
 const double MouseRenderer::TIME_TO_SHOW_MOUSE_BEFORE_FADE = 2.0;
 const double MouseRenderer::FADE_IN_TIME  = 0.1;
@@ -89,6 +90,7 @@ void MouseRenderer::Draw(double dT, const GameModel& gameModel) {
 }
 
 void MouseRenderer::SetState(MouseState newState) {
+
     switch (newState) {
         case NotShowing:
             this->mouseAlphaAnim.ClearLerp();
@@ -96,6 +98,8 @@ void MouseRenderer::SetState(MouseState newState) {
             break;
 
         case FadingIn: {
+            WindowManager::GetInstance()->ShowCursor(false);
+
             // If we're already showing the mouse then we just ignore this
             if (this->currState == Showing || this->currState == FadingIn) {
                 return;
@@ -113,11 +117,14 @@ void MouseRenderer::SetState(MouseState newState) {
         }
 
         case Showing:
+            WindowManager::GetInstance()->ShowCursor(false);
             this->mouseAlphaAnim.ClearLerp();
             this->mouseAlphaAnim.SetInterpolantValue(1.0f);
             break;
 
         case FadingOut: {
+            WindowManager::GetInstance()->ShowCursor(false);
+
             // If we're already not showing the mouse then just ignore this
             if (this->currState == NotShowing || this->currState == FadingOut) {
                 return;
@@ -157,8 +164,9 @@ void MouseRenderer::Render(const GameModel& gameModel) {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    glTranslatef(this->mouseX, this->mouseY, 0.0f);
-    glColor4f(1.0f, 1.0f, 1.0f, alpha);
+
+
+    float rotAngleInDegs = 0.0f;
 
     Texture2D* mouseTexture = NULL;
     const BallBoostModel* boostModel = gameModel.GetBallBoostModel();
@@ -166,8 +174,7 @@ void MouseRenderer::Render(const GameModel& gameModel) {
         mouseTexture = this->boostMouseTex;
         // Rotate the cursor to be aligned with the center of the screen
         Vector2D centerToCursorVec = Point2D(this->mouseX, this->mouseY) - Point2D(Camera::GetWindowWidth()/2.0f, Camera::GetWindowHeight()/2.0f);
-        float rotAngle = atan2f(centerToCursorVec[1], centerToCursorVec[0]) - M_PI_DIV2;
-        glRotatef(Trig::radiansToDegrees(rotAngle), 0, 0, 1);
+        rotAngleInDegs = Trig::radiansToDegrees(atan2f(centerToCursorVec[1], centerToCursorVec[0]) - M_PI_DIV2);
     }
     else {
         mouseTexture = this->defaultMouseTex;
@@ -176,7 +183,12 @@ void MouseRenderer::Render(const GameModel& gameModel) {
     assert(mouseTexture != NULL);
 
     mouseTexture->BindTexture();
+
+    glTranslatef(this->mouseX + mouseTexture->GetWidth()/2, this->mouseY - mouseTexture->GetHeight()/2, 0.0f);
+    glRotatef(rotAngleInDegs, 0, 0, 1);
     glScalef(mouseTexture->GetWidth(), mouseTexture->GetHeight(), 1);
+    
+    glColor4f(1.0f, 1.0f, 1.0f, alpha);
     GeometryMaker::GetInstance()->DrawQuad();
     mouseTexture->UnbindTexture();
 

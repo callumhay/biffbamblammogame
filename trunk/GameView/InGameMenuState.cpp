@@ -15,7 +15,6 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/StringHelper.h"
 
-// GameDisplay Includes
 #include "InGameMenuState.h"
 #include "InGameDisplayState.h"
 #include "MainMenuDisplayState.h"
@@ -23,11 +22,9 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
-// GameModel Includes
 #include "../GameModel/GameModel.h"
-
-// GameSound Includes
 #include "../GameSound/GameSound.h"
+#include "../WindowManager.h"
 
 const Colour InGameMenuState::MENU_ITEM_IDLE_COLOUR		= Colour(0.75f, 0.75f, 0.75f);
 const Colour InGameMenuState::MENU_ITEM_SEL_COLOUR		= Colour(1, 0.8f, 0);
@@ -111,6 +108,9 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(
 	this->InitTopMenu();
 
     this->display->GetMouse()->HideMouse();
+    if (!WindowManager::GetInstance()->GetIsFullscreen()) {
+        WindowManager::GetInstance()->ShowCursor(true);
+    }
 }
 
 InGameMenuState::~InGameMenuState() {
@@ -516,6 +516,8 @@ void InGameMenuState::InitTopMenu() {
 }
 
 void InGameMenuState::ResumeTheGame() {
+    WindowManager::GetInstance()->ShowCursor(false);
+
     GameSound* sound = this->display->GetSound();
 
     // Play unpause all sounds and effects

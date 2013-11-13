@@ -75,7 +75,11 @@ std::vector<std::string> TextureFontSet::ParseTextToWidth(const std::string& s, 
         }
 
         if (currChar == '\n') {
-            lines.push_back(s.substr(lastLineBeginIdx, i - lastLineBeginIdx));
+            std::string subStr = s.substr(lastLineBeginIdx, i - lastLineBeginIdx);
+            if (!subStr.empty()) {
+                lines.push_back(subStr);
+            }
+
             currCount = 0;
             lastLineBeginIdx = i+1;
             lastSpaceIdx = lastLineBeginIdx;
@@ -91,13 +95,19 @@ std::vector<std::string> TextureFontSet::ParseTextToWidth(const std::string& s, 
         }
 
         if (currCount >= width && lastSpaceIdx != 0) {
-            lines.push_back(s.substr(lastLineBeginIdx, lastSpaceIdx - lastLineBeginIdx));
+            std::string subStr = s.substr(lastLineBeginIdx, lastSpaceIdx - lastLineBeginIdx);
+            if (!subStr.empty()) {
+                lines.push_back(subStr);
+            }
             currCount -= countAtSpace;
             lastLineBeginIdx = lastSpaceIdx+1;
             lastSpaceIdx = 0;
         }
         if (i == s.size()-1 && lastLineBeginIdx != i) {
-            lines.push_back(s.substr(lastLineBeginIdx, s.size() - lastLineBeginIdx));
+            std::string subStr = s.substr(lastLineBeginIdx, s.size() - lastLineBeginIdx);
+            if (!subStr.empty()) {
+                lines.push_back(subStr);
+            }
         }
     }
 

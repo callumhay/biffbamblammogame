@@ -2,7 +2,7 @@
  * DecoratorOverlayPane.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -12,20 +12,23 @@
 #include "DecoratorOverlayPane.h"
 #include "GameFontAssetsManager.h"
 #include "GameMenu.h"
+#include "GameDisplay.h"
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
 const float DecoratorOverlayPane::X_BORDER     = 30;
 const float DecoratorOverlayPane::Y_BORDER     = 30;
-const float DecoratorOverlayPane::ITEM_SPACING = 20;
+const float DecoratorOverlayPane::ITEM_Y_SPACING = 20;
+const float DecoratorOverlayPane::ITEM_X_SPACING = 15;
 const float DecoratorOverlayPane::X_OPTION_GAP = 50;
 const float DecoratorOverlayPane::COL_GAP      = 20;
 
 DecoratorOverlayPane::DecoratorOverlayPane(OverlayPaneEventHandler* handler,
                                            size_t width, const Colour& bgColour) :
 eventHandler(handler), width(width),
-currYPos(-Y_BORDER + ITEM_SPACING),
-currImgYPos(-Y_BORDER + ITEM_SPACING),
+currYPos(-Y_BORDER + ITEM_Y_SPACING),
+currXPos(X_BORDER),
+currImgYPos(-Y_BORDER + ITEM_Y_SPACING),
 selectedIdx(-1), optionActive(false),
 OPTION_IDLE_COLOUR(0.75f, 0.75f, 0.75f),
 OPTION_SEL_COLOUR(1.0f, 1.0f, 1.0f),
@@ -83,17 +86,83 @@ DecoratorOverlayPane::~DecoratorOverlayPane() {
     this->ClearSelectableOptions();
 }
 
-void DecoratorOverlayPane::AddText(const std::string& text, const Colour& colour, float scale) {
-    if (!this->textLabels.empty()) {
-        this->currYPos -= 2*ITEM_SPACING;
+void DecoratorOverlayPane::DecorateAsBlammopediaPane(const Texture2D* texture, const std::string& currName, 
+                                                     const std::string& currDesc, const std::string& finePrint, 
+                                                     bool imgHasBorder) {
+    this->ClearTextLabels();
+    this->ClearImages();
+    this->ClearSelectableOptions();
+    
+    this->currXPos = X_BORDER;
+    this->currYPos = -(Y_BORDER + ITEM_Y_SPACING);
+
+    float imgWidth  = texture->GetWidth()  * GameDisplay::GetTextScalingFactor();
+    float imgHeight = texture->GetHeight() * GameDisplay::GetTextScalingFactor();
+
+    // Image in the top-left corner of the pop-up
+    Image* newImage = new Image(this->currXPos, this->currYPos, imgWidth, imgHeight, texture, imgHasBorder);
+    this->images.push_back(newImage);
+
+    this->currXPos += imgWidth + ITEM_X_SPACING;
+
+    // Title on the right next to the image
+    TextLabel2DFixedWidth* titleLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Huge),
+        (static_cast<int>(this->width) - X_BORDER - this->currXPos), currName);
+    titleLabel->SetScale(0.80f * GameDisplay::GetTextScalingFactor());
+    titleLabel->SetColour(Colour(1,1,1));
+    titleLabel->SetDropShadow(Colour(0,0,0), 0.10f);
+    titleLabel->SetTopLeftCorner(this->currXPos, this->currYPos - (imgHeight - static_cast<int>(titleLabel->GetHeight())) / 2.0f);
+    titleLabel->SetAlignment(TextLabel2DFixedWidth::LeftAligned);
+    this->textLabels.push_back(titleLabel);
+
+    this->currYPos -= (2*ITEM_Y_SPACING + imgHeight);
+    this->currXPos = X_BORDER;
+
+    TextLabel2DFixedWidth* descLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
+        (static_cast<int>(this->width) - 2*X_BORDER), currDesc);
+    descLabel->SetScale(1.0f * GameDisplay::GetTextScalingFactor());
+    descLabel->SetColour(Colour(1,1,1));
+    descLabel->SetDropShadow(Colour(0,0,0), 0.10f);
+    descLabel->SetTopLeftCorner(this->currXPos, this->currYPos);
+    descLabel->SetAlignment(TextLabel2DFixedWidth::LeftAligned);
+    this->textLabels.push_back(descLabel);
+
+    if (!finePrint.empty()) {
+        this->currYPos -= (2*ITEM_Y_SPACING + descLabel->GetHeight());
+
+        TextLabel2DFixedWidth* finePrintLabel = new TextLabel2DFixedWidth(
+            GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
+            (static_cast<int>(this->width) - 2*X_BORDER), finePrint);
+        finePrintLabel->SetScale(0.6f * GameDisplay::GetTextScalingFactor());
+        finePrintLabel->SetColour(Colour(1,1,1));
+        finePrintLabel->SetDropShadow(Colour(0,0,0), 0.10f);
+        finePrintLabel->SetTopLeftCorner(this->currXPos, this->currYPos);
+        finePrintLabel->SetAlignment(TextLabel2DFixedWidth::LeftAligned);
+        this->textLabels.push_back(finePrintLabel);
+
+        this->currYPos -= (ITEM_Y_SPACING + finePrintLabel->GetHeight());
     }
     else {
-        this->currYPos -= ITEM_SPACING;
+        this->currYPos -= (ITEM_Y_SPACING + descLabel->GetHeight());
+    }
+}
+
+void DecoratorOverlayPane::AddText(const std::string& text, const Colour& colour, float scale, bool keepAtSameY) {
+    if (!keepAtSameY && this->layout != DecoratorOverlayPane::Left) {
+        if (!this->textLabels.empty()) {
+            this->currYPos -= 2*ITEM_Y_SPACING;
+        }
+        else {
+            this->currYPos -= ITEM_Y_SPACING;
+        }
     }
 
     float labelWidth = 0;
     switch (this->layout) {
         case Centered:
+        case Left:
             labelWidth = this->width - 2*X_BORDER;
             break;
         case TwoColumn:
@@ -116,8 +185,13 @@ void DecoratorOverlayPane::AddText(const std::string& text, const Colour& colour
         case Centered:
             newLabel->SetTopLeftCorner((this->width - newLabel->GetWidth()) / 2.0f, this->currYPos);
             newLabel->SetAlignment(TextLabel2DFixedWidth::CenterAligned);
-            this->currImgYPos -= ITEM_SPACING;
+            this->currImgYPos -= ITEM_Y_SPACING;
             this->currImgYPos -= newLabel->GetHeight();
+            break;
+        case Left:
+            newLabel->SetTopLeftCorner(this->currXPos, this->currYPos);
+            newLabel->SetAlignment(TextLabel2DFixedWidth::LeftAligned);
+            this->currXPos += newLabel->GetWidth() + ITEM_X_SPACING;
             break;
         case TwoColumn:
             newLabel->SetTopLeftCorner(X_BORDER, this->currYPos);
@@ -129,29 +203,54 @@ void DecoratorOverlayPane::AddText(const std::string& text, const Colour& colour
     }
 
     this->textLabels.push_back(newLabel);
-    this->currYPos -= newLabel->GetHeight();
-    
+    if (!keepAtSameY) {
+        this->currYPos -= newLabel->GetHeight();
+        this->currXPos = X_BORDER;
+    }
 }
 
-void DecoratorOverlayPane::AddImage(size_t width, const Texture* image) {
+void DecoratorOverlayPane::AddImage(size_t width, const Texture* image, bool keepAtSameY) {
     float height = static_cast<float>(width) * (static_cast<float>(image->GetHeight()) / static_cast<float>(image->GetWidth()));
 
     switch (this->layout) {
         case Centered: {
-            this->currYPos -= ITEM_SPACING;
+            if (!keepAtSameY) {
+                this->currYPos -= ITEM_Y_SPACING;
+            }
             Image* newImage = new Image((this->width - width) / 2.0f, this->currYPos, width, static_cast<size_t>(height), image);
             this->images.push_back(newImage);
-            this->currYPos -= static_cast<int>(height);
+            if (!keepAtSameY) {
+                this->currYPos -= static_cast<int>(height);
+            }
+            break;
+        }
+        case Left: {
+            if (!keepAtSameY) {
+                this->currYPos -= ITEM_Y_SPACING;
+            }
+            
+            Image* newImage = new Image(this->currXPos, this->currYPos, width, static_cast<size_t>(height), image);
+            this->images.push_back(newImage);
+
+            this->currXPos += ITEM_X_SPACING + width;
+            if (!keepAtSameY) {
+                this->currYPos -= static_cast<int>(height);
+                this->currXPos = X_BORDER;
+            }
             break;
         }
         case TwoColumn: {
-            this->currImgYPos -= 2*ITEM_SPACING;
+            if (!keepAtSameY) {
+                this->currImgYPos -= 2*ITEM_Y_SPACING;
+            }
+            
             float xPos =  this->width - X_BORDER - 256;
-
             Image* newImage = new Image(xPos, this->currImgYPos, width, static_cast<size_t>(height), image);
             this->images.push_back(newImage);
-
-            this->currImgYPos -= static_cast<int>(height);
+            
+            if (!keepAtSameY) {
+                this->currImgYPos -= static_cast<int>(height);
+            }
             break;
         }
         default:
@@ -164,8 +263,8 @@ void DecoratorOverlayPane::SetSelectableOptions(const std::vector<std::string>& 
     assert(defaultIdx >= 0 && defaultIdx < static_cast<int>(options.size()));
     assert(!options.empty());
 
-    this->currYPos    -= 2*ITEM_SPACING;
-    this->currImgYPos -= 2*ITEM_SPACING;
+    this->currYPos    -= 2*ITEM_Y_SPACING;
+    this->currImgYPos -= 2*ITEM_Y_SPACING;
     float selectableYPos = std::min<float>(this->currYPos, this->currImgYPos);
 
     float totalWidth = 0.0f;
@@ -224,6 +323,16 @@ void DecoratorOverlayPane::Show(double delayInSecs, double timeInSecs) {
 }
 
 void DecoratorOverlayPane::Hide(double delayInSecs, double timeInSecs) {
+    if (timeInSecs == 0.0 && delayInSecs == 0.0) {
+        this->fgFadeAnimation.ClearLerp();
+        this->fgFadeAnimation.SetInterpolantValue(0.0f);
+        this->bgFadeAnimation.ClearLerp();
+        this->bgFadeAnimation.SetInterpolantValue(0.0f);
+        this->scaleAnimation.ClearLerp();
+        this->scaleAnimation.SetInterpolantValue(0.001f);
+        return;
+    }
+
     this->fgFadeAnimation.SetLerp(delayInSecs, delayInSecs + 0.5f*timeInSecs, this->fgFadeAnimation.GetInterpolantValue(), 0.0f);
     this->bgFadeAnimation.SetLerp(delayInSecs + 0.5f*timeInSecs, delayInSecs + timeInSecs, 1.0f, 0.0f);
     this->scaleAnimation.SetLerp(delayInSecs + 0.5f*timeInSecs, delayInSecs + timeInSecs, 1.0f, 0.001f); 
@@ -508,9 +617,9 @@ void DecoratorOverlayPane::DrawArrow(const Point2D& topLeftCorner, float alpha,
 
 DecoratorOverlayPane::Image::Image(int topLeftX, int topLeftY, 
                                    size_t width, size_t height, 
-                                   const Texture* texture) :
+                                   const Texture* texture, bool hasBorder) :
 
-topLeftX(topLeftX), topLeftY(topLeftY), width(width), height(height), texture(texture) {
+topLeftX(topLeftX), topLeftY(topLeftY), width(width), height(height), texture(texture), hasBorder(hasBorder) {
     assert(texture != NULL);
     assert(width > 0);
     assert(height > 0);
@@ -529,13 +638,15 @@ void DecoratorOverlayPane::Image::Draw(float alpha, float tX, float tY) {
     this->texture->UnbindTexture();
 
     // Draw an outline to frame the image
-    glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT);
-    glColor4f(0,0,0,alpha);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    glPolygonMode(GL_FRONT, GL_LINE);
-    glLineWidth(2.0f);
-    GeometryMaker::GetInstance()->DrawQuad();
-    glPopAttrib();
+    if (hasBorder) {
+        glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT);
+        glColor4f(0,0,0,alpha);
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glPolygonMode(GL_FRONT, GL_LINE);
+        glLineWidth(2.0f);
+        GeometryMaker::GetInstance()->DrawQuad();
+        glPopAttrib();
+    }
 
     glPopMatrix();
 }

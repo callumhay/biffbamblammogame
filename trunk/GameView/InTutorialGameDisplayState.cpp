@@ -19,6 +19,7 @@
 #include "PopupTutorialHint.h"
 #include "LivesLeftHUD.h"
 #include "BallBoostHUD.h"
+#include "../WindowManager.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
 DisplayState(display), renderPipeline(display), beforeTutorialDifficulty(display->GetCachedDifficulty()),
@@ -31,7 +32,7 @@ tutorialAttentionEffect(display->GetAssets()->GetFBOAssets()->GetFinalFullScreen
     // Disable the paddle release timer for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(false);
     // Make the boost time longer for the tutorial
-    BallBoostModel::SetMaxBulletTimeDuration(5.0);
+    BallBoostModel::SetMaxBulletTimeDuration(10.0);
     
     // Set the life HUD to display an infinite number of lives
     this->display->GetAssets()->GetLifeHUD()->ToggleInfiniteLivesDisplay(true);
@@ -86,6 +87,10 @@ InTutorialGameDisplayState::~InTutorialGameDisplayState() {
     // Place the player difficulty back to what it was before the tutorial (the level complete page
     // will ask the player to switch their difficulty if they feel so inclined)
     this->display->GetModel()->SetDifficulty(this->beforeTutorialDifficulty);
+
+    if (!WindowManager::GetInstance()->GetIsFullscreen()) {
+        WindowManager::GetInstance()->ShowCursor(true);
+    }
 }
 
 void InTutorialGameDisplayState::RenderFrame(double dT) {
@@ -102,9 +107,6 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
         this->tutorialAttentionEffect.SetInputFBO(this->display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO());
         this->tutorialAttentionEffect.Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
         this->display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()->GetFBOTexture()->RenderTextureToFullscreenQuad(1.0f);
-    }
-    else {
-        this->tutorialAttentionEffect.SetAlpha(0.0f);
     }
 
     for (HintListIter iter = this->noDepthTutorialHints.begin(); iter != this->noDepthTutorialHints.end(); ++iter) {
@@ -313,20 +315,27 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialListener->SetDoBoostSlingshotHint(doBoostSlingshotHint);
     this->noDepthTutorialHints.push_back(doBoostSlingshotHint);
 
-    const float multiplierHintScale = 0.70f * scaleFactor;
-    const float multiplierHintWidth = 275;
-    BasicMultiTutorialHint* multiplierHints = new BasicMultiTutorialHint(3.0, 1.0, 1.0);
+    const float multiplierHintScale = 0.75f * scaleFactor;
+    const float multiplierHintWidth = 300 * scaleFactor;
+    const Colour ballFollowHintColour(1, 0.8f, 0);
+
+    BasicMultiTutorialHint* multiplierHints = new BasicMultiTutorialHint(4.5, 1.0, 1.0);
     multiplierHints->PushHint("Destroying Blocks Increases Your Multiplier", multiplierHintScale, multiplierHintWidth);
-    multiplierHints->PushHint("A Higher Multiplier Means More Points", multiplierHintScale, multiplierHintWidth);
-    multiplierHints->PushHint("More Points Means More Stars", multiplierHintScale, multiplierHintWidth);
+    multiplierHints->PushHint("Higher Multipliers = More Points", multiplierHintScale, multiplierHintWidth);
+    multiplierHints->PushHint("More Points = More Stars", multiplierHintScale, multiplierHintWidth);
+    multiplierHints->SetColour(ballFollowHintColour);
+    multiplierHints->SetListener(new SlowBallHintListener(this));
     this->ballFollowTutorialHints.push_back(multiplierHints);
     this->tutorialListener->SetMultiplierHints(multiplierHints);
 
-    BasicTutorialHint* multiplierLostHint = new BasicTutorialHint(
-        "Your Multiplier is Lost if a Ball Hits the Paddle", multiplierHintScale, multiplierHintWidth);
+    BasicMultiTutorialHint* multiplierLostHint = new BasicMultiTutorialHint(5.0, 1.0, 1.0);
+    multiplierLostHint->PushHint("Your Multiplier is Lost When a Ball Hits the Paddle", multiplierHintScale, multiplierHintWidth);
+    multiplierLostHint->SetColour(ballFollowHintColour);
+    multiplierLostHint->SetListener(new SlowBallHintListener(this));
     this->ballFollowTutorialHints.push_back(multiplierLostHint);
     this->tutorialListener->SetMultiplierLostHint(multiplierLostHint);
 
+    /*
     // The Points hint is hidden behind the first layer of blocks and is uncovered as the level is played
     TextLabel2D pointHintTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
         GameFontAssetsManager::Small), "Less paddle hits = More points"); 
@@ -340,6 +349,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     assert(pointsTutorialHintEmitter != NULL);
 
     this->tutorialListener->SetPointsHintEmitter(pointsTutorialHintEmitter);
+    */
 }
 
 void InTutorialGameDisplayState::HintListener::OnTutorialHintShown() {
@@ -365,7 +375,7 @@ void InTutorialGameDisplayState::SlowBallHintListener::OnTutorialHintShown() {
 
     GameModel* gameModel = this->state->display->GetModel();
     if (gameModel->GetCurrentStateType() == GameState::BallInPlayStateType) {
-        this->SetBallSpeed(0.5f * GameBall::GetSlowestSpeed());
+        this->SetBallSpeed(GameBall::GetSlowestAllowableSpeed());
     }
 }
 void InTutorialGameDisplayState::SlowBallHintListener::OnTutorialHintUnshown() {
@@ -381,5 +391,7 @@ void InTutorialGameDisplayState::SlowBallHintListener::SetBallSpeed(float speed)
     for (std::list<GameBall*>::iterator iter = balls.begin(); iter != balls.end(); ++iter) {
         GameBall* ball = *iter;
         ball->SetSpeed(speed);
+        ball->TurnOffImpulse();
+        ball->TurnOffBoost();
     }
 }

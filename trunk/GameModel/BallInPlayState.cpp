@@ -93,7 +93,12 @@ void BallInPlayState::ShootActionReleaseUse() {
         }
     }
 
-    if ((this->gameModel->GetPauseState() & (GameModel::PausePaddle | GameModel::PausePaddleControls)) == 0x0) {
+    // Be absolutely sure we aren't still in bullet time before we apply controls to the paddle,
+    // also make sure the paddle isn't paused in any way
+    assert(this->gameModel->boostModel != NULL);
+    if (this->gameModel->boostModel->GetBulletTimeState() == BallBoostModel::NotInBulletTime &&
+        (this->gameModel->GetPauseState() & (GameModel::PausePaddle | GameModel::PausePaddleControls)) == 0x0) {
+
 	    // Check for paddle items that use the action key...
 	    PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	    paddle->Shoot(this->gameModel);
@@ -511,6 +516,11 @@ void BallInPlayState::Tick(double seconds) {
 
     // Update the boost model for the ball(s)
     this->gameModel->boostModel->Tick(*this->gameModel, seconds);
+
+    // Update AI entities
+    if ((this->gameModel->GetPauseState() & GameModel::PauseAI) == 0x00000000) {
+        this->gameModel->GetCurrentLevel()->TickAIEntities(seconds, this->gameModel);
+    }
 }
 
 // n must be normalized

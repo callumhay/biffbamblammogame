@@ -1341,6 +1341,8 @@ void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBloc
 }
 
 void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
+    bool isGameInPlay = GameState::IsGameInPlayState(*this->display->GetModel());
+
     this->display->GetAssets()->GetFBOAssets()->UpdateBulletTimeState(boostModel);
 
     if (boostModel.GetBulletTimeState() == BallBoostModel::BulletTimeFadeIn ||
@@ -1354,6 +1356,7 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
     switch (boostModel.GetBulletTimeState()) {
 
         case BallBoostModel::BulletTimeFadeIn: {
+
             // Sounds and sound effects for going into bullet time mode
             enterBulletTimeSoundID = sound->PlaySound(GameSound::EnterBulletTimeEvent, false, false);
             sound->StopSound(exitBulletTimeSoundID);
@@ -1367,9 +1370,10 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
         }
 
         case BallBoostModel::BulletTimeFadeOut: {
-            // Sounds for exiting bullet time mode
-            exitBulletTimeSoundID = sound->PlaySound(GameSound::ExitBulletTimeEvent, false, false);
-            
+            if (isGameInPlay) {
+                // Sounds for exiting bullet time mode
+                exitBulletTimeSoundID = sound->PlaySound(GameSound::ExitBulletTimeEvent, false, false);
+            }
             sound->StopSound(enterBulletTimeSoundID);
             sound->StopSound(inBulletTimeLoopSoundID);
 

@@ -464,8 +464,9 @@ void GameSound::StopAllSoundsWithType(const GameSound::SoundType& soundType, dou
 }
 
 // NOTE: This is only meant for in-game foreground objects that have sound attached to them!!!
-SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped,
-                                      const Vector3D& localTranslation, float volume) {
+SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, 
+                                      bool isLooped, const Vector3D& localTranslation, float volume) {
+
     if (this->ignorePlaySounds) {
         return INVALID_SOUND_ID;
     }

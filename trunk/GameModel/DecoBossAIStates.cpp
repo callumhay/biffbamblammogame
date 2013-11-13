@@ -1032,6 +1032,8 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
         float atan2Angle = atan2(attackVec[1], attackVec[0]);
 
         if (isLeftArmAlive) {
+
+
             // atan2 returns a negative angle when in the half plane of y < 0, in [-pi, 0]. For the left arm,
             // that angle must be in the [-pi, -pi/2] range for the arm to be able to attack
             if (atan2Angle <= -M_PI_DIV2 && atan2Angle >= -M_PI) {
@@ -1055,9 +1057,6 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
                         this->currLeftArmRotInDegs -= dA;
                     }
 
-                    sound->AttachAndPlaySound(leftArm, GameSound::DecoBossArmRotateLoop, true, 
-                        gameModel->GetCurrentLevelTranslation());
-
                     leftArm->SetLocalZRotation(this->currLeftArmRotInDegs);
                 }
             }
@@ -1065,6 +1064,10 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
             float shakeAmt = this->leftArmShakeAnim.GetInterpolantValue();
             this->leftArmShakeAnim.Tick(dT);
             leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+
+            sound->AttachAndPlaySound(leftArm, GameSound::DecoBossArmRotateLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
+
         }
         else if (isRightArmAlive) {
             // atan2 returns a negative angle when in the half plane of y < 0, in [-pi, 0]. For the right arm,
@@ -1089,15 +1092,15 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
                         this->currRightArmRotInDegs -= dA;
                     }
 
-                    sound->AttachAndPlaySound(rightArm, GameSound::DecoBossArmRotateLoop, true, 
-                        gameModel->GetCurrentLevelTranslation());
-
                     rightArm->SetLocalZRotation(this->currRightArmRotInDegs);
                 }
             }
             float shakeAmt = this->rightArmShakeAnim.GetInterpolantValue();
             this->rightArmShakeAnim.Tick(dT);
             rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+
+            sound->AttachAndPlaySound(rightArm, GameSound::DecoBossArmRotateLoop, true, 
+                gameModel->GetCurrentLevelTranslation());
         }
         else {
             // This shouldn't happen -- boss will always have at least one arm to attack with
@@ -1505,35 +1508,15 @@ Stage1AI::~Stage1AI() {
 
 GameItem::ItemType Stage1AI::GenerateRandomItemDropType(GameModel* gameModel) const {
     assert(gameModel != NULL);
-    if (this->nextDropItemType != GameItem::PaddleShrinkItem &&
-        gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
-        if (Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) {
-            return GameItem::PaddleShrinkItem;
-        }
-    }
-
-    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 5) {
-        case 0: case 1: default:
-            if (gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize &&
-                this->nextDropItemType != GameItem::PaddleShrinkItem) {
-                return GameItem::PaddleShrinkItem;
-            }
-            else {
-                switch (Randomizer::GetInstance()->RandomUnsignedInt() % 3) {
-                    case 0:
-                        return GameItem::BallSpeedUpItem;
-                    case 1:
-                        return GameItem::InvisiPaddleItem;
-                    case 2:
-                    default:
-                        return GameItem::InvisiBallItem;
-                }
-            }
-        case 2:
+    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 4) {
+        case 0:
             return GameItem::BallSpeedUpItem;
-        case 3:
+        case 1:
             return GameItem::InvisiPaddleItem;
-        case 4:
+        case 2:
+            return GameItem::PaddleShrinkItem;
+        case 3:
+        default:
             return GameItem::InvisiBallItem;
     }
 }
@@ -1735,43 +1718,20 @@ Stage2AI::~Stage2AI() {
 
 GameItem::ItemType Stage2AI::GenerateRandomItemDropType(GameModel* gameModel) const {
     assert(gameModel != NULL);
-    if (this->nextDropItemType != GameItem::PaddleShrinkItem &&
-        gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
 
-        if (Randomizer::GetInstance()->RandomUnsignedInt() % 5 == 0) {
-            return GameItem::PaddleShrinkItem;
-        }
-    }
-
-    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 8) {
-        case 0: case 1: case 2: default:
-            if (gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
-                return GameItem::PaddleShrinkItem;
-            }
-            else {
-                switch (Randomizer::GetInstance()->RandomUnsignedInt() % 5) {
-                    case 0:
-                        return GameItem::InvisiPaddleItem;
-                    case 1:
-                        return GameItem::InvisiBallItem;
-                    case 2:
-                        return GameItem::PoisonPaddleItem;
-                    case 3:
-                        return GameItem::UpsideDownItem;
-                    case 4:
-                    default:
-                        return GameItem::BallSpeedUpItem;
-                }
-            }
-        case 3:
+    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 6) {
+        case 0:
             return GameItem::InvisiPaddleItem;
-        case 4:
+        case 1:
             return GameItem::InvisiBallItem;
-        case 5:
+        case 2:
             return GameItem::PoisonPaddleItem;
-        case 6:
+        case 3:
             return GameItem::UpsideDownItem;
-        case 7:
+        case 4:
+            return GameItem::PaddleShrinkItem;
+        case 5:
+        default:
             return GameItem::BallSpeedUpItem;
     }
 }
@@ -1860,8 +1820,8 @@ void Stage2AI::SetState(DecoBossAIState::AIState newState) {
             GameSound* sound = this->boss->GetGameModel()->GetSound();
             // Stop the current boss background music
             sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
-            // ... and play the transition sound just once
-            sound->PlaySound(GameSound::BossBackgroundLoopTransition, false, false);
+            // ... and play the transition sound
+            sound->PlaySound(GameSound::BossBackgroundLoopTransitionSingleHitEvent, false, false);
 
             break;
         }
@@ -2051,52 +2011,23 @@ Stage3AI::~Stage3AI() {
 
 GameItem::ItemType Stage3AI::GenerateRandomItemDropType(GameModel* gameModel) const {
     assert(gameModel != NULL);
-    if (this->nextDropItemType != GameItem::PaddleShrinkItem &&
-        gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
-
-            if (Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) {
-                return GameItem::PaddleShrinkItem;
-            }
-    }
-
-    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 12) {
-        case 0: case 1: case 2: case 3: case 4: default:
-            if (gameModel->GetPlayerPaddle()->GetPaddleSize() != PlayerPaddle::SmallestSize) {
-                return GameItem::PaddleShrinkItem;
-            }
-            else {
-                switch (Randomizer::GetInstance()->RandomUnsignedInt() % 7) {
-                    case 0:
-                        return GameItem::InvisiBallItem;
-                    case 1:
-                        return GameItem::PoisonPaddleItem;
-                    case 2:
-                        return GameItem::UpsideDownItem;
-                    case 3:
-                        return GameItem::BallSpeedUpItem;
-                    case 4:
-                        return GameItem::CrazyBallItem;
-                    case 5:
-                        return GameItem::GravityBallItem;
-                    case 6:
-                    default:
-                        return GameItem::InvisiPaddleItem;
-                }
-            }
-            
-        case 5:
+    switch (Randomizer::GetInstance()->RandomUnsignedInt() % 8) {
+        case 0:
             return GameItem::InvisiBallItem;
-        case 6:
+        case 1:
             return GameItem::PoisonPaddleItem;
-        case 7:
+        case 2:
             return GameItem::UpsideDownItem;
-        case 8:
+        case 3:
             return GameItem::BallSpeedUpItem;
-        case 9:
+        case 4:
             return GameItem::CrazyBallItem;
-        case 10:
+        case 5:
             return GameItem::GravityBallItem;
-        case 11:
+        case 6:
+            return GameItem::PaddleShrinkItem;
+        case 7:
+        default:
             return GameItem::InvisiPaddleItem;
     }
 }

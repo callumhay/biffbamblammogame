@@ -88,7 +88,7 @@ void ClassicalBossAI::SignalLaserFireEffects() {
 
 float ClassicalBossAI::GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const {
     UNUSED_PARAMETER(level);
-    return (bossWidth / 2.0f) + (2.0f * LevelPiece::PIECE_WIDTH);
+    return (bossWidth / 2.0f) + (2.75f * LevelPiece::PIECE_WIDTH);
 }
 
 float ClassicalBossAI::GetBossMovementMaxXBound(const GameLevel* level, float bossWidth) const {
@@ -1097,13 +1097,13 @@ tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL), trans
 }
 
 BodyHeadAI::~BodyHeadAI() {
-    this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
+    this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 3.0);
 }
 
 void BodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
     UNUSED_PARAMETER(gameModel);
     
-    // Check to see if the collision was with any of the column weakpoints
+    // Check to see if the collision was with any of the column weak points
     for (int i = 0; i < static_cast<int>(this->columnWeakpts.size()); i++) {
         BossWeakpoint* column = this->columnWeakpts[i];
         if (collisionPart == column) {
@@ -1235,6 +1235,7 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             // Stop the current boss background music
             sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
             // ... and play the transition sound in a loop
+            sound->PlaySound(GameSound::BossBackgroundLoopTransitionSingleHitEvent, false, false);
             this->transitionSoundID = sound->PlaySound(GameSound::BossBackgroundLoopTransition, true, false);
             
             break;
@@ -1602,7 +1603,7 @@ void BodyHeadAI::ExecuteEyeRisesFromPedimentState(double dT) {
         this->eye->Translate(Vector3D(0, this->GetEyeRiseHeight(), 0));
 
         // Go to the next high-level AI state
-        this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
+        this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 3.0);
         this->transitionSoundID = INVALID_SOUND_ID;
         this->boss->SetNextAIState(new HeadAI(this->boss));
     }

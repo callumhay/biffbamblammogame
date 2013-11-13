@@ -21,7 +21,6 @@
 
 const float ButtonTutorialHint::BUTTON_SCALE_MULTIPLIER = 2.0f;
 
-#define ACTION_LABEL_DEFAULT_COLOUR Colour(0.3882f, 0.72157f, 1.0f)
 
 ButtonTutorialHint::ButtonTutorialHint(const GameTutorialAssets* tutorialAssets,
                                        const std::string& action) : 
@@ -35,14 +34,12 @@ mouseLabel(NULL) {
     assert(tutorialAssets != NULL);
 
     this->SetActionNameWithSeparator(action, ":");
-    this->actionLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
+    this->SetColour(Colour(0.3882f, 0.72157f, 1.0f));
     this->actionLabel.SetDropShadow(Colour(0,0,0), 0.10f);
 
-    orLabel.SetScale(0.75f);
-    orLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
-    orLabel.SetDropShadow(Colour(0,0,0), 0.10f);
-    commaLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
-    commaLabel.SetDropShadow(Colour(0,0,0), 0.07f);
+    this->orLabel.SetScale(0.75f);
+    this->orLabel.SetDropShadow(Colour(0,0,0), 0.10f);
+    this->commaLabel.SetDropShadow(Colour(0,0,0), 0.07f);
 
     this->fadeAnim.ClearLerp();
     this->fadeAnim.SetInterpolantValue(0.0f);
@@ -262,7 +259,7 @@ void ButtonTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float de
         this->actionLabel.SetColour(this->flashAnim->GetInterpolantValue());
     }
     else {
-        this->actionLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
+        this->actionLabel.SetColour(this->actionLabelDefaultColour);
     }
 
     float scale = 1.0f;

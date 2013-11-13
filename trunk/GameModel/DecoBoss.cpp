@@ -308,7 +308,7 @@ void DecoBoss::Init(float startingX, float startingY) {
     rightArmHand->Translate(Vector3D(0, ARM_SCOPING_SEG1_Y_RETRACT_TRANSLATION + ARM_SCOPING_SEG2_Y_RETRACT_TRANSLATION + 
         ARM_SCOPING_SEG3_Y_RETRACT_TRANSLATION + ARM_SCOPING_SEG4_Y_RETRACT_TRANSLATION, 0));
 
-    this->SetNextAIState(new Stage1AI(this));
+    this->SetCurrentAIStateImmediately(new Stage1AI(this));
     // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
 }
 

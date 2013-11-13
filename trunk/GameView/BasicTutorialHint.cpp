@@ -14,16 +14,14 @@
 #include "GameTutorialAssets.h"
 #include "TutorialHintListeners.h"
 
-#define LABEL_DEFAULT_COLOUR Colour(1,1,1)
-
 BasicTutorialHint::BasicTutorialHint(const std::string& action, float scale, float screenSpaceWidth) : 
-EmbededTutorialHint(), flashAnim(NULL), alphaWhenShowing(1.0f),
+EmbededTutorialHint(), flashAnim(NULL), alphaWhenShowing(1.0f), actionLabelDefaultColour(Colour(1,1,1)),
 actionLabel(GameFontAssetsManager::GetInstance()->GetFont(
             GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), 
             screenSpaceWidth <= 0 ? Camera::GetWindowWidth() : screenSpaceWidth, "") {
 
     this->SetActionName(action);
-    this->actionLabel.SetColour(LABEL_DEFAULT_COLOUR);
+    this->actionLabel.SetColour(this->actionLabelDefaultColour);
     this->actionLabel.SetDropShadow(Colour(0,0,0), 0.10f);
     this->actionLabel.SetScale(scale);
 
@@ -101,7 +99,7 @@ void BasicTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float dep
         this->actionLabel.SetColour(this->flashAnim->GetInterpolantValue());
     }
     else {
-        this->actionLabel.SetColour(LABEL_DEFAULT_COLOUR);
+        this->actionLabel.SetColour(this->actionLabelDefaultColour);
     }
 
     // Draw the action label...

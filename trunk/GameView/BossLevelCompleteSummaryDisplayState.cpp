@@ -239,9 +239,14 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 
         if (fadeIsDone) {
 
+
             // Stop the background music by fading it out...
-            sound->StopSound(this->bgMusicSoundID, 1.0);
-            this->bgMusicSoundID = INVALID_SOUND_ID;
+            // We only stop it in this state if the next state is not the game complete state...
+            const GameModel* gameModel = this->display->GetModel();
+            if (!gameModel->IsOnLastLevelOfGame()) {
+                sound->StopSound(this->bgMusicSoundID, 1.0);
+                this->bgMusicSoundID = INVALID_SOUND_ID;
+            }
 
             // If we're done fading then we can go to the next state
             // Update the game model until there's a new queued state

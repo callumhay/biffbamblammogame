@@ -2,7 +2,7 @@
  * BlammopediaState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010-2011
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -62,14 +62,15 @@ goBackToMainMenu(false), starryBG(NULL), listEventHandler(NULL) {
     Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
     assert(blammopedia != NULL);
 	this->listViews.reserve(3);
-    this->listViews.push_back(this->BuildGameplayListView());
+    this->listViews.push_back(this->BuildTutorialListView());
 	this->listViews.push_back(this->BuildGameItemsListView(blammopedia));
 	this->listViews.push_back(this->BuildGameBlockListView(blammopedia));
 
-    this->selectedItemNameLbl.SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
-        GameFontAssetsManager::Medium));
-    this->selectedItemNameLbl.SetColour(Colour(1, 0.65f, 0));
-    this->selectedItemNameLbl.SetDropShadow(Colour(0,0,0), 0.125f);
+    //this->selectedItemNameLbl.SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
+    //    GameFontAssetsManager::Medium));
+    //this->selectedItemNameLbl.SetColour(Colour(1, 0.65f, 0));
+    //this->selectedItemNameLbl.SetDropShadow(Colour(0,0,0), 0.125f);
+    //this->selectedItemNameLbl.SetScale(0.5f * this->display->GetTextScalingFactor());
 
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
@@ -187,8 +188,6 @@ void BlammopediaState::RenderFrame(double dT) {
     ItemListView* currListView = this->GetCurrentListView();
     assert(currListView != NULL);
 
-    ItemListView::ListItem* currItem = currListView->GetSelectedItem();
-
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -270,21 +269,22 @@ void BlammopediaState::RenderFrame(double dT) {
         glVertex2i(0, TOTAL_MENU_HEIGHT);
         glEnd();
 
-        if (currItem != NULL) {
-            // Draw the name of the currently selected item in the active blammopedia list...
-            // If the item is locked we change the colour value to something that looks neutral
-            if (currItem->GetIsLocked()) {
-                this->selectedItemNameLbl.SetColour(Colour(0.66f, 0.66f, 0.66f));
-            }
-            else {
-                this->selectedItemNameLbl.SetColour(Colour(1.0f, 1.0f, 1.0f));
-            }
-            this->selectedItemNameLbl.SetText(currItem->GetNameLbl()->GetText());
-            this->selectedItemNameLbl.SetTopLeftCorner(camera.GetWindowWidth() - 
-                this->selectedItemNameLbl.GetLastRasterWidth() - BlammopediaState::ITEM_NAME_BORDER_SIZE,
-                this->selectedItemNameLbl.GetHeight() + BlammopediaState::ITEM_NAME_BORDER_SIZE);
-            this->selectedItemNameLbl.Draw();
-        }
+        //ItemListView::ListItem* currItem = currListView->GetSelectedItem();
+        //if (currItem != NULL) {
+        //    // Draw the name of the currently selected item in the active blammopedia list...
+        //    // If the item is locked we change the colour value to something that looks neutral
+        //    if (currItem->GetIsLocked()) {
+        //        this->selectedItemNameLbl.SetColour(Colour(0.66f, 0.66f, 0.66f));
+        //    }
+        //    else {
+        //        this->selectedItemNameLbl.SetColour(Colour(1.0f, 1.0f, 1.0f));
+        //    }
+        //    this->selectedItemNameLbl.SetText(currItem->GetName());
+        //    this->selectedItemNameLbl.SetTopLeftCorner(camera.GetWindowWidth() - 
+        //        this->selectedItemNameLbl.GetLastRasterWidth() - BlammopediaState::ITEM_NAME_BORDER_SIZE,
+        //        this->selectedItemNameLbl.GetHeight() + BlammopediaState::ITEM_NAME_BORDER_SIZE);
+        //    this->selectedItemNameLbl.Draw();
+        //}
 
         // Animate any highlighted labels...
         if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
@@ -364,8 +364,8 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
             this->SetBlammoMenuItemDeselection();
         }
         else {
-            // Do nothing if a tutorial item is activated and any button but esc is pressed
-            if (currList->GetIsItemActivated() && this->currListViewIndex == 0 && pressedButton != GameControl::EscapeButtonAction) {
+            // Do nothing if an item is activated and the enter button is pressed
+            if (currList->GetIsItemActivated() && pressedButton == GameControl::EnterButtonAction) {
                 return;
             }
 
@@ -458,7 +458,7 @@ void BlammopediaState::BlammopediaListEventHandler::ItemDeactivated() {
     this->state->display->GetSound()->PlaySound(GameSound::BlammopediaListItemDeselectEvent, false);
 }
 
-ItemListView* BlammopediaState::BuildGameplayListView() {
+ItemListView* BlammopediaState::BuildTutorialListView() {
 
     GameTutorialAssets* tutorialAssets = this->display->GetAssets()->GetTutorialAssets();
     ItemListView* itemsListView = new ItemListView(Camera::GetWindowWidth(), Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
@@ -501,7 +501,7 @@ ItemListView* BlammopediaState::BuildGameplayListView() {
     boostPopupPane->AddText("Ball Boosting", Colour(1,1,1), TITLE_TEXT_SCALE);
     boostPopupPane->SetLayoutType(DecoratorOverlayPane::TwoColumn);
     boostPopupPane->AddText(
-        std::string("During gameplay the boost gauge in the top-left will fill up and make boosts available."),
+        std::string("During game play the boost gauge in the top-left will fill up and make boosts available."),
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* boostHUDImg = tutorialAssets->GetBoostTutorialHUDTexture();
@@ -562,15 +562,10 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
 	
 	// Add each item in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
-    Colour itemColour;
-    std::string currName;
-    std::string currDesc;
-    std::string finePrint;
-    
     const Blammopedia::ItemEntryMap& itemEntries = blammopedia->GetItemEntries();
     for (Blammopedia::ItemEntryMapConstIter iter = itemEntries.begin(); iter != itemEntries.end(); ++iter) {
+        
         Blammopedia::ItemEntry* itemEntry = iter->second;
-        const Texture2D* texture = blammopedia->GetLockedItemTexture();
 
         // SKIP BALL AND PADDLE CAM FOR NOW
         // TODO: REMOVE THIS!!!
@@ -578,23 +573,28 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
             continue;
         }
 
+        ItemListView::ListItem* listItem = NULL;
         if (!itemEntry->GetIsLocked()) {
 
-            texture   = itemEntry->GetItemTexture();
-            currName  = itemEntry->GetName();
-            currDesc  = itemEntry->GetDescription();
-            finePrint = itemEntry->GetFinePrint();
+            const Texture2D* texture   = itemEntry->GetItemTexture();
+            const std::string& currName  = itemEntry->GetName();
+            const std::string& currDesc  = itemEntry->GetDescription();
+            const std::string& finePrint = itemEntry->GetFinePrint();
             
-            GameItem::ItemDisposition itemDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(iter->first);
-            itemColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(itemDisposition);
+            //GameItem::ItemDisposition itemDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(iter->first);
+            //itemColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(itemDisposition);
+
+            float popupHintWidth = std::min<float>(1000.0f, 0.8f * Camera::GetWindowWidth());
+
+            PopupTutorialHint* itemPopup  = new PopupTutorialHint(popupHintWidth);
+            DecoratorOverlayPane* popupPane = itemPopup->GetPane();
+            popupPane->DecorateAsBlammopediaPane(texture, currName, currDesc, finePrint, true);
+
+            listItem = itemsListView->AddBlammopediaItem(currName, texture, itemPopup, itemEntry->GetHasBeenViewed());
         }
         else {
-            itemColour = Colour(0.5, 0.5, 0.5);
-            currName = LOCKED_NAME;
-            currDesc = "";
+            listItem = itemsListView->AddLockedBlammopediaItem(blammopedia->GetLockedItemTexture());
         }
-        ItemListView::ListItem* listItem = itemsListView->AddBlammopediaItem(currName, currDesc, finePrint, itemColour, texture,
-            itemEntry->GetIsLocked(), itemEntry->GetHasBeenViewed());
 
         this->itemToEntryMap.insert(std::make_pair(listItem, itemEntry));
     }
@@ -614,13 +614,10 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
 
 	// Add each block in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
-    std::string currName;
-    std::string currDesc;
-    std::string finePrint;
     const Blammopedia::BlockEntryMap& blockEntries = blammopedia->GetBlockEntries();
     for (Blammopedia::BlockEntryMapConstIter iter = blockEntries.begin(); iter != blockEntries.end(); ++iter) {
+        
         Blammopedia::AbstractBlockEntry* blockEntry = iter->second;
-        const Texture2D* texture = blammopedia->GetLockedItemTexture();
 
         // SKIP THE PORTAL BLOCK FOR NOW
         // TODO: REMOVE THIS!!!
@@ -628,17 +625,27 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
             continue;
         }
 
+        ItemListView::ListItem* listItem = NULL;
         if (!blockEntry->GetIsLocked()) {
-            texture   = blockEntry->GetBlockTexture(furthestWorldIdx);
-            currName  = blockEntry->GetName();
-            currDesc  = blockEntry->GetDescription();
-            finePrint = blockEntry->GetFinePrint();
+            const Texture2D* texture   = blockEntry->GetBlockTexture(furthestWorldIdx);
+            const std::string& currName  = blockEntry->GetName();
+            const std::string& currDesc  = blockEntry->GetDescription();
+            const std::string& finePrint = blockEntry->GetFinePrint();
+
+            float popupHintWidth = std::min<float>(1000.0f, 0.9f * Camera::GetWindowWidth());
+
+            PopupTutorialHint* itemPopup  = new PopupTutorialHint(popupHintWidth);
+            DecoratorOverlayPane* popupPane = itemPopup->GetPane();
+            popupPane->DecorateAsBlammopediaPane(texture, currName, currDesc, finePrint, false);
+
+            listItem = blockListView->AddBlammopediaItem(currName, texture, itemPopup, blockEntry->GetHasBeenViewed());
+
         }
         else {
-            currName = LOCKED_NAME;
+            listItem = blockListView->AddLockedBlammopediaItem(blammopedia->GetLockedItemTexture());
         }
-        ItemListView::ListItem* listItem = blockListView->AddBlammopediaItem(currName, currDesc, finePrint, Colour(0.3f, 0.6f, 0.85f), texture,
-            blockEntry->GetIsLocked(), blockEntry->GetHasBeenViewed());
+        //ItemListView::ListItem* listItem = blockListView->AddBlammopediaItem(currName, currDesc, finePrint, Colour(0.3f, 0.6f, 0.85f), texture,
+        //    blockEntry->GetIsLocked(), blockEntry->GetHasBeenViewed());
 
         this->itemToEntryMap.insert(std::make_pair(listItem, blockEntry));
     }

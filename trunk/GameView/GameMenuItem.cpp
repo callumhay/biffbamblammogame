@@ -328,17 +328,17 @@ void SelectionListMenuItem::ButtonPressed(const GameControl::ActionButton& press
 			break;
 
         case GameControl::UpButtonAction:
-            this->EscapeFromMenuItem(true);
-            if (this->parent != NULL) {
-                this->parent->ButtonPressed(GameControl::UpButtonAction);
-            }
+            //this->EscapeFromMenuItem(true);
+            //if (this->parent != NULL) {
+            //    this->parent->ButtonPressed(GameControl::UpButtonAction);
+            //}
             break;
 
         case GameControl::DownButtonAction:
-            this->EscapeFromMenuItem(true);
-            if (this->parent != NULL) {
-                this->parent->ButtonPressed(GameControl::DownButtonAction);
-            }
+            //this->EscapeFromMenuItem(true);
+            //if (this->parent != NULL) {
+            //    this->parent->ButtonPressed(GameControl::DownButtonAction);
+            //}
             break;
 
 		case GameControl::EscapeButtonAction:
@@ -636,17 +636,17 @@ void AmountScrollerMenuItem::ButtonPressed(const GameControl::ActionButton& pres
 			break;
 
         case GameControl::UpButtonAction:
-            this->EscapeFromMenuItem(true);
-            if (this->parent != NULL) {
-                this->parent->ButtonPressed(GameControl::UpButtonAction);
-            }
+            //this->EscapeFromMenuItem(true);
+            //if (this->parent != NULL) {
+            //    this->parent->ButtonPressed(GameControl::UpButtonAction);
+            //}
             break;
 
         case GameControl::DownButtonAction:
-            this->EscapeFromMenuItem(true);
-            if (this->parent != NULL) {
-                this->parent->ButtonPressed(GameControl::DownButtonAction);
-            }
+            //this->EscapeFromMenuItem(true);
+            //if (this->parent != NULL) {
+            //    this->parent->ButtonPressed(GameControl::DownButtonAction);
+            //}
             break;
 		case GameControl::EscapeButtonAction:
             this->EscapeFromMenuItem(false);

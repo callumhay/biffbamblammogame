@@ -35,6 +35,7 @@ public:
     void MousePressed(const GameControl::MouseButton& pressedButton);
 
     // Overridden event methods
+    void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
     void BallShotEvent(const GameBall& shotBall);
     void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
     void ItemActivatedEvent(const GameItem& item);
@@ -59,10 +60,10 @@ public:
     void SetHoldBoostHint(ButtonTutorialHint* hint)  { this->holdBoostHint = hint; }
     void SetBoostAvailableHint(ButtonTutorialHint* hint)  { this->boostAvailableHint = hint; }
     
-    void SetPointsHintEmitter(ESPPointEmitter* hint) { this->pointsTutorialHintEmitter = hint; }
+    //void SetPointsHintEmitter(ESPPointEmitter* hint) { this->pointsTutorialHintEmitter = hint; }
 
     void SetMultiplierHints(BasicMultiTutorialHint* hints) { this->multiplierHints = hints; }
-    void SetMultiplierLostHint(BasicTutorialHint* hint) { this->multiplierLostHint = hint; }
+    void SetMultiplierLostHint(BasicMultiTutorialHint* hint) { this->multiplierLostHint = hint; }
 
 private:
     GameDisplay* display;
@@ -91,11 +92,11 @@ private:
     ButtonTutorialHint* holdBoostHint;
     ButtonTutorialHint* boostAvailableHint;
 
-    BasicTutorialHint* multiplierLostHint;
+    BasicMultiTutorialHint* multiplierLostHint;
     BasicMultiTutorialHint* multiplierHints;
 
-    ESPPointEmitter* pointsTutorialHintEmitter;
-    ESPParticleColourEffector fadeEffector;
+    //ESPPointEmitter* pointsTutorialHintEmitter;
+    //ESPParticleColourEffector fadeEffector;
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };
@@ -103,10 +104,6 @@ private:
 inline void TutorialEventsListener::BallShotEvent(const GameBall& shotBall) {
     UNUSED_PARAMETER(shotBall);
     this->shootBallHint->Unshow(0.0, 0.5);
-}
-
-inline void TutorialEventsListener::PaddleWeaponFiredEvent() {
-    this->fireWeaponHint->Unshow(0.0, 1.0, true);
 }
 
 #endif // __TUTORIALEVENTSLISTENER_H__

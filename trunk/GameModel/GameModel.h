@@ -689,12 +689,7 @@ inline void GameModel::Tick(double seconds) {
 	if (currState != NULL) {
 		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
             
-            this->currState->Tick(seconds);
-            
-            if ((this->pauseBitField & GameModel::PauseAI) == 0x00000000) {
-                this->GetCurrentLevel()->TickAIEntities(seconds, this);
-            }
-            
+            this->currState->Tick(seconds); 
             this->totalLevelTimeInSeconds += seconds;
 		}
 		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0) {

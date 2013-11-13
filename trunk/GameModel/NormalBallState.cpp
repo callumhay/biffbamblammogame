@@ -53,7 +53,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
         // IMPORTANT: Gather the current velocity BEFORE we change it based on the current impulse acceleration/deceleration
         currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
         
-        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currBoostDecceleration);
+        this->gameBall->SetSpeed(std::max<float>(GameBall::GetSlowestAllowableSpeed(), this->gameBall->GetSpeed() - currBoostDecceleration));
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
         crazyBallVelChangeAllowed = false;
     }
@@ -73,7 +73,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
         // IMPORTANT: Gather the current velocity BEFORE we change it based on the current impulse acceleration/deceleration
         currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
 
-        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currImpulseDeceleration);
+        this->gameBall->SetSpeed(std::max<float>(GameBall::GetSlowestAllowableSpeed(), this->gameBall->GetSpeed() - currImpulseDeceleration));
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
         crazyBallVelChangeAllowed = false;
     }

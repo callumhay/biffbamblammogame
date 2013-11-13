@@ -210,7 +210,7 @@ void FuturismWorldAssets::InitializeEmitters() {
 	this->triangleEmitterSm.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->triangleEmitterSm.SetEmitVolume(triangleMinPt, triangleMaxPt);
 	this->triangleEmitterSm.SetEmitDirection(Vector3D(0, 1, 0));
-	this->triangleEmitterSm.SetParticleAlignment(ESP::ScreenAligned);
+	this->triangleEmitterSm.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->triangleEmitterSm.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->triangleEmitterSm.AddEffector(&this->triangleFader);
     this->triangleEmitterSm.SetParticles(NUM_PARTICLES_PER_EMITTER, this->futurismTriangleTex);
@@ -222,7 +222,7 @@ void FuturismWorldAssets::InitializeEmitters() {
 	this->triangleEmitterMed.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->triangleEmitterMed.SetEmitVolume(triangleMinPt, triangleMaxPt);
 	this->triangleEmitterMed.SetEmitDirection(Vector3D(0, 1, 0));
-	this->triangleEmitterMed.SetParticleAlignment(ESP::ScreenAligned);
+	this->triangleEmitterMed.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->triangleEmitterMed.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->triangleEmitterMed.AddEffector(&this->triangleFader);
 	this->triangleEmitterMed.SetParticles(NUM_PARTICLES_PER_EMITTER, this->futurismTriangleTex);
@@ -234,7 +234,7 @@ void FuturismWorldAssets::InitializeEmitters() {
 	this->triangleEmitterLg.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->triangleEmitterLg.SetEmitVolume(triangleMinPt, triangleMaxPt);
 	this->triangleEmitterLg.SetEmitDirection(Vector3D(0, 1, 0));
-	this->triangleEmitterLg.SetParticleAlignment(ESP::ScreenAligned);
+	this->triangleEmitterLg.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->triangleEmitterLg.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->triangleEmitterLg.AddEffector(&this->triangleFader);
 	this->triangleEmitterLg.SetParticles(NUM_PARTICLES_PER_EMITTER, this->futurismTriangleTex);

@@ -475,7 +475,6 @@ ItemMovingLoop {
 BossFadeInIntroEvent {
 	file = resources/BossFadeInIntroEvent.ogg
 }
-
 BossBackgroundLoop {
 	world = Classical
 	file = resources/BossClassicalWorldBackgroundLoop.ogg	
@@ -492,11 +491,14 @@ BossBackgroundLoop {
 	world = Deco
 	file = resources/BossDecoWorldBackgroundLoop.ogg	
 }
-
+// TODO: Change back to resources/BossBackgroundLoopTransition.ogg
 BossBackgroundLoopTransition {
-	file = resources/BossBackgroundLoopTransition.ogg
+	file = resources/BossBackgroundLoopTransitionSingleHitEvent.ogg
 }
-
+// TODO: Change back to resources/BossBackgroundLoopTransitionSingleHitEvent.ogg
+BossBackgroundLoopTransitionSingleHitEvent {
+	file = TODO
+}
 BossAngryBackgroundLoop {
 	world = Classical
 	file = resources/BossAngryClassicalWorldBackgroundLoop.ogg

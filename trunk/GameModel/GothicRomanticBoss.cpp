@@ -203,7 +203,7 @@ void GothicRomanticBoss::Init(float startingX, float startingY) {
     // Move the boss up a bit to start off
     this->root->Translate(Vector3D(startingX, startingY + 2*LevelPiece::PIECE_HEIGHT, 0.0f));
 
-    this->SetNextAIState(new FireBallAI(this));
+    this->SetCurrentAIStateImmediately(new FireBallAI(this));
     // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
 }
 
