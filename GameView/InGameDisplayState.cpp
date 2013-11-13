@@ -20,9 +20,9 @@
 #include "CgFxAfterImage.h"
 #include "CgFxBloom.h"
 
-// Game Model stuff
 #include "../GameModel/GameModel.h"
 #include "../GameModel/Beam.h"
+#include "../WindowManager.h"
 
 InGameDisplayState::InGameDisplayState(GameDisplay* display) :
 DisplayState(display), renderPipeline(display) {
@@ -36,6 +36,9 @@ DisplayState(display), renderPipeline(display) {
 }
 
 InGameDisplayState::~InGameDisplayState() {
+    if (!WindowManager::GetInstance()->GetIsFullscreen()) {
+        WindowManager::GetInstance()->ShowCursor(true);
+    }
 }
 
 /**

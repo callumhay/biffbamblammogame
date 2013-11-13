@@ -31,14 +31,24 @@ public:
 
 class DecoratorOverlayPane {
 public:
+    static const float X_BORDER;
+    static const float Y_BORDER;
+    static const float ITEM_Y_SPACING;
+    static const float ITEM_X_SPACING;
+
     DecoratorOverlayPane(OverlayPaneEventHandler* handler, size_t width, const Colour& bgColour);
     ~DecoratorOverlayPane();
 
-    enum LayoutType { Centered, TwoColumn };
+    void DecorateAsBlammopediaPane(const Texture2D* texture, const std::string& currName, 
+        const std::string& currDesc, const std::string& finePrint, bool imgHasBorder);
+
+    enum LayoutType { Centered, TwoColumn, Left };
     void SetLayoutType(const LayoutType& layout) { this->layout = layout; }
 
-    void AddText(const std::string& text, const Colour& colour = Colour(1,1,1), float scale = 1.0f);
-    void AddImage(size_t width, const Texture* image);
+    void AddText(const std::string& text, const Colour& colour = Colour(1,1,1), float scale = 1.0f, bool keepAtSameY = false);
+    void AddImage(size_t width, const Texture* image, bool keepAtSameY = false);
+    void AddYSpacing(int spacing) { this->currYPos += spacing; }
+    void AddXSpacing(int spacing) { this->currXPos += spacing; }
     void SetSelectableOptions(const std::vector<std::string>& options, int defaultIdx);
 
     void Show(double delayInSecs, double timeInSecs);
@@ -60,9 +70,6 @@ public:
     std::string GetSelectedOptionStr() const { return this->selectableOptions[this->selectedIdx]->GetText(); }
 
 private:
-    static const float X_BORDER;
-    static const float Y_BORDER;
-    static const float ITEM_SPACING;
     static const float X_OPTION_GAP;
     static const float COL_GAP;
     
@@ -72,9 +79,10 @@ private:
 
     class Image {
     public:
-        Image(int topLeftX, int topLeftY, size_t width, size_t height, const Texture* texture);
+        Image(int topLeftX, int topLeftY, size_t width, size_t height, const Texture* texture, bool hasBorder = true);
         void Draw(float alpha, float tX, float tY);
     private:
+        bool hasBorder;
         int topLeftX, topLeftY;
         size_t width, height;
         const Texture* texture;
@@ -96,6 +104,7 @@ private:
 
     int selectedIdx;
     int currYPos;
+    int currXPos;
     bool optionActive;
 
     Colour bgColour;

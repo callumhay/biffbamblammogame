@@ -43,6 +43,7 @@ public:
 	bool ToggleFullscreen();
     void ShowCursor(bool show);
 
+    bool GetIsFullscreen() const;
 
 	std::vector<std::string> GetPossibleResolutionsList();
 
@@ -56,14 +57,18 @@ private:
 	
 	SDL_Surface* videoSurface;
 	int bitsPerPixel;
+    bool inFullscreenMode;
 	
-
 	WindowManager();
 	~WindowManager();
 };
 
 inline void WindowManager::ShowCursor(bool show) {
     SDL_ShowCursor(show ? 1 : 0);
+}
+
+inline bool WindowManager::GetIsFullscreen() const {
+    return this->inFullscreenMode;
 }
 
 #endif

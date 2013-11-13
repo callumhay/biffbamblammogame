@@ -20,6 +20,7 @@
 
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
+#include "../WindowManager.h"
 
 const double LevelStartDisplayState::FADE_IN_TIME               = 1.25;
 const double LevelStartDisplayState::WIPE_TIME                  = 0.8f;
@@ -143,6 +144,8 @@ paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
         assert(sound != NULL);
         sound->PlaySound(GameSound::WorldBackgroundLoop, true, true, 1.0f);
     }
+
+    WindowManager::GetInstance()->ShowCursor(false);
 }
 
 LevelStartDisplayState::~LevelStartDisplayState() {

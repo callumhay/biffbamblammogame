@@ -430,6 +430,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossFadeInIntroEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoopTransition));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoopTransitionSingleHitEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossAngryBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossGlowEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossElectricitySpasmLoop));

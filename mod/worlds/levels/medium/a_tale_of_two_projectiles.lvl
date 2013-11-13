@@ -2,13 +2,13 @@ A Tale of Two Projectiles
 21 30
 E E E S S S S S S S E S S S S S S S E E E 
 E E E S E E E E E S E S E E E E E S E E E 
-E E E S A(0,0,c,d){3} T(G,ul) M T(G,ur) A(0,0,d,c){4} S E S A(0,0,e,f){5} T(G,ul) J T(G,ur) A(0,0,f,e){6} S E E E 
+E E E S A(0,0,c,d){3} T(G,ul) M E A(0,0,d,c){4} S E S A(0,0,e,f){5} E J T(G,ur) A(0,0,f,e){6} S E E E 
 E E E S E E E E E S S S E E E E E S E E E 
 E E S S F(d) F(d) F(d) F(d) F(d) S A(1,1,a,b){2} S F(d) F(d) F(d) F(d) F(d) S S E E 
-E E S W(3) E K(StickyPaddle,StickyPaddle,StickyPaddle) E K(ShieldPaddle,ShieldPaddle,ShieldPaddle) E E E E E K(ShieldPaddle,ShieldPaddle,ShieldPaddle) E K(StickyPaddle,StickyPaddle,StickyPaddle) E W(6) S E E 
-E E S E E E E E E E E E E E E E E E S E E 
-E E S E Q(f) E Q(f) E Q(f) E E E Q(f) E Q(f) E Q(f) E S E E 
-E E S Q(f) E Q(f) K(UberBall,UberBall,UberBall) Q(f) E Q(f) E Q(f) E Q(f) K(IceBall,IceBall,IceBall) Q(f) E Q(f) S E E 
+E E S W(3) R K(StickyPaddle,StickyPaddle,StickyPaddle) E K(StickyPaddle,StickyPaddle,StickyPaddle) R E E E R K(ShieldPaddle,ShieldPaddle,ShieldPaddle) E K(ShieldPaddle,ShieldPaddle,ShieldPaddle) R W(6) S E E 
+E E S E E R R R E E E E E R R R E E S E E 
+E E S E Q(f) E Q(f) E Q(f) E R E Q(f) E Q(f) E Q(f) E S E E 
+E E S R E Q(f) K(UberBall,UberBall,UberBall) Q(f) E R E R E Q(f) K(IceBall,IceBall,IceBall) Q(f) E R S E E 
 E E S G E G E G E G E G E G E G E G S E E 
 E E S G E G E G E G E G E G E G E G S E E 
 E E S G E G E G E G E G E G E G E G S E E 
@@ -35,15 +35,15 @@ STARS:
 15000
 30000
 40000
-50000
-56000
+50500
+57500
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 0
 BallGrow 2
+UberBall 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

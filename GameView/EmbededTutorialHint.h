@@ -25,6 +25,8 @@ public:
     virtual float GetHeight() const = 0;
     virtual float GetWidth() const = 0;
 
+    virtual void SetColour(const Colour& colour) = 0;
+
     virtual void SetTopLeftCorner(float x, float y) = 0;
 
     virtual void SetAlphaWhenShowing(float alpha) = 0;

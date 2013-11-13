@@ -169,6 +169,7 @@ public:
         BossFadeInIntroEvent,
         BossBackgroundLoop,
         BossBackgroundLoopTransition,
+        BossBackgroundLoopTransitionSingleHitEvent,
         BossAngryBackgroundLoop,
         BossGlowEvent,
         BossElectricitySpasmLoop,
@@ -196,6 +197,7 @@ public:
         DecoBossLevelRotatingLoop,
         DecoBossLightningBoltAttackEvent,
         DecoBossElectricShockLoop,
+        DecoBossBackgroundLoopTransitionEvent,
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,

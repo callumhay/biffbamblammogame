@@ -188,5 +188,9 @@ void GameCompleteDisplayState::ButtonPressed(const GameControl::ActionButton& pr
         this->goToCredits = true;
         this->fadeAnim.SetLerp(0.0, FADE_OUT_TIME, 0.0f, 1.0f);
         this->fadeAnim.SetInterpolantValue(0.0f);
+
+        // Fade out any background music
+        GameSound* sound = this->display->GetSound();
+        sound->StopAllSoundLoops(FADE_OUT_TIME);
     }
 }

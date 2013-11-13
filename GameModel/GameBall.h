@@ -39,6 +39,7 @@ public:
     static float GetZeroSpeed() { return GameBall::ZeroSpeed; }
     static float GetSlowestSpeed() { return GameBall::SlowestSpeed; }
     static float GetNormalSpeed() { return GameBall::NormalSpeed; }
+    static float GetSlowestAllowableSpeed() { return 0.25f * GameBall::SlowestSpeed; }
 
 	enum BallSize  { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType  { NormalBall = 0x00000000, UberBall = 0x00000001,  InvisiBall = 0x00000002, GhostBall = 0x00000004, 

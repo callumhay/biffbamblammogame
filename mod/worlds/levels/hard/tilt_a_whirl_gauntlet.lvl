@@ -1,18 +1,18 @@
 Tilt-a-Whirl Gauntlet
 21 30
-E E E S N S E S N S E E E E E E E E E E E 
-E E E S L S E S L S E E E E E E E E E E E 
-E E E S E S E S E S E E E E E E E E E E E 
-S S S S S S D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S N N N N N N N S 
+E E E S N S E S N S E E S S S S S S E E E 
+E E E S L S E S L S E E N E E E E E S E E 
+E E E S E S E S E S E E N E E E E E E S E 
+S S S S S S D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S T(S,ll) E C(315-360) E C(315-360) E E S 
 S E E E S E E E S E E E S E E E E E E E S 
 S E E E N E E E N E E E S E E E E E E E S 
 S E R E N E G E N E R E S E C(0) E C(0) E C(0) E S 
 S R B R S G E G S R B R S E E E E E E E S 
 S E O E S E G E S E O E S E E E E E E E S 
-S O E O S G E G S O E O S S S E E E S S S 
+S O E O S G E G S O E O S S E S E S E S S 
 S E Y E S E G E S E Y E S E E E E E E E S 
 S Y E Y S G E G S Y E Y S E E E E E E E S 
-S E C(180) E S E K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket,FireBall,FireBall,FireBall) E S E C(180) E S E E E E E E E S 
+S E C(180) E S E K(FireBall,FireBall,FireBall) E S E C(180) E S E E E E E E E S 
 S Y E Y S G E G S Y E Y S C(0-45) E S E C(315-360) E E S 
 S E Y E S E G E S E Y E S E E S E E E E S 
 S O E O S G E G S O E O S E E S S E E S S 

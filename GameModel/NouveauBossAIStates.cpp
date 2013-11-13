@@ -1384,7 +1384,13 @@ AnimationMultiLerp<Vector3D> GlassDomeAI::GenerateTopDeathTranslationAnimation(G
 
 void GlassDomeAI::GoToNextRandomAttackState() {
 
+    if (this->currState == NouveauBossAI::HurtTopAIState) {
+        this->SetState(NouveauBossAI::MoveToTargetStopAndShootAIState);
+        return;
+    }
+
     if (this->GetTotalLifePercent() <= 0.75f) {
+
         if (this->GetTotalLifePercent() <= 0.5f) {
             int randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % 12;
             switch (randomNum) {
@@ -1524,9 +1530,9 @@ void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
             GameSound* sound = this->boss->GetGameModel()->GetSound();
             // Stop the current boss background music
             sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
-            // ... and play the transition sound just once
-            sound->PlaySound(GameSound::BossBackgroundLoopTransition, false, false);
 
+            // ... and play the transition sound just once
+            sound->PlaySound(GameSound::BossBackgroundLoopTransitionSingleHitEvent, false, false);
 
             // EVENT: Boss is angry! Rawr.
             GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetBody());

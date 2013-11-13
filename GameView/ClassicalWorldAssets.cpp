@@ -105,7 +105,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	fireEmitter1.SetEmitAngleInDegrees(5);
 	fireEmitter1.SetParticleRotation(ESPInterval(-180.0f, 180.0f));
 	fireEmitter1.SetRadiusDeviationFromCenter(ESPInterval(0.0f, OFF_CENTER_AMT), ESPInterval(0), ESPInterval(0.0f, OFF_CENTER_AMT));
-	fireEmitter1.SetParticleAlignment(ESP::ScreenAligned);
+	fireEmitter1.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	fireEmitter1.SetEmitPosition(Point3D(X_FLAME1_POS, Y_FLAME_POS_WITH_OFFSET, Z_FLAME_POS));
     fireEmitter1.SetEmitDirection(Vector3D(0,1,0));
 	fireEmitter1.AddEffector(&this->fireColourFader);
@@ -121,7 +121,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	fireEmitter2.SetEmitAngleInDegrees(5);
 	fireEmitter2.SetParticleRotation(ESPInterval(-180.0f, 180.0f));
 	fireEmitter2.SetRadiusDeviationFromCenter(ESPInterval(0.0f, OFF_CENTER_AMT), ESPInterval(0), ESPInterval(0.0f, OFF_CENTER_AMT));
-	fireEmitter2.SetParticleAlignment(ESP::ScreenAligned);
+	fireEmitter2.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	fireEmitter2.SetEmitPosition(Point3D(X_FLAME2_POS, Y_FLAME_POS_WITH_OFFSET, Z_FLAME_POS));
     fireEmitter2.SetEmitDirection(Vector3D(0,1,0));
 	fireEmitter2.AddEffector(&this->fireColourFader);

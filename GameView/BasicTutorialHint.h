@@ -25,11 +25,14 @@ public:
     virtual float GetHeight() const;
     virtual float GetWidth() const;
 
+    virtual void SetColour(const Colour& colour);
+
     void SetTopLeftCorner(float x, float y);
     void SetActionName(const std::string& action);
 
     void SetFlashing(bool on);
     void SetAlphaWhenShowing(float alpha) { this->alphaWhenShowing = alpha; };
+    float GetAlpha() const { return this->fadeAnim.GetInterpolantValue(); }
 
     void Show(double delayInSeconds, double fadeInTimeInSeconds);
     void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
@@ -42,6 +45,7 @@ protected:
     AnimationMultiLerp<Colour>* flashAnim;
     float alphaWhenShowing;
 
+    Colour actionLabelDefaultColour;
     TextLabel2DFixedWidth actionLabel;
 
 private:
@@ -54,6 +58,11 @@ inline float BasicTutorialHint::GetHeight() const {
 
 inline float BasicTutorialHint::GetWidth() const {
     return this->actionLabel.GetWidth();
+}
+
+inline void BasicTutorialHint::SetColour(const Colour& colour) {
+    this->actionLabel.SetColour(colour);
+    this->actionLabelDefaultColour = colour;
 }
 
 inline void BasicTutorialHint::SetTopLeftCorner(float x, float y) {

@@ -975,7 +975,7 @@ numRocketsToFireAtPaddle(0), transitionSoundID(INVALID_SOUND_ID) {
 }
 
 IceBallAI::~IceBallAI() {
-    this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
+    this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 3.0);
 }
 
 void IceBallAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
@@ -1181,8 +1181,9 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             // Stop the current boss background music
             sound->StopAllSoundsWithType(GameSound::BossBackgroundLoop, 1.0);
             // ... and play the transition sound in a loop
+            sound->PlaySound(GameSound::BossBackgroundLoopTransitionSingleHitEvent, false, false);
             this->transitionSoundID = sound->PlaySound(GameSound::BossBackgroundLoopTransition, true, false);
-
+            
             break;
         }
 
@@ -1529,7 +1530,7 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
     if (isFinished) {
         this->boss->alivePartsRoot->SetLocalYRotation(0.0);
         
-        this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 0.5);
+        this->boss->GetGameModel()->GetSound()->StopSound(this->transitionSoundID, 3.0);
         this->transitionSoundID = INVALID_SOUND_ID;
 
         // Go to the next high-level AI state

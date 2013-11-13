@@ -87,6 +87,8 @@ void GameTransformMgr::Reset() {
 	this->levelFlipAnimations.clear();
 	this->ballDeathAnimations.clear();
 	this->animationQueue.clear();
+
+    this->currCamOrientation = this->defaultCamOrientation;
 }
 
 /**
@@ -226,9 +228,6 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
     GameTransformMgr::TransformAnimationType animType;
     PaddleRemoteControlRocketProjectile* rocketData = NULL;
     
-    // Get rid of any bullet time animations...
-    this->bulletTimeCamAnimation.ClearLerp();
-
     if (turnOnRocketCam) {
         assert(rocket != NULL);
         rocketData = rocket;
@@ -260,6 +259,15 @@ void GameTransformMgr::SetRemoteControlRocketCamera(bool turnOnRocketCam, Paddle
                 this->storedCamOriBeforeRemoteControlRocketCam = this->currCamOrientation;
             }
 
+            this->animationQueue.pop_back();
+        }
+        else if (previousType == GameTransformMgr::ToBulletTimeCamAnimation || 
+                 previousType == GameTransformMgr::FromBulletTimeCamAnimation) {
+
+            // Kill any bullet time animations and reset the camera orientation -- this shouldn't happen,
+            // but just in case...
+            this->bulletTimeCamAnimation.ClearLerp();
+            this->currCamOrientation = this->defaultCamOrientation;
             this->animationQueue.pop_back();
         }
         else {
@@ -1299,7 +1307,6 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
         return;
     }
 
-	// Clear any previous ball death animations
 	this->bulletTimeCamAnimation = AnimationMultiLerp<Orientation3D>(&this->currCamOrientation);
     
 	// Based on the animation, set the animations for the camera's orientation

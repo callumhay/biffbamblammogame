@@ -127,6 +127,11 @@ void BallOnPaddleState::Tick(double seconds) {
             this->ShootActionReleaseUse();
         }
     }
+
+    // Update AI entities
+    if ((this->gameModel->GetPauseState() & GameModel::PauseAI) == 0x00000000) {
+        this->gameModel->GetCurrentLevel()->TickAIEntities(seconds, this->gameModel);
+    }
 }
 
 /**

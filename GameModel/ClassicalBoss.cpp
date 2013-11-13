@@ -293,7 +293,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
     } // end root
 
     this->root->Translate(Vector3D(startingX, startingY, 0.0f));
-    this->SetNextAIState(new ArmsBodyHeadAI(this));
+    this->SetCurrentAIStateImmediately(new ArmsBodyHeadAI(this));
 
     // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
 }

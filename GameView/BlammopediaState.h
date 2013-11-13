@@ -2,7 +2,7 @@
  * BlammopediaState.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -64,7 +64,7 @@ private:
 
     AnimationLerp<float> fadeAnimation;
 
-    TextLabel2D selectedItemNameLbl;
+    //TextLabel2D selectedItemNameLbl;
 
     Texture2D* starryBG;
 
@@ -100,7 +100,7 @@ private:
 
     BlammopediaListEventHandler* listEventHandler;
 
-    ItemListView* BuildGameplayListView();
+    ItemListView* BuildTutorialListView();
 	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia);
 	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia);
 

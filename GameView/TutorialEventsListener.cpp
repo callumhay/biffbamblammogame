@@ -19,7 +19,9 @@ TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(d
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
 finishedPointsHint(false), keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
 doBoostPressToReleaseHint(NULL), doBoostSlingshotHint(NULL), holdBoostHint(NULL), hasShownBoostHint(false),
-boostAvailableHint(NULL), multiplierHints(NULL), multiplierLostHint(NULL), fadeEffector(1, 0) {
+boostAvailableHint(NULL), multiplierHints(NULL), multiplierLostHint(NULL)
+//fadeEffector(1, 0) 
+{
     assert(display != NULL);
 }
 
@@ -49,13 +51,30 @@ void TutorialEventsListener::MousePressed(const GameControl::MouseButton& presse
     UNUSED_PARAMETER(pressedButton);
 }
 
+void TutorialEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(ball);
+    UNUSED_PARAMETER(paddle);
+
+    if (this->multiplierHints->IsDoneShowingAllHints() && 
+        !this->multiplierLostHint->IsDoneShowingAllHints()) {
+
+        if (this->multiplierLostHint->GetIsVisible()) {
+            this->multiplierLostHint->Resume(1.0);
+        }
+        else {
+            this->multiplierLostHint->Show(0.0, 1.0);
+        }
+    }
+}
+
 void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
     UNUSED_PARAMETER(block);
     UNUSED_PARAMETER(method);
 
     this->numBlocksDestroyed++;
 
-    const GameLevel* level = this->display->GetModel()->GetCurrentLevel();
+    const GameModel* gameModel = this->display->GetModel();
+    const GameLevel* level = gameModel->GetCurrentLevel();
 
     // Check to see whether the points tutorial hint has already been faded...
     if (!this->finishedPointsHint) {
@@ -76,21 +95,31 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
         }
 
         if (blockIndicesAllEmpty) {
-            this->pointsTutorialHintEmitter->SetParticleLife(ESPInterval(3.0f), true);
-            this->pointsTutorialHintEmitter->ClearEffectors();
-            this->pointsTutorialHintEmitter->AddEffector(&this->fadeEffector);
+            //this->pointsTutorialHintEmitter->SetParticleLife(ESPInterval(3.0f), true);
+            //this->pointsTutorialHintEmitter->ClearEffectors();
+            //this->pointsTutorialHintEmitter->AddEffector(&this->fadeEffector);
             this->finishedPointsHint = true;
         }
     }
+    
+    // Determine the state of the multiplier hint and display it appropriately
+    if (this->multiplierHints->GetIsVisible() && this->hasShownBoostHint &&
+        gameModel->GetBallBoostModel() != NULL && gameModel->GetBallBoostModel()->GetBulletTimeState() == BallBoostModel::NotInBulletTime) {
+        this->multiplierHints->Resume(1.0);
+    }
+    else {
+        GameBall* ball = this->display->GetModel()->GetGameBalls().front();
+        assert(ball != NULL);
 
-    GameBall* ball = this->display->GetModel()->GetGameBalls().front();
-    assert(ball != NULL);
-    if (!this->multiplierHints->IsDoneShowingAllHints() &&
-        !level->IsLevelAlmostComplete() && this->hasShownBoostHint && 
-        ball->GetCenterPosition2D()[1] >= 18 * LevelPiece::PIECE_HEIGHT) {
+        if (!this->multiplierHints->IsDoneShowingAllHints() &&
+            !level->IsLevelAlmostComplete() && this->hasShownBoostHint && 
+            ball->GetCenterPosition2D()[1] >= 18 * LevelPiece::PIECE_HEIGHT) {
 
-        // Start showing the multiplier hints...
-        this->multiplierHints->Show(0.0, 1.0);
+            // Start showing the multiplier hints...
+            if (!this->multiplierHints->GetIsVisible()) {
+                this->multiplierHints->Show(0.0, 1.0);
+            }
+        }
     }
 }
 
@@ -101,15 +130,20 @@ void TutorialEventsListener::ItemActivatedEvent(const GameItem& item) {
         case GameItem::RocketPaddleItem:
         case GameItem::MineLauncherPaddleItem:
         case GameItem::RemoteCtrlRocketItem:
-            if (!this->fireWeaponAlreadyShown) {
-                this->fireWeaponHint->Show(0.0, 1.0);
-                this->fireWeaponHint->Unshow(6.0, 1.0);
-                this->fireWeaponAlreadyShown = true;
+            if (!this->fireWeaponAlreadyShown && !this->fireWeaponHint->GetIsVisible() && 
+                this->hasShownBoostHint && !this->startBoostHint->GetIsVisible()) {
+                this->fireWeaponHint->Show(0.0, 1.0); 
             }
             break;
         default:
             break;
-    
+    }
+}
+
+void TutorialEventsListener::PaddleWeaponFiredEvent() {
+    if (!this->fireWeaponAlreadyShown) {
+        this->fireWeaponHint->Unshow(0.0, 0.5);
+        this->fireWeaponAlreadyShown = true;
     }
 }
 
@@ -159,6 +193,16 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             }
             this->boostAvailableHint->Unshow(0.0, 0.5);
 
+            if (this->multiplierHints->GetIsVisible()) {
+                this->multiplierHints->Pause(0.5);
+            }
+            if (this->multiplierLostHint->GetIsVisible()) {
+                this->multiplierLostHint->Pause(0.5);
+            }
+            this->fireWeaponHint->Unshow(0.0, 0.5);
+
+            break;
+
         case BallBoostModel::BulletTime:
 
             break;
@@ -171,6 +215,14 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             if (boostModel.GetNumAvailableBoosts() > 0 && this->keepShowingBoostHint) {
                 this->boostAvailableHint->Show(0.0, 0.5);
             }
+
+            if (this->display->GetModel()->GetPlayerPaddle()->HasPaddleType(
+                PlayerPaddle::LaserBeamPaddle | PlayerPaddle::LaserBulletPaddle | PlayerPaddle::RocketPaddle) &&
+                !this->fireWeaponAlreadyShown) {
+
+                this->fireWeaponHint->Show(0.0, 1.0);
+            }
+
             break;
 
         default:
@@ -200,6 +252,9 @@ void TutorialEventsListener::AllBallsDeadEvent(int livesLeft) {
     this->doBoostSlingshotHint->Unshow(0.0, 0.5);
     this->doBoostPressToReleaseHint->Unshow(0.0, 0.5);
     this->holdBoostHint->Unshow(0.0, 0.5);
+    this->fireWeaponHint->Unshow(0.0, 0.5);
+    this->multiplierHints->Pause(0.5);
+    this->multiplierLostHint->Pause(0.5);
 }
 
 void TutorialEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) {
@@ -210,6 +265,9 @@ void TutorialEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToD
     this->doBoostSlingshotHint->Unshow(0.0, 0.5);
     this->doBoostPressToReleaseHint->Unshow(0.0, 0.5);
     this->holdBoostHint->Unshow(0.0, 0.5);
+    this->fireWeaponHint->Unshow(0.0, 0.5);
+    this->multiplierHints->Pause(0.5);
+    this->multiplierLostHint->Pause(0.5);
 }
 
 void TutorialEventsListener::NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars) {

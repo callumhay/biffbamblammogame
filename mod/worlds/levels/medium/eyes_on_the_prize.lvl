@@ -5,19 +5,19 @@ E E E E E N N N N N N N E E E E E
 E E E E N N E E E E E N N E E E E 
 E E E E N E L G G G L E N E E E E 
 E E E E N E G Y G Y G E N E E E E 
-E E E E N G G G K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) G G G N E E E E 
+E E E E N G G G K(RocketPaddle,RocketPaddle,RocketPaddle) G G G N E E E E 
 E E E E N E G Y G Y G E N E E E E 
-E E E K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) N B G G G G G B N K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle,UpsideDown,UpsideDown,UpsideDown) E E E 
+E E E K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) N B G G G G G B N K(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle) E E E 
 E E E E N I E L E L E I N E E E E 
 E E E E N E G G G G G E N E E E E 
 E E E E N E G Y G Y G E N E E E E 
 E E M E N Y K(ShieldPaddle,ShieldPaddle,ShieldPaddle) G K(RocketPaddle,RocketPaddle,RocketPaddle) G K(ShieldPaddle,ShieldPaddle,ShieldPaddle) Y N E J E E 
 E E E E N E G Y G Y G E N E E E E 
-E E E K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle,UpsideDown,UpsideDown,UpsideDown) N B G G G G G B N K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E E E 
+E E E K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) N B G G G G G B N K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E E E 
 E E E E N I E E L E E I N E E E E 
 E E E E N E G G G G G E N E E E E 
 E E E E N E G Y G Y G E N E E E E 
-E E E E N O G G K(RocketPaddle,RocketPaddle,RocketPaddle) G G O N E E E E 
+E E E E N O G G K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) G G O N E E E E 
 E E E E N E G Y G Y G E N E E E E 
 E E E E N E G G G G G E N E E E E 
 S N N N N E E E E E E E N N N N S 
@@ -33,16 +33,16 @@ S E E E E E E E E E E E E E E E S
 STARS:
 6000
 14000
-19500
+20000
 26000
-31000
+33500
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 0

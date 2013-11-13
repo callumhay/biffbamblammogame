@@ -478,7 +478,7 @@ void NouveauBoss::Init(float startingX, float startingY) {
 
     this->root->Translate(Vector3D(startingX, startingY, 0.0f)); // NOTE: THIS MUST BE DONE BEFORE SETTING THE FIRST AI STATE!
 
-    this->SetNextAIState(new SideSphereAI(this));
+    this->SetCurrentAIStateImmediately(new SideSphereAI(this));
     // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
 }
 

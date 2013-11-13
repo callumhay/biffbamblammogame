@@ -28,6 +28,8 @@ public:
     float GetHeight() const;
     float GetWidth() const;
 
+    void SetColour(const Colour& colour);
+
     void SetActionNameWithSeparator(const std::string& action, const std::string& separator = "");
 
     void SetXBoxButton(GameViewConstants::XBoxButtonType buttonType, const std::string& buttonText,
@@ -89,6 +91,12 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(ButtonTutorialHint);
 };
+
+inline void ButtonTutorialHint::SetColour(const Colour& colour) {
+    BasicTutorialHint::SetColour(colour);
+    this->orLabel.SetColour(colour);
+    this->commaLabel.SetColour(colour);
+}
 
 inline float ButtonTutorialHint::GetHeight() const {
     return this->actionLabel.GetHeight() * BUTTON_SCALE_MULTIPLIER;
