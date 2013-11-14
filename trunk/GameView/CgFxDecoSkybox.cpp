@@ -24,24 +24,29 @@ const char* CgFxDecoSkybox::DECOSKYBOX_TECHNIQUE_NAME = "DecoSkybox";
 
 CgFxDecoSkybox::CgFxDecoSkybox(Texture *skyTex) :
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_DECOSKYBOX_SHADER), skyTex(skyTex),
-timer(0.0f), freq(0.025f), noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
+timer(0.0f), twinkleFreq(0.01f), moveFreq(0.0055f), noiseScale(0.005f), fgScale(0.78f),
+noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
+
 	assert(skyTex != NULL);
 
 	// Set the technique
 	this->currTechnique = this->techniques[DECOSKYBOX_TECHNIQUE_NAME];
 
 	// Transform parameters
-	this->wvpMatrixParam			= cgGetNamedEffectParameter(this->cgEffect, "ModelViewProjXf");
-	this->worldMatrixParam		= cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
+	this->wvpMatrixParam   = cgGetNamedEffectParameter(this->cgEffect, "ModelViewProjXf");
+	this->worldMatrixParam = cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
 
 	// Noise texture sampler param
 	this->noiseSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
 	this->skySamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "SkySampler");
 
-	// Time and frequency paramters
-	this->timerParam = cgGetNamedEffectParameter(this->cgEffect, "Timer");
-	this->freqParam	 = cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->viewDirParam = cgGetNamedEffectParameter(this->cgEffect, "ViewDir");
+	// Time and frequency parameters
+    this->fgScaleParam     = cgGetNamedEffectParameter(this->cgEffect, "FGScale");
+	this->timerParam       = cgGetNamedEffectParameter(this->cgEffect, "Timer");
+	this->twinkleFreqParam = cgGetNamedEffectParameter(this->cgEffect, "TwinkleFreq");
+    this->moveFreqParam    = cgGetNamedEffectParameter(this->cgEffect, "MoveFreq"); 
+    this->noiseScaleParam  = cgGetNamedEffectParameter(this->cgEffect, "NoiseScale");
+	this->viewDirParam     = cgGetNamedEffectParameter(this->cgEffect, "ViewDir");
 
 	debug_cg_state();
 }
@@ -58,7 +63,10 @@ void CgFxDecoSkybox::SetupBeforePasses(const Camera& camera) {
 	cgGLSetStateMatrixParameter(this->wvpMatrixParam,   CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX,            CG_GL_MATRIX_IDENTITY);
 
-	cgGLSetParameter1f(this->freqParam, this->freq);
+	cgGLSetParameter1f(this->twinkleFreqParam, this->twinkleFreq);
+    cgGLSetParameter1f(this->moveFreqParam, this->moveFreq);
+    cgGLSetParameter1f(this->noiseScaleParam, this->noiseScale);
+    cgGLSetParameter1f(this->fgScaleParam, this->fgScale);
 	double timeInSecs = static_cast<double>(BlammoTime::GetSystemTimeInMillisecs()) / 1000.0;
 	cgGLSetParameter1f(this->timerParam, timeInSecs);
 

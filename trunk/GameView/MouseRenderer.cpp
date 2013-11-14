@@ -151,7 +151,7 @@ void MouseRenderer::SetState(MouseState newState) {
 
 void MouseRenderer::Render(const GameModel& gameModel) {
     float alpha = this->mouseAlphaAnim.GetInterpolantValue();
-    if (alpha <= 0.0f || !this->windowHasFocus) {
+    if (alpha <= 0.0f) {
         return;
     }
 

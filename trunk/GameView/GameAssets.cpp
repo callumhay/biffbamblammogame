@@ -315,7 +315,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 	// Average values used to calculate the colour and position of the ball light
 	Point3D avgBallPosition(0,0,0);
 	Colour avgBallColour(0,0,0);
-	unsigned int visibleBallCount = 0;
+	int visibleBallCount = 0;
     bool ballWithOmniLaserDrawn = false;
 
 	// Go through each ball in the game, draw it accordingly
@@ -323,6 +323,13 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		
+        // Obtain the colour of the ball from the model, if it's completely invisible 
+        // (not "invisiball", actually invisible), then just skip all of the draw calls
+        const ColourRGBA& ballColour = currBall->GetColour();
+        if (ballColour.A() <= 0.0f) {
+            continue;
+        }
+
 		bool ballIsInvisible = (currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall;
 		CgFxEffectBase* ballEffectTemp = NULL;
 		Colour currBallColour(0,0,0);
@@ -338,7 +345,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		else {
 			// The ball has an item in effect on it... figure out what effect(s) and render it/them appropriately
 
-			unsigned int numColoursApplied = 0;
+			int numColoursApplied = 0;
 			
             if (!ballIsInvisible) {
 
@@ -469,13 +476,6 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				ballEffectTemp = this->invisibleEffect;
             }
 		}
-
-        // Obtain the colour of the ball from the model, if it's completely invisible
-        // then just skip all of the draw calls
-        const ColourRGBA& ballColour = currBall->GetColour();
-        if (ballColour.A() <= 0.0f) {
-            continue;
-        }
 
 		// Draw the ball model...
 		glPushMatrix();

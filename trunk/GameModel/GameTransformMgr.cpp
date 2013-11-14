@@ -594,7 +594,9 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 /**
  * Private helper function to get the exact location of the paddle camera in world space.
  */
-void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov) {
+void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, 
+                                                  Vector3D& paddleCamPos, float& fov) {
+
 	const float DIST_FROM_PADDLE = paddle.GetHalfWidthTotal();
 
 	Point2D paddleCamPosition = paddle.GetCenterPosition() - Vector2D(0, paddle.GetHalfHeight() + DIST_FROM_PADDLE);
@@ -609,7 +611,9 @@ void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, fl
 /**
  * Private helper function to get the exact location of the ball camera in world space.
  */
-void GameTransformMgr::GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Vector3D& ballCamPos, float& fov) {
+void GameTransformMgr::GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, 
+                                                Vector3D& ballCamPos, float& fov) {
+
 	Collision::Circle2D ballBounds = ball.GetBounds();
 
 	// Position the ball camera almost exactly at the bottom of the ball (we make sure we're at least a bit above that
