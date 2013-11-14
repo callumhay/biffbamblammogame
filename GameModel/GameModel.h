@@ -87,6 +87,7 @@ public:
     bool IsOutOfGameBoundsForItem(const Point2D& pos) const;
     bool IsOutOfGameBoundsForProjectile(const Point2D& pos) const;
     bool IsOutOfPaddedLevelBounds(const Point2D& pos, float padding) const;
+    bool IsOutOfPaddedLevelBounds(const Point2D& pos, float xPadding, float yPadding) const;
     
     Collision::AABB2D GenerateLevelProjectileBoundaries() const;
 
@@ -700,7 +701,8 @@ inline void GameModel::Tick(double seconds) {
 }
 
 inline bool GameModel::IsOutOfGameBoundsForBall(const Point2D& pos) const {
-    return this->IsOutOfPaddedLevelBounds(pos, GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_BALL);
+    return this->IsOutOfPaddedLevelBounds(pos, GameLevel::OUT_OF_BOUNDS_X_BUFFER_SPACE_FOR_BALL, 
+        GameLevel::OUT_OF_BOUNDS_Y_BUFFER_SPACE_FOR_BALL);
 }
 
 inline bool GameModel::IsOutOfGameBoundsForItem(const Point2D& pos) const {
@@ -709,6 +711,10 @@ inline bool GameModel::IsOutOfGameBoundsForItem(const Point2D& pos) const {
 
 inline bool GameModel::IsOutOfGameBoundsForProjectile(const Point2D& pos) const {
     return this->IsOutOfPaddedLevelBounds(pos, GameLevel::OUT_OF_BOUNDS_BUFFER_SPACE_FOR_PROJECTILE);
+}
+
+inline bool GameModel::IsOutOfPaddedLevelBounds(const Point2D& pos, float padding) const {
+    return this->IsOutOfPaddedLevelBounds(pos, padding, padding);
 }
 
 inline Collision::AABB2D GameModel::GenerateLevelProjectileBoundaries() const {

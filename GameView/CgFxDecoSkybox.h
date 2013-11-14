@@ -2,7 +2,7 @@
  * CgFxDecoSkybox.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010-2011
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -18,6 +18,13 @@
 class Texture;
 
 class CgFxDecoSkybox : public CgFxEffectBase {
+public:
+    CgFxDecoSkybox(Texture *skyTex);
+    ~CgFxDecoSkybox();
+
+protected:
+    void SetupBeforePasses(const Camera& camera);
+
 private:
 	static const char* DECOSKYBOX_TECHNIQUE_NAME;
 
@@ -25,7 +32,10 @@ private:
 	CGparameter wvpMatrixParam;
 	CGparameter worldMatrixParam;
 
-	CGparameter freqParam;
+    CGparameter fgScaleParam;
+	CGparameter twinkleFreqParam;
+    CGparameter moveFreqParam;
+    CGparameter noiseScaleParam;
 	CGparameter timerParam;
 	CGparameter viewDirParam;
 
@@ -33,18 +43,13 @@ private:
 	CGparameter skySamplerParam;
 
 	// Stored values for parameters
-	float timer, freq;
+	float timer, twinkleFreq, moveFreq, noiseScale, fgScale;
 	GLint noiseTexID; 
 	Texture* skyTex;
 
 	Vector3D viewDir;
 
-protected:
-	virtual void SetupBeforePasses(const Camera& camera);
-
-public:
-	CgFxDecoSkybox(Texture *skyTex);
-	virtual ~CgFxDecoSkybox();
-
+    DISALLOW_COPY_AND_ASSIGN(CgFxDecoSkybox);
 };
-#endif
+
+#endif // __CGFXDECOSKYBOX_H__

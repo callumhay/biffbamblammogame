@@ -2,7 +2,7 @@
  * DecoSkybox.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -18,17 +18,18 @@
 #include "CgFxDecoSkybox.h"
 
 class DecoSkybox : public Skybox {
+public:
+    DecoSkybox();
+    ~DecoSkybox();
+
+    void Tick(double){};
+    void Draw(const Camera& camera);
 
 private:
 	GLuint skyboxDispList;
 	CgFxDecoSkybox decoSkyboxEffect;
 
-public:
-	DecoSkybox();
-	virtual ~DecoSkybox();
-
-	virtual void Tick(double){};
-	virtual void Draw(const Camera& camera);
+    DISALLOW_COPY_AND_ASSIGN(DecoSkybox);
 };
 
 #endif
