@@ -15,6 +15,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "MenuBackgroundRenderer.h"
 
 const char* GameCompleteDisplayState::DEMO_COMPLETE_TITLE_TEXT = "Demo Complete!"; 
 const char* GameCompleteDisplayState::CONGRATS_TEXT = "Thanks for playing! Hope you enjoyed Biff! Bam!! Blammo!?!";
@@ -36,11 +37,7 @@ creditLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager:
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
              GameViewConstants::GetInstance()->LICENSE_TEXT),
-congratsLabel(NULL), noteLabel(NULL), starryBG(NULL), bbbLogoTex(NULL) {
-    
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
+congratsLabel(NULL), noteLabel(NULL), bbbLogoTex(NULL) {
 
     this->bbbLogoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BBB_LOGO, Texture::Trilinear));
@@ -83,8 +80,6 @@ GameCompleteDisplayState::~GameCompleteDisplayState() {
     this->noteLabel = NULL;
 
     bool success = false;
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bbbLogoTex);
     assert(success);
     UNUSED_VARIABLE(success);
@@ -92,15 +87,14 @@ GameCompleteDisplayState::~GameCompleteDisplayState() {
 
 void GameCompleteDisplayState::RenderFrame(double dT) {
 
+    const Camera& camera = this->display->GetCamera();
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
+
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw the starry background...
-    this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
-    this->starryBG->UnbindTexture();
+    // Draw the background...
+    bgRenderer->DrawBG(camera);
 
     // Draw all of the text labels
     float yPos = Camera::GetWindowHeight() - TITLE_Y_GAP;
@@ -158,18 +152,8 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
     float fadeValue = this->fadeAnim.GetInterpolantValue();
     
     if (fadeValue != 0.0f) {
-	    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-	    glDisable(GL_TEXTURE_2D);
-	    glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
-        this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
-            ColourRGBA(1,1,1, fadeValue));
-        this->starryBG->UnbindTexture();
-	    glPopAttrib();
+
+        bgRenderer->DrawBG(camera, fadeValue);
 
         if (fadeValue >= 1.0f && this->goToCredits) {
             this->display->SetCurrentState(new CreditsDisplayState(this->display));

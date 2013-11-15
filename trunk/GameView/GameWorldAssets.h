@@ -13,14 +13,13 @@
 #define __GAMEWORLDASSETS_H__
 
 #include "GameViewConstants.h"
+#include "Skybox.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Mesh.h"
-#include "../BlammoEngine/Skybox.h"
 #include "../BlammoEngine/Light.h"
 #include "../ResourceManager.h"
-
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/PlayerPaddle.h"
 
@@ -42,8 +41,7 @@ public:
 		return this->skybox;
 	}
 
-	virtual void Tick(double dT) {
-		this->skybox->Tick(dT);
+	virtual void Tick(double dT, const GameModel&) {
         this->bgFadeAnim.Tick(dT);
 	    this->currBGMeshColourAnim.Tick(dT);
 	};
@@ -57,6 +55,9 @@ public:
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 	virtual void DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight) = 0;
     virtual void FastDrawBackgroundModel();
+
+    virtual void DrawBackgroundPostOutlinePreEffects(const Camera& camera) { UNUSED_PARAMETER(camera); }
+
 	virtual void FadeBackground(bool fadeout, float fadeTime);
 	virtual void ResetToInitialState();
 

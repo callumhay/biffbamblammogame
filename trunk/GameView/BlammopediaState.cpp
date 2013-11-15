@@ -16,6 +16,7 @@
 #include "GameAssets.h"
 #include "GameTutorialAssets.h"
 #include "GameFontAssetsManager.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../ResourceManager.h"
 
@@ -42,7 +43,7 @@ const float BlammopediaState::LABEL_ITEM_GAP = 50;
 
 BlammopediaState::BlammopediaState(GameDisplay* display) : 
 DisplayState(display), currMenuItemIndex(NO_MENU_ITEM_INDEX), currListViewIndex(0), 
-goBackToMainMenu(false), starryBG(NULL), listEventHandler(NULL) {
+goBackToMainMenu(false), listEventHandler(NULL) {
 
     // Start the background music for the blammopedia
     this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::BlammopediaBackgroundLoop, true);
@@ -71,10 +72,6 @@ goBackToMainMenu(false), starryBG(NULL), listEventHandler(NULL) {
     //this->selectedItemNameLbl.SetColour(Colour(1, 0.65f, 0));
     //this->selectedItemNameLbl.SetDropShadow(Colour(0,0,0), 0.125f);
     //this->selectedItemNameLbl.SetScale(0.5f * this->display->GetTextScalingFactor());
-
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
 
     TextLabel2D* gameplayMenuItem = new TextLabel2D();
     gameplayMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
@@ -173,11 +170,6 @@ BlammopediaState::~BlammopediaState() {
     }
     this->blammoMenuLabels.clear();
 
-    bool success = false;
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
-    UNUSED_VARIABLE(success);
-
     delete this->listEventHandler;
     this->listEventHandler = NULL;
 }
@@ -187,6 +179,7 @@ void BlammopediaState::RenderFrame(double dT) {
     
     ItemListView* currListView = this->GetCurrentListView();
     assert(currListView != NULL);
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
 
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -202,11 +195,7 @@ void BlammopediaState::RenderFrame(double dT) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Draw the starry background...
-    this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
-    this->starryBG->UnbindTexture();
+    bgRenderer->DrawBG(camera);
 
     static const float LINE_WIDTH = 2.0f;
     glLineWidth(LINE_WIDTH);
@@ -321,7 +310,7 @@ void BlammopediaState::RenderFrame(double dT) {
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone || this->goBackToMainMenu) {
-        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue(), this->starryBG);
+        bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
     }
   
     if (fadeDone && this->goBackToMainMenu) {

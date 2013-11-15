@@ -13,14 +13,14 @@
 #include "GameAssets.h"
 #include "GameViewConstants.h"
 #include "CgFxVolumetricEffect.h"
-#include "DecoSkybox.h"
+#include "Skybox.h"
 
 #include "../ResourceManager.h"
 
 
 // Basic constructor: Load all the basic assets for the deco world...
 DecoWorldAssets::DecoWorldAssets(GameAssets* assets) : 
-GameWorldAssets(assets, new DecoSkybox(),
+GameWorldAssets(assets, new Skybox(),
         ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH)),
@@ -104,15 +104,18 @@ DecoWorldAssets::~DecoWorldAssets() {
 void DecoWorldAssets::InitializeEmitters() {
 	// Load the textures for the emitter particles
 	assert(this->spiralTexSm == NULL);
-	this->spiralTexSm = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_SMALL, Texture::Trilinear, GL_TEXTURE_2D));
+	this->spiralTexSm = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPIRAL_SMALL, Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->spiralTexSm != NULL);
 	
 	assert(this->spiralTexMed == NULL);
-	this->spiralTexMed = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_MEDIUM, Texture::Trilinear, GL_TEXTURE_2D));
+	this->spiralTexMed = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPIRAL_MEDIUM, Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->spiralTexMed != NULL);
 
 	assert(this->spiralTexLg == NULL);
-	this->spiralTexLg = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_LARGE, Texture::Trilinear, GL_TEXTURE_2D));
+	this->spiralTexLg = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPIRAL_LARGE, Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->spiralTexLg != NULL);
 
 	// Setup the spiral emitters that come out at the very back, behind the buildings
@@ -184,7 +187,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	}
 }
 
-void DecoWorldAssets::Tick(double dT) {
+void DecoWorldAssets::Tick(double dT, const GameModel& model) {
 	// Rotate the background effect (sky beams)
 	this->RotateSkybeams(dT);
 
@@ -199,7 +202,7 @@ void DecoWorldAssets::Tick(double dT) {
 	this->spiralEmitterLg.Tick(dT);
 	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
 	
-	GameWorldAssets::Tick(dT);
+	GameWorldAssets::Tick(dT, model);
 }
 
 void DecoWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset, const Vector3D& fgFillPosOffset) const {

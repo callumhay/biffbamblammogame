@@ -62,7 +62,6 @@ private:
     TextLabel2D creditLabel;
     TextLabel2D licenseLabel;
 
-    Texture2D* starryBG;
     Texture2D* bbbLogoTex;
 
 	float gameCompleteLabelRasterWidth;

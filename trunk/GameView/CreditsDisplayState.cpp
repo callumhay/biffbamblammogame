@@ -14,6 +14,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "MainMenuDisplayState.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../ResourceManager.h"
 
@@ -25,16 +26,12 @@ const char* CreditsDisplayState::CREDITS_2_NAMES_TEXT  = "Adam Axbey";
 const char* CreditsDisplayState::SPECIAL_THANKS_TITLE_TEXT = "Special Thanks To";
 const char* CreditsDisplayState::SPECIAL_THANKS_NAMES_TEXT = "Sara Vinten\nMikhail St-Denis\nBlake Withers\nAndre Lowy";
 
-CreditsDisplayState::CreditsDisplayState(GameDisplay* display) : DisplayState(display), starryBG(NULL),
+CreditsDisplayState::CreditsDisplayState(GameDisplay* display) : DisplayState(display),
 creditLabel1(CREDITS_1_TITLE_TEXT, CREDITS_1_NAMES_TEXT, Camera::GetWindowWidth()*0.75f), 
 creditLabel2(CREDITS_2_TITLE_TEXT, CREDITS_2_NAMES_TEXT, Camera::GetWindowWidth()*0.75f),
 specialThanksLabel(SPECIAL_THANKS_TITLE_TEXT, SPECIAL_THANKS_NAMES_TEXT, Camera::GetWindowWidth()*0.75f),
 exitState(false), bbbLogoTex(NULL) {
-    
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
-
+   
     this->bbbLogoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BBB_LOGO, Texture::Trilinear));
     assert(this->bbbLogoTex != NULL);
@@ -74,24 +71,20 @@ exitState(false), bbbLogoTex(NULL) {
 
 CreditsDisplayState::~CreditsDisplayState() {
     bool success = false;
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bbbLogoTex);
     assert(success);
     UNUSED_VARIABLE(success);
 }
 
 void CreditsDisplayState::RenderFrame(double dT) {
+    const Camera& camera = this->display->GetCamera();
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw the starry background...
-    this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
-    this->starryBG->UnbindTexture();
+    // Draw the background...
+    bgRenderer->DrawBG(camera);
 
     float credit1LabelAlpha = 0.0f;
     float credit2LabelAlpha = 0.0f;

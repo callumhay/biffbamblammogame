@@ -33,7 +33,7 @@ public:
 	void FadeBackground(bool fadeout, float fadeTime);
 	void ResetToInitialState();
 
-	void Tick(double dT);
+	void Tick(double dT, const GameModel& model);
 
 private:
     Texture2D* cloudTex;
@@ -67,8 +67,8 @@ inline void ClassicalWorldAssets::DrawBackgroundEffects(const Camera& camera) {
     this->fireEmitter2.Draw(camera);
 }
 
-inline void ClassicalWorldAssets::Tick(double dT) {
-    GameWorldAssets::Tick(dT);
+inline void ClassicalWorldAssets::Tick(double dT, const GameModel& model) {
+    GameWorldAssets::Tick(dT, model);
 
     static const float CONE_SIZE_IN_DEGREES = 10.0f;
     static const float ACCEL_MAG = 12.0f;

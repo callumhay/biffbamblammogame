@@ -16,6 +16,7 @@
 #include "GameDisplay.h"
 #include "CgFxBloom.h"
 #include "GameViewConstants.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/FBObj.h"
@@ -34,7 +35,7 @@ const float SelectWorldMenuState::UNSELECTED_MENU_ITEM_SIZE = 128;
 
 SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info, SoundID bgSoundLoopID) :
 DisplayState(display), bgSoundLoopID(bgSoundLoopID), pressEscAlphaAnim(0.0f), worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
-goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), bloomEffect(NULL), itemActivated(false), starryBG(NULL), padlockTex(NULL),
+goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), bloomEffect(NULL), itemActivated(false), padlockTex(NULL),
 goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL), worldUnlockAnim(NULL),
 totalNumGameStarsLabel(NULL), totalLabel(NULL), starGlowTexture(NULL) {
     this->Init(info);
@@ -71,8 +72,6 @@ SelectWorldMenuState::~SelectWorldMenuState() {
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
     assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->padlockTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starGlowTexture);
@@ -90,18 +89,15 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 
     this->pressEscAlphaAnim.Tick(dT);
     const Camera& camera = this->display->GetCamera();
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
 
     // Bind the menu's FrameBufferObject - we use this to do Bloom on the menu
 	this->menuFBO->BindFBObj();
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw the starry background...
-    this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
-    this->starryBG->UnbindTexture();
+    // Draw the background...
+    bgRenderer->DrawBG(camera);
 
 	// Draw in window coordinates
 	Camera::PushWindowCoords();
@@ -145,8 +141,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
     // Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone || this->goBackToMainMenu) {
-        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-            this->fadeAnimation.GetInterpolantValue(), this->starryBG);
+        bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
     }
 
     glPopMatrix();
@@ -179,12 +174,14 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+        const Texture* bgTexture = bgRenderer->GetMenuBGTexture();
+
         float screenWidth = Camera::GetWindowWidth();
         float screenHeight = Camera::GetWindowHeight();
-        float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(this->starryBG->GetWidth()));
-        float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(this->starryBG->GetHeight()));
+        float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
+        float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
 
-        this->starryBG->BindTexture();
+        bgTexture->BindTexture();
         glColor4f(1,1,1,1);
         glBegin(GL_QUADS);
             glTexCoord2f(0, 0);
@@ -196,7 +193,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 	        glTexCoord2f(0, totalTexV);
             glVertex2f(-moveAmt, Camera::GetWindowHeight());
         glEnd();
-        this->starryBG->UnbindTexture();
+        bgTexture->UnbindTexture();
 
         this->menuFBO->GetFBOTexture()->BindTexture();
         glColor4f(1,1,1,alphaAmt);
@@ -391,11 +388,6 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     if (this->bgSoundLoopID == INVALID_SOUND_ID) {
         this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
     }
-
-    // Load background texture
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-    GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
 
     this->padlockTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
     GameViewConstants::GetInstance()->TEXTURE_PADLOCK, Texture::Trilinear));

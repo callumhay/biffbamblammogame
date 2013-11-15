@@ -67,7 +67,6 @@ private:
 
     TextLabel2D pressAnyKeyLabel;
 
-    Texture2D* bgTex;
     Texture2D* spinGlowTex;
     Texture2D* flareTex;
     Texture2D* bangStarTex;
@@ -81,7 +80,6 @@ private:
     float GetWorldCompleteLabelHeight() const;
     float GetUnlockedLabelHeight() const;
     
-
     float DrawVictoryLabel(float screenWidth);
     float DrawWorldCompleteLabel(float screenWidth, float currYPos);
     void DrawUnlockedLabel(double dT, float screenWidth, float currYPos);

@@ -117,8 +117,6 @@ private:
     Texture2D* lensFlareTex;
     Texture2D* haloTex;
 
-    Texture2D* starryBG;
-
     std::vector<ESPPointEmitter*> starBgEmitters;
     std::vector<ESPPointEmitter*> starFgEmitters;
 

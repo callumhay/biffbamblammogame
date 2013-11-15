@@ -32,7 +32,7 @@ public:
     
     GameWorld::WorldStyle GetStyle() const;
 
-    void Tick(double dT);
+    void Tick(double dT, const GameModel& model);
     void TickSkybeams(double dT);
 	void DrawBackgroundEffects(const Camera& camera);
 	void DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight);
@@ -79,7 +79,7 @@ inline void FuturismWorldAssets::ResetToInitialState() {
     GameWorldAssets::ResetToInitialState();
 }
 
-inline void FuturismWorldAssets::Tick(double dT) {
+inline void FuturismWorldAssets::Tick(double dT, const GameModel& model) {
     this->TickSkybeams(dT);
 
     float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
@@ -91,7 +91,7 @@ inline void FuturismWorldAssets::Tick(double dT) {
     this->triangleEmitterMed.Tick(dT);
     this->triangleEmitterLg.Tick(dT);
 
-    GameWorldAssets::Tick(dT);
+    GameWorldAssets::Tick(dT, model);
 }
 
 inline void FuturismWorldAssets::DrawFrontBeam(const Camera& camera, float rotationAmt) {

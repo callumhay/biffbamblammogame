@@ -566,11 +566,11 @@ void GameAssets::DrawGameBallsPostEffects(double dT, GameModel& gameModel, const
 	debug_opengl_state();
 }
 
-void GameAssets::Tick(double dT) {
+void GameAssets::Tick(double dT, const GameModel& gameModel) {
 	// Tick the world assets (e.g., for background animations)
-	this->worldAssets->Tick(dT);
+	this->worldAssets->Tick(dT, gameModel);
 
-	// Tick the FBO assets (e.g., for post-processing / fullscreen effects animations)
+	// Tick the FBO assets (e.g., for post-processing / full screen effects animations)
 	this->fboAssets->Tick(dT);
 
 	// Tick the light assets (light animations for strobing, changing colours, etc.)

@@ -19,7 +19,8 @@
 
 const float TeslaBlockMesh::COIL_ROTATION_SPEED_DEGSPERSEC = 270;
 
-TeslaBlockMesh::TeslaBlockMesh() : teslaBaseMesh(NULL), teslaCoilMesh(NULL), flarePulse(0,0), /*sparkGravity(Vector3D(0, -9.8f, 0)), sparkTex(NULL), teslaSparks(NULL),*/
+TeslaBlockMesh::TeslaBlockMesh() : teslaBaseMesh(NULL), teslaCoilMesh(NULL), flarePulse(0,0), 
+/*sparkGravity(Vector3D(0, -9.8f, 0)), sparkTex(NULL), teslaSparks(NULL),*/
 teslaCenterFlare(NULL), flareTex(NULL), haloTexture(NULL), haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f) {
 	this->LoadMesh();
 	
@@ -67,10 +68,7 @@ teslaCenterFlare(NULL), flareTex(NULL), haloTexture(NULL), haloExpandPulse(1.0f,
 	this->teslaCenterFlare->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));
 	this->teslaCenterFlare->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.79f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->teslaCenterFlare->AddEffector(&this->flarePulse);
-	
-	bool result = this->teslaCenterFlare->SetParticles(1, this->flareTex);
-    UNUSED_VARIABLE(result);
-	assert(result);
+	this->teslaCenterFlare->SetParticles(1, this->flareTex);
 
 	/*
 	// DECIDED NOT TO DO SPARKS SINCE EACH TESLA BLOCK WOULD NEED ITS OWN AND THEY WOULD NEED TO BE RESET

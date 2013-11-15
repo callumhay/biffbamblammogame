@@ -69,7 +69,7 @@ public:
 	~GameAssets();
 
 	void LoadWorldAssets(const GameWorld& world);
-	void Tick(double dT);
+	void Tick(double dT, const GameModel& gameModel);
 
 	// Draw functions ******************************************************************************
 	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera);
@@ -155,7 +155,7 @@ public:
         return this->tutorialAssets;
     }
 
-    const GameWorldAssets* GetCurrentWorldAssets() const {
+    GameWorldAssets* GetCurrentWorldAssets() const {
         return this->worldAssets;
     }
 

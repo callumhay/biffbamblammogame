@@ -69,8 +69,6 @@ private:
 	ESPPointEmitter* shockwaveEmitter;
 	ESPPointEmitter* starEmitter;
 
-    Texture2D* starryBG;
-
     // Sound IDs for tracking level starting sounds
     SoundID paddleMoveUpSoundID;
     SoundID ballSpawnSoundID;

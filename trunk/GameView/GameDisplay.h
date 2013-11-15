@@ -2,7 +2,7 @@
  * GameDisplay.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -24,6 +24,7 @@ class GameAssets;
 class GameSound;
 class GameEventsListener;
 class MouseRenderer;
+class MenuBackgroundRenderer;
 
 // The main display class, used to execute the main rendering loop
 // and adjust size, etc.
@@ -89,6 +90,10 @@ public:
         return this->mouseRenderer;
     }
 
+    MenuBackgroundRenderer* GetMenuBGRenderer() {
+        return this->menuBGRenderer;
+    }
+
 	static float GetTextScalingFactor();
 
 	// Enumeration of the various actions that can be sent to the GameDisplay
@@ -145,6 +150,7 @@ private:
 	GameAssets* assets;
 
     MouseRenderer* mouseRenderer;
+    MenuBackgroundRenderer* menuBGRenderer;
 
 	GameEventsListener* gameListener;
 

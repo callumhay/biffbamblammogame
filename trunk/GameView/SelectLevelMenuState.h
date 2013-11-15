@@ -75,7 +75,6 @@ private:
     Texture* bossIconTexture;
     Texture* starGlowTexture;
 
-    Texture2D* starryBG;
     Texture2D* padlockTexture;
 	CgFxBloom* bloomEffect;
 	

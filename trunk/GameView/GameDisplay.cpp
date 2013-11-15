@@ -20,6 +20,7 @@
 #include "CreditsDisplayState.h"
 #include "LoadingScreen.h"
 #include "MouseRenderer.h"
+#include "MenuBackgroundRenderer.h"
 
 // Model includes
 #include "../GameModel/GameWorld.h"
@@ -35,7 +36,7 @@ const int GameDisplay::MAX_FRAMERATE = 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight): 
-gameListener(NULL), currState(NULL), mouseRenderer(NULL), model(model), 
+gameListener(NULL), currState(NULL), mouseRenderer(NULL), menuBGRenderer(NULL), model(model), 
 assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCamera() {
 
 	assert(model != NULL);
@@ -46,6 +47,7 @@ assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCam
 
     this->assets = new GameAssets(initWidth, initHeight, this->sound);
     this->mouseRenderer = new MouseRenderer();
+    this->menuBGRenderer = new MenuBackgroundRenderer();
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
@@ -74,6 +76,9 @@ GameDisplay::~GameDisplay() {
 
     delete this->mouseRenderer;
     this->mouseRenderer = NULL;
+
+    delete this->menuBGRenderer;
+    this->menuBGRenderer = NULL;
 
 	// Delete game assets LAST!! (If you don't do this last
 	// then all the other things being destroyed in this destructor
