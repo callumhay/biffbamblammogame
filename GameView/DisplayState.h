@@ -22,6 +22,8 @@
 
 class GameDisplay;
 class GameModel;
+class CgFxSkybox;
+class Camera;
 
 class DisplayStateInfo {
 public:
@@ -57,20 +59,22 @@ private:
 class DisplayState {
 
 public:
-	enum DisplayStateType { MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart, WorldStart, 
+	enum DisplayStateType { MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart,  
                             InTutorialGame, InGame, InGameBossLevel, InGameMenu, LevelEnd, LevelCompleteSummary,
                             BossLevelCompleteSummary, GameComplete, GameOver, Credits };
 
-	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, const DisplayStateInfo& info, GameDisplay* display);
-    static bool IsGameInPlayDisplayState(const DisplayStateType& type);
+    DisplayState(GameDisplay* display);
+    virtual ~DisplayState();
 
-	DisplayState(GameDisplay* display) : display(display) {}
-	virtual ~DisplayState() {};
+	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, 
+        const DisplayStateInfo& info, GameDisplay* display);
+    static bool IsGameInPlayDisplayState(const DisplayStateType& type);
 
     virtual bool AllowsGameModelUpdates() const = 0;
 	virtual void RenderFrame(double dT) = 0;
 
-	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude)   = 0;
+	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton, 
+        const GameControl::ActionMagnitude& magnitude)   = 0;
 	virtual void ButtonReleased(const GameControl::ActionButton& releasedButton) = 0;
     virtual void MousePressed(const GameControl::MouseButton& pressedButton)     = 0;
     virtual void MouseReleased(const GameControl::MouseButton& releasedButton)    = 0;
@@ -89,44 +93,16 @@ public:
 protected:
 	GameDisplay* display;
 
-    void DrawFadeOverlay(int width, int height, float alpha);
-    void DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture2D* tex);
-
 #ifdef _DEBUG
 	void DebugDrawBounds();
 #endif
 
 private:
 	DISALLOW_COPY_AND_ASSIGN(DisplayState);
-
 };
 
 inline bool DisplayState::IsGameInPlayDisplayState(const DisplayStateType& type) {
     return (type == DisplayState::InGame || type == DisplayState::InGameBossLevel || type == DisplayState::InTutorialGame);
-}
-
-inline void DisplayState::DrawFadeOverlay(int width, int height, float alpha) {
-    // Draw the fade quad overlay
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 1.0f, ColourRGBA(0, 0, 0, alpha));
-    glPopAttrib();
-}
-
-inline void DisplayState::DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture2D* tex) {
-    // Draw the fade quad overlay
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    tex->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(width, height, 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(width) / static_cast<float>(tex->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(height) / static_cast<float>(tex->GetHeight()),
-        ColourRGBA(1,1,1, alpha));
-    tex->UnbindTexture();
-    glPopAttrib();
 }
 
 #endif

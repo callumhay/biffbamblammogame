@@ -17,10 +17,11 @@
 #include "../BlammoEngine/Texture3D.h"
 #include "../BlammoEngine/Texture2D.h"
 
-const char* CgFxVolumetricEffect::BASIC_TECHNIQUE_NAME				= "Basic";
+const char* CgFxVolumetricEffect::BASIC_TECHNIQUE_NAME	        = "Basic";
 const char* CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME		= "GhostBall";
 const char* CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME	= "SmokeSprite";
 const char* CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME		= "FireSprite";
+const char* CgFxVolumetricEffect::CLOUDYSPRITE_TECHNIQUE_NAME   = "CloudySprite";
 
 // Default constructor
 CgFxVolumetricEffect::CgFxVolumetricEffect() : 

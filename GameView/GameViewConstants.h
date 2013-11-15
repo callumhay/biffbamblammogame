@@ -61,7 +61,7 @@ public:
 	const char* CGFX_INKBLOCK_SHADER;
 	const char* CGFX_POSTREFRACT_SHADER;
 	const char* CGFX_VOLUMEMETRIC_SHADER;
-	const char* CGFX_DECOSKYBOX_SHADER;
+	const char* CGFX_SKYBOX_SHADER;
 	const char* CGFX_GAUSSIAN_SHADER;
 	const char* CGFX_AFTERIMAGE_SHADER;
 	const char* CGFX_BLOOM_SHADER;
@@ -78,6 +78,7 @@ public:
     const char* CGFX_GREYSCALE_SHADER;
     const char* CGFX_CELOUTLINES_SHADER;
     const char* CGFX_POSTTUTORIALATTENTION_SHADER;
+    const char* CGFX_CLOUD_SHADER;
 
 	// Texture path constants *******************************
 	const char* TEXTURE_BANG1;
@@ -140,6 +141,7 @@ public:
     const char* TEXTURE_BOSS_ICON;
     const char* TEXTURE_PADLOCK;
     const char* TEXTURE_CHEVRON;
+    const char* TEXTURE_MOON;
     
     const char* TEXTURE_DROPLET;
 

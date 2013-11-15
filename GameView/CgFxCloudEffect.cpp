@@ -1,0 +1,88 @@
+/**
+ * CgFxCloudEffect.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 License
+ * Callum Hay, 2013
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar license to this one.
+ */
+
+#include "CgFxCloudEffect.h"
+#include "GameViewConstants.h"
+
+#include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/Noise.h"
+#include "../BlammoEngine/Texture3D.h"
+#include "../BlammoEngine/Texture2D.h"
+
+const char* CgFxCloudEffect::BASIC_TECHNIQUE_NAME = "CloudySprite";
+
+CgFxCloudEffect::CgFxCloudEffect() : 
+CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_CLOUD_SHADER), 
+scale(1.0f), freq(1.0f), fadeExponent(1), colour(1,1,1), flowDir(0, 0, 1), attenuation(0.035f),
+noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL), lightPos(0,0,0) {
+
+	// Set the technique
+	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
+
+	// Transform parameters
+	this->worldITMatrixParam  = cgGetNamedEffectParameter(this->cgEffect, "WorldITXf");
+	this->wvpMatrixParam      = cgGetNamedEffectParameter(this->cgEffect, "WvpXf");
+	this->worldMatrixParam    = cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
+	this->viewInvMatrixParam  = cgGetNamedEffectParameter(this->cgEffect, "ViewIXf");
+
+	// Noise texture sampler param
+	this->noiseSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
+	this->maskSamplerParam  = cgGetNamedEffectParameter(this->cgEffect, "MaskSampler");
+
+	// Timer parameter
+	this->timerParam = cgGetNamedEffectParameter(this->cgEffect, "Timer");
+
+	// Tweak-able params
+	this->scaleParam         = cgGetNamedEffectParameter(this->cgEffect, "Scale");
+	this->freqParam          = cgGetNamedEffectParameter(this->cgEffect, "Freq");
+	this->flowDirectionParam = cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
+	this->colourParam        = cgGetNamedEffectParameter(this->cgEffect, "Colour");
+	this->fadeExpParam       = cgGetNamedEffectParameter(this->cgEffect, "FadeExp");
+    this->lightPosParam      = cgGetNamedEffectParameter(this->cgEffect, "LightPos");
+    this->attenuationParam   = cgGetNamedEffectParameter(this->cgEffect, "LightAtten");
+
+	debug_cg_state();
+}
+
+CgFxCloudEffect::~CgFxCloudEffect() {
+}
+
+void CgFxCloudEffect::SetupBeforePasses(const Camera& camera) {
+
+	// Transform setup
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
+	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
+	
+    const Matrix4x4& invViewXf = camera.GetInvViewTransform();
+	cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
+
+	// Set tweak-ables...
+	cgGLSetParameter1f(this->scaleParam, this->scale);
+	cgGLSetParameter1f(this->freqParam, this->freq);
+	cgGLSetParameter1f(this->fadeExpParam, this->fadeExponent);
+	cgGLSetParameter1f(this->attenuationParam, this->attenuation);
+    cgGLSetParameter3fv(this->flowDirectionParam, this->flowDir.begin());
+	cgGLSetParameter3fv(this->colourParam, this->colour.begin());
+    cgGLSetParameter3fv(this->lightPosParam, this->lightPos.begin());
+
+	// Set the timer and noise parameters...
+	double timeInSecs = static_cast<double>(BlammoTime::GetSystemTimeInMillisecs()) / 1000.0;
+	cgGLSetParameter1f(this->timerParam, timeInSecs);
+
+	// Set noise texture sampler...
+	cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);
+
+	// Set the mask texture sampler if it exists
+	if (this->maskTex != NULL) {
+		cgGLSetTextureParameter(this->maskSamplerParam, this->maskTex->GetTextureID());
+	}
+}

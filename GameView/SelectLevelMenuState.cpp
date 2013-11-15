@@ -16,6 +16,7 @@
 #include "GameViewConstants.h"
 #include "GameDisplay.h"
 #include "CgFxBloom.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/FBObj.h"
@@ -32,7 +33,7 @@ DisplayState(display), worldLabel(NULL), bgSoundLoopID(bgSoundLoopID), world(dis
 goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
 bossIconTexture(NULL), starGlowTexture(NULL), arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL), 
 autoUnlockAnimCountdown(0.25), playAutoUnlockAnim(false), totalNumGameStarsLabel(NULL), totalLabel(NULL),
-starryBG(NULL), padlockTexture(NULL), freezePlayerInput(false), explosionTex(NULL), sphereNormalsTex(NULL), menuFBO(NULL), postMenuFBObj(NULL),
+padlockTexture(NULL), freezePlayerInput(false), explosionTex(NULL), sphereNormalsTex(NULL), menuFBO(NULL), postMenuFBObj(NULL),
 selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumWorldStarsLabel(NULL),
 particleFader(1, 0), particleMediumGrowth(1.0f, 2.0f), particleSuperGrowth(1.0f, 10.0f), particleSmallGrowth(1.0f, 1.3f),
 particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)), levelWasUnlockedViaStarCost(false),
@@ -64,11 +65,6 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
         GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starGlowTexture != NULL);
     this->starGlowTexture->SetWrapParams(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-    // Load background texture
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-    GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
 
     this->padlockTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
     GameViewConstants::GetInstance()->TEXTURE_PADLOCK, Texture::Trilinear));
@@ -241,8 +237,6 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->arrowTexture);
     assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->padlockTexture);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starGlowTexture);
@@ -255,8 +249,8 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
         iter != this->smokeTextures.end(); ++iter) {
 
-            success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-            assert(success);	
+        success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+        assert(success);	
     }
     this->smokeTextures.clear();
 
@@ -273,6 +267,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     this->pressEscAlphaAnim.Tick(dT);
 
     const Camera& camera = this->display->GetCamera();
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
 
     // Bind the menu's FrameBufferObject - we use this to do Bloom on the menu
 	this->menuFBO->BindFBObj();
@@ -281,11 +276,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 
     // Draw the starry background...
     if (!this->goBackToWorldSelectMenu) {
-        this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
-        this->starryBG->UnbindTexture();
+        bgRenderer->DrawBG(camera);
     }
 
 	// Draw in window coordinates
@@ -324,8 +315,12 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
     if (!fadeDone) {
-        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-            this->fadeAnimation.GetInterpolantValue(), this->starryBG);
+        if (this->goToStartLevel) {
+            bgRenderer->DrawNonAnimatedFadeBG(this->fadeAnimation.GetInterpolantValue());
+        }
+        else {
+            bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+        }
     }
 
     // Special case for when the player enters the level select screen and the next level is unlock-able by the
@@ -368,12 +363,14 @@ void SelectLevelMenuState::RenderFrame(double dT) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
 
+        Texture* bgTexture = bgRenderer->GetMenuBGTexture();
+
         float screenWidth = Camera::GetWindowWidth();
         float screenHeight = Camera::GetWindowHeight();
-        float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(this->starryBG->GetWidth()));
-        float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(this->starryBG->GetHeight()));
+        float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
+        float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
 
-        this->starryBG->BindTexture();
+        bgTexture->BindTexture();
         glColor4f(1,1,1,1);
         glBegin(GL_QUADS);
             glTexCoord2f(0, 0);
@@ -426,7 +423,6 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     // Handle the case where the player selected a level
     if (this->goToStartLevel && fadeDone) {
         
-
         // Start the currently selected level
         {
             AbstractLevelMenuItem* selectedLevelItem = this->pages[this->selectedPage]->GetSelectedItem();

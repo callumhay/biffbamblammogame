@@ -13,6 +13,7 @@
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../GameModel/Onomatoplex.h"
 #include "../GameModel/GameProgressIO.h"
@@ -37,7 +38,7 @@ const float BossLevelCompleteSummaryDisplayState::MAX_COMPLETE_TEXT_SCALE = 1.3f
 
 BossLevelCompleteSummaryDisplayState::BossLevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), allAnimationIsDone(false), waitingForKeyPress(true), unlockedLabel(NULL), worldCompleteLabel(NULL),
-bgTex(NULL), spinGlowTex(NULL), bgMusicSoundID(INVALID_SOUND_ID), victoryMessageSoundID(INVALID_SOUND_ID),
+spinGlowTex(NULL), bgMusicSoundID(INVALID_SOUND_ID), victoryMessageSoundID(INVALID_SOUND_ID),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
                  GameFontAssetsManager::Medium), "- Press Any Key to Continue -"),
 victoryLabel1(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big),
@@ -57,10 +58,6 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
 
     GameSound* sound = this->display->GetSound();
     this->bgMusicSoundID = sound->PlaySound(GameSound::WorldCompleteBackgroundLoop, true, false);
-
-    this->bgTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->bgTex != NULL);
 
     this->spinGlowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
@@ -171,8 +168,6 @@ BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
     }
 
     bool success = false;
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bgTex);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->spinGlowTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bangStarTex);
@@ -184,18 +179,16 @@ BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
 
 void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
  
+    const Camera& camera = this->display->GetCamera();
     GameSound* sound = this->display->GetSound();
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
 
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // Draw the background...
-    this->bgTex->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->bgTex->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->bgTex->GetHeight()));
-    this->bgTex->UnbindTexture();
+    bgRenderer->DrawBG(camera);
 
     this->allAnimationIsDone = true;
     this->allAnimationIsDone &= this->fadeInAnimation.Tick(dT);
@@ -235,10 +228,10 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         // Begin fading out the summary screen
         bool fadeIsDone = this->fadeOutAnimation.Tick(dT);
         float fadeValue = this->fadeOutAnimation.GetInterpolantValue();
-        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), fadeValue, this->bgTex);
+        
+        bgRenderer->DrawBG(camera, fadeValue);
 
         if (fadeIsDone) {
-
 
             // Stop the background music by fading it out...
             // We only stop it in this state if the next state is not the game complete state...

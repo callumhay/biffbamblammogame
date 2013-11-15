@@ -19,6 +19,7 @@
 #include "GameMenuItem.h"
 #include "GameAssets.h"
 #include "CgFxBloom.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../BlammoEngine/FBObj.h"
 #include "../GameModel/GameModel.h"
@@ -60,7 +61,7 @@ mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NUL
 eraseProgVerifyHandler(NULL), volItemHandler(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
 menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
-particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), starryBG(NULL), bbbLogoTex(NULL),
+particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), bbbLogoTex(NULL),
 blammopediaItemIndex(-1), creditsItemIndex(-1),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
@@ -83,10 +84,6 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture2D::Trilinear, GL_TEXTURE_2D));
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture2D::Trilinear, GL_TEXTURE_2D));
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D));
-
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
 
     this->bbbLogoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BBB_LOGO, Texture::Trilinear));
@@ -178,8 +175,6 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 		assert(success);
 	}
 
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bbbLogoTex);
     assert(success);
     UNUSED_VARIABLE(success);
@@ -507,9 +502,11 @@ void MainMenuDisplayState::SetupBloomEffect() {
 void MainMenuDisplayState::RenderFrame(double dT) {
 	bool finishFadeAnim = this->fadeAnimation.Tick(dT);
 
+    const Camera& camera = this->display->GetCamera();
     GameSound* sound = this->display->GetSound();
     GameModel* model = this->display->GetModel();
-
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
+    
 	// Check to see if we're switching game states...
     if (finishFadeAnim) {
         static const double SOUND_FADE_OUT_TIME = 0.5;
@@ -588,12 +585,8 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Draw the starry background...
-    this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(DISPLAY_WIDTH, DISPLAY_HEIGHT, 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(DISPLAY_WIDTH) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(DISPLAY_HEIGHT) / static_cast<float>(this->starryBG->GetHeight()));
-    this->starryBG->UnbindTexture();
+    // Draw the background...
+    bgRenderer->DrawBG(camera);
 
     Camera menuCamera;
 	menuCamera.SetPerspective();
@@ -624,7 +617,12 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     this->eraseFailedPopup->Draw(menuCamera);
 
 	// Fade-in/out overlay
-    this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeAnimation.GetInterpolantValue(), this->starryBG);
+    if (this->fadeAnimation.GetTargetValue() == 0.0f) {
+        bgRenderer->DrawNonAnimatedFadeBG(this->fadeAnimation.GetInterpolantValue());
+    }
+    else {
+        bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+    }
 
 	this->menuFBO->UnbindFBObj();
 

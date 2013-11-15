@@ -36,7 +36,7 @@ public:
 	void FadeBackground(bool fadeout, float fadeTime);
 	void ResetToInitialState();
 
-	void Tick(double dT);
+	void Tick(double dT, const GameModel& model);
 
     void LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset = Vector3D(0,0,0), 
         const Vector3D& fgFillPosOffset = Vector3D(0,0,0)) const;

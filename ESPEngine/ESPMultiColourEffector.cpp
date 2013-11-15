@@ -32,9 +32,9 @@ void ESPMultiColourEffector::AffectParticleOnTick(double dT, ESPParticle* partic
 
 	double particleLifeElapsed = particle->GetCurrentLifeElapsed();
 	double totalParticleLife   = particle->GetLifespanLength();
-	double percentLifeElapsed	 = particleLifeElapsed / totalParticleLife;
+    double percentLifeElapsed  = std::min<float>(1.0f, particleLifeElapsed / totalParticleLife);
 
-	int lookupIndexBase = static_cast<int>(percentLifeElapsed * static_cast<double>(colours.size()-1));
+	int lookupIndexBase = static_cast<int>(percentLifeElapsed * static_cast<double>(this->colours.size()-1));
 	int lookupIndexNext = (lookupIndexBase + 1);
 	
 	if (lookupIndexNext >= static_cast<int>(this->colours.size())) {

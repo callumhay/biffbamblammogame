@@ -13,8 +13,7 @@
 #define __NOUVEAUWORLDASSETS_H__
 
 #include "../BlammoEngine/Bezier.h"
-#include "../ESPEngine/ESPVolumeEmitter.h"
-#include "../ESPEngine/ESPMultiColourEffector.h"
+#include "../ESPEngine/ESP.h"
 #include "GameWorldAssets.h"
 
 class ESPVolumeEmitter;
@@ -30,7 +29,7 @@ public:
 	void FadeBackground(bool fadeout, float fadeTime);
 	void ResetToInitialState();
 
-	void Tick(double dT);
+	void Tick(double dT, const GameModel& model);
 
     void LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset = Vector3D(0,0,0),
         const Vector3D& fgFillPosOffset = Vector3D(0,0,0)) const;
@@ -47,6 +46,32 @@ private:
     ESPVolumeEmitter rightGapEmitter;
     ESPMultiColourEffector fadeEffector;
     */
+
+    const Point3D lamp1Pos;
+    const Point3D lamp2Pos;
+
+    static const float HALO_ALPHA_MULTIPLIER;
+    static const float LENS_FLARE_ALPHA_MULTIPLIER;
+
+    Texture2D* glowTex;
+    Texture2D* haloTex;
+    Texture2D* lensFlareTex;
+
+    ESPPointEmitter lamp1GlowEmitter;
+    ESPPointEmitter lamp1HaloEmitter;
+    ESPPointEmitter lamp1LensFlareEmitter;
+    ESPPointEmitter lamp2GlowEmitter;
+    ESPPointEmitter lamp2HaloEmitter;
+    ESPPointEmitter lamp2LensFlareEmitter;
+
+    ESPParticleScaleEffector glowPulse;
+    ESPParticleScaleEffector haloPulse;
+    //Texture2D* haloTex;
+
+
+    void InitEmitters();
+    void BuildLampEmitter(const Point3D& pos, ESPPointEmitter& glowEmitter, 
+        ESPPointEmitter& haloEmitter, ESPPointEmitter& lensFlareEmitter);
 
     DISALLOW_COPY_AND_ASSIGN(NouveauWorldAssets);
 };

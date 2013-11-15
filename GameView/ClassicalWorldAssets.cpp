@@ -14,10 +14,10 @@
 #include "../ResourceManager.h"
 
 // TODO: Get rid of this
-#include "DecoSkybox.h"
+#include "Skybox.h"
 
 ClassicalWorldAssets::ClassicalWorldAssets(GameAssets* assets) :
-GameWorldAssets(assets, new DecoSkybox(),
+GameWorldAssets(assets, new Skybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BACKGROUND_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_PADDLE_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BLOCK_MESH)), cloudTex(NULL),

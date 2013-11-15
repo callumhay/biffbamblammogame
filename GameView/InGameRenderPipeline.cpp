@@ -60,7 +60,7 @@ void InGameRenderPipeline::SetupRenderFrame(double dT) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// Tick the assets (update them for amount of elapsed time dT).
-	this->display->GetAssets()->Tick(dT);
+	this->display->GetAssets()->Tick(dT, *this->display->GetModel());
 }
 
 // Apply the in-game camera to the current world - this places the player camera in the correct
@@ -141,7 +141,8 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelD
 	// Draw background effects into the background FBO -- we do this as a separate pass because
     // if we include it in the previous pass, the outlines will show through all the effects (which is not so pretty)
     backgroundFBO->BindFBObj();
-    
+    colourAndDepthFBO->BindDepthRenderTexture();
+    assets->GetCurrentWorldAssets()->DrawBackgroundPostOutlinePreEffects(camera);
     assets->DrawBackgroundEffects(camera);
     glPopMatrix();
 
@@ -240,6 +241,8 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
         celOutlineEffect.Draw(colourAndDepthFBO, fullSceneFBO);
     }
 
+
+
 	// Draw Post-full-scene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
     fullSceneFBO->BindFBObj();
 
@@ -331,7 +334,7 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
         celOutlineEffect.Draw(colourAndDepthFBO, finalFBO);
     }
 
-	// Render the final fullscreen effects
+	// Render the final full screen effects
 	fboAssets->RenderFinalFullscreenEffects(camera.GetWindowWidth(), camera.GetWindowHeight(), dT, *gameModel);
 
 	glPopMatrix();

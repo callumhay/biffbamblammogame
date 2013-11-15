@@ -67,7 +67,6 @@ private:
     static const char* SPECIAL_THANKS_TITLE_TEXT;
     static const char* SPECIAL_THANKS_NAMES_TEXT;
 
-    Texture2D* starryBG;
     Texture2D* bbbLogoTex;
 
     CreditLabel creditLabel1;

@@ -11,18 +11,35 @@
 
 #include "NouveauWorldAssets.h"
 #include "GameViewConstants.h"
-#include "DecoSkybox.h"
+#include "Skybox.h"
 #include "GameAssets.h"
 
 #include "../ESPEngine/ESP.h"
 #include "../ResourceManager.h"
 
+const float NouveauWorldAssets::HALO_ALPHA_MULTIPLIER       = 0.15f;
+const float NouveauWorldAssets::LENS_FLARE_ALPHA_MULTIPLIER = 0.35f;
+
 // Basic constructor: Load all the basic assets for the deco world...
 NouveauWorldAssets::NouveauWorldAssets(GameAssets* assets) : 
-GameWorldAssets(assets, new DecoSkybox(),
+GameWorldAssets(assets, new Skybox(),
         ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BACKGROUND_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_PADDLE_MESH),
-		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BLOCK_MESH)) {
+		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NOUVEAU_BLOCK_MESH)),
+lamp1Pos(-4.788f, 16.550f, -6.716f), lamp2Pos(4.729f, 16.550f, -6.716f), glowTex(NULL), haloTex(NULL), lensFlareTex(NULL),
+glowPulse(0,0), haloPulse(0,0) {
+    
+    this->glowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->glowTex != NULL);
+
+    this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->haloTex != NULL);
+
+    this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->lensFlareTex != NULL);
 
     // Change the default values for drawing outlines
     this->outlineMinDistance = 0.1f;
@@ -32,9 +49,8 @@ GameWorldAssets(assets, new DecoSkybox(),
 
     // Colour Pallet for art nouveau...
     std::vector<Colour> nouveauColourPalette;
-    nouveauColourPalette.reserve(26);
+    nouveauColourPalette.reserve(25);
     nouveauColourPalette.push_back(Colour(0x787E58)); // Light olive
-    nouveauColourPalette.push_back(Colour(0xD4CFBC)); // Light Rose
     nouveauColourPalette.push_back(Colour(0x4C4441)); // Dark mauve / grey
     nouveauColourPalette.push_back(Colour(0x916447)); // Cream brown with slight peach tinge
     nouveauColourPalette.push_back(Colour(0x76704C)); // Medium olive
@@ -251,6 +267,8 @@ GameWorldAssets(assets, new DecoSkybox(),
         }
     }
     */
+
+    this->InitEmitters();
 }
 
 NouveauWorldAssets::~NouveauWorldAssets() {
@@ -261,9 +279,20 @@ NouveauWorldAssets::~NouveauWorldAssets() {
     //    curve = NULL;
     //}
     //this->curves.clear();
+
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
-void NouveauWorldAssets::Tick(double dT) {
+void NouveauWorldAssets::Tick(double dT, const GameModel& model) {
+
+    float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+    ESPInterval alphaInterval(currBGAlpha);
 
     //this->leftSideEmitter.Tick(dT);
     //this->centerEmitter.Tick(dT);
@@ -272,27 +301,28 @@ void NouveauWorldAssets::Tick(double dT) {
     //this->rightGapEmitter.Tick(dT);
 
     // Curves need to fade with the rest of the background in certain cases (e.g., ball death)
-    //float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
     //this->leftSideEmitter.SetParticleAlpha(currBGAlpha);
     //this->centerEmitter.SetParticleAlpha(currBGAlpha);
     //this->rightSideEmitter.SetParticleAlpha(currBGAlpha);
     //this->leftGapEmitter.SetParticleAlpha(currBGAlpha);
     //this->rightGapEmitter.SetParticleAlpha(currBGAlpha);
 
-	GameWorldAssets::Tick(dT);
-}
+    this->lamp1GlowEmitter.SetParticleAlpha(alphaInterval);
+    this->lamp1GlowEmitter.Tick(dT);
+    this->lamp2GlowEmitter.SetParticleAlpha(alphaInterval);
+    this->lamp2GlowEmitter.Tick(dT);
 
-void NouveauWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset, const Vector3D& fgFillPosOffset) const {
-    assets->GetLightAssets()->SetForegroundLightDefaults(
-        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgKeyPosOffset, 
-        GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0175f), 
-        BasicPointLight(Point3D(10, 10, 50) + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.02f));
-}
+    this->lamp1HaloEmitter.SetParticleAlpha(HALO_ALPHA_MULTIPLIER*alphaInterval);
+    this->lamp1HaloEmitter.Tick(dT);
+    this->lamp2HaloEmitter.SetParticleAlpha(HALO_ALPHA_MULTIPLIER*alphaInterval);
+    this->lamp2HaloEmitter.Tick(dT);
 
-void NouveauWorldAssets::LoadBGLighting(GameAssets* assets) const {
-    assets->GetLightAssets()->SetBackgroundLightDefaults(
-        BasicPointLight(Point3D(60.0f, 60.0f, 60.0f), Colour(0.4f, 0.45f, 0.45f), 0.06f),
-        BasicPointLight(Point3D(30.0f, 11.0f, -15.0f), Colour(0.8f, 0.8f, 0.8f),  0.01f));
+    this->lamp1LensFlareEmitter.SetParticleAlpha(LENS_FLARE_ALPHA_MULTIPLIER*alphaInterval);
+    this->lamp1LensFlareEmitter.Tick(dT);
+    this->lamp2LensFlareEmitter.SetParticleAlpha(LENS_FLARE_ALPHA_MULTIPLIER*alphaInterval);
+    this->lamp2LensFlareEmitter.Tick(dT);
+
+	GameWorldAssets::Tick(dT, model);
 }
 
 void NouveauWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight,
@@ -313,12 +343,84 @@ void NouveauWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPo
 }
 
 void NouveauWorldAssets::DrawBackgroundEffects(const Camera& camera) {
-    UNUSED_PARAMETER(camera);
+    this->lamp1GlowEmitter.Draw(camera, Vector3D(0,0,0), true);
+    this->lamp2GlowEmitter.Draw(camera, Vector3D(0,0,0), true);
 
-	//float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
-	//if (currBGAlpha == 0) {
-	//	return;
-	//}
-	
-    // TODO?
+    this->lamp1HaloEmitter.Draw(camera);
+    this->lamp2HaloEmitter.Draw(camera);
+
+    this->lamp1LensFlareEmitter.Draw(camera);
+    this->lamp2LensFlareEmitter.Draw(camera);
+}
+
+void NouveauWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset, const Vector3D& fgFillPosOffset) const {
+    assets->GetLightAssets()->SetForegroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgKeyPosOffset, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0175f), 
+        BasicPointLight(Point3D(10, 10, 50) + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.02f));
+}
+
+void NouveauWorldAssets::LoadBGLighting(GameAssets* assets) const {
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(Point3D(60.0f, 60.0f, 60.0f), Colour(0.4f, 0.45f, 0.45f), 0.06f),
+        BasicPointLight(Point3D(30.0f, 11.0f, -15.0f), Colour(0.8f, 0.8f, 0.8f),  0.01f));
+}
+
+void NouveauWorldAssets::InitEmitters() {
+
+    ScaleEffect glowPulseSettings;
+    glowPulseSettings.pulseGrowthScale = 1.15f;
+    glowPulseSettings.pulseRate        = 0.15f;
+    this->glowPulse = ESPParticleScaleEffector(glowPulseSettings);
+
+    ScaleEffect haloPulseSettings;
+    haloPulseSettings.pulseGrowthScale = 1.05f;
+    haloPulseSettings.pulseRate = glowPulseSettings.pulseRate;
+    this->haloPulse = ESPParticleScaleEffector(haloPulseSettings);
+
+    this->BuildLampEmitter(this->lamp1Pos, this->lamp1GlowEmitter, this->lamp1HaloEmitter, this->lamp1LensFlareEmitter);
+    this->BuildLampEmitter(this->lamp2Pos, this->lamp2GlowEmitter, this->lamp2HaloEmitter, this->lamp2LensFlareEmitter);
+}
+
+void NouveauWorldAssets::BuildLampEmitter(const Point3D& pos, ESPPointEmitter& glowEmitter, 
+                                          ESPPointEmitter& haloEmitter, ESPPointEmitter& lensFlareEmitter) {
+
+    static const float LAMP_GLOW_SIZE = 1.40f;
+
+    Point3D finalPos = pos + Vector3D(0.0f, -0.15f*LAMP_GLOW_SIZE, 0.0f);
+
+    glowEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    glowEmitter.SetInitialSpd(ESPInterval(0));
+    glowEmitter.SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    glowEmitter.SetEmitAngleInDegrees(0);
+    glowEmitter.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    glowEmitter.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    glowEmitter.SetEmitPosition(finalPos);
+    glowEmitter.SetParticleSize(ESPInterval(LAMP_GLOW_SIZE));
+    glowEmitter.SetParticleColour(ESPInterval(0.9f), ESPInterval(0.9f), ESPInterval(0.5f), ESPInterval(1.0f));
+    glowEmitter.AddEffector(&this->glowPulse);
+    glowEmitter.SetParticles(1, this->glowTex);
+
+    haloEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    haloEmitter.SetInitialSpd(ESPInterval(0));
+    haloEmitter.SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    haloEmitter.SetEmitAngleInDegrees(0);
+    haloEmitter.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    haloEmitter.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    haloEmitter.SetEmitPosition(finalPos);
+    haloEmitter.SetParticleSize(ESPInterval(3.0f * LAMP_GLOW_SIZE));
+    haloEmitter.SetParticleColour(ESPInterval(0.95f), ESPInterval(0.95f), ESPInterval(0.65f), ESPInterval(HALO_ALPHA_MULTIPLIER));
+    haloEmitter.AddEffector(&this->haloPulse);
+    haloEmitter.SetParticles(1, this->haloTex);
+
+    lensFlareEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    lensFlareEmitter.SetInitialSpd(ESPInterval(0));
+    lensFlareEmitter.SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    lensFlareEmitter.SetEmitAngleInDegrees(0);
+    lensFlareEmitter.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    lensFlareEmitter.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    lensFlareEmitter.SetEmitPosition(finalPos);
+    lensFlareEmitter.SetParticleSize(ESPInterval(3.75f * LAMP_GLOW_SIZE));
+    lensFlareEmitter.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(LENS_FLARE_ALPHA_MULTIPLIER));
+    lensFlareEmitter.SetParticles(1, this->lensFlareTex);
 }

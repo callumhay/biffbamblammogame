@@ -2,7 +2,7 @@
  * DisplayState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,7 +16,6 @@
 #include "SelectLevelMenuState.h"
 #include "BlammopediaState.h"
 #include "LevelStartDisplayState.h"
-#include "WorldStartDisplayState.h"
 #include "InTutorialGameDisplayState.h"
 #include "InGameDisplayState.h"
 #include "InGameBossLevelDisplayState.h"
@@ -26,9 +25,16 @@
 #include "BossLevelCompleteSummaryDisplayState.h"
 #include "GameCompleteDisplayState.h"
 #include "GameOverDisplayState.h"
+#include "CgFxSkybox.h"
 
 #include "../GameModel/BallBoostModel.h"
 #include "../GameModel/Beam.h"
+
+DisplayState::DisplayState(GameDisplay* display) : display(display) {
+}
+
+DisplayState::~DisplayState() {
+}
 
 // Factory method for building a display state from a given enumerated
 // type. Caller takes ownership of returned memory.
@@ -45,8 +51,6 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
             return new BlammopediaState(display);
 		case DisplayState::LevelStart:
 			return new LevelStartDisplayState(display);
-		case DisplayState::WorldStart:
-			return new WorldStartDisplayState(display);
         case DisplayState::InTutorialGame:
             return new InTutorialGameDisplayState(display);
 		case DisplayState::InGame:
@@ -76,7 +80,7 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 
 #ifdef _DEBUG
 /**
- * Debugging function that draws the collision boundries of level pieces.
+ * Debugging function that draws the collision boundaries of level pieces.
  */
 void DisplayState::DebugDrawBounds() {
 	if (!GameDisplay::IsDrawDebugBoundsOn()) { return; }
@@ -85,10 +89,10 @@ void DisplayState::DebugDrawBounds() {
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
-	// Draw boundry of paddle...
+	// Draw boundary of paddle...
 	this->display->GetModel()->GetPlayerPaddle()->DebugDraw();
 	
-	// Draw of boundries of each block...
+	// Draw of boundaries of each block...
 	std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
 	for (size_t i = 0; i < pieces.size(); i++) {
 		std::vector<LevelPiece*> setOfPieces = pieces[i];

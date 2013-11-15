@@ -72,7 +72,6 @@ private:
     // Animation of the scales for the selection indicator
     AnimationMultiLerp<float> selectionBorderAddYellowAnim; 
 
-
     TextLabel2D* totalNumGameStarsLabel;
     TextLabel2D* totalLabel;
     AnimationMultiLerp<float> totalGameStarGlowPulseAnim;
@@ -83,7 +82,6 @@ private:
 	FBObj* menuFBO;
     FBObj* postMenuFBObj;
 
-    Texture2D* starryBG;
     Texture2D* padlockTex;
 
     SoundID bgSoundLoopID;

@@ -13,6 +13,7 @@
 #include "GameDisplay.h"
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../BlammoEngine/GeometryMaker.h"
@@ -59,7 +60,7 @@ newHighScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMa
 maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL), lensFlareTex(NULL), haloTex(NULL),
 starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), 
-starFgPulser(ScaleEffect(1.0f, 1.5f)), starryBG(NULL), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
+starFgPulser(ScaleEffect(1.0f, 1.5f)), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
 flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
 highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallySoundID(INVALID_SOUND_ID) {
     
@@ -135,10 +136,6 @@ highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallyS
 
     this->maxTotalLabelHeight = this->totalScoreLabel.GetHeight();
     this->newHighScoreLabel.SetDropShadow(Colour(0,0,0), this->display->GetTextScalingFactor() * 0.1f);
-
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-    GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
 
     this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear, GL_TEXTURE_2D));
@@ -475,8 +472,6 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTexture);
     assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
@@ -522,18 +517,16 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 
+    const Camera& camera = this->display->GetCamera();
     GameSound* sound = this->display->GetSound();
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
 
 	// Clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    // Draw the starry background...
-    this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
-    this->starryBG->UnbindTexture();
+    // Draw the background...
+    bgRenderer->DrawBG(camera);
 
     if (this->difficultyChoicePane != NULL) {
         this->difficultyChoicePane->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight());
@@ -643,20 +636,8 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         float fadeValue = this->fadeAnimation.GetInterpolantValue();
 
 		// Draw the fade quad overlay
-		glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        this->starryBG->BindTexture();
-        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
-            ColourRGBA(1, 1, 1, fadeValue));
-        this->starryBG->UnbindTexture();
-
-		glPopAttrib();
-
+        bgRenderer->DrawBG(camera, fadeValue);
+		
         if (fadeIsDone) {
 
             // Stop the background music with a slower fade out time than the typical

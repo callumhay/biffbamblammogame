@@ -17,6 +17,7 @@
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
+#include "MenuBackgroundRenderer.h"
 
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
@@ -32,7 +33,7 @@ const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING            = 50;			// P
 const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING            = 80;			// Padding from the bottom of the screen to the bottom of the level name text
 
 LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) : 
-DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL), starryBG(NULL),
+DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL), 
 levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), ""),
 paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
 
@@ -122,11 +123,6 @@ paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
 	this->starEmitter = this->display->GetAssets()->GetESPAssets()->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
 		ESPInterval(0.5f, 1.0f), ESPInterval(0.0f), false, 20);
 
-    // Load background texture
-    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-    GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
-    assert(this->starryBG != NULL);
-
 	// Reset any HUD animations - this makes sure the animations are always displayed (e.g., the life balls fly in)
 	// at the beginning of each level
     GameAssets* assets = this->display->GetAssets();
@@ -153,16 +149,12 @@ LevelStartDisplayState::~LevelStartDisplayState() {
 	this->shockwaveEmitter = NULL;
 	delete this->starEmitter;
 	this->starEmitter = NULL;
-
-    bool success = false;
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
-    assert(success);
-    UNUSED_VARIABLE(success);
 }
 
 void LevelStartDisplayState::RenderFrame(double dT) {
 	const Camera& camera   = this->display->GetCamera();
     GameAssets* gameAssets = this->display->GetAssets();
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
 
 	bool fadeInDone           = this->fadeInAnimation.Tick(dT);
 	bool wipeInDone           = this->showLevelNameWipeAnimation.Tick(dT);
@@ -205,8 +197,8 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 
 	// Render the fade-in if we haven't already
 	if (!fadeInDone) {
-		// Draw the starry background...
-        this->DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), this->fadeInAnimation.GetInterpolantValue(), this->starryBG);
+		// Draw the background...
+        bgRenderer->DrawNonAnimatedFadeBG(this->fadeInAnimation.GetInterpolantValue());
 	}
 
 	if (!levelTextFadeOutDone) {
@@ -238,16 +230,18 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 			// header, the other quad is a gradiant from white to transparent and it moves along the header
 			// over time, revealing it as it goes (wipe fade in)
 			
+            Texture* bgTexture = bgRenderer->GetMenuBGTexture();
+
             float screenWidth = static_cast<float>(camera.GetWindowWidth());
             float screenHeight = static_cast<float>(camera.GetWindowHeight());
             
-            float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(this->starryBG->GetWidth()));
-            float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(this->starryBG->GetHeight()));
+            float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
+            float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
 
             float startTexU = (this->levelNameLabel.GetTopLeftCorner()[0] - hPadding) * totalTexU / screenWidth;
             float startTexV = quadHeight * totalTexV / screenHeight;
 
-            this->starryBG->BindTexture();
+            bgTexture->BindTexture();
 			glBegin(GL_QUADS);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -276,7 +270,7 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 			glVertex2f(currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE, 0.0f);
 
 			glEnd();
-            this->starryBG->UnbindTexture();
+            bgTexture->UnbindTexture();
 
 			glPopMatrix();
 			Camera::PopWindowCoords();

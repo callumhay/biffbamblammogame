@@ -442,10 +442,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\Skybox.h"
-					>
-				</File>
-				<File
 					RelativePath=".\BlammoEngine\StringHelper.h"
 					>
 				</File>
@@ -547,10 +543,6 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\Point.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\Skybox.cpp"
 					>
 				</File>
 				<File
@@ -794,10 +786,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\DecoSkybox.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\GameDisplay.h"
 					>
 				</File>
@@ -826,6 +814,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\MenuBackgroundRenderer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\MineMeshManager.h"
 					>
 				</File>
@@ -843,6 +835,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\RandomToItemAnimation.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\Skybox.h"
 					>
 				</File>
 				<File
@@ -867,10 +863,6 @@
 				>
 				<File
 					RelativePath=".\GameView\BlockStatusEffectRenderer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\DecoSkybox.cpp"
 					>
 				</File>
 				<File
@@ -902,6 +894,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\MenuBackgroundRenderer.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\MineMeshManager.cpp"
 					>
 				</File>
@@ -919,6 +915,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\RandomToItemAnimation.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\Skybox.cpp"
 					>
 				</File>
 				<File
@@ -957,7 +957,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameView\CgFxDecoSkybox.h"
+						RelativePath=".\GameView\CgFxCloudEffect.h"
 						>
 					</File>
 					<File
@@ -1025,6 +1025,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxSkybox.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxStickyPaddle.h"
 						>
 					</File>
@@ -1053,7 +1057,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameView\CgFxDecoSkybox.cpp"
+						RelativePath=".\GameView\CgFxCloudEffect.cpp"
 						>
 					</File>
 					<File
@@ -1118,6 +1122,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPrism.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxSkybox.cpp"
 						>
 					</File>
 					<File
@@ -1200,10 +1208,6 @@
 						RelativePath=".\GameView\SelectWorldMenuState.h"
 						>
 					</File>
-					<File
-						RelativePath=".\GameView\WorldStartDisplayState.h"
-						>
-					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -1270,10 +1274,6 @@
 					</File>
 					<File
 						RelativePath=".\GameView\SelectWorldMenuState.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\GameView\WorldStartDisplayState.cpp"
 						>
 					</File>
 				</Filter>
