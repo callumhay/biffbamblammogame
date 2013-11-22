@@ -25,6 +25,7 @@
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
 #include "RemoteControlRocketHUD.h"
+#include "BallCamHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 #include "RocketMesh.h"
@@ -43,6 +44,8 @@
 #include "../GameModel/PaddleMineProjectile.h"
 #include "../GameModel/PaddleRemoteControlRocketProjectile.h"
 #include "../GameModel/FullscreenFlashEffectInfo.h"
+#include "../GameModel/GameTransformMgr.h"
+#include "../GameModel/CannonBlock.h"
 
 // Game Sound Includes
 #include "../GameSound/GameSound.h"
@@ -80,6 +83,7 @@ pointsHUD(NULL),
 boostHUD(NULL),
 ballReleaseHUD(NULL),
 remoteControlRocketHUD(NULL),
+ballCamHUD(NULL),
 
 ball(NULL), 
 spikeyBall(NULL),
@@ -100,7 +104,7 @@ omniLaserBallEffect(NULL),
 magnetPaddleEffect(NULL)
 {
 	// Load ESP assets
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading purdy pictures...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
 	this->espAssets      = new GameESPAssets();
     this->tutorialAssets = new GameTutorialAssets();
 
@@ -108,22 +112,22 @@ magnetPaddleEffect(NULL)
     this->fboAssets = new GameFBOAssets(screenWidth, screenHeight, this->sound);
 
 	// Load item assets
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading game items...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
 	this->itemAssets = new GameItemAssets(this->espAssets, this->sound);
 	bool didItemAssetsLoad = this->itemAssets->LoadItemAssets();
     UNUSED_VARIABLE(didItemAssetsLoad);
 	assert(didItemAssetsLoad);
 
 	// Load all fonts
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading fonts...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
 	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
 
 	// Load regular meshes
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading geometry...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
 	this->LoadRegularMeshAssets();
 
 	// Load regular effects
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading effects...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
 	this->LoadRegularEffectAssets();
 
 	// Initialize any HUD elements
@@ -135,6 +139,7 @@ magnetPaddleEffect(NULL)
     this->boostHUD       = new BallBoostHUD(screenHeight);
     this->ballReleaseHUD = new BallReleaseHUD(sound);
     this->remoteControlRocketHUD = new RemoteControlRocketHUD(*this);
+    this->ballCamHUD = new BallCamHUD(*this);
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -218,6 +223,8 @@ GameAssets::~GameAssets() {
     this->ballReleaseHUD = NULL;
     delete this->remoteControlRocketHUD;
     this->remoteControlRocketHUD = NULL;
+    delete this->ballCamHUD;
+    this->ballCamHUD = NULL;
 }
 
 /**
@@ -324,9 +331,10 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		GameBall* currBall = *ballIter;
 		
         // Obtain the colour of the ball from the model, if it's completely invisible 
-        // (not "invisiball", actually invisible), then just skip all of the draw calls
+        // (NOT "invisiball", actually invisible), then just skip all of the draw calls, unless we're
+        // in ball camera mode, in which case we still want to light things up
         const ColourRGBA& ballColour = currBall->GetColour();
-        if (ballColour.A() <= 0.0f) {
+        if (ballColour.A() <= 0.0f && !currBall->HasBallCameraActive()) {
             continue;
         }
 
@@ -476,6 +484,11 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				ballEffectTemp = this->invisibleEffect;
             }
 		}
+
+        // If the ball isn't visible then just skip all of the draw calls
+        if (ballColour.A() <= 0.0f) {
+            continue;
+        }
 
 		// Draw the ball model...
 		glPushMatrix();
@@ -1630,7 +1643,7 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 	}
 
 	// Check to see if we've already loaded the world assets...
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading movement assets...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
 	if (this->worldAssets == NULL || this->worldAssets->GetStyle() != world.GetStyle()) {
 		// Delete all previously loaded style-related assets
 		delete this->worldAssets;
@@ -1641,7 +1654,7 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 		assert(this->worldAssets != NULL);
 	}
 
-	LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
+	LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
     this->ReinitializeAssets();
 }
 
@@ -1742,6 +1755,15 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight, newFGKeyLightPos, 0.08f, 1.5f);
 			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
 
+            // Stop any sound associated with the cannon rotating if the ball that has the ball camera associated with it
+            // is inside a cannon that was previously rotating
+            GameBall* cameraBall = gameModel.GetBallChosenForBallCamera();
+            if (cameraBall->IsLoadedInCannonBlock()) {
+                const CannonBlock* cannon = cameraBall->GetCannonBlock();
+                assert(cannon != NULL);
+                this->sound->DetachAndStopSound(cannon, GameSound::CannonBlockRotatingLoop);
+            }
+
 			// Fade out the background...
 			this->worldAssets->FadeBackground(true, 2.0f);
             break;
@@ -1835,6 +1857,9 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 			// Move the foreground key and fill lights back to their default positions...
 			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGKeyLight, 1.5f);
 			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGFillLight, 1.5f);
+
+            // Turn off any ball camera HUD elements that might currently be on
+            this->ballCamHUD->Deactivate();
 
 			// Show the background once again...
 			this->worldAssets->FadeBackground(false, 2.0f);

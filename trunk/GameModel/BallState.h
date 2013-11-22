@@ -32,7 +32,7 @@ public:
 	virtual BallState* Clone(GameBall* newBall) const = 0;
 	virtual void Tick(bool simulateMovement, double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) = 0;
 	virtual ColourRGBA GetBallColour() const = 0;
-	virtual const CannonBlock* GetCannonBlock() const;
+	virtual CannonBlock* GetCannonBlock() const;
 
 	virtual BallState::BallStateType GetBallStateType() const = 0;
 
@@ -41,7 +41,7 @@ protected:
 
 };
 
-inline const CannonBlock* BallState::GetCannonBlock() const {
+inline CannonBlock* BallState::GetCannonBlock() const {
 	return NULL;
 }
 

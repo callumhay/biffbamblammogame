@@ -656,7 +656,7 @@ ESPPointEmitter* BossMesh::BuildExplodingEmitter(float volumeAmt, const Abstract
 	
     int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
     assert(numParticles < 30);
-    bool success = explosionEmitter->SetAnimatedParticles(numParticles, this->explosionAnimTex, 64, 64);
+    bool success = explosionEmitter->SetAnimatedParticles(numParticles, this->explosionAnimTex, 256, 256);
 	assert(success);
     UNUSED_VARIABLE(success);
 

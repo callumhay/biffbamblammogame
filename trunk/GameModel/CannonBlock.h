@@ -2,7 +2,7 @@
  * CannonBlock.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -25,6 +25,8 @@ public:
 	static const float HALF_CANNON_BARREL_HEIGHT;
 
 	static const int RANDOM_SET_ROTATION;
+    
+    static const double BALL_CAMERA_ROTATION_TIME_IN_SECS;
 
 	CannonBlock(unsigned int wLoc, unsigned int hLoc, int setRotation);
     CannonBlock(unsigned int wLoc, unsigned int hLoc, const std::pair<int, int>& rotationInterval);
@@ -62,7 +64,7 @@ public:
         return false;
     }
 	
-	// Even the uber ball just bounces off like a solid block
+	// Even the uber-ball just bounces off like a solid block
 	bool BallBlastsThrough(const GameBall& b) const {
         UNUSED_PARAMETER(b);
 		return false;
@@ -100,7 +102,12 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
-	bool RotateAndEventuallyFire(double dT);
+    void SetRotationSpeed(int dir, float magnitudePercent);
+    void Fire();
+    void InitBallCameraInCannonValues(bool changeRotationToPointDown);
+
+	bool RotateAndEventuallyFire(double dT, bool overrideFireRotation = false);
+
 	Vector2D GetCurrentCannonDirection() const;
 	float GetCurrentCannonAngleInDegs() const;
 	Point2D GetEndOfBarrelPoint() const;
@@ -110,6 +117,9 @@ public:
 	bool GetHasRandomRotation() const;
 	float GetFixedRotationDegsFromX() const;
     float GetRotationSpeed() const;
+
+    double GetElapsedRotationTime() const;
+    double GetTotalRotationTime() const;
 
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
@@ -132,7 +142,7 @@ private:
     std::pair<int,int> rotationInterval; // The interval of rotation (i.e., the degree angle(s) where the cannon block always fires,
                                          // measured from 12 o'clock), -1 for random
 
-	void SetupCannonFireTimeAndDirection();
+	void SetupRandomCannonFireTimeAndDirection();
 
 	BoundingLines BuildBounds() const;
 };
@@ -156,6 +166,26 @@ inline bool CannonBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT
 
 inline bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
 	return this->bounds.CollisionCheck(boundingLines, dT, velocity);
+}
+
+inline void CannonBlock::SetRotationSpeed(int dir, float magnitudePercent) {
+    this->currRotationSpeed = dir * magnitudePercent * MAX_ROTATION_SPD_IN_DEGS_PER_SEC;
+}
+
+inline void CannonBlock::Fire() {
+    this->elapsedRotationTime = this->totalRotationTime;
+}
+
+inline void CannonBlock::InitBallCameraInCannonValues(bool changeRotationToPointDown) {
+    // The player gains control of the cannon and will be able to fire it in any direction,
+    // to avoid disorienting the player, we re-orient the cannon to face downwards
+    this->totalRotationTime       = CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS;
+    this->elapsedRotationTime     = 0.0;
+    this->currRotationSpeed       = 0.0f;
+
+    if (changeRotationToPointDown) {
+        this->currRotationFromXInDegs = -90.0f;
+    }
 }
 
 /**
@@ -198,6 +228,14 @@ inline float CannonBlock::GetFixedRotationDegsFromX() const {
 
 inline float CannonBlock::GetRotationSpeed() const {
     return this->currRotationSpeed;
+}
+
+inline double CannonBlock::GetElapsedRotationTime() const {
+    return this->elapsedRotationTime;
+}
+
+inline double CannonBlock::GetTotalRotationTime() const {
+    return this->totalRotationTime;
 }
 
 #endif // __CANNONBLOCK_H__

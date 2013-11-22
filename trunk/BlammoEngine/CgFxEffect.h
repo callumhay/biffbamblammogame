@@ -21,6 +21,8 @@
 
 #include "../ResourceManager.h"
 
+//#include <boost/function.hpp>
+
 class PolygonGroup;
 class FBObj;
 
@@ -159,6 +161,17 @@ public:
 			currPass = cgGetNextPass(currPass);
 		}
 	}
+    //void Draw(const Camera& camera, boost::function<void()> drawFunc) {
+    //    this->SetupBeforePasses(camera);
+
+    //    // Draw each pass of this effect
+    //    CGpass currPass = cgGetFirstPass(this->currTechnique);
+    //    while (currPass) {
+    //        CgFxEffectBase::DrawPassWithFunction(currPass, drawFunc);
+    //        currPass = cgGetNextPass(currPass);
+    //    }
+    //}
+
     void DrawText(const Camera& camera, GLuint baseDispList, const std::string& s) {
 		this->SetupBeforePasses(camera);
 		
@@ -220,6 +233,11 @@ private:
 		glCallLists(displayListIDs.size(), GL_UNSIGNED_INT, &displayListIDs[0]);
 		cgResetPassState(pass);
 	}
+    //static void DrawPassWithFunction(CGpass pass, boost::function<void()> drawFunc) {
+    //    cgSetPassState(pass);
+    //    drawFunc();
+    //    cgResetPassState(pass);
+    //}
 
     DISALLOW_COPY_AND_ASSIGN(CgFxEffectBase);
 };

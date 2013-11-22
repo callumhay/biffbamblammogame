@@ -429,6 +429,17 @@ public:
     virtual void BallBoostLostEvent(bool allBoostsLost) { UNUSED_PARAMETER(allBoostsLost); }
     virtual void BallBoostUsedEvent() {}
 
+    /** 
+     * Event triggered when the ball camera has been set or unset (this is after the full animation into or out of
+     * the ball has been completed, respectively).
+     * Arguments: ball  - The ball that has or had the camera in it.
+     *            isSet - true if ball camera mode was just fully activated, false if not.
+     */
+    virtual void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet) {
+        UNUSED_PARAMETER(ball);
+        UNUSED_PARAMETER(isSet);
+    }
+
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same
 	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side

@@ -47,8 +47,8 @@ numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(
     assert(this->starryBG != NULL);
 
 	// Load the absurd descriptions...
-	this->absurdLoadingDescriptions.reserve(30);
-	this->absurdLoadingDescriptions.push_back("Generating mind-numbing onamotapoeia ...");
+	this->absurdLoadingDescriptions.reserve(21);
+	this->absurdLoadingDescriptions.push_back("Synthesizing mind-numbing onomatopoeia ...");
 	this->absurdLoadingDescriptions.push_back("Initializing blocky stuffs ...");
 	this->absurdLoadingDescriptions.push_back("Loading balls of doom ...");
 	this->absurdLoadingDescriptions.push_back("Loading extraneous punctuation ...");
@@ -59,16 +59,16 @@ numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(
 	this->absurdLoadingDescriptions.push_back("Composing Musak ...");
 	this->absurdLoadingDescriptions.push_back("Generating distracting colours ...");
 	this->absurdLoadingDescriptions.push_back("Baking cake ...");
-	this->absurdLoadingDescriptions.push_back("Eating cake ... Om nom nom");
+	this->absurdLoadingDescriptions.push_back("Eating cake ...");
 	this->absurdLoadingDescriptions.push_back("Compiling sounds to words ...");
-	this->absurdLoadingDescriptions.push_back("Contacting Skynet ...");
 	this->absurdLoadingDescriptions.push_back("Doing... stuff ...");
-	this->absurdLoadingDescriptions.push_back("Communicating with the MCP ...");
 	this->absurdLoadingDescriptions.push_back("Reconciling Quantum Mechanics and Relativity ...");
 	this->absurdLoadingDescriptions.push_back("Deploying Nanotubes ...");
 	this->absurdLoadingDescriptions.push_back("Loading moderately relevant things ...");
 	this->absurdLoadingDescriptions.push_back("Nomming your CPU ...");
 	this->absurdLoadingDescriptions.push_back("Affixing suffixes and prefixes ...");
+    this->absurdLoadingDescriptions.push_back("Adhering to reasonably consistent art style ...");
+    this->absurdLoadingDescriptions.push_back("Transfixing art movements ...");
 
 	this->lastRandomAbsurdity = Randomizer::GetInstance()->RandomUnsignedInt() % this->absurdLoadingDescriptions.size();
 
@@ -161,10 +161,7 @@ void LoadingScreen::SetupFullscreenEffect(int width, int height) {
 		delete this->bloomEffect;
 	}
 	this->bloomEffect = new CgFxBloom(this->loadingScreenFBO);
-	this->bloomEffect->SetHighlightThreshold(0.4f);
-	this->bloomEffect->SetSceneIntensity(0.70f);
-	this->bloomEffect->SetGlowIntensity(0.3f);
-	this->bloomEffect->SetHighlightIntensity(0.1f);
+    this->bloomEffect->SetMenuBloomSettings();
 }
 
 /**
@@ -213,7 +210,7 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 
 	this->loadingScreenOn = true;
 	
-    this->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
+    this->UpdateLoadingScreenWithRandomLoadStr();
 }
 
 /**
@@ -222,15 +219,16 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
  * screen to a certain percentage based on the numExpectedUpdates and the number of
  * calls to this function so far.
  */
-void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
+void LoadingScreen::UpdateLoadingScreen(const std::string& loadingStr) {
 	if (!this->loadingScreenOn) { 
 		return; 
 	}
+    std::string resultLoadStr(loadingStr);
 
 	// If the loading string asks for absurdity then make it something absurd...
-	if (loadingStr == LoadingScreen::ABSURD_LOADING_DESCRIPTION) {
+    if (loadingStr == LoadingScreen::ABSURD_LOADING_DESCRIPTION) {
 		assert(this->lastRandomAbsurdity >= 0 && this->lastRandomAbsurdity < this->absurdLoadingDescriptions.size());
-		loadingStr = this->absurdLoadingDescriptions[this->lastRandomAbsurdity];
+		resultLoadStr = this->absurdLoadingDescriptions[this->lastRandomAbsurdity];
 		this->lastRandomAbsurdity = (this->lastRandomAbsurdity + 1) % this->absurdLoadingDescriptions.size();
 	}
 
@@ -239,7 +237,7 @@ void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
 	ESPInterval randColourG(0.4f, 1.0f);
 	ESPInterval randColourB(0.4f, 1.0f);
 	this->itemLoadingLabel.SetColour(Colour(randColourR.RandomValueInInterval(), randColourG.RandomValueInInterval(), randColourB.RandomValueInInterval()));
-	this->itemLoadingLabel.SetText(loadingStr);
+	this->itemLoadingLabel.SetText(resultLoadStr);
 
 	// Increment the counter of updates and make sure we are under what is expected
 	this->numCallsToUpdate++;

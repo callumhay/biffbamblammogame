@@ -225,7 +225,7 @@ public:
 		return *this;
 	}
 
-	~AnimationMultiLerp() {
+	virtual ~AnimationMultiLerp() {
 		if (this->hasOwnInterpolant) {
 			delete this->interpolant;
 			this->interpolant = NULL;
@@ -385,22 +385,6 @@ public:
 		this->interpolationPts.push_back(finalValue);
 	}
 
-	/*
-	// Blend the given lerp additively to the current one - this will blend with the current state of the
-	// animation using the current state as the basis for the given times (i.e., time 0 will be whatever 
-	// time into the current animation we're at now).
-	void AdditiveBlendLerp(const std::vector<double>& times, const std::vector<T>& interpolations) {
-		assert(times.size() == interpolations.size());
-		if (this->timePts.size() == 0) {
-			this->SetLerp(times, interpolations);
-			return;
-		}
-
-		double lastTime;
-		
-	}
-	*/
-
 	/**
 	 * Completely clear the interpolation animation values (i.e., next time
 	 * tick is called nothing will happen).
@@ -456,7 +440,7 @@ public:
 		}
 
 		// Linearly interpolate the given interpolate over the current value and time interval
-		(*this->interpolant) = valueStart + (x - timeStart) * (valueEnd - valueStart) / (timeEnd - timeStart);
+		(*this->interpolant) = this->ExecuteLerp(valueStart, valueEnd, timeStart, timeEnd);
 
 		// Figure out if we move on to the next interval or not
 		if (x < timeEnd) {
@@ -515,7 +499,11 @@ public:
         return dX / dT;
     }
 
-private:
+protected:
+    virtual T ExecuteLerp(const T& valueStart, const T& valueEnd, double timeStart, double timeEnd) const {
+        return valueStart + (this->x - timeStart) * (valueEnd - valueStart) / (timeEnd - timeStart);
+    }
+
 	bool hasOwnInterpolant;	// Whether an interpolant was provided or not
 	bool repeat;						// Whether we repeat the animation or not
 
@@ -525,7 +513,7 @@ private:
 	double x;													// The currently tracked time value - increases with each tick until it reaches x1 (final time)
 
 	unsigned int tracker;		// Tracks the index of the interpolation/time values currently being used
-};
 
+};
 
 #endif

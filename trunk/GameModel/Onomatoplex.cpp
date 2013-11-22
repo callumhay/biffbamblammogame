@@ -421,6 +421,7 @@ void Generator::LoadBadSadWords() {
 	singleWordBadSad.push_back("Gah");
 	singleWordBadSad.push_back("Agh");
 	singleWordBadSad.push_back("Egad");
+    singleWordBadSad.push_back("Narf");
 	this->simpleSingleWords[BADSAD] = singleWordBadSad;
 
 	std::vector<std::string> goodSingleWordBadSad;

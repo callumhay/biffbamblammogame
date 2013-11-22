@@ -38,10 +38,10 @@ currState(NotOn), totalTimeUntilCountdownOver(totalTimeUntilCountdownOver) {
 CountdownHUD::~CountdownHUD() {
 }
 
-void CountdownHUD::Draw(const Camera& camera, double dT, double timeElapsed) {
+void CountdownHUD::DrawUsingTimeLeft(const Camera& camera, double dT, double timeLeft) {
+
     UNUSED_PARAMETER(camera);
 
-    double timeLeft = this->totalTimeUntilCountdownOver - timeElapsed;
     if (timeLeft > 3.0) {
         this->SetState(NotOn);
         return;

@@ -19,6 +19,7 @@
 #include "PopupTutorialHint.h"
 #include "LivesLeftHUD.h"
 #include "BallBoostHUD.h"
+#include "../GameModel/GameTransformMgr.h"
 #include "../WindowManager.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
@@ -143,7 +144,7 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
     const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
     if (boostModel != NULL && boostModel->GetBulletTimeState() == BallBoostModel::BulletTime) {
         this->boostCountdownHUD.SetTotalTimeUntilCountdownIsOver(BallBoostModel::GetMaxBulletTimeDuration());
-        this->boostCountdownHUD.Draw(camera, actualDt, boostModel->GetTotalBulletTimeElapsed());
+        this->boostCountdownHUD.DrawUsingTimeElapsed(camera, actualDt, boostModel->GetTotalBulletTimeElapsed());
     }
     else {
         this->boostCountdownHUD.Reset();

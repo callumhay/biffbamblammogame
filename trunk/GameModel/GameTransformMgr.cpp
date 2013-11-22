@@ -543,10 +543,8 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
             this->GetRemoteCtrlRocketPositionRotationAndFOV(*this->remoteControlRocketWithCamera, currLevel->GetLevelUnitWidth(), 
                 currLevel->GetLevelUnitHeight(), worldSpaceTranslation, worldSpaceRotation, this->cameraFOVAngle);
 
-            
-
             this->currCamOrientation.SetTranslation(worldSpaceTranslation);
-            this->currCamOrientation.SetRotation(worldSpaceRotation);
+            this->currCamOrientation.SetXYZRotation(worldSpaceRotation);
         }
         else {
             if (this->paddleWithCamera != NULL) {
@@ -566,29 +564,20 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                 // Rotate the y-axis to move the view point when the paddle is discombobulated!
 		        // Update the camera position and rotation based on the movement of the paddle and the level transform
 		        this->currCamOrientation.SetTranslation(worldSpaceTranslation);
-		        this->currCamOrientation.SetRotation(worldRotation);
+		        this->currCamOrientation.SetXYZRotation(worldRotation);
 	        }
 	        else if (this->ballWithCamera != NULL) {
+
 		        // Calculate the location of the ball in world space
 		        GameLevel* currLevel = gameModel.GetCurrentLevel();
 		        assert(currLevel != NULL);
 
-		        Vector3D worldSpaceTranslation;
-		        this->GetBallCamPositionAndFOV(*this->ballWithCamera, currLevel->GetLevelUnitWidth(), 
-                                               currLevel->GetLevelUnitHeight(), worldSpaceTranslation,
-                                               this->cameraFOVAngle);
-
-		        // TODO: make the rotation a little more creative...
-		        Vector3D worldRotation(-90, 0, 0);
-		        worldRotation = this->GetGameXYZTransform() * worldRotation;
-
-		        // Update the camera position and rotation based on the movement of the ball and the level transform
-		        this->currCamOrientation.SetTranslation(worldSpaceTranslation);
-		        this->currCamOrientation.SetRotation(worldRotation);
+                // Update the camera position and rotation based on the movement of the ball and the level transform
+		        this->GetBallCamPositionRotationAndFOV(*this->ballWithCamera, currLevel->GetLevelUnitWidth(), 
+                                                       currLevel->GetLevelUnitHeight(), this->currCamOrientation, this->cameraFOVAngle);
 	        }
         }
     }
-
 }
 
 /**
@@ -611,20 +600,38 @@ void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, fl
 /**
  * Private helper function to get the exact location of the ball camera in world space.
  */
-void GameTransformMgr::GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, 
-                                                Vector3D& ballCamPos, float& fov) {
+void GameTransformMgr::GetBallCamPositionRotationAndFOV(const GameBall& ball, float levelWidth, float levelHeight, 
+                                                        Orientation3D& ballCamOri, float& fov) {
 
 	Collision::Circle2D ballBounds = ball.GetBounds();
 
 	// Position the ball camera almost exactly at the bottom of the ball (we make sure we're at least a bit above that
 	// so that we don't get weirdo clipping issues)
-	Point2D  ballCamPosition = ballBounds.Center() - Vector2D(0, 0.8f*ballBounds.Radius());
+	const Point2D& ballCamPosition = ballBounds.Center();
 	Vector2D halfLevelDim	= 0.5 * Vector2D(levelWidth, levelHeight);
 	Point2D  worldSpaceBallPos = ballCamPosition - halfLevelDim;
 	Vector3D worldSpaceTranslation(worldSpaceBallPos[0], worldSpaceBallPos[1], 0.0f);
 
-	ballCamPos = this->GetGameXYZTransform() * worldSpaceTranslation;
-	fov = 2.0f * Trig::radiansToDegrees(atan(ballBounds.Radius() / GameBall::DEFAULT_BALL_RADIUS));
+	ballCamOri.SetTranslation(this->GetGameXYZTransform() * worldSpaceTranslation);
+
+    // If we're in ball camera mode and the ball is in a cannon block then we rotate
+    // the camera with the cannon block...
+    // TODO: make the rotation a little more creative...?
+    const CannonBlock* cannon = ball.GetCannonBlock();
+    if (cannon != NULL) {
+        ballCamOri.SetZYXRotation(this->GetGameXYZTransform() * 
+            Vector3D(cannon->GetCurrentCannonAngleInDegs() + 90, 0.0f, this->GetXRotationForBallCam()));
+        
+        // We need to adjust the fov so that we 
+        //Point2D endOfBarrel = cannon->GetEndOfBarrelPoint();
+        
+        fov = 45.0f;
+    }
+    else {
+        ballCamOri.SetXYZRotation(this->GetGameXYZTransform() * 
+            Vector3D(this->GetXRotationForBallCam(), 0.0f, 0.0f));
+        fov = std::min<float>(75.0f, 50.0f + 15.0f * (ballBounds.Radius() / GameBall::DEFAULT_BALL_RADIUS));
+    }
 }
 
 void GameTransformMgr::GetRemoteCtrlRocketPositionRotationAndFOV(const PaddleRemoteControlRocketProjectile& rocket, 
@@ -644,30 +651,9 @@ void GameTransformMgr::GetRemoteCtrlRocketPositionRotationAndFOV(const PaddleRem
     // Camera rotates with the rocket...
     rocketCamRotation[0] = 0.0f;
     rocketCamRotation[1] = 0.0f;
-    rocketCamRotation[2] = fmod(Trig::radiansToDegrees(-atan2(rocketVelDir[1], rocketVelDir[0])) + 90 + this->currGameDegRotZ, 360.0f);
+    rocketCamRotation[2] = fmod(Trig::radiansToDegrees(atan2(rocketVelDir[1], rocketVelDir[0])) - 90 - this->currGameDegRotZ, 360.0f);
 
     fov = Camera::FOV_ANGLE_IN_DEGS;
-}
-
-/**
- * Grab the current transform for the camera.
- */
-Matrix4x4 GameTransformMgr::GetCameraTransform() const {
-
-	// If we're in ball camera mode and the ball is in a cannon block then we rotate
-	// the camera with the cannon block...
-	if (this->ballWithCamera != NULL) {
-		const CannonBlock* cannon = this->ballWithCamera->GetCannonBlock();
-		if (cannon != NULL) {
-			const Vector3D& currCamRot = this->currCamOrientation.GetRotation();
-			return (Matrix4x4::translationMatrix(this->currCamOrientation.GetTranslation()) *
-							Matrix4x4::rotationMatrix('z', 90 + cannon->GetCurrentCannonAngleInDegs(), true) *
-							Matrix4x4::rotationMatrix('x', currCamRot[0], true)).inverse();
-		}
-	}
-
-	// The inverse is returned because the camera transform is applied to the world matrix
-	return this->currCamOrientation.GetTransform().inverse();
 }
 
 void GameTransformMgr::StartLevelFlipAnimation(double dT, GameModel& gameModel) {
@@ -789,7 +775,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 	worldSpacePaddlePos = this->GetGameXYZTransform() * worldSpacePaddlePos;
 	
 	if (paddleCamAnim.type == GameTransformMgr::ToPaddleCamAnimation) {
-		// We are going into paddle camera mode... animate the camera from whereever
+		// We are going into paddle camera mode... animate the camera from wherever
 		// it currently is, into the paddle and animate its orientation appropriately
 
 		// We want to be in the paddle, looking up at the level
@@ -825,7 +811,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 		timeValues.push_back(timeToMoveAnimate);
 		timeValues.push_back(totalTimeToAnimate);
 
-		AnimationMultiLerp<Orientation3D> toPaddleCamAnim(&this->currCamOrientation);
+		OrientationMultiLerp toPaddleCamAnim(&this->currCamOrientation);
 		toPaddleCamAnim.SetRepeat(false);
 		toPaddleCamAnim.SetLerp(timeValues, orientationValues);
 		
@@ -850,8 +836,8 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 	}
 	else {
 		// We are going out of paddle camera mode back to default - take the camera
-		// from whereever it is currently and move it back to the default position
-		AnimationMultiLerp<Orientation3D> toDefaultCamAnim(&this->currCamOrientation);
+		// from wherever it is currently and move it back to the default position
+		OrientationMultiLerp toDefaultCamAnim(&this->currCamOrientation);
 
 		// Calculate the distance that will be traveled by the camera
 		Vector3D travelVec = this->defaultCamOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
@@ -893,7 +879,7 @@ bool GameTransformMgr::TickPaddleCamAnimation(double dT, GameModel& gameModel) {
 	paddle->Animate(dT);
 
 	// Animate any camera-related animations for the paddle cam
-	for (std::list<AnimationMultiLerp<Orientation3D> >::iterator iter = this->paddleCamAnimations.begin(); iter != this->paddleCamAnimations.end();) {
+	for (std::list<OrientationMultiLerp >::iterator iter = this->paddleCamAnimations.begin(); iter != this->paddleCamAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->paddleCamAnimations.erase(iter);
@@ -972,35 +958,30 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 	worldSpaceBallPos = this->GetGameXYZTransform() * worldSpaceBallPos;
 
 	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
-		// We are going into ball camera mode... animate the camera from whereever
+		// We are going into ball camera mode... animate the camera from wherever
 		// it currently is, into the ball and animate its orientation appropriately
-
-		// We want to be in the ball, looking down at the paddle
-		float finalCamRotationXDegs = this->isFlipped ? 90.0f : -90.0f;
 
 		// The values for the camera orientation during the ball camera animation...
 		// We want the camera to go into the ball and then turn towards the paddle
-		Vector3D finalPos;
 		float finalFOVAngle;
-		this->GetBallCamPositionAndFOV(*ball, currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight(), finalPos, finalFOVAngle);
-		
-		Orientation3D intermediateOrientation(worldSpaceBallPos, Vector3D(0, 0, 0));
-		Orientation3D finalOrientation(finalPos, Vector3D(finalCamRotationXDegs, 0, 0));
+		Orientation3D finalOrientation;
+        this->GetBallCamPositionRotationAndFOV(*ball, currLevel->GetLevelUnitWidth(), 
+            currLevel->GetLevelUnitHeight(), finalOrientation, finalFOVAngle);
 
 		std::vector<Orientation3D> orientationValues;
 		orientationValues.reserve(3);
 		orientationValues.push_back(this->currCamOrientation);
-		orientationValues.push_back(intermediateOrientation);
 		orientationValues.push_back(finalOrientation);
+        orientationValues.push_back(finalOrientation);
 		
-		// Calculate the distance that will be travelled by the camera
+		// Calculate the distance that will be traveled by the camera
 		Vector3D travelVec = finalOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
 		float distToTravel = travelVec.length();
 		double timeToMoveAnimate   = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_BALLCAM;
 		double timeToRotateAnimate = timeToMoveAnimate / 2.0;
 		double totalTimeToAnimate  = timeToMoveAnimate + timeToRotateAnimate;
 
-		// Create the animation to get from whereever the camera currently is to the paddle
+		// Create the animation to get from wherever the camera currently is to the paddle
 		// looking at the level
 		std::vector<double> timeValues;
 		timeValues.reserve(3);
@@ -1008,7 +989,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 		timeValues.push_back(timeToMoveAnimate);
 		timeValues.push_back(totalTimeToAnimate);
 
-		AnimationMultiLerp<Orientation3D> toBallCamAnim(&this->currCamOrientation);
+		OrientationMultiLerp toBallCamAnim(&this->currCamOrientation);
 		toBallCamAnim.SetRepeat(false);
 		toBallCamAnim.SetLerp(timeValues, orientationValues);
 		
@@ -1034,7 +1015,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 	else {
 		// We are going out of ball camera mode back to default - take the camera
 		// from wherever it is currently and move it back to the default position
-		AnimationMultiLerp<Orientation3D> toDefaultCamAnim(&this->currCamOrientation);
+		OrientationMultiLerp toDefaultCamAnim(&this->currCamOrientation);
 
 		// Calculate the distance that will be traveled by the camera
 		Vector3D travelVec = this->defaultCamOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
@@ -1077,7 +1058,7 @@ bool GameTransformMgr::TickBallCamAnimation(double dT, GameModel& gameModel) {
 	ball->Animate(dT);
 
 	// Animate the camera
-	for (std::list<AnimationMultiLerp<Orientation3D> >::iterator iter = this->ballCamAnimations.begin(); iter != this->ballCamAnimations.end();) {
+	for (std::list<OrientationMultiLerp >::iterator iter = this->ballCamAnimations.begin(); iter != this->ballCamAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->ballCamAnimations.erase(iter);
@@ -1117,7 +1098,7 @@ void GameTransformMgr::FinishBallCamAnimation(double dT, GameModel& gameModel) {
 	gameModel.UnsetPause(GameModel::PauseState);
 
 	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
-		this->ballWithCamera = *(gameModel.GetGameBalls().begin());
+		this->ballWithCamera = gameModel.GetBallChosenForBallCamera();
 		GameBall::SetBallCamera(this->ballWithCamera);
 	}
 	else {
@@ -1135,7 +1116,7 @@ bool GameTransformMgr::TickBallDeathAnimation(double dT, GameModel& gameModel) {
 	assert(this->ballDeathAnimations.size() > 0);
 
 	// Animate the camera
-	for (std::list<AnimationMultiLerp<Orientation3D> >::iterator iter = this->ballDeathAnimations.begin(); iter != this->ballDeathAnimations.end();) {
+	for (std::list<OrientationMultiLerp >::iterator iter = this->ballDeathAnimations.begin(); iter != this->ballDeathAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->ballDeathAnimations.erase(iter);
@@ -1204,7 +1185,7 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 		timeVals.push_back(0);
 		timeVals.push_back(timeToAnimate);
 
-		AnimationMultiLerp<Orientation3D> toBallDeathAnim(&this->currCamOrientation);
+		OrientationMultiLerp toBallDeathAnim(&this->currCamOrientation);
 		toBallDeathAnim.SetLerp(timeVals, orients);
 		toBallDeathAnim.SetRepeat(false);
 		this->ballDeathAnimations.push_back(toBallDeathAnim);
@@ -1216,7 +1197,7 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 	}
 	else {
 		// Leaving the death cam back to the default camera
-		AnimationMultiLerp<Orientation3D> toDefaultCamAnim(&this->currCamOrientation);
+		OrientationMultiLerp toDefaultCamAnim(&this->currCamOrientation);
 
 		// Calculate the distance that will be traveled by the camera
 		Vector3D travelVec = this->defaultCamOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
@@ -1285,9 +1266,9 @@ bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameMode
                 this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetTranslation()[2]);
 
             this->bulletTimeCamAnimation.SetInterpolationValue(1, Orientation3D(translation1, 
-                this->bulletTimeCamAnimation.GetInterpolationValue(1).GetRotation()));
+                this->bulletTimeCamAnimation.GetInterpolationValue(1).GetXYZRotation()));
             this->bulletTimeCamAnimation.SetFinalInterpolationValue(Orientation3D(translation2, 
-                this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetRotation()));
+                this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetXYZRotation()));
         }
     }
 
@@ -1311,7 +1292,7 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
         return;
     }
 
-	this->bulletTimeCamAnimation = AnimationMultiLerp<Orientation3D>(&this->currCamOrientation);
+	this->bulletTimeCamAnimation = OrientationMultiLerp(&this->currCamOrientation);
     
 	// Based on the animation, set the animations for the camera's orientation
     if (bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
@@ -1364,8 +1345,8 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
                            BallBoostModel::GetMaxBulletTimeDuration());
         std::vector<Orientation3D> orientVals;
         orientVals.push_back(this->currCamOrientation);
-        orientVals.push_back(Orientation3D(translation1, this->currCamOrientation.GetRotation()));
-        orientVals.push_back(Orientation3D(translation2, this->currCamOrientation.GetRotation()));
+        orientVals.push_back(Orientation3D(translation1, this->currCamOrientation.GetXYZRotation()));
+        orientVals.push_back(Orientation3D(translation2, this->currCamOrientation.GetXYZRotation()));
 
         this->bulletTimeCamAnimation.SetLerp(timeVals, orientVals);
         this->bulletTimeCamAnimation.SetRepeat(false);
@@ -1445,7 +1426,7 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
         timeValues.push_back(0.0);
         timeValues.push_back(totalTimeToAnimate);
 
-        AnimationMultiLerp<Orientation3D> toRocketCamAnim(&this->currCamOrientation);
+        OrientationMultiLerp toRocketCamAnim(&this->currCamOrientation);
         toRocketCamAnim.SetRepeat(false);
         toRocketCamAnim.SetLerp(timeValues, orientationValues);
 
@@ -1484,7 +1465,7 @@ void GameTransformMgr::StartRemoteControlRocketCamAnimation(double dT, GameModel
 
         // We are going out of ball camera mode back to the original - take the camera
         // from wherever it is currently and move it back to the default position
-        AnimationMultiLerp<Orientation3D> toOriginalCamAnim(&this->currCamOrientation);
+        OrientationMultiLerp toOriginalCamAnim(&this->currCamOrientation);
 
         // Calculate the distance that will be traveled by the camera
         Vector3D travelVec = this->storedCamOriBeforeRemoteControlRocketCam.GetTranslation() - this->currCamOrientation.GetTranslation();
@@ -1563,12 +1544,12 @@ bool GameTransformMgr::TickRemoteControlRocketCamAnimation(double dT, GameModel&
         assert(this->remoteControlRocketCamAnimations.size() == 1);
         Orientation3D& finalOrientation = this->remoteControlRocketCamAnimations.front().GetEditableFinalInterpolationValue();
         finalOrientation.SetTranslation(rcRocketPos);
-        finalOrientation.SetRotation(rcRocketRot);
+        finalOrientation.SetXYZRotation(rcRocketRot);
     }
 
     // Animate the camera for the animation to move to or away from the rocket when
     // going into or out of the remote control rocket camera mode
-    for (std::list<AnimationMultiLerp<Orientation3D> >::iterator iter = this->remoteControlRocketCamAnimations.begin(); 
+    for (std::list<OrientationMultiLerp >::iterator iter = this->remoteControlRocketCamAnimations.begin(); 
          iter != this->remoteControlRocketCamAnimations.end();) {
 
         bool currAnimationFinished = iter->Tick(dT);

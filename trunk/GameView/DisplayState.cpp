@@ -42,7 +42,7 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
                                                       GameDisplay* display) {
 	switch (type) {
 		case DisplayState::MainMenu:
-			return new MainMenuDisplayState(display);
+			return new MainMenuDisplayState(display, info);
         case DisplayState::SelectWorldMenu:
             return new SelectWorldMenuState(display, info);
         case DisplayState::SelectLevelMenu:

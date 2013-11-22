@@ -27,7 +27,13 @@ class Camera;
 
 class DisplayStateInfo {
 public:
-    DisplayStateInfo() : worldSelectionIdx(-1), worldUnlockIdx(-1), levelSelectionIdx(-1) {}
+    DisplayStateInfo() : worldSelectionIdx(-1), worldUnlockIdx(-1), levelSelectionIdx(-1), doAnimatedFadeIn(false) {}
+
+    static DisplayStateInfo BuildMainMenuInfo(bool doAnimatedFadeIn) {
+        DisplayStateInfo info;
+        info.doAnimatedFadeIn = doAnimatedFadeIn;
+        return info;
+    }
 
     static DisplayStateInfo BuildSelectWorldInfo(int worldSelectionIdx) {
         DisplayStateInfo info;
@@ -49,11 +55,13 @@ public:
     int GetWorldSelectionIndex() const { return this->worldSelectionIdx; }
     int GetWorldUnlockIndex() const { return this->worldUnlockIdx; }
     int GetLevelSelectionIndex() const { return this->levelSelectionIdx; }
+    bool GetDoAnimatedFadeIn() const { return this->doAnimatedFadeIn; }
 
 private:
     int worldSelectionIdx;
     int worldUnlockIdx;
     int levelSelectionIdx;
+    bool doAnimatedFadeIn;
 };
 
 class DisplayState {

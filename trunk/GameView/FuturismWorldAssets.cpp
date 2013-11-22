@@ -45,6 +45,32 @@ rotFrontRightBeam3(-STARTING_FRONT_BEAM_ANGLE),
 futurismTriangleTex(NULL),
 triangleFader(0.0f, 1.0f)
 {
+
+    // Make the background colours different, make sure they're all fairly dark, there's
+    // a lot of light from the beams and emitters already!
+    // Setup the default colour change list
+    std::vector<Colour> colours;
+    colours.reserve(11);
+    colours.push_back(Colour(0x58706D));
+    colours.push_back(Colour(0x4B5757));
+    colours.push_back(Colour(0x7C8A6E));
+    colours.push_back(Colour(0x7375A5));
+    colours.push_back(Colour(0x4F475C));
+    colours.push_back(Colour(0x6FA380));
+    colours.push_back(Colour(0x8F968A));
+    colours.push_back(Colour(0x8890AD));
+    colours.push_back(Colour(0x525051));
+    colours.push_back(Colour(0xADBF73));
+    colours.push_back(Colour(0x336E80));
+
+    this->UpdateColourChangeList(colours);
+    
+    // Change the default values for drawing outlines
+    this->outlineMinDistance = 0.007f;
+    this->outlineMaxDistance = 10.0f;
+    this->outlineContrast    = 1.0f;
+    this->outlineOffset      = 0.3f;
+
 	// Setup the beam effects
 	this->backBeamEffect->SetColour(Colour(1, 1, 1));
 	this->backBeamEffect->SetFadeExponent(1.5f);
@@ -186,6 +212,16 @@ void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicP
 	glPopAttrib();
 }
 
+void FuturismWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset, const Vector3D& fgFillPosOffset) const {
+    GameWorldAssets::LoadFGLighting(assets, fgKeyPosOffset, fgFillPosOffset);
+    // TODO?
+}
+
+void FuturismWorldAssets::LoadBGLighting(GameAssets* assets) const {
+    GameWorldAssets::LoadBGLighting(assets);
+    // TODO?
+}
+
 void FuturismWorldAssets::InitializeTextures() {
    assert(this->futurismTriangleTex == NULL);
    this->futurismTriangleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -196,7 +232,7 @@ void FuturismWorldAssets::InitializeTextures() {
 void FuturismWorldAssets::InitializeEmitters() {
 
 	static const int NUM_PARTICLES_PER_EMITTER = 25;
-	ESPInterval triangleLife(20.0f, 25.0f);
+	ESPInterval triangleLife(25.0f, 30.0f);
     ESPInterval triangleSpawn(triangleLife.minValue / NUM_PARTICLES_PER_EMITTER, triangleLife.maxValue / NUM_PARTICLES_PER_EMITTER);
 	ESPInterval triangleSpd(5.0f, 7.0f);
 

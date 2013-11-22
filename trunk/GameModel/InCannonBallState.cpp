@@ -52,10 +52,7 @@ void InCannonBallState::Tick(bool simulateMovement, double seconds, const Vector
     UNUSED_PARAMETER(gameModel);
 	UNUSED_PARAMETER(worldSpaceGravityDir);
 
-	// 'Tick' the cannon to spin the ball around inside it... eventually the function will say
-	// it has 'fired' the ball
-	bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);
-
+    bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds, this->gameBall->HasBallCameraActive());
 	if (cannonHasFired) {
 		
 		// Set the velocity in the direction the cannon has fired in

@@ -14,6 +14,7 @@
 #include "GameAssets.h"
 
 #include "../GameModel/Boss.h"
+#include "../GameModel/GameTransformMgr.h"
 
 #include "../GameControl/GameControllerManager.h"
 #include "../GameControl/BBBGameController.h"

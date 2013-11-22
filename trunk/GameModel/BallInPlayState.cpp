@@ -22,6 +22,8 @@
 #include "BallBoostModel.h"
 #include "SafetyNet.h"
 #include "PaddleRemoteControlRocketProjectile.h"
+#include "CannonBlock.h"
+#include "GameTransformMgr.h"
 
 struct BallCollisionChangeInfo {
 public:
@@ -93,6 +95,21 @@ void BallInPlayState::ShootActionReleaseUse() {
         }
     }
 
+    // Deal with the special case where the player is in ball camera mode and the ball is in a cannon:
+    // The player has control to shoot the ball out of the cannon
+    if (GameBall::GetIsBallCameraOn()) {
+        const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
+        for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+            GameBall* currBall = *iter;
+            if (currBall->IsLoadedInCannonBlock()) {
+                CannonBlock* cannon = currBall->GetCannonBlock();
+                assert(cannon != NULL);
+                cannon->Fire();
+                break;
+            }
+        }
+    }
+
     // Be absolutely sure we aren't still in bullet time before we apply controls to the paddle,
     // also make sure the paddle isn't paused in any way
     assert(this->gameModel->boostModel != NULL);
@@ -111,6 +128,26 @@ void BallInPlayState::ShootActionContinuousUse(float magnitudePercent) {
     if (remoteControlRocket != NULL) {
         remoteControlRocket->ControlRocketThrust(magnitudePercent);
     }
+}
+
+void BallInPlayState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
+
+    // Deal with the special case where the player is in ball camera mode and the ball is in a cannon:
+    // The player has control to rotate the cannon
+    if (GameBall::GetIsBallCameraOn()) {
+        const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
+        for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+            GameBall* currBall = *iter;
+            if (currBall->IsLoadedInCannonBlock()) {
+                CannonBlock* cannon = currBall->GetCannonBlock();
+                assert(cannon != NULL);
+                cannon->SetRotationSpeed(dir, magnitudePercent);
+                return;
+            }
+        }
+    }
+
+    GameState::MoveKeyPressedForPaddle(dir, magnitudePercent);
 }
 
 void BallInPlayState::MoveKeyPressedForOther(int dir, float magnitudePercent) {

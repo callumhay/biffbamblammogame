@@ -151,10 +151,7 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
 
 	// Create the new bloom effect and set its parameters appropriately
 	this->bloomEffect = new CgFxBloom(this->menuFBO);
-	this->bloomEffect->SetHighlightThreshold(0.4f);
-	this->bloomEffect->SetSceneIntensity(0.70f);
-	this->bloomEffect->SetGlowIntensity(0.3f);
-	this->bloomEffect->SetHighlightIntensity(0.1f);
+	this->bloomEffect->SetMenuBloomSettings();
 
     Colour titleColour(0.4f, 0.6f, 0.8f); // Steel blue
     std::stringstream worldLabelTxt;

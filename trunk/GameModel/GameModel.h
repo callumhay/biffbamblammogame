@@ -28,7 +28,6 @@
 #include "GameItemTimer.h"
 #include "GameItemFactory.h"
 #include "Projectile.h"
-#include "GameTransformMgr.h"
 #include "BallBoostModel.h"
 #include "Beam.h"
 
@@ -39,6 +38,7 @@ class LevelStartState;
 class PointAward;
 class SafetyNet;
 class PaddleRemoteControlRocketProjectile;
+class GameTransformMgr;
 
 class GameModel {
 
@@ -92,6 +92,7 @@ public:
     Collision::AABB2D GenerateLevelProjectileBoundaries() const;
 
     void GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) const;
+    void OverrideGetFurthestProgress(int& worldIdx, int& levelIdx);
     
     static bool IsTutorialLevel(int worldIdx, int levelIdx) {
         return (worldIdx == 0 && levelIdx == 0);
@@ -308,6 +309,10 @@ public:
 		return false;
 	}
 
+    GameBall* GetBallChosenForBallCamera() const {
+        return this->GetGameBalls().front();
+    }
+
 	bool IsGameOver() const {
 		return this->currLivesLeft == 0;
 	}
@@ -339,16 +344,8 @@ public:
     }
     Point2D GetAvgBallLoc() const;
 
-    Vector3D GetGravityDir() const {
-        Vector3D gravityDir = this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(0, -1, 0);
-	    gravityDir.Normalize();
-        return gravityDir;
-    }
-    Vector3D GetGravityRightDir() const {
-        Vector3D gravityRightDir =  this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(1, 0, 0);
-        gravityRightDir.Normalize();
-        return gravityRightDir;
-    }
+    Vector3D GetGravityDir() const;
+    Vector3D GetGravityRightDir() const;
 
 	// Paddle and ball related manipulators *********************************
 
@@ -499,16 +496,8 @@ public:
         return this->areControlsFlipped;
     }
 
-    Vector2D GetGameSpacePaddleRightUnitVec() const {
-        Vector2D rightVec(1,0);
-        rightVec.Rotate(this->gameTransformInfo->GetGameZRotationInDegs());
-        return rightVec;
-    }
-    Vector2D GetGameSpacePaddleUpUnitVec() const {
-        Vector2D rightVec(0,1);
-        rightVec.Rotate(this->gameTransformInfo->GetGameZRotationInDegs());
-        return rightVec;
-    }
+    Vector2D GetGameSpacePaddleRightUnitVec() const;
+    Vector2D GetGameSpacePaddleUpUnitVec() const;
 
 	// *******************************************************************
 
@@ -676,28 +665,6 @@ inline void GameModel::ClearStatusUpdatePieces() {
 	}
 	this->statusUpdatePieces.clear();
 	this->doingPieceStatusListIteration = false;
-}
-
-/**
- * Cause the game model to execute over the given amount of time in seconds.
- */
-inline void GameModel::Tick(double seconds) {
-	// If the entire game has been paused then we exit immediately
-	if ((this->pauseBitField & GameModel::PauseGame) == GameModel::PauseGame) {
-		return;
-	}
-
-	if (currState != NULL) {
-		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
-            
-            this->currState->Tick(seconds); 
-            this->totalLevelTimeInSeconds += seconds;
-		}
-		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0) {
-			this->playerPaddle->Tick(seconds, (this->pauseBitField & GameModel::PauseState) == GameModel::PauseState, *this);
-		}
-	}
-	this->gameTransformInfo->Tick(seconds, *this);
 }
 
 inline bool GameModel::IsOutOfGameBoundsForBall(const Point2D& pos) const {

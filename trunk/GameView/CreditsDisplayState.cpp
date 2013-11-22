@@ -115,6 +115,7 @@ void CreditsDisplayState::RenderFrame(double dT) {
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
     glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Camera::PushWindowCoords();
@@ -152,7 +153,8 @@ void CreditsDisplayState::RenderFrame(double dT) {
     this->specialThanksLabel.Draw();
 
     if (fadeOutIsFinished) {
-        this->display->SetCurrentState(new MainMenuDisplayState(this->display));
+        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, 
+            DisplayStateInfo::BuildMainMenuInfo(true), this->display));
         return;
     }
 }

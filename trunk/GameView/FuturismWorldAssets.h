@@ -42,6 +42,10 @@ public:
     void DrawFrontBeam(const Camera& camera, float rotationAmt);
     void DrawBackBeam(const Camera& camera, float rotationAmt);
 
+    void LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset = Vector3D(0,0,0), 
+        const Vector3D& fgFillPosOffset = Vector3D(0,0,0)) const;
+    void LoadBGLighting(GameAssets* assets) const;
+
 private:
 
 	Mesh* beamMesh;

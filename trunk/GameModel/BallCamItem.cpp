@@ -2,7 +2,7 @@
  * BallCamItem.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -11,6 +11,8 @@
 
 #include "BallCamItem.h"
 #include "GameModel.h"
+#include "GameTransformMgr.h"
+#include "CannonBlock.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
 
@@ -53,7 +55,7 @@ void BallCamItem::Deactivate() {
 		return;
 	}
 
-	// Deactivate the paddle camera effect
+	// Deactivate the ball camera effect
 	this->gameModel->GetTransformInfo()->SetBallCamera(false);
 
 	this->isActive = false;

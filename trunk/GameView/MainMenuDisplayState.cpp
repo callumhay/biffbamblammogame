@@ -55,14 +55,14 @@ const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
 const double MainMenuDisplayState::FADE_IN_TIME_IN_SECS = 3.0;
 const double MainMenuDisplayState::FADE_OUT_TIME_IN_SECS = 1.25;
 
-MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
+MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info) : 
 DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
 eraseProgVerifyHandler(NULL), volItemHandler(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
 menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), bbbLogoTex(NULL),
-blammopediaItemIndex(-1), creditsItemIndex(-1),
+blammopediaItemIndex(-1), creditsItemIndex(-1), doAnimatedFadeIn(info.GetDoAnimatedFadeIn()),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
@@ -489,11 +489,7 @@ void MainMenuDisplayState::SetupBloomEffect() {
 
 	// Create the new bloom effect and set its parameters appropriately
 	this->bloomEffect = new CgFxBloom(this->menuFBO);
-
-	this->bloomEffect->SetHighlightThreshold(0.4f);
-	this->bloomEffect->SetSceneIntensity(0.70f);
-	this->bloomEffect->SetGlowIntensity(0.3f);
-	this->bloomEffect->SetHighlightIntensity(0.1f);
+    this->bloomEffect->SetMenuBloomSettings();
 }
 
 /**
@@ -516,9 +512,16 @@ void MainMenuDisplayState::RenderFrame(double dT) {
             sound->StopSound(this->bgLoopedSoundID);
 		    
             // Figure out the furthest world and level that the player has progressed to
-            int furthestWorldIdx, furthestLevelIdx;
+            int furthestWorldIdx = -1;
+            int furthestLevelIdx = -1;
             model->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
             
+            // Probably because I'm still developing the game and I added a world...
+            // This should never happen in production!!
+            if (furthestWorldIdx == -1) {
+                model->OverrideGetFurthestProgress(furthestWorldIdx, furthestLevelIdx);
+            }
+
             // Figure out whether the level is locked and requires a certain number of stars to unlock...
             GameWorld* furthestWorld = model->GetWorldByIndex(furthestWorldIdx);
             assert(furthestWorld != NULL);
@@ -618,10 +621,20 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	// Fade-in/out overlay
     if (this->fadeAnimation.GetTargetValue() == 0.0f) {
-        bgRenderer->DrawNonAnimatedFadeBG(this->fadeAnimation.GetInterpolantValue());
+        if (this->doAnimatedFadeIn) {
+            bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+        }
+        else {
+            bgRenderer->DrawNonAnimatedFadeBG(this->fadeAnimation.GetInterpolantValue());
+        }
     }
     else {
-        bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+        if (this->changeToPlayGameState) {
+            bgRenderer->DrawNonAnimatedFadeBG(this->fadeAnimation.GetInterpolantValue());
+        }
+        else {
+            bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+        }
     }
 
 	this->menuFBO->UnbindFBObj();

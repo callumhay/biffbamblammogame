@@ -23,6 +23,8 @@
 #include "../GameModel/GameModel.h"
 #include "../WindowManager.h"
 
+//#include <boost/bind.hpp>
+
 const double LevelStartDisplayState::FADE_IN_TIME               = 1.25;
 const double LevelStartDisplayState::WIPE_TIME                  = 0.8f;
 const double LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME   = 2.5;
@@ -33,9 +35,17 @@ const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING            = 50;			// P
 const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING            = 80;			// Padding from the bottom of the screen to the bottom of the level name text
 
 LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) : 
-DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL), 
-levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), ""),
+DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL), menuFBO(NULL), bloomEffect(NULL),
+levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(
+               GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), ""),
 paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
+
+    // Setup any full-screen effects
+    this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+        Texture::Nearest, FBObj::NoAttachment);
+
+    this->bloomEffect = new CgFxBloom(this->menuFBO);
+    this->bloomEffect->SetMenuBloomSettings();
 
     GameModel* gameModel = this->display->GetModel();
     
@@ -149,6 +159,11 @@ LevelStartDisplayState::~LevelStartDisplayState() {
 	this->shockwaveEmitter = NULL;
 	delete this->starEmitter;
 	this->starEmitter = NULL;
+
+    delete this->menuFBO;
+    this->menuFBO = NULL;
+    delete this->bloomEffect;
+    this->bloomEffect = NULL;
 }
 
 void LevelStartDisplayState::RenderFrame(double dT) {
@@ -195,6 +210,12 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 
     this->display->GetMouse()->Draw(dT, *this->display->GetModel());
 
+    this->menuFBO->BindFBObj();
+
+    // Render background stuffs (behind the menu)
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	// Render the fade-in if we haven't already
 	if (!fadeInDone) {
 		// Draw the background...
@@ -208,75 +229,39 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 		this->levelNameLabel.Draw();
 
 		if (!wipeInDone) {
-			glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_POLYGON_BIT);
-			glEnable(GL_BLEND);
-			glDisable(GL_DEPTH_TEST);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			const float hPadding              = 20;
-			const float quadHeight            = this->levelNameLabel.GetHeight() + 2 * LevelStartDisplayState::LEVEL_TEXT_Y_PADDING;
-			const float currOpaqueQuadWidth	  = hPadding + this->levelNameLabel.GetLastRasterWidth() + 
-                                                LevelStartDisplayState::LEVEL_TEXT_X_PADDING + 
-                                                LevelStartDisplayState::LEVEL_NAME_WIPE_FADE_QUAD_SIZE - 
-                                                this->showLevelNameWipeAnimation.GetInterpolantValue();
-			Camera::PushWindowCoords();
+            //boost::function<void()> drawFunc = boost::bind(&LevelStartDisplayState::DrawWipeIn, this);
 
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
-			glTranslatef(this->levelNameLabel.GetTopLeftCorner()[0] - hPadding, quadHeight, 0.0f);
+            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_POLYGON_BIT);
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			// Draw the wipe-in quads - 2 quads, one is totally opaque and starts covering the entire
-			// header, the other quad is a gradiant from white to transparent and it moves along the header
-			// over time, revealing it as it goes (wipe fade in)
-			
+            Camera::PushWindowCoords();
+
             Texture* bgTexture = bgRenderer->GetMenuBGTexture();
-
-            float screenWidth = static_cast<float>(camera.GetWindowWidth());
-            float screenHeight = static_cast<float>(camera.GetWindowHeight());
-            
-            float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
-            float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
-
-            float startTexU = (this->levelNameLabel.GetTopLeftCorner()[0] - hPadding) * totalTexU / screenWidth;
-            float startTexV = quadHeight * totalTexV / screenHeight;
-
             bgTexture->BindTexture();
-			glBegin(GL_QUADS);
-
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			if (currOpaqueQuadWidth > 0.0f) {
-				glTexCoord2f(startTexU, startTexV);     
-				glVertex2f(0.0f, 0.0f);
-				glTexCoord2f(startTexU, 0.0f);                
-				glVertex2f(0.0f, -quadHeight);
-				glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, 0.0f);            
-				glVertex2f(currOpaqueQuadWidth, -quadHeight);
-				glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, startTexV);
-				glVertex2f(currOpaqueQuadWidth, 0.0f);
-			}
-			glEnd();
-
-			glBegin(GL_QUADS);
-			// Gradient quad used to do the wipe
-			glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, startTexV);
-			glVertex2f(currOpaqueQuadWidth, 0.0f);
-			glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, 0.0f);           
-			glVertex2f(currOpaqueQuadWidth, -quadHeight);
-			glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
-			glTexCoord2f(startTexU + (currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE) * totalTexU / screenWidth, 0.0f);           
-			glVertex2f(currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE, -quadHeight);
-			glTexCoord2f(startTexU + (currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE) * totalTexU / screenWidth, startTexV);
-			glVertex2f(currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE, 0.0f);
-
-			glEnd();
+            this->DrawWipeIn();
             bgTexture->UnbindTexture();
 
-			glPopMatrix();
-			Camera::PopWindowCoords();
-			glPopAttrib();
+            //bgRenderer->UseEffectWithDrawCall(camera, drawFunc);
+            Camera::PopWindowCoords();
+
+            glPopAttrib();
 		}
 	}
+
+    this->menuFBO->UnbindFBObj();
+    this->bloomEffect->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
+    
+    glPushAttrib(GL_ENABLE_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    this->menuFBO->GetFBOTexture()->BindTexture();
+    GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 1.0f, 
+        ColourRGBA(1,1,1,this->fadeInAnimation.GetInterpolantValue()));
+    this->menuFBO->GetFBOTexture()->UnbindTexture();
+    glPopAttrib();
 	
 	// All done animating the start of the level - go to the official in-game state
 	if (fadeInDone && wipeInDone && levelTextFadeOutDone && levelPieceFadeInDone) {
@@ -300,6 +285,66 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	}
 
 	debug_opengl_state();
+}
+
+void LevelStartDisplayState::DrawWipeIn() {
+
+    MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
+
+    const float hPadding              = 20;
+    const float quadHeight            = this->levelNameLabel.GetHeight() + 2 * LevelStartDisplayState::LEVEL_TEXT_Y_PADDING;
+    const float currOpaqueQuadWidth	  = hPadding + this->levelNameLabel.GetLastRasterWidth() + 
+        LevelStartDisplayState::LEVEL_TEXT_X_PADDING + 
+        LevelStartDisplayState::LEVEL_NAME_WIPE_FADE_QUAD_SIZE - 
+        this->showLevelNameWipeAnimation.GetInterpolantValue();
+    
+    Texture* bgTexture = bgRenderer->GetMenuBGTexture();
+
+    float screenWidth = static_cast<float>(Camera::GetWindowWidth());
+    float screenHeight = static_cast<float>(Camera::GetWindowHeight());
+
+    float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
+    float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
+
+    float startTexU = (this->levelNameLabel.GetTopLeftCorner()[0] - hPadding) * totalTexU / screenWidth;
+    float startTexV = quadHeight * totalTexV / screenHeight;
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(this->levelNameLabel.GetTopLeftCorner()[0] - hPadding, quadHeight, 0.0f);
+
+    glBegin(GL_QUADS);
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    if (currOpaqueQuadWidth > 0.0f) {
+        glTexCoord2f(startTexU, startTexV);     
+        glVertex2f(0.0f, 0.0f);
+        glTexCoord2f(startTexU, 0.0f);                
+        glVertex2f(0.0f, -quadHeight);
+        glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, 0.0f);            
+        glVertex2f(currOpaqueQuadWidth, -quadHeight);
+        glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, startTexV);
+        glVertex2f(currOpaqueQuadWidth, 0.0f);
+    }
+    glEnd();
+
+    glBegin(GL_QUADS);
+
+    // Gradient quad used to do the wipe
+    glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, startTexV);
+    glVertex2f(currOpaqueQuadWidth, 0.0f);
+    glTexCoord2f(startTexU + currOpaqueQuadWidth * totalTexU / screenWidth, 0.0f);           
+    glVertex2f(currOpaqueQuadWidth, -quadHeight);
+    glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+    glTexCoord2f(startTexU + (currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE) * totalTexU / screenWidth, 0.0f);           
+    glVertex2f(currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE, -quadHeight);
+    glTexCoord2f(startTexU + (currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE) * totalTexU / screenWidth, startTexV);
+    glVertex2f(currOpaqueQuadWidth + LEVEL_NAME_WIPE_FADE_QUAD_SIZE, 0.0f);
+
+    glEnd();
+
+    glPopMatrix();
 }
 
 /**

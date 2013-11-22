@@ -21,6 +21,7 @@
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
+#include "BallCamHUD.h"
 #include "BallSafetyNetMesh.h"
 #include "BossMesh.h"
 
@@ -98,7 +99,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
     // Load the new movement/world's assets...
 	LoadingScreen::GetInstance()->StartShowLoadingScreen(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 3);
 	this->display->GetAssets()->LoadWorldAssets(world);
-    LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading movement sounds...");
+    LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
     this->display->GetSound()->LoadWorldSounds(world.GetStyle());
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
@@ -733,18 +734,31 @@ void GameEventsListener::BallEnteredCannonEvent(const GameBall& ball, const Cann
     UNUSED_PARAMETER(ball);
     UNUSED_PARAMETER(cannonBlock);
 
-    // Start the sound of the cannon rotating
     GameSound* sound = this->display->GetSound();
     sound->SetPauseForAllAttachedSounds(&ball, true);
     sound->PlaySoundAtPosition(GameSound::CannonBlockLoadedEvent, false, cannonBlock.GetPosition3D(), true, true, true);
-    sound->AttachAndPlaySound(&cannonBlock, GameSound::CannonBlockRotatingLoop, true, 
-        this->display->GetModel()->GetCurrentLevelTranslation());
+
+    // If the ball is in camera mode then we don't make the rotating sound...
+    if (ball.HasBallCameraActive()) {
+        // Activate the HUD for when a ball in ball camera mode is inside a cannon
+        this->display->GetAssets()->GetBallCamHUD()->ToggleCannonHUD(true, &cannonBlock);
+    }
+    else {
+        // Start the sound of the cannon rotating
+        sound->AttachAndPlaySound(&cannonBlock, GameSound::CannonBlockRotatingLoop, true, 
+            this->display->GetModel()->GetCurrentLevelTranslation());
+    }
 
     debug_output("EVENT: Ball entered cannon");
 }
 
 void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
 	UNUSED_PARAMETER(ball);
+
+    if (ball.HasBallCameraActive()) {
+        // Deactivate the HUD for when a ball in ball camera mode is inside a cannon
+        this->display->GetAssets()->GetBallCamHUD()->ToggleCannonHUD(false, NULL);
+    }
 
     // Stop the sound of the cannon rotating and add a sound for the blast
 	GameSound* sound = this->display->GetSound();
@@ -1437,6 +1451,21 @@ void GameEventsListener::BallBoostLostEvent(bool allBoostsLost) {
     else {
         this->display->GetAssets()->GetBoostHUD()->BoostLost();
         debug_output("EVENT: Ball boost lost");
+    }
+}
+
+void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet) {
+
+    if (isSet) {
+        // If the ball camera is set and the ball is inside a cannon then we need to activate that HUD immediately
+        if (ball.IsLoadedInCannonBlock()) {
+            this->display->GetAssets()->GetBallCamHUD()->ToggleCannonHUD(true, ball.GetCannonBlock());
+        }
+
+        debug_output("EVENT: Ball camera set");
+    }
+    else {
+        debug_output("EVENT: Ball camera unset");
     }
 }
 

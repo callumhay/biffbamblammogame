@@ -2,7 +2,7 @@
  * LevelCompleteState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the
@@ -15,6 +15,7 @@
 #include "LevelStartState.h"
 #include "GameModel.h"
 #include "GameProgressIO.h"
+#include "GameTransformMgr.h"
 
 /**
  * When a level completes the game model needs to be set to the appropriate

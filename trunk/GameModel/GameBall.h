@@ -65,11 +65,10 @@ public:
 
 	void ResetBallAttributes();
 
-	static void SetBallCamera(GameBall* ballCamBall) { 
-		GameBall::currBallCamBall = ballCamBall; 
-	}
+	static void SetBallCamera(GameBall* ballCamBall);
 	static bool GetIsBallCameraOn() { return (GameBall::currBallCamBall != NULL); }
 	static const GameBall* GetBallCameraBall() { return GameBall::currBallCamBall; }
+    bool HasBallCameraActive() const { return this == GameBall::currBallCamBall; }
 
 	// Ball colour set/get functions
 	ColourRGBA GetColour() const {
@@ -350,7 +349,7 @@ public:
 
 	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
 	bool IsLoadedInCannonBlock() const;
-	const CannonBlock* GetCannonBlock() const;
+	CannonBlock* GetCannonBlock() const;
 
     bool IsBallAllowedToBoost() const;
     bool IsBallAllowedToBoostIgnoreAlreadyBoosting() const;
@@ -430,7 +429,7 @@ inline float GameBall::GetCollisionDamage() const {
     return this->GetDamageMultiplier() * GameModelConstants::GetInstance()->DEFAULT_DAMAGE_ON_BALL_HIT;
 }
 
-inline const CannonBlock* GameBall::GetCannonBlock() const {
+inline CannonBlock* GameBall::GetCannonBlock() const {
 	return this->currState->GetCannonBlock();
 }	
 

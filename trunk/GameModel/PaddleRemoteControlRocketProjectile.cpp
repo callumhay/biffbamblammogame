@@ -11,6 +11,7 @@
 
 #include "PaddleRemoteControlRocketProjectile.h"
 #include "GameModel.h"
+#include "GameTransformMgr.h"
 
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT = 1.5f;
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT  = 0.69f;

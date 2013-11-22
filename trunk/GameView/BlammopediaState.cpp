@@ -317,7 +317,8 @@ void BlammopediaState::RenderFrame(double dT) {
         this->display->GetSound()->StopSound(this->bgLoopedSoundID, 0.5);
 
         // Go back to the main menu now
-        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, DisplayStateInfo(), this->display));
+        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, 
+            DisplayStateInfo::BuildMainMenuInfo(true), this->display));
         return;
     }
 

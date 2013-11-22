@@ -2,7 +2,7 @@
  * GameModel.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -25,6 +25,7 @@
 #include "SafetyNet.h"
 #include "PaddleMineProjectile.h"
 #include "PaddleRemoteControlRocketProjectile.h"
+#include "GameTransformMgr.h"
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../GameSound/GameSound.h"
@@ -130,6 +131,62 @@ void GameModel::GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) c
 
 }
 
+void GameModel::OverrideGetFurthestProgress(int& worldIdx, int& levelIdx) {
+    worldIdx = -1;
+    levelIdx = -1;
+
+    for (int i = 0; i < static_cast<int>(this->worlds.size()); i++) {
+        GameWorld* world = this->worlds[i];
+        assert(world != NULL);
+
+        if (!world->GetHasBeenUnlocked()) {
+            
+            if (worldIdx == -1) {
+                world->SetHasBeenUnlocked(true);
+                worldIdx = i;
+                levelIdx = world->GetLastLevelIndexPassed();
+                if (levelIdx == -1) {
+                    levelIdx = 0;
+                }
+            }
+
+            break;
+        }
+
+        int lastLevelPassedIdx = world->GetLastLevelIndexPassed();
+
+        // If the last level passed in the world was the last level in that world then
+        // the progress goes beyond the current world...
+        // TODO: Game Completion Condition?
+        if (lastLevelPassedIdx == world->GetLastLevelIndex()) {
+
+            // Special condition: the game has been completed, choose the very last world's level
+            if (i == static_cast<int>(this->worlds.size())-1) {
+                worldIdx = i;
+                levelIdx = lastLevelPassedIdx;
+                break;
+            }
+
+            continue;
+        }
+        else {
+            worldIdx = i;
+            if (lastLevelPassedIdx == GameWorld::NO_LEVEL_PASSED) {
+                // If no level has been passed in this world then the current progress
+                // is the first level of the current world
+                levelIdx = 0;
+            }
+            else {
+                // The next level is the one after the last level that has been passed in
+                // the current world
+                levelIdx = lastLevelPassedIdx + 1;
+            }
+            assert(levelIdx >= 0 && levelIdx <= world->GetLastLevelIndex());
+            break;
+        }
+    }
+}
+
 void GameModel::ResetLevelValues(int numLives) {
 	// Reset the score, lives, etc.
 	this->currPlayerScore = GameModelConstants::GetInstance()->INIT_SCORE;
@@ -200,6 +257,28 @@ void GameModel::PerformLevelCompletionChecks() {
             this->boostModel->SetBoostChargeTime(BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS);
         }
     }
+}
+
+/**
+ * Cause the game model to execute over the given amount of time in seconds.
+ */
+void GameModel::Tick(double seconds) {
+	// If the entire game has been paused then we exit immediately
+	if ((this->pauseBitField & GameModel::PauseGame) == GameModel::PauseGame) {
+		return;
+	}
+
+	if (currState != NULL) {
+		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
+            
+            this->currState->Tick(seconds); 
+            this->totalLevelTimeInSeconds += seconds;
+		}
+		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0) {
+			this->playerPaddle->Tick(seconds, (this->pauseBitField & GameModel::PauseState) == GameModel::PauseState, *this);
+		}
+	}
+	this->gameTransformInfo->Tick(seconds, *this);
 }
 
 /**
@@ -1318,6 +1397,17 @@ void GameModel::RemoveBallDeathMineProjectiles() {
     }
 }
 
+Vector2D GameModel::GetGameSpacePaddleRightUnitVec() const {
+    Vector2D rightVec(1,0);
+    rightVec.Rotate(this->gameTransformInfo->GetGameZRotationInDegs());
+    return rightVec;
+}
+Vector2D GameModel::GetGameSpacePaddleUpUnitVec() const {
+    Vector2D rightVec(0,1);
+    rightVec.Rotate(this->gameTransformInfo->GetGameZRotationInDegs());
+    return rightVec;
+}
+
 /**
  * Function for adding a possible item drop for the given level piece.
  */
@@ -1604,6 +1694,18 @@ Point2D GameModel::GetAvgBallLoc() const {
 
     avgLoc /= static_cast<float>(this->balls.size());
     return avgLoc;
+}
+
+Vector3D GameModel::GetGravityDir() const {
+    Vector3D gravityDir = this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(0, -1, 0);
+    gravityDir.Normalize();
+    return gravityDir;
+}
+
+Vector3D GameModel::GetGravityRightDir() const {
+    Vector3D gravityRightDir =  this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(1, 0, 0);
+    gravityRightDir.Normalize();
+    return gravityRightDir;
 }
 
 float GameModel::GetPercentBallReleaseTimerElapsed() const {

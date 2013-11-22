@@ -455,7 +455,7 @@ void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const
         }
     }
 
-    // Draw effects for the left side curls
+    // DrawUsingTimeElapsed effects for the left side curls
     this->circleGlowTex->BindTexture();
     const BossBodyPart* leftSideCurls = this->boss->GetLeftSideCurls();
     if (leftSideCurls->GetAlpha() > 0.0f) {
@@ -479,7 +479,7 @@ void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const
         glPopMatrix();
     }
 
-    // Draw effects for the right side curls
+    // DrawUsingTimeElapsed effects for the right side curls
     const BossBodyPart* rightSideCurls = this->boss->GetRightSideCurls();
     if (rightSideCurls->GetAlpha() > 0.0f) {
         float scale = 0.75f * pulseScaler;
@@ -502,7 +502,7 @@ void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const
         glPopMatrix();
     }
 
-    // Draw effects for the bottom sphere
+    // DrawUsingTimeElapsed effects for the bottom sphere
     const BossBodyPart* bottomSphere = this->boss->GetBottomHexSphere();
     if (bottomSphere->GetAlpha() > 0.0f) {
         float scale = 1.2f * pulseScaler;

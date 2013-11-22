@@ -184,14 +184,14 @@ int main(int argc, char *argv[]) {
         //GameControllerManager::GetInstance()->SetControllerSensitivity(initCfgOptions.GetControllerSensitivity());
 
 		// Load the blammopedia...
-		LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading blammopedia...");
+		LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
         if (!ResourceManager::GetInstance()->LoadBlammopedia(ResourceManager::GetLoadDir() + std::string("blammopedia.dat"))) {
 			quitGame = true;
 			break;
 		}
 
         // Load basic default in-memory sounds
-        LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
+        LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
         sound = new GameSound();
         if (sound->Init()) {
             sound->LoadGlobalSounds();
