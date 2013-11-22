@@ -26,6 +26,13 @@ public:
 	virtual void Draw(int screenWidth, int screenHeight, double dT);
 	std::list<AnimationMultiLerp<float> > GetPulseAnimation(float pulseLengthInSec, float pulseAmount);
 
+    inline void SetMenuBloomSettings() {
+        this->SetHighlightThreshold(0.4f);
+        this->SetSceneIntensity(0.70f);
+        this->SetGlowIntensity(0.3f);
+        this->SetHighlightIntensity(0.1f);
+    }
+
 	inline void SetHighlightThreshold(float hlgtThreshold) {
 		this->highlightThreshold = hlgtThreshold;
 	}

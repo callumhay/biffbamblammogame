@@ -228,8 +228,11 @@ void SelectWorldMenuState::RenderFrame(double dT) {
     }
 
     if (fadeDone && this->goBackToMainMenu) {
+        bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+
         // Go back to the main menu now
-        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, DisplayStateInfo(), this->display));
+        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::MainMenu, 
+            DisplayStateInfo::BuildMainMenuInfo(true), this->display));
         return;
     }
 
@@ -465,18 +468,22 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
 
 	// Create the new bloom effect and set its parameters appropriately
 	this->bloomEffect = new CgFxBloom(this->menuFBO);
-	this->bloomEffect->SetHighlightThreshold(0.4f);
-	this->bloomEffect->SetSceneIntensity(0.70f);
-	this->bloomEffect->SetGlowIntensity(0.3f);
-	this->bloomEffect->SetHighlightIntensity(0.1f);
+	this->bloomEffect->SetMenuBloomSettings();
 
     // Setup the world items for the GUI menu
-    const GameModel* gameModel = this->display->GetModel();
+    GameModel* gameModel = this->display->GetModel();
     const std::vector<GameWorld*>& gameWorlds = gameModel->GetGameWorlds();
     assert(!gameWorlds.empty());
 
-    int furthestWorldIdx, furthestLevelIdx;
-    this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+    int furthestWorldIdx = -1;
+    int furthestLevelIdx = -1;
+    gameModel->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+    
+    // Probably because I'm still developing the game and I added a world...
+    // This should never happen in production!!
+    if (furthestWorldIdx == -1) {
+        gameModel->OverrideGetFurthestProgress(furthestWorldIdx, furthestLevelIdx);
+    }
 
     // Special case: The furthest world hasn't been unlocked yet so we make sure that it's
     // treated as a locked world

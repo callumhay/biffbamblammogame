@@ -2,7 +2,7 @@
  * PaddleCamItem.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -11,6 +11,7 @@
 
 #include "PaddleCamItem.h"
 #include "GameModel.h"
+#include "GameTransformMgr.h"
 
 const char* PaddleCamItem::PADDLE_CAM_ITEM_NAME			  = "PaddleCam";
 const double PaddleCamItem::PADDLE_CAM_TIMER_IN_SECS	= 17.0;

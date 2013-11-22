@@ -141,6 +141,41 @@ void GameBall::ResetBallAttributes() {
 	this->SetBallState(new NormalBallState(this), true);
 }
 
+void GameBall::SetBallCamera(GameBall* ballCamBall) {
+
+    if (GameBall::currBallCamBall == NULL && ballCamBall != NULL) {
+        GameBall::currBallCamBall = ballCamBall;
+
+        // Special case: if the ball is inside a cannon block then we will reset the 
+        // cannon timer...
+        if (ballCamBall->IsLoadedInCannonBlock()) {
+            CannonBlock* cannon = ballCamBall->GetCannonBlock();
+            assert(cannon != NULL);
+            cannon->InitBallCameraInCannonValues(false);
+        }
+
+        // EVENT: Ball camera is now set
+        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*ballCamBall, true);
+    }
+    else if (GameBall::currBallCamBall != NULL && ballCamBall == NULL) {
+        const GameBall* prevBallCam = GameBall::currBallCamBall;
+        GameBall::currBallCamBall = NULL; 
+
+        // Check to see if the ball with the camera in it is inside a cannon block,
+        // if it is then we immediately fire it out of the cannon block...
+        if (prevBallCam->IsLoadedInCannonBlock()) {
+            prevBallCam->GetCannonBlock()->Fire();
+        }
+
+        // EVENT: Ball camera is now unset
+        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*prevBallCam, false);
+    }
+    else {
+        // No events, just set the camera ball and leave
+        GameBall::currBallCamBall = ballCamBall; 
+    }
+}
+
 /**
  * Get the damage multiplier for this ball based on its current state and attributes.
  */

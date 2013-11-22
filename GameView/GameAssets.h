@@ -51,6 +51,7 @@ class PointsHUD;
 class BallBoostHUD;
 class BallReleaseHUD;
 class RemoteControlRocketHUD;
+class BallCamHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 class RocketMesh;
@@ -174,6 +175,9 @@ public:
     RemoteControlRocketHUD* GetRemoteControlRocketHUD() const {
         return this->remoteControlRocketHUD;
     }
+    BallCamHUD* GetBallCamHUD() const {
+        return this->ballCamHUD;
+    }
 
     GameSound* GetSound() const {
         return this->sound;
@@ -209,6 +213,7 @@ private:
     BallBoostHUD* boostHUD;
     BallReleaseHUD* ballReleaseHUD;
     RemoteControlRocketHUD* remoteControlRocketHUD;
+    BallCamHUD* ballCamHUD;
 
 	// Level-related meshes
 	LevelMesh* currentLevelMesh;

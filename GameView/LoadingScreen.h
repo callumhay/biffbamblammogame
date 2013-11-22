@@ -45,7 +45,9 @@ public:
 	}
 
 	void StartShowLoadingScreen(int width, int height, unsigned int numExpectedUpdates);
-	void UpdateLoadingScreen(std::string loadingStr);
+	void UpdateLoadingScreenWithRandomLoadStr();
+    void UpdateLoadingScreen(const std::string& loadingStr);
+
 	void EndShowingLoadingScreen();
 
 private:
@@ -78,5 +80,12 @@ private:
 	void RenderLoadingScreen();
 	void SetupFullscreenEffect(int width, int height);
 	void DrawLoadingBar();	
+
+    DISALLOW_COPY_AND_ASSIGN(LoadingScreen);
 };
+
+inline void LoadingScreen::UpdateLoadingScreenWithRandomLoadStr() {
+    this->UpdateLoadingScreen(ABSURD_LOADING_DESCRIPTION);
+}
+
 #endif

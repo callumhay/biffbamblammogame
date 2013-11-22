@@ -123,6 +123,7 @@ private:
     SelectionListMenuItem*  difficultyItem;
     //AmountScrollerMenuItem* controllerSensitivityItem;
 
+    bool doAnimatedFadeIn;
 	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
 
 	bool changeToPlayGameState;
@@ -152,7 +153,7 @@ private:
 	std::list<ESPPointEmitter*> deadOnoEffects;
 
 public:
-	MainMenuDisplayState(GameDisplay* display);
+	MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info = DisplayStateInfo());
 	~MainMenuDisplayState();
 
     bool AllowsGameModelUpdates() const { return true; }

@@ -13,6 +13,7 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../GameModel/GameModel.h"
+#include "../GameModel/GameTransformMgr.h"
 #include "../GameSound/GameSound.h"
 
 BallReleaseHUD::BallReleaseHUD(GameSound* sound) : sound(sound), 

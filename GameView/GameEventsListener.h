@@ -93,6 +93,8 @@ public:
     void BallBoostGainedEvent();
     void BallBoostLostEvent(bool allBoostsLost);
 
+    void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet);
+
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
 	void RocketExplodedEvent(const RocketProjectile& rocket);

@@ -21,6 +21,7 @@
 #include "LevelShakeEffectInfo.h"
 #include "ExpandingHaloEffectInfo.h"
 #include "StarSmashEffectInfo.h"
+#include "GameTransformMgr.h"
 
 #include "../GameSound/GameSound.h"
 
@@ -1701,14 +1702,9 @@ Stage2AI::Stage2AI(DecoBoss* boss) : DecoBossAIState(boss), stayAliveArm(NULL), 
     // Choose an arm that will stay alive after this state and the other that won't
     BossCompositeBodyPart* leftArm  = boss->GetLeftArmEditable();
     BossCompositeBodyPart* rightArm = boss->GetRightArmEditable();
-    if (Randomizer::GetInstance()->RandomTrueOrFalse()) {
-        this->stayAliveArm  = leftArm;
-        this->becomeDeadArm = rightArm;
-    }
-    else {
-        this->stayAliveArm  = rightArm;
-        this->becomeDeadArm = leftArm;
-    }
+
+    this->stayAliveArm  = leftArm;
+    this->becomeDeadArm = rightArm;
 
     this->SetState(MoveToCenterForLevelRotAIState);
 }

@@ -28,6 +28,8 @@ public:
     void DrawBG(const Camera& camera, float alpha = 1.0f);
     void DrawNonAnimatedFadeBG(float alpha);
 
+    //void UseEffectWithDrawCall(const Camera& camera, boost::function<void()> drawFunc);
+
     Texture* GetMenuBGTexture() const;
 
 private:
@@ -38,6 +40,11 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(MenuBackgroundRenderer);
 };
+
+//inline void MenuBackgroundRenderer::UseEffectWithDrawCall(const Camera& camera, boost::function<void()> drawFunc) {
+//    this->bgEffect->SetAlpha(1.0f);
+//    this->bgEffect->Draw(camera, drawFunc);
+//}
 
 inline void MenuBackgroundRenderer::DrawNonAnimatedFadeBG(float alpha) {
     DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), alpha, this->GetMenuBGTexture());

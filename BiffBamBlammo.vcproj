@@ -67,6 +67,8 @@
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
+				EnableUAC="true"
+				UACExecutionLevel="2"
 				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -150,6 +152,8 @@
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
+				EnableUAC="true"
+				UACExecutionLevel="2"
 				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -231,6 +235,8 @@
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
+				EnableUAC="true"
+				UACExecutionLevel="2"
 				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -313,6 +319,8 @@
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
+				EnableUAC="true"
+				UACExecutionLevel="2"
 				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -1717,6 +1725,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\BallCamHUD.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\BallReleaseHUD.h"
 						>
 					</File>
@@ -1754,6 +1766,10 @@
 					>
 					<File
 						RelativePath=".\GameView\BallBoostHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BallCamHUD.cpp"
 						>
 					</File>
 					<File
@@ -3256,7 +3272,7 @@
 			</Filter>
 		</Filter>
 		<File
-			RelativePath=".\resources\icons\BiffBamBlammo.ico"
+			RelativePath=".\BiffBamBlammo.ico"
 			>
 		</File>
 		<File

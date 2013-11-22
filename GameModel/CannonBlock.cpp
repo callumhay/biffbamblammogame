@@ -2,7 +2,7 @@
  * CannonBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -26,8 +26,9 @@ const float CannonBlock::CANNON_BARREL_HEIGHT       = 0.9f;
 const float CannonBlock::HALF_CANNON_BARREL_HEIGHT	= CannonBlock::CANNON_BARREL_HEIGHT / 2.0f;
 
 // Rotation will happen for some random period of time in between these values
-const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 1.0f;
-const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.0f;
+const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	        = 1.0;
+const double CannonBlock::MAX_ROTATION_TIME_IN_SECS         = 2.0;
+const double CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS = 8.0;
 
 // Rotation will occur at some random speed in between these values
 const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC = 360.0f;
@@ -147,7 +148,13 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 		return this;
 	}
 
-	this->SetupCannonFireTimeAndDirection();
+    // Special case: the ball is in ball camera mode
+    if (ball.HasBallCameraActive()) {
+        this->InitBallCameraInCannonValues(true);
+    }
+    else {
+	    this->SetupRandomCannonFireTimeAndDirection();
+    }
 
 	// Place the ball in the cannon and make sure we don't continue colliding...
 	ball.LoadIntoCannonBlock(this);
@@ -195,7 +202,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			// the rocket gets captured by the cannon block and shot somewhere else...
 			if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {
 				RocketProjectile* rocketProjectile = static_cast<RocketProjectile*>(projectile);
-				this->SetupCannonFireTimeAndDirection();
+				this->SetupRandomCannonFireTimeAndDirection();
 				rocketProjectile->LoadIntoCannonBlock(this);
 				rocketProjectile->SetLastThingCollidedWith(this);
 				this->loadedProjectile = rocketProjectile;
@@ -214,7 +221,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
                     mineProjectile->SetAsFalling();
                 }
                 else {
-				    this->SetupCannonFireTimeAndDirection();
+				    this->SetupRandomCannonFireTimeAndDirection();
 				    mineProjectile->LoadIntoCannonBlock(this);
 				    this->loadedProjectile = mineProjectile;
 			    }
@@ -241,18 +248,20 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
  * fire based on some random time.
  * Returns: true if the ball has fired, false if still rotating.
  */
-bool CannonBlock::RotateAndEventuallyFire(double dT) {
+bool CannonBlock::RotateAndEventuallyFire(double dT, bool overrideFireRotation) {
 	assert(this->totalRotationTime > 0.0);
 
     // If we're done rotating then reset the cannon...
 	if (this->elapsedRotationTime >= this->totalRotationTime) {
 		// In the case of fixed direction firing, we need to make sure the degree angle
 		// is set to exactly the firing angle when we fire...
-		if (!this->GetHasRandomRotation()) {
+		if (!this->GetHasRandomRotation() && !overrideFireRotation) {
             this->currRotationFromXInDegs = this->GetFixedRotationDegsFromX();
 			this->bounds = this->BuildBounds();
 			this->bounds.RotateLinesAndNormals(this->currRotationFromXInDegs, this->center);
 		}
+
+        // Shoot the ball!
 		this->elapsedRotationTime = this->totalRotationTime;
 		this->loadedBall = NULL;
 		this->loadedProjectile = NULL;
@@ -279,7 +288,7 @@ bool CannonBlock::RotateAndEventuallyFire(double dT) {
 	return false;
 }
 
-void CannonBlock::SetupCannonFireTimeAndDirection() {
+void CannonBlock::SetupRandomCannonFireTimeAndDirection() {
 	// Reset the elapsed rotation time
 	this->elapsedRotationTime = 0.0;
 

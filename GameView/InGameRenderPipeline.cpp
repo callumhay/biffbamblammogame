@@ -2,7 +2,7 @@
  * InGameRenderPipeline.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2012
+ * Callum Hay, 2012-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -18,11 +18,13 @@
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
 #include "RemoteControlRocketHUD.h"
+#include "BallCamHUD.h"
 #include "CgFxCelOutlines.h"
 #include "MouseRenderer.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
+#include "../GameModel/GameTransformMgr.h"
 #include "../GameControl/GameControllerManager.h"
 
 const unsigned int InGameRenderPipeline::HUD_X_INDENT = 10;	
@@ -370,9 +372,11 @@ void InGameRenderPipeline::RenderHUD(double dT) {
     BallReleaseHUD* ballReleaseHUD = gameAssets->GetBallReleaseHUD();
     ballReleaseHUD->Draw(dT, camera, *gameModel);
 
-    // Draw the remote control rocket HUD display
+    // Draw various game-item-related HUD displays
     RemoteControlRocketHUD* rocketHUD = gameAssets->GetRemoteControlRocketHUD();
     rocketHUD->Draw(dT, camera);
+    BallCamHUD* ballCamHUD = gameAssets->GetBallCamHUD();
+    ballCamHUD->Draw(dT, camera);
 
     // Draw the timers that are currently in existence
 	gameAssets->DrawTimers(dT, camera, *gameModel);
@@ -380,8 +384,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	// Draw any HUD special elements based on currently active items, etc.
 	gameAssets->DrawActiveItemHUDElements(dT, *gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
-	// Draw the 'informative' game elements (e.g., tutorial stuff, or important information for the player)
-	// this stuff should always be on the top
+    // Misc. elements in the HUD
 	gameAssets->DrawInformativeGameElements(camera, dT, *gameModel);
 
     // The mouse is the very last thing to draw, this should be on top of everything

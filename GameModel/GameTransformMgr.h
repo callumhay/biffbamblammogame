@@ -124,13 +124,13 @@ private:
 
 	// Active Animations
 	std::list<AnimationLerp<float> > levelFlipAnimations;
-	std::list<AnimationMultiLerp<Orientation3D> > paddleCamAnimations;
-	std::list<AnimationMultiLerp<Orientation3D> > ballCamAnimations;
-	std::list<AnimationMultiLerp<Orientation3D> > ballDeathAnimations;
-    AnimationMultiLerp<Orientation3D> bulletTimeCamAnimation;
+	std::list<OrientationMultiLerp> paddleCamAnimations;
+	std::list<OrientationMultiLerp> ballCamAnimations;
+	std::list<OrientationMultiLerp> ballDeathAnimations;
+    OrientationMultiLerp bulletTimeCamAnimation;
 	std::list<AnimationMultiLerp<float> > camFOVAnimations;
 
-    std::list<AnimationMultiLerp<Orientation3D> > remoteControlRocketCamAnimations;
+    std::list<OrientationMultiLerp> remoteControlRocketCamAnimations;
 
 	bool TickLevelFlipAnimation(double dT);
 	void StartLevelFlipAnimation(double dT, GameModel& gameModel);
@@ -157,12 +157,15 @@ private:
     void FinishRemoteControlRocketCamAnimation(double dT, GameModel& gameModel);
 
 	void GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov);
-	void GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Vector3D& ballCamPos, float& fov); 
+	void GetBallCamPositionRotationAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Orientation3D& ballCamOri, float& fov); 
 
     void GetRemoteCtrlRocketPositionRotationAndFOV(const PaddleRemoteControlRocketProjectile& rocket, 
         float levelWidth, float levelHeight, Vector3D& rocketCamPos, Vector3D& rocketCamRotation, float& fov);
 
 	void ClearSpecialCamEffects();
+
+    float GetXRotationForBallCam() const { return this->isFlipped ? 90.0f : -90.0f; }
+    float GetXRotationForPaddleCam() const { return this->isFlipped ? -90.0f : 90.0f; }
 
     DISALLOW_COPY_AND_ASSIGN(GameTransformMgr);
 };
@@ -179,6 +182,15 @@ inline Matrix4x4 GameTransformMgr::GetGameXYZTransform() const {
 inline Matrix4x4 GameTransformMgr::GetGameXYTransform() const {
     return Matrix4x4::rotationXYZMatrix(this->currGameDegRotX, this->currGameDegRotY, 0);
 }
+
+/**
+ * Grab the current transform for the camera.
+ */
+inline Matrix4x4 GameTransformMgr::GetCameraTransform() const {
+	// The inverse is returned because the camera transform is applied to the world matrix
+	return this->currCamOrientation.GetTransform().inverse();
+}
+
 
 /**
  * Get the current camera Field of View angle.

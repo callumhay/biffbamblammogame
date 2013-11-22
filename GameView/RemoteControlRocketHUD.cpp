@@ -60,12 +60,12 @@ RemoteControlRocketHUD::~RemoteControlRocketHUD() {
 }
 
 void RemoteControlRocketHUD::Draw(double dT, const Camera& camera) {
-    this->moveHint.Tick(dT);
-    this->thrustHint.Tick(dT);
-
-    if (!this->isActive || rocket == NULL) {
+    if (this->moveHint.GetAlpha() <= 0.0f && (!this->isActive || this->rocket == NULL)) {
         return;
     }
+
+    this->moveHint.Tick(dT);
+    this->thrustHint.Tick(dT);
 
     // Place the hint in the correct location on-screen
     float yPos = this->moveHint.GetHeight() + MOVE_HINT_BOTTOM_FROM_SCREEN_BOTTOM;
@@ -73,10 +73,14 @@ void RemoteControlRocketHUD::Draw(double dT, const Camera& camera) {
     this->moveHint.Draw(camera);
 
     yPos -= (this->moveHint.GetHeight() + 50);
-    this->thrustHint.SetTopLeftCorner((camera.GetWindowWidth() - this->moveHint.GetWidth()) / 2.0f, yPos);
+    this->thrustHint.SetTopLeftCorner((camera.GetWindowWidth() - this->thrustHint.GetWidth()) / 2.0f, yPos);
     this->thrustHint.Draw(camera);
 
-    this->rocketExplodeCountdown.Draw(camera, dT, 
+    if (!this->isActive || this->rocket == NULL) {
+        return;
+    }
+
+    this->rocketExplodeCountdown.DrawUsingTimeElapsed(camera, dT, 
         PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS - this->rocket->GetTimeUntilFuelRunsOut());
 }
 

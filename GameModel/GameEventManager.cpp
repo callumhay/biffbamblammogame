@@ -486,6 +486,13 @@ void GameEventManager::ActionBallBoostUsed() {
 	}
 }
 
+void GameEventManager::ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->BallCameraSetOrUnsetEvent(ball, isSet);
+    }
+}
+
 // Action for when the release timer starts up
 void GameEventManager::ActionReleaseTimerStarted() {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

@@ -2,7 +2,7 @@
  * BallBoostModel.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the
@@ -12,6 +12,7 @@
 #include "BallBoostModel.h"
 #include "GameEventManager.h"
 #include "GameModel.h"
+#include "GameTransformMgr.h"
 
 // Amounts of time to fade in and out of bullet time when it's activated/deactivated
 const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS        = 0.35;

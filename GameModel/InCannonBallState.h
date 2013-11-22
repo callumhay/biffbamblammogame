@@ -31,7 +31,7 @@ public:
 	BallState* Clone(GameBall* newBall) const;
 	void Tick(bool simulateMovement, double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
 	ColourRGBA GetBallColour() const;
-	const CannonBlock* GetCannonBlock() const;
+	CannonBlock* GetCannonBlock() const;
 
 	BallState::BallStateType GetBallStateType() const;
 
@@ -48,7 +48,7 @@ inline ColourRGBA InCannonBallState::GetBallColour() const {
 	return ColourRGBA(0, 0, 0, 0);
 }
 
-inline const CannonBlock* InCannonBallState::GetCannonBlock() const {
+inline CannonBlock* InCannonBallState::GetCannonBlock() const {
 	return this->cannonBlock;
 }
 

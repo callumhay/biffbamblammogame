@@ -125,6 +125,7 @@ public:
     void ActionBallBoostGained();
     void ActionBallBoostLost(bool allBoostsLost);
     void ActionBallBoostUsed();
+    void ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet);
 
     void ActionReleaseTimerStarted();
 
