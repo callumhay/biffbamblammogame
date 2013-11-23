@@ -87,13 +87,13 @@ inline void FuturismWorldAssets::Tick(double dT, const GameModel& model) {
     this->TickSkybeams(dT);
 
     float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
-    this->triangleEmitterSm.SetParticleAlpha(ESPInterval(currBGAlpha));
-    this->triangleEmitterMed.SetParticleAlpha(ESPInterval(currBGAlpha));
-    this->triangleEmitterLg.SetParticleAlpha(ESPInterval(currBGAlpha));
 
     this->triangleEmitterSm.Tick(dT);
+    this->triangleEmitterSm.SetAliveParticleAlphaMax(currBGAlpha);
     this->triangleEmitterMed.Tick(dT);
+    this->triangleEmitterMed.SetAliveParticleAlphaMax(currBGAlpha);
     this->triangleEmitterLg.Tick(dT);
+    this->triangleEmitterLg.SetAliveParticleAlphaMax(currBGAlpha);
 
     GameWorldAssets::Tick(dT, model);
 }

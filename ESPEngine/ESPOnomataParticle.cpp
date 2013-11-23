@@ -73,7 +73,8 @@ void ESPOnomataParticle::Tick(const double dT) {
 /**
  * Draw this particle as it is currently.
  */
-void ESPOnomataParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) {
+void ESPOnomataParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment) {
+
 	// Don't draw if dead...
 	if (this->IsDead()) {
 		return;

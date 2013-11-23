@@ -20,7 +20,7 @@
 const char* CgFxCloudEffect::BASIC_TECHNIQUE_NAME = "CloudySprite";
 
 CgFxCloudEffect::CgFxCloudEffect() : 
-CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_CLOUD_SHADER), 
+CgFxTextureEffectBase(GameViewConstants::GetInstance()->CGFX_CLOUD_SHADER), 
 scale(1.0f), freq(1.0f), fadeExponent(1), colour(1,1,1), flowDir(0, 0, 1), attenuation(0.035f),
 noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL), lightPos(0,0,0) {
 

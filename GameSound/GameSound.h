@@ -116,6 +116,7 @@ public:
 		BasicBlockDestroyedEvent,
 		CannonBlockLoadedEvent,
 		CannonBlockRotatingLoop,
+        CannonBlockRotatingPart,
         CannonBlockFiredEvent,
 		PortalTeleportEvent,
 		CollateralBlockFlashingLoop,

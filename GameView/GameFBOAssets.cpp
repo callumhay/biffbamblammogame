@@ -2,7 +2,7 @@
  * GameFBOAssets.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -56,9 +56,6 @@ drawItemsInLastPass(true), inkSplatterEventSoundID(INVALID_SOUND_ID) {
     this->bulletTimeEffect      = new CgFxPostBulletTime(this->tempFBO);
 
 	this->SetupPaddleShieldEffect();
-
-	this->barrelOverlayTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BARREL_OVERLAY, Texture::Trilinear);
-	assert(this->barrelOverlayTex != NULL);
 }
 
 GameFBOAssets::~GameFBOAssets() {
@@ -96,10 +93,6 @@ GameFBOAssets::~GameFBOAssets() {
 	this->fireBallCamEffect = NULL;
     delete this->bulletTimeEffect;
     this->bulletTimeEffect = NULL;
-
-	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->barrelOverlayTex);
-    UNUSED_VARIABLE(success);
-	assert(success);
 }
 
 /**
@@ -360,6 +353,7 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 
 	inputFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1.0f);
 
+    /*
 	if (GameBall::GetIsBallCameraOn()) {
 		const GameBall* camBall = GameBall::GetBallCameraBall();
 		assert(camBall != NULL);
@@ -367,143 +361,15 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			float overlayAlpha = std::min<float>(0.9f, 1.0f - camBall->GetColour().A());
 			assert(overlayAlpha >= 0.0f);
 
-			// If the ball is inside a cannon and is in ball camera mode then we do the James-Bond-esque
+			// If the ball is inside a cannon and is in ball camera mode then we do the
 			// barrel overlay on the screen...
-			this->DrawCannonBarrelOverlay(width, height, overlayAlpha);
+			this->DrawCannonBarrelOverlay(dT, width, height, overlayAlpha);
 		}
 	}
+    */
 
 	this->finalFSEffectFBO = inputFBO;
 	this->tempFBO = outputFBO;
-}
-
-void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) {
-	static const float depth = 0.9f;
-	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0, width, 0, height);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_ALWAYS);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-    float heightBufferSize = static_cast<float>(height - static_cast<int>(this->barrelOverlayTex->GetHeight()));
-    float widthBufferSize  = static_cast<float>(width  - static_cast<int>(this->barrelOverlayTex->GetWidth()));
-    float overlayWidth  = this->barrelOverlayTex->GetWidth();
-    float overlayHeight = this->barrelOverlayTex->GetHeight();
-
-    if (widthBufferSize >= 0 && heightBufferSize >= 0) {
-        // Best case scenario, we can fit the full resolution overlay into the window
-    }
-    else {
-        // A window dimension is constricting the overlay, figure out if it's the height or width or both
-        bool widthBufferTooSmall  = widthBufferSize < 0;
-        bool heightBufferTooSmall = heightBufferSize < 0;
-
-        if (widthBufferTooSmall && heightBufferTooSmall) {
-            // Both are too small, take the largest of the two and that will be the dimension
-            if (width > height) {
-                widthBufferSize = static_cast<float>(width - height);
-                overlayWidth  = height;
-                heightBufferSize = 0;
-                overlayHeight = height;
-            }
-            else {
-                heightBufferSize = static_cast<float>(height - width);
-                overlayHeight = width;
-                widthBufferSize = 0;
-                overlayWidth  = width;
-            }
-        }
-        else if (widthBufferTooSmall) {
-            // Width is too small but the height isn't, we need to restrict the size based on width
-            heightBufferSize = static_cast<float>(height - width);
-            overlayHeight = width;
-            widthBufferSize = 0;
-            overlayWidth  = width;
-        }
-        else {
-            // Height is too small but the width isn't, restrict based on height
-            assert(heightBufferTooSmall);
-            widthBufferSize = static_cast<float>(width - height);
-            overlayWidth  = height;
-            heightBufferSize = 0;
-            overlayHeight = height;
-        }
-    }
-
-    widthBufferSize  /= 2.0f;
-    heightBufferSize /= 2.0f;
-
-    float afterOverlayX = widthBufferSize + overlayWidth;
-    float afterOverlayY = heightBufferSize + overlayHeight;
-
-    glColor4f(0, 0, 0, alpha);
-    glBegin(GL_QUADS);
-
-    // Draw the two width buffers as black (if there are any)
-    if (widthBufferSize > 0) {
-	    glVertex3f(0, 0, depth);
-	    glVertex3f(widthBufferSize, 0, depth);
-	    glVertex3f(widthBufferSize, height, depth);
-	    glVertex3f(0, height, depth);
-    	
-	    glVertex3f(afterOverlayX, 0, depth);
-	    glVertex3f(width, 0, depth);
-	    glVertex3f(width, height, depth);
-	    glVertex3f(afterOverlayX, height, depth);
-    }
-
-    // Draw the two height buffers as black (if there are any)
-    if (heightBufferSize > 0) {
-        glVertex3f(0, 0, depth);
-        glVertex3f(width, 0, depth);
-        glVertex3f(width, heightBufferSize, depth);
-        glVertex3f(0, heightBufferSize, depth);
-
-        glVertex3f(0, afterOverlayY, depth);
-        glVertex3f(width, afterOverlayY, depth);
-        glVertex3f(width, height, depth);
-        glVertex3f(0, height, depth);
-    }
-
-	// Now draw the overlay right in the center
-	glColor4f(1, 1, 1, alpha);
-	glEnd();
-
-	this->barrelOverlayTex->BindTexture();
-
-	glBegin(GL_QUADS);
-	glTexCoord2i(0, 0);
-	glVertex3f(widthBufferSize, heightBufferSize, depth);
-	glTexCoord2i(1, 0);
-	glVertex3f(afterOverlayX, heightBufferSize, depth);
-	glTexCoord2i(1, 1);
-	glVertex3f(afterOverlayX, afterOverlayY, depth);
-	glTexCoord2i(0, 1);
-	glVertex3f(widthBufferSize, afterOverlayY, depth);
-	glEnd();
-
-	this->barrelOverlayTex->UnbindTexture();
-
-	glPopMatrix();
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glPopAttrib();
-
-	debug_opengl_state();
 }
 
 /**

@@ -133,7 +133,7 @@ void BallInPlayState::ShootActionContinuousUse(float magnitudePercent) {
 void BallInPlayState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
 
     // Deal with the special case where the player is in ball camera mode and the ball is in a cannon:
-    // The player has control to rotate the cannon
+    // The player can control the rotation of the cannon
     if (GameBall::GetIsBallCameraOn()) {
         const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
@@ -142,6 +142,10 @@ void BallInPlayState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
                 CannonBlock* cannon = currBall->GetCannonBlock();
                 assert(cannon != NULL);
                 cannon->SetRotationSpeed(dir, magnitudePercent);
+                if (dir != 0 && magnitudePercent > 0.0f) {
+                    // EVENT: Player just controlled the rotation of the cannon
+                    GameEventManager::Instance()->ActionBallCameraCannonRotation(*currBall, *cannon);
+                }
                 return;
             }
         }

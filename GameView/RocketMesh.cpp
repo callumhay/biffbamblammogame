@@ -143,7 +143,7 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
     this->fireEffect.SetScale(0.25f);
     this->fireEffect.SetFrequency(1.5f);
     this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
-    this->fireEffect.SetMaskTexture(this->glowTex);
+    this->fireEffect.SetTexture(this->glowTex);
 
     this->rocketThrustHyperBurnEmitter = new ESPPointEmitter();
     this->rocketThrustHyperBurnEmitter->SetSpawnDelta(ESPInterval(0.01f));

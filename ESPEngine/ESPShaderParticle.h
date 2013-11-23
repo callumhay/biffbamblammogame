@@ -27,14 +27,14 @@
 class TextureFontSet;
 class CgFxEffectBase;
 
-class ESPShaderParticle : public ESPParticle{
+class ESPShaderParticle : public ESPParticle {
 public: 
 	ESPShaderParticle(CgFxEffectBase* effect);
 	virtual ~ESPShaderParticle();
 
 	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
-	virtual void Tick(const double dT);
-	virtual void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
+	void Tick(const double dT);
+	virtual void Draw(const Camera& camera, const ESP::ESPAlignment& alignment);
 
 protected:
 	// The shader effect for this particle

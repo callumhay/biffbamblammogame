@@ -23,7 +23,7 @@ public:
 
 	void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	void Tick(const double dT);
-    void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
+    void Draw(const Camera& camera, const ESP::ESPAlignment& alignment);
 
 private:
     const std::vector<Bezier*> possibleCurves;

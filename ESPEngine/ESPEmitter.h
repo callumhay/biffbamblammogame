@@ -27,6 +27,7 @@
 #include <map>
 
 class CgFxEffectBase;
+class CgFxTextureEffectBase;
 class TextLabel2D;
 class ESPEmitterEventHandler;
 class Bezier;
@@ -71,6 +72,7 @@ public:
     
     bool SetAnimatedParticles(unsigned int numParticles, Texture2D* texture, int spriteSizeX, int spriteSizeY, double animationFPS = 24.0);
     bool SetRandomTextureParticles(unsigned int numParticles, std::vector<Texture2D*>& textures);
+    bool SetRandomTextureEffectParticles(unsigned int numParticles, CgFxTextureEffectBase* effect, std::vector<Texture2D*>& textures);
     bool SetRandomCurveParticles(unsigned int numParticles, const ESPInterval& lineThickness, 
         const std::vector<Bezier*>& curves, const ESPInterval& animateTimeInSecs);
 

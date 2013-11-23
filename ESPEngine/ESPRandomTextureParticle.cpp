@@ -27,7 +27,8 @@ void ESPRandomTextureParticle::Revive(const Point3D& pos, const Vector3D& vel, c
     this->SelectRandomTexture();
 }
 
-void ESPRandomTextureParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) {
+void ESPRandomTextureParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment) {
+
 	// Don't draw if dead...
 	if (this->IsDead()) {
 		return;
@@ -52,8 +53,4 @@ void ESPRandomTextureParticle::Draw(const Camera& camera, const ESP::ESPAlignmen
     currTexture->UnbindTexture();
 
 	glPopMatrix();
-}
-
-void ESPRandomTextureParticle::SelectRandomTexture() {
-    this->currSelectedTexIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->textures.size();
 }

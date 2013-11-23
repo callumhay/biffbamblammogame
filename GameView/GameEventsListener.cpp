@@ -62,11 +62,12 @@
 
 // Wait times before showing the same effect - these prevent the game view from displaying a whole ton
 // of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS      = 125;
-const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS       = 60;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 80;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS    = 125;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS     = 60;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS       = 125;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS        = 60;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		 = 80;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS     = 125;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS      = 60;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS = 150;
 
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS = 250;
 
@@ -80,6 +81,7 @@ timeSinceLastBallBossCollisionEventInMS(0),
 timeSinceLastBallBlockCollisionEventInMS(0),
 timeSinceLastBallPaddleCollisionEventInMS(0),
 timeSinceLastBallTeslaCollisionEventInMS(0),
+timeSinceLastControlledCannonRotationInMS(0),
 numFallingItemsInPlay(0), fallingItemSoundID(INVALID_SOUND_ID){
 	assert(d != NULL);
 }
@@ -673,7 +675,7 @@ void GameEventsListener::BallBossCollisionEvent(GameBall& ball, const Boss& boss
 }
 
 void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) {
-	
+
     // Play the sound for the collision
     Point3D collisionPtEstimate = ball1.GetCenterPosition() + ball1.GetBounds().Radius() * 
         Vector3D::Normalize(ball2.GetCenterPosition() - ball1.GetCenterPosition());
@@ -693,7 +695,9 @@ void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, cons
         enterPortal.GetPosition3D(), true, true, true);
 
     // Add the teleportation effect
-	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball.GetBounds().Center(), enterPortal);
+    if (!ball.HasBallCameraActive()) {
+	    this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball.GetBounds().Center(), enterPortal);
+    }
 
 	debug_output("EVENT: Ball teleported by portal block");
 }
@@ -766,8 +770,10 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 	sound->PlaySoundAtPosition(GameSound::CannonBlockFiredEvent, false, cannonBlock.GetPosition3D(), true, true, true);
     
 	// Add the blast effect of the ball exiting the cannon
-	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(
-        Point3D(cannonBlock.GetEndOfBarrelPoint()), cannonBlock.GetCurrentCannonDirection());
+    if (!ball.HasBallCameraActive()) {
+	    this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(
+            Point3D(cannonBlock.GetEndOfBarrelPoint()), cannonBlock.GetCurrentCannonDirection());
+    }
 
     sound->SetPauseForAllAttachedSounds(&ball, false);
 
@@ -1466,6 +1472,20 @@ void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall& ball, bool is
     }
     else {
         debug_output("EVENT: Ball camera unset");
+    }
+}
+
+void GameEventsListener::BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon) {
+    UNUSED_PARAMETER(ball);
+    UNUSED_PARAMETER(cannon);
+
+    long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+    bool doSound = (currSystemTime - this->timeSinceLastControlledCannonRotationInMS) > 
+        SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS;
+
+    if (doSound) {
+        this->display->GetSound()->PlaySound(GameSound::CannonBlockRotatingPart, false);
+        this->timeSinceLastControlledCannonRotationInMS = currSystemTime;
     }
 }
 

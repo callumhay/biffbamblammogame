@@ -33,6 +33,7 @@ const double CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS = 8.0;
 // Rotation will occur at some random speed in between these values
 const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC = 360.0f;
 const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 500.0f;
+const float CannonBlock::BALL_CAMERA_ROTATION_SPD_IN_DEGS_PER_SEC = MIN_ROTATION_SPD_IN_DEGS_PER_SEC / 2.5f;
 
 // When the rotation angle is fixed, we can still spin the cannon a whole bunch of times...
 const float CannonBlock::MIN_DEGREES_PER_FIXED_ROTATION = 0.65f;
@@ -50,6 +51,9 @@ rotationInterval(rotationInterval), loadedBall(NULL), loadedProjectile(NULL), cu
 currRotationSpeed(0.0f), elapsedRotationTime(0.0), totalRotationTime(0.0) {
     
     assert(rotationInterval.first <= rotationInterval.second);
+    if (!this->GetHasRandomRotation()) {
+        this->fixedRotationXInDegs = this->GetFixedRotationDegsFromX();
+    }
 }
 
 CannonBlock::~CannonBlock() {
@@ -150,7 +154,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 
     // Special case: the ball is in ball camera mode
     if (ball.HasBallCameraActive()) {
-        this->InitBallCameraInCannonValues(true);
+        this->InitBallCameraInCannonValues(true, ball);
     }
     else {
 	    this->SetupRandomCannonFireTimeAndDirection();
@@ -256,7 +260,7 @@ bool CannonBlock::RotateAndEventuallyFire(double dT, bool overrideFireRotation) 
 		// In the case of fixed direction firing, we need to make sure the degree angle
 		// is set to exactly the firing angle when we fire...
 		if (!this->GetHasRandomRotation() && !overrideFireRotation) {
-            this->currRotationFromXInDegs = this->GetFixedRotationDegsFromX();
+            this->currRotationFromXInDegs = this->fixedRotationXInDegs;
 			this->bounds = this->BuildBounds();
 			this->bounds.RotateLinesAndNormals(this->currRotationFromXInDegs, this->center);
 		}
@@ -292,6 +296,10 @@ void CannonBlock::SetupRandomCannonFireTimeAndDirection() {
 	// Reset the elapsed rotation time
 	this->elapsedRotationTime = 0.0;
 
+    if (!this->GetHasRandomRotation()) {
+        
+    }
+
     float rotationAngleToFireAt = 0;
 
 	// Based on whether the cannon fires randomly or not, set up the time until the cannon will fire
@@ -306,7 +314,9 @@ void CannonBlock::SetupRandomCannonFireTimeAndDirection() {
 	else {
 		// We need to actually fire in a proper direction dictated by the degree angle in 'fixedRotation',
 		// which measures from the y-axis from 0 to 359 degrees
-        rotationAngleToFireAt = fmod(this->GetFixedRotationDegsFromX(), 360.0f);
+        float fixedRotatationFromX = this->GetFixedRotationDegsFromX();
+        rotationAngleToFireAt = fmod(fixedRotatationFromX, 360.0f);
+        this->fixedRotationXInDegs = fixedRotatationFromX;
     }
 
 	// Pick a random rotation time (this will dictate all other values)

@@ -117,9 +117,6 @@ private:
 
     CgFxCelOutlines celOutlineEffect;
 
-	// Misc. Textures and overlays
-	Texture* barrelOverlayTex;	// Texture for overlay of the cannon barrel
-
 	bool drawItemsInLastPass;	// Whether or not items get drawn in the final pass
 
 	enum FBOAnimationType { PoisonAnimationType };
@@ -143,8 +140,6 @@ private:
 
 		return &(iter2->second);
 	}
-
-	void DrawCannonBarrelOverlay(int width, int height, float alpha);
     
     DISALLOW_COPY_AND_ASSIGN(GameFBOAssets);
 };

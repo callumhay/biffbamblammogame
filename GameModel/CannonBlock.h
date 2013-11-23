@@ -104,7 +104,7 @@ public:
 
     void SetRotationSpeed(int dir, float magnitudePercent);
     void Fire();
-    void InitBallCameraInCannonValues(bool changeRotationToPointDown);
+    void InitBallCameraInCannonValues(bool changeRotation, const GameBall& ball);
 
 	bool RotateAndEventuallyFire(double dT, bool overrideFireRotation = false);
 
@@ -127,6 +127,7 @@ private:
 
 	static const float MIN_ROTATION_SPD_IN_DEGS_PER_SEC;
 	static const float MAX_ROTATION_SPD_IN_DEGS_PER_SEC;
+    static const float BALL_CAMERA_ROTATION_SPD_IN_DEGS_PER_SEC;
 
 	static const float MIN_DEGREES_PER_FIXED_ROTATION;
 	static const float MAX_DEGREES_PER_FIXED_ROTATION;
@@ -135,6 +136,7 @@ private:
     Projectile* loadedProjectile;
 
 	float currRotationFromXInDegs;	// The current rotation from the x-axis (default position) in degrees
+    float fixedRotationXInDegs;
 	float currRotationSpeed;		// The current rotation speed of the cannon
 	double elapsedRotationTime;		// The elapsed rotation time from the start of the ball coming into the cannon
 	double totalRotationTime;		// The total time before the ball is fired from the cannon
@@ -169,22 +171,31 @@ inline bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines, doub
 }
 
 inline void CannonBlock::SetRotationSpeed(int dir, float magnitudePercent) {
-    this->currRotationSpeed = dir * magnitudePercent * MAX_ROTATION_SPD_IN_DEGS_PER_SEC;
+    this->currRotationSpeed    = dir * magnitudePercent * BALL_CAMERA_ROTATION_SPD_IN_DEGS_PER_SEC;
+    this->fixedRotationXInDegs = this->currRotationFromXInDegs;
 }
 
 inline void CannonBlock::Fire() {
-    this->elapsedRotationTime = this->totalRotationTime;
+    this->elapsedRotationTime  = this->totalRotationTime;
+    this->fixedRotationXInDegs = this->currRotationFromXInDegs;
 }
 
-inline void CannonBlock::InitBallCameraInCannonValues(bool changeRotationToPointDown) {
+inline void CannonBlock::InitBallCameraInCannonValues(bool changeRotation, const GameBall& ball) {
     // The player gains control of the cannon and will be able to fire it in any direction,
     // to avoid disorienting the player, we re-orient the cannon to face downwards
     this->totalRotationTime       = CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS;
     this->elapsedRotationTime     = 0.0;
     this->currRotationSpeed       = 0.0f;
 
-    if (changeRotationToPointDown) {
-        this->currRotationFromXInDegs = -90.0f;
+    if (changeRotation) {
+        // Figure out the direction to point in based on the direction the ball was coming from...
+        const Vector2D& ballDir = ball.GetDirection();
+        if (ballDir.IsZero()) {
+            this->currRotationFromXInDegs = -90.0f;
+        }
+        else {
+            this->currRotationFromXInDegs = atan2f(-ballDir[1], -ballDir[0]);
+        }
     }
 }
 

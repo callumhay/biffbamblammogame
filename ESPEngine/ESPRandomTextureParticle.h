@@ -20,7 +20,7 @@ public:
 	~ESPRandomTextureParticle();
 
 	void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
-	void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
+	void Draw(const Camera& camera, const ESP::ESPAlignment& alignment);
 
 private:
     int currSelectedTexIdx;
@@ -30,5 +30,9 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(ESPRandomTextureParticle);
 };
+
+inline void ESPRandomTextureParticle::SelectRandomTexture() {
+    this->currSelectedTexIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->textures.size();
+}
 
 #endif // __ESPRANDOMTEXTUREPARTICLE_H__

@@ -49,9 +49,9 @@ private:
 	typedef std::map<const LevelPiece*, StatusEffectMap> PieceStatusEffectMap;
 	PieceStatusEffectMap pieceStatusEffects;
 
-	// Persistant Textures
+	// Persistent Textures
 	std::vector<Texture2D*> smokePuffTextures;
-	Texture2D* cloudTexture;
+    std::vector<Texture2D*> cloudTextures;
 	Texture2D* gritTexture;
 	Texture2D* rectPrismTexture;
 	Texture2D* frostTexture;
@@ -62,8 +62,7 @@ private:
 	
 	void SetupTextures();
 	
-
-	// Persistant Effects structures
+	// Persistent Effects structures
 	ESPParticleColourEffector fireColourEffector;
 	ESPParticleColourEffector semiFaderEffector;
 	ESPParticleColourEffector fullFaderEffector;

@@ -126,6 +126,7 @@ private:
 	std::vector<Texture2D*> snowflakeTextures;
     std::vector<Texture2D*> boltTextures;
 	std::vector<Texture2D*> rockTextures;
+    std::vector<Texture2D*> cloudTextures;
 	std::vector<CgFxFireBallEffect*> moltenRockEffects;
 	
     Texture2D* cleanCircleGradientTex;
@@ -148,8 +149,6 @@ private:
     Texture2D* bubblyExplosionTex;
 	Texture2D* lightningBoltTex;
 	Texture2D* sphereNormalsTex;
-	//Texture2D* rectPrismTexture;
-	Texture2D* cloudTex;
     Texture2D* cloudNormalTex;
     Texture2D* vapourTrailTex;
     Texture2D* heartTex;

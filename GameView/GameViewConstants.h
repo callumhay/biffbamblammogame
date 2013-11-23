@@ -131,7 +131,9 @@ public:
 	const char* TEXTURE_LIGHTNING_BOLT;
 	const char* TEXTURE_SPHERE_NORMALS;
 	const char* TEXTURE_RECT_PRISM_NORMALS;
-	const char* TEXTURE_CLOUD;
+	const char* TEXTURE_CLOUD1;
+    const char* TEXTURE_CLOUD2;
+    const char* TEXTURE_CLOUD3;
     const char* TEXTURE_NORMAL_CLOUD;
 	const char* TEXTURE_GRIT;
 	const char* TEXTURE_FROST;

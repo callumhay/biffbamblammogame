@@ -300,6 +300,9 @@ CannonBlockLoadedEvent {
 CannonBlockRotatingLoop {
 	file = resources/CannonBlockRotatingLoop.ogg
 }
+CannonBlockRotatingPart {
+	file = resources/CannonBlockRotatingPart_01.ogg | resources/CannonBlockRotatingPart_02.ogg | resources/CannonBlockRotatingPart_03.ogg | resources/CannonBlockRotatingPart_04.ogg | resources/CannonBlockRotatingPart_05.ogg | resources/CannonBlockRotatingPart_06.ogg | resources/CannonBlockRotatingPart_07.ogg
+}
 CannonBlockFiredEvent {
 	file = resources/CannonBlockFiredEvent.ogg
 }

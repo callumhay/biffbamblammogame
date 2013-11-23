@@ -493,6 +493,13 @@ void GameEventManager::ActionBallCameraSetOrUnset(const GameBall& ball, bool isS
     }
 }
 
+void GameEventManager::ActionBallCameraCannonRotation(const GameBall& ball, const CannonBlock& cannon) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->BallCameraCannonRotationEvent(ball, cannon);
+    }
+}
+
 // Action for when the release timer starts up
 void GameEventManager::ActionReleaseTimerStarted() {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

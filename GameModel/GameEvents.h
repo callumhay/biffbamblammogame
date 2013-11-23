@@ -440,6 +440,17 @@ public:
         UNUSED_PARAMETER(isSet);
     }
 
+    /** 
+     * Event triggered whenever the player controls the rotation of a cannon block, is triggered
+     * only once the player has applied some rotation, not when the rotation is set to zero.
+     * Arguments: ball   - The ball that is inside the cannon.
+     *            cannon - The cannon block being rotated.
+     */
+    virtual void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon) {
+        UNUSED_PARAMETER(ball);
+        UNUSED_PARAMETER(cannon);
+    }
+
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same
 	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side

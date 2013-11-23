@@ -25,7 +25,7 @@ const char* CgFxVolumetricEffect::CLOUDYSPRITE_TECHNIQUE_NAME   = "CloudySprite"
 
 // Default constructor
 CgFxVolumetricEffect::CgFxVolumetricEffect() : 
-CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_VOLUMEMETRIC_SHADER), 
+CgFxTextureEffectBase(GameViewConstants::GetInstance()->CGFX_VOLUMEMETRIC_SHADER), 
 scale(1.0f), freq(1.0f), fadeExponent(1), colour(1,1,1), flowDir(0, 0, 1), alphaMultiplier(1.0f), 
 noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL) {
 

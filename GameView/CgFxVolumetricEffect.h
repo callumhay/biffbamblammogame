@@ -19,7 +19,7 @@
 class Camera;
 class Texture2D;
 
-class CgFxVolumetricEffect : public CgFxEffectBase {
+class CgFxVolumetricEffect : public CgFxTextureEffectBase {
 public:
 	static const char* BASIC_TECHNIQUE_NAME;
 	static const char* GHOSTBALL_TECHNIQUE_NAME;
@@ -30,7 +30,7 @@ public:
 	CgFxVolumetricEffect();
 	~CgFxVolumetricEffect();
 
-	void SetMaskTexture(Texture2D* tex) {
+	void SetTexture(const Texture2D* tex) {
 		this->maskTex = tex;
 	}
 
@@ -82,7 +82,7 @@ private:
 	Colour colour;
 	Vector3D flowDir;
 	GLuint noiseTexID; 
-	Texture2D* maskTex;
+	const Texture2D* maskTex;
 
 	DISALLOW_COPY_AND_ASSIGN(CgFxVolumetricEffect);
 };

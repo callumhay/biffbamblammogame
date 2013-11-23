@@ -16,11 +16,11 @@
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Texture3D.h"
 
-const char* CgFxFireBallEffect::BASIC_TECHNIQUE_NAME					= "FireBall";
-const char* CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME	= "FireBallNoDepthWithMask";
+const char* CgFxFireBallEffect::BASIC_TECHNIQUE_NAME              = "FireBall";
+const char* CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME = "FireBallNoDepthWithMask";
 
 CgFxFireBallEffect::CgFxFireBallEffect() : 
-CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_FIREBALL_SHADER), 
+CgFxTextureEffectBase(GameViewConstants::GetInstance()->CGFX_FIREBALL_SHADER), 
 scale(1.0f), freq(0.6f), flowDir(0, 0, 1), alphaMultiplier(1.0f),
 noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL),
 brightFireColour(1.0f, 1.0f, 0.0f), darkFireColour(1.0f, 0.0f, 0.0f) {

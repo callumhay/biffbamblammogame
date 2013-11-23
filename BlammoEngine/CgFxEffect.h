@@ -242,6 +242,17 @@ private:
     DISALLOW_COPY_AND_ASSIGN(CgFxEffectBase);
 };
 
+class CgFxTextureEffectBase : public CgFxEffectBase {
+public:
+    CgFxTextureEffectBase(const std::string& effectPath) : CgFxEffectBase(effectPath) {}
+    virtual ~CgFxTextureEffectBase() {}
+
+    virtual void SetTexture(const Texture2D* texture) = 0;
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(CgFxTextureEffectBase);
+};
+
 /**
  * Base class for loading and dealing with CgFx material shaders.
  */

@@ -20,14 +20,26 @@ ClassicalWorldAssets::ClassicalWorldAssets(GameAssets* assets) :
 GameWorldAssets(assets, new Skybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BACKGROUND_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_PADDLE_MESH),
-    ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BLOCK_MESH)), cloudTex(NULL),
+    ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BLOCK_MESH)), 
 fireColourFader(ColourRGBA(1.0f, 0.9f, 0.0f, 1.0f), ColourRGBA(0.3f, 0.10f, 0.0f, 0.2f)),
-fireParticleScaler(1.0f, 0.025f), fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector3D(1,1,1))
-{
+fireParticleScaler(1.0f, 0.025f), fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector3D(1,1,1)) {
 
     // Initialize textures...
-	this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
-	assert(this->cloudTex != NULL);
+    assert(this->cloudTextures.empty());
+    this->cloudTextures.reserve(3);
+    Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD1, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
+    temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD2, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
+    temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD3, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
+
 
     // Change the colours for the background mesh from the default to something a bit more washed out
     // (i.e., more classical-architecture-like)
@@ -48,8 +60,13 @@ fireParticleScaler(1.0f, 0.025f), fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector
 ClassicalWorldAssets::~ClassicalWorldAssets() {
     bool success = false;
 
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
-    assert(success);
+    for (std::vector<Texture2D*>::iterator iter = this->cloudTextures.begin();
+        iter != this->cloudTextures.end(); ++iter) {
+
+            success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+            assert(success);	
+    }
+    this->cloudTextures.clear();
 
     UNUSED_VARIABLE(success);
 }
@@ -67,8 +84,6 @@ void ClassicalWorldAssets::DrawBackgroundModel(const Camera& camera, const Basic
 }
 
 void ClassicalWorldAssets::InitializeEmitters() {
-    assert(this->cloudTex != NULL);
-
     static const float FIRE_SIZE_MIN = 2.6f;
     static const float FIRE_SIZE_MAX = 3.5f;
     static const float FIRE_LIFE_IN_SECS_MIN = 1.6f;
@@ -94,7 +109,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	this->fireEffect.SetScale(FLAME_SCALE);
 	this->fireEffect.SetFrequency(FLAME_FREQ);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
-	this->fireEffect.SetMaskTexture(this->cloudTex);
+	this->fireEffect.SetTexture(this->cloudTextures[0]);
 
     bool result = false;
 
@@ -111,7 +126,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	fireEmitter1.AddEffector(&this->fireColourFader);
 	fireEmitter1.AddEffector(&this->fireParticleScaler);
 	fireEmitter1.AddEffector(&this->fireAccel1);
-	result = fireEmitter1.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect);
+	result = fireEmitter1.SetRandomTextureEffectParticles(NUM_FIRE_PARTICLES, &this->fireEffect, this->cloudTextures);
 	assert(result);
 
 	fireEmitter2.SetSpawnDelta(ESPInterval(FIRE_SPAWN_DELTA_MIN, FIRE_SPAWN_DELTA_MAX));
@@ -127,7 +142,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
 	fireEmitter2.AddEffector(&this->fireColourFader);
 	fireEmitter2.AddEffector(&this->fireParticleScaler);
 	fireEmitter2.AddEffector(&this->fireAccel2);
-	result = fireEmitter2.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect);
+	result = fireEmitter2.SetRandomTextureEffectParticles(NUM_FIRE_PARTICLES, &this->fireEffect, this->cloudTextures);
 	assert(result);
 
     UNUSED_VARIABLE(result);
