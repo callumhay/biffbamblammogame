@@ -19,14 +19,14 @@
 class Camera;
 class Texture2D;
 
-class CgFxCloudEffect : public CgFxEffectBase {
+class CgFxCloudEffect : public CgFxTextureEffectBase {
 public:
 	static const char* BASIC_TECHNIQUE_NAME;
 
 	CgFxCloudEffect();
 	~CgFxCloudEffect();
 
-	void SetMaskTexture(Texture2D* tex) {
+	void SetTexture(const Texture2D* tex) {
 		this->maskTex = tex;
 	}
 	void SetScale(float s) {
@@ -81,7 +81,7 @@ private:
 	Colour colour;
 	Vector3D flowDir;
 	GLuint noiseTexID; 
-	Texture2D* maskTex;
+	const Texture2D* maskTex;
     Point3D lightPos;
     float attenuation;
 

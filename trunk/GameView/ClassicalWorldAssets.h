@@ -36,7 +36,7 @@ public:
 	void Tick(double dT, const GameModel& model);
 
 private:
-    Texture2D* cloudTex;
+    std::vector<Texture2D*> cloudTextures;
 
     CgFxVolumetricEffect fireEffect;
     ESPPointEmitter fireEmitter1, fireEmitter2;

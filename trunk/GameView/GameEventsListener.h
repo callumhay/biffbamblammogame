@@ -94,6 +94,7 @@ public:
     void BallBoostLostEvent(bool allBoostsLost);
 
     void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet);
+    void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon);
 
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
@@ -149,6 +150,7 @@ private:
 	long timeSinceLastBallPaddleCollisionEventInMS;
 	long timeSinceLastBallTeslaCollisionEventInMS;
     long timeSinceLastBallBossCollisionEventInMS;
+    long timeSinceLastControlledCannonRotationInMS;
 
     typedef std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, SoundID> TeslaLightningSoundIDMap;
     typedef TeslaLightningSoundIDMap::iterator TeslaLightningSoundIDMapIter;
@@ -161,13 +163,12 @@ private:
     ProjectileEffectTimestampMap projectileEffectTSMap;
     
     static const long EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS;
-
-
     static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
     static const long SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
+    static const long SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS;
 
     static SoundID enterBulletTimeSoundID;
     static SoundID exitBulletTimeSoundID;

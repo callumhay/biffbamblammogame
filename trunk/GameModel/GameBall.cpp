@@ -151,7 +151,7 @@ void GameBall::SetBallCamera(GameBall* ballCamBall) {
         if (ballCamBall->IsLoadedInCannonBlock()) {
             CannonBlock* cannon = ballCamBall->GetCannonBlock();
             assert(cannon != NULL);
-            cannon->InitBallCameraInCannonValues(false);
+            cannon->InitBallCameraInCannonValues(false, *ballCamBall);
         }
 
         // EVENT: Ball camera is now set

@@ -52,7 +52,8 @@ void ESPParticle::Tick(const double dT) {
 /**
  * Draw this particle as it is currently.
  */
-void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) {
+void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment) {
+
 	// Don't draw if dead...
 	if (this->IsDead()) {
 		return;

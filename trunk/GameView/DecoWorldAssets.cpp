@@ -196,11 +196,14 @@ void DecoWorldAssets::Tick(double dT, const GameModel& model) {
 	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
 
 	this->spiralEmitterSm.Tick(dT);
-	this->spiralEmitterSm.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
+	this->spiralEmitterSm.SetParticleColour(spiralColour);
+    this->spiralEmitterSm.SetAliveParticleAlphaMax(currBGAlpha);
 	this->spiralEmitterMed.Tick(dT);
-	this->spiralEmitterMed.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
+	this->spiralEmitterMed.SetParticleColour(spiralColour);
+    this->spiralEmitterMed.SetAliveParticleAlphaMax(currBGAlpha);
 	this->spiralEmitterLg.Tick(dT);
-	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
+	this->spiralEmitterLg.SetParticleColour(spiralColour);
+    this->spiralEmitterLg.SetAliveParticleAlphaMax(currBGAlpha);
 	
 	GameWorldAssets::Tick(dT, model);
 }

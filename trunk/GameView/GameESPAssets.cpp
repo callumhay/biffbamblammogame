@@ -124,8 +124,6 @@ hugeExplosionTex(NULL),
 bubblyExplosionTex(NULL),
 lightningBoltTex(NULL),
 sphereNormalsTex(NULL),
-//rectPrismTexture(NULL),
-cloudTex(NULL),
 cloudNormalTex(NULL),
 vapourTrailTex(NULL),
 heartTex(NULL),
@@ -202,12 +200,19 @@ GameESPAssets::~GameESPAssets() {
 	}
 	this->rockTextures.clear();
 
+    for (std::vector<Texture2D*>::iterator iter = this->cloudTextures.begin(); iter != this->cloudTextures.end(); ++iter) {
+        removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+        assert(removed);
+    }
+    this->cloudTextures.clear();
+
 	for (std::vector<CgFxFireBallEffect*>::iterator iter = this->moltenRockEffects.begin(); iter != this->moltenRockEffects.end(); ++iter) {
 		CgFxFireBallEffect* effect = *iter;
 		delete effect;
 		effect = NULL;
 	}
 	this->moltenRockEffects.clear();
+
 
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cleanCircleGradientTex);
     assert(removed);
@@ -248,10 +253,6 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningBoltTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
-	assert(removed);
-	//removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->rectPrismTexture);
-	//assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
 	assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudNormalTex);
     assert(removed);
@@ -561,20 +562,6 @@ void GameESPAssets::InitESPTextures() {
 		this->smokeTextures.push_back(temp);	
 	}
 
-	// Initialize all the fire glob textures
-	//if (this->fireGlobTextures.empty()) {
-	//	this->fireGlobTextures.reserve(3);
-	//	Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB1, Texture::Trilinear));
-	//	assert(temp != NULL);
-	//	this->fireGlobTextures.push_back(temp);
-	//	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB2, Texture::Trilinear));
-	//	assert(temp != NULL);
-	//	this->fireGlobTextures.push_back(temp);
-	//	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB3, Texture::Trilinear));
-	//	assert(temp != NULL);
-	//	this->fireGlobTextures.push_back(temp);
-	//}
-
 	// Initialize all the snowflake textures
 	if (this->snowflakeTextures.empty()) {
 		this->snowflakeTextures.reserve(3);
@@ -634,7 +621,7 @@ void GameESPAssets::InitESPTextures() {
 		for (std::vector<Texture2D*>::iterator iter = this->rockTextures.begin(); iter != this->rockTextures.end(); ++iter) {
 			CgFxFireBallEffect* newFireEffect = new CgFxFireBallEffect();
 			newFireEffect->SetTechnique(CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME);
-			newFireEffect->SetMaskTexture(*iter);
+			newFireEffect->SetTexture(*iter);
 			newFireEffect->SetDarkFireColour(Colour(1.0f, 0.9f, 0.15f));
 			newFireEffect->SetBrightFireColour(Colour(0.75f, 0.15f, 0.10f));
 			newFireEffect->SetScale(0.6f);
@@ -747,11 +734,22 @@ void GameESPAssets::InitESPTextures() {
     //GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
 	//	assert(this->rectPrismTexture != NULL);
 	//}	
-	if (this->cloudTex == NULL) {
-		this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
-		assert(this->cloudTex != NULL);
-	}
+    if (this->cloudTextures.empty()) {
+        this->cloudTextures.reserve(3);
+        Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CLOUD1, Texture::Trilinear));
+        assert(temp != NULL);
+        this->cloudTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CLOUD2, Texture::Trilinear));
+        assert(temp != NULL);
+        this->cloudTextures.push_back(temp);
+        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CLOUD3, Texture::Trilinear));
+        assert(temp != NULL);
+        this->cloudTextures.push_back(temp);
+    }
+
     if (this->cloudNormalTex == NULL) {
         this->cloudNormalTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
             GameViewConstants::GetInstance()->TEXTURE_NORMAL_CLOUD, Texture::Trilinear));
@@ -1268,7 +1266,7 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->ghostBallSmoke.SetScale(0.5f);
 	this->ghostBallSmoke.SetFrequency(0.25f);
 	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
-	this->ghostBallSmoke.SetMaskTexture(this->circleGradientTex);
+	this->ghostBallSmoke.SetTexture(this->circleGradientTex);
 
 	// Fire effect used in various things - like explosions and such.
 	this->fireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
@@ -1276,21 +1274,21 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->fireEffect.SetScale(0.25f);
 	this->fireEffect.SetFrequency(1.0f);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
-	this->fireEffect.SetMaskTexture(this->circleGradientTex);
+	this->fireEffect.SetTexture(this->circleGradientTex);
 
 	this->fireBallTrailEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
 	this->fireBallTrailEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
 	this->fireBallTrailEffect.SetScale(0.8f);
 	this->fireBallTrailEffect.SetFrequency(1.2f);
 	this->fireBallTrailEffect.SetFlowDirection(Vector3D(0, 0, 1));
-	this->fireBallTrailEffect.SetMaskTexture(this->cloudTex);
+	this->fireBallTrailEffect.SetTexture(this->cloudTextures[0]);
 
 	this->iceBallTrailEffect.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
 	this->iceBallTrailEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
 	this->iceBallTrailEffect.SetScale(0.5f);
 	this->iceBallTrailEffect.SetFrequency(0.5f);
 	this->iceBallTrailEffect.SetFlowDirection(Vector3D(0, 0, 1));
-	this->iceBallTrailEffect.SetMaskTexture(this->cloudTex);
+	this->iceBallTrailEffect.SetTexture(this->cloudTextures[0]);
 
 	// Setup the post refraction normal effect with the sphere normal - this is for forcefield
 	// and shockwave effects
@@ -1378,7 +1376,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
  */
 void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block) {
 	// We don't do the effect for certain types of blocks...
-    if (!block.ProducesBounceEffectsWithBallWhenHit(ball)) {
+    if (!block.ProducesBounceEffectsWithBallWhenHit(ball) || ball.HasBallCameraActive()) {
 		return;
 	}
 
@@ -1387,11 +1385,19 @@ void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelP
 }
 
 void GameESPAssets::AddBounceBossEffect(const GameBall& ball) {
+    if (ball.HasBallCameraActive()) {
+        return;
+    }
+
     // Add the new emitter to the list of active emitters
     this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::BOUNCE));
 }
 
 void GameESPAssets::AddMiscBallPieceCollisionEffect(const GameBall& ball, const LevelPiece& block) {
+    if (ball.HasBallCameraActive()) {
+        return;
+    }
+
     switch (block.GetType()) {
         case LevelPiece::RocketTurret:
         case LevelPiece::MineTurret:
@@ -1414,6 +1420,10 @@ void GameESPAssets::AddMiscBallPieceCollisionEffect(const GameBall& ball, const 
  * Adds ball bouncing effect when the ball bounces off the player paddle.
  */
 void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle) {
+    if (ball.HasBallCameraActive() || paddle.GetIsPaddleCameraOn()) {
+        return;
+    }
+
 	// Shield takes priority over the sticky paddle
 	if (paddle.HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 		// The ball hits a energy shield bbzzzap!
@@ -1433,6 +1443,10 @@ void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPadd
  * Adds the effect that occurs when two balls bounce off of each other.
  */
 void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2) {
+    if (ball1.HasBallCameraActive() || ball2.HasBallCameraActive()) {
+        return;
+    }
+
 	// Obtain a reasonably centered position to show the effect
 	const Point2D& ball1Center = ball1.GetBounds().Center();
 	const Point2D& ball2Center = ball2.GetBounds().Center();
@@ -1685,8 +1699,11 @@ void GameESPAssets::AddBossHitByProjectileEffect(const Projectile& projectile, c
 }
 
 void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
+    if (ball.HasBallCameraActive()) {
+        return;
+    }
 
-	// Add the lightning bolt graphic and onomatopeia effect
+	// Add the lightning bolt graphic and onomatopoeia effect
 	ESPInterval boltLifeInterval		= ESPInterval(0.8f, 1.1f);
 	ESPInterval boltOnoLifeInterval	= ESPInterval(boltLifeInterval.minValue + 0.3f, boltLifeInterval.maxValue + 0.3f);
 	ESPInterval sizeIntervalX(0.8f, 1.0f);
@@ -1817,6 +1834,7 @@ ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, flo
  * a portal block and got teleported to its sibling.
  */
 void GameESPAssets::AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block) {
+
 	ESPPointEmitter* enterEffect = this->CreateTeleportEffect(enterPt, block, false);
 	if (enterEffect == NULL) {
 		return;
@@ -1837,11 +1855,6 @@ void GameESPAssets::AddPortalTeleportEffect(const Point2D& enterPt, const Portal
  * Add an effect to the end of the cannon barrel for when it fires a ball out.
  */
 void GameESPAssets::AddCannonFireEffect(const Point3D& endOfCannonPt, const Vector2D& fireDir) {
-	// Don't bother if the ball camera is on...
-	if (GameBall::GetIsBallCameraOn()) {
-		return;
-	}
-
 	Vector3D emitDir(fireDir);
 	bool result = true;
 
@@ -2681,7 +2694,7 @@ void GameESPAssets::AddIceMeltedByFireEffect(const LevelPiece& block) {
     else {
         waterVapourEffect->AddEffector(&this->smokeRotatorCCW);
     }
-    waterVapourEffect->SetParticles(6, this->cloudTex);
+    waterVapourEffect->SetRandomTextureParticles(6, this->cloudTextures);
 
     // Water droplets raining down from the block
 	ESPPointEmitter* waterDropletRainEffect = new ESPPointEmitter();
@@ -2728,7 +2741,7 @@ void GameESPAssets::AddFirePutOutByIceEffect(const LevelPiece& block) {
     else {
         puffOfSmokeEffect1->AddEffector(&this->smokeRotatorCCW);
     }
-    puffOfSmokeEffect1->SetParticles(6, this->cloudTex);
+    puffOfSmokeEffect1->SetRandomTextureParticles(6, this->cloudTextures);
 
 	ESPPointEmitter* puffOfSmokeEffect2 = new ESPPointEmitter();
     puffOfSmokeEffect2->SetNumParticleLives(1);
@@ -2775,7 +2788,7 @@ void GameESPAssets::AddFireballCancelledEffect(const GameBall* ball) {
     else {
         fireDisperseEffect1->AddEffector(&this->smokeRotatorCCW);
     }
-    fireDisperseEffect1->SetParticles(8, this->cloudTex);
+    fireDisperseEffect1->SetRandomTextureParticles(8, this->cloudTextures);
 
 	ESPPointEmitter* fireDisperseEffect2 = new ESPPointEmitter();
     fireDisperseEffect2->SetNumParticleLives(1);
@@ -2835,7 +2848,7 @@ void GameESPAssets::AddIceballCancelledEffect(const GameBall* ball) {
     else {
         iceDisperseEffect1->AddEffector(&this->smokeRotatorCCW);
     }
-    iceDisperseEffect1->SetParticles(8, this->cloudTex);
+    iceDisperseEffect1->SetRandomTextureParticles(8, this->cloudTextures);
 
 	ESPPointEmitter* iceDisperseEffect2 = new ESPPointEmitter();
     iceDisperseEffect2->SetNumParticleLives(1);

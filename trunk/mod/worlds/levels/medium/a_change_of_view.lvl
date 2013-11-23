@@ -2,11 +2,11 @@ A Change of View
 15 30
 E E E S S S S S S S S S E E E 
 E S S T(S,ul) E E E E E E E T(S,ur) S S E 
-E S E E E E E E E E E E E S E 
+E S E E E G E E E G E E E S E 
 E S E E E E E G E E E E E S E 
 E S E E E E E E E E E E E S E 
 E S E E E E E E E E E E E S E 
-S S T(S,ul) C(180) T(S,ur) S S D(BallCam,BallCam,BallCam) S S T(S,ul) C(180) T(S,ur) S S 
+S S S C(180) S S S D(BallCam,BallCam,BallCam) S S S C(180) S S S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 
@@ -42,8 +42,8 @@ PaddleGrow 1
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 1
-UberBall 1
 BallGrow 0
+UberBall 1
 StickyPaddle 1
 ShieldPaddle 2
 LaserBulletPaddle 1

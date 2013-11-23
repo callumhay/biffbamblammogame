@@ -17,7 +17,7 @@
 #include "../BlammoEngine/Vector.h"
 
 
-class CgFxFireBallEffect : public CgFxEffectBase {
+class CgFxFireBallEffect : public CgFxTextureEffectBase {
 public:
 	// Constants used for loading the CelShading effect
 	static const char* BASIC_TECHNIQUE_NAME;
@@ -26,14 +26,13 @@ public:
 	CgFxFireBallEffect();
 	~CgFxFireBallEffect();
 
+    void SetTexture(const Texture2D* texture) {
+        this->maskTex = texture;
+    }
+
 	void SetAlphaMultiplier(float a) {
 		this->alphaMultiplier = a;
 	}
-
-	void SetMaskTexture(Texture2D* tex) {
-		this->maskTex = tex;
-	}
-
 	void SetBrightFireColour(const Colour& c) {
 		this->brightFireColour = c;
 	}
@@ -72,7 +71,7 @@ private:
 	float scale, freq, alphaMultiplier;
 	Vector3D flowDir;
 	GLuint noiseTexID; 
-	Texture2D* maskTex;
+	const Texture2D* maskTex;
 
 	Colour brightFireColour;
 	Colour darkFireColour;

@@ -28,14 +28,13 @@ particleMediumGrowth(1.0f, 1.85f),
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
 smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 gritTexture(NULL),
-cloudTexture(NULL),
 rectPrismTexture(NULL),
 frostTexture(NULL) {
 
 	this->SetupTextures();
 
 	this->fireEffect.SetTechnique(CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME);
-	this->fireEffect.SetMaskTexture(this->cloudTexture);
+	this->fireEffect.SetTexture(this->cloudTextures[0]);
 
 	this->iceBlockEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_WITH_OVERLAY_TECHNIQUE_NAME);
 	this->iceBlockEffect.SetWarpAmountParam(35.0f);
@@ -65,7 +64,7 @@ BlockStatusEffectRenderer::~BlockStatusEffectRenderer() {
     bool removed;
     UNUSED_VARIABLE(removed);
 
-	// Release all the persistant texture resources
+	// Release all the persistent texture resources
 	for (std::vector<Texture2D*>::iterator iter = this->smokePuffTextures.begin();
 		iter != this->smokePuffTextures.end(); ++iter) {
 		
@@ -75,8 +74,15 @@ BlockStatusEffectRenderer::~BlockStatusEffectRenderer() {
 	}
 	this->smokePuffTextures.clear();
 
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTexture);
-	assert(removed);
+    for (std::vector<Texture2D*>::iterator iter = this->cloudTextures.begin();
+        iter != this->cloudTextures.end(); ++iter) {
+
+            removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+            UNUSED_VARIABLE(removed);
+            assert(removed);	
+    }
+    this->cloudTextures.clear();
+
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->gritTexture);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->rectPrismTexture);
@@ -231,31 +237,48 @@ void BlockStatusEffectRenderer::Draw(double dT, const Camera& camera, const Text
 }
 
 void BlockStatusEffectRenderer::SetupTextures() {
-	// Initialize all the smoke puff textures...
+
 	assert(this->smokePuffTextures.empty());
 	this->smokePuffTextures.reserve(6);
-	Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
+	Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);
-	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
+	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);
-	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
+	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);
-	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
+	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);
-	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
+	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);
-	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
+	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);	
 
-	assert(this->cloudTexture == NULL);
-	this->cloudTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
-	assert(this->cloudTexture != NULL);
+	assert(this->cloudTextures.empty());
+    this->cloudTextures.reserve(3);
+    temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD1, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
+    temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD2, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
+    temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD3, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
 
 	assert(this->gritTexture == NULL);
 	this->gritTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_GRIT, Texture::Trilinear));
@@ -280,7 +303,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const Le
 	pulsingFlame->SetRadiusDeviationFromCenter(
         ESPInterval(0.0f, LevelPiece::PIECE_WIDTH/3.1f), 
         ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.2f), ESPInterval(0.0f));
-	pulsingFlame->SetParticleAlignment(ESP::ScreenAligned);
+	pulsingFlame->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	pulsingFlame->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 3.4f, LevelPiece::PIECE_WIDTH / 2.15f));
 	pulsingFlame->SetParticleRotation(ESPInterval(0, 359.99));
 	pulsingFlame->SetEmitPosition(Point3D(piece.GetCenter(), 0.0f));
@@ -293,7 +316,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const Le
 	else {
 		pulsingFlame->AddEffector(&this->smokeRotatorCCW);
 	}
-	bool result = pulsingFlame->SetParticles(4, &this->fireEffect);
+	bool result = pulsingFlame->SetRandomTextureEffectParticles(4, &this->fireEffect, this->cloudTextures);
     UNUSED_VARIABLE(result);
 	pulsingFlame->SimulateTicking(Randomizer::GetInstance()->RandomNumZeroToOne() * 10);
 	assert(result);
@@ -311,7 +334,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireSmokeEffect(const Le
 	smokeClouds->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 3.8f, LevelPiece::PIECE_WIDTH / 2.4f));
 	smokeClouds->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH/3.0f), 
 											  ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.0f), ESPInterval(0.0f));
-	smokeClouds->SetParticleAlignment(ESP::ScreenAligned);
+	smokeClouds->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	smokeClouds->SetEmitPosition(Point3D(piece.GetCenter()));
 	smokeClouds->SetEmitDirection(Vector3D(0, 1, 0));
 	smokeClouds->SetEmitAngleInDegrees(30.0f);

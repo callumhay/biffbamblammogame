@@ -38,8 +38,11 @@ public:
 	void Tick(double dT, const GameModel& model);
 
 private:
+    static const float MOON_CLOUD_ALPHA;
+    static const float LESS_VISIBLE_CLOUD_ALPHA;
+
     const Point3D moonPos;
-    Texture2D* cloudTex;
+    std::vector<Texture2D*> cloudTextures;
     Texture2D* moonTex;
 
     CgFxVolumetricEffect fireEffect;
@@ -51,14 +54,18 @@ private:
     ESPParticleColourEffector fireColourFader;
     ESPParticleScaleEffector fireParticleScaler;
 
-    ESPVolumeEmitter cloudEmitter1;
-    ESPMultiColourEffector cloudFader;
+    ESPVolumeEmitter moonCloudEmitter;
+    ESPMultiColourEffector moonCloudFader;
     ESPParticleScaleEffector cloudGrower;
+
+    ESPVolumeEmitter lowerCloudEmitter;
+    ESPMultiColourEffector lessVisibleCloudFader;
+
 
     void InitializeEmitters();
     void ApplyRandomFireAccel(ESPParticleAccelEffector& accelEffector);
 
-    void BuildCloudEmitter(const Point3D& min, const Point3D& max, int dir, ESPVolumeEmitter& emitter);
+    void BuildCloudEmitter(const Point3D& min, const Point3D& max, int dir, ESPMultiColourEffector& colourEffector, ESPVolumeEmitter& emitter);
     void BuildFrontDoorFireEmitter(const Point3D& pos, ESPPointEmitter& emitter);
     void BuildWindowWallFireEmitter(const Point3D& pos, ESPPointEmitter& emitter);
     

@@ -382,6 +382,7 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFlashingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFallingLoop));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockRotatingLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockRotatingPart));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, TeslaLightningArcLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, SwitchBlockActivated));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockFrozenEvent));

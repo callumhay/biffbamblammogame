@@ -49,7 +49,8 @@ void ESPAnimatedSpriteParticle::Tick(const double dT) {
     }
 }
 
-void ESPAnimatedSpriteParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) {
+void ESPAnimatedSpriteParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment) {
+
 	// Don't draw if dead...
 	if (this->IsDead() || this->currSpriteIdx >= this->numSprites) {
 		return;

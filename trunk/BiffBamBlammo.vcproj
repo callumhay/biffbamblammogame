@@ -650,6 +650,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPTextureShaderParticle.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPUtil.h"
 					>
 				</File>

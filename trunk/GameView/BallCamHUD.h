@@ -37,7 +37,13 @@ private:
     ButtonTutorialHint cannonRotateHint;
     ButtonTutorialHint cannonFireHint;
 
+    // Misc. Textures and overlays
+    Texture* barrelOverlayTex;	// Texture for overlay of the cannon barrel
+    AnimationLerp<float> overlayFadeAnim;
+    AnimationMultiLerp<ColourRGBA> arrowColourAnim;
+
     void DrawCannonHUD(double dT, const Camera& camera);
+    void DrawCannonBarrelOverlay(double dT, float alpha);
 
     DISALLOW_COPY_AND_ASSIGN(BallCamHUD);
 };

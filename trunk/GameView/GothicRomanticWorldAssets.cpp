@@ -10,11 +10,13 @@
  */
 
 #include "GothicRomanticWorldAssets.h"
+#include "Skybox.h"
+
 #include "../GameModel/GameModel.h"
 #include "../ResourceManager.h"
 
-// TODO: Get rid of this
-#include "Skybox.h"
+const float GothicRomanticWorldAssets::MOON_CLOUD_ALPHA         = 0.4f;
+const float GothicRomanticWorldAssets::LESS_VISIBLE_CLOUD_ALPHA = 0.2f;
 
 GothicRomanticWorldAssets::GothicRomanticWorldAssets(GameAssets* assets) : 
 GameWorldAssets(assets, new Skybox(),
@@ -22,17 +24,29 @@ GameWorldAssets(assets, new Skybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->GOTHIC_ROMANTIC_PADDLE_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->GOTHIC_ROMANTIC_BLOCK_MESH)),
 fireColourFader(ColourRGBA(1.0f, 0.9f, 0.0f, 1.0f), ColourRGBA(0.3f, 0.10f, 0.0f, 0.2f)),
-fireParticleScaler(1.0f, 0.025f), cloudTex(NULL), moonTex(NULL),
+fireParticleScaler(1.0f, 0.025f), moonTex(NULL),
 fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector3D(1,1,1)),
 fireAccel4(Vector3D(1,1,1)), fireAccel5(Vector3D(1,1,1)), fireAccel6(Vector3D(1,1,1)),
-cloudFader(), cloudGrower(1.0f, 1.15f), moonPos(23.0f, 38.0f, -50.0f) {
+moonCloudFader(), cloudGrower(1.0f, 1.15f), moonPos(23.0f, 38.0f, -50.0f) {
 
     // Initialize textures...
-	this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
-	assert(this->cloudTex != NULL);
+    assert(this->cloudTextures.empty());
+    this->cloudTextures.reserve(3);
+    Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD1, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
+    temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD2, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
+    temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLOUD3, Texture::Trilinear));
+    assert(temp != NULL);
+    this->cloudTextures.push_back(temp);
 
     this->moonTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_MOON, Texture::Trilinear));
-    assert(this->cloudTex != NULL);
+    assert(this->moonTex != NULL);
 
     this->skybox->SetFGStarMoveSpd(0.001f);
 
@@ -51,8 +65,14 @@ cloudFader(), cloudGrower(1.0f, 1.15f), moonPos(23.0f, 38.0f, -50.0f) {
 GothicRomanticWorldAssets::~GothicRomanticWorldAssets() {
     bool success = false;
 
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
-    assert(success);
+    for (std::vector<Texture2D*>::iterator iter = this->cloudTextures.begin();
+        iter != this->cloudTextures.end(); ++iter) {
+
+            success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+            assert(success);	
+    }
+    this->cloudTextures.clear();
+
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->moonTex);
     assert(success);
 
@@ -88,7 +108,8 @@ void GothicRomanticWorldAssets::DrawBackgroundPostOutlinePreEffects(const Camera
     this->moonTex->UnbindTexture();
     glPopMatrix();
 
-    this->cloudEmitter1.Draw(camera);
+    this->lowerCloudEmitter.Draw(camera);
+    this->moonCloudEmitter.Draw(camera);
 
     glPopAttrib();
 }
@@ -104,30 +125,30 @@ void GothicRomanticWorldAssets::Tick(double dT, const GameModel& model) {
 
     // Tick the emitters
     float alpha = this->bgFadeAnim.GetInterpolantValue();
-    ESPInterval alphaInterval(alpha);
 
     this->fireEffect.SetAlphaMultiplier(alpha);
-    this->fireEmitter1.SetParticleAlpha(alphaInterval);
     this->fireEmitter1.Tick(dT);
-    this->fireEmitter2.SetParticleAlpha(alphaInterval);
+    this->fireEmitter1.SetAliveParticleAlphaMax(alpha);
     this->fireEmitter2.Tick(dT);
+    this->fireEmitter2.SetAliveParticleAlphaMax(alpha);
 
-    this->fireEmitter4.SetParticleAlpha(alphaInterval);
     this->fireEmitter4.Tick(dT);
-    this->fireEmitter5.SetParticleAlpha(alphaInterval);
+    this->fireEmitter4.SetAliveParticleAlphaMax(alpha);
     this->fireEmitter5.Tick(dT);
-    this->fireEmitter6.SetParticleAlpha(alphaInterval);
+    this->fireEmitter5.SetAliveParticleAlphaMax(alpha);
     this->fireEmitter6.Tick(dT);
+    this->fireEmitter6.SetAliveParticleAlphaMax(alpha);
 
-    this->cloudEmitter1.SetParticleAlpha(0.9f*alphaInterval);
-    this->cloudEmitter1.Tick(dT);
+    this->lowerCloudEmitter.Tick(dT);
+    this->lowerCloudEmitter.SetAliveParticleAlphaMax(LESS_VISIBLE_CLOUD_ALPHA*alpha);
+
+    this->moonCloudEmitter.Tick(dT);
+    this->moonCloudEmitter.SetAliveParticleAlphaMax(MOON_CLOUD_ALPHA*alpha);
 
     this->cloudEffect.SetLightPos(moonPos + model.GetCurrentLevelTranslation());
 }
 
 void GothicRomanticWorldAssets::InitializeEmitters() {
-    assert(this->cloudTex != NULL);
-
     static const float FLAME_FREQ = 0.25f;
     static const float FLAME_SCALE = 0.33f;
 
@@ -136,7 +157,7 @@ void GothicRomanticWorldAssets::InitializeEmitters() {
 	this->fireEffect.SetScale(FLAME_SCALE);
 	this->fireEffect.SetFrequency(FLAME_FREQ);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
-	this->fireEffect.SetMaskTexture(this->cloudTex);
+	this->fireEffect.SetTexture(this->cloudTextures[0]);
 
 	this->BuildFrontDoorFireEmitter(Point3D(7.180f, 0.85f, -0.690f), fireEmitter1);
 	fireEmitter1.AddEffector(&this->fireAccel1);
@@ -166,23 +187,38 @@ void GothicRomanticWorldAssets::InitializeEmitters() {
     this->cloudEffect.SetTechnique(CgFxVolumetricEffect::CLOUDYSPRITE_TECHNIQUE_NAME);
     this->cloudEffect.SetColour(Colour(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT));
     this->cloudEffect.SetScale(0.25f);
-    this->cloudEffect.SetFrequency(0.075f);
+    this->cloudEffect.SetFrequency(0.08f);
     this->cloudEffect.SetFlowDirection(Vector3D(-1, 0, 1));
-    this->cloudEffect.SetMaskTexture(this->cloudTex);
+    this->cloudEffect.SetTexture(this->cloudTextures[0]);
     this->cloudEffect.SetLightPos(this->moonPos);
+    this->cloudEffect.SetAttenuation(0.038f);
 
     std::vector<ColourRGBA> cloudColours;
     cloudColours.reserve(6);
     cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 0.0f));
-    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 1.0f));
-    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 1.0f));
-    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 1.0f));
-    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 1.0f));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, MOON_CLOUD_ALPHA));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, MOON_CLOUD_ALPHA));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, MOON_CLOUD_ALPHA));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, MOON_CLOUD_ALPHA));
     cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 0.0f));
-    cloudFader.SetColours(cloudColours);
+    this->moonCloudFader.SetColours(cloudColours);
 
-    this->BuildCloudEmitter(Point3D(-70.0f, moonPos[1] - 4.0f, -48.0f), 
-        Point3D(-50.0f, moonPos[1] + 5.0f, -42.0f), 1, this->cloudEmitter1);
+    cloudColours.clear();
+    cloudColours.reserve(6);
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 0.0f));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, LESS_VISIBLE_CLOUD_ALPHA));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, LESS_VISIBLE_CLOUD_ALPHA));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, LESS_VISIBLE_CLOUD_ALPHA));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, LESS_VISIBLE_CLOUD_ALPHA));
+    cloudColours.push_back(ColourRGBA(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT, 0.0f));
+    this->lessVisibleCloudFader.SetColours(cloudColours);
+
+    // Moon cloud emitter
+    this->BuildCloudEmitter(Point3D(-70.0f, moonPos[1] - 4.0f, -45.0f), 
+        Point3D(-50.0f, moonPos[1] + 5.0f, -42.0f), 1, this->moonCloudFader, this->moonCloudEmitter);
+    // Lower clouds
+    this->BuildCloudEmitter(Point3D(-70.0f, moonPos[1] - 38.0f, -49.0f), 
+        Point3D(-50.0f, moonPos[1] - 9.0f, -46.0f), 1, this->lessVisibleCloudFader, this->lowerCloudEmitter);
 }
 
 void GothicRomanticWorldAssets::ApplyRandomFireAccel(ESPParticleAccelEffector& accelEffector) {
@@ -196,18 +232,20 @@ void GothicRomanticWorldAssets::ApplyRandomFireAccel(ESPParticleAccelEffector& a
 	accelEffector.SetAcceleration(Vector3D(accelVec, 0.0f));
 }
 
-void GothicRomanticWorldAssets::BuildCloudEmitter(const Point3D& min, const Point3D& max, int dir, ESPVolumeEmitter& emitter) {
+void GothicRomanticWorldAssets::BuildCloudEmitter(const Point3D& min, const Point3D& max, int dir, 
+                                                  ESPMultiColourEffector& colourEffector, ESPVolumeEmitter& emitter) {
 
     emitter.SetEmitVolume(min, max);
     emitter.SetSpawnDelta(ESPInterval(45.0f, 55.0f));
     emitter.SetInitialSpd(ESPInterval(0.6f, 0.85f));
     emitter.SetParticleLife(ESPInterval(190.0f, 210.0f));
-    emitter.SetParticleSize(ESPInterval(50.0f, 100.0f), ESPInterval(15.0f, 30.0f));
+    emitter.SetParticleSize(ESPInterval(60.0f, 100.0f), ESPInterval(15.0f, 22.0f));
     emitter.SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     emitter.SetEmitDirection(Vector3D(dir*1,0,0));
-    emitter.AddEffector(&this->cloudFader);
+    emitter.AddEffector(&colourEffector);
     emitter.AddEffector(&this->cloudGrower);
-    emitter.SetParticles(10, &this->cloudEffect);
+    emitter.SetRandomTextureEffectParticles(10, &this->cloudEffect, this->cloudTextures);
+
     for (int i = 0; i < 100; i++) {
         emitter.Tick(10.0);
     }
@@ -238,7 +276,7 @@ void GothicRomanticWorldAssets::BuildFrontDoorFireEmitter(const Point3D& pos, ES
     emitter.SetEmitDirection(Vector3D(0,1,0));
 	emitter.AddEffector(&this->fireColourFader);
 	emitter.AddEffector(&this->fireParticleScaler);
-	emitter.SetParticles(NUM_FIRE_PARTICLES, &this->fireEffect);
+	emitter.SetRandomTextureEffectParticles(NUM_FIRE_PARTICLES, &this->fireEffect, this->cloudTextures);
 }
 
 void GothicRomanticWorldAssets::BuildWindowWallFireEmitter(const Point3D& pos, ESPPointEmitter& emitter) {
