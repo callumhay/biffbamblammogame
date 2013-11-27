@@ -54,9 +54,12 @@ public:
 
 			// Decrease the magnitude of the shake based on expired time (use linear interpolation)...
 			Vector3D lerpShakeMagMultiplier = this->shakeMagnitude - (this->shakeTimeElapsed  * this->shakeMagnitude / this->shakeTimeTotal);
-			glTranslatef(lerpShakeMagMultiplier[0]*sin(this->shakeVar), 
-									 lerpShakeMagMultiplier[1]*sin(this->shakeVar), 
-									 lerpShakeMagMultiplier[2]*sin(this->shakeVar));
+			float shakeSine = sin(this->shakeVar);
+
+            glTranslatef(
+                lerpShakeMagMultiplier[0]*shakeSine,
+                lerpShakeMagMultiplier[1]*shakeSine, 
+                lerpShakeMagMultiplier[2]*shakeSine);
 			
 			this->shakeVar += dT * this->shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
 			if (this->shakeVar > 1.0) {
@@ -66,6 +69,26 @@ public:
 			this->shakeTimeElapsed += dT;
 		}
 	}
+
+    Vector3D TickAndGetCameraShakeTransform(double dT) {
+        Vector3D lerpShakeMagMultiplier(0,0,0);
+
+        if (this->shakeTimeElapsed < this->shakeTimeTotal) {
+
+            // Decrease the magnitude of the shake based on expired time (use linear interpolation)...
+            lerpShakeMagMultiplier = this->shakeMagnitude - (this->shakeTimeElapsed  * this->shakeMagnitude / this->shakeTimeTotal);
+            lerpShakeMagMultiplier *= sin(this->shakeVar);
+
+            this->shakeVar += dT * this->shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
+            if (this->shakeVar > 1.0) {
+                this->shakeVar -= 1.0;
+            }
+
+            this->shakeTimeElapsed += dT;
+        }
+
+        return lerpShakeMagMultiplier;
+    }
 
 	static void SetWindowDimensions(int w, int h) {
 		assert(w > 0 && h > 0);
@@ -116,7 +139,7 @@ public:
 	 * Set the view matrix and its inverse to be the identity matrix.
 	 */
 	void Reset() {
-		this->viewMatrix		= Matrix4x4();
+		this->viewMatrix    = Matrix4x4();
 		this->invViewMatrix = Matrix4x4();
 	}
 

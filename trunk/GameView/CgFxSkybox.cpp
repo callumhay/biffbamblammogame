@@ -25,7 +25,7 @@ const char* CgFxSkybox::SKYBOX_TECHNIQUE_NAME = "Skybox";
 CgFxSkybox::CgFxSkybox(Texture *skyTex) :
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_SKYBOX_SHADER), skyTex(skyTex),
 timer(0.0f), twinkleFreq(0.01f), moveFreq(0.0055f), noiseScale(0.005f), fgScale(0.78f), alpha(1.0f),
-noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
+noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), uvTranslation(0,0) {
 
 	assert(skyTex != NULL);
 
@@ -48,6 +48,7 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
     this->moveFreqParam    = cgGetNamedEffectParameter(this->cgEffect, "MoveFreq"); 
     this->noiseScaleParam  = cgGetNamedEffectParameter(this->cgEffect, "NoiseScale");
 	this->viewDirParam     = cgGetNamedEffectParameter(this->cgEffect, "ViewDir");
+    this->uvTranslateParam = cgGetNamedEffectParameter(this->cgEffect, "UVTranslate");
 
 	debug_cg_state();
 }
@@ -74,6 +75,8 @@ void CgFxSkybox::SetupBeforePasses(const Camera& camera) {
 
 	Vector3D camDir = camera.GetNormalizedViewVector();
 	cgGLSetParameter3fv(this->viewDirParam, camDir.begin());
+
+    cgGLSetParameter2fv(this->uvTranslateParam, this->uvTranslation.begin());
 
 	// Set noise sampler
 	cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);

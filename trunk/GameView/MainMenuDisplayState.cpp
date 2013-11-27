@@ -58,18 +58,16 @@ const double MainMenuDisplayState::FADE_OUT_TIME_IN_SECS = 1.25;
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info) : 
 DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
-eraseProgVerifyHandler(NULL), volItemHandler(NULL),
+eraseProgVerifyHandler(NULL), volItemHandler(NULL), postMenuFBObj(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
 menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
-particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), bbbLogoTex(NULL),
+particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), bgLoopedSoundID(INVALID_SOUND_ID),
+titleDisplay(display->GetTextScalingFactor(), 0.25, display->GetSound()),
 blammopediaItemIndex(-1), creditsItemIndex(-1), doAnimatedFadeIn(info.GetDoAnimatedFadeIn()),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
              GameViewConstants::GetInstance()->LICENSE_TEXT) {
-
-    // Play the main menu background music...
-    this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::MainMenuBackgroundLoop, true);
 
     this->madeByTextLabel.SetColour(Colour(1,1,1));
     this->madeByTextLabel.SetScale(this->display->GetTextScalingFactor());
@@ -84,10 +82,6 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture2D::Trilinear, GL_TEXTURE_2D));
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture2D::Trilinear, GL_TEXTURE_2D));
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D));
-
-    this->bbbLogoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_BBB_LOGO, Texture::Trilinear));
-    assert(this->bbbLogoTex != NULL);
 
 	// Setup any emitter/sprite/particle effects
 	this->InitializeESPEffects();
@@ -111,7 +105,8 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 	this->fadeAnimation.SetInterpolantValue(1.0f);
 
 	// Setup any full-screen effects
-    this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+    this->menuFBO       = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+    this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 
 	// Allocate memory...
@@ -165,6 +160,8 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 
 	delete this->menuFBO;
 	this->menuFBO = NULL;
+    delete this->postMenuFBObj;
+    this->postMenuFBObj = NULL;
 	delete this->bloomEffect;
 	this->bloomEffect = NULL;
 
@@ -175,8 +172,6 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 		assert(success);
 	}
 
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bbbLogoTex);
-    assert(success);
     UNUSED_VARIABLE(success);
 
 	// Clean up any left over emitters
@@ -232,7 +227,7 @@ void MainMenuDisplayState::InitializeMainMenu()  {
 	this->mainMenu->SetColourScheme(MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR, MainMenuDisplayState::MENU_ITEM_SEL_COLOUR, 
 	                                MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
 
-	// Setup submenues
+	// Setup sub-menus
 	this->InitializeOptionsSubMenu();
 
 	// Scale the labels based on the height/width of the window
@@ -348,9 +343,7 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->optionsSubMenu->SetColourScheme(MainMenuDisplayState::SUBMENU_ITEM_IDLE_COLOUR, MainMenuDisplayState::MENU_ITEM_SEL_COLOUR, 
 	                                      MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
 
-	// Add the toggle fullscreen item
-	//subMenuLabelSm.SetText("TODO: Fullscreen:");
-	//subMenuLabelLg.SetText("TODO: Fullscreen:");
+	// Add the toggle full screen item
 	std::vector<std::string> fullscreenOptions;
 	fullscreenOptions.reserve(2);
 	fullscreenOptions.push_back("On");
@@ -496,9 +489,19 @@ void MainMenuDisplayState::SetupBloomEffect() {
  * Render the menu and any other stuff associated with it.
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
-	bool finishFadeAnim = this->fadeAnimation.Tick(dT);
+	bool finishFadeAnim = false;
+    
+    if (this->titleDisplay.IsFinishedAnimating()) {
+        // Play the main menu background music...
+        if (this->bgLoopedSoundID == INVALID_SOUND_ID) {
+            this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::MainMenuBackgroundLoop, true);
+        }
+        finishFadeAnim = this->fadeAnimation.Tick(dT);
+    }
 
-    const Camera& camera = this->display->GetCamera();
+    Camera& camera = this->display->GetCamera();
+    Vector3D shakeAmt = camera.TickAndGetCameraShakeTransform(dT);
+
     GameSound* sound = this->display->GetSound();
     GameModel* model = this->display->GetModel();
     MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
@@ -589,15 +592,14 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw the background...
-    bgRenderer->DrawBG(camera);
+    bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1]);
 
     Camera menuCamera;
 	menuCamera.SetPerspective();
 	menuCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
 
 	this->RenderBackgroundEffects(dT, menuCamera);
-	this->RenderTitle();
-
+	
     // Figure out where the menu needs to be to ensure it doesn't clip with the bottom of the screen...
     this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT * this->display->GetTextScalingFactor());
 	// Render the menu
@@ -622,18 +624,21 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	// Fade-in/out overlay
     if (this->fadeAnimation.GetTargetValue() == 0.0f) {
         if (this->doAnimatedFadeIn) {
-            bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
         }
         else {
-            bgRenderer->DrawNonAnimatedFadeBG(this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
         }
+        this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
     }
     else {
+        this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
+
         if (this->changeToPlayGameState) {
-            bgRenderer->DrawNonAnimatedFadeBG(this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
         }
         else {
-            bgRenderer->DrawBG(camera, this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
         }
     }
 
@@ -641,43 +646,13 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	// Do bloom on the menu screen and draw it
 	this->bloomEffect->Draw(DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
-	this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
+	
+    this->postMenuFBObj->BindFBObj();
+    this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
+    this->postMenuFBObj->UnbindFBObj();
+    this->postMenuFBObj->GetFBOTexture()->RenderTextureToFullscreenQuad();
 
 	debug_opengl_state();
-}
-
-/**
- * Render the title for the menu screen.
- */
-void MainMenuDisplayState::RenderTitle() {
-    float scaleFactor = GameDisplay::GetTextScalingFactor();
-
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4f(1,1,1,1);
-
-    Camera::PushWindowCoords();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
-    float xSize = 1.05f*scaleFactor*1024.0f;
-    float xSizeDiv2 = xSize/2.0f;
-    float ySize = 1.05f*scaleFactor*512.0f;
-    float ySizeDiv2 = ySize/2.0f;
-
-    const float VERT_DIST_FROM_EDGE  = scaleFactor * -25;
-
-    glTranslatef((Camera::GetWindowWidth() - xSize) / 2.0f + xSizeDiv2, Camera::GetWindowHeight() - ySizeDiv2 - VERT_DIST_FROM_EDGE, 0);
-    glScalef(xSize, ySize, 1.0f);
-    this->bbbLogoTex->BindTexture();
-    GeometryMaker::GetInstance()->DrawQuad();
-    this->bbbLogoTex->UnbindTexture();
-    glPopMatrix();
-    Camera::PopWindowCoords();
-
-    glPopAttrib();
 }
 
 /**
@@ -838,6 +813,10 @@ void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& presse
     UNUSED_PARAMETER(magnitude);
 	assert(this->mainMenu != NULL);
 
+    if (!this->titleDisplay.IsFinishedAnimating()) {
+        return;
+    }
+
 	// Tell the main menu about the key pressed event
     if (this->eraseFailedPopup->GetIsVisible() || this->eraseSuccessfulPopup->GetIsVisible()) {
         this->eraseSuccessfulPopup->ButtonPressed(pressedButton);
@@ -850,6 +829,11 @@ void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& presse
 
 void MainMenuDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	assert(this->mainMenu != NULL);
+
+    if (!this->titleDisplay.IsFinishedAnimating()) {
+        return;
+    }
+
 	// Tell the main menu about the key pressed event
     if (this->eraseFailedPopup->GetIsVisible() || this->eraseSuccessfulPopup->GetIsVisible()) {
     }
@@ -864,6 +848,8 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 
 	delete this->menuFBO;
 	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
+    delete this->postMenuFBObj;
+    this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 }
 

@@ -25,6 +25,10 @@ public:
     void SetMoveFrequency(float freq) { this->moveFreq = freq; }
     void SetFGScale(float scale) { this->fgScale = scale; }
     void SetAlpha(float alpha) { this->alpha = alpha; }
+    void SetUVTranslation(float s, float t) {
+        this->uvTranslation[0] = s;
+        this->uvTranslation[1] = t;
+    }
 
     Texture* GetSkyTexture() const { return this->skyTex; }
 
@@ -45,13 +49,15 @@ private:
 	CGparameter timerParam;
     CGparameter alphaParam;
 	CGparameter viewDirParam;
+    CGparameter uvTranslateParam;
 
 	CGparameter noiseSamplerParam;
 	CGparameter skySamplerParam;
 
 	// Stored values for parameters
 	float timer, twinkleFreq, moveFreq, noiseScale, fgScale, alpha;
-	GLint noiseTexID; 
+	Vector2D uvTranslation;
+    GLint noiseTexID; 
 	Texture* skyTex;
 
 	Vector3D viewDir;

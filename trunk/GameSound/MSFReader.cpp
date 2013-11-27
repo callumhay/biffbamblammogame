@@ -320,6 +320,9 @@ void MSFReader::InitSoundTypeMapping() {
 	}
 
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuBackgroundLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuTitleBiffSlamEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuTitleBamSlamEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuTitleBlammoSlamEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemChangedSelectionEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemEnteredEvent));
 	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemCancelEvent));

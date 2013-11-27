@@ -230,6 +230,13 @@ public:
         return v_[ idx ];
     }
 
+    Vector3D& operator*=(float s) {
+        v_[0] *= s;
+        v_[1] *= s;
+        v_[2] *= s;
+        return *this;
+    }
+
     bool IsZero() const;
 
     float dot(const Vector3D& other) const {
@@ -366,10 +373,10 @@ inline std::ostream& operator <<(std::ostream& os, const Vector3D& v) {
     return os << "v<" << v[0] << "," << v[1] << "," << v[2] << ">";
 }
 
-inline Vector3D operator *(float s, const Vector3D& v)
-{
+inline Vector3D operator *(float s, const Vector3D& v) {
     return Vector3D(s*v[0], s*v[1], s*v[2]);
 }
+
 inline Vector3D operator /(const Vector3D& v, float d) {
     assert(d != 0);
     return Vector3D(v[0]/d, v[1]/d, v[2]/d);

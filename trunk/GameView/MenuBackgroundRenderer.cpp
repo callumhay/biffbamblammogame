@@ -69,7 +69,15 @@ void MenuBackgroundRenderer::DrawBG(const Camera& camera, float alpha) {
     debug_opengl_state();
 }
 
-void MenuBackgroundRenderer::DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture* tex) {
+void MenuBackgroundRenderer::DrawShakeBG(const Camera& camera, float shakeX, float shakeY, float alpha) {
+
+    this->bgEffect->SetUVTranslation(shakeX, shakeY);
+    this->DrawBG(camera, alpha);
+    this->bgEffect->SetUVTranslation(0, 0);
+}
+
+void MenuBackgroundRenderer::DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture* tex, 
+                                                    float shakeS, float shakeT) {
     // Draw the fade quad overlay
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
     
@@ -80,7 +88,7 @@ void MenuBackgroundRenderer::DrawFadeOverlayWithTex(int width, int height, float
     GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(width, height, 
         GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(width) / static_cast<float>(tex->GetWidth()),
         GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(height) / static_cast<float>(tex->GetHeight()),
-        ColourRGBA(1,1,1, alpha));
+        ColourRGBA(1,1,1, alpha), shakeS, shakeT);
     tex->UnbindTexture();
 
     glPopAttrib();

@@ -46,6 +46,9 @@ public:
 
         // Menu sounds
 		MainMenuBackgroundLoop,
+        MainMenuTitleBiffSlamEvent,
+        MainMenuTitleBamSlamEvent,
+        MainMenuTitleBlammoSlamEvent,
 		MenuItemChangedSelectionEvent, 
 		MenuItemEnteredEvent,
 		MenuItemCancelEvent,
