@@ -190,7 +190,7 @@ public:
 
 
 	inline void DrawTiledFullScreenQuad(int width, int height, float tilingX, float tilingY,
-        const ColourRGBA& colour = ColourRGBA(1,1,1,1)) {
+        const ColourRGBA& colour = ColourRGBA(1,1,1,1), float tS = 0, float tT = 0) {
 		glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT |
             GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);
 		
@@ -211,10 +211,10 @@ public:
 
 		glColor4f(colour.R(), colour.G(), colour.B(), colour.A());
 		glBegin(GL_QUADS);
-				glTexCoord2f(0, 0); glVertex2f(0, 0);
-				glTexCoord2f(tilingX, 0); glVertex2f(width, 0);
-				glTexCoord2f(tilingX, tilingY); glVertex2f(width, height);
-				glTexCoord2f(0, tilingY); glVertex2f(0, height);
+				glTexCoord2f(tS, tT); glVertex2f(0, 0);
+				glTexCoord2f(tS + tilingX, tT); glVertex2f(width, 0);
+				glTexCoord2f(tS + tilingX, tT + tilingY); glVertex2f(width, height);
+				glTexCoord2f(tS, tT + tilingY); glVertex2f(0, height);
 		glEnd();
 
 		glPopMatrix();

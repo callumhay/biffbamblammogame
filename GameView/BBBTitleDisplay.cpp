@@ -2,7 +2,7 @@
  * BBBTitleDisplay.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -12,169 +12,232 @@
 #include "BBBTitleDisplay.h"
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
-#include "../BlammoEngine/Vector.h"
+
+#include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/Texture2D.h"
+#include "../BlammoEngine/GeometryMaker.h"
+
+#include "../GameSound/GameSound.h"
+
 #include "../ResourceManager.h"
 
-const char* BBBTitleDisplay::TITLE_BIFF_TEXT    = "Biff!";
-const char* BBBTitleDisplay::TITLE_BAM_TEXT     = "Bam!!";
-const char* BBBTitleDisplay::TITLE_BLAMMO_TEXT  = "Blammo!?!";
+BBBTitleDisplay::BBBTitleDisplay(float scaleFactor, double fadeInTime, GameSound* sound) : 
+scaleFactor(scaleFactor), alpha(1.0f), sound(sound), biffTex(NULL), bamTex(NULL), blammoTex(NULL),
+sphereNormalsTex(NULL), isFinishedAnimating(false), particleFader(1, 0), particleSuperGrowth(1.0f, 20.0f),
+biffSlamEffectDone(false), bamSlamEffectDone(false), blammoSlamEffectDone(false) {
 
-//const float BBBTitleDisplay::OUTLINE_SIZE_MULTIPLIER = 1.04f;
+    this->biffTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BIFF_LOGO, Texture::Trilinear));
+    assert(this->biffTex != NULL);
+    this->bamTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BAM_LOGO, Texture::Trilinear));
+    assert(this->bamTex != NULL);
+    this->blammoTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BLAMMO_LOGO, Texture::Trilinear));
+    assert(this->blammoTex != NULL);
 
-BBBTitleDisplay::BBBTitleDisplay(float scale) : blammoWidth(0), scale(scale) {
+    static const float STARTING_SCALE_FACTOR = 10.0f;
 
-	// Setup any textures for rendering the title
-	this->bangTextures.reserve(3);
-	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture2D::Trilinear, GL_TEXTURE_2D));
-	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture2D::Trilinear, GL_TEXTURE_2D));
-	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D));
+    static const double FIRST_DELAY  = 0.42;
+    static const double SECOND_DELAY = 0.39;
 
-    // Setup the full title display...
-    static const float TEXT_DROP_SHADOW_SCALE_COEFF = 0.06f;
+    // Setup the animations
+    std::vector<double> scaleTimeVals;
+    scaleTimeVals.reserve(3);
+    scaleTimeVals.push_back(fadeInTime);
+    scaleTimeVals.push_back(fadeInTime + 0.22);
+    scaleTimeVals.push_back(fadeInTime + 0.225);
 
-    // "Biff!" Bang Title Text
-	this->biffEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->biffEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->biffEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->biffEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->biffEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->biffEmitter.SetParticleRotation(ESPInterval(-10));
-	this->biffEmitter.SetParticleSize(ESPInterval(scale*10), ESPInterval(scale*5));
-	this->biffEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[0]));
+    std::vector<float> scaleVals;
+    scaleVals.reserve(scaleTimeVals.size());
+    scaleVals.push_back(STARTING_SCALE_FACTOR);
+    scaleVals.push_back(0.75f);
+    scaleVals.push_back(1.0f);
 
-	this->biffTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->biffTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->biffTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->biffTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->biffTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->biffTextEmitter.SetParticleRotation(ESPInterval(-10));
-	this->biffTextEmitter.SetParticleSize(ESPInterval(scale*1), ESPInterval(scale*1));
-	
-    //this->biffTextOutlineEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-    //this->biffTextOutlineEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-    //this->biffTextOutlineEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-    //this->biffTextOutlineEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-    //this->biffTextOutlineEmitter.SetParticleAlignment(ESP::ScreenAligned);
-    //this->biffTextOutlineEmitter.SetParticleRotation(ESPInterval(-10));
-    //this->biffTextOutlineEmitter.SetParticleSize(ESPInterval(scale*OUTLINE_SIZE_MULTIPLIER), ESPInterval(scale*OUTLINE_SIZE_MULTIPLIER));
-    //this->biffTextOutlineEmitter.SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+    std::vector<double> alphaTimeVals;
+    alphaTimeVals.reserve(2);
+    alphaTimeVals.push_back(fadeInTime);
+    alphaTimeVals.push_back(fadeInTime + 0.15);
 
-	TextLabel2D biffTitleText(GameFontAssetsManager::GetInstance()->GetFont(
-        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge),
-        TITLE_BIFF_TEXT);
-	biffTitleText.SetDropShadow(Colour(0,0,0), TEXT_DROP_SHADOW_SCALE_COEFF*scale);
-    biffTitleText.SetScale(scale);
-	this->biffTextEmitter.SetParticles(1, biffTitleText);
-    //biffTitleText.SetDropShadowAmount(0.0f);
-    //this->biffTextOutlineEmitter.SetParticles(1, biffTitleText);
+    std::vector<float> alphaVals;
+    alphaVals.reserve(alphaTimeVals.size());
+    alphaVals.push_back(0.0f);
+    alphaVals.push_back(1.0f);
 
-	// "Bam!!" Bang title text
-	this->bamEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->bamEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->bamEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->bamEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->bamEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->bamEmitter.SetParticleRotation(ESPInterval(-15));
-	this->bamEmitter.SetParticleSize(ESPInterval(scale*11.0f), ESPInterval(scale*5.0f));
-	this->bamEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[1]));
+    this->biffScaleAnim.SetLerp(scaleTimeVals, scaleVals);
+    this->biffScaleAnim.SetRepeat(false);
+    this->biffScaleAnim.SetInterpolantValue(STARTING_SCALE_FACTOR);
+    
+    this->biffAlphaAnim.SetLerp(alphaTimeVals, alphaVals);
+    this->biffAlphaAnim.SetRepeat(false);
+    this->biffAlphaAnim.SetInterpolantValue(0.0f);
 
-	this->bamTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->bamTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->bamTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->bamTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->bamTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->bamTextEmitter.SetParticleRotation(ESPInterval(-15));
-	this->bamTextEmitter.SetParticleSize(ESPInterval(scale*1), ESPInterval(scale*1));
+    std::transform(scaleTimeVals.begin(), scaleTimeVals.end(), scaleTimeVals.begin(), std::bind2nd(std::plus<double>(), FIRST_DELAY));
+    std::transform(alphaTimeVals.begin(), alphaTimeVals.end(), alphaTimeVals.begin(), std::bind2nd(std::plus<double>(), FIRST_DELAY));
+    this->bamScaleAnim.SetLerp(scaleTimeVals, scaleVals);
+    this->bamScaleAnim.SetInterpolantValue(STARTING_SCALE_FACTOR);
 
-	TextLabel2D bamTitleText(GameFontAssetsManager::GetInstance()->GetFont(
-        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge),
-        TITLE_BAM_TEXT);
-	bamTitleText.SetDropShadow(Colour(0,0,0), TEXT_DROP_SHADOW_SCALE_COEFF*scale);
-    bamTitleText.SetScale(scale);
-	this->bamTextEmitter.SetParticles(1, bamTitleText);
+    this->bamAlphaAnim.SetLerp(alphaTimeVals, alphaVals);
+    this->bamAlphaAnim.SetRepeat(false);
+    this->bamAlphaAnim.SetInterpolantValue(0.0f);
 
-	// "Blammo!?!" Bang title text
-	this->blammoEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->blammoEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->blammoEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->blammoEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->blammoEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->blammoEmitter.SetParticleRotation(ESPInterval(-8));
-	this->blammoEmitter.SetParticleSize(ESPInterval(scale*12.0f), ESPInterval(scale*6.5f));
-	this->blammoEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[2]));
+    std::transform(scaleTimeVals.begin(), scaleTimeVals.end(), scaleTimeVals.begin(), std::bind2nd(std::plus<double>(), SECOND_DELAY));
+    std::transform(alphaTimeVals.begin(), alphaTimeVals.end(), alphaTimeVals.begin(), std::bind2nd(std::plus<double>(), SECOND_DELAY));
+    this->blammoScaleAnim.SetLerp(scaleTimeVals, scaleVals);
+    this->blammoScaleAnim.SetInterpolantValue(STARTING_SCALE_FACTOR);
 
-	this->blammoTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->blammoTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->blammoTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->blammoTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->blammoTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->blammoTextEmitter.SetParticleRotation(ESPInterval(-8));
-	this->blammoTextEmitter.SetParticleSize(ESPInterval(scale*1), ESPInterval(scale*1));
+    this->blammoAlphaAnim.SetLerp(alphaTimeVals, alphaVals);
+    this->blammoAlphaAnim.SetRepeat(false);
+    this->blammoAlphaAnim.SetInterpolantValue(0.0f);
 
-	TextLabel2D blammoTitleText(GameFontAssetsManager::GetInstance()->GetFont(
-        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), 
-		TITLE_BLAMMO_TEXT);
-	blammoTitleText.SetDropShadow(Colour(0,0,0), TEXT_DROP_SHADOW_SCALE_COEFF*scale);
-    blammoTitleText.SetScale(scale);
-	this->blammoWidth = blammoTitleText.GetLastRasterWidth();
-	this->blammoTextEmitter.SetParticles(1, blammoTitleText);
+
+    this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
+    assert(this->sphereNormalsTex != NULL);
+
+    this->normalTexRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
+    this->normalTexRefractEffect.SetWarpAmountParam(27.0f);
+    this->normalTexRefractEffect.SetIndexOfRefraction(1.2f);
+    this->normalTexRefractEffect.SetNormalTexture(this->sphereNormalsTex);
+
+    this->SetupShockwave(-324*scaleFactor, 157*scaleFactor, this->biffShockwave);
+    this->SetupShockwave(-130*scaleFactor, -90*scaleFactor, this->bamShockwave);
+    this->SetupShockwave( 241*scaleFactor, -40*scaleFactor, this->blammoShockwave);
 }
 
 BBBTitleDisplay::~BBBTitleDisplay() {
-	// Release texture assets that we no longer need
-	for (size_t i = 0; i < this->bangTextures.size(); i++) {
-		bool releaseTexSuccess = ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTextures[i]);
-        UNUSED_VARIABLE(releaseTexSuccess);
-		assert(releaseTexSuccess);
-	}
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->biffTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bamTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->blammoTex);
+    assert(success);
+
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
+    assert(success);
+
+    UNUSED_VARIABLE(success);
 }
 
-void BBBTitleDisplay::SetAlpha(float alpha) {
-    this->biffEmitter.SetParticleAlpha(ESPInterval(alpha));
-    this->bamEmitter.SetParticleAlpha(ESPInterval(alpha));
-    this->blammoEmitter.SetParticleAlpha(ESPInterval(alpha));
 
-    this->biffTextEmitter.SetParticleAlpha(ESPInterval(alpha));
-    this->bamTextEmitter.SetParticleAlpha(ESPInterval(alpha));
-    this->blammoTextEmitter.SetParticleAlpha(ESPInterval(alpha));
+void BBBTitleDisplay::Draw(double dT, Camera& camera, const Texture2D* fboTex) {
+    const float VERT_DIST_FROM_EDGE = this->scaleFactor * -25;
+
+    // Setup the base size values
+    float xSize = 1.05f * this->scaleFactor * 1024.0f;
+    float ySize = 1.05f * this->scaleFactor * 512.0f;
+
+    // Tick all of the animations
+    bool biffDoneAnimating = this->biffScaleAnim.Tick(dT);
+    biffDoneAnimating &= this->biffAlphaAnim.Tick(dT);
+
+    bool bamDoneAnimating = this->bamScaleAnim.Tick(dT);
+    bamDoneAnimating &= this->bamAlphaAnim.Tick(dT);
+
+    bool blammoDoneAnimating = this->blammoScaleAnim.Tick(dT);
+    blammoDoneAnimating &= this->blammoAlphaAnim.Tick(dT);
+
+    this->isFinishedAnimating = blammoDoneAnimating && bamDoneAnimating && biffDoneAnimating; 
+
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    Camera::PushWindowCoords();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Always translate to the same center, the elements of the title will scale about this center
+    glTranslatef((Camera::GetWindowWidth() - xSize) / 2.0f + xSize / 2.0f, 
+        Camera::GetWindowHeight() - ySize / 2.0f - VERT_DIST_FROM_EDGE, 0);
+
+    static const double CAMERA_SHAKE_DURATION  = 0.6;
+    static const float CAMERA_BASE_SHAKE_MAG   = 0.2f;
+    static const float CAMERA_BASE_SHAKE_SPEED = 85.0f;
+
+    // Draw the after effects when necessary
+    if (biffDoneAnimating) {
+        //this->biffSlamEffectsDone = true;
+        this->normalTexRefractEffect.SetFBOTexture(fboTex);
+        this->biffShockwave.Tick(dT);
+        this->biffShockwave.Draw(camera);
+
+        if (!this->biffSlamEffectDone) {
+            this->sound->PlaySound(GameSound::MainMenuTitleBiffSlamEvent, false, false);
+            camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
+            this->biffSlamEffectDone = true;
+        }
+
+        if (bamDoneAnimating) {
+            this->bamShockwave.Tick(dT);
+            this->bamShockwave.Draw(camera);
+
+            if (!this->bamSlamEffectDone) {
+                this->sound->PlaySound(GameSound::MainMenuTitleBamSlamEvent, false, false);
+                camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
+                this->bamSlamEffectDone = true;
+            }
+
+            if (blammoDoneAnimating) {
+                this->blammoShockwave.Tick(dT);
+                this->blammoShockwave.Draw(camera);
+
+                if (!this->blammoSlamEffectDone) {
+                    this->sound->PlaySound(GameSound::MainMenuTitleBlammoSlamEvent, false, false);
+                    camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
+                    this->blammoSlamEffectDone = true;
+                }
+            }
+        }
+    }
+
+    // Draw "Biff!"
+    float biffScale = this->biffScaleAnim.GetInterpolantValue();
+    glPushMatrix();
+    glScalef(xSize*biffScale, ySize*biffScale, 1.0f);
+    this->biffTex->BindTexture();
+    glColor4f(1, 1, 1, this->alpha * this->biffAlphaAnim.GetInterpolantValue());
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    // Draw "Bam!!"
+    float bamScale = this->bamScaleAnim.GetInterpolantValue();
+    glPushMatrix();
+    glScalef(xSize*bamScale, ySize*bamScale, 1.0f);
+    glColor4f(1, 1, 1, this->alpha * this->bamAlphaAnim.GetInterpolantValue());
+    this->bamTex->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    // Draw "Blammo!?!"
+    float blammoScale = this->blammoScaleAnim.GetInterpolantValue();
+    glPushMatrix();
+    glScalef(xSize*blammoScale, ySize*blammoScale, 1.0f);
+    this->blammoTex->BindTexture();
+    glColor4f(1, 1, 1, this->alpha * this->blammoAlphaAnim.GetInterpolantValue());
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    glPopMatrix();
+    Camera::PopWindowCoords();
+
+    glPopAttrib();
 }
 
-void BBBTitleDisplay::Draw(float x, float y, const Camera& camera) {
-
-	// Draw the "Biff!" Text
-	Point3D BIFF_EMIT_COORD = Point3D(x, y - this->scale*3.0f, 0);
-
-	this->biffEmitter.OverwriteEmittedPosition(BIFF_EMIT_COORD);
-	this->biffEmitter.Tick(0.1);
-	this->biffEmitter.Draw(camera);
-
-    //this->biffTextOutlineEmitter.OverwriteEmittedPosition(BIFF_EMIT_COORD);
-    //this->biffTextOutlineEmitter.Tick(0.1);
-    //this->biffTextOutlineEmitter.Draw(camera);
-
-	this->biffTextEmitter.OverwriteEmittedPosition(BIFF_EMIT_COORD);
-	this->biffTextEmitter.Tick(0.1);
-	this->biffTextEmitter.Draw(camera);
-
-	// Draw the "Bam!!" Text
-	Point3D BAM_EMIT_COORD = Point3D(x + this->scale*5.5f, y - this->scale*4.5f, 0);
-
-	this->bamEmitter.OverwriteEmittedPosition(BAM_EMIT_COORD);
-	this->bamEmitter.Tick(0.1);
-	this->bamEmitter.Draw(camera);
-	
-	this->bamTextEmitter.OverwriteEmittedPosition(BAM_EMIT_COORD);
-	this->bamTextEmitter.Tick(0.1);
-	this->bamTextEmitter.Draw(camera);
-
-	// Draw the "Blammo!?!" Text
-	Point3D BLAMMO_EMIT_COORD = Point3D(x + this->scale*11.5f, y - this->scale*6.75f, 0);
-
-	this->blammoEmitter.OverwriteEmittedPosition(BLAMMO_EMIT_COORD);
-	this->blammoEmitter.Tick(0.1);
-	this->blammoEmitter.Draw(camera);
-
-	this->blammoTextEmitter.OverwriteEmittedPosition(BLAMMO_EMIT_COORD);
-	this->blammoTextEmitter.Tick(0.1);
-	this->blammoTextEmitter.Draw(camera);
+void BBBTitleDisplay::SetupShockwave(float x, float y, ESPPointEmitter& shockwaveEmitter) {
+    shockwaveEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    shockwaveEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    shockwaveEmitter.SetParticleLife(ESPInterval(0.33f));
+    shockwaveEmitter.SetParticleSize(ESPInterval(scaleFactor * 128));
+    shockwaveEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    shockwaveEmitter.SetParticleAlignment(ESP::NoAlignment);
+    shockwaveEmitter.SetEmitPosition(Point3D(x, y, 0));
+    shockwaveEmitter.SetEmitDirection(Vector3D(0,1,0));
+    shockwaveEmitter.SetToggleEmitOnPlane(true);
+    shockwaveEmitter.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    shockwaveEmitter.AddEffector(&this->particleFader);
+    shockwaveEmitter.AddEffector(&this->particleSuperGrowth);
+    shockwaveEmitter.SetParticles(1, &this->normalTexRefractEffect);
 }

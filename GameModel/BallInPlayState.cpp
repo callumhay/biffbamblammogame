@@ -137,15 +137,21 @@ void BallInPlayState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
     if (GameBall::GetIsBallCameraOn()) {
         const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+            
             GameBall* currBall = *iter;
             if (currBall->IsLoadedInCannonBlock()) {
                 CannonBlock* cannon = currBall->GetCannonBlock();
                 assert(cannon != NULL);
                 cannon->SetRotationSpeed(dir, magnitudePercent);
+                
                 if (dir != 0 && magnitudePercent > 0.0f) {
                     // EVENT: Player just controlled the rotation of the cannon
                     GameEventManager::Instance()->ActionBallCameraCannonRotation(*currBall, *cannon);
                 }
+
+                // Ensure that all other things being controlled are told to stop
+                GameState::MoveKeyPressedForPaddle(0, 0);
+
                 return;
             }
         }

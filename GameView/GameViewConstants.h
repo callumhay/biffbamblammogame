@@ -220,6 +220,9 @@ public:
     const char* TEXTURE_BOOST_MOUSE;
 
     const char* TEXTURE_BBB_LOGO;
+    const char* TEXTURE_BIFF_LOGO;
+    const char* TEXTURE_BAM_LOGO;
+    const char* TEXTURE_BLAMMO_LOGO;
 
     enum XBoxButtonType { XBoxPushButton, XBoxAnalogStick, XBoxTrigger };
     enum KeyboardButtonType { KeyboardChar, KeyboardSpaceBar };

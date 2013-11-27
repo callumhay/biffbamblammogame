@@ -29,8 +29,8 @@
 static const float BORDER_GAP = 10;
 
 SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const DisplayStateInfo& info, SoundID bgSoundLoopID) : 
-DisplayState(display), worldLabel(NULL), bgSoundLoopID(bgSoundLoopID), world(display->GetModel()->GetWorldByIndex(info.GetWorldSelectionIndex())), pressEscAlphaAnim(0.0f), 
-goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
+DisplayState(display), worldLabel(NULL), bgSoundLoopID(bgSoundLoopID), world(display->GetModel()->GetWorldByIndex(info.GetWorldSelectionIndex())), 
+pressEscAlphaAnim(0.0f), goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
 bossIconTexture(NULL), starGlowTexture(NULL), arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL), 
 autoUnlockAnimCountdown(0.25), playAutoUnlockAnim(false), totalNumGameStarsLabel(NULL), totalLabel(NULL),
 padlockTexture(NULL), freezePlayerInput(false), explosionTex(NULL), sphereNormalsTex(NULL), menuFBO(NULL), postMenuFBObj(NULL),

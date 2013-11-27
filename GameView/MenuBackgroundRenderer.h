@@ -26,7 +26,9 @@ public:
     ~MenuBackgroundRenderer();
 
     void DrawBG(const Camera& camera, float alpha = 1.0f);
+    void DrawShakeBG(const Camera& camera, float shakeX, float shakeY, float alpha = 1.0f);
     void DrawNonAnimatedFadeBG(float alpha);
+    void DrawNonAnimatedFadeShakeBG(float shakeX, float shakeY, float alpha);
 
     //void UseEffectWithDrawCall(const Camera& camera, boost::function<void()> drawFunc);
 
@@ -36,7 +38,7 @@ private:
     CgFxSkybox* bgEffect;
     GLuint fullscreenQuadDL;
 
-    static void DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture* tex);
+    static void DrawFadeOverlayWithTex(int width, int height, float alpha, const Texture* tex, float shakeS = 0, float shakeT = 0);
 
     DISALLOW_COPY_AND_ASSIGN(MenuBackgroundRenderer);
 };
@@ -48,6 +50,10 @@ private:
 
 inline void MenuBackgroundRenderer::DrawNonAnimatedFadeBG(float alpha) {
     DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), alpha, this->GetMenuBGTexture());
+}
+
+inline void MenuBackgroundRenderer::DrawNonAnimatedFadeShakeBG(float shakeX, float shakeY, float alpha) {
+    DrawFadeOverlayWithTex(Camera::GetWindowWidth(), Camera::GetWindowHeight(), alpha, this->GetMenuBGTexture(), shakeX, shakeY);
 }
 
 inline Texture* MenuBackgroundRenderer::GetMenuBGTexture() const {

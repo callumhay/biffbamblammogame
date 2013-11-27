@@ -2,10 +2,10 @@ A Change of View
 15 30
 E E E S S S S S S S S S E E E 
 E S S T(S,ul) E E E E E E E T(S,ur) S S E 
-E S E E E G E E E G E E E S E 
-E S E E E E E G E E E E E S E 
+E S E E E G E G E G E E E S E 
 E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
+E S E E E E E S E E E E E S E 
+E S E E E S S S S S E E E S E 
 S S S C(180) S S S D(BallCam,BallCam,BallCam) S S S C(180) S S S 
 S E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E S 

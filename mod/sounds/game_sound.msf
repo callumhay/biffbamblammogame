@@ -9,6 +9,16 @@ MainMenuBackgroundLoop {
 	file = resources/MainMenuBackgroundLoop.ogg
 }
 
+MainMenuTitleBiffSlamEvent {
+	file = resources/MainMenuTitleBiffSlamEvent.ogg
+}
+MainMenuTitleBamSlamEvent {
+	file = resources/MainMenuTitleBamSlamEvent.ogg
+}
+MainMenuTitleBlammoSlamEvent {
+	file = resources/MainMenuTitleBlammoSlamEvent.ogg
+}
+
 // Plays when the user highlights (i.e., changes the selection to) a new item in a menu
 MenuItemChangedSelectionEvent {
 	file = resources/MenuItemChangedSelectionEvent.ogg

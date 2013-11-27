@@ -25,6 +25,7 @@
 #include "DisplayState.h"
 #include "DecoratorOverlayPane.h"
 #include "PopupTutorialHint.h"
+#include "BBBTitleDisplay.h"
 
 #include "../ConfigOptions.h"
 
@@ -96,6 +97,7 @@ private:
 
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
+    FBObj* postMenuFBObj;
 
     TextLabel2D madeByTextLabel;
     TextLabel2D licenseLabel;
@@ -106,7 +108,7 @@ private:
 
 	std::vector<Texture*> bangTextures;
 	
-    Texture2D* bbbLogoTex;
+    BBBTitleDisplay titleDisplay;
 
 	GameMenu* mainMenu;             // Main (top-most/parent) menu
 	GameSubMenu* optionsSubMenu;    // Options sub-menu
@@ -140,7 +142,6 @@ private:
 
 	void SetupBloomEffect();
 
-	void RenderTitle();
 	void RenderBackgroundEffects(double dT, Camera& menuCam);
 
 	void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
