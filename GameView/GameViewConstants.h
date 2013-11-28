@@ -165,6 +165,7 @@ public:
     const char* TEXTURE_GOTHIC_ROMANTIC_BLOCK_IMG;
     const char* TEXTURE_NOUVEAU_BLOCK_IMG;
     const char* TEXTURE_DECO_BLOCK_IMG;
+    const char* TEXTURE_FUTURISM_BLOCK_IMG;
 
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;
@@ -184,6 +185,7 @@ public:
     const char* TEXTURE_BOOST_HUD_TRAILFILL_1;
     const char* TEXTURE_BOOST_HUD_TRAILFILL_2;
     const char* TEXTURE_BOOST_HUD_TRAILFILL_3;
+    const char* TEXTURE_BOOST_MALFUNCTION;
 
 	const char* TEXTURE_STARFIELD;
 	

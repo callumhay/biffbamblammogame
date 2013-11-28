@@ -37,14 +37,13 @@ const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
 	Colour(0.3137f, 0.7843f, 0.47f),                // Emerald Green
 	Colour(1.0f, 0.6f, 0.4f),                       // Grapefruit pink
 	Colour(0.57647f, 0.4392f, 0.8588f),             // Medium Purple
-	Colour(0.45098f, 0.76078f, 0.98431f)            // Maya Blue
 };
 
 GameMenu::GameMenu() : topLeftCorner(Point2D(0,0)), menuItemPadding(0.0f),
 selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f),
 alignment(GameMenu::LeftJustified)  {
 	
-	this->bgColour = Colour(0.45098f, 0.76078f, 0.98431f);	// Maya Blue
+	this->bgColour = Colour(0.6f, 0.4f, 0.8f);
 	this->SetupAnimations();
 }
 
@@ -52,7 +51,7 @@ GameMenu::GameMenu(const Point2D& topLeftCorner) : topLeftCorner(topLeftCorner),
 selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f),
 alignment(GameMenu::LeftJustified) {
 	
-	this->bgColour = Colour(0.45098f, 0.76078f, 0.98431f);	// Maya Blue
+	this->bgColour = Colour(0.6f, 0.4f, 0.8f);
 	this->SetupAnimations();
 }
 

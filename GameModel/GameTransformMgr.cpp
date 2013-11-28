@@ -37,7 +37,8 @@ const double GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM = 0.015;
 const float GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL = 20.0f;
 
 GameTransformMgr::GameTransformMgr() : paddleWithCamera(NULL), ballWithCamera(NULL), 
-remoteControlRocketWithCamera(NULL), currGameDegRotX(0), currGameDegRotY(0), currGameDegRotZ(0) {
+remoteControlRocketWithCamera(NULL), currGameDegRotX(0), currGameDegRotY(0), currGameDegRotZ(0), 
+lastBallCamZRot(0), currBallCamZRot(0) {
 	this->Reset();
 }
 
@@ -82,6 +83,8 @@ void GameTransformMgr::Reset() {
     this->currGameDegRotZ = 0.0f;
 	this->isFlipped = false;
 	this->isBallDeathCamIsOn = false;
+    this->lastBallCamZRot = 0.0f;
+    this->currBallCamZRot = 0.0f;
 
 	this->ClearSpecialCamEffects();
 	this->levelFlipAnimations.clear();
@@ -130,11 +133,24 @@ void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
 	// Add the paddle cam transform to the queue
 	TransformAnimation transformAnim(animType);
 	// Make sure we compress the last transform in the animation queue if it is also a paddle camera transform
-	if (this->animationQueue.size() > 0) {
+	while (this->animationQueue.size() > 0) {
 		GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
-		if (previousType == GameTransformMgr::ToPaddleCamAnimation || previousType == GameTransformMgr::FromPaddleCamAnimation) {
+		
+        if (previousType == GameTransformMgr::ToPaddleCamAnimation || 
+            previousType == GameTransformMgr::FromPaddleCamAnimation) {
 			this->animationQueue.pop_back();
 		}
+        else if (previousType == GameTransformMgr::ToBulletTimeCamAnimation || 
+            previousType == GameTransformMgr::FromBulletTimeCamAnimation) {
+
+                // Kill any bullet time animations and reset the camera orientation -- this shouldn't happen,
+                // but just in case...
+                this->bulletTimeCamAnimation.ClearLerp();
+                this->animationQueue.pop_back();
+        }
+        else {
+            break;
+        }
 	}
 	this->animationQueue.push_back(transformAnim);
 }
@@ -163,9 +179,18 @@ void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
     while (!this->animationQueue.empty()) {
 
         GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
+        
         if (previousType == GameTransformMgr::ToBallCamAnimation || 
             previousType == GameTransformMgr::FromBallCamAnimation) {
 
+                this->animationQueue.pop_back();
+        }
+        else if (previousType == GameTransformMgr::ToBulletTimeCamAnimation || 
+                 previousType == GameTransformMgr::FromBulletTimeCamAnimation) {
+
+                // Kill any bullet time animations and reset the camera orientation -- this shouldn't happen,
+                // but just in case...
+                this->bulletTimeCamAnimation.ClearLerp();
                 this->animationQueue.pop_back();
         }
         else {
@@ -178,7 +203,7 @@ void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
 /**
  * This will either enable the camera that focuses on the last ball as it dies or
  * takes the focus off the last dieing ball.
- * This will obliterate all other transforms occuring in the transform manager
+ * This will obliterate all other transforms occurring in the transform manager
  * and ONLY play the animation for the camera at ball death.
  */
 void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
@@ -575,6 +600,9 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                 // Update the camera position and rotation based on the movement of the ball and the level transform
 		        this->GetBallCamPositionRotationAndFOV(*this->ballWithCamera, currLevel->GetLevelUnitWidth(), 
                                                        currLevel->GetLevelUnitHeight(), this->currCamOrientation, this->cameraFOVAngle);
+
+                // Exponential decay towards the last z rotation from the current one...
+                this->currBallCamZRot = NumberFuncs::LerpOverTime(0.0, 0.1, this->currBallCamZRot, this->lastBallCamZRot, dT);
 	        }
         }
     }
@@ -616,20 +644,38 @@ void GameTransformMgr::GetBallCamPositionRotationAndFOV(const GameBall& ball, fl
 
     // If we're in ball camera mode and the ball is in a cannon block then we rotate
     // the camera with the cannon block...
-    // TODO: make the rotation a little more creative...?
     const CannonBlock* cannon = ball.GetCannonBlock();
     if (cannon != NULL) {
+
+        this->currBallCamZRot = cannon->GetCurrentCannonAngleInDegs() + 90;
+        this->lastBallCamZRot = this->currBallCamZRot;
+
         ballCamOri.SetZYXRotation(this->GetGameXYZTransform() * 
-            Vector3D(cannon->GetCurrentCannonAngleInDegs() + 90, 0.0f, this->GetXRotationForBallCam()));
-        
-        // We need to adjust the fov so that we 
-        //Point2D endOfBarrel = cannon->GetEndOfBarrelPoint();
-        
+            Vector3D(this->currBallCamZRot, 0.0f, this->GetXRotationForBallCam()));
         fov = 45.0f;
     }
     else {
-        ballCamOri.SetXYZRotation(this->GetGameXYZTransform() * 
-            Vector3D(this->GetXRotationForBallCam(), 0.0f, 0.0f));
+        this->lastBallCamZRot = 0.0f;
+
+        // We'll be a bit more creative than just point the camera downwards:
+        // Check to see if the ball is traveling in the direction of a reasonably downwards-pointed
+        // trajectory, if so then we use that to modify the lock-at direction of the camera...
+        static const float MODIFY_LOOKAT_CUTOFF_ANGLE_IN_DEGS = 45.0f;
+        static const float MODIFY_LOOKAT_CUTOFF_ANGLE_IN_RADS = Trig::degreesToRadians(MODIFY_LOOKAT_CUTOFF_ANGLE_IN_DEGS);
+        const Vector2D& ballDir = ball.GetDirection();
+        if (!ballDir.IsZero()) {
+
+            // Get the angle of the ball's direction in the space of the downwards vector
+            float angle = atan2(ballDir[1], ballDir[0]);
+            angle += M_PI_DIV2;
+
+            if (fabs(angle) <= MODIFY_LOOKAT_CUTOFF_ANGLE_IN_RADS) {
+                this->lastBallCamZRot = Trig::radiansToDegrees(angle);
+            }
+        }
+        
+        ballCamOri.SetZYXRotation(this->GetGameXYZTransform() * 
+            Vector3D(this->currBallCamZRot, 0.0f, this->GetXRotationForBallCam()));
         fov = std::min<float>(75.0f, 50.0f + 15.0f * (ballBounds.Radius() / GameBall::DEFAULT_BALL_RADIUS));
     }
 }
@@ -960,6 +1006,10 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
 		// We are going into ball camera mode... animate the camera from wherever
 		// it currently is, into the ball and animate its orientation appropriately
+
+        this->currBallCamZRot = 0.0f;
+        this->lastBallCamZRot = 0.0f;
+
 
 		// The values for the camera orientation during the ball camera animation...
 		// We want the camera to go into the ball and then turn towards the paddle

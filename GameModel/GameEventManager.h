@@ -74,7 +74,7 @@ public:
     void ActionPaddleHitByBoss(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
 	void ActionBallDied(const GameBall& deadBall);
 	void ActionLastBallAboutToDie(const GameBall& ballAboutToDie);
-	void ActionLastBallExploded(const GameBall& explodedBall);
+	void ActionLastBallExploded(const GameBall& explodedBall, bool wasSkipped);
 	void ActionAllBallsDead(int livesLeft);
 	void ActionBallSpawn(const GameBall& spawnBall);
 	void ActionBallShot(const GameBall& shotBall);
@@ -125,6 +125,7 @@ public:
     void ActionBallBoostGained();
     void ActionBallBoostLost(bool allBoostsLost);
     void ActionBallBoostUsed();
+    void ActionBoostFailedDueToNoBallsAvailable();
 
     void ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet);
     void ActionBallCameraCannonRotation(const GameBall& ball, const CannonBlock& cannon);

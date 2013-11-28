@@ -138,8 +138,12 @@ public:
 	 * Event triggered when the last ball explodes in a blaze of horrible, horrible glory.
 	 * This event is triggered once just as the ball explodes (but is not officially dead yet).
 	 * Arguments: explodedBall - The ball that is exploding / just exploded.
+     *            wasSkipped   - Whether or not the dead sequence was skipped by the player.
 	 */
-    virtual void LastBallExploded(const GameBall& explodedBall) { UNUSED_PARAMETER(explodedBall); }
+    virtual void LastBallExplodedEvent(const GameBall& explodedBall, bool wasSkipped) {
+        UNUSED_PARAMETER(explodedBall);
+        UNUSED_PARAMETER(wasSkipped);
+    }
 
 	/**
 	 * Event triggered when one of the game balls has died. This event is triggered
@@ -428,6 +432,7 @@ public:
     // Args: allBoostsLost - true if all boosts were lost
     virtual void BallBoostLostEvent(bool allBoostsLost) { UNUSED_PARAMETER(allBoostsLost); }
     virtual void BallBoostUsedEvent() {}
+    virtual void BoostFailedDueToNoBallsAvailableEvent() {}
 
     /** 
      * Event triggered when the ball camera has been set or unset (this is after the full animation into or out of

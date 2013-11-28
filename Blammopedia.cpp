@@ -651,6 +651,18 @@ Blammopedia::SolidBlockEntry::~SolidBlockEntry() {
     this->blockTextureFilenameMap.clear();
 }
 
+Texture2D* Blammopedia::SolidBlockEntry::GetBlockTexture(int furthestWorldIdx) const {
+    assert(furthestWorldIdx+1 <= static_cast<int>(this->blockTextureMap.size()));
+
+    int randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % (furthestWorldIdx+1);
+    assert(randomIdx >= 0 && randomIdx <= furthestWorldIdx);
+
+    std::map<GameWorld::WorldStyle, Texture2D*>::const_iterator findIter =
+        this->blockTextureMap.find(static_cast<GameWorld::WorldStyle>(randomIdx));
+    assert(findIter != this->blockTextureMap.end());
+    return findIter->second;
+};
+
 bool Blammopedia::SolidBlockEntry::PopulateFromFile() {
     
     long fileLength;
@@ -674,7 +686,8 @@ bool Blammopedia::SolidBlockEntry::PopulateFromFile() {
     for (std::map<GameWorld::WorldStyle, const char*>::const_iterator iter = this->blockTextureFilenameMap.begin();
         iter != this->blockTextureFilenameMap.end(); ++iter) {
 
-        this->blockTextureMap.insert(std::make_pair(iter->first, static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        this->blockTextureMap.insert(std::make_pair(iter->first, 
+            static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
             iter->second, Texture::Trilinear, GL_TEXTURE_2D))));
     }
 

@@ -62,14 +62,15 @@
 
 // Wait times before showing the same effect - these prevent the game view from displaying a whole ton
 // of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS       = 125;
-const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS        = 60;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		 = 80;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS     = 125;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS      = 60;
-const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS = 150;
-
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS        = 125;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS         = 60;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		  = 80;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS      = 125;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS       = 60;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS  = 150;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS           = 570;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS = 250;
+
 
 SoundID GameEventsListener::enterBulletTimeSoundID  = INVALID_SOUND_ID;
 SoundID GameEventsListener::exitBulletTimeSoundID   = INVALID_SOUND_ID;
@@ -77,11 +78,12 @@ SoundID GameEventsListener::inBulletTimeLoopSoundID = INVALID_SOUND_ID;
 
 GameEventsListener::GameEventsListener(GameDisplay* d) : 
 display(d), 
-timeSinceLastBallBossCollisionEventInMS(0),
-timeSinceLastBallBlockCollisionEventInMS(0),
-timeSinceLastBallPaddleCollisionEventInMS(0),
-timeSinceLastBallTeslaCollisionEventInMS(0),
-timeSinceLastControlledCannonRotationInMS(0),
+timeOfLastBallBossCollisionEventInMS(0),
+timeOfLastBallBlockCollisionEventInMS(0),
+timeOfLastBallPaddleCollisionEventInMS(0),
+timeOfLastBallTeslaCollisionEventInMS(0),
+timeOfLastControlledCannonRotationInMS(0),
+timeOfLastBoostMalfunctionInMS(0),
 numFallingItemsInPlay(0), fallingItemSoundID(INVALID_SOUND_ID){
 	assert(d != NULL);
 }
@@ -387,7 +389,8 @@ void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) {
 	debug_output("EVENT: Last ball is about to die.");
 
-	this->display->GetAssets()->ActivateLastBallDeathEffects(lastBallToDie);
+    GameAssets* assets = this->display->GetAssets();
+	assets->ActivateLastBallDeathEffects(lastBallToDie);
 
 	// Setup the sound to quiet everything else and play the sound of the ball spiraling to its most horrible death
     GameSound* sound = this->display->GetSound();
@@ -414,26 +417,40 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
 	sound->PlaySound(GameSound::LastBallSpiralingToDeathLoop, false, true, true);
 
 	// Clear out the timers - they no longer matter since the ball is doomed
-	this->display->GetAssets()->GetItemAssets()->ClearTimers();
+    assets->GetItemAssets()->ClearTimers();
+    // Show the skip label, if the player can skip the death animation
+    if (this->display->GetModel()->GetLivesLeft() > 1) {
+        assets->ToggleSkipLabel(true);
+    }
 }
 
-void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
-	debug_output("EVENT: Last ball exploded.");
+void GameEventsListener::LastBallExplodedEvent(const GameBall& explodedBall, bool wasSkipped) {
+	GameAssets* assets = this->display->GetAssets();
+    
+    // Stop showing the skip label
+    assets->ToggleSkipLabel(false);
 
-	// Add a cool effect for when the ball explodes
-	this->display->GetAssets()->GetESPAssets()->AddBallExplodedEffect(&explodedBall);
-
-	// Stop the spiraling sound loop, restore all previous sounds to their proper volume and add the sound for the last ball exploding
+    // Stop the spiraling sound loop, restore all previous sounds to their proper volume and add the sound for the last ball exploding
     GameSound* sound = this->display->GetSound();
     sound->StopAllEffects();
     sound->DetachAndStopAllSounds(&explodedBall);
-    sound->PlaySound(GameSound::LastBallExplodedEvent, false);
+	
+    if (wasSkipped) {
+        sound->StopAllSoundsWithType(GameSound::LastBallSpiralingToDeathLoop, 0.5);
+    }
+    else {
+        // Add a cool effect for when the ball explodes
+	    assets->GetESPAssets()->AddBallExplodedEffect(&explodedBall);
+        sound->PlaySound(GameSound::LastBallExplodedEvent, false);
+    }
     
     // Set the background loop back to full volume
     sound->SetSoundTypeVolume(GameSound::WorldBackgroundLoop, 1.0f);
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoop, 1.0f);
     sound->SetSoundTypeVolume(GameSound::BossAngryBackgroundLoop, 1.0f);
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoopTransition, 1.0f);
+
+    debug_output("EVENT: Last ball exploded.");
 }
 
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
@@ -535,7 +552,7 @@ void GameEventsListener::ProjectileBossCollisionEvent(const Projectile& projecti
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
 	
     long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-	bool doEffects = (currSystemTime - this->timeSinceLastBallBlockCollisionEventInMS) > 
+	bool doEffects = (currSystemTime - this->timeOfLastBallBlockCollisionEventInMS) > 
         GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
     bool isBallVelocityZero = ball.GetVelocity().IsZero();
 
@@ -581,13 +598,13 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
             ball.GetPosition3D(), true, true, true);
     }
 
-	this->timeSinceLastBallBlockCollisionEventInMS = currSystemTime;
+	this->timeOfLastBallBlockCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball-block collision");
 }
 
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
 	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-	bool doEffect = (currSystemTime - this->timeSinceLastBallPaddleCollisionEventInMS) > 
+	bool doEffect = (currSystemTime - this->timeOfLastBallPaddleCollisionEventInMS) > 
 	    EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 
 	if (doEffect) {
@@ -640,7 +657,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 		GameControllerManager::GetInstance()->VibrateControllers(0.15f, vibrationLeft, vibrationRight);
 	}
 
-	this->timeSinceLastBallPaddleCollisionEventInMS = currSystemTime;
+	this->timeOfLastBallPaddleCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball-paddle collision");
 }
 
@@ -649,7 +666,7 @@ void GameEventsListener::BallBossCollisionEvent(GameBall& ball, const Boss& boss
     UNUSED_PARAMETER(bossPart);
 
     long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-    bool doEffects = (currSystemTime - this->timeSinceLastBallBossCollisionEventInMS) > 
+    bool doEffects = (currSystemTime - this->timeOfLastBallBossCollisionEventInMS) > 
         GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
     bool isBallVelocityZero = ball.GetVelocity().IsZero();
 
@@ -664,13 +681,13 @@ void GameEventsListener::BallBossCollisionEvent(GameBall& ball, const Boss& boss
         }
     }
 
-    bool doSound = (currSystemTime - this->timeSinceLastBallBossCollisionEventInMS) >
+    bool doSound = (currSystemTime - this->timeOfLastBallBossCollisionEventInMS) >
         GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BALL_BOSS_COLLISIONS_IN_MS;
     if (doSound && !isBallVelocityZero) {
         this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBossCollisionEvent, false, ball.GetPosition3D(), true, true, true);
     }
 
-    this->timeSinceLastBallBossCollisionEventInMS = currSystemTime;
+    this->timeOfLastBallBossCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball-boss collision");
 }
 
@@ -850,7 +867,7 @@ void GameEventsListener::GamePauseStateChangedEvent(int32_t oldPauseState, int32
 void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball) {
 
 	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-	bool doEffect = (currSystemTime - this->timeSinceLastBallTeslaCollisionEventInMS) > 
+	bool doEffect = (currSystemTime - this->timeOfLastBallTeslaCollisionEventInMS) > 
 									EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
 
 	if (doEffect) {
@@ -864,7 +881,7 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball) {
     // Play the sound for the ball hitting the lightning
     this->display->GetSound()->PlaySoundAtPosition(GameSound::BallTeslaLightningCollisionEvent, false, ball.GetPosition3D(), true, true, true);
 
-	this->timeSinceLastBallTeslaCollisionEventInMS = currSystemTime;
+	this->timeOfLastBallTeslaCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball hit Tesla lightning arc");
 }
 
@@ -1460,6 +1477,29 @@ void GameEventsListener::BallBoostLostEvent(bool allBoostsLost) {
     }
 }
 
+void GameEventsListener::BoostFailedDueToNoBallsAvailableEvent() {
+    GameAssets* assets = this->display->GetAssets();
+    
+    // Check to see if the ball / paddle camera is on...
+    if (GameBall::GetIsBallCameraOn()) {
+
+        long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+        bool doSound = (currSystemTime - this->timeOfLastBoostMalfunctionInMS) > 
+            SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS;
+
+        if (assets->GetBallCamHUD()->GetIsMalfunctionHUDActive() && doSound) {
+            // Play the sound for when a ball can't boost due to malfunction
+            this->display->GetSound()->PlaySound(GameSound::BoostAttemptWhileMalfunctioningEvent, false, true, 1.0f);
+            this->timeOfLastBoostMalfunctionInMS = currSystemTime;
+        }
+
+        assets->GetBallCamHUD()->ActivateBoostMalfunctionHUD();
+    }
+    else if (this->display->GetModel()->GetPlayerPaddle()->GetIsPaddleCameraOn()) {
+        //assets->GetPaddleCamHUD()->ActivateBoostMalfunctionHUD();
+    }
+}
+
 void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet) {
 
     if (isSet) {
@@ -1471,6 +1511,7 @@ void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall& ball, bool is
         debug_output("EVENT: Ball camera set");
     }
     else {
+        this->display->GetAssets()->GetBallCamHUD()->Deactivate();
         debug_output("EVENT: Ball camera unset");
     }
 }
@@ -1480,12 +1521,12 @@ void GameEventsListener::BallCameraCannonRotationEvent(const GameBall& ball, con
     UNUSED_PARAMETER(cannon);
 
     long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-    bool doSound = (currSystemTime - this->timeSinceLastControlledCannonRotationInMS) > 
+    bool doSound = (currSystemTime - this->timeOfLastControlledCannonRotationInMS) > 
         SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS;
 
     if (doSound) {
         this->display->GetSound()->PlaySound(GameSound::CannonBlockRotatingPart, false);
-        this->timeSinceLastControlledCannonRotationInMS = currSystemTime;
+        this->timeOfLastControlledCannonRotationInMS = currSystemTime;
     }
 }
 

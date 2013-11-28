@@ -1737,6 +1737,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\BoostMalfunctionHUD.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CountdownHUD.h"
 						>
 					</File>
@@ -1778,6 +1782,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\BallReleaseHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BoostMalfunctionHUD.cpp"
 						>
 					</File>
 					<File

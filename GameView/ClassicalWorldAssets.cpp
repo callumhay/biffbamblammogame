@@ -2,7 +2,7 @@
  * ClassicalWorldAssets.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2012
+ * Callum Hay, 2012-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -10,11 +10,9 @@
  */
 
 #include "ClassicalWorldAssets.h"
+#include "Skybox.h"
 
 #include "../ResourceManager.h"
-
-// TODO: Get rid of this
-#include "Skybox.h"
 
 ClassicalWorldAssets::ClassicalWorldAssets(GameAssets* assets) :
 GameWorldAssets(assets, new Skybox(),

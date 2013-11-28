@@ -25,7 +25,9 @@
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
 #include "RemoteControlRocketHUD.h"
+#include "BoostMalfunctionHUD.h"
 #include "BallCamHUD.h"
+#include "ButtonTutorialHint.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 #include "RocketMesh.h"
@@ -83,7 +85,10 @@ pointsHUD(NULL),
 boostHUD(NULL),
 ballReleaseHUD(NULL),
 remoteControlRocketHUD(NULL),
+boostMalfunctionHUD(NULL),
 ballCamHUD(NULL),
+
+skipLabel(NULL),
 
 ball(NULL), 
 spikeyBall(NULL),
@@ -137,9 +142,16 @@ magnetPaddleEffect(NULL)
 	this->flashHUD       = new FlashHUD();
     this->pointsHUD      = new PointsHUD();
     this->boostHUD       = new BallBoostHUD(screenHeight);
-    this->ballReleaseHUD = new BallReleaseHUD(sound);
+    this->ballReleaseHUD = new BallReleaseHUD(this->sound);
     this->remoteControlRocketHUD = new RemoteControlRocketHUD(*this);
-    this->ballCamHUD = new BallCamHUD(*this);
+
+    this->boostMalfunctionHUD = new BoostMalfunctionHUD(this->sound);
+    this->ballCamHUD = new BallCamHUD(*this, this->boostMalfunctionHUD);
+    //this->paddleCamHUD = new PaddleCamHUD(*this, this->boostMalfunctionHUD);
+
+    this->skipLabel = new ButtonTutorialHint(this->tutorialAssets, "Skip");
+    this->skipLabel->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+    this->skipLabel->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -223,8 +235,17 @@ GameAssets::~GameAssets() {
     this->ballReleaseHUD = NULL;
     delete this->remoteControlRocketHUD;
     this->remoteControlRocketHUD = NULL;
+    
     delete this->ballCamHUD;
     this->ballCamHUD = NULL;
+    //delete this->paddleCamHUD;
+    //this->paddleCamHUD = NULL;
+
+    delete this->boostMalfunctionHUD;
+    this->boostMalfunctionHUD = NULL;
+
+    delete this->skipLabel;
+    this->skipLabel = NULL;
 }
 
 /**
@@ -1070,33 +1091,8 @@ void GameAssets::DrawMeshProjectiles(double dT, const GameModel& gameModel, cons
  * Draw informational game elements (e.g., tutorial bubbles, information about items acquired, etc.).
  */
 void GameAssets::DrawInformativeGameElements(const Camera& camera, double dT, const GameModel& gameModel) {
-	if (!this->randomToItemAnimation.GetIsActive()) {
-		return;
-	}
-
-    // Don't show and stop the informative random item animation if the player is in ball camera or
-    // paddle camera mode
-	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-    if (GameBall::GetIsBallCameraOn() || paddle->GetIsPaddleCameraOn()) {
-        this->randomToItemAnimation.Stop();
-        return;
-    }
-
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_DEPTH_TEST);
-
-	Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel.GetLevelUnitDimensions(), 0.0);
-	glPushMatrix();
-	Matrix4x4 gameTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
-	glMultMatrixf(gameTransform.begin());
-	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
-
-	// Draw the random item to actual item animation when required...
-	this->randomToItemAnimation.Draw(camera, dT);
-
-	glPopMatrix();
-
-	glPopAttrib();
+    this->DrawRandomToItemAnimation(camera, dT, gameModel);
+    this->DrawSkipDeathAnimation(camera, dT);
 }
 
 /**
@@ -1628,6 +1624,15 @@ void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info,
     this->flashHUD->Activate(info.GetTime(), 1.0f * flashMultiplier);
 }
 
+void GameAssets::ToggleSkipLabel(bool activate) {
+    if (activate) {
+        this->skipLabel->Show(0.0, 0.5);
+    }
+    else {
+        this->skipLabel->Unshow(0.0, 0.25);
+    }
+}
+
 /*
  * This will load a set of assets for use in a game based off a
  * given world-style, after loading all assets will be available for use in-game.
@@ -1667,6 +1672,7 @@ void GameAssets::ReinitializeAssets() {
     this->boostHUD->Reinitialize();
     this->ballReleaseHUD->Reinitialize();
     this->remoteControlRocketHUD->Reinitialize();
+    this->skipLabel->Unshow(0, 0, true);
 }
 
 void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem) {
@@ -1858,9 +1864,6 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGKeyLight, 1.5f);
 			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGFillLight, 1.5f);
 
-            // Turn off any ball camera HUD elements that might currently be on
-            this->ballCamHUD->Deactivate();
-
 			// Show the background once again...
 			this->worldAssets->FadeBackground(false, 2.0f);
 			break;
@@ -1927,4 +1930,50 @@ void GameAssets::DeactivateLastBallDeathEffects() {
 
 void GameAssets::ApplyRocketThrust(const PaddleRemoteControlRocketProjectile& rocket) {
     this->rocketMesh->ApplyRocketThrust(rocket);
+}
+
+void GameAssets::DrawRandomToItemAnimation(const Camera& camera, double dT, const GameModel& gameModel) {
+    if (!this->randomToItemAnimation.GetIsActive()) {
+        return;
+    }
+
+    // Don't show and stop the informative random item animation if the player is in ball camera or
+    // paddle camera mode
+    const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+    if (GameBall::GetIsBallCameraOn() || paddle->GetIsPaddleCameraOn()) {
+        this->randomToItemAnimation.Stop();
+        return;
+    }
+
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel.GetLevelUnitDimensions(), 0.0);
+    glPushMatrix();
+    Matrix4x4 gameTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
+    glMultMatrixf(gameTransform.begin());
+    glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
+
+    // Draw the random item to actual item animation when required...
+    this->randomToItemAnimation.Draw(camera, dT);
+
+    glPopMatrix();
+
+    glPopAttrib();
+}
+
+void GameAssets::DrawSkipDeathAnimation(const Camera& camera, double dT) {
+    
+    this->skipLabel->Tick(dT);
+    if (this->skipLabel->GetAlpha() <= 0.0f) {
+        return;
+    }
+
+    static const float HORIZONTAL_GAP = 10;
+    static const float VERTICAL_GAP   = 10;
+
+    this->skipLabel->SetTopLeftCorner(
+        Camera::GetWindowWidth() - this->skipLabel->GetWidth() - HORIZONTAL_GAP, this->skipLabel->GetHeight() + VERTICAL_GAP);
+
+    this->skipLabel->Draw(camera);
 }

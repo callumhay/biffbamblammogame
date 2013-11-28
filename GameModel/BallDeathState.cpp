@@ -76,6 +76,47 @@ BallDeathState::~BallDeathState() {
 	this->gameModel->UnsetPause(GameModel::PausePaddle);
 }
 
+void BallDeathState::ShootActionReleaseUse() {
+    // If this is being pressed then the user wants to skip the death animation...
+
+    // We don't let players skip the final death animation
+    if (this->gameModel->GetLivesLeft() <= 1) {
+        return;
+    }
+
+    switch (this->currAnimationState) {
+
+        case BallDeathState::SpiralingToDeath: {
+            // We need to clean some stuff up first and signal some events/functions to make sure
+            // all the 'housekeeping' is taken care of
+            
+            // EVENT: Ball just exploded, player skipped it...
+            GameEventManager::Instance()->ActionLastBallExploded(*this->lastBallToBeAlive, true);
+
+            bool stateChanged = false;
+            this->gameModel->BallDied(this->lastBallToBeAlive, stateChanged);
+            assert(stateChanged);
+
+            // The state has officially changed, get out of here immediately!
+            return;
+        }
+
+        case BallDeathState::Exploding:
+            // Don't wait for the explosion, go immediately to the dead state
+            this->timeElapsed = BallDeathState::EXPLOSION_ANIMATION_TIME_TOTAL;
+            this->currAnimationState = BallDeathState::Dead;
+            break;
+
+        case BallDeathState::Dead:
+            // Ignore the button press, we're going back to gameplay anyway
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+}
+
 /**
  * Follow the ball down into the abyss and then have it spiral and explodinate.
  */
@@ -121,7 +162,7 @@ void BallDeathState::ExecuteSpiralingToDeathState(double dT) {
 	float spiralXMultiplier	= -NumberFuncs::SignOf(this->initialBallVelocityDir[0]);
 	float modifiedRadius    = spiralXMultiplier * this->spiralRadius;
 
-	// To make the ball spiral we use a parameteric equation:
+	// To make the ball spiral we use a parametric equation:
 	Vector2D ballTranslation(modifiedRadius * cos(circleDistTravelled) - modifiedRadius, 
         (-this->spiralRadius * sin(circleDistTravelled)));
 
@@ -136,9 +177,9 @@ void BallDeathState::ExecuteSpiralingToDeathState(double dT) {
 		this->currAnimationState = BallDeathState::Exploding;
 		
 		// EVENT: Ball just exploded...
-		GameEventManager::Instance()->ActionLastBallExploded(*this->lastBallToBeAlive);
+		GameEventManager::Instance()->ActionLastBallExploded(*this->lastBallToBeAlive, false);
 
-		// Make the ball disappear as it explodes and also (sortof) stop moving
+		// Make the ball disappear as it explodes and also (sort of) stop moving
 		this->lastBallToBeAlive->SetAlpha(0.0f);
         this->lastBallToBeAlive->SetSpeed(GameBall::GetSlowestSpeed());
 	}

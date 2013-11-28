@@ -490,8 +490,9 @@ void MainMenuDisplayState::SetupBloomEffect() {
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
 	bool finishFadeAnim = false;
-    
-    if (this->titleDisplay.IsFinishedAnimating()) {
+    bool isTitleFinishedAnimating = this->titleDisplay.IsFinishedAnimating();
+
+    if (isTitleFinishedAnimating) {
         // Play the main menu background music...
         if (this->bgLoopedSoundID == INVALID_SOUND_ID) {
             this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::MainMenuBackgroundLoop, true);
@@ -600,6 +601,10 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	this->RenderBackgroundEffects(dT, menuCamera);
 	
+    if (isTitleFinishedAnimating && finishFadeAnim) {
+        this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
+    }
+
     // Figure out where the menu needs to be to ensure it doesn't clip with the bottom of the screen...
     this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT * this->display->GetTextScalingFactor());
 	// Render the menu
@@ -629,10 +634,15 @@ void MainMenuDisplayState::RenderFrame(double dT) {
         else {
             bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
         }
-        this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
+
+        if (!isTitleFinishedAnimating || !finishFadeAnim) {
+            this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
+        }
     }
     else {
-        this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
+        if (!isTitleFinishedAnimating || !finishFadeAnim) {
+            this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
+        }
 
         if (this->changeToPlayGameState) {
             bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());

@@ -637,6 +637,14 @@ BallBoostGainedEvent {
 	file = resources/BallBoostGainedEvent.ogg
 }
 
+BoostMalfunctionPromptEvent {
+	file = resources/BoostMalfunctionPromptEvent.ogg
+}
+
+BoostAttemptWhileMalfunctioningEvent {
+	file = resources/BoostAttemptWhileMalfunctioningEvent.ogg
+}
+
 // Star, points and life Events **********************************************
 
 LifeUpAcquiredEvent {

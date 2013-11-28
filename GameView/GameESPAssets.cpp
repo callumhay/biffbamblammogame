@@ -3649,8 +3649,37 @@ void GameESPAssets::AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESP
     std::vector<ESPPointEmitter*>& beamBlockOnlyEndEmittersVec = this->beamBlockOnlyEndEmitters[&beam];
     std::vector<ESPPointEmitter*>& beamEndFallingBitsEmittersVec = this->beamEndFallingBitsEmitters[&beam];
 
+    bool nextSegStartsWithLensFlare = false;
     for (std::list<BeamSegment*>::const_iterator iter = beamSegments.begin(); iter != beamSegments.end(); ++iter) {
         const BeamSegment* currentBeamSeg = *iter;
+        
+        // Handle a special case with portal blocks where we want the effect at the start of the beam
+        // as well, since there's a disconnect due to the "teleportation" of the beam through the portal
+        if (nextSegStartsWithLensFlare) {
+            beamEndEmittersVec.push_back(this->CreateBeamEndEffect(beam));
+            
+            ESPPointEmitter* beamEndEmitter = beamEndEmittersVec[beamEndCounter];
+            assert(beamEndEmitter != NULL);
+            beamEndEmitter->SetParticleSize(2.5 * currentBeamSeg->GetRadius());
+            beamEndEmitter->SetEmitPosition(Point3D(currentBeamSeg->GetStartPoint()));
+            beamEndEmitter->Reset();
+            beamEndEmitter->Tick(1.0f);
+            beamEmitters.push_back(beamEndEmitter);
+            beamEndCounter++;
+
+            beamFlareEmittersVec.push_back(this->CreateBeamFlareEffect(beam));
+            
+            ESPPointEmitter* beamStartFlare = beamFlareEmittersVec[beamFlareCounter];
+            assert(beamStartFlare != NULL);
+            beamStartFlare->SetParticleSize(5 * currentBeamSeg->GetRadius());
+            beamStartFlare->SetEmitPosition(Point3D(currentBeamSeg->GetStartPoint()));
+            beamStartFlare->Reset();
+            beamStartFlare->Tick(1.0f);
+            beamEmitters.push_back(beamStartFlare);
+            beamFlareCounter++;
+
+            nextSegStartsWithLensFlare = false;
+        }
 
         // Each beam segment has a blasty thingy at the end of it, if it ends at a 
         // prism block then it also has a lens flare...
@@ -3672,6 +3701,8 @@ void GameESPAssets::AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESP
 
         // Lens flare
         if (currentBeamSeg->GetCollidingPiece() != NULL) {
+            nextSegStartsWithLensFlare = (currentBeamSeg->GetCollidingPiece()->GetType() == LevelPiece::Portal);
+
             if (currentBeamSeg->GetCollidingPiece()->IsLightReflectorRefractor()) {
                 while (beamFlareEmittersVec.size() <= beamFlareCounter) {
                     beamFlareEmittersVec.push_back(this->CreateBeamFlareEffect(beam));
@@ -7067,9 +7098,7 @@ void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera, const Vecto
 		 iter != this->activeBeamEmitters.end(); ++iter) {
 
 		const Beam* beam = iter->first;
-        UNUSED_VARIABLE(beam);
 		std::list<ESPEmitter*>& beamEmitters = iter->second;
-		assert(beam != NULL);
 
 		// Update and draw the emitters...
 		for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {

@@ -209,6 +209,8 @@ public:
         ExitBulletTimeEvent,
         BallBoostEvent,
         BallBoostGainedEvent,
+        BoostMalfunctionPromptEvent,
+        BoostAttemptWhileMalfunctioningEvent,
 
         // -> Star, points and life sounds
         LifeUpAcquiredEvent,

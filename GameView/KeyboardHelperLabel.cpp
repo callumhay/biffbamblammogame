@@ -11,7 +11,10 @@
 
 #include "KeyboardHelperLabel.h"
 #include "GameViewConstants.h"
+#include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
+
+const float KeyboardHelperLabel::TEXT_KEY_PIC_GAP = 10;
 
 KeyboardHelperLabel::KeyboardHelperLabel(const GameFontAssetsManager::FontStyle& fontStyle, 
                                          const GameFontAssetsManager::FontSize& fontSize, 
@@ -21,22 +24,37 @@ KeyboardHelperLabel::KeyboardHelperLabel(const GameFontAssetsManager::FontStyle&
 keyTexture(NULL), xboxButtonTexture(NULL), keyLbl(NULL), buttonLbl(NULL), orLbl(NULL), beforeLbl(NULL),
 afterLbl(NULL), alpha(1.0f), xboxButtonDisplayOn(true) {
 
-    this->keyTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SHORT_KEYBOARD_KEY, 
-        Texture::Trilinear, GL_TEXTURE_2D);
+    std::string keyNameStr(keyName);
+    std::transform(keyNameStr.begin(), keyNameStr.end(), keyNameStr.begin(), ::toupper);
+
+    if (keyNameStr == "SPACE") {
+        this->keyTexture = ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_LONG_KEYBOARD_KEY, Texture::Trilinear, GL_TEXTURE_2D);
+    }
+    else {
+        this->keyTexture = ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_SHORT_KEYBOARD_KEY, Texture::Trilinear, GL_TEXTURE_2D);
+    }
     assert(this->keyTexture != NULL);
 
-    this->xboxButtonTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_XBOX_CONTROLLER_BUTTON, 
-        Texture::Trilinear, GL_TEXTURE_2D);
+    this->xboxButtonTexture = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_XBOX_CONTROLLER_BUTTON, Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->xboxButtonTexture != NULL); 
 
     this->beforeLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, fontSize), beforeTxt);
     this->beforeLbl->SetColour(Colour(0,0,0));
     
-    this->keyLbl    = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, fontSize), keyName);
+    this->keyLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, fontSize), keyName);
     this->keyLbl->SetColour(Colour(0,0,0));
     this->keyLbl->SetScale(0.5f);
 
-    this->buttonLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, fontSize), "B");
+    if (keyNameStr == "ESC") {
+        this->buttonLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, fontSize), "B");
+    }
+    else {
+        this->buttonLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, fontSize), "A");
+    }
+
     this->buttonLbl->SetColour(Colour(1,1,1));
     this->buttonLbl->SetScale(0.8f);
 
@@ -75,7 +93,6 @@ void KeyboardHelperLabel::SetScale(float scale) {
 }
 
 void KeyboardHelperLabel::Draw() {
-    static const float TEXT_KEY_PIC_GAP = 10;
     const float X_TEXT_LOC = this->beforeLbl->GetTopLeftCorner()[0];
     const float Y_TEXT_LOC = this->beforeLbl->GetTopLeftCorner()[1];
     const float KEY_SIZE = 2 * this->beforeLbl->GetHeight();
