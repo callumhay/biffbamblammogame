@@ -2,7 +2,7 @@
  * GameAssets.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -52,6 +52,8 @@ class BallBoostHUD;
 class BallReleaseHUD;
 class RemoteControlRocketHUD;
 class BallCamHUD;
+class BoostMalfunctionHUD;
+class ButtonTutorialHint;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 class RocketMesh;
@@ -195,6 +197,8 @@ public:
 
     void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera, const GameModel* gameModel);
 
+    void ToggleSkipLabel(bool activate);
+
 private:
     GameSound* sound; // Sound module for the game
 
@@ -213,7 +217,10 @@ private:
     BallBoostHUD* boostHUD;
     BallReleaseHUD* ballReleaseHUD;
     RemoteControlRocketHUD* remoteControlRocketHUD;
+    BoostMalfunctionHUD* boostMalfunctionHUD;
     BallCamHUD* ballCamHUD;
+
+    ButtonTutorialHint* skipLabel;
 
 	// Level-related meshes
 	LevelMesh* currentLevelMesh;
@@ -256,6 +263,9 @@ private:
     // Private draw functions
     void DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera);
     void DrawGameBallsBoostPostEffects(double dT, GameModel& gameModel, const Camera& camera);
+
+    void DrawRandomToItemAnimation(const Camera& camera, double dT, const GameModel& gameModel);
+    void DrawSkipDeathAnimation(const Camera& camera, double dT);
 
     DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };

@@ -27,7 +27,7 @@ skyboxDispList(0) {
 	assert(this->skyboxDispList != 0);
 
 	glNewList(this->skyboxDispList, GL_COMPILE);
-	Skybox::DrawSkyboxGeometry(4, (Camera::FAR_PLANE_DIST - 1.0f) / SQRT_2);
+	Skybox::DrawSkyboxGeometry(4, 0.5f);//(Camera::FAR_PLANE_DIST - 1.0f) / SQRT_2);
 	glEndList();
 }
 

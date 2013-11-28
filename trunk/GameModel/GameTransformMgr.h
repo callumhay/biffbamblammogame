@@ -69,6 +69,9 @@ public:
     float GetGameZRotationInDegs() const;
 
     bool GetIsLevelFlipAnimationActive() const;
+    bool GetIsBallCamAnimationActive() const;
+    bool GetIsPaddleCamAnimationActive() const;
+
     bool GetIsPaddleCameraOn() const;
     bool GetIsBallCameraOn() const;
     bool GetIsRemoteControlRocketCameraOn() const;
@@ -111,7 +114,10 @@ private:
 	bool isBallDeathCamIsOn;
 
 	PlayerPaddle* paddleWithCamera;	// Will be the paddle where the camera is in paddle cam mode, NULL otherwise
-	GameBall* ballWithCamera;       // Will be the ball where the camera is in ball cam mode, NULL otherwise
+	
+    GameBall* ballWithCamera;       // Will be the ball where the camera is in ball cam mode, NULL otherwise
+    float currBallCamZRot;
+    float lastBallCamZRot;
 
 	PaddleRemoteControlRocketProjectile* remoteControlRocketWithCamera; // The rocket where the camera is following it or inside it, NULL otherwise.
     Orientation3D storedCamOriBeforeRemoteControlRocketCam;
@@ -191,7 +197,6 @@ inline Matrix4x4 GameTransformMgr::GetCameraTransform() const {
 	return this->currCamOrientation.GetTransform().inverse();
 }
 
-
 /**
  * Get the current camera Field of View angle.
  */
@@ -205,6 +210,27 @@ inline float GameTransformMgr::GetGameZRotationInDegs() const {
 
 inline bool GameTransformMgr::GetIsLevelFlipAnimationActive() const {
     return !this->levelFlipAnimations.empty();
+}
+
+inline bool GameTransformMgr::GetIsBallCamAnimationActive() const {
+    for (std::list<TransformAnimation>::const_iterator iter = this->animationQueue.begin();
+         iter != this->animationQueue.end(); ++iter) {
+        
+        if (iter->type == ToBallCamAnimation || iter->type == FromBallCamAnimation) {
+            return true;
+        }
+    }
+    return false;
+}
+inline bool GameTransformMgr::GetIsPaddleCamAnimationActive() const {
+    for (std::list<TransformAnimation>::const_iterator iter = this->animationQueue.begin();
+        iter != this->animationQueue.end(); ++iter) {
+
+            if (iter->type == ToPaddleCamAnimation || iter->type == FromPaddleCamAnimation) {
+                return true;
+            }
+    }
+    return false;
 }
 
 inline bool GameTransformMgr::GetIsPaddleCameraOn() const {

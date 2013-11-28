@@ -118,10 +118,10 @@ void GameEventManager::ActionLastBallAboutToDie(const GameBall& ballAboutToDie) 
 }
 
 // Action for when the last ball is exploding
-void GameEventManager::ActionLastBallExploded(const GameBall& explodedBall) {
+void GameEventManager::ActionLastBallExploded(const GameBall& explodedBall, bool wasSkipped) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->LastBallExploded(explodedBall);
+		(*listenerIter)->LastBallExplodedEvent(explodedBall, wasSkipped);
 	}	
 }
 
@@ -484,6 +484,13 @@ void GameEventManager::ActionBallBoostUsed() {
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
 		(*listenerIter)->BallBoostUsedEvent();
 	}
+}
+
+void GameEventManager::ActionBoostFailedDueToNoBallsAvailable() {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->BoostFailedDueToNoBallsAvailableEvent();
+    }
 }
 
 void GameEventManager::ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet) {

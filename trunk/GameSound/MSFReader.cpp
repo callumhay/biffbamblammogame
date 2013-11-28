@@ -468,6 +468,8 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, ExitBulletTimeEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostGainedEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BoostMalfunctionPromptEvent));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BoostAttemptWhileMalfunctioningEvent));
 
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LifeUpAcquiredEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, StarAcquiredEvent));

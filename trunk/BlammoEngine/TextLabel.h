@@ -199,6 +199,12 @@ public:
         }
 	}
 
+    void SetScale(float scale, const std::string& text) {
+        assert(scale != 0.0f);
+        this->scale = scale;
+        this->SetText(text);
+    }
+
 	void SetFont(const TextureFontSet* font) {
 		this->font = font;
         this->SetText(this->GetText());

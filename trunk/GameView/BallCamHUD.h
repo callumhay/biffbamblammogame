@@ -14,16 +14,20 @@
 
 #include "ButtonTutorialHint.h"
 #include "CountdownHUD.h"
+#include "BoostMalfunctionHUD.h"
 
 class GameAssets;
 
 class BallCamHUD {
 public:
-    BallCamHUD(GameAssets& assets);
+    BallCamHUD(GameAssets& assets, BoostMalfunctionHUD* boostMalfunctionHUD);
     ~BallCamHUD();
+
+    bool GetIsMalfunctionHUDActive() const;
 
     void Draw(double dT, const Camera& camera);
 
+    void ActivateBoostMalfunctionHUD();
     void ToggleCannonHUD(bool activate, const CannonBlock* cannon);
     void Deactivate();
     void Reinitialize();
@@ -31,6 +35,8 @@ public:
 private:
     static const float ROTATE_HINT_BOTTOM_FROM_SCREEN_BOTTOM;
 
+    BoostMalfunctionHUD* boostMalfunctionHUD; // Not owned by this object
+   
     const CannonBlock* cannon;
     bool cannonHUDActive;
     CountdownHUD cannonCountdown;
@@ -48,14 +54,28 @@ private:
     DISALLOW_COPY_AND_ASSIGN(BallCamHUD);
 };
 
+inline bool BallCamHUD::GetIsMalfunctionHUDActive() const {
+    return this->boostMalfunctionHUD->GetIsActive();
+}
+
 inline void BallCamHUD::Draw(double dT, const Camera& camera) {
 
     // Cannon HUD drawing
     this->DrawCannonHUD(dT, camera);
+
+    // Boost malfunction HUD drawing
+    this->boostMalfunctionHUD->Draw(dT, camera);
+}
+
+inline void BallCamHUD::ActivateBoostMalfunctionHUD() {
+    if (!this->cannonHUDActive) {
+        this->boostMalfunctionHUD->Activate();
+    }
 }
 
 inline void BallCamHUD::Deactivate() {
     this->ToggleCannonHUD(false, NULL);
+    this->boostMalfunctionHUD->Deactivate();
 }
 
 #endif // __BALLCAMHUD_H__

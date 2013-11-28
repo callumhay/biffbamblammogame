@@ -180,25 +180,6 @@ inline void CannonBlock::Fire() {
     this->fixedRotationXInDegs = this->currRotationFromXInDegs;
 }
 
-inline void CannonBlock::InitBallCameraInCannonValues(bool changeRotation, const GameBall& ball) {
-    // The player gains control of the cannon and will be able to fire it in any direction,
-    // to avoid disorienting the player, we re-orient the cannon to face downwards
-    this->totalRotationTime       = CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS;
-    this->elapsedRotationTime     = 0.0;
-    this->currRotationSpeed       = 0.0f;
-
-    if (changeRotation) {
-        // Figure out the direction to point in based on the direction the ball was coming from...
-        const Vector2D& ballDir = ball.GetDirection();
-        if (ballDir.IsZero()) {
-            this->currRotationFromXInDegs = -90.0f;
-        }
-        else {
-            this->currRotationFromXInDegs = atan2f(-ballDir[1], -ballDir[0]);
-        }
-    }
-}
-
 /**
  * Query the current pointing direction of the cannon.
  * Returns: The normalized direction the cannon is currently pointing in.

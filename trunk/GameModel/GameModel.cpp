@@ -1672,6 +1672,18 @@ void GameModel::ClearSpecificBeams(const Beam::BeamType& beamType) {
     }
 }
 
+bool GameModel::IsTimerTypeActive(const GameItem::ItemType& type) const {
+    for (std::list<GameItemTimer*>::const_iterator iter = this->activeTimers.begin();
+        iter != this->activeTimers.end(); ++iter) {
+
+        const GameItemTimer* timer = *iter;
+        if (timer->GetTimerItemType() == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool GameModel::GetIsUnusualCameraModeActive() const {
     bool unusualCamModeIsActive = (this->gameTransformInfo->GetIsPaddleCameraOn() || this->gameTransformInfo->GetIsBallCameraOn() ||
         this->gameTransformInfo->GetIsRemoteControlRocketCameraOn());

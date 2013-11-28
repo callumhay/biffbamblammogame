@@ -119,14 +119,7 @@ public:
         SolidBlockEntry(const std::string& filename);
         ~SolidBlockEntry();
         
-        Texture2D* GetBlockTexture(int furthestWorldIdx) const {
-            int randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % (furthestWorldIdx+1);
-            assert(randomIdx >= 0 && randomIdx <= furthestWorldIdx);
-            std::map<GameWorld::WorldStyle, Texture2D*>::const_iterator findIter =
-                this->blockTextureMap.find(static_cast<GameWorld::WorldStyle>(randomIdx));
-            assert(findIter != this->blockTextureMap.end());
-            return findIter->second;
-        };
+        Texture2D* GetBlockTexture(int furthestWorldIdx) const;
 
     private:
         bool PopulateFromFile();

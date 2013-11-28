@@ -16,10 +16,13 @@
 
 const float BallCamHUD::ROTATE_HINT_BOTTOM_FROM_SCREEN_BOTTOM = 150.0f;
 
-BallCamHUD::BallCamHUD(GameAssets& assets) :
+BallCamHUD::BallCamHUD(GameAssets& assets, BoostMalfunctionHUD* boostMalfunctionHUD) :
+boostMalfunctionHUD(boostMalfunctionHUD), 
 cannonRotateHint(assets.GetTutorialAssets(), "Rotate Cannon"),
 cannonFireHint(assets.GetTutorialAssets(), "Fire Cannon"),
 cannonCountdown(CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS), cannonHUDActive(false), cannon(NULL) {
+
+    assert(boostMalfunctionHUD != NULL);
 
     // Initialize the hints...
     std::list<GameViewConstants::XBoxButtonType> xboxButtonTypes;
@@ -95,6 +98,8 @@ void BallCamHUD::ToggleCannonHUD(bool activate, const CannonBlock* cannon) {
         this->overlayFadeAnim.SetLerp(0.5, 0.9f);
         this->cannonHUDActive = true;
         this->cannonCountdown.Reset();
+
+        this->boostMalfunctionHUD->Deactivate();
     }
     else {
 
@@ -117,6 +122,7 @@ void BallCamHUD::Reinitialize() {
     this->cannonCountdown.Reset();
     this->overlayFadeAnim.ClearLerp();
     this->overlayFadeAnim.SetInterpolantValue(0.0f);
+    this->boostMalfunctionHUD->Reset();
 }
 
 void BallCamHUD::DrawCannonHUD(double dT, const Camera& camera) {

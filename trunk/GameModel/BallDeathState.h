@@ -36,12 +36,13 @@ public:
 		return GameState::BallDeathStateType;
 	}
 
-	void Tick(double seconds);
-	void ShootActionReleaseUse() {}
-	void MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
-		UNUSED_PARAMETER(dir);
+    void ShootActionReleaseUse();
+    void MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
+        UNUSED_PARAMETER(dir);
         UNUSED_PARAMETER(magnitudePercent);
-	}
+    }
+
+	void Tick(double seconds);
 
 private:
 	// Constant Ball spiraling death values

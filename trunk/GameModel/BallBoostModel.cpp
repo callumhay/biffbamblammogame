@@ -165,6 +165,9 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
     else {
         // Boosting is disallowed currently...
         this->ReleaseBulletTime();
+
+        // EVENT: Boost attempt failed
+        GameEventManager::Instance()->ActionBoostFailedDueToNoBallsAvailable();
     }
 }
 
@@ -333,6 +336,11 @@ const std::list<GameBall*>& BallBoostModel::GetBalls() const {
  * Returns: The number of boostable balls in play.
  */
 int BallBoostModel::GetNumBallsAllowedToBoost() const {
+    const GameTransformMgr* transformInfo = this->gameModel->GetTransformInfo();
+    if (transformInfo->GetIsBallCamAnimationActive() || transformInfo->GetIsPaddleCamAnimationActive()) {
+        return 0;
+    }
+
     int count = 0;
     const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
     for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
@@ -350,9 +358,12 @@ int BallBoostModel::GetNumBallsAllowedToBoost() const {
  * Returns: true if there's a ball that can be boosted, false otherwise.
  */
 bool BallBoostModel::IsBallAvailableForBoosting() const {
+    const GameTransformMgr* transformInfo = this->gameModel->GetTransformInfo();
+
     // No boosting allowed if ball camera or paddle camera is active
     if (this->gameModel->GetPlayerPaddle()->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn() ||
-        this->gameModel->GetTransformInfo()->GetIsLevelFlipAnimationActive()) {
+        this->gameModel->GetTransformInfo()->GetIsLevelFlipAnimationActive() ||
+        transformInfo->GetIsBallCamAnimationActive() || transformInfo->GetIsPaddleCamAnimationActive()) {
         return false;
     }
 

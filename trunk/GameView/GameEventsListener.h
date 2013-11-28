@@ -44,7 +44,7 @@ public:
 	// Ball/Block related events
 	void BallDiedEvent(const GameBall& deadBall);
 	void LastBallAboutToDieEvent(const GameBall& lastBallToDie);
-	void LastBallExploded(const GameBall& explodedBall);
+	void LastBallExplodedEvent(const GameBall& explodedBall, bool wasSkipped);
 	void AllBallsDeadEvent(int livesLeft);
 	void BallSpawnEvent(const GameBall& spawnedBall);
 	void BallShotEvent(const GameBall& shotBall);
@@ -92,6 +92,7 @@ public:
     void BallBoostExecutedEvent(const BallBoostModel& boostModel);
     void BallBoostGainedEvent();
     void BallBoostLostEvent(bool allBoostsLost);
+    void BoostFailedDueToNoBallsAvailableEvent();
 
     void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet);
     void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon);
@@ -146,11 +147,12 @@ public:
 
 private:
 	GameDisplay* display;
-	long timeSinceLastBallBlockCollisionEventInMS;
-	long timeSinceLastBallPaddleCollisionEventInMS;
-	long timeSinceLastBallTeslaCollisionEventInMS;
-    long timeSinceLastBallBossCollisionEventInMS;
-    long timeSinceLastControlledCannonRotationInMS;
+	long timeOfLastBallBlockCollisionEventInMS;
+	long timeOfLastBallPaddleCollisionEventInMS;
+	long timeOfLastBallTeslaCollisionEventInMS;
+    long timeOfLastBallBossCollisionEventInMS;
+    long timeOfLastControlledCannonRotationInMS;
+    long timeOfLastBoostMalfunctionInMS;
 
     typedef std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, SoundID> TeslaLightningSoundIDMap;
     typedef TeslaLightningSoundIDMap::iterator TeslaLightningSoundIDMapIter;
@@ -169,6 +171,7 @@ private:
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
     static const long SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS;
+    static const long SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS;
 
     static SoundID enterBulletTimeSoundID;
     static SoundID exitBulletTimeSoundID;
