@@ -68,24 +68,9 @@ public:
     
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, CgFxEffectBase* replacementMat, 
                     const BasicPointLight& keyLight, const BasicPointLight& fillLight,
-                    const BasicPointLight& ballLight) const {
+                    const BasicPointLight& ballLight) const;
 
-		const ColourRGBA& paddleColour = p.GetColour();
-		if (paddleColour.A() <= 0.0f) {
-			return;
-		}
-
-		glPushMatrix();
-		
-		float paddleScaleFactor  = p.GetPaddleScaleFactor();
-		float paddleZRotationAmt = p.GetZRotation();
-
-		glRotatef(paddleZRotationAmt, 0, 0, 1);
-		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-		glColor4f(paddleColour.R(), paddleColour.G(), paddleColour.B(), paddleColour.A());
-		this->playerPaddle->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
-		glPopMatrix();
-	}
+    void DrawGhostPaddle(const PlayerPaddle& p, const Camera& camera);
 
     float GetOutlineMinDistance() const;
     float GetOutlineMaxDistance() const;

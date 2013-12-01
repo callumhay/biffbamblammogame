@@ -14,6 +14,7 @@
 #include "CgFxPrism.h"
 #include "InGameBossLevelDisplayState.h"
 #include "GameAssets.h"
+#include "GameFBOAssets.h"
 
 #include "../BlammoEngine/Mesh.h"
 #include "../GameModel/NouveauBoss.h"

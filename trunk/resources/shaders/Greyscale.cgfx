@@ -1,0 +1,54 @@
+/**
+ * Greyscale.cgfx
+ * Created By: Callum Hay
+ *
+ * This effect will apply greyscale to the rendering.
+ */
+
+float GreyscaleFactor <
+    string UIName =  "Greyscale Factor";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIWidget = "Slider";
+> = 1.0f;
+ 
+texture ColourTexture  <
+    string ResourceName = "default_color.dds";
+    string UIName =  "Diffuse Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
+}; 
+
+/**
+ * Greyscale conversion function that desaturates a given colour.
+ */
+float3 ToGreyscale(float3 sceneColour) {
+    float sceneTone = (sceneColour.r + sceneColour.g + sceneColour.b) / 3.0f;
+    return float3(sceneTone);
+}
+
+
+float4 GreyscalePS(float2 UV : TEXCOORD0) : COLOR {
+    float3 textureColour   = tex2D(ColourSampler, UV).rgb;
+    float3 greyscaleColour = ToGreyscale(textureColour.rgb);
+    return float4(lerp(textureColour, greyscaleColour, GreyscaleFactor), 1.0f);
+}
+
+technique Greyscale <string Script = "Pass=p0;";> {
+    pass p0 <string Script = "Draw=geometry;";> {
+        
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+        
+        FragmentProgram = compile arbfp1 GreyscalePS();
+    }
+}

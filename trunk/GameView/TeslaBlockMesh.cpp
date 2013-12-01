@@ -2,7 +2,7 @@
  * TeslaBlockMesh.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -66,7 +66,7 @@ teslaCenterFlare(NULL), flareTex(NULL), haloTexture(NULL), haloExpandPulse(1.0f,
 	this->teslaCenterFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->teslaCenterFlare->SetEmitPosition(Point3D(0, 0, 0));
 	this->teslaCenterFlare->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));
-	this->teslaCenterFlare->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.79f), ESPInterval(1.0f), ESPInterval(1.0f));
+	this->teslaCenterFlare->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.8f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->teslaCenterFlare->AddEffector(&this->flarePulse);
 	this->teslaCenterFlare->SetParticles(1, this->flareTex);
 

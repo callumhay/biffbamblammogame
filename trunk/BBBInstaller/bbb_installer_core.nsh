@@ -1,7 +1,7 @@
 
 Name "Biff! Bam!! Blammo!?!"
 
-RequestExecutionLevel user
+RequestExecutionLevel admin
 
 Function create_desktop_shortcut_action
 SetOutPath $INSTDIR

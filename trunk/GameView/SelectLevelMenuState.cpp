@@ -15,7 +15,6 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 #include "GameDisplay.h"
-#include "CgFxBloom.h"
 #include "MenuBackgroundRenderer.h"
 
 #include "../BlammoEngine/TextLabel.h"
@@ -149,10 +148,6 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
 	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
     this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 
-	// Create the new bloom effect and set its parameters appropriately
-	this->bloomEffect = new CgFxBloom(this->menuFBO);
-	this->bloomEffect->SetMenuBloomSettings();
-
     Colour titleColour(0.4f, 0.6f, 0.8f); // Steel blue
     std::stringstream worldLabelTxt;
     worldLabelTxt << this->world->GetName();
@@ -207,9 +202,6 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     this->menuFBO = NULL;
     delete this->postMenuFBObj;
     this->postMenuFBObj = NULL;
-
-    delete this->bloomEffect;
-    this->bloomEffect = NULL;
 
     delete this->worldLabel;
     this->worldLabel = NULL;
@@ -294,12 +286,6 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     this->keyEscLabel->SetTopLeftCorner(20, this->keyEscLabel->GetHeight()); 
     this->keyEscLabel->Draw();
 
-    this->menuFBO->UnbindFBObj();
-	// Do bloom on most of the screen then bind the FBO again and draw the stuff we don't
-    // want the bloom applied to...
-	this->bloomEffect->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
-    this->menuFBO->BindFBObj();
-    
     // Draw the menu
     this->DrawLevelSelectMenu(camera, dT);
 
@@ -1956,7 +1942,7 @@ void SelectLevelMenuState::BossLevelMenuItem::RebuildItem(bool enabled, const Po
         this->topLeftCorner[1] - (NUM_TO_BOSS_NAME_GAP + std::max<float>(this->bossLabel->GetHeight(), this->bossIconSize)));
     this->nameLabel->SetFont(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
-    this->nameLabel->SetScale(std::min<float>(1.0f, 
+    this->nameLabel->SetScale(GameDisplay::GetTextScalingFactor() * std::min<float>(1.0f, 
         (this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth())) / this->nameLabel->GetWidth()));
     this->nameLabel->SetFixedWidth((this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth())));
 

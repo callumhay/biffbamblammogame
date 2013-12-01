@@ -37,7 +37,8 @@ const float BossLevelCompleteSummaryDisplayState::COMPLETE_TO_UNLOCKED_VERTICAL_
 const float BossLevelCompleteSummaryDisplayState::MAX_COMPLETE_TEXT_SCALE = 1.3f;
 
 BossLevelCompleteSummaryDisplayState::BossLevelCompleteSummaryDisplayState(GameDisplay* display) :
-DisplayState(display), allAnimationIsDone(false), waitingForKeyPress(true), unlockedLabel(NULL), worldCompleteLabel(NULL),
+DisplayState(display), allAnimationIsDone(false), waitingForKeyPress(false), leavingState(false),
+unlockedLabel(NULL), worldCompleteLabel(NULL),
 spinGlowTex(NULL), bgMusicSoundID(INVALID_SOUND_ID), victoryMessageSoundID(INVALID_SOUND_ID),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
                  GameFontAssetsManager::Medium), "- Press Any Key to Continue -"),
@@ -110,8 +111,11 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
 	// Setup the fade animations
     this->fadeInAnimation.SetInterpolantValue(1.0f);
     this->fadeInAnimation.SetLerp(0.0, FADE_TIME, 1.0f, 0.0f);
-	this->fadeOutAnimation.SetInterpolantValue(0.0f);
-	this->fadeOutAnimation.SetLerp(0.0, 0.0, 0.0f, 0.0f);
+    this->fadeInAnimation.SetRepeat(false);
+
+    this->fadeOutAnimation.SetInterpolantValue(0.0f);
+    this->fadeOutAnimation.SetLerp(FADE_TIME, 1.0f);
+    this->fadeOutAnimation.SetRepeat(false);
 
     // The victory label "Sweet... victory" comes down from the top of the screen and bounces a bit
     float centerBlockTopYCoord = this->GetCenterTextBlockTopYCoord(Camera::GetWindowHeight());
@@ -219,10 +223,13 @@ void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     currYPos -= COMPLETE_TO_UNLOCKED_VERTICAL_PADDING;
     this->DrawUnlockedLabel(dT, Camera::GetWindowWidth(), currYPos);
 
-    this->footerColourAnimation.Tick(dT);
-    this->DrawPressAnyKeyTextFooter(Camera::GetWindowWidth());
+    if (this->allAnimationIsDone) {
+        this->waitingForKeyPress = true;
+        this->footerColourAnimation.Tick(dT);
+        this->DrawPressAnyKeyTextFooter(Camera::GetWindowWidth());
+    }
 
-    if (!this->waitingForKeyPress) {
+    if (this->leavingState) {
         // We're no longer waiting for a key press - fade out to white and then switch to the next state
 
         // Begin fading out the summary screen
@@ -397,26 +404,5 @@ void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
         return;
     }
 
-    // Check to see if all other animations are done...
-    if (this->allAnimationIsDone) {
-        // Setup the fade animation
-        this->fadeOutAnimation.SetLerp(FADE_TIME, 1.0f);
-        waitingForKeyPress = false;
-        return;
-    }
-
-    // Finish all of the animations...
-    this->victoryLabelMoveAnim.SetInterpolantValue(this->victoryLabelMoveAnim.GetFinalInterpolationValue());
-    this->victoryLabelMoveAnim.ClearLerp();
-
-    this->worldCompleteAlphaAnim.SetInterpolantValue(this->worldCompleteAlphaAnim.GetTargetValue());
-    this->worldCompleteAlphaAnim.ClearLerp();
-
-    this->unlockedAlphaAnim.SetInterpolantValue(this->unlockedAlphaAnim.GetTargetValue());
-    this->unlockedAlphaAnim.ClearLerp();
-
-    this->glowScaleAnim.SetInterpolantValue(this->glowScaleAnim.GetTargetValue());
-    this->glowScaleAnim.ClearLerp();
-
-    this->allAnimationIsDone = true;   
+    this->leavingState = true;
 }

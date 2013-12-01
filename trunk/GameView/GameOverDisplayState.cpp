@@ -15,6 +15,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameFBOAssets.h"
 
 const char* GameOverDisplayState::GAME_OVER_TEXT         = "Game Over";
 const int GameOverDisplayState::GAME_OVER_LABEL_X_BORDER = 50;

@@ -56,10 +56,7 @@ protected:
 
 private:
 	// CG Transform params
-	CGparameter worldITMatrixParam;
 	CGparameter wvpMatrixParam;
-	CGparameter worldMatrixParam;
-	CGparameter viewInvMatrixParam;
 
 	CGparameter noiseSamplerParam;	// Noise texture sampler param
 	CGparameter maskSamplerParam;   // Mask texture

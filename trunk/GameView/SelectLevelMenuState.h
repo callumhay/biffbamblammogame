@@ -23,7 +23,6 @@
 #include "../GameSound/SoundCommon.h"
 
 class FBObj;
-class CgFxBloom;
 class TextLabel2D;
 class TextLabel2DFixedWidth;
 class GameWorld;
@@ -76,7 +75,6 @@ private:
     Texture* starGlowTexture;
 
     Texture2D* padlockTexture;
-	CgFxBloom* bloomEffect;
 	
     FBObj* menuFBO;
     FBObj* postMenuFBObj;

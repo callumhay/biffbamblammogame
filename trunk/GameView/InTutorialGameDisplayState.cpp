@@ -13,6 +13,7 @@
 #include "InGameMenuState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameFBOAssets.h"
 #include "TutorialHint.h"
 #include "TutorialEventsListener.h"
 #include "ButtonTutorialHint.h"

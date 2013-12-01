@@ -12,6 +12,8 @@
 #include "InGameRenderPipeline.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameESPAssets.h"
+#include "GameFBOAssets.h"
 #include "GameFontAssetsManager.h"
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
@@ -150,11 +152,15 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelD
 
 	backgroundFBO->UnbindFBObj();
 
+    // Blur the background a bit so that it is less in focus than the foreground
+    fboAssets->RenderBackgroundBlur(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
+
 	debug_opengl_state();
 	return backgroundFBO;
 }
 
-FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelDim, const Matrix4x4& gameTransform, FBObj* backgroundFBO, double dT) {
+FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelDim, const Matrix4x4& gameTransform, 
+                                                   FBObj* backgroundFBO, double dT) {
 	assert(backgroundFBO != NULL);
 
 	const Camera& camera = this->display->GetCamera();
@@ -181,6 +187,11 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 
 	glPushMatrix();
 	glMultMatrixf(gameTransform.begin());
+
+    // Tesla lightning arcs -- This is the only place they make sense to draw:
+    // we need them in the background so that block and other effects blend with them and
+    // we still need them to have depth for effects like the paddle camera
+    assets->GetESPAssets()->DrawTeslaLightningArcs(dT, camera);
 
     // Bosses
     assets->DrawBoss(dT, currLevel, camera);
@@ -248,16 +259,16 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 	// Draw Post-full-scene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
     fullSceneFBO->BindFBObj();
 
+    GameESPAssets* espAssets = assets->GetESPAssets();
+
 	// Render any post-processing effects for various items/objects in the game
-	assets->DrawProjectiles(dT, camera);
+	espAssets->DrawProjectileEffects(dT, camera);
     assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
     assets->DrawLevelPiecesPostEffects(dT, camera);
 	assets->DrawStatusEffects(dT, camera, colourAndDepthFBO);
     assets->DrawMiscEffects(*gameModel);
-    glPopMatrix();
 
-    // Tesla lightning arcs
-    assets->DrawTeslaLightning(dT, camera);
+    glPopMatrix();
     glPopMatrix();
 
 	FBObj::UnbindFBObj();
@@ -279,7 +290,7 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
 
 	// Render full-screen effects
     // N.B., Bloom is applied here
-	FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
+    FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);//fboAssets->GetFullSceneFBO();
     FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
     FBObj* finalFBO = fboAssets->GetFinalFullScreenFBO();
     

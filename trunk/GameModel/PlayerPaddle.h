@@ -308,6 +308,11 @@ public:
     }
     void ResetLastEntityThatHurtPaddle() { this->lastEntityThatHurtHitPaddle = NULL; }
 
+    bool GetIsHittingAWall() const {
+        return this->hitWall;
+    }
+    bool GetIsCloseToAWall() const;
+
 private:
 	// Default values for the dimensions of the paddle
 	static const float PADDLE_WIDTH_ANGLED_SIDE;

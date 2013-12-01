@@ -699,7 +699,7 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
             this->SetNextState(GameState::GameOverStateType);
 		}
 		else {
-            this->SetNextState(GameState::BallOnPaddleStateType);
+            this->SetNextState(new BallOnPaddleState(this, 0.5));
 		}
 		stateChanged = true;
 	}
@@ -1718,6 +1718,28 @@ Vector3D GameModel::GetGravityRightDir() const {
     Vector3D gravityRightDir =  this->GetTransformInfo()->GetGameXYZTransform() * Vector3D(1, 0, 0);
     gravityRightDir.Normalize();
     return gravityRightDir;
+}
+
+// Get the maximum distance from the ball to the paddle line, before the ghost paddle will 
+// appear in ball camera mode
+float GameModel::GetGhostPaddleDistance() const {
+    switch (this->difficulty) {
+
+        case GameModel::EasyDifficulty:
+            return 15.0f;
+
+        case GameModel::MediumDifficulty:
+            return 12.0f;
+
+        case GameModel::HardDifficulty:
+            return 10.0f;
+
+        default:
+            assert(false);
+            break;
+    }
+
+    return 0.0f;
 }
 
 float GameModel::GetPercentBallReleaseTimerElapsed() const {

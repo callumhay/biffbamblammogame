@@ -17,6 +17,7 @@
 #include "InGameMenuState.h"
 #include "MainMenuDisplayState.h"
 #include "GameCompleteDisplayState.h"
+#include "BossLevelCompleteSummaryDisplayState.h"
 #include "CreditsDisplayState.h"
 #include "LoadingScreen.h"
 #include "MouseRenderer.h"
@@ -51,6 +52,7 @@ assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCam
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
+    //this->SetCurrentState(new BossLevelCompleteSummaryDisplayState(this)); // Testing world complete screen
     //this->SetCurrentState(new GameCompleteDisplayState(this)); // Testing game complete screen
 	SetInitialRenderOptions();
 }
@@ -99,9 +101,6 @@ void GameDisplay::SetInitialRenderOptions() {
 	glDisable(GL_LIGHTING);
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 }
 
 // Sets the current state to be the next state lined up on the

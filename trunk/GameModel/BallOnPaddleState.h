@@ -21,7 +21,7 @@ public:
     static const double START_RELEASE_TIMER_TIME_IN_SECS;
     static const double TOTAL_RELEASE_TIMER_TIME_IN_SECS;
 
-	BallOnPaddleState(GameModel* gm);
+	BallOnPaddleState(GameModel* gm, double pauseTime = 0.0);
 	~BallOnPaddleState();
 
     double GetReleaseTimerPercentDone() const;
@@ -38,6 +38,10 @@ private:
 	bool firstTick;
     bool releaseTimerStarted;
     double releaseTimerCounter;
+    
+    double waitTimerCounter;
+    double timeToWaitBeforeReleaseIsAllowed;
+
     bool ballWasReleased;
 
 	void UpdateBallPosition();

@@ -2,7 +2,7 @@
  * LevelStartDisplayState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -12,18 +12,19 @@
 #include "LevelStartDisplayState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameESPAssets.h"
+#include "GameFBOAssets.h"
 #include "GameFontAssetsManager.h"
 #include "LevelMesh.h"
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
+#include "BallCamHUD.h"
 #include "MenuBackgroundRenderer.h"
 
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
 #include "../WindowManager.h"
-
-//#include <boost/bind.hpp>
 
 const double LevelStartDisplayState::FADE_IN_TIME               = 1.25;
 const double LevelStartDisplayState::WIPE_TIME                  = 0.8f;
@@ -35,17 +36,10 @@ const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING            = 50;			// P
 const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING            = 80;			// Padding from the bottom of the screen to the bottom of the level name text
 
 LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) : 
-DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL), menuFBO(NULL), bloomEffect(NULL),
+DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL),
 levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(
                GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), ""),
 paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
-
-    // Setup any full-screen effects
-    this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
-        Texture::Nearest, FBObj::NoAttachment);
-
-    this->bloomEffect = new CgFxBloom(this->menuFBO);
-    this->bloomEffect->SetMenuBloomSettings();
 
     GameModel* gameModel = this->display->GetModel();
     
@@ -140,6 +134,8 @@ paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
 	assets->GetLifeHUD()->LivesGained(this->display->GetModel()->GetLivesLeft());
     assets->GetBoostHUD()->Reinitialize();
     assets->GetPointsHUD()->Reinitialize();
+    assets->GetBallCamHUD()->Reinitialize();
+    assets->ReinitializeSkipLabel();
 
     // Special case: If the level is a boss level then all the lights start off and no music plays...
     if (level->GetHasBoss()) {
@@ -159,11 +155,6 @@ LevelStartDisplayState::~LevelStartDisplayState() {
 	this->shockwaveEmitter = NULL;
 	delete this->starEmitter;
 	this->starEmitter = NULL;
-
-    delete this->menuFBO;
-    this->menuFBO = NULL;
-    delete this->bloomEffect;
-    this->bloomEffect = NULL;
 }
 
 void LevelStartDisplayState::RenderFrame(double dT) {
@@ -174,14 +165,13 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	bool fadeInDone           = this->fadeInAnimation.Tick(dT);
 	bool wipeInDone           = this->showLevelNameWipeAnimation.Tick(dT);
 	bool levelTextFadeOutDone = this->levelNameFadeOutAnimation.Tick(dT);
-	//bool dropShadowAnimDone   = this->dropShadowAnimation.Tick(dT);
 	bool levelPieceFadeInDone = this->blockFadeInAnimation.Tick(dT);
 	bool paddleMoveDone       = this->paddleMoveUpAnimation.Tick(dT);
 	bool ballFadeInDone       = this->ballFadeInAnimation.Tick(dT);
 
 	// Fade in the level pieces...
 	gameAssets->GetCurrentLevelMesh()->SetLevelAlpha(this->blockFadeInAnimation.GetInterpolantValue());
-	// Fade in tesla lightning...
+	// Fade in Tesla lightning...
 	gameAssets->GetESPAssets()->SetTeslaLightiningAlpha(this->blockFadeInAnimation.GetInterpolantValue());
 
 	PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
@@ -210,12 +200,6 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 
     this->display->GetMouse()->Draw(dT, *this->display->GetModel());
 
-    this->menuFBO->BindFBObj();
-
-    // Render background stuffs (behind the menu)
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	// Render the fade-in if we haven't already
 	if (!fadeInDone) {
 		// Draw the background...
@@ -223,15 +207,12 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	}
 
 	if (!levelTextFadeOutDone) {
+
 		// If we're done the fade in then we need to do the level text display...
 		this->levelNameLabel.SetAlpha(this->levelNameFadeOutAnimation.GetInterpolantValue());
-		//this->levelNameLabel.SetDropShadowAmount(this->dropShadowAnimation.GetInterpolantValue());
 		this->levelNameLabel.Draw();
 
 		if (!wipeInDone) {
-
-            //boost::function<void()> drawFunc = boost::bind(&LevelStartDisplayState::DrawWipeIn, this);
-
             glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_POLYGON_BIT);
             glDisable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
@@ -244,24 +225,11 @@ void LevelStartDisplayState::RenderFrame(double dT) {
             this->DrawWipeIn();
             bgTexture->UnbindTexture();
 
-            //bgRenderer->UseEffectWithDrawCall(camera, drawFunc);
             Camera::PopWindowCoords();
 
             glPopAttrib();
 		}
 	}
-
-    this->menuFBO->UnbindFBObj();
-    this->bloomEffect->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
-    
-    glPushAttrib(GL_ENABLE_BIT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    this->menuFBO->GetFBOTexture()->BindTexture();
-    GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 1.0f, 
-        ColourRGBA(1,1,1,this->fadeInAnimation.GetInterpolantValue()));
-    this->menuFBO->GetFBOTexture()->UnbindTexture();
-    glPopAttrib();
 	
 	// All done animating the start of the level - go to the official in-game state
 	if (fadeInDone && wipeInDone && levelTextFadeOutDone && levelPieceFadeInDone) {

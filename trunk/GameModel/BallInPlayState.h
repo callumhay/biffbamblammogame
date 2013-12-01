@@ -57,7 +57,7 @@ private:
 	void DoBallCollision(GameBall& ball1, GameBall& ball2);
 	void DoItemCollision();
 
-	void AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const PlayerPaddle& p, const Vector2D& collisionNormal);
+	bool AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const PlayerPaddle& p, const Vector2D& collisionNormal);
 	
 	//void UpdateActiveBalls(double seconds);
     DISALLOW_COPY_AND_ASSIGN(BallInPlayState);

@@ -356,6 +356,7 @@ namespace Collision {
 		return false;
 	}
 
+
 	inline bool GetCollisionPoint(const LineSeg2D& l1, const LineSeg2D& l2, Point2D& collisionPt) {
 		float a1 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P2());
 		float a2 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P1());

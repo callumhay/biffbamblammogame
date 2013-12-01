@@ -18,7 +18,6 @@
 #include "GameMenu.h"
 #include "GameMenuItem.h"
 #include "GameAssets.h"
-#include "CgFxBloom.h"
 #include "MenuBackgroundRenderer.h"
 
 #include "../BlammoEngine/FBObj.h"
@@ -60,7 +59,7 @@ DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(N
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
 eraseProgVerifyHandler(NULL), volItemHandler(NULL), postMenuFBObj(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
-menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
+menuFBO(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), bgLoopedSoundID(INVALID_SOUND_ID),
 titleDisplay(display->GetTextScalingFactor(), 0.25, display->GetSound()),
 blammopediaItemIndex(-1), creditsItemIndex(-1), doAnimatedFadeIn(info.GetDoAnimatedFadeIn()),
@@ -107,7 +106,6 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 	// Setup any full-screen effects
     this->menuFBO       = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
     this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
-	this->SetupBloomEffect();
 
 	// Allocate memory...
 	for (size_t i = 0; i < TOTAL_NUM_BANG_EFFECTS; i++) {
@@ -162,8 +160,6 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->menuFBO = NULL;
     delete this->postMenuFBObj;
     this->postMenuFBObj = NULL;
-	delete this->bloomEffect;
-	this->bloomEffect = NULL;
 
 	// Release texture assets that we no longer need
     bool success = false;
@@ -475,16 +471,6 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->optionsSubMenu->SetSelectedMenuItem(this->optionsFullscreenIndex, false);
 }
 
-void MainMenuDisplayState::SetupBloomEffect() {
-	if (this->bloomEffect != NULL) {
-		delete this->bloomEffect;
-	}
-
-	// Create the new bloom effect and set its parameters appropriately
-	this->bloomEffect = new CgFxBloom(this->menuFBO);
-    this->bloomEffect->SetMenuBloomSettings();
-}
-
 /**
  * Render the menu and any other stuff associated with it.
  */
@@ -654,9 +640,6 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	this->menuFBO->UnbindFBObj();
 
-	// Do bloom on the menu screen and draw it
-	this->bloomEffect->Draw(DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
-	
     this->postMenuFBObj->BindFBObj();
     this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
     this->postMenuFBObj->UnbindFBObj();
@@ -860,7 +843,6 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
     delete this->postMenuFBObj;
     this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
-	this->SetupBloomEffect();
 }
 
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {

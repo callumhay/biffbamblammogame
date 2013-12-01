@@ -13,6 +13,8 @@
 #include "GameEventsListener.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameESPAssets.h"
+#include "GameFBOAssets.h"
 #include "LevelMesh.h"
 #include "LoadingScreen.h"
 #include "GameOverDisplayState.h"
@@ -1962,20 +1964,21 @@ void GameEventsListener::BossHurtEvent(const BossWeakpoint* hurtPart) {
 }
 
 void GameEventsListener::BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart) {
-    UNUSED_PARAMETER(boss);
-
-    Collision::AABB2D partAABB = angryPart->GetLocalBounds().GenerateAABBFromLines();
-
-    this->display->GetAssets()->GetESPAssets()->AddBossAngryEffect(angryPart->GetTranslationPt2D(),
-        partAABB.GetWidth(), partAABB.GetHeight());
     
+    Collision::AABB2D partAABB = angryPart->GetLocalBounds().GenerateAABBFromLines();
+    this->BossAngryEvent(boss, angryPart->GetTranslationPt2D(), partAABB.GetWidth(), partAABB.GetHeight());
+}
+
+void GameEventsListener::BossAngryEvent(const Boss* boss, const Point2D& angryPartLoc, float angryPartWidth, float angryPartHeight) {
+    UNUSED_PARAMETER(boss);
+    this->display->GetAssets()->GetESPAssets()->AddBossAngryEffect(angryPartLoc, angryPartWidth, angryPartHeight);
+
     // Play sound...
     GameSound* sound = this->display->GetSound();
     sound->PlaySound(GameSound::BossAngryEvent, false, false);
-    
+
     debug_output("EVENT: Boss is angry.");
 }
-
 
 void GameEventsListener::BossEffectEvent(const BossEffectEventInfo& effectEvent) {
     BossMesh* bossMesh = this->display->GetAssets()->GetCurrentLevelMesh()->GetBossMesh();

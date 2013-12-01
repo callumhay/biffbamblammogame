@@ -46,9 +46,14 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 		return;
 	}
 
-	// Set the bounding lines for a bevelled block...
+	// Set the bounding lines for a beveled block...
 	std::vector<Collision::LineSeg2D> boundingLines;
-	std::vector<Vector2D>  boundingNorms;
+	std::vector<Vector2D> boundingNorms;
+    std::vector<bool> onInside;
+
+    boundingLines.reserve(4);
+    boundingNorms.reserve(4);
+    onInside.reserve(4);
 
 	static const float HALF_SWITCH_HEIGHT_BOUND = LevelPiece::HALF_PIECE_HEIGHT;
 	static const float HALF_SWITCH_WIDTH_BOUND  = LevelPiece::HALF_PIECE_WIDTH;
@@ -64,6 +69,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	    Vector2D n1(-1, 0);
 	    boundingLines.push_back(l1);
 	    boundingNorms.push_back(n1);
+        onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus));
     }
 
 	// Bottom boundary of the piece
@@ -75,6 +81,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	    Vector2D n2(0, -1);
 	    boundingLines.push_back(l2);
 	    boundingNorms.push_back(n2);
+        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
 	}
 
 	// Right boundary of the piece
@@ -86,6 +93,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	    Vector2D n3(1, 0);
 	    boundingLines.push_back(l3);
 	    boundingNorms.push_back(n3);
+        onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus));
 	}
 
 	// Top boundary of the piece
@@ -97,9 +105,10 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	    Vector2D n4(0, 1);
 	    boundingLines.push_back(l4);
 	    boundingNorms.push_back(n4);
+        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
 	}
 
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+    this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 

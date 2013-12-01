@@ -10,6 +10,8 @@
  */
 
 #include "GameAssets.h"
+#include "GameESPAssets.h"
+#include "GameFBOAssets.h"
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
 #include "CgFxPostRefract.h"
@@ -746,6 +748,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 
 	if (!paddle->GetIsPaddleCameraOn()) {
 		// Draw the shield around the paddle (if it's currently activated)
+        this->paddleShield->SetAlpha(paddle->GetAlpha());
 		this->paddleShield->DrawAndTick(*paddle, camera, dT);
 	}
 
@@ -784,8 +787,58 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	// BALL CAMERA CHECK
 	if (GameBall::GetIsBallCameraOn() && !gameModel.IsBlackoutEffectActive()) {
 		const GameBall* ballWithCam = GameBall::GetBallCameraBall();
-		// Draw a target around balls when in paddle camera mode AND ball is not invisible
+		
+        // Draw a target on the paddle
 		this->espAssets->DrawBallCamEffects(dT, camera, *ballWithCam, *paddle);
+
+        /*
+        TODO!!!!!
+
+        // Special case: The ball is coming down towards the paddle, draw a flickering ghost paddle when
+        // the ball is near enough in the location where the ball is coming down
+        const GameLevel* currLevel = gameModel.GetCurrentLevel();
+        Collision::Ray2D ballRay(ballWithCam->GetCenterPosition2D(), ballWithCam->GetDirection());
+        
+        if (Vector2D::Dot(ballWithCam->GetDirection(), Vector2D(0, -1)) > 0 &&
+            currLevel->GetLevelPieceColliderFast(ballRay, ballWithCam->GetBounds().Radius()) == NULL) {
+
+            // Intersect the ray with the paddle plane to find the location of the ghost paddle...
+            float intersectHeight = paddleCenter[1] + scaleHeightAdjustment + paddle->GetHalfHeight();
+            Collision::LineSeg2D paddleLine(Point2D(0, intersectHeight), Point2D(currLevel->GetLevelUnitWidth(), intersectHeight));
+            float rayIntersectionT = 0.0f;
+            
+            // TODO: Add condition for how small rayIntersectionT must be to show the ghost paddle
+            float furthestGhostDist = gameModel.GetGhostPaddleDistance();
+            float fadeInGhostDist = 0.85f * furthestGhostDist;
+            if (Collision::IsCollision(ballRay, paddleLine, rayIntersectionT) && rayIntersectionT <= furthestGhostDist) {
+
+                rayIntersectionT = fabs(rayIntersectionT);
+                float alphaMultiplier = 1.0f;
+                if (rayIntersectionT <= furthestGhostDist && rayIntersectionT >= fadeInGhostDist) {
+                    alphaMultiplier = NumberFuncs::LerpOverFloat(furthestGhostDist, fadeInGhostDist, 0.0f, 1.0f, rayIntersectionT);
+                }
+
+                glPushMatrix();
+                glTranslatef(ballRay.GetPointAlongRayFromOrigin(rayIntersectionT)[0], paddleCenter[1] + scaleHeightAdjustment, 0);
+
+                glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+                
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+                
+                // Disable the depth draw, this will make sure the paddle attachments don't get outlined
+                glDepthMask(GL_FALSE);
+                
+                // Draw the ghost paddle
+                glColor4f(1, 1, 1, alphaMultiplier * 0.66f);
+                this->worldAssets->DrawGhostPaddle(*paddle, camera);
+
+                glPopMatrix();
+
+                glPopAttrib();
+            }
+        }
+        */
 	}
 	glPopAttrib();
 
@@ -817,6 +870,16 @@ void GameAssets::DrawBackgroundModel(const Camera& camera) {
  */
 void GameAssets::DrawBackgroundEffects(const Camera& camera) {
 	this->worldAssets->DrawBackgroundEffects(camera);
+}
+
+// Draw the foreground level pieces...
+void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
+    Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
+
+    BasicPointLight fgKeyLight, fgFillLight, ballLight;
+    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+    this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight,
+        ballLight, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 
 void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera) {
@@ -1633,6 +1696,10 @@ void GameAssets::ToggleSkipLabel(bool activate) {
     }
 }
 
+void GameAssets::ReinitializeSkipLabel() {
+    this->skipLabel->Unshow(0.0, 0.0, true);
+}
+
 /*
  * This will load a set of assets for use in a game based off a
  * given world-style, after loading all assets will be available for use in-game.
@@ -1672,7 +1739,7 @@ void GameAssets::ReinitializeAssets() {
     this->boostHUD->Reinitialize();
     this->ballReleaseHUD->Reinitialize();
     this->remoteControlRocketHUD->Reinitialize();
-    this->skipLabel->Unshow(0, 0, true);
+    this->ReinitializeSkipLabel();
 }
 
 void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem) {

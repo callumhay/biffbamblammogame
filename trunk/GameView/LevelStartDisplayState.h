@@ -23,7 +23,6 @@
 
 class GameDisplay;
 class ESPPointEmitter;
-class CgFxBloom;
 
 class LevelStartDisplayState : public DisplayState {
 public:
@@ -75,10 +74,6 @@ private:
     // Sound IDs for tracking level starting sounds
     SoundID paddleMoveUpSoundID;
     SoundID ballSpawnSoundID;
-
-    // Bloom for rendering overlays
-    CgFxBloom* bloomEffect;
-    FBObj* menuFBO;
 
     DISALLOW_COPY_AND_ASSIGN(LevelStartDisplayState);
 };
