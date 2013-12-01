@@ -22,6 +22,7 @@ public:
 	~ESPBeamSegment();
 
 	void SetDefaultPointOnLine(const Point3D& pt);
+
 	const Point3D& GetEndPoint() const;
 	ESPBeamSegment* AddESPBeamSegment();
 
@@ -30,11 +31,16 @@ public:
 	void Tick(double dT, const ESPBeam& parentBeam);
 
 private:
+    static const double ANIMATION_TIME;
+
 	Point3D defaultPtOnLine;
 	Point3D endPt;
+
+    Point3D startPt;
+    Point3D animationToPt;
+
 	double timeCounter;
 
-	// 4 points to represent the quad...
 	ESPBeamSegment* parentSegment;
 	std::list<ESPBeamSegment*> childSegments;
 
@@ -46,6 +52,8 @@ private:
 inline void ESPBeamSegment::SetDefaultPointOnLine(const Point3D& pt) {
 	this->defaultPtOnLine = pt;
 	this->endPt = pt;
+    this->startPt = pt;
+    this->animationToPt = pt;
 }
 
 inline const Point3D& ESPBeamSegment::GetEndPoint() const {

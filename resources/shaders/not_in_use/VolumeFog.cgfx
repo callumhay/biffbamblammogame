@@ -1,0 +1,183 @@
+
+
+float Script : STANDARDSGLOBAL <
+    string UIWidget = "none";
+    string ScriptClass = "object";
+    string ScriptOrder = "standard";
+    string ScriptOutput = "color";
+    string Script = "Technique=Main;";
+> = 0.8;
+
+float4x4 WvpXf   : WorldViewProjection < string UIWidget="None"; >;
+float4x4 WorldXf : World < string UIWidget="None"; >;
+
+float Near <
+    string UIWidget = "slider";
+    float UIMin = 0.1;
+    float UIMax = 10000.0;
+    float UIStep = 0.1;
+    string UIName =  "Near";
+> = 0.01;
+
+float Far <
+    string UIWidget = "slider";
+    float UIMin = 1;
+    float UIMax = 10000.0;
+    float UIStep = 1;
+    string UIName =  "Far";
+> = 300.0f;
+
+float FogDensity <
+    string UIWidget = "slider";
+    float UIMin = 0.1f;
+    float UIMax = 10.0f;
+    float UIStep = 0.1f;
+    string UIName =  "Fog Density";
+> = 1.0f;
+
+float3 FogColour <
+	string UIWidget = "color";
+    string UIName = "Fog Colour";
+> = {1, 1, 1};
+
+float Timer : TIME <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.01;
+    string UIName =  "Timer";
+> = 0;
+
+float NoiseFreq <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 10.0;
+    float UIStep = 0.1;
+    string UIName =  "Frequency";
+> = 1;
+
+float NoiseScale <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.1;
+    string UIName =  "Scale";
+> = 1;
+
+float3 NoiseFlowDir <
+    string UIName = "Flow Direction";
+> = {0, 1, 1};
+
+// Textures and Samplers *****************************************
+texture ColourTexture  <
+    string UIName =  "Scene Colour Texture";
+    string ResourceType = "2D";
+>;
+sampler2D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
+	WrapS = ClampToEdge;
+	WrapT = ClampToEdge;
+}; 
+
+texture DepthTexture  <
+    string UIName =  "Scene Depth Texture";
+    string ResourceType = "2D";
+>;
+sampler2D DepthSampler = sampler_state {
+    Texture = <DepthTexture>;
+	WrapS = ClampToEdge;
+	WrapT = ClampToEdge;
+}; 
+
+texture NoiseTexture  <
+    string ResourceName = "noiseL8_32x32x32.dds";
+    string UIName =  "Noise Texture";
+    string ResourceType = "3D";
+>;
+sampler3D NoiseSampler = sampler_state {
+    Texture = <NoiseTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+    WrapR = Repeat;
+};
+// ***************************************************************
+
+// Shader Input/Output Structures ********************************
+struct AppData {
+    float3 Position : POSITION;
+};
+struct VSOutput {
+    float4 HPosition : POSITION;
+	float3 HPosNDC;
+	float3 WorldPos;
+};
+// ***************************************************************
+
+float LinearizeDepth(float z) {
+    return 2.0 * Near * Far / (Far + Near - (2.0 * z - 1.0) * (Far - Near));
+}
+
+VSOutput volumeFogVS(AppData IN) {
+    VSOutput OUT = (VSOutput)0;
+    
+    // Transform the model-space vertex position into homogeneous coordinates space
+    float4 pos4d = float4(IN.Position.xyz, 1.0f);
+    float4 HPos  = mul(WvpXf, pos4d);
+	
+	OUT.HPosition = HPos;
+	OUT.HPosNDC   = HPos.xyz / HPos.w;
+	
+	// We also need the world space vertex position for the noise texture lookup
+	OUT.WorldPos = mul(WorldXf, pos4d).xyz;
+	
+    return OUT;
+}
+
+float4 volumeFogPS(VSOutput IN) : COLOR {
+
+	// Calculate the texture coordinates using the normalized device coords
+	// This is just a mapping from [-1,1] to [0,1] in the x and y coordinates
+	float2 texCoordUV = (IN.HPosNDC.xy + float2(1.0f)) / 2.0f;
+	
+    // Get the normalized device coordinates of the current pixel's homogeneous space
+    // coordinate so that we can look up the depth of the scene
+    float sceneDepth = LinearizeDepth(float(tex2D(DepthSampler, texCoordUV.xy)));
+    
+    // Also get the depth of the front of the fog volume
+    float fogDepth = IN.HPosNDC.z;
+    
+    // Calculate the distance from the front of the fog volume to the scene, this
+    // will be used to determine how much fog to add to this pixel
+    float fogDist = clamp(sceneDepth - fogDepth, 0, 1);
+    
+	// Calculate how the 3D noise texture will contribute to the fog
+	//float3 noiseCoord = NoiseScale * (IN.WorldPos.xyz + NoiseFreq * Timer * NoiseFlowDir);
+    //float4 noiseVal = tex3D(NoiseSampler, noiseCoord);
+	//float totalNoiseVal = 8.0 * (abs(noiseVal.x - 0.25) + abs(noiseVal.y - 0.125) + 
+    //                             abs(noiseVal.z - 0.0625) + abs(noiseVal.w - 0.03125));
+    //totalNoiseVal = clamp(totalNoiseVal, 0, 1);
+	
+	float fogFalloffCoeff = exp(-fogDist * FogDensity);
+	float3 sceneColour = tex2D(ColourSampler, texCoordUV.xy).rgb;
+	float3 finalColour = lerp(FogColour, sceneColour, fogFalloffCoeff);
+	
+	return float4(finalColour, 1.0f);
+}
+
+technique VolumeFog < string Script = "Pass=p0;"; > {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+		
+        DepthMask = false;
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+		
+        VertexProgram   = compile arbvp1 volumeFogVS();
+        FragmentProgram = compile arbfp1 volumeFogPS();
+    }
+}

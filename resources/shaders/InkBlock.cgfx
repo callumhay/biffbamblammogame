@@ -1,0 +1,407 @@
+
+#define BSIZE 32
+#define FULLSIZE 66
+#define NOISEFRAC 0.03125
+
+const float4 NTab[FULLSIZE] <
+    string UIWidget = "None";
+> = {   {-0.569811,0.432591,-0.698699,0},
+        {0.78118,0.163006,0.60265,1},
+        {0.436394,-0.297978,0.848982,2},
+        {0.843762,-0.185742,-0.503554,3},
+        {0.663712,-0.68443,-0.301731,4},
+        {0.616757,0.768825,0.168875,5},
+        {0.457153,-0.884439,-0.093694,6},
+        {-0.956955,0.110962,-0.268189,7},
+        {0.115821,0.77523,0.620971,8},
+        {-0.716028,-0.477247,-0.50945,9},
+        {0.819593,-0.123834,0.559404,10},
+        {-0.522782,-0.586534,0.618609,11},
+        {-0.792328,-0.577495,-0.196765,12},
+        {-0.674422,0.0572986,0.736119,13},
+        {-0.224769,-0.764775,-0.60382,14},
+        {0.492662,-0.71614,0.494396,15},
+        {0.470993,-0.645816,0.600905,16},
+        {-0.19049,0.321113,0.927685,17},
+        {0.0122118,0.946426,-0.32269,18},
+        {0.577419,0.408182,0.707089,19},
+        {-0.0945428,0.341843,-0.934989,20},
+        {0.788332,-0.60845,-0.0912217,21},
+        {-0.346889,0.894997,-0.280445,22},
+        {-0.165907,-0.649857,0.741728,23},
+        {0.791885,0.124138,0.597919,24},
+        {-0.625952,0.73148,0.270409,25},
+        {-0.556306,0.580363,0.594729,26},
+        {0.673523,0.719805,0.168069,27},
+        {-0.420334,0.894265,0.153656,28},
+        {-0.141622,-0.279389,0.949676,29},
+        {-0.803343,0.458278,0.380291,30},
+        {0.49355,-0.402088,0.77119,31},
+        {-0.569811,0.432591,-0.698699,0},
+        {0.78118,0.163006,0.60265,1},
+        {0.436394,-0.297978,0.848982,2},
+        {0.843762,-0.185742,-0.503554,3},
+        {0.663712,-0.68443,-0.301731,4},
+        {0.616757,0.768825,0.168875,5},
+        {0.457153,-0.884439,-0.093694,6},
+        {-0.956955,0.110962,-0.268189,7},
+        {0.115821,0.77523,0.620971,8},
+        {-0.716028,-0.477247,-0.50945,9},
+        {0.819593,-0.123834,0.559404,10},
+        {-0.522782,-0.586534,0.618609,11},
+        {-0.792328,-0.577495,-0.196765,12},
+        {-0.674422,0.0572986,0.736119,13},
+        {-0.224769,-0.764775,-0.60382,14},
+        {0.492662,-0.71614,0.494396,15},
+        {0.470993,-0.645816,0.600905,16},
+        {-0.19049,0.321113,0.927685,17},
+        {0.0122118,0.946426,-0.32269,18},
+        {0.577419,0.408182,0.707089,19},
+        {-0.0945428,0.341843,-0.934989,20},
+        {0.788332,-0.60845,-0.0912217,21},
+        {-0.346889,0.894997,-0.280445,22},
+        {-0.165907,-0.649857,0.741728,23},
+        {0.791885,0.124138,0.597919,24},
+        {-0.625952,0.73148,0.270409,25},
+        {-0.556306,0.580363,0.594729,26},
+        {0.673523,0.719805,0.168069,27},
+        {-0.420334,0.894265,0.153656,28},
+        {-0.141622,-0.279389,0.949676,29},
+        {-0.803343,0.458278,0.380291,30},
+        {0.49355,-0.402088,0.77119,31},
+        {-0.569811,0.432591,-0.698699,0},
+        {0.78118,0.163006,0.60265,1}};
+
+float Timer : TIME < string UIWidget = "None"; >;
+float4x4 WvpXf : WORLDVIEWPROJECTION <string UIWidget="None";>;
+float4x4 WorldITXf : WorldInverseTranspose < string UIWidget="None"; >;
+float4x4 ViewIXf   : ViewInverse < string UIWidget="None"; >;
+float4x4 WorldXf : World < string UIWidget="None"; >;   
+        
+// Key Point Light ----------------------------------
+float3 KeyPointLightPos : Position <
+    string Object = "PointLight0";
+    string UIName =  "Diffuse Light Position";
+    string Space = "World";
+> = {-0.5f,2.0f,1.25f};
+
+float3 KeyPointLightColour : Specular <
+    string UIName =  "Diffuse Light";
+    string Object = "Pointlight0";
+    string UIWidget = "Color";
+> = {1.0f,1.0f,1.0f};
+// --------------------------------------------------
+
+// Fill Point Light ---------------------------------
+float3 FillPointLightPos : Position <
+    string Object = "PointLight1";
+    string UIName =  "Diffuse Light Position";
+    string Space = "World";
+> = {-0.5f,2.0f,1.25f};
+
+float3 FillPointLightColour : Specular <
+    string UIName =  "Diffuse Light";
+    string Object = "Pointlight1";
+    string UIWidget = "Color";
+> = {1.0f,1.0f,1.0f};
+
+float FillPointLightLinearAtten <
+    string UIName =  "Fill Light Linear Attenuation";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIWidget = "Slider";
+> = 1.0f;
+// --------------------------------------------------
+
+// Ball Point Light ---------------------------------
+float3 BallPointLightPos : Position <
+    string Object = "PointLight2";
+    string UIName =  "Diffuse Light Position";
+    string Space = "World";
+> = {-0.5f,2.0f,1.25f};
+
+float3 BallPointLightDiffuse : Specular <
+    string UIName =  "Diffuse Light";
+    string Object = "Pointlight2";
+    string UIWidget = "Color";
+> = {1.0f,1.0f,1.0f};
+
+float BallPointLightLinearAtten <
+    string UIName =  "Ball Light Linear Attenuation";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIWidget = "Slider";
+> = 1.0f;
+// --------------------------------------------------
+
+// The colour of the material
+float3 DiffuseColour <
+    string UIName =  "Ink Colour";
+    string UIWidget = "Color";
+> = {0.40f,0.50f,1.00f};
+
+float3 SpecularColour <
+    string UIName =  "Specular Colour";
+    string UIWidget = "Color";
+> = {0.30f,0.30f,0.30f};
+
+// Specular exponent for the material
+float Shininess <
+    string UIWidget = "slider";
+    float UIMin = 1.0;
+    float UIMax = 128.0;
+    float UIStep = 1.0;
+    string UIName =  "Shininess";
+> = 128.0;
+
+float AlphaMultiplier <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "AlphaMultiplier";
+> = 1.0;
+
+float Displacement <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 2.0;
+    float UIStep = 0.01;
+> = 1.6f;
+
+float Sharpness <
+    string UIWidget = "slider";
+    float UIMin = 0.1;
+    float UIMax = 5.0;
+    float UIStep = 0.1;
+> = 1.90f;
+
+float Speed <
+    string UIWidget = "slider";
+    float UIMin = 0.01;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIName = "Speed";
+> = 0.3f;
+
+float TurbDensity <
+    string UIWidget = "slider";
+    string UIName = "Turbulence Density";
+    float UIMin = 0.01;
+    float UIMax = 8.0;
+    float UIStep = 0.001;
+> = 2.27f;
+
+//////////////////////////// texture ///////////////////////
+
+texture ColourTexture <
+    string ResourceName = "noiseL8_32x32x32.dds";
+    string UIName =  "Colour Texture";
+    string ResourceType = "2D";
+>;
+
+sampler3D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
+    WrapS = Repeat;
+    WrapT = Repeat;
+    WrapR = Repeat;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+};   
+
+// Smoothstep function f(t) = 3t^2 - 2t^3, without the normalization
+float3 s_curve(float3 t) { return t*t*( float3(3,3,3) - float3(2,2,2)*t); }
+float2 s_curve(float2 t) { return t*t*( float2(3,3) - float2(2,2)*t); }
+float  s_curve(float  t) { return t*t*(3.0-2.0*t); }
+
+// 3D version
+float noise(float3 v, const uniform float4 pg[FULLSIZE])
+{
+    v = v + (10000.0f).xxx;   // hack to avoid negative numbers
+
+    float3 i = frac(v * NOISEFRAC) * BSIZE;   // index between 0 and BSIZE-1
+    float3 f = frac(v);            // fractional position
+
+    // lookup in permutation table
+    float2 p;
+    p.x = pg[ i[0]     ].w;
+    p.y = pg[ i[0] + 1 ].w;
+    p = p + i[1];
+
+    float4 b;
+    b.x = pg[ p[0] ].w;
+    b.y = pg[ p[1] ].w;
+    b.z = pg[ p[0] + 1 ].w;
+    b.w = pg[ p[1] + 1 ].w;
+    b = b + i[2];
+
+    // Compute dot products between gradients and vectors
+    float4 r;
+    r[0] = dot( pg[ b[0] ].xyz, f );
+    r[1] = dot( pg[ b[1] ].xyz, f - float3(1.0f, 0.0f, 0.0f) );
+    r[2] = dot( pg[ b[2] ].xyz, f - float3(0.0f, 1.0f, 0.0f) );
+    r[3] = dot( pg[ b[3] ].xyz, f - float3(1.0f, 1.0f, 0.0f) );
+
+    float4 r1;
+    r1[0] = dot( pg[ b[0] + 1 ].xyz, f - float3(0.0f, 0.0f, 1.0f) );
+    r1[1] = dot( pg[ b[1] + 1 ].xyz, f - float3(1.0f, 0.0f, 1.0f) );
+    r1[2] = dot( pg[ b[2] + 1 ].xyz, f - float3(0.0f, 1.0f, 1.0f) );
+    r1[3] = dot( pg[ b[3] + 1 ].xyz, f - float3(1.0f, 1.0f, 1.0f) );
+
+    // interpolate
+    f = s_curve(f);
+    r = lerp( r, r1, f[2] );
+    r = lerp( r.xyyy, r.zwww, f[1] );
+    return lerp( r.x, r.y, f[0] );
+}
+
+/////////////////////////////
+
+struct appData {
+    float3 Position     : POSITION;
+    float4 Normal       : NORMAL;
+};
+
+// define outputs from vertex shader
+struct vertexData {
+    float4 HPosition    : POSITION;
+    float3 WorldView    : TEXCOORD0;
+    float3 WorldNormal  : TEXCOORD1;
+    float3 WorldPos     : TEXCOORD2;
+    float Noise         : TEXCOORD3;
+};
+
+struct appdata_outlines {
+    float3 Position   : POSITION;
+    float4 Normal       : NORMAL;
+};
+
+struct vertexOutput_outlines {
+    float4 HPosition    : POSITION;
+};
+
+vertexData ink_block_VS(appData IN) {
+    
+    vertexData OUT;
+    float4 Pos = float4(IN.Position.xyz, 1.0f);
+    float3 noisePos = TurbDensity * (Pos.xyz + (Speed*Timer));
+    float i = (noise(noisePos, NTab) + 1.0f) * 0.5f;
+    
+    // Displacement along normal
+    float ni = pow(abs(i),Sharpness);
+    float3 Nn = normalize(IN.Normal.xyz);
+    float3 NewPos = (Pos.xyz - (Nn * (ni-0.5) * Displacement));
+    
+    float3 Pw = mul(WorldXf, Pos).xyz;
+    float3 viewToVert  = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw;
+
+    OUT.WorldPos    = Pw;
+    OUT.WorldView   = normalize(viewToVert);
+    OUT.WorldNormal = normalize(mul(WorldITXf, IN.Normal).xyz);
+    OUT.HPosition   = mul(WvpXf, float4(NewPos, 1));
+    OUT.Noise = i;
+    return OUT;
+}
+
+vertexOutput_outlines outline_VS(appdata_outlines IN) {
+    vertexOutput_outlines OUT = (vertexOutput_outlines)0;
+    
+    float3 noisePos = TurbDensity * (IN.Position + (Speed*Timer));
+    float i = (noise(noisePos, NTab) + 1.0f) * 0.5f;
+    float ni = pow(abs(i),Sharpness);
+    float3 Nn = normalize(IN.Normal.xyz);
+    float3 NewPos = IN.Position - (Nn * (ni-0.5) * Displacement);
+    
+    OUT.HPosition = mul(WvpXf, float4(NewPos, 1));
+    return OUT;
+}
+
+void SpecularHighlight(float3 Nn, float3 WorldPos, float3 Vn, out float3 SpecularContrib, out float3 DiffuseContrib)
+{
+    float3 KeyLightVec  = KeyPointLightPos - WorldPos;
+    float3 FillLightVec = FillPointLightPos - WorldPos;
+    
+    float3 KeyLn  = normalize(KeyLightVec);
+    float3 FillLn = normalize(FillLightVec);
+    
+    float3 KeyHn = normalize(Vn + KeyLn);
+    float3 KeyLitV = lit(dot(KeyLn,Nn),dot(KeyHn,Nn),Shininess).xyz;
+    
+    float3 FillHn = normalize(Vn + FillLn);
+    float3 FillLitV = lit(dot(FillLn,Nn),dot(FillHn,Nn),Shininess).xyz;
+    
+    float FillLinearAtten = clamp(1.0f / (FillPointLightLinearAtten * distance(FillPointLightPos, WorldPos)), 0, 1);
+    FillLinearAtten = clamp(FillLinearAtten, 0, 1);
+    
+    SpecularContrib = (KeyLitV.z * KeyPointLightColour) + FillLinearAtten * (FillLitV.z * FillPointLightColour);
+    DiffuseContrib  = (KeyLitV.y * KeyPointLightColour) + FillLinearAtten * (FillLitV.y * FillPointLightColour);
+      
+    float3 BallLn = normalize(BallPointLightPos - WorldPos);
+    float3 BallHn = normalize(Vn + BallLn);
+    float3 BallLitV = lit(dot(BallLn,Nn), dot(BallHn,Nn), Shininess).xyz;
+    
+    float BallLinearAtten =  clamp(1.0f / (BallPointLightLinearAtten * distance(BallPointLightPos, WorldPos)), 0, 1);
+    SpecularContrib += BallLinearAtten * (BallLitV.z * BallPointLightDiffuse);
+    DiffuseContrib  += BallLinearAtten * (BallLitV.y * BallPointLightDiffuse);
+}
+
+
+float4 ink_block_PS(vertexData IN) : COLOR {
+    // Specular from ball and key light
+    float3 specContrib;
+    float3 diffuseContrib;
+    float3 Vn     = normalize(IN.WorldView);
+    float3 Nn     = normalize(IN.WorldNormal);
+    
+    SpecularHighlight(Nn, IN.WorldPos, Vn, specContrib, diffuseContrib);    
+    
+    //float3 samplerColour = tex3D(ColourSampler, IN.WorldPos + float3(Speed*Timer)).rgb;
+    float4 texVal = tex3D(ColourSampler, IN.WorldPos + float3(Speed*Timer));
+    float noiseAmt = (texVal.x + texVal.y + texVal.z + texVal.w + 0.03125) * 2.5f;
+    float3 finalColour = SpecularColour * specContrib + DiffuseColour * diffuseContrib;
+    finalColour *= noiseAmt;
+    
+    return float4(finalColour.xyz, 0.9f * AlphaMultiplier);
+}
+
+float4 outline_PS(vertexOutput_outlines IN) : COLOR {
+    return float4(0.0f, 0.0f, 0.0f, 1.0f * AlphaMultiplier);
+}
+
+technique InkBlock {
+    
+    pass p0 <string Script = "Draw=geometry;";> {
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+        
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        
+        VertexProgram = compile arbvp1 ink_block_VS();
+        FragmentProgram = compile arbfp1 ink_block_PS();
+    }
+    /*
+    pass p1 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+       
+        CullFaceEnable = true;
+        CullFace = Front;
+        
+        LineWidth = 1.5f;
+        LineSmoothEnable = true;
+        PolygonMode = int2(Back, Line);
+        
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
+    }
+    */
+}

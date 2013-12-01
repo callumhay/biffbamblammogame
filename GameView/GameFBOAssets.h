@@ -20,8 +20,6 @@
 #include "../GameSound/SoundCommon.h"
 
 #include "CgFxGaussianBlur.h"
-#include "CgFxAfterImage.h"
-#include "CgFxBloom.h"
 #include "CgFxFullscreenGoo.h"
 #include "CgFxInkSplatter.h"
 #include "CgFxPostBulletTime.h"
@@ -33,6 +31,7 @@ class GameItem;
 class CgFxPostSmokey;
 class CgFxPostUberIntense;
 class CgFxPostFirey;
+class CgFxBloom;
 
 /**
  * Storage class for framebuffer object assets used in the game graphics
@@ -53,22 +52,23 @@ public:
 
 	inline bool DrawItemsInLastPass() const { return this->drawItemsInLastPass; }
 
+    FBObj* RenderInitialFullscreenEffects(int width, int height, double dT);
+
 	inline void RenderFullSceneBlur(int width, int height, double dT) {
-		this->fgAndBgBlurEffect->Draw(width, height, dT);
+        this->blurEffect->SetInputFBO(this->fgAndBgFBO);
+        this->blurEffect->SetBlurType(CgFxGaussianBlur::Kernel3x3);
+        this->blurEffect->SetSigma(0.8f);
+		this->blurEffect->Draw(width, height, dT);
 	}
+    inline void RenderBackgroundBlur(int width, int height, double dT) {
+        this->blurEffect->SetInputFBO(this->bgFBO);
+        this->blurEffect->SetBlurType(CgFxGaussianBlur::Kernel3x3);
+        this->blurEffect->SetSigma(1.125f);
+        this->blurEffect->Draw(width, height, dT);
+    }
 
 	/**
-	 * Render all fullscreen effects that are required before
-	 * particles and items are drawn.
-	 */
-	inline FBObj* RenderInitialFullscreenEffects(int width, int height, double dT) {
-		// Do some purdy bloom - this adds a nice contrasty highlighted touch to the entire scene
-		this->bloomEffect->Draw(width, height, dT);
-        return this->fgAndBgFBO;
-	}
-
-	/**
-	 * Render all fullscreen effects that are required at the very
+	 * Render all full screen effects that are required at the very
 	 * end of the 3D pipeline.
 	 */
 	void RenderFinalFullscreenEffects(int width, int height, double dT, const GameModel& gameModel);
@@ -89,23 +89,17 @@ public:
 
 private:
     GameSound* sound; // Not owned by this
-    // Sound IDs -- used for tracking the last ink splat sound and other sounds that get activated and modified
-    // in this object
-    SoundID inkSplatterEventSoundID;
-
+    SoundID inkSplatterEventSoundID; // For tracking the last ink splat sound and other sounds that get activated and modified in this object
 
 	// FBO assets for the game pipeline
 	FBObj* bgFBO;			
 	FBObj* fgAndBgFBO;
 	FBObj* finalFSEffectFBO;
-
-	FBObj* tempFBO;	// FBO used for temporary work
-
     FBObj* colourAndDepthTexFBO;
+    FBObj* tempFBO;	// FBO used for temporary work
 
-	// Post-processing / fullscreen filters and effects used with the FBOs
-	CgFxGaussianBlur* fgAndBgBlurEffect;
-	CgFxBloom* bloomEffect;
+	// Post-processing / full screen filters and effects used with the FBOs
+	CgFxGaussianBlur* blurEffect;
 	CgFxInkSplatter* inkSplatterEffect;
 	CgFxFullscreenGoo* stickyPaddleCamEffect;
 	CgFxPostSmokey* smokeyCamEffect;
@@ -114,7 +108,7 @@ private:
 	CgFxFullscreenGoo* shieldPaddleCamEffect;
 	CgFxPostFirey* fireBallCamEffect;
     CgFxPostBulletTime* bulletTimeEffect;
-
+    CgFxBloom* bloomEffect;
     CgFxCelOutlines celOutlineEffect;
 
 	bool drawItemsInLastPass;	// Whether or not items get drawn in the final pass
@@ -122,24 +116,6 @@ private:
 	enum FBOAnimationType { PoisonAnimationType };
 	enum FBOAnimationItem { None };
 	std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float> > > fboAnimations;
-
-	/**
-	 * Trys to find a particular animation and return it.
-	 * Returns: A pointer to the found animation or NULL if not found.
-	 */
-	inline AnimationMultiLerp<float>* FindFBOAnimation(FBOAnimationType type, FBOAnimationItem item) {
-		std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float> > >::iterator iter1 = this->fboAnimations.find(type);
-		if (iter1 == this->fboAnimations.end()) {
-			return NULL;
-		}
-
-		std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator iter2 = iter1->second.find(item);
-		if (iter2 == iter1->second.end()) {
-			return NULL;
-		}
-
-		return &(iter2->second);
-	}
     
     DISALLOW_COPY_AND_ASSIGN(GameFBOAssets);
 };

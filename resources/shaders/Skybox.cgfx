@@ -1,0 +1,155 @@
+/*********************************************************************
+Skybox.cgfx
+Created by: Callum Hay
+The following is a skybox shader for use with a cubemap to ensure that
+whenever the user looks at this material they see the right place on
+the cube map (skybox).
+**********************************************************************/
+
+float4x4 ModelViewProjXf : WorldViewProjection < string UIWidget="None"; >;
+float4x4 WorldXf         : World < string UIWidget="None"; >;
+
+float TwinkleFreq <
+    string UIWidget = "slider";
+    float UIMin = 0.001;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIName =  "Twinkle Frequency";
+> = 0.01;
+
+float MoveFreq <
+    string UIWidget = "slider";
+    float UIMin = 0.001;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIName =  "Move Frequency";
+> = 0.01;
+
+float NoiseScale <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.1;
+    string UIName =  "Noise Scale";
+> = 1;
+
+float FGScale <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.1;
+    string UIName =  "FG Scale";
+> = 1;
+
+float Timer : TIME <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.01;
+    string UIName =  "Timer";
+> = 0;
+
+float Alpha <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.1;
+    string UIName =  "Alpha";
+> = 1;
+
+float2 UVTranslate <
+> = {0, 0};
+
+float3 ViewDir <
+> = {0, 0, 1};
+
+texture SkyTex : Environment <
+    string ResourceName = "starfield_1024x1024.jpg";
+    string UIName = "Sky Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D SkySampler = sampler_state {
+    Texture = <SkyTex>;
+	WrapS = Repeat;
+    WrapT = Repeat;
+};
+
+texture NoiseTexture  <
+    string ResourceName = "noiseL8_32x32x32.dds";
+    string UIName =  "Noise Texture";
+    string ResourceType = "3D";
+>;
+
+sampler3D NoiseSampler = sampler_state {
+    Texture = <NoiseTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+    WrapR = Repeat;
+    
+};  
+
+// application to vertex shader ------------------------------------------
+struct appdata {
+    float3 Position : POSITION;
+    float2 UV       : TEXCOORD0;
+    float4 Colour   : COLOR0;
+};
+
+// vertex shader to pixel shader -----------------------------------------
+struct vertexOutput {
+    float4 HPosition    : POSITION;
+    float3 WorldPos     : TEXCOORD0;
+    float2 UV           : TEXCOORD1;
+    float4 Colour       : TEXCOORD2;
+};
+
+
+// Vertex Shader ---------------------------------------------------------
+vertexOutput skybox_VS(appdata IN) {
+    vertexOutput OUT = (vertexOutput)0;
+    
+    float4 Pos = float4(IN.Position.xyz,1);
+    float3 Pw = mul(WorldXf,Pos).xyz;
+    
+    OUT.HPosition = mul(ModelViewProjXf,Pos);
+    OUT.WorldPos = Pw;
+    OUT.UV = IN.UV;
+    OUT.Colour = IN.Colour;
+    
+    return OUT;
+}
+
+// Fragement Shader (Floating Point) --------------------------------------
+float4 skybox_PS(vertexOutput IN) : COLOR {
+
+    // Make the stars in the sky twinkle using a noise texture
+    // lookup and multiplying it with the starry sky lookup
+    float3 noiseLookup = IN.WorldPos.xyz + TwinkleFreq*Timer*ViewDir / NoiseScale;
+    
+    float4 texVal = tex3D(NoiseSampler, NoiseScale * noiseLookup).rgba;
+    float noiseVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
+                            abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
+    noiseVal = clamp(noiseVal, 0.1, 1.0);
+    
+	float2 translatedUV = UVTranslate + IN.UV.xy;
+    float3 skyBGColour = tex2D(SkySampler, translatedUV).rgb;
+    float3 skyFGColour = tex2D(SkySampler, MoveFreq*Timer*float2(1,0) + FGScale*translatedUV + float2(0.3, 0.6)).rgb;
+    float3 finalColour = skyBGColour + noiseVal * skyFGColour;
+    
+    return float4(finalColour, Alpha * IN.Colour.a);
+}
+
+technique Skybox {
+    pass pass0 {
+        PolygonMode = int2(Front, Fill);
+        CullFaceEnable = true;
+        CullFace = Back;
+        
+        VertexProgram = compile arbvp1 skybox_VS();
+        FragmentProgram = compile arbfp1 skybox_PS();
+    }
+}
+

@@ -12,7 +12,9 @@
 #include "ESPBeamSegment.h"
 #include "ESPBeam.h"
 
-ESPBeamSegment::ESPBeamSegment(ESPBeamSegment* parent) : parentSegment(parent), timeCounter(0.1) {
+const double ESPBeamSegment::ANIMATION_TIME = 0.075;
+
+ESPBeamSegment::ESPBeamSegment(ESPBeamSegment* parent) : parentSegment(parent), timeCounter(ANIMATION_TIME) {
 }
 
 ESPBeamSegment::~ESPBeamSegment() {
@@ -27,22 +29,27 @@ ESPBeamSegment::~ESPBeamSegment() {
 void ESPBeamSegment::Tick(double dT, const ESPBeam& parentBeam) {
 	// Modify the position of the segment based on the set variation, this gives
 	// the impression of a noisy lightning-like beam in some situations - do this for every mid-beam segment point
-	if (timeCounter >= 0.1 && this->childSegments.size() != 0 && this->parentSegment != NULL) {
+	if (timeCounter >= ANIMATION_TIME && this->childSegments.size() != 0 && this->parentSegment != NULL) {
 
 		Vector3D randomVec = Matrix4x4::rotationMatrix(
             static_cast<float>(2*M_PI*Randomizer::GetInstance()->RandomNumNegOneToOne()), parentBeam.GetBeamLineVec()) * 
 			parentBeam.GetOrthoBeamLineVec();
-		this->endPt = this->defaultPtOnLine + parentBeam.GetRandomLineDistanceVariation() * parentBeam.GetBeamLineVec() + 
+
+        this->startPt = this->endPt;
+        this->animationToPt = this->defaultPtOnLine + parentBeam.GetRandomLineDistanceVariation() * parentBeam.GetBeamLineVec() + 
             parentBeam.GetRandomAmplitudeVariation() * randomVec;
 
 		timeCounter = 0.0;
 	}
-	
+    else {
+        timeCounter += dT;
+    }
+
+    this->endPt = NumberFuncs::LerpOverTime<Point3D>(0.0, ANIMATION_TIME, this->startPt, this->animationToPt, this->timeCounter);
+
 	ESPBeamSegment* childSegment;
 	for (std::list<ESPBeamSegment*>::iterator iter = this->childSegments.begin(); iter != this->childSegments.end(); ++iter) {
 		childSegment = *iter;
 		childSegment->Tick(dT, parentBeam);
 	}
-
-	timeCounter += dT;
 }

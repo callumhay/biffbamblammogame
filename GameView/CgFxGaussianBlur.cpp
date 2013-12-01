@@ -26,11 +26,9 @@ tempFBO(NULL), sigma(0.8f), isPoisonBlurActive(false) {
 	// Set the blur type - this will also set the proper technique for the shader
 	this->SetBlurType(blurType);
 
-	// Setup the temporary FBO, used to ping-pong rendering of seperable filters
+	// Setup the temporary FBO, used to ping-pong rendering of separable filters
 	this->tempFBO = new FBObj(sceneFBO->GetFBOTexture()->GetWidth(), 
-														sceneFBO->GetFBOTexture()->GetHeight(), 
-														Texture::Nearest,
-														FBObj::NoAttachment);
+	    sceneFBO->GetFBOTexture()->GetHeight(), Texture::Nearest, FBObj::NoAttachment);
 
 	// Establish all the CG parameters in the effect
 	this->sceneSamplerParam       = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");

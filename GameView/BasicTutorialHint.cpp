@@ -68,7 +68,13 @@ void BasicTutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) 
 void BasicTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow) {
     if (!this->isShown && !overridePrevUnshow) { return; }
 
-    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeOutTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 0.0f);
+    if (delayInSeconds == 0 && fadeOutTimeInSeconds == 0) {
+        this->fadeAnim.ClearLerp();
+        this->fadeAnim.SetInterpolantValue(0.0f);
+    }
+    else {
+        this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeOutTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 0.0f);
+    }
     this->fadeAnim.SetRepeat(false);
 
     if (this->listener != NULL) {

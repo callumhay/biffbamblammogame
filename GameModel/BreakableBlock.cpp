@@ -99,7 +99,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
     if (leftNeighbor != NULL) {
         if ((leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable && 
-            leftNeighbor->GetType() != LevelPiece::Bomb &&
+            leftNeighbor->GetType() != LevelPiece::Bomb && leftNeighbor->GetType() != LevelPiece::Tesla &&
             leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen))) {
 
             shouldGenBounds = true;
@@ -128,7 +128,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
     if (bottomNeighbor != NULL) {
         if ((bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
-             bottomNeighbor->GetType() != LevelPiece::Bomb &&
+             bottomNeighbor->GetType() != LevelPiece::Bomb && bottomNeighbor->GetType() != LevelPiece::Tesla &&
              bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen))) {
 
             shouldGenBounds = true;
@@ -157,7 +157,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
     if (rightNeighbor != NULL) {
         if ((rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
             (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
-             rightNeighbor->GetType() != LevelPiece::Bomb &&
+             rightNeighbor->GetType() != LevelPiece::Bomb && rightNeighbor->GetType() != LevelPiece::Tesla &&
              rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen))) {
 
             shouldGenBounds = true;
@@ -186,7 +186,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
     if (topNeighbor != NULL) {
         if (topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
             (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
-             topNeighbor->GetType() != LevelPiece::Bomb &&
+             topNeighbor->GetType() != LevelPiece::Bomb && topNeighbor->GetType() != LevelPiece::Tesla &&
              topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen)) {
 
             shouldGenBounds = true;

@@ -379,11 +379,16 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             //debug_output("Entering LostArmsAngryAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
+
+            // Generate the rest of the boss bounds for its core body...
+            this->boss->GenerateFullColumnPedimentBounds();
+
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossAngryFlashAnim());
             this->angryMoveAnim.ResetToStart();
 
             // EVENT: Boss is angry! Rawr.
-            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetEye());
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetEye()->GetTranslationPt2D(), 
+                ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
             
             break;
 
@@ -1217,7 +1222,8 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->angryMoveAnim.ResetToStart();
 
             // EVENT: Boss is angry! Rawr.
-            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetEye());
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetEye()->GetTranslationPt2D(), 
+                ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
 
             break;
         
@@ -1230,6 +1236,9 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
         case ClassicalBossAI::EyeRisesFromPedimentAIState: {
             this->currVel = Vector2D(0,0);
             this->desiredVel = Vector2D(0,0);
+
+            // Build bounding lines for the eye
+            this->boss->GenerateEyeBounds();
 
             GameSound* sound = this->boss->GetGameModel()->GetSound();
             // Stop the current boss background music

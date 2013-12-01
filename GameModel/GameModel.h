@@ -348,6 +348,8 @@ public:
     Vector3D GetGravityDir() const;
     Vector3D GetGravityRightDir() const;
 
+    float GetGhostPaddleDistance() const;
+
 	// Paddle and ball related manipulators *********************************
 
 	// Move the paddle or some other interactive element that is active in the game...

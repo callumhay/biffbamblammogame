@@ -45,11 +45,12 @@
 
 GameESPAssets::GameESPAssets() : 
 particleFader(1, 0),
-particleBoostFader(0.8f, 0.0f),
+particleBoostFader(ColourRGBA(1.0f, 1.0f, 1.0f, 0.8f), ColourRGBA(0.85f,1.0f,1.0f, 0.0f)),
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 particleWaterVapourColourFader(ColourRGBA(0.68f, 0.85f, 0.9f, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.0f)),
 particleSmokeColourFader(ColourRGBA(0.45f, 0.45f, 0.45f, 0.5f), ColourRGBA(0.9f, 0.9f, 0.9f, 0.0f)),
 particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
+particleSuperFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.5f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 fireBallColourFader(ColourRGBA(1.0f, 1.0f, 0.0f, 1.0f), ColourRGBA(0.4f, 0.15f, 0.0f, 0.2f)),
 iceBallColourFader(ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.1f)),
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
@@ -290,6 +291,8 @@ GameESPAssets::~GameESPAssets() {
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
     assert(removed);
+
+    UNUSED_VARIABLE(removed);
 
 	// Delete any standalone effects
 	delete this->crazyBallAura;
@@ -4008,8 +4011,8 @@ void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, con
     bigLightningArc->SetColour(ColourRGBA(GameModelConstants::GetInstance()->TESLA_LIGHTNING_BRIGHT_COLOUR, 1.0f));
 	bigLightningArc->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
 	bigLightningArc->SetNumBeamShots(1);
-	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.0f, 0.8f * LevelPiece::PIECE_HEIGHT));
-	bigLightningArc->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 12.0f, LevelPiece::PIECE_WIDTH / 10.0f));
+	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.1f * LevelPiece::PIECE_HEIGHT, 0.8f * LevelPiece::PIECE_HEIGHT));
+	bigLightningArc->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 10.0f, LevelPiece::PIECE_WIDTH / 8.0f));
 	bigLightningArc->SetNumMainESPBeamSegments(totalSegments);
 	
 	// Create some purple-ish smaller arcs
@@ -4020,7 +4023,7 @@ void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, con
 	smallerLightningArcs->SetNumBeamShots(2);
 	smallerLightningArcs->SetMainBeamAmplitude(ESPInterval(0.1f * LevelPiece::PIECE_HEIGHT, 0.75f * LevelPiece::PIECE_HEIGHT));
 	smallerLightningArcs->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 20.0f, LevelPiece::PIECE_WIDTH / 18.0f));
-	smallerLightningArcs->SetNumMainESPBeamSegments(totalSegments / 1.25f);
+	smallerLightningArcs->SetNumMainESPBeamSegments(static_cast<int>(totalSegments / 1.15f));
 
 	std::list<ESPPointToPointBeam*> lightningArcs;
 	lightningArcs.push_back(bigLightningArc);
@@ -4291,17 +4294,17 @@ void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile)
 
 	// Create the trail of smoke and fire effects...
 	ESPPointEmitter* fireCloudTrail = new ESPPointEmitter();
-	fireCloudTrail->SetSpawnDelta(ESPInterval(0.008f, 0.015f));
+	fireCloudTrail->SetSpawnDelta(ESPInterval(0.15f, 0.25f));
 	fireCloudTrail->SetInitialSpd(ESPInterval(projectileSpd));
-	fireCloudTrail->SetParticleLife(ESPInterval(0.7f, 0.9f));
-	fireCloudTrail->SetParticleSize(ESPInterval(projectile.GetHalfWidth(), projectile.GetWidth()));
+	fireCloudTrail->SetParticleLife(ESPInterval(0.9f, 1.25f));
+	fireCloudTrail->SetParticleSize(ESPInterval(0.75f*projectile.GetHalfWidth(), 0.75f*projectile.GetWidth()));
 	fireCloudTrail->SetEmitAngleInDegrees(5);
 	fireCloudTrail->SetEmitDirection(-projectileDir3D);
 	fireCloudTrail->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfHeight()));
-	fireCloudTrail->SetAsPointSpriteEmitter(true);
 	fireCloudTrail->SetEmitPosition(projectilePos3D - 1.5f * projectile.GetHeight() * projectileDir3D);
+    fireCloudTrail->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	fireCloudTrail->AddEffector(&this->particleLargeGrowth);
-	fireCloudTrail->AddEffector(&this->particleFireColourFader);
+	fireCloudTrail->AddEffector(&this->particleSuperFireFastColourFader);
 	fireCloudTrail->SetParticles(10, this->explosionTex);
 
 	this->activeProjectileEmitters[&projectile].push_back(fireCloudTrail);
@@ -4324,7 +4327,7 @@ void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectil
 	    smokeyTrailEmitter1->SetEmitAngleInDegrees(45);
 	    smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, -1, 0));
 	    smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	    smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
+	    smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	    smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
 	    smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
 	    smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
@@ -4339,7 +4342,7 @@ void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectil
 	    smokeyTrailEmitter2->SetEmitAngleInDegrees(45);
 	    smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, -1, 0));
 	    smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	    smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
+	    smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	    smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
 	    smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
 	    smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
@@ -4365,7 +4368,7 @@ void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectil
     fireyTrailEmitter->SetEmitAngleInDegrees(15);
     fireyTrailEmitter->SetEmitDirection(Vector3D(0, -1, 0));
     fireyTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    fireyTrailEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    fireyTrailEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     fireyTrailEmitter->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
     fireyTrailEmitter->AddEffector(&this->particleLargeGrowth);
     fireyTrailEmitter->SetParticles(25, fireTrailEffect);
@@ -5242,7 +5245,6 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         float ballRadius     = currGameBall->GetBounds().Radius();
         Point3D ballPosition = currGameBall->GetCenterPosition();
         Vector3D emitDir(-boostDir);
-        //Point2D boostPos = currGameBall->GetCenterPosition2D() - ballRadius * boostDir;
 
 	    ESPPointEmitter* boostSparkles = new ESPPointEmitter();
 	    boostSparkles->SetNumParticleLives(1);
@@ -5253,7 +5255,6 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
 	    boostSparkles->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	    boostSparkles->SetEmitAngleInDegrees(17);
 	    boostSparkles->SetEmitDirection(emitDir);
-	    boostSparkles->SetAsPointSpriteEmitter(true);
         boostSparkles->SetEmitPosition(ballPosition);
 	    boostSparkles->AddEffector(&this->particleFader);
         boostSparkles->AddEffector(&this->particleMediumShrink);
@@ -5262,15 +5263,15 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
 
 	    ESPPointEmitter* glowEmitterTrail = new ESPPointEmitter();
         glowEmitterTrail->SetNumParticleLives(1);
-	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.005f));
+	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.0025f));
 	    glowEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
 	    glowEmitterTrail->SetParticleLife(ESPInterval(ballRadius*2.5f));
 	    glowEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
 	    glowEmitterTrail->SetEmitAngleInDegrees(0);
 	    glowEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	    glowEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
+	    glowEmitterTrail->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	    glowEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
-        glowEmitterTrail->SetParticleColour(ESPInterval(0.70f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+        glowEmitterTrail->SetParticleColour(ESPInterval(0.85f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
         glowEmitterTrail->AddEffector(&this->particleBoostFader);
 	    glowEmitterTrail->AddEffector(&this->particleShrinkToNothing);
 	    result = glowEmitterTrail->SetParticles(40, this->circleGradientTex);
@@ -5278,8 +5279,8 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
 
         ESPPointEmitter* vapourTrailEffect = new ESPPointEmitter();
         vapourTrailEffect->SetNumParticleLives(1);
-	    vapourTrailEffect->SetSpawnDelta(ESPInterval(0.0235f));
-	    vapourTrailEffect->SetInitialSpd(ESPInterval(3.0f));
+	    vapourTrailEffect->SetSpawnDelta(ESPInterval(0.03f));
+	    vapourTrailEffect->SetInitialSpd(ESPInterval(2.0f));
 	    vapourTrailEffect->SetParticleLife(ESPInterval(1.0f));
 	    vapourTrailEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
 	    vapourTrailEffect->SetEmitPosition(ballPosition);
@@ -5290,7 +5291,7 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         vapourTrailEffect->SetToggleEmitOnPlane(true);
 	    vapourTrailEffect->AddEffector(&this->particleFader);
         vapourTrailEffect->AddEffector(&this->particleLargeGrowth);
-        result = vapourTrailEffect->SetParticles(6, &this->vapourTrailRefractEffect);
+        result = vapourTrailEffect->SetParticles(10, &this->vapourTrailRefractEffect);
 	    assert(result);
 
         this->boostBallEmitters[currGameBall].push_back(vapourTrailEffect);
@@ -7077,8 +7078,9 @@ void GameESPAssets::TickButDontDrawBackgroundPaddleEffects(double dT) {
 
 void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
 
-	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter = this->teslaLightningArcs.begin();
-		iter != this->teslaLightningArcs.end(); ++iter) {
+	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, 
+         std::list<ESPPointToPointBeam*> >::iterator iter = this->teslaLightningArcs.begin();
+		 iter != this->teslaLightningArcs.end(); ++iter) {
 
 		std::list<ESPPointToPointBeam*>& arcs = iter->second;
 		for (std::list<ESPPointToPointBeam*>::iterator arcIter = arcs.begin(); arcIter != arcs.end(); ++arcIter) {

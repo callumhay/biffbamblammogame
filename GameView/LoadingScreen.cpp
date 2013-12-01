@@ -2,7 +2,7 @@
  * LoadingScreen.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -11,16 +11,12 @@
 
 #include "LoadingScreen.h"
 #include "GameFontAssetsManager.h"
-#include "CgFxBloom.h"
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
 
-#include "../ResourceManager.h"
-
-#include "../ESPEngine/ESPUtil.h"
-
 #include "../BlammoEngine/Camera.h"
-#include "../BlammoEngine/FBObj.h"
+#include "../ESPEngine/ESPUtil.h"
+#include "../ResourceManager.h"
 
 LoadingScreen* LoadingScreen::instance = NULL;
 
@@ -31,7 +27,7 @@ const int LoadingScreen::LOADING_BAR_HEIGHT = 50;
 const char* LoadingScreen::ABSURD_LOADING_DESCRIPTION = "ABSURD";
 
 LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), 
-numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(NULL), starryBG(NULL) {
+numExpectedUpdates(0), numCallsToUpdate(0), starryBG(NULL) {
 	// At the very least we need fonts to display info on the loading screen...
 	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
 	
@@ -56,12 +52,12 @@ numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(
 	this->absurdLoadingDescriptions.push_back("Pushing buttons ...");
 	this->absurdLoadingDescriptions.push_back("Twisting knobs ...");
 	this->absurdLoadingDescriptions.push_back("Making breakfast ...");
-	this->absurdLoadingDescriptions.push_back("Composing Musak ...");
+	this->absurdLoadingDescriptions.push_back("Composing Music ...");
 	this->absurdLoadingDescriptions.push_back("Generating distracting colours ...");
 	this->absurdLoadingDescriptions.push_back("Baking cake ...");
 	this->absurdLoadingDescriptions.push_back("Eating cake ...");
 	this->absurdLoadingDescriptions.push_back("Compiling sounds to words ...");
-	this->absurdLoadingDescriptions.push_back("Doing... stuff ...");
+	this->absurdLoadingDescriptions.push_back("Doing ... stuff ...");
 	this->absurdLoadingDescriptions.push_back("Reconciling Quantum Mechanics and Relativity ...");
 	this->absurdLoadingDescriptions.push_back("Deploying Nanotubes ...");
 	this->absurdLoadingDescriptions.push_back("Loading moderately relevant things ...");
@@ -75,15 +71,6 @@ numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(
 }
 
 LoadingScreen::~LoadingScreen() {
-	if (this->loadingScreenFBO != NULL) {
-		delete this->loadingScreenFBO;
-		this->loadingScreenFBO = NULL;
-	}
-	if (this->bloomEffect != NULL) {
-		delete this->bloomEffect;
-		this->bloomEffect = NULL;
-	}
-
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
     assert(success);
@@ -95,14 +82,14 @@ LoadingScreen::~LoadingScreen() {
  * for the loading screen.
  */
 void LoadingScreen::InitOpenGLForLoadingScreen() {
+
 	// Initialize a very basic OpenGL context...
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_1D);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_TEXTURE_3D);
-
-	glEnable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -111,19 +98,18 @@ void LoadingScreen::InitOpenGLForLoadingScreen() {
 }
 
 void LoadingScreen::RenderLoadingScreen() {
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
 	// Initialize basic OpenGL state
 	LoadingScreen::InitOpenGLForLoadingScreen();
 	this->itemLoadingLabel.SetTopLeftCorner((this->width - this->itemLoadingLabel.GetLastRasterWidth()) / 2.0f, 
                                             (this->height + LOADING_BAR_HEIGHT) / 2 + this->itemLoadingLabel.GetHeight() + GAP_PIXELS/2);
 
-	// Bind the FBO so we draw the loading screen into it
-	this->loadingScreenFBO->BindFBObj();
-
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    
     // Draw the starry background...
     this->starryBG->BindTexture();
     GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(this->width, this->height, 
@@ -137,31 +123,10 @@ void LoadingScreen::RenderLoadingScreen() {
 	// Draw labels for loading screen
 	this->itemLoadingLabel.Draw();
 
-	// Unbind the FBO, add bloom and draw it as a texture on a full screen quad
-	this->loadingScreenFBO->UnbindFBObj();
-	this->bloomEffect->Draw(this->width, this->height, 0.0f);
-
-	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1);
-
 	SDL_GL_SwapBuffers();
 
 	glPopAttrib();
 	debug_opengl_state();
-}
-
-void LoadingScreen::SetupFullscreenEffect(int width, int height) {
-	// Setup the FBO for the loading screen
-	if (this->loadingScreenFBO != NULL) {
-		delete this->loadingScreenFBO;
-	}
-	this->loadingScreenFBO = new FBObj(width, height, Texture::Nearest, FBObj::NoAttachment);
-
-	// Setup the bloom effect and its parameters
-	if (this->bloomEffect != NULL) {
-		delete this->bloomEffect;
-	}
-	this->bloomEffect = new CgFxBloom(this->loadingScreenFBO);
-    this->bloomEffect->SetMenuBloomSettings();
 }
 
 /**
@@ -176,9 +141,6 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 
 	debug_output("Loading Screen start...");
 
-	// Setup the FBO and bloom CgFx Effect
-	this->SetupFullscreenEffect(width, height);
-
 	this->numCallsToUpdate = 0;
 	this->numExpectedUpdates = numExpectedUpdates + 1;
 	this->width = width;
@@ -189,20 +151,14 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 	// Initialize basic OpenGL state
 	LoadingScreen::InitOpenGLForLoadingScreen();
 
-	this->loadingScreenFBO->BindFBObj();
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
 	debug_opengl_state();
 	
 	this->DrawLoadingBar();
 
-	this->loadingScreenFBO->UnbindFBObj();
 	debug_opengl_state();
-
-	this->bloomEffect->Draw(width, height, 0.0f);
-
-	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1);
 
 	SDL_GL_SwapBuffers();
 
@@ -275,8 +231,8 @@ void LoadingScreen::DrawLoadingBar() {
 		return; 
 	}
 	// Figure out what estimated percentage of loading is complete and fill the bar based on that percentage
-	float percentageDone			= std::min<float>(1.0f, static_cast<float>(this->numCallsToUpdate) / static_cast<float>(this->numExpectedUpdates));
-	float lengthOfLoadingBar	= percentageDone * LOADING_BAR_WIDTH;
+	float percentageDone     = std::min<float>(1.0f, static_cast<float>(this->numCallsToUpdate) / static_cast<float>(this->numExpectedUpdates));
+	float lengthOfLoadingBar = percentageDone * LOADING_BAR_WIDTH;
 
 	Point2D loadingBarUpperLeft = Point2D((this->width - LOADING_BAR_WIDTH) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2.0f);
 

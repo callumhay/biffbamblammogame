@@ -1082,7 +1082,7 @@ void BoundingLines::DebugDraw() const {
 	glColor3f(1,1,1);
 	glBegin(GL_LINES);
 	for (size_t i = 0; i < this->normals.size(); i++) {
-		Vector2D currNorm = this->normals[i];
+		Vector2D currNorm = 0.5f*this->normals[i];
 		Collision::LineSeg2D currLine = this->lines[i];
 		
 		// Place normal at midpoint

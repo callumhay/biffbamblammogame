@@ -22,7 +22,6 @@
 
 class TextLabel2D;
 class FBObj;
-class CgFxBloom;
 class KeyboardHelperLabel;
 class GameWorld;
 class Texture;
@@ -78,7 +77,6 @@ private:
     Texture2D* starTexture;
     Texture2D* starGlowTexture;
 
-	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
     FBObj* postMenuFBObj;
 

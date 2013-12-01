@@ -1,0 +1,163 @@
+float Script : STANDARDSGLOBAL <
+    string UIWidget = "none";
+    string ScriptClass = "object";
+    string ScriptOrder = "standard";
+    string ScriptOutput = "color";
+    string Script = "Technique=Main;";
+> = 0.8;
+
+//// UN-TWEAKABLES - AUTOMATICALLY-TRACKED TRANSFORMS ////////////////
+
+float4x4 WvpXf     : WorldViewProjection < string UIWidget="None"; >;
+
+//// TWEAKABLE PARAMETERS ////////////////////
+
+float Timer : TIME <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.01;
+    string UIName =  "Timer";
+> = 0;
+
+float Scale <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.1;
+    string UIName =  "Scale";
+> = 1;
+
+float Freq <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 10.0;
+    float UIStep = 0.1;
+    string UIName =  "Frequency";
+> = 1;
+
+float FadeExp <
+    string UIWidget = "slider";
+    float UIMin = 1.0;
+    float UIMax = 128.0;
+    float UIStep = 1.0;
+    string UIName =  "Fade Exponent";
+> = 1;
+
+float3 FlowDir <
+    string UIName = "Flow Direction";
+> = {0, 1, 1};
+
+float3 Colour <
+    string UIName =  "Colour";
+    string UIWidget = "Color";
+> = {0.30f,0.30f,0.30f};
+
+float3 LightPos <
+    string UIName =  "Colour";
+    string UIWidget = "Color";
+> = {0,0,0};
+
+float LightAtten <
+> = 1;
+
+
+//////// COLOR & TEXTURE /////////////////////
+
+texture NoiseTexture  <
+    string ResourceName = "noiseL8_32x32x32.dds";
+    string UIName =  "Noise Texture";
+    string ResourceType = "3D";
+>;
+
+sampler3D NoiseSampler = sampler_state {
+    Texture = <NoiseTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+    WrapR = Repeat;
+    
+};  
+
+texture MaskTexture <
+    string ResourceName = "Circle_Gradient_64x64.png";
+    string UIName = "Mask Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D MaskSampler = sampler_state {
+    Texture = <MaskTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+};
+
+//////// CONNECTOR DATA STRUCTURES ///////////
+
+/* data from application vertex buffer */
+struct appdata {
+    float3 Position : POSITION;
+    float4 UV       : TEXCOORD0;
+    float4 Colour   : COLOR0;
+};
+
+/* data passed from vertex shader to pixel shader */
+struct vertexOutput {
+    float4 HPosition	: POSITION;
+    float3 WorldPos	    : TEXCOORD0;
+    float3 UV           : TEXCOORD1;
+    float4 Colour       : TEXCOORD2;
+};
+ 
+///////// VERTEX SHADING /////////////////////
+vertexOutput localpos_VS(appdata IN) {
+    vertexOutput OUT = (vertexOutput)0;
+    
+    float4 Po = float4(IN.Position.xyz,1);
+    OUT.WorldPos  = Po.xyz;
+    OUT.HPosition = mul(WvpXf,Po);
+    OUT.UV        = IN.UV.xyz;
+    OUT.Colour    = IN.Colour;
+    return OUT;
+}
+
+///////// PIXEL SHADING //////////////////////
+float4 cloudy_sprite_PS(vertexOutput IN) : COLOR {
+	
+    float3 sampleCoord = IN.WorldPos.xyz + Freq*Timer*FlowDir;
+    float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
+    float totalTexVal = clamp((texVal.x + texVal.y + texVal.z + texVal.w + 0.03125) * 1.5f, 0.0f, 1.0f);
+    float fadeAmtCoeff = tex2D(MaskSampler, IN.UV.xy).a;
+	
+    float lightAmt = clamp(1.0f / (LightAtten * max(0.0001f, length(LightPos - IN.WorldPos.xyz))), 0.0f, 1.0f);
+    float alphaAmt = totalTexVal*fadeAmtCoeff*IN.Colour.a;
+    
+    // Make the light stronger at the 'edges' of the clouds
+    lightAmt *= smoothstep(1.0f, 0.33f, alphaAmt);
+    
+    // Emphasize areas of darkness in the clouds by making them more opaque
+    alphaAmt = clamp((totalTexVal + (1.0f - lightAmt)), 0.0f, 1.0f) * fadeAmtCoeff*IN.Colour.a;
+	
+    return float4((lightAmt.rrr + Colour.rgb) * totalTexVal.rrr, alphaAmt);
+}
+
+technique CloudySprite < string Script = "Pass=p0;"; > {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+		BlendEquation = FuncAdd;
+		
+        PolygonMode = int2(Front, Fill);
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+	    CullFace = Back;
+	    DepthMask = false;
+	    CullFaceEnable = true;
+
+        VertexProgram   = compile arbvp1 localpos_VS();            
+        FragmentProgram = compile arbfp1 cloudy_sprite_PS();
+    }
+}

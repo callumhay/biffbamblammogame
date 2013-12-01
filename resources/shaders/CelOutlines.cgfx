@@ -1,0 +1,132 @@
+
+float Script : STANDARDSGLOBAL <
+    string UIWidget = "none";
+    string ScriptClass = "object";
+    string ScriptOrder = "standard";
+    string ScriptOutput = "color";
+    string Script = "Technique=Main;";
+> = 0.8;
+
+//// TWEAKABLE PARAMETERS ////////////////////
+
+float Near <
+    string UIWidget = "slider";
+    float UIMin = 0.1;
+    float UIMax = 10000.0;
+    float UIStep = 0.1;
+    string UIName =  "Near";
+> = 0.1;
+
+float Far <
+    string UIWidget = "slider";
+    float UIMin = 1;
+    float UIMax = 10000.0;
+    float UIStep = 1;
+    string UIName =  "Far";
+> = 0.1;
+
+float MinDistance = 64;
+float MaxDistance = 3.277e4;
+
+float AmbientBrightness = 1.0;
+float AmbientDarkness   = 0.1;
+
+float Contrast = 1.5;
+
+float AlphaMultiplier  <
+    string UIWidget = "slider";
+    float UIMin = 0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "AlphaMultiplier";
+> = 1.0;
+
+float2 TextureOffsets[9];
+
+//////// COLOR & TEXTURE /////////////////////
+
+texture ColourTexture  <
+    string UIName =  "Colour Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
+}; 
+
+texture DepthTexture  <
+    string UIName =  "Depth Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D DepthSampler = sampler_state {
+    Texture = <DepthTexture>;
+}; 
+
+
+float LinearizeDepth(float z) {
+	return 2.0 * Near * Far / (Far + Near - (2.0 * z - 1.0) * (Far - Near));
+}
+
+///////// PIXEL SHADING //////////////////////
+
+struct PSOutData {
+	float4 colour : COLOR;
+	float  depth  : DEPTH;
+};
+
+PSOutData celOutlinesPS(float2 UV : TEXCOORD0) {
+
+	// Gets all neighboring fragments depths stored into the depth texture
+	// The result fragment sample matrix is as below, where x is the current fragment (index = 4)
+	// 0 1 2
+	// 3 x 5
+	// 6 7 8
+	float samples[9];
+	for (int i = 0; i < 4; i++) {
+  		samples[i] = LinearizeDepth(float(tex2D(DepthSampler, UV.st + TextureOffsets[i])));
+	}
+	for (int i = 5; i < 9; i++) {
+  		samples[i] = LinearizeDepth(float(tex2D(DepthSampler, UV.st + TextureOffsets[i])));
+	}
+	
+	// Sobel filtering...
+	float xValue  = -samples[6] - (2.0 * samples[7]) - samples[8] + samples[0] + (2.0 * samples[1]) + samples[2];
+	float yValue  = -samples[6] + samples[8] - (2.0 * samples[3]) + (2.0 * samples[5]) - samples[0] + samples[2];
+	float sqrDist = (xValue * xValue) + (yValue * yValue);
+	
+	// Calculate a basic edge multiplier
+	float edgeMultiplier = clamp(lerp(AmbientBrightness, AmbientDarkness, (sqrDist - MinDistance) / MaxDistance), 0, 1);
+
+	// Perform contrast pass
+	edgeMultiplier = pow(edgeMultiplier, Contrast);
+
+	// Fade pass
+	edgeMultiplier = max(clamp(1.0 - AlphaMultiplier, 0, 1), edgeMultiplier);
+	
+	// Composite pass
+	float4 sceneColour = tex2D(ColourSampler, UV.st);
+	sceneColour = float4(edgeMultiplier * sceneColour.rgb, 1.0);
+	
+	PSOutData outData = (PSOutData)0;
+	outData.colour = sceneColour;
+	outData.depth  = float(tex2D(DepthSampler, UV.st));
+	
+	return outData;
+}
+
+///// TECHNIQUES /////////////////////////////
+
+technique CelOutlines < string Script = "Pass=p0;"; > {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+		
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+		
+        FragmentProgram = compile arbfp1 celOutlinesPS();
+    }
+}

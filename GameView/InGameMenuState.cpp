@@ -21,6 +21,7 @@
 #include "LevelStartDisplayState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameFBOAssets.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameSound/GameSound.h"

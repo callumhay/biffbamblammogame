@@ -28,10 +28,7 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(N
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
 
 	// Transform parameters
-	this->worldITMatrixParam  = cgGetNamedEffectParameter(this->cgEffect, "WorldITXf");
 	this->wvpMatrixParam      = cgGetNamedEffectParameter(this->cgEffect, "WvpXf");
-	this->worldMatrixParam    = cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
-	this->viewInvMatrixParam  = cgGetNamedEffectParameter(this->cgEffect, "ViewIXf");
 
 	// Noise texture sampler param
 	this->noiseSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
@@ -56,14 +53,10 @@ CgFxCloudEffect::~CgFxCloudEffect() {
 }
 
 void CgFxCloudEffect::SetupBeforePasses(const Camera& camera) {
+    UNUSED_PARAMETER(camera);
 
 	// Transform setup
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
-	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	
-    const Matrix4x4& invViewXf = camera.GetInvViewTransform();
-	cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 
 	// Set tweak-ables...
 	cgGLSetParameter1f(this->scaleParam, this->scale);

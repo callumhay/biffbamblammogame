@@ -141,6 +141,7 @@ public:
 
     void BossHurtEvent(const BossWeakpoint* hurtPart);
     void BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart);
+    void BossAngryEvent(const Boss* boss, const Point2D& angryPartLoc, float angryPartWidth, float angryPartHeight);
 
     void BossEffectEvent(const BossEffectEventInfo& effectEvent);
     void GeneralEffectEvent(const GeneralEffectEventInfo& effectEvent);

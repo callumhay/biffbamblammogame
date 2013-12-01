@@ -27,16 +27,18 @@
 
 struct BallCollisionChangeInfo {
 public:
-    BallCollisionChangeInfo() : posChanged(false), impulseApplied(false), impulseAmt(0), impulseDecel(0) {}
-    BallCollisionChangeInfo(bool posChanged) : posChanged(posChanged), impulseApplied(false), impulseAmt(0), impulseDecel(0) {}
+    BallCollisionChangeInfo() : posChanged(false), paddleRedirectBallVelocity(false), impulseApplied(false), impulseAmt(0), impulseDecel(0) {}
+    BallCollisionChangeInfo(bool posChanged) : posChanged(posChanged), paddleRedirectBallVelocity(false), impulseApplied(false), impulseAmt(0), impulseDecel(0) {}
     BallCollisionChangeInfo(bool posChanged, bool impulseApplied, float impulseAmt, float impulseDecel) :
-      posChanged(posChanged), impulseApplied(impulseApplied), impulseAmt(impulseAmt), impulseDecel(impulseDecel) {}
+      posChanged(posChanged), impulseApplied(impulseApplied), impulseAmt(impulseAmt), impulseDecel(impulseDecel), paddleRedirectBallVelocity(false) {}
     BallCollisionChangeInfo(const BallCollisionChangeInfo& copy) : posChanged(copy.posChanged), 
-        impulseApplied(copy.impulseApplied), impulseAmt(copy.impulseAmt), impulseDecel(copy.impulseDecel) {}
+        paddleRedirectBallVelocity(copy.paddleRedirectBallVelocity), impulseApplied(copy.impulseApplied), 
+        impulseAmt(copy.impulseAmt), impulseDecel(copy.impulseDecel) {}
     ~BallCollisionChangeInfo(){}
 
     BallCollisionChangeInfo& operator=(const BallCollisionChangeInfo& copy) {
         this->posChanged = copy.posChanged;
+        this->paddleRedirectBallVelocity = copy.paddleRedirectBallVelocity;
         this->impulseApplied = copy.impulseApplied;
         this->impulseAmt = copy.impulseAmt;
         this->impulseDecel = copy.impulseDecel;
@@ -44,7 +46,9 @@ public:
     }
 
     bool posChanged;
+    bool paddleRedirectBallVelocity;
     bool impulseApplied;
+    
     float impulseAmt;
     float impulseDecel;
 };
@@ -349,18 +353,20 @@ void BallInPlayState::Tick(double seconds) {
                         GameBall::MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS, paddle->GetVelocity(), true);
                     
                     BallCollisionChangeInfo& collisionInfo = ballChangedByCollision[ballIdx];                    
-                    collisionInfo.posChanged     = true;
-                    collisionInfo.impulseApplied = true;
-                    collisionInfo.impulseAmt     = (GameBall::GetNormalSpeed() / currBall->GetSpeed()) * fabs(paddle->GetSpeed()) / 5.0f;
-                    collisionInfo.impulseDecel   = collisionInfo.impulseAmt;
+                    collisionInfo.posChanged = true;
 
+                    // Only apply the impulse if the paddle is not close to a wall...
+                    if (!paddle->GetIsHittingAWall() || paddle->GetIsCloseToAWall()) {
+                        collisionInfo.impulseApplied = true;
+                        collisionInfo.impulseAmt     = (GameBall::GetNormalSpeed() / currBall->GetSpeed()) * fabs(paddle->GetSpeed()) / 5.0f;
+                        collisionInfo.impulseDecel   = collisionInfo.impulseAmt;
+                    }
+  
 				    // Tell the model that a ball collision occurred with the paddle
 				    this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
 				    if (!paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
-				        // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
-				        // still see it fly into the void. If the shield is active then no help is provided
-                        this->AugmentBallDirectionToBeNotTooDownwards(*currBall, *paddle, n);
+                        collisionInfo.paddleRedirectBallVelocity = true;
 				    }
 
 				    // If there are multiple balls and the one that just hit the paddle is not
@@ -501,20 +507,8 @@ void BallInPlayState::Tick(double seconds) {
                             break;
 				        }
     					
-                        //bool currPieceCanChangeSelfOrPiecesAroundIt = 
-                        //    currPiece->CanChangeSelfOrOtherPiecesWhenHit() || currPiece->CanBeDestroyedByBall();
-				        
                         // Tell the model that a ball collision occurred with currPiece
                         this->gameModel->CollisionOccurred(*currBall, currPiece);
-                        
-                        // Recalculate the blocks we're dealing with in this loop since 
-                        // some blocks may no longer exist after a collision - of course this would only happen if the piece
-                        // that collided could be destroyed during this loop by the ball
-                        //if (currPieceCanChangeSelfOrPiecesAroundIt) {
-			            //    collisionPieces = currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(), 
-                        //        std::max<float>(GameBall::DEFAULT_BALL_RADIUS, currBall->GetBounds().Radius()), currBall->GetSpeed());
-                        //    pieceIter = collisionPieces.begin();
-                        //}
                     }
                 }
             }
@@ -530,7 +524,15 @@ void BallInPlayState::Tick(double seconds) {
 		    // Update the current ball, we don't simulate any ball movement if the ball's position has already
             // been augmented by a previous collision during this frame/tick
             currBall->Tick(!currCollisionInfo.posChanged, seconds, worldGravity2D, this->gameModel);
-            if (currCollisionInfo.impulseApplied) {
+             
+            bool dirWasAugmentedByPaddle = false;
+            if (currCollisionInfo.paddleRedirectBallVelocity) {
+                // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
+                // still see it fly into the void. If the shield is active then no help is provided
+                dirWasAugmentedByPaddle = this->AugmentBallDirectionToBeNotTooDownwards(*currBall, *paddle, n);
+            }
+
+            if (!dirWasAugmentedByPaddle && currCollisionInfo.impulseApplied) {
                 currBall->ApplyImpulseForce(currCollisionInfo.impulseAmt, currCollisionInfo.impulseDecel);
             }
 	    }
@@ -811,17 +813,16 @@ void BallInPlayState::DoItemCollision() {
 
 // Makes sure that the ball's direction is upwards and changes it to be upwards - when it gets
 // hit by the paddle this is called.
-void BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const PlayerPaddle& p, const Vector2D& collisionNormal) {
+bool BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const PlayerPaddle& p, const Vector2D& collisionNormal) {
     // We are unforgiving if the collision normal was pointing very downwards as well
     if (collisionNormal[1] < -0.9f) {
-        return;
+        return false;
     }
     // We are also unforgiving if the ball is below the paddle...
     if (b.GetCenterPosition2D()[1] < (p.GetCenterPosition()[1] - p.GetHalfHeight() - 0.9f*b.GetBounds().Radius())) {
-        return;
+        return false;
     }
     // We also don't change the direction if the ball is past one of the paddle boundaries
-
 
 	Vector2D ballDirection = b.GetDirection();
 
@@ -829,5 +830,8 @@ void BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const
 		ballDirection[1] = fabs(ballDirection[0] * tanf(GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS));
 		ballDirection.Normalize();
 		b.SetDirection(ballDirection);
+        return true;
 	}
+
+    return false;
 }

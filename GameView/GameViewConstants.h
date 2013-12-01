@@ -63,7 +63,6 @@ public:
 	const char* CGFX_VOLUMEMETRIC_SHADER;
 	const char* CGFX_SKYBOX_SHADER;
 	const char* CGFX_GAUSSIAN_SHADER;
-	const char* CGFX_AFTERIMAGE_SHADER;
 	const char* CGFX_BLOOM_SHADER;
 	const char* CGFX_FULLSCREENGOO_SHADER;
 	const char* CGFX_STICKYPADDLE_SHADER;

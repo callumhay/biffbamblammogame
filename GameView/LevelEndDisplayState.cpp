@@ -2,7 +2,7 @@
  * LevelEndDisplayState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -12,6 +12,7 @@
 #include "LevelEndDisplayState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameESPAssets.h"
 #include "GameFBOAssets.h"
 #include "PointsHUD.h"
 #include "LivesLeftHUD.h"

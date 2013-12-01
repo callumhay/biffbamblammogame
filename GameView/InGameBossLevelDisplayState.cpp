@@ -12,6 +12,7 @@
 #include "InGameBossLevelDisplayState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameESPAssets.h"
 
 #include "../GameModel/Boss.h"
 #include "../GameModel/GameTransformMgr.h"

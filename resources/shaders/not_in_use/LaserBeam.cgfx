@@ -1,0 +1,137 @@
+float Script : STANDARDSGLOBAL <
+    string UIWidget = "none";
+    string ScriptClass = "object";
+    string ScriptOrder = "standard";
+    string ScriptOutput = "color";
+    string Script = "Technique=Main;";
+> = 0.8;
+
+//// UN-TWEAKABLES - AUTOMATICALLY-TRACKED TRANSFORMS ////////////////
+
+float4x4 WvpXf : WorldViewProjection < string UIWidget="None"; >;
+float4x4 WorldXf : World < string UIWidget="None"; >;
+float4x4 ViewIXf : ViewInverse < string UIWidget="None"; >;
+
+float Timer : TIME <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.01;
+    string UIName =  "Timer";
+> = 0;
+
+float Scale <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.1;
+    string UIName =  "Scale";
+> = 1;
+
+float Freq <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 10.0;
+    float UIStep = 0.1;
+    string UIName =  "Frequency";
+> = 1;
+
+float3 BeamColour <
+    string UIName =  "Beam Colour";
+    string UIWidget = "Color";
+> = {1.0, 1.0, 1.0};
+
+texture NoiseTexture  <
+    string ResourceName = "noiseL8_32x32x32.dds";
+    string UIName =  "Noise Texture";
+    string ResourceType = "3D";
+>;
+
+sampler3D NoiseSampler = sampler_state {
+    Texture = <NoiseTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+    WrapR = Repeat;
+    
+};
+
+texture MaskTexture <
+    string ResourceName = "Circle_Gradient_64x64.png";
+    string UIName = "Mask Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D MaskSampler = sampler_state {
+    Texture = <MaskTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+};
+
+// Data from application vertex buffer
+struct appdata {
+    float3 Position	: POSITION;
+    float4 Normal	: NORMAL;
+	float4 Colour   : COLOR0;
+	float2 UV		: TEXCOORD0;
+};
+
+// Data passed from vertex shader to pixel shader
+struct vertexOutput {
+    float4 HPosition  : POSITION;
+    float3 WorldPos	  : TEXCOORD0;
+	float3 WorldView  : TEXCOORD1;
+	float4 Colour     : TEXCOORD2;
+	float2 UV		  : TEXCOORD3;
+};
+
+// Vertex Shading
+
+vertexOutput laserbeam_vs(appdata IN) {
+    vertexOutput OUT = (vertexOutput)0;
+
+    float4 Po = float4(IN.Position.xyz,1);
+	float3 Pw = mul(WorldXf,Po).xyz;
+	
+    OUT.WorldPos = Pw;
+    OUT.WorldView = normalize(float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw);
+	OUT.HPosition = mul(WvpXf,Po);
+	OUT.Colour    = IN.Colour;
+	OUT.UV		  = IN.UV;
+    return OUT;
+}
+
+// Pixel Shading
+
+float4 laserbeam_ps(vertexOutput IN) : COLOR {
+	float3 sampleCoord = IN.WorldPos.xyz - (Freq * Timer * float3(0, 0, 1));
+	float4 noiseTexVal = tex3D(NoiseSampler, Scale * sampleCoord);
+    float  totalNoiseTexVal  = 8.0 * (abs(noiseTexVal.x - 0.25)  + abs(noiseTexVal.y - 0.125) + 
+                               abs(noiseTexVal.z - 0.0625) + abs(noiseTexVal.w - 0.03125));
+	totalNoiseTexVal = noiseTexVal.x;
+	
+	float4 maskTexVal = tex2D(MaskSampler, IN.UV.xy);
+	
+	float3 totalColour = clamp(totalNoiseTexVal * BeamColour, 0, 1);
+    return /*IN.Colour * */maskTexVal * float4(totalColour, totalNoiseTexVal);							   
+}
+
+///// TECHNIQUES /////////////////////////////
+
+technique LaserBeam < string Script = "Pass=p0;"; > {
+    pass p0 < string Script = "Draw=geometry;"; > {
+		
+        VertexProgram = compile arbvp1 laserbeam_vs();
+		DepthTestEnable = true;
+		DepthMask = true;
+		CullFaceEnable = false;
+		BlendEnable = true;
+		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+		BlendEquation = FuncAdd;
+		DepthFunc = LEqual;
+        FragmentProgram = compile arbfp1 laserbeam_ps();	
+    }
+}

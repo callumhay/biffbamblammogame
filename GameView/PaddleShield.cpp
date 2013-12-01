@@ -23,7 +23,7 @@ const double PaddleShield::DEACTIVATING_TIME	= 0.4f; // Time it takes to go from
 
 PaddleShield::PaddleShield() : SHIELD_COLOUR(0.7f, 0.8f, 1.0f), particleFader(1.0f, 0.0f), particleShrink(1.0f, 0.25f),
 state(PaddleShield::Deactivated), sphereNormalsTex(NULL), haloTex(NULL), shieldRefractEffect(NULL), sparkleTex(NULL), 
-auraEnergyOut(NULL), particleGrowth(1.0f, 1.8f), particleEnergyInAndOut(NULL) {
+particleGrowth(1.0f, 1.8f), particleEnergyInAndOut(NULL), alpha(1.0f) {
 	this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
 	assert(this->sphereNormalsTex != NULL);
 	this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
@@ -62,21 +62,20 @@ auraEnergyOut(NULL), particleGrowth(1.0f, 1.8f), particleEnergyInAndOut(NULL) {
 	bool result = this->particleEnergyInAndOut->SetParticles(35, this->sparkleTex);
 	assert(result);
 
-	const float HALO_LIFETIME = 2.3f;
-	const int NUM_HALOS = 3;
-	this->auraEnergyOut = new ESPPointEmitter();
-	this->auraEnergyOut->SetSpawnDelta(ESPInterval(HALO_LIFETIME / static_cast<float>(NUM_HALOS)));
-	this->auraEnergyOut->SetInitialSpd(ESPInterval(0));
-	this->auraEnergyOut->SetParticleLife(ESPInterval(HALO_LIFETIME));
-	this->auraEnergyOut->SetEmitAngleInDegrees(0);
-	this->auraEnergyOut->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->auraEnergyOut->SetParticleAlignment(ESP::ScreenAligned);
-	this->auraEnergyOut->SetEmitPosition(Point3D(0, 0, 0));
-	this->auraEnergyOut->SetParticleColour(ESPInterval(0.5f, 0.7f), ESPInterval(0.75f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-	this->auraEnergyOut->AddEffector(&this->particleGrowth);
-	this->auraEnergyOut->AddEffector(&this->particleFader);
-	result = this->auraEnergyOut->SetParticles(NUM_HALOS, this->haloTex);
-	assert(result);
+    std::vector<double> timeVals;
+    timeVals.reserve(3);
+    timeVals.push_back(0.0);
+    timeVals.push_back(1.0);
+    timeVals.push_back(2.0);
+    std::vector<float> glowVals;
+    glowVals.reserve(timeVals.size());
+    glowVals.push_back(0.0f);
+    glowVals.push_back(0.3f);
+    glowVals.push_back(0.0f);
+
+    this->shieldGlowAnimation.SetInterpolantValue(0.0f);
+    this->shieldGlowAnimation.SetLerp(timeVals, glowVals);
+    this->shieldGlowAnimation.SetRepeat(true);
 }
 
 PaddleShield::~PaddleShield() {
@@ -84,8 +83,6 @@ PaddleShield::~PaddleShield() {
 	this->shieldRefractEffect = NULL;
 	delete this->particleEnergyInAndOut;
 	this->particleEnergyInAndOut = NULL;
-	delete this->auraEnergyOut;
-	this->auraEnergyOut = NULL;
 
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
 	assert(success);
@@ -128,6 +125,7 @@ void PaddleShield::DeactivateShield() {
 
 void PaddleShield::DrawAndTick(const PlayerPaddle& paddle, const Camera& camera, double dT) {
 	switch (this->state) {
+
 		case PaddleShield::Deactivated:
 			// Draw/Do nothing
 			break;
@@ -135,7 +133,7 @@ void PaddleShield::DrawAndTick(const PlayerPaddle& paddle, const Camera& camera,
 		case PaddleShield::Activating: {
 				// Tick all of the proper timers/animations
 				this->particleEnergyInAndOut->Tick(dT);
-				this->auraEnergyOut->Tick(dT);
+                this->shieldGlowAnimation.Tick(dT);
 				this->shieldRefractEffect->AddToTimer(dT);
 				bool isDead = this->particleEnergyInAndOut->IsDead();
 				isDead &= this->shieldSizeAnimation.Tick(dT); 
@@ -153,13 +151,13 @@ void PaddleShield::DrawAndTick(const PlayerPaddle& paddle, const Camera& camera,
 
 		case PaddleShield::Sustained:
 			// Just keep drawing the refraction bubble with the aura(s) around it
-			this->auraEnergyOut->Tick(dT);
+            this->shieldGlowAnimation.Tick(dT);
 			this->shieldRefractEffect->AddToTimer(dT);
 			this->DrawRefractionWithAura(paddle, camera, dT);
 			break;
 
 		case PaddleShield::Deactivating: {
-				this->auraEnergyOut->Tick(dT);
+				this->shieldGlowAnimation.Tick(dT);
 				this->shieldRefractEffect->AddToTimer(dT);
 				this->particleEnergyInAndOut->Tick(dT);
 				bool isDead = this->particleEnergyInAndOut->IsDead(); 
@@ -189,11 +187,9 @@ void PaddleShield::DrawRefractionWithAura(const PlayerPaddle& paddle, const Came
 	glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
 
 	float scaleAmt = 2.25f * paddle.GetHalfWidthTotal() * this->shieldSizeAnimation.GetInterpolantValue();
-	this->auraEnergyOut->SetParticleSize(ESPInterval(scaleAmt));
-
 
 	Vector3D alignNormalVec = -camera.GetNormalizedViewVector();
-	Vector3D alignUpVec		  = camera.GetNormalizedUpVector();
+	Vector3D alignUpVec	    = camera.GetNormalizedUpVector();
 	Vector3D alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
 	Matrix4x4 screenAlignMatrix(alignRightVec, alignUpVec, alignNormalVec);
 
@@ -201,18 +197,19 @@ void PaddleShield::DrawRefractionWithAura(const PlayerPaddle& paddle, const Came
 	glMultMatrixf(screenAlignMatrix.begin());
 	glScalef(scaleAmt, scaleAmt, scaleAmt);
 
-	glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
+	glColor4f(1.0f, 1.0f, 1.0f, this->alpha * 0.9f);
 	this->shieldRefractEffect->Draw(camera, GeometryMaker::GetInstance()->GetQuadDL());
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(SHIELD_COLOUR.R(), SHIELD_COLOUR.G(), SHIELD_COLOUR.B(), 1.0f);
+
+    float colourAdd = this->shieldGlowAnimation.GetInterpolantValue();
+    Colour currColour = SHIELD_COLOUR + Colour(colourAdd, colourAdd, colourAdd);
+	glColor4f(currColour.R(), currColour.G(), currColour.B(), this->alpha);
 
 	this->haloTex->BindTexture();
 	GeometryMaker::GetInstance()->DrawQuad();
 
 	glPopMatrix();
-
-	this->auraEnergyOut->Draw(camera);
 	glPopAttrib();
 }

@@ -14,7 +14,6 @@
 #include "KeyboardHelperLabel.h"
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
-#include "CgFxBloom.h"
 #include "GameViewConstants.h"
 #include "MenuBackgroundRenderer.h"
 
@@ -35,7 +34,7 @@ const float SelectWorldMenuState::UNSELECTED_MENU_ITEM_SIZE = 128;
 
 SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const DisplayStateInfo& info, SoundID bgSoundLoopID) :
 DisplayState(display), bgSoundLoopID(bgSoundLoopID), pressEscAlphaAnim(0.0f), worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
-goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), bloomEffect(NULL), itemActivated(false), padlockTex(NULL),
+goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), itemActivated(false), padlockTex(NULL),
 goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL), worldUnlockAnim(NULL),
 totalNumGameStarsLabel(NULL), totalLabel(NULL), starGlowTexture(NULL) {
     this->Init(info);
@@ -58,8 +57,6 @@ SelectWorldMenuState::~SelectWorldMenuState() {
     this->menuFBO = NULL;
     delete this->postMenuFBObj;
     this->postMenuFBObj = NULL;
-    delete this->bloomEffect;
-    this->bloomEffect = NULL;
 
     for (std::vector<WorldSelectItem*>::iterator iter = this->worldItems.begin(); 
          iter != this->worldItems.end(); ++iter) {
@@ -149,9 +146,6 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 
 	this->menuFBO->UnbindFBObj();
 
-	// Do bloom on the menu and draw it
-	this->bloomEffect->Draw(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
-	
     if (this->itemActivated) {
         bool animDone = this->goToLevelSelectAlphaAnim.Tick(dT);
         animDone &= this->goToLevelSelectMoveAnim.Tick(dT);
@@ -465,10 +459,6 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     // Build a framebuffer object for the menu
 	this->menuFBO = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
     this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
-
-	// Create the new bloom effect and set its parameters appropriately
-	this->bloomEffect = new CgFxBloom(this->menuFBO);
-	this->bloomEffect->SetMenuBloomSettings();
 
     // Setup the world items for the GUI menu
     GameModel* gameModel = this->display->GetModel();

@@ -21,10 +21,9 @@ class FBObj;
 class CgFxBloom : public CgFxPostProcessingEffect {
 public:
 	CgFxBloom(FBObj* sceneFBO);
-	virtual ~CgFxBloom();
+	~CgFxBloom();
 
-	virtual void Draw(int screenWidth, int screenHeight, double dT);
-	std::list<AnimationMultiLerp<float> > GetPulseAnimation(float pulseLengthInSec, float pulseAmount);
+	void Draw(int screenWidth, int screenHeight, double dT);
 
     inline void SetMenuBloomSettings() {
         this->SetHighlightThreshold(0.4f);

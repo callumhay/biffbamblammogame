@@ -183,7 +183,7 @@ void GothicRomanticWorldAssets::InitializeEmitters() {
 		this->fireEmitter6.Tick(0.5);
 	}
 
-    static const float CLOUD_GREY_AMT = 0.45f;
+    static const float CLOUD_GREY_AMT = 0.33f;
     this->cloudEffect.SetTechnique(CgFxVolumetricEffect::CLOUDYSPRITE_TECHNIQUE_NAME);
     this->cloudEffect.SetColour(Colour(CLOUD_GREY_AMT, CLOUD_GREY_AMT, CLOUD_GREY_AMT));
     this->cloudEffect.SetScale(0.25f);
@@ -191,7 +191,7 @@ void GothicRomanticWorldAssets::InitializeEmitters() {
     this->cloudEffect.SetFlowDirection(Vector3D(-1, 0, 1));
     this->cloudEffect.SetTexture(this->cloudTextures[0]);
     this->cloudEffect.SetLightPos(this->moonPos);
-    this->cloudEffect.SetAttenuation(0.038f);
+    this->cloudEffect.SetAttenuation(0.033f);
 
     std::vector<ColourRGBA> cloudColours;
     cloudColours.reserve(6);

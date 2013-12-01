@@ -64,24 +64,27 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 
 		// Based on whether it's in warning mode, change its colour and position to indicate that
 		// it's about to 'go off'
-		if (collateralBlock->GetState() == CollateralBlock::WarningState) {
-			// Randomly shake the block around...
-			shake[0] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
-			shake[1] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
-			shake[2] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
-			glTranslatef(shake[0], shake[1], shake[2]);
+        switch (collateralBlock->GetState()) {
+            case CollateralBlock::WarningState:
+			    // Randomly shake the block around...
+			    shake[0] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
+			    shake[1] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
+			    shake[2] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
+			    glTranslatef(shake[0], shake[1], shake[2]);
 
-			// Randomly flash colour on the block
-			colour[0] = 0.5f + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5f;
-			colour[1] = Randomizer::GetInstance()->RandomNumZeroToOne();
-			colour[2] = 0.0f;
-			
-            this->alphaFlashAnim.Tick(dT);
-            glColor4f(colour[0], colour[1], colour[2], this->alphaFlashAnim.GetInterpolantValue());
-		}
-		else {
-			glColor4f(1, 1, 1, 1);
-		}
+			    // Randomly flash colour on the block
+			    colour[0] = 0.5f + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5f;
+			    colour[1] = Randomizer::GetInstance()->RandomNumZeroToOne();
+			    colour[2] = 0.0f;
+    			
+                this->alphaFlashAnim.Tick(dT);
+                glColor4f(colour[0], colour[1], colour[2], this->alphaFlashAnim.GetInterpolantValue());
+                break;
+
+            default:
+			    glColor4f(1, 1, 1, 1);
+                break;
+        }
 
 		// Rotate it based on its current rotation...
 		glRotatef(currRotation, 1, 0, 0);

@@ -953,10 +953,6 @@
 					Name="Header Files"
 					>
 					<File
-						RelativePath=".\GameView\CgFxAfterImage.h"
-						>
-					</File>
-					<File
 						RelativePath=".\GameView\CgFxBloom.h"
 						>
 					</File>
@@ -1052,10 +1048,6 @@
 				<Filter
 					Name="Source Files"
 					>
-					<File
-						RelativePath=".\GameView\CgFxAfterImage.cpp"
-						>
-					</File>
 					<File
 						RelativePath=".\GameView\CgFxBloom.cpp"
 						>

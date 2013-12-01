@@ -14,6 +14,7 @@
 
 #include "../BlammoEngine/Light.h"
 #include "../BlammoEngine/Animation.h"
+#include "../BlammoEngine/FBObj.h"
 
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameLevel.h"
@@ -24,11 +25,9 @@
 #include "../GameModel/GameItemTimer.h"
 #include "../GameModel/SafetyNet.h"
 
-// Compositional classes for asssets
+// Compositional classes for assets
 #include "GameWorldAssets.h"
-#include "GameESPAssets.h"
 #include "GameItemAssets.h"
-#include "GameFBOAssets.h"
 #include "GameLightAssets.h"
 #include "GameTutorialAssets.h"
 #include "RandomToItemAnimation.h"
@@ -64,6 +63,8 @@ class MagnetPaddleEffect;
 class RocketProjectile;
 class MineMeshManager;
 class FullscreenFlashEffectInfo;
+class GameESPAssets;
+class GameFBOAssets;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -97,8 +98,6 @@ public:
 	void DrawTimers(double dT, const Camera& camera, const GameModel& gameModel);
 
 	void DrawBeams(const GameModel& gameModel, const Camera& camera);
-	void DrawTeslaLightning(double dT, const Camera& camera);
-	void DrawProjectiles(double dT, const Camera& camera);
     void DrawMeshProjectiles(double dT, const GameModel& gameModel, const Camera& camera);
 
 	void DrawInformativeGameElements(const Camera& camera, double dT, const GameModel& gameModel);
@@ -198,6 +197,7 @@ public:
     void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera, const GameModel* gameModel);
 
     void ToggleSkipLabel(bool activate);
+    void ReinitializeSkipLabel();
 
 private:
     GameSound* sound; // Sound module for the game
@@ -286,20 +286,7 @@ inline void GameAssets::DrawTimers(double dT, const Camera& camera, const GameMo
 	this->itemAssets->DrawTimers(dT, camera, gameModel);
 }
 
-// Draw any currently active Tesla lightning bolts in the game.
-inline void GameAssets::DrawTeslaLightning(double dT, const Camera& camera) {
-	this->espAssets->DrawTeslaLightningArcs(dT, camera);
-}
 
-// Draw the foreground level pieces...
-inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
-	Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
-
-	BasicPointLight fgKeyLight, fgFillLight, ballLight;
-	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight,
-        ballLight, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
-}
 
 inline void GameAssets::DrawLevelPiecesPostEffects(double dT, const Camera& camera) {
     BasicPointLight fgKeyLight, fgFillLight, ballLight;
@@ -355,13 +342,6 @@ inline void GameAssets::ToggleLights(bool lightsOn, double toggleTime) {
 }
 inline void GameAssets::ToggleLightsForBossDeath(bool lightsOn, double toggleTime) {
     this->lightAssets->ToggleLightsForBossDeath(lightsOn, toggleTime);
-}
-
-/**
- * Draw the currently active projectiles in the game.
- */
-inline void GameAssets::DrawProjectiles(double dT, const Camera& camera) {
-    this->espAssets->DrawProjectileEffects(dT, camera);
 }
 
 #endif

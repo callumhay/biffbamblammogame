@@ -446,13 +446,13 @@ bool DecoBossAIState::UpdateArmAnimation(double dT, AnimationMultiLerp<float>& a
         Vector2D leftArmOriVec(0,-1);
         leftArmOriVec.Rotate(this->boss->GetLeftArm()->GetLocalZRotation());
 
-        float dxDt = armSeg1Anim.GetDxDt();
+        float dxDt = fabs(armSeg1Anim.GetDxDt());
         leftArmScoping1->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
-        dxDt += armSeg2Anim.GetDxDt();
+        dxDt += fabs(armSeg2Anim.GetDxDt());
         leftArmScoping2->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
-        dxDt += armSeg3Anim.GetDxDt();
+        dxDt += fabs(armSeg3Anim.GetDxDt());
         leftArmScoping3->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
-        dxDt += armSeg4Anim.GetDxDt();
+        dxDt += fabs(armSeg4Anim.GetDxDt());
         leftArmScoping4->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
         leftHand->SetExternalAnimationVelocity(dxDt * leftArmOriVec);
     }
@@ -477,13 +477,13 @@ bool DecoBossAIState::UpdateArmAnimation(double dT, AnimationMultiLerp<float>& a
         Vector2D rightArmOriVec(0,-1);
         rightArmOriVec.Rotate(this->boss->GetRightArm()->GetLocalZRotation());
 
-        float dxDt = armSeg1Anim.GetDxDt();
+        float dxDt = fabs(armSeg1Anim.GetDxDt());
         rightArmScoping1->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-        dxDt += armSeg2Anim.GetDxDt();
+        dxDt += fabs(armSeg2Anim.GetDxDt());
         rightArmScoping2->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-        dxDt += armSeg3Anim.GetDxDt();
+        dxDt += fabs(armSeg3Anim.GetDxDt());
         rightArmScoping3->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
-        dxDt += armSeg4Anim.GetDxDt();
+        dxDt += fabs(armSeg4Anim.GetDxDt());
         rightArmScoping4->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
         rightHand->SetExternalAnimationVelocity(dxDt * rightArmOriVec);
     }
@@ -1034,7 +1034,6 @@ void DecoBossAIState::ExecuteMoveToPaddleArmAttackPosState(double dT, GameModel*
 
         if (isLeftArmAlive) {
 
-
             // atan2 returns a negative angle when in the half plane of y < 0, in [-pi, 0]. For the left arm,
             // that angle must be in the [-pi, -pi/2] range for the arm to be able to attack
             if (atan2Angle <= -M_PI_DIV2 && atan2Angle >= -M_PI) {
@@ -1508,7 +1507,9 @@ Stage1AI::~Stage1AI() {
 }
 
 GameItem::ItemType Stage1AI::GenerateRandomItemDropType(GameModel* gameModel) const {
+    UNUSED_PARAMETER(gameModel);
     assert(gameModel != NULL);
+
     switch (Randomizer::GetInstance()->RandomUnsignedInt() % 4) {
         case 0:
             return GameItem::BallSpeedUpItem;
@@ -1713,6 +1714,7 @@ Stage2AI::~Stage2AI() {
 }
 
 GameItem::ItemType Stage2AI::GenerateRandomItemDropType(GameModel* gameModel) const {
+    UNUSED_PARAMETER(gameModel);
     assert(gameModel != NULL);
 
     switch (Randomizer::GetInstance()->RandomUnsignedInt() % 6) {
@@ -2006,7 +2008,9 @@ Stage3AI::~Stage3AI() {
 }
 
 GameItem::ItemType Stage3AI::GenerateRandomItemDropType(GameModel* gameModel) const {
+    UNUSED_PARAMETER(gameModel);
     assert(gameModel != NULL);
+
     switch (Randomizer::GetInstance()->RandomUnsignedInt() % 8) {
         case 0:
             return GameItem::InvisiBallItem;

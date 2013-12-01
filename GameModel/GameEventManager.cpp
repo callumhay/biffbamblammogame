@@ -812,6 +812,13 @@ void GameEventManager::ActionBossAngry(const Boss* boss, const BossBodyPart* ang
 	}
 }
 
+void GameEventManager::ActionBossAngry(const Boss* boss, const Point2D& angryPartLoc, float angryPartWidth, float angryPartHeight) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->BossAngryEvent(boss, angryPartLoc, angryPartWidth, angryPartHeight);
+    }
+}
+
 void GameEventManager::ActionGeneralEffect(const GeneralEffectEventInfo& effectEvent) {
     std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
     for (; listenerIter != this->eventListeners.end(); ++listenerIter) {

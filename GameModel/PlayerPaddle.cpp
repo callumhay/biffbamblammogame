@@ -1199,6 +1199,12 @@ float PlayerPaddle::GetMineProjectileStartingHeightRelativeToPaddle() const {
     return this->currHalfHeight + 0.25f * this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;
 }
 
+bool PlayerPaddle::GetIsCloseToAWall() const {
+    static const float CLOSE_DIST = GameBall::DEFAULT_BALL_RADIUS * 0.1;
+    return (this->GetCenterPosition()[0] - this->minBound) <= CLOSE_DIST ||
+           (this->maxBound - this->GetCenterPosition()[0]) <= CLOSE_DIST;
+}
+
 /**
  * Do the paddle collision with the collateral block projectile - this will knock the
  * the paddle off course and rotate it a bit.

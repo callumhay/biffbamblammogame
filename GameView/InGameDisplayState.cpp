@@ -13,12 +13,11 @@
 #include "InGameMenuState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "GameFBOAssets.h"
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
 #include "LivesLeftHUD.h"
 #include "CgFxGaussianBlur.h"
-#include "CgFxAfterImage.h"
-#include "CgFxBloom.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/Beam.h"

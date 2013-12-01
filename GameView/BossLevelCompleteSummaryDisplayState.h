@@ -49,6 +49,8 @@ private:
 
     bool allAnimationIsDone;
     bool waitingForKeyPress;
+    bool leavingState;
+
     AnimationLerp<float> fadeInAnimation;
     AnimationLerp<float> fadeOutAnimation;
     AnimationMultiLerp<Colour> footerColourAnimation;

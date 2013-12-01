@@ -103,17 +103,9 @@ void ClassicalBoss::Init(float startingX, float startingY) {
 
             // eye
             {
-                static const float HEIGHT = EYE_HEIGHT;
-                static const float WIDTH  = EYE_WIDTH;
-                static const float HALF_HEIGHT = HEIGHT / 2.0f;
-                static const float HALF_WIDTH  = WIDTH  / 2.0f;
-
+                // Eye has no bounds to begin with (since it's inside the pediment and we don't want it to
+                // mess with ball collisions)
                 BoundingLines eyeBounds;
-                eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, HALF_HEIGHT), Point2D(-HALF_WIDTH, 0.0f)), Vector2D(-HALF_HEIGHT, HALF_WIDTH));   // top-left diagonal
-                eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, HALF_HEIGHT), Point2D(HALF_WIDTH, 0.0f)), Vector2D(HALF_HEIGHT, HALF_WIDTH));     // top-right diagonal
-                eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, -HALF_HEIGHT), Point2D(-HALF_WIDTH, 0.0f)), Vector2D(-HALF_HEIGHT, -HALF_WIDTH)); // bottom-left diagonal
-                eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, -HALF_HEIGHT), Point2D(HALF_WIDTH, 0.0f)), Vector2D(HALF_HEIGHT, -HALF_WIDTH));   // bottom-right diagonal
-
                 BossBodyPart* eye = new BossBodyPart(eyeBounds);
 
                 // Translation from the local-space center of the entire boss body
@@ -135,7 +127,6 @@ void ClassicalBoss::Init(float startingX, float startingY) {
                 BoundingLines pedimentBounds;
                 pedimentBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, HALF_HEIGHT), Point2D(-HALF_WIDTH, -HALF_HEIGHT)), Vector2D(-HEIGHT, HALF_WIDTH)); // top-left diagonal
                 pedimentBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(HEIGHT, HALF_WIDTH));   // top-right diagonal
-                pedimentBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, -HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(0, -1));        // bottom
 
                 BossBodyPart* pediment = new BossBodyPart(pedimentBounds);
 
@@ -203,14 +194,9 @@ void ClassicalBoss::Init(float startingX, float startingY) {
 
             // *BodyColumnx
             {
-                static const float HEIGHT = COLUMN_HEIGHT;
-                static const float WIDTH  = COLUMN_WIDTH;
-                static const float HALF_HEIGHT = HEIGHT / 2.0f;
-                static const float HALF_WIDTH  = WIDTH  / 2.0f;
-
+                BoundingLines emptyBounds;
                 BoundingLines columnBounds;
-                columnBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, HALF_HEIGHT), Point2D(-HALF_WIDTH, -HALF_HEIGHT)), Vector2D(-1, 0)); // Left
-                columnBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(1, 0));    // Right
+                this->BuildColumnBounds(columnBounds);
 
                 // leftBodyColumn1
                 {
@@ -222,7 +208,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
                 }
                 // leftBodyColumn2
                 {
-                    BossBodyPart* leftBodyColumn2 = new BossBodyPart(columnBounds);
+                    BossBodyPart* leftBodyColumn2 = new BossBodyPart(emptyBounds);
                     leftBodyColumn2->Translate(Vector3D(-5.101f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(leftBodyColumn2);
                     this->leftCol2Idx = this->bodyParts.size();
@@ -230,7 +216,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
                 }
                 // leftBodyColumn3
                 {
-                    BossBodyPart* leftBodyColumn3 = new BossBodyPart(columnBounds);
+                    BossBodyPart* leftBodyColumn3 = new BossBodyPart(emptyBounds);
                     leftBodyColumn3->Translate(Vector3D(-2.927f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(leftBodyColumn3);
                     this->leftCol3Idx = this->bodyParts.size();
@@ -247,7 +233,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
                 }
                 // rightBodyColumn2
                 {
-                    BossBodyPart* rightBodyColumn2 = new BossBodyPart(columnBounds);
+                    BossBodyPart* rightBodyColumn2 = new BossBodyPart(emptyBounds);
                     rightBodyColumn2->Translate(Vector3D(5.101f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(rightBodyColumn2);
                     this->rightCol2Idx = this->bodyParts.size();
@@ -255,7 +241,7 @@ void ClassicalBoss::Init(float startingX, float startingY) {
                 }
                 // rightBodyColumn3
                 {
-                    BossBodyPart* rightBodyColumn3 = new BossBodyPart(columnBounds);
+                    BossBodyPart* rightBodyColumn3 = new BossBodyPart(emptyBounds);
                     rightBodyColumn3->Translate(Vector3D(2.927f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(rightBodyColumn3);
                     this->rightCol3Idx = this->bodyParts.size();
@@ -399,6 +385,70 @@ void ClassicalBoss::BuildArm(bool isLeftArm, const Vector3D& armTranslation, siz
     }
 
     arm->Translate(armTranslation);
+}
+
+void ClassicalBoss::GenerateFullColumnPedimentBounds() {
+    
+    // Add the bottom bound for the pediment...
+    {
+        static const float HEIGHT = PEDIMENT_HEIGHT;
+        static const float WIDTH  = PEDIMENT_WIDTH;
+        static const float HALF_HEIGHT = HEIGHT / 2.0f;
+        static const float HALF_WIDTH  = WIDTH  / 2.0f;
+    
+        BossBodyPart* pediment = static_cast<BossBodyPart*>(this->bodyParts[this->pedimentIdx]);
+        BoundingLines pedimentBounds = pediment->GetLocalBounds();
+        pedimentBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, -HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(0, -1));        // bottom
+        pediment->SetLocalBounds(pedimentBounds);
+    }
+
+    // Add the remaining column bounds
+    {
+        BoundingLines columnBounds;
+        this->BuildColumnBounds(columnBounds);
+
+        BossBodyPart* leftCol2 = static_cast<BossBodyPart*>(this->bodyParts[this->leftCol2Idx]);
+        leftCol2->SetLocalBounds(columnBounds);
+        BossBodyPart* leftCol3 = static_cast<BossBodyPart*>(this->bodyParts[this->leftCol3Idx]);
+        leftCol3->SetLocalBounds(columnBounds);
+        
+        BossBodyPart* rightCol2 = static_cast<BossBodyPart*>(this->bodyParts[this->rightCol2Idx]);
+        rightCol2->SetLocalBounds(columnBounds);
+        BossBodyPart* rightCol3 = static_cast<BossBodyPart*>(this->bodyParts[this->rightCol3Idx]);
+        rightCol3->SetLocalBounds(columnBounds);
+    }
+
+}
+
+void ClassicalBoss::GenerateEyeBounds() {
+    BoundingLines eyeBounds;
+    this->BuildEyeBounds(eyeBounds);
+    BossBodyPart* eye = static_cast<BossBodyPart*>(this->bodyParts[this->eyeIdx]);
+    eye->SetLocalBounds(eyeBounds);
+}
+
+void ClassicalBoss::BuildEyeBounds(BoundingLines& eyeBounds) {
+    static const float HEIGHT = EYE_HEIGHT;
+    static const float WIDTH  = EYE_WIDTH;
+    static const float HALF_HEIGHT = HEIGHT / 2.0f;
+    static const float HALF_WIDTH  = WIDTH  / 2.0f;
+
+    eyeBounds.Clear();
+    eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, HALF_HEIGHT), Point2D(-HALF_WIDTH, 0.0f)), Vector2D(-HALF_HEIGHT, HALF_WIDTH));   // top-left diagonal
+    eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, HALF_HEIGHT), Point2D(HALF_WIDTH, 0.0f)), Vector2D(HALF_HEIGHT, HALF_WIDTH));     // top-right diagonal
+    eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, -HALF_HEIGHT), Point2D(-HALF_WIDTH, 0.0f)), Vector2D(-HALF_HEIGHT, -HALF_WIDTH)); // bottom-left diagonal
+    eyeBounds.AddBound(Collision::LineSeg2D(Point2D(0.0f, -HALF_HEIGHT), Point2D(HALF_WIDTH, 0.0f)), Vector2D(HALF_HEIGHT, -HALF_WIDTH));   // bottom-right diagonal
+}
+
+void ClassicalBoss::BuildColumnBounds(BoundingLines& columnBounds) {
+    static const float HEIGHT = COLUMN_HEIGHT;
+    static const float WIDTH  = COLUMN_WIDTH;
+    static const float HALF_HEIGHT = HEIGHT / 2.0f;
+    static const float HALF_WIDTH  = WIDTH  / 2.0f;
+
+    columnBounds.Clear();
+    columnBounds.AddBound(Collision::LineSeg2D(Point2D(-HALF_WIDTH, HALF_HEIGHT), Point2D(-HALF_WIDTH, -HALF_HEIGHT)), Vector2D(-1, 0)); // Left
+    columnBounds.AddBound(Collision::LineSeg2D(Point2D(HALF_WIDTH, HALF_HEIGHT), Point2D(HALF_WIDTH, -HALF_HEIGHT)), Vector2D(1, 0));    // Right
 }
 
 std::vector<const BossBodyPart*> ClassicalBoss::GetBodyColumns() const {

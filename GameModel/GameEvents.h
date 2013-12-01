@@ -887,6 +887,12 @@ public:
         UNUSED_PARAMETER(boss);
         UNUSED_PARAMETER(angryPart);
     }
+    virtual void BossAngryEvent(const Boss* boss, const Point2D& angryPartLoc, float angryPartWidth, float angryPartHeight) {
+        UNUSED_PARAMETER(boss);
+        UNUSED_PARAMETER(angryPartLoc);
+        UNUSED_PARAMETER(angryPartWidth);
+        UNUSED_PARAMETER(angryPartHeight);
+    }
 
     // Effect Events *********************************************************************
     

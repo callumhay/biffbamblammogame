@@ -1921,6 +1921,51 @@ void GameLevel::BuildCollisionBoundsCombinationAndMap(const std::vector<LevelPie
     }
 }
 
+LevelPiece* GameLevel::GetLevelPieceColliderFast(const Collision::Ray2D& ray,  
+                                                 float toleranceRadius) const {
+
+    // Step along the ray - not a perfect algorithm but will result in something very reasonable
+    // NOTE: if the step size is too large then the ray might skip over entire sections of blocks - BECAREFUL!
+    const float STEP_SIZE = 0.5f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
+    int NUM_STEPS = static_cast<int>(this->levelHypotenuse / STEP_SIZE);
+
+    Collision::Circle2D toleranceCircle(Point2D(0,0), toleranceRadius);
+    Point2D currSamplePoint;
+    float rayT;
+
+    for (int i = 0; i < NUM_STEPS; i++) {
+        currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
+
+        // Indices of the sampled level piece can be found using the point...
+        std::set<LevelPiece*> collisionCandidates = 
+            this->GetLevelPieceCollisionCandidatesNoSort(currSamplePoint, toleranceRadius);
+
+        for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); 
+            iter != collisionCandidates.end(); ++iter) {
+
+            LevelPiece* currSamplePiece = *iter;
+            assert(currSamplePiece != NULL);
+            if (currSamplePiece->IsNoBoundsPieceType()) {
+                continue;
+            }
+
+            // Check to see if the piece can be collided with, if so try to collide the ray with
+            // the actual block bounds, if there's a collision we get out of here and just return the piece
+            if (currSamplePiece->CollisionCheck(ray, rayT)) {
+                return currSamplePiece;
+            }
+            else if (toleranceRadius != 0.0f) {
+                toleranceCircle.SetCenter(currSamplePoint);
+                if (currSamplePiece->CollisionCheck(toleranceCircle, ray.GetUnitDirection())) {
+                    return currSamplePiece;
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+
 /**
  * Get the first piece in the level to collide with the given ray, if the ray does not collide
  * with any piece in the level then NULL is returned.
@@ -1946,9 +1991,12 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 		currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
 		
 		// Indices of the sampled level piece can be found using the point...
-		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidatesNoSort(currSamplePoint, toleranceRadius);
-		float minRayT = FLT_MAX;
-		for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); iter != collisionCandidates.end(); ++iter) {
+		std::set<LevelPiece*> collisionCandidates = 
+            this->GetLevelPieceCollisionCandidatesNoSort(currSamplePoint, toleranceRadius);
+		
+        float minRayT = FLT_MAX;
+		for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); 
+             iter != collisionCandidates.end(); ++iter) {
 			
 			LevelPiece* currSamplePiece = *iter;
 			assert(currSamplePiece != NULL);

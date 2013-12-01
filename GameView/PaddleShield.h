@@ -28,6 +28,8 @@ public:
 	PaddleShield();
 	~PaddleShield();
 
+    void SetAlpha(float alpha);
+
 	void ActivateShield(const PlayerPaddle& paddle, const Texture2D& bgTexture);
 	void DeactivateShield();
 
@@ -48,21 +50,27 @@ private:
 	//ESPPointEmitter* paddleShieldAura;
 
 	ESPPointEmitter* particleEnergyInAndOut;	// Particles that get sucked toward the paddle when the shield forms
-	ESPPointEmitter* auraEnergyOut;						// Aura energy the emits out from the shield
 	ESPParticleColourEffector particleFader;
 	ESPParticleScaleEffector  particleShrink;
 	ESPParticleScaleEffector particleGrowth;
 	
 	AnimationLerp<float> shieldSizeAnimation;
+    AnimationMultiLerp<float> shieldGlowAnimation;
 
 	enum ShieldState { Deactivated = 0, Activating, Sustained, Deactivating };
 	ShieldState state;
 
+    float alpha;
+
 	void DrawRefractionWithAura(const PlayerPaddle& paddle, const Camera& camera, double dT);
 
 	// Disallow copy and assign
-	PaddleShield& operator=(const PaddleShield& p);
-	PaddleShield(const PaddleShield& p);
+    DISALLOW_COPY_AND_ASSIGN(PaddleShield);
 };
+
+inline void PaddleShield::SetAlpha(float alpha) {
+    assert(alpha >= 0.0f && alpha <= 1.0f);
+    this->alpha = alpha;
+}
 
 #endif // __PADDLESHIELD_H__

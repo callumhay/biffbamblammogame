@@ -18,8 +18,10 @@
 const double BallOnPaddleState::START_RELEASE_TIMER_TIME_IN_SECS = 2.5;
 const double BallOnPaddleState::TOTAL_RELEASE_TIMER_TIME_IN_SECS = START_RELEASE_TIMER_TIME_IN_SECS + 6.0;
 
-BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), 
-firstTick(true), releaseTimerStarted(false), releaseTimerCounter(0.0), ballWasReleased(false) {
+BallOnPaddleState::BallOnPaddleState(GameModel* gm, double pauseTime) : GameState(gm), 
+firstTick(true), releaseTimerStarted(false), releaseTimerCounter(0.0), waitTimerCounter(0.0),
+timeToWaitBeforeReleaseIsAllowed(pauseTime), ballWasReleased(false) {
+
 	assert(gm != NULL);
 
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
@@ -108,12 +110,13 @@ void BallOnPaddleState::Tick(double seconds) {
 	if (this->firstTick) {
 		this->firstTick = false;
         this->releaseTimerCounter = 0.0;
+        this->waitTimerCounter = 0.0;
 
 		// EVENT: Ball (Re)spawning
 		GameEventManager::Instance()->ActionBallSpawn(*this->GetGameBall());
 	}
     else if (PlayerPaddle::GetIsPaddleReleaseTimerEnabled()) {
-        // Logic for the release timer
+        // Logic for the release timer and wait
         this->releaseTimerCounter += seconds;
 
         // Check to see whether we should start the release timer yet, we only send an event for
@@ -127,6 +130,8 @@ void BallOnPaddleState::Tick(double seconds) {
             this->ShootActionReleaseUse();
         }
     }
+
+    this->waitTimerCounter += seconds;
 
     // Update AI entities
     if ((this->gameModel->GetPauseState() & GameModel::PauseAI) == 0x00000000) {
@@ -151,6 +156,12 @@ void BallOnPaddleState::ShootActionReleaseUse() {
 
     // Only fire the ball if it's enabled
     if (PlayerPaddle::GetIsPaddleReleaseEnabled()) {
+
+        // If we're paused before firing then we can't fire
+        if (this->waitTimerCounter < this->timeToWaitBeforeReleaseIsAllowed) {
+            return;
+        }
+
 	    // Fire the ball off the paddle
 	    this->gameModel->GetPlayerPaddle()->Shoot(this->gameModel);
 	    // Now change the game model's state machine to have the ball in play

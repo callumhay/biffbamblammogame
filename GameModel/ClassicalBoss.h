@@ -101,8 +101,15 @@ private:
     static const float EYE_ACCELERATION;
 
     ClassicalBoss();
-    void BuildArm(bool isLeftArm, const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);
 
+    void BuildArm(bool isLeftArm, const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);
+    
+    void GenerateFullColumnPedimentBounds();
+    void GenerateEyeBounds();
+
+    void BuildEyeBounds(BoundingLines& eyeBounds);
+    void BuildColumnBounds(BoundingLines& columnBounds);
+    
     // Inherited from Boss
     void Init(float startingX, float startingY);
 

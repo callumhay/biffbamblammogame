@@ -4,10 +4,10 @@ E E E S S S S S S S E S S S S S S S E E E
 E E E S E E E E E S E S E E E E E S E E E 
 E E E S A(0,0,c,d){3} T(G,ul) M E A(0,0,d,c){4} S E S A(0,0,e,f){5} E J T(G,ur) A(0,0,f,e){6} S E E E 
 E E E S E E E E E S S S E E E E E S E E E 
-E E S S F(d) F(d) F(d) F(d) F(d) S A(1,1,a,b){2} S F(d) F(d) F(d) F(d) F(d) S S E E 
+E E S S F(d) F(d) F(d) F(d) F(d) S A(0,1,a,b){2} S F(d) F(d) F(d) F(d) F(d) S S E E 
 E E S W(3) R K(StickyPaddle,StickyPaddle,StickyPaddle) E K(StickyPaddle,StickyPaddle,StickyPaddle) R E E E R K(ShieldPaddle,ShieldPaddle,ShieldPaddle) E K(ShieldPaddle,ShieldPaddle,ShieldPaddle) R W(6) S E E 
-E E S E E R R R E E E E E R R R E E S E E 
-E E S E Q(f) E Q(f) E Q(f) E R E Q(f) E Q(f) E Q(f) E S E E 
+E E S E E R R R E R E R E R R R E E S E E 
+E E S E Q(f) E Q(f) E Q(f) E E E Q(f) E Q(f) E Q(f) E S E E 
 E E S R E Q(f) K(UberBall,UberBall,UberBall) Q(f) E R E R E Q(f) K(IceBall,IceBall,IceBall) Q(f) E R S E E 
 E E S G E G E G E G E G E G E G E G S E E 
 E E S G E G E G E G E G E G E G E G S E E 
@@ -22,7 +22,7 @@ E E N O E O E O E O E O E O E O E O N E E
 E E N O E O E O E O E O E O E O E O N E E 
 E E N O E O E O E O E O E O E O E O N E E 
 E E N R E R E R E R E R E R E R E R N E E 
-E E N R E R E R E R A(1,1,b,a){1} R E R E R E R N E E 
+E E N R E R E R E R A(0,1,b,a){1} R E R E R E R N E E 
 E E N E E E E E E E E E E E E E E E N E E 
 E E N E E E E E E E E E E E E E E E N E E 
 E E S E E E E E E E E E E E E E E E S E E 

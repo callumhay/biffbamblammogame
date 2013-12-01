@@ -31,7 +31,6 @@
 
 class TextLabel2D;
 class FBObj;
-class CgFxBloom;
 
 /**
  * State for displaying the main, out of game menu. This is the first 
@@ -95,7 +94,6 @@ private:
 	static const unsigned int MENU_Y_INDENT = 320;
 	static const unsigned int MENU_ITEM_PADDING = 15;
 
-	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
     FBObj* postMenuFBObj;
 
@@ -140,12 +138,9 @@ private:
 	void InitializeMainMenu();
 	void InitializeOptionsSubMenu();
 
-	void SetupBloomEffect();
-
 	void RenderBackgroundEffects(double dT, Camera& menuCam);
 
 	void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
-	//void InsertZapEffectIntoBGEffects();
 
 	static const size_t TOTAL_NUM_BANG_EFFECTS;
 	std::list<ESPPointEmitter*> aliveBangEffects;

@@ -2,7 +2,7 @@
  * LoadingScreen.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -14,9 +14,6 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/TextLabel.h"
-
-class FBObj;
-class CgFxBloom;
 
 /**
  * Static class that will spawn a thread to render a loading screen for
@@ -67,9 +64,6 @@ private:
 	static const int LOADING_BAR_HEIGHT;			// Height of the loading bar in pixels
 
 	TextLabel2D itemLoadingLabel;			// Text label for saying what is being currently loaded
-
-	FBObj* loadingScreenFBO;
-	CgFxBloom* bloomEffect;
     Texture2D* starryBG;
 
 	LoadingScreen();
@@ -78,7 +72,6 @@ private:
 	inline static void InitOpenGLForLoadingScreen();
 	
 	void RenderLoadingScreen();
-	void SetupFullscreenEffect(int width, int height);
 	void DrawLoadingBar();	
 
     DISALLOW_COPY_AND_ASSIGN(LoadingScreen);
