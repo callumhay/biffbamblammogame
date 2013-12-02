@@ -50,7 +50,6 @@ protected:
 private:
 	// CG Transform params
 	CGparameter wvpMatrixParam;
-	CGparameter worldMatrixParam;
 
 	// Texture sampler params
 	CGparameter noiseSamplerParam;

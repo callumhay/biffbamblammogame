@@ -24,7 +24,7 @@ const char* CgFxSkybox::SKYBOX_TECHNIQUE_NAME = "Skybox";
 
 CgFxSkybox::CgFxSkybox(Texture *skyTex) :
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_SKYBOX_SHADER), skyTex(skyTex),
-timer(0.0f), twinkleFreq(0.01f), moveFreq(0.0055f), noiseScale(0.005f), fgScale(0.78f), alpha(1.0f),
+timer(0.0f), twinkleFreq(0.01f), moveFreq(0.0055f), noiseScale(0.005f), fgScale(0.5f), alpha(1.0f),
 noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), uvTranslation(0,0) {
 
 	assert(skyTex != NULL);

@@ -24,7 +24,7 @@
 ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), particleTexture(NULL),
 particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
-isReversed(false), isPointSprite(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),
+isReversed(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),
 radiusDeviationFromPtX(0.0), radiusDeviationFromPtY(0.0), radiusDeviationFromPtZ(0.0) {
 	// NOTE: The death plane has been setup so that it's impossible to be in the 'death-zone' of it
 	this->particleSize[0] = ESPInterval(1,1);
@@ -282,11 +282,11 @@ void ESPEmitter::Tick(const double dT) {
 /**
  * Draw this emitter.
  */
-void ESPEmitter::Draw(const Camera& camera, const Vector3D& worldTranslation, bool enableDepth) {
+void ESPEmitter::Draw(const Camera& camera) {
 	// Setup OpenGL for drawing the particles in this emitter...
 	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 	
 
-	enableDepth ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -299,29 +299,37 @@ void ESPEmitter::Draw(const Camera& camera, const Vector3D& worldTranslation, bo
 		this->particleTexture->BindTexture();
 	}
 
-	if (this->isPointSprite && GLEW_ARB_point_sprite) {
-		
-		// Draw things faster if we're doing point sprites
-		glEnable(GL_POINT_SPRITE);
-		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-		glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
-		glPointParameterf(GL_POINT_SIZE_MAX, 9999.0f);
-		glPointParameterf(GL_POINT_SIZE_MIN, 0.0f);
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+		ESPParticle* currParticle = *iter;
+		currParticle->Draw(camera, this->particleAlignment);
+	}
 
-		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
-			ESPParticle* currParticle = *iter;
-			currParticle->DrawAsPointSprite(camera, worldTranslation);
-		}
-	}
-	else {
-		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
-			ESPParticle* currParticle = *iter;
-			currParticle->Draw(camera, this->particleAlignment);
-		}
-	}
-	
 	glPopAttrib();
-	debug_opengl_state();
+}
+
+void ESPEmitter::DrawWithDepth(const Camera& camera) {
+    // Setup OpenGL for drawing the particles in this emitter...
+    glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 	
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
+    glPolygonMode(GL_FRONT, GL_FILL);
+
+    // Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
+    if (this->particleTexture != NULL) {
+        this->particleTexture->BindTexture();
+    }
+
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+        ESPParticle* currParticle = *iter;
+        currParticle->Draw(camera, this->particleAlignment);
+    }
+
+    glPopAttrib();
 }
 
 /**
@@ -673,13 +681,6 @@ void ESPEmitter::SetNumParticleLives(int lives) {
  */
 void ESPEmitter::SetIsReversed(bool isReversed) {
 	this->isReversed = isReversed;
-}
-
-/**
- * Sets whether this emitter emits point sprites or not.
- */
-void ESPEmitter::SetAsPointSpriteEmitter(bool isPointSprite) {
-	this->isPointSprite = isPointSprite;
 }
 
 /**

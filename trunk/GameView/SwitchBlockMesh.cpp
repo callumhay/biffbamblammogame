@@ -415,7 +415,6 @@ ESPPointEmitter* SwitchBlockMesh::SwitchConnection::BuildGlowEmitter(const Point
 	glowEmitter->SetParticleColour(ESPInterval(0.7f), ESPInterval(0.9f, 1.0f), ESPInterval(0.7f, 1.0f), ESPInterval(1.0f));
 	glowEmitter->SetEmitAngleInDegrees(180);
 	glowEmitter->SetRadiusDeviationFromCenter(0);
-	glowEmitter->SetAsPointSpriteEmitter(true);
 	glowEmitter->SetEmitPosition(Point3D(position,0));
 	glowEmitter->AddEffector(&this->particleFader);
     glowEmitter->AddEffector(&this->particleGrower);

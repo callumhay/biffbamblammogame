@@ -60,8 +60,8 @@ public:
         this->blurEffect->SetSigma(0.8f);
 		this->blurEffect->Draw(width, height, dT);
 	}
-    inline void RenderBackgroundBlur(int width, int height, double dT) {
-        this->blurEffect->SetInputFBO(this->bgFBO);
+    inline void RenderBlur(int width, int height, double dT, FBObj* blurBuffer) {
+        this->blurEffect->SetInputFBO(blurBuffer);
         this->blurEffect->SetBlurType(CgFxGaussianBlur::Kernel3x3);
         this->blurEffect->SetSigma(1.125f);
         this->blurEffect->Draw(width, height, dT);

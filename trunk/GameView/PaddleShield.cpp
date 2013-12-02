@@ -53,7 +53,6 @@ particleGrowth(1.0f, 1.8f), particleEnergyInAndOut(NULL), alpha(1.0f) {
         ESPInterval(1.0f));
 
 	this->particleEnergyInAndOut->SetEmitAngleInDegrees(180);
-	this->particleEnergyInAndOut->SetAsPointSpriteEmitter(true);
 	this->particleEnergyInAndOut->SetParticleAlignment(ESP::ScreenAligned);
 	
 	this->particleEnergyInAndOut->SetEmitPosition(Point3D(0, 0, 0));

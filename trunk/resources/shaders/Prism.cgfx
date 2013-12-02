@@ -130,7 +130,7 @@ float WarpAmount <
     string UIName =  "Warp Amount";
 > = 200.0f;
 
-// UNUSED ************************************
+// UNUSED, BUT NEEDED DUE TO INHERITANCE ******
 texture ColourTexture  <
     string ResourceName = "default_color.dds";
     string ResourceType = "2D";
@@ -142,7 +142,7 @@ sampler2D ColourSampler = sampler_state {
 // ********************************************
 
 texture SceneTexture <
-    string ResourceName = "scene_background_test.jpg";
+    string ResourceName = "";
     string UIName =  "Scene Texture";
     string ResourceType = "2D";
 >;
@@ -162,7 +162,6 @@ struct appdata {
     float4 Colour   : COLOR0;
 };
 
-/* data passed from vertex shader to pixel shader */
 struct vertexOutput {
     float4 HPosition    : POSITION;
     float3 WorldPos     : TEXCOORD1;
@@ -171,10 +170,6 @@ struct vertexOutput {
     float4 Colour       : TEXCOORD4;
     float3 ProjPos      : TEXCOORD5;
 };
-
-///////// VERTEX SHADING /////////////////////
-
-/*********** Generic Vertex Shader ******/
 
 vertexOutput prism_VS(appdata IN) {
     vertexOutput OUT = (vertexOutput)0;
@@ -193,7 +188,6 @@ vertexOutput prism_VS(appdata IN) {
     OUT.Colour.a *= AlphaMultiplier;
     return OUT;
 }
-
 
 // Utility function for shading the prism via the various scene lights
 void PrismShading(float3 Nn, float3 WorldPos, float3 Vn,
@@ -264,7 +258,6 @@ float4 prism_PS(vertexOutput IN) : COLOR {
     float3 refractColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
 	
     float3 result = SpecularColour * specContrib + DiffuseColour * diffContrib + refractColour;
-	//return float4(result, 1);
     return float4(result, IN.Colour.a);
 }
 

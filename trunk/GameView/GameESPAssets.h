@@ -400,7 +400,7 @@ public:
 
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera);
-	void DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
+	void DrawBeamEffects(double dT, const Camera& camera);
 	void DrawProjectileEffects(double dT, const Camera& camera);
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);

@@ -106,7 +106,7 @@ PSOutData celOutlinesPS(float2 UV : TEXCOORD0) {
 	
 	// Composite pass
 	float4 sceneColour = tex2D(ColourSampler, UV.st);
-	sceneColour = float4(edgeMultiplier * sceneColour.rgb, 1.0);
+	sceneColour = float4(edgeMultiplier * sceneColour.rgb, sceneColour.a);
 	
 	PSOutData outData = (PSOutData)0;
 	outData.colour = sceneColour;

@@ -1,3 +1,11 @@
+/**
+ * FullscreenGoo.cgfx
+ * (cc) Callum Hay, 2013
+ *
+ * Used as a post fullscreen effect in order to simulate a 'goo' on the camera
+ * lens, which 'refracts' the previous scene texture.
+ */
+
 float Timer : TIME <
     string UIWidget = "slider";
     float UIMin = 0.0;
@@ -106,8 +114,8 @@ float4 mask_splatter_PS(float2 UV : TEXCOORD0) : COLOR {
 }
 
 float4 nomask_splatter_PS(float2 UV : TEXCOORD0) : COLOR {
-    float3 sceneColour    = tex2D(SceneSampler, UV).rgb;
-    float4 noise          = tex3D(NoiseSampler, Scale * float3(UV.xy, Freq * Timer));
+    float3 sceneColour = tex2D(SceneSampler, UV).rgb;
+    float4 noise       = tex3D(NoiseSampler, Scale * float3(UV.xy, Freq * Timer));
     
     float fadeDisplacement = Displacement * Fade;
     float lerpAmt = Fade;

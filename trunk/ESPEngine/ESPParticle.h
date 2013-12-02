@@ -50,7 +50,6 @@ public:
 	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	virtual void Tick(const double dT);
 	virtual void Draw(const Camera& camera, const ESP::ESPAlignment& alignment);
-	virtual void DrawAsPointSprite(const Camera& camera, const Vector3D& translation);
 	virtual void Kill() {
 		this->currLifeElapsed = this->totalLifespan;
 	}

@@ -3,7 +3,7 @@
 #define FULLSIZE 66
 #define NOISEFRAC 0.03125
 
-const float4 NTab[FULLSIZE] <
+const float4 NoiseinessArray[FULLSIZE] <
     string UIWidget = "None";
 > = {   {-0.569811,0.432591,-0.698699,0},
         {0.78118,0.163006,0.60265,1},
@@ -217,12 +217,12 @@ float2 s_curve(float2 t) { return t*t*( float2(3,3) - float2(2,2)*t); }
 float  s_curve(float  t) { return t*t*(3.0-2.0*t); }
 
 // 3D version
-float noise(float3 v, const uniform float4 pg[FULLSIZE])
-{
+float noise(float3 v, const uniform float4 pg[FULLSIZE]) {
+	
     v = v + (10000.0f).xxx;   // hack to avoid negative numbers
 
     float3 i = frac(v * NOISEFRAC) * BSIZE;   // index between 0 and BSIZE-1
-    float3 f = frac(v);            // fractional position
+    float3 f = frac(v);                       // fractional position
 
     // lookup in permutation table
     float2 p;
@@ -275,11 +275,7 @@ struct vertexData {
 
 struct appdata_outlines {
     float3 Position   : POSITION;
-    float4 Normal       : NORMAL;
-};
-
-struct vertexOutput_outlines {
-    float4 HPosition    : POSITION;
+    float4 Normal     : NORMAL;
 };
 
 vertexData ink_block_VS(appData IN) {
@@ -287,10 +283,10 @@ vertexData ink_block_VS(appData IN) {
     vertexData OUT;
     float4 Pos = float4(IN.Position.xyz, 1.0f);
     float3 noisePos = TurbDensity * (Pos.xyz + (Speed*Timer));
-    float i = (noise(noisePos, NTab) + 1.0f) * 0.5f;
+    float i = (noise(noisePos, NoiseinessArray) + 1.0f) * 0.5f;
     
     // Displacement along normal
-    float ni = pow(abs(i),Sharpness);
+    float ni = pow(abs(i), Sharpness);
     float3 Nn = normalize(IN.Normal.xyz);
     float3 NewPos = (Pos.xyz - (Nn * (ni-0.5) * Displacement));
     
@@ -301,25 +297,13 @@ vertexData ink_block_VS(appData IN) {
     OUT.WorldView   = normalize(viewToVert);
     OUT.WorldNormal = normalize(mul(WorldITXf, IN.Normal).xyz);
     OUT.HPosition   = mul(WvpXf, float4(NewPos, 1));
-    OUT.Noise = i;
+    OUT.Noise       = i;
     return OUT;
 }
 
-vertexOutput_outlines outline_VS(appdata_outlines IN) {
-    vertexOutput_outlines OUT = (vertexOutput_outlines)0;
-    
-    float3 noisePos = TurbDensity * (IN.Position + (Speed*Timer));
-    float i = (noise(noisePos, NTab) + 1.0f) * 0.5f;
-    float ni = pow(abs(i),Sharpness);
-    float3 Nn = normalize(IN.Normal.xyz);
-    float3 NewPos = IN.Position - (Nn * (ni-0.5) * Displacement);
-    
-    OUT.HPosition = mul(WvpXf, float4(NewPos, 1));
-    return OUT;
-}
-
-void SpecularHighlight(float3 Nn, float3 WorldPos, float3 Vn, out float3 SpecularContrib, out float3 DiffuseContrib)
-{
+void SpecularHighlight(float3 Nn, float3 WorldPos, float3 Vn, 
+                       out float3 SpecularContrib, out float3 DiffuseContrib) {
+						   
     float3 KeyLightVec  = KeyPointLightPos - WorldPos;
     float3 FillLightVec = FillPointLightPos - WorldPos;
     
@@ -342,32 +326,26 @@ void SpecularHighlight(float3 Nn, float3 WorldPos, float3 Vn, out float3 Specula
     float3 BallHn = normalize(Vn + BallLn);
     float3 BallLitV = lit(dot(BallLn,Nn), dot(BallHn,Nn), Shininess).xyz;
     
-    float BallLinearAtten =  clamp(1.0f / (BallPointLightLinearAtten * distance(BallPointLightPos, WorldPos)), 0, 1);
+    float BallLinearAtten = clamp(1.0f / (BallPointLightLinearAtten * distance(BallPointLightPos, WorldPos)), 0, 1);
     SpecularContrib += BallLinearAtten * (BallLitV.z * BallPointLightDiffuse);
     DiffuseContrib  += BallLinearAtten * (BallLitV.y * BallPointLightDiffuse);
 }
-
 
 float4 ink_block_PS(vertexData IN) : COLOR {
     // Specular from ball and key light
     float3 specContrib;
     float3 diffuseContrib;
-    float3 Vn     = normalize(IN.WorldView);
-    float3 Nn     = normalize(IN.WorldNormal);
+    float3 Vn = normalize(IN.WorldView);
+    float3 Nn = normalize(IN.WorldNormal);
     
     SpecularHighlight(Nn, IN.WorldPos, Vn, specContrib, diffuseContrib);    
-    
-    //float3 samplerColour = tex3D(ColourSampler, IN.WorldPos + float3(Speed*Timer)).rgb;
+
     float4 texVal = tex3D(ColourSampler, IN.WorldPos + float3(Speed*Timer));
     float noiseAmt = (texVal.x + texVal.y + texVal.z + texVal.w + 0.03125) * 2.5f;
     float3 finalColour = SpecularColour * specContrib + DiffuseColour * diffuseContrib;
     finalColour *= noiseAmt;
     
     return float4(finalColour.xyz, 0.9f * AlphaMultiplier);
-}
-
-float4 outline_PS(vertexOutput_outlines IN) : COLOR {
-    return float4(0.0f, 0.0f, 0.0f, 1.0f * AlphaMultiplier);
 }
 
 technique InkBlock {
@@ -383,25 +361,7 @@ technique InkBlock {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         
-        VertexProgram = compile arbvp1 ink_block_VS();
+        VertexProgram   = compile arbvp1 ink_block_VS();
         FragmentProgram = compile arbfp1 ink_block_PS();
     }
-    /*
-    pass p1 < string Script = "Draw=geometry;"; > {
-        BlendEnable = true;
-        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
-        DepthTestEnable = true;
-        DepthFunc = LEqual;
-       
-        CullFaceEnable = true;
-        CullFace = Front;
-        
-        LineWidth = 1.5f;
-        LineSmoothEnable = true;
-        PolygonMode = int2(Back, Line);
-        
-        VertexProgram = compile arbvp1 outline_VS();
-        FragmentProgram = compile arbfp1 outline_PS();
-    }
-    */
 }

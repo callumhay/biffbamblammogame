@@ -46,7 +46,6 @@ powerNeutralSparkEmitter(NULL), powerDownSparkEmitter(NULL) {
 	this->flareParticleEmitter->SetParticleSize(ESPInterval(0.5f, 0.9f));
 	this->flareParticleEmitter->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->flareParticleEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->flareParticleEmitter->SetAsPointSpriteEmitter(true);
 	this->flareParticleEmitter->SetEmitDirection(Vector3D(0, -1, 0));
 	this->flareParticleEmitter->SetEmitVolume(minPt, maxPt);
 	this->flareParticleEmitter->AddEffector(&this->particleFader);
@@ -226,7 +225,6 @@ ESPVolumeEmitter* ItemDropBlockMesh::InitSparkEmitter(const Colour& colour, cons
         ESPInterval(colour.G(), std::min<float>(1.0f, colour.G() + 0.5f)), 
         ESPInterval(colour.B(), std::min<float>(1.0f, colour.B() + 0.5f)), ESPInterval(1.0f));
 	emitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	emitter->SetAsPointSpriteEmitter(true);
 	emitter->SetEmitDirection(Vector3D(0, -1, 0));
 	emitter->SetEmitVolume(minPt, maxPt);
 	emitter->AddEffector(&this->particleFader);

@@ -1,3 +1,10 @@
+/**
+ * CloudEffect.cgfx
+ * (cc) Callum Hay, 2013
+ *
+ * Shader that fakes the effect of light passing through cloud sprites.
+ */
+
 float Script : STANDARDSGLOBAL <
     string UIWidget = "none";
     string ScriptClass = "object";
@@ -135,7 +142,7 @@ float4 cloudy_sprite_PS(vertexOutput IN) : COLOR {
     float alphaAmt = totalTexVal*fadeAmtCoeff*IN.Colour.a;
     
     // Make the light stronger at the 'edges' of the clouds
-    lightAmt *= smoothstep(1.0f, 0.33f, alphaAmt);
+    //lightAmt *= smoothstep(1.0f, 0.33f, alphaAmt);
     
     // Emphasize areas of darkness in the clouds by making them more opaque
     alphaAmt = clamp((totalTexVal + (1.0f - lightAmt)), 0.0f, 1.0f) * fadeAmtCoeff*IN.Colour.a;

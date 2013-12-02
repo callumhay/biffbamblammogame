@@ -1,6 +1,6 @@
 /**
  * PostBulletTime.cgfx
- * Created By: Callum Hay
+ * (cc) Callum Hay, 2013
  *
  * Used to simulate the slow down of time when going into bullet time mode.
  * This effect will greyscale and radial blur the scene as a post-processing effect.
