@@ -24,7 +24,7 @@ private:
 
 	// Noise Texture
 	Texture3D* noise3DTexture;
-	static const int Noise3DTexSize = 128;
+	static const int Noise3DTexSize = 64;
 
 	static const int MAXB	= 0x100;
 	static const int N		= 0x1000;

@@ -102,33 +102,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 	Vector3D alignNormalVec	= Vector3D(0, 0, 1);
 	
 	Point3D camPos = cam.GetCurrentCameraPosition();
-	/*
-	if (alignment == ESP::ViewPointAligned || alignment == ESP::AxisAligned) {
-		float tempMVXfVals[16];
-		glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
-		
-		// Obtain JUST the world transform...
-		glPushMatrix();
-		glLoadIdentity();
-		glMultMatrixf(tempMVXfVals);
-		glMultMatrixf(cam.GetInvViewTransform().begin());
-		glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
-		glPopMatrix();
-
-		//Matrix4x4 worldMatrix(tempMVXfVals);
-		//Point3D worldSpacePosition = worldMatrix * this->position;
-		
-		// The normal vector is from the particle center to the eye
-		alignNormalVec = Vector3D(camPos[0], camPos[1], camPos[2]);
-		// Make sure there is a normal...
-		if (alignNormalVec == Vector3D(0,0,0)) {
-			alignNormalVec = PARTICLE_NORMAL_VEC;
-		}
-		else {
-			alignNormalVec = Vector3D::Normalize(alignNormalVec);
-		}
-	}
-*/
+	
 	// Create the alignment transform matrix based off the given alignment...
 	switch(alignment) {
 		case ESP::ViewPointAligned:
@@ -145,7 +119,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 
 			// The particle is aligned to the view-point
 			// - The up vector is the particle up vector
-			alignUpVec			= PARTICLE_UP_VEC;
+			alignUpVec = PARTICLE_UP_VEC;
 		
 			// Find out if up and normal are parallel and fix in that case...
 			alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
@@ -156,7 +130,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 				}
 			}
 			alignRightVec = Vector3D::Normalize(alignRightVec);
-			alignUpVec		= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
+			alignUpVec    = Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
 			break;
 
 		case ESP::AxisAligned:
@@ -180,7 +154,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
                 alignUpVec = Vector3D(0, 1, 0);
             }
 			
-            alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
+            alignRightVec = Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
 				alignRightVec = Vector3D::cross(PARTICLE_RIGHT_VEC, alignNormalVec);
 				if (alignRightVec == Vector3D(0,0,0)) {
@@ -198,14 +172,14 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			// - The right vector is just a cross product of the above two...
 
 			alignNormalVec = -cam.GetNormalizedViewVector();
-			alignUpVec		 = cam.GetNormalizedUpVector();
-			alignRightVec	 = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+			alignUpVec     = cam.GetNormalizedUpVector();
+			alignRightVec  = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
 			break;
 
 		case ESP::ScreenAlignedFollowVelocity:
 			alignNormalVec = -cam.GetNormalizedViewVector();
 			alignUpVec     = Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));
-			alignRightVec	 = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+			alignRightVec  = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
 			break;
 
         case ESP::ScreenAlignedGlobalUpVec:
@@ -230,17 +204,17 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 
 			// FIX THIS!!!!
 			alignNormalVec = -cam.GetNormalizedViewVector();
-			alignUpVec			= PARTICLE_UP_VEC;
+			alignUpVec     = PARTICLE_UP_VEC;
 
-			alignRightVec	= Vector3D::cross(alignUpVec, alignNormalVec);
+			alignRightVec = Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
 				alignRightVec = Vector3D::cross(PARTICLE_RIGHT_VEC, alignNormalVec);
 				if (alignRightVec == Vector3D(0,0,0)) {
 					alignRightVec = Vector3D::cross(PARTICLE_NORMAL_VEC, alignNormalVec);
 				}
 			}
-			alignRightVec		= Vector3D::Normalize(alignRightVec);
-			alignUpVec			= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
+			alignRightVec = Vector3D::Normalize(alignRightVec);
+			alignUpVec    = Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
 			break;
 
 		case ESP::NoAlignment:

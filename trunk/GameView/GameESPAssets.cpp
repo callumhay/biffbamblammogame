@@ -4767,7 +4767,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
     trailEmitter->SetAsPointSpriteEmitter(true);
     trailEmitter->SetEmitPosition(Point3D(0, 0, 0));
     trailEmitter->AddEffector(&this->particleMediumShrink);
-    trailEmitter->AddEffector(&this->particleBoostFader);
+    trailEmitter->AddEffector(&this->particleFader);
     trailEmitter->SetParticles(NUM_TRAIL_PARTICLES, this->cleanCircleGradientTex);
 
     this->activeProjectileEmitters[&projectile].push_back(trailEmitter);

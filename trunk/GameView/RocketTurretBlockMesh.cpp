@@ -325,7 +325,7 @@ void RocketTurretBlockMesh::BlockData::DrawLights(float pulse) {
     const float LIGHT_ALPHA = this->alpha * 0.8f;
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
-	
+	glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);

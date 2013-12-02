@@ -40,7 +40,7 @@ drawItemsInLastPass(true), inkSplatterEventSoundID(INVALID_SOUND_ID) {
 	// Effects setup
 	this->blurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
 	this->inkSplatterEffect	= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-    this->bloomEffect = new CgFxBloom(this->fgAndBgFBO);
+    this->bloomEffect = new CgFxBloom(this->fgAndBgFBO, this->blurEffect);
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 
@@ -157,7 +157,7 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
     this->smokeyCamEffect   = new CgFxPostSmokey(this->tempFBO);
 	this->blurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
 	this->inkSplatterEffect = new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-	this->bloomEffect       = new CgFxBloom(this->fgAndBgFBO);
+	this->bloomEffect       = new CgFxBloom(this->fgAndBgFBO, this->blurEffect);
     this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	

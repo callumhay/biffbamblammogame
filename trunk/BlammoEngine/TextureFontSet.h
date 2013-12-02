@@ -29,8 +29,8 @@ public:
 	static const float TEXT_3D_SCALE;
 
 	~TextureFontSet();
-	float OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn = false, float scale = 1.0f) const;
-    float OrthoPrint(const Point3D& topLeftCorner, const std::string& s, float rotationInDegs, float scale = 1.0f) const;
+	void OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn = false, float scale = 1.0f) const;
+    void OrthoPrint(const Point3D& topLeftCorner, const std::string& s, float rotationInDegs, float scale = 1.0f) const;
 	void Print(const std::string& s) const;
     void BasicPrint(const std::string& s) const;
 

@@ -200,25 +200,12 @@ public:
             static_cast<double>(windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
-	// Functions for changing the current view transform to a full ortho2D,
-	// such that all coordinates are in window coords
-	//static void PushWindowCoords(int w, int h) {
-	//	glPushAttrib(GL_TRANSFORM_BIT);
-	//	glMatrixMode(GL_PROJECTION);
-	//	glPushMatrix();
-	//	glLoadIdentity();
-	//	glViewport(0, 0, w, h);
-	//	gluOrtho2D(0,0,w,h);
-	//	glPopAttrib();
-	//}
 	static void PushWindowCoords() {
 		glPushAttrib(GL_TRANSFORM_BIT);
-		GLint viewport[4];
-		glGetIntegerv(GL_VIEWPORT, viewport);
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		gluOrtho2D(viewport[0],viewport[2],viewport[1],viewport[3]);
+        gluOrtho2D(0,Camera::GetWindowWidth(),0,Camera::GetWindowHeight());
 		glPopAttrib();
 	}
 	static void PopWindowCoords() {

@@ -43,8 +43,7 @@ assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCam
 	assert(model != NULL);
     assert(sound != NULL);
 
-    // MAKE SURE WE SET THE CAMERA DIMENSIONS!!!!
-    Camera::SetWindowDimensions(initWidth, initHeight);
+    
 
     this->assets = new GameAssets(initWidth, initHeight, this->sound);
     this->mouseRenderer = new MouseRenderer();

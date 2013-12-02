@@ -177,6 +177,9 @@ int main(int argc, char *argv[]) {
 		// TODO: VSync: option for this?
 		BlammoTime::SetVSync(initCfgOptions.GetIsVSyncOn());
 
+        // MAKE SURE WE SET THE CAMERA DIMENSIONS!!!!
+        Camera::SetWindowDimensions(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
+
 		// Create the MVC while showing the loading screen...
 		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 7);
 		
