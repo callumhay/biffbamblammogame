@@ -18,7 +18,7 @@
 const char* CgFxBloom::BLOOM_FILTER_TECHNIQUE_NAME           = "BloomFilter";
 const char* CgFxBloom::BLOOM_COMPOSITION_TECHNIQUE_NAME	     = "CompositeBloom";
 
-const float CgFxBloom::DEFAULT_HIGHLIGHT_THRESHOLD	= 0.58f;
+const float CgFxBloom::DEFAULT_HIGHLIGHT_THRESHOLD	= 0.6f;
 const float CgFxBloom::DEFAULT_SCENE_INTENSITY		= 1.0f;
 const float CgFxBloom::DEFAULT_GLOW_INTENSITY		= 0.33333f;
 const float CgFxBloom::DEFAULT_HIGHLIGHT_INTENSITY	= 0.05f;

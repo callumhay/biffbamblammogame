@@ -135,7 +135,7 @@ void TeslaBlockMesh::DrawPostEffects(double dT, const Camera& camera, const Basi
 
         // Only draw the flare in the middle and only rotate the center if the Tesla block is active
         if (currTeslaBlock->GetIsElectricityActive()) {
-            this->teslaCenterFlare->Draw(camera, Vector3D(0,0,0), true);
+            this->teslaCenterFlare->DrawWithDepth(camera);
             currRotationAmt += rotationAmt;
             currTeslaBlock->SetRotationAmount(currRotationAmt);
         }

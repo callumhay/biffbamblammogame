@@ -102,6 +102,7 @@ Section "Biff! Bam!! Blammo!?!" SEC0000
     File ..\lib\SDL_mixer.dll
     File ..\lib\XInput9_1_0.dll
     File "..\lib\${BBB_MSVCR_FILE}"
+    File "..\lib\${BBB_MSVCP_FILE}"
     File ..\BBBResources.zip
     File ..\BiffBamBlammoIcon.bmp
     File "..\BiffBamBlammo.ico"
@@ -154,6 +155,7 @@ Section /o "-un.Biff! Bam!! Blammo!?! Install" UNSEC0000
     Delete /REBOOTOK $INSTDIR\cg.dll
     Delete /REBOOTOK $INSTDIR\XInput9_1_0.dll
     Delete /REBOOTOK "$INSTDIR\${BBB_MSVCR_FILE}"
+    Delete /REBOOTOK "$INSTDIR\${BBB_MSVCP_FILE}"
 
     MessageBox MB_YESNO "Would you like to keep all game progress and configuration files? (Warning: By clicking 'No' you will delete all game progress you've made in Biff! Bam!! Blammo!?!)." IDNO delete_progress IDYES keep_progress
     delete_progress:

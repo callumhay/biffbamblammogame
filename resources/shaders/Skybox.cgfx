@@ -1,6 +1,6 @@
 /*********************************************************************
 Skybox.cgfx
-Created by: Callum Hay
+(cc) Callum Hay, 2013
 The following is a skybox shader for use with a cubemap to ensure that
 whenever the user looks at this material they see the right place on
 the cube map (skybox).
@@ -91,23 +91,19 @@ sampler3D NoiseSampler = sampler_state {
     
 };  
 
-// application to vertex shader ------------------------------------------
 struct appdata {
     float3 Position : POSITION;
     float2 UV       : TEXCOORD0;
     float4 Colour   : COLOR0;
 };
 
-// vertex shader to pixel shader -----------------------------------------
 struct vertexOutput {
-    float4 HPosition    : POSITION;
-    float3 WorldPos     : TEXCOORD0;
-    float2 UV           : TEXCOORD1;
-    float4 Colour       : TEXCOORD2;
+    float4 HPosition : POSITION;
+    float3 WorldPos  : TEXCOORD0;
+    float2 UV        : TEXCOORD1;
+    float4 Colour    : TEXCOORD2;
 };
 
-
-// Vertex Shader ---------------------------------------------------------
 vertexOutput skybox_VS(appdata IN) {
     vertexOutput OUT = (vertexOutput)0;
     
@@ -122,9 +118,8 @@ vertexOutput skybox_VS(appdata IN) {
     return OUT;
 }
 
-// Fragement Shader (Floating Point) --------------------------------------
 float4 skybox_PS(vertexOutput IN) : COLOR {
-
+/*
     // Make the stars in the sky twinkle using a noise texture
     // lookup and multiplying it with the starry sky lookup
     float3 noiseLookup = IN.WorldPos.xyz + TwinkleFreq*Timer*ViewDir / NoiseScale;
@@ -133,11 +128,11 @@ float4 skybox_PS(vertexOutput IN) : COLOR {
     float noiseVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
                             abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
     noiseVal = clamp(noiseVal, 0.1, 1.0);
-    
+*/
 	float2 translatedUV = UVTranslate + IN.UV.xy;
     float3 skyBGColour = tex2D(SkySampler, translatedUV).rgb;
     float3 skyFGColour = tex2D(SkySampler, MoveFreq*Timer*float2(1,0) + FGScale*translatedUV + float2(0.3, 0.6)).rgb;
-    float3 finalColour = skyBGColour + noiseVal * skyFGColour;
+    float3 finalColour = skyBGColour + skyFGColour;
     
     return float4(finalColour, Alpha * IN.Colour.a);
 }

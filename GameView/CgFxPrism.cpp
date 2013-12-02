@@ -25,11 +25,11 @@ sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(200) {
 
 	this->currTechnique = this->techniques[DEFAULT_PRISM_TECHNIQUE_NAME];
 
-	this->indexOfRefractionParam	= cgGetNamedEffectParameter(this->cgEffect, "IndexOfRefraction");
-	this->warpAmountParam					= cgGetNamedEffectParameter(this->cgEffect, "WarpAmount");
-	this->sceneWidthParam					= cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
-	this->sceneHeightParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
-	this->sceneSamplerParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->indexOfRefractionParam = cgGetNamedEffectParameter(this->cgEffect, "IndexOfRefraction");
+	this->warpAmountParam        = cgGetNamedEffectParameter(this->cgEffect, "WarpAmount");
+	this->sceneWidthParam        = cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
+	this->sceneHeightParam       = cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
+	this->sceneSamplerParam      = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
 
 	// Set the appropriate diffuse colour
 	this->properties->diffuse   = GameViewConstants::GetInstance()->PRISM_BLOCK_COLOUR;

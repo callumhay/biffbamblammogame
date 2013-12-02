@@ -76,26 +76,6 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment)
 	glPopMatrix();
 }
 
-void ESPParticle::DrawAsPointSprite(const Camera& camera, const Vector3D& translation) {
-	if (this->IsDead()) {
-		return;
-	}
-
-	// Calculate distance from sprite to camera and use it to adjust sprite size...
-	Point3D camPos = camera.GetCurrentCameraPosition();
-	Vector3D vecToCam = camPos - (this->position + translation);
-	
-	float dist = vecToCam.length();
-	float pointSize = (this->size[0] / 2.0) * static_cast<float>(camera.GetWindowHeight()) / (tan(Trig::degreesToRadians(camera.GetFOVAngleInDegrees() / 2.0)) * dist);
-	pointSize = std::max<float>(minMaxPtSize[0], std::min<float>(minMaxPtSize[1], pointSize));
-	glPointSize(pointSize);
-
-	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
-	glBegin(GL_POINTS);
-	glVertex3fv(this->position.begin());
-	glEnd();
-}
-
 Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment) {
 	Vector3D alignRightVec	= Vector3D(1, 0, 0);
 	Vector3D alignUpVec		= Vector3D(0, 1, 0);

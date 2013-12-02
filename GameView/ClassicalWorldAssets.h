@@ -45,6 +45,7 @@ private:
     ESPParticleColourEffector fireColourFader;
     ESPParticleScaleEffector fireParticleScaler;
 
+    void LoadBGLighting(GameAssets* assets) const;
     void InitializeEmitters();
 
     DISALLOW_COPY_AND_ASSIGN(ClassicalWorldAssets);

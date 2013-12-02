@@ -61,6 +61,7 @@ private:
     ESPVolumeEmitter lowerCloudEmitter;
     ESPMultiColourEffector lessVisibleCloudFader;
 
+    void LoadBGLighting(GameAssets* assets) const;
 
     void InitializeEmitters();
     void ApplyRandomFireAccel(ESPParticleAccelEffector& accelEffector);

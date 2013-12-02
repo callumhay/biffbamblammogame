@@ -109,10 +109,8 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelD
     const Camera& camera = this->display->GetCamera();
 
 	FBObj* backgroundFBO = fboAssets->GetBackgroundFBO();
-	assert(backgroundFBO != NULL);
-
+    FBObj* tempFBO = fboAssets->GetTempFBO();
     FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
-    assert(colourAndDepthFBO != NULL);
 
     // Render the background geometry into the colour and depth FBO
     colourAndDepthFBO->BindFBObj();
@@ -120,13 +118,12 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelD
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Draw the background of the current scene
-	glPushMatrix();
-	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
+    // Draw the background of the current scene
+    glPushMatrix();
+    glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
 
-	assets->DrawSkybox(camera);
 	assets->DrawBackgroundModel(camera);
- 
+
     // Render the outlines using the special cel outline effect on what we just rendered...
     {
         const GameWorldAssets* currWorldAssets = assets->GetCurrentWorldAssets();
@@ -139,21 +136,31 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelD
         celOutlineEffect.SetOffsetMultiplier(currWorldAssets->GetOutlineOffset());
         celOutlineEffect.SetAlphaMultiplier(assets->GetCurrentWorldAssets()->GetAlpha());
         celOutlineEffect.SetAmbientBrightness(OUTLINE_AMBIENT_BRIGHTNESS);
-        celOutlineEffect.Draw(colourAndDepthFBO, backgroundFBO);
+        celOutlineEffect.Draw(colourAndDepthFBO, tempFBO);
     }
+
+    // Blur the background a bit so that it is less in focus than the foreground
+    fboAssets->RenderBlur(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT, tempFBO);
 
 	// Draw background effects into the background FBO -- we do this as a separate pass because
     // if we include it in the previous pass, the outlines will show through all the effects (which is not so pretty)
     backgroundFBO->BindFBObj();
+
+    assets->DrawSkybox(camera);
+
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    glEnable(GL_BLEND);
+    tempFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
+    glPopAttrib();
+
     colourAndDepthFBO->BindDepthRenderTexture();
     assets->GetCurrentWorldAssets()->DrawBackgroundPostOutlinePreEffects(camera);
     assets->DrawBackgroundEffects(camera);
     glPopMatrix();
 
 	backgroundFBO->UnbindFBObj();
-
-    // Blur the background a bit so that it is less in focus than the foreground
-    fboAssets->RenderBackgroundBlur(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
 
 	debug_opengl_state();
 	return backgroundFBO;
@@ -180,17 +187,13 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	//backgroundFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+
     backgroundFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
-    //glClear(GL_DEPTH_BUFFER_BIT);
 
 	glPushMatrix();
 	glMultMatrixf(gameTransform.begin());
 
-    // Tesla lightning arcs -- This is the only place they make sense to draw:
-    // we need them in the background so that block and other effects blend with them and
-    // we still need them to have depth for effects like the paddle camera
+    // Tesla lightning arcs
     assets->GetESPAssets()->DrawTeslaLightningArcs(dT, camera);
 
     // Bosses
@@ -324,7 +327,7 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
 
 	// Typical Particle effects...
 	GameESPAssets* espAssets = assets->GetESPAssets();
-	espAssets->DrawBeamEffects(dT, camera, Vector3D(negHalfLevelDim,0));
+	espAssets->DrawBeamEffects(dT, camera);
 	espAssets->DrawParticleEffects(dT, camera);
 
 	// Absolute post effects call for various object effects

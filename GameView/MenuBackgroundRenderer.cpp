@@ -22,7 +22,7 @@ MenuBackgroundRenderer::MenuBackgroundRenderer() : bgEffect(NULL) {
 
     this->bgEffect = new CgFxSkybox(bgTex);
     this->bgEffect->SetMoveFrequency(0.007f);
-    this->bgEffect->SetFGScale(0.55f);
+    this->bgEffect->SetFGScale(0.5f);
 
     glNewList(this->fullscreenQuadDL, GL_COMPILE); 
 

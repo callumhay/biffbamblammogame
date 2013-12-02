@@ -1,3 +1,9 @@
+/**
+ * GaussianBlur.cgfx
+ * (cc) Callum Hay, 2013
+ *
+ * Performs a gaussian blur of varying kernel size and sigma on a given scene texture.
+ */
 
 #define PI 3.14159265358979323846264338327950288
 

@@ -10,6 +10,7 @@
  */
 
 #include "GothicRomanticWorldAssets.h"
+#include "GameAssets.h"
 #include "Skybox.h"
 
 #include "../GameModel/GameModel.h"
@@ -146,6 +147,14 @@ void GothicRomanticWorldAssets::Tick(double dT, const GameModel& model) {
     this->moonCloudEmitter.SetAliveParticleAlphaMax(MOON_CLOUD_ALPHA*alpha);
 
     this->cloudEffect.SetLightPos(moonPos + model.GetCurrentLevelTranslation());
+}
+
+void GothicRomanticWorldAssets::LoadBGLighting(GameAssets* assets) const {
+    // Setup the Background lights
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(Point3D(-25.0f, 15.0f, 55.0f), GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.02f),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  
+        GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_ATTEN));
 }
 
 void GothicRomanticWorldAssets::InitializeEmitters() {

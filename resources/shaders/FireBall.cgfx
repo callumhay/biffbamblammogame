@@ -1,3 +1,10 @@
+/**
+ * FireBall.cgfx
+ * (cc) Callum Hay, 2013
+ *
+ * Fire effect, simulates flames using a texture mask and perlin noise.
+ */
+
 float Script : STANDARDSGLOBAL <
     string UIWidget = "none";
     string ScriptClass = "object";
@@ -6,12 +13,7 @@ float Script : STANDARDSGLOBAL <
     string Script = "Technique=Main;";
 > = 0.8;
 
-//// UN-TWEAKABLES - AUTOMATICALLY-TRACKED TRANSFORMS ////////////////
-
-float4x4 WvpXf     : WorldViewProjection < string UIWidget="None"; >;
-float4x4 WorldXf   : World < string UIWidget="None"; >;
-
-//// TWEAKABLE PARAMETERS ////////////////////
+float4x4 WvpXf : WorldViewProjection < string UIWidget="None"; >;
 
 float Timer : TIME <
     string UIWidget = "slider";
@@ -57,7 +59,6 @@ float3 DarkFireColour <
     string UIName = "Dark Fire Colour";
 > = {1, 0, 0};
 
-//////// COLOR & TEXTURE /////////////////////
 
 texture NoiseTexture  <
     string ResourceName = "noiseL8_32x32x32.dds";
@@ -72,9 +73,7 @@ sampler3D NoiseSampler = sampler_state {
     WrapS = Repeat;
     WrapT = Repeat;
     WrapR = Repeat;
-    
 };  
-
 
 texture MaskTexture <
     string ResourceName = "Circle_Gradient_64x64.png";
@@ -90,9 +89,6 @@ sampler2D MaskSampler = sampler_state {
     WrapT = Repeat;
 };
 
-//////// CONNECTOR DATA STRUCTURES ///////////
-
-/* data from application vertex buffer */
 struct appdata {
     float3 Position : POSITION;
 };
@@ -103,7 +99,6 @@ struct appdatawithuv {
     float4 Colour   : COLOR0;
 };
 
-/* data passed from vertex shader to pixel shader */
 struct vertexOutput {
     float4 HPosition    : POSITION;
     float3 WorldPos     : TEXCOORD0;
@@ -115,19 +110,14 @@ struct vertexOutputWithUV {
     float2 UV           : TEXCOORD1;    
     float4 Colour       : TEXCOORD2;
 };
- 
-///////// VERTEX SHADING /////////////////////
-
-/*********** Generic Vertex Shader ******/
 
 vertexOutput localpos_VS(appdata IN) {
     vertexOutput OUT = (vertexOutput)0;
     
-    float4 Po = float4(IN.Position.xyz,1);
-    float3 Pw = mul(WorldXf,Po).xyz;
+    float4 Po = float4(IN.Position.xyz, 1);
 
     OUT.WorldPos  = Po.xyz;
-    OUT.HPosition = mul(WvpXf,Po);
+    OUT.HPosition = mul(WvpXf, Po);
     return OUT;
 }
 
@@ -135,7 +125,6 @@ vertexOutputWithUV mask_VS(appdatawithuv IN) {
     vertexOutputWithUV OUT = (vertexOutputWithUV)0;
     
     float4 Po = float4(IN.Position.xyz,1);
-    float3 Pw = mul(WorldXf,Po).xyz;
 
     OUT.WorldPos  = Po.xyz;
     OUT.HPosition = mul(WvpXf,Po);
@@ -143,8 +132,6 @@ vertexOutputWithUV mask_VS(appdatawithuv IN) {
     OUT.Colour = IN.Colour;
     return OUT;
 }
-
-///////// PIXEL SHADING //////////////////////
 
 float4 firey_sprite_PS(vertexOutput IN) : COLOR {
     float3 sampleCoord = IN.WorldPos.xyz + Freq*Timer*FlowDir;
@@ -170,8 +157,6 @@ float4 firey_sprite_with_mask_PS(vertexOutputWithUV IN) : COLOR {
     float3 fireColour = lerp(DarkFireColour, BrightFireColour, totalTexVal.x);             
     return IN.Colour * float4(fireColour.xyz, 1) * tex2D(MaskSampler, IN.UV).rgba;
 }
-
-///// TECHNIQUES /////////////////////////////
 
 technique FireBall < string Script = "Pass=p0;"; > {
 
@@ -208,5 +193,3 @@ technique FireBallNoDepthWithMask < string Script = "Pass=p0;"; > {
         FragmentProgram = compile arbfp1 firey_sprite_with_mask_PS();
     }
 }
-
-/////////////////////////////////////// eof //

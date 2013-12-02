@@ -10,6 +10,7 @@
  */
 
 #include "ClassicalWorldAssets.h"
+#include "GameAssets.h"
 #include "Skybox.h"
 
 #include "../ResourceManager.h"
@@ -79,6 +80,14 @@ void ClassicalWorldAssets::DrawBackgroundModel(const Camera& camera, const Basic
 	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), this->bgFadeAnim.GetInterpolantValue());
 	this->background->Draw(camera, bgKeyLight, bgFillLight);
 	glPopAttrib();
+}
+
+void ClassicalWorldAssets::LoadBGLighting(GameAssets* assets) const {
+    // Setup the Background lights
+    assets->GetLightAssets()->SetBackgroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.02f),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  
+        GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_ATTEN));
 }
 
 void ClassicalWorldAssets::InitializeEmitters() {

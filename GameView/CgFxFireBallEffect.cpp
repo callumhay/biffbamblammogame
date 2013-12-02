@@ -30,7 +30,6 @@ brightFireColour(1.0f, 1.0f, 0.0f), darkFireColour(1.0f, 0.0f, 0.0f) {
 
 	// Transform parameters
 	this->wvpMatrixParam			= cgGetNamedEffectParameter(this->cgEffect, "WvpXf");
-	this->worldMatrixParam		= cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
 
 	// Noise texture sampler param
 	this->noiseSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
@@ -41,12 +40,12 @@ brightFireColour(1.0f, 1.0f, 0.0f), darkFireColour(1.0f, 0.0f, 0.0f) {
 	this->timerParam = cgGetNamedEffectParameter(this->cgEffect, "Timer");
 
 	// Tweakable params
-	this->scaleParam						= cgGetNamedEffectParameter(this->cgEffect, "Scale");
-	this->freqParam							= cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->flowDirectionParam		= cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
-	this->alphaMultParam				= cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
+	this->scaleParam            = cgGetNamedEffectParameter(this->cgEffect, "Scale");
+	this->freqParam             = cgGetNamedEffectParameter(this->cgEffect, "Freq");
+	this->flowDirectionParam    = cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
+	this->alphaMultParam        = cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
 	this->brightFireColourParam	= cgGetNamedEffectParameter(this->cgEffect, "BrightFireColour");
-	this->darkFireColourParam		= cgGetNamedEffectParameter(this->cgEffect, "DarkFireColour");
+	this->darkFireColourParam   = cgGetNamedEffectParameter(this->cgEffect, "DarkFireColour");
 
 	debug_cg_state();
 }
@@ -58,10 +57,9 @@ void CgFxFireBallEffect::SetupBeforePasses(const Camera& camera) {
 	UNUSED_PARAMETER(camera);
 
 	// Transform setup
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam,   CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 
-	// Set tweakables...
+	// Set tweak-ables...
 	cgGLSetParameter1f(this->scaleParam, this->scale);
 	cgGLSetParameter1f(this->freqParam, this->freq);
 	cgGLSetParameter1f(this->alphaMultParam, this->alphaMultiplier);

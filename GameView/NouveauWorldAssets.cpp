@@ -343,8 +343,8 @@ void NouveauWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPo
 }
 
 void NouveauWorldAssets::DrawBackgroundEffects(const Camera& camera) {
-    this->lamp1GlowEmitter.Draw(camera, Vector3D(0,0,0), true);
-    this->lamp2GlowEmitter.Draw(camera, Vector3D(0,0,0), true);
+    this->lamp1GlowEmitter.DrawWithDepth(camera);
+    this->lamp2GlowEmitter.DrawWithDepth(camera);
 
     this->lamp1HaloEmitter.Draw(camera);
     this->lamp2HaloEmitter.Draw(camera);

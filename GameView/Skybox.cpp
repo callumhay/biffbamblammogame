@@ -19,7 +19,7 @@
 
 Skybox::Skybox() :
 skyboxEffect(ResourceManager::GetInstance()->GetImgTextureResource(
-                 GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear)),
+             GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear)),
 skyboxDispList(0) {
 
 	// Create a display list for the skybox geometry
@@ -27,7 +27,7 @@ skyboxDispList(0) {
 	assert(this->skyboxDispList != 0);
 
 	glNewList(this->skyboxDispList, GL_COMPILE);
-	Skybox::DrawSkyboxGeometry(4, 0.5f);//(Camera::FAR_PLANE_DIST - 1.0f) / SQRT_2);
+	Skybox::DrawSkyboxGeometry(5, 0.5f); //(Camera::FAR_PLANE_DIST - 1.0f) / SQRT_2);
 	glEndList();
 }
 
@@ -46,8 +46,9 @@ void Skybox::Draw(const Camera& camera) {
 	camTransform.setTranslation(Point3D(0,0,0));
 	glMultMatrixf(camTransform.begin());
 
-	glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
+	glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
 	this->skyboxEffect.Draw(camera, this->skyboxDispList);
 

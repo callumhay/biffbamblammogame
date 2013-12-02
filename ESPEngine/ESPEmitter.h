@@ -93,7 +93,6 @@ public:
 	void SetParticleRotation(const ESPInterval& particleRot);
 	void SetNumParticleLives(int lives);
 	void SetIsReversed(bool isReversed);
-	void SetAsPointSpriteEmitter(bool isPointSprite);
 	void SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter);
 	void SetRadiusDeviationFromCenter(const ESPInterval& xDistFromCenter, const ESPInterval& yDistFromCenter, const ESPInterval& zDistFromCenter);
 	void SetParticleDeathPlane(const Plane& plane);
@@ -114,7 +113,8 @@ public:
 	void SimulateTicking(double time);
 
 	void Tick(double dT);
-	void Draw(const Camera& camera, const Vector3D& worldTranslation = Vector3D(0,0,0), bool enableDepth = false);
+	void Draw(const Camera& camera);
+    void DrawWithDepth(const Camera& camera);
 
 	void Reset();
 
@@ -129,7 +129,6 @@ protected:
 	int numParticleLives;
 	
 	bool isReversed;		// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
-	bool isPointSprite;	// Whether this emitter emits point sprites
 
 	std::list<ESPParticleEffector*> effectors;					// All the particle effectors of this emitter
 	std::list<ESPEmitterEventHandler*> eventHandlers;		// The event handlers attached to this emitter
