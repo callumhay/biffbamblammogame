@@ -19,9 +19,7 @@ TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(d
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
 finishedPointsHint(false), keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
 doBoostPressToReleaseHint(NULL), doBoostSlingshotHint(NULL), holdBoostHint(NULL), hasShownBoostHint(false),
-boostAvailableHint(NULL), multiplierHints(NULL), multiplierLostHint(NULL)
-//fadeEffector(1, 0) 
-{
+boostAvailableHint(NULL), multiplierHints(NULL), multiplierLostHint(NULL) {
     assert(display != NULL);
 }
 

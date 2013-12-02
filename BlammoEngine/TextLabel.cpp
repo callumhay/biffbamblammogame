@@ -62,7 +62,6 @@ void TextLabel2D::Draw(bool depthTestOn, float depth) {
 	// Draw coloured text part
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
 	this->font->OrthoPrint(Point3D(this->topLeftCorner, depth), this->text, depthTestOn, this->scale);
-	//this->lastRasterWidth = this->font->GetWidth(this->text);
 }
 
 void TextLabel2D::Draw(float rotationInDegs) {
@@ -79,7 +78,6 @@ void TextLabel2D::Draw(float rotationInDegs) {
 	// Draw coloured text part
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
     this->font->OrthoPrint(Point3D(this->topLeftCorner, 0.0f), this->text, rotationInDegs, this->scale);
-	//this->lastRasterWidth = this->font->GetWidth(this->text);
 }
 
 void TextLabel2D::Draw3D(const Camera& camera, float rotationInDegs, float z) {
@@ -216,8 +214,7 @@ void TextLabel2DFixedWidth::DrawTextLines(float xOffset, float yOffset) {
 
             break;
 
-        case TextLabel2DFixedWidth::RightAligned:
-            {
+        case TextLabel2DFixedWidth::RightAligned: {
                 float baseTopLeftX = currTextTopLeftPos[0] + this->fixedWidth;
                 for (std::vector<std::string>::const_iterator iter = this->textLines.begin(); 
                      iter != this->textLines.end(); ++iter) {

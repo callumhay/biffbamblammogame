@@ -42,16 +42,18 @@ Texture3D* Texture3D::Create3DNoiseTexture(int size) {
 	// Grab the noise data
 	GLubyte* texData = ResourceManager::GetInstance()->ReadNoiseOctave3DTextureData();
 
+    /*
 	// IF YOU NEED TO SAVE IT TO RAW DATA FILE...
-	//if (texData == NULL) {
-		//GLubyte* texData = Noise::GetInstance()->Make3DNoiseTexture(size);
+	if (texData == NULL) {
+		texData = Noise::GetInstance()->Make3DNoiseTexture(size);
 		// Save the texture data to file...
-		//std::ofstream outStream("noise_octaves.raw", std::ofstream::binary);
-		//if (outStream.good()) {
-		//	outStream.write((const char*)texData, size * size * size * 4);
-		//	outStream.close();
-		//}
-	//}
+		std::ofstream outStream("noise_octaves.raw", std::ofstream::binary);
+		if (outStream.good()) {
+			outStream.write((const char*)texData, size * size * size * 4);
+			outStream.close();
+		}
+	}
+    */
 
 	assert(texData != NULL);
 

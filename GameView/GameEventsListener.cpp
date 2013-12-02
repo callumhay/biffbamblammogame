@@ -409,12 +409,14 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
     exceptTypes.insert(GameSound::BossBackgroundLoop);
     exceptTypes.insert(GameSound::BossAngryBackgroundLoop);
     exceptTypes.insert(GameSound::BossBackgroundLoopTransition);
+    exceptTypes.insert(GameSound::TeslaLightningArcLoop);
 
     sound->StopAllSoundsExcept(exceptTypes, 0.5f);
     sound->SetSoundTypeVolume(GameSound::WorldBackgroundLoop, 0.5f);
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoop, 0.5f);
     sound->SetSoundTypeVolume(GameSound::BossAngryBackgroundLoop, 0.5f);
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoopTransition, 0.5f);
+    sound->SetSoundTypeVolume(GameSound::TeslaLightningArcLoop, 0.1f);
 
 	sound->PlaySound(GameSound::LastBallSpiralingToDeathLoop, false, true, true);
 
@@ -451,6 +453,7 @@ void GameEventsListener::LastBallExplodedEvent(const GameBall& explodedBall, boo
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoop, 1.0f);
     sound->SetSoundTypeVolume(GameSound::BossAngryBackgroundLoop, 1.0f);
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoopTransition, 1.0f);
+    sound->SetSoundTypeVolume(GameSound::TeslaLightningArcLoop, 0.25f);
 
     debug_output("EVENT: Last ball exploded.");
 }

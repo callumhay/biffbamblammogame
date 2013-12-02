@@ -125,7 +125,7 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	// Obtain the current model view and inverse view transforms
 	float tempMVXfVals[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
-	Matrix4x4 tempMVXf(tempMVXfVals);
+
 	const Matrix4x4& invViewXf = camera.GetInvViewTransform();
     cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
 
@@ -133,7 +133,8 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	glPushMatrix();
 	glLoadIdentity();
 	glMultMatrixf(invViewXf.begin());
-	glMultMatrixf(tempMVXf.begin());
+	glMultMatrixf(tempMVXfVals);
+
 	// Set the world transform parameters
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
 	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);

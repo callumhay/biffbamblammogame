@@ -121,7 +121,7 @@ std::vector<std::string> TextureFontSet::ParseTextToWidth(const std::string& s, 
  * Precondition: s cannot have any new lines in it!!
  * Returns: The length of the printed text.
  */
-float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn, float scale) const {
+void TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn, float scale) const {
 	assert(s.find('\n') == std::string::npos);
 	assert(s.find('\r') == std::string::npos);
 
@@ -147,16 +147,12 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	glLoadIdentity();
 	glTranslatef(topLeftCorner[0], topLeftCorner[1] - this->heightInPixels*scale, topLeftCorner[2]);
 	glScalef(scale, scale, 1.0f);
-	glRasterPos2i(0, 0);
+	//glRasterPos2i(0, 0);
 
 	// Draw the text
 	glListBase(this->baseDisplayList);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
 
-	float rpos[4];
-	glGetFloatv(GL_CURRENT_RASTER_POSITION, rpos);
-	float textLength = rpos[0] - topLeftCorner[0];
-	
 	glPopMatrix();
 	glPopAttrib();  
 
@@ -165,10 +161,9 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	
 	debug_opengl_state();
 
-	return textLength;
 }
 
-float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string& s, 
+void TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string& s, 
                                  float rotationInDegs, float scale) const {
 	assert(s.find('\n') == std::string::npos);
 	assert(s.find('\r') == std::string::npos);
@@ -190,15 +185,11 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	glTranslatef(topLeftCorner[0], topLeftCorner[1] - this->heightInPixels*scale, topLeftCorner[2]);
 	glRotatef(rotationInDegs, 0, 0, 1);
     glScalef(scale, scale, 1.0f);
-	glRasterPos2i(0, 0);
+	//glRasterPos2i(0, 0);
 
 	// Draw the text
 	glListBase(this->baseDisplayList);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
-
-	float rpos[4];
-	glGetFloatv(GL_CURRENT_RASTER_POSITION, rpos);
-	float textLength = rpos[0] - topLeftCorner[0];
 	
 	glPopMatrix();
 	glPopAttrib();  
@@ -207,8 +198,6 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	Camera::PopWindowCoords();
 	
 	debug_opengl_state();
-
-	return textLength;
 }
 
 /** 

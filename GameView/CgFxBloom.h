@@ -17,10 +17,11 @@
 #include "../BlammoEngine/CgFxEffect.h"
 
 class FBObj;
+class CgFxGaussianBlur;
 
 class CgFxBloom : public CgFxPostProcessingEffect {
 public:
-	CgFxBloom(FBObj* sceneFBO);
+	CgFxBloom(FBObj* sceneFBO, CgFxGaussianBlur* blurEffect);
 	~CgFxBloom();
 
 	void Draw(int screenWidth, int screenHeight, double dT);
@@ -50,9 +51,6 @@ public:
 
 private:
     static const char* BLOOM_FILTER_TECHNIQUE_NAME;
-    static const char* BRIGHT_DOWNSAMPLE_LVL2_TECHNIQUE_NAME;
-    static const char* BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME;
-    static const char* BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME;
     static const char* BLOOM_COMPOSITION_TECHNIQUE_NAME;
 
     static const float DEFAULT_HIGHLIGHT_THRESHOLD;
@@ -62,10 +60,10 @@ private:
 
     // CG parameters
     CGparameter sceneSamplerParam;
-    CGparameter brightDownSampler2Param;
-    CGparameter brightDownSampler4Param;
-    CGparameter brightComposite2Param;
-    CGparameter brightComposite4Param;
+    CGparameter brightBlurSamplerParam;
+
+    CGparameter brightBlurSamplerMip3Param;
+    CGparameter brightBlurSamplerMip4Param;
 
     CGparameter sceneWidthParam;
     CGparameter sceneHeightParam;
@@ -75,13 +73,9 @@ private:
     CGparameter glowIntensityParam;
     CGparameter highlightIntensityParam;
 
+    CgFxGaussianBlur* blurEffect; // Not owned by this
     FBObj* bloomFilterFBO;
-    FBObj* blurFBO;
-    FBObj* downsampleBlur2FBO;
-    FBObj* downsampleBlur4FBO;
 
     float highlightThreshold, sceneIntensity, glowIntensity, highlightIntensity;
-
-    void DoDownsampledBlur(int screenWidth, int screenHeight, const std::string& techniqueName, CGparameter downsampleParam, FBObj* downsampleFBO);
 };
 #endif
