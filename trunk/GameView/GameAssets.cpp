@@ -962,7 +962,8 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	}
 
     static const float BRIGHT_BEAM_CENTER_MULTIPLER = 2.28f;
-	static const float TYPICAL_BEAM_ALPHA = 0.4f;
+    static const float TYPICAL_INNER_BEAM_ALPHA = 0.8f;
+	static const float TYPICAL_OUTER_BEAM_ALPHA = 0.4f;
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	float quarterPaddleDepth = paddle->GetHalfDepthTotal() / 2.0f;
 
@@ -972,6 +973,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	glDisable(GL_CULL_FACE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
 
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
@@ -1000,6 +1002,9 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
             }
             else {
                 paddleLaserBeamActive = true;
+                if (paddle->GetIsPaddleCameraOn()) {
+                    currAlpha *= 0.25f;
+                }
             }
         }
         
@@ -1033,7 +1038,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
 			beamDepthVec = Vector3D(0, 0, 0.5f * quarterPaddleDepth);
 
-			glColor4f(beamCenterColour.R(), beamCenterColour.G(), beamCenterColour.B(), TYPICAL_BEAM_ALPHA*currAlpha);
+			glColor4f(beamCenterColour.R(), beamCenterColour.G(), beamCenterColour.B(), TYPICAL_INNER_BEAM_ALPHA*currAlpha);
 			
 			// Front face
 			temp = beamSegStart - beamRightVec - beamDepthVec;
@@ -1080,7 +1085,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
 			beamDepthVec = Vector3D(0, 0, quarterPaddleDepth);
 
-			glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_BEAM_ALPHA*currAlpha);
+			glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_OUTER_BEAM_ALPHA*currAlpha);
 
 			// Front face
 			temp = beamSegStart - beamRightVec - beamDepthVec;
@@ -1127,10 +1132,17 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	glPopMatrix();
 	glPopAttrib();
 
-    // If in paddle cam mode draw a fullscreen quad with the laser colour
+    // If in paddle cam mode draw a full screen quad with the laser colour
     if (paddle->GetIsPaddleCameraOn() && paddleLaserBeamActive) {
-        GeometryMaker::GetInstance()->DrawFullScreenQuad(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 0.0, 
-            ColourRGBA(GameModelConstants::GetInstance()->PADDLE_LASER_BEAM_COLOUR, 0.2f));
+
+        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        GeometryMaker::GetInstance()->DrawFullScreenQuadNoDepth(Camera::GetWindowWidth(), Camera::GetWindowHeight(), 
+           ColourRGBA(GameModelConstants::GetInstance()->PADDLE_LASER_BEAM_COLOUR, 0.2f));
+
+        glPopAttrib();
     }
 
 	debug_opengl_state();

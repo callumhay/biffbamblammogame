@@ -19,7 +19,9 @@
 
 Skybox::Skybox() :
 skyboxEffect(ResourceManager::GetInstance()->GetImgTextureResource(
-             GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear)),
+             GameViewConstants::GetInstance()->TEXTURE_STARFIELD_FG, Texture::Trilinear),
+             ResourceManager::GetInstance()->GetImgTextureResource(
+             GameViewConstants::GetInstance()->TEXTURE_STARFIELD_BG, Texture::Trilinear)),
 skyboxDispList(0) {
 
 	// Create a display list for the skybox geometry

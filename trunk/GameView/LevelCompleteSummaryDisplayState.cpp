@@ -953,20 +953,25 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
         return;
     }
 
-    if (this->starAddAnimationCount == 0 && 
-        this->scoreValueAnimation.GetInterpolantValue() == this->scoreValueAnimation.GetTargetValue()) {
+    GameSound* sound = this->display->GetSound();
 
-        // Start the fade out animation - the user wants to start playing!
-	    this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
-        this->waitingForKeyPress = false;
-        
-        // Play confirm sound
-        this->display->GetSound()->PlaySound(GameSound::LevelSummaryConfirmEvent, false, false);
+    bool scoreTallyIsDone = this->scoreValueAnimation.GetInterpolantValue() == this->scoreValueAnimation.GetTargetValue();
+    if (scoreTallyIsDone) {
+        if (this->starAddAnimationCount == 0) {
+
+            // Start the fade out animation - the user wants to start playing!
+	        this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
+            this->waitingForKeyPress = false;
+            
+            // Play confirm sound
+            sound->PlaySound(GameSound::LevelSummaryConfirmEvent, false, false);
+        }
     }
-
-    // Automatically finish the score tally and other animations
-    this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
-    this->scoreValueAnimation.ClearLerp();
+    else {
+        // Play the skip sound for the score tally (fast tally)
+        sound->PlaySound(GameSound::LevelSummaryPointTallySkipEvent, false, false);
+        this->scoreValueAnimation.SetTimeValue(std::max<double>(this->scoreValueAnimation.GetTimeValue(), this->scoreValueAnimation.GetFinalTime()-0.25));
+    }
 
     this->levelCompleteTextScaleAnimation.SetInterpolantValue(this->levelCompleteTextScaleAnimation.GetTargetValue());
     this->levelCompleteTextScaleAnimation.ClearLerp();

@@ -57,7 +57,7 @@ inline void MenuBackgroundRenderer::DrawNonAnimatedFadeShakeBG(float shakeX, flo
 }
 
 inline Texture* MenuBackgroundRenderer::GetMenuBGTexture() const {
-    return this->bgEffect->GetSkyTexture();
+    return this->bgEffect->GetBGSkyTexture();
 }
 
 #endif // __MENUBACKGROUNDRENDERER_H__

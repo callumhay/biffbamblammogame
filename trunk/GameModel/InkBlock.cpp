@@ -38,46 +38,37 @@ void InkBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bo
 
 	// Make the bounds a bit smaller than a typical level piece and always make all of them
 
-	// Clear all the currently existing boundry lines first
-	this->bounds.Clear();
-
-	// Set the bounding lines for a rectangular block
-	std::vector<Collision::LineSeg2D> boundingLines;
-	std::vector<Vector2D>  boundingNorms;
+	// Clear all the currently existing boundary lines first
+    static const int MAX_NUM_LINES = 4;
+    Collision::LineSeg2D boundingLines[MAX_NUM_LINES];
+    Vector2D  boundingNorms[MAX_NUM_LINES];
 
 	static const float FRACTION_HALF_PIECE_WIDTH  = 0.7f * LevelPiece::HALF_PIECE_WIDTH;
 	static const float FRACTION_HALF_PIECE_HEIGHT = 0.7f * LevelPiece::HALF_PIECE_HEIGHT;
 
-	// Left boundry of the piece
-	Collision::LineSeg2D l1(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT), 
-							 this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
-	Vector2D n1(-1, 0);
-	boundingLines.push_back(l1);
-	boundingNorms.push_back(n1);
+	// Left boundary of the piece
+    boundingLines[0] = Collision::LineSeg2D(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT), 
+        this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
+	boundingNorms[0] = Vector2D(-1, 0);
 
-	// Bottom boundry of the piece
-	Collision::LineSeg2D l2(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
-							 this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
-	Vector2D n2(0, -1);
-	boundingLines.push_back(l2);
-	boundingNorms.push_back(n2);
+	// Bottom boundary of the piece
+    boundingLines[1] = Collision::LineSeg2D(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
+        this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
+	boundingNorms[1] = Vector2D(0, -1);
 
-	// Right boundry of the piece
-	Collision::LineSeg2D l3(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
-							 this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
-	Vector2D n3(1, 0);
-	boundingLines.push_back(l3);
-	boundingNorms.push_back(n3);
+	// Right boundary of the piece
+    boundingLines[2] = Collision::LineSeg2D(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
+        this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
+	boundingNorms[2] = Vector2D(1, 0);
 
-	// Top boundry of the piece
-	Collision::LineSeg2D l4(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT),
-							 this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
-	Vector2D n4(0, 1);
-	boundingLines.push_back(l4);
-	boundingNorms.push_back(n4);
+	// Top boundary of the piece
+    boundingLines[3] = Collision::LineSeg2D(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT),
+        this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
+	boundingNorms[3] = Vector2D(0, 1);
 
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-                                  topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	this->SetBounds(BoundingLines(MAX_NUM_LINES, boundingLines, boundingNorms), 
+        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 // Determine whether the given projectile will pass through this block...

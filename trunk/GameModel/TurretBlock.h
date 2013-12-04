@@ -73,6 +73,15 @@ inline bool TurretBlock::StatusTick(double dT, GameModel* gameModel, int32_t& re
 	return false;
 }
 
+inline void TurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                      const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                      const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+    LevelPiece::UpdateBreakableBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+}
+
 inline float TurretBlock::GetHealthPercent() const {
     return this->currLifePoints / this->startingLifePoints;
 }

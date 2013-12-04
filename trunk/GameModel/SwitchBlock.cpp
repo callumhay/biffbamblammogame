@@ -40,75 +40,71 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
                                const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
                                const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
     
-	// If the tesla block is in ice then its bounds are a basic rectangle...
+	// If the block is in ice then its bounds are a basic rectangle...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+            topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 		return;
 	}
 
 	// Set the bounding lines for a beveled block...
-	std::vector<Collision::LineSeg2D> boundingLines;
-	std::vector<Vector2D> boundingNorms;
-    std::vector<bool> onInside;
-
-    boundingLines.reserve(4);
-    boundingNorms.reserve(4);
-    onInside.reserve(4);
+    static const int MAX_NUM_LINES = 4;
+    Collision::LineSeg2D boundingLines[MAX_NUM_LINES];
+    Vector2D  boundingNorms[MAX_NUM_LINES];
+    bool onInside[MAX_NUM_LINES];
 
 	static const float HALF_SWITCH_HEIGHT_BOUND = LevelPiece::HALF_PIECE_HEIGHT;
 	static const float HALF_SWITCH_WIDTH_BOUND  = LevelPiece::HALF_PIECE_WIDTH;
 
     bool shouldGenBounds = false;
+    int lineCount = 0;
 
 	// Left boundary of the piece
     shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         leftNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
-		Collision::LineSeg2D l1(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND), 
-							    this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
-	    Vector2D n1(-1, 0);
-	    boundingLines.push_back(l1);
-	    boundingNorms.push_back(n1);
-        onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus));
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND), 
+            this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
+	    boundingNorms[lineCount] = Vector2D(-1, 0);
+        onInside[lineCount] = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus));
+        lineCount++;
     }
 
 	// Bottom boundary of the piece
     shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         bottomNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
-	    Collision::LineSeg2D l2(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
-							     this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
-	    Vector2D n2(0, -1);
-	    boundingLines.push_back(l2);
-	    boundingNorms.push_back(n2);
-        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
+            this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
+	    boundingNorms[lineCount] = Vector2D(0, -1);
+        onInside[lineCount] = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
+        lineCount++;
 	}
 
 	// Right boundary of the piece
     shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
         rightNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
-	    Collision::LineSeg2D l3(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
-							     this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
-	    Vector2D n3(1, 0);
-	    boundingLines.push_back(l3);
-	    boundingNorms.push_back(n3);
-        onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus));
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
+            this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
+	    boundingNorms[lineCount] = Vector2D(1, 0);
+        onInside[lineCount] = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus));
+        lineCount++;
 	}
 
 	// Top boundary of the piece
     shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
         topNeighbor->GetType() != LevelPiece::Solid);
     if (shouldGenBounds) {
-	    Collision::LineSeg2D l4(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND),
-							     this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
-	    Vector2D n4(0, 1);
-	    boundingLines.push_back(l4);
-	    boundingNorms.push_back(n4);
-        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND),
+            this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
+	    boundingNorms[lineCount] = Vector2D(0, 1);
+        onInside[lineCount] = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus));
+        lineCount++;
 	}
 
-    this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+    this->SetBounds(BoundingLines(lineCount, boundingLines, boundingNorms, onInside), 
+        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 

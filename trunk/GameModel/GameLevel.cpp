@@ -1850,7 +1850,7 @@ std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(double dT, 
 }
 
 std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius) const {
-	// Get the ball boundry and use it to figure out what levelpieces are relevant
+	// Get the ball boundary and use it to figure out what levelpieces are relevant
 	// Find the non-rounded max and min indices to look at along the x and y axis
 	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
 	float xIndexMax = floorf(xNonAdjustedIndex + radius); 

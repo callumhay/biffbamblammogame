@@ -23,6 +23,8 @@ public:
 	BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms);
     BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms,
         const std::vector<bool>& onInside);
+    BoundingLines(int numLines, const Collision::LineSeg2D lineArray[], const Vector2D normArray[], const bool onInsideArray[]);
+    BoundingLines(int numLines, const Collision::LineSeg2D lineArray[], const Vector2D normArray[]);
     BoundingLines(const Collision::AABB2D& aabb);
     BoundingLines(const BoundingLines& copy);
 	~BoundingLines();

@@ -1138,6 +1138,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamGlowSparks->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleBeamGlowSparks->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->paddleBeamGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
+    this->paddleBeamGlowSparks->SetParticleAlignment(ESP::ScreenAligned);
 	this->paddleBeamGlowSparks->AddEffector(&this->particleFader);
 	result = this->paddleBeamGlowSparks->SetParticles(50, this->circleGradientTex);
 	assert(result);
@@ -1149,6 +1150,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamOriginUp->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleBeamOriginUp->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->paddleBeamOriginUp->SetEmitDirection(Vector3D(0, 1, 0));
+    this->paddleBeamOriginUp->SetParticleAlignment(ESP::ScreenAligned);
 	this->paddleBeamOriginUp->AddEffector(&this->particleFader);
 	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, this->sparkleTex);
 	assert(result);

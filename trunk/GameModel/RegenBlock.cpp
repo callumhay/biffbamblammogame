@@ -56,7 +56,7 @@ bool RegenBlock::ProducesBounceEffectsWithBallWhenHit(const GameBall& b) const {
 // Whether or not the ball can just blast right through this block.
 // Returns: true if it can, false otherwise.
 bool RegenBlock::BallBlastsThrough(const GameBall& b) const {
-    // The may blast through this if it's uber and not firey/icy
+    // The may blast through this if it's uber and not fiery/icy
 	return ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) &&
            ((b.GetBallType() & GameBall::IceBall) != GameBall::IceBall) && 
            ((b.GetBallType() & GameBall::FireBall) != GameBall::FireBall) &&
@@ -104,84 +104,6 @@ int RegenBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
     return 0;
 }
 
-void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
-
-	UNUSED_PARAMETER(bottomLeftNeighbor);
-	UNUSED_PARAMETER(bottomRightNeighbor);
-	UNUSED_PARAMETER(topRightNeighbor);
-	UNUSED_PARAMETER(topLeftNeighbor);
-
-	// Set the bounding lines for a rectangular block
-	std::vector<Collision::LineSeg2D> boundingLines;
-	std::vector<Vector2D>  boundingNorms;
-    std::vector<bool> onInside;
-
-    bool shouldGenBounds = false;
-
-	// Left boundary of the piece
-    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable &&
-        leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen));
-    if (shouldGenBounds) {
-		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-								this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n1(-1, 0);
-		boundingLines.push_back(l1);
-		boundingNorms.push_back(n1);
-        onInside.push_back(leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            leftNeighbor->GetType() == LevelPiece::OneWay);
-	}
-
-	// Bottom boundary of the piece
-    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-        (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
-         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
-    if (shouldGenBounds) {
-		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-								this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n2(0, -1);
-		boundingLines.push_back(l2);
-		boundingNorms.push_back(n2);
-        onInside.push_back(bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry);
-	}
-
-	// Right boundary of the piece
-    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
-         rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen));
-    if (shouldGenBounds) {
-		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-								this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n3(1, 0);
-		boundingLines.push_back(l3);
-		boundingNorms.push_back(n3);
-        onInside.push_back(rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry);
-	}
-
-	// Top boundary of the piece
-    shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-        (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
-         topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen));
-    if (shouldGenBounds) {
-		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-								this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n4(0, 1);
-		boundingLines.push_back(l4);
-		boundingNorms.push_back(n4);
-        onInside.push_back(topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            topNeighbor->GetType() == LevelPiece::OneWay || topNeighbor->GetType() == LevelPiece::NoEntry);
-	}
-
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms, onInside),
-        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
-        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-}
-
 LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
     
     // If this block has infinite life then it can only be destroyed in very particular ways...
@@ -191,7 +113,7 @@ LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
             method != LevelPiece::TeslaDestruction && method != LevelPiece::RocketDestruction && 
             method != LevelPiece::MineDestruction) {
 
-            // EVENT: The block has been 'preturbed'
+            // EVENT: The block has been 'perturbed'
             GameEventManager::Instance()->ActionRegenBlockPreturbed(*this);
             return this;
         }

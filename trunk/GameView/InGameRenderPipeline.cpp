@@ -224,11 +224,6 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     // Mesh projectiles (e.g., rockets, mines)
     assets->DrawMeshProjectiles(dT, *gameModel, camera);
 
-	glPopMatrix();
-
-    glPushMatrix();
-	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
-
 	// Draw the dropping items if not in the last pass
 	if (!fboAssets->DrawItemsInLastPass()) {
 		std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
@@ -237,8 +232,8 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 		}				
 	}
 
-	// Render the beam effects
-	assets->DrawBeams(*gameModel, camera);
+    // Render the beam effects
+    assets->DrawBeams(*gameModel, camera);
 
     // Add outlines to the scene...
     {
@@ -256,8 +251,6 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
         celOutlineEffect.SetAmbientBrightness(1.0f);
         celOutlineEffect.Draw(colourAndDepthFBO, fullSceneFBO);
     }
-
-
 
 	// Draw Post-full-scene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
     fullSceneFBO->BindFBObj();

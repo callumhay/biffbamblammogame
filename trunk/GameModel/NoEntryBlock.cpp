@@ -78,16 +78,21 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
                                 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	// Set the bounding lines for a rectangular block
-	std::vector<Collision::LineSeg2D> boundingLines;
-	std::vector<Vector2D>  boundingNorms;
+    static const int MAX_NUM_LINES = 4;
+    Collision::LineSeg2D boundingLines[MAX_NUM_LINES];
+    Vector2D  boundingNorms[MAX_NUM_LINES];
 
     bool shouldGenBounds = false;
+    int lineCount = 0;
 
 	// Left boundary of the piece
 	if (leftNeighbor != NULL) {
-        if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::NoEntry &&
-            leftNeighbor->GetType() != LevelPiece::LaserTurret && leftNeighbor->GetType() != LevelPiece::RocketTurret &&
-            leftNeighbor->GetType() != LevelPiece::MineTurret && leftNeighbor->GetType() != LevelPiece::Cannon &&
+        if (leftNeighbor->GetType() != LevelPiece::Solid &&
+            leftNeighbor->GetType() != LevelPiece::NoEntry &&
+            leftNeighbor->GetType() != LevelPiece::LaserTurret &&
+            leftNeighbor->GetType() != LevelPiece::RocketTurret &&
+            leftNeighbor->GetType() != LevelPiece::MineTurret &&
+            leftNeighbor->GetType() != LevelPiece::Cannon &&
             leftNeighbor->GetType() != LevelPiece::Regen) {
 
             shouldGenBounds = true;
@@ -97,19 +102,21 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n1(-1, 0);
-		boundingLines.push_back(l1);
-		boundingNorms.push_back(n1);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+            this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));;
+		boundingNorms[lineCount] = Vector2D(-1, 0);
+        lineCount++;
     }
     shouldGenBounds = false;
 
 	// Bottom boundary of the piece
 	if (bottomNeighbor != NULL) {
-		if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::NoEntry &&
-            bottomNeighbor->GetType() != LevelPiece::LaserTurret && bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
-            bottomNeighbor->GetType() != LevelPiece::MineTurret && bottomNeighbor->GetType() != LevelPiece::Cannon &&
+		if (bottomNeighbor->GetType() != LevelPiece::Solid &&
+            bottomNeighbor->GetType() != LevelPiece::NoEntry &&
+            bottomNeighbor->GetType() != LevelPiece::LaserTurret &&
+            bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
+            bottomNeighbor->GetType() != LevelPiece::MineTurret &&
+            bottomNeighbor->GetType() != LevelPiece::Cannon &&
             bottomNeighbor->GetType() != LevelPiece::Regen) {
             
             shouldGenBounds = true;
@@ -119,19 +126,21 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n2(0, -1);
-		boundingLines.push_back(l2);
-		boundingNorms.push_back(n2);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+            this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+		boundingNorms[lineCount] = Vector2D(0, -1);
+        lineCount++;
     }
     shouldGenBounds = false;
 
 	// Right boundary of the piece
 	if (rightNeighbor != NULL) {
-		if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::NoEntry &&
-            rightNeighbor->GetType() != LevelPiece::LaserTurret && rightNeighbor->GetType() != LevelPiece::RocketTurret &&
-            rightNeighbor->GetType() != LevelPiece::MineTurret && rightNeighbor->GetType() != LevelPiece::Cannon &&
+		if (rightNeighbor->GetType() != LevelPiece::Solid &&
+            rightNeighbor->GetType() != LevelPiece::NoEntry &&
+            rightNeighbor->GetType() != LevelPiece::LaserTurret &&
+            rightNeighbor->GetType() != LevelPiece::RocketTurret &&
+            rightNeighbor->GetType() != LevelPiece::MineTurret &&
+            rightNeighbor->GetType() != LevelPiece::Cannon &&
             rightNeighbor->GetType() != LevelPiece::Regen) {
 
             shouldGenBounds = true;
@@ -141,19 +150,21 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n3(1, 0);
-		boundingLines.push_back(l3);
-		boundingNorms.push_back(n3);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+            this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));;
+		boundingNorms[lineCount] = Vector2D(1, 0);
+        lineCount++;
     }
     shouldGenBounds = false;
 
 	// Top boundary of the piece
 	if (topNeighbor != NULL) {
-		if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::NoEntry &&
-            topNeighbor->GetType() != LevelPiece::LaserTurret && topNeighbor->GetType() != LevelPiece::RocketTurret &&
-            topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::Cannon &&
+		if (topNeighbor->GetType() != LevelPiece::Solid &&
+            topNeighbor->GetType() != LevelPiece::NoEntry &&
+            topNeighbor->GetType() != LevelPiece::LaserTurret &&
+            topNeighbor->GetType() != LevelPiece::RocketTurret &&
+            topNeighbor->GetType() != LevelPiece::MineTurret &&
+            topNeighbor->GetType() != LevelPiece::Cannon &&
             topNeighbor->GetType() != LevelPiece::Regen) {
 
             shouldGenBounds = true;
@@ -163,15 +174,15 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n4(0, 1);
-		boundingLines.push_back(l4);
-		boundingNorms.push_back(n4);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+            this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+		boundingNorms[lineCount] = Vector2D(0, 1);
+        lineCount++;
     }
 
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 						 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	this->SetBounds(BoundingLines(lineCount, boundingLines, boundingNorms), 
+        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
