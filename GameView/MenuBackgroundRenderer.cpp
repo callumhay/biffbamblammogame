@@ -17,12 +17,14 @@
 
 MenuBackgroundRenderer::MenuBackgroundRenderer() : bgEffect(NULL) {
 
+    Texture* fgTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD_FG, Texture::Trilinear);
     Texture* bgTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear);
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD_BG, Texture::Trilinear);
 
-    this->bgEffect = new CgFxSkybox(bgTex);
+    this->bgEffect = new CgFxSkybox(fgTex, bgTex);
     this->bgEffect->SetMoveFrequency(0.007f);
-    this->bgEffect->SetFGScale(0.5f);
+    this->bgEffect->SetFGScale(1.0f);
 
     glNewList(this->fullscreenQuadDL, GL_COMPILE); 
 

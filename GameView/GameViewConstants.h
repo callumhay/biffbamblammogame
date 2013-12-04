@@ -186,7 +186,8 @@ public:
     const char* TEXTURE_BOOST_HUD_TRAILFILL_3;
     const char* TEXTURE_BOOST_MALFUNCTION;
 
-	const char* TEXTURE_STARFIELD;
+	const char* TEXTURE_STARFIELD_BG;
+    const char* TEXTURE_STARFIELD_FG;
 	
 	const char* TEXTURE_INKSPLATTER;
 	const char* TEXTURE_CIRCLE_TARGET;

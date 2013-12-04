@@ -32,20 +32,6 @@ timeOfLastDrop(0), hasSparkleEffect(true) {
 ItemDropBlock::~ItemDropBlock() {
 }
 
-void ItemDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                                 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                                 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                                 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
-
-    // Check to see if there's something directly below this piece, if there is then we don't do the sparkle effect
-    if (bottomNeighbor != NULL) {
-        this->hasSparkleEffect = bottomNeighbor->IsNoBoundsPieceType();
-    }
-
-    LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
-        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-}
-
 bool ItemDropBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 		

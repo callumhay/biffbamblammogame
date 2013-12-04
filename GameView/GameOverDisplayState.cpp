@@ -38,7 +38,7 @@ maxMenuItemWidth(0.0f), menuHeight(0.0f), selectedAndActivatedItem(-1), gameOver
     this->gameOverLabel.SetScale(1.25f * this->display->GetTextScalingFactor());
 
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD_BG, Texture::Trilinear));
     assert(this->starryBG != NULL);
 
     this->SetupMenu();

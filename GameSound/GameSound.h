@@ -237,6 +237,7 @@ public:
         LevelSummaryBackgroundLoop,
         LevelSummaryNewHighScoreEvent,
         LevelSummaryPointTallyLoop,
+        LevelSummaryPointTallySkipEvent,
         LevelSummaryStarTallyEvent,
         LevelSummaryConfirmEvent,
         LevelStarCostPaidUnlockEvent,

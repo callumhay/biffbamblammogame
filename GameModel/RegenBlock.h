@@ -119,6 +119,15 @@ inline LevelPiece* RegenBlock::TickPaddleShieldCollision(double dT, const Player
     return this->HurtPiece(dT * paddle.GetShieldDamagePerSecond(), gameModel, LevelPiece::PaddleShieldDestruction);
 }
 
+inline void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                     const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                     const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                     const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+    LevelPiece::UpdateBreakableBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+}
+
 // Get whether or not this regen block has infinite life
 inline bool RegenBlock::HasInfiniteLife() const {
     return (this->currLifePoints == INFINITE_LIFE_POINTS);

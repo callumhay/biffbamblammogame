@@ -101,4 +101,14 @@ inline bool BombBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remo
 	return false;
 }
 
+inline void BombBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                    const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                    const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                    const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+    LevelPiece::UpdateBreakableBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+}
+
+
 #endif

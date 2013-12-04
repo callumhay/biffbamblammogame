@@ -494,6 +494,7 @@ void MSFReader::InitSoundTypeMapping() {
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryBackgroundLoop));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryNewHighScoreEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryPointTallyLoop));
+    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryPointTallySkipEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryStarTallyEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryConfirmEvent));
     soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStarCostPaidUnlockEvent));

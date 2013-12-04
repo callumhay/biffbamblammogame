@@ -19,7 +19,7 @@ class Texture;
 
 class CgFxSkybox : public CgFxEffectBase {
 public:
-    CgFxSkybox(Texture *skyTex);
+    CgFxSkybox(Texture* fgSkyTex, Texture *bgSkyTex);
     ~CgFxSkybox();
 
     void SetMoveFrequency(float freq) { this->moveFreq = freq; }
@@ -30,7 +30,7 @@ public:
         this->uvTranslation[1] = t;
     }
 
-    Texture* GetSkyTexture() const { return this->skyTex; }
+    Texture* GetBGSkyTexture() const { return this->bgSkyTex; }
 
 protected:
     void SetupBeforePasses(const Camera& camera);
@@ -51,14 +51,15 @@ private:
 	CGparameter viewDirParam;
     CGparameter uvTranslateParam;
 
-	CGparameter noiseSamplerParam;
-	CGparameter skySamplerParam;
+	CGparameter fgSkySamplerParam;
+	CGparameter bgSkySamplerParam;
 
 	// Stored values for parameters
 	float timer, twinkleFreq, moveFreq, noiseScale, fgScale, alpha;
 	Vector2D uvTranslation;
     GLint noiseTexID; 
-	Texture* skyTex;
+	Texture* bgSkyTex;
+    Texture* fgSkyTex;
 
 	Vector3D viewDir;
 

@@ -151,6 +151,20 @@ inline bool ItemDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& 
 	return false;
 }
 
+inline void ItemDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                        const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                        const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                        const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+    // Check to see if there's something directly below this piece, if there is then we don't do the sparkle effect
+    if (bottomNeighbor != NULL) {
+        this->hasSparkleEffect = bottomNeighbor->IsNoBoundsPieceType();
+    }
+
+    LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+}
+
 inline void ItemDropBlock::AttemptToDropAnItem(GameModel* gameModel) {
 	// Drop an item if the item drop timer allows it...
 	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {

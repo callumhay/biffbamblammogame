@@ -41,10 +41,6 @@ void TeslaBlock::Triggered(GameModel* gameModel) {
     this->ToggleElectricity(*gameModel, *gameModel->GetCurrentLevel(), true);
 }
 
-/**
- * Update the collision boundaries of this Tesla block, Tesla blocks are special in that they will
- * ALWAYS have all possible collision boundaries enabled and created.
- */
 void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
                               const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
                               const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
@@ -61,67 +57,79 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	static const float HALF_TESLA_WIDTH_BOUND  = LevelPiece::HALF_PIECE_WIDTH;
 
 	// Set the bounding lines for a rectangular block
-	std::vector<Collision::LineSeg2D> boundingLines;
-	std::vector<Vector2D>  boundingNorms;
+    static const int MAX_NUM_LINES = 4;
+    Collision::LineSeg2D boundingLines[MAX_NUM_LINES];
+    Vector2D  boundingNorms[MAX_NUM_LINES];
 
     bool shouldGenBounds = false;
+    int lineCount = 0;
 
 	// Left boundary of the piece
     shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable && 
-        leftNeighbor->GetType() != LevelPiece::Bomb && leftNeighbor->GetType() != LevelPiece::Tesla &&
-        leftNeighbor->GetType() != LevelPiece::AlwaysDrop && leftNeighbor->GetType() != LevelPiece::Regen));
+        (leftNeighbor->GetType() != LevelPiece::Solid &&
+         leftNeighbor->GetType() != LevelPiece::Breakable && 
+         leftNeighbor->GetType() != LevelPiece::Bomb &&
+         leftNeighbor->GetType() != LevelPiece::Tesla &&
+         leftNeighbor->GetType() != LevelPiece::AlwaysDrop && 
+         leftNeighbor->GetType() != LevelPiece::Regen));
 
     if (shouldGenBounds) {
-	    Collision::LineSeg2D l1(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND), 
-							     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
-	    Vector2D n1(-1, 0);
-	    boundingLines.push_back(l1);
-	    boundingNorms.push_back(n1);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND), 
+            this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
+	    boundingNorms[lineCount] = Vector2D(-1, 0);
+        lineCount++;
 	}
 
 	// Bottom boundary of the piece
 	shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-        (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable &&
-        bottomNeighbor->GetType() != LevelPiece::Bomb && bottomNeighbor->GetType() != LevelPiece::Tesla &&
-        bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && bottomNeighbor->GetType() != LevelPiece::Regen));
+        (bottomNeighbor->GetType() != LevelPiece::Solid && 
+         bottomNeighbor->GetType() != LevelPiece::Breakable &&
+         bottomNeighbor->GetType() != LevelPiece::Bomb &&
+         bottomNeighbor->GetType() != LevelPiece::Tesla &&
+         bottomNeighbor->GetType() != LevelPiece::AlwaysDrop && 
+         bottomNeighbor->GetType() != LevelPiece::Regen));
 
     if (shouldGenBounds) {
-        Collision::LineSeg2D l2(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
-						         this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
-        Vector2D n2(0, -1);
-        boundingLines.push_back(l2);
-        boundingNorms.push_back(n2);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
+            this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
+        boundingNorms[lineCount] = Vector2D(0, -1);
+        lineCount++;
 	}
 
 	// Right boundary of the piece
     shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-        (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable &&
-        rightNeighbor->GetType() != LevelPiece::Bomb && rightNeighbor->GetType() != LevelPiece::Tesla &&
-        rightNeighbor->GetType() != LevelPiece::AlwaysDrop && rightNeighbor->GetType() != LevelPiece::Regen));
+        (rightNeighbor->GetType() != LevelPiece::Solid && 
+         rightNeighbor->GetType() != LevelPiece::Breakable &&
+         rightNeighbor->GetType() != LevelPiece::Bomb && 
+         rightNeighbor->GetType() != LevelPiece::Tesla &&
+         rightNeighbor->GetType() != LevelPiece::AlwaysDrop && 
+         rightNeighbor->GetType() != LevelPiece::Regen));
 
     if (shouldGenBounds) {
-	    Collision::LineSeg2D l3(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
-							     this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
-	    Vector2D n3(1, 0);
-	    boundingLines.push_back(l3);
-	    boundingNorms.push_back(n3);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
+            this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
+	    boundingNorms[lineCount] = Vector2D(1, 0);
+        lineCount++;
 	}
 
 	// Top boundary of the piece
     shouldGenBounds = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-        (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable &&
-        topNeighbor->GetType() != LevelPiece::Bomb && topNeighbor->GetType() != LevelPiece::Tesla &&
-        topNeighbor->GetType() != LevelPiece::AlwaysDrop && topNeighbor->GetType() != LevelPiece::Regen));
+        (topNeighbor->GetType() != LevelPiece::Solid && 
+         topNeighbor->GetType() != LevelPiece::Breakable &&
+         topNeighbor->GetType() != LevelPiece::Bomb && 
+         topNeighbor->GetType() != LevelPiece::Tesla &&
+         topNeighbor->GetType() != LevelPiece::AlwaysDrop && 
+         topNeighbor->GetType() != LevelPiece::Regen));
+
     if (shouldGenBounds) {
-	    Collision::LineSeg2D l4(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND),
-							     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
-	    Vector2D n4(0, 1);
-	    boundingLines.push_back(l4);
-	    boundingNorms.push_back(n4);
+        boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND),
+            this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
+	    boundingNorms[lineCount] = Vector2D(0, 1);
+        lineCount++;
 	}
 
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+	this->SetBounds(BoundingLines(lineCount, boundingLines, boundingNorms), 
+        leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 

@@ -29,6 +29,19 @@ lines(lines), normals(norms), onInside(onInside) {
     assert(lines.size() == onInside.size());
 }
 
+BoundingLines::BoundingLines(int numLines, const Collision::LineSeg2D lineArray[], 
+                             const Vector2D normArray[], const bool onInsideArray[]) :
+lines(lineArray, lineArray + numLines), 
+normals(normArray, normArray + numLines), 
+onInside(onInsideArray, onInsideArray + numLines) {
+}
+
+BoundingLines::BoundingLines(int numLines, const Collision::LineSeg2D lineArray[], const Vector2D normArray[]) :
+lines(lineArray, lineArray + numLines), 
+normals(normArray, normArray + numLines), 
+onInside(numLines, false) {
+}
+
 BoundingLines::BoundingLines(const Collision::AABB2D& aabb) {
     Point2D aabbTopLeft(aabb.GetMin()[0], aabb.GetMax()[1]);
     Point2D aabbBottomRight(aabb.GetMax()[0], aabb.GetMin()[1]);

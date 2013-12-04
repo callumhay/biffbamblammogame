@@ -46,9 +46,9 @@ LevelPiece* PrismBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
 }
 
 /**
- * Update the boundry lines of the prism block. The prism block is shaped like a diamond, meaning
+ * Update the boundary lines of the prism block. The prism block is shaped like a diamond, meaning
  * we care about its corner neighbors as well. If any of the 3 neighbors making up a full corner and
- * its two sides are eliminated, we need to form a boundry.
+ * its two sides are eliminated, we need to form a boundary.
  */
 void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
                               const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
@@ -65,7 +65,7 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
     bool shouldGenBounds = false;
 
-    // Bottom-left diagonal boundry
+    // Bottom-left diagonal boundary
     if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
         (bottomLeftNeighbor != NULL && bottomLeftNeighbor->IsNoBoundsPieceType()) ||
         (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
@@ -76,12 +76,12 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-        Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
+        Collision::LineSeg2D boundary(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
             this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
         Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
         n1.Normalize();
 
-        boundingLines.push_back(boundry);
+        boundingLines.push_back(boundary);
         boundingNorms.push_back(n1);
         onInside.push_back(
             ((leftNeighbor == NULL || !leftNeighbor->IsNoBoundsPieceType()) && (bottomNeighbor == NULL || !bottomNeighbor->IsNoBoundsPieceType())) ||
@@ -92,7 +92,7 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         shouldGenBounds = false;
     }
     
-    // Bottom-right diagonal boundry
+    // Bottom-right diagonal boundary
     if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
         (bottomRightNeighbor != NULL && bottomRightNeighbor->IsNoBoundsPieceType()) ||
         (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
@@ -103,12 +103,12 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-        Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
+        Collision::LineSeg2D boundary(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
             this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
         Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
         n1.Normalize();
 
-        boundingLines.push_back(boundry);
+        boundingLines.push_back(boundary);
         boundingNorms.push_back(n1);
         onInside.push_back(
             ((rightNeighbor == NULL || !rightNeighbor->IsNoBoundsPieceType()) && (bottomNeighbor == NULL || !bottomNeighbor->IsNoBoundsPieceType())) ||
@@ -119,7 +119,7 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         shouldGenBounds = false;
     }
     
-    // Top-left diagonal boundry
+    // Top-left diagonal boundary
     if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
         (topLeftNeighbor != NULL && topLeftNeighbor->IsNoBoundsPieceType()) ||
         (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
@@ -130,12 +130,12 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-        Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
+        Collision::LineSeg2D boundary(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
             this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
         Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
         n1.Normalize();
 
-        boundingLines.push_back(boundry);
+        boundingLines.push_back(boundary);
         boundingNorms.push_back(n1);
         onInside.push_back(
             ((leftNeighbor == NULL || !leftNeighbor->IsNoBoundsPieceType()) && (topNeighbor == NULL || !topNeighbor->IsNoBoundsPieceType())) ||
@@ -146,7 +146,7 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         shouldGenBounds = false;
     }
 
-    // Top-right diagonal boundry
+    // Top-right diagonal boundary
     if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
         (topRightNeighbor != NULL && topRightNeighbor->IsNoBoundsPieceType()) ||
         (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
@@ -157,12 +157,12 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
         shouldGenBounds = true;
     }
     if (shouldGenBounds) {
-        Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
+        Collision::LineSeg2D boundary(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
             this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
         Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
         n1.Normalize();
 
-        boundingLines.push_back(boundry);
+        boundingLines.push_back(boundary);
         boundingNorms.push_back(n1);
         onInside.push_back(
             ((rightNeighbor == NULL || !rightNeighbor->IsNoBoundsPieceType()) && (topNeighbor == NULL      || !topNeighbor->IsNoBoundsPieceType())) ||
@@ -326,7 +326,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			}
 		}
 		else if (OLD_PROJECTILE_DELTA[1] <= EPSILON) {
-			// Ray is colliding with the lower-left boundry...
+			// Ray is colliding with the lower-left boundary...
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
@@ -339,7 +339,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			}
 		}
 		else {
-			// Ray is colliding with the upper-left boundry...
+			// Ray is colliding with the upper-left boundary...
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
@@ -370,7 +370,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			}
 		}
 		else if (OLD_PROJECTILE_DELTA[1] <= EPSILON) {
-			// Ray is colliding with the lower-right boundry...
+			// Ray is colliding with the lower-right boundary...
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
@@ -383,7 +383,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			}
 		}
 		else {
-			// Ray is colliding with the upper-right boundry...
+			// Ray is colliding with the upper-right boundary...
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;

@@ -39,7 +39,7 @@ numExpectedUpdates(0), numCallsToUpdate(0), starryBG(NULL) {
 	this->itemLoadingLabel.SetDropShadow(Colour(0,0,0), 0.05);
 
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD_BG, Texture::Trilinear));
     assert(this->starryBG != NULL);
 
 	// Load the absurd descriptions...

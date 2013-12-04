@@ -149,4 +149,14 @@ inline const GameItem::ItemDisposition& AlwaysDropBlock::GetNextDropItemDisposit
 	return this->nextDropDisposition;
 }
 
+inline void AlwaysDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                          const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                          const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                          const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+    LevelPiece::UpdateBreakableBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+}
+
+
 #endif // __ALWAYSDROPBLOCK_H__

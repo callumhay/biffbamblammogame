@@ -106,4 +106,13 @@ inline bool SolidBlock::StatusTick(double dT, GameModel* gameModel, int32_t& rem
 	return false;
 }
 
+inline void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                     const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                     const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                     const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+    LevelPiece::UpdateSolidRectBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+}
+
 #endif

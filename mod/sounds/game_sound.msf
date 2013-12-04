@@ -737,6 +737,10 @@ LevelSummaryPointTallyLoop {
 	file = resources/LevelSummaryPointTallyLoop.ogg
 }
 
+LevelSummaryPointTallySkipEvent {
+	file = resources/LevelSummaryPointTallySkipEvent.ogg
+}
+
 LevelSummaryStarTallyEvent {
 	file = resources/LevelSummaryStarTallyEvent.ogg
 }

@@ -147,7 +147,7 @@ void PlayerPaddle::RegenerateBounds() {
 		lineBounds.reserve(3);
 		lineNorms.reserve(3);
 
-		// 'Top' (flat) boundry
+		// 'Top' (flat) boundary
 		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthFlat, -this->currHalfHeight));
 		Vector2D n1(0, 1);
 		lineBounds.push_back(l1);
@@ -168,7 +168,7 @@ void PlayerPaddle::RegenerateBounds() {
 		lineBounds.reserve(4);
 		lineNorms.reserve(4);
 
-		// Top boundry
+		// Top boundary
 		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
 		Vector2D n1(0, 1);
 		lineBounds.push_back(l1);
@@ -185,7 +185,7 @@ void PlayerPaddle::RegenerateBounds() {
 		lineBounds.push_back(sideLine2);
 		lineNorms.push_back(sideNormal2);
 
-		// Bottom boundry
+		// Bottom boundary
 		Collision::LineSeg2D bottomLine(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
 		Vector2D bottomNormal(0, -1);
 		lineBounds.push_back(bottomLine);

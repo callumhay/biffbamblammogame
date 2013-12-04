@@ -22,12 +22,12 @@
 
 const char* CgFxSkybox::SKYBOX_TECHNIQUE_NAME = "Skybox";
 
-CgFxSkybox::CgFxSkybox(Texture *skyTex) :
-CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_SKYBOX_SHADER), skyTex(skyTex),
-timer(0.0f), twinkleFreq(0.01f), moveFreq(0.0055f), noiseScale(0.005f), fgScale(0.5f), alpha(1.0f),
-noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), uvTranslation(0,0) {
+CgFxSkybox::CgFxSkybox(Texture* fgSkyTex, Texture *bgSkyTex) :
+CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_SKYBOX_SHADER), fgSkyTex(fgSkyTex), bgSkyTex(bgSkyTex),
+timer(0.0f), twinkleFreq(0.01f), moveFreq(0.0055f), noiseScale(0.005f), fgScale(1.0f), alpha(1.0f), uvTranslation(0,0) {
 
-	assert(skyTex != NULL);
+    assert(fgSkyTex != NULL);
+	assert(bgSkyTex != NULL);
 
 	// Set the technique
 	this->currTechnique = this->techniques[SKYBOX_TECHNIQUE_NAME];
@@ -37,8 +37,8 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), uvTransla
 	this->worldMatrixParam = cgGetNamedEffectParameter(this->cgEffect, "WorldXf");
 
 	// Noise texture sampler param
-	this->noiseSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
-	this->skySamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "SkySampler");
+	this->fgSkySamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "FGSkySampler");
+	this->bgSkySamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "BGSkySampler");
 
 	// Time and frequency parameters
     this->alphaParam       = cgGetNamedEffectParameter(this->cgEffect, "Alpha");
@@ -55,7 +55,10 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), uvTransla
 
 CgFxSkybox::~CgFxSkybox() {
 	// Release the skybox texture
-	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->skyTex);
+	bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->fgSkyTex);
+    UNUSED_VARIABLE(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bgSkyTex);
     UNUSED_VARIABLE(success);
 	assert(success);
 }
@@ -78,8 +81,8 @@ void CgFxSkybox::SetupBeforePasses(const Camera& camera) {
 
     cgGLSetParameter2fv(this->uvTranslateParam, this->uvTranslation.begin());
 
-	// Set noise sampler
-	cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);
-	// Set the sky sampler
-	cgGLSetTextureParameter(this->skySamplerParam, this->skyTex->GetTextureID());
+	// Set the fg sky sampler
+	cgGLSetTextureParameter(this->fgSkySamplerParam, this->fgSkyTex->GetTextureID());
+	// Set the bg sky sampler
+	cgGLSetTextureParameter(this->bgSkySamplerParam, this->bgSkyTex->GetTextureID());
 }

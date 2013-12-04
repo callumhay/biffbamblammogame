@@ -154,7 +154,7 @@ protected:
 	ColourRGBA colour;        // The colour of this level piece
 	Point2D center;           // The exact center of this piece in the game model
 	size_t wIndex, hIndex;    // The width and height index to where this block is in its level
-	BoundingLines bounds;     // The bounding box, rep. as lines forming the boundry of this, kept in world space
+	BoundingLines bounds;     // The bounding box, rep. as lines forming the boundary of this, kept in world space
     
     TriggerID triggerID;
 
@@ -175,6 +175,17 @@ protected:
                    const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
                    const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
                    const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+
+    static void UpdateBreakableBlockBounds(LevelPiece* thePiece,
+        const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+        const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+        const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+        const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+    static void UpdateSolidRectBlockBounds(LevelPiece* thePiece,
+        const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+        const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+        const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+        const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 	int32_t pieceStatus;
 
@@ -326,7 +337,7 @@ inline void LevelPiece::Triggered(GameModel* gameModel) {
     //return false;
 }
 
-// Draws the boundry lines and normals for this level piece.
+// Draws the boundary lines and normals for this level piece.
 inline void LevelPiece::DebugDraw() const {
 	this->bounds.DebugDraw();
 }

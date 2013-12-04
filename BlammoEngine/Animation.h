@@ -80,6 +80,11 @@ public:
     double GetTimeValue() const {
         return this->x;
     }
+    void SetTimeValue(double t) {
+        assert(t >= 0.0);
+        assert(t <= this->GetFinalTime());
+        this->x = t;
+    }
 
 	/**
 	 * Set whether the animation is on repeat or not.

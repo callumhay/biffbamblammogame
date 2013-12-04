@@ -72,7 +72,7 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
 	// Make the bounds a bit smaller than a typical level piece and always make all of them
 
-	// Clear all the currently existing boundry lines first
+	// Clear all the currently existing boundary lines first
 	this->bounds.Clear();
 
 	// Set the bounding lines for a rectangular block
@@ -82,28 +82,28 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	static const float FRACTION_HALF_PIECE_WIDTH  = 0.75f * LevelPiece::HALF_PIECE_WIDTH;
 	static const float FRACTION_HALF_PIECE_HEIGHT = 0.75f * LevelPiece::HALF_PIECE_HEIGHT;
 
-	// Left boundry of the piece
+	// Left boundary of the piece
 	Collision::LineSeg2D l1(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT), 
 							 this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
 	Vector2D n1(-1, 0);
 	boundingLines.push_back(l1);
 	boundingNorms.push_back(n1);
 
-	// Bottom boundry of the piece
+	// Bottom boundary of the piece
 	Collision::LineSeg2D l2(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
 							 this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
 	Vector2D n2(0, -1);
 	boundingLines.push_back(l2);
 	boundingNorms.push_back(n2);
 
-	// Right boundry of the piece
+	// Right boundary of the piece
 	Collision::LineSeg2D l3(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
 							 this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
 	Vector2D n3(1, 0);
 	boundingLines.push_back(l3);
 	boundingNorms.push_back(n3);
 
-	// Top boundry of the piece
+	// Top boundary of the piece
 	Collision::LineSeg2D l4(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT),
 							 this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
 	Vector2D n4(0, 1);
