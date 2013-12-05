@@ -968,7 +968,9 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
         }
     }
     else {
-        // Play the skip sound for the score tally (fast tally)
+        // Play the skip sound for the score tally (fast tally) and stop the background loop of the tally
+        sound->StopSound(this->pointTallySoundID);
+        this->pointTallySoundID = INVALID_SOUND_ID;
         sound->PlaySound(GameSound::LevelSummaryPointTallySkipEvent, false, false);
         this->scoreValueAnimation.SetTimeValue(std::max<double>(this->scoreValueAnimation.GetTimeValue(), this->scoreValueAnimation.GetFinalTime()-0.25));
     }

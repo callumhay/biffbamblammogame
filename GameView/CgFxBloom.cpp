@@ -88,11 +88,11 @@ void CgFxBloom::Draw(int screenWidth, int screenHeight, double dT) {
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);
 
-    // Step 2: Using the gaussian blur effect, blur only the most luminous parts of the scene acquired in step 1
+    // Step 2: Using the Gaussian blur effect, blur only the most luminous parts of the scene acquired in step 1
     this->blurEffect->SetInputFBO(this->bloomFilterFBO);
     this->blurEffect->SetBlurType(CgFxGaussianBlur::Kernel5x5);
     this->blurEffect->SetSigma(10.0f);
-    this->blurEffect->Draw(screenWidth, screenHeight, dT);
+    this->blurEffect->Draw(screenWidth, screenHeight);
 
     // Step 3: Final bloom composition that will combine the original scene with the blurred luminance buffer
     cgGLSetTextureParameter(this->brightBlurSamplerParam, this->bloomFilterFBO->GetFBOTexture()->GetTextureID());

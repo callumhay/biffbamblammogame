@@ -26,9 +26,10 @@ public:
 	~CgFxGaussianBlur();
 
 	void SetPoisonBlurAnimation(bool on);
+    void Tick(double dT);
 
 	void SetBlurType(BlurType type);
-	void Draw(int screenWidth, int screenHeight, double dT);
+	void Draw(int screenWidth, int screenHeight);
 
     void SetSigma(float sigma) { this->sigma = sigma; }
 
@@ -49,5 +50,19 @@ private:
 
     bool isPoisonBlurActive;
 	AnimationMultiLerp<float> poisonBlurAnim;
+
+    void Draw(int, int, double) { assert(false); }
+
+    DISALLOW_COPY_AND_ASSIGN(CgFxGaussianBlur);
 };
+
+inline void CgFxGaussianBlur::Tick(double dT) {
+    // Check for any animations
+    if (this->isPoisonBlurActive) {
+        if (this->poisonBlurAnim.Tick(dT)) {
+            this->isPoisonBlurActive = false;
+        }
+    }
+}
+
 #endif

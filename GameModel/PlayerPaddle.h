@@ -265,6 +265,9 @@ public:
 
 	void UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision);
 
+    const Collision::LineSeg2D& GetBottomCollisionLine() const { return this->bounds.GetLine(3); }
+    const Vector2D& GetBottomCollisionNormal() const { return this->bounds.GetNormal(3); }
+
 	// TODO: Add the parameter: "bool includeAttachedBallCheck" to all paddle collision checks...
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
 	bool CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const;
