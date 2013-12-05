@@ -768,7 +768,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	bangOnoEffect->SetNumParticleLives(1);
 	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangOnoEffect->SetParticleLife(ESPInterval(randomLife));
-	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
+	bangOnoEffect->SetParticleSize(ESPInterval(0.8f), ESPInterval(0.8f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
 	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
@@ -783,9 +783,10 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 		bangOnoEffect->AddEventHandler(this->particleEventHandler);
 
 		// Add the single text particle to the emitter with the severity of the effect...
-		TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+		TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "");
 		bangTextLabel.SetColour(Colour(1, 1, 1));
 		bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+        bangTextLabel.SetScale(0.675f);
 		
 		Onomatoplex::Extremeness randomExtremeness = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::WEAK, Onomatoplex::UBER);
 		bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, randomExtremeness);

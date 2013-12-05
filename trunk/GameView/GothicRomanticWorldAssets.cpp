@@ -51,14 +51,27 @@ moonCloudFader(), cloudGrower(1.0f, 1.15f), moonPos(23.0f, 38.0f, -50.0f) {
 
     this->skybox->SetFGStarMoveSpd(0.001f);
 
-    /*
-    // TODO... 
-    // Change the colours for the background mesh from the default to something more gothic-architectury
+    // Makes sure the colours are dark enough not to saturate/blanche insanely
+    // and that they properly reflect the movement: ominous, moody, washed-out colours
     std::vector<Colour> colours;
-    colours.reserve(?);
+    colours.reserve(15);
+    colours.push_back(Colour(0x604848)); // Murky purple
+    colours.push_back(Colour(0x45424B)); // Dark grey
+    colours.push_back(Colour(0x603034)); // Mulberry-Brownish
+    colours.push_back(Colour(0xCAA9BA)); // Washed-out pinky mauve
+    colours.push_back(Colour(0x4C6366)); // Corpse green
+    colours.push_back(Colour(0x2C667E)); // Deep turquoise
+    colours.push_back(Colour(0x784819)); // Poop-Brownish
+    colours.push_back(Colour(0x849C6D)); // Sickly green
+    colours.push_back(Colour(0x54113A)); // Mulberryish
+    colours.push_back(Colour(0x481816)); // Brownish-purple
+    colours.push_back(Colour(0x304848)); // Murky turqouise
+    colours.push_back(Colour(0x353B5B)); // Shadowy Bluish Purple
+    colours.push_back(Colour(0x745F68)); // MurkyMurky
+    colours.push_back(Colour(0x660C0C)); // Burgundy
+    colours.push_back(Colour(0x850B00)); // Blood
 
     this->UpdateColourChangeList(colours);
-    */
 
     this->InitializeEmitters();
 }

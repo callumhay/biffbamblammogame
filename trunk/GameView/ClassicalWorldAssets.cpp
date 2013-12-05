@@ -43,14 +43,28 @@ fireParticleScaler(1.0f, 0.025f), fireAccel1(Vector3D(1,1,1)), fireAccel2(Vector
     // Change the colours for the background mesh from the default to something a bit more washed out
     // (i.e., more classical-architecture-like)
     std::vector<Colour> colours;
-    colours.reserve(8);
-    colours.push_back(Colour(0.4375f, 0.5f, 0.5647f));             // slate greyish-blue
+    colours.reserve(15);
+
     colours.push_back(Colour(0.2745098f, 0.5098039f, 0.70588f));   // steel blue
-    colours.push_back(Colour(0.51372549f, 0.4352941f, 1.0f));      // slate purple
     colours.push_back(Colour(0.8588235f, 0.439215686f, 0.57647f)); // pale violet
     colours.push_back(Colour(0.3725f, 0.6196078f, 0.62745098f));   // cadet (olive-) blue
+    colours.push_back(Colour(0.4375f, 0.5f, 0.5647f)); // slate greyish-blue
+
     colours.push_back(Colour(0.4f, 0.8039215f, 0.666667f));		   // deep aquamarine
-    colours.push_back(Colour(0.737f, 0.933f, 0.4078f));            // olive
+    
+    colours.push_back(Colour(0x828661)); // Olive
+    
+    colours.push_back(Colour(0x96A09F)); // gray
+    colours.push_back(Colour(0x3F5F91)); // Deep-dark-blue
+    colours.push_back(Colour(0x7EAC9A)); // Washed-out greenishblue
+    colours.push_back(Colour(0xC1B0A0)); // dusty
+    colours.push_back(Colour(0xAFB575)); // Faded-yellow-green
+
+    colours.push_back(Colour(0xD3A888)); // rosy
+    colours.push_back(Colour(0xA8B1BD)); // bluish-grey
+    colours.push_back(Colour(0x6998B0)); // Washed-out blue
+    colours.push_back(Colour(0xC3A136)); // creamy-tan-yellow
+
     this->UpdateColourChangeList(colours);
 
     this->InitializeEmitters();
@@ -92,7 +106,7 @@ void ClassicalWorldAssets::LoadBGLighting(GameAssets* assets) const {
 
 void ClassicalWorldAssets::InitializeEmitters() {
     static const float FIRE_SIZE_MIN = 2.6f;
-    static const float FIRE_SIZE_MAX = 3.5f;
+    static const float FIRE_SIZE_MAX = 3.3f;
     static const float FIRE_LIFE_IN_SECS_MIN = 1.6f;
     static const float FIRE_LIFE_IN_SECS_MAX = 1.8f;
     static const float FIRE_SPAWN_DELTA_MIN = 0.025f;

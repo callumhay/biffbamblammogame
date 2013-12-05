@@ -107,7 +107,7 @@ void KeyboardSDLController::Sync(size_t frameID, double dT) {
 	}
 
     // Other special actions for hold-down keys...
-    if (this->keyPressed[SDLK_SPACE]) {
+    if (this->keyPressed[SDLK_SPACE] || this->keyPressed[SDLK_UP] || this->keyPressed[SDLK_w]) {
         this->model->ShootActionContinuousUse(1.0f);
     }
 
@@ -120,7 +120,7 @@ void KeyboardSDLController::KeyDown(SDLKey key) {
 	this->SetKeyPress(key, true);
 
 	this->ExecuteDisplayKeyPressedNotifications(key);
-	if (key == SDLK_SPACE) {
+	if (key == SDLK_SPACE || key == SDLK_UP || key == SDLK_w) {
 		this->model->ShootActionReleaseUse();
 	}
 
