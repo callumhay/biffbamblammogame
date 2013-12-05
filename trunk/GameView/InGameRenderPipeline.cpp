@@ -140,7 +140,7 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelD
     }
 
     // Blur the background a bit so that it is less in focus than the foreground
-    fboAssets->RenderBlur(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT, tempFBO);
+    fboAssets->RenderBlur(Camera::GetWindowWidth(), Camera::GetWindowHeight(), tempFBO);
 
 	// Draw background effects into the background FBO -- we do this as a separate pass because
     // if we include it in the previous pass, the outlines will show through all the effects (which is not so pretty)
@@ -270,7 +270,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 	FBObj::UnbindFBObj();
 
 	// Do a Gaussian blur for a softer feeling
-	assets->GetFBOAssets()->RenderFullSceneBlur(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
+	assets->GetFBOAssets()->RenderFullSceneBlur(camera.GetWindowWidth(), camera.GetWindowHeight());
 
 	debug_opengl_state();
 

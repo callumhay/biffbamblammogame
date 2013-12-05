@@ -21,7 +21,7 @@ resources/worlds/levels/easy/curve_ball.lvl
 
 # One-way block intro levels
 resources/worlds/levels/easy/one_way_street.lvl
-resources/worlds/levels/easy/side_step.lvl : 21
+resources/worlds/levels/easy/side_step.lvl : 20
 
 
 # Ink block intro levels
@@ -37,7 +37,7 @@ resources/worlds/levels/easy/breaking_barriers.lvl
 
 # Teaching/Encouraging boosting (with collaterals, breakables, and bombs)
 resources/worlds/levels/easy/watch_for_falling_objects.lvl
-resources/worlds/levels/easy/collateral_damage.lvl : 47
+resources/worlds/levels/easy/collateral_damage.lvl : 45
 
 # Collateral + bomb + ink
 resources/worlds/levels/medium/death_from_above.lvl
@@ -54,7 +54,7 @@ resources/worlds/levels/medium/dividing_lines.lvl
 resources/worlds/levels/hard/participatory_impaction.lvl
 
 # Boss
-resources/worlds/levels/bosses/pediment_head.lvl : 75
+resources/worlds/levels/bosses/pediment_head.lvl : 70
 
 # END OF MOVEMENT ---------------------------------------
 

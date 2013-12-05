@@ -221,6 +221,8 @@ void GameFBOAssets::DeactivateItemEffects(const GameItem& item) {
  */
 void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double dT, const GameModel& gameModel) {
 	
+    this->blurEffect->Tick(dT);
+
 	// Use these to ping-pong our final fullscreen effect shader passes
 	FBObj* inputFBO		= this->finalFSEffectFBO;
 	FBObj* outputFBO	= this->tempFBO;

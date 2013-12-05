@@ -79,17 +79,13 @@ void CgFxGaussianBlur::SetBlurType(BlurType type) {
  * the same technique. Note that the extra parameter is used to add an extra
  * blur effect - kind of like being drunk, if needed.
  */
-void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
+void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight) {
 	
 	float revisedWidth  = screenWidth;
 	float revisedHeight = screenHeight;
-	
-	// Check for any animations
+
     if (this->isPoisonBlurActive) {
         revisedWidth = this->poisonBlurAnim.GetInterpolantValue();
-        if (this->poisonBlurAnim.Tick(dT)) {
-            this->isPoisonBlurActive = false;
-        }
     }
 
 	// Step 0: Establish uniform parameter(s)

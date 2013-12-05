@@ -1654,10 +1654,11 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
              }
              else {
                  // Ball is traveling downwards/parallel at the paddle
-                 Collision::LineSeg2D bottomLine = this->bounds.GetLine(3);
-                 Vector2D bottomNormal = this->bounds.GetNormal(3);
+                 const Collision::LineSeg2D& bottomLine = this->GetBottomCollisionLine();
+                 const Vector2D& bottomNormal = this->GetBottomCollisionNormal();
                  this->bounds.PopLast();
-                 bool wasCollision = this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+                 bool wasCollision = this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
+                     collisionLine, timeUntilCollision, this->GetVelocity());
                  this->bounds.Push(bottomLine, bottomNormal);
                  return wasCollision;
              }

@@ -376,6 +376,8 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
     }
 
 	// Clear beam emitters
+    this->activeBeamEmitters.clear();
+
 #define BEAM_EMITTER_MAP_DELETE(mapVar) \
     for (BeamSegEmitterMapIter iter1 = mapVar.begin(); iter1 != mapVar.end(); ++iter1) { \
         std::vector<ESPPointEmitter*>& emitters = iter1->second; \
@@ -3954,7 +3956,9 @@ void GameESPAssets::UpdateBeamEffect(const Beam& beam) {
 void GameESPAssets::RemoveBeamEffect(const Beam& beam, bool removeCachedEffects) {
     // Remove from the active beam emitters...
     {
-	    std::map<const Beam*, std::list<ESPEmitter*> >::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
+	    std::map<const Beam*, std::list<ESPEmitter*> >::iterator foundBeamIter = 
+            this->activeBeamEmitters.find(&beam);
+
 	    if (foundBeamIter != this->activeBeamEmitters.end()) {
 		    this->activeBeamEmitters.erase(foundBeamIter);
 	    }

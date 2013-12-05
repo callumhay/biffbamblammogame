@@ -340,12 +340,17 @@ void BallInPlayState::Tick(double seconds) {
 				    // If the sticky paddle power-up is activated then the ball will simply be attached to
 				    // the player paddle (if there are no balls already attached) ... unless the paddle has a shield active as well
 				    if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle) && !paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
-					    bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
-					    if (couldAttach) {
-                            // Reset the multiplier
-                            this->gameModel->SetNumInterimBlocksDestroyed(0);
-						    continue;
-					    }
+                        
+                        // Check to see what collision line on the paddle the ball collided with, if it's the undercarriage then we
+                        // will not allow the ball to stick to the paddle
+                        if (paddle->GetBottomCollisionNormal() != n) {
+					        bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
+					        if (couldAttach) {
+                                // Reset the multiplier
+                                this->gameModel->SetNumInterimBlocksDestroyed(0);
+						        continue;
+					        }
+                        }
 				    }
 
 				    // Do ball-paddle collision
