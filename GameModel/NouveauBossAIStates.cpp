@@ -1125,7 +1125,7 @@ void SideSphereAI::SetState(NouveauBossAI::AIState newState) {
             this->angryMoveAnim.ResetToStart();
 
             // EVENT: Boss is angry! Rawr.
-            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetBody());
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetTopSphere());
             break;
 
         default:
@@ -1535,7 +1535,7 @@ void GlassDomeAI::SetState(NouveauBossAI::AIState newState) {
             sound->PlaySound(GameSound::BossBackgroundLoopTransitionSingleHitEvent, false, false);
 
             // EVENT: Boss is angry! Rawr.
-            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetBody());
+            GameEventManager::Instance()->ActionBossAngry(this->boss, this->boss->GetTopSphere());
             break;
         }
 

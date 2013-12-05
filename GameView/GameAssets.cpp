@@ -37,6 +37,7 @@
 #include "OmniLaserBallEffect.h"
 #include "MagnetPaddleEffect.h"
 #include "MineMeshManager.h"
+#include "PaddleMineLauncher.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
@@ -185,8 +186,6 @@ GameAssets::~GameAssets() {
 	bool success = false;
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleBeamAttachment);
 	assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleMineAttachment);
-    assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->ball);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->spikeyBall);
@@ -204,6 +203,9 @@ GameAssets::~GameAssets() {
 	this->paddleStickyAttachment = NULL;
 	delete this->paddleShield;
 	this->paddleShield = NULL;
+
+    delete this->paddleMineAttachment;
+    this->paddleMineAttachment = NULL;
 
     delete this->ballSafetyNet;
     this->ballSafetyNet = NULL;
@@ -715,7 +717,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
         if (p.HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
             this->mineMeshMgr->DrawLoadingMine(dT, p, camera, paddleKeyLight, paddleFillLight, ballLight,
                 this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
-			this->paddleMineAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
+			this->paddleMineAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
 
         glPopMatrix();
@@ -733,12 +735,14 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
 	// Do nothing if we are in paddle camera mode
+    // NOTE: IF YOU CHANGE THIS THEN RE-EXAMINE ALL THE CALLS AFTER IT, BECAUSE THEY RELY
+    // ON THE PADDLE CAMERA NOT BEING ON!!!
 	if (paddle->GetIsPaddleCameraOn() || paddle->GetAlpha() <= 0.0f) {
 		return;
 	}
 	
 	const Point2D& paddleCenter = paddle->GetCenterPosition();
-	float paddleScaleFactor = paddle->GetPaddleScaleFactor();
+	float paddleScaleFactor     = paddle->GetPaddleScaleFactor();
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
 
 	glPushAttrib(GL_CURRENT_BIT);
@@ -746,17 +750,15 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
 
-	if (!paddle->GetIsPaddleCameraOn()) {
-		// Draw the shield around the paddle (if it's currently activated)
-        this->paddleShield->SetAlpha(paddle->GetAlpha());
-		this->paddleShield->DrawAndTick(*paddle, camera, dT);
-	}
+	// Draw the shield around the paddle (if it's currently activated)
+    this->paddleShield->SetAlpha(paddle->GetAlpha());
+	this->paddleShield->DrawAndTick(*paddle, camera, dT);
 
 	// When the paddle has the 'sticky' power-up we attach sticky goo to its top
 	if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
 
 		// Set the texture for the refraction in the goo - be careful here, we can't get
-		// the 'post full scene' fbo because we are currently in the middle of drawing to it
+		// the 'post full scene' FBO because we are currently in the middle of drawing to it
 		this->paddleStickyAttachment->SetSceneTexture(sceneFBO->GetFBOTexture());
 
 		// In the case where the paddle laser beam is also active then the beam will refract through the goo,
@@ -777,7 +779,9 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	}
 
 	// In order to draw the laser glow effect make sure there isn't a rocket sitting on the paddle
-	if (paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle) && !paddle->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+	if (paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle) && 
+        !paddle->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+
 		// Draw glow-y effects where the laser originates...
 		this->espAssets->DrawPaddleLaserBulletEffects(dT, camera, *paddle);
 	}
@@ -1245,7 +1249,7 @@ void GameAssets::LoadRegularMeshAssets() {
 		this->paddleBeamAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_BEAM_ATTACHMENT_MESH);
 	}
     if (this->paddleMineAttachment == NULL) {
-        this->paddleMineAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_MINE_ATTACHMENT_MESH);
+        this->paddleMineAttachment = new PaddleMineLauncher();
     }
 	if (this->paddleLaserAttachment == NULL) {
 		this->paddleLaserAttachment = new LaserPaddleGun();
@@ -1398,6 +1402,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             // Notify the mine manager...
             const MineProjectile* mine = static_cast<const MineProjectile*>(&projectile);
             this->mineMeshMgr->AddMineProjectile(mine);
+            this->paddleMineAttachment->FireMine();
             break;
         }
             
@@ -1890,6 +1895,10 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
             this->sound->PlaySound(GameSound::BallOrPaddleShrinkEvent, false);
             break;
 
+        case GameItem::MineLauncherPaddleItem:
+            this->paddleMineAttachment->Activate();
+            break;
+
 		default:
 			break;
 	}
@@ -1964,6 +1973,10 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 
         case GameItem::MagnetPaddleItem:
             this->sound->DetachAndStopSound(gameModel.GetPlayerPaddle(), GameSound::MagnetPaddleLoop);
+            break;
+
+        case GameItem::MineLauncherPaddleItem:
+            this->paddleMineAttachment->Deactivate();
             break;
 
 		default:

@@ -15,10 +15,10 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Mesh.h"
 
-#include "../GameModel/PlayerPaddle.h"
+class PlayerPaddle;
 
 class PaddleMineLauncher {
-
+public:
     PaddleMineLauncher();
     ~PaddleMineLauncher();
 
@@ -27,28 +27,26 @@ class PaddleMineLauncher {
 	 * animating the attachment and setting the appropriate transformations.
 	 */
 	inline void Draw(double dT, const PlayerPaddle& p, const Camera& camera, CgFxEffectBase* replacementMat,
-                     const BasicPointLight& keyLight, const BasicPointLight& fillLight) {
+                     const BasicPointLight& paddleKeyLight, const BasicPointLight& paddleFillLight, 
+                     const BasicPointLight& ballLight) {
 
-		float paddleScaleFactor = p.GetPaddleScaleFactor();
-		this->loadingMineAnim.Tick(dT);
-
-        glPushMatrix();
-        
-        glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-		this->paddleMineAttachmentMesh->Draw(camera, replacementMat, keyLight, fillLight);
-
-        glTranslatef(0, 0, this->loadingMineAnim.GetInterpolantValue());	// Animate the mine, moving up into a firing position
-		this->paddleMineAttachmentMesh->Draw(camera, replacementMat, keyLight, fillLight);
-
-		glPopMatrix();
+        this->paddleMineAttachment->Draw(camera, replacementMat, paddleKeyLight, paddleFillLight, ballLight);
+        this->DrawEffects(dT, p);
 	}
 
+    void Activate();
+    void Deactivate();
+    
 	void FireMine();
 
 private:
-	Mesh* paddleMineAttachmentMesh;
-    Mesh* mineMesh;
-	AnimationMultiLerp<float> loadingMineAnim;
+    bool isActive;
+	Mesh* paddleMineAttachment; // Mine launcher attachment mesh for paddle
+
+    AnimationMultiLerp<float> flickerAnim;
+    AnimationMultiLerp<float> pulseAlphaAnim;
+    
+    void DrawEffects(double dT, const PlayerPaddle& paddle);
 
     DISALLOW_COPY_AND_ASSIGN(PaddleMineLauncher);
 };

@@ -65,6 +65,7 @@ class MineMeshManager;
 class FullscreenFlashEffectInfo;
 class GameESPAssets;
 class GameFBOAssets;
+class PaddleMineLauncher;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -233,7 +234,7 @@ private:
     MineMeshManager* mineMeshMgr;               // A manager for the mines that can be fired from the paddle
 
 	Mesh* paddleBeamAttachment;                 // Laser beam attachment for paddle
-    Mesh* paddleMineAttachment;                 // Mine launcher attachment for paddle
+    PaddleMineLauncher* paddleMineAttachment;   // Mine launcher attachment for paddle
 	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 	PaddleShield* paddleShield;                 // Refractive glowy shield for the paddle
@@ -243,7 +244,7 @@ private:
 
 	RandomToItemAnimation randomToItemAnimation;
 
-	// Special effects - persistant special effects in the game
+	// Special effects - persistent special effects in the game
 	CgFxPostRefract* invisibleEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
 	CgFxFireBallEffect* fireBallEffect;
@@ -263,7 +264,7 @@ private:
     // Private draw functions
     void DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera);
     void DrawGameBallsBoostPostEffects(double dT, GameModel& gameModel, const Camera& camera);
-
+    
     void DrawRandomToItemAnimation(const Camera& camera, double dT, const GameModel& gameModel);
     void DrawSkipDeathAnimation(const Camera& camera, double dT);
 

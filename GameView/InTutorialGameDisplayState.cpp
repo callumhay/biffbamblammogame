@@ -225,8 +225,31 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     
     // Tutorial hint for firing the ball
     ButtonTutorialHint* shootBallHint = new ButtonTutorialHint(tutorialAssets, "Shoot Ball");
-    shootBallHint->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
-    shootBallHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    
+    keyboardButtonTypes.clear();
+    keyboardButtonTypes.push_back(GameViewConstants::KeyboardSpaceBar);
+    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
+    buttonTexts.clear();
+    buttonTexts.push_back("Space");
+    buttonTexts.push_back("W");
+    
+    shootBallHint->SetKeyboardButtons(keyboardButtonTypes, buttonTexts); //GameViewConstants::KeyboardSpaceBar, "Space");
+
+    xboxButtonTypes.clear();
+    xboxButtonTypes.push_back(GameViewConstants::XBoxPushButton);
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    buttonTexts.clear();
+    buttonTexts.push_back("A");
+    buttonTexts.push_back("RT");
+    buttonTexts.push_back("LT");
+    buttonColours.clear();
+    buttonColours.push_back(GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+    buttonColours.push_back(Colour(1,1,1));
+    buttonColours.push_back(Colour(1,1,1));
+
+    shootBallHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours); //GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+    
     shootBallHint->SetTopLeftCorner((Camera::GetWindowWidth() - shootBallHint->GetWidth()) / 2.0f, shootBallHint->GetHeight() + 150.0f);
     shootBallHint->SetListener(new HintListener(this));
     
