@@ -81,8 +81,8 @@ std::vector<std::string> ConfigOptions::GetDifficultyItems() {
 std::vector<std::string> ConfigOptions::GetBallBoostModeItems() {
     std::vector<std::string> boostModeItems;
     boostModeItems.reserve(2);
-    boostModeItems.push_back("Slingshot");
-    boostModeItems.push_back("Press-to-release");
+    boostModeItems.push_back("Slingshot (auto)");
+    boostModeItems.push_back("Press-to-release (manual)");
     return boostModeItems;
 }
 
