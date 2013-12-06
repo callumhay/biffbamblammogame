@@ -203,112 +203,107 @@ Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {
 }
 
 /**
- * Test collision between the bounding lines of this and the given circle c.
+ * Test collision between the bounding lines of this and the given circle.
  * Return: The average normal for the lines that the given circle collided with in the value n. 
  * Also returns the distance from the center of the circle to the line (negative d means the circle is
  * inside the line, positive means outside - the outward normal pointing direction).
  * The boolean return value will be true if one or more collisions occurred, false otherwise.
  */
-bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const Vector2D& velocity, Vector2D& n, 
 							Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeUntilCollision) const {
 
-    assert(c.Radius() > 0);
-
-    Vector2D sampleIncDist(0,0);
-    double sampleIncTime = 0.0;
-    int numCollisionSamples;
-
-    bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
+    assert(circle.Radius() > 0);
     
-    if (zeroVelocity) {
-        numCollisionSamples = 1;
+    Collision::LineSeg2D circleVelLine(circle.Center(), circle.Center() + dT * velocity);
+    const float sqrRadius = circle.Radius() * circle.Radius();
+
+    float velocityMag  = velocity.Magnitude();
+    Vector2D nVelocity(0,0);
+    bool zeroVelocity = false;
+    if (velocityMag > EPSILON) {
+        nVelocity = velocity / velocityMag;
     }
     else {
-        // Calculate the number of samples required
-        numCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
-        numCollisionSamples = std::min<int>(40, std::max<int>(2, numCollisionSamples + 1));
-
-        // Figure out the distance along the vector traveled since the last collision
-        // to take each sample at...
-        sampleIncDist = dT * velocity / static_cast<double>(numCollisionSamples-1);
-        sampleIncTime = dT / static_cast<double>(numCollisionSamples-1);
+        zeroVelocity = true;
     }
-
-    Point2D currSamplePt = c.Center();
-    double currTimeUntilCollision = 0.0;
-
-    // Keep track of all the indices collided with and the collision point collided at
     
+    Point2D point1, point2, pointC, a, b, c, d;
+    Vector2D point1Vec, bVec, cVec, dVec;
+    bool collisionIsPossible = false;
+
     std::vector<size_t> collisionLineIdxs;
     collisionLineIdxs.reserve(this->GetNumLines());
     std::vector<Point2D> closestPts;
     closestPts.reserve(this->GetNumLines());
     
-    Point2D collisionPt;
     bool isCollision = false;
+    timeUntilCollision = dT;
 
-    // Go through all of the samples starting with the first (which is just a bit off from the previous
-    // tick location) and moving towards the circle's current location, when a collision is found we exit
-    if (zeroVelocity) {
-        for (int lineIdx = 0; lineIdx < static_cast<int>(this->lines.size()); ++lineIdx) {
-            bool tempIsCollision = Collision::GetCollisionPoint(Collision::Circle2D(currSamplePt, c.Radius()), 
-                this->lines[lineIdx], collisionPt);
-            if (tempIsCollision) {
-                collisionLineIdxs.push_back(lineIdx);
-                closestPts.push_back(Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]));
-                isCollision = true;
-            }
+    // Solution for moving circle to static-line collision, found here:
+    // http://ericleong.me/research/circle-line
+    for (int lineIdx = 0; lineIdx < static_cast<int>(this->lines.size()); ++lineIdx) {
+        
+        const Collision::LineSeg2D& currBoundsLine = this->lines[lineIdx];
+        
+        // Start by finding the closest point on the bounds line to the center of the circle...
+        Collision::ClosestPoint(circle.Center(), currBoundsLine, point1);
+        point1Vec = circle.Center() - point1;
+        if (point1Vec.SqrMagnitude() <= sqrRadius) {
+            // The circle is already colliding with the current bounding line...
+            
+            collisionLineIdxs.push_back(lineIdx);
+            closestPts.push_back(point1);
+            timeUntilCollision = 0.0;
+            isCollision = true;
+
+            continue;
         }
-    }
-    else {
-        bool onlyInsideCollisions = true;
-        bool outsideEliminated = false;
+        
+        collisionIsPossible = false;
+        if (Collision::GetCollisionPoint(currBoundsLine, circleVelLine, a)) {
+            // The velocity line intersects the bounding line...
+            collisionIsPossible = true;
+        }
+        else {
+            // The velocity line doesn't intersect, but a collision can still happen...
+            Collision::ClosestPoint(circleVelLine.P2(), currBoundsLine, b);
+            bVec = (circleVelLine.P2() - b);
+            if (bVec.SqrMagnitude() <= sqrRadius) {
+                collisionIsPossible = true;
+            }
+            else {
 
-        std::vector<int> outsideEliminatedIndices;
-        std::vector<Point2D> outsideEliminatedClosestPts;
-        outsideEliminatedIndices.reserve(this->lines.size());
-        outsideEliminatedClosestPts.reserve(this->lines.size());
+                Collision::ClosestPoint(currBoundsLine.P1(), circleVelLine, c);
+                cVec = (currBoundsLine.P1() - c);
+                if (cVec.SqrMagnitude() <= sqrRadius) {
+                    collisionIsPossible = true;
+                }
+                else {
 
-        for (int i = 0; i < numCollisionSamples; i++) {
-            for (int lineIdx = 0; lineIdx < static_cast<int>(this->lines.size()); ++lineIdx) {
-
-                bool tempIsCollision = Collision::GetCollisionPoint(Collision::Circle2D(currSamplePt, c.Radius()), 
-                                                                    this->lines[lineIdx], collisionPt);
-                if (tempIsCollision) {
-
-                    // If the velocity is not heading towards the normal within some reasonable capacity then we don't allow for a collision
-                    if (Vector2D::Dot(velocity, this->normals[lineIdx]) > 0) {
-                        if (!this->onInside[lineIdx] && !outsideEliminated) {
-                            Point2D closestPt = Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]);
-                            outsideEliminatedIndices.push_back(lineIdx);
-                            outsideEliminatedClosestPts.push_back(closestPt);
-                        }
-                        continue;
+                    Collision::ClosestPoint(currBoundsLine.P2(), circleVelLine, d);
+                    dVec = (currBoundsLine.P2() - d);
+                    if (dVec.SqrMagnitude() <= sqrRadius) {
+                        collisionIsPossible = true;
                     }
-
-                    Point2D closestPt = Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]);
-                    collisionLineIdxs.push_back(lineIdx);
-                    closestPts.push_back(closestPt);
-                    isCollision = true;
-                    onlyInsideCollisions &= this->onInside[lineIdx];
                 }
             }
-
-            if (!outsideEliminatedIndices.empty()) {
-                outsideEliminated = true;
-            }
-
-            if (isCollision) { break; }
-
-            currSamplePt = currSamplePt + sampleIncDist;
-            currTimeUntilCollision += sampleIncTime;
         }
 
-        // If the only lines found to be colliding are inside lines and any outside lines were 
-        // eliminated then we add the outside lines back...
-        if (isCollision && onlyInsideCollisions) {
-            collisionLineIdxs.insert(collisionLineIdxs.end(), outsideEliminatedIndices.begin(), outsideEliminatedIndices.end());
-            closestPts.insert(closestPts.end(), outsideEliminatedClosestPts.begin(), outsideEliminatedClosestPts.end());
+        if (collisionIsPossible) {
+            // Do some more calculation to figure out the point of intersection...
+            
+            point2 = a - (circle.Radius() * (((a - circle.Center()).Magnitude()) / (point1 - circle.Center()).Magnitude()) * (nVelocity / velocityMag));
+            // point2 is the position of the circle at collision
+            Collision::ClosestPoint(point2, currBoundsLine, pointC);
+            // pointC is the contact point on the line at collision
+
+            double currTimeUntilCollision = (circle.Center() - point2).Magnitude() / velocityMag;
+
+            collisionLineIdxs.push_back(lineIdx);
+            closestPts.push_back(pointC);
+            isCollision = true;
+
+            timeUntilCollision = std::min<double>(timeUntilCollision, currTimeUntilCollision);
         }
     }
 
@@ -317,8 +312,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     }
 
     assert(!collisionLineIdxs.empty());
-    assert((currTimeUntilCollision - dT) <= EPSILON);
-    timeUntilCollision = currTimeUntilCollision;
+    assert((timeUntilCollision - dT) <= EPSILON);
 
     if (zeroVelocity || collisionLineIdxs.size() == 1) {
         n = this->normals[collisionLineIdxs.front()];
@@ -326,6 +320,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         collisionLineIdx = collisionLineIdxs.front();
     }
     else {
+        Point2D currSamplePt = circle.Center() + timeUntilCollision * velocity;
+
         // We need to figure out which line got hit first
         float smallestInsideDist  = FLT_MAX;
         int insideIdx = -1;
@@ -344,7 +340,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         if (hasInside) {
 
             for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
-                
+
                 int lineIdx = collisionLineIdxs[i];
                 const Collision::LineSeg2D& currLine = this->lines[lineIdx];
                 const Vector2D& currNormal = this->normals[lineIdx];
@@ -367,24 +363,23 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
             }
         }
         else {
-            Vector2D velocityDir = Vector2D::Normalize(velocity);
             for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
-                
+
                 int lineIdx = collisionLineIdxs[i];
                 const Point2D& closestPt = closestPts[i];
                 float sqrDist = Point2D::SqDistance(currSamplePt, closestPt);
-            
+
                 assert(!this->onInside[lineIdx]);
                 if (sqrDist < smallestOutsideDist) {
-                    
+
                     if (fabs(sqrDist - smallestOutsideDist) <= EPSILON && outsideIdx >= 0) {
                         // Really close call... choose the normal that is closest to the opposite of the ball's velocity
                         const Vector2D& currNormal  = this->normals[lineIdx];
                         const Vector2D& otherNormal = this->normals[outsideIdx];
-                        
-                        if (acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(velocityDir, currNormal)))) >
-                            acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(velocityDir, otherNormal))))) {
-                            
+
+                        if (acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(nVelocity, currNormal)))) >
+                            acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(nVelocity, otherNormal))))) {
+
                             smallestOutsideDist = sqrDist;
                             outsideIdx = lineIdx;
                         }
@@ -397,7 +392,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
             }
         }
 
-        #define DO_ASSIGNMENT(idx) n = this->normals[idx]; collisionLine = this->lines[idx]; collisionLineIdx = idx;
+#define DO_ASSIGNMENT(idx) n = this->normals[idx]; collisionLine = this->lines[idx]; collisionLineIdx = idx;
 
         // If only an inside or an outside was found then return that
         if (outsideIdx == -1) {
@@ -410,24 +405,25 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         }
         else {
             // There is an outside and an inside found in the tie... 
-            
+
             // Check to see if the ball is in the half-plane of the outside boundary, also
             // if they are close together then we favour the outside boundary over the inside...
-            const float COLLISION_DISTANCE_EPSILON = c.Radius() / BALL_INSIDE_OUTSIDE_DIST_DIVISOR;
+            const float COLLISION_DISTANCE_EPSILON = circle.Radius() / BALL_INSIDE_OUTSIDE_DIST_DIVISOR;
             Vector2D toBallFromOutsideLine = currSamplePt - this->lines[outsideIdx].P1();
             if (Vector2D::Dot(toBallFromOutsideLine, this->normals[outsideIdx]) > 0 || 
                 fabs(smallestInsideDist - smallestOutsideDist) <= COLLISION_DISTANCE_EPSILON) {
+
                 DO_ASSIGNMENT(outsideIdx);
             }
             else {
-                
+
                 if (smallestInsideDist < smallestOutsideDist) {
 
                     // One final check: prioritize normal areas...
                     Collision::AABB2D insideNormalArea(this->lines[insideIdx].P1(), this->lines[insideIdx].P1());
                     insideNormalArea.AddPoint(this->lines[insideIdx].P2());
-                    insideNormalArea.AddPoint(this->lines[insideIdx].P1() + 2*c.Radius()*this->normals[insideIdx]);
-                    insideNormalArea.AddPoint(this->lines[insideIdx].P2() + 2*c.Radius()*this->normals[insideIdx]);
+                    insideNormalArea.AddPoint(this->lines[insideIdx].P1() + 2*circle.Radius()*this->normals[insideIdx]);
+                    insideNormalArea.AddPoint(this->lines[insideIdx].P2() + 2*circle.Radius()*this->normals[insideIdx]);
 
                     if (Collision::SqDistFromPtToAABB(insideNormalArea, currSamplePt) < EPSILON) {
                         DO_ASSIGNMENT(insideIdx);
@@ -435,15 +431,15 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                     else {
                         DO_ASSIGNMENT(outsideIdx);
                     }
-                    
+
                 }
                 else {
                     DO_ASSIGNMENT(outsideIdx);
                 }
             }
         }
-        
-        #undef DO_ASSIGNMENT
+
+#undef DO_ASSIGNMENT
     }
 
     if (n.IsZero()) {
@@ -454,17 +450,17 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 }
 
 // Ball-BoundingLines collisions where both the ball and these bounding lines are moving...
-bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const Vector2D& velocity, Vector2D& n, 
                             Collision::LineSeg2D& collisionLine, double& timeUntilCollision, 
                             const Vector2D& lineVelocity) const {
 
 
-    assert(c.Radius() > 0);
+    assert(circle.Radius() > 0);
 
     bool zeroLineVelocity = (lineVelocity == Vector2D(0.0f, 0.0f));
     if (zeroLineVelocity) {
-        // Simpler solution if the line isn't moving
-        return this->Collide(dT, c, velocity, n, collisionLine, timeUntilCollision);
+        // Perform the simpler solution (where the line isn't moving)
+        return this->Collide(dT, circle, velocity, n, collisionLine, timeUntilCollision);
     }
 
     bool zeroBallVelocity = (velocity == Vector2D(0.0f, 0.0f));
@@ -478,13 +474,13 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     if (!zeroBallVelocity) {
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to a fraction of the radius of the circle
-        numBallCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
+        numBallCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * circle.Radius()) * velocity.Magnitude()));
         numBallCollisionSamples = std::min<int>(40, std::max<int>(2, numBallCollisionSamples + 1));
     }
     if (!zeroLineVelocity) {
         // Calculate the number of samples required to make sure that the increment distance
         // less than or equal to some reasonable delta distance (a fraction of the radius of the circle)...
-        numLineCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * lineVelocity.Magnitude()));
+        numLineCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * circle.Radius()) * lineVelocity.Magnitude()));
         numLineCollisionSamples = std::min<int>(40, std::max<int>(2, numLineCollisionSamples + 1));
     }
     
@@ -495,7 +491,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         sampleIncDistForLine = dT * lineVelocity / static_cast<float>(maxCollisionSamples-1);
     }
      
-    Point2D currBallSamplePt = c.Center();  // The position of the ball where we're currently sampling
+    Point2D currBallSamplePt = circle.Center();  // The position of the ball where we're currently sampling
     BoundingLines currSampleLines = *this;  // Where we're currently sampling as we move the lines
     double currTimeUntilCollision = 0.0;
 
@@ -519,10 +515,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                 continue;
             }
 
-            bool tempIsCollision = Collision::GetCollisionPoint(
-                Collision::Circle2D(currBallSamplePt, c.Radius()), currSampleLines.GetLine(lineIdx), collisionPt);
-
-            if (tempIsCollision) {
+            if (Collision::GetCollisionPoint(Collision::Circle2D(currBallSamplePt, circle.Radius()), currSampleLines.GetLine(lineIdx), collisionPt)) {
                 collisionLineIdxs.push_back(lineIdx);
                 closestPts.push_back(Collision::ClosestPoint(currBallSamplePt, currSampleLines.GetLine(lineIdx)));
                 isCollision = true;
@@ -638,7 +631,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 
             // Check to see if the ball is in the half-plane of the outside boundary, also
             // if they are close together then we favour the outside boundary over the inside...
-            const float COLLISION_DISTANCE_EPSILON = c.Radius() / BALL_INSIDE_OUTSIDE_DIST_DIVISOR;
+            const float COLLISION_DISTANCE_EPSILON = circle.Radius() / BALL_INSIDE_OUTSIDE_DIST_DIVISOR;
             Vector2D toBallFromOutsideLine = currBallSamplePt - this->lines[outsideIdx].P1();
             if (Vector2D::Dot(toBallFromOutsideLine, this->normals[outsideIdx]) > 0 || 
                 fabs(smallestInsideDist - smallestOutsideDist) <= COLLISION_DISTANCE_EPSILON) {
@@ -651,8 +644,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
                     // One final check: prioritize normal areas...
                     Collision::AABB2D insideNormalArea(currSampleLines.GetLine(insideIdx).P1(), currSampleLines.GetLine(insideIdx).P1());
                     insideNormalArea.AddPoint(currSampleLines.GetLine(insideIdx).P2());
-                    insideNormalArea.AddPoint(currSampleLines.GetLine(insideIdx).P1() + 2*c.Radius()*currSampleLines.GetNormal(insideIdx));
-                    insideNormalArea.AddPoint(currSampleLines.GetLine(insideIdx).P2() + 2*c.Radius()*currSampleLines.GetNormal(insideIdx));
+                    insideNormalArea.AddPoint(currSampleLines.GetLine(insideIdx).P1() + 2*circle.Radius()*currSampleLines.GetNormal(insideIdx));
+                    insideNormalArea.AddPoint(currSampleLines.GetLine(insideIdx).P2() + 2*circle.Radius()*currSampleLines.GetNormal(insideIdx));
 
                     if (Collision::SqDistFromPtToAABB(insideNormalArea, currBallSamplePt) < EPSILON) {
                         DO_ASSIGNMENT(insideIdx);

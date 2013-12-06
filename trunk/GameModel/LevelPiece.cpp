@@ -283,7 +283,8 @@ void LevelPiece::UpdateBreakableBlockBounds(LevelPiece* thePiece,
             thePiece->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
         boundingNorms[lineCount] = Vector2D(-1, 0);
         onInside[lineCount] = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::PrismTriangle);
+            leftNeighbor->GetType() == LevelPiece::OneWay || leftNeighbor->GetType() == LevelPiece::NoEntry ||
+            leftNeighbor->GetType() == LevelPiece::PrismTriangle);
         lineCount++;
     }
 
@@ -319,7 +320,8 @@ void LevelPiece::UpdateBreakableBlockBounds(LevelPiece* thePiece,
             thePiece->GetCenter() + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
         boundingNorms[lineCount] = Vector2D(0, -1);
         onInside[lineCount] = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::PrismTriangle);
+            bottomNeighbor->GetType() == LevelPiece::OneWay || bottomNeighbor->GetType() == LevelPiece::NoEntry ||
+            bottomNeighbor->GetType() == LevelPiece::PrismTriangle);
         lineCount++;
     }
 
@@ -355,7 +357,8 @@ void LevelPiece::UpdateBreakableBlockBounds(LevelPiece* thePiece,
             thePiece->GetCenter() + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
         boundingNorms[lineCount] = Vector2D(1, 0);
         onInside[lineCount] = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::PrismTriangle);
+            rightNeighbor->GetType() == LevelPiece::OneWay || rightNeighbor->GetType() == LevelPiece::NoEntry ||
+            rightNeighbor->GetType() == LevelPiece::PrismTriangle);
         lineCount++;
     }
 
@@ -391,7 +394,8 @@ void LevelPiece::UpdateBreakableBlockBounds(LevelPiece* thePiece,
             thePiece->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
         boundingNorms[lineCount] = Vector2D(0, 1);
         onInside[lineCount] = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-            topNeighbor->GetType() == LevelPiece::OneWay || topNeighbor->GetType() == LevelPiece::PrismTriangle);
+            topNeighbor->GetType() == LevelPiece::OneWay || topNeighbor->GetType() == LevelPiece::NoEntry ||
+            topNeighbor->GetType() == LevelPiece::PrismTriangle);
         lineCount++;
     }
 

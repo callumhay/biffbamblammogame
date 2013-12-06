@@ -541,6 +541,21 @@ namespace Collision {
 
 		return lineSeg.P1() + t * lineSegDir;
 	}
+
+    inline void ClosestPoint(const Point2D& pt, const LineSeg2D& lineSeg, Point2D& closestPtOnLineSeg) {
+        Vector2D lineSegDir = lineSeg.P2() - lineSeg.P1();
+        float t = Vector2D::Dot(pt - lineSeg.P1(), lineSegDir) / Vector2D::Dot(lineSegDir, lineSegDir);
+
+        if (t < 0.0f) {
+            t = 0.0f;
+        }
+        else if (t > 1.0f) {
+            t = 1.0f;
+        }
+
+        closestPtOnLineSeg = lineSeg.P1() + t * lineSegDir;
+    }
+
 	inline Point3D ClosestPoint(const Point3D& pt, const LineSeg3D& lineSeg) {
 		Vector3D lineSegDir = lineSeg.P2() - lineSeg.P1();
 		float t = Vector3D::Dot(pt - lineSeg.P1(), lineSegDir) / Vector3D::Dot(lineSegDir, lineSegDir);

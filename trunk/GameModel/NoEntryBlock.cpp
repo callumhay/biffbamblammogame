@@ -80,7 +80,8 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
 	// Set the bounding lines for a rectangular block
     static const int MAX_NUM_LINES = 4;
     Collision::LineSeg2D boundingLines[MAX_NUM_LINES];
-    Vector2D  boundingNorms[MAX_NUM_LINES];
+    Vector2D boundingNorms[MAX_NUM_LINES];
+    bool onInside[MAX_NUM_LINES];
 
     bool shouldGenBounds = false;
     int lineCount = 0;
@@ -105,6 +106,8 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
             this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));;
 		boundingNorms[lineCount] = Vector2D(-1, 0);
+        onInside[lineCount] = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
+            leftNeighbor->GetType() == LevelPiece::Breakable);
         lineCount++;
     }
     shouldGenBounds = false;
@@ -129,6 +132,8 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
             this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		boundingNorms[lineCount] = Vector2D(0, -1);
+        onInside[lineCount] = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) || 
+            bottomNeighbor->GetType() == LevelPiece::Breakable);
         lineCount++;
     }
     shouldGenBounds = false;
@@ -153,6 +158,8 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
             this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));;
 		boundingNorms[lineCount] = Vector2D(1, 0);
+        onInside[lineCount] = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
+            rightNeighbor->GetType() == LevelPiece::Breakable);
         lineCount++;
     }
     shouldGenBounds = false;
@@ -177,10 +184,12 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
         boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
             this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		boundingNorms[lineCount] = Vector2D(0, 1);
+        onInside[lineCount] = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) || 
+            topNeighbor->GetType() == LevelPiece::Breakable);
         lineCount++;
     }
 
-	this->SetBounds(BoundingLines(lineCount, boundingLines, boundingNorms), 
+	this->SetBounds(BoundingLines(lineCount, boundingLines, boundingNorms, onInside), 
         leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
 		topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
