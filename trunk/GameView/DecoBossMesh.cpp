@@ -124,7 +124,6 @@ eyeGlowSoundID(INVALID_SOUND_ID), lightningRelaySoundID(INVALID_SOUND_ID) {
         this->eyeFlashingAlphaAnim.SetLerp(timeVals, alphaVals);
         this->eyeFlashingAlphaAnim.SetRepeat(true);
     }
-
 }
 
 DecoBossMesh::~DecoBossMesh() {
@@ -221,27 +220,27 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // world space locations...
 
-    ColourRGBA currColour;
+    const ColourRGBA* currColour;
 
 #define DRAW_BODY_PART(bodyPart, bodyPartMesh) \
     assert(bodyPart != NULL); \
-    currColour = bodyPart->GetColour(); \
-    if (currColour.A() > 0.0f) { \
-    glPushMatrix(); \
-    glMultMatrixf(bodyPart->GetWorldTransform().begin()); \
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A()); \
-    bodyPartMesh->Draw(camera, keyLight, fillLight, ballLight); \
-    glPopMatrix(); \
+    currColour = &bodyPart->GetColour(); \
+    if (currColour->A() > 0.0f) { \
+        glPushMatrix(); \
+        glMultMatrixf(bodyPart->GetWorldTransform().begin()); \
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A()); \
+        bodyPartMesh->Draw(camera, keyLight, fillLight, ballLight); \
+        glPopMatrix(); \
     }
     
     // Middle body
     const BossBodyPart* core = this->boss->GetCore();
 
-    currColour = core->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &core->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(core->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->coreMesh->Draw(camera, keyLight, fillLight, ballLight);
         
         // Draw any loaded item that the boss is about to drop towards the paddle

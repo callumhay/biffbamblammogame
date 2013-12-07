@@ -2,7 +2,7 @@
  * PointsHUD.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -54,11 +54,11 @@ public:
     void SetScore(long pointScore);
     void SetMultiplierCounter(int count);
     void SetMultiplier(int multiplierAmt);
-    void PostPointNotification(const PointAward& pointAward);
+    //void PostPointNotification(const PointAward& pointAward);
     
     void SetAlpha(float alpha);
 
-    static const char* GetPointNotificationName(const PointAward& pointAward);
+    //static const char* GetPointNotificationName(const PointAward& pointAward);
 
 private:
     static const int STAR_SIZE;
@@ -69,6 +69,7 @@ private:
     static const int SCORE_TO_MULTIPLER_HORIZONTAL_GAP;
     static const int ALL_STARS_WIDTH;
     
+    /*
     class PointNotification {
     public:
         static const int NOTIFIER_TO_NOTIFIER_VERTICAL_GAP;
@@ -94,6 +95,7 @@ private:
 
         DISALLOW_COPY_AND_ASSIGN(PointNotification);
     };
+    */
 
     class MultiplierHUD {
     public:
@@ -150,15 +152,14 @@ private:
 
         int currMultiplierCounterIdx;
         Texture* multiplierGageOutlineTex;                 // The outline for the multiplier gage
-        Texture* multiplierGageGradientTex;
         std::vector<Texture*> multiplierGageFillTexs;      // Fills for the multiplier gage (there are 9 of them)
 
         DISALLOW_COPY_AND_ASSIGN(MultiplierGageHUD);
     };
 
-    typedef std::list<PointNotification*> PointNotifyList;
-    typedef PointNotifyList::iterator PointNotifyListIter;
-    typedef PointNotifyList::const_iterator PointNotifyListConstIter;
+    //typedef std::list<PointNotification*> PointNotifyList;
+    //typedef PointNotifyList::iterator PointNotifyListIter;
+    //typedef PointNotifyList::const_iterator PointNotifyListConstIter;
 
     //AnimationType currAnimState;
 

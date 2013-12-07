@@ -26,7 +26,7 @@ resources/worlds/levels/medium/cannon_peekaboo.lvl
 resources/worlds/levels/medium/the_towering_inferno.lvl
 
 # Tesla blocks gaurd the route for a remote control rocket
-resources/worlds/levels/hard/the_house_that_tesla_built.lvl : 264
+resources/worlds/levels/hard/the_house_that_tesla_built.lvl : 250
 
 # Tesla block intro level
 resources/worlds/levels/easy/electric_access.lvl
@@ -48,7 +48,7 @@ resources/worlds/levels/medium/deflection_redirection.lvl
 resources/worlds/levels/hard/safety_third.lvl
 
 # Tesla + Prisms/Ice/Lasers
-resources/worlds/levels/hard/lighting_the_lightning.lvl : 295
+resources/worlds/levels/hard/lighting_the_lightning.lvl : 280
 
 # Shield + rocket to redirect to other cannons and destroy turrets
 resources/worlds/levels/hard/upward_not_forward_and_always_twirling.lvl
@@ -70,4 +70,4 @@ resources/worlds/levels/medium/a_tale_of_two_projectiles.lvl
 resources/worlds/levels/hard/shooting_gallery.lvl
 
 # BOSS: Electrocutioner
-resources/worlds/levels/bosses/electrocutioner.lvl : 327
+resources/worlds/levels/bosses/electrocutioner.lvl : 310

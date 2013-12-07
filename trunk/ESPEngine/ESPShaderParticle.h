@@ -41,9 +41,22 @@ protected:
 	CgFxEffectBase* shaderEffect;
 
 private:
-	// Disallow copy and assign
-	ESPShaderParticle(const ESPShaderParticle& p);
-	ESPShaderParticle& operator=(const ESPShaderParticle& p);
-
+    DISALLOW_COPY_AND_ASSIGN(ESPShaderParticle);
 };
+
+/**
+ * Revive this particle with the given lifespan length in seconds.
+ */
+inline void ESPShaderParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan) {
+	// Set the members to reflect a 'new life'
+	ESPParticle::Revive(pos, vel, size, rot, totalLifespan);
+}
+
+/**
+ * Called each frame with the delta time for that frame, this will
+ * provide a slice of the lifetime of the particle.
+ */
+inline void ESPShaderParticle::Tick(const double dT) {
+	ESPParticle::Tick(dT);
+}
 #endif

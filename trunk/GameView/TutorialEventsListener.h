@@ -35,7 +35,7 @@ public:
     void MousePressed(const GameControl::MouseButton& pressedButton);
 
     // Overridden event methods
-    void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
+    void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside);
     void BallShotEvent(const GameBall& shotBall);
     void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
     void ItemActivatedEvent(const GameItem& item);

@@ -214,8 +214,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
 
     assert(circle.Radius() > 0);
     
-    Collision::LineSeg2D circleVelLine(circle.Center(), circle.Center() + dT * velocity);
-    const float sqrRadius = circle.Radius() * circle.Radius();
+
 
     float velocityMag  = velocity.Magnitude();
     Vector2D nVelocity(0,0);
@@ -226,10 +225,15 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
     else {
         zeroVelocity = true;
     }
+
+    Collision::LineSeg2D circleVelLine(circle.Center(), circle.Center() + dT * velocity);
+    Collision::Ray2D circleVelRay(circle.Center(), nVelocity);
+    const float sqrRadius = circle.Radius() * circle.Radius();
     
-    Point2D point1, point2, pointC, a, b, c, d;
-    Vector2D point1Vec, bVec, cVec, dVec;
-    bool collisionIsPossible = false;
+    float rayT, lineT;
+    Point2D point1, point2, pointC, a, tempPt2D;
+    Vector2D tempDiff;
+    bool collisionHappened;
 
     std::vector<size_t> collisionLineIdxs;
     collisionLineIdxs.reserve(this->GetNumLines());
@@ -247,8 +251,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
         
         // Start by finding the closest point on the bounds line to the center of the circle...
         Collision::ClosestPoint(circle.Center(), currBoundsLine, point1);
-        point1Vec = circle.Center() - point1;
-        if (point1Vec.SqrMagnitude() <= sqrRadius) {
+        if ((circle.Center() - point1).SqrMagnitude() <= sqrRadius) {
             // The circle is already colliding with the current bounding line...
             
             collisionLineIdxs.push_back(lineIdx);
@@ -259,51 +262,104 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
             continue;
         }
         
-        collisionIsPossible = false;
-        if (Collision::GetCollisionPoint(currBoundsLine, circleVelLine, a)) {
-            // The velocity line intersects the bounding line...
-            collisionIsPossible = true;
-        }
-        else {
-            // The velocity line doesn't intersect, but a collision can still happen...
-            Collision::ClosestPoint(circleVelLine.P2(), currBoundsLine, b);
-            bVec = (circleVelLine.P2() - b);
-            if (bVec.SqrMagnitude() <= sqrRadius) {
-                collisionIsPossible = true;
+        collisionHappened = false;
+        if (Collision::IsCollision(circleVelRay, currBoundsLine, rayT, lineT)) {
+            if (rayT <= 0.0f) {
+                // No collision, the line is behind the circle velocity ray
+                continue;
+            }
+
+            a = circleVelRay.GetPointAlongRayFromOrigin(rayT);
+            // Check if the ray hits the within the line segment and the velocity vector
+            if (lineT >= 0.0f && lineT <= 1.0f && rayT <= velocityMag*dT) {
+                // There's a collision
+                collisionHappened = true;
             }
             else {
-
-                Collision::ClosestPoint(currBoundsLine.P1(), circleVelLine, c);
-                cVec = (currBoundsLine.P1() - c);
-                if (cVec.SqrMagnitude() <= sqrRadius) {
-                    collisionIsPossible = true;
+                // The circle velocity ray doesn't directly intersect the bounding line segment, 
+                // but a collision can still happen with the outer capsule formed by the moving circle...
+                Collision::ClosestPoint(circleVelLine.P2(), currBoundsLine, tempPt2D);
+                if ((circleVelLine.P2() - tempPt2D).SqrMagnitude() <= sqrRadius) {
+                    collisionHappened = true;
                 }
                 else {
+                    Collision::ClosestPoint(currBoundsLine.P1(), circleVelLine, tempPt2D);
+                    if ((currBoundsLine.P1() - tempPt2D).SqrMagnitude() <= sqrRadius) {
+                        collisionHappened = true;
+                    }
+                    else {
 
-                    Collision::ClosestPoint(currBoundsLine.P2(), circleVelLine, d);
-                    dVec = (currBoundsLine.P2() - d);
-                    if (dVec.SqrMagnitude() <= sqrRadius) {
-                        collisionIsPossible = true;
+                        Collision::ClosestPoint(currBoundsLine.P2(), circleVelLine, tempPt2D);
+                        if ((currBoundsLine.P2() - tempPt2D).SqrMagnitude() <= sqrRadius) {
+                            collisionHappened = true;
+                        }
                     }
                 }
             }
+
+            if (collisionHappened) {
+
+                // Calculate point2, the position of the circle at collision
+                point2 = a - (circle.Radius() * (((a - circle.Center()).Magnitude()) / (point1 - circle.Center()).Magnitude()) * (nVelocity / velocityMag));
+
+                // Calculate pointC, the contact point on the line at collision.
+                // Check to see if pointC is actually on the bounding line, if not then the circle must have collided
+                // with an end point of the bounding line...
+
+                if (Collision::ClosestPointMustBeOnSegment(point2, currBoundsLine, pointC)) {
+                    timeUntilCollision = std::min<double>(timeUntilCollision, (point2 - circle.Center()).Magnitude() / velocityMag);
+                }
+                else {
+                    // Deal with the special case of end point collisions...
+
+                    // Find the closest point on the movement vector to the end point that the circle collided with
+                    Collision::ClosestPoint(pointC, circleVelLine, tempPt2D);
+
+                    // Use Pythagorean theorem to solve for where the collision occurred
+                    tempDiff = pointC - tempPt2D;
+                    tempPt2D -= sqrt(std::max<float>(0.0f, (sqrRadius - tempDiff.SqrMagnitude()))) * nVelocity;
+
+                    timeUntilCollision = std::min<double>(timeUntilCollision, (tempPt2D - circle.Center()).Magnitude() / velocityMag);
+                }
+
+                collisionLineIdxs.push_back(lineIdx);
+                closestPts.push_back(pointC);
+                isCollision = true;
+            }
         }
+        else {
+            // It looks like the circle velocity ray is parallel to the bounding line,
+            // The circle has to collide with either one or the other end in order for their to be a collision
+            Collision::ClosestPoint(currBoundsLine.P1(), circleVelLine, tempPt2D);
+            if ((currBoundsLine.P1() - tempPt2D).SqrMagnitude() <= sqrRadius) {
+                collisionHappened = true;
+                pointC = currBoundsLine.P1();
+            }
+            else {
 
-        if (collisionIsPossible) {
-            // Do some more calculation to figure out the point of intersection...
-            
-            point2 = a - (circle.Radius() * (((a - circle.Center()).Magnitude()) / (point1 - circle.Center()).Magnitude()) * (nVelocity / velocityMag));
-            // point2 is the position of the circle at collision
-            Collision::ClosestPoint(point2, currBoundsLine, pointC);
-            // pointC is the contact point on the line at collision
+                Collision::ClosestPoint(currBoundsLine.P2(), circleVelLine, tempPt2D);
+                if ((currBoundsLine.P2() - tempPt2D).SqrMagnitude() <= sqrRadius) {
+                    collisionHappened = true;
+                    pointC = currBoundsLine.P2();
+                }
+            }
 
-            double currTimeUntilCollision = (circle.Center() - point2).Magnitude() / velocityMag;
+            if (collisionHappened) {
+                // Deal with the special case of end point collisions...
 
-            collisionLineIdxs.push_back(lineIdx);
-            closestPts.push_back(pointC);
-            isCollision = true;
+                // Find the closest point on the movement vector to the end point that the circle collided with
+                Collision::ClosestPoint(pointC, circleVelLine, tempPt2D);
 
-            timeUntilCollision = std::min<double>(timeUntilCollision, currTimeUntilCollision);
+                // Use Pythagorean theorem to solve for where the collision occurred
+                tempDiff = pointC - tempPt2D;
+                tempPt2D -= sqrt(std::max<float>(0.0f, (sqrRadius - tempDiff.SqrMagnitude()))) * nVelocity;
+
+                timeUntilCollision = std::min<double>(timeUntilCollision, (tempPt2D - circle.Center()).Magnitude() / velocityMag);
+
+                collisionLineIdxs.push_back(lineIdx);
+                closestPts.push_back(pointC);
+                isCollision = true;
+            }
         }
     }
 
@@ -331,8 +387,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
 
         bool hasInside = false;
         for (int i = 0; i < static_cast<int>(collisionLineIdxs.size()); i++) {
-            int lineIdx = collisionLineIdxs[i];
-            hasInside |= this->onInside[lineIdx];
+            hasInside |= this->onInside[collisionLineIdxs[i]];
         }
 
         assert(collisionLineIdxs.size() == closestPts.size());
@@ -372,7 +427,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
                 assert(!this->onInside[lineIdx]);
                 if (sqrDist < smallestOutsideDist) {
 
-                    if (fabs(sqrDist - smallestOutsideDist) <= EPSILON && outsideIdx >= 0) {
+                    if (outsideIdx >= 0 && fabs(sqrDist - smallestOutsideDist) <= EPSILON) {
                         // Really close call... choose the normal that is closest to the opposite of the ball's velocity
                         const Vector2D& currNormal  = this->normals[lineIdx];
                         const Vector2D& otherNormal = this->normals[outsideIdx];

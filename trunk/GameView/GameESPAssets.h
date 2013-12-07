@@ -335,7 +335,7 @@ public:
 	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);
     void AddBounceBossEffect(const GameBall& ball);
     void AddMiscBallPieceCollisionEffect(const GameBall& ball, const LevelPiece& block);
-	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle);
+	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside);
 	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);
 	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
     void AddSafetyNetHitByProjectileEffect(const Projectile& projectile);

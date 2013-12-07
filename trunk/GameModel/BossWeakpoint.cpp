@@ -138,16 +138,18 @@ void BossWeakpoint::ColourAnimationFinished() {
 
 void BossWeakpoint::SetFlashingColourAnim() {
     std::vector<double> timeValues;
-    timeValues.reserve(3);
+    timeValues.reserve(4);
     timeValues.push_back(0.0);
-    timeValues.push_back(1.0);
-    timeValues.push_back(2.0);
+    timeValues.push_back(0.65);
+    timeValues.push_back(0.67);
+    timeValues.push_back(1.32);
     
     std::vector<ColourRGBA> colourValues;
-    colourValues.reserve(3);
-    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
-    colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
-    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
+    colourValues.reserve(4);
+    colourValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 
     this->rgbaAnim.SetLerp(timeValues, colourValues);
     this->rgbaAnim.SetRepeat(true);

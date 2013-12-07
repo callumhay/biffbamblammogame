@@ -160,7 +160,7 @@ void GameWorldAssets::DrawGhostPaddle(const PlayerPaddle& p, const Camera& camer
 void GameWorldAssets::ResetToInitialState() {
 	this->bgFadeAnim.ClearLerp();
 	this->bgFadeAnim.SetInterpolantValue(1.0f);
-    this->currBGMeshColourAnim.ResetToStart();
+    this->currBGMeshColourAnim.SetToRandom();
 }
 
 // Static creation method

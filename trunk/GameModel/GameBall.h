@@ -356,6 +356,10 @@ public:
     bool ExecuteBallBoost(const Vector2D& dir);
     bool IsBallBoosting() const;
 
+#ifdef _DEBUG
+    void DebugDraw() const;
+#endif
+
 private:
     static const float INCREMENT_SPD_AMT;
 

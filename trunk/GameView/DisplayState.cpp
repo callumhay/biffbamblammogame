@@ -90,10 +90,18 @@ void DisplayState::DebugDrawBounds() {
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
 	// Draw boundary of paddle...
-	this->display->GetModel()->GetPlayerPaddle()->DebugDraw();
+	GameModel* model = this->display->GetModel();
+    model->GetPlayerPaddle()->DebugDraw();
 	
+    // Draw debug info for each ball...
+    const std::list<GameBall*>& balls = model->GetGameBalls();
+    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+        const GameBall* ball = *iter;
+        ball->DebugDraw();
+    }
+
 	// Draw of boundaries of each block...
-	std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
+	std::vector<std::vector<LevelPiece*>> pieces = model->GetCurrentLevel()->GetCurrentLevelLayout();
 	for (size_t i = 0; i < pieces.size(); i++) {
 		std::vector<LevelPiece*> setOfPieces = pieces[i];
 		for (size_t j = 0; j < setOfPieces.size(); j++) {
@@ -102,33 +110,32 @@ void DisplayState::DebugDrawBounds() {
 	}
 
 	// Draw any beam rays...
-	std::list<Beam*>& beams = this->display->GetModel()->GetActiveBeams();
+	std::list<Beam*>& beams = model->GetActiveBeams();
 	for (std::list<Beam*>::const_iterator iter = beams.begin(); iter != beams.end(); ++iter) {
 		(*iter)->DebugDraw();
 	}
 
     // Draw the debug bounds of all balls
-    const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
+    const BallBoostModel* boostModel = model->GetBallBoostModel();
     if (boostModel != NULL && boostModel->GetBulletTimeState() != BallBoostModel::NotInBulletTime) {
         boostModel->DebugDraw();
     }
 
     // Draw the debug bounds of any boss
-    const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+    const GameLevel* currLevel = model->GetCurrentLevel();
     const Boss* boss = currLevel->GetBoss();
     if (boss != NULL) {
         boss->DebugDraw();
     }
 
     // Draw boundaries of all projectiles
-    const GameModel::ProjectileMap& projectiles = this->display->GetModel()->GetActiveProjectiles();
+    const GameModel::ProjectileMap& projectiles = model->GetActiveProjectiles();
     for (GameModel::ProjectileMapConstIter iter1 = projectiles.begin(); iter1 != projectiles.end(); ++iter1) {
 
         const GameModel::ProjectileList& projectileList = iter1->second; 
         for (GameModel::ProjectileListConstIter iter2 = projectileList.begin(); iter2 != projectileList.end(); ++iter2) {
             (*iter2)->DebugDraw();
         }
-        
     }
 
 	glPopMatrix();

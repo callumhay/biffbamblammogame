@@ -125,7 +125,7 @@ private:
 
     class AbstractLevelMenuItem {
     public:
-        AbstractLevelMenuItem(SelectLevelMenuState* state, int levelNum, GameLevel* level,
+        AbstractLevelMenuItem(SelectLevelMenuState* state, GameLevel* level,
             float width, const Point2D& topLeftCorner, bool isEnabled);
         virtual ~AbstractLevelMenuItem();
 
@@ -155,7 +155,6 @@ private:
         GameLevel* level;
         bool isEnabled;
 
-        TextLabel2D* numLabel;
         TextLabel2DFixedWidth* nameLabel;
 
         AnimationMultiLerp<float> lockedAnim;
@@ -207,6 +206,7 @@ private:
         GLuint starDisplayList;
         float starSize;
 
+        TextLabel2D* numLabel;
         TextLabel2D* highScoreLabel;
 
         void BuildStarDisplayList();
@@ -216,7 +216,7 @@ private:
 
     class BossLevelMenuItem : public AbstractLevelMenuItem {
     public:
-        BossLevelMenuItem(SelectLevelMenuState* state, int levelNum, GameLevel* level,
+        BossLevelMenuItem(SelectLevelMenuState* state, GameLevel* level,
             float width, float height, const Point2D& topLeftCorner, bool isEnabled, const Texture* bossTexture);
         ~BossLevelMenuItem();
 

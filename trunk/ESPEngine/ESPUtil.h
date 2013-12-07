@@ -21,7 +21,7 @@ class Camera;
 
 namespace ESP {
 	// Possible alignment configurations for sprites and particles w.r.t. the viewer
-	enum ESPAlignment { NoAlignment, ScreenAligned, ScreenAlignedFollowVelocity, ScreenAlignedGlobalUpVec, ViewPlaneAligned, ViewPointAligned, AxisAligned };
+	enum ESPAlignment { NoAlignment, ScreenAligned, ScreenAlignedFollowVelocity, ScreenAlignedGlobalUpVec, ViewPlaneAligned, AxisAligned };
 };
 
 // An interval pairing of values

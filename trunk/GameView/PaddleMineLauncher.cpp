@@ -19,7 +19,7 @@ PaddleMineLauncher::PaddleMineLauncher() : paddleMineAttachment(NULL), isActive(
         GameViewConstants::GetInstance()->PADDLE_MINE_ATTACHMENT_MESH);
     assert(this->paddleMineAttachment != NULL);
     
-    this->pulseAlphaAnim.SetLerp(0.0, 1.0, 2.0, 1.0f, 0.6f, 1.0f);
+    this->pulseAlphaAnim.SetLerp(0.0, 1.0, 2.0, 1.0f, 0.75f, 1.0f);
     this->pulseAlphaAnim.SetRepeat(true);
 
     this->Deactivate();
@@ -112,32 +112,6 @@ void PaddleMineLauncher::DrawEffects(double dT, const PlayerPaddle& paddle) {
     glColor4f(1, 1, 1, 0.0f);
     glVertex3f(halfSmallHighlightWidth,  highlightHeight, negHalfPaddleDepth);
     glVertex3f(-halfSmallHighlightWidth, highlightHeight, negHalfPaddleDepth);
-
-    /*
-    // Middle laser
-    glColor4f(1, 0, 0, 1.0f*alpha);
-    glVertex3f(-halfMidLaserWidth, 0, negHalfPaddleDepth);
-    glVertex3f(halfMidLaserWidth, 0, negHalfPaddleDepth);
-    glColor4f(1, 0, 0, 0.0f);
-    glVertex3f(halfMidLaserWidth,  midLaserHeight, negHalfPaddleDepth);
-    glVertex3f(-halfMidLaserWidth, midLaserHeight, negHalfPaddleDepth);
-
-    // Left laser
-    glColor4f(1, 0, 0, 1.0f*alpha);
-    glVertex3f(-halfSideLaserWidth - xDistToSideLaser, 0, negHalfPaddleDepth);
-    glVertex3f(halfSideLaserWidth - xDistToSideLaser, 0, negHalfPaddleDepth);
-    glColor4f(1, 0, 0, 0.0f);
-    glVertex3f(halfSideLaserWidth - xDistToSideLaser,  sideLaserHeight, negHalfPaddleDepth);
-    glVertex3f(-halfSideLaserWidth - xDistToSideLaser, sideLaserHeight, negHalfPaddleDepth);
-
-    // Right laser
-    glColor4f(1, 0, 0, 1.0f*alpha);
-    glVertex3f(-halfSideLaserWidth + xDistToSideLaser, 0, negHalfPaddleDepth);
-    glVertex3f(halfSideLaserWidth + xDistToSideLaser, 0, negHalfPaddleDepth);
-    glColor4f(1, 0, 0, 0.0f);
-    glVertex3f(halfSideLaserWidth + xDistToSideLaser,  sideLaserHeight, negHalfPaddleDepth);
-    glVertex3f(-halfSideLaserWidth + xDistToSideLaser, sideLaserHeight, negHalfPaddleDepth);
-    */
 
     glEnd();
 

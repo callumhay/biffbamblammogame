@@ -44,11 +44,14 @@ LevelPiece::~LevelPiece() {
 	// We need to be sure to obliterate any status effects that might be lingering on the level piece -
 	// this emits an important event to any model listeners to remove those effects as well!
 	this->RemoveAllStatus(NULL);
+    this->DetachAllProjectiles();
+}
 
+void LevelPiece::DetachAllProjectiles() {
     // Make sure we remove all attached projectiles as well
     // NOTE: DO NOT USE ITERATORS HERE SINCE THE MINE PROJECTILE DETACHES ITSELF IN THE SetAsFalling call
     while (!this->attachedProjectiles.empty()) {
-                 
+
         MineProjectile* p = *this->attachedProjectiles.begin();
         p->SetLastThingCollidedWith(NULL);
         p->SetAsFalling();

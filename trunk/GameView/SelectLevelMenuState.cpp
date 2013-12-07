@@ -876,7 +876,7 @@ void SelectLevelMenuState::SetupLevelPages(const DisplayStateInfo& info) {
             }
 
             if (currLevel->GetHasBoss()) {
-                levelItem = new BossLevelMenuItem(this, currLevelIdx+1, currLevel, itemWidth, standardHeight,
+                levelItem = new BossLevelMenuItem(this, currLevel, itemWidth, standardHeight,
                     Point2D(itemX, itemY), !noScoreEncountered && currLevel->GetAreUnlockStarsPaidFor(), this->bossIconTexture);
             }
             else {
@@ -1149,7 +1149,7 @@ const float SelectLevelMenuState::AbstractLevelMenuItem::STAR_LOCKED_PADLOCK_SCA
 const double SelectLevelMenuState::AbstractLevelMenuItem::TOTAL_STAR_UNLOCK_TIME = 3.0;
 
 SelectLevelMenuState::AbstractLevelMenuItem::AbstractLevelMenuItem(SelectLevelMenuState* state,
-                                                                   int levelNum, GameLevel* level, float width,
+                                                                   GameLevel* level, float width,
                                                                    const Point2D& topLeftCorner, bool isEnabled) :
 state(state), level(level), topLeftCorner(topLeftCorner), width(width), starShrinkAnim(NULL), starAlphaAnim(NULL),
 isEnabled(isEnabled), nameLabel(NULL), unlockNumStarsLabel(NULL), unlockStarColourAnim(NULL), unlockStarGlowPulseAnim(NULL),
@@ -1159,14 +1159,6 @@ fireSmokeEmitter2(NULL), lockFadeAnim(NULL) {
 
     assert(state != NULL);
     assert(level != NULL);
-    assert(levelNum > 0);
-
-    std::stringstream levelNumStr;
-    levelNumStr << levelNum;
-
-    this->numLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-        GameFontAssetsManager::Huge), levelNumStr.str());
-    this->numLabel->SetScale(state->display->GetTextScalingFactor());
 
     this->lockedAnim.ClearLerp();
     this->lockedAnim.SetInterpolantValue(0);
@@ -1174,8 +1166,6 @@ fireSmokeEmitter2(NULL), lockFadeAnim(NULL) {
 
 SelectLevelMenuState::AbstractLevelMenuItem::~AbstractLevelMenuItem() {
 
-    delete this->numLabel;
-    this->numLabel = NULL;
     delete this->nameLabel;
     this->nameLabel = NULL;
 
@@ -1242,81 +1232,6 @@ SelectLevelMenuState::AbstractLevelMenuItem::~AbstractLevelMenuItem() {
 void SelectLevelMenuState::AbstractLevelMenuItem::RebuildItem(bool enabled, const Point2D& topLeftCorner) {
     this->isEnabled = enabled;
     this->topLeftCorner = topLeftCorner;
-
-    this->numLabel->SetTopLeftCorner(this->topLeftCorner);
-
-    float scaleFactor = this->state->display->GetTextScalingFactor();
-    float nameLabelWidth = this->width - NUM_TO_NAME_GAP - this->numLabel->GetLastRasterWidth();
-
-    std::string levelName;
-    if (isEnabled) {
-        levelName = this->level->GetName();
-    }
-    else {
-        levelName = std::string("???");
-    }
-
-    if (this->nameLabel != NULL) {
-        delete this->nameLabel;
-    }
-
-    this->nameLabel = new TextLabel2DFixedWidth(
-        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-        GameFontAssetsManager::Small), nameLabelWidth, levelName);
-    this->nameLabel->SetLineSpacing(4.0f);
-    this->nameLabel->SetScale(scaleFactor);
-
-    float nameXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
-    float nameYPos = this->topLeftCorner[1] - std::max<float>(0, ((this->numLabel->GetHeight() - this->nameLabel->GetHeight()) / 2.0f));
-    this->nameLabel->SetTopLeftCorner(nameXPos, nameYPos);
-
-    if (isEnabled) {
-        this->nameLabel->SetColour(Colour(0,0,0));
-        this->numLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
-        this->numLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
-    }
-    else {
-        this->nameLabel->SetColour(DISABLED_COLOUR);
-        this->numLabel->SetColour(DISABLED_COLOUR);
-
-        if (this->level->GetNumStarsRequiredToUnlock() > 0) {
-            std::stringstream starStrStream;
-            starStrStream << this->level->GetNumStarsRequiredToUnlock();
-
-            if (this->unlockNumStarsLabel != NULL) {
-                delete this->unlockNumStarsLabel;
-            }
-            this->unlockNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
-                GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), starStrStream.str());
-            this->unlockNumStarsLabel->SetColour(Colour(0,0,0));
-            this->unlockNumStarsLabel->SetScale(1.5f * scaleFactor);
-            this->unlockNumStarsLabel->SetDropShadow(Colour(1,1,1), 0.05f);
-
-            std::vector<double> timeVals(3);
-            timeVals[0] = 0.0; timeVals[1] = 1.0; timeVals[2] = 2.0f;
-            std::vector<Colour> colourVals(3);
-            colourVals[0] = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
-            colourVals[1] = GameViewConstants::GetInstance()->BRIGHT_POINT_STAR_COLOUR;
-            colourVals[2] = colourVals[0];
-
-            if (this->unlockStarColourAnim != NULL) {
-                delete this->unlockStarColourAnim;
-            }
-            this->unlockStarColourAnim = new AnimationMultiLerp<Colour>();
-            this->unlockStarColourAnim->SetLerp(timeVals, colourVals);
-            this->unlockStarColourAnim->SetRepeat(true);
-
-            std::vector<float> pulseVals(3);
-            pulseVals[0] = 1.2f; pulseVals[1] = 1.4f; pulseVals[2] = pulseVals[0];
-
-            if (this->unlockStarGlowPulseAnim != NULL) {
-                delete this->unlockStarGlowPulseAnim;
-            }
-            this->unlockStarGlowPulseAnim = new AnimationMultiLerp<float>();
-            this->unlockStarGlowPulseAnim->SetLerp(timeVals, pulseVals);
-            this->unlockStarGlowPulseAnim->SetRepeat(true);
-        }
-    }
 }
 
 float SelectLevelMenuState::AbstractLevelMenuItem::GetUnlockStarSize() const {
@@ -1756,9 +1671,17 @@ SelectLevelMenuState::LevelMenuItem::LevelMenuItem(SelectLevelMenuState* state,
                                                    int levelNum, GameLevel* level, 
                                                    float width, const Point2D& topLeftCorner, 
                                                    bool isEnabled) : 
-AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), starDisplayList(0) {
+AbstractLevelMenuItem(state, level, width, topLeftCorner, isEnabled), numLabel(NULL), starDisplayList(0) {
 
     float scaleFactor = state->display->GetTextScalingFactor();
+
+    assert(levelNum > 0);
+
+    std::stringstream levelNumStr;
+    levelNumStr << levelNum;
+    this->numLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+        GameFontAssetsManager::Huge), levelNumStr.str());
+    this->numLabel->SetScale(state->display->GetTextScalingFactor());
 
     std::string highScoreStr = "High Score: " + stringhelper::AddNumberCommas(this->level->GetHighScore()) ;
     this->highScoreLabel = new TextLabel2D(
@@ -1770,7 +1693,8 @@ AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
 }
 
 SelectLevelMenuState::LevelMenuItem::~LevelMenuItem() {
-
+    delete this->numLabel;
+    this->numLabel = NULL;
     delete this->highScoreLabel;
     this->highScoreLabel = NULL;
 
@@ -1780,6 +1704,81 @@ SelectLevelMenuState::LevelMenuItem::~LevelMenuItem() {
 
 void SelectLevelMenuState::LevelMenuItem::RebuildItem(bool enabled, const Point2D& topLeftCorner) {
     AbstractLevelMenuItem::RebuildItem(enabled, topLeftCorner);
+
+    this->numLabel->SetTopLeftCorner(this->topLeftCorner);
+
+    float scaleFactor = this->state->display->GetTextScalingFactor();
+    float nameLabelWidth = this->width - NUM_TO_NAME_GAP - this->numLabel->GetLastRasterWidth();
+
+    std::string levelName;
+    if (isEnabled) {
+        levelName = this->level->GetName();
+    }
+    else {
+        levelName = std::string("???");
+    }
+
+    if (this->nameLabel != NULL) {
+        delete this->nameLabel;
+    }
+
+    this->nameLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+        GameFontAssetsManager::Small), nameLabelWidth, levelName);
+    this->nameLabel->SetLineSpacing(4.0f);
+    this->nameLabel->SetScale(scaleFactor);
+
+    float nameXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
+    float nameYPos = this->topLeftCorner[1] - std::max<float>(0, ((this->numLabel->GetHeight() - this->nameLabel->GetHeight()) / 2.0f));
+    this->nameLabel->SetTopLeftCorner(nameXPos, nameYPos);
+
+    if (isEnabled) {
+        this->nameLabel->SetColour(Colour(0,0,0));
+        this->numLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
+        this->numLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
+    }
+    else {
+        this->nameLabel->SetColour(DISABLED_COLOUR);
+        this->numLabel->SetColour(DISABLED_COLOUR);
+
+        if (this->level->GetNumStarsRequiredToUnlock() > 0) {
+            std::stringstream starStrStream;
+            starStrStream << this->level->GetNumStarsRequiredToUnlock();
+
+            if (this->unlockNumStarsLabel != NULL) {
+                delete this->unlockNumStarsLabel;
+            }
+            this->unlockNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+                GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), starStrStream.str());
+            this->unlockNumStarsLabel->SetColour(Colour(0,0,0));
+            this->unlockNumStarsLabel->SetScale(1.5f * scaleFactor);
+            this->unlockNumStarsLabel->SetDropShadow(Colour(1,1,1), 0.05f);
+
+            std::vector<double> timeVals(3);
+            timeVals[0] = 0.0; timeVals[1] = 1.0; timeVals[2] = 2.0f;
+            std::vector<Colour> colourVals(3);
+            colourVals[0] = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+            colourVals[1] = GameViewConstants::GetInstance()->BRIGHT_POINT_STAR_COLOUR;
+            colourVals[2] = colourVals[0];
+
+            if (this->unlockStarColourAnim != NULL) {
+                delete this->unlockStarColourAnim;
+            }
+            this->unlockStarColourAnim = new AnimationMultiLerp<Colour>();
+            this->unlockStarColourAnim->SetLerp(timeVals, colourVals);
+            this->unlockStarColourAnim->SetRepeat(true);
+
+            std::vector<float> pulseVals(3);
+            pulseVals[0] = 1.2f; pulseVals[1] = 1.4f; pulseVals[2] = pulseVals[0];
+
+            if (this->unlockStarGlowPulseAnim != NULL) {
+                delete this->unlockStarGlowPulseAnim;
+            }
+            this->unlockStarGlowPulseAnim = new AnimationMultiLerp<float>();
+            this->unlockStarGlowPulseAnim->SetLerp(timeVals, pulseVals);
+            this->unlockStarGlowPulseAnim->SetRepeat(true);
+        }
+    }
 
     this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner()[0],
         this->numLabel->GetTopLeftCorner()[1] - (NUM_TO_HIGH_SCORE_Y_GAP + this->numLabel->GetHeight()));
@@ -1900,10 +1899,10 @@ const float SelectLevelMenuState::BossLevelMenuItem::NUM_TO_BOSS_NAME_GAP = 10.0
 const float SelectLevelMenuState::BossLevelMenuItem::BOSS_NAME_ICON_GAP   = 4.0f;
 
 SelectLevelMenuState::BossLevelMenuItem::BossLevelMenuItem(SelectLevelMenuState* state,
-                                                           int levelNum, GameLevel* level,
+                                                           GameLevel* level,
                                                            float width, float height, const Point2D& topLeftCorner,
                                                            bool isEnabled, const Texture* bossTexture) :
-AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
+AbstractLevelMenuItem(state, level, width, topLeftCorner, isEnabled), 
 height(height), bossTexture(bossTexture), bossDeadLabel(NULL), bossIconDisplayList(0) {
 
     assert(bossTexture != NULL);
@@ -1931,20 +1930,83 @@ SelectLevelMenuState::BossLevelMenuItem::~BossLevelMenuItem() {
 void SelectLevelMenuState::BossLevelMenuItem::RebuildItem(bool enabled, const Point2D& topLeftCorner) {
     AbstractLevelMenuItem::RebuildItem(enabled, topLeftCorner);
 
-    float bossXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
-    this->bossIconSize = this->bossLabel->GetHeight();
-    float halfBossIconSize = bossIconSize / 2.0f;
-    float iconXPos = this->topLeftCorner[0] + this->width - (this->width - 
-        (NUM_TO_NAME_GAP + BORDER_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
-    float iconYPos = this->topLeftCorner[1] - halfBossIconSize;
+    float scaleFactor = this->state->display->GetTextScalingFactor();
+    float nameLabelWidth = this->width - NUM_TO_NAME_GAP;
 
+    std::string levelName;
+    if (isEnabled) {
+        levelName = this->level->GetName();
+    }
+    else {
+        levelName = std::string("???");
+    }
+
+    if (this->nameLabel != NULL) {
+        delete this->nameLabel;
+    }
+
+    this->nameLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+        GameFontAssetsManager::Small), nameLabelWidth, levelName);
+    this->nameLabel->SetLineSpacing(4.0f);
+
+    if (isEnabled) {
+        this->nameLabel->SetColour(Colour(0,0,0));
+    }
+    else {
+        this->nameLabel->SetColour(DISABLED_COLOUR);
+
+        if (this->level->GetNumStarsRequiredToUnlock() > 0) {
+            std::stringstream starStrStream;
+            starStrStream << this->level->GetNumStarsRequiredToUnlock();
+
+            if (this->unlockNumStarsLabel != NULL) {
+                delete this->unlockNumStarsLabel;
+            }
+            this->unlockNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+                GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), starStrStream.str());
+            this->unlockNumStarsLabel->SetColour(Colour(0,0,0));
+            this->unlockNumStarsLabel->SetScale(1.5f * scaleFactor);
+            this->unlockNumStarsLabel->SetDropShadow(Colour(1,1,1), 0.05f);
+
+            std::vector<double> timeVals(3);
+            timeVals[0] = 0.0; timeVals[1] = 1.0; timeVals[2] = 2.0f;
+            std::vector<Colour> colourVals(3);
+            colourVals[0] = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+            colourVals[1] = GameViewConstants::GetInstance()->BRIGHT_POINT_STAR_COLOUR;
+            colourVals[2] = colourVals[0];
+
+            if (this->unlockStarColourAnim != NULL) {
+                delete this->unlockStarColourAnim;
+            }
+            this->unlockStarColourAnim = new AnimationMultiLerp<Colour>();
+            this->unlockStarColourAnim->SetLerp(timeVals, colourVals);
+            this->unlockStarColourAnim->SetRepeat(true);
+
+            std::vector<float> pulseVals(3);
+            pulseVals[0] = 1.2f; pulseVals[1] = 1.4f; pulseVals[2] = pulseVals[0];
+
+            if (this->unlockStarGlowPulseAnim != NULL) {
+                delete this->unlockStarGlowPulseAnim;
+            }
+            this->unlockStarGlowPulseAnim = new AnimationMultiLerp<float>();
+            this->unlockStarGlowPulseAnim->SetLerp(timeVals, pulseVals);
+            this->unlockStarGlowPulseAnim->SetRepeat(true);
+        }
+    }
+
+    
+    this->bossIconSize = this->bossLabel->GetHeight();
+    float bossXPos = this->topLeftCorner[0] + this->bossIconSize + NUM_TO_NAME_GAP;
+ 
+    this->bossLabel->SetTopLeftCorner(bossXPos, this->topLeftCorner[1]);
     this->nameLabel->SetTopLeftCorner(bossXPos,
         this->topLeftCorner[1] - (NUM_TO_BOSS_NAME_GAP + std::max<float>(this->bossLabel->GetHeight(), this->bossIconSize)));
     this->nameLabel->SetFont(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
     this->nameLabel->SetScale(GameDisplay::GetTextScalingFactor() * std::min<float>(1.0f, 
-        (this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth())) / this->nameLabel->GetWidth()));
-    this->nameLabel->SetFixedWidth((this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth())));
+        (this->width - NUM_TO_NAME_GAP) / this->nameLabel->GetWidth()));
+    this->nameLabel->SetFixedWidth((this->width - NUM_TO_NAME_GAP));
 
     if (enabled) {
         this->bossLabel->SetColour(Colour(1, 0, 0));
@@ -1962,8 +2024,8 @@ void SelectLevelMenuState::BossLevelMenuItem::RebuildItem(bool enabled, const Po
             this->bossDeadLabel->SetScale(1.5f * this->state->display->GetTextScalingFactor());
             this->bossDeadLabel->SetColour(Colour(1, 0, 0));
             this->bossDeadLabel->SetTopLeftCorner(
-                (iconXPos - halfBossIconSize) + (this->bossIconSize - this->bossDeadLabel->GetLastRasterWidth()) / 2.0f,
-                (iconYPos + halfBossIconSize) - (this->bossIconSize - this->bossDeadLabel->GetHeight()) / 2.0f);
+                this->topLeftCorner[0] + (this->bossIconSize - this->bossDeadLabel->GetLastRasterWidth()) / 2.0f,
+                this->topLeftCorner[1] - (this->bossIconSize - this->bossDeadLabel->GetHeight()) / 2.0f);
         }
     }
     else {
@@ -1979,11 +2041,6 @@ void SelectLevelMenuState::BossLevelMenuItem::BuildBossIconDisplayList() {
         glDeleteLists(this->bossIconDisplayList, 1);
     }
 
-    float bossXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
-    float bossYPos = this->topLeftCorner[1];
-
-    this->bossLabel->SetTopLeftCorner(bossXPos, bossYPos);
-
     this->bossIconSize = this->bossLabel->GetHeight();
     float halfBossIconSize = bossIconSize / 2.0f;
 
@@ -1994,8 +2051,7 @@ void SelectLevelMenuState::BossLevelMenuItem::BuildBossIconDisplayList() {
     glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
     glPushMatrix();
 
-    float iconXPos = this->topLeftCorner[0] + this->width - (this->width - 
-        (NUM_TO_NAME_GAP + BORDER_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
+    float iconXPos = this->topLeftCorner[0] + halfBossIconSize;
     float iconYPos = this->topLeftCorner[1] - halfBossIconSize;
 
     glTranslatef(iconXPos, iconYPos, 0.0f);
@@ -2031,7 +2087,6 @@ void SelectLevelMenuState::BossLevelMenuItem::Draw(const Camera& camera, double 
     this->DrawBG(isSelected);
 
     // Draw the level number and name
-    this->numLabel->Draw();
     this->nameLabel->Draw();
     this->bossLabel->Draw();
     

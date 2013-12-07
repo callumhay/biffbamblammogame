@@ -246,6 +246,14 @@ public:
 		this->tracker = 0;
 		this->SetInterpolantValue(this->interpolationPts[0]);
 	}
+    void SetToRandom() {
+        assert(this->interpolationPts.size() > 0);
+
+        size_t randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->interpolationPts.size();
+        this->x = this->timePts[randomIdx];
+        this->tracker = randomIdx;
+        this->SetInterpolantValue(this->interpolationPts[randomIdx]);
+    }
 	void SetInterpolantValue(T value) {
 		(*this->interpolant) = value;
 	}

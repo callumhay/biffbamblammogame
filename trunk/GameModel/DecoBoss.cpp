@@ -171,8 +171,8 @@ void DecoBoss::Init(float startingX, float startingY) {
                     Point2D PT4(1.641f, 3.485f);
                     Point2D PT5(1.641f, 2.137f);
 
-                    Point2D BTM_PT0(-2.494f, -5.987f);
-                    Point2D BTM_PT1(2.494f, -5.987f);
+                    //Point2D BTM_PT0(-2.494f, -5.987f);
+                    //Point2D BTM_PT1(2.494f, -5.987f);
 
                     BoundingLines coreBounds;
                     coreBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(-1, 0), false);
@@ -180,7 +180,7 @@ void DecoBoss::Init(float startingX, float startingY) {
                     coreBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0, 1), false);
                     coreBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(PT3[1] - PT4[1], PT4[0] - PT3[0]), false);
                     coreBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(1, 0), false);
-                    coreBounds.AddBound(Collision::LineSeg2D(BTM_PT0, BTM_PT1), Vector2D(0, -1), false);
+                    //coreBounds.AddBound(Collision::LineSeg2D(BTM_PT0, BTM_PT1), Vector2D(0, -1), false);
 
                     BossBodyPart* core = new BossBodyPart(coreBounds);
                     middleBody->AddBodyPart(core);
@@ -190,10 +190,10 @@ void DecoBoss::Init(float startingX, float startingY) {
 
                 // Lightning Relay
                 {
-                    Point2D PT0(-2.281f, -5.987f);
+                    Point2D PT0(-2.494f, -5.987f);
                     Point2D PT1(-1.369f, -6.581f);
                     Point2D PT2(1.369f, -6.581f);
-                    Point2D PT3(2.281f, -5.987f);
+                    Point2D PT3(2.494f, -5.987f);
 
                     BoundingLines relayBounds;
                     relayBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(PT1[1] - PT0[1], PT0[0] - PT1[0]), false);

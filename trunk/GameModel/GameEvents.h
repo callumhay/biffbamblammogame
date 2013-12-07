@@ -259,11 +259,13 @@ public:
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
 	 * collides with the paddle.
 	 * Arguments: ball   - The ball as it is colliding with the player paddle.
-	 *             paddle - The paddle as it is colliding with the ball.
+	 *            paddle - The paddle as it is colliding with the ball.
+     *            hitPaddleUnderside - true if the ball hit the underside of the paddle, false if not.
      */
-    virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
+    virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside) {
         UNUSED_PARAMETER(ball);
         UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(hitPaddleUnderside);
     }
 
 	/**

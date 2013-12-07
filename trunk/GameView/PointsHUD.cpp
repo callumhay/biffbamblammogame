@@ -2,7 +2,7 @@
  * PointsHUD.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -295,10 +295,10 @@ void PointsHUD::Reinitialize() {
     this->multiplierGage->Reinitialize();
 }
 
-
+/*
 void PointsHUD::PostPointNotification(const PointAward& pointAward) {
     UNUSED_PARAMETER(pointAward);
-    /*
+    
     // Don't notify the HUD unless there's specific bonus for the point award
     if (pointAward.GetType() == ScoreTypes::UndefinedBonus) {
         return;
@@ -322,7 +322,6 @@ void PointsHUD::PostPointNotification(const PointAward& pointAward) {
 
     PointNotification* ptNotify = new PointNotification(pointAward, initialTopY, finalTopY);
     this->ptNotifications.push_back(ptNotify);
-    */
 }
 
 const char* PointsHUD::GetPointNotificationName(const PointAward& pointAward) {
@@ -340,6 +339,7 @@ const char* PointsHUD::GetPointNotificationName(const PointAward& pointAward) {
             return NULL;
     }
 }
+*/
 
 /**
  * Sets the current alpha (1 for completely visible, 0 for completely invisible) for the entire
@@ -358,6 +358,7 @@ void PointsHUD::SetAlpha(float alpha) {
     }
 }
 
+/*
 const int PointsHUD::PointNotification::NOTIFIER_TO_NOTIFIER_VERTICAL_GAP = -2;
 const int PointsHUD::PointNotification::INITIAL_NOTIFY_VERTICAL_GAP = 50;
 const int PointsHUD::PointNotification::NAME_POINT_VERTICAL_GAP     = 5;
@@ -491,6 +492,7 @@ float PointsHUD::PointNotification::GetHeight() const {
     }
     return totalHeight;
 }
+*/
 
 // MULTIPLIER HUD FUNCTIONS ***********************************************
 
@@ -819,11 +821,6 @@ currMultiplierCounterIdx(-1), multiplierGageOutlineTex(NULL), alpha(1.0) {
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->multiplierGageOutlineTex != NULL);
 
-    this->multiplierGageGradientTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_GRADIENT,
-        Texture::Trilinear, GL_TEXTURE_2D);
-    assert(this->multiplierGageGradientTex != NULL);
-
     Texture* tempTex = NULL;
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_1,
@@ -875,8 +872,6 @@ currMultiplierCounterIdx(-1), multiplierGageOutlineTex(NULL), alpha(1.0) {
 PointsHUD::MultiplierGageHUD::~MultiplierGageHUD() {
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierGageOutlineTex);
     assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierGageGradientTex);
-    assert(success);
 
     for (std::vector<Texture*>::iterator iter = this->multiplierGageFillTexs.begin();
          iter != this->multiplierGageFillTexs.end(); ++iter) {
@@ -897,20 +892,15 @@ void PointsHUD::MultiplierGageHUD::Draw(float rightMostX, float topMostY, double
     glPushMatrix();
     glTranslatef(rightMostX - HALF_MULTIPLIER_GAGE_SIZE, topMostY - HALF_MULTIPLIER_GAGE_SIZE, 0.0f);
     glScalef(MULTIPLIER_GAGE_SIZE, MULTIPLIER_GAGE_SIZE, 1.0f);
+    glColor4f(1, 1, 1, this->alpha);
 
     if (this->currMultiplierCounterIdx >= 0) {
         // Draw any fills on the multiplier gage
-        glColor4f(1, 1, 1, 0.8f * this->alpha);
         this->multiplierGageFillTexs[this->currMultiplierCounterIdx]->BindTexture();
         GeometryMaker::GetInstance()->DrawQuad();
     }
 
-    glColor4f(1, 1, 1, 0.25f * this->alpha);
-    this->multiplierGageGradientTex->BindTexture();
-    GeometryMaker::GetInstance()->DrawQuad();
-
     // Draw the outline of the gage...
-    glColor4f(1, 1, 1, this->alpha);
     this->multiplierGageOutlineTex->BindTexture();
     GeometryMaker::GetInstance()->DrawQuad();
 

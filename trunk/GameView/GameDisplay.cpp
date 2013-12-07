@@ -53,7 +53,7 @@ assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCam
 	this->SetCurrentState(new MainMenuDisplayState(this));
     //this->SetCurrentState(new BossLevelCompleteSummaryDisplayState(this)); // Testing world complete screen
     //this->SetCurrentState(new GameCompleteDisplayState(this)); // Testing game complete screen
-	SetInitialRenderOptions();
+	this->SetInitialRenderOptions();
 }
 
 GameDisplay::~GameDisplay() {

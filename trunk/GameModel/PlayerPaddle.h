@@ -284,8 +284,6 @@ public:
         return this->bounds;
     }
 
-	void DebugDraw() const;
-
     // Enable options for the paddle - used during the tutorial
     static void SetEnablePaddleReleaseTimer(bool enabled) {
         PlayerPaddle::paddleBallReleaseTimerEnabled = enabled;
@@ -315,6 +313,10 @@ public:
         return this->hitWall;
     }
     bool GetIsCloseToAWall() const;
+
+#ifdef _DEBUG
+    void DebugDraw() const;
+#endif
 
 private:
 	// Default values for the dimensions of the paddle

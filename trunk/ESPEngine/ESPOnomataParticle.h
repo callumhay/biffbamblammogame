@@ -2,7 +2,7 @@
  * ESPOnomataParticle.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the
@@ -66,9 +66,44 @@ protected:
 	void GenerateNewString();
 
 private:
-	// Disallow copy and assign
-	ESPOnomataParticle(const ESPOnomataParticle& p);
-	ESPOnomataParticle& operator=(const ESPOnomataParticle& p);
-
+	DISALLOW_COPY_AND_ASSIGN(ESPOnomataParticle);
 };
+
+inline void ESPOnomataParticle::GenerateNewString() {
+	assert(!this->useGivenString);
+	this->currStr = Onomatoplex::Generator::GetInstance()->Generate(this->soundType, this->extremeness);
+	this->currHalfStrWidth = TextureFontSet::TEXT_3D_SCALE * this->font->GetWidth(this->currStr) * 0.5f;
+}
+inline void ESPOnomataParticle::SetRandomSoundType() {
+	assert(!this->useGivenString);
+	unsigned int soundTypeRnd		= Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumSoundTypes;
+	this->soundType		= static_cast<Onomatoplex::SoundType>(soundTypeRnd);
+}
+inline void ESPOnomataParticle::SetRandomExtremeness() {
+	assert(!this->useGivenString);
+	unsigned int extremenessRnd	= Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumExtremenessTypes;
+	this->extremeness	= static_cast<Onomatoplex::Extremeness>(extremenessRnd);
+}
+
+/**
+ * Revive this particle with the given lifespan length in seconds.
+ */
+inline void ESPOnomataParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan) {
+	// Set the members to reflect a 'new life'
+	ESPParticle::Revive(pos, vel, size, rot, totalLifespan);
+	
+	if (!this->useGivenString) {
+		this->GenerateNewString();
+	}
+}
+
+/**
+ * Called each frame with the delta time for that frame, this will
+ * provide a slice of the lifetime of the particle.
+ */
+inline void ESPOnomataParticle::Tick(const double dT) {
+	ESPParticle::Tick(dT);
+}
+
+
 #endif

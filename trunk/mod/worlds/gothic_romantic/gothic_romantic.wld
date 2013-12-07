@@ -43,7 +43,7 @@ resources/worlds/levels/medium/giving_it_100_percent.lvl
 
 
 # Iceball Item Intro
-resources/worlds/levels/medium/breaking_the_ice.lvl : 127
+resources/worlds/levels/medium/breaking_the_ice.lvl : 120
 
 # Fireball Item Intro (uses no-entry blocks)
 resources/worlds/levels/medium/burning_down_the_house.lvl
@@ -65,4 +65,4 @@ resources/worlds/levels/hard/all_of_the_above.lvl
 
 
 # Boss
-resources/worlds/levels/bosses/itemmancer.lvl : 158
+resources/worlds/levels/bosses/itemmancer.lvl : 147
