@@ -140,12 +140,13 @@ public:
 	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, IceCubeStatus = 0x00000002 };
 	bool HasStatus(int32_t statusMask) const;
 	void AddStatus(GameLevel* level, const PieceStatus& status);
-	void RemoveStatus(GameLevel* level, const PieceStatus& status);
+	virtual void RemoveStatus(GameLevel* level, const PieceStatus& status);
 	void RemoveStatuses(GameLevel* level, int32_t statusMask);
 
     // Projectile attachment functionality
     void AttachProjectile(MineProjectile* p);
     void DetachProjectile(MineProjectile* p);
+    void DetachAllProjectiles();
 
 	// Debug Stuffs
 	void DebugDraw() const;

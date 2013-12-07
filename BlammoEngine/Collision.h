@@ -480,26 +480,30 @@ namespace Collision {
 		return IsCollision(lineRay, aabb, rayMin) && rayMin >= 0.0f && rayMin <= lineLength;
 	}
 
-	inline bool IsCollision(const Ray2D& ray, const LineSeg2D& lineSeg, float& rayT) {
-		// Create a parameteric equation for the line segment
-		Vector2D D1 = lineSeg.P2() - lineSeg.P1();
-		Vector2D D0  = ray.GetUnitDirection();
-			
-		Vector2D perpD1(D1[1], -D1[0]);
-		float dotPerpD1D0 = Vector2D::Dot(perpD1, D0);
-		if (fabs(dotPerpD1D0) < EPSILON) {
-			// Ray and line segment are parallel...
-			return false;
-		}
+    inline bool IsCollision(const Ray2D& ray, const LineSeg2D& lineSeg, float& rayT, float& lineT) {
+        // Create a parameteric equation for the line segment
+        Vector2D D1 = lineSeg.P2() - lineSeg.P1();
+        Vector2D D0  = ray.GetUnitDirection();
 
-		Vector2D perpD0(D0[1], -D0[0]);
-		Vector2D P1MinusP0 = lineSeg.P1() - ray.GetOrigin();
-		//P1MinusP0.Normalize();
-		rayT = Vector2D::Dot(perpD1, P1MinusP0) / dotPerpD1D0;
-		float lineT = Vector2D::Dot(perpD0, P1MinusP0) / dotPerpD1D0;
+        Vector2D perpD1(D1[1], -D1[0]);
+        float dotPerpD1D0 = Vector2D::Dot(perpD1, D0);
+        if (fabs(dotPerpD1D0) < EPSILON) {
+            // Ray and line segment are parallel...
+            return false;
+        }
 
-		return (rayT >= 0 && lineT >= -EPSILON && lineT <= (1+EPSILON));
-	}
+        Vector2D perpD0(D0[1], -D0[0]);
+        Vector2D P1MinusP0 = lineSeg.P1() - ray.GetOrigin();
+        rayT  = Vector2D::Dot(perpD1, P1MinusP0) / dotPerpD1D0;
+        lineT = Vector2D::Dot(perpD0, P1MinusP0) / dotPerpD1D0;
+
+        return (rayT >= 0 && lineT >= -EPSILON && lineT <= (1+EPSILON));
+    }
+
+    inline bool IsCollision(const Ray2D& ray, const LineSeg2D& lineSeg, float& rayT) {
+        float lineT;
+        return IsCollision(ray, lineSeg, rayT, lineT);
+    }
 
 	inline bool IsCollision(const Ray2D& ray, const Circle2D& circle, float& rayT) {
 		Vector2D m = ray.GetOrigin() - circle.Center();
@@ -554,6 +558,25 @@ namespace Collision {
         }
 
         closestPtOnLineSeg = lineSeg.P1() + t * lineSegDir;
+    }
+
+    inline bool ClosestPointMustBeOnSegment(const Point2D& pt, const LineSeg2D& lineSeg, Point2D& closestPtOnLineSeg) {
+        Vector2D lineSegDir = lineSeg.P2() - lineSeg.P1();
+        float t = Vector2D::Dot(pt - lineSeg.P1(), lineSegDir) / Vector2D::Dot(lineSegDir, lineSegDir);
+
+        bool result = true;
+
+        if (t < 0.0f) {
+            t = 0.0f;
+            result = false;
+        }
+        else if (t > 1.0f) {
+            t = 1.0f;
+            result = false;
+        }
+
+        closestPtOnLineSeg = lineSeg.P1() + t * lineSegDir;
+        return result;
     }
 
 	inline Point3D ClosestPoint(const Point3D& pt, const LineSeg3D& lineSeg) {

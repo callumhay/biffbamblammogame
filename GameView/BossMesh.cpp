@@ -15,6 +15,7 @@
 #include "NouveauBossMesh.h"
 #include "DecoBossMesh.h"
 #include "GameViewConstants.h"
+#include "CgFxBossWeakpoint.h"
 
 #include "../BlammoEngine/Texture2D.h"
 
@@ -36,7 +37,10 @@
 #include "../ResourceManager.h"
 
 BossMesh::BossMesh(GameSound* sound) : 
-sound(sound), explosionAnimTex(NULL), finalExplosionIsActive(false),
+sound(sound), 
+explosionAnimTex(NULL), 
+weakpointMaterial(NULL),
+finalExplosionIsActive(false),
 finalExplosionSoundID(INVALID_SOUND_ID),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f), 
@@ -100,6 +104,8 @@ particleShrinkToNothing(1, 0)
 
     this->lineAnim.ClearLerp();
     this->flashAnim.ClearLerp();
+
+    this->weakpointMaterial = new CgFxBossWeakpoint();
 }
 
 BossMesh::~BossMesh() {
@@ -138,6 +144,9 @@ BossMesh::~BossMesh() {
         handler = NULL;
     }
     this->explodingEmitterHandlers.clear();
+
+    delete this->weakpointMaterial;
+    this->weakpointMaterial = NULL;
 }
 
 BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss, GameSound* sound) {

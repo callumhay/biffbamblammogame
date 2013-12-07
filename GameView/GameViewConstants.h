@@ -78,6 +78,7 @@ public:
     const char* CGFX_CELOUTLINES_SHADER;
     const char* CGFX_POSTTUTORIALATTENTION_SHADER;
     const char* CGFX_CLOUD_SHADER;
+    const char* CGFX_BOSSWEAKPOINT_SHADER;
 
 	// Texture path constants *******************************
 	const char* TEXTURE_BANG1;
@@ -168,7 +169,6 @@ public:
 
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;
-    const char* TEXTURE_MULTIPLIER_GAGE_GRADIENT;
     const char* TEXTURE_MULTIPLIER_GAGE_FILL_1;
     const char* TEXTURE_MULTIPLIER_GAGE_FILL_2;
     const char* TEXTURE_MULTIPLIER_GAGE_FILL_3;

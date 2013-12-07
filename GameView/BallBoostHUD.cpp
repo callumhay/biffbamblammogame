@@ -26,9 +26,12 @@ BallBoostHUD::BallBoostHUD(int displayHeight) : ballHUDOutlineTex(NULL), ballFil
 haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), haloFader(1.0f, 0.10f), alpha(0.0f) {
 
     // Initialize the textures for the ball boost HUD
-    this->ballHUDOutlineTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_OUTLINE,  Texture::Trilinear, GL_TEXTURE_2D);
-    this->ballFillTex       = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_BALLFILL, Texture::Trilinear, GL_TEXTURE_2D);
-    this->haloTexture       = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+    this->ballHUDOutlineTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_OUTLINE,  Texture::Trilinear, GL_TEXTURE_2D);
+    this->ballFillTex       = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_BALLFILL, Texture::Trilinear, GL_TEXTURE_2D);
+    this->haloTexture       = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
     
     assert(this->ballHUDOutlineTex != NULL);
     assert(this->ballFillTex       != NULL);
@@ -36,9 +39,12 @@ haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), halo
 
     // Initialize the trail fill components
     this->trailFills.reserve(3);
-    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_1, ColourRGBA(1.0f, 1.0f, 0.0f, this->alpha)));
-    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_2, ColourRGBA(1.0f, 0.7f, 0.0f, this->alpha)));
-    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_3, ColourRGBA(1.0f, 0.3f, 0.0f, this->alpha)));
+    this->trailFills.push_back(new BallBoostHUD::TrailFill(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_1, ColourRGBA(Colour(0xFFFF00), this->alpha)));
+    this->trailFills.push_back(new BallBoostHUD::TrailFill(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_2, ColourRGBA(Colour(0xFF9600), this->alpha)));
+    this->trailFills.push_back(new BallBoostHUD::TrailFill(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_3, ColourRGBA(Colour(0xFF3200), this->alpha)));
 
     // Initialize the emitter/effect for when boosts are gained
     static const float TOTAL_HALO_LIFE  = 0.8f;

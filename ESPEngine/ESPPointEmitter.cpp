@@ -41,7 +41,7 @@ Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
 		
 		// Now just manipulate the theta and phi values based on the range (cone) of the emitter...
 		double thetaVariation = this->emitAngleInRads * Randomizer::GetInstance()->RandomNumNegOneToOne();
-		double phiVariation		= this->emitAngleInRads * Randomizer::GetInstance()->RandomNumNegOneToOne();
+		double phiVariation   = this->emitAngleInRads * Randomizer::GetInstance()->RandomNumNegOneToOne();
 		sphCoordEmitDir[1] += thetaVariation;
 		sphCoordEmitDir[2] += phiVariation;
 

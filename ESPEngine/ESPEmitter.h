@@ -121,17 +121,17 @@ public:
 protected:			
 	Texture2D* particleTexture;		// Texture of particles in this emitter
 
-	std::map<const ESPParticle*, int> particleLivesLeft;		// Number of lives left for each particle
-	std::list<ESPParticle*> aliveParticles;									// All the alive particles in this emitter
-	std::list<ESPParticle*> deadParticles;									// All the dead particles in this emitter
+	std::map<const ESPParticle*, int> particleLivesLeft;  // Number of lives left for each particle
+	std::list<ESPParticle*> aliveParticles;               // All the alive particles in this emitter
+	std::list<ESPParticle*> deadParticles;                // All the dead particles in this emitter
 	
-	float timeSinceLastSpawn;																// Time since the last particle was spawned	
+	float timeSinceLastSpawn;  // Time since the last particle was spawned	
 	int numParticleLives;
 	
 	bool isReversed;		// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
 
-	std::list<ESPParticleEffector*> effectors;					// All the particle effectors of this emitter
-	std::list<ESPEmitterEventHandler*> eventHandlers;		// The event handlers attached to this emitter
+	std::list<ESPParticleEffector*> effectors;        // All the particle effectors of this emitter
+	std::list<ESPEmitterEventHandler*> eventHandlers; // The event handlers attached to this emitter
 	
 	Plane particleDeathPlane;
 

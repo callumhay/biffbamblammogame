@@ -267,10 +267,10 @@ void GameEventManager::ActionIceBallCancelledByFireBall(const GameBall& ball) {
 }
 
 // Action for when the ball collides with the player paddle
-void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle) {
+void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->BallPaddleCollisionEvent(ball, paddle);
+		(*listenerIter)->BallPaddleCollisionEvent(ball, paddle, hitPaddleUnderside);
 	}	
 }
 

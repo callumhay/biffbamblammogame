@@ -54,11 +54,10 @@ moonCloudFader(), cloudGrower(1.0f, 1.15f), moonPos(23.0f, 38.0f, -50.0f) {
     // Makes sure the colours are dark enough not to saturate/blanche insanely
     // and that they properly reflect the movement: ominous, moody, washed-out colours
     std::vector<Colour> colours;
-    colours.reserve(15);
+    colours.reserve(14);
     colours.push_back(Colour(0x604848)); // Murky purple
     colours.push_back(Colour(0x45424B)); // Dark grey
     colours.push_back(Colour(0x603034)); // Mulberry-Brownish
-    colours.push_back(Colour(0xCAA9BA)); // Washed-out pinky mauve
     colours.push_back(Colour(0x4C6366)); // Corpse green
     colours.push_back(Colour(0x2C667E)); // Deep turquoise
     colours.push_back(Colour(0x784819)); // Poop-Brownish

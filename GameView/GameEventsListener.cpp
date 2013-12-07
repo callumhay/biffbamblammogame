@@ -607,7 +607,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	debug_output("EVENT: Ball-block collision");
 }
 
-void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
+void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside) {
 	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
 	bool doEffect = (currSystemTime - this->timeOfLastBallPaddleCollisionEventInMS) > 
 	    EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
@@ -622,7 +622,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
         if (paddle.HasPaddleType(PlayerPaddle::ShieldPaddle)) {
             sound->PlaySoundAtPosition(GameSound::BallShieldPaddleCollisionEvent, false, collisionPtEstimate, true, true, true);
 		}
-		else if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle)) {
+		else if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle) && !hitPaddleUnderside) {
             // If there is already a ball attached to the sticky paddle then the ball will bounce off
             // the sticky goo, resulting in a different sound...
             if (paddle.HasBallAttached()) {
@@ -637,7 +637,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 		}
 
 		// Add the visual effect for when the ball hits the paddle
-		this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(ball, paddle);
+		this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(ball, paddle, hitPaddleUnderside);
 
 		bool ballIsUber = (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall;
 		BBBGameController::VibrateAmount vibrationLeft  = BBBGameController::VerySoftVibration;
@@ -1748,14 +1748,6 @@ void GameEventsListener::BlockFireCancelledWithIceEvent(const LevelPiece& block)
 void GameEventsListener::ReleaseTimerStartedEvent() {
     this->display->GetAssets()->GetBallReleaseHUD()->TimerStarted();
     debug_output("EVENT: Ball release timer started");
-}
-
-void GameEventsListener::PointNotificationEvent(const PointAward& pointAward) {
-
-    PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
-    pointsHUD->PostPointNotification(pointAward);
-
-    debug_output("EVENT: Point notification");
 }
 
 void GameEventsListener::NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars) {

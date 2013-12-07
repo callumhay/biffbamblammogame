@@ -66,7 +66,7 @@ public:
     bool GetIsDestroyed() const;
     virtual void SetDestroyed(bool isDestroyed);
 
-    ColourRGBA GetColour() const { return this->rgbaAnim.GetInterpolantValue(); }
+    const ColourRGBA& GetColour() const { return this->rgbaAnim.GetInterpolantValue(); }
     float GetAlpha() const { return this->rgbaAnim.GetInterpolantValue().A(); }
     void SetColour(double animateTimeInSecs, const ColourRGBA& colour);
     void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);

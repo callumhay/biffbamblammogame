@@ -60,7 +60,7 @@ public:
     void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
-
+    void RemoveStatus(GameLevel* level, const PieceStatus& status);
 private:
     static const int POINTS_ON_BLOCK_DESTROYED = 100;
 

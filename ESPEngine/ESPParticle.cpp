@@ -63,10 +63,8 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment)
 	glPushMatrix();
 
 	// Do any personal alignment transforms...
-	Matrix4x4 personalAlignXF = this->GetPersonalAlignmentTransform(camera, alignment);
-	
 	glTranslatef(this->position[0], this->position[1], this->position[2]);
-	glMultMatrixf(personalAlignXF.begin());
+	glMultMatrixf(this->GetPersonalAlignmentTransform(camera, alignment).begin());
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
@@ -85,34 +83,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 	
 	// Create the alignment transform matrix based off the given alignment...
 	switch(alignment) {
-		case ESP::ViewPointAligned:
-
-			// The normal vector is from the particle center to the eye
-			alignNormalVec = Vector3D(-camPos[0], camPos[1], camPos[2]);
-			// Make sure there is a normal...
-			if (alignNormalVec == Vector3D(0,0,0)) {
-				alignNormalVec = PARTICLE_NORMAL_VEC;
-			}
-			else {
-				alignNormalVec = Vector3D::Normalize(alignNormalVec);
-			}
-
-			// The particle is aligned to the view-point
-			// - The up vector is the particle up vector
-			alignUpVec = PARTICLE_UP_VEC;
 		
-			// Find out if up and normal are parallel and fix in that case...
-			alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
-			if (alignRightVec == Vector3D(0,0,0)) {
-				alignRightVec = Vector3D::cross(cam.GetNormalizedUpVector(), alignNormalVec);
-				if (alignRightVec == Vector3D(0,0,0)) {
-					alignRightVec = PARTICLE_RIGHT_VEC;
-				}
-			}
-			alignRightVec = Vector3D::Normalize(alignRightVec);
-			alignUpVec    = Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
-			break;
-
 		case ESP::AxisAligned:
 			// The normal vector is from the particle center to the eye
 			alignNormalVec = Vector3D(camPos[0], -camPos[1], camPos[2]);

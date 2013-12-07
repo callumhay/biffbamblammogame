@@ -219,8 +219,6 @@ void LoadingScreen::EndShowingLoadingScreen() {
 	this->loadingScreenOn = false;
 	this->numCallsToUpdate = 0;
 	this->numExpectedUpdates = 0;
-
-	//GameDisplay::SetInitialRenderOptions();
 }
 
 /**

@@ -22,7 +22,7 @@
 #include "../BlammoEngine/TextLabel.h"
 
 ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), particleTexture(NULL),
-particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
+particleAlignment(ESP::ScreenAlignedGlobalUpVec), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
 isReversed(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),
 radiusDeviationFromPtX(0.0), radiusDeviationFromPtY(0.0), radiusDeviationFromPtZ(0.0) {
@@ -158,22 +158,26 @@ bool ESPEmitter::IsParticlePastDeathPlane(const ESPParticle& p) {
  * the movement between alive and dead particles.
  */
 void ESPEmitter::TickParticles(double dT) {
-	std::list<std::list<ESPParticle*>::iterator> nowDead;
+
+    std::list<ESPParticle*>::iterator tempIter;
+    ESPParticle* currParticle;
 
 	// Go through the alive iterators and figure out which ones have died and tick those that are still alive
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
-		// Give the particle time to do its thing...
-		ESPParticle* currParticle = *iter;
-		std::list<ESPParticle*>::iterator tempIter = iter;
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ) {
+		
+        // Give the particle time to do its thing...
+		currParticle = *iter;
+		tempIter = iter;
 
 		// Check to see if the particle has died, if so place it among the dead
 		if (currParticle->IsDead() || this->IsParticlePastDeathPlane(*currParticle)) {
-			nowDead.push_back(iter);
 			this->deadParticles.push_back(currParticle);
-
-            for (std::list<ESPEmitterEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
-                (*iter)->ParticleDiedEvent(currParticle);
+            for (std::list<ESPEmitterEventHandler*>::iterator iter2 = this->eventHandlers.begin(); iter2 != this->eventHandlers.end(); ++iter2) {
+                (*iter2)->ParticleDiedEvent(currParticle);
             }
+
+            iter = this->aliveParticles.erase(iter);
+            continue;
 		}
 		else {
 			currParticle->Tick(dT);
@@ -183,10 +187,8 @@ void ESPEmitter::TickParticles(double dT) {
 				(*effIter)->AffectParticleOnTick(dT, currParticle);
 			}
 		}
-	}
 
-	for (std::list<std::list<ESPParticle*>::iterator>::iterator iter = nowDead.begin(); iter != nowDead.end(); ++iter) {
-		this->aliveParticles.erase(*iter);	
+        ++iter;
 	}
 }
 
@@ -248,6 +250,7 @@ void ESPEmitter::SimulateTicking(double time) {
  * Public function, called each frame to execute the emitter.
  */
 void ESPEmitter::Tick(const double dT) {
+
 	// Check for the special case of a single lifetime
 	if (this->OnlySpawnsOnce()) {
 		// Inline: Particles only have a single life time and are spawned immediately
@@ -260,7 +263,6 @@ void ESPEmitter::Tick(const double dT) {
 		}
 		this->timeSinceLastSpawn += dT;
 		this->TickParticles(dT);
-
 	}
 	else {
 		// Inline: there is a variable respawn time
@@ -275,7 +277,6 @@ void ESPEmitter::Tick(const double dT) {
 			this->timeSinceLastSpawn += dT;
 		}
 		this->TickParticles(dT);
-
 	}
 }
 

@@ -52,7 +52,7 @@ public:
     void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet);
     void ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);
 	void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
-	void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
+	void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside);
     void BallBossCollisionEvent(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart);
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
@@ -121,7 +121,7 @@ public:
 	void ScoreChangedEvent(int newScore);
     void ScoreMultiplierCounterChangedEvent(int oldCounterValue, int newCounterValue);
 	void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier, const Point2D& position);
-    void PointNotificationEvent(const PointAward& pointAward);
+    void PointNotificationEvent(const PointAward&) {}
     void NumStarsChangedEvent(const PointAward* pointAward, int oldNumStars, int newNumStars);
 
     void DifficultyChangedEvent(const GameModel::Difficulty& newDifficulty);

@@ -22,11 +22,6 @@ currSelectedTexIdx(0), textures(textures) {
 ESPRandomTextureParticle::~ESPRandomTextureParticle() {
 }
 
-void ESPRandomTextureParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan) {
-    ESPParticle::Revive(pos, vel, size, rot, totalLifespan);
-    this->SelectRandomTexture();
-}
-
 void ESPRandomTextureParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment) {
 
 	// Don't draw if dead...
@@ -37,11 +32,8 @@ void ESPRandomTextureParticle::Draw(const Camera& camera, const ESP::ESPAlignmen
 	// Transform and draw the particle
 	glPushMatrix();
 
-	// Do any personal alignment transforms...
-	Matrix4x4 personalAlignXF = this->GetPersonalAlignmentTransform(camera, alignment);
-	
 	glTranslatef(this->position[0], this->position[1], this->position[2]);
-	glMultMatrixf(personalAlignXF.begin());
+	glMultMatrixf(this->GetPersonalAlignmentTransform(camera, alignment).begin());
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
@@ -50,7 +42,6 @@ void ESPRandomTextureParticle::Draw(const Camera& camera, const ESP::ESPAlignmen
 
     currTexture->BindTexture();
 	GeometryMaker::GetInstance()->DrawQuad();
-    currTexture->UnbindTexture();
 
 	glPopMatrix();
 }

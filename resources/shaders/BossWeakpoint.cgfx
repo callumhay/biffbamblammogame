@@ -1,0 +1,90 @@
+/**
+ * BossWeakpoint.cgfx
+ * Author: Callum Hay
+ * 
+ * A super-simple shader for colouring boss weakpoints so that they are not
+ * lit, but instead are 'emissive' and, as a result, obvious to the player.
+ */
+ 
+ float Script : STANDARDSGLOBAL <
+    string UIWidget = "none";
+    string ScriptClass = "object";
+    string ScriptOrder = "standard";
+    string ScriptOutput = "color";
+    string Script = "Technique=Basic;";
+> = 0.8;
+
+float4x4 WvpXf : WorldViewProjection < string UIWidget="None"; >;
+
+float LightAmount <
+> = 0.0;
+
+texture ColourTexture  <
+    string ResourceName = "default_color.dds";
+    string UIName =  "Diffuse Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
+};  
+
+struct appdata {
+    float3 Position : POSITION;
+    float4 UV       : TEXCOORD0;
+    float4 Colour   : COLOR0;
+};
+
+struct vertexOutput {
+    float4 HPosition   : POSITION;
+    float2 UV          : TEXCOORD0;
+    float4 Colour      : TEXCOORD1;
+};
+
+vertexOutput bossweakpoint_VS(appdata IN) {
+    vertexOutput OUT = (vertexOutput)0;
+
+    float4 Po = float4(IN.Position.xyz,1);
+	OUT.HPosition = mul(WvpXf,Po);
+	
+    OUT.UV = IN.UV.xy;
+    OUT.Colour = float4(LightAmount * IN.Colour.rgb, IN.Colour.a);
+	
+    return OUT;
+}
+
+float4 bossweakpoint_PS(vertexOutput IN) : COLOR {
+    return IN.Colour;
+}
+
+float4 textured_bossweakpoint_PS(vertexOutput IN) : COLOR {
+    float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
+    return float4((0.5f*textureColour + 0.5f*IN.Colour.rgb) * IN.Colour.rgb, IN.Colour.a);
+}
+
+technique Basic {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+        
+        VertexProgram   = compile arbvp1 bossweakpoint_VS();        
+        FragmentProgram = compile arbfp1 bossweakpoint_PS();
+    }  
+}
+
+technique Textured {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+    
+        VertexProgram   = compile arbvp1 bossweakpoint_VS();        
+        FragmentProgram = compile arbfp1 textured_bossweakpoint_PS();
+    }     
+}
+

@@ -15,6 +15,7 @@
 #include "InGameBossLevelDisplayState.h"
 #include "GameAssets.h"
 #include "GameFBOAssets.h"
+#include "CgFxBossWeakpoint.h"
 
 #include "../BlammoEngine/Mesh.h"
 #include "../GameModel/NouveauBoss.h"
@@ -116,6 +117,11 @@ bottomGlowSoundID(INVALID_SOUND_ID)
         this->frillColourAnim.SetLerp(timeVals, colourVals);
         this->frillColourAnim.SetRepeat(true);
     }
+
+    const Texture2D* bossTexture = static_cast<const Texture2D*>(
+        this->bodyMesh->GetMaterialGroups().begin()->second->GetMaterial()->GetProperties()->diffuseTexture);
+    assert(bossTexture != NULL);
+    this->weakpointMaterial->SetTexture(bossTexture);
 }
 
 NouveauBossMesh::~NouveauBossMesh() {
@@ -199,19 +205,37 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
 
     UNUSED_PARAMETER(dT);
 
-    // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
-    // worldspace locations...
+    this->weakpointMaterial->SetLightAmt(keyLight, fillLight);
 
-    ColourRGBA currColour;
+    // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
+    // world space locations...
+
+    const ColourRGBA* currColour;
 
 #define DRAW_BODY_PART(bodyPart, bodyPartMesh) \
     assert(bodyPart != NULL); \
-    currColour = bodyPart->GetColour(); \
-    if (currColour.A() > 0.0f) { \
+    currColour = &bodyPart->GetColour(); \
+    if (currColour->A() > 0.0f) { \
         glPushMatrix(); \
         glMultMatrixf(bodyPart->GetWorldTransform().begin()); \
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A()); \
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A()); \
         bodyPartMesh->Draw(camera, keyLight, fillLight, ballLight); \
+        glPopMatrix(); \
+    }
+
+#define DRAW_POSSIBLE_WEAKPOINT_BODY_PART(bodyPart, bodyPartMesh) \
+    assert(bodyPart != NULL); \
+    currColour = &bodyPart->GetColour(); \
+    if (currColour->A() > 0.0f) { \
+        glPushMatrix(); \
+        glMultMatrixf(bodyPart->GetWorldTransform().begin()); \
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A()); \
+        if (bodyPart->GetType() == AbstractBossBodyPart::WeakpointBodyPart) { \
+            bodyPartMesh->Draw(camera, this->weakpointMaterial); \
+        } \
+        else { \
+            bodyPartMesh->Draw(camera, keyLight, fillLight, ballLight); \
+        } \
         glPopMatrix(); \
     }
 
@@ -226,38 +250,37 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
     DRAW_BODY_PART(rightSideCurl, this->sideCurlsMesh);
 
     // Side arms (curl holder, sphere, frills)
-    const BossBodyPart* leftHolderCurl       = this->boss->GetLeftSideHolderCurl();
-    const BossBodyPart* leftSideSphere       = this->boss->GetLeftSideSphere();
-    
-    DRAW_BODY_PART(leftHolderCurl, this->sideSphereHolderCurlMesh);
-    DRAW_BODY_PART(leftSideSphere, this->sideSphereMesh);
+    const BossBodyPart* leftHolderCurl = this->boss->GetLeftSideHolderCurl();
+    const BossBodyPart* leftSideSphere = this->boss->GetLeftSideSphere();
+    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(leftHolderCurl, this->sideSphereHolderCurlMesh);
+    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(leftSideSphere, this->sideSphereMesh);
 
-    const BossBodyPart* rightHolderCurl       = this->boss->GetRightSideHolderCurl();
-    const BossBodyPart* rightSideSphere       = this->boss->GetRightSideSphere();
-    DRAW_BODY_PART(rightHolderCurl, this->sideSphereHolderCurlMesh);
-    DRAW_BODY_PART(rightSideSphere, this->sideSphereMesh);
+    const BossBodyPart* rightHolderCurl = this->boss->GetRightSideHolderCurl();
+    const BossBodyPart* rightSideSphere = this->boss->GetRightSideSphere();
+    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(rightHolderCurl, this->sideSphereHolderCurlMesh);
+    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(rightSideSphere, this->sideSphereMesh);
 
     // Make the frills glow special colours to indicate that they must be destroyed (when they haven't yet been destroyed)
     const BossBodyPart* leftSideSphereFrills = this->boss->GetLeftSideSphereFrills();
     const BossBodyPart* rightSideSphereFrills = this->boss->GetRightSideSphereFrills();
     
     this->frillColourAnim.Tick(dT);
-    Colour& frillColour = this->frillColourAnim.GetInterpolantValue();
+    const Colour& frillColour = this->frillColourAnim.GetInterpolantValue();
 
-    currColour = leftSideSphereFrills->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &leftSideSphereFrills->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(leftSideSphereFrills->GetWorldTransform().begin());
-        glColor4f(frillColour.R(), frillColour.G(), frillColour.B(), currColour.A());
+        glColor4f(frillColour.R(), frillColour.G(), frillColour.B(), currColour->A());
         this->sideSphereFrillsMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 
-    currColour = rightSideSphereFrills->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &rightSideSphereFrills->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(rightSideSphereFrills->GetWorldTransform().begin());
-        glColor4f(frillColour.R(), frillColour.G(), frillColour.B(), currColour.A());
+        glColor4f(frillColour.R(), frillColour.G(), frillColour.B(), currColour->A());
         this->sideSphereFrillsMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
@@ -274,7 +297,7 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
 
     // Top sphere
     const BossBodyPart* topSphere = this->boss->GetTopSphere();
-    DRAW_BODY_PART(topSphere, this->topSphereMesh);
+    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(topSphere, this->topSphereMesh);
 
     // Top Gazebo
     const BossBodyPart* topGazebo = this->boss->GetTopGazebo();
@@ -289,6 +312,7 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
     DRAW_BODY_PART(topDome, this->topDomeMesh);
 
 #undef DRAW_BODY_PART
+#undef DRAW_POSSIBLE_WEAKPOINT_BODY_PART
 }
 
 void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {

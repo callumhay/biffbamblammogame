@@ -412,3 +412,16 @@ void GameBall::SetSpeed(float speed) {
 	this->currSpeed = speed;
 	this->gravitySpeed = speed;
 }
+
+#ifdef _DEBUG
+void GameBall::DebugDraw() const {
+    const Point2D& center = this->GetCenterPosition2D();
+    Point2D velocityPt = center + 0.25f*this->GetVelocity();
+
+    glBegin(GL_LINES);
+    glColor3f(0,1,0);
+    glVertex3f(center[0], center[1], 0.0f);
+    glVertex3f(velocityPt[0], velocityPt[1], 0.0f);
+    glEnd();
+}
+#endif

@@ -21,8 +21,7 @@ NoEntryBlock::~NoEntryBlock() {
 }
 
 bool NoEntryBlock::ProjectilePassesThrough(const Projectile* projectile) const {
-    UNUSED_PARAMETER(projectile);
-    return true;
+    return projectile->IsRefractableOrReflectable() || !this->HasStatus(LevelPiece::IceCubeStatus);
 }
 
 /**
@@ -107,7 +106,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
             this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));;
 		boundingNorms[lineCount] = Vector2D(-1, 0);
         onInside[lineCount] = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
-            leftNeighbor->GetType() == LevelPiece::Breakable);
+            leftNeighbor->GetType() == LevelPiece::Breakable || leftNeighbor->GetType() == LevelPiece::OneWay);
         lineCount++;
     }
     shouldGenBounds = false;
@@ -133,7 +132,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
             this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		boundingNorms[lineCount] = Vector2D(0, -1);
         onInside[lineCount] = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) || 
-            bottomNeighbor->GetType() == LevelPiece::Breakable);
+            bottomNeighbor->GetType() == LevelPiece::Breakable || bottomNeighbor->GetType() == LevelPiece::OneWay);
         lineCount++;
     }
     shouldGenBounds = false;
@@ -159,7 +158,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
             this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));;
 		boundingNorms[lineCount] = Vector2D(1, 0);
         onInside[lineCount] = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) || 
-            rightNeighbor->GetType() == LevelPiece::Breakable);
+            rightNeighbor->GetType() == LevelPiece::Breakable || rightNeighbor->GetType() == LevelPiece::OneWay);
         lineCount++;
     }
     shouldGenBounds = false;
@@ -185,7 +184,7 @@ void NoEntryBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece
             this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		boundingNorms[lineCount] = Vector2D(0, 1);
         onInside[lineCount] = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) || 
-            topNeighbor->GetType() == LevelPiece::Breakable);
+            topNeighbor->GetType() == LevelPiece::Breakable || topNeighbor->GetType() == LevelPiece::OneWay);
         lineCount++;
     }
 
@@ -291,4 +290,13 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
 	}
 
 	return resultingPiece;
+}
+
+void NoEntryBlock::RemoveStatus(GameLevel* level, const PieceStatus& status) {
+    LevelPiece::RemoveStatus(level, status);
+
+    // If the status removed was ice, then detach all attached projectiles...
+    if (status == LevelPiece::IceCubeStatus) {
+        this->DetachAllProjectiles();
+    }
 }

@@ -1189,11 +1189,11 @@ void PlayerPaddle::AnimateFade(bool fadeOut, double duration) {
 	this->colourAnimation.SetLerp(duration, finalColour);
 }
 
+#ifdef _DEBUG
 void PlayerPaddle::DebugDraw() const {
-	glPushMatrix();
 	this->bounds.DebugDraw();
-	glPopMatrix();
 }
+#endif
 
 float PlayerPaddle::GetMineProjectileStartingHeightRelativeToPaddle() const {
     return this->currHalfHeight + 0.25f * this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;

@@ -66,9 +66,45 @@ protected:
 	void GenerateNewString();
 
 private:
-	// Disallow copy and assign
-	ESPOrthoOnomataParticle(const ESPOrthoOnomataParticle& p);
-	ESPOrthoOnomataParticle& operator=(const ESPOrthoOnomataParticle& p);
+	DISALLOW_COPY_AND_ASSIGN(ESPOrthoOnomataParticle);
 
 };
+
+inline void ESPOrthoOnomataParticle::GenerateNewString() {
+	assert(!this->useGivenString);
+	this->currStr = Onomatoplex::Generator::GetInstance()->Generate(this->soundType, this->extremeness);
+	this->currHalfStrWidth = this->font->GetWidth(this->currStr) * 0.5f;
+}
+inline void ESPOrthoOnomataParticle::SetRandomSoundType() {
+	assert(!this->useGivenString);
+	unsigned int soundTypeRnd = Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumSoundTypes;
+	this->soundType		= static_cast<Onomatoplex::SoundType>(soundTypeRnd);
+}
+inline void ESPOrthoOnomataParticle::SetRandomExtremeness() {
+	assert(!this->useGivenString);
+	unsigned int extremenessRnd	= Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumExtremenessTypes;
+	this->extremeness	= static_cast<Onomatoplex::Extremeness>(extremenessRnd);
+}
+
+/**
+ * Revive this particle with the given lifespan length in seconds.
+ */
+inline void ESPOrthoOnomataParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan) {
+	// Set the members to reflect a 'new life'
+	ESPParticle::Revive(pos, vel, size, rot, totalLifespan);
+	
+	if (!this->useGivenString) {
+		this->GenerateNewString();
+	}
+}
+
+/**
+ * Called each frame with the delta time for that frame, this will
+ * provide a slice of the lifetime of the particle.
+ */
+inline void ESPOrthoOnomataParticle::Tick(const double dT) {
+	ESPParticle::Tick(dT);
+}
+
+
 #endif // __ESPORTHOONOMATAPARTICLE_H__

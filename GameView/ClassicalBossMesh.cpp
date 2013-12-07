@@ -13,6 +13,7 @@
 #include "GameViewConstants.h"
 #include "GameAssets.h"
 #include "GameLightAssets.h"
+#include "CgFxBossWeakpoint.h"
 
 #include "../ResourceManager.h"
 #include "../BlammoEngine/Mesh.h"
@@ -96,12 +97,20 @@ eyeGlowPulser(ScaleEffect(1.0f, 1.5f)), sparkleSoundID(INVALID_SOUND_ID), glowSo
     this->baseExplodingEmitter     = this->BuildExplodingEmitter(0.75f, this->boss->GetBase(), ClassicalBoss::BASE_WIDTH, ClassicalBoss::BASE_HEIGHT);
     this->pedimentExplodingEmitter = this->BuildExplodingEmitter(0.75f, this->boss->GetPediment(), ClassicalBoss::PEDIMENT_WIDTH, ClassicalBoss::PEDIMENT_HEIGHT);
     this->eyeExplodingEmitter      = this->BuildExplodingEmitter(1.0f,  this->boss->GetEye(), 1.5f * ClassicalBoss::EYE_WIDTH, 1.5f * ClassicalBoss::EYE_HEIGHT);
+
+    const Texture2D* bossTexture = static_cast<const Texture2D*>(
+        this->eyeMesh->GetMaterialGroups().begin()->second->GetMaterial()->GetProperties()->diffuseTexture);
+    assert(bossTexture != NULL);
+    this->weakpointMaterial->SetTexture(bossTexture);
 }
 
 ClassicalBossMesh::~ClassicalBossMesh() {
 
     // The boss pointer doesn't belong to this, just referenced
     this->boss = NULL;
+
+    // No more texture for the weak point material
+    this->weakpointMaterial->SetTexture(NULL);
 
     // Release the mesh assets...
     bool success = false;
@@ -203,10 +212,12 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     UNUSED_PARAMETER(dT);
     UNUSED_PARAMETER(assets);
 
+    this->weakpointMaterial->SetLightAmt(keyLight, fillLight);
+
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // world space locations...
 
-    ColourRGBA currColour;
+    const ColourRGBA* currColour;
 
     // Arms
     const BossBodyPart* leftRestOfArm  = this->boss->GetLeftRestOfArm();
@@ -218,39 +229,50 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     assert(leftArmSquare != NULL);
     assert(rightArmSquare != NULL);
 
-    currColour = leftRestOfArm->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &leftRestOfArm->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 
-    currColour = rightRestOfArm->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &rightRestOfArm->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 
-    currColour = leftArmSquare->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &leftArmSquare->GetColour();
+    if (currColour->A() > 0.0f) {
+
         glPushMatrix();
         glMultMatrixf(leftArmSquare->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-        this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+        if (leftArmSquare->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            this->armSquareMesh->Draw(camera, this->weakpointMaterial);
+        }
+        else {
+            this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
         glPopMatrix();
     }
 
-    currColour = rightArmSquare->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &rightArmSquare->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(rightArmSquare->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-        this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+        if (rightArmSquare->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            this->armSquareMesh->Draw(camera, this->weakpointMaterial);
+        }
+        else {
+            this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
         glPopMatrix();
     }
 
@@ -258,12 +280,17 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     const BossBodyPart* eye = this->boss->GetEye();
     assert(eye != NULL);
 
-    currColour = eye->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &eye->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(eye->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-        this->eyeMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+        if (eye->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            this->eyeMesh->Draw(camera, this->weakpointMaterial);
+        }
+        else {
+            this->eyeMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
         glPopMatrix();
     }
 
@@ -271,11 +298,11 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     const BossBodyPart* pediment = this->boss->GetPediment();
     assert(pediment != NULL);
 
-    currColour = pediment->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &pediment->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(pediment->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->pedimentMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
@@ -291,38 +318,38 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     assert(bottomRightTab != NULL);
 
     // All tablatures have the same colour...
-    currColour = topLeftTab->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &topLeftTab->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(topLeftTab->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 
-    currColour = topRightTab->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &topRightTab->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(topRightTab->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 
-    currColour = bottomLeftTab->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &bottomLeftTab->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(bottomLeftTab->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 
-    currColour = bottomRightTab->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &bottomRightTab->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(bottomRightTab->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
@@ -333,12 +360,17 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
         const BossBodyPart* column = columns[i];
         assert(column != NULL);
 
-        currColour = column->GetColour();
-        if (currColour.A() > 0.0f) {
+        currColour = &column->GetColour();
+        if (currColour->A() > 0.0f) {
             glPushMatrix();
             glMultMatrixf(column->GetWorldTransform().begin());
-            glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-            this->columnMesh->Draw(camera, keyLight, fillLight, ballLight);
+            glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+            if (column->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+                this->columnMesh->Draw(camera, this->weakpointMaterial);
+            }
+            else {
+                this->columnMesh->Draw(camera, keyLight, fillLight, ballLight);
+            }
             glPopMatrix();
         }
     }
@@ -347,11 +379,11 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     const BossBodyPart* base = this->boss->GetBase();
     assert(base != NULL);
 
-    currColour = base->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &base->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(base->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         this->baseMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }

@@ -96,7 +96,7 @@ public:
     void ActionFireBallCancelledByIceBall(const GameBall& ball);
     void ActionIceBallCancelledByFireBall(const GameBall& ball);
 
-	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
+	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside);
 	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);
     void ActionBallBossCollision(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart);
 	void ActionBlockDestroyed(const LevelPiece& block, const LevelPiece::DestructionMethod& method);

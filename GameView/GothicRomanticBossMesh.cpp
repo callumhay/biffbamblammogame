@@ -14,6 +14,7 @@
 #include "GameAssets.h"
 #include "GameLightAssets.h"
 #include "InGameBossLevelDisplayState.h"
+#include "CgFxBossWeakpoint.h"
 
 #include "../ResourceManager.h"
 #include "../BlammoEngine/Mesh.h"
@@ -86,6 +87,11 @@ circleGlowTex(NULL), bottomGlowSoundID(INVALID_SOUND_ID) {
         this->legGlowAlphaAnims[i].SetInterpolantValue(0.0f);
         this->legGlowAlphaAnims[i].SetRepeat(false);
     }
+
+    const Texture2D* bossTexture = static_cast<const Texture2D*>(
+        this->legMesh->GetMaterialGroups().begin()->second->GetMaterial()->GetProperties()->diffuseTexture);
+    assert(bossTexture != NULL);
+    this->weakpointMaterial->SetTexture(bossTexture);
 }
 
 GothicRomanticBossMesh::~GothicRomanticBossMesh() {
@@ -160,21 +166,28 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
     UNUSED_PARAMETER(dT);
     UNUSED_PARAMETER(assets);
 
+    this->weakpointMaterial->SetLightAmt(keyLight, fillLight);
+
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // world space locations...
 
-    ColourRGBA currColour;
+    const ColourRGBA* currColour;
 
     // Body
     const BossBodyPart* body = this->boss->GetBody();
     assert(body != NULL);
 
-    currColour = body->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &body->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(body->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-        this->bodyMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+        if (body->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            this->bodyMesh->Draw(camera, this->weakpointMaterial);
+        }
+        else {
+            this->bodyMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
         glPopMatrix();
     }
 
@@ -182,12 +195,17 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
     const BossBodyPart* topPoint = this->boss->GetTopPoint();
     assert(topPoint != NULL);
 
-    currColour = topPoint->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &topPoint->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(topPoint->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-        this->topPointMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+        if (topPoint->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            this->topPointMesh->Draw(camera, this->weakpointMaterial);
+        }
+        else {
+            this->topPointMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
         glPopMatrix();
     }
 
@@ -195,12 +213,17 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
     const BossBodyPart* bottomPoint = this->boss->GetBottomPoint();
     assert(bottomPoint != NULL);
 
-    currColour = bottomPoint->GetColour();
-    if (currColour.A() > 0.0f) {
+    currColour = &bottomPoint->GetColour();
+    if (currColour->A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(bottomPoint->GetWorldTransform().begin());
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-        this->bottomPointMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+        if (bottomPoint->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            this->bottomPointMesh->Draw(camera, this->weakpointMaterial);
+        }
+        else {
+            this->bottomPointMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
         glPopMatrix();
     }
 
@@ -209,11 +232,11 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
         const BossBodyPart* leg = this->boss->GetLeg(i);
         assert(leg != NULL);
 
-        currColour = leg->GetColour();
-        if (currColour.A() > 0.0f) {
+        currColour = &leg->GetColour();
+        if (currColour->A() > 0.0f) {
             glPushMatrix();
             glMultMatrixf(leg->GetWorldTransform().begin());
-            glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+            glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
             this->legMesh->Draw(camera, keyLight, fillLight, ballLight);
             glPopMatrix();
         }

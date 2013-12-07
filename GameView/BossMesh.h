@@ -28,6 +28,7 @@ class ExpandingHaloEffectInfo;
 class SparkBurstEffectInfo;
 class ElectricitySpasmEffectInfo;
 class ElectrifiedEffectInfo;
+class CgFxBossWeakpoint;
 
 /**
  * The abstract superclass for all meshes/visuals of bosses in the game.
@@ -55,6 +56,9 @@ public:
 
 protected:
     GameSound* sound;
+
+    // Weak point material used by all bosses
+    CgFxBossWeakpoint* weakpointMaterial;
 
     // Shared visual effects and textures for bosses
     std::vector<Texture2D*> smokeTextures;

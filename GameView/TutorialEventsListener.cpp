@@ -49,9 +49,10 @@ void TutorialEventsListener::MousePressed(const GameControl::MouseButton& presse
     UNUSED_PARAMETER(pressedButton);
 }
 
-void TutorialEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
+void TutorialEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside) {
     UNUSED_PARAMETER(ball);
     UNUSED_PARAMETER(paddle);
+    UNUSED_PARAMETER(hitPaddleUnderside);
 
     if (this->multiplierHints->IsDoneShowingAllHints() && 
         !this->multiplierLostHint->IsDoneShowingAllHints()) {

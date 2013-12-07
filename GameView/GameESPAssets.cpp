@@ -1421,17 +1421,17 @@ void GameESPAssets::AddMiscBallPieceCollisionEffect(const GameBall& ball, const 
 /**
  * Adds ball bouncing effect when the ball bounces off the player paddle.
  */
-void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle) {
+void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside) {
     if (ball.HasBallCameraActive() || paddle.GetIsPaddleCameraOn()) {
         return;
     }
 
 	// Shield takes priority over the sticky paddle
 	if (paddle.HasPaddleType(PlayerPaddle::ShieldPaddle)) {
-		// The ball hits a energy shield bbzzzap!
+		// The ball hits the energy shield
 		this->AddEnergyShieldHitEffect(paddle.GetCenterPosition(), ball);
 	}
-	else if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle) && !paddle.HasPaddleType(PlayerPaddle::ShieldPaddle)) {
+	else if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle) && !hitPaddleUnderside) {
 		// The sticky paddle should make a spongy gooey sound when hit by the ball...
 		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::GOO));
 	}
@@ -5253,12 +5253,12 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         boostSparkles->SetEmitPosition(ballPosition);
 	    boostSparkles->AddEffector(&this->particleFader);
         boostSparkles->AddEffector(&this->particleMediumShrink);
-	    result = boostSparkles->SetParticles(20, this->sparkleTex);
+	    result = boostSparkles->SetParticles(15, this->sparkleTex);
 	    assert(result);
 
 	    ESPPointEmitter* glowEmitterTrail = new ESPPointEmitter();
         glowEmitterTrail->SetNumParticleLives(1);
-	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.0025f));
+	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.002f));
 	    glowEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
 	    glowEmitterTrail->SetParticleLife(ESPInterval(ballRadius*2.5f));
 	    glowEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
@@ -5269,7 +5269,7 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         glowEmitterTrail->SetParticleColour(ESPInterval(0.85f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
         glowEmitterTrail->AddEffector(&this->particleBoostFader);
 	    glowEmitterTrail->AddEffector(&this->particleShrinkToNothing);
-	    result = glowEmitterTrail->SetParticles(40, this->circleGradientTex);
+	    result = glowEmitterTrail->SetParticles(30, this->circleGradientTex);
 	    assert(result);
 
         ESPPointEmitter* vapourTrailEffect = new ESPPointEmitter();
@@ -5286,7 +5286,7 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         vapourTrailEffect->SetToggleEmitOnPlane(true);
 	    vapourTrailEffect->AddEffector(&this->particleFader);
         vapourTrailEffect->AddEffector(&this->particleLargeGrowth);
-        result = vapourTrailEffect->SetParticles(10, &this->vapourTrailRefractEffect);
+        result = vapourTrailEffect->SetParticles(8, &this->vapourTrailRefractEffect);
 	    assert(result);
 
         this->boostBallEmitters[currGameBall].push_back(vapourTrailEffect);
