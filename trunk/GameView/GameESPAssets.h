@@ -200,9 +200,14 @@ private:
 	// Cached paddle effects
     ESPPointEmitter*  paddleLaserGlowAura;
 	ESPPointEmitter*  paddleLaserGlowSparks;
-	ESPVolumeEmitter* paddleBeamGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;
 	ESPPointEmitter*  paddleBeamBlastBits;
+
+    ESPVolumeEmitter* paddleBeamGlowSparks;
+    ESPVolumeEmitter* stickyPaddleBeamGlowSparks0;
+    ESPVolumeEmitter* stickyPaddleBeamGlowSparks1;
+    ESPVolumeEmitter* stickyPaddleBeamGlowSparks2;
+
 	
     typedef std::map<const Beam*, std::vector<ESPPointEmitter*> > BeamSegEmitterMap;
     typedef BeamSegEmitterMap::iterator BeamSegEmitterMapIter;
@@ -457,24 +462,6 @@ inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera&
 	this->paddleLaserGlowSparks->Tick(dT);
 }
 
-/**
- * Draw particle effects associated with the laser beam paddle.
- * NOTE: You must transform these effects to be where the paddle is first!
- */
-inline void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
-	float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
-    float tempYBound = paddle.GetHalfHeight();
-	float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
-	assert(tempXBound > 0);
-	assert(tempZBound > 0);
-
-	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, tempYBound, -tempZBound), Point3D(tempXBound, tempYBound, tempZBound));
-	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
-    this->paddleBeamGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
-
-	this->paddleBeamGlowSparks->Draw(camera);
-	this->paddleBeamGlowSparks->Tick(dT);
-}
 
 inline void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	ESPInterval xSize(paddle.GetHalfFlatTopWidth() * 0.3f, paddle.GetHalfFlatTopWidth() * 0.6f);

@@ -35,6 +35,31 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 		return false;
 	}
 
+    // Grab a proper list of screen resolutions
+    std::vector<std::pair<int, int> > resPairs;
+    this->GetPossibleResolutionsList(resPairs);
+
+    // If we can't find the width and height in the list then we set it to whatever the
+    // closest pair is...
+    int chosenIdx = 0;
+    for (std::vector<std::pair<int, int> >::const_iterator iter = resPairs.begin(); iter != resPairs.end(); ++iter) {
+        const std::pair<int, int>& currPair = *iter;
+
+        if (width == currPair.first && height == currPair.second) {
+            break;
+        }
+        else if (width <= currPair.first) {
+            break;
+        }
+
+        chosenIdx++;
+    }
+    chosenIdx = std::min<int>(chosenIdx, static_cast<int>(resPairs.size())-1);
+
+    int determinedWidth  = resPairs[chosenIdx].first;
+    int determinedHeight = resPairs[chosenIdx].second;
+    assert(determinedWidth > 0 && determinedHeight > 0);
+
 	// Load SDL, make sure the window is centered
 	putenv("SDL_VIDEO_CENTERED=1");
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
@@ -76,7 +101,8 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 
     // Set the draw surface...
 	unsigned int videoFlags = WindowManager::DEFAULT_VIDEO_FLAGS | (isFullscreen ? SDL_FULLSCREEN : NULL);
-	this->videoSurface = SDL_SetVideoMode(width, height, bitsPerPixel, videoFlags);
+	this->videoSurface = SDL_SetVideoMode(determinedWidth, determinedHeight, bitsPerPixel, videoFlags);
+    
 	if (this->videoSurface == NULL) {
 
 		debug_output("Unable to set video mode: " << SDL_GetError());
@@ -86,7 +112,7 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
     this->inFullscreenMode = isFullscreen;
 	
     // Draw black
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, determinedWidth, determinedHeight);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -108,7 +134,7 @@ void WindowManager::Shutdown() {
 }
 
 /**
- * Toggles fullscreen mode on/off for the render window.
+ * Toggles full screen mode on/off for the render window.
  */
 bool WindowManager::ToggleFullscreen() {
 	if (this->videoSurface == NULL) {
@@ -129,34 +155,52 @@ bool WindowManager::ToggleFullscreen() {
  * Obtain a list of possible resolutions for the display device
  * being used to display the game.
  */
-std::vector<std::string> WindowManager::GetPossibleResolutionsList() {
-	std::set<std::string> resolutionSet;
-	std::vector<std::string> resolutionVec;
+void WindowManager::GetPossibleResolutionsList(std::vector<std::string>& resolutions) const {
 
-	// cross-compatibility issue
+    std::vector<std::pair<int, int> > resPairs;
+    this->GetPossibleResolutionsList(resPairs);
+
+    resolutions.clear();
+    resolutions.reserve(resPairs.size());
+
+    std::stringstream resolutionStrStream;
+    for (std::vector<std::pair<int, int> >::const_iterator iter = resPairs.begin(); iter != resPairs.end(); ++iter) {
+        const std::pair<int, int>& resPair = *iter;
+        resolutionStrStream.str("");
+        resolutionStrStream << resPair.first << " x " << resPair.second;
+        resolutions.push_back(resolutionStrStream.str());
+    }
+
+    assert(resPairs.size() == resolutions.size());
+}
+
+void WindowManager::GetPossibleResolutionsList(std::vector<std::pair<int, int> >& resolutionWHPairs) const {
+    std::set<std::pair<int, int> > resolutionSet;
+
+    // cross-compatibility issue
 #ifdef WIN32
-	DEVMODE devMode;
-	DWORD count = 0;
-	
-	while (EnumDisplaySettings(NULL, count, &devMode) != NULL) {
-		std::stringstream resolutionStrStream;
-		resolutionStrStream << devMode.dmPelsWidth << " x " << devMode.dmPelsHeight;
+    DEVMODE devMode;
+    DWORD count = 0;
+
+    while (EnumDisplaySettings(NULL, count, &devMode) != NULL) {
         // Don't accept resolutions under 800 width or 600 height
         if (devMode.dmPelsWidth < 800 || devMode.dmPelsHeight < 600) {
             count++;
             continue;
         }
 
-		// We use the set as a detector for unique resolutions, and we only insert
-		// unique ones into the vector that we will be returning
-		resolutionSet.insert(resolutionStrStream.str());
-
-		count++;
-	}
+        // We use the set as a detector for unique resolutions, and we only insert
+        // unique ones into the vector that we will be returning
+        resolutionSet.insert(std::make_pair(devMode.dmPelsWidth, devMode.dmPelsHeight));
+        count++;
+    }
+#else
+    #error No cross platform code implemented for determining allowed screen resolutions!
+    assert(false);
 #endif
 
-	resolutionVec.insert(resolutionVec.begin(), resolutionSet.begin(), resolutionSet.end());
-	sort(resolutionVec.begin(), resolutionVec.end(), SortingFunctions::ResolutionCompare);
-	
-	return resolutionVec;
+    resolutionWHPairs.clear();
+    resolutionWHPairs.reserve(resolutionSet.size());
+    resolutionWHPairs.insert(resolutionWHPairs.end(), resolutionSet.begin(), resolutionSet.end());
+    sort(resolutionWHPairs.begin(), resolutionWHPairs.end(), SortingFunctions::ResolutionPairCompare);
 }

@@ -1,5 +1,5 @@
 boss
-Pediment Head
+Parthenoneon
 22 29
 S S S S S S S S S S S S S S S S S S S S S S 
 S E E E E E E E E E E E E E E E E E E E E S 
@@ -40,8 +40,8 @@ STARS:
 
 PaddleGrow 0
 PoisonPaddle 0
-BallSafetyNet 0
 Blackout 0
+BallSafetyNet 0
 BallGrow 0
 UberBall 0
 StickyPaddle 0
@@ -61,6 +61,7 @@ MultiBall5 0
 BallCam 0
 MagnetPaddle 0
 MultiBall3 0
+RemoteControlRocket 0
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 0

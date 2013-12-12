@@ -19,7 +19,7 @@ public:
     IGameMenu() {}
     virtual ~IGameMenu() {}
 
-	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton) = 0;
+	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude) = 0;
 	virtual void ButtonReleased(const GameControl::ActionButton& releasedButton) = 0;
 
     virtual void ActivatedMenuItemChanged()   = 0;

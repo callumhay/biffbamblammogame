@@ -36,6 +36,7 @@ private:
 
     double timeSinceLastOmniBullets;
 	void ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity, GameModel* gameModel);
+    void ApplyGravityBallVelocityChange(double dT, const GameModel* gameModel, const Vector2D& worldSpaceGravityDir, Vector2D& currVelocity);
     void AttemptFireOfOmniBullets(double dT, GameModel* gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(NormalBallState);

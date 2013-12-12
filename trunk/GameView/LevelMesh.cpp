@@ -919,7 +919,7 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 }
 
 void LevelMesh::UpdateNoEntryBlock(bool remoteControlRocketOn) {
-    float alpha = 1.0f;
+    float alpha = 0.75f;
     if (remoteControlRocketOn) {
         alpha = 0.5f;
     }

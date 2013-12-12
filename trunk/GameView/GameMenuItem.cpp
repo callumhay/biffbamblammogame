@@ -293,7 +293,9 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
  * Called from the parent menu of this item when a key is pressed and this item
  * is the one currently selected and relevant.
  */
-void SelectionListMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void SelectionListMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton, 
+                                          const GameControl::ActionMagnitude& magnitude) {
+    UNUSED_PARAMETER(magnitude);
 	assert(this->parent != NULL);
 
 	// Key pressing does nothing if there's nothing to select from
@@ -410,12 +412,14 @@ void SelectionListMenuItemWithVerify::Draw(double dT, const Point2D& topLeftCorn
     }
 }
 
-void SelectionListMenuItemWithVerify::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void SelectionListMenuItemWithVerify::ButtonPressed(const GameControl::ActionButton& pressedButton, 
+                                                    const GameControl::ActionMagnitude& magnitude) {
+
     if (this->verifyMenuActive) {
-        this->verifyMenu->ButtonPressed(pressedButton);
+        this->verifyMenu->ButtonPressed(pressedButton, magnitude);
     }
     else {
-        SelectionListMenuItem::ButtonPressed(pressedButton);
+        SelectionListMenuItem::ButtonPressed(pressedButton, magnitude);
     }
 }
 
@@ -604,7 +608,9 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	Camera::PopWindowCoords();
 }
 
-void AmountScrollerMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void AmountScrollerMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton, 
+                                           const GameControl::ActionMagnitude& magnitude) {
+    UNUSED_PARAMETER(magnitude);
 	this->incrementAmt = this->baseIncrementAmt;
 
 	/*
@@ -986,7 +992,11 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
     glPopAttrib();
 }
 
-void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton, 
+                                   const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
+
 	// If the verify menu is not active then we just exit... this shouldn't happen though
 	if (!this->verifyMenuActive) {
 		assert(false);

@@ -2,7 +2,7 @@
  * PlayerHurtHUD.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -20,7 +20,7 @@ public:
 	PlayerHurtHUD();
 	~PlayerHurtHUD();
 
-	enum PainIntensity { MinorPain, ModeratePain, MajorPain };
+	enum PainIntensity { MinorPain, ModeratePain, MoreThanModeratePain, MajorPain };
 
 	void Activate(PlayerHurtHUD::PainIntensity intensity);
     void Activate(double totalFadeOutTime, float initialIntensity);

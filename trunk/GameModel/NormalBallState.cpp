@@ -71,10 +71,17 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
         }
 
         // IMPORTANT: Gather the current velocity BEFORE we change it based on the current impulse acceleration/deceleration
-        currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+        if (this->gameBall->HasBallType(GameBall::GraviBall) &&
+            gameModel->GetPlayerPaddle()->GetAttachedBall() != this->gameBall) {
+            this->ApplyGravityBallVelocityChange(seconds, gameModel, worldSpaceGravityDir, currVelocity);
+        }
+        else {
+            currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+        }
 
         this->gameBall->SetSpeed(std::max<float>(GameBall::GetSlowestAllowableSpeed(), this->gameBall->GetSpeed() - currImpulseDeceleration));
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
+   
         crazyBallVelChangeAllowed = false;
     }
     else {
@@ -84,28 +91,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 	    if ((this->gameBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall &&
             gameModel->GetPlayerPaddle()->GetAttachedBall() != this->gameBall) {
 
-		    // Keep track of the last gravity speed calculated based on the gravity pulling the ball down
-		    // The gravitySpeed variable is basically a mirror of currSpeed but it tracks 
-		    // the speed of the ball as it gets pulled down by gravity - currSpeed does not do this
-		    Vector2D currGravityVelocity = (this->gameBall->gravitySpeed * this->gameBall->currDir);
-    		
-		    // Figure out the projected gravity vector and speed
-		    Vector2D nGravityDir = Vector2D::Normalize(worldSpaceGravityDir);
-            float projectedGravitySpeed  = std::max<float>(GameBall::SlowestSpeed, Vector2D::Dot(currGravityVelocity, nGravityDir));
-		    Vector2D projectedGravityVec = projectedGravitySpeed * nGravityDir;
-
-            // If the ball ever exceeds the current ball speed projected on the gravity vector then slow it down along that axis
-		    if (projectedGravitySpeed > this->gameBall->currSpeed) {
-			    currVelocity = currGravityVelocity - projectedGravityVec + (this->gameBall->currSpeed * nGravityDir) + 
-                    (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);
-		    }
-		    else {
-			    currVelocity = currGravityVelocity + (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);
-		    }
-
-		    float newVelocityMag    = Vector2D::Magnitude(currVelocity);
-		    Vector2D newVelocityDir = (currVelocity / newVelocityMag);
-		    this->gameBall->SetGravityVelocity(newVelocityMag, newVelocityDir);
+            this->ApplyGravityBallVelocityChange(seconds, gameModel, worldSpaceGravityDir, currVelocity);
 	    }
 	    else {
 		    currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
@@ -114,6 +100,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
     }
     
     if (simulateMovement) {
+    
         // Update the position of the ball based on the current velocity of it
 	    this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + (static_cast<float>(seconds) * currVelocity));
     
@@ -124,6 +111,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
         // IMPORTANT: We do this AFTER changing the position of the ball based on the current velocity
         if (this->gameBall->HasBallType(GameBall::CrazyBall) && crazyBallVelChangeAllowed) {
             this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel);
+            this->gameBall->SetLastThingCollidedWith(NULL);
         }
     }
 
@@ -139,7 +127,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 		this->gameBall->SetDimensions(this->gameBall->currScaleFactor + ((scaleFactorDiff * seconds) / GameBall::SECONDS_TO_CHANGE_SIZE));
 	}
 
-	// Decrement the collision disabled timer if necessary
+	// Decrement the collision disabled timers if necessary
 	if (this->gameBall->ballballCollisionsDisabledTimer >= 0.0) {
 		this->gameBall->ballballCollisionsDisabledTimer -= seconds;
 	}
@@ -207,6 +195,38 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 
         this->gameBall->SetVelocity(this->gameBall->currSpeed, newVelocityDir);
 	}
+}
+
+void NormalBallState::ApplyGravityBallVelocityChange(double dT, const GameModel* gameModel, 
+                                                     const Vector2D& worldSpaceGravityDir, Vector2D& currVelocity) {
+
+    // Keep track of the last gravity speed calculated based on the gravity pulling the ball down
+    // The gravitySpeed variable is basically a mirror of currSpeed but it tracks 
+    // the speed of the ball as it gets pulled down by gravity - currSpeed does not do this
+    Vector2D currGravityVelocity = (this->gameBall->gravitySpeed * this->gameBall->currDir);
+    currVelocity = currGravityVelocity + (dT * GameBall::GRAVITY_ACCELERATION * worldSpaceGravityDir);
+
+    float projectedGravitySpeed  = Vector2D::Dot(currVelocity, worldSpaceGravityDir);
+    Vector2D projectedGravityVec = projectedGravitySpeed * worldSpaceGravityDir;
+
+    if (projectedGravitySpeed > this->gameBall->currSpeed) {
+        currVelocity = currGravityVelocity - projectedGravityVec + (this->gameBall->currSpeed * worldSpaceGravityDir) + 
+            (dT * GameBall::GRAVITY_ACCELERATION * worldSpaceGravityDir);
+    }
+
+    float newVelocityMag = Vector2D::Magnitude(currVelocity);
+    if (newVelocityMag > 0.0) {
+        this->gameBall->SetGravityVelocity(newVelocityMag, currVelocity / newVelocityMag);
+    }
+    else {
+        assert(false);
+    }
+
+    // Deal with a special case where the ball gets thrown up by the paddle, but then comes right back down on the paddle --
+    // we don't want the ball to go through the paddle in this case...
+    if (this->gameBall->IsLastThingCollidedWith(gameModel->GetPlayerPaddle())) {
+        this->gameBall->SetLastThingCollidedWith(NULL);
+    }
 }
 
 // When the ball has the omni laser effect we try to fire lasers whenever possible outwards

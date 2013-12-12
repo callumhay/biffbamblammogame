@@ -44,8 +44,11 @@ public:
     void ShowCursor(bool show);
 
     bool GetIsFullscreen() const;
+    int GetWidth() const;
+    int GetHeight() const;
 
-	std::vector<std::string> GetPossibleResolutionsList();
+	void GetPossibleResolutionsList(std::vector<std::string>& resolutions) const;
+    void GetPossibleResolutionsList(std::vector<std::pair<int, int> >& resolutionWHPairs) const;
 
 private:
 	static WindowManager* instance;
@@ -69,6 +72,14 @@ inline void WindowManager::ShowCursor(bool show) {
 
 inline bool WindowManager::GetIsFullscreen() const {
     return this->inFullscreenMode;
+}
+
+inline int WindowManager::GetWidth() const {
+    return this->videoSurface->w;
+}
+
+inline int WindowManager::GetHeight() const {
+    return this->videoSurface->h;
 }
 
 #endif

@@ -2,7 +2,7 @@
  * PlayerHurtHUD.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2010
+ * Callum Hay, 2010-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -33,6 +33,10 @@ void PlayerHurtHUD::Activate(PlayerHurtHUD::PainIntensity intensity) {
 			totalFadeOutTime = 1.0;
 			initialOverlayIntensity = 0.5f;
 			break;
+        case PlayerHurtHUD::MoreThanModeratePain:
+            totalFadeOutTime = 1.15;
+            initialOverlayIntensity = 0.7f;
+            break;
 		case PlayerHurtHUD::MajorPain:
 			totalFadeOutTime = 1.33;
 			initialOverlayIntensity = 0.75f;

@@ -2,7 +2,7 @@
  * XBox360Controller.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the
@@ -52,7 +52,8 @@ directionMagnitudePercentLeftRight(0.0f), directionMagnitudePercentUpDown(0.0) {
 
 	this->enterActionOn = this->leftActionOn = this->rightActionOn =
 	this->upActionOn = this->downActionOn =	this->escapeActionOn = 
-    this->pauseActionOn = this->specialDirOn = this->triggerActionOn = false;
+    this->pauseActionOn = this->specialDirOn = this->triggerActionOn = 
+    this->leftBumperActionOn = this->rightBumperActionOn = false;
 }
 
 XBox360Controller::~XBox360Controller() {
@@ -224,6 +225,32 @@ bool XBox360Controller::ProcessState() {
 		}
 	}
 
+    if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) {
+        if (!this->leftBumperActionOn) {
+            this->display->ButtonPressed(GameControl::LeftBumperAction);
+            this->leftBumperActionOn = true;
+        }
+    }
+    else {
+        if (this->leftBumperActionOn) {
+            this->display->ButtonReleased(GameControl::LeftBumperAction);
+            this->leftBumperActionOn = false;
+        }
+    }
+
+    if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
+        if (!this->rightBumperActionOn) {
+            this->display->ButtonPressed(GameControl::RightBumperAction);
+            this->rightBumperActionOn = true;
+        }
+    }
+    else {
+        if (this->rightBumperActionOn) {
+            this->display->ButtonReleased(GameControl::RightBumperAction);
+            this->rightBumperActionOn = false;
+        }
+    }
+
 	return false;
 }
 
@@ -244,7 +271,13 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
                 magnitude = XBox360Controller::GetMagnitudeForThumbpad(controllerState.Gamepad.sThumbLY);
             }
 
-			this->display->ButtonPressed(GameControl::UpButtonAction, magnitude);
+            // Only do the button press if the magnitude is greater in the y-axis than the x
+            if (!(controllerState.Gamepad.wButtons & (XINPUT_GAMEPAD_DPAD_LEFT | XINPUT_GAMEPAD_DPAD_RIGHT)) && 
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLY)) >= 
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLX))) {
+
+			    this->display->ButtonPressed(GameControl::UpButtonAction, magnitude);
+            }
 			this->upActionOn = true;
 		}
 
@@ -279,7 +312,14 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
                 magnitude = XBox360Controller::GetMagnitudeForThumbpad(controllerState.Gamepad.sThumbLY);
             }
 
-			this->display->ButtonPressed(GameControl::DownButtonAction, magnitude);
+            // Only do the button press if the magnitude is greater in the y-axis than the x
+            if (!(controllerState.Gamepad.wButtons & (XINPUT_GAMEPAD_DPAD_LEFT | XINPUT_GAMEPAD_DPAD_RIGHT)) && 
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLY)) >= 
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLX))) {
+
+			    this->display->ButtonPressed(GameControl::DownButtonAction, magnitude);
+            }
+
 			this->downActionOn = true;
 		}
 
@@ -316,7 +356,14 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
                 magnitude = XBox360Controller::GetMagnitudeForThumbpad(controllerState.Gamepad.sThumbLX);
             }
 
-			this->display->ButtonPressed(GameControl::LeftButtonAction, magnitude);
+            // We do a button pressed only if the magnitude is greater on the x-axis than the y
+            if (!(controllerState.Gamepad.wButtons & (XINPUT_GAMEPAD_DPAD_UP | XINPUT_GAMEPAD_DPAD_DOWN)) && 
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLX)) >=
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLY))) {
+
+			    this->display->ButtonPressed(GameControl::LeftButtonAction, magnitude);
+            }
+
 			this->leftActionOn = true;
 		}
 
@@ -352,7 +399,14 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
                 magnitude = XBox360Controller::GetMagnitudeForThumbpad(controllerState.Gamepad.sThumbLX);
             }
 
-			this->display->ButtonPressed(GameControl::RightButtonAction, magnitude);
+            // We do a button pressed only if the magnitude is greater on the x-axis than the y
+			if (!(controllerState.Gamepad.wButtons & (XINPUT_GAMEPAD_DPAD_UP | XINPUT_GAMEPAD_DPAD_DOWN)) && 
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLX)) >= 
+                std::max<SHORT>(sensitivityLeft, abs(controllerState.Gamepad.sThumbLY))) {
+
+                this->display->ButtonPressed(GameControl::RightButtonAction, magnitude);
+            }
+
 			this->rightActionOn = true;
 		}
 
@@ -437,13 +491,13 @@ void XBox360Controller::DebugRepeatActions() {
 
 }
 
-GameControl::ActionMagnitude XBox360Controller::GetMagnitudeForThumbpad(int16_t value) {
+GameControl::ActionMagnitude XBox360Controller::GetMagnitudeForThumbpad(int16_t v) {
 
     const int SMALL_MAGNITUDE_MAX_VALUE  = 10000;
-    const int NORMAL_MAGNITUDE_MAX_VALUE = SMALL_MAGNITUDE_MAX_VALUE  + 10000;
-    const int LARGE_MAGNITUDE_MAX_VALUE  = NORMAL_MAGNITUDE_MAX_VALUE + 12000;
+    const int NORMAL_MAGNITUDE_MAX_VALUE = SMALL_MAGNITUDE_MAX_VALUE  + 8000;
+    const int LARGE_MAGNITUDE_MAX_VALUE  = NORMAL_MAGNITUDE_MAX_VALUE + 7000;
     
-    int absValue = abs(value);
+    int absValue = abs(v);
     
     if (absValue == 0) {
         return GameControl::ZeroMagnitude;

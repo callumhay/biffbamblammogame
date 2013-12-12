@@ -66,6 +66,7 @@ class FullscreenFlashEffectInfo;
 class GameESPAssets;
 class GameFBOAssets;
 class PaddleMineLauncher;
+class PaddleBeamAttachment;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -233,7 +234,7 @@ private:
     
     MineMeshManager* mineMeshMgr;               // A manager for the mines that can be fired from the paddle
 
-	Mesh* paddleBeamAttachment;                 // Laser beam attachment for paddle
+	PaddleBeamAttachment* paddleBeamAttachment; // Laser beam attachment for paddle
     PaddleMineLauncher* paddleMineAttachment;   // Mine launcher attachment for paddle
 	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle

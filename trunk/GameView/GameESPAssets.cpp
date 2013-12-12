@@ -24,6 +24,7 @@
 #include "../GameModel/Projectile.h"
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/Beam.h"
+#include "../GameModel/PaddleLaserBeam.h"
 #include "../GameModel/BallBoostModel.h"
 #include "../GameModel/PortalBlock.h"
 #include "../GameModel/CannonBlock.h"
@@ -92,9 +93,13 @@ boostSparkleEmitterDark(NULL),
 
 paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
-paddleBeamGlowSparks(NULL),
 paddleBeamOriginUp(NULL),
 paddleBeamBlastBits(NULL),
+
+paddleBeamGlowSparks(NULL),
+stickyPaddleBeamGlowSparks0(NULL),
+stickyPaddleBeamGlowSparks1(NULL),
+stickyPaddleBeamGlowSparks2(NULL),
 
 explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
 explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
@@ -306,12 +311,20 @@ GameESPAssets::~GameESPAssets() {
 	this->paddleLaserGlowAura = NULL;
 	delete this->paddleLaserGlowSparks;
 	this->paddleLaserGlowSparks = NULL;
-	delete this->paddleBeamGlowSparks;
-	this->paddleBeamGlowSparks = NULL;
+
 	delete this->paddleBeamOriginUp;
 	this->paddleBeamOriginUp = NULL;
 	delete this->paddleBeamBlastBits;
 	this->paddleBeamBlastBits = NULL;
+
+    delete this->paddleBeamGlowSparks;
+    this->paddleBeamGlowSparks = NULL;
+    delete this->stickyPaddleBeamGlowSparks0;
+    this->stickyPaddleBeamGlowSparks0 = NULL;
+    delete this->stickyPaddleBeamGlowSparks1;
+    this->stickyPaddleBeamGlowSparks1 = NULL;
+    delete this->stickyPaddleBeamGlowSparks2;
+    this->stickyPaddleBeamGlowSparks2 = NULL;
 }
 
 /**
@@ -1049,17 +1062,9 @@ void GameESPAssets::AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& ef
  * Initialize the standalone effects for the paddle laser.
  */
 void GameESPAssets::InitLaserPaddleESPEffects() {
-	assert(this->crazyBallAura == NULL);
-    assert(this->boostSparkleEmitterLight == NULL);
-    assert(this->boostSparkleEmitterDark == NULL);
-	assert(this->paddleLaserGlowAura == NULL);
-	assert(this->paddleLaserGlowSparks == NULL);
-	assert(this->paddleBeamGlowSparks == NULL);
-	assert(this->paddleBeamOriginUp == NULL);
-	assert(this->paddleBeamBlastBits == NULL);
-
 	bool result = false;
 
+    assert(this->crazyBallAura == NULL);
 	this->crazyBallAura = new ESPPointEmitter();
 	this->crazyBallAura->SetSpawnDelta(ESPInterval(-1));
 	this->crazyBallAura->SetInitialSpd(ESPInterval(0));
@@ -1073,11 +1078,12 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->crazyBallAura->AddEffector(&this->particlePulsePaddleLaser);
 	result = this->crazyBallAura->SetParticles(1, this->circleGradientTex);
 
+    assert(this->boostSparkleEmitterLight == NULL);
     this->boostSparkleEmitterLight = new ESPPointEmitter();
-    this->boostSparkleEmitterLight->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
-    this->boostSparkleEmitterLight->SetInitialSpd(ESPInterval(2*GameBall::DEFAULT_BALL_RADIUS, 4*GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterLight->SetSpawnDelta(ESPInterval(0.025f));
+    this->boostSparkleEmitterLight->SetInitialSpd(ESPInterval(4*GameBall::DEFAULT_BALL_RADIUS));
     this->boostSparkleEmitterLight->SetParticleLife(ESPInterval(0.75f, 1.5f));
-    this->boostSparkleEmitterLight->SetParticleSize(ESPInterval(1.25f * GameBall::DEFAULT_BALL_RADIUS, 2.5f * GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterLight->SetParticleSize(ESPInterval(2.5f * GameBall::DEFAULT_BALL_RADIUS));
     this->boostSparkleEmitterLight->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
     this->boostSparkleEmitterLight->SetEmitAngleInDegrees(0);
     this->boostSparkleEmitterLight->SetEmitDirection(Vector3D(1, 0, 0));
@@ -1086,14 +1092,15 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->boostSparkleEmitterLight->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     this->boostSparkleEmitterLight->AddEffector(&this->particleMediumShrink);
     this->boostSparkleEmitterLight->AddEffector(&this->particleFader);
-    result = this->boostSparkleEmitterLight->SetParticles(26, this->sparkleTex);
+    result = this->boostSparkleEmitterLight->SetParticles(40, this->sparkleTex);
     assert(result);
 
+    assert(this->boostSparkleEmitterDark == NULL);
     this->boostSparkleEmitterDark = new ESPPointEmitter();
-    this->boostSparkleEmitterDark->SetSpawnDelta(ESPInterval(0.02f, 0.04f));
-    this->boostSparkleEmitterDark->SetInitialSpd(ESPInterval(2*GameBall::DEFAULT_BALL_RADIUS, 4*GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterDark->SetSpawnDelta(ESPInterval(0.025f));
+    this->boostSparkleEmitterDark->SetInitialSpd(ESPInterval(4*GameBall::DEFAULT_BALL_RADIUS));
     this->boostSparkleEmitterDark->SetParticleLife(ESPInterval(0.75f, 1.5f));
-    this->boostSparkleEmitterDark->SetParticleSize(ESPInterval(1.45f * GameBall::DEFAULT_BALL_RADIUS, 2.66f * GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterDark->SetParticleSize(ESPInterval(3.5f * GameBall::DEFAULT_BALL_RADIUS));
     this->boostSparkleEmitterDark->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
     this->boostSparkleEmitterDark->SetEmitAngleInDegrees(0);
     this->boostSparkleEmitterDark->SetEmitDirection(Vector3D(1, 0, 0));
@@ -1102,9 +1109,10 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->boostSparkleEmitterDark->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     this->boostSparkleEmitterDark->AddEffector(&this->particleMediumShrink);
     this->boostSparkleEmitterDark->AddEffector(&this->particleFader);
-    result = this->boostSparkleEmitterDark->SetParticles(13, this->sparkleTex);
+    result = this->boostSparkleEmitterDark->SetParticles(40, this->sparkleTex);
     assert(result);
 
+    assert(this->paddleLaserGlowAura == NULL);
 	this->paddleLaserGlowAura = new ESPPointEmitter();
 	this->paddleLaserGlowAura->SetSpawnDelta(ESPInterval(-1));
 	this->paddleLaserGlowAura->SetInitialSpd(ESPInterval(0));
@@ -1119,6 +1127,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	result = this->paddleLaserGlowAura->SetParticles(1, this->circleGradientTex);
 	assert(result);
 
+    assert(this->paddleLaserGlowSparks == NULL);
 	this->paddleLaserGlowSparks = new ESPPointEmitter();
 	this->paddleLaserGlowSparks->SetSpawnDelta(ESPInterval(0.033f));
 	this->paddleLaserGlowSparks->SetInitialSpd(ESPInterval(1.5f, 3.5f));
@@ -1133,18 +1142,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, this->circleGradientTex);
 	assert(result);		
 	
-	this->paddleBeamGlowSparks = new ESPVolumeEmitter();
-	this->paddleBeamGlowSparks->SetSpawnDelta(ESPInterval(0.005f, 0.01f));
-	this->paddleBeamGlowSparks->SetInitialSpd(ESPInterval(2.0f, 5.0f));
-	this->paddleBeamGlowSparks->SetParticleLife(ESPInterval(0.75f, 1.0f));
-	this->paddleBeamGlowSparks->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-	this->paddleBeamGlowSparks->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->paddleBeamGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
-    this->paddleBeamGlowSparks->SetParticleAlignment(ESP::ScreenAligned);
-	this->paddleBeamGlowSparks->AddEffector(&this->particleFader);
-	result = this->paddleBeamGlowSparks->SetParticles(50, this->circleGradientTex);
-	assert(result);
-
+    assert(this->paddleBeamOriginUp == NULL);
 	this->paddleBeamOriginUp = new ESPVolumeEmitter();
 	this->paddleBeamOriginUp->SetSpawnDelta(ESPInterval(0.01f));
 	this->paddleBeamOriginUp->SetInitialSpd(ESPInterval(3.0f, 8.0f));
@@ -1157,6 +1155,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, this->sparkleTex);
 	assert(result);
 
+    assert(this->paddleBeamBlastBits == NULL);
 	this->paddleBeamBlastBits = new ESPPointEmitter();
 	this->paddleBeamBlastBits->SetSpawnDelta(ESPInterval(0.001f, 0.005f));
 	this->paddleBeamBlastBits->SetInitialSpd(ESPInterval(1.5f, 2.5f));
@@ -1169,7 +1168,59 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamBlastBits->AddEffector(&this->particleLargeVStretch);
 	this->paddleBeamBlastBits->AddEffector(&this->beamBlastColourEffector);
 	result = this->paddleBeamBlastBits->SetParticles(35, this->circleGradientTex);
-	assert(result);	
+	assert(result);
+
+    const ESPInterval GLOW_SPARK_SPAWN_DELTA(0.005f, 0.01f);
+    const ESPInterval GLOW_SPARK_SPD(2.0f, 5.0f);
+    const ESPInterval GLOW_SPARK_LIFE(0.75f, 1.0f);
+    
+    assert(this->paddleBeamGlowSparks == NULL);
+    this->paddleBeamGlowSparks = new ESPVolumeEmitter();
+    this->paddleBeamGlowSparks->SetSpawnDelta(GLOW_SPARK_SPAWN_DELTA);
+    this->paddleBeamGlowSparks->SetInitialSpd(GLOW_SPARK_SPD);
+    this->paddleBeamGlowSparks->SetParticleLife(GLOW_SPARK_LIFE);
+    this->paddleBeamGlowSparks->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->paddleBeamGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
+    this->paddleBeamGlowSparks->SetParticleAlignment(ESP::ScreenAligned);
+    this->paddleBeamGlowSparks->AddEffector(&this->particleFader);
+    result = this->paddleBeamGlowSparks->SetParticles(50, this->circleGradientTex);
+    assert(result);
+
+    assert(this->stickyPaddleBeamGlowSparks0 == NULL);
+    this->stickyPaddleBeamGlowSparks0 = new ESPVolumeEmitter();
+    this->stickyPaddleBeamGlowSparks0->SetSpawnDelta(GLOW_SPARK_SPAWN_DELTA);
+    this->stickyPaddleBeamGlowSparks0->SetInitialSpd(GLOW_SPARK_SPD);
+    this->stickyPaddleBeamGlowSparks0->SetParticleLife(GLOW_SPARK_LIFE);
+    this->stickyPaddleBeamGlowSparks0->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->stickyPaddleBeamGlowSparks0->SetEmitDirection(Vector3D(0, 1, 0));
+    this->stickyPaddleBeamGlowSparks0->SetParticleAlignment(ESP::ScreenAligned);
+    this->stickyPaddleBeamGlowSparks0->AddEffector(&this->particleFader);
+    result = this->stickyPaddleBeamGlowSparks0->SetParticles(30, this->circleGradientTex);
+    assert(result);
+
+    assert(this->stickyPaddleBeamGlowSparks1 == NULL);
+    this->stickyPaddleBeamGlowSparks1 = new ESPVolumeEmitter();
+    this->stickyPaddleBeamGlowSparks1->SetSpawnDelta(GLOW_SPARK_SPAWN_DELTA);
+    this->stickyPaddleBeamGlowSparks1->SetInitialSpd(GLOW_SPARK_SPD);
+    this->stickyPaddleBeamGlowSparks1->SetParticleLife(GLOW_SPARK_LIFE);
+    this->stickyPaddleBeamGlowSparks1->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->stickyPaddleBeamGlowSparks1->SetEmitDirection(Vector3D(0, 1, 0));
+    this->stickyPaddleBeamGlowSparks1->SetParticleAlignment(ESP::ScreenAligned);
+    this->stickyPaddleBeamGlowSparks1->AddEffector(&this->particleFader);
+    result = this->stickyPaddleBeamGlowSparks1->SetParticles(30, this->circleGradientTex);
+    assert(result);
+
+    assert(this->stickyPaddleBeamGlowSparks2 == NULL);
+    this->stickyPaddleBeamGlowSparks2 = new ESPVolumeEmitter();
+    this->stickyPaddleBeamGlowSparks2->SetSpawnDelta(GLOW_SPARK_SPAWN_DELTA);
+    this->stickyPaddleBeamGlowSparks2->SetInitialSpd(GLOW_SPARK_SPD);
+    this->stickyPaddleBeamGlowSparks2->SetParticleLife(GLOW_SPARK_LIFE);
+    this->stickyPaddleBeamGlowSparks2->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->stickyPaddleBeamGlowSparks2->SetEmitDirection(Vector3D(0, 1, 0));
+    this->stickyPaddleBeamGlowSparks2->SetParticleAlignment(ESP::ScreenAligned);
+    this->stickyPaddleBeamGlowSparks2->AddEffector(&this->particleFader);
+    result = this->stickyPaddleBeamGlowSparks2->SetParticles(30, this->circleGradientTex);
+    assert(result);
 }
 
 /**
@@ -7063,6 +7114,67 @@ void GameESPAssets::TickButDontDrawBackgroundPaddleEffects(double dT) {
             ++iter;
 		}
 	}
+}
+
+/**
+ * Draw particle effects associated with the laser beam paddle.
+ * NOTE: You must transform these effects to be where the paddle is first!
+ */
+void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+    
+    float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
+    float tempYBound = paddle.GetHalfHeight();
+    assert(tempZBound > 0);
+
+    if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle)) {
+        
+        float beamSpacing = PaddleLaserBeam::GetStickyPaddleOriginBeamSpacing(paddle);
+        
+        Vector2D centerVec, leftVec, rightVec;
+        float centerSize, leftSize, rightSize;
+        StickyPaddleBeamDirGenerator::GetBeamValues(Vector2D(0,1), centerVec, leftVec, rightVec, centerSize, leftSize, rightSize);
+        
+        centerSize *= 0.5f;
+        leftSize   *= 0.5f;
+        rightSize  *= 0.5f;
+
+        this->stickyPaddleBeamGlowSparks0->SetAliveParticleAlphaMax(paddle.GetAlpha());
+        this->stickyPaddleBeamGlowSparks1->SetAliveParticleAlphaMax(paddle.GetAlpha());
+        this->stickyPaddleBeamGlowSparks2->SetAliveParticleAlphaMax(paddle.GetAlpha());
+
+        const ESPInterval particleSize(0.075f * paddle.GetHalfFlatTopWidth(), 0.15f * paddle.GetHalfFlatTopWidth());
+        this->stickyPaddleBeamGlowSparks0->SetParticleSize(particleSize);
+        this->stickyPaddleBeamGlowSparks1->SetParticleSize(particleSize);
+        this->stickyPaddleBeamGlowSparks2->SetParticleSize(particleSize);
+
+        // Center
+        this->stickyPaddleBeamGlowSparks0->SetEmitDirection(Vector3D(centerVec, 0.0f));
+        this->stickyPaddleBeamGlowSparks0->SetEmitVolume(Point3D(-centerSize, tempYBound, -tempZBound), Point3D(centerSize, tempYBound, tempZBound));
+        // Left
+        this->stickyPaddleBeamGlowSparks1->SetEmitDirection(Vector3D(leftVec, 0.0f));
+        this->stickyPaddleBeamGlowSparks1->SetEmitVolume(Point3D(-beamSpacing-leftSize, tempYBound, -tempZBound), Point3D(-beamSpacing+leftSize, tempYBound, tempZBound));
+        // Right
+        this->stickyPaddleBeamGlowSparks2->SetEmitDirection(Vector3D(rightVec, 0.0f));
+        this->stickyPaddleBeamGlowSparks2->SetEmitVolume(Point3D(beamSpacing-rightSize, tempYBound, -tempZBound), Point3D(beamSpacing+rightSize, tempYBound, tempZBound));
+
+        this->stickyPaddleBeamGlowSparks0->Tick(dT);
+        this->stickyPaddleBeamGlowSparks0->Draw(camera);
+        this->stickyPaddleBeamGlowSparks1->Tick(dT);
+        this->stickyPaddleBeamGlowSparks1->Draw(camera);
+        this->stickyPaddleBeamGlowSparks2->Tick(dT);
+        this->stickyPaddleBeamGlowSparks2->Draw(camera);
+    }
+    else {
+        float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
+        assert(tempXBound > 0);
+        
+	    this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, tempYBound, -tempZBound), Point3D(tempXBound, tempYBound, tempZBound));
+	    this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
+        this->paddleBeamGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
+
+        this->paddleBeamGlowSparks->Tick(dT);
+	    this->paddleBeamGlowSparks->Draw(camera);
+    }
 }
 
 void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {

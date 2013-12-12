@@ -24,7 +24,7 @@ resources/worlds/levels/easy/rocket_like_a_hurricane.lvl
 
 
 # No-entry blocks
-resources/worlds/levels/easy/access_denied.lvl : 90
+resources/worlds/levels/easy/access_denied.lvl : 85
 resources/worlds/levels/medium/more_than_one_way_to_break_a_block.lvl
 resources/worlds/levels/hard/balancing_act.lvl
 
@@ -43,7 +43,7 @@ resources/worlds/levels/medium/giving_it_100_percent.lvl
 
 
 # Iceball Item Intro
-resources/worlds/levels/medium/breaking_the_ice.lvl : 120
+resources/worlds/levels/medium/breaking_the_ice.lvl : 115
 
 # Fireball Item Intro (uses no-entry blocks)
 resources/worlds/levels/medium/burning_down_the_house.lvl
@@ -65,4 +65,4 @@ resources/worlds/levels/hard/all_of_the_above.lvl
 
 
 # Boss
-resources/worlds/levels/bosses/itemmancer.lvl : 147
+resources/worlds/levels/bosses/itemmancer.lvl : 145

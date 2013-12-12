@@ -38,6 +38,7 @@
 #include "MagnetPaddleEffect.h"
 #include "MineMeshManager.h"
 #include "PaddleMineLauncher.h"
+#include "PaddleBeamAttachment.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
@@ -184,8 +185,6 @@ GameAssets::~GameAssets() {
 	}
 
 	bool success = false;
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleBeamAttachment);
-	assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->ball);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->spikeyBall);
@@ -204,13 +203,15 @@ GameAssets::~GameAssets() {
 	delete this->paddleShield;
 	this->paddleShield = NULL;
 
+    delete this->paddleBeamAttachment;
+    this->paddleBeamAttachment = NULL;
     delete this->paddleMineAttachment;
     this->paddleMineAttachment = NULL;
 
     delete this->ballSafetyNet;
     this->ballSafetyNet = NULL;
 
-    // Clean up tutotial assets
+    // Clean up tutorial assets
     delete this->tutorialAssets;
     this->tutorialAssets = NULL;
 
@@ -678,17 +679,6 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 		}
 	}
 
-    /*
-    // TODO:
-    if (p.HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
-        // Draw an effect on the paddle to indicate that there is a mine launcher attachment activated,
-        // but we only draw it if there isn't a rocket on the paddle
-		if (!p.HasPaddleType(PlayerPaddle::RocketPaddle)) {
-			this->espAssets->DrawPaddleMineActiveEffects(dT, camera, p);
-		}
-    }
-    */
-
 	// In the case of a laser bullet paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
     if (!p.GetIsPaddleCameraOn() && p.GetAlpha() > 0.0f &&
@@ -712,7 +702,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
         glRotatef(p.GetZRotation(), 0, 0, 1);
        
 		if (p.HasPaddleType(PlayerPaddle::LaserBeamPaddle)) {
-			this->paddleBeamAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
+			this->paddleBeamAttachment->Draw(p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
         if (p.HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
             this->mineMeshMgr->DrawLoadingMine(dT, p, camera, paddleKeyLight, paddleFillLight, ballLight,
@@ -1246,7 +1236,7 @@ void GameAssets::LoadRegularMeshAssets() {
         this->mineMeshMgr = new MineMeshManager();
     }
 	if (this->paddleBeamAttachment == NULL) {
-		this->paddleBeamAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_BEAM_ATTACHMENT_MESH);
+		this->paddleBeamAttachment = new PaddleBeamAttachment();
 	}
     if (this->paddleMineAttachment == NULL) {
         this->paddleMineAttachment = new PaddleMineLauncher();
@@ -1555,7 +1545,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
             // Not necessary since it's already played when the collateral block is destroyed
             //this->sound->PlaySoundAtPosition(GameSound::PaddleCollateralBlockCollisionEvent, false, 
             //    projectile.GetPosition3D(), true, true, true, 10*PlayerPaddle::PADDLE_WIDTH_TOTAL);
-            intensity = PlayerHurtHUD::MajorPain;
+            intensity = PlayerHurtHUD::MoreThanModeratePain;
             break;
 
 		case Projectile::PaddleRocketBulletProjectile:
@@ -1661,8 +1651,8 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera,
         this->flashHUD->Activate(0.33, 0.75f * flashMultiplier);
     }
     else {
-        camera.ApplyCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 130);
-        GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
+        camera.ApplyCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 122);
+        GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.5f,
             BBBGameController::MediumVibration, BBBGameController::HeavyVibration);
         this->flashHUD->Activate(0.5, 1.0f * flashMultiplier);
     }

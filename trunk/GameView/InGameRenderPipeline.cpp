@@ -210,6 +210,10 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 
     // Paddle
 	assets->DrawPaddle(dT, *gameModel->GetPlayerPaddle(), camera);
+
+    // Render the beam effects
+    assets->DrawBeams(*gameModel, camera);
+
 	glPopMatrix();
 
 	// Level pieces / blocks and their associated emitter effects
@@ -231,9 +235,6 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 			assets->DrawItem(dT, camera, (**iter));
 		}				
 	}
-
-    // Render the beam effects
-    assets->DrawBeams(*gameModel, camera);
 
     // Add outlines to the scene...
     {

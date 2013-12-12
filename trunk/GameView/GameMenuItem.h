@@ -107,8 +107,9 @@ public:
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 
-	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton) {
+	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude) {
 		UNUSED_PARAMETER(pressedButton);
+        UNUSED_PARAMETER(magnitude);
 	}
 	virtual void ButtonReleased(const GameControl::ActionButton& releasedButton) {
 		UNUSED_PARAMETER(releasedButton);
@@ -216,7 +217,7 @@ public:
 	}
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
     float GetWidth(bool useMax) const;
 	void Activate();
 
@@ -252,7 +253,7 @@ public:
     ~SelectionListMenuItemWithVerify();
 
     void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-    void ButtonPressed(const GameControl::ActionButton& pressedButton);
+    void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
     void ButtonReleased(const GameControl::ActionButton& releasedButton);
 
 private:
@@ -287,7 +288,7 @@ public:
 
 	// Inherited from GameMenuItem
 	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     float GetWidth(bool useMax) const { UNUSED_PARAMETER(useMax); return this->maxWidth; }
 
@@ -358,7 +359,7 @@ public:
 	void SetVerifyMenuColours(const Colour& descTxtColour, const Colour& idleColour, const Colour& selColour);
 
 	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
 
 	void Activate();
 	void Deactivate();

@@ -838,6 +838,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\PaddleBeamAttachment.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\PaddleMineLauncher.h"
 					>
 				</File>
@@ -915,6 +919,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\OmniLaserBallEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PaddleBeamAttachment.cpp"
 					>
 				</File>
 				<File

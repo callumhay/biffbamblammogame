@@ -1301,8 +1301,6 @@ void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const Pla
 
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 
-    static const float ITEM_ACTIVATED_SOUND_VOL = 0.85f;
-
     bool playItemActivateGeneralSound = (item.GetItemType() != GameItem::LifeUpItem);
     if (playItemActivateGeneralSound) {
 
@@ -1311,15 +1309,15 @@ void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 	    switch (item.GetItemDisposition()) {
 
 		    case GameItem::Good:
-                sound->PlaySound(GameSound::PowerUpItemActivatedEvent, false, true, ITEM_ACTIVATED_SOUND_VOL);
+                sound->PlaySound(GameSound::PowerUpItemActivatedEvent, false);
 			    break;
 
 		    case GameItem::Neutral:
-			    sound->PlaySound(GameSound::PowerNeutralItemActivatedEvent, false, true, ITEM_ACTIVATED_SOUND_VOL);
+			    sound->PlaySound(GameSound::PowerNeutralItemActivatedEvent, false);
 			    break;
 
 		    case GameItem::Bad:
-			    sound->PlaySound(GameSound::PowerDownItemActivatedEvent, false, true, ITEM_ACTIVATED_SOUND_VOL);
+			    sound->PlaySound(GameSound::PowerDownItemActivatedEvent, false);
 			    break;
 
 		    default:

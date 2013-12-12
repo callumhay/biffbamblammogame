@@ -158,10 +158,22 @@ int main(int argc, char *argv[]) {
 		initCfgOptions = ResourceManager::ReadConfigurationOptions(true);
 
 		// Setup the window - this initializes OpenGL so that OGL calls may be made after this
-		if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), initCfgOptions.GetIsFullscreenOn())) {
-			quitGame = true;
-			break;
+		if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 
+                                                initCfgOptions.GetIsFullscreenOn())) {
+			
+            // Try one more time but without full screen on (full screen forces the resolution, if the res isn't supported
+            // it's typically the culprit of the failure)
+            if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), false)) {
+                quitGame = true;
+			    break;
+            }
 		}
+
+        // Reset the config options based on what the window manager decided to be a non-erroneous configuration
+        initCfgOptions.SetWindowWidth(WindowManager::GetInstance()->GetWidth());
+        initCfgOptions.SetWindowHeight(WindowManager::GetInstance()->GetHeight());
+        initCfgOptions.SetIsFullscreenOn(WindowManager::GetInstance()->GetIsFullscreen());
+        ResourceManager::WriteConfigurationOptionsToFile(initCfgOptions);
 
 		// Establish the resource manager
 		ResourceManager::InitResourceManager(ResourceManager::GetLoadDir() + std::string(RESOURCE_ZIP), argv[0]);

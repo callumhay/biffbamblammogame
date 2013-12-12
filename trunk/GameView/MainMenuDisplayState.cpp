@@ -51,7 +51,7 @@ const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 
 const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
 
-const double MainMenuDisplayState::FADE_IN_TIME_IN_SECS = 3.0;
+const double MainMenuDisplayState::FADE_IN_TIME_IN_SECS  = 0.75;
 const double MainMenuDisplayState::FADE_OUT_TIME_IN_SECS = 1.25;
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info) : 
@@ -367,7 +367,8 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	subMenuLabelSm.SetText("Resolution");
 	subMenuLabelLg.SetText("Resolution");
 	
-	std::vector<std::string> resolutionOptions = WindowManager::GetInstance()->GetPossibleResolutionsList();
+	std::vector<std::string> resolutionOptions;
+    WindowManager::GetInstance()->GetPossibleResolutionsList(resolutionOptions);
 
 	// Try to figure out what index the resolution is set to (so we can set the menu item
 	// to the appropriate index
@@ -587,14 +588,19 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	this->RenderBackgroundEffects(dT, menuCamera);
 	
+    float fadeAlpha = this->fadeAnimation.GetInterpolantValue();
     if (isTitleFinishedAnimating && finishFadeAnim) {
         this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
     }
 
     // Figure out where the menu needs to be to ensure it doesn't clip with the bottom of the screen...
     this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT * this->display->GetTextScalingFactor());
+
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_DEPTH_TEST);
 	// Render the menu
 	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    glPopAttrib();
 
     // Render created by text
     static const int NAME_LICENCE_Y_PADDING = 5;
@@ -615,10 +621,10 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	// Fade-in/out overlay
     if (this->fadeAnimation.GetTargetValue() == 0.0f) {
         if (this->doAnimatedFadeIn) {
-            bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1], fadeAlpha);
         }
         else {
-            bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], fadeAlpha);
         }
 
         if (!isTitleFinishedAnimating || !finishFadeAnim) {
@@ -631,10 +637,10 @@ void MainMenuDisplayState::RenderFrame(double dT) {
         }
 
         if (this->changeToPlayGameState) {
-            bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawNonAnimatedFadeShakeBG(shakeAmt[0], shakeAmt[1], fadeAlpha);
         }
         else {
-            bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1], this->fadeAnimation.GetInterpolantValue());
+            bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1], fadeAlpha);
         }
     }
 
@@ -804,7 +810,6 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
                                          const GameControl::ActionMagnitude& magnitude) {
 
-    UNUSED_PARAMETER(magnitude);
 	assert(this->mainMenu != NULL);
 
     if (!this->titleDisplay.IsFinishedAnimating()) {
@@ -817,14 +822,14 @@ void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& presse
         this->eraseFailedPopup->ButtonPressed(pressedButton);
     }
     else {
-	    this->mainMenu->ButtonPressed(pressedButton);
+	    this->mainMenu->ButtonPressed(pressedButton, magnitude);
     }
 }
 
 void MainMenuDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	assert(this->mainMenu != NULL);
 
-    if (!this->titleDisplay.IsFinishedAnimating()) {
+    if (!this->titleDisplay.IsFinishedAnimating() || this->fadeAnimation.GetInterpolantValue() > 0.0f) {
         return;
     }
 
