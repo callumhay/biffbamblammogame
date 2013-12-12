@@ -70,11 +70,9 @@ void GameOverDisplayState::RenderFrame(double dT) {
 
 void GameOverDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
                                          const GameControl::ActionMagnitude& magnitude) {
-	UNUSED_PARAMETER(pressedButton);
-    UNUSED_PARAMETER(magnitude);
 
     if (this->currState == IdleState) {
-        this->gameOverMenu->ButtonPressed(pressedButton);
+        this->gameOverMenu->ButtonPressed(pressedButton, magnitude);
     }
 }
 

@@ -16,7 +16,7 @@ class GameControl {
 public:
     enum ActionButton { UpButtonAction, DownButtonAction, LeftButtonAction, RightButtonAction, 
                         EnterButtonAction, EscapeButtonAction, PauseButtonAction, SpecialCheatButtonAction,
-                        OtherButtonAction};
+                        OtherButtonAction, LeftBumperAction, RightBumperAction };
 
     enum ActionMagnitude { ZeroMagnitude, SmallMagnitude, NormalMagnitude, LargeMagnitude, FullMagnitude };
 

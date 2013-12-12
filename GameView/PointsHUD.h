@@ -151,7 +151,8 @@ private:
         float alpha;
 
         int currMultiplierCounterIdx;
-        Texture* multiplierGageOutlineTex;                 // The outline for the multiplier gage
+        Texture* multiplierGaugeOutlineTex;                 // The outline for the multiplier gage
+        Texture* multiplierGaugeFillTex;
         std::vector<Texture*> multiplierGageFillTexs;      // Fills for the multiplier gage (there are 9 of them)
 
         DISALLOW_COPY_AND_ASSIGN(MultiplierGageHUD);

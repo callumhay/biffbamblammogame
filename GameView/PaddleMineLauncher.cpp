@@ -79,7 +79,11 @@ void PaddleMineLauncher::DrawEffects(double dT, const PlayerPaddle& paddle) {
     this->flickerAnim.Tick(dT);
     this->pulseAlphaAnim.Tick(dT);
 
-    float alpha = this->flickerAnim.GetInterpolantValue() * this->pulseAlphaAnim.GetInterpolantValue();
+    if (paddle.HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle | PlayerPaddle::InvisiPaddle)) {
+        return;
+    }
+
+    float alpha = this->flickerAnim.GetInterpolantValue() * this->pulseAlphaAnim.GetInterpolantValue() * paddle.GetAlpha();
 
     float negHalfPaddleDepth      = -paddle.GetHalfDepthTotal();
     float halfBigHighlightWidth   = 0.3f * paddle.GetHalfFlatTopWidth();
@@ -93,27 +97,32 @@ void PaddleMineLauncher::DrawEffects(double dT, const PlayerPaddle& paddle) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glPushMatrix();
+    glTranslatef(0, 0, negHalfPaddleDepth);
+    glRotatef(0,0,1, paddle.GetZRotation());
+
     glBegin(GL_QUADS);
 
     // Big highlight
-    static const float BIG_HIGHLIGHT_VAL = 0.66f;
+    static const float BIG_HIGHLIGHT_VAL = 0.75f;
     glColor4f(BIG_HIGHLIGHT_VAL, BIG_HIGHLIGHT_VAL, BIG_HIGHLIGHT_VAL, 0.4f*alpha);
-    glVertex3f(-halfBigHighlightWidth, 0, negHalfPaddleDepth);
-    glVertex3f(halfBigHighlightWidth, 0, negHalfPaddleDepth);
+    glVertex3f(-halfBigHighlightWidth, 0, 0);
+    glVertex3f(halfBigHighlightWidth, 0, 0);
     glColor4f(1, 1, 1, 0.0f);
-    glVertex3f(halfBigHighlightWidth,  highlightHeight, negHalfPaddleDepth);
-    glVertex3f(-halfBigHighlightWidth, highlightHeight, negHalfPaddleDepth);
+    glVertex3f(halfBigHighlightWidth,  highlightHeight, 0);
+    glVertex3f(-halfBigHighlightWidth, highlightHeight, 0);
 
     // Highlight behind the lasers
-    static const float SMALL_HIGHLIGHT_VAL = 0.75f;
+    static const float SMALL_HIGHLIGHT_VAL = 1.0f;
     glColor4f(SMALL_HIGHLIGHT_VAL, SMALL_HIGHLIGHT_VAL, SMALL_HIGHLIGHT_VAL, 0.4f*alpha);
-    glVertex3f(-halfSmallHighlightWidth, 0, negHalfPaddleDepth);
-    glVertex3f(halfSmallHighlightWidth, 0, negHalfPaddleDepth);
+    glVertex3f(-halfSmallHighlightWidth, 0, 0);
+    glVertex3f(halfSmallHighlightWidth, 0, 0);
     glColor4f(1, 1, 1, 0.0f);
-    glVertex3f(halfSmallHighlightWidth,  highlightHeight, negHalfPaddleDepth);
-    glVertex3f(-halfSmallHighlightWidth, highlightHeight, negHalfPaddleDepth);
+    glVertex3f(halfSmallHighlightWidth,  highlightHeight, 0);
+    glVertex3f(-halfSmallHighlightWidth, highlightHeight, 0);
 
     glEnd();
 
+    glPopMatrix();
     glPopAttrib();
 }

@@ -15,6 +15,7 @@
 #include "EmptySpaceBlock.h"
 
 NoEntryBlock::NoEntryBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {
+    this->colour[3] = 0.75f;
 }
 
 NoEntryBlock::~NoEntryBlock() {

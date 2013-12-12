@@ -338,9 +338,11 @@ void ItemListView::ButtonPressed(const GameControl::ActionButton& pressedButton)
             this->MoveSelectionY(false);
             break;
         case GameControl::RightButtonAction:
+        case GameControl::RightBumperAction:
             this->MoveSelectionX(true);
             break;
         case GameControl::LeftButtonAction:
+        case GameControl::LeftBumperAction:
             this->MoveSelectionX(false);
             break;
         case GameControl::EnterButtonAction:

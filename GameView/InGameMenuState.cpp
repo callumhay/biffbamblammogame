@@ -269,8 +269,7 @@ void InGameMenuState::CleanUpReturnToDisplayState() {
  */
 void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton,
                                     const GameControl::ActionMagnitude& magnitude) {
-	
-    UNUSED_PARAMETER(magnitude);                                    
+	                                 
     assert(this->topMenu != NULL);
 
 	// If the pause button is hit again then just exit this menu back to the game...
@@ -279,7 +278,7 @@ void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButt
 	}
 	else {
 		// Tell the top-most menu about the key pressed event
-		this->topMenu->ButtonPressed(pressedButton);
+		this->topMenu->ButtonPressed(pressedButton, magnitude);
 	}
 }
 

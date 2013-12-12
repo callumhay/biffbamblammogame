@@ -32,7 +32,7 @@ const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT                 = 768;
 const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		        = false;
 const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE                  = false;
 const int  ConfigOptions::DEFAULT_VOLUME                        = ConfigOptions::MAX_VOLUME;
-const bool ConfigOptions::DEFAULT_INVERT_BALL_BOOST_TOGGLE      = false;
+const bool ConfigOptions::DEFAULT_INVERT_BALL_BOOST_TOGGLE      = true;
 const BallBoostModel::BallBoostMode ConfigOptions::DEFAULT_BALL_BOOST_MODE = BallBoostModel::Slingshot;
 const GameModel::Difficulty ConfigOptions::DEFAULT_DIFFICULTY              = GameModel::MediumDifficulty;
 

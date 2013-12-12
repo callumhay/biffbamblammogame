@@ -107,7 +107,7 @@ private:
     void GoBackToMainMenu();
     void SetBlammoMenuItemHighlighted(int menuItemIndex, bool playSound = true);
     void SetBlammoMenuItemSelection(bool playSound = true);
-    void SetBlammoMenuItemDeselection();
+    void SetBlammoMenuItemDeselection(bool playSound = true);
 
 	DISALLOW_COPY_AND_ASSIGN(BlammopediaState);
 };

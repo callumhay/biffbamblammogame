@@ -355,8 +355,33 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
         }
         else {
             // Do nothing if an item is activated and the enter button is pressed
-            if (currList->GetIsItemActivated() && pressedButton == GameControl::EnterButtonAction) {
-                return;
+            if (itemWasActivated) {
+                if (pressedButton == GameControl::EnterButtonAction) {
+                    return;
+                }
+            }
+            else {
+                if (pressedButton == GameControl::RightBumperAction || pressedButton == GameControl::LeftBumperAction) {
+                    // Switch the selected blammopedia menu
+                    currList->ButtonPressed(GameControl::EscapeButtonAction);
+                    currList->SetSelectedItemIndex(-1);
+                    this->SetBlammoMenuItemDeselection(false);
+
+                    int newIndex = 0;
+                    if (pressedButton == GameControl::RightBumperAction) {
+                        newIndex = (this->currMenuItemIndex + 1) % (TOTAL_NUM_MENU_ITEMS-1);
+                    }
+                    else {
+                        newIndex = this->currMenuItemIndex - 1;
+                        if (newIndex < 0) {
+                            newIndex = TOTAL_NUM_MENU_ITEMS - 2;
+                        }
+                    }
+
+                    this->SetBlammoMenuItemHighlighted(newIndex, true);
+                    this->SetBlammoMenuItemSelection(false);
+                    return;
+                }
             }
 
             currList->ButtonPressed(pressedButton);
@@ -388,7 +413,8 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
                 this->SetBlammoMenuItemSelection();
                 break;
 
-            case GameControl::LeftButtonAction: {
+            case GameControl::LeftButtonAction:
+            case GameControl::LeftBumperAction: {
                     int tempIndex = this->currMenuItemIndex - 1;
                     if (tempIndex < 0) {
                         tempIndex = TOTAL_NUM_MENU_ITEMS - 1;
@@ -398,6 +424,7 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
                 break;
 
             case GameControl::RightButtonAction:
+            case GameControl::RightBumperAction:
                 this->SetBlammoMenuItemHighlighted((this->currMenuItemIndex + 1) % TOTAL_NUM_MENU_ITEMS);
                 break;
 
@@ -720,8 +747,10 @@ void BlammopediaState::SetBlammoMenuItemSelection(bool playSound) {
     }
 }
 
-void BlammopediaState::SetBlammoMenuItemDeselection() {
-    this->display->GetSound()->PlaySound(GameSound::BlammopediaListDeselectEvent, false);
+void BlammopediaState::SetBlammoMenuItemDeselection(bool playSound) {
+    if (playSound) {
+        this->display->GetSound()->PlaySound(GameSound::BlammopediaListDeselectEvent, false);
+    }
 
     ItemListView* prevListSelected = this->listViews[this->currListViewIndex];
     assert(prevListSelected != NULL);

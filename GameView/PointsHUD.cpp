@@ -815,62 +815,72 @@ const int PointsHUD::MultiplierGageHUD::MULTIPLIER_GAGE_SIZE = 110;
 const int PointsHUD::MultiplierGageHUD::HALF_MULTIPLIER_GAGE_SIZE = MULTIPLIER_GAGE_SIZE/2;
 
 PointsHUD::MultiplierGageHUD::MultiplierGageHUD() : 
-currMultiplierCounterIdx(-1), multiplierGageOutlineTex(NULL), alpha(1.0) {
-    this->multiplierGageOutlineTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_OUTLINE,
+currMultiplierCounterIdx(-1), multiplierGaugeOutlineTex(NULL), multiplierGaugeFillTex(NULL), alpha(1.0) {
+    
+    this->multiplierGaugeOutlineTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_OUTLINE,
         Texture::Trilinear, GL_TEXTURE_2D);
-    assert(this->multiplierGageOutlineTex != NULL);
+    assert(this->multiplierGaugeOutlineTex != NULL);
+
+    this->multiplierGaugeFillTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->multiplierGaugeFillTex != NULL);
 
     Texture* tempTex = NULL;
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_1,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_1,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_2,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_2,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_3,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_3,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_4,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_4,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_5,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_5,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_6,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_6,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_7,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_7,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_8,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_8,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
     tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_9,
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAUGE_FILL_9,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(tempTex != NULL);
     this->multiplierGageFillTexs.push_back(tempTex);
 }
 
 PointsHUD::MultiplierGageHUD::~MultiplierGageHUD() {
-    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierGageOutlineTex);
+    bool success = false;
+    
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierGaugeOutlineTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierGaugeFillTex);
     assert(success);
 
     for (std::vector<Texture*>::iterator iter = this->multiplierGageFillTexs.begin();
@@ -894,14 +904,18 @@ void PointsHUD::MultiplierGageHUD::Draw(float rightMostX, float topMostY, double
     glScalef(MULTIPLIER_GAGE_SIZE, MULTIPLIER_GAGE_SIZE, 1.0f);
     glColor4f(1, 1, 1, this->alpha);
 
+    // Draw the background fill of the gauge
+    this->multiplierGaugeFillTex->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+
+    // Draw any fills on the multiplier gauge
     if (this->currMultiplierCounterIdx >= 0) {
-        // Draw any fills on the multiplier gage
         this->multiplierGageFillTexs[this->currMultiplierCounterIdx]->BindTexture();
         GeometryMaker::GetInstance()->DrawQuad();
     }
 
-    // Draw the outline of the gage...
-    this->multiplierGageOutlineTex->BindTexture();
+    // Draw the outline of the gauge
+    this->multiplierGaugeOutlineTex->BindTexture();
     GeometryMaker::GetInstance()->DrawQuad();
 
     glPopMatrix();

@@ -80,8 +80,7 @@ inline void BBBTitleDisplay::SetAlpha(float alpha) {
 }
 
 inline bool BBBTitleDisplay::IsFinishedAnimating() const {
-    return this->isFinishedAnimating && this->biffSlamEffectDone &&
-        this->bamSlamEffectDone && this->blammoSlamEffectDone;
+    return this->isFinishedAnimating;
 }
 
 #endif // __BBBTITLEDISPLAY_H__

@@ -20,8 +20,7 @@ const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS = 12;  // Length of ti
 const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND         = 115; // Damage per second that the paddle laser does to blocks and stuff																															// NOTE: a typical block has about 100 life
 
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameModel* gameModel) : 
-Beam(PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), 
-paddle(paddle), reInitStickyPaddle(true) {
+Beam(PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), paddle(paddle) {
     
     assert(paddle != NULL);
     assert(gameModel != NULL);
@@ -31,6 +30,8 @@ paddle(paddle), reInitStickyPaddle(true) {
 }
 
 PaddleLaserBeam::~PaddleLaserBeam() {
+    StickyPaddleBeamDirGenerator::ReinitializeBeams();
+
 	// Remove the paddle laser beam...
 	this->paddle->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
 	this->paddle->SetIsLaserBeamFiring(false);
@@ -94,7 +95,7 @@ void PaddleLaserBeam::UpdateCollisions(const GameModel* gameModel) {
     std::list<BeamSegment*> initialBeamSegs;
 
 	// Create the very first beam part that shoots out of the paddle towards the level
-	const float INITIAL_BEAM_RADIUS  = this->beamAlpha * this->paddle->GetHalfFlatTopWidth()/2.0f;
+	const float INITIAL_BEAM_RADIUS  = this->beamAlpha * PaddleLaserBeam::GetInitialBeamRadius(*this->paddle);
     const Point2D BEAM_ORIGIN        = this->paddle->GetCenterPosition() + Vector2D(0, this->paddle->GetHalfHeight());
     const Vector2D BEAM_UNIT_DIR     = this->paddle->GetUpVector();
 
@@ -108,44 +109,77 @@ void PaddleLaserBeam::UpdateCollisions(const GameModel* gameModel) {
     // In the case where there's a sticky paddle the beam refracts through the sticky paddle a bit
     if (this->paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
 
-	    static int rotateBeamCenterBeamAmt;
-	    static int rotateBeamRefract1Amt;
-	    static int rotateBeamRefract2Amt;
-		
-	    static float centerBeamRadiusAmt;
-	    static float beamRefract1RadiusAmt;
-	    static float beamRefract2RadiusAmt;
+        Vector2D centerVec, leftVec, rightVec;
+        float centerSize, leftSize, rightSize;
+	    StickyPaddleBeamDirGenerator::GetBeamValues(BEAM_UNIT_DIR, centerVec, leftVec, rightVec, centerSize, leftSize, rightSize);
 
-	    if (this->reInitStickyPaddle) {
-		    rotateBeamCenterBeamAmt = static_cast<int>(Randomizer::GetInstance()->RandomNumNegOneToOne() * 20);
-		    rotateBeamRefract1Amt   = rotateBeamCenterBeamAmt + 10 + static_cast<int>(Randomizer::GetInstance()->RandomNumZeroToOne() * 40);
-		    rotateBeamRefract2Amt   = rotateBeamCenterBeamAmt - 10 - static_cast<int>(Randomizer::GetInstance()->RandomNumZeroToOne() * 40);
-			
-		    centerBeamRadiusAmt   = (0.5f + 0.25f * Randomizer::GetInstance()->RandomNumZeroToOne()) ;
-		    beamRefract1RadiusAmt = (0.2f + 0.4f * Randomizer::GetInstance()->RandomNumZeroToOne());
-		    beamRefract2RadiusAmt = (0.2f + 0.4f * Randomizer::GetInstance()->RandomNumZeroToOne());
+	    firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, centerVec), 
+	        centerSize * INITIAL_BEAM_RADIUS, centerSize * this->baseDamagePerSecond, NULL);
 
-		    this->reInitStickyPaddle = false;
-	    }
-
-	    firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, Vector2D::Rotate(rotateBeamCenterBeamAmt, BEAM_UNIT_DIR)), 
-	        centerBeamRadiusAmt * INITIAL_BEAM_RADIUS, centerBeamRadiusAmt * this->baseDamagePerSecond, NULL);
-
-	    Vector2D adjustBeamOriginAmt(paddle->GetHalfFlatTopWidth()*0.5, 0.0f);
-	    BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN - adjustBeamOriginAmt, Vector2D::Rotate(rotateBeamRefract1Amt, BEAM_UNIT_DIR)), 
-	        beamRefract1RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract1RadiusAmt * this->baseDamagePerSecond, NULL);
+	    Vector2D adjustBeamOriginAmt(PaddleLaserBeam::GetStickyPaddleOriginBeamSpacing(*this->paddle), 0.0f);
+	    
+        BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN - adjustBeamOriginAmt, leftVec), 
+	        leftSize * INITIAL_BEAM_RADIUS, leftSize * this->baseDamagePerSecond, NULL);
 	    initialBeamSegs.push_back(refractSeg1);
-	    BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN + adjustBeamOriginAmt, Vector2D::Rotate(rotateBeamRefract2Amt, BEAM_UNIT_DIR)), 
-	        beamRefract2RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract2RadiusAmt * this->baseDamagePerSecond, NULL);
+	    
+        BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN + adjustBeamOriginAmt, rightVec), 
+	        rightSize * INITIAL_BEAM_RADIUS, rightSize * this->baseDamagePerSecond, NULL);
 	    initialBeamSegs.push_back(refractSeg2);
     }
     else {
 	    firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, BEAM_UNIT_DIR), INITIAL_BEAM_RADIUS, this->baseDamagePerSecond, NULL);
-	    this->reInitStickyPaddle = true;
+        StickyPaddleBeamDirGenerator::ReinitializeBeams();
     }
 
     initialBeamSegs.push_front(firstBeamSeg);
     
     // Build the rest of the beam using the initial beam segments
     this->BuildAndUpdateCollisionsForBeamParts(initialBeamSegs, gameModel);
+}
+
+float PaddleLaserBeam::GetInitialBeamRadius(const PlayerPaddle& paddle) {
+    return paddle.GetHalfFlatTopWidth() / 2.0f;
+}
+
+float PaddleLaserBeam::GetStickyPaddleOriginBeamSpacing(const PlayerPaddle& paddle) {
+    return paddle.GetHalfFlatTopWidth() * 0.5;
+}
+
+
+bool StickyPaddleBeamDirGenerator::isInit = false;
+
+int StickyPaddleBeamDirGenerator::rotateCenterBeamAmt = 0;
+int StickyPaddleBeamDirGenerator::rotateLeftBeamAmt   = 0;
+int StickyPaddleBeamDirGenerator::rotateRightBeamAmt  = 0;
+
+float StickyPaddleBeamDirGenerator::stickyPaddleOriginBeamSizeCenter = 0.0f;
+float StickyPaddleBeamDirGenerator::stickyPaddleOriginBeamSizeLeft   = 0.0f;
+float StickyPaddleBeamDirGenerator::stickyPaddleOriginBeamSizeRight  = 0.0f;
+
+void StickyPaddleBeamDirGenerator::ReinitializeBeams() {
+
+    rotateCenterBeamAmt = static_cast<int>(Randomizer::GetInstance()->RandomNumNegOneToOne() * 20);
+    rotateLeftBeamAmt   = rotateCenterBeamAmt + 10 + static_cast<int>(Randomizer::GetInstance()->RandomNumZeroToOne() * 40);
+    rotateRightBeamAmt  = rotateCenterBeamAmt - 10 - static_cast<int>(Randomizer::GetInstance()->RandomNumZeroToOne() * 40);
+
+    stickyPaddleOriginBeamSizeCenter = (0.5f + 0.25f * Randomizer::GetInstance()->RandomNumZeroToOne());
+    stickyPaddleOriginBeamSizeLeft   = (0.2f + 0.4f * Randomizer::GetInstance()->RandomNumZeroToOne());
+    stickyPaddleOriginBeamSizeRight  = (0.2f + 0.4f * Randomizer::GetInstance()->RandomNumZeroToOne());
+}
+
+void StickyPaddleBeamDirGenerator::GetBeamValues(const Vector2D& upVec, Vector2D& centerVec, Vector2D& leftVec, Vector2D& rightVec,
+                                                 float& centerSize, float& leftSize, float& rightSize) {
+
+    if (!isInit) {
+        ReinitializeBeams();
+        isInit = true;
+    }
+
+    centerVec = Vector2D::Rotate(rotateCenterBeamAmt, upVec);
+    leftVec   = Vector2D::Rotate(rotateLeftBeamAmt,   upVec);
+    rightVec  = Vector2D::Rotate(rotateRightBeamAmt,  upVec);
+
+    centerSize = stickyPaddleOriginBeamSizeCenter;
+    leftSize   = stickyPaddleOriginBeamSizeLeft;
+    rightSize  = stickyPaddleOriginBeamSizeRight;
 }

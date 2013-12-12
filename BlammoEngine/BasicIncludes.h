@@ -124,7 +124,7 @@
 namespace SortingFunctions {
 
 // Function for sorting resolutions
-inline static bool ResolutionCompare(const std::string& res1, const std::string& res2) {
+inline static bool ResolutionStrCompare(const std::string& res1, const std::string& res2) {
 	std::stringstream res1SS(res1);
 	std::stringstream res2SS(res2);
 
@@ -151,6 +151,29 @@ inline static bool ResolutionCompare(const std::string& res1, const std::string&
 		}
 	}
 	return false;
+}
+
+inline static bool ResolutionPairCompare(const std::pair<int, int>& res1, const std::pair<int, int>& res2) {
+
+    int resolution1Width, resolution2Width, resolution1Height, resolution2Height;
+    resolution1Width = res1.first;
+    resolution2Width = res2.first;
+
+    if (resolution1Width < resolution2Width) {
+        return true;
+    }
+    else if (resolution1Width > resolution2Width) {
+        return false;
+    }
+    else {
+        resolution1Height = res1.second;
+        resolution2Height = res2.second;
+
+        if (resolution1Height < resolution2Height) {
+            return true;
+        }
+    }
+    return false;
 }
 
 };

@@ -193,27 +193,38 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 	this->selArrowFadeAnim.Tick(dT);
 }
 
-void GameMenu::LeftAction() {
+void GameMenu::LeftAction(const GameControl::ActionMagnitude& magnitude) {
     if (this->isSelectedItemActivated) {
         return;
     }
 
     GameMenuItem* highlightedItem = this->menuItems[this->selectedMenuItemIndex];
     assert(highlightedItem != NULL);
-    if (highlightedItem->IsLeftRightScrollable() && highlightedItem->GetIsActivated()) {
-        highlightedItem->ButtonPressed(GameControl::LeftButtonAction);
+
+    if (highlightedItem->IsLeftRightScrollable()) {
+        if (highlightedItem->GetIsActivated()) {
+            highlightedItem->ButtonPressed(GameControl::LeftButtonAction, magnitude);
+        }
+        else {
+            this->ActivateSelectedMenuItem();
+        }
     }
 }
 
-void GameMenu::RightAction() {
+void GameMenu::RightAction(const GameControl::ActionMagnitude& magnitude) {
     if (this->isSelectedItemActivated) {
         return;
     }
 
     GameMenuItem* highlightedItem = this->menuItems[this->selectedMenuItemIndex];
     assert(highlightedItem != NULL);
-    if (highlightedItem->IsLeftRightScrollable() && highlightedItem->GetIsActivated()) {
-        highlightedItem->ButtonPressed(GameControl::RightButtonAction);
+    if (highlightedItem->IsLeftRightScrollable()) {
+        if (highlightedItem->GetIsActivated()) {
+            highlightedItem->ButtonPressed(GameControl::RightButtonAction, magnitude);
+        }
+        else {
+            this->ActivateSelectedMenuItem();
+        }
     }
 }
 
@@ -376,7 +387,9 @@ void GameMenu::DeactivateSelectedMenuItem() {
  * Capture input from the keyboard for a key pressed event
  * and navigate or change the menu based on the given key input.
  */
-void GameMenu::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void GameMenu::ButtonPressed(const GameControl::ActionButton& pressedButton, 
+                             const GameControl::ActionMagnitude& magnitude) {
+
 	// We check to see if we're in a sub menu - so that we know where
 	// to pass the key pressed event
 	GameMenu* currentMenu = this;
@@ -387,11 +400,11 @@ void GameMenu::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 		if (currentMenu == NULL) {
 			// In this case we are dealing with a menu item that takes input,
 			// give that menu item the input
-			activatedMenuItem->ButtonPressed(pressedButton);
+			activatedMenuItem->ButtonPressed(pressedButton, magnitude);
 		}
 		else {
 			// Recursively tell the menu about the key press
-			currentMenu->ButtonPressed(pressedButton);
+			currentMenu->ButtonPressed(pressedButton, magnitude);
 		}
 		return;
 	}
@@ -401,11 +414,13 @@ void GameMenu::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	switch(pressedButton) {
         
         case GameControl::LeftButtonAction:
-            currentMenu->LeftAction();
+        case GameControl::LeftBumperAction:
+            currentMenu->LeftAction(magnitude);
             break;
 
         case GameControl::RightButtonAction:
-            currentMenu->RightAction();
+        case GameControl::RightBumperAction:
+            currentMenu->RightAction(magnitude);
             break;
 
 		case GameControl::DownButtonAction:

@@ -32,10 +32,11 @@ public:
 	int GetNumBaseBeamSegments() const;
     const Colour& GetBeamColour() const;
 
+    static float GetStickyPaddleOriginBeamSpacing(const PlayerPaddle& paddle);
+    static float GetInitialBeamRadius(const PlayerPaddle& paddle);
+    
 private:
 	static const int BASE_DAMAGE_PER_SECOND;
-
-	bool reInitStickyPaddle;	// Indicates whether the beam should reinitialize its sticky paddle beams
 
 	PlayerPaddle* paddle;
 
@@ -45,5 +46,27 @@ private:
 inline const Colour& PaddleLaserBeam::GetBeamColour() const {
     return GameModelConstants::GetInstance()->PADDLE_LASER_BEAM_COLOUR;
 }
+
+class StickyPaddleBeamDirGenerator {
+public:
+    static void ReinitializeBeams();
+    static void GetBeamValues(const Vector2D& upVec, Vector2D& centerVec, Vector2D& leftVec, Vector2D& rightVec,
+        float& centerSize, float& leftSize, float& rightSize);
+
+private:
+    static bool isInit;
+    static int rotateCenterBeamAmt;
+    static int rotateLeftBeamAmt;
+    static int rotateRightBeamAmt;
+    static float stickyPaddleOriginBeamSizeCenter;
+    static float stickyPaddleOriginBeamSizeLeft;
+    static float stickyPaddleOriginBeamSizeRight;
+
+    StickyPaddleBeamDirGenerator() {}
+    ~StickyPaddleBeamDirGenerator() {}
+    DISALLOW_COPY_AND_ASSIGN(StickyPaddleBeamDirGenerator);
+};
+
+
 
 #endif // __PADDLELASERBEAM_H__

@@ -159,7 +159,7 @@ public:
 	void Draw(double dT, int windowWidth, int windowHeight);
 	void DebugDraw();
 
-	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 
 	inline void MenuItemHighlighted(bool signalEvents) {
@@ -229,8 +229,8 @@ protected:
 		this->SetSelectedMenuItem((this->selectedMenuItemIndex + 1) % this->menuItems.size(), true);
 	}
 
-    void LeftAction();
-    void RightAction();
+    void LeftAction(const GameControl::ActionMagnitude& magnitude);
+    void RightAction(const GameControl::ActionMagnitude& magnitude);
 
 private:
 	void SetupAnimations();

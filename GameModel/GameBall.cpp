@@ -47,7 +47,7 @@ const float GameBall::MAX_ROATATION_SPEED	= 70;
 const float GameBall::BOOST_TEMP_SPD_INCREASE_AMT = 7.0f;
 
 // Acceleration of the ball towards the ground when gravity ball is activated
-const float GameBall::GRAVITY_ACCELERATION  = 9.8f;
+const float GameBall::GRAVITY_ACCELERATION  = 7.5f;
 const float GameBall::BOOST_DECCELERATION   = BOOST_TEMP_SPD_INCREASE_AMT;
 
 GameBall* GameBall::currBallCamBall = NULL;
