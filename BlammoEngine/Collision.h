@@ -242,9 +242,10 @@ namespace Collision {
         }
 
         bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-            Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
+            Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& cCenterAtCollision) const;
         bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-            Collision::LineSeg2D& collisionLine, double& timeUntilCollision, const Vector2D& thisCircleVelocity) const;
+            Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& cCenterAtCollision, 
+            Point2D& thisCenterAtCollision, const Vector2D& thisCircleVelocity) const;
 
         Circle2D& operator=(const Circle2D& copy) {
             this->center = copy.center;
@@ -255,6 +256,9 @@ namespace Collision {
 	private:
 		Point2D center;
 		float radius;
+
+        bool CollideGetCollisionPt(double dT, const Collision::Circle2D& c, const Vector2D& velocity,
+            Point2D& collisionPt, float& collisionDist, float& moveVecDist) const;
 	};
 
 	/**

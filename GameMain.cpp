@@ -210,6 +210,8 @@ int main(int argc, char *argv[]) {
         sound = new GameSound();
         if (sound->Init()) {
             sound->LoadGlobalSounds();
+            sound->SetSFXVolume(static_cast<float>(initCfgOptions.GetSFXVolume()) / 100.0f);
+            sound->SetMusicVolume(static_cast<float>(initCfgOptions.GetMusicVolume()) / 100.0f);
             std::cout << "Sound initialized successfully." << std::endl;
         }
         else {

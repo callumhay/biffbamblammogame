@@ -50,7 +50,8 @@ public:
 
 	inline bool GetIsFullscreenOn() const { return this->fullscreenIsOn; }
 	inline bool GetIsVSyncOn() const { return this->vSyncIsOn; }
-	inline int GetVolume() const { return this->volume; }
+	inline int GetMusicVolume() const { return this->musicVolume; }
+    inline int GetSFXVolume() const { return this->sfxVolume; }
     inline bool GetInvertBallBoost() const { return this->invertBallBoost; }
     inline BallBoostModel::BallBoostMode GetBallBoostMode() const { return this->ballBoostMode; }
     inline GameModel::Difficulty GetDifficulty() const { return this->difficulty; }
@@ -67,11 +68,16 @@ public:
 	void SetResolutionByString(const std::string& resStr);
 	inline void SetIsFullscreenOn(bool isOn) { this->fullscreenIsOn = isOn; }
 	inline void SetIsVSyncOn(bool isOn) { this->vSyncIsOn = isOn; }
-	inline void SetVolume(int volume) {
+	
+    inline void SetMusicVolume(int volume) {
 		assert(volume >= MIN_VOLUME && volume <= MAX_VOLUME);
-		this->volume = std::max<int>(MIN_VOLUME, std::min<int>(MAX_VOLUME, volume));
+		this->musicVolume = std::max<int>(MIN_VOLUME, std::min<int>(MAX_VOLUME, volume));
 	}
-    
+    inline void SetSFXVolume(int volume) {
+        assert(volume >= MIN_VOLUME && volume <= MAX_VOLUME);
+        this->sfxVolume = std::max<int>(MIN_VOLUME, std::min<int>(MAX_VOLUME, volume));
+    }
+
     inline void SetInvertBallBoost(bool isInverted) { this->invertBallBoost = isInverted; }
     inline void SetBallBoostMode(BallBoostModel::BallBoostMode mode) { this->ballBoostMode = mode; }
     inline void SetDifficulty(GameModel::Difficulty difficulty) { this->difficulty = difficulty; }
@@ -91,7 +97,8 @@ private:
 	static const char* WINDOW_WIDTH_VAR;
 	static const char* WINDOW_FULLSCREEN_VAR;
 	static const char* WINDOW_VSYNC_VAR;
-	static const char* VOLUME_VAR;
+	static const char* MUSIC_VOLUME_VAR;
+    static const char* SFX_VOLUME_VAR;
     static const char* INVERT_BALL_BOOST_VAR;
     static const char* BALL_BOOST_MODE_VAR;
     static const char* DIFFICULTY_VAR;
@@ -101,7 +108,8 @@ private:
 	static const int  DEFAULT_WINDOW_HEIGHT;
 	static const bool DEFAULT_FULLSCREEN_TOGGLE;
 	static const bool DEFAULT_VSYNC_TOGGLE;
-	static const int  DEFAULT_VOLUME;
+	static const int  DEFAULT_MUSIC_VOLUME;
+    static const int  DEFAULT_SFX_VOLUME;
     static const bool DEFAULT_INVERT_BALL_BOOST_TOGGLE;
     static const BallBoostModel::BallBoostMode DEFAULT_BALL_BOOST_MODE;
     static const GameModel::Difficulty DEFAULT_DIFFICULTY;
@@ -110,7 +118,8 @@ private:
 	int windowWidth, windowHeight;
 	bool fullscreenIsOn;
 	bool vSyncIsOn;
-	int volume;
+	int musicVolume;
+    int sfxVolume;
     bool invertBallBoost;
     BallBoostModel::BallBoostMode ballBoostMode;
     GameModel::Difficulty difficulty;

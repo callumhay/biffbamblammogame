@@ -100,7 +100,8 @@ public:
 	}
 
     bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
-	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, 
+        double& timeUntilCollision, Point2D& pointOfCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	bool CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const;
 

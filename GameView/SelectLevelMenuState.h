@@ -75,6 +75,9 @@ private:
     Texture* starGlowTexture;
 
     Texture2D* padlockTexture;
+    Texture2D* padlockBrokenLeftTexture;
+    Texture2D* padlockBrokenRightTexture;
+    Texture2D* snapTexture;
 	
     FBObj* menuFBO;
     FBObj* postMenuFBObj;
@@ -91,6 +94,8 @@ private:
     std::vector<Texture2D*> smokeTextures;
     CgFxPostRefract normalTexRefractEffect;
     ESPParticleColourEffector particleFader;
+    ESPAnimatedAlphaEffector particleFlickerFader;
+    ESPParticleAccelEffector lockBreakGravityEffector;
 
     ESPParticleColourEffector particleFireFastColourFader;
     ESPParticleScaleEffector particleSmallGrowth;
@@ -107,7 +112,8 @@ private:
     
     bool freezePlayerInput;
     bool levelWasUnlockedViaStarCost;
-    bool playAutoUnlockAnim;
+    bool playAutoStarUnlockAnim;
+    bool playAutoBasicUnlockAnim;
     double autoUnlockAnimCountdown;
 
     void DrawStarTotalLabels(const Camera& camera, double dT);
@@ -131,15 +137,23 @@ private:
 
         virtual void RebuildItem(bool enabled, const Point2D& topLeftCorner);
         virtual float GetHeight() const = 0;
+
         virtual void Draw(const Camera& camera, double dT, bool isSelected) = 0;
+        virtual void DrawAfter(const Camera& camera, double dT) = 0;
 
         const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
         const float GetWidth() const { return this->width; }
         GameLevel* GetLevel() const { return this->level; }
         bool GetIsEnabled() const { return this->isEnabled; }
+        void SetEnabled(bool enabled) {
+            if (this->isEnabled != enabled) {
+                this->RebuildItem(enabled, this->topLeftCorner);
+            }
+        }
 
         void ExecuteLockedAnimation();
         void ExecuteUnlockStarsPaidForAnimation();
+        void ExecuteBasicUnlockAnimation();
 
     protected:
         static const float NUM_TO_NAME_GAP;
@@ -165,19 +179,26 @@ private:
         
         // Animations specific to unlocking the star cost
         static const double TOTAL_STAR_UNLOCK_TIME;
-        bool isUnlockAnimPlaying;
+        bool isStarUnlockAnimPlaying;
         AnimationMultiLerp<float>* starShrinkAnim;
         AnimationLerp<float>* starAlphaAnim;
         AnimationMultiLerp<float>* lockShakeRotateAnim;
         AnimationMultiLerp<Vector2D>* lockShakeTranslateAnim;
         AnimationLerp<float>* lockShrinkAnim;
-        AnimationLerp<float>* lockFadeAnim;
+        AnimationLerp<float>* starLockFadeAnim;
 
         ESPPointEmitter* explosionEmitter;
         ESPPointEmitter* explosionOnoEmitter;
         ESPPointEmitter* shockwaveEffect;
         ESPPointEmitter* fireSmokeEmitter1;
         ESPPointEmitter* fireSmokeEmitter2;
+
+        // Animations specific to basic unlocking
+        bool isBasicUnlockAnimPlaying;
+        ESPPointEmitter* lockSnapEmitter;
+        ESPPointEmitter* lockSnapOnoEmitter;
+        ESPPointEmitter* leftLockHalfEmitter;
+        ESPPointEmitter* rightLockHalfEmitter;
 
         float GetUnlockStarSize() const;
         float GetUnlockStarCenterYOffset() const;
@@ -197,6 +218,7 @@ private:
         void RebuildItem(bool enabled, const Point2D& topLeftCorner);
 
         void Draw(const Camera& camera, double dT, bool isSelected);
+        void DrawAfter(const Camera& camera, double dT);
         float GetHeight() const;
 
     private:
@@ -223,6 +245,7 @@ private:
         void RebuildItem(bool enabled, const Point2D& topLeftCorner);
 
         void Draw(const Camera& camera, double dT, bool isSelected);
+        void DrawAfter(const Camera& camera, double dT);
         float GetHeight() const;
 
     private:
@@ -291,6 +314,9 @@ inline DisplayState::DisplayStateType SelectLevelMenuState::GetType() const {
 inline void SelectLevelMenuState::LevelMenuPage::Draw(const Camera& camera, double dT) {
     for (size_t i = 0; i < this->levelItems.size(); i++) {
         this->levelItems[i]->Draw(camera, dT, this->selectedItem == i);
+    }
+    for (size_t i = 0; i < this->levelItems.size(); i++) {
+        this->levelItems[i]->DrawAfter(camera, dT);
     }
 }
 

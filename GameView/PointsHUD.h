@@ -68,34 +68,6 @@ private:
     static const int STAR_TO_SCORE_VERTICAL_GAP;
     static const int SCORE_TO_MULTIPLER_HORIZONTAL_GAP;
     static const int ALL_STARS_WIDTH;
-    
-    /*
-    class PointNotification {
-    public:
-        static const int NOTIFIER_TO_NOTIFIER_VERTICAL_GAP;
-        static const int INITIAL_NOTIFY_VERTICAL_GAP;
-
-        PointNotification(const PointAward& pointAward, float initialTopY, float finalTopY);
-        ~PointNotification();
-
-        bool Draw(int displayWidth, double dT);
-        
-        void SetAlpha(float alpha);
-        const Point2D& GetTopLeftCorner() const;
-        float GetHeight() const;
-
-    private:
-        static const int NAME_POINT_VERTICAL_GAP;
-        int pointAmount;
-        TextLabel2D* notificationName;  // The name of the bonus/notification, may be NULL
-        TextLabel2D* pointLabel;        // The points earned/removed, always not NULL
-
-        AnimationLerp<float> moveAnimation;
-        AnimationMultiLerp<ColourRGBA> rgbaAnimation;
-
-        DISALLOW_COPY_AND_ASSIGN(PointNotification);
-    };
-    */
 
     class MultiplierHUD {
     public:
@@ -158,17 +130,10 @@ private:
         DISALLOW_COPY_AND_ASSIGN(MultiplierGageHUD);
     };
 
-    //typedef std::list<PointNotification*> PointNotifyList;
-    //typedef PointNotifyList::iterator PointNotifyListIter;
-    //typedef PointNotifyList::const_iterator PointNotifyListConstIter;
-
-    //AnimationType currAnimState;
-
-    int numStars;                                   // The current number of stars awarded to the player
-    long currPtScore;                               // The current score
-    //std::list<PointNotification*> ptNotifications;  // FIFO Queue of current point notifications
-    MultiplierHUD* multiplier;                      // HUD for the multiplier
-    MultiplierGageHUD* multiplierGage;
+    int numStars;                      // The current number of stars awarded to the player
+    long currPtScore;                  // The current score
+    MultiplierHUD* multiplier;         // HUD for the multiplier
+    MultiplierGageHUD* multiplierGage; // HUD for the gauge that determines the multiplier
     
     // Labels
     TextLabel2D* ptScoreLabel;
@@ -178,6 +143,7 @@ private:
   
     std::vector<AnimationMultiLerp<float>*> starSizeAnimators;
     std::vector<AnimationMultiLerp<ColourRGBA>*> starColourAnimators;
+    AnimationMultiLerp<ColourRGBA> flashingStarAnimator;
 
     // Textures
     Texture* starTex;

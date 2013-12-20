@@ -79,7 +79,6 @@ private:
     bool fireWeaponAlreadyShown;
     bool keepShowingBoostHint;
     bool multPopupHintAlreadyShown;
-    bool finishedPointsHint;
     bool hasShownBoostHint;
 
     // Tutorial hints
@@ -94,9 +93,8 @@ private:
 
     BasicMultiTutorialHint* multiplierLostHint;
     BasicMultiTutorialHint* multiplierHints;
-
-    //ESPPointEmitter* pointsTutorialHintEmitter;
-    //ESPParticleColourEffector fadeEffector;
+    bool hasShownMultiplierHints;
+    bool hasShownMultiplierLostHint;
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };

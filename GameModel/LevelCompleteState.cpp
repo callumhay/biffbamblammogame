@@ -41,10 +41,13 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm), waitingFo
             currLevel->SetNewHighScore(false);
         }
     }
+    
+    int levelPassedBefore = currWorld->GetLastLevelIndexPassed();
     currWorld->UpdateLastLevelPassedIndex();
+    int levelPassedAfter = currWorld->GetLastLevelIndexPassed();
 
     // EVENT: Level is complete
-    GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
+    GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel, levelPassedBefore, levelPassedAfter);
 
     // Check to see if a new world was just unlocked, if it was, unlock it!
     if (currWorld->GetWorldIndex() != this->gameModel->GetLastWorldIndex() &&

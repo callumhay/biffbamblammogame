@@ -648,10 +648,11 @@ void GameEventManager::ActionLevelAlmostComplete(const GameLevel& level) {
 }
 
 // Action for when a level completes in-game
-void GameEventManager::ActionLevelCompleted(const GameWorld& world, const GameLevel& level) {
+void GameEventManager::ActionLevelCompleted(const GameWorld& world, const GameLevel& level,
+                                            int furthestLevelIdxBefore, int furthestLevelIdxAfter) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->LevelCompletedEvent(world, level);
+		(*listenerIter)->LevelCompletedEvent(world, level, furthestLevelIdxBefore, furthestLevelIdxAfter);
 	}	
 }
 

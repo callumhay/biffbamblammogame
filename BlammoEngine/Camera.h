@@ -61,9 +61,9 @@ public:
                 lerpShakeMagMultiplier[1]*shakeSine, 
                 lerpShakeMagMultiplier[2]*shakeSine);
 			
-			this->shakeVar += dT * this->shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
-			if (this->shakeVar > 1.0) {
-				this->shakeVar -= 1.0;
+			this->shakeVar += dT * this->shakeSpeed;
+			if (this->shakeVar > M_PI) {
+				this->shakeVar -= M_PI;
 			}
 
 			this->shakeTimeElapsed += dT;
@@ -79,9 +79,9 @@ public:
             lerpShakeMagMultiplier = this->shakeMagnitude - (this->shakeTimeElapsed  * this->shakeMagnitude / this->shakeTimeTotal);
             lerpShakeMagMultiplier *= sin(this->shakeVar);
 
-            this->shakeVar += dT * this->shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
-            if (this->shakeVar > 1.0) {
-                this->shakeVar -= 1.0;
+            this->shakeVar += dT * this->shakeSpeed;
+            if (this->shakeVar > M_PI) {
+                this->shakeVar -= M_PI;
             }
 
             this->shakeTimeElapsed += dT;

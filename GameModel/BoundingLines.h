@@ -41,13 +41,15 @@ public:
 
     // Ball - bounding line collisions, where the ball is moving...
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-	    Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
+	    Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& cPointOfCollision) const;
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-	    Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeUntilCollision) const;
+	    Collision::LineSeg2D& collisionLine, int& collisionLineIdx, double& timeUntilCollision, 
+        Point2D& cPointOfCollision) const;
 
-    // Ball-boundingline collisions where both the ball and these bounding lines are moving...
+    // Ball-BoundingLine collisions where both the ball and these bounding lines are moving...
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-	    Collision::LineSeg2D& collisionLine, double& timeUntilCollision, const Vector2D& lineVelocity) const;
+	    Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& cPointOfCollision, 
+        const Vector2D& lineVelocity) const;
 
 	Point2D ClosestPoint(const Point2D& pt) const;
 	bool IsInside(const Point2D& pt) const;
@@ -125,10 +127,10 @@ private:
 };
 
 inline bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-                                   Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const {
+                                   Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& cPointOfCollision) const {
 
     int temp;
-    return this->Collide(dT, c, velocity, n, collisionLine, temp, timeUntilCollision);
+    return this->Collide(dT, c, velocity, n, collisionLine, temp, timeUntilCollision, cPointOfCollision);
 }
 
 /**

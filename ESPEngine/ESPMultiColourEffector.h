@@ -18,16 +18,17 @@
 #include "ESPParticleEffector.h"
 
 class ESPMultiColourEffector : public ESPParticleEffector {
+public:
+    ESPMultiColourEffector();
+    ~ESPMultiColourEffector() {}
+
+    void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void SetColours(const std::vector<ColourRGBA>& colours);
 
 private:
 	std::vector<double> percentages;
 	std::vector<ColourRGBA> colours;
 
-public:
-	ESPMultiColourEffector();
-	~ESPMultiColourEffector() {}
-	void AffectParticleOnTick(double dT, ESPParticle* particle);
-
-	void SetColours(const std::vector<ColourRGBA>& colours);
+    DISALLOW_COPY_AND_ASSIGN(ESPMultiColourEffector);
 };
 #endif

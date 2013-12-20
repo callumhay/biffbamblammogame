@@ -142,6 +142,8 @@ public:
     const char* TEXTURE_FUTURISM_TRIANGLE;
     const char* TEXTURE_BOSS_ICON;
     const char* TEXTURE_PADLOCK;
+    const char* TEXTURE_PADLOCK_BROKEN_LEFT;
+    const char* TEXTURE_PADLOCK_BROKEN_RIGHT;
     const char* TEXTURE_CHEVRON;
     const char* TEXTURE_MOON;
     

@@ -27,6 +27,7 @@ public:
     virtual ~BossBodyPart();
 
     void ToggleSimpleBoundingCalc(bool on);
+    bool GetIsSimpleBoundingCalcOn() const;
     void SetLocalBounds(const BoundingLines& bounds);
     const BoundingLines& GetLocalBounds() const;
     const BoundingLines& GetWorldBounds() const;
@@ -35,7 +36,7 @@ public:
     virtual void Tick(double dT);
 
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-        Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& pointOfCollision);
     BossBodyPart* CollisionCheck(const PlayerPaddle& paddle);
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity);
@@ -131,6 +132,10 @@ inline void BossBodyPart::ToggleSimpleBoundingCalc(bool on) {
     this->isSimpleBoundingCalcOn = on;
 }
 
+inline bool BossBodyPart::GetIsSimpleBoundingCalcOn() const {
+    return this->isSimpleBoundingCalcOn;
+}
+
 inline void BossBodyPart::SetLocalBounds(const BoundingLines& bounds) {
     this->localBounds = bounds;
     this->isWorldBoundsDirty = true;
@@ -163,7 +168,8 @@ inline void BossBodyPart::Tick(double dT) {
 }
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-                                                  Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
+                                                  Collision::LineSeg2D& collisionLine, 
+                                                  double& timeUntilCollision, Point2D& pointOfCollision) {
 
     if (this->collisionsDisabled) {
         return NULL;
@@ -172,7 +178,7 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double d
     Vector2D bossVelocity = this->GetCollisionVelocity();
 
     if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), 
-        n, collisionLine, timeUntilCollision, bossVelocity)) {
+        n, collisionLine, timeUntilCollision, pointOfCollision, bossVelocity)) {
         return this;
     }
     return NULL;

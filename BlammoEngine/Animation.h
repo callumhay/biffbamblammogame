@@ -324,6 +324,9 @@ public:
 	void SetRepeat(bool repeatOn) {
 		this->repeat = repeatOn;
 	}
+    bool GetRepeat() const {
+        return this->repeat;
+    }
 
 	/**
 	 * Set the linear interpolation values and their corresponding time intervals i.e., 

@@ -396,6 +396,21 @@ void GameBall::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 	this->SetBallState(new InCannonBallState(this, cannonBlock, this->currState), false);
 }
 
+bool GameBall::CollisionCheck(double dT, const GameBall& otherBall, Vector2D& n, 
+                              Collision::LineSeg2D& collisionLine, double& timeUntilCollision, 
+                              Point2D& otherBallCenterAtCollision, Point2D& thisBallCenterAtCollision) const {
+
+    // If the collisions are disabled then we only return false
+    if (!this->CanCollideWithOtherBalls() || !otherBall.CanCollideWithOtherBalls() ||
+        this->IsLastThingCollidedWith(&otherBall)) {
+            return false;
+    }
+
+    return this->bounds.Collide(dT, otherBall.GetBounds(), otherBall.GetVelocity(), 
+        n, collisionLine, timeUntilCollision, otherBallCenterAtCollision, 
+        thisBallCenterAtCollision, this->GetVelocity());
+}
+
 void GameBall::ApplyImpulseForce(float impulseAmt, float deceleration) {
     if (this->impulseSpdDecreaseCounter < this->impulseAmount || impulseAmt == 0.0) {
         // Ignore the impulse if there already is one

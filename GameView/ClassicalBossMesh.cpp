@@ -415,9 +415,10 @@ void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, con
             this->eyePulseGlow.SetParticleAlpha(
                 ESPInterval(0.7f * std::max<float>(0.0f, std::min<float>(1.0f, 
                 1.0f - this->introTimeCountdown / START_GLOW_TIME))));
+
             this->eyePulseGlow.Tick(dT);
-            
             this->eyePulseGlow.Draw(camera);
+
             glPopMatrix();
         }
 

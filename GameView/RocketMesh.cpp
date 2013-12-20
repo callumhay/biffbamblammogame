@@ -506,8 +506,6 @@ void RocketMesh::TickAndDrawExtraneousRocketEffects(const RocketProjectile* rock
             else {
                 this->rocketThrustBurstEmitter->Tick(dT);
                 this->rocketThrustBurstEmitter->Draw(camera);
-                //this->rocketThrustingSparksEmitter->Tick(dT);
-                //this->rocketThrustingSparksEmitter->Draw(camera);
             }
 
             glPopMatrix();

@@ -749,6 +749,10 @@ LevelSummaryConfirmEvent {
 	file = resources/LevelSummaryConfirmEvent.ogg
 }
 
+LevelBasicUnlockEvent {
+	file = resources/LevelBasicUnlockEvent.ogg
+}
+
 LevelStarCostPaidUnlockEvent {
 	file = resources/LevelStarCostPaidUnlockEvent.ogg
 }
@@ -763,6 +767,10 @@ WorldCompleteBackgroundLoop {
 
 WorldCompleteVictoryMessageEvent {
 	file = resources/WorldCompleteVictoryMessageEvent.ogg
+}
+
+WorldSummaryConfirmEvent {
+	file = resources/WorldSummaryConfirmEvent.ogg
 }
 
 WorldUnlockEvent {

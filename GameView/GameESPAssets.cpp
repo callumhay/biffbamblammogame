@@ -146,9 +146,10 @@ plusTex(NULL),
 plusOutlineTex(NULL),
 xTex(NULL),
 xOutlineTex(NULL),
-lightningAnimTex(NULL)
+lightningAnimTex(NULL),
+leftHalfBrokenPadlockTex(NULL),
+rightHalfBrokenPadlockTex(NULL)
 {
-
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
 }
@@ -295,6 +296,11 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->xOutlineTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
+    assert(removed);
+
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->leftHalfBrokenPadlockTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->rightHalfBrokenPadlockTex);
     assert(removed);
 
     UNUSED_VARIABLE(removed);
@@ -855,6 +861,17 @@ void GameESPAssets::InitESPTextures() {
         this->lightningAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
             GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION, Texture::Trilinear));
         assert(this->lightningAnimTex != NULL);
+    }
+
+    if (this->leftHalfBrokenPadlockTex == NULL) {
+        this->leftHalfBrokenPadlockTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_PADLOCK_BROKEN_LEFT, Texture::Trilinear));
+        assert(this->leftHalfBrokenPadlockTex != NULL);
+    }
+    if (this->rightHalfBrokenPadlockTex == NULL) {
+        this->rightHalfBrokenPadlockTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_PADLOCK_BROKEN_RIGHT, Texture::Trilinear));
+        assert(this->rightHalfBrokenPadlockTex != NULL);
     }
 
 	debug_opengl_state();
@@ -6308,9 +6325,9 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 			curr = NULL;
 		}
 		else {
-			// Not dead yet so we draw and tick
-			curr->Draw(camera);
+			// Not dead yet
 			curr->Tick(dT);
+            curr->Draw(camera);
 			++iter;
 		}
 	}
@@ -6362,8 +6379,9 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
 			glRotatef(angleToRotate, 0.0f, 0.0f, 1.0f);
 		}
 
-        projectileEmitter->Draw(camera);
         projectileEmitter->Tick(dT);
+        projectileEmitter->Draw(camera);
+        
         glPopMatrix();
 	}
 	else {
@@ -6372,9 +6390,9 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
         Point3D emitPos = Point3D(projectile.GetPosition() - projectile.GetHalfHeight() * projectile.GetVelocityDirection(), projectile.GetZOffset());
 		projectileEmitter->SetEmitPosition(emitPos);
 		projectileEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()[0], -projectile.GetVelocityDirection()[1], 0.0f));
-        projectileEmitter->Draw(camera);
         projectileEmitter->Tick(dT);
-	}
+        projectileEmitter->Draw(camera);   
+    }
 }
 
 /**
@@ -6394,8 +6412,8 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
 	assert(itemDropEffectIter->second.size() > 0);
 	for (std::list<ESPEmitter*>::iterator iter = itemDropEffectIter->second.begin(); iter != itemDropEffectIter->second.end(); ++iter) {
 		ESPEmitter* currEmitter = *iter;
-		currEmitter->Draw(camera);
 		currEmitter->Tick(dT);
+        currEmitter->Draw(camera);
 	}
 }
 
@@ -6538,8 +6556,8 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 
 	uberBallEffectList[1]->SetParticleSize(ESPInterval(3.0f*ball.GetBounds().Radius()));
     uberBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    uberBallEffectList[1]->Tick(dT);
     uberBallEffectList[1]->Draw(camera);
-	uberBallEffectList[1]->Tick(dT);
 
 	glPopMatrix();
 
@@ -6547,8 +6565,8 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	uberBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
 	uberBallEffectList[0]->SetEmitPosition(Point3D(ballPos[0], ballPos[1], 0.0f));
 	uberBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    uberBallEffectList[0]->Tick(dT);
     uberBallEffectList[0]->Draw(camera);
-	uberBallEffectList[0]->Tick(dT);
 }
 
 /**
@@ -6582,8 +6600,8 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 	// Draw the ghostly trail for the ball...
     ghostBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
 	ghostBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    ghostBallEffectList[0]->Tick(dT);
     ghostBallEffectList[0]->Draw(camera);
-	ghostBallEffectList[0]->Tick(dT);
 	
 	glPopMatrix();
 }
@@ -6619,8 +6637,8 @@ void GameESPAssets::DrawFireBallEffects(double dT, const Camera& camera, const G
 
 		emitter->SetParticleSize(ESPInterval(2.33f*ball.GetBounds().Radius(), 3.33f*ball.GetBounds().Radius()));
 		emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
+        emitter->Tick(dT);
         emitter->Draw(camera);
-		emitter->Tick(dT);
 	}
 
 	glPopMatrix();
@@ -6661,11 +6679,11 @@ void GameESPAssets::DrawIceBallEffects(double dT, const Camera& camera, const Ga
 	glPushMatrix();
 	glTranslatef(loc[0], loc[1], 0);
     iceBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
-	iceBallEffectList[0]->Draw(camera);
 	iceBallEffectList[0]->Tick(dT);
+    iceBallEffectList[0]->Draw(camera);
     iceBallEffectList[lastIdx]->SetAliveParticleAlphaMax(ball.GetAlpha());
-	iceBallEffectList[lastIdx]->Draw(camera);
 	iceBallEffectList[lastIdx]->Tick(dT);
+    iceBallEffectList[lastIdx]->Draw(camera);
 	glPopMatrix();
 
 	for (size_t i = 1; i < lastIdx; i++) {
@@ -6673,8 +6691,8 @@ void GameESPAssets::DrawIceBallEffects(double dT, const Camera& camera, const Ga
 		emitter->SetEmitDirection(-Vector3D(dir));
 		emitter->SetEmitPosition(Point3D(loc));
         emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
-		emitter->Draw(camera);
-		emitter->Tick(dT);
+        emitter->Tick(dT);
+        emitter->Draw(camera);
 	}
 }
 
@@ -6708,8 +6726,8 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 		}
 
         emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
-		emitter->Draw(camera);
-        emitter->Tick(dT);
+		emitter->Tick(dT);
+        emitter->Draw(camera);
 	}
 
 	glPopMatrix();
@@ -6743,8 +6761,8 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 
 	this->crazyBallAura->SetParticleSize(ESPInterval(2.75f*ball.GetBounds().Radius()));
     this->crazyBallAura->SetAliveParticleAlphaMax(ball.GetAlpha());
-	this->crazyBallAura->Draw(camera);
-    this->crazyBallAura->Tick(dT);
+	this->crazyBallAura->Tick(dT);
+    this->crazyBallAura->Draw(camera);
 	glPopMatrix();
 
 	for (std::vector<ESPPointEmitter*>::iterator iter = crazyBallEffectList.begin();
@@ -6754,8 +6772,8 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 		emitter->SetEmitPosition(ball.GetCenterPosition());
 		emitter->SetEmitDirection(-Vector3D(ball.GetDirection()));
         emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
-		emitter->Draw(camera);
-        emitter->Tick(dT);
+		emitter->Tick(dT);
+        emitter->Draw(camera);
 	}
 }
 
@@ -6781,8 +6799,8 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
     // Draw the aura
 	slowBallEffectList[0]->SetParticleSize(ESPInterval(3.75f * ball.GetBounds().Radius()));
 	slowBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    slowBallEffectList[0]->Tick(dT);
     slowBallEffectList[0]->Draw(camera);
-	slowBallEffectList[0]->Tick(dT);
 
 	// Draw the tail...
     // Reset the tail emitter when the direction of the ball changes
@@ -6795,8 +6813,8 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
     slowBallEffectList[1]->SetEmitDirection(negBallDir);
 	slowBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
     slowBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
-	slowBallEffectList[1]->Draw(camera);
 	slowBallEffectList[1]->Tick(dT);
+    slowBallEffectList[1]->Draw(camera);
 
     glPopMatrix();
 }
@@ -6823,8 +6841,8 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
     // Draw the aura
 	fastBallEffectList[0]->SetParticleSize(ESPInterval(3.5f * ball.GetBounds().Radius()));
 	fastBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    fastBallEffectList[0]->Tick(dT);
     fastBallEffectList[0]->Draw(camera);
-	fastBallEffectList[0]->Tick(dT);
 
 	// Draw the tail...
     // Reset the tail emitter when the direction of the ball changes
@@ -6837,9 +6855,9 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
     fastBallEffectList[1]->SetEmitDirection(ballDir);
 	fastBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
     fastBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    fastBallEffectList[1]->Tick(dT);
     fastBallEffectList[1]->Draw(camera);
-	fastBallEffectList[1]->Tick(dT);
-
+	
     glPopMatrix();
 }
 
@@ -6881,8 +6899,8 @@ void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const 
 	
 	paddleCamBallEffectList[0]->SetParticleColour(ESPInterval(targetColour.R()), ESPInterval(targetColour.G()), ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
 	paddleCamBallEffectList[0]->SetParticleSize(ESPInterval(ball.GetBallSize()));
-	paddleCamBallEffectList[0]->Draw(camera);
 	paddleCamBallEffectList[0]->Tick(dT);
+    paddleCamBallEffectList[0]->Draw(camera);
 
 	glPopMatrix();
 }
@@ -6924,8 +6942,8 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
         ESPInterval(targetColour.R()), ESPInterval(targetColour.G()),
         ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
 	ballCamPaddleEffectList[0]->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal()*2));
-	ballCamPaddleEffectList[0]->Draw(camera);
 	ballCamPaddleEffectList[0]->Tick(dT);
+    ballCamPaddleEffectList[0]->Draw(camera);
 
 	glPopMatrix();
 }
@@ -7011,8 +7029,8 @@ void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
                 if (!currBall->GetDirection().IsZero()) {
                     currEmitter->SetEmitDirection(Vector3D(-currBall->GetDirection()));
                 }
+                currEmitter->Tick(dT);
 			    currEmitter->Draw(camera);
-			    currEmitter->Tick(dT);
 			    ++iter2;
 		    }
         }
@@ -7052,8 +7070,8 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
 		}
 		else {
 			// Not dead yet so we draw and tick
-			curr->Draw(camera);
 			curr->Tick(dT);
+            curr->Draw(camera);
 			++iter;
 		}
 	}
@@ -7088,8 +7106,8 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
                 curr->SetAliveParticleAlphaMax(paddle.GetAlpha());
             }
             curr->SetParticleRotation(ESPInterval(-paddle.GetZRotation()));
+            curr->Tick(dT);
             curr->Draw(camera);
-			curr->Tick(dT);
             ++iter;
 		}
 	}
@@ -7208,8 +7226,8 @@ void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera) {
 			ESPEmitter* currentEmitter = *emitIter;
 			assert(currentEmitter != NULL);
             currentEmitter->SetParticleAlpha(ESPInterval(beam->GetBeamAlpha()));
-			currentEmitter->Draw(camera);
 			currentEmitter->Tick(dT);
+            currentEmitter->Draw(camera);
 		}
 	}
 }
@@ -7235,8 +7253,8 @@ void GameESPAssets::DrawTimerHUDEffect(double dT, const Camera& camera, GameItem
 		}
 		else {
 			// Not dead yet so we draw and tick
-			currEmitter->Draw(camera);
 			currEmitter->Tick(dT);
+            currEmitter->Draw(camera);
 			++iter;
 		}
 	}

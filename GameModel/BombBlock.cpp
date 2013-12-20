@@ -118,7 +118,6 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
 				if (currDestroyedPiece->CanBeDestroyedByBall()) {
                     currDestroyedPiece->Destroy(gameModel, LevelPiece::BombDestruction);
 				}
-
 			}
 		}
 

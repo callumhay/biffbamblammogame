@@ -72,7 +72,9 @@ const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN
 const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS  = 150;
 const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS           = 570;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS = 250;
-
+const long GameEventsListener::SOUND_DAMPEN_TIME_BETWEEN_BLOCK_COUNTERS_IN_MS             = 10;
+const long GameEventsListener::SOUND_DAMPEN_TIME_BETWEEN_MULTIPLIERS_IN_MS                = 10;
+const long GameEventsListener::SOUND_DAMPEN_TIME_BETWEEN_ITEM_SPAWNS_IN_MS                = 10;
 
 SoundID GameEventsListener::enterBulletTimeSoundID  = INVALID_SOUND_ID;
 SoundID GameEventsListener::exitBulletTimeSoundID   = INVALID_SOUND_ID;
@@ -86,7 +88,11 @@ timeOfLastBallPaddleCollisionEventInMS(0),
 timeOfLastBallTeslaCollisionEventInMS(0),
 timeOfLastControlledCannonRotationInMS(0),
 timeOfLastBoostMalfunctionInMS(0),
-numFallingItemsInPlay(0), fallingItemSoundID(INVALID_SOUND_ID){
+timeOfLastCounterEventInMS(0),
+timeOfLastMultiplierEventInMS(0),
+timeOfLastItemSpawnInMS(0),
+numFallingItemsInPlay(0), 
+fallingItemSoundID(INVALID_SOUND_ID){
 	assert(d != NULL);
 }
 
@@ -165,7 +171,9 @@ void GameEventsListener::LevelAlmostCompleteEvent(const GameLevel& level) {
 	debug_output("EVENT: Level almost complete");
 }
 
-void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
+void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level, 
+                                             int furthestLevelIdxBefore, int furthestLevelIdxAfter) {
+
     GameModel* gameModel = this->display->GetModel();
 
     // Clear all the Tesla lightning sounds that are left playing
@@ -230,9 +238,13 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
         if (nextLevel->GetAreUnlockStarsPaidFor()) {
             levelSelectionIdx = nextLevelIdx;
         }
+        
+        bool showBasicUnlockBreak = (furthestLevelIdxBefore != furthestLevelIdxAfter && 
+            furthestLevelIdxAfter == nextLevelIdx-1);
 
         this->display->AddStateToQueue(DisplayState::SelectLevelMenu, 
-            DisplayStateInfo::BuildSelectLevelInfo(world.GetWorldIndex(), levelSelectionIdx));
+            DisplayStateInfo::BuildSelectLevelInfo(world.GetWorldIndex(), levelSelectionIdx, 
+            showBasicUnlockBreak));
     }
 
 	this->display->SetCurrentStateAsNextQueuedState();
@@ -698,12 +710,12 @@ void GameEventsListener::BallBossCollisionEvent(GameBall& ball, const Boss& boss
 
 void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) {
 
-    // Play the sound for the collision
-    Point3D collisionPtEstimate = ball1.GetCenterPosition() + ball1.GetBounds().Radius() * 
-        Vector3D::Normalize(ball2.GetCenterPosition() - ball1.GetCenterPosition());
+    const Point2D& ball1Center = ball1.GetBounds().Center();
+    const Point2D& ball2Center = ball2.GetBounds().Center();
 
+    // Play the sound for the collision
 	this->display->GetSound()->PlaySoundAtPosition(GameSound::BallBallCollisionEvent, false, 
-        collisionPtEstimate, true, true, true);
+        Point3D(Point2D::GetMidPoint(ball1Center, ball2Center), 0.0f), true, true, true);
     
     // Add the effect for ball-ball collision
 	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(ball1, ball2);
@@ -913,6 +925,27 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
         this->display->GetAssets()->GetESPAssets()->AddBlockDisintegrationEffect(block);
     }
     else {
+        float destructionVol = 1.0f;
+
+        // If the block was destroyed by a bomb, rocket or mine, we tone down the sound a bit or else we'll deafen the player --
+        // Such destructions tend to get many blocks at once and we don't want to completely clip all the sounds
+        // and blast the speakers with the noises of all the block destructions and combos
+        switch (method) {
+            case LevelPiece::RocketDestruction:
+                destructionVol = 0.25f;
+                break;
+            case LevelPiece::BombDestruction:
+                if (block.GetType() != LevelPiece::Bomb) {
+                    destructionVol = 0.4f;
+                }
+                break;
+            case LevelPiece::MineDestruction:
+                destructionVol = 0.5f;
+                break;
+            default:
+                break;
+        }
+
         bool wasFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 
 	    // Add the effects based on the type of block that is being destroyed, its status and method of destruction...
@@ -933,7 +966,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+                    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), 
+                        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    }
 			    break;
 
@@ -947,7 +981,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), 
+                        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    }
 			    break;
             }
@@ -962,7 +997,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), 
+                        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    }
 			    break;
 
@@ -974,7 +1010,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    else {
 				    // Typical break effect
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), 
+                        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    }
 			    break;
 
@@ -986,7 +1023,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    else {
 				    // Typical break effect for basic breakable blocks
 				    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+				    sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(),
+                        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    }
                 break;
 
@@ -1000,8 +1038,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 				    this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
 				    this->display->GetCamera().ApplyCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
 				    GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
-                    //sound->PlaySound(GameSound::BombBlockDestroyedEvent, false);
-                    sound->PlaySoundAtPosition(GameSound::BombBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+                    sound->PlaySoundAtPosition(GameSound::BombBlockDestroyedEvent, false, block.GetPosition3D(), 
+                        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    }
 			    break;
 
@@ -1019,10 +1057,11 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		    	    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
 		        }
 		        else {
-		    	    // Emit goo from ink block and make onomata effects
+		    	    // Emit goo from ink block and make onomatopoeia effects
 		    	    this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(
                         this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
-		    	    sound->PlaySoundAtPosition(GameSound::InkBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+		    	    sound->PlaySoundAtPosition(GameSound::InkBlockDestroyedEvent, false, block.GetPosition3D(), 
+                        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 
 		    	    if (inkSplatter) {
 		    		    // Cover camera in ink with a fullscreen splatter effect
@@ -1035,12 +1074,14 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		    case LevelPiece::Prism:
 		    case LevelPiece::PrismTriangle:
 			    this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-                sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+                sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), 
+                    true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    break;
 
 		    case LevelPiece::Cannon: {
                 this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-                sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), true, true, true);
+                sound->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, block.GetPosition3D(), 
+                    true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
 			    break;
             }
 
@@ -1244,8 +1285,16 @@ void GameEventsListener::CollateralBlockChangedStateEvent(const CollateralBlock&
 void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
     GameSound* sound = this->display->GetSound();
 
+    long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+    float soundVol = 1.0f;
+    if ((currSystemTime - this->timeOfLastItemSpawnInMS) <= SOUND_DAMPEN_TIME_BETWEEN_ITEM_SPAWNS_IN_MS) {
+        soundVol *= 0.33f;
+    }
+    this->timeOfLastItemSpawnInMS = currSystemTime;
+
 	// Play item spawn sound
-	sound->PlaySoundAtPosition(GameSound::ItemSpawnedEvent, false, item.GetPosition3D(), true, true, true);
+    sound->PlaySoundAtPosition(GameSound::ItemSpawnedEvent, false, item.GetPosition3D(), 
+        true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, soundVol);
 
 	// We don't show the stars coming off the dropping items if it gets in the way of playing
 	// the game - e.g., when in paddle camera mode
@@ -1786,39 +1835,55 @@ void GameEventsListener::ScoreChangedEvent(int newScore) {
 }
 
 void GameEventsListener::ScoreMultiplierCounterChangedEvent(int oldCounterValue, int newCounterValue) {
-    
+    static const float COUNTER_SOUND_VOLUME = 0.33f;
+
     if (oldCounterValue < newCounterValue && newCounterValue > 0) {
         // Play sounds as we count up towards higher multipliers by destroying more blocks...
         GameSound* sound = this->display->GetSound();
         
-        static const float COUNTER_SOUND_VOLUME = 0.33f;
+        long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+
+        float soundVol = COUNTER_SOUND_VOLUME;
+        if ((currSystemTime - this->timeOfLastCounterEventInMS) <= SOUND_DAMPEN_TIME_BETWEEN_BLOCK_COUNTERS_IN_MS) {
+            soundVol *= 0.33f;
+        }
+        
         switch (newCounterValue) {
             case 1:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc1, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc1, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 2:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc2, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc2, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 3:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc3, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc3, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 4:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc4, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc4, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 5:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc5, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc5, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 6:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc6, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc6, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 7:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc7, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc7, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 8:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc8, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc8, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
             case 9:
-                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc9, false, true, COUNTER_SOUND_VOLUME);
+                sound->PlaySound(GameSound::BlockBrokenMultiplierCounterInc9, false, true, soundVol);
+                this->timeOfLastCounterEventInMS = currSystemTime;
                 break;
 
             default:
@@ -1844,20 +1909,32 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
     // Indicate the change in multiplier where it happens in the level...
     GameSound* sound = this->display->GetSound();
     if (newMultiplier > 1 && oldMultiplier != newMultiplier) {
-        static const float SCORE_MULTIPLIER_VOLUME = 0.8f;
+        static const float SCORE_MULTIPLIER_VOLUME = 0.5f;
+
+        long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+        float soundVol = SCORE_MULTIPLIER_VOLUME;
+        if ((currSystemTime - this->timeOfLastMultiplierEventInMS) <= SOUND_DAMPEN_TIME_BETWEEN_MULTIPLIERS_IN_MS) {
+            soundVol *= 0.33f;
+        }
 
         // Play a sound for the increase in multiplier
-        if (newMultiplier == 2) {
-            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo2Event, false, true, SCORE_MULTIPLIER_VOLUME);
+        switch (newMultiplier) {
+            case 2:
+                sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo2Event, false, true, soundVol);
+                this->timeOfLastMultiplierEventInMS = currSystemTime;
+                break;
+            case 3:
+                sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo3Event, false, true, soundVol);
+                this->timeOfLastMultiplierEventInMS = currSystemTime;
+                break;
+            case 4:
+                sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo4Event, false, true, soundVol);
+                this->timeOfLastMultiplierEventInMS = currSystemTime;
+                break;
+            default:
+                break;
         }
-        else if (newMultiplier == 3) {
-            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo3Event, false, true, SCORE_MULTIPLIER_VOLUME);
 
-        }
-        else if (newMultiplier == 4) {
-            sound->PlaySound(GameSound::ScoreMultiplierIncreasedTo4Event, false, true, SCORE_MULTIPLIER_VOLUME);
-        }
-        
         // Don't display the effect if we're in ball or paddle camera mode...
         if (!gameModel->GetPlayerPaddle()->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
             this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(

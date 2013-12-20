@@ -2174,13 +2174,15 @@ void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const Tesl
 
 bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, 
 											 Collision::LineSeg2D& collisionLine, 
-                                             double& timeUntilCollision) const {
+                                             double& timeUntilCollision, Point2D& pointOfCollision) const {
 	// Fast exit if there's no Tesla stuffs
 	if (this->teslaLightning.empty()) {
 		return false;
 	}
 
-    if (!this->teslaLightningBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeUntilCollision)) {
+    if (!this->teslaLightningBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, 
+        collisionLine, timeUntilCollision, pointOfCollision)) {
+
         return false;
     }
 

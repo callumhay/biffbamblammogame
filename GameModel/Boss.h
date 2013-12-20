@@ -48,7 +48,7 @@ public:
     float GetAliveWidth() const;
     
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-        Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const;
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& pointOfCollision) const;
     BossBodyPart* CollisionCheck(const PlayerPaddle& paddle) const;
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const;
@@ -167,8 +167,8 @@ inline bool Boss::GetIsLevelCompleteDead() const {
 
 inline BossBodyPart* Boss::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                           Collision::LineSeg2D& collisionLine,
-                                          double& timeUntilCollision) const {
-    return this->alivePartsRoot->CollisionCheck(ball, dT, n, collisionLine, timeUntilCollision);
+                                          double& timeUntilCollision, Point2D& pointOfCollision) const {
+    return this->alivePartsRoot->CollisionCheck(ball, dT, n, collisionLine, timeUntilCollision, pointOfCollision);
 }
 
 inline BossBodyPart* Boss::CollisionCheck(const PlayerPaddle& paddle) const {

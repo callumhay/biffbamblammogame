@@ -37,9 +37,6 @@ public:
     virtual void Tick(double dT) = 0;
     virtual void Draw(const Camera& camera, bool drawWithDepth = false, float depth = 0.0f) = 0;
 
-protected:
-
-
 private:
     DISALLOW_COPY_AND_ASSIGN(EmbededTutorialHint);
 };

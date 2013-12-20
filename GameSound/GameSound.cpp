@@ -24,13 +24,17 @@
 
 const float GameSound::DEFAULT_MIN_3D_SOUND_DIST       = 1000.0f;
 const float GameSound::DEFAULT_3D_SOUND_ROLLOFF_FACTOR = 0.1f;
+const float GameSound::DEFAULT_MASTER_VOLUME = 1.0f;
+
+GameSound::IsMusicMap GameSound::musicSoundTypeMap;
 
 GameSound::GameSound() : soundEngine(NULL), currLoadedWorldStyle(GameWorld::None), 
-levelTranslation(0,0,0), gameFGTransform(), ignorePlaySounds(false)
+levelTranslation(0,0,0), gameFGTransform(), ignorePlaySounds(false), musicVolume(1.0f), sfxVolume(1.0f)
 {
     this->soundEngine = irrklang::createIrrKlangDevice();
     this->soundEngine->setRolloffFactor(DEFAULT_3D_SOUND_ROLLOFF_FACTOR);
     this->soundEngine->setDefault3DSoundMinDistance(DEFAULT_MIN_3D_SOUND_DIST);
+    this->soundEngine->setSoundVolume(DEFAULT_MASTER_VOLUME);
     
     assert(this->soundEngine != NULL);
 }
@@ -58,7 +62,9 @@ bool GameSound::Init() {
 
     // Set the master volume from the initial configuration options
     ConfigOptions cfgOptions = ResourceManager::ReadConfigurationOptions(true);
-    this->SetMasterVolume(static_cast<float>(cfgOptions.GetVolume()) / 100.0f);
+    this->SetMasterVolume(1.0f);
+    this->SetMusicVolume(static_cast<float>(cfgOptions.GetMusicVolume()) / 100.0f);
+    this->SetSFXVolume(static_cast<float>(cfgOptions.GetSFXVolume()) / 100.0f);
 
     return true;
 }
@@ -71,7 +77,7 @@ void GameSound::Tick(double dT) {
     for (SoundMapIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end();) {
         
         Sound* currSound = iter->second;
-        currSound->Tick(dT);
+        currSound->Tick(dT, *this);
         
         if (currSound->IsFinished()) {
             delete currSound;
@@ -93,7 +99,7 @@ void GameSound::Tick(double dT) {
         for (SoundMapIter iter2 = soundMap.begin(); iter2 != soundMap.end();) {
             
             Sound* currSound = iter2->second;
-            currSound->Tick(dT);
+            currSound->Tick(dT, *this);
 
             if (currSound->IsFinished()) {
                 delete currSound;
@@ -373,7 +379,8 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
     if (newSound == NULL) {
         return INVALID_SOUND_ID;
     }
-    newSound->SetVolume(volume);
+
+    newSound->SetVolume(this->GetSoundTypeMasterVolume(*newSound), volume);
     newSound->SetPause(false);
     
     this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
@@ -403,7 +410,7 @@ SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType, bo
         return INVALID_SOUND_ID;
     }
     newSound->SetMinimumDistance(minDistance);
-    newSound->SetVolume(volume);
+    newSound->SetVolume(this->GetSoundTypeMasterVolume(*newSound), volume);
     newSound->SetPause(false);
 
     this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
@@ -493,7 +500,9 @@ SoundID GameSound::AttachAndPlaySound(const IPositionObject* posObj, const GameS
         return INVALID_SOUND_ID;
     }
 
-    newSound->SetVolume(volume);
+    // All attached sounds SHOULD NOT be music
+    assert(!newSound->IsMusic());
+    newSound->SetVolume(this->GetSFXVolume(), volume);
     newSound->SetPause(false);
 
     // Attach the new sound to the object and return its ID
@@ -662,8 +671,47 @@ void GameSound::SetMasterVolume(float volume) {
         return;
     }
 
+    // The sound engine has its own master volume independent of the music and sfx master volumes
     this->soundEngine->setSoundVolume(volume);
 }
+
+void GameSound::SetMusicVolume(float volume) {
+    if (this->soundEngine == NULL) {
+        return;
+    }
+    if (volume < 0.0f || volume > 1.0f) {
+        assert(false);
+        return;
+    }
+
+    this->musicVolume = volume;
+
+    std::list<Sound*> allPlayingMusic;
+    this->GetAllPlayingMusicAsList(allPlayingMusic);
+    for (std::list<Sound*>::iterator iter = allPlayingMusic.begin(); iter != allPlayingMusic.end(); ++iter) {
+        Sound* currSound = *iter;
+        currSound->SetMasterVolume(this->musicVolume);
+    }
+}
+void GameSound::SetSFXVolume(float volume) {
+    if (this->soundEngine == NULL) {
+        return;
+    }
+    if (volume < 0.0f || volume > 1.0f) {
+        assert(false);
+        return;
+    }
+
+    this->sfxVolume = volume;
+
+    std::list<Sound*> allPlayingSFX;
+    this->GetAllPlayingSFXAsList(allPlayingSFX);
+    for (std::list<Sound*>::iterator iter = allPlayingSFX.begin(); iter != allPlayingSFX.end(); ++iter) {
+        Sound* currSound = *iter;
+        currSound->SetMasterVolume(this->sfxVolume);
+    }
+}
+
 
 void GameSound::SetSoundVolume(const SoundID& soundID, float volume) {
     if (this->soundEngine == NULL) {
@@ -673,16 +721,17 @@ void GameSound::SetSoundVolume(const SoundID& soundID, float volume) {
     if (sound == NULL) {
         return;
     }
-    sound->SetVolume(volume);
+    sound->SetVolume(this->GetSoundTypeMasterVolume(*sound), volume);
 }
 
 void GameSound::SetSoundTypeVolume(const GameSound::SoundType& soundType, float volume) {
+    
     std::list<Sound*> allPlayingSounds;
     this->GetAllPlayingSoundsAsList(allPlayingSounds);
     for (std::list<Sound*>::iterator iter = allPlayingSounds.begin(); iter != allPlayingSounds.end(); ++iter) {
         Sound* currSound = *iter;
         if (currSound->GetSoundType() == soundType) {
-            currSound->SetVolume(volume);
+            currSound->SetVolume(this->GetSoundTypeMasterVolume(*currSound), volume);
         }
     } 
 }
@@ -767,11 +816,14 @@ bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& s
         return false;
     }
 
-    Sound* newSound = source->Spawn2DSoundWithID(id, isLooped, startPaused);
+    Sound* newSound = source->Spawn2DSoundWithID(id, isLooped, true);
     if (newSound == NULL) {
         assert(false);
         return false;
     }
+
+    newSound->SetVolume(this->GetSoundTypeMasterVolume(*newSound), 1.0f);
+    newSound->SetPause(startPaused);
     
     // Apply any active effects to the sound
     for (EffectSetConstIter iter = this->activeEffects.begin(); iter != this->activeEffects.end(); ++iter) {
@@ -783,6 +835,11 @@ bool GameSound::PlaySoundWithID(const SoundID& id, const GameSound::SoundType& s
     this->nonAttachedPlayingSounds.insert(std::make_pair(newSound->GetSoundID(), newSound));
     return true;
 }
+
+float GameSound::GetSoundTypeMasterVolume(const Sound& sound) const {
+    return (sound.IsMusic() ? this->GetMusicVolume() : this->GetSFXVolume());
+}
+
 
 void GameSound::ClearAll() {
     this->ClearEffects();
@@ -923,6 +980,30 @@ void GameSound::GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) cons
         }
     }
 }
+
+void GameSound::GetAllPlayingMusicAsList(std::list<Sound*>& playingMusic) const {
+    playingMusic.clear();
+    for (SoundMapConstIter iter = this->nonAttachedPlayingSounds.begin(); iter != this->nonAttachedPlayingSounds.end(); ++iter) {
+        Sound* sound = iter->second;
+        if (sound->IsMusic()) {
+            playingMusic.push_back(sound);
+        }
+    }
+}
+
+void GameSound::GetAllPlayingSFXAsList(std::list<Sound*>& playingSFX) const {
+    this->GetAllPlayingSoundsAsList(playingSFX);
+    for (std::list<Sound*>::iterator iter = playingSFX.begin(); iter != playingSFX.end();) {
+        const Sound* sound = *iter;
+        if (sound->IsMusic()) {
+            iter = playingSFX.erase(iter);
+        }
+        else {
+            ++iter;
+        }
+    }
+}
+
 
 // Private helper function for building 2D and 3D sounds
 // If the sound could not be built it returns NULL.

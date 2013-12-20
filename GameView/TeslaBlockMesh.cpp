@@ -104,9 +104,12 @@ TeslaBlockMesh::~TeslaBlockMesh() {
 void TeslaBlockMesh::DrawPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                      const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
-     if (this->teslaBlocks.empty()) {
-         return;
-     }
+    if (this->teslaBlocks.empty()) {
+        return;
+    }
+
+    this->teslaCenterFlare->Tick(dT);
+    this->shieldEmitter->Tick(dT);
 
     float rotationAmt = dT * COIL_ROTATION_SPEED_DEGSPERSEC;
 
@@ -150,8 +153,6 @@ void TeslaBlockMesh::DrawPostEffects(double dT, const Camera& camera, const Basi
 
     glPopAttrib();
 
-    this->teslaCenterFlare->Tick(dT);
-    this->shieldEmitter->Tick(dT);
 }
 
 void TeslaBlockMesh::SetAlphaMultiplier(float alpha) {

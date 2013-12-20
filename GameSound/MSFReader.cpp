@@ -34,11 +34,11 @@ std::map<std::string, GameSound::EffectType> MSFReader::effectTypeMapping;
 
 bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 
-	// Intialize the mapping from strings to enums for all the possible game sounds and effects
+	// Initialize the mapping from strings to enums for all the possible game sounds and effects
     MSFReader::InitSoundTypeMapping();
     MSFReader::InitEffectTypeMapping();
 
-	// Grab a file in stream from the main manu music script file:
+	// Grab a file in stream from the main menu music script file:
 	// in debug mode we load right off disk, in release we load it from the zip file system
 	std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(filepath);
 	if (inStream == NULL) {
@@ -314,204 +314,215 @@ bool MSFReader::ReadMSF(GameSound& gameSound, const std::string& filepath) {
 #define MAPPING_PAIR(Class, EnumVal) std::make_pair(STRINGIFY(EnumVal), Class::EnumVal)
 
 void MSFReader::InitSoundTypeMapping() {
+
 	// Check to see if the mapping has already been initialized
-	if (!soundTypeMapping.empty()) {
+	if (!MSFReader::soundTypeMapping.empty()) {
 		return;
 	}
 
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuTitleBiffSlamEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuTitleBamSlamEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MainMenuTitleBlammoSlamEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemChangedSelectionEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemEnteredEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemCancelEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemVerifyAndSelectEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuItemVerifyAndSelectStartGameEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuSelectionItemScrolledEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuScrollerItemScrolledEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MenuOpenSubMenuWindowEvent));
+    GameSound::musicSoundTypeMap.clear();
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaBaseMenuItemChangedSelectionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaBaseMenuItemSelectEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemChangedSelectionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemSelectEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemDeselectEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListDeselectEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlammopediaListItemLockedEvent));
+#define INSERT_MAPPING_PAIR(Class, EnumVal, isMusic) \
+    MSFReader::soundTypeMapping.insert(MAPPING_PAIR(Class, EnumVal)); \
+    GameSound::musicSoundTypeMap[Class::EnumVal] = isMusic
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuItemChangedSelectionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuItemSelectEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldMenuItemLockedEvent));
+	INSERT_MAPPING_PAIR(GameSound, MainMenuBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, MainMenuTitleBiffSlamEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MainMenuTitleBamSlamEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MainMenuTitleBlammoSlamEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, MenuItemChangedSelectionEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, MenuItemEnteredEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, MenuItemCancelEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, MenuItemVerifyAndSelectEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MenuItemVerifyAndSelectStartGameEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, MenuSelectionItemScrolledEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MenuScrollerItemScrolledEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MenuOpenSubMenuWindowEvent, false);
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemChangedSelectionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemSelectEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelMenuItemLockedEvent));
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaBaseMenuItemChangedSelectionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaBaseMenuItemSelectEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaListItemChangedSelectionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaListItemSelectEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaListItemDeselectEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaListDeselectEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlammopediaListItemLockedEvent, false);
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuOpened));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, InGameMenuClosed));
+    INSERT_MAPPING_PAIR(GameSound, WorldMenuBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, WorldMenuItemChangedSelectionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, WorldMenuItemSelectEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, WorldMenuItemLockedEvent, false);
+
+    INSERT_MAPPING_PAIR(GameSound, LevelMenuBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, LevelMenuItemChangedSelectionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelMenuItemSelectEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelMenuItemLockedEvent, false);
+
+    INSERT_MAPPING_PAIR(GameSound, InGameMenuOpened, false);
+    INSERT_MAPPING_PAIR(GameSound, InGameMenuClosed, false);
     
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldBackgroundLoop));
+	INSERT_MAPPING_PAIR(GameSound, WorldBackgroundLoop, true);
 
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleHitWallEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, LastBallExplodedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBallCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBossCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LastBallSpiralingToDeathLoop));
+	INSERT_MAPPING_PAIR(GameSound, PaddleHitWallEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, LastBallExplodedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallBallCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallBossCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LastBallSpiralingToDeathLoop, false);
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallPaddleCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallStickyPaddleAttachEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallStickyPaddleBounceEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallShieldPaddleCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallTeslaLightningCollisionEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOrPaddleGrowEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOrPaddleShrinkEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallOnPaddleTimerRunningOutLoop));
+    INSERT_MAPPING_PAIR(GameSound, BallPaddleCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallStickyPaddleAttachEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallStickyPaddleBounceEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallShieldPaddleCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallTeslaLightningCollisionEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, BallOrPaddleGrowEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, BallOrPaddleShrinkEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallOnPaddleTimerRunningOutLoop, false);
     
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockBasicBounceEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBlockCollisionColourChange));
+	INSERT_MAPPING_PAIR(GameSound, BallBlockBasicBounceEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallBlockCollisionColourChange, false);
 	
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BombBlockDestroyedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, InkBlockDestroyedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, InkSplatterEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BasicBlockDestroyedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockLoadedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockFiredEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PortalTeleportEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFlashingLoop));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CollateralBlockFallingLoop));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockRotatingLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, CannonBlockRotatingPart));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, TeslaLightningArcLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, SwitchBlockActivated));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockFrozenEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockOnFireLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, IceShatterEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, IceMeltedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, FireFrozeEvent));
+	INSERT_MAPPING_PAIR(GameSound, BombBlockDestroyedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, InkBlockDestroyedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, InkSplatterEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, BasicBlockDestroyedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, CannonBlockLoadedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, CannonBlockFiredEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, PortalTeleportEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, CollateralBlockFlashingLoop, false);
+	INSERT_MAPPING_PAIR(GameSound, CollateralBlockFallingLoop, false);
+	INSERT_MAPPING_PAIR(GameSound, CannonBlockRotatingLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, CannonBlockRotatingPart, false);
+    INSERT_MAPPING_PAIR(GameSound, TeslaLightningArcLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, SwitchBlockActivated, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockFrozenEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockOnFireLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, IceShatterEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, IceMeltedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FireFrozeEvent, false);
 
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, TurretRocketFiredEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, TurretRocketMovingLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossRocketFiredEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossRocketMovingLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketLaunchEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleRocketMovingLoop));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketExplodedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, RemoteControlRocketThrustEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, TurretMineFiredEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleMineFiredEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MineExplodedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MineLatchedOnEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBulletShotEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserBeamFiringLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LaserDeflectedByShieldEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, RocketOrMineDeflectedByShieldEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleLaserBulletCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleLaserBeamCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleCollateralBlockCollisionEvent));
+    INSERT_MAPPING_PAIR(GameSound, TurretRocketFiredEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, TurretRocketMovingLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, BossRocketFiredEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossRocketMovingLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleRocketLaunchEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleRocketMovingLoop, false);
+	INSERT_MAPPING_PAIR(GameSound, RocketExplodedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, RemoteControlRocketThrustEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, TurretMineFiredEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleMineFiredEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MineExplodedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MineLatchedOnEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LaserBulletShotEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LaserBeamFiringLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, LaserDeflectedByShieldEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, RocketOrMineDeflectedByShieldEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleLaserBulletCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleLaserBeamCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleCollateralBlockCollisionEvent, false);
 
 
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallSafetyNetCreatedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallSafetyNetDestroyedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelFlipEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelUnflipEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleShieldActivatedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, PaddleShieldDeactivatedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, MagnetPaddleLoop));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemSpawnedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerUpItemActivatedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerNeutralItemActivatedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, PowerDownItemActivatedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemTimerEndingLoop));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemTimerEndedEvent));
-	soundTypeMapping.insert(MAPPING_PAIR(GameSound, ItemMovingLoop));
+	INSERT_MAPPING_PAIR(GameSound, BallSafetyNetCreatedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, BallSafetyNetDestroyedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelFlipEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelUnflipEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleShieldActivatedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleShieldDeactivatedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, MagnetPaddleLoop, false);
+	INSERT_MAPPING_PAIR(GameSound, ItemSpawnedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, PowerUpItemActivatedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, PowerNeutralItemActivatedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, PowerDownItemActivatedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, ItemTimerEndingLoop, false);
+	INSERT_MAPPING_PAIR(GameSound, ItemTimerEndedEvent, false);
+	INSERT_MAPPING_PAIR(GameSound, ItemMovingLoop, false);
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossFadeInIntroEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoopTransition));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBackgroundLoopTransitionSingleHitEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossAngryBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossGlowEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossElectricitySpasmLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossAngryEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossHurtEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossBlowingUpLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossDeathFlashToFullscreenWhiteoutEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossCrosshairTargetingEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BossLaserBeamLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossSparkleEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmShakeLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossArmAttackHitEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ClassicalBossPowerChargeEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossOrbAttackEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossSummonItemChargeEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossChargeShockwaveEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GothicBossMassiveShockwaveEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossLightningRelayTurnOnEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmRotateLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmExtendEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmRetractEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmLevelCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossArmPaddleCollisionEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossLevelRotatingLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossLightningBoltAttackEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, DecoBossElectricShockLoop));
+    INSERT_MAPPING_PAIR(GameSound, BossFadeInIntroEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, BossBackgroundLoopTransition, true);
+    INSERT_MAPPING_PAIR(GameSound, BossBackgroundLoopTransitionSingleHitEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossAngryBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, BossGlowEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossElectricitySpasmLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, BossAngryEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossHurtEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossBlowingUpLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, BossDeathFlashToFullscreenWhiteoutEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossCrosshairTargetingEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossLaserBeamLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, ClassicalBossSparkleEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, ClassicalBossArmShakeLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, ClassicalBossArmAttackEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, ClassicalBossArmAttackHitEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, ClassicalBossPowerChargeEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, GothicBossOrbAttackEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, GothicBossSummonItemChargeEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, GothicBossChargeShockwaveEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, GothicBossMassiveShockwaveEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossLightningRelayTurnOnEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossArmRotateLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossArmExtendEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossArmRetractEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossArmLevelCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossArmPaddleCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossLevelRotatingLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossLightningBoltAttackEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossElectricShockLoop, false);
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, EnterBulletTimeEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, InBulletTimeLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ExitBulletTimeEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BallBoostGainedEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BoostMalfunctionPromptEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BoostAttemptWhileMalfunctioningEvent));
+    INSERT_MAPPING_PAIR(GameSound, EnterBulletTimeEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, InBulletTimeLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, ExitBulletTimeEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallBoostEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BallBoostGainedEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BoostMalfunctionPromptEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BoostAttemptWhileMalfunctioningEvent, false);
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LifeUpAcquiredEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, StarAcquiredEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, FiveStarsAcquiredEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo2Event));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo3Event));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo4Event));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, ScoreMultiplierLostEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc1));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc2));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc3));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc4));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc5));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc6));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc7));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc8));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc9));
+    INSERT_MAPPING_PAIR(GameSound, LifeUpAcquiredEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, StarAcquiredEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FiveStarsAcquiredEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo2Event, false);
+    INSERT_MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo3Event, false);
+    INSERT_MAPPING_PAIR(GameSound, ScoreMultiplierIncreasedTo4Event, false);
+    INSERT_MAPPING_PAIR(GameSound, ScoreMultiplierLostEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc1, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc2, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc3, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc4, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc5, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc6, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc7, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc8, false);
+    INSERT_MAPPING_PAIR(GameSound, BlockBrokenMultiplierCounterInc9, false);
 
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStartPaddleMoveUpEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStartBallSpawnOnPaddleEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelEndFadeoutEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryNewHighScoreEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryPointTallyLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryPointTallySkipEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryStarTallyEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelSummaryConfirmEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, LevelStarCostPaidUnlockEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldCompleteBackgroundLoop));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldCompleteVictoryMessageEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, WorldUnlockEvent));
-    soundTypeMapping.insert(MAPPING_PAIR(GameSound, GameOverEvent));
+    INSERT_MAPPING_PAIR(GameSound, LevelStartPaddleMoveUpEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelStartBallSpawnOnPaddleEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelEndFadeoutEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelSummaryBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, LevelSummaryNewHighScoreEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelSummaryPointTallyLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelSummaryPointTallySkipEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelSummaryStarTallyEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelSummaryConfirmEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelBasicUnlockEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelStarCostPaidUnlockEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, WorldCompleteBackgroundLoop, true);
+    INSERT_MAPPING_PAIR(GameSound, WorldCompleteVictoryMessageEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, WorldSummaryConfirmEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, WorldUnlockEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, GameOverEvent, true);
+
+#undef INSERT_MAPPING_PAIR
 }
 
 void MSFReader::InitEffectTypeMapping() {
-    if (!effectTypeMapping.empty()) {
+    if (!MSFReader::effectTypeMapping.empty()) {
         return;
     }
 
-    effectTypeMapping.insert(MAPPING_PAIR(GameSound, BulletTimeEffect));
-	effectTypeMapping.insert(MAPPING_PAIR(GameSound, InkSplatterEffect));
-	effectTypeMapping.insert(MAPPING_PAIR(GameSound, PoisonEffect));
+    MSFReader::effectTypeMapping.insert(MAPPING_PAIR(GameSound, BulletTimeEffect));
+	MSFReader::effectTypeMapping.insert(MAPPING_PAIR(GameSound, InkSplatterEffect));
+	MSFReader::effectTypeMapping.insert(MAPPING_PAIR(GameSound, PoisonEffect));
 }
 
 /**

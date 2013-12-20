@@ -36,9 +36,10 @@ BossWeakpoint* BossWeakpoint::BuildWeakpoint(BossBodyPart* part, float lifePoint
     }
 
     BossWeakpoint* result = new BossWeakpoint(lifePoints, dmgOnBallHit, part->GetLocalBounds());
+    result->ToggleSimpleBoundingCalc(part->GetIsSimpleBoundingCalcOn());
     result->worldTransform  = part->GetWorldTransform();
     result->attachedProjectiles = part->GetAttachedProjectilesMap();
-
+    
     return result;
 }
 

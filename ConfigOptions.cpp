@@ -17,7 +17,8 @@ const char* ConfigOptions::WINDOW_HEIGHT_VAR      = "window_height";
 const char* ConfigOptions::WINDOW_WIDTH_VAR       = "window_width";
 const char* ConfigOptions::WINDOW_FULLSCREEN_VAR  = "fullscreen";
 const char* ConfigOptions::WINDOW_VSYNC_VAR       = "vsync";
-const char* ConfigOptions::VOLUME_VAR             = "volume";
+const char* ConfigOptions::MUSIC_VOLUME_VAR       = "music_vol";
+const char* ConfigOptions::SFX_VOLUME_VAR         = "sfx_vol";
 const char* ConfigOptions::DIFFICULTY_VAR         = "difficulty";
 const char* ConfigOptions::BALL_BOOST_MODE_VAR    = "ball_boost_mode";
 const char* ConfigOptions::INVERT_BALL_BOOST_VAR  = "invert_ball_boost";
@@ -31,7 +32,8 @@ const int  ConfigOptions::DEFAULT_WINDOW_WIDTH                  = 1024;
 const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT                 = 768;
 const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		        = false;
 const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE                  = false;
-const int  ConfigOptions::DEFAULT_VOLUME                        = ConfigOptions::MAX_VOLUME;
+const int  ConfigOptions::DEFAULT_MUSIC_VOLUME                  = ConfigOptions::MAX_VOLUME;
+const int  ConfigOptions::DEFAULT_SFX_VOLUME                    = ConfigOptions::MAX_VOLUME;
 const bool ConfigOptions::DEFAULT_INVERT_BALL_BOOST_TOGGLE      = true;
 const BallBoostModel::BallBoostMode ConfigOptions::DEFAULT_BALL_BOOST_MODE = BallBoostModel::Slingshot;
 const GameModel::Difficulty ConfigOptions::DEFAULT_DIFFICULTY              = GameModel::MediumDifficulty;
@@ -43,8 +45,10 @@ const char* ConfigOptions::EASY_DIFFICULTY_STR      = "easy";
 const char* ConfigOptions::MEDIUM_DIFFICULTY_STR    = "medium";
 const char* ConfigOptions::HARD_DIFFICULTY_STR      = "hard";
 
-ConfigOptions::ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
-fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), volume(ConfigOptions::DEFAULT_VOLUME),
+ConfigOptions::ConfigOptions() : 
+windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
+fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), 
+musicVolume(ConfigOptions::DEFAULT_MUSIC_VOLUME), sfxVolume(ConfigOptions::DEFAULT_SFX_VOLUME),
 invertBallBoost(DEFAULT_INVERT_BALL_BOOST_TOGGLE), ballBoostMode(DEFAULT_BALL_BOOST_MODE), difficulty(DEFAULT_DIFFICULTY) {
 }
 
@@ -81,8 +85,8 @@ std::vector<std::string> ConfigOptions::GetDifficultyItems() {
 std::vector<std::string> ConfigOptions::GetBallBoostModeItems() {
     std::vector<std::string> boostModeItems;
     boostModeItems.reserve(2);
-    boostModeItems.push_back("Slingshot (auto)");
-    boostModeItems.push_back("Press-to-release (manual)");
+    boostModeItems.push_back("Auto");
+    boostModeItems.push_back("Manual");
     return boostModeItems;
 }
 
@@ -176,15 +180,24 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 				cfgOptions->vSyncIsOn = true;
 			}
 		}
-        // Volume config
-		else if (currStr == ConfigOptions::VOLUME_VAR) {
+        // Music volume config
+		else if (currStr == ConfigOptions::MUSIC_VOLUME_VAR) {
 			READ_IN_FILE_FAIL(inFile, skipEquals);
 
 			// Read in the sound/music volume for the game
-			int volume = ConfigOptions::DEFAULT_VOLUME;
-			READ_IN_FILE_FAIL(inFile, volume);
-			cfgOptions->volume = std::max<int>(ConfigOptions::MIN_VOLUME, std::min<int>(ConfigOptions::MAX_VOLUME, volume));
+			int musicVolume = ConfigOptions::DEFAULT_MUSIC_VOLUME;
+			READ_IN_FILE_FAIL(inFile, musicVolume);
+			cfgOptions->musicVolume = std::max<int>(ConfigOptions::MIN_VOLUME, std::min<int>(ConfigOptions::MAX_VOLUME, musicVolume));
 		}
+        // SFX volume config
+        else if (currStr == ConfigOptions::SFX_VOLUME_VAR) {
+            READ_IN_FILE_FAIL(inFile, skipEquals);
+
+            // Read in the sound/music volume for the game
+            int sfxVolume = ConfigOptions::DEFAULT_SFX_VOLUME;
+            READ_IN_FILE_FAIL(inFile, sfxVolume);
+            cfgOptions->sfxVolume = std::max<int>(ConfigOptions::MIN_VOLUME, std::min<int>(ConfigOptions::MAX_VOLUME, sfxVolume));
+        }
         // Inverted ball boosting config
         else if (currStr == ConfigOptions::INVERT_BALL_BOOST_VAR) {
 			READ_IN_FILE_FAIL(inFile, skipEquals);
@@ -200,6 +213,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 				cfgOptions->invertBallBoost = true;
 			}
         }
+        // Ball boosting mode config
         else if (currStr == ConfigOptions::BALL_BOOST_MODE_VAR) {
             READ_IN_FILE_FAIL(inFile, skipEquals);
 
@@ -214,6 +228,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
                 cfgOptions->ballBoostMode = ConfigOptions::DEFAULT_BALL_BOOST_MODE;
             }
         }
+        // Game difficulty config
         else if (currStr == ConfigOptions::DIFFICULTY_VAR) {
             READ_IN_FILE_FAIL(inFile, skipEquals);
             
@@ -277,11 +292,16 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 	outFile << ConfigOptions::WINDOW_VSYNC_VAR << " = " << (this->vSyncIsOn ? "1" : "0") << std::endl;
 	outFile << std::endl;
 
-	// Volume option
-	outFile << "// Volume (0 - mute, 100 - loudest)" << std::endl;
-	outFile << ConfigOptions::VOLUME_VAR << " = " << (this->volume) << std::endl;
+	// Music Volume option
+	outFile << "// Music Volume (0 - mute, 100 - loudest)" << std::endl;
+	outFile << ConfigOptions::MUSIC_VOLUME_VAR << " = " << (this->musicVolume) << std::endl;
 	outFile << std::endl;
 	
+    // SFX Volume option
+    outFile << "// SFX Volume (0 - mute, 100 - loudest)" << std::endl;
+    outFile << ConfigOptions::SFX_VOLUME_VAR << " = " << (this->sfxVolume) << std::endl;
+    outFile << std::endl;
+
     // Inverted ball boosting option
     outFile << "// Inverted ball boosting (0 - off, 1 - on)" << std::endl;
     outFile << ConfigOptions::INVERT_BALL_BOOST_VAR << " = " << (this->invertBallBoost ? "1" : "0") << std::endl;

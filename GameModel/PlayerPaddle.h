@@ -269,7 +269,8 @@ public:
     const Vector2D& GetBottomCollisionNormal() const { return this->bounds.GetNormal(3); }
 
 	// TODO: Add the parameter: "bool includeAttachedBallCheck" to all paddle collision checks...
-	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeUntilCollision);
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, 
+        double& timeUntilCollision, Point2D& pointOfCollision);
 	bool CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const;
     bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
     bool CollisionCheckWithProjectile(const Projectile& projectile, const BoundingLines& bounds) const;

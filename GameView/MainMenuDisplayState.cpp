@@ -57,9 +57,10 @@ const double MainMenuDisplayState::FADE_OUT_TIME_IN_SECS = 1.25;
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info) : 
 DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
-eraseProgVerifyHandler(NULL), volItemHandler(NULL), postMenuFBObj(NULL),
+eraseProgVerifyHandler(NULL), musicVolItemHandler(NULL), sfxVolItemHandler(NULL), postMenuFBObj(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
 menuFBO(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
+musicVolumeMenuItem(NULL), sfxVolumeMenuItem(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), bgLoopedSoundID(INVALID_SOUND_ID),
 titleDisplay(display->GetTextScalingFactor(), 0.25, display->GetSound()),
 blammopediaItemIndex(-1), creditsItemIndex(-1), doAnimatedFadeIn(info.GetDoAnimatedFadeIn()),
@@ -92,7 +93,8 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 	this->mainMenuEventHandler    = new MainMenuEventHandler(this);
 	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);
 	this->selectListItemsHandler  = new SelectListItemsEventHandler(this);
-    this->volItemHandler          = new VolumeItemEventHandler(this);
+    this->musicVolItemHandler     = new VolumeItemEventHandler(this, VolumeItemEventHandler::Music);
+    this->sfxVolItemHandler       = new VolumeItemEventHandler(this, VolumeItemEventHandler::SFX);
 	this->particleEventHandler    = new BangParticleEventHandler(this);
     this->quitVerifyHandler       = new QuitVerifyEventHandler(this);
     this->eraseProgVerifyHandler  = new EraseProgressVerifyEventHandler(this);
@@ -127,6 +129,9 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
     eraseFailedPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
     eraseFailedPopupPane->AddText("Progress erase failed.", Colour(1,1,1), 1.0f);
     eraseFailedPopupPane->SetSelectableOptions(selectableOptions, 0);
+
+    // Clear any previous camera shake
+    this->display->GetCamera().ClearCameraShake();
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -147,8 +152,10 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->optionsMenuEventHandler = NULL;
 	delete this->selectListItemsHandler;
 	this->selectListItemsHandler = NULL;
-    delete this->volItemHandler;
-    this->volItemHandler = NULL;
+    delete this->musicVolItemHandler;
+    this->musicVolItemHandler = NULL;
+    delete this->sfxVolItemHandler;
+    this->sfxVolItemHandler = NULL;
 	delete this->particleEventHandler;
 	this->particleEventHandler = NULL;
     delete this->quitVerifyHandler;
@@ -394,16 +401,26 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->resolutionMenuItem->SetEventHandler(this->selectListItemsHandler);
 	this->optionsResolutionIndex = this->optionsSubMenu->AddMenuItem(this->resolutionMenuItem);
 
-	// Add a sound volume option
-	subMenuLabelSm.SetText("Volume");
-	subMenuLabelLg.SetText("Volume");
+	// Add a music and SFX volume options
+	subMenuLabelSm.SetText("Music Volume");
+	subMenuLabelLg.SetText("Music Volume");
 
-	int currentVolume = cfgOptions.GetVolume(); // Determine the volume of the sound...
-	this->soundVolumeMenuItem = new AmountScrollerMenuItem(subMenuLabelSm, subMenuLabelLg,
+	int currentVolume = cfgOptions.GetMusicVolume(); // Determine the volume of the sound...
+	this->musicVolumeMenuItem = new AmountScrollerMenuItem(subMenuLabelSm, subMenuLabelLg,
 		ConfigOptions::MIN_VOLUME, ConfigOptions::MAX_VOLUME, currentVolume, 5.0f);
-	this->soundVolumeMenuItem->SetConstantChangeFeedback(true);
-	this->soundVolumeMenuItem->SetEventHandler(this->volItemHandler);
-	this->optionsSoundVolumeIndex = this->optionsSubMenu->AddMenuItem(this->soundVolumeMenuItem);
+	this->musicVolumeMenuItem->SetConstantChangeFeedback(true);
+	this->musicVolumeMenuItem->SetEventHandler(this->musicVolItemHandler);
+	this->optionsMusicVolumeIndex = this->optionsSubMenu->AddMenuItem(this->musicVolumeMenuItem);
+
+    subMenuLabelSm.SetText("SFX Volume");
+    subMenuLabelLg.SetText("SFX Volume");
+
+    currentVolume = cfgOptions.GetSFXVolume(); // Determine the volume of the sound...
+    this->sfxVolumeMenuItem = new AmountScrollerMenuItem(subMenuLabelSm, subMenuLabelLg,
+        ConfigOptions::MIN_VOLUME, ConfigOptions::MAX_VOLUME, currentVolume, 5.0f);
+    this->sfxVolumeMenuItem->SetConstantChangeFeedback(true);
+    this->sfxVolumeMenuItem->SetEventHandler(this->sfxVolItemHandler);
+    this->optionsSFXVolumeIndex = this->optionsSubMenu->AddMenuItem(this->sfxVolumeMenuItem);
 
 	// Add a controller sensitivity option
 	//subMenuLabelSm.SetText("Controller Sensitivity");
@@ -1035,7 +1052,7 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 		return;
 	}
 
-	// A configuration option has changed - rewrite the configuration file to accomodate the change
+	// A configuration option has changed - rewrite the configuration file to accommodate the change
 	ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->mainMenuState->cfgOptions);
 }
 
@@ -1056,46 +1073,101 @@ MainMenuDisplayState::SelectListItemsEventHandler::SelectListItemsEventHandler(M
 SelectionListEventHandlerWithSound(mainMenuState->display->GetSound()), mainMenuState(mainMenuState) {
 }
 
-MainMenuDisplayState::VolumeItemEventHandler::VolumeItemEventHandler(MainMenuDisplayState* mainMenuState) :
-ScrollerItemEventHandlerWithSound(mainMenuState->display->GetSound()), mainMenuState(mainMenuState) {
+MainMenuDisplayState::VolumeItemEventHandler::VolumeItemEventHandler(MainMenuDisplayState* mainMenuState, Type t) :
+ScrollerItemEventHandlerWithSound(mainMenuState->display->GetSound()), mainMenuState(mainMenuState), type(t) {
 }
 
 void MainMenuDisplayState::VolumeItemEventHandler::MenuItemScrolled()  { 
     ScrollerItemEventHandlerWithSound::MenuItemScrolled();
     
     // Set the global volume level for all sounds...
-    int volumeLevel = static_cast<int>(this->mainMenuState->soundVolumeMenuItem->GetScrollerValue());
+    int volumeLevel;
+    switch (this->type) {
+        case Music:
+            volumeLevel = static_cast<int>(this->mainMenuState->musicVolumeMenuItem->GetScrollerValue());
+            break;
+
+        case SFX:
+            volumeLevel = static_cast<int>(this->mainMenuState->sfxVolumeMenuItem->GetScrollerValue());
+            break;
+
+        default:
+            assert(false);
+            return;
+    }
+    
     this->UpdateGameMasterVolume(volumeLevel);
 }
 void MainMenuDisplayState::VolumeItemEventHandler::MenuItemConfirmed() {
     ScrollerItemEventHandlerWithSound::MenuItemConfirmed();
 
-	int volumeLevel = static_cast<int>(this->mainMenuState->soundVolumeMenuItem->GetScrollerValue());
+	int volumeLevel;
 	
-    // Set the global volume level for all sounds...
-    this->UpdateGameMasterVolume(volumeLevel);
-
     // Set the configuration option
-	this->mainMenuState->cfgOptions.SetVolume(volumeLevel);
+    switch (this->type) {
+        case Music:
+            volumeLevel = static_cast<int>(this->mainMenuState->musicVolumeMenuItem->GetScrollerValue());
+            this->mainMenuState->cfgOptions.SetMusicVolume(volumeLevel);
+            break;
+
+        case SFX:
+            volumeLevel = static_cast<int>(this->mainMenuState->sfxVolumeMenuItem->GetScrollerValue());
+            this->mainMenuState->cfgOptions.SetSFXVolume(volumeLevel);
+            break;
+
+        default:
+            assert(false);
+            return;
+    }
+
 	// A configuration option has changed - rewrite the configuration file to accommodate the change
 	ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->mainMenuState->cfgOptions);
+
+    // Set the global volume level for all sounds...
+    this->UpdateGameMasterVolume(volumeLevel);
 }
 
 void MainMenuDisplayState::VolumeItemEventHandler::MenuItemCancelled() {
     ScrollerItemEventHandlerWithSound::MenuItemCancelled();
 
     // Set the global volume level for all sounds...
-    int volumeLevel = static_cast<int>(this->mainMenuState->soundVolumeMenuItem->GetScrollerValue());
+    int volumeLevel;
+    switch (this->type) {
+        case Music:
+            volumeLevel = static_cast<int>(this->mainMenuState->musicVolumeMenuItem->GetScrollerValue());
+            // Since we canceled, there should be no change to the configuration
+            assert(volumeLevel == this->mainMenuState->cfgOptions.GetMusicVolume());
+            break;
+
+        case SFX:
+            volumeLevel = static_cast<int>(this->mainMenuState->sfxVolumeMenuItem->GetScrollerValue());
+            // Since we canceled, there should be no change to the configuration
+            assert(volumeLevel == this->mainMenuState->cfgOptions.GetSFXVolume());
+            break;
+
+        default:
+            assert(false);
+            return;
+    }
+
     this->UpdateGameMasterVolume(volumeLevel);
-    
-    // Since we canceled, there should be no change to the configuration
-	assert(volumeLevel == this->mainMenuState->cfgOptions.GetVolume());
 }
 
 void MainMenuDisplayState::VolumeItemEventHandler::UpdateGameMasterVolume(int volumeLevel) {
 	// Set the global volume level for all sounds...
     GameSound* sound = this->mainMenuState->display->GetSound();
-    sound->SetMasterVolume(static_cast<float>(volumeLevel) / 100.0f);
+    float volumeLvl  = static_cast<float>(volumeLevel) / 100.0f;
+    switch (this->type) {
+        case SFX:
+            sound->SetSFXVolume(volumeLvl);
+            break;
+        case Music:
+            sound->SetMusicVolume(volumeLvl);
+            break;
+        default:
+            assert(false);
+            break;
+    }
 }
 
 MainMenuDisplayState::QuitVerifyEventHandler::QuitVerifyEventHandler(MainMenuDisplayState *mainMenuState) : 

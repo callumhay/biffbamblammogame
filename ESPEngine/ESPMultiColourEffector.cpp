@@ -14,7 +14,7 @@
 
 #include "../BlammoEngine/Animation.h"
 
-ESPMultiColourEffector::ESPMultiColourEffector() {
+ESPMultiColourEffector::ESPMultiColourEffector() : ESPParticleEffector() {
 }
 
 void ESPMultiColourEffector::AffectParticleOnTick(double dT, ESPParticle* particle) {
@@ -42,14 +42,13 @@ void ESPMultiColourEffector::AffectParticleOnTick(double dT, ESPParticle* partic
 	}
 
 	double startPercentage = static_cast<double>(lookupIndexBase) / static_cast<double>(colours.size()-1);
-	double endPercentage	 = static_cast<double>(lookupIndexNext) / static_cast<double>(colours.size()-1);
-	ColourRGBA startColour = this->colours[lookupIndexBase];
-	ColourRGBA endColour   = this->colours[lookupIndexNext];
-
+	double endPercentage   = static_cast<double>(lookupIndexNext) / static_cast<double>(colours.size()-1);
+	
+    const ColourRGBA& startColour = this->colours[lookupIndexBase];
+	const ColourRGBA& endColour   = this->colours[lookupIndexNext];
 	ColourRGBA lerpColour = startColour + (percentLifeElapsed - startPercentage) * (endColour - startColour) / (endPercentage - startPercentage);
 
 	particle->SetColour(lerpColour);
-
 }
 
 void ESPMultiColourEffector::SetColours(const std::vector<ColourRGBA>& colours) {

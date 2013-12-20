@@ -301,6 +301,7 @@ void MineTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& c
             this->smokeySmokeEmitter->SetParticleSize(ESPInterval(0.25f*percentToDeathFrom75 + 0.1f * LevelPiece::PIECE_WIDTH,
                 0.25f*percentToDeathFrom75 + 0.45f * LevelPiece::PIECE_WIDTH));
             
+            this->smokeySmokeEmitter->Tick(dT);
             this->smokeySmokeEmitter->Draw(camera);
 
             if (this->block.GetHealthPercent() <= 0.5f) {
@@ -310,15 +311,13 @@ void MineTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& c
                 this->fireySmokeEmitter->SetParticleSize(ESPInterval(0.2f*percentToDeathFrom50 + 0.1f * LevelPiece::PIECE_WIDTH,
                     0.2f*percentToDeathFrom50 + 0.45f * LevelPiece::PIECE_WIDTH));
 
-                this->fireySmokeEmitter->Draw(camera);
                 this->fireySmokeEmitter->Tick(dT);
-
+                this->fireySmokeEmitter->Draw(camera);
+                
                 if (this->block.GetHealthPercent() <= this->block.GetLifePercentForOneMoreBallHit()) {
                     this->redColourMultiplierAnim.Tick(dT);
                 }
             }
-
-            this->smokeySmokeEmitter->Tick(dT);
         }
     }
 }
