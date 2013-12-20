@@ -79,7 +79,8 @@ private:
 	int optionsFullscreenIndex;
 	int optionsVSyncIndex;
 	int optionsResolutionIndex;
-	int optionsSoundVolumeIndex;
+	int optionsMusicVolumeIndex;
+    int optionsSFXVolumeIndex;
     //int optionsControllerSensitivityIndex;
     int optionsInvertBallBoostIndex;
     int optionsBallBoostModeIndex;
@@ -117,7 +118,8 @@ private:
 	SelectionListMenuItem*  fullscreenMenuItem;
 	SelectionListMenuItem*  resolutionMenuItem;
 	SelectionListMenuItem*  vSyncMenuItem;
-	AmountScrollerMenuItem* soundVolumeMenuItem;
+	AmountScrollerMenuItem* musicVolumeMenuItem;
+    AmountScrollerMenuItem* sfxVolumeMenuItem;
     SelectionListMenuItem*  invertBallBoostItem;
     SelectionListMenuItem*  ballBoostModeItem;
     SelectionListMenuItem*  difficultyItem;
@@ -199,7 +201,9 @@ public:
 
     class VolumeItemEventHandler : public ScrollerItemEventHandlerWithSound {
 	public:
-		VolumeItemEventHandler(MainMenuDisplayState* mainMenuState);
+        enum Type { SFX, Music };
+
+		VolumeItemEventHandler(MainMenuDisplayState* mainMenuState, Type t);
 		~VolumeItemEventHandler() {}
 
         void MenuItemScrolled();
@@ -207,6 +211,8 @@ public:
         void MenuItemCancelled();
 
 	private:
+        Type type;
+
         void UpdateGameMasterVolume(int volumeLevel);
 		MainMenuDisplayState* mainMenuState;
     };
@@ -248,7 +254,8 @@ private:
 	MainMenuEventHandler* mainMenuEventHandler;             // Event handler for the main (top-most) menu
 	OptionsSubMenuEventHandler* optionsMenuEventHandler;	// Event handler for the options sub-menu
 	SelectListItemsEventHandler* selectListItemsHandler;            // Event handler for more complicated items (e.g., scrollers, verify menus)
-	VolumeItemEventHandler* volItemHandler;
+	VolumeItemEventHandler* musicVolItemHandler;
+    VolumeItemEventHandler* sfxVolItemHandler;
     BangParticleEventHandler* particleEventHandler;         // Event handler for the sound particles
     QuitVerifyEventHandler* quitVerifyHandler;
     EraseProgressVerifyEventHandler* eraseProgVerifyHandler;

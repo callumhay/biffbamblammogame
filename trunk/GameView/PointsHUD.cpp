@@ -72,6 +72,22 @@ haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRot
         starColourAnim->SetRepeat(false);
         this->starColourAnimators.push_back(starColourAnim);
     }
+
+    std::vector<double> timeValues;
+    timeValues.reserve(3);
+    timeValues.push_back(0.0);
+    timeValues.push_back(1.0);
+    timeValues.push_back(2.0);
+
+    std::vector<ColourRGBA> colourValues;
+    colourValues.reserve(3);
+    colourValues.push_back(ColourRGBA(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR, 1.2f * STAR_ALPHA));
+    colourValues.push_back(ColourRGBA(GameViewConstants::GetInstance()->BRIGHT_POINT_STAR_COLOUR, 1.0f));
+    colourValues.push_back(ColourRGBA(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR, 1.2f * STAR_ALPHA));
+
+    this->flashingStarAnimator.SetInterpolantValue(colourValues.front());
+    this->flashingStarAnimator.SetLerp(timeValues, colourValues);
+    this->flashingStarAnimator.SetRepeat(true);
 }
 
 PointsHUD::~PointsHUD() {
@@ -144,19 +160,6 @@ void PointsHUD::Draw(const Camera& camera, int displayWidth, int displayHeight, 
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
-    // Draw any point notifications
-    //for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
-    //    PointNotification* ptNotification = *iter;
-    //    if (ptNotification->Draw(displayWidth, dT)) {
-    //        delete ptNotification;
-    //        ptNotification = NULL;
-    //        iter = this->ptNotifications.erase(iter);
-    //    }
-    //    else {
-    //        ++iter;
-    //    }
-    //}
-
     glPopAttrib();
 }
 
@@ -164,12 +167,17 @@ void PointsHUD::DrawIdleStars(const Camera& camera, float rightMostX, float topM
     float currentCenterX = rightMostX - ALL_STARS_WIDTH + STAR_HALF_SIZE;
     float centerY = topMostY - STAR_HALF_SIZE;
 
+    this->flashingStarAnimator.Tick(dT);
+
     this->starTex->BindTexture();
     for (int currStarIdx = 0; currStarIdx < GameLevel::MAX_STARS_PER_LEVEL; currStarIdx++) {
 
-        starColourAnimators[currStarIdx]->Tick(dT);
-        const ColourRGBA& starColour = starColourAnimators[currStarIdx]->GetInterpolantValue();
-        glColor4f(starColour.R(), starColour.G(), starColour.B(), starColour.A() * this->starAlpha);
+        this->starColourAnimators[currStarIdx]->Tick(dT);
+        const ColourRGBA* starColour = &this->starColourAnimators[currStarIdx]->GetInterpolantValue();
+        if (starColour->GetColour() == GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR) {
+            starColour = &this->flashingStarAnimator.GetInterpolantValue();
+        }
+        glColor4f(starColour->R(), starColour->G(), starColour->B(), starColour->A() * this->starAlpha);
 
         this->starSizeAnimators[currStarIdx]->Tick(dT);
         float sizeMultiplier = this->starSizeAnimators[currStarIdx]->GetInterpolantValue();
@@ -210,12 +218,14 @@ void PointsHUD::SetStarAcquiredAnimation(const Camera& camera, size_t starIdx) {
     UNUSED_PARAMETER(camera);
     assert(starIdx < this->starSizeAnimators.size());
 
+    static const double TOTAL_ANIM_TIME = 1.0;
+
     // Set up animations for size and colour
     std::vector<double> timeValues;
     timeValues.reserve(3);
     timeValues.push_back(0.0);
-    timeValues.push_back(0.33);
-    timeValues.push_back(1.0);
+    timeValues.push_back(TOTAL_ANIM_TIME * 0.33);
+    timeValues.push_back(TOTAL_ANIM_TIME);
 
     std::vector<float> sizeValues;
     sizeValues.reserve(3);
@@ -230,7 +240,9 @@ void PointsHUD::SetStarAcquiredAnimation(const Camera& camera, size_t starIdx) {
     colourValues.push_back(ColourRGBA(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR, 1.2f * STAR_ALPHA));
 
     this->starSizeAnimators[starIdx]->SetLerp(timeValues, sizeValues);
+    this->starSizeAnimators[starIdx]->SetRepeat(false);
     this->starColourAnimators[starIdx]->SetLerp(timeValues, colourValues);
+    this->starColourAnimators[starIdx]->SetRepeat(false);
 
     Point2D starCenter = this->GetStarStartPos(camera.GetWindowWidth());
     starCenter[0] = starCenter[0] - ALL_STARS_WIDTH + STAR_HALF_SIZE;
@@ -243,7 +255,7 @@ void PointsHUD::SetStarAcquiredAnimation(const Camera& camera, size_t starIdx) {
     ESPPointEmitter* flareEmitter = new ESPPointEmitter();
     flareEmitter->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
 	flareEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	flareEmitter->SetParticleLife(ESPInterval(1.0));
+	flareEmitter->SetParticleLife(ESPInterval(TOTAL_ANIM_TIME - EPSILON));
 	flareEmitter->SetParticleSize(ESPInterval(2.0f * STAR_SIZE));
 	flareEmitter->SetParticleAlignment(ESP::ScreenAligned);
     flareEmitter->SetEmitPosition(Point3D(starCenter + Vector2D(STAR_SIZE*0.15f, STAR_SIZE*0.15f), 0.0f));
@@ -254,7 +266,7 @@ void PointsHUD::SetStarAcquiredAnimation(const Camera& camera, size_t starIdx) {
     ESPPointEmitter* haloEmitter = new ESPPointEmitter();
     haloEmitter->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
 	haloEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	haloEmitter->SetParticleLife(ESPInterval(1.5));
+	haloEmitter->SetParticleLife(ESPInterval(1.5 * TOTAL_ANIM_TIME));
 	haloEmitter->SetParticleSize(ESPInterval(1.25f * STAR_SIZE));
 	haloEmitter->SetParticleAlignment(ESP::ScreenAligned);
     haloEmitter->SetEmitPosition(Point3D(starCenter, 0.0f));
@@ -275,10 +287,12 @@ void PointsHUD::Reinitialize() {
     for (size_t i = 0; i < this->starSizeAnimators.size(); i++) {
         this->starSizeAnimators[i]->ClearLerp();
         this->starSizeAnimators[i]->SetInterpolantValue(1.0f);
+        this->starSizeAnimators[i]->SetRepeat(false);
     }
     for (size_t i = 0; i < this->starColourAnimators.size(); i++) {
         this->starColourAnimators[i]->ClearLerp();
         this->starColourAnimators[i]->SetInterpolantValue(ColourRGBA(GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR, STAR_ALPHA));
+        this->starColourAnimators[i]->SetRepeat(false);
     }
 
     for (std::list<ESPPointEmitter*>::iterator iter = this->starEffectEmitters.begin();
@@ -294,52 +308,6 @@ void PointsHUD::Reinitialize() {
     this->multiplier->Reinitialize();
     this->multiplierGage->Reinitialize();
 }
-
-/*
-void PointsHUD::PostPointNotification(const PointAward& pointAward) {
-    UNUSED_PARAMETER(pointAward);
-    
-    // Don't notify the HUD unless there's specific bonus for the point award
-    if (pointAward.GetType() == ScoreTypes::UndefinedBonus) {
-        return;
-    }
-
-    // Figure out where the notification is going to appear and move to
-    float finalTopY = this->ptScoreLabel->GetTopLeftCorner()[1] - this->ptScoreLabel->GetHeight();
-    float initialTopY;
-    
-    // If there are any other notifications present then we place the new notification underneath the
-    // current one
-    if (this->ptNotifications.empty()) {
-        initialTopY = this->ptScoreLabel->GetTopLeftCorner()[1] - static_cast<float>(this->ptScoreLabel->GetHeight()) -
-                      PointsHUD::PointNotification::INITIAL_NOTIFY_VERTICAL_GAP;
-    }
-    else {
-        initialTopY = this->ptNotifications.back()->GetTopLeftCorner()[1] - 
-                      static_cast<float>(this->ptNotifications.back()->GetHeight()) - 
-                      PointsHUD::PointNotification::NOTIFIER_TO_NOTIFIER_VERTICAL_GAP;
-    }
-
-    PointNotification* ptNotify = new PointNotification(pointAward, initialTopY, finalTopY);
-    this->ptNotifications.push_back(ptNotify);
-}
-
-const char* PointsHUD::GetPointNotificationName(const PointAward& pointAward) {
-    switch (pointAward.GetType()) {
-        case ScoreTypes::UndefinedBonus:
-            return "";
-        case ScoreTypes::PaddleBullseyeBonus:
-            return "Bullseye!";
-        case ScoreTypes::PaddleDaredevilBonus:
-            return "Paddle Daredevil";
-        case ScoreTypes::SpeedyPaddleBonus:
-            return "Speedy Paddle Save";
-        default:
-            assert(false);
-            return NULL;
-    }
-}
-*/
 
 /**
  * Sets the current alpha (1 for completely visible, 0 for completely invisible) for the entire
@@ -357,142 +325,6 @@ void PointsHUD::SetAlpha(float alpha) {
         currEmitter->SetParticleAlpha(ESPInterval(alpha)); 
     }
 }
-
-/*
-const int PointsHUD::PointNotification::NOTIFIER_TO_NOTIFIER_VERTICAL_GAP = -2;
-const int PointsHUD::PointNotification::INITIAL_NOTIFY_VERTICAL_GAP = 50;
-const int PointsHUD::PointNotification::NAME_POINT_VERTICAL_GAP     = 5;
-
-PointsHUD::PointNotification::PointNotification(const PointAward& pointAward, 
-                                                float initialTopY, float finalTopY) :
-pointLabel(NULL), notificationName(NULL), pointAmount(pointAmount), moveAnimation(0.0f) {
-    // Make sure the award has a notification name
-    const char* notificationName = PointsHUD::GetPointNotificationName(pointAward);
-    std::string name;
-    if (notificationName == NULL) {
-        assert(false);
-    }
-    else {
-        name = notificationName;
-    }
-    int pointAmount = pointAward.GetPointAmount();
-    int multiplyAmount = pointAward.GetMultiplierAmount();
-
-    bool isPositive = (pointAmount > 0);
-    std::string positiveSign("");
-    Colour labelColour;
-    if (isPositive) {
-        labelColour = GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
-        positiveSign = "+";
-    }
-    else {
-        labelColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
-    }
-
-    float topY = initialTopY;
-    if (!name.empty()) {
-        this->notificationName = new TextLabel2D(
-            GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), name);
-        this->notificationName->SetScale(0.9f);
-        this->notificationName->SetDropShadow(Colour(0,0,0), 0.07f);
-        this->notificationName->SetColour(labelColour);
-        this->notificationName->SetTopLeftCorner(0, topY);
-        topY -= (this->notificationName->GetHeight() + NAME_POINT_VERTICAL_GAP);
-    }
-
-    std::stringstream pointStr;
-    pointStr << positiveSign << pointAmount;
-    if (multiplyAmount > 1) {
-        pointStr << " x " << multiplyAmount;
-    }
-
-    this->pointLabel = new TextLabel2D(
-        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
-        pointStr.str());
-    this->pointLabel->SetDropShadow(Colour(0,0,0), 0.04f);
-    this->pointLabel->SetColour(labelColour);
-    this->pointLabel->SetTopLeftCorner(0, topY);
-
-    // Make sure all labels move at the same speed
-    static const double NOTIFY_SPEED_PIXELS_PER_SECOND = 50;
-    double distance = finalTopY - initialTopY;
-    double time     = std::max<double>(0.5, distance / NOTIFY_SPEED_PIXELS_PER_SECOND);
-    this->moveAnimation.SetLerp(0.0, time, initialTopY, finalTopY);
-    this->moveAnimation.SetRepeat(false);
-
-    std::vector<double> timeVals;
-    timeVals.push_back(0.0);
-    timeVals.push_back(0.3);
-    timeVals.push_back(0.5);
-    timeVals.push_back(time);
-    std::vector<ColourRGBA> colourVals;
-    colourVals.push_back(ColourRGBA(labelColour, 0.0f));
-    colourVals.push_back(ColourRGBA(1, 1, 1, 1));
-    colourVals.push_back(ColourRGBA(labelColour, 1.0f));
-    colourVals.push_back(ColourRGBA(labelColour, 0.0f));
-
-    this->rgbaAnimation.SetLerp(timeVals, colourVals);
-    this->rgbaAnimation.SetRepeat(false);
-}
-
-PointsHUD::PointNotification::~PointNotification() {
-    delete this->pointLabel;
-    this->pointLabel = NULL;
-
-    if (this->notificationName != NULL) {
-        delete this->notificationName;
-        this->notificationName = NULL;
-    }
-}
-
-bool PointsHUD::PointNotification::Draw(int displayWidth, double dT) {
-    bool isDone = this->moveAnimation.Tick(dT);
-    isDone &= this->rgbaAnimation.Tick(dT);
-
-    float currentY                  = this->moveAnimation.GetInterpolantValue();
-    const ColourRGBA& currentColour = this->rgbaAnimation.GetInterpolantValue();
-
-    if (this->notificationName != NULL) {
-
-        this->notificationName->SetTopLeftCorner(
-            displayWidth - this->notificationName->GetLastRasterWidth() - 
-            PointsHUD::SCREEN_EDGE_HORIZONTAL_GAP, currentY);
-        this->notificationName->SetColour(currentColour);
-        this->notificationName->Draw();
-        currentY -= (this->notificationName->GetHeight() + NAME_POINT_VERTICAL_GAP);
-
-    }
-    this->pointLabel->SetTopLeftCorner(displayWidth -
-        this->pointLabel->GetLastRasterWidth() - PointsHUD::SCREEN_EDGE_HORIZONTAL_GAP, currentY);
-    this->pointLabel->SetColour(currentColour);
-    this->pointLabel->Draw();
-    
-    return isDone;
-}
-
-void PointsHUD::PointNotification::SetAlpha(float alpha) {
-    this->pointLabel->SetAlpha(alpha);
-    if (this->notificationName != NULL) {
-        this->notificationName->SetAlpha(alpha);
-    }
-}
-
-const Point2D& PointsHUD::PointNotification::GetTopLeftCorner() const {
-    if (this->notificationName != NULL) {
-        return this->notificationName->GetTopLeftCorner();
-    }
-    return this->pointLabel->GetTopLeftCorner();
-}
-
-float PointsHUD::PointNotification::GetHeight() const {
-    float totalHeight = this->pointLabel->GetHeight();
-    if (this->notificationName != NULL) {
-        totalHeight += NAME_POINT_VERTICAL_GAP;
-        totalHeight += this->notificationName->GetHeight();
-    }
-    return totalHeight;
-}
-*/
 
 // MULTIPLIER HUD FUNCTIONS ***********************************************
 
@@ -740,21 +572,17 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
                 this->scaleAnim.SetInterpolantValue(1.0f);
                 
                 std::vector<double> timeVals;
-                timeVals.reserve(5);
-                std::vector<ColourRGBA> colourVals;
-                colourVals.reserve(5);
-
+                timeVals.reserve(3);
                 timeVals.push_back(0.0);
-                timeVals.push_back(1.0);
                 timeVals.push_back(1.5);
-                timeVals.push_back(2.0);
                 timeVals.push_back(3.0);
                 
                 ColourRGBA multiplyColour(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), MULTIPLIER_NUM_BASE_ALPHA);
-                colourVals.push_back(multiplyColour);
+
+                std::vector<ColourRGBA> colourVals;
+                colourVals.reserve(timeVals.size());
                 colourVals.push_back(multiplyColour);
                 colourVals.push_back(ColourRGBA(1,1,1,MULTIPLIER_NUM_BASE_ALPHA));
-                colourVals.push_back(multiplyColour);
                 colourVals.push_back(multiplyColour);
                 
                 this->rgbaLabelAnim.SetLerp(timeVals, colourVals);

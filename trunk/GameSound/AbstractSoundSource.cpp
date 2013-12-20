@@ -15,9 +15,10 @@
 
 #include "../ResourceManager.h"
 
-AbstractSoundSource::AbstractSoundSource(irrklang::ISoundEngine* soundEngine, const GameSound::SoundType& soundType,
+AbstractSoundSource::AbstractSoundSource(irrklang::ISoundEngine* soundEngine, 
+                                         const GameSound::SoundType& soundType,
                                          const std::string& soundName) :
-soundEngine(soundEngine), soundType(soundType), soundName(soundName) {
+soundEngine(soundEngine), soundType(soundType), soundName(soundName), isMusic(GameSound::IsMusic(soundType)) {
     assert(soundEngine != NULL);
 }
 
@@ -67,7 +68,7 @@ Sound* AbstractSoundSource::Spawn2DSoundWithIDAndSource(const SoundID& id, irrkl
         return NULL;
     }
 
-    return new Sound(id, this->soundType, newSound);
+    return new Sound(id, this->soundType, newSound, this->isMusic);
 }
 
 Sound* AbstractSoundSource::Spawn2DSoundWithIDAndSource(const SoundID& id, irrklang::ISoundSource* source, 
@@ -81,5 +82,5 @@ Sound* AbstractSoundSource::Spawn2DSoundWithIDAndSource(const SoundID& id, irrkl
         return NULL;
     }
 
-    return new Sound(id, this->soundType, newSound);
+    return new Sound(id, this->soundType, newSound, this->isMusic);
 }

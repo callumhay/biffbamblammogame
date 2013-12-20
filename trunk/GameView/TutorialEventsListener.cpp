@@ -17,9 +17,11 @@
 
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-finishedPointsHint(false), keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
+keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
 doBoostPressToReleaseHint(NULL), doBoostSlingshotHint(NULL), holdBoostHint(NULL), hasShownBoostHint(false),
-boostAvailableHint(NULL), multiplierHints(NULL), multiplierLostHint(NULL) {
+boostAvailableHint(NULL), multiplierHints(NULL), multiplierLostHint(NULL), hasShownMultiplierHints(false),
+hasShownMultiplierLostHint(false) {
+
     assert(display != NULL);
 }
 
@@ -57,11 +59,15 @@ void TutorialEventsListener::BallPaddleCollisionEvent(const GameBall& ball, cons
     if (this->multiplierHints->IsDoneShowingAllHints() && 
         !this->multiplierLostHint->IsDoneShowingAllHints()) {
 
-        if (this->multiplierLostHint->GetIsVisible()) {
+        if (this->hasShownMultiplierLostHint && 
+            this->multiplierLostHint->GetIsVisible()) {
+
             this->multiplierLostHint->Resume(1.0);
         }
-        else {
+        else if (!this->hasShownMultiplierLostHint) {
+
             this->multiplierLostHint->Show(0.0, 1.0);
+            this->hasShownMultiplierLostHint = true;
         }
     }
 }
@@ -74,50 +80,23 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
 
     const GameModel* gameModel = this->display->GetModel();
     const GameLevel* level = gameModel->GetCurrentLevel();
-
-    // Check to see whether the points tutorial hint has already been faded...
-    if (!this->finishedPointsHint) {
-        // Figure out when to fade the points hint...
-        
-        // The following block indices must be empty to make the points hint disappear:
-        // row idx 14 - 16
-        // col idx 1 - 8
-        
-        const std::vector<std::vector<LevelPiece*> >& levelPieces = level->GetCurrentLevelLayout();
-        bool blockIndicesAllEmpty = true;
-        for (int row = 14; row <= 16 && blockIndicesAllEmpty; row++) {
-            for (int col = 1; col <= 8 && blockIndicesAllEmpty; col++) {
-                if (levelPieces[row][col]->GetType() != LevelPiece::Empty) {
-                    blockIndicesAllEmpty = false;
-                }
-            }
-        }
-
-        if (blockIndicesAllEmpty) {
-            //this->pointsTutorialHintEmitter->SetParticleLife(ESPInterval(3.0f), true);
-            //this->pointsTutorialHintEmitter->ClearEffectors();
-            //this->pointsTutorialHintEmitter->AddEffector(&this->fadeEffector);
-            this->finishedPointsHint = true;
-        }
-    }
     
     // Determine the state of the multiplier hint and display it appropriately
-    if (this->multiplierHints->GetIsVisible() && this->hasShownBoostHint &&
+    if (this->hasShownMultiplierHints &&
+        this->multiplierHints->GetIsVisible() && this->hasShownBoostHint &&
         gameModel->GetBallBoostModel() != NULL && gameModel->GetBallBoostModel()->GetBulletTimeState() == BallBoostModel::NotInBulletTime) {
         this->multiplierHints->Resume(1.0);
     }
-    else {
+    else if (!this->hasShownMultiplierHints) {
         GameBall* ball = this->display->GetModel()->GetGameBalls().front();
         assert(ball != NULL);
 
-        if (!this->multiplierHints->IsDoneShowingAllHints() &&
-            !level->IsLevelAlmostComplete() && this->hasShownBoostHint && 
+        if (!level->IsLevelAlmostComplete() && this->hasShownBoostHint && 
             ball->GetCenterPosition2D()[1] >= 18 * LevelPiece::PIECE_HEIGHT) {
 
             // Start showing the multiplier hints...
-            if (!this->multiplierHints->GetIsVisible()) {
-                this->multiplierHints->Show(0.0, 1.0);
-            }
+            this->multiplierHints->Show(0.0, 1.0);
+            this->hasShownMultiplierHints = true;
         }
     }
 }

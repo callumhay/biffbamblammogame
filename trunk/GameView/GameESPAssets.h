@@ -171,6 +171,9 @@ private:
 
     Texture2D* lightningAnimTex;
 
+    Texture2D* leftHalfBrokenPadlockTex;
+    Texture2D* rightHalfBrokenPadlockTex;
+
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
 	std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > paddleEffects;
@@ -456,12 +459,11 @@ inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera&
     this->paddleLaserGlowAura->SetAliveParticleAlphaMax(paddle.GetAlpha());
     this->paddleLaserGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
 
+    this->paddleLaserGlowAura->Tick(dT);
 	this->paddleLaserGlowAura->Draw(camera);
-	this->paddleLaserGlowAura->Tick(dT);
-	this->paddleLaserGlowSparks->Draw(camera);
 	this->paddleLaserGlowSparks->Tick(dT);
+    this->paddleLaserGlowSparks->Draw(camera);
 }
-
 
 inline void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	ESPInterval xSize(paddle.GetHalfFlatTopWidth() * 0.3f, paddle.GetHalfFlatTopWidth() * 0.6f);
@@ -470,8 +472,8 @@ inline void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Cam
 	this->paddleBeamBlastBits->SetParticleSize(xSize);
     this->paddleBeamBlastBits->SetAliveParticleAlphaMax(paddle.GetAlpha());
 
+    this->paddleBeamBlastBits->Tick(dT);
 	this->paddleBeamBlastBits->Draw(camera);
-	this->paddleBeamBlastBits->Tick(dT);
 }
 
 #endif

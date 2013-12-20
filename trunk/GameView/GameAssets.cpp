@@ -786,8 +786,6 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		this->espAssets->DrawBallCamEffects(dT, camera, *ballWithCam, *paddle);
 
         /*
-        TODO!!!!!
-
         // Special case: The ball is coming down towards the paddle, draw a flickering ghost paddle when
         // the ball is near enough in the location where the ball is coming down
         const GameLevel* currLevel = gameModel.GetCurrentLevel();
@@ -1355,7 +1353,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 
         case Projectile::BossOrbBulletProjectile:
             this->sound->PlaySoundAtPosition(GameSound::GothicBossOrbAttackEvent, false,
-                projectile.GetPosition3D(), true, true, true);
+                projectile.GetPosition3D(), true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.8f);
             break;
 
         case Projectile::BossLightningBoltBulletProjectile:

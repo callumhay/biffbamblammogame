@@ -30,7 +30,8 @@ public:
 	void WorldCompletedEvent(const GameWorld& world);
 	void LevelStartedEvent(const GameWorld& world, const GameLevel& level);
     void LevelAlmostCompleteEvent(const GameLevel& level);
-	void LevelCompletedEvent(const GameWorld& world, const GameLevel& level);
+	void LevelCompletedEvent(const GameWorld& world, const GameLevel& level,
+        int furthestLevelIdxBefore, int furthestLevelIdxAfter);
 
 	// Paddle related events
 	void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc);
@@ -154,6 +155,9 @@ private:
     long timeOfLastBallBossCollisionEventInMS;
     long timeOfLastControlledCannonRotationInMS;
     long timeOfLastBoostMalfunctionInMS;
+    long timeOfLastCounterEventInMS;
+    long timeOfLastMultiplierEventInMS;
+    long timeOfLastItemSpawnInMS;
 
     typedef std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, SoundID> TeslaLightningSoundIDMap;
     typedef TeslaLightningSoundIDMap::iterator TeslaLightningSoundIDMapIter;
@@ -173,6 +177,9 @@ private:
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
     static const long SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS;
     static const long SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS;
+    static const long SOUND_DAMPEN_TIME_BETWEEN_BLOCK_COUNTERS_IN_MS;
+    static const long SOUND_DAMPEN_TIME_BETWEEN_MULTIPLIERS_IN_MS;
+    static const long SOUND_DAMPEN_TIME_BETWEEN_ITEM_SPAWNS_IN_MS;
 
     static SoundID enterBulletTimeSoundID;
     static SoundID exitBulletTimeSoundID;

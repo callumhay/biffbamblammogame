@@ -729,6 +729,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\ESPEngine\ESPAnimatedAlphaEffector.h"
+						>
+					</File>
+					<File
 						RelativePath=".\ESPEngine\ESPMultiColourEffector.h"
 						>
 					</File>

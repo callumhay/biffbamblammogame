@@ -114,8 +114,8 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
     for (HintListIter iter = this->noDepthTutorialHints.begin(); iter != this->noDepthTutorialHints.end(); ++iter) {
 
         EmbededTutorialHint* hint = *iter;
-        hint->Draw(camera);
         hint->Tick(actualDt);
+        hint->Draw(camera);
     }
 
     static const float TEXT_BALL_BUFFER_SPACE_IN_PX = 2;
@@ -138,8 +138,8 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
         
         EmbededTutorialHint* hint = *iter;
         hint->SetTopLeftCorner(ballHintPos[0], ballHintPos[1] + hint->GetHeight()/2.0f);
-        hint->Draw(camera);
         hint->Tick(actualDt);
+        hint->Draw(camera);
     }
 
     const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
@@ -359,22 +359,6 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     multiplierLostHint->SetListener(new SlowBallHintListener(this));
     this->ballFollowTutorialHints.push_back(multiplierLostHint);
     this->tutorialListener->SetMultiplierLostHint(multiplierLostHint);
-
-    /*
-    // The Points hint is hidden behind the first layer of blocks and is uncovered as the level is played
-    TextLabel2D pointHintTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
-        GameFontAssetsManager::Small), "Less paddle hits = More points"); 
-    pointHintTextLabel.SetColour(Colour(0.3882f, 0.72157f, 1.0f));
-    pointHintTextLabel.SetDropShadow(Colour(0,0,0), 0.10f);
-    
-    //const GameLevel* level = this->display->GetModel()->GetCurrentLevel();
-    ESPPointEmitter* pointsTutorialHintEmitter = this->renderPipeline.AddEmbededTutorialHint(
-        Point3D(LevelPiece::PIECE_WIDTH * 5.0f, LevelPiece::PIECE_HEIGHT * 15.5f, LevelPiece::PIECE_DEPTH + 1.0f),
-        pointHintTextLabel, true);
-    assert(pointsTutorialHintEmitter != NULL);
-
-    this->tutorialListener->SetPointsHintEmitter(pointsTutorialHintEmitter);
-    */
 }
 
 void InTutorialGameDisplayState::HintListener::OnTutorialHintShown() {

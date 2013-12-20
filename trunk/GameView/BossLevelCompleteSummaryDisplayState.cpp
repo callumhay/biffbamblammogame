@@ -400,9 +400,14 @@ void BossLevelCompleteSummaryDisplayState::DrawPressAnyKeyTextFooter(float scree
 
 
 void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
-	if (!this->waitingForKeyPress) {
+	if (!this->waitingForKeyPress || this->leavingState) {
         return;
     }
 
     this->leavingState = true;
+
+    GameSound* sound = this->display->GetSound();
+    
+    // Play the confirm sound
+    sound->PlaySound(GameSound::WorldSummaryConfirmEvent, false, false);
 }

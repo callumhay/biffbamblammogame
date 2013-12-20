@@ -45,22 +45,25 @@ public:
         info.worldUnlockIdx = worldUnlockIdx;
         return info;
     }
-    static DisplayStateInfo BuildSelectLevelInfo(int worldIdx, int levelSelectIdx = -1) {
+    static DisplayStateInfo BuildSelectLevelInfo(int worldIdx, int levelSelectIdx = -1, bool doBasicUnlockAnim = false) {
         DisplayStateInfo info;
         info.worldSelectionIdx = worldIdx;
         info.levelSelectionIdx = levelSelectIdx;
+        info.doBasicLevelUnlockAnim = doBasicUnlockAnim;
         return info;
     }
 
     int GetWorldSelectionIndex() const { return this->worldSelectionIdx; }
     int GetWorldUnlockIndex() const { return this->worldUnlockIdx; }
     int GetLevelSelectionIndex() const { return this->levelSelectionIdx; }
+    bool GetDoBasicLevelUnlockAnimation() const { return this->doBasicLevelUnlockAnim; }
     bool GetDoAnimatedFadeIn() const { return this->doAnimatedFadeIn; }
 
 private:
     int worldSelectionIdx;
     int worldUnlockIdx;
     int levelSelectionIdx;
+    bool doBasicLevelUnlockAnim;
     bool doAnimatedFadeIn;
 };
 

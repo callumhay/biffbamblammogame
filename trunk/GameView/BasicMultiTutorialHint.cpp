@@ -36,6 +36,7 @@ BasicMultiTutorialHint::~BasicMultiTutorialHint() {
 void BasicMultiTutorialHint::Reset() {
     this->currLabelIdx = -1;
     this->labelCountdown = 0;
+    this->isPaused = false;
     for (std::vector<BasicTutorialHint*>::iterator iter = this->labels.begin(); iter != this->labels.end(); ++iter) {
         BasicTutorialHint* label = *iter;
         label->Unshow(0, 0, true);
@@ -43,19 +44,21 @@ void BasicMultiTutorialHint::Reset() {
 }
 
 void BasicMultiTutorialHint::Pause(double pauseFadeOutTime) {
-    if (this->isPaused || !this->GetIsVisible()) { return; }
+    if (this->isPaused || !this->isShown) { return; }
 
     if (this->currLabelIdx >= 0 && this->currLabelIdx < static_cast<int>(this->labels.size())) {
         this->labels[this->currLabelIdx]->Unshow(0.0, pauseFadeOutTime, true);
-        if (this->listener != NULL) {
-            this->listener->OnTutorialHintUnshown();
-        }
     }
+
+    if (this->listener != NULL) {
+        this->listener->OnTutorialHintUnshown();
+    }
+
     this->isPaused = true;
 }
 
 void BasicMultiTutorialHint::Resume(double pauseFadeInTime) {
-    if (!this->isPaused) { return; }
+    if (!this->isPaused || !this->isShown) { return; }
 
     if (this->currLabelIdx >= 0 && this->currLabelIdx < static_cast<int>(this->labels.size())) {
         this->labels[this->currLabelIdx]->Show(0.0, pauseFadeInTime);
@@ -157,7 +160,7 @@ void BasicMultiTutorialHint::Tick(double dT) {
         label->Tick(dT);
     }
 
-    if (this->isPaused || this->currLabelIdx >= static_cast<int>(this->labels.size()) || !this->isShown) {
+    if (this->isPaused || !this->isShown || this->currLabelIdx >= static_cast<int>(this->labels.size())) {
         return;
     }
 
@@ -175,7 +178,8 @@ void BasicMultiTutorialHint::Tick(double dT) {
             if (this->listener != NULL) {
                 this->listener->OnTutorialHintUnshown();
             }
-            this->isShown = false;
+            this->isShown  = false;
+            this->isPaused = false;
             return;
         }
 

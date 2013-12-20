@@ -814,17 +814,18 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	Vector2D normal;
 	Collision::LineSeg2D collisionLine;
 	double timeUntilCollision;
+    Point2D collisionPoint;
 	
-	if (this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeUntilCollision)) {
+	if (this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeUntilCollision, collisionPoint)) {
 		// Position the ball so that it is against the collision line, perpendicular to its normal
-        Point2D closestPtOnCollisionLine = Collision::ClosestPoint(ballCenter, collisionLine);
-		this->attachedBall->SetCenterPosition(closestPtOnCollisionLine + (EPSILON + ballRadius) * normal);
+        //Point2D closestPtOnCollisionLine = Collision::ClosestPoint(ballCenter, collisionLine);
+		this->attachedBall->SetCenterPosition(collisionPoint/*closestPtOnCollisionLine + (EPSILON + ballRadius) * normal*/);
 	}
 
 	// Remove the ball's direction but not its speed
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), Vector2D(0, 0));
 
-	// Disable collisions for the ball (reenable them when the ball is detached)
+	// Disable collisions for the ball (re-enable them when the ball is detached)
 	this->attachedBall->SetBallBallCollisionsDisabled();
 	this->attachedBall->SetBallPaddleCollisionsDisabled();
 
@@ -1625,7 +1626,8 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 // Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
 // as the time since the collision occurred
 bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
-                                  Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
+                                  Collision::LineSeg2D& collisionLine, 
+                                  double& timeUntilCollision, Point2D& pointOfCollision) {
 
      if (ball.IsLastThingCollidedWith(this)) {
          return false;
@@ -1634,12 +1636,15 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
      // If the paddle has a shield around it do the collision with the shield
      if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
          Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
-         return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+         Point2D shieldPtOfCollision;
+         return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n,
+             collisionLine, timeUntilCollision, pointOfCollision, shieldPtOfCollision, this->GetVelocity());
      }
      else {
 
          if (this->bounds.GetNumLines() == 3) {
-             return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+             return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
+                 collisionLine, timeUntilCollision, pointOfCollision, this->GetVelocity());
          }
          else {
 
@@ -1650,7 +1655,8 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
              if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight() - 0.9f*ball.GetBounds().Radius())) &&
                  Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
                      // Ball is traveling upwards at the paddle from below it...
-                     return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeUntilCollision, this->GetVelocity());
+                     return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, 
+                         timeUntilCollision, pointOfCollision, this->GetVelocity());
              }
              else {
                  // Ball is traveling downwards/parallel at the paddle
@@ -1658,7 +1664,7 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                  const Vector2D& bottomNormal = this->GetBottomCollisionNormal();
                  this->bounds.PopLast();
                  bool wasCollision = this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
-                     collisionLine, timeUntilCollision, this->GetVelocity());
+                     collisionLine, timeUntilCollision, pointOfCollision, this->GetVelocity());
                  this->bounds.Push(bottomLine, bottomNormal);
                  return wasCollision;
              }

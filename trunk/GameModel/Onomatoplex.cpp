@@ -672,6 +672,7 @@ void Generator::LoadShatterWords() {
 	shatterSimpleWords.push_back("Smash");
 	shatterSimpleWords.push_back("Shatter");
 	shatterSimpleWords.push_back("Crunch");
+    shatterSimpleWords.push_back("Crush");
 	shatterSimpleWords.push_back("Splinter");
 	shatterSimpleWords.push_back("Break");
 	shatterSimpleWords.push_back("Krrzzk");
@@ -682,6 +683,9 @@ void Generator::LoadShatterWords() {
 	shatterGoodWords.push_back("Crackkk");
 	shatterGoodWords.push_back("Cracky");
 	shatterGoodWords.push_back("Krssszzk");
+    shatterGoodWords.push_back("Crrggnk");
+    shatterGoodWords.push_back("Crringgk");
+    shatterGoodWords.push_back("Crrizzk");
 	shatterGoodWords.push_back("Smaassh");
 	shatterGoodWords.push_back("Crrassh");
 	shatterGoodWords.push_back("Crunchy");

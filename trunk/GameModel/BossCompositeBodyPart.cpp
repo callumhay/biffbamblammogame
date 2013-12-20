@@ -37,16 +37,18 @@ void BossCompositeBodyPart::Tick(double dT) {
 }
 
 BossBodyPart* BossCompositeBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-                                                    Collision::LineSeg2D& collisionLine, double& timeUntilCollision) {
+                                                    Collision::LineSeg2D& collisionLine, 
+                                                    double& timeUntilCollision, Point2D& pointOfCollision) {
 
     double bestTimeSinceCollision = DBL_MAX;
     BossBodyPart* bestChoice = NULL;
     Vector2D currNormal(0,0);
     Collision::LineSeg2D currLineSeg;
+    Point2D currPtOfCollision;
 
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         AbstractBossBodyPart* part = this->childParts[i];
-        BossBodyPart* result = part->CollisionCheck(ball, dT, currNormal, currLineSeg, timeUntilCollision);
+        BossBodyPart* result = part->CollisionCheck(ball, dT, currNormal, currLineSeg, timeUntilCollision, currPtOfCollision);
         
         if (result != NULL) {
             if (bestTimeSinceCollision > timeUntilCollision) {
@@ -54,6 +56,7 @@ BossBodyPart* BossCompositeBodyPart::CollisionCheck(const GameBall& ball, double
                 bestTimeSinceCollision = timeUntilCollision;
                 n = currNormal;
                 collisionLine = currLineSeg;
+                pointOfCollision = currPtOfCollision;
                 bestChoice = result;
             }
         }

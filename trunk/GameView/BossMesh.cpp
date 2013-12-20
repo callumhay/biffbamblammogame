@@ -509,8 +509,8 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
             }
             else {
                 // Not dead yet so we draw and tick
-                curr->Draw(camera);
                 curr->Tick(dT);
+                curr->Draw(camera);
                 ++iter;
             }
         }
@@ -534,8 +534,8 @@ void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAs
         }
         else {
             // Not dead yet so we draw and tick
-            curr->Draw(camera);
             curr->Tick(dT);
+            curr->Draw(camera);
             ++iter;
         }
     }

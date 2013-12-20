@@ -240,9 +240,11 @@ public:
         LevelSummaryPointTallySkipEvent,
         LevelSummaryStarTallyEvent,
         LevelSummaryConfirmEvent,
+        LevelBasicUnlockEvent,
         LevelStarCostPaidUnlockEvent,
         WorldCompleteBackgroundLoop,
         WorldCompleteVictoryMessageEvent,
+        WorldSummaryConfirmEvent,
         WorldUnlockEvent,
         GameOverEvent
     };
@@ -261,6 +263,7 @@ public:
 
     static const int MENU_CONFIRM_SOUND_DELAY_IN_MS = 1200;
     
+    static const float DEFAULT_MASTER_VOLUME;
     static const float DEFAULT_MIN_3D_SOUND_DIST;
     static const float DEFAULT_3D_SOUND_ROLLOFF_FACTOR;
 
@@ -311,6 +314,8 @@ public:
 
     // Volume functions
     void SetMasterVolume(float volume);
+    void SetMusicVolume(float volume);
+    void SetSFXVolume(float volume);
     void SetSoundVolume(const SoundID& soundID, float volume);
     void SetSoundTypeVolume(const GameSound::SoundType& soundType, float volume);
     //void SetAllPlayingSoundsVolume(float volume, double lerpTimeInSecs = 0.0);
@@ -321,9 +326,12 @@ public:
     void SetGameFGTransform(const Matrix4x4& m);
     
     // Query functions
+    static bool IsMusic(const GameSound::SoundType& soundType);
     bool IsSoundPlaying(SoundID soundID) const;
     bool IsEffectActive(GameSound::EffectType type) const;
     bool IsEffectPaused(GameSound::EffectType type) const;
+    float GetMusicVolume() const;
+    float GetSFXVolume() const;
 
 private:
     typedef std::map<SoundID, Sound*> SoundMap;
@@ -348,6 +356,10 @@ private:
     typedef EffectSet::iterator EffectSetIter;
     typedef EffectSet::const_iterator EffectSetConstIter;
 
+    typedef std::map<GameSound::SoundType, bool> IsMusicMap;
+    typedef IsMusicMap::iterator IsMusicMapIter;
+    typedef IsMusicMap::const_iterator IsMusicMapConstIter;
+
     // Sound Source and Effects Maps
     SoundSourceMap globalSounds;
     EffectMap globalEffects;
@@ -368,6 +380,12 @@ private:
 
     bool ignorePlaySounds;
 
+    // Separate volumes for music and sound effects
+    float musicVolume;
+    float sfxVolume;
+
+    static IsMusicMap musicSoundTypeMap; // A map that keeps track of what sounds types are music
+
     // IrrKlang stuff
     irrklang::ISoundEngine* soundEngine;
 
@@ -381,6 +399,7 @@ private:
     bool LoadFromMSF();
 
     bool PlaySoundWithID(const SoundID& id, const GameSound::SoundType& soundType, bool isLooped, bool startPaused = false);
+    float GetSoundTypeMasterVolume(const Sound& sound) const;
 
     void ClearAll();
     void ClearEffects();
@@ -391,6 +410,8 @@ private:
     SoundEffect* GetSoundEffectFromType(const GameSound::EffectType& type) const;
     Sound* GetPlayingSound(SoundID soundID) const;
     void GetAllPlayingSoundsAsList(std::list<Sound*>& playingSounds) const;
+    void GetAllPlayingMusicAsList(std::list<Sound*>& playingMusic) const;
+    void GetAllPlayingSFXAsList(std::list<Sound*>& playingSFX) const;
 
     Sound* BuildSound(const GameSound::SoundType& soundType, bool isLooped, 
         const Point3D* position = NULL, bool applyActiveEffects = true, bool startPaused = false);
@@ -400,6 +421,11 @@ private:
 
 inline void GameSound::SetIgnorePlaySound(bool ignore) {
     this->ignorePlaySounds = ignore;
+}
+
+inline bool GameSound::IsMusic(const GameSound::SoundType& soundType) {
+    assert(GameSound::musicSoundTypeMap.find(soundType) != GameSound::musicSoundTypeMap.end());
+    return GameSound::musicSoundTypeMap[soundType];
 }
 
 inline bool GameSound::IsSoundPlaying(SoundID soundID) const {
@@ -412,6 +438,14 @@ inline bool GameSound::IsEffectActive(GameSound::EffectType type) const {
 
 inline bool GameSound::IsEffectPaused(GameSound::EffectType type) const {
     return this->pausedEffects.find(type) != this->pausedEffects.end();
+}
+
+inline float GameSound::GetMusicVolume() const {
+    return this->musicVolume;
+}
+
+inline float GameSound::GetSFXVolume() const {
+    return this->sfxVolume;
 }
 
 inline void GameSound::ToggleSoundEffect(const GameSound::EffectType& effectType, bool effectOn) {

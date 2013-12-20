@@ -87,8 +87,16 @@ public:
 	 * Event occurs when a level is finished. This event occurs once just as the level finishes.
 	 * Arguments: world - The world of the level that just finished.
 	 *            level - The level that is just finished.
+     *            furthestLevelIdxBefore - The index of the level that was the furthest progress of the player before finishing the current level.
+     *            furthestLevelIdxAfter  - The index of the level that was the furthest progress of the player after finishing the current level.
 	 */
-    virtual void LevelCompletedEvent(const GameWorld& world, const GameLevel& level) { UNUSED_PARAMETER(world); UNUSED_PARAMETER(level); }
+    virtual void LevelCompletedEvent(const GameWorld& world, const GameLevel& level,
+                                     int furthestLevelIdxBefore, int furthestLevelIdxAfter) { 
+        UNUSED_PARAMETER(world);
+        UNUSED_PARAMETER(level);
+        UNUSED_PARAMETER(furthestLevelIdxBefore);
+        UNUSED_PARAMETER(furthestLevelIdxAfter);
+    }
 
 
 	// Paddle related events *************************************************************

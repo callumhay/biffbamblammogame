@@ -46,6 +46,7 @@ protected:
 
     const GameSound::SoundType soundType;
     const std::string soundName;
+    bool isMusic;
 
     irrklang::ISoundSource* LoadSoundSource(const std::string& filepath);
     void UnloadSoundSource(irrklang::ISoundSource* source);

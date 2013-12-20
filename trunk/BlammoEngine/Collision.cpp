@@ -15,128 +15,111 @@ using namespace Collision;
 
 #define BALL_COLLISION_SAMPLING_INV_AMT 0.1f
 
-bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-                       Collision::LineSeg2D& collisionLine, double& timeUntilCollision) const {
-
+bool Circle2D::CollideGetCollisionPt(double dT, const Collision::Circle2D& c, const Vector2D& velocity,
+                                     Point2D& collisionPt, float& collisionDist, float& moveVecDist) const {
     assert(c.Radius() > 0);
 
-    Vector2D sampleIncDist;
-    double sampleIncTime;
-    int numCollisionSamples;
+    
 
-    bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
-
-    if (zeroVelocity) {
-       numCollisionSamples = 1;
-    }
-    else {
-       // Calculate the number of samples required to make sure that the increment distance is
-       // less than a reasonable fraction of the radius of the circle
-       numCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * c.Radius()) * velocity.Magnitude()));
-       numCollisionSamples = std::min<int>(40, std::max<int>(1, numCollisionSamples + 1));
+    Vector2D moveVec = dT * velocity;
+    if (moveVec.IsZero()) {
+        return false;
     }
 
-    // Figure out the distance along the vector traveled since the last collision
-    // to take each sample at...
-    sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
-    sampleIncTime = dT / static_cast<double>(numCollisionSamples);
-
-    Circle2D sampleCircle = c;
-    double currTimeUntilCollision = 0.0;
-
-    // Go through all of the samples starting with the first, moving towards the circle's current location, 
-    // when a collision is found we exit
-    bool isCollision = false;
-    for (int i = 0; i < numCollisionSamples; i++) {
-        
-        if (Collision::IsCollision(sampleCircle, *this)) {
-            // Calculate the normal and line of collision...
-            Vector2D thisToBallVec = sampleCircle.Center() - this->Center();
-            n = Vector2D::Normalize(thisToBallVec);
-            
-            // Make the collision line tangent to the circle
-            Vector2D perpToNormal(-n[1], n[0]);
-            Point2D approxCollisionPt = sampleCircle.Center() - sampleCircle.Radius() * n;
-            collisionLine = Collision::LineSeg2D(approxCollisionPt - perpToNormal, approxCollisionPt + perpToNormal);
-
-            isCollision = true;
-            break;
-        }
-        sampleCircle.SetCenter(sampleCircle.Center() + sampleIncDist);
-        currTimeUntilCollision += sampleIncTime;
+    moveVecDist = moveVec.Magnitude();
+    float dist = (c.Center() - this->Center()).Magnitude();
+    float sumRadii = (c.Radius() + this->Radius());
+    dist -= sumRadii;
+    if (moveVecDist < dist) {
+        return false;
     }
 
-    timeUntilCollision = currTimeUntilCollision;
-    return isCollision;
+    Vector2D moveDir = moveVec / moveVecDist;
+    Vector2D cVec = this->Center() - c.Center();
+    float d = Vector2D::Dot(moveDir, cVec);
+
+    if (d <= 0) {
+        return false;
+    }
+
+    float f = cVec.SqrMagnitude() - (d*d);
+    float sqrSumRadii = sumRadii * sumRadii;
+    if (f >= sqrSumRadii) {
+        return false;
+    }
+
+    float t = sqrSumRadii - f;
+    if (t < 0) {
+        return false;
+    }
+
+    collisionDist = d - sqrt(t);
+    if (moveVecDist < collisionDist) {
+        return false;
+    }
+
+    collisionPt = c.Center() + collisionDist * moveDir;
+    return true;
 }
 
 bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-                       Collision::LineSeg2D& collisionLine, double& timeUntilCollision, const Vector2D& thisCircleVelocity) const {
+                       Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& cCenterAtCollision) const {
 
-    assert(c.Radius() > 0);
+    float collisionDist, moveVecDist;
+    if (!this->CollideGetCollisionPt(dT, c, velocity, cCenterAtCollision, collisionDist, moveVecDist)) {
+        return false;
+    }
 
-    bool zeroThisCircleVelocity = (thisCircleVelocity == Vector2D(0.0f, 0.0f));
+    timeUntilCollision = collisionDist / velocity.Magnitude();
+    n = Vector2D::Normalize(cCenterAtCollision - this->Center());
+    
+    Vector2D perpToNormal(-n[1], n[0]);
+    Point2D linePos = cCenterAtCollision - c.Radius() * n;
+    collisionLine = Collision::LineSeg2D(linePos - perpToNormal, linePos + perpToNormal);
+
+    return true;
+}
+
+bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+                       Collision::LineSeg2D& collisionLine, double& timeUntilCollision, 
+                       Point2D& cCenterAtCollision, Point2D& thisCenterAtCollision, 
+                       const Vector2D& thisCircleVelocity) const {
+
+    bool zeroThisCircleVelocity = thisCircleVelocity.IsZero();
     if (zeroThisCircleVelocity) {
-       // Simpler solution if the line isn't moving
-       return this->Collide(dT, c, velocity, n, collisionLine, timeUntilCollision);
+       // Simpler solution if this circle isn't moving
+       thisCenterAtCollision = this->Center();
+       return this->Collide(dT, c, velocity, n, collisionLine, timeUntilCollision, cCenterAtCollision);
     }
 
-    bool zeroBallVelocity = (velocity == Vector2D(0.0f, 0.0f));
-    int numBallCollisionSamples = 1;
-    int numLineCollisionSamples = 1;
-
-    float minimumRadius = std::min<float>(c.Radius(), this->Radius());
-
-    if (!zeroBallVelocity) {
-       // Calculate the number of samples required to make sure that the increment distance
-       // less than or equal to a fraction of the radius of the circle
-       numBallCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * minimumRadius) * velocity.Magnitude()));
-       numBallCollisionSamples = std::min<int>(40, std::max<int>(1, numBallCollisionSamples + 1));
+    bool zeroOtherBallVelocity = velocity.IsZero();
+    if (zeroOtherBallVelocity) {
+        return false;
     }
-    if (!zeroThisCircleVelocity) {
-       // Calculate the number of samples required to make sure that the increment distance
-       // less than or equal to some reasonable delta distance (a fraction of the radius of the circle)...
-       numLineCollisionSamples = ceil(ceil(dT / (BALL_COLLISION_SAMPLING_INV_AMT * minimumRadius) * thisCircleVelocity.Magnitude()));
-       numLineCollisionSamples = std::min<int>(40, std::max<int>(1, numLineCollisionSamples + 1));
+    
+    // The solution to a two moving circle problem is pretty much the same as a 
+    // single moving circle colliding with a static circle, but we need to change the frame of
+    // reference to a single circle...
+    // See: http://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php?page=2
+    Vector2D relativeVel = velocity - thisCircleVelocity;
+    float collisionDist, moveVecDist;
+    if (!this->CollideGetCollisionPt(dT, c, relativeVel, cCenterAtCollision, collisionDist, moveVecDist)) {
+        return false;
     }
 
-    int maxCollisionSamples = std::max<int>(numBallCollisionSamples, numLineCollisionSamples);
+    // Move back to the original frame of reference...
+    float fract = collisionDist / moveVecDist;
+    
+    // Determine the non-relative positions of both circles at the time of collision
+    cCenterAtCollision = c.Center() + fract * dT * velocity;
+    thisCenterAtCollision = this->Center() + fract * dT * thisCircleVelocity;
 
-    // Figure out the distance along the vector traveled since the last collision
-    // to take each sample at...
-    Vector2D sampleIncDistForBall = dT * velocity / static_cast<float>(maxCollisionSamples);
-    Vector2D sampleIncDistForLine = dT * thisCircleVelocity / static_cast<float>(maxCollisionSamples);
-    double sampleIncTime = dT / static_cast<double>(maxCollisionSamples);
+    timeUntilCollision = NumberFuncs::SignOf(fract) * (cCenterAtCollision - c.Center()).Magnitude() / velocity.Magnitude();
 
-    Circle2D currSampleBallCircle = c;
-    Circle2D currSampleThisCircle = *this;
-    double currTimeUntilCollision = 0.0;
+    n = Vector2D::Normalize(cCenterAtCollision - thisCenterAtCollision);
+    Vector2D perpToNormal(-n[1], n[0]);
+    Point2D linePos = cCenterAtCollision - c.Radius() * n;
+    collisionLine = Collision::LineSeg2D(linePos - perpToNormal, linePos + perpToNormal);
 
-    // Move the two circles in the directions they're traveling over the course of the dT
-    // in order to find out when a collision (if any) occurred
-    bool isCollision = false;
-    for (int i = 0; i < maxCollisionSamples; i++) {
-
-       if (Collision::IsCollision(currSampleBallCircle, currSampleThisCircle)) {
-           
-           // Calculate the normal and line of collision...
-           Vector2D thisToBallVec = currSampleBallCircle.Center() - currSampleThisCircle.Center();
-           n = Vector2D::Normalize(thisToBallVec);
-
-           // Make the collision line tangent to the circle
-           Vector2D perpToNormal(-n[1], n[0]);
-           Point2D approxCollisionPt = currSampleBallCircle.Center() - currSampleBallCircle.Radius() * n;
-           collisionLine = Collision::LineSeg2D(approxCollisionPt - perpToNormal, approxCollisionPt + perpToNormal);
-
-           isCollision = true;
-           break;
-       }
-
-       currSampleBallCircle.SetCenter(currSampleBallCircle.Center() + sampleIncDistForBall);
-       currSampleThisCircle.SetCenter(currSampleThisCircle.Center() + sampleIncDistForLine);
-       currTimeUntilCollision += sampleIncTime;
-    }
-
-    timeUntilCollision = currTimeUntilCollision;
-    return isCollision;
+    return true;
 }

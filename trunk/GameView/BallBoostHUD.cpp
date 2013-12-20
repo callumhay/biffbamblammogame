@@ -125,8 +125,8 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
             iter = this->activeEffects.erase(iter);
             continue;
         }
-        currEmitter->Draw(camera);
         currEmitter->Tick(dT);
+        currEmitter->Draw(camera);
         ++iter;
     }
 

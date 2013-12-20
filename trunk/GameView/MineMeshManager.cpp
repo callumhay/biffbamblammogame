@@ -184,8 +184,8 @@ void MineMeshManager::MineInstance::Draw(double dT, const Camera& camera, const 
      
         this->trailEmitter.SetParticleSpawnSize(ESPInterval(mine->GetWidth()));
         this->trailEmitter.SetEmitPosition(Point3D(position[0], position[1], 0.0f));
+        this->trailEmitter.Tick(dT);
         this->trailEmitter.Draw(camera);
-	    this->trailEmitter.Tick(dT);
     }
     
     // Don't draw the mine while it's loaded in a cannon
@@ -220,15 +220,15 @@ void MineMeshManager::MineInstance::Draw(double dT, const Camera& camera, const 
             this->fastPulseSettings.pulseRate = pulseRateAndGrowth;
             this->fastPulser.ResetScaleEffect(this->fastPulseSettings);
 
+            currTriggeredPulseEmitter->Tick(dT);
             currTriggeredPulseEmitter->Draw(camera);
-	        currTriggeredPulseEmitter->Tick(dT);
         }
         else {
             // Draw any proximity pulse for the mine if it's armed
             if (this->mine->GetIsArmed()) {
                 currArmedPulseEmitter->SetParticleSpawnSize(ESPInterval(mine->GetWidth()));
+                currArmedPulseEmitter->Tick(dT);
                 currArmedPulseEmitter->Draw(camera);
-	            currArmedPulseEmitter->Tick(dT);
             }
             else {
                 currArmedPulseEmitter->Reset();

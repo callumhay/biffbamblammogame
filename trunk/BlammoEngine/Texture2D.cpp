@@ -207,8 +207,8 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 		for (int i=0; i < width; i++){
 			// That Value Which We Use Will Be 0 If We Are In The Padding Zone, And Whatever
 			// Is The FreeType Bitmap Otherwise.
-				expandedData[2*(i+j*width)] = 255;
-        expandedData[2*(i+j*width)+1] = (i >= bmp.width || j >= bmp.rows) ? 0 : bmp.buffer[i + bmp.width*j];
+            expandedData[2*(i+j*width)] = 255;
+            expandedData[2*(i+j*width)+1] = (i >= bmp.width || j >= bmp.rows) ? 0 : bmp.buffer[i + bmp.width*j];
 		}
 	}
 

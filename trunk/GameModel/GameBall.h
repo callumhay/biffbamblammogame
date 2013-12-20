@@ -110,27 +110,9 @@ public:
 		return this->ballballCollisionsDisabledTimer <= 0.0;
 	}
 
-	/**
-	 * Check to see if this ball collided with another.
-	 * Returns: true if there was a collision between this ball and otherball, false otherwise.
-	 */
-	bool CollisionCheck(const GameBall& otherBall) const {
-		// If the collisions are disabled then we only return false
-		if (!this->CanCollideWithOtherBalls() || !otherBall.CanCollideWithOtherBalls() ||
-            this->IsLastThingCollidedWith(&otherBall)) {
-			return false;
-		}
-
-		return this->CollisionCheck(otherBall.GetBounds());
-	}
-
-	bool CollisionCheck(const Collision::Circle2D& circle) const {
-		Vector2D lengthVec = this->bounds.Center() - circle.Center();
-		float sqLength = Vector2D::Dot(lengthVec, lengthVec);
-		float radiiSum = this->bounds.Radius() + circle.Radius();
-		float sqRadii = radiiSum * radiiSum;
-		return sqLength < sqRadii;
-	}
+    bool CollisionCheck(double dT, const GameBall& otherBall, Vector2D& n, 
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision, 
+        Point2D& otherBallCenterAtCollision, Point2D& thisBallCenterAtCollision) const;
 
     void ApplyImpulseForce(float impulseAmt, float deceleration);
     //void ApplyNewtonsThirdLawCollisionVelocity(const Vector2D& impulse);

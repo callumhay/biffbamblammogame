@@ -1304,11 +1304,16 @@ void DecoBossAIState::ExecuteElectrifiedState(double dT, GameModel* gameModel) {
         this->armSeg1RetractAnim, this->armSeg1RetractAnim);
     bool isFinishedHurtAnim = this->electrifiedHurtAnim.Tick(dT);
 
+
+    if (this->IsFinalAIStage()) {
+        // Freeze the ball and paddle, in it's final stage, the boss is dead after it's done being electrified
+        this->boss->GetGameModel()->SetPauseState(GameModel::PausePaddleControls | GameModel::PauseBall);
+    }
+
     this->boss->alivePartsRoot->SetLocalTranslation(this->electrifiedHurtAnim.GetInterpolantValue());
     if (this->electrifiedHurtAnim.GetCurrentTimeValue() >= TOTAL_ELECTRIFIED_TIME_IN_SECS || isFinishedHurtAnim && armAnimIsFinished) {
 
         if (this->IsFinalAIStage() && isFinishedHurtAnim) {
-
             // Stop any colour animation that was set for this state
             this->boss->alivePartsRoot->ResetColourRGBAAnimation();
             // Clean up all the translations and rotations on the body of the boss for this state
@@ -2082,6 +2087,10 @@ void Stage3AI::SetState(DecoBossAIState::AIState newState) {
 
         case ElectrifiedAIState: 
             this->InitElectrifiedState();
+            
+            // Freeze the ball and paddle, the boss is pretty much dead after it's done being electrified
+            this->boss->GetGameModel()->SetPauseState(GameModel::PausePaddleControls | GameModel::PauseBall);
+
             break;
 
         case FinalDeathThroesAIState: {
