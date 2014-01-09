@@ -40,7 +40,7 @@ public:
 	void Vibrate(double lengthInSeconds, const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
     void ClearVibration();
 
-	bool ProcessState();
+	bool ProcessState(double dT);
 	void Sync(size_t frameID, double dT);
 	bool IsConnected() const;
 
@@ -69,7 +69,7 @@ private:
     float directionMagnitudePercentUpDown;
 
 	void NotInGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState);
-	void InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState);
+	void InGameOnProcessStateSpecificActions(double dT, const XINPUT_STATE& controllerState);
 
 	void SetVibration(const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
     void UpdateDirections(const XINPUT_STATE& controllerState, int sensitivityLeft);

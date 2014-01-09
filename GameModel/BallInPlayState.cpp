@@ -122,15 +122,30 @@ void BallInPlayState::ShootActionReleaseUse() {
 
 	    // Check for paddle items that use the action key...
 	    PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-	    paddle->Shoot(this->gameModel);
+	    paddle->DiscreteShoot(this->gameModel);
     }
 }
 
-void BallInPlayState::ShootActionContinuousUse(float magnitudePercent) {
+void BallInPlayState::ShootActionContinuousUse(double dT, float magnitudePercent) {
+    
     // If there's a remote control rocket then we apply thrust to it...
     PaddleRemoteControlRocketProjectile* remoteControlRocket = this->gameModel->GetActiveRemoteControlRocket();
     if (remoteControlRocket != NULL) {
         remoteControlRocket->ControlRocketThrust(magnitudePercent);
+        return;
+    }
+
+    // Other continuous-use cases:
+  
+    // For special paddle types...
+    // Be absolutely sure we aren't still in bullet time before we apply controls to the paddle,
+    // also make sure the paddle isn't paused in any way
+    assert(this->gameModel->boostModel != NULL);
+    if (this->gameModel->boostModel->GetBulletTimeState() == BallBoostModel::NotInBulletTime &&
+        (this->gameModel->GetPauseState() & (GameModel::PausePaddle | GameModel::PausePaddleControls)) == 0x0) {
+
+        PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+        paddle->ContinuousShoot(dT, this->gameModel, magnitudePercent);
     }
 }
 

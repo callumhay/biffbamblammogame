@@ -124,7 +124,9 @@ bool SwitchBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 
 		case Projectile::CollateralBlockProjectile:
 			return false;
+
 		case Projectile::FireGlobProjectile:
+        case Projectile::PaddleFlameBlastProjectile:
             return false;
 
 		default:
@@ -230,6 +232,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
             break;
 
 		case Projectile::FireGlobProjectile:
+        case Projectile::PaddleFlameBlastProjectile:
 			// Fire glob activates a switch block, unless it's frozen in an ice cube;
 			// in that case, unfreeze it
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {

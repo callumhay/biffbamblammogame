@@ -90,7 +90,7 @@ static void GameRenderLoop() {
 		SDL_Delay(GameDisplay::FRAME_SLEEP_MS);
 
 		// Process controller events
-		quitGame = GameControllerManager::GetInstance()->ProcessControllers();
+		quitGame = GameControllerManager::GetInstance()->ProcessControllers(frameTimeDelta);
 		if (quitGame) {
 			display->QuitGame();
 		}

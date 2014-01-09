@@ -119,7 +119,7 @@ void XBox360Controller::NotInGameOnProcessStateSpecificActions(const XINPUT_STAT
     this->UpdateDirections(controllerState, 2*XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 }
 
-void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState) {
+void XBox360Controller::InGameOnProcessStateSpecificActions(double dT, const XINPUT_STATE& controllerState) {
     if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_A) {
         //controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_B ||
         //controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_X ||
@@ -165,14 +165,14 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
             this->triggerActionOn = true;
         }
 
-        this->model->ShootActionContinuousUse(
+        this->model->ShootActionContinuousUse(dT,
             (std::max<float>(controllerState.Gamepad.bLeftTrigger, controllerState.Gamepad.bRightTrigger) - XINPUT_GAMEPAD_TRIGGER_THRESHOLD) / 
             static_cast<float>(std::numeric_limits<BYTE>::max() - XINPUT_GAMEPAD_TRIGGER_THRESHOLD));
 
     }
     else if (this->triggerActionOn) {
         this->triggerActionOn = false;
-        this->model->ShootActionContinuousUse(0.0f);
+        this->model->ShootActionContinuousUse(dT, 0.0f);
     }
 
     // Special stuff (ball bullet time)...
@@ -193,7 +193,8 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
     }
 }
 
-bool XBox360Controller::ProcessState() {
+bool XBox360Controller::ProcessState(double dT) {
+
 	// Clear the state
 	XINPUT_STATE controllerState;
 	ZeroMemory(&controllerState, sizeof(XINPUT_STATE));
@@ -206,7 +207,7 @@ bool XBox360Controller::ProcessState() {
 	if (this->display->GetCurrentDisplayState() == DisplayState::InGame ||
         this->display->GetCurrentDisplayState() == DisplayState::InGameBossLevel ||
         this->display->GetCurrentDisplayState() == DisplayState::InTutorialGame) {
-		this->InGameOnProcessStateSpecificActions(controllerState);
+		this->InGameOnProcessStateSpecificActions(dT, controllerState);
 	}
 	else {
 		this->NotInGameOnProcessStateSpecificActions(controllerState);
@@ -530,7 +531,8 @@ void XBox360Controller::Vibrate(double lengthInSeconds, const VibrateAmount& lef
 	UNUSED_PARAMETER(rightMotorAmt);
 }
 
-void XBox360Controller::ProcessState() {
+void XBox360Controller::ProcessState(double dT) {
+	UNUSED_PARAMETER(dT);
 }
 
 void XBox360Controller::Sync(double dT) {

@@ -30,7 +30,9 @@ BBBGameController(model, display), dirHeldDownTimeCounter(0.0), windowHasFocus(t
 KeyboardSDLController::~KeyboardSDLController() {
 }
 
-bool KeyboardSDLController::ProcessState() {
+bool KeyboardSDLController::ProcessState(double dT) {
+    UNUSED_PARAMETER(dT);
+
 	SDL_Event keyEvent;
 	// Grab all the events off the queue
 	while (SDL_PollEvent(&keyEvent)) {
@@ -108,7 +110,7 @@ void KeyboardSDLController::Sync(size_t frameID, double dT) {
 
     // Other special actions for hold-down keys...
     if (this->keyPressed[SDLK_SPACE] || this->keyPressed[SDLK_UP] || this->keyPressed[SDLK_w]) {
-        this->model->ShootActionContinuousUse(1.0f);
+        this->model->ShootActionContinuousUse(dT, 1.0f);
     }
 
 	// Execute any debug functionality for when a button is held down...
@@ -566,11 +568,11 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                 
                 case SDLK_MINUS:
                 case SDLK_UNDERSCORE:
-                    // ...
+                    this->model->DropItem(GameItem::FlameBlasterPaddleItem);
                     break;
                 case SDLK_EQUALS:
                 case SDLK_PLUS:
-                    // ...
+                    // ... TODO: this->model->DropItem(GameItem::IceBeamPaddleItem);
                     break;
 
                 case SDLK_BACKSLASH:

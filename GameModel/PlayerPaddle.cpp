@@ -19,6 +19,7 @@
 #include "PaddleRocketProjectile.h"
 #include "PaddleRemoteControlRocketProjectile.h"
 #include "FireGlobProjectile.h"
+#include "PaddleFlameBlasterProjectile.h"
 #include "PaddleLaserBeam.h"
 #include "BossBodyPart.h"
 
@@ -42,6 +43,12 @@ const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.7f;
 // (bigger is slower, smaller is faster)
 const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 
+// Flamethrower constants
+const float PlayerPaddle::MIN_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS = 0.06;
+const float PlayerPaddle::MAX_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS = 0.2;
+const float PlayerPaddle::DIFF_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS     = 
+    MAX_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS - MIN_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
+
 // Default speed of the paddle (units/sec)
 const float PlayerPaddle::DEFAULT_MAX_SPEED = 27.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
@@ -56,6 +63,7 @@ const int PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE = 18.0f;
 
 // Delay between shots of the laser
 const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
+const double PlayerPaddle::PADDLE_FLAME_BLAST_DELAY = 0.5;
 const double PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY  = 0.75;
 
 // The default amount of damage the the paddle shield does to a block, when colliding with the block, per second
@@ -72,7 +80,7 @@ PlayerPaddle::PlayerPaddle() :
 centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 
 maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
-timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
+timeSinceLastFlameBlast(PlayerPaddle::PADDLE_FLAME_BLAST_DELAY), timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
 impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), 
@@ -86,6 +94,7 @@ PlayerPaddle::~PlayerPaddle() {
 // Reset the dimensions and position of this paddle (e.g., after death, start of a level).
 void PlayerPaddle::ResetPaddle() {
 	this->timeSinceLastLaserBlast = 0.0;
+    this->timeSinceLastFlameBlast = 0.0;
     this->timeSinceLastMineLaunch = 0.0;
 	this->laserBeamTimer = 0.0;
 	this->currSize = PlayerPaddle::NormalSize;
@@ -141,7 +150,7 @@ void PlayerPaddle::RegenerateBounds() {
 	std::vector<Vector2D> lineNorms;
 
 	if (this->isPaddleCamActive) {
-		// When the paddle camera is active we compress the collision boundries down to the bottom of the paddle
+		// When the paddle camera is active we compress the collision boundaries down to the bottom of the paddle
 		// this help make for a better game experience since the collision seems more natural when it's on the camera's view plane
 
 		lineBounds.reserve(3);
@@ -153,7 +162,7 @@ void PlayerPaddle::RegenerateBounds() {
 		lineBounds.push_back(l1);
 		lineNorms.push_back(n1);
 
-		// 'Side' (oblique) boundries
+		// 'Side' (oblique) boundaries
 		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
 		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
 		lineBounds.push_back(sideLine1);
@@ -371,14 +380,11 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	float startingZRotation = this->rotAngleZAnimation.GetInterpolantValue();
 	this->rotAngleZAnimation.Tick(seconds);
 
-	// Check to see if we need to increment seconds since the previous laser shot
-	// This makes sure the user can't consecutively fire lasers like crazy
-	if (this->timeSinceLastLaserBlast < PADDLE_LASER_BULLET_DELAY) {
-		this->timeSinceLastLaserBlast += seconds;
-	}
-    if (this->timeSinceLastMineLaunch < PADDLE_MINE_LAUNCH_DELAY) {
-        this->timeSinceLastMineLaunch += seconds;
-    }
+	// Increment seconds since the various types of previous weapon shots
+	// This makes sure the user can't consecutively fire various weapons like crazy
+	this->timeSinceLastLaserBlast += seconds;
+    this->timeSinceLastFlameBlast += seconds;
+    this->timeSinceLastMineLaunch += seconds;
 
 	// Figure out what the current acceleration is based on whether the player
 	// is currently telling the paddle to move or not
@@ -615,16 +621,21 @@ void PlayerPaddle::ReleaseEverythingAttached() {
     }
 }
 
+void PlayerPaddle::ContinuousShoot(double dT, GameModel* gameModel, float magnitudePercent) {
+    assert(gameModel != NULL);
+    assert(magnitudePercent >= 0.0f && magnitudePercent <= 1.0f);
+}
+
 /**
  * This will fire any weapons or abilities that paddle currently has - if none
  * exist then this function does nothing.
  */
-void PlayerPaddle::Shoot(GameModel* gameModel) {
+void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
+    assert(gameModel != NULL);
+
     const GameLevel* currentLevel = gameModel->GetCurrentLevel();
     assert(currentLevel != NULL);
     
-	
-	
 	// If there's a ball attached to the paddle then we release it and exit
 	if (this->HasBallAttached()) {
 		this->FireAttachedBall();
@@ -743,6 +754,20 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		    }
         }
 
+        // Check for the flame blaster paddle (shoots blasts of fire)
+        if (this->HasPaddleType(PlayerPaddle::FlameBlasterPaddle)) {
+            if (this->timeSinceLastFlameBlast >= PADDLE_FLAME_BLAST_DELAY) {
+
+                PaddleFlameBlasterProjectile* fireProjectile = new PaddleFlameBlasterProjectile(*this);
+                gameModel->AddProjectile(fireProjectile);
+
+                this->timeSinceLastFlameBlast = 0.0;
+
+                // EVENT: Paddle just fired a bit of flame...
+                GameEventManager::Instance()->ActionPaddleWeaponFired();
+            }
+        }
+
         // Check for mine launcher paddle (shoots explosive mines from the paddle)
         if (this->HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
             if (this->timeSinceLastMineLaunch >= PADDLE_MINE_LAUNCH_DELAY) {
@@ -773,6 +798,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
                 GameEventManager::Instance()->ActionPaddleWeaponFired();
             }
         }
+
 	} // other paddle shooting abilities go here...
 
 
@@ -940,6 +966,11 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 
 // Called when the paddle is hit by a projectile
 void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& projectile) {
+    
+    // Ignore paddle flame thrower projectiles
+    if (projectile.GetType() == Projectile::PaddleFlameBlastProjectile) {
+        return;
+    }
 
 	// The paddle is unaffected if it has a shield active...
 	if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
@@ -988,6 +1019,11 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 		case Projectile::FireGlobProjectile:
 			this->FireGlobProjectileCollision(projectile);
 			break;
+
+        case Projectile::PaddleFlameBlastProjectile:
+            // This does nothing, we shouldn't even get here
+            assert(false);
+            return;
 
 		default:
 			assert(false);

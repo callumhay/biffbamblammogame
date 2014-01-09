@@ -146,6 +146,10 @@ public:
     const char* TEXTURE_PADLOCK_BROKEN_RIGHT;
     const char* TEXTURE_CHEVRON;
     const char* TEXTURE_MOON;
+    const char* TEXTURE_FIRE_GLOB1;
+    const char* TEXTURE_FIRE_GLOB2;
+    const char* TEXTURE_FIRE_GLOB3;
+    //const char* TEXTURE_FIRE_GLOB4;
     
     const char* TEXTURE_DROPLET;
 
@@ -367,7 +371,7 @@ public:
 
 	const char* SKYBOX_MESH;
 	const char* ITEM_MESH;
-	const char* PADDLE_LASER_ATTACHMENT_MESH;
+	const char* PADDLE_GUN_ATTACHMENT_MESH;
 	const char* PADDLE_BEAM_ATTACHMENT_MESH;
     const char* PADDLE_MINE_ATTACHMENT_MESH;
 	const char* PADDLE_STICKY_ATTACHMENT_MESH;

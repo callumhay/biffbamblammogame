@@ -245,8 +245,8 @@ technique SmokeSprite < string Script = "Pass=p0;"; > {
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		DepthMask = false;
-	    CullFaceEnable = true;
+	DepthMask = false;
+	CullFaceEnable = true;
 
         VertexProgram = compile arbvp1 localpos_VS();            
         FragmentProgram = compile arbfp1 smokey_sprite_PS();

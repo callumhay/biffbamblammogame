@@ -53,6 +53,7 @@ public:
 	static const int MAX_DEFLECTION_DEGREE_ANGLE;
 
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
+    static const double PADDLE_FLAME_BLAST_DELAY;   // Delay between shots of the flame blaster
     static const double PADDLE_MINE_LAUNCH_DELAY;   // Delay between launches of mines
 
 	static const Vector2D DEFAULT_PADDLE_UP_VECTOR;
@@ -60,10 +61,15 @@ public:
 
 	static const int DEFAULT_SHIELD_DMG_PER_SECOND;
 
+    static const float MIN_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
+    static const float MAX_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
+    static const float DIFF_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
+
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000002, 
                       StickyPaddle = 0x00000004, LaserBeamPaddle = 0x00000008, RocketPaddle = 0x00000010, 
                       ShieldPaddle = 0x00000020, InvisiPaddle = 0x00000040, MagnetPaddle = 0x00000080,
-                      MineLauncherPaddle = 0x00000100, RemoteControlRocketPaddle = 0x00000200 };
+                      MineLauncherPaddle = 0x00000100, RemoteControlRocketPaddle = 0x00000200, 
+                      FlameBlasterPaddle = 0x00000400 };
 
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
@@ -233,7 +239,8 @@ public:
 	}
 
 	// Attach/detach ball functions
-	void Shoot(GameModel* gameModel);
+    void ContinuousShoot(double dT, GameModel* gameModel, float magnitudePercent);
+	void DiscreteShoot(GameModel* gameModel);
     void ShootBall();
     void ReleaseEverythingAttached();
 	
@@ -339,13 +346,13 @@ private:
     int32_t currSpecialStatus;  // An ORed together status for various types/attributes of the paddle, usually based on specific
                                 // activation sequences of types
 
-	Point2D centerPos;						// Paddle position (at its center) in the game model
-	float currHalfHeight;					// Half the height of the paddle
-	float currHalfWidthFlat;			// Half of the flat portion of the paddle
-	float currHalfWidthTotal;			// Half of the total width of the paddle
-	float currHalfDepthTotal;			// Half of the total depth of the paddle
-	float minBound, maxBound;			// The current level's boundries along its width for the paddle
-	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
+	Point2D centerPos;          // Paddle position (at its center) in the game model
+	float currHalfHeight;       // Half the height of the paddle
+	float currHalfWidthFlat;    // Half of the flat portion of the paddle
+	float currHalfWidthTotal;   // Half of the total width of the paddle
+	float currHalfDepthTotal;   // Half of the total depth of the paddle
+	float minBound, maxBound;   // The current level's boundaries along its width for the paddle
+	float currScaleFactor;      // The scale difference between the paddle's current size and its default size
 	
     float startingXPos; // Starting position of the paddle when the level begins or the ball dies and is revived
 
@@ -357,7 +364,7 @@ private:
 	float lastDirection;  // Used to store the last direction the user told the paddle to move in (-1 for left, 1 for right, 0 for no movement)
 	bool moveButtonDown;  // Whether the move button is being held down currently
 
-	float impulse;              // When there's an immediate impulse applied to the paddle
+	float impulse;                    // When there's an immediate impulse applied to the paddle
     float impulseDeceleration;
     float impulseSpdDecreaseCounter;
 
@@ -368,18 +375,19 @@ private:
 	AnimationMultiLerp<float> rotAngleZAnimation;		// Animation for rotating the paddle on the plane that the game is played, default angle is zero (pointing up)
     const void* lastEntityThatHurtHitPaddle;            // Pointer to the last entity that hit the paddle
 
-	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
+	BoundingLines bounds; // Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
     double timeSinceLastMineLaunch; // Time since the last launch of a mine projectile
 	double timeSinceLastLaserBlast;	// Time since the last laser projectile/bullet was fired
-	double laserBeamTimer;					// Time left on the laser beam power-up
+    double timeSinceLastFlameBlast; // Time since the last fire blast projectile was fired
+	double laserBeamTimer;          // Time left on the laser beam power-up
 
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
     std::list<Projectile*> attachedProjectiles;
 
 	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
-	bool isFiringBeam;			// Whether this paddle is firing the laser beam
+	bool isFiringBeam;      // Whether this paddle is firing the laser beam
 
     bool levelBoundsCheckingOn;
 

@@ -145,6 +145,8 @@ public:
         PaddleMineFiredEvent,
         MineExplodedEvent,
         MineLatchedOnEvent,
+        FlameBlasterShotEvent,
+        FlameBlasterHitEvent,
         LaserBulletShotEvent,
 		LaserBeamFiringLoop,
         LaserDeflectedByShieldEvent,

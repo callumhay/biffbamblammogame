@@ -279,6 +279,10 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			}
 			break;
 
+        case Projectile::PaddleFlameBlastProjectile:
+            this->LightPieceOnFire(gameModel);
+            break;
+
 		default:
 			assert(false);
 			break;

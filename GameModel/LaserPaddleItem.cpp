@@ -2,7 +2,7 @@
  * LaserPaddleItem.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -40,11 +40,11 @@ double LaserPaddleItem::Activate() {
 		}
 	}
 	// Remove the laser paddle timers from the list of active timers
-	for (unsigned int i = 0; i < removeTimers.size(); i++) {
-			GameItemTimer* currTimer = removeTimers[i];
-			activeTimers.remove(currTimer);
-			delete currTimer;
-			currTimer = NULL;
+	for (int i = 0; i < static_cast<int>(removeTimers.size()); i++) {
+	    GameItemTimer* currTimer = removeTimers[i];
+	    activeTimers.remove(currTimer);
+	    delete currTimer;
+	    currTimer = NULL;
 	}
 
 	// Make the paddle have laser shooting abilities
@@ -61,8 +61,6 @@ void LaserPaddleItem::Deactivate() {
 
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
-	
-	// Make the paddle normal again
 	paddle->RemovePaddleType(PlayerPaddle::LaserBulletPaddle);
 	this->isActive = false;
 	GameItem::Deactivate();

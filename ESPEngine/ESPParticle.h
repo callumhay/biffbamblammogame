@@ -61,6 +61,11 @@ public:
 	void SetPosition(const Point3D& p) {
 		this->position = p;
 	}
+    void SetPosition(float x, float y, float z) {
+        this->position[0] = x;
+        this->position[1] = y;
+        this->position[2] = z;
+    }
 
     // Inherited from IPositionObject
     Point3D GetPosition3D() const {

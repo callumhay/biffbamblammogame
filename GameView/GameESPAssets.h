@@ -12,10 +12,9 @@
 #ifndef __GAMESPASSETS_H__
 #define __GAMESPASSETS_H__
 
-#include <list>
-
 #include "CgFXVolumetricEffect.h"
 #include "CgFXPostRefract.h"
+#include "CgFxFireBallEffect.h"
 
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Point.h"
@@ -37,7 +36,7 @@ class PlayerPaddle;
 class GameModel;
 class GameLevel;
 class Beam;
-class CgFxFireBallEffect;
+class PaddleFlameBlasterProjectile;
 struct ESPInterval;
 
 class PuffOfSmokeEffectInfo;
@@ -54,6 +53,11 @@ private:
     typedef std::map<const GameBall*, std::list<ESPPointEmitter*> > BallEffectsMap;
     typedef BallEffectsMap::iterator BallEffectsMapIter;
 
+    typedef std::list<ESPPointEmitter*> ProjectileEmitterCollection;
+    typedef ProjectileEmitterCollection::iterator ProjectileEmitterCollectionIter;
+    typedef std::map<const Projectile*, ProjectileEmitterCollection> ProjectileEmitterMap;
+    typedef ProjectileEmitterMap::iterator ProjectileEmitterMapIter;
+
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
 	std::list<ESPEmitter*> activePaddleEmitters;
@@ -61,7 +65,7 @@ private:
 	std::map<const GameBall*, std::list<ESPEmitter*> > activeBallBGEmitters;
     BallEffectsMap boostBallEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*> > activeItemDropEmitters;
-	std::map<const Projectile*, std::list<ESPPointEmitter*> > activeProjectileEmitters;
+	ProjectileEmitterMap activeProjectileEmitters;
 	std::map<const Beam*, std::list<ESPEmitter*> > activeBeamEmitters;
 	std::map<GameItem::ItemType, std::list<ESPEmitter*> > activeTimerHUDEmitters;
 	//std::map<const LevelPiece*, std::list<ESPEmitter*> > activeLevelPieceEmitters;
@@ -73,6 +77,7 @@ private:
 	ESPParticleColourEffector particleFireColourFader;
     ESPParticleColourEffector particleWaterVapourColourFader;
     ESPParticleColourEffector particleSmokeColourFader;
+    ESPParticleColourEffector flameBlastSmokeColourFader;
     ESPParticleColourEffector particleFireFastColourFader;
     ESPParticleColourEffector particleSuperFireFastColourFader;
 	ESPParticleColourEffector fireBallColourFader;
@@ -84,6 +89,7 @@ private:
     ESPParticleColourEffector slowBallColourFader;
     ESPParticleColourEffector fastBallColourFader;
     ESPMultiColourEffector starColourFlasher;
+    ESPMultiColourEffector fireOriginColourEffector;
 
 	ESPParticleScaleEffector particlePulseUberballAura;
 	ESPParticleScaleEffector particlePulseItemDropAura;
@@ -128,6 +134,7 @@ private:
     std::vector<Texture2D*> boltTextures;
 	std::vector<Texture2D*> rockTextures;
     std::vector<Texture2D*> cloudTextures;
+    std::vector<Texture2D*> fireGlobTextures;
 	std::vector<CgFxFireBallEffect*> moltenRockEffects;
 	
     Texture2D* cleanCircleGradientTex;
@@ -175,7 +182,7 @@ private:
     Texture2D* rightHalfBrokenPadlockTex;
 
 	// Ball and paddle related ESP effects
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // Stores each balls set of item-related (defined by unique ID) effects
 	std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > paddleEffects;
 
 	// Constants for the number of particles for particular effects
@@ -200,7 +207,7 @@ private:
     ESPPointEmitter* boostSparkleEmitterLight;
     ESPPointEmitter* boostSparkleEmitterDark;
 
-	// Cached paddle effects
+	// Cached beam and laser paddle effects -----------------------------------
     ESPPointEmitter*  paddleLaserGlowAura;
 	ESPPointEmitter*  paddleLaserGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;
@@ -211,7 +218,6 @@ private:
     ESPVolumeEmitter* stickyPaddleBeamGlowSparks1;
     ESPVolumeEmitter* stickyPaddleBeamGlowSparks2;
 
-	
     typedef std::map<const Beam*, std::vector<ESPPointEmitter*> > BeamSegEmitterMap;
     typedef BeamSegEmitterMap::iterator BeamSegEmitterMapIter;
     BeamSegEmitterMap beamOriginEmitters;
@@ -219,11 +225,21 @@ private:
 	BeamSegEmitterMap beamBlockOnlyEndEmitters;
 	BeamSegEmitterMap beamEndFallingBitsEmitters;
 	BeamSegEmitterMap beamFlareEmitters;
+    // -------------------------------------------------------------------------
+
+    // Cached flamethrower effects ---------------------------------------------
+    ESPPointEmitter* paddleFlameBlasterOrigin;
+
+    ProjectileEmitterMap  activeFlameBlasterFlames;
+    // -------------------------------------------------------------------------
 
 	CgFxVolumetricEffect ghostBallSmoke;
 	CgFxVolumetricEffect fireEffect;
 	CgFxVolumetricEffect fireBallTrailEffect;
 	CgFxVolumetricEffect iceBallTrailEffect;
+    CgFxVolumetricEffect flameBlasterOriginFireEffect;
+    CgFxVolumetricEffect flameBlasterFireEffect;
+    CgFxFireBallEffect   flameBlasterParticleEffect;
 
     CgFxPostRefract refractFireEffect;
 	CgFxPostRefract normalTexRefractEffect;
@@ -251,6 +267,7 @@ private:
 	void AddLifeUpEffect(const PlayerPaddle* paddle);
 
 	void InitLaserPaddleESPEffects();
+    void InitFlamethrowerPaddleESPEffects();
 
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
@@ -258,7 +275,7 @@ private:
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const RocketProjectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
-    
+    void AddFlamethrowerProjectileEffects(const GameModel& gameModel, const PaddleFlameBlasterProjectile& projectile);
     void AddPaddleMineFiredEffects(const GameModel& gameModel, const PaddleMineProjectile& projectile);
     void AddPaddleMineAttachedEffects(const Projectile& projectile);
 
@@ -279,6 +296,7 @@ private:
     void AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
+    void AddFlameBlastHitWallEffect(float size, const Point2D& loc);
 	void AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc, const Colour& baseColour, const Colour& brightColour);
     void AddLightningBoltHitWallEffect(float width, float height, const Point2D& loc);
     void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
@@ -308,6 +326,9 @@ private:
         Texture2D* itemSpecificOutlineShapeTex, Texture2D* itemSepecificFaceTex,
         const ESPInterval& redRandomColour, const ESPInterval& greenRandomColour, const ESPInterval& blueRandomColour,
         const ESPInterval& alpha, int numParticlesPerEmitter);
+
+    void RemoveAllProjectileEffectsFromMap(ProjectileEmitterMap& projectileMap);
+    void RemoveProjectileEffectFromMap(const Projectile& projectile, ProjectileEmitterMap& projectileMap);
 
 public:
 	GameESPAssets();
@@ -410,6 +431,8 @@ public:
 	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawBeamEffects(double dT, const Camera& camera);
 	void DrawProjectileEffects(double dT, const Camera& camera);
+    void DrawPaddleFlamethrowerEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+    void DrawPaddleFireBlasterProjectiles(double dT, const Camera& camera);
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 

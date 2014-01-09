@@ -660,6 +660,33 @@ void ESPEmitter::SetAliveParticleAlphaMax(float alpha) {
     }
 }
 
+void ESPEmitter::SetAliveParticlePosition(float x, float y, float z) {
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+         iter != this->aliveParticles.end(); ++iter) {
+
+        ESPParticle* currParticle = *iter;
+        currParticle->SetPosition(x, y, z);
+    }
+}
+void ESPEmitter::SetAliveParticleScale(const ESPInterval& sX, const ESPInterval& sY) {
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+        iter != this->aliveParticles.end(); ++iter) {
+
+            ESPParticle* currParticle = *iter;
+            currParticle->SetScale(sX.RandomValueInInterval(), sY.RandomValueInInterval());
+    }
+}
+
+void ESPEmitter::SetAliveParticleScale(const ESPInterval& size) {
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+        iter != this->aliveParticles.end(); ++iter) {
+
+            ESPParticle* currParticle = *iter;
+            float scale = size.RandomValueInInterval();
+            currParticle->SetScale(scale, scale);
+    }
+}
+
 void ESPEmitter::SetNumParticleLives(int lives) {
 	assert(lives >= ESPParticle::INFINITE_PARTICLE_LIVES);
     

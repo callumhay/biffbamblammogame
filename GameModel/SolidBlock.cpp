@@ -39,7 +39,9 @@ bool SolidBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 
 		case Projectile::CollateralBlockProjectile:
 			return true;
+
 		case Projectile::FireGlobProjectile:
+        case Projectile::PaddleFlameBlastProjectile:
             return false;
 
 		default:
@@ -184,6 +186,10 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			// in that case, unfreeze it
 			this->LightPieceOnFire(gameModel, false);
 			break;
+
+        case Projectile::PaddleFlameBlastProjectile:
+            this->LightPieceOnFire(gameModel, false);
+            break;
 
 		default:
 			assert(false);

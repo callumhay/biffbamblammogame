@@ -1,16 +1,16 @@
 /**
- * LaserPaddleGun.h
+ * PaddleGunAttachment.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2014
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
  * resulting work only under the same or similar license to this one.
  */
 
-#ifndef __LASERPADDLEGUN_H__
-#define __LASERPADDLEGUN_H__
+#ifndef __PADDLEGUNATTACHMENT_H__
+#define __PADDLEGUNATTACHMENT_H__
 
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Mesh.h"
@@ -19,13 +19,13 @@
 
 /**
  * Helper class (similar to StickyPaddleGoo) for holding the mesh,
- * materials and effects used for the laser paddle gun attachment -
- * visible when the user has a laserpaddle power-up active.
+ * materials and effects used for the various paddle gun-types -
+ * visible when the user has a paddle gun-type item active.
  */
-class LaserPaddleGun {
+class PaddleGunAttachment {
 public:
-	LaserPaddleGun();
-	~LaserPaddleGun();
+	PaddleGunAttachment();
+	~PaddleGunAttachment();
 
 	/**
 	 * Draws the paddle laser gun attachment - also is responsible for
@@ -35,22 +35,22 @@ public:
                      const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
       
-		this->laserGunRecoilAnim.Tick(dT);
+		this->gunRecoilAnim.Tick(dT);
 
 		glPushMatrix();
-		glTranslatef(0, 0, this->laserGunRecoilAnim.GetInterpolantValue());	// Animate recoil on fire
+		glTranslatef(0, 0, this->gunRecoilAnim.GetInterpolantValue());	// Animate recoil on fire
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
         glRotatef(p.GetZRotation(), 0, 0, 1);
-		this->laserGunMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
+		this->gunMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}
 
-	void FirePaddleLaserGun(const PlayerPaddle& paddle);
+	void FirePaddleGun(const PlayerPaddle& paddle);
 
 private:
-	Mesh* laserGunMesh;
-	AnimationMultiLerp<float> laserGunRecoilAnim;
+	Mesh* gunMesh;
+	AnimationMultiLerp<float> gunRecoilAnim;
 
-    DISALLOW_COPY_AND_ASSIGN(LaserPaddleGun);
+    DISALLOW_COPY_AND_ASSIGN(PaddleGunAttachment);
 };
-#endif
+#endif // __PADDLEGUNATTACHMENT_H__
