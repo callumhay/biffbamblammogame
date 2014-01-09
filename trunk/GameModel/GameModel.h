@@ -418,12 +418,12 @@ public:
 		}
 	}
 
-    void ShootActionContinuousUse(float magnitudePercent = 1.0f) {
+    void ShootActionContinuousUse(double dT, float magnitudePercent = 1.0f) {
         if (this->currState != NULL &&
             (this->pauseBitField & GameModel::PauseState) == 0x0 &&
             (this->pauseBitField & GameModel::PauseGame) == 0x0) {
 
-            this->currState->ShootActionContinuousUse(magnitudePercent);
+            this->currState->ShootActionContinuousUse(dT, magnitudePercent);
         }
     }
 

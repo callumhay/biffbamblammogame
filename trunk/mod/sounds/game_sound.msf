@@ -400,6 +400,14 @@ MineLatchedOnEvent {
 	file = resources/MineLatchedOnEvent.ogg
 }
 
+FlameBlasterShotEvent {
+	file = resources/FlameBlasterShotEvent.ogg
+}
+
+FlameBlasterHitEvent {
+	file = resources/FlameBlasterHitEvent.ogg
+}
+
 LaserBulletShotEvent {
 	file = resources/LaserBulletShotEvent.ogg
 }

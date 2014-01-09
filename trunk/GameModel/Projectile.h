@@ -35,7 +35,9 @@ public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, PaddleRemoteCtrlRocketBulletProjectile,
                           RocketTurretBulletProjectile, FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
-                          BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile, BossLightningBoltBulletProjectile };
+                          PaddleFlameBlastProjectile,
+                          BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile, 
+                          BossLightningBoltBulletProjectile };
 
 	virtual ~Projectile();
 
@@ -108,7 +110,7 @@ public:
 		// Set the right vector... (short cut which is a 90 degree rotation about the z axis)
 		this->rightVec = Vector2D(this->velocityDir[1], -this->velocityDir[0]);
 	}
-	Vector2D GetRightVectorDirection() const { return this->rightVec; }
+	const Vector2D& GetRightVectorDirection() const { return this->rightVec; }
 
 	// Functionality for storing the last level piece that the particle collided with
 	// and for querying it

@@ -285,6 +285,10 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
 			this->LightPieceOnFire(gameModel, false);
 			break;
 
+        case Projectile::PaddleFlameBlastProjectile:
+            this->LightPieceOnFire(gameModel, false);
+            break;
+
 		default:
 			assert(false);
 			break;

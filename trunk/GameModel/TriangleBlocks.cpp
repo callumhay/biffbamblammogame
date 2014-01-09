@@ -271,6 +271,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
             break;
 
 		case Projectile::FireGlobProjectile:
+        case Projectile::PaddleFlameBlastProjectile:
 			// Fire glob will just extinguish
 			break;
 

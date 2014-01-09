@@ -31,7 +31,7 @@
 #include "BallCamHUD.h"
 #include "ButtonTutorialHint.h"
 #include "StickyPaddleGoo.h"
-#include "LaserPaddleGun.h"
+#include "PaddleGunAttachment.h"
 #include "RocketMesh.h"
 #include "PaddleShield.h"
 #include "OmniLaserBallEffect.h"
@@ -100,7 +100,7 @@ rocketMesh(NULL),
 mineMeshMgr(NULL),
 paddleBeamAttachment(NULL),
 paddleMineAttachment(NULL),
-paddleLaserAttachment(NULL),
+paddleGunAttachment(NULL),
 paddleStickyAttachment(NULL),
 paddleShield(NULL),
 ballSafetyNet(NULL),
@@ -196,8 +196,8 @@ GameAssets::~GameAssets() {
 	this->rocketMesh = NULL;
     delete this->mineMeshMgr;
     this->mineMeshMgr = NULL;
-	delete this->paddleLaserAttachment;
-	this->paddleLaserAttachment = NULL;
+	delete this->paddleGunAttachment;
+	this->paddleGunAttachment = NULL;
 	delete this->paddleStickyAttachment;
 	this->paddleStickyAttachment = NULL;
 	delete this->paddleShield;
@@ -682,7 +682,8 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	// In the case of a laser bullet paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
     if (!p.GetIsPaddleCameraOn() && p.GetAlpha() > 0.0f &&
-         p.HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::LaserBeamPaddle | PlayerPaddle::MineLauncherPaddle)) {
+         p.HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::LaserBeamPaddle | 
+                         PlayerPaddle::MineLauncherPaddle | PlayerPaddle::FlameBlasterPaddle)) {
 
 		glColor4f(1.0f, 1.0f, 1.0f, p.GetAlpha());
 
@@ -693,8 +694,8 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
         }
 
         // Draw the various active attachments...
-        if (p.HasPaddleType(PlayerPaddle::LaserBulletPaddle)) {
-			this->paddleLaserAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
+        if (p.HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::FlameBlasterPaddle)) {
+			this->paddleGunAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
 
         glPushMatrix();
@@ -776,7 +777,13 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		this->espAssets->DrawPaddleLaserBulletEffects(dT, camera, *paddle);
 	}
 
-	glPopMatrix();
+    if (paddle->HasPaddleType(PlayerPaddle::FlameBlasterPaddle)) {
+        this->espAssets->DrawPaddleFlamethrowerEffects(dT, camera, *paddle);
+        glPopMatrix();
+    }
+    else {
+        glPopMatrix();
+    }
 
 	// BALL CAMERA CHECK
 	if (GameBall::GetIsBallCameraOn() && !gameModel.IsBlackoutEffectActive()) {
@@ -1239,8 +1246,8 @@ void GameAssets::LoadRegularMeshAssets() {
     if (this->paddleMineAttachment == NULL) {
         this->paddleMineAttachment = new PaddleMineLauncher();
     }
-	if (this->paddleLaserAttachment == NULL) {
-		this->paddleLaserAttachment = new LaserPaddleGun();
+	if (this->paddleGunAttachment == NULL) {
+		this->paddleGunAttachment = new PaddleGunAttachment();
 	}
 	if (this->paddleStickyAttachment == NULL) {
 		this->paddleStickyAttachment = new StickyPaddleGoo();
@@ -1333,10 +1340,22 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
                 // Add a sound for firing the laser
                 this->sound->PlaySoundAtPosition(GameSound::LaserBulletShotEvent, false, paddle.GetPosition3D(), true, true, true);
                 // Make the laser attachment animate for firing the gun...
-                this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
+                this->paddleGunAttachment->FirePaddleGun(paddle);
             }
 
 			break;
+        }
+
+        case Projectile::PaddleFlameBlastProjectile: {
+            const PlayerPaddle& paddle = *gameModel.GetPlayerPaddle();
+
+            // Add a sound for firing the flame blast
+            this->sound->PlaySoundAtPosition(GameSound::FlameBlasterShotEvent, false, paddle.GetPosition3D(), true, true, true);
+
+            // Make the laser attachment animate for firing the gun...
+            this->paddleGunAttachment->FirePaddleGun(paddle);
+
+            break;
         }
 
         case Projectile::BossLaserBulletProjectile:
@@ -1514,6 +1533,11 @@ void GameAssets::FireRocket(const GameModel& gameModel, const RocketProjectile& 
  * occur to show the hurting.
  */
 void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile) {
+
+    // Paddle isn't hurt by its own flamethrower projectiles
+    if (projectile.GetType() == Projectile::PaddleFlameBlastProjectile) {
+        return;
+    }
 
 	// Add the sprite/particle effect
 	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile);

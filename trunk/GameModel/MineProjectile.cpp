@@ -153,33 +153,38 @@ BoundingLines MineProjectile::BuildBoundingLines() const {
 	Point2D topLeft     = topRight - this->GetWidth()*RIGHT_DIR;
 	Point2D bottomLeft  = topLeft - this->GetHeight()*UP_DIR;
 
-
-
     // Bounds are the outside square around the mine and an X from corner-to-corner
     // through the middle of it (for more robust collisions)
-	std::vector<Collision::LineSeg2D> bounds;
-	
+
+#define BUILD_BASIC_BOUNDS(b) \
+    b[0] = Collision::LineSeg2D(topLeft, bottomLeft); \
+    b[1] = Collision::LineSeg2D(topRight, bottomRight); \
+    b[2] = Collision::LineSeg2D(topRight, topLeft); \
+    b[3] = Collision::LineSeg2D(bottomRight, bottomLeft)
+
     const Vector2D& velDir = this->GetVelocityDirection();
     if (velDir.IsZero()) {
-        bounds.reserve(4);
+        static const int NUM_BOUNDS = 4;
+        Collision::LineSeg2D bounds[NUM_BOUNDS];
+        Vector2D norms[NUM_BOUNDS];
+        
+        BUILD_BASIC_BOUNDS(bounds);
+        
+        return BoundingLines(NUM_BOUNDS, bounds, norms);
     }
     else {
-        bounds.reserve(5);
         Point2D midFront = this->GetPosition() + this->GetHalfHeight() * velDir;
         Point2D midBack  = midFront - this->GetHeight()*velDir;
-        bounds.push_back(Collision::LineSeg2D(midFront, midBack));
-    }
-    
-	
-    bounds.push_back(Collision::LineSeg2D(topLeft, bottomLeft));
-	bounds.push_back(Collision::LineSeg2D(topRight, bottomRight));
-	bounds.push_back(Collision::LineSeg2D(topRight, topLeft));
-	bounds.push_back(Collision::LineSeg2D(bottomRight, bottomLeft));
-	
-    std::vector<Vector2D> normBounds;
-	normBounds.resize(bounds.size());
 
-	return BoundingLines(bounds, normBounds);
+        static const int NUM_BOUNDS = 5;
+        Collision::LineSeg2D bounds[NUM_BOUNDS];
+        Vector2D norms[NUM_BOUNDS];
+
+        BUILD_BASIC_BOUNDS(bounds);
+        bounds[4] = Collision::LineSeg2D(midFront, midBack);
+        
+        return BoundingLines(NUM_BOUNDS, bounds, norms);
+    }
 }
 
 void MineProjectile::LoadIntoCannonBlock(CannonBlock* cannonBlock) {

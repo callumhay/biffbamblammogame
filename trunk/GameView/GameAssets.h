@@ -54,7 +54,7 @@ class BallCamHUD;
 class BoostMalfunctionHUD;
 class ButtonTutorialHint;
 class StickyPaddleGoo;
-class LaserPaddleGun;
+class PaddleGunAttachment;
 class RocketMesh;
 class PaddleShield;
 class RandomItem;
@@ -236,7 +236,7 @@ private:
 
 	PaddleBeamAttachment* paddleBeamAttachment; // Laser beam attachment for paddle
     PaddleMineLauncher* paddleMineAttachment;   // Mine launcher attachment for paddle
-	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
+	PaddleGunAttachment* paddleGunAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 	PaddleShield* paddleShield;                 // Refractive glowy shield for the paddle
 

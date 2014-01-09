@@ -371,7 +371,7 @@ technique PostRefractNormalTex {
         BlendEquation = FuncAdd;
             
         PolygonMode = int2(Front, Fill);
-        
+        DepthMask = false;
         CullFace = Back;
         CullFaceEnable = true;
   
@@ -388,6 +388,7 @@ technique PostRefractNormalTexWithOverlay {
         BlendEquation = FuncAdd;
         
         DepthTestEnable = true;
+        DepthMask = false;
         DepthFunc = LEqual;
         DepthMask = true;
         CullFaceEnable = true;
@@ -407,6 +408,7 @@ technique PostRefractNormalTexWithNoise {
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
         
         DepthTestEnable = true;
+        DepthMask = false;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;

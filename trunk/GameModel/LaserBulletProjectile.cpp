@@ -27,17 +27,6 @@ LaserBulletProjectile::~LaserBulletProjectile() {
 }
 
 /**
- * Tick function - executed every frame with given delta seconds. This will
- * update the position and other relevant information for this paddle laser projectile.
- */
-void LaserBulletProjectile::Tick(double seconds, const GameModel& model) {
-    this->AugmentDirectionOnPaddleMagnet(seconds, model, 70.0f);
-
-	// Update the laser's position
-	this->position = this->position + (seconds * this->velocityMag * this->velocityDir);
-}
-
-/**
  * Obtain the bounding lines for this projectile for use in various collision detection tests.
  * Returns: Bounding lines for this projectile.
  */

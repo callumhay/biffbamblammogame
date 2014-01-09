@@ -193,7 +193,8 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
             break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob will just extinguish
+        case Projectile::PaddleFlameBlastProjectile:
+            // Fire glob will just extinguish
 			break;
 
 		default:

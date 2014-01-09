@@ -194,6 +194,11 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
             this->LightPieceOnFire(gameModel, false);
 			break;
 
+        case Projectile::PaddleFlameBlastProjectile:
+            this->LightPieceOnFire(gameModel, false);
+            this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::FireDestruction);
+            break;
+
 		default:
 			assert(false);
 			break;

@@ -46,7 +46,7 @@ public:
 
 	//const std::list<BBBGameController*>& GetLoadedGameControllers() const;
 
-	bool ProcessControllers();
+	bool ProcessControllers(double dT);
 	void SyncControllers(double dT);
 	void VibrateControllers(double lengthInSeconds, const BBBGameController::VibrateAmount& leftMotorAmt, 
                             const BBBGameController::VibrateAmount& rightMotorAmt);
@@ -81,14 +81,14 @@ inline bool GameControllerManager::ControllersCanStillPlugAndPlay() const {
  * Process the current state on all controllers in this manager.
  * Returns: true on a quit signal from any of the controllers.
  */
-inline bool GameControllerManager::ProcessControllers() {
+inline bool GameControllerManager::ProcessControllers(double dT) {
 	bool quit = false;
 	BBBGameController* currController;
 	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end();) {
 		currController = *iter;
 		// Make sure the controller is still connected...
 		if (currController->IsConnected()) {
-			quit |= currController->ProcessState();
+			quit |= currController->ProcessState(dT);
 			++iter;
 		}
 		else {

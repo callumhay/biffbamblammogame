@@ -818,10 +818,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\LaserPaddleGun.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\LevelMesh.h"
 					>
 				</File>
@@ -843,6 +839,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PaddleBeamAttachment.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PaddleGunAttachment.h"
 					>
 				</File>
 				<File
@@ -902,10 +902,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\LaserPaddleGun.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\LevelMesh.cpp"
 					>
 				</File>
@@ -927,6 +923,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PaddleBeamAttachment.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PaddleGunAttachment.cpp"
 					>
 				</File>
 				<File
@@ -2273,6 +2273,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\FlameBlasterPaddleItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\GameItem.h"
 						>
 					</File>
@@ -2402,6 +2406,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\FireBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\FlameBlasterPaddleItem.cpp"
 						>
 					</File>
 					<File
@@ -2569,6 +2577,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleFlameBlasterProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleLaserBeam.h"
 						>
 					</File>
@@ -2658,6 +2670,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\OrbProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleFlameBlasterProjectile.cpp"
 						>
 					</File>
 					<File

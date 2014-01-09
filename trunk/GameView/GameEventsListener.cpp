@@ -544,6 +544,15 @@ void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& project
 	    // Add any visual effects required for when a projectile hits the block
 	    this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
 
+        GameSound* sound = this->display->GetSound();
+        switch (projectile.GetType()) {
+            case Projectile::PaddleFlameBlastProjectile:
+                sound->PlaySoundAtPosition(GameSound::FlameBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
+                break;
+            default:
+                break;
+        }
+
         debug_output("EVENT: Projectile-block collision");
     }
 }

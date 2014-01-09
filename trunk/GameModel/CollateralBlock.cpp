@@ -185,7 +185,8 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
             break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob detonates the collateral block, unless it's frozen in an ice cube;
+        case Projectile::PaddleFlameBlastProjectile:
+			// Fire detonates the collateral block, unless it's frozen in an ice cube;
 			// in that case, unfreeze it
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				this->LightPieceOnFire(gameModel, false);
@@ -195,7 +196,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
                 newLevelPiece = this->Detonate(gameModel); 
             }
 			break;
-				
+		
 		default:
 			assert(false);
 			break;

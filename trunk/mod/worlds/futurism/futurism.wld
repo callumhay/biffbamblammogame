@@ -18,7 +18,7 @@ resources/worlds/levels/medium/a_change_of_view.lvl
 
 
 # Portal block intro levels
-# Rename "checker portals" to "Plinko... but with teleportation"
+# Rename "checker portals" to "Like Plinko... but with teleportation"
 resources/worlds/levels/medium/checker_portals.lvl 
 resources/worlds/levels/medium/shutin.lvl
 

@@ -163,7 +163,7 @@ void BallOnPaddleState::ShootActionReleaseUse() {
         }
 
 	    // Fire the ball off the paddle
-	    this->gameModel->GetPlayerPaddle()->Shoot(this->gameModel);
+	    this->gameModel->GetPlayerPaddle()->DiscreteShoot(this->gameModel);
 	    // Now change the game model's state machine to have the ball in play
         this->gameModel->SetNextState(GameState::BallInPlayStateType);
 

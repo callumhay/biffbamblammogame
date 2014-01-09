@@ -414,6 +414,8 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, PaddleMineFiredEvent, false);
     INSERT_MAPPING_PAIR(GameSound, MineExplodedEvent, false);
     INSERT_MAPPING_PAIR(GameSound, MineLatchedOnEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FlameBlasterShotEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FlameBlasterHitEvent, false);
     INSERT_MAPPING_PAIR(GameSound, LaserBulletShotEvent, false);
     INSERT_MAPPING_PAIR(GameSound, LaserBeamFiringLoop, false);
     INSERT_MAPPING_PAIR(GameSound, LaserDeflectedByShieldEvent, false);

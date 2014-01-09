@@ -27,7 +27,7 @@ public:
     void ClearVibration();
 	bool IsConnected() const;
 
-	bool ProcessState();
+	bool ProcessState(double dT);
 	void Sync(size_t frameID, double dT);
 
 private:
