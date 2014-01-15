@@ -19,6 +19,7 @@
 #include "GameTransformMgr.h"
 #include "PaddleRocketProjectile.h"
 #include "PaddleMineProjectile.h"
+#include "PaddleFlameBlasterProjectile.h"
 
 const float CannonBlock::CANNON_BARREL_LENGTH       = 1.30f;
 const float CannonBlock::HALF_CANNON_BARREL_LENGTH	= CannonBlock::CANNON_BARREL_LENGTH	/ 2.0f;
@@ -63,7 +64,7 @@ CannonBlock::~CannonBlock() {
 
 // Determine whether the given projectile will pass through this block...
 bool CannonBlock::ProjectilePassesThrough(const Projectile* projectile) const {
-	return projectile->IsRocket();
+    return projectile->IsRocket() || projectile->GetType() == Projectile::PaddleFlameBlastProjectile;
 }
 
 LevelPiece* CannonBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
@@ -163,7 +164,8 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
     gameModel->BallBoostReleasedForBall(ball);
 
     // EVENT: Ball has entered the cannon block
-    GameEventManager::Instance()->ActionBallEnteredCannon(ball, *this);
+    GameEventManager::Instance()->ActionBallEnteredCannon(ball, *this,
+        ball.CanShootBallCamOutOfCannon(*this, *gameModel->GetCurrentLevel()));
 
 	return this;
 }
@@ -234,6 +236,15 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
+            // If the cannon isn't already loaded with a projectile then
+            // the blast gets captured by the cannon block and shot somewhere else...
+            if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {
+                PaddleFlameBlasterProjectile* blastProjectile = static_cast<PaddleFlameBlasterProjectile*>(projectile);
+                this->SetupRandomCannonFireTimeAndDirection();
+                blastProjectile->LoadIntoCannonBlock(this);
+                blastProjectile->SetLastThingCollidedWith(this);
+                this->loadedProjectile = blastProjectile;
+            }
             break;
 
 		default:
@@ -311,11 +322,6 @@ bool CannonBlock::RotateAndEventuallyFire(double dT, bool overrideFireRotation) 
 void CannonBlock::SetupRandomCannonFireTimeAndDirection() {
 	// Reset the elapsed rotation time
 	this->elapsedRotationTime = 0.0;
-
-    if (!this->GetHasRandomRotation()) {
-        
-    }
-
     float rotationAngleToFireAt = 0;
 
 	// Based on whether the cannon fires randomly or not, set up the time until the cannon will fire
@@ -329,7 +335,7 @@ void CannonBlock::SetupRandomCannonFireTimeAndDirection() {
 	}
 	else {
 		// We need to actually fire in a proper direction dictated by the degree angle in 'fixedRotation',
-		// which measures from the y-axis from 0 to 359 degrees
+		// which measures from the y-axis in [0,360) degrees
         float fixedRotatationFromX = this->GetFixedRotationDegsFromX();
         rotationAngleToFireAt = fmod(fixedRotatationFromX, 360.0f);
         this->fixedRotationXInDegs = fixedRotatationFromX;
@@ -339,37 +345,28 @@ void CannonBlock::SetupRandomCannonFireTimeAndDirection() {
 	this->totalRotationTime = CannonBlock::MIN_ROTATION_TIME_IN_SECS +
 		Randomizer::GetInstance()->RandomNumZeroToOne() * 
         (CannonBlock::MAX_ROTATION_TIME_IN_SECS - CannonBlock::MIN_ROTATION_TIME_IN_SECS);
-	assert(this->totalRotationTime > 0.0);
+	assert(this->totalRotationTime > CannonBlock::MIN_ROTATION_TIME_IN_SECS);
 
 	// And we still rotate at some speed that allows us to get to the proper firing direction at the end of
 	// the totalRotationTime, after some randomNumberOfRotations
 	
-	float noSpinNumDegrees = rotationAngleToFireAt - this->currRotationFromXInDegs;
-	if (noSpinNumDegrees >= 360.0f) {
-		noSpinNumDegrees -= 360.0f;
+	float diffNumDegrees = rotationAngleToFireAt - this->currRotationFromXInDegs;
+	if (diffNumDegrees >= 360.0f) {
+		diffNumDegrees -= 360.0f;
 	}
-	else if (noSpinNumDegrees <= -360.0f) {
-		noSpinNumDegrees += 360.0f;
+	else if (diffNumDegrees <= -360.0f) {
+		diffNumDegrees += 360.0f;
 	}
-	assert(noSpinNumDegrees < 360);
-	assert(noSpinNumDegrees > -360);
-
-	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		if (noSpinNumDegrees < 0) {
-			noSpinNumDegrees = 360 + noSpinNumDegrees;
-		}
-		else {
-			noSpinNumDegrees = noSpinNumDegrees - 360;
-		}
-	}
+	assert(diffNumDegrees < 360);
+	assert(diffNumDegrees > -360);
 	
 	float approxTimePerRotation = MIN_DEGREES_PER_FIXED_ROTATION + Randomizer::GetInstance()->RandomNumZeroToOne() * 
 		                          (MAX_DEGREES_PER_FIXED_ROTATION - MIN_DEGREES_PER_FIXED_ROTATION);
 	int randomNumberOfRotations = std::max<int>(1, static_cast<int>(ceil(this->totalRotationTime / approxTimePerRotation)));
 	
-	float totalDegAngleDist = noSpinNumDegrees + (Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f * randomNumberOfRotations);
-	if (fabs(totalDegAngleDist) < 0.1f) {
-		totalDegAngleDist = Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f; 
+	float totalDegAngleDist = diffNumDegrees + (Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f * randomNumberOfRotations);
+	if (fabs(totalDegAngleDist) < 90.0f) {
+        totalDegAngleDist = totalDegAngleDist + NumberFuncs::SignOf(totalDegAngleDist) * 360.0f; 
 	}
 
 	assert(fabs(totalDegAngleDist) > 0.0f);

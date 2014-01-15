@@ -1,42 +1,44 @@
 A Change of View
-15 30
-E E E S S S S S S S S S E E E 
-E E S T(S,ul) E E E E E E E T(S,ur) S E E 
-E S T(S,ul) E E G E G E G E E T(S,ur) S E 
-E S E E E E E E E E E E E S E 
-E S E E E E E E E E E E E S E 
-E S E E T(S,lr) S S S S S T(S,ll) E E S E 
-S S S C(180) S S S D(BallCam,BallCam,BallCam) S S S C(180) S S S 
-S E E E E E E E E E E E E E S 
-S E G E E E E E E E E E G E S 
-S G G G G G E E E G G G G G S 
-S E E E E G G G G G E E E E S 
-S G G G E E G G G E E G G G S 
-S G G G G E E E E E G G G G S 
-S G G G G G G G G G G G G G S 
-S E E E E E E E E E E E E E S 
-S G G G G G G G G G G G G G S 
-S E E E E G G G G G E E E E S 
-S E E G E E G G G E E G E E S 
-S E G G G E E G E E G G G E S 
-S G G G G G E E E G G G G G S 
-S G G G G G G E G G G G G G S 
-S E E E E E E E E E E E E E S 
-S G E G E G E G E G E G E G S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
+17 32
+E E E E S S S S S S S S S E E E E 
+E E E E S E E E E E E E S E E E E 
+E E E E S E E E G E E E S E E E E 
+E E E E S E E E E E E E S E E E E 
+E E E E S E E E E E E E S E E E E 
+E E E E S E E E S E E E S E E E E 
+S S S S S S C(180) S D(BallCam,BallCam,BallCam) S C(180) S S S S S S 
+S T(S,ul) E F(r) E E Q(f) E E E Q(f) E E F(l) E T(S,ur) S 
+S E E F(r) E G E E E E E G E F(l) E E S 
+S E E F(r) E G G E E E G G E F(l) E E S 
+S E E F(r) E E G G E G G E E F(l) E E S 
+S E E S G E E G G G E E G S E E S 
+S E E S G G E E G E E G G S E E S 
+S E E S E E E E E E E E E S E E S 
+S G E S G G Y O R O Y G G S E G S 
+S E E S R R O Y G Y O R R S E E S 
+S E E S E E G G G G G E E S E E S 
+S E E S G E E G G G E E G S E E S 
+S E E S G G E E K(StickyPaddle,StickyPaddle,StickyPaddle) E E G G S E E S 
+S E E S K(BallCam,BallCam,BallCam) G G E E E G G K(BallCam,BallCam,BallCam) S E E S 
+S E E S E G G G E G G G E S E E S 
+S E E S E E E E E E E E E S E E S 
+S S C(140-170) S G E G E G E G E G S C(190-220) S S 
+S E E E E G E G E G E G E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
 
 STARS:
 9000
-12500
-15000
+13000
 18000
-20000
+21000
+24000
 
 PaddleGrow 1
 PoisonPaddle 2
@@ -54,7 +56,7 @@ LaserBeamPaddle 1
 OmniLaserBall 2
 FireBall 2
 RocketPaddle 1
-GhostBall 2
+GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 1
@@ -69,4 +71,4 @@ GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0

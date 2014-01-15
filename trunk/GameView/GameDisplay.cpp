@@ -43,8 +43,6 @@ assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCam
 	assert(model != NULL);
     assert(sound != NULL);
 
-    
-
     this->assets = new GameAssets(initWidth, initHeight, this->sound);
     this->mouseRenderer = new MouseRenderer();
     this->menuBGRenderer = new MenuBackgroundRenderer();

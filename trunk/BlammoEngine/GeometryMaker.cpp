@@ -14,13 +14,17 @@
 
 GeometryMaker* GeometryMaker::instance = NULL;
 
-GeometryMaker::GeometryMaker() : quadDL(0), cubeDL(0), sphereDL(0) {
+const int GeometryMaker::CIRCLE_TESSELATION = 16;
+
+GeometryMaker::GeometryMaker() : quadDL(0), cubeDL(0), lineCircleDL(0), sphereDL(0) {
 	
 	// Initialize all the geometry display lists
 	bool result = this->InitializeQuadDL();
 	assert(result);
 	result = this->InitializeCubeDL();
 	assert(result);
+    result = this->InitializeLineCircleDL();
+    assert(result);
 	result = this->InitializeSphereDL();
 	assert(result);
 }
@@ -31,6 +35,8 @@ GeometryMaker::~GeometryMaker() {
 	this->quadDL = 0;
 	glDeleteLists(this->cubeDL, 1);
 	this->cubeDL = 0;
+    glDeleteLists(this->lineCircleDL, 1);
+    this->lineCircleDL = 0;
 	glDeleteLists(this->sphereDL, 1);
 	this->sphereDL = 0;
 }
@@ -54,6 +60,18 @@ bool GeometryMaker::InitializeQuadDL() {
 	glEndList();
 
 	return this->quadDL != 0;
+}
+
+void GeometryMaker::DrawRawLineCircle(const Point3D& center, float radius) const {
+    glBegin(GL_LINE_LOOP);
+    double radsPerIter = M_PI_MULT2 / static_cast<double>(CIRCLE_TESSELATION);
+
+    for (int i = 0; i < CIRCLE_TESSELATION; i++) {
+        double currRads = i * radsPerIter;
+        glVertex2f(center[0] + cos(currRads)*radius, center[1] + sin(currRads)*radius);
+    }
+
+    glEnd();
 }
 
 void GeometryMaker::DrawRawCube(const Point3D& center, const Vector3D& size) const {
@@ -135,6 +153,14 @@ bool GeometryMaker::InitializeCubeDL() {
 	this->DrawRawCube(Point3D(0,0,0), Vector3D(1,1,1));
 	glEndList();
 	return this->cubeDL != 0;
+}
+
+bool GeometryMaker::InitializeLineCircleDL() {
+    this->lineCircleDL = glGenLists(1);
+    glNewList(this->lineCircleDL, GL_COMPILE);
+    this->DrawRawLineCircle(Point3D(0,0,0), 1.0f);
+    glEndList();
+    return this->lineCircleDL != 0;
 }
 
 /**

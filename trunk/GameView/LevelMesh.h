@@ -59,12 +59,13 @@ public:
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void RemovePiece(const LevelPiece& piece);
 	
-	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight, 
-	    const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
+	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const GameModel* gameModel, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
     void DrawPiecesPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
     void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);

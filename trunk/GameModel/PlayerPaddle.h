@@ -29,6 +29,8 @@ class GameBall;
 class PaddleMineProjectile;
 class MineTurretProjectile;
 class MineProjectile;
+class FireGlobProjectile;
+class PaddleFlameBlasterProjectile;
 class BossBodyPart;
 class Beam;
 class BeamSegment;
@@ -408,7 +410,8 @@ private:
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
     void MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile);
-	void FireGlobProjectileCollision(const Projectile& projectile);
+	void FireGlobProjectileCollision(const FireGlobProjectile& fireGlobProjectile);
+    void FlameBlastProjectileCollision(const PaddleFlameBlasterProjectile& flameBlastProjectile);
     void BeamCollision(const Beam& beam, const BeamSegment& beamSegment);
 
 	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);

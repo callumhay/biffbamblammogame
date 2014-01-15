@@ -56,6 +56,9 @@ The ball lights on fire causing certain blocks that it hits to catch on fire (wh
 ~ IceBall
 The ball becomes icy causing blocks that it hits to freeze instantly - making them easier (or harder depending on the block) to destroy.
 
+~ FlameBlasterPaddle
+The paddle gains the ability to shoot fire balls directly upwards. Fire balls will cause hit blocks to catch fire.
+
 ~ OmniLaserBall
 The ball gains the ability to shoot lasers randomly in all directions destroying blocks and knocking the paddle around.
 

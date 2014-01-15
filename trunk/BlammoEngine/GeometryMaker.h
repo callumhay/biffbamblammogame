@@ -36,12 +36,16 @@ private:
 	// Display list IDs
 	GLuint quadDL;
 	GLuint cubeDL;
-	GLuint sphereDL;
+	GLuint lineCircleDL;
+    GLuint sphereDL;
+    
 
 	bool InitializeQuadDL();
 	bool InitializeCubeDL();
+    bool InitializeLineCircleDL();
 	bool InitializeSphereDL();
 
+    static const int CIRCLE_TESSELATION;
 	static const int TUNNEL_TESSELATION;
 	static const float TUNNEL_WALL_SIZE;	// Have width and height?
 	static const float HALF_TUNNEL_WALL_SIZE;
@@ -73,6 +77,10 @@ public:
 	inline void DrawQuad() const { glCallList(this->quadDL); }
 	inline GLuint GetQuadDL() const { return this->quadDL; }
 	
+    void DrawRawLineCircle(const Point3D& center, float radius) const;
+    inline void DrawLineCircle() const { glCallList(this->lineCircleDL); }
+    inline GLuint GetLineCircleDL() const { return this->lineCircleDL; }
+
 	// Draw a basic unit cube
 	void DrawRawCube(const Point3D& center, const Vector3D& size) const;
 	inline void DrawCube() const { glCallList(this->cubeDL); }

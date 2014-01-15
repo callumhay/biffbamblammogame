@@ -1,5 +1,5 @@
 /**
- * BoostMalfunctionHUD.h
+ * MalfunctionTextHUD.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2013
@@ -9,8 +9,8 @@
  * resulting work only under the same or similar license to this one.
  */
 
-#ifndef __BOOSTMALFUNCTIONHUD_H__
-#define __BOOSTMALFUNCTIONHUD_H__
+#ifndef __MALFUNCTIONTEXTHUD_H__
+#define __MALFUNCTIONTEXTHUD_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Animation.h"
@@ -23,10 +23,10 @@ class Camera;
 class Texture2D;
 class GameSound;
 
-class BoostMalfunctionHUD {
+class MalfunctionTextHUD {
 public:
-    BoostMalfunctionHUD(GameSound* sound);
-    ~BoostMalfunctionHUD();
+    MalfunctionTextHUD(const char* text, GameSound* sound);
+    ~MalfunctionTextHUD();
 
     void Draw(double dT, const Camera& camera);
 
@@ -38,7 +38,6 @@ public:
 
 private:
     static const float ICON_TEXT_X_GAP;
-    static const char* WARNING_TEXT;
     static const double TIME_UNTIL_BOOST_MALFUNCTON_DEACTIVATION;
     static const float STATIC_SCALE;
 
@@ -60,11 +59,11 @@ private:
 
     AnimationLerp<float> fadeAnim;
 
-    DISALLOW_COPY_AND_ASSIGN(BoostMalfunctionHUD);
+    DISALLOW_COPY_AND_ASSIGN(MalfunctionTextHUD);
 };
 
-inline bool BoostMalfunctionHUD::GetIsActive() const {
+inline bool MalfunctionTextHUD::GetIsActive() const {
     return this->isActive;
 }
 
-#endif // __BOOSTMALFUNCTIONHUD_H__
+#endif // __MALFUNCTIONTEXTHUD_H__

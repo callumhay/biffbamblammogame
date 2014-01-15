@@ -622,6 +622,10 @@ void PlayerPaddle::ReleaseEverythingAttached() {
 }
 
 void PlayerPaddle::ContinuousShoot(double dT, GameModel* gameModel, float magnitudePercent) {
+    UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(magnitudePercent);
+
     assert(gameModel != NULL);
     assert(magnitudePercent >= 0.0f && magnitudePercent <= 1.0f);
 }
@@ -845,7 +849,7 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	if (this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeUntilCollision, collisionPoint)) {
 		// Position the ball so that it is against the collision line, perpendicular to its normal
         //Point2D closestPtOnCollisionLine = Collision::ClosestPoint(ballCenter, collisionLine);
-		this->attachedBall->SetCenterPosition(collisionPoint/*closestPtOnCollisionLine + (EPSILON + ballRadius) * normal*/);
+		this->attachedBall->SetCenterPosition(collisionPoint);
 	}
 
 	// Remove the ball's direction but not its speed
@@ -967,11 +971,6 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 // Called when the paddle is hit by a projectile
 void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& projectile) {
     
-    // Ignore paddle flame thrower projectiles
-    if (projectile.GetType() == Projectile::PaddleFlameBlastProjectile) {
-        return;
-    }
-
 	// The paddle is unaffected if it has a shield active...
 	if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 		// EVENT: Paddle shield was just hit by a projectile
@@ -1017,13 +1016,12 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
             break;
 
 		case Projectile::FireGlobProjectile:
-			this->FireGlobProjectileCollision(projectile);
+			this->FireGlobProjectileCollision(*static_cast<const FireGlobProjectile*>(&projectile));
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
-            // This does nothing, we shouldn't even get here
-            assert(false);
-            return;
+            this->FlameBlastProjectileCollision(*static_cast<const PaddleFlameBlasterProjectile*>(&projectile));
+            break;
 
 		default:
 			assert(false);
@@ -1407,22 +1405,20 @@ void PlayerPaddle::MineProjectileCollision(GameModel* gameModel, const MineProje
 	currentLevel->MineExplosion(gameModel, &projectile);
 }
 
-void PlayerPaddle::FireGlobProjectileCollision(const Projectile& projectile) {
-	assert(projectile.GetType() == Projectile::FireGlobProjectile);
-	const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
+void PlayerPaddle::FireGlobProjectileCollision(const FireGlobProjectile& fireGlobProjectile) {
 
 	float currHeight = 2.0f * this->GetHalfHeight();
-	switch (fireGlobProjectile->GetRelativeSize()) {
+	switch (fireGlobProjectile.GetRelativeSize()) {
 		case FireGlobProjectile::Small:
-			this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 2.0f, currHeight, currHeight, 20.0f);
+			this->SetPaddleHitByProjectileAnimation(fireGlobProjectile.GetPosition(), 2.0f, currHeight, currHeight, 20.0f);
 			break;
 
 		case FireGlobProjectile::Medium:
-			this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 2.75f, 2.0f * currHeight, 1.5f * currHeight, 35.0f);
+			this->SetPaddleHitByProjectileAnimation(fireGlobProjectile.GetPosition(), 2.75f, 2.0f * currHeight, 1.5f * currHeight, 35.0f);
 			break;
 
 		case FireGlobProjectile::Large:
-			this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 3.25f, 2.5f * currHeight, 2.0f * currHeight, 70.0f);
+			this->SetPaddleHitByProjectileAnimation(fireGlobProjectile.GetPosition(), 3.25f, 2.5f * currHeight, 2.0f * currHeight, 70.0f);
 			break;
 
 		default:
@@ -1430,7 +1426,18 @@ void PlayerPaddle::FireGlobProjectileCollision(const Projectile& projectile) {
 			break;
 	}
 
-    this->lastEntityThatHurtHitPaddle = &projectile;
+    this->lastEntityThatHurtHitPaddle = &fireGlobProjectile;
+}
+
+void PlayerPaddle::FlameBlastProjectileCollision(const PaddleFlameBlasterProjectile& flameBlastProjectile) {
+
+    float multiplier = flameBlastProjectile.GetSizeMultiplier();
+    float currHeight = 2.0f * this->GetHalfHeight();
+
+    this->SetPaddleHitByProjectileAnimation(flameBlastProjectile.GetPosition(), 
+        multiplier * 3.0f, multiplier * currHeight * 2.5f, currHeight * 2.0f, 80.0f);
+
+    this->lastEntityThatHurtHitPaddle = &flameBlastProjectile;
 }
 
 void PlayerPaddle::BeamCollision(const Beam& beam, const BeamSegment& beamSegment) {
@@ -1773,6 +1780,7 @@ bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
             case Projectile::PaddleMineBulletProjectile:
             case Projectile::MineTurretBulletProjectile:
             case Projectile::BossRocketBulletProjectile:
+            case Projectile::PaddleFlameBlastProjectile:
                 return true;
             default:
                 break;

@@ -217,7 +217,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 	glPopMatrix();
 
 	// Level pieces / blocks and their associated emitter effects
-	assets->DrawLevelPieces(dT, currLevel, camera);
+	assets->DrawLevelPieces(dT, *gameModel, camera);
 
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
@@ -384,7 +384,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
     RemoteControlRocketHUD* rocketHUD = gameAssets->GetRemoteControlRocketHUD();
     rocketHUD->Draw(dT, camera);
     BallCamHUD* ballCamHUD = gameAssets->GetBallCamHUD();
-    ballCamHUD->Draw(dT, camera);
+    ballCamHUD->Draw(dT, camera, *gameModel);
 
     // Draw the timers that are currently in existence
 	gameAssets->DrawTimers(dT, camera, *gameModel);

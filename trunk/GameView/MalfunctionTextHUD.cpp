@@ -1,5 +1,5 @@
 /**
- * BoostMalfunctionHUD.cpp
+ * MalfunctionTextHUD.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
  * Callum Hay, 2013
@@ -9,7 +9,7 @@
  * resulting work only under the same or similar license to this one.
  */
 
-#include "BoostMalfunctionHUD.h"
+#include "MalfunctionTextHUD.h"
 #include "PointsHUD.h"
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
@@ -19,19 +19,16 @@
 #include "../GameSound/GameSound.h"
 #include "../ResourceManager.h"
 
-const float BoostMalfunctionHUD::ICON_TEXT_X_GAP = 5.0f;
-const char* BoostMalfunctionHUD::WARNING_TEXT = ">>WARNING:\n>>BOOST MALFUNCTION?!";
+const float MalfunctionTextHUD::ICON_TEXT_X_GAP = 5.0f;
+const double MalfunctionTextHUD::TIME_UNTIL_BOOST_MALFUNCTON_DEACTIVATION = 4.0;
+const float MalfunctionTextHUD::STATIC_SCALE = 0.8f;
 
-const double BoostMalfunctionHUD::TIME_UNTIL_BOOST_MALFUNCTON_DEACTIVATION = 4.0;
-
-const float BoostMalfunctionHUD::STATIC_SCALE = 0.8f;
-
-BoostMalfunctionHUD::BoostMalfunctionHUD(GameSound* sound) : sound(sound),
-malfunctionIconTex(NULL), isActive(false), malfunctionText(WARNING_TEXT),
+MalfunctionTextHUD::MalfunctionTextHUD(const char* text, GameSound* sound) : sound(sound),
+malfunctionIconTex(NULL), isActive(false), malfunctionText(text),
 timeSinceLastBoostMalfunction(TIME_UNTIL_BOOST_MALFUNCTON_DEACTIVATION),
 malfunctionLabel(GameFontAssetsManager::GetInstance()->GetFont(
                  GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), 
-                 600.0f, WARNING_TEXT) {
+                 600.0f, text) {
 
     assert(sound != NULL);
 
@@ -39,7 +36,7 @@ malfunctionLabel(GameFontAssetsManager::GetInstance()->GetFont(
         GameViewConstants::GetInstance()->TEXTURE_BOOST_MALFUNCTION,  Texture::Trilinear, GL_TEXTURE_2D));
     assert(this->malfunctionIconTex != NULL);
 
-    this->malfunctionLabel.SetScale(STATIC_SCALE * GameDisplay::GetTextScalingFactor(), std::string(WARNING_TEXT));
+    this->malfunctionLabel.SetScale(STATIC_SCALE * GameDisplay::GetTextScalingFactor(), this->malfunctionText);
     this->fullTextWidth  = this->malfunctionLabel.GetWidth();
     this->fullTextHeight = this->malfunctionLabel.GetHeight();
 
@@ -62,7 +59,7 @@ malfunctionLabel(GameFontAssetsManager::GetInstance()->GetFont(
     this->Reset();
 }
 
-BoostMalfunctionHUD::~BoostMalfunctionHUD() {
+MalfunctionTextHUD::~MalfunctionTextHUD() {
     bool success = false;
     
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->malfunctionIconTex);
@@ -71,7 +68,7 @@ BoostMalfunctionHUD::~BoostMalfunctionHUD() {
     UNUSED_VARIABLE(success);
 }
 
-void BoostMalfunctionHUD::Draw(double dT, const Camera& camera) {
+void MalfunctionTextHUD::Draw(double dT, const Camera& camera) {
     UNUSED_PARAMETER(camera);
 
     static const float Y_DIST_FROM_TOP = 150;
@@ -100,7 +97,7 @@ void BoostMalfunctionHUD::Draw(double dT, const Camera& camera) {
         Camera::GetWindowHeight() - Y_DIST_FROM_TOP);
 
     float iconYOffset = (finalIconSize - static_cast<float>(this->fullTextHeight)) / 2.0f;
-    float iconXPos = this->malfunctionLabel.GetTopLeftCorner()[0] - BoostMalfunctionHUD::ICON_TEXT_X_GAP*scalingFactor - halfFinalIconSize;
+    float iconXPos = this->malfunctionLabel.GetTopLeftCorner()[0] - MalfunctionTextHUD::ICON_TEXT_X_GAP*scalingFactor - halfFinalIconSize;
     float iconYPos = this->malfunctionLabel.GetTopLeftCorner()[1] - halfFinalIconSize + iconYOffset;
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
@@ -137,7 +134,7 @@ void BoostMalfunctionHUD::Draw(double dT, const Camera& camera) {
     this->timeSinceLastBoostMalfunction += dT;
 }
 
-void BoostMalfunctionHUD::Activate() {
+void MalfunctionTextHUD::Activate() {
 
     if (this->isActive) {
         this->timeSinceLastBoostMalfunction = 0.0;
@@ -157,7 +154,7 @@ void BoostMalfunctionHUD::Activate() {
     this->sound->PlaySound(GameSound::BoostMalfunctionPromptEvent, false, true, 1.0f);
 }
 
-void BoostMalfunctionHUD::Deactivate() {
+void MalfunctionTextHUD::Deactivate() {
 
     if (!this->isActive) {
         return;
@@ -173,7 +170,7 @@ void BoostMalfunctionHUD::Deactivate() {
     this->timeSinceLastBoostMalfunction = TIME_UNTIL_BOOST_MALFUNCTON_DEACTIVATION;
 }
 
-void BoostMalfunctionHUD::Reset() {
+void MalfunctionTextHUD::Reset() {
     this->fadeAnim.ClearLerp();
     this->fadeAnim.SetInterpolantValue(0.0f);
     this->iconScaleAnim.ClearLerp();

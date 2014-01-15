@@ -58,7 +58,7 @@ public:
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
 	void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal);
-	void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
+	void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock, bool canShootWithoutObstruction);
     void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
 	void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
 	void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);
@@ -95,8 +95,9 @@ public:
     void BallBoostLostEvent(bool allBoostsLost);
     void BoostFailedDueToNoBallsAvailableEvent();
 
-    void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet);
-    void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon);
+    void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet, bool canShootWithoutObstruction);
+    void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon, bool canShootWithoutObstruction);
+    void CantFireBallCamFromCannonEvent();
 
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
@@ -155,6 +156,7 @@ private:
     long timeOfLastBallBossCollisionEventInMS;
     long timeOfLastControlledCannonRotationInMS;
     long timeOfLastBoostMalfunctionInMS;
+    long timeOfLastCannonObstrMalfuncInMS;
     long timeOfLastCounterEventInMS;
     long timeOfLastMultiplierEventInMS;
     long timeOfLastItemSpawnInMS;
@@ -177,6 +179,7 @@ private:
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
     static const long SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS;
     static const long SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS;
+    static const long SOUND_WAIT_TIME_BETWEEN_CANNON_OBSTR_MALFUNCS_IN_MS;
     static const long SOUND_DAMPEN_TIME_BETWEEN_BLOCK_COUNTERS_IN_MS;
     static const long SOUND_DAMPEN_TIME_BETWEEN_MULTIPLIERS_IN_MS;
     static const long SOUND_DAMPEN_TIME_BETWEEN_ITEM_SPAWNS_IN_MS;

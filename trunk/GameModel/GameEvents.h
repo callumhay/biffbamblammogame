@@ -310,7 +310,7 @@ public:
 	 * Event triggered when a projectile is teleported by a portal block. Only occurs once per projectile,
 	 * occurs one frame before the projectile is shown coming out of the sibling portal.
 	 * Arguments: projectile  - The projectile teleported.
-	 *             enterPortal - The portal entered by the projectile.
+	 *            enterPortal - The portal entered by the projectile.
 	 */
     virtual void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal) {
         UNUSED_PARAMETER(projectile);
@@ -320,18 +320,21 @@ public:
     /**
 	 * Event triggered when a ball enters a cannon block. Only occurs once as the ball is JUST entering.
 	 * Arguments: ball        - The ball entering the cannon.
-	 *             cannonBlock - The cannon block that the ball is entering.
+	 *            cannonBlock - The cannon block that the ball is entering.
+     *            canShootWithoutObstruction - Whether or not the player can shoot the ball from the cannon without there being an obstruction.
 	 */
-    virtual void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
+    virtual void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock, 
+                                        bool canShootWithoutObstruction) {
         UNUSED_PARAMETER(ball);
         UNUSED_PARAMETER(cannonBlock);
+        UNUSED_PARAMETER(canShootWithoutObstruction);
     }
 
 	/**
 	 * Event triggered when a ball is fired out of a cannon block. Only occurs once as the ball is JUST being
 	 * fired out of the barrel of the cannon.
 	 * Arguments: ball        - The ball being fired out of the cannon.
-	 *             cannonBlock - The cannon block firing the ball.
+	 *            cannonBlock - The cannon block firing the ball.
 	 */
     virtual void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
         UNUSED_PARAMETER(ball);
@@ -342,7 +345,7 @@ public:
 	 * Event triggered when a projectile enters a cannon block. Only occurs once as the projectile is JUST being
 	 * loaded into the barrel of the cannon.
 	 * Arguments: projectile  - The projectile being loaded by the cannon.
-	 *             cannonBlock - The cannon block loading the rocket. 
+	 *            cannonBlock - The cannon block loading the rocket. 
 	 */
     virtual void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
         UNUSED_PARAMETER(projectile);
@@ -353,7 +356,7 @@ public:
 	 * Event triggered when a projectile is fired out of a cannon block. Only occurs once as the projectile is JUST being
 	 * fired out of the barrel of the cannon.
 	 * Arguments: projectile  - The rocket being fired out of the cannon.
-	 *             cannonBlock - The cannon block firing the rocket. 
+	 *            cannonBlock - The cannon block firing the rocket. 
 	 */
     virtual void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
         UNUSED_PARAMETER(projectile);
@@ -361,9 +364,9 @@ public:
     }
 
 	/**
-	 * Event triggered when the ball hits a tesla block to tesla block lightning arc.
+	 * Event triggered when the ball hits a Tesla block to Tesla block lightning arc.
 	 * Occurs right before the the repel of the ball from the arc takes place.
-	 * Arguments: ball         - The ball that hit the lightning arc.
+	 * Arguments: ball - The ball that hit the lightning arc.
 	 */
     virtual void BallHitTeslaLightningArcEvent(const GameBall& ball) {
         UNUSED_PARAMETER(ball);
@@ -394,10 +397,7 @@ public:
 
 	// Misc Events (Destruction, Combos, etc.) ************************************************
 
-    /// <summary> Block destroyed event. </summary>
-    /// <remarks> Beowulf, 08/10/2013. </remarks>
-    /// <param name="block">  The block. </param>
-    /// <param name="method"> The method. </param>
+
     virtual void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
         UNUSED_PARAMETER(block);
         UNUSED_PARAMETER(method);
@@ -449,10 +449,13 @@ public:
      * the ball has been completed, respectively).
      * Arguments: ball  - The ball that has or had the camera in it.
      *            isSet - true if ball camera mode was just fully activated, false if not.
+     *            canShootWithoutObstruction - Whether or not the player can shoot the ball from the cannon without there being an obstruction.
      */
-    virtual void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet) {
+    virtual void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet, 
+                                           bool canShootWithoutObstruction) {
         UNUSED_PARAMETER(ball);
         UNUSED_PARAMETER(isSet);
+        UNUSED_PARAMETER(canShootWithoutObstruction);
     }
 
     /** 
@@ -460,11 +463,20 @@ public:
      * only once the player has applied some rotation, not when the rotation is set to zero.
      * Arguments: ball   - The ball that is inside the cannon.
      *            cannon - The cannon block being rotated.
+     *            canShootWithoutObstruction - Whether or not the player can shoot the ball from the cannon without there being an obstruction.
      */
-    virtual void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon) {
+    virtual void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon, 
+                                               bool canShootWithoutObstruction) {
         UNUSED_PARAMETER(ball);
         UNUSED_PARAMETER(cannon);
+        UNUSED_PARAMETER(canShootWithoutObstruction);
     }
+
+    /**
+     * Event triggered when a player tries to shoot the ball from a cannon (when in ball camera mode)
+     * but they can't due to an obstruction.
+     */
+    virtual void CantFireBallCamFromCannonEvent() {}
 
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same

@@ -106,9 +106,17 @@ void BallInPlayState::ShootActionReleaseUse() {
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
             GameBall* currBall = *iter;
             if (currBall->IsLoadedInCannonBlock()) {
+                
                 CannonBlock* cannon = currBall->GetCannonBlock();
                 assert(cannon != NULL);
-                cannon->Fire();
+
+                if (currBall->CanShootBallCamOutOfCannon(*cannon, *this->gameModel->GetCurrentLevel())) {
+                    cannon->Fire();
+                }
+                else {
+                    // EVENT: Not allowed to fire the ball out of the cannon due to obstruction
+                    GameEventManager::Instance()->ActionCantFireBallCamFromCannon();
+                }
                 break;
             }
         }
@@ -165,7 +173,8 @@ void BallInPlayState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
                 
                 if (dir != 0 && magnitudePercent > 0.0f) {
                     // EVENT: Player just controlled the rotation of the cannon
-                    GameEventManager::Instance()->ActionBallCameraCannonRotation(*currBall, *cannon);
+                    GameEventManager::Instance()->ActionBallCameraCannonRotation(*currBall, *cannon, 
+                        currBall->CanShootBallCamOutOfCannon(*cannon, *this->gameModel->GetCurrentLevel()));
                 }
 
                 // Ensure that all other things being controlled are told to stop

@@ -110,8 +110,9 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
         // change to the position/velocity of the ball via collisions at some point during this frame/tick)
         // IMPORTANT: We do this AFTER changing the position of the ball based on the current velocity
         if (this->gameBall->HasBallType(GameBall::CrazyBall) && crazyBallVelChangeAllowed) {
-            this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel);
-            this->gameBall->SetLastThingCollidedWith(NULL);
+            if (this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel)) {
+                this->gameBall->SetLastThingCollidedWith(NULL);
+            }
         }
     }
 
@@ -143,7 +144,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
 
 // Apply the crazy ball item's effect to the velocity of the ball by changing it somewhat randomly
 // and strangely to make it difficult to track where the ball will go
-void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity, GameModel* gameModel) {
+bool NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity, GameModel* gameModel) {
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
 	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.75;
@@ -155,7 +156,7 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
         // immediately after the player lets the ball go
         TIME_TRACKER = 0.0;
         NEXT_TIME    = 1.5;
-		return;
+		return false;
 	}
 
 	TIME_TRACKER += dT;
@@ -194,7 +195,10 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
         }
 
         this->gameBall->SetVelocity(this->gameBall->currSpeed, newVelocityDir);
-	}
+        return true;
+    }
+
+    return false;
 }
 
 void NormalBallState::ApplyGravityBallVelocityChange(double dT, const GameModel* gameModel, 

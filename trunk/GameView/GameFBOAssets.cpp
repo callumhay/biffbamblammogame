@@ -361,21 +361,6 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 
 	inputFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1.0f);
 
-    /*
-	if (GameBall::GetIsBallCameraOn()) {
-		const GameBall* camBall = GameBall::GetBallCameraBall();
-		assert(camBall != NULL);
-		if (camBall->IsLoadedInCannonBlock()) {
-			float overlayAlpha = std::min<float>(0.9f, 1.0f - camBall->GetColour().A());
-			assert(overlayAlpha >= 0.0f);
-
-			// If the ball is inside a cannon and is in ball camera mode then we do the
-			// barrel overlay on the screen...
-			this->DrawCannonBarrelOverlay(dT, width, height, overlayAlpha);
-		}
-	}
-    */
-
 	this->finalFSEffectFBO = inputFBO;
 	this->tempFBO = outputFBO;
 }

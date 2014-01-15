@@ -275,7 +275,7 @@ private:
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const RocketProjectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
-    void AddFlamethrowerProjectileEffects(const GameModel& gameModel, const PaddleFlameBlasterProjectile& projectile);
+    void AddFlameBlastProjectileEffects(const GameModel& gameModel, const PaddleFlameBlasterProjectile& projectile);
     void AddPaddleMineFiredEffects(const GameModel& gameModel, const PaddleMineProjectile& projectile);
     void AddPaddleMineAttachedEffects(const Projectile& projectile);
 

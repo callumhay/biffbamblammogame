@@ -303,7 +303,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const Le
 	pulsingFlame->SetRadiusDeviationFromCenter(
         ESPInterval(0.0f, LevelPiece::PIECE_WIDTH/3.1f), 
         ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.2f), ESPInterval(0.0f));
-	pulsingFlame->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	pulsingFlame->SetParticleAlignment(ESP::ScreenAligned);
 	pulsingFlame->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 3.4f, LevelPiece::PIECE_WIDTH / 2.15f));
 	pulsingFlame->SetParticleRotation(ESPInterval(0, 359.99));
 	pulsingFlame->SetEmitPosition(Point3D(piece.GetCenter(), 0.0f));
@@ -334,7 +334,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireSmokeEffect(const Le
 	smokeClouds->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 3.8f, LevelPiece::PIECE_WIDTH / 2.4f));
 	smokeClouds->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH/3.0f), 
 											  ESPInterval(0.0f, LevelPiece::PIECE_HEIGHT/3.0f), ESPInterval(0.0f));
-	smokeClouds->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	smokeClouds->SetParticleAlignment(ESP::ScreenAligned);
 	smokeClouds->SetEmitPosition(Point3D(piece.GetCenter()));
 	smokeClouds->SetEmitDirection(Vector3D(0, 1, 0));
 	smokeClouds->SetEmitAngleInDegrees(30.0f);

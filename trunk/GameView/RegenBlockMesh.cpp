@@ -13,6 +13,7 @@
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
 
+#include "../GameModel/GameModel.h"
 #include "../GameModel/RegenBlock.h"
 
 #include "../ResourceManager.h"
@@ -95,8 +96,9 @@ void RegenBlockMesh::RemoveRegenBlock(const RegenBlock* block) {
     this->blocks.erase(findIter);
 }
 
-void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                          const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+void RegenBlockMesh::Draw(double dT, const Camera& camera, const GameModel* gameModel,  
+                          const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+                          const BasicPointLight& ballLight) {
 
     UNUSED_PARAMETER(camera);
     UNUSED_PARAMETER(keyLight);
@@ -132,14 +134,21 @@ void RegenBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);   
 
     // Draw the block info (life/infinity symbol)
+    const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
+    if (!paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
+        for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
+
+            // Draw information on the block (life amount or infinity symbol)
+            BlockData* currBlockData = iter->second;
+            currBlockData->DrawLifeInfo(camera, keyLight, fillLight, ballLight);
+        }
+    }
+
     for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
     	
         RegenBlock* currBlock    = iter->first;
         BlockData* currBlockData = iter->second;
         
-        // Draw information on the block (life amount or infinity symbol)
-        currBlockData->DrawLifeInfo(camera, keyLight, fillLight, ballLight);
-
         // Regenerate and tick the block and its visual data...
         currBlock->Regen(dT);
         currBlockData->Tick(dT);
