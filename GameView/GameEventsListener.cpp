@@ -70,7 +70,8 @@ const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS      = 125;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS       = 60;
 const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_CONTROLLED_CANNON_ROTATIONS_IN_MS  = 150;
-const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS           = 570;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS           = 400;
+const long GameEventsListener::SOUND_WAIT_TIME_BETWEEN_CANNON_OBSTR_MALFUNCS_IN_MS        = 400;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_PROJECTILE_BLOCK_COLLISIONS_IN_MS = 250;
 const long GameEventsListener::SOUND_DAMPEN_TIME_BETWEEN_BLOCK_COUNTERS_IN_MS             = 10;
 const long GameEventsListener::SOUND_DAMPEN_TIME_BETWEEN_MULTIPLIERS_IN_MS                = 10;
@@ -88,6 +89,7 @@ timeOfLastBallPaddleCollisionEventInMS(0),
 timeOfLastBallTeslaCollisionEventInMS(0),
 timeOfLastControlledCannonRotationInMS(0),
 timeOfLastBoostMalfunctionInMS(0),
+timeOfLastCannonObstrMalfuncInMS(0),
 timeOfLastCounterEventInMS(0),
 timeOfLastMultiplierEventInMS(0),
 timeOfLastItemSpawnInMS(0),
@@ -755,6 +757,8 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::FireGlobProjectile:
 			// TODO: Maybe a rotating sparkle or something?
 			break;
 
@@ -777,7 +781,8 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 	debug_output("EVENT: Projectile teleported by portal block");
 }
 
-void GameEventsListener::BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
+void GameEventsListener::BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock,
+                                                bool canShootWithoutObstruction) {
     UNUSED_PARAMETER(ball);
     UNUSED_PARAMETER(cannonBlock);
 
@@ -787,8 +792,11 @@ void GameEventsListener::BallEnteredCannonEvent(const GameBall& ball, const Cann
 
     // If the ball is in camera mode then we don't make the rotating sound...
     if (ball.HasBallCameraActive()) {
+        BallCamHUD* ballCamHUD = this->display->GetAssets()->GetBallCamHUD();
+        
         // Activate the HUD for when a ball in ball camera mode is inside a cannon
-        this->display->GetAssets()->GetBallCamHUD()->ToggleCannonHUD(true, &cannonBlock);
+        ballCamHUD->ToggleCannonHUD(true, &cannonBlock);
+        ballCamHUD->SetCanShootCannon(canShootWithoutObstruction);
     }
     else {
         // Start the sound of the cannon rotating
@@ -1548,7 +1556,7 @@ void GameEventsListener::BoostFailedDueToNoBallsAvailableEvent() {
         bool doSound = (currSystemTime - this->timeOfLastBoostMalfunctionInMS) > 
             SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS;
 
-        if (assets->GetBallCamHUD()->GetIsMalfunctionHUDActive() && doSound) {
+        if (assets->GetBallCamHUD()->GetIsBoostMalfunctionHUDActive() && doSound) {
             // Play the sound for when a ball can't boost due to malfunction
             this->display->GetSound()->PlaySound(GameSound::BoostAttemptWhileMalfunctioningEvent, false, true, 1.0f);
             this->timeOfLastBoostMalfunctionInMS = currSystemTime;
@@ -1561,23 +1569,29 @@ void GameEventsListener::BoostFailedDueToNoBallsAvailableEvent() {
     }
 }
 
-void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet) {
+void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet,
+                                                   bool canShootWithoutObstruction) {
+    GameAssets* assets = this->display->GetAssets();
 
     if (isSet) {
+
+        assets->GetBallCamHUD()->Activate();
         // If the ball camera is set and the ball is inside a cannon then we need to activate that HUD immediately
         if (ball.IsLoadedInCannonBlock()) {
-            this->display->GetAssets()->GetBallCamHUD()->ToggleCannonHUD(true, ball.GetCannonBlock());
+            assets->GetBallCamHUD()->ToggleCannonHUD(true, ball.GetCannonBlock());
+            assets->GetBallCamHUD()->SetCanShootCannon(canShootWithoutObstruction);
         }
 
         debug_output("EVENT: Ball camera set");
     }
     else {
-        this->display->GetAssets()->GetBallCamHUD()->Deactivate();
+        assets->GetBallCamHUD()->Deactivate();
         debug_output("EVENT: Ball camera unset");
     }
 }
 
-void GameEventsListener::BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon) {
+void GameEventsListener::BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon,
+                                                       bool canShootWithoutObstruction) {
     UNUSED_PARAMETER(ball);
     UNUSED_PARAMETER(cannon);
 
@@ -1589,6 +1603,28 @@ void GameEventsListener::BallCameraCannonRotationEvent(const GameBall& ball, con
         this->display->GetSound()->PlaySound(GameSound::CannonBlockRotatingPart, false);
         this->timeOfLastControlledCannonRotationInMS = currSystemTime;
     }
+
+    this->display->GetAssets()->GetBallCamHUD()->SetCanShootCannon(canShootWithoutObstruction);
+}
+
+void GameEventsListener::CantFireBallCamFromCannonEvent() {
+
+    if (GameBall::GetIsBallCameraOn()) {
+        GameAssets* assets = this->display->GetAssets();
+
+        long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+        bool doSound = (currSystemTime - this->timeOfLastCannonObstrMalfuncInMS) > 
+            SOUND_WAIT_TIME_BETWEEN_CANNON_OBSTR_MALFUNCS_IN_MS;
+
+        if (assets->GetBallCamHUD()->GetIsCannonObstrctionHUDActive() && doSound) {
+            // Play the sound for when a player can't shoot the ball out of a cannon due to an obstruction
+            this->display->GetSound()->PlaySound(GameSound::CannonObstructionMalfunctionEvent, false, true, 1.0f);
+            this->timeOfLastCannonObstrMalfuncInMS = currSystemTime;
+        }
+
+        assets->GetBallCamHUD()->ActivateCannonObstructionHUD();
+    }
+    debug_output("EVENT: Can't shoot ball from cannon due to obstruction.");
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

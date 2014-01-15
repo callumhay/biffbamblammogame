@@ -204,10 +204,11 @@ void GameEventManager::ActionProjectilePortalBlockTeleport(const Projectile& pro
 }
 
 // Action when a ball enters a cannon block
-void GameEventManager::ActionBallEnteredCannon(const GameBall& ball, const CannonBlock& cannonBlock) {
+void GameEventManager::ActionBallEnteredCannon(const GameBall& ball, const CannonBlock& cannonBlock, 
+                                               bool canShootWithoutObstruction) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->BallEnteredCannonEvent(ball, cannonBlock);
+		(*listenerIter)->BallEnteredCannonEvent(ball, cannonBlock, canShootWithoutObstruction);
 	}	
 }
 
@@ -493,17 +494,24 @@ void GameEventManager::ActionBoostFailedDueToNoBallsAvailable() {
     }
 }
 
-void GameEventManager::ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet) {
+void GameEventManager::ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet, bool canShootWithoutObstruction) {
     std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
     for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-        (*listenerIter)->BallCameraSetOrUnsetEvent(ball, isSet);
+        (*listenerIter)->BallCameraSetOrUnsetEvent(ball, isSet, canShootWithoutObstruction);
     }
 }
 
-void GameEventManager::ActionBallCameraCannonRotation(const GameBall& ball, const CannonBlock& cannon) {
+void GameEventManager::ActionBallCameraCannonRotation(const GameBall& ball, const CannonBlock& cannon, bool canShootWithoutObstruction) {
     std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
     for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-        (*listenerIter)->BallCameraCannonRotationEvent(ball, cannon);
+        (*listenerIter)->BallCameraCannonRotationEvent(ball, cannon, canShootWithoutObstruction);
+    }
+}
+
+void GameEventManager::ActionCantFireBallCamFromCannon() {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->CantFireBallCamFromCannonEvent();
     }
 }
 

@@ -114,6 +114,8 @@ public:
 
     BoundingLines& operator=(const BoundingLines& copy);
 
+    void DrawSimpleBounds() const;
+
 	// Debug stuffs
 	void DebugDraw() const;
 

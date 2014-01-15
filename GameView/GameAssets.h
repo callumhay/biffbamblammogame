@@ -51,7 +51,7 @@ class BallBoostHUD;
 class BallReleaseHUD;
 class RemoteControlRocketHUD;
 class BallCamHUD;
-class BoostMalfunctionHUD;
+class MalfunctionTextHUD;
 class ButtonTutorialHint;
 class StickyPaddleGoo;
 class PaddleGunAttachment;
@@ -89,7 +89,7 @@ public:
 	void DrawBackgroundModel(const Camera& camera);
 	void DrawBackgroundEffects(const Camera& camera);
 
-	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
+	void DrawLevelPieces(double dT, const GameModel& gameModel, const Camera& camera);
     void DrawLevelPiecesPostEffects(double dT, const Camera& camera);
     void DrawNoBloomLevelPieces(double dT, const Camera& camera);
     void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
@@ -219,7 +219,6 @@ private:
     BallBoostHUD* boostHUD;
     BallReleaseHUD* ballReleaseHUD;
     RemoteControlRocketHUD* remoteControlRocketHUD;
-    BoostMalfunctionHUD* boostMalfunctionHUD;
     BallCamHUD* ballCamHUD;
 
     ButtonTutorialHint* skipLabel;

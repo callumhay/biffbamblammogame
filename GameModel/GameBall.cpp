@@ -141,21 +141,23 @@ void GameBall::ResetBallAttributes() {
 	this->SetBallState(new NormalBallState(this), true);
 }
 
-void GameBall::SetBallCamera(GameBall* ballCamBall) {
+void GameBall::SetBallCamera(GameBall* ballCamBall, const GameLevel* currLevel) {
 
     if (GameBall::currBallCamBall == NULL && ballCamBall != NULL) {
         GameBall::currBallCamBall = ballCamBall;
 
         // Special case: if the ball is inside a cannon block then we will reset the 
         // cannon timer...
+        bool canShootOutOfCannon = true;
         if (ballCamBall->IsLoadedInCannonBlock()) {
             CannonBlock* cannon = ballCamBall->GetCannonBlock();
             assert(cannon != NULL);
             cannon->InitBallCameraInCannonValues(false, *ballCamBall);
+            canShootOutOfCannon = (currLevel == NULL) ? false : ballCamBall->CanShootBallCamOutOfCannon(*cannon, *currLevel);
         }
 
         // EVENT: Ball camera is now set
-        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*ballCamBall, true);
+        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*ballCamBall, true, canShootOutOfCannon);
     }
     else if (GameBall::currBallCamBall != NULL && ballCamBall == NULL) {
         const GameBall* prevBallCam = GameBall::currBallCamBall;
@@ -168,12 +170,36 @@ void GameBall::SetBallCamera(GameBall* ballCamBall) {
         }
 
         // EVENT: Ball camera is now unset
-        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*prevBallCam, false);
+        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*prevBallCam, false, true);
     }
     else {
         // No events, just set the camera ball and leave
         GameBall::currBallCamBall = ballCamBall; 
     }
+}
+
+bool GameBall::CanShootBallCamOutOfCannon(const CannonBlock& cannon, const GameLevel& currLevel) const {
+
+    // Check to see if the ball will instantly collide with something when it's shot,
+    // if it does then we don't let the player shoot the ball (it's very disorienting otherwise)
+    Vector2D cannonDir = cannon.GetCurrentCannonDirection();
+    Collision::Circle2D testBallBounds(cannon.GetCenter() + 
+        (CannonBlock::HALF_CANNON_BARREL_LENGTH + this->GetBounds().Radius()) * cannonDir,
+        this->GetBounds().Radius());
+
+    std::vector<LevelPiece*> collisionPieces = 
+        currLevel.GetLevelPieceCollisionCandidates(0.0, testBallBounds.Center(), testBallBounds.Radius(), 0.0);
+
+    for (std::vector<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
+         pieceIter != collisionPieces.end(); ++pieceIter) {
+
+        const LevelPiece *currPiece = *pieceIter;
+        if (currPiece != &cannon && currPiece->GetBounds().CollisionCheck(testBallBounds)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**

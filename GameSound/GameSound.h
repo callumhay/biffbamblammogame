@@ -121,6 +121,7 @@ public:
 		CannonBlockRotatingLoop,
         CannonBlockRotatingPart,
         CannonBlockFiredEvent,
+        CannonObstructionMalfunctionEvent,
 		PortalTeleportEvent,
 		CollateralBlockFlashingLoop,
 		CollateralBlockFallingLoop,

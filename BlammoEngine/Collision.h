@@ -14,6 +14,7 @@
 
 #include "Vector.h"
 #include "Point.h"
+#include "GeometryMaker.h"
 
 namespace Collision {
 
@@ -251,6 +252,14 @@ namespace Collision {
             this->center = copy.center;
             this->radius = copy.radius;
             return *this;
+        }
+
+        void DrawSimpleBounds() const {
+            glPushMatrix();
+            glTranslatef(this->center[0], this->center[1], 0.0f);
+            glScalef(this->radius, this->radius, 1.0f);
+            GeometryMaker::GetInstance()->DrawLineCircle();
+            glPopMatrix();
         }
 
 	private:

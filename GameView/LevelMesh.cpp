@@ -539,7 +539,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
 void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera,
-                           const BasicPointLight& keyLight, 
+                           const GameModel* gameModel, const BasicPointLight& keyLight, 
                            const BasicPointLight& fillLight, const BasicPointLight& ballLight,
                            const Texture2D* sceneTexture) {
 
@@ -584,7 +584,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->mineTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-    this->regenBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->regenBlock->Draw(dT, camera, gameModel, keyLight, fillLight, ballLight);
     this->itemDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
     this->alwaysDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();

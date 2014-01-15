@@ -1269,8 +1269,8 @@ void GameESPAssets::InitFlamethrowerPaddleESPEffects() {
     this->paddleFlameBlasterOrigin = new ESPPointEmitter();
     this->paddleFlameBlasterOrigin->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
     this->paddleFlameBlasterOrigin->SetSpawnDelta(ESPInterval(0.01f, 0.0125f));
-    this->paddleFlameBlasterOrigin->SetInitialSpd(ESPInterval(1.5f, 2.0f));
-    this->paddleFlameBlasterOrigin->SetParticleLife(ESPInterval(0.5f, 1.1f));
+    this->paddleFlameBlasterOrigin->SetInitialSpd(ESPInterval(1.6f, 2.0f));
+    this->paddleFlameBlasterOrigin->SetParticleLife(ESPInterval(0.75f, 1.0f));
     this->paddleFlameBlasterOrigin->SetParticleSize(ESPInterval(1.0f, 1.3f));
     this->paddleFlameBlasterOrigin->SetEmitDirection(Vector3D(0,1,0));
     this->paddleFlameBlasterOrigin->SetEmitAngleInDegrees(100);
@@ -1376,20 +1376,21 @@ void GameESPAssets::InitStandaloneESPEffects() {
     this->starColourFlasher.SetColours(starFlashColours);
 
     std::vector<ColourRGBA> fireOriginColours;
-    fireOriginColours.reserve(9);
+    fireOriginColours.reserve(10);
     fireOriginColours.push_back(ColourRGBA(Colour(0x9DC8DD),1.0f)); // Blueish-white
     fireOriginColours.push_back(ColourRGBA(1,1,0,1));
-    fireOriginColours.push_back(ColourRGBA(1,1,0,1));
+    fireOriginColours.push_back(ColourRGBA(1,0.9f,0,1));
+    fireOriginColours.push_back(ColourRGBA(1,0.7f,0,1));
     fireOriginColours.push_back(ColourRGBA(1,0.5f,0,1));
-    fireOriginColours.push_back(ColourRGBA(1,0.5f,0,1));
-    fireOriginColours.push_back(ColourRGBA(1,0.5f,0,0.75f));
+    fireOriginColours.push_back(ColourRGBA(1,0.35f,0,1));
+    fireOriginColours.push_back(ColourRGBA(1,0.2f,0,0.75f));
     fireOriginColours.push_back(ColourRGBA(1,0.0f,0,0.5f));
-    fireOriginColours.push_back(ColourRGBA(1,0.0f,0,0.25f));
+    fireOriginColours.push_back(ColourRGBA(0.5f,0.0f,0,0.25f));
     fireOriginColours.push_back(ColourRGBA(0.0f,0.0f,0.0f,0.0f));
 
     this->fireOriginColourEffector.SetColours(fireOriginColours);
 
-	// Ghost smoke effect used for ghostball
+	// Ghost smoke effect used for ghost-ball
 	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
 	this->ghostBallSmoke.SetScale(0.5f);
 	this->ghostBallSmoke.SetFrequency(0.25f);
@@ -1813,6 +1814,10 @@ void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projecti
             this->AddLaserHitWallEffect(projectile.GetPosition());
             break;
 
+        case Projectile::PaddleFlameBlastProjectile:
+            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            break;
+
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
             this->AddPaddleMineAttachedEffects(projectile);
@@ -2013,15 +2018,16 @@ void GameESPAssets::AddCannonFireEffect(const Point3D& endOfCannonPt, const Vect
 	bool result = true;
 
 	// Basic bang
-	ESPPointEmitter* cannonBlast = new ESPPointEmitter();
+    static const float BLAST_HEIGHT = 2.7 * CannonBlock::CANNON_BARREL_HEIGHT;
+    ESPPointEmitter* cannonBlast = new ESPPointEmitter();
 	cannonBlast->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	cannonBlast->SetInitialSpd(ESPInterval(0.001f));
 	cannonBlast->SetParticleLife(ESPInterval(0.85f));
-	cannonBlast->SetParticleSize(ESPInterval(1.8 * CannonBlock::CANNON_BARREL_HEIGHT), ESPInterval(2.7 * CannonBlock::CANNON_BARREL_HEIGHT));
+	cannonBlast->SetParticleSize(ESPInterval(1.8 * CannonBlock::CANNON_BARREL_HEIGHT), ESPInterval(BLAST_HEIGHT));
 	cannonBlast->SetEmitAngleInDegrees(0);
 	cannonBlast->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	cannonBlast->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	cannonBlast->SetEmitPosition(endOfCannonPt + 1.5 * CannonBlock::CANNON_BARREL_HEIGHT * emitDir);
+	cannonBlast->SetEmitPosition(endOfCannonPt + 0.5f*BLAST_HEIGHT * emitDir);
 	cannonBlast->SetEmitDirection(emitDir);
 	cannonBlast->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	cannonBlast->AddEffector(&this->particleFader);
@@ -3318,6 +3324,11 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 			this->AddBasicPaddleHitByProjectileEffect(paddle, projectile);
 			break;
 
+        case Projectile::PaddleFlameBlastProjectile:
+            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            // Paddle catches on fire briefly?
+            break;
+
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
@@ -3328,9 +3339,6 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
             // NOTE: THIS IS TAKEN CARE OF BY THE MineExplodedEvent
-            break;
-
-        case Projectile::PaddleFlameBlastProjectile:
             break;
 
 		default:
@@ -3700,7 +3708,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
-            this->AddFlamethrowerProjectileEffects(gameModel, *static_cast<const PaddleFlameBlasterProjectile*>(&projectile));
+            this->AddFlameBlastProjectileEffects(gameModel, *static_cast<const PaddleFlameBlasterProjectile*>(&projectile));
             break;
 
 		default:
@@ -4668,7 +4676,7 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 	projectileEmitters.push_back(fireRock);
 }
 
-void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel, 
+void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel, 
                                                      const PaddleFlameBlasterProjectile& projectile) {
     
     Point3D projectilePos(projectile.GetPosition(), projectile.GetZOffset());
@@ -4679,7 +4687,7 @@ void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel,
     fireParticle->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
     fireParticle->SetParticleSize(ESPInterval(1.15f*projectile.GetWidth()));
     fireParticle->SetParticleRotation(ESPInterval(180));
-    fireParticle->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    fireParticle->SetParticleAlignment(ESP::ScreenAligned);
     fireParticle->SetEmitPosition(projectilePos);
     fireParticle->SetEmitDirection(Vector3D(0,1,0));
     fireParticle->SetParticles(1, &this->flameBlasterParticleEffect);
@@ -4691,11 +4699,11 @@ void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel,
     fireTrail->SetParticleLife(ESPInterval(0.4f, 0.8f));
     fireTrail->SetParticleSize(ESPInterval(1.4f*projectile.GetWidth()));
     fireTrail->SetEmitAngleInDegrees(5);
-    fireTrail->SetParticleRotation(ESPInterval(180));
+    //fireTrail->SetParticleRotation(ESPInterval(180));
     fireTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     fireTrail->SetEmitPosition(projectilePos);
     fireTrail->SetEmitDirection(Vector3D(0, -1, 0));
-    fireTrail->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    fireTrail->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     fireTrail->AddEffector(&this->particleMediumShrink);
     fireTrail->AddEffector(&this->particleFireFastColourFader);
     fireTrail->SetRandomTextureEffectParticles(18, &this->flameBlasterFireEffect, this->fireGlobTextures);
@@ -4714,7 +4722,7 @@ void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel,
         ESPInterval(0.0f));
     fireBits->SetEmitPosition(projectilePos);
     fireBits->SetEmitDirection(Vector3D(0, 1, 0));
-    fireBits->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    fireBits->SetParticleAlignment(ESP::ScreenAligned);
     fireBits->AddEffector(&this->particleShrinkToNothing);
     fireBits->AddEffector(&this->gravity);
     fireBits->AddEffector(&this->fireOriginColourEffector);
@@ -4731,7 +4739,7 @@ void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel,
     smokeTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     smokeTrail->SetEmitPosition(projectilePos);
     smokeTrail->SetEmitDirection(Vector3D(0, -1, 0));
-    smokeTrail->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    smokeTrail->SetParticleAlignment(ESP::ScreenAligned);
     smokeTrail->AddEffector(&this->particleMediumGrowth);
     smokeTrail->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCCW : &this->smokeRotatorCW);
     smokeTrail->AddEffector(&this->flameBlastSmokeColourFader);
@@ -4745,7 +4753,7 @@ void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel,
     shimmerTrailEmitter->SetEmitAngleInDegrees(15);
     shimmerTrailEmitter->SetEmitDirection(Vector3D(0, -1, 0));
     shimmerTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    shimmerTrailEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    shimmerTrailEmitter->SetParticleAlignment(ESP::ScreenAligned);
     shimmerTrailEmitter->SetEmitPosition(projectilePos);
     shimmerTrailEmitter->AddEffector(&this->particleLargeGrowth);
     shimmerTrailEmitter->AddEffector(&this->particleFader);
@@ -4759,27 +4767,28 @@ void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel,
     emitters.push_back(fireTrail);
     emitters.push_back(fireBits);
 
-    // Add the effect for the actual shot
-    ESPPointEmitter* shotEmitter = new ESPPointEmitter();
-    shotEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-    shotEmitter->SetNumParticleLives(1);
-    shotEmitter->SetInitialSpd(ESPInterval(3.0f, 6.0f));
-    shotEmitter->SetParticleLife(ESPInterval(0.8f, 1.5f));
-    shotEmitter->SetEmitAngleInDegrees(70);
-    shotEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.15f*projectile.GetWidth()),
-        ESPInterval(0.0f), ESPInterval(0.0f));
-    shotEmitter->SetParticleSize(ESPInterval(0.1f*projectile.GetWidth(), 0.25f*projectile.GetWidth()));
-    shotEmitter->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
-    shotEmitter->SetParticleRotation(ESPInterval(180.0f));
-    shotEmitter->SetEmitPosition(projectilePos);
-    shotEmitter->AddEffector(&this->particleFireFastColourFader);
-    shotEmitter->AddEffector(&this->particleLargeGrowth);
-    shotEmitter->SetParticles(8, this->cleanCircleGradientTex);
-
-    this->activeGeneralEmitters.push_back(shotEmitter);
-
     const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
     if (!paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
+
+        // Add the effect for the actual shot
+        ESPPointEmitter* shotEmitter = new ESPPointEmitter();
+        shotEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+        shotEmitter->SetNumParticleLives(1);
+        shotEmitter->SetInitialSpd(ESPInterval(3.0f, 6.0f));
+        shotEmitter->SetParticleLife(ESPInterval(0.8f, 1.5f));
+        shotEmitter->SetEmitAngleInDegrees(70);
+        shotEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.15f*projectile.GetWidth()),
+            ESPInterval(0.0f), ESPInterval(0.0f));
+        shotEmitter->SetParticleSize(ESPInterval(0.1f*projectile.GetWidth(), 0.25f*projectile.GetWidth()));
+        shotEmitter->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+        shotEmitter->SetParticleRotation(ESPInterval(180.0f));
+        shotEmitter->SetEmitPosition(projectilePos);
+        shotEmitter->AddEffector(&this->particleFireFastColourFader);
+        shotEmitter->AddEffector(&this->particleLargeGrowth);
+        shotEmitter->SetParticles(8, this->cleanCircleGradientTex);
+
+        this->activeGeneralEmitters.push_back(shotEmitter);
+
         // .. and the onomatopoeia for it
         ESPPointEmitter* shotOnoEffect = new ESPPointEmitter();
         // Set up the emitter...
@@ -4810,6 +4819,7 @@ void GameESPAssets::AddFlamethrowerProjectileEffects(const GameModel& gameModel,
         shotParticle->SetDropShadow(dpTemp);
         shotParticle->SetOnomatoplexSound(Onomatoplex::SHOT, Onomatoplex::GOOD);
         shotOnoEffect->AddParticle(shotParticle);
+
         this->activeGeneralEmitters.push_back(shotOnoEffect);
     }
 }
@@ -6752,9 +6762,14 @@ void GameESPAssets::DrawPaddleFireBlasterProjectiles(double dT, const Camera& ca
     for (ProjectileEmitterMapIter iter = this->activeFlameBlasterFlames.begin();
          iter != this->activeFlameBlasterFlames.end(); ++iter) {
 
-        const Projectile* currProjectile = iter->first;
+        const PaddleFlameBlasterProjectile* currProjectile = static_cast<const PaddleFlameBlasterProjectile*>(iter->first);
+        if (currProjectile->IsLoadedInCannonBlock()) {
+            continue;
+        }
+
         Point3D projectilePos3d(currProjectile->GetPosition());
-        
+        const Vector3D projectileOppositeDir(-currProjectile->GetVelocityDirection(), 0.0f);
+
         ProjectileEmitterCollection& projEmitters = iter->second;
 
         assert(currProjectile != NULL);
@@ -6771,6 +6786,7 @@ void GameESPAssets::DrawPaddleFireBlasterProjectiles(double dT, const Camera& ca
             ESPPointEmitter* currEmitter = *emitIter;
             
             currEmitter->SetEmitPosition(projectilePos3d);
+            currEmitter->SetEmitDirection(projectileOppositeDir);
             currEmitter->Tick(dT);
             currEmitter->Draw(camera);
         }

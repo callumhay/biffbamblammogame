@@ -324,7 +324,7 @@ highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallyS
 	    this->flareEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	    this->flareEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.25f));
 	    this->flareEmitter.SetParticleSize(ESPInterval(2.5f * this->starTotalLabel.GetHeight()));
-	    this->flareEmitter.SetParticleAlignment(ESP::ScreenAligned);
+	    this->flareEmitter.SetParticleAlignment(ESP::NoAlignment);
         this->flareEmitter.AddEffector(&this->flareRotator);
         this->flareEmitter.SetParticles(1, this->lensFlareTex);
         this->flareEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
@@ -356,7 +356,7 @@ highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallyS
 	    starFgEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	    starFgEmitter->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
 	    starFgEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	    starFgEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	    starFgEmitter->SetParticleAlignment(ESP::NoAlignment);
 	    starFgEmitter->SetParticleRotation(ESPInterval(0));
         starFgEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), 
             ESPInterval(1), ESPInterval(0.8f));
@@ -372,7 +372,7 @@ highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallyS
 	    starBgEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	    starBgEmitter->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
 	    starBgEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	    starBgEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	    starBgEmitter->SetParticleAlignment(ESP::NoAlignment);
 	    starBgEmitter->SetParticleRotation(ESPInterval(0));
         starBgEmitter->SetParticleColour(ESPInterval(STAR_COLOUR_BG.R()), ESPInterval(STAR_COLOUR_BG.G()), 
             ESPInterval(STAR_COLOUR_BG.B()), ESPInterval(1));

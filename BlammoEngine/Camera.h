@@ -215,5 +215,15 @@ public:
 		glPopAttrib();
 	}
 
+    static void PushOrthoWindowCoords(float viewportWidth, float viewportHeight) {
+        glPushAttrib(GL_TRANSFORM_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glViewport(0, 0, viewportWidth, viewportHeight);
+        gluOrtho2D(0, viewportWidth, 0, viewportHeight);
+        glPopAttrib();
+    }
+
 };
 #endif

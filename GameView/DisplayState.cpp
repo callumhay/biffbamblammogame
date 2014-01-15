@@ -101,9 +101,9 @@ void DisplayState::DebugDrawBounds() {
     }
 
 	// Draw of boundaries of each block...
-	std::vector<std::vector<LevelPiece*>> pieces = model->GetCurrentLevel()->GetCurrentLevelLayout();
+	const std::vector<std::vector<LevelPiece*>>& pieces = model->GetCurrentLevel()->GetCurrentLevelLayout();
 	for (size_t i = 0; i < pieces.size(); i++) {
-		std::vector<LevelPiece*> setOfPieces = pieces[i];
+		const std::vector<LevelPiece*>& setOfPieces = pieces[i];
 		for (size_t j = 0; j < setOfPieces.size(); j++) {
 			setOfPieces[j]->DebugDraw();
 		}

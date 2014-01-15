@@ -27,6 +27,7 @@
 class LevelPiece;
 class CannonBlock;
 class GameModel;
+class GameLevel;
 
 class GameBall : public IPositionObject {
 	// State Machine Design Pattern Friendships
@@ -65,10 +66,12 @@ public:
 
 	void ResetBallAttributes();
 
-	static void SetBallCamera(GameBall* ballCamBall);
+	static void SetBallCamera(GameBall* ballCamBall, const GameLevel* currLevel);
 	static bool GetIsBallCameraOn() { return (GameBall::currBallCamBall != NULL); }
 	static const GameBall* GetBallCameraBall() { return GameBall::currBallCamBall; }
     bool HasBallCameraActive() const { return this == GameBall::currBallCamBall; }
+
+    bool CanShootBallCamOutOfCannon(const CannonBlock& cannon, const GameLevel& currLevel) const;
 
 	// Ball colour set/get functions
 	ColourRGBA GetColour() const {

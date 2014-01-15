@@ -12,17 +12,30 @@
 #include "BallCamHUD.h"
 #include "GameAssets.h"
 
+#include "../BlammoEngine/FBObj.h"
 #include "../GameModel/CannonBlock.h"
+#include "../GameView/GameDisplay.h"
 
 const float BallCamHUD::ROTATE_HINT_BOTTOM_FROM_SCREEN_BOTTOM = 150.0f;
 
-BallCamHUD::BallCamHUD(GameAssets& assets, BoostMalfunctionHUD* boostMalfunctionHUD) :
-boostMalfunctionHUD(boostMalfunctionHUD), 
+const double BallCamHUD::LEVEL_DISPLAY_FADE_IN_ANIMATE_TIME  = 1.0;
+const double BallCamHUD::LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME = 0.5;
+
+const char* BallCamHUD::BOOST_MALFUNCTION_TEXT              = ">>WARNING:\n>>BOOST MALFUNCTION?!";
+const char* BallCamHUD::CANNON_OBSTRUCTION_MALFUNCTION_TEXT = ">>ERROR:\n>>OBSTRUCTION DETECTED!";
+
+BallCamHUD::BallCamHUD(GameAssets& assets) :
+boostMalfunctionHUD(NULL), cannonObstructionHUD(NULL), cannon(NULL),
 cannonRotateHint(assets.GetTutorialAssets(), "Rotate Cannon"),
 cannonFireHint(assets.GetTutorialAssets(), "Fire Cannon"),
-cannonCountdown(CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS), cannonHUDActive(false), cannon(NULL) {
+cannonCountdown(CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS), 
+cannonHUDActive(false), canShootCannon(false) {
 
-    assert(boostMalfunctionHUD != NULL);
+    this->boostMalfunctionHUD  = new MalfunctionTextHUD(BOOST_MALFUNCTION_TEXT, assets.GetSound());
+    this->cannonObstructionHUD = new MalfunctionTextHUD(CANNON_OBSTRUCTION_MALFUNCTION_TEXT, assets.GetSound());
+
+    this->levelOverlayHUDWidth  = static_cast<int>(GameDisplay::GetTextScalingFactor()*360);
+    this->levelOverlayHUDHeight = static_cast<int>(GameDisplay::GetTextScalingFactor()*270);
 
     // Initialize the hints...
     std::list<GameViewConstants::XBoxButtonType> xboxButtonTypes;
@@ -59,9 +72,9 @@ cannonCountdown(CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS), cannonHUDActive
         GameViewConstants::GetInstance()->TEXTURE_BARREL_OVERLAY, Texture::Trilinear);
     assert(this->barrelOverlayTex != NULL);
 
-    this->overlayFadeAnim.ClearLerp();
-    this->overlayFadeAnim.SetInterpolantValue(0.0f);
-    this->overlayFadeAnim.SetRepeat(false);
+    this->cannonOverlayFadeAnim.ClearLerp();
+    this->cannonOverlayFadeAnim.SetInterpolantValue(0.0f);
+    this->cannonOverlayFadeAnim.SetRepeat(false);
 
     std::vector<double> timeValues;
     timeValues.reserve(3);
@@ -76,12 +89,61 @@ cannonCountdown(CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS), cannonHUDActive
 
     this->arrowColourAnim.SetLerp(timeValues, colourValues);
     this->arrowColourAnim.SetRepeat(true);
+
+    this->levelDisplayFadeAnim.ClearLerp();
+    this->levelDisplayFadeAnim.SetInterpolantValue(0.0f);
+    this->levelDisplayFadeAnim.SetRepeat(false);
+
+    this->SetCanShootCannon(true);
 }
 
 BallCamHUD::~BallCamHUD() {
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->barrelOverlayTex);
     UNUSED_VARIABLE(success);
     assert(success);
+
+    delete this->boostMalfunctionHUD;
+    this->boostMalfunctionHUD = NULL;
+    delete this->cannonObstructionHUD;
+    this->cannonObstructionHUD = NULL;
+}
+
+void BallCamHUD::SetCanShootCannon(bool canShoot) {
+    
+    static const double TIME_FLASH_INTERVAL_IN_SECS = 1.0;
+
+    if (canShoot && !this->canShootCannon) {
+ 
+        std::vector<double> timeVals(3);
+        timeVals[0] = 0.0; timeVals[1] = TIME_FLASH_INTERVAL_IN_SECS; timeVals[2] = 2*TIME_FLASH_INTERVAL_IN_SECS;
+
+        std::vector<Colour> colourVals;
+        colourVals.reserve(timeVals.size());
+        colourVals.push_back(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR);
+        colourVals.push_back(Colour(0.5f, 0.5f, 0.5f) + GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR);
+        colourVals.push_back(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR);
+
+        this->canShootCannonColourAnim.SetLerp(timeVals, colourVals);
+        this->canShootCannonColourAnim.SetRepeat(true);
+
+        this->canShootCannon = true;
+    }
+    else if (!canShoot && this->canShootCannon) {
+        std::vector<double> timeVals(3);
+        timeVals[0] = 0.0; timeVals[1] = TIME_FLASH_INTERVAL_IN_SECS; timeVals[2] = 2*TIME_FLASH_INTERVAL_IN_SECS;
+
+        std::vector<Colour> colourVals;
+        colourVals.reserve(timeVals.size());
+        colourVals.push_back(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR);
+        colourVals.push_back(Colour(0.5f, 0.5f, 0.5f) + GameViewConstants::GetInstance()->ITEM_BAD_COLOUR);
+        colourVals.push_back(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR);
+
+        this->canShootCannonColourAnim.SetLerp(timeVals, colourVals);
+        this->canShootCannonColourAnim.SetRepeat(true);
+
+        this->canShootCannon = false;
+    }
+
 }
 
 void BallCamHUD::ToggleCannonHUD(bool activate, const CannonBlock* cannon) {
@@ -95,11 +157,14 @@ void BallCamHUD::ToggleCannonHUD(bool activate, const CannonBlock* cannon) {
         this->cannon = cannon;
         this->cannonRotateHint.Show(0.5, 2.0);
         this->cannonFireHint.Show(0.5, 2.0);
-        this->overlayFadeAnim.SetLerp(0.5, 0.9f);
+        this->cannonOverlayFadeAnim.SetLerp(0.5, 0.9f);
         this->cannonHUDActive = true;
         this->cannonCountdown.Reset();
 
         this->boostMalfunctionHUD->Deactivate();
+        this->cannonObstructionHUD->Deactivate();
+
+        this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME, 0.0f);
     }
     else {
 
@@ -110,9 +175,25 @@ void BallCamHUD::ToggleCannonHUD(bool activate, const CannonBlock* cannon) {
         this->cannon = NULL;
         this->cannonRotateHint.Unshow(0.0, 0.5);
         this->cannonFireHint.Unshow(0.0, 0.5);
-        this->overlayFadeAnim.SetLerp(0.25, 0.0f);
+        this->cannonOverlayFadeAnim.SetLerp(0.25, 0.0f);
         this->cannonHUDActive = false;
+        this->cannonObstructionHUD->Deactivate();
+
+        this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_IN_ANIMATE_TIME, 1.0f);
     }
+}
+
+void BallCamHUD::Activate() {
+    this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_IN_ANIMATE_TIME, 1.0f);
+}
+
+void BallCamHUD::Deactivate() {
+    this->ToggleCannonHUD(false, NULL);
+    this->boostMalfunctionHUD->Deactivate();
+    this->cannonObstructionHUD->Deactivate();
+
+    // Make sure this happens last
+    this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME, 0.0f);
 }
 
 void BallCamHUD::Reinitialize() {
@@ -120,9 +201,13 @@ void BallCamHUD::Reinitialize() {
     this->cannonFireHint.Unshow(0.0, 0.0, true);
     this->cannonHUDActive = false;
     this->cannonCountdown.Reset();
-    this->overlayFadeAnim.ClearLerp();
-    this->overlayFadeAnim.SetInterpolantValue(0.0f);
+    this->cannonOverlayFadeAnim.ClearLerp();
+    this->cannonOverlayFadeAnim.SetInterpolantValue(0.0f);
     this->boostMalfunctionHUD->Reset();
+    this->cannonObstructionHUD->Reset();
+    
+    this->levelDisplayFadeAnim.ClearLerp();
+    this->levelDisplayFadeAnim.SetInterpolantValue(0.0f);
 }
 
 void BallCamHUD::DrawCannonHUD(double dT, const Camera& camera) {
@@ -130,11 +215,11 @@ void BallCamHUD::DrawCannonHUD(double dT, const Camera& camera) {
         return;
     }
 
-    this->overlayFadeAnim.Tick(dT);
+    this->cannonOverlayFadeAnim.Tick(dT);
     this->cannonRotateHint.Tick(dT);
     this->cannonFireHint.Tick(dT);
 
-    this->DrawCannonBarrelOverlay(dT, this->overlayFadeAnim.GetInterpolantValue());
+    this->DrawCannonBarrelOverlay(dT, this->cannonOverlayFadeAnim.GetInterpolantValue());
 
     // Place the hint in the correct location on-screen
     float yPos = this->cannonRotateHint.GetHeight() + ROTATE_HINT_BOTTOM_FROM_SCREEN_BOTTOM;
@@ -257,9 +342,12 @@ void BallCamHUD::DrawCannonBarrelOverlay(double dT, float alpha) {
         glVertex3f(0, height, depth);
     }
 
-    // Now draw the overlay right in the center
-    glColor4f(1, 1, 1, alpha);
     glEnd();
+
+    // Now draw the overlay right in the center
+    this->canShootCannonColourAnim.Tick(dT);
+    const Colour& overlayColour = this->canShootCannonColourAnim.GetInterpolantValue();
+    glColor4f(overlayColour.R(), overlayColour.G(), overlayColour.B(), alpha);
 
     this->barrelOverlayTex->BindTexture();
 
@@ -302,6 +390,99 @@ void BallCamHUD::DrawCannonBarrelOverlay(double dT, float alpha) {
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glPopAttrib();
+}
 
-    debug_opengl_state();
+
+void BallCamHUD::DrawLevelDisplayHUD(double dT, const GameModel& gameModel) {
+
+    this->levelDisplayFadeAnim.Tick(dT);
+    float currAlpha = this->levelDisplayFadeAnim.GetInterpolantValue();
+    if (currAlpha <= 0.0f) {
+        return;
+    }
+
+    const GameLevel* currLevel = gameModel.GetCurrentLevel();
+
+    static const float PADDING_PERCENT = 0.05f;
+
+    const float WINDOW_WIDTH  = this->levelOverlayHUDWidth;
+    const float WINDOW_HEIGHT = this->levelOverlayHUDHeight;
+
+    const int HUD_PADDING_IN_PIXELS = static_cast<int>(this->levelOverlayHUDWidth*0.1);
+
+    float levelWidth  = currLevel->GetLevelUnitWidth();
+    float levelHeight = currLevel->GetLevelUnitHeight();
+
+    float scale = 1.0f;
+    if (levelWidth > levelHeight) {
+        float windowHeightWithPadding = WINDOW_HEIGHT - 2.0f * WINDOW_HEIGHT * PADDING_PERCENT;
+        scale = windowHeightWithPadding / levelHeight;
+    }
+    else {
+        float windowWidthWithPadding = WINDOW_WIDTH - 2.0f * WINDOW_WIDTH * PADDING_PERCENT;
+        scale = windowWidthWithPadding / levelWidth;
+    }
+
+    glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_COLOR_BUFFER_BIT);
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Camera::PushWindowCoords();
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(Camera::GetWindowWidth() - WINDOW_WIDTH - HUD_PADDING_IN_PIXELS, HUD_PADDING_IN_PIXELS, 0.0f);
+
+    glPushMatrix();
+    glScalef(WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f);
+    glTranslatef(0.5f, 0.5f, 0.0f);
+    glColor4f(0, 0, 0, 0.5f*currAlpha);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    glTranslatef(WINDOW_WIDTH/2.0f, WINDOW_HEIGHT/2.0f, 0.0f);
+    glScalef(scale, scale, 1.0f);
+    glTranslatef(-levelWidth/2.0f, -levelHeight/2.0f, 0.0f);
+
+    glColor4f(1, 1, 1, 1*currAlpha);
+    glLineWidth(1.0f);
+
+    const std::vector<std::vector<LevelPiece*> >& pieces = gameModel.GetCurrentLevel()->GetCurrentLevelLayout();
+    for (size_t i = 0; i < pieces.size(); i++) {
+        const std::vector<LevelPiece*>& setOfPieces = pieces[i];
+        for (size_t j = 0; j < setOfPieces.size(); j++) {
+            const LevelPiece* currPiece = setOfPieces[j];
+            currPiece->GetBounds().DrawSimpleBounds();
+        }
+    }
+
+    const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+    if (paddle->HasPaddleType(PlayerPaddle::InvisiPaddle)) {
+        glColor4f(0, 0, 0, 0.33f*currAlpha);
+    }
+    else {
+        glColor4f(0, 1, 0, 1.0f*currAlpha);
+    }
+    paddle->GetBounds().DrawSimpleBounds();
+
+    const GameBall* ball = GameBall::GetBallCameraBall();
+    if (ball == NULL) {
+        ball = gameModel.GetBallChosenForBallCamera();
+    }
+    assert(ball != NULL);
+    if (ball->HasBallType(GameBall::InvisiBall)) {
+        glColor4f(0, 0, 0, 0.33f*currAlpha);
+    }
+    else {
+        glColor4f(1, 1, 0, 1.0f*currAlpha);
+    }
+    ball->GetBounds().DrawSimpleBounds();
+
+    glPopMatrix();
+
+    Camera::PopWindowCoords();
+    glPopAttrib();
 }

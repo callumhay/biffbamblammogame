@@ -27,7 +27,7 @@
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
 #include "RemoteControlRocketHUD.h"
-#include "BoostMalfunctionHUD.h"
+#include "MalfunctionTextHUD.h"
 #include "BallCamHUD.h"
 #include "ButtonTutorialHint.h"
 #include "StickyPaddleGoo.h"
@@ -49,6 +49,7 @@
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
 #include "../GameModel/PaddleRemoteControlRocketProjectile.h"
+#include "../GameModel/PaddleFlameBlasterProjectile.h"
 #include "../GameModel/FullscreenFlashEffectInfo.h"
 #include "../GameModel/GameTransformMgr.h"
 #include "../GameModel/CannonBlock.h"
@@ -89,7 +90,7 @@ pointsHUD(NULL),
 boostHUD(NULL),
 ballReleaseHUD(NULL),
 remoteControlRocketHUD(NULL),
-boostMalfunctionHUD(NULL),
+
 ballCamHUD(NULL),
 
 skipLabel(NULL),
@@ -149,9 +150,8 @@ magnetPaddleEffect(NULL)
     this->ballReleaseHUD = new BallReleaseHUD(this->sound);
     this->remoteControlRocketHUD = new RemoteControlRocketHUD(*this);
 
-    this->boostMalfunctionHUD = new BoostMalfunctionHUD(this->sound);
-    this->ballCamHUD = new BallCamHUD(*this, this->boostMalfunctionHUD);
-    //this->paddleCamHUD = new PaddleCamHUD(*this, this->boostMalfunctionHUD);
+    this->ballCamHUD = new BallCamHUD(*this);
+    //this->paddleCamHUD = new PaddleCamHUD(*this);
 
     this->skipLabel = new ButtonTutorialHint(this->tutorialAssets, "Skip");
     this->skipLabel->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
@@ -245,9 +245,6 @@ GameAssets::~GameAssets() {
     this->ballCamHUD = NULL;
     //delete this->paddleCamHUD;
     //this->paddleCamHUD = NULL;
-
-    delete this->boostMalfunctionHUD;
-    this->boostMalfunctionHUD = NULL;
 
     delete this->skipLabel;
     this->skipLabel = NULL;
@@ -791,53 +788,6 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		
         // Draw a target on the paddle
 		this->espAssets->DrawBallCamEffects(dT, camera, *ballWithCam, *paddle);
-
-        /*
-        // Special case: The ball is coming down towards the paddle, draw a flickering ghost paddle when
-        // the ball is near enough in the location where the ball is coming down
-        const GameLevel* currLevel = gameModel.GetCurrentLevel();
-        Collision::Ray2D ballRay(ballWithCam->GetCenterPosition2D(), ballWithCam->GetDirection());
-        
-        if (Vector2D::Dot(ballWithCam->GetDirection(), Vector2D(0, -1)) > 0 &&
-            currLevel->GetLevelPieceColliderFast(ballRay, ballWithCam->GetBounds().Radius()) == NULL) {
-
-            // Intersect the ray with the paddle plane to find the location of the ghost paddle...
-            float intersectHeight = paddleCenter[1] + scaleHeightAdjustment + paddle->GetHalfHeight();
-            Collision::LineSeg2D paddleLine(Point2D(0, intersectHeight), Point2D(currLevel->GetLevelUnitWidth(), intersectHeight));
-            float rayIntersectionT = 0.0f;
-            
-            // TODO: Add condition for how small rayIntersectionT must be to show the ghost paddle
-            float furthestGhostDist = gameModel.GetGhostPaddleDistance();
-            float fadeInGhostDist = 0.85f * furthestGhostDist;
-            if (Collision::IsCollision(ballRay, paddleLine, rayIntersectionT) && rayIntersectionT <= furthestGhostDist) {
-
-                rayIntersectionT = fabs(rayIntersectionT);
-                float alphaMultiplier = 1.0f;
-                if (rayIntersectionT <= furthestGhostDist && rayIntersectionT >= fadeInGhostDist) {
-                    alphaMultiplier = NumberFuncs::LerpOverFloat(furthestGhostDist, fadeInGhostDist, 0.0f, 1.0f, rayIntersectionT);
-                }
-
-                glPushMatrix();
-                glTranslatef(ballRay.GetPointAlongRayFromOrigin(rayIntersectionT)[0], paddleCenter[1] + scaleHeightAdjustment, 0);
-
-                glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-                
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
-                
-                // Disable the depth draw, this will make sure the paddle attachments don't get outlined
-                glDepthMask(GL_FALSE);
-                
-                // Draw the ghost paddle
-                glColor4f(1, 1, 1, alphaMultiplier * 0.66f);
-                this->worldAssets->DrawGhostPaddle(*paddle, camera);
-
-                glPopMatrix();
-
-                glPopAttrib();
-            }
-        }
-        */
 	}
 	glPopAttrib();
 
@@ -872,12 +822,13 @@ void GameAssets::DrawBackgroundEffects(const Camera& camera) {
 }
 
 // Draw the foreground level pieces...
-void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
-    Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
-
+void GameAssets::DrawLevelPieces(double dT, const GameModel& gameModel, const Camera& camera) {
+    
+    Vector3D worldTransform = gameModel.GetCurrentLevelTranslation();
     BasicPointLight fgKeyLight, fgFillLight, ballLight;
+
     this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-    this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, fgKeyLight, fgFillLight,
+    this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, &gameModel, fgKeyLight, fgFillLight,
         ballLight, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 
@@ -1534,11 +1485,6 @@ void GameAssets::FireRocket(const GameModel& gameModel, const RocketProjectile& 
  */
 void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile) {
 
-    // Paddle isn't hurt by its own flamethrower projectiles
-    if (projectile.GetType() == Projectile::PaddleFlameBlastProjectile) {
-        return;
-    }
-
 	// Add the sprite/particle effect
 	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile);
 
@@ -1594,6 +1540,18 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 			}
 			break;
 
+        case Projectile::PaddleFlameBlastProjectile: {
+            intensity = PlayerHurtHUD::MajorPain;
+            this->sound->PlaySoundAtPosition(GameSound::FlameBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
+            //this->sound->PlaySoundAtPosition(GameSound::PaddleBriefOnFireEvent ...);
+
+            float multiplier = static_cast<const PaddleFlameBlasterProjectile*>(&projectile)->GetSizeMultiplier();
+            GameControllerManager::GetInstance()->VibrateControllers(multiplier * 0.33f,
+                BBBGameController::SoftVibration, BBBGameController::MediumVibration);
+
+            break;
+        }
+
 		default:
 			assert(false);
 			return;
@@ -1617,7 +1575,7 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
 
     // Vibrate the controller
     float intensityMultiplier = (beamSegment.GetRadius() / paddle.GetHalfWidthTotal());
-    GameControllerManager::GetInstance()->VibrateControllers(intensityMultiplier * 1.5f,
+    GameControllerManager::GetInstance()->VibrateControllers(intensityMultiplier * 1.33f,
         BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
 }
 

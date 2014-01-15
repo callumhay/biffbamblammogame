@@ -107,14 +107,16 @@ bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& 
         return false;
     }
 
-    // Move back to the original frame of reference...
-    float fract = collisionDist / moveVecDist;
-    
-    // Determine the non-relative positions of both circles at the time of collision
-    cCenterAtCollision = c.Center() + fract * dT * velocity;
-    thisCenterAtCollision = this->Center() + fract * dT * thisCircleVelocity;
+    float fract = 0.0f;
+    if (moveVecDist >= EPSILON) {
+        // Move back to the original frame of reference...
+        fract = collisionDist / moveVecDist;
+    }
 
-    timeUntilCollision = NumberFuncs::SignOf(fract) * (cCenterAtCollision - c.Center()).Magnitude() / velocity.Magnitude();
+    // Determine the non-relative positions of both circles at the time of collision
+    cCenterAtCollision    = c.Center() + fract * dT * velocity;
+    thisCenterAtCollision = this->Center() + fract * dT * thisCircleVelocity;
+    timeUntilCollision    = NumberFuncs::SignOf(fract) * (cCenterAtCollision - c.Center()).Magnitude() / velocity.Magnitude();
 
     n = Vector2D::Normalize(cCenterAtCollision - thisCenterAtCollision);
     Vector2D perpToNormal(-n[1], n[0]);

@@ -17,6 +17,7 @@
 #include "../BlammoEngine/Mesh.h"
 
 class RegenBlock;
+class GameModel;
 
 class RegenBlockMesh {
 public:
@@ -41,8 +42,9 @@ public:
 
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+	void Draw(double dT, const Camera& camera, const GameModel* gameModel, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+        const BasicPointLight& ballLight);
 
 	void SetAlphaMultiplier(float alpha);
 

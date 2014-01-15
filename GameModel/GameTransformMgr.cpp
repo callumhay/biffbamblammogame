@@ -49,7 +49,7 @@ GameTransformMgr::~GameTransformMgr() {
 void GameTransformMgr::ClearSpecialCamEffects() {
 	if (this->ballWithCamera != NULL) {
 		this->ballWithCamera = NULL;
-		GameBall::SetBallCamera(NULL);
+		GameBall::SetBallCamera(NULL, NULL);
 	}
 
 	if (this->paddleWithCamera != NULL) {
@@ -660,7 +660,7 @@ void GameTransformMgr::GetBallCamPositionRotationAndFOV(const GameBall& ball, fl
         // We'll be a bit more creative than just point the camera downwards:
         // Check to see if the ball is traveling in the direction of a reasonably downwards-pointed
         // trajectory, if so then we use that to modify the lock-at direction of the camera...
-        static const float MODIFY_LOOKAT_CUTOFF_ANGLE_IN_DEGS = 45.0f;
+        static const float MODIFY_LOOKAT_CUTOFF_ANGLE_IN_DEGS = 60.0f;
         static const float MODIFY_LOOKAT_CUTOFF_ANGLE_IN_RADS = Trig::degreesToRadians(MODIFY_LOOKAT_CUTOFF_ANGLE_IN_DEGS);
         const Vector2D& ballDir = ball.GetDirection();
         if (!ballDir.IsZero()) {
@@ -1149,11 +1149,11 @@ void GameTransformMgr::FinishBallCamAnimation(double dT, GameModel& gameModel) {
 
 	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
 		this->ballWithCamera = gameModel.GetBallChosenForBallCamera();
-		GameBall::SetBallCamera(this->ballWithCamera);
+		GameBall::SetBallCamera(this->ballWithCamera, gameModel.GetCurrentLevel());
 	}
 	else {
 		this->ballWithCamera = NULL;
-		GameBall::SetBallCamera(NULL);
+		GameBall::SetBallCamera(NULL, gameModel.GetCurrentLevel());
 	}
 
 	// Pop the animation off the queue

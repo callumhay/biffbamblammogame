@@ -19,10 +19,18 @@
 
 #include "../ResourceManager.h"
 
-CrosshairLaserHUD::CrosshairLaserHUD() : bulletCrosshairTex(NULL), beamCrosshairTex(NULL), beamCenterGlowTex(NULL) {
-	this->bulletCrosshairTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BULLET_CROSSHAIR, Texture::Nearest, GL_TEXTURE_2D);
-	this->beamCrosshairTex   = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BEAM_CROSSHAIR, Texture::Nearest, GL_TEXTURE_2D);
-	this->beamCenterGlowTex  = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear, GL_TEXTURE_2D);
+CrosshairLaserHUD::CrosshairLaserHUD() : bulletCrosshairTex(NULL), 
+beamCrosshairTex(NULL), beamCenterGlowTex(NULL) {
+
+	this->bulletCrosshairTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BULLET_CROSSHAIR, Texture::Nearest, GL_TEXTURE_2D);
+    assert(this->bulletCrosshairTex != NULL);
+	this->beamCrosshairTex   = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BEAM_CROSSHAIR, Texture::Nearest, GL_TEXTURE_2D);
+    assert(this->beamCrosshairTex != NULL);
+	this->beamCenterGlowTex  = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->beamCenterGlowTex != NULL);
 
 	std::vector<double> times;
 	times.reserve(3);
@@ -76,7 +84,7 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 
 	// Don't draw anything if there's significant paddle effect active
 	bool beamIsActive   = paddle->HasPaddleType(PlayerPaddle::LaserBeamPaddle);
-	bool bulletIsActive = paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle);
+    bool bulletIsActive = paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::FlameBlasterPaddle);
     bool rocketIsActive = paddle->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle);
     bool mineIsActive   = paddle->HasPaddleType(PlayerPaddle::MineLauncherPaddle);
 	if (!beamIsActive && !bulletIsActive && !rocketIsActive && !mineIsActive) {

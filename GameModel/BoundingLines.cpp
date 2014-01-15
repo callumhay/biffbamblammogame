@@ -526,15 +526,21 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
 
     Vector2D relativeMoveVec = dT * relativeVel;
     float relativeMoveVecDist = relativeMoveVec.Magnitude();
-    float collisionDist = (cPointOfCollision - circle.Center()).Magnitude();
 
+    if (relativeMoveVecDist < EPSILON) {
+        cPointOfCollision  = circle.Center();
+        timeUntilCollision = 0.0;
+        return true;
+    }
+
+    float collisionDist = (cPointOfCollision - circle.Center()).Magnitude();
     float fract = collisionDist / relativeMoveVecDist;
     if (fract > 1.0f) {
         return false;
     }
     
     // Remap back to the original frame of reference
-    cPointOfCollision = circle.Center() + fract * dT * velocity;
+    cPointOfCollision  = circle.Center() + fract * dT * velocity;
     timeUntilCollision = NumberFuncs::SignOf(fract) * (cPointOfCollision - circle.Center()).Magnitude() / velocity.Magnitude();
     return true;
 }
@@ -931,6 +937,16 @@ BoundingLines& BoundingLines::operator=(const BoundingLines& copy) {
     return (*this);
 }
 
+void BoundingLines::DrawSimpleBounds() const {
+    glBegin(GL_LINES);
+	for (int i = 0; i < static_cast<int>(this->lines.size()); i++) {
+        const Collision::LineSeg2D& currLine = this->lines[i];
+        glVertex2f(currLine.P1()[0], currLine.P1()[1]);
+        glVertex2f(currLine.P2()[0], currLine.P2()[1]);
+    }
+    glEnd();
+}
+
 void BoundingLines::DebugDraw() const {
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT);
 	glDisable(GL_DEPTH_TEST);
@@ -939,14 +955,14 @@ void BoundingLines::DebugDraw() const {
 	glLineWidth(1.0f);
 	
     glBegin(GL_LINES);
-	for (size_t i = 0; i < this->lines.size(); i++) {
+	for (int i = 0; i < static_cast<int>(this->lines.size()); i++) {
         if (this->onInside[i]) {
             glColor3f(0,1,1);
         }
         else {
             glColor3f(1,0,1);
         }
-		Collision::LineSeg2D currLine = this->lines[i];
+		const Collision::LineSeg2D& currLine = this->lines[i];
 		glVertex2f(currLine.P1()[0], currLine.P1()[1]);
 		glVertex2f(currLine.P2()[0], currLine.P2()[1]);
 	}

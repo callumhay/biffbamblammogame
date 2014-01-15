@@ -316,6 +316,9 @@ CannonBlockRotatingPart {
 CannonBlockFiredEvent {
 	file = resources/CannonBlockFiredEvent.ogg
 }
+CannonObstructionMalfunctionEvent {
+	file = resources/MalfunctioningEvent.ogg
+}
 
 // CannonBlockLoadedWithBallCamBallEvent
 
@@ -650,7 +653,7 @@ BoostMalfunctionPromptEvent {
 }
 
 BoostAttemptWhileMalfunctioningEvent {
-	file = resources/BoostAttemptWhileMalfunctioningEvent.ogg
+	file = resources/MalfunctioningEvent.ogg
 }
 
 // Star, points and life Events **********************************************
