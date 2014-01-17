@@ -680,7 +680,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
     if (!p.GetIsPaddleCameraOn() && p.GetAlpha() > 0.0f &&
          p.HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::LaserBeamPaddle | 
-                         PlayerPaddle::MineLauncherPaddle | PlayerPaddle::FlameBlasterPaddle)) {
+         PlayerPaddle::MineLauncherPaddle | PlayerPaddle::FlameBlasterPaddle | PlayerPaddle::IceBlasterPaddle)) {
 
 		glColor4f(1.0f, 1.0f, 1.0f, p.GetAlpha());
 
@@ -691,7 +691,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
         }
 
         // Draw the various active attachments...
-        if (p.HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::FlameBlasterPaddle)) {
+        if (p.HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::FlameBlasterPaddle | PlayerPaddle::IceBlasterPaddle)) {
 			this->paddleGunAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
 
@@ -775,12 +775,13 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	}
 
     if (paddle->HasPaddleType(PlayerPaddle::FlameBlasterPaddle)) {
-        this->espAssets->DrawPaddleFlamethrowerEffects(dT, camera, *paddle);
-        glPopMatrix();
+        this->espAssets->DrawPaddleFlameBlasterEffects(dT, camera, *paddle);
     }
-    else {
-        glPopMatrix();
+    else if (paddle->HasPaddleType(PlayerPaddle::IceBlasterPaddle)) {
+        this->espAssets->DrawPaddleIceBlasterEffects(dT, camera, *paddle);
     }
+
+    glPopMatrix();
 
 	// BALL CAMERA CHECK
 	if (GameBall::GetIsBallCameraOn() && !gameModel.IsBlackoutEffectActive()) {
@@ -1302,7 +1303,17 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 
             // Add a sound for firing the flame blast
             this->sound->PlaySoundAtPosition(GameSound::FlameBlasterShotEvent, false, paddle.GetPosition3D(), true, true, true);
+            // Make the laser attachment animate for firing the gun...
+            this->paddleGunAttachment->FirePaddleGun(paddle);
 
+            break;
+        }
+
+        case Projectile::PaddleIceBlastProjectile: {
+            const PlayerPaddle& paddle = *gameModel.GetPlayerPaddle();
+
+            // Add a sound for firing the flame blast
+            this->sound->PlaySoundAtPosition(GameSound::IceBlasterShotEvent, false, paddle.GetPosition3D(), true, true, true);
             // Make the laser attachment animate for firing the gun...
             this->paddleGunAttachment->FirePaddleGun(paddle);
 
@@ -1548,6 +1559,20 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
             float multiplier = static_cast<const PaddleFlameBlasterProjectile*>(&projectile)->GetSizeMultiplier();
             GameControllerManager::GetInstance()->VibrateControllers(multiplier * 0.33f,
                 BBBGameController::SoftVibration, BBBGameController::MediumVibration);
+
+            break;
+        }
+
+        case Projectile::PaddleIceBlastProjectile: {
+            intensity = PlayerHurtHUD::MinorPain;
+            this->sound->PlaySoundAtPosition(GameSound::IceBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
+            
+            // TODO: Encase the paddle in ice!!!
+            //this->sound->PlaySoundAtPosition(GameSound::PaddleBriefFrozenInIceEvent, ...);
+
+            float multiplier = static_cast<const PaddleFlameBlasterProjectile*>(&projectile)->GetSizeMultiplier();
+            GameControllerManager::GetInstance()->VibrateControllers(multiplier * 0.25f,
+                BBBGameController::SoftVibration, BBBGameController::SoftVibration);
 
             break;
         }

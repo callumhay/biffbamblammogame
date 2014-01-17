@@ -551,6 +551,9 @@ void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& project
             case Projectile::PaddleFlameBlastProjectile:
                 sound->PlaySoundAtPosition(GameSound::FlameBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
                 break;
+            case Projectile::PaddleIceBlastProjectile:
+                sound->PlaySoundAtPosition(GameSound::IceBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
+                break;
             default:
                 break;
         }
@@ -757,8 +760,9 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
-        case Projectile::PaddleFlameBlastProjectile:
         case Projectile::FireGlobProjectile:
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile:
 			// TODO: Maybe a rotating sparkle or something?
 			break;
 
@@ -919,20 +923,36 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball) {
 	debug_output("EVENT: Ball hit Tesla lightning arc");
 }
 
-void GameEventsListener::FireBallCancelledByIceBallEvent(const GameBall& ball) {
+void GameEventsListener::FireBallCanceledByIceBallEvent(const GameBall& ball) {
 
-    this->display->GetAssets()->GetESPAssets()->AddFireballCancelledEffect(&ball);
+    this->display->GetAssets()->GetESPAssets()->AddFireballCanceledEffect(ball);
     this->display->GetSound()->PlaySoundAtPosition(GameSound::FireFrozeEvent, false, ball.GetPosition3D(), true, true, true);
 
 	debug_output("EVENT: Fireball canceled by Iceball");
 }
 
-void GameEventsListener::IceBallCancelledByFireBallEvent(const GameBall& ball) {
+void GameEventsListener::IceBallCanceledByFireBallEvent(const GameBall& ball) {
 
-    this->display->GetAssets()->GetESPAssets()->AddIceballCancelledEffect(&ball);
+    this->display->GetAssets()->GetESPAssets()->AddIceballCanceledEffect(ball);
     this->display->GetSound()->PlaySoundAtPosition(GameSound::FireFrozeEvent, false, ball.GetPosition3D(), true, true, true);
 
 	debug_output("EVENT: Iceball canceled by Fireball");
+}
+
+void GameEventsListener::PaddleIceBlasterCanceledByFireBlasterEvent(const PlayerPaddle& paddle) {
+
+    this->display->GetAssets()->GetESPAssets()->AddIceBlasterCanceledEffect(paddle);
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::FireFrozeEvent, false, paddle.GetPosition3D(), true, true, true);
+
+    debug_output("EVENT: Ice blaster canceled by Fire blaster");
+}
+
+void GameEventsListener::PaddleFireBlasterCanceledByIceBlasterEvent(const PlayerPaddle& paddle) {
+
+    this->display->GetAssets()->GetESPAssets()->AddFireBlasterCanceledEffect(paddle);
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::FireFrozeEvent, false, paddle.GetPosition3D(), true, true, true);
+
+    debug_output("EVENT: Fire blaster canceled by Ice blaster");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {

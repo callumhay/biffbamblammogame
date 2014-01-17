@@ -2,7 +2,7 @@ Switch is it?
 23 27
 S N S E S S S S S S S S S S S S S S S E S N S 
 S E S E S E E E E E E E E E E E E E S E S E S 
-S E S E S E Q(f) D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){2} D(IceBall,IceBall,IceBall){5} D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){6} E E E D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){1} D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle){3} D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,powerdowns){4} Q(f) E S E S E S 
+S E S E S E Q(f) D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){2} D(IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle){5} D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){6} E E E D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,BallShrink,BallShrink,BallShrink,FastBall,FastBall,FastBall,Blackout,Blackout,Blackout,InvisiBall,InvisiBall,InvisiBall,PaddleShrink,PaddleShrink,PaddleShrink,InvisiPaddle,InvisiPaddle,InvisiPaddle,PoisonPaddle,PoisonPaddle,PoisonPaddle,UpsideDown,UpsideDown,UpsideDown){1} D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle){3} D(GravityBall,GravityBall,GravityBall,CrazyBall,CrazyBall,CrazyBall,MagnetPaddle,powerdowns){4} Q(f) E S E S E S 
 S E S E S E E E E E E E E E E E E E S E S E S 
 S E S E S S F(d) F(d) F(d) F(d) F(d) D(RemoteControlRocket) F(d) F(d) F(d) F(d) F(d) S S E S E S 
 S E S E E S E E E E Q(f) E Q(f) E E E E S E E S E S 
@@ -39,8 +39,8 @@ PaddleGrow 0
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0
@@ -49,6 +49,7 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 0
 OmniLaserBall 2
+FlameBlasterPaddle 2
 FireBall 2
 RocketPaddle 2
 GhostBall 2
@@ -60,10 +61,11 @@ MagnetPaddle 2
 MultiBall3 2
 RemoteControlRocket 2
 IceBall 0
+IceBlasterPaddle 0
 MineLauncherPaddle 2
 SlowBall 2
+FastBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
-FastBall 2
 PaddleCam 0

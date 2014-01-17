@@ -43,6 +43,7 @@
 #include "PaddleMineLauncherItem.h"
 #include "RemoteControlRocketItem.h"
 #include "FlameBlasterPaddleItem.h"
+#include "IceBlasterPaddleItem.h"
 #include "RandomItem.h"
 
 GameItemFactory* GameItemFactory::instance = NULL;
@@ -80,8 +81,8 @@ GameItemFactory::GameItemFactory() {
     itemNameToTypeMap.insert(std::make_pair(MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME,                  GameItem::MagnetPaddleItem));
     itemNameToTypeMap.insert(std::make_pair(PaddleMineLauncherItem::MINE_LAUNCHER_PADDLE_ITEM_NAME,     GameItem::MineLauncherPaddleItem));
     itemNameToTypeMap.insert(std::make_pair(RemoteControlRocketItem::REMOTE_CONTROL_ROCKET_ITEM_NAME,   GameItem::RemoteCtrlRocketItem));
-    itemNameToTypeMap.insert(std::make_pair(FlameBlasterPaddleItem::FLAMETHROWER_PADDLE_ITEM_NAME,      GameItem::FlameBlasterPaddleItem));
-    //itemNameToTypeMap.insert(std::make_pair(IceBeamPaddleItem::ICEBEAM_PADDLE_ITEM_NAME,                GameItem::IceBeamPaddleItem));
+    itemNameToTypeMap.insert(std::make_pair(FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_ITEM_NAME,     GameItem::FlameBlasterPaddleItem));
+    itemNameToTypeMap.insert(std::make_pair(IceBlasterPaddleItem::ICE_BLASTER_PADDLE_ITEM_NAME,         GameItem::IceBlasterPaddleItem));
 	itemNameToTypeMap.insert(std::make_pair(RandomItem::RANDOM_ITEM_NAME,                               GameItem::RandomItem));
 	
 	// Establish the set of ALL items except the random item!
@@ -117,7 +118,7 @@ GameItemFactory::GameItemFactory() {
     allItemTypes.insert(GameItem::MineLauncherPaddleItem);
     allItemTypes.insert(GameItem::RemoteCtrlRocketItem);
     allItemTypes.insert(GameItem::FlameBlasterPaddleItem);
-    //allItemTypes.insert(GameItem::IceBeamPaddleItem);
+    allItemTypes.insert(GameItem::IceBlasterPaddleItem);
 	
 	// Establish the Power-up item set
 	allPowerUpItemTypes.insert(GameItem::BallSlowDownItem);
@@ -142,7 +143,7 @@ GameItemFactory::GameItemFactory() {
 	allPowerNeutralItemTypes.insert(GameItem::FireBallItem);
     allPowerNeutralItemTypes.insert(GameItem::FlameBlasterPaddleItem);
 	allPowerNeutralItemTypes.insert(GameItem::IceBallItem);
-    //allPowerNeutralItemTypes.insert(GameItem::IceBeamPaddleItem);
+    allPowerNeutralItemTypes.insert(GameItem::IceBlasterPaddleItem);
     allPowerNeutralItemTypes.insert(GameItem::OmniLaserBallItem);
     allPowerNeutralItemTypes.insert(GameItem::MagnetPaddleItem);
     allPowerNeutralItemTypes.insert(GameItem::RandomItem);
@@ -311,8 +312,8 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
         case GameItem::FlameBlasterPaddleItem:
             return new FlameBlasterPaddleItem(spawnOrigin, gameModel);
 
-        //case GameItem::IceBeamPaddleItem:
-            //return new IceBeamPaddleItem(spawnOrigin, gameModel);
+        case GameItem::IceBlasterPaddleItem:
+            return new IceBlasterPaddleItem(spawnOrigin, gameModel);
 
 		// Random item is a very special kind of item that can't be generated anywhere else but here
 		case GameItem::RandomItem:

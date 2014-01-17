@@ -88,6 +88,7 @@ bool OneWayBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 
 		case Projectile::FireGlobProjectile:
         case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile:
             return false;
 
 		default:
@@ -378,6 +379,10 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
         case Projectile::PaddleFlameBlastProjectile:
             this->LightPieceOnFire(gameModel, false);
+            break;
+
+        case Projectile::PaddleIceBlastProjectile:
+            this->FreezePieceInIce(gameModel);
             break;
 
 		default:

@@ -34,6 +34,7 @@
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
 #include "../GameModel/PaddleFlameBlasterProjectile.h"
+#include "../GameModel/PaddleIceBlasterProjectile.h"
 #include "../GameModel/PuffOfSmokeEffectInfo.h"
 #include "../GameModel/ShockwaveEffectInfo.h"
 #include "../GameModel/DebrisEffectInfo.h"
@@ -60,6 +61,7 @@ particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
 particleGravityArrowColour(ColourRGBA(GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
 flashColourFader(ColourRGBA(1,1,1,1), ColourRGBA(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR, 0.0f)),
+iceOriginColourEffector(ColourRGBA(0.75f, 0.85f, 1.0f, 1.0f), ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 0.0f)),
 starColourFlasher(),
 fireOriginColourEffector(),
 
@@ -105,6 +107,7 @@ stickyPaddleBeamGlowSparks1(NULL),
 stickyPaddleBeamGlowSparks2(NULL),
 
 paddleFlameBlasterOrigin(NULL),
+paddleIceBlasterOrigin(NULL),
 
 explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
 explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
@@ -345,6 +348,8 @@ GameESPAssets::~GameESPAssets() {
 
     delete this->paddleFlameBlasterOrigin;
     this->paddleFlameBlasterOrigin = NULL;
+    delete this->paddleIceBlasterOrigin;
+    this->paddleIceBlasterOrigin = NULL;
 }
 
 /**
@@ -395,7 +400,7 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
     if (killProjectiles) {
 	    // Clear projectile emitters
         this->RemoveAllProjectileEffectsFromMap(this->activeProjectileEmitters);
-        this->RemoveAllProjectileEffectsFromMap(this->activeFlameBlasterFlames);
+        this->RemoveAllProjectileEffectsFromMap(this->activeBlasterProjectileEffects);
     }
 
 	// Clear beam emitters
@@ -1263,7 +1268,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     assert(result);
 }
 
-void GameESPAssets::InitFlamethrowerPaddleESPEffects() {
+void GameESPAssets::InitPaddleBlasterESPEffects() {
     
     assert(this->paddleFlameBlasterOrigin == NULL);
     this->paddleFlameBlasterOrigin = new ESPPointEmitter();
@@ -1274,13 +1279,33 @@ void GameESPAssets::InitFlamethrowerPaddleESPEffects() {
     this->paddleFlameBlasterOrigin->SetParticleSize(ESPInterval(1.0f, 1.3f));
     this->paddleFlameBlasterOrigin->SetEmitDirection(Vector3D(0,1,0));
     this->paddleFlameBlasterOrigin->SetEmitAngleInDegrees(100);
-    this->paddleFlameBlasterOrigin->SetParticleRotation(ESPInterval(180));
     this->paddleFlameBlasterOrigin->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     this->paddleFlameBlasterOrigin->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->paddleFlameBlasterOrigin->AddEffector(&this->particleMediumShrink);
     this->paddleFlameBlasterOrigin->AddEffector(&this->smokeRotatorCW);
     this->paddleFlameBlasterOrigin->AddEffector(&this->fireOriginColourEffector);
     this->paddleFlameBlasterOrigin->SetRandomTextureEffectParticles(40, &this->flameBlasterOriginFireEffect, this->cloudTextures);
+
+    assert(this->paddleIceBlasterOrigin == NULL);
+    this->paddleIceBlasterOrigin = new ESPPointEmitter();
+    this->paddleIceBlasterOrigin->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+    this->paddleIceBlasterOrigin->SetSpawnDelta(ESPInterval(0.01f, 0.0125f));
+    this->paddleIceBlasterOrigin->SetInitialSpd(ESPInterval(1.6f, 2.0f));
+    this->paddleIceBlasterOrigin->SetParticleLife(ESPInterval(0.75f, 1.0f));
+    this->paddleIceBlasterOrigin->SetParticleSize(ESPInterval(1.0f, 1.3f));
+    this->paddleIceBlasterOrigin->SetEmitDirection(Vector3D(0,1,0));
+    this->paddleIceBlasterOrigin->SetEmitAngleInDegrees(100);
+    this->paddleIceBlasterOrigin->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->paddleIceBlasterOrigin->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->paddleIceBlasterOrigin->AddEffector(&this->particleMediumShrink);
+    this->paddleIceBlasterOrigin->AddEffector(&this->smokeRotatorCCW);
+    this->paddleIceBlasterOrigin->AddEffector(&this->iceOriginColourEffector);
+
+    std::vector<Texture2D*> originTextures;
+    originTextures.reserve(this->cloudTextures.size() + this->snowflakeTextures.size());
+    originTextures.insert(originTextures.end(), this->cloudTextures.begin(), this->cloudTextures.end());
+    originTextures.insert(originTextures.end(), this->snowflakeTextures.begin(), this->snowflakeTextures.end());
+    this->paddleIceBlasterOrigin->SetRandomTextureEffectParticles(40, &this->iceBlasterCloudEffect, originTextures);
 }
 
 /**
@@ -1315,7 +1340,7 @@ ESPPointEmitter* GameESPAssets::CreateSpinningTargetESPEffect() {
 void GameESPAssets::InitStandaloneESPEffects() {
 
 	this->InitLaserPaddleESPEffects();
-    this->InitFlamethrowerPaddleESPEffects();
+    this->InitPaddleBlasterESPEffects();
 
 	// Pulsing effect for particles
 	ScaleEffect itemDropPulseSettings;
@@ -1424,6 +1449,20 @@ void GameESPAssets::InitStandaloneESPEffects() {
     this->flameBlasterParticleEffect.SetDarkFireColour(Colour(0.8f, 0.125f, 0.10f));
     this->flameBlasterParticleEffect.SetBrightFireColour(Colour(1.0f, 0.7f, 0.10f));
     this->flameBlasterParticleEffect.SetScale(0.6f);
+
+    this->iceBlasterParticleEffect.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
+    this->iceBlasterParticleEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
+    this->iceBlasterParticleEffect.SetScale(0.5f);
+    this->iceBlasterParticleEffect.SetFrequency(0.8f);
+    this->iceBlasterParticleEffect.SetFlowDirection(Vector3D(0, 0, 1));
+    this->iceBlasterParticleEffect.SetTexture(this->cleanCircleGradientTex);
+
+    this->iceBlasterCloudEffect.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
+    this->iceBlasterCloudEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
+    this->iceBlasterCloudEffect.SetScale(0.5f);
+    this->iceBlasterCloudEffect.SetFrequency(0.8f);
+    this->iceBlasterCloudEffect.SetFlowDirection(Vector3D(0, 0, 1));
+    this->iceBlasterCloudEffect.SetTexture(this->cloudTextures[0]);
 
 	this->fireBallTrailEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
 	this->fireBallTrailEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
@@ -1779,7 +1818,8 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 		case Projectile::FireGlobProjectile:
 			break;
 
-        case Projectile::PaddleFlameBlastProjectile: {
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile: {
             Point2D midPoint = BUILD_PROJECTILE_POS();
             this->AddHitWallEffect(projectile, midPoint);
             break;
@@ -1816,6 +1856,10 @@ void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projecti
 
         case Projectile::PaddleFlameBlastProjectile:
             this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            break;
+
+        case Projectile::PaddleIceBlastProjectile:
+            this->AddIceBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
             break;
 
         case Projectile::PaddleMineBulletProjectile:
@@ -2925,18 +2969,19 @@ void GameESPAssets::AddFirePutOutByIceEffect(const LevelPiece& block) {
     this->activeGeneralEmitters.push_back(puffOfSmokeEffect2);
 }
 
-void GameESPAssets::AddFireballCancelledEffect(const GameBall* ball) {
+void GameESPAssets::AddFireballCanceledEffect(const GameBall& ball) {
 
 	ESPPointEmitter* fireDisperseEffect1 = new ESPPointEmitter();
     fireDisperseEffect1->SetNumParticleLives(1);
 	fireDisperseEffect1->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	fireDisperseEffect1->SetInitialSpd(ESPInterval(3.0f, 5.0f));
 	fireDisperseEffect1->SetParticleLife(ESPInterval(0.5f, 1.0f));
-    fireDisperseEffect1->SetParticleSize(ESPInterval(1.5f * ball->GetBounds().Radius(), 2.5f*ball->GetBounds().Radius()));
+    fireDisperseEffect1->SetParticleSize(ESPInterval(1.5f * ball.GetBounds().Radius(), 2.5f*ball.GetBounds().Radius()));
 	fireDisperseEffect1->SetEmitAngleInDegrees(180);
-    fireDisperseEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), 
-        ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), ESPInterval(0.0f));
-    fireDisperseEffect1->SetEmitPosition(ball->GetCenterPosition());
+    fireDisperseEffect1->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    fireDisperseEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), 
+        ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), ESPInterval(0.0f));
+    fireDisperseEffect1->SetEmitPosition(ball.GetCenterPosition());
     fireDisperseEffect1->AddEffector(&this->particleLargeGrowth);
     fireDisperseEffect1->AddEffector(&this->particleFireColourFader);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -2952,11 +2997,12 @@ void GameESPAssets::AddFireballCancelledEffect(const GameBall* ball) {
     fireDisperseEffect2->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     fireDisperseEffect2->SetInitialSpd(ESPInterval(3.0f, 5.0f));
 	fireDisperseEffect2->SetParticleLife(ESPInterval(0.75f, 1.5f));
-    fireDisperseEffect2->SetParticleSize(ESPInterval(1.25f * ball->GetBounds().Radius(), 2.25f*ball->GetBounds().Radius()));
+    fireDisperseEffect2->SetParticleSize(ESPInterval(1.25f * ball.GetBounds().Radius(), 2.25f*ball.GetBounds().Radius()));
 	fireDisperseEffect2->SetEmitAngleInDegrees(180);
-	fireDisperseEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), 
-        ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), ESPInterval(0.0f));
-    fireDisperseEffect2->SetEmitPosition(ball->GetCenterPosition());
+    fireDisperseEffect2->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+	fireDisperseEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), 
+        ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), ESPInterval(0.0f));
+    fireDisperseEffect2->SetEmitPosition(ball.GetCenterPosition());
 	fireDisperseEffect2->AddEffector(&this->particleFireColourFader);
     fireDisperseEffect2->AddEffector(&this->particleMediumGrowth);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -2971,11 +3017,11 @@ void GameESPAssets::AddFireballCancelledEffect(const GameBall* ball) {
 	haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	haloExpandingAura->SetInitialSpd(ESPInterval(0));
 	haloExpandingAura->SetParticleLife(ESPInterval(1.33f));
-	haloExpandingAura->SetParticleSize(ESPInterval(4.0f*ball->GetBounds().Radius()));
+	haloExpandingAura->SetParticleSize(ESPInterval(4.0f*ball.GetBounds().Radius()));
 	haloExpandingAura->SetEmitAngleInDegrees(0);
 	haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
-	haloExpandingAura->SetEmitPosition(ball->GetCenterPosition());
+	haloExpandingAura->SetEmitPosition(ball.GetCenterPosition());
     haloExpandingAura->AddEffector(&this->particleSuperGrowth);
     haloExpandingAura->AddEffector(&this->particleFireColourFader);
 	haloExpandingAura->SetParticles(1, this->haloTex);
@@ -2985,18 +3031,19 @@ void GameESPAssets::AddFireballCancelledEffect(const GameBall* ball) {
     this->activeGeneralEmitters.push_back(fireDisperseEffect2);
 }
 
-void GameESPAssets::AddIceballCancelledEffect(const GameBall* ball) {
+void GameESPAssets::AddIceballCanceledEffect(const GameBall& ball) {
 
 	ESPPointEmitter* iceDisperseEffect1 = new ESPPointEmitter();
     iceDisperseEffect1->SetNumParticleLives(1);
 	iceDisperseEffect1->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	iceDisperseEffect1->SetInitialSpd(ESPInterval(3.0f, 5.0f));
 	iceDisperseEffect1->SetParticleLife(ESPInterval(0.5f, 1.0f));
-    iceDisperseEffect1->SetParticleSize(ESPInterval(1.5f * ball->GetBounds().Radius(), 2.5f*ball->GetBounds().Radius()));
+    iceDisperseEffect1->SetParticleSize(ESPInterval(1.5f * ball.GetBounds().Radius(), 2.5f*ball.GetBounds().Radius()));
 	iceDisperseEffect1->SetEmitAngleInDegrees(180);
-    iceDisperseEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), 
-        ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), ESPInterval(0.0f));
-    iceDisperseEffect1->SetEmitPosition(ball->GetCenterPosition());
+    iceDisperseEffect1->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    iceDisperseEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), 
+        ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), ESPInterval(0.0f));
+    iceDisperseEffect1->SetEmitPosition(ball.GetCenterPosition());
     iceDisperseEffect1->AddEffector(&this->particleLargeGrowth);
     iceDisperseEffect1->AddEffector(&this->particleWaterVapourColourFader);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -3012,11 +3059,12 @@ void GameESPAssets::AddIceballCancelledEffect(const GameBall* ball) {
     iceDisperseEffect2->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     iceDisperseEffect2->SetInitialSpd(ESPInterval(3.0f, 5.0f));
 	iceDisperseEffect2->SetParticleLife(ESPInterval(0.75f, 1.5f));
-    iceDisperseEffect2->SetParticleSize(ESPInterval(1.25f * ball->GetBounds().Radius(), 2.25f*ball->GetBounds().Radius()));
+    iceDisperseEffect2->SetParticleSize(ESPInterval(1.25f * ball.GetBounds().Radius(), 2.25f*ball.GetBounds().Radius()));
 	iceDisperseEffect2->SetEmitAngleInDegrees(180);
-	iceDisperseEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), 
-        ESPInterval(0.0f, 0.9f*ball->GetBounds().Radius()), ESPInterval(0.0f));
-    iceDisperseEffect2->SetEmitPosition(ball->GetCenterPosition());
+    iceDisperseEffect2->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+	iceDisperseEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), 
+        ESPInterval(0.0f, 0.9f*ball.GetBounds().Radius()), ESPInterval(0.0f));
+    iceDisperseEffect2->SetEmitPosition(ball.GetCenterPosition());
 	iceDisperseEffect2->AddEffector(&this->particleWaterVapourColourFader);
     iceDisperseEffect2->AddEffector(&this->particleMediumGrowth);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -3031,17 +3079,148 @@ void GameESPAssets::AddIceballCancelledEffect(const GameBall* ball) {
 	haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	haloExpandingAura->SetInitialSpd(ESPInterval(0));
 	haloExpandingAura->SetParticleLife(ESPInterval(1.33f));
-	haloExpandingAura->SetParticleSize(ESPInterval(4.0f*ball->GetBounds().Radius()));
+	haloExpandingAura->SetParticleSize(ESPInterval(4.0f*ball.GetBounds().Radius()));
 	haloExpandingAura->SetEmitAngleInDegrees(0);
 	haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
-	haloExpandingAura->SetEmitPosition(ball->GetCenterPosition());
+	haloExpandingAura->SetEmitPosition(ball.GetCenterPosition());
     haloExpandingAura->AddEffector(&this->particleSuperGrowth);
     haloExpandingAura->AddEffector(&this->particleWaterVapourColourFader);
 	haloExpandingAura->SetParticles(1, this->haloTex);
 
     this->activeGeneralEmitters.push_back(haloExpandingAura);
+    this->activeGeneralEmitters.push_back(iceDisperseEffect1);
+    this->activeGeneralEmitters.push_back(iceDisperseEffect2);
+}
 
+void GameESPAssets::AddFireBlasterCanceledEffect(const PlayerPaddle& paddle) {
+
+    const Point3D pos(paddle.GetCenterPosition() + Vector2D(0.0f, paddle.GetHalfHeight() + 
+        PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE), 0.0f);
+    const float scaleFactor = paddle.GetPaddleScaleFactor();
+
+    ESPPointEmitter* fireDisperseEffect1 = new ESPPointEmitter();
+    fireDisperseEffect1->SetNumParticleLives(1);
+    fireDisperseEffect1->SetSpawnDelta(ESPInterval(0.01f, 0.015f));
+    fireDisperseEffect1->SetInitialSpd(ESPInterval(1.5f, 2.0f));
+    fireDisperseEffect1->SetParticleLife(ESPInterval(1.0f, 1.25f));
+    fireDisperseEffect1->SetParticleSize(ESPInterval(1.0f*scaleFactor, 1.5f*scaleFactor));
+    fireDisperseEffect1->SetEmitAngleInDegrees(180);
+    fireDisperseEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*scaleFactor), 
+        ESPInterval(0.0f, 0.9f*scaleFactor), ESPInterval(0.0f));
+    fireDisperseEffect1->SetEmitPosition(pos);
+    fireDisperseEffect1->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    fireDisperseEffect1->AddEffector(&this->particleLargeGrowth);
+    fireDisperseEffect1->AddEffector(&this->particleFireColourFader);
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        fireDisperseEffect1->AddEffector(&this->smokeRotatorCW);
+    }
+    else {
+        fireDisperseEffect1->AddEffector(&this->smokeRotatorCCW);
+    }
+    fireDisperseEffect1->SetRandomTextureEffectParticles(12, &this->flameBlasterOriginFireEffect, this->cloudTextures);
+
+    ESPPointEmitter* fireDisperseEffect2 = new ESPPointEmitter();
+    fireDisperseEffect2->SetNumParticleLives(1);
+    fireDisperseEffect2->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    fireDisperseEffect2->SetInitialSpd(ESPInterval(2.5f, 3.5f));
+    fireDisperseEffect2->SetParticleLife(ESPInterval(0.75f, 1.5f));
+    fireDisperseEffect2->SetParticleSize(ESPInterval(0.4f*scaleFactor, 1.1f*scaleFactor));
+    fireDisperseEffect2->SetEmitAngleInDegrees(180);
+    fireDisperseEffect2->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    fireDisperseEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*scaleFactor), 
+        ESPInterval(0.0f, 0.9f*scaleFactor), ESPInterval(0.0f));
+    fireDisperseEffect2->SetEmitPosition(pos);
+    fireDisperseEffect2->AddEffector(&this->particleFireColourFader);
+    fireDisperseEffect2->AddEffector(&this->particleMediumGrowth);
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        fireDisperseEffect2->AddEffector(&this->smokeRotatorCW);
+    }
+    else {
+        fireDisperseEffect2->AddEffector(&this->smokeRotatorCCW);
+    }
+    fireDisperseEffect2->SetRandomTextureParticles(10, this->smokeTextures);
+
+    ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
+    haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    haloExpandingAura->SetInitialSpd(ESPInterval(0));
+    haloExpandingAura->SetParticleLife(ESPInterval(1.33f));
+    haloExpandingAura->SetParticleSize(ESPInterval(1.5f*scaleFactor));
+    haloExpandingAura->SetEmitAngleInDegrees(0);
+    haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+    haloExpandingAura->SetEmitPosition(pos);
+    haloExpandingAura->AddEffector(&this->particleSuperGrowth);
+    haloExpandingAura->AddEffector(&this->particleFireColourFader);
+    haloExpandingAura->SetParticles(1, this->haloTex);
+
+    this->activeGeneralEmitters.push_back(haloExpandingAura);
+    this->activeGeneralEmitters.push_back(fireDisperseEffect1);
+    this->activeGeneralEmitters.push_back(fireDisperseEffect2);
+}
+
+void GameESPAssets::AddIceBlasterCanceledEffect(const PlayerPaddle& paddle) {
+
+    const Point3D pos(paddle.GetCenterPosition() + Vector2D(0.0f, paddle.GetHalfHeight() + 
+        PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE), 0.0f);
+    const float scaleFactor = paddle.GetPaddleScaleFactor();
+
+    ESPPointEmitter* iceDisperseEffect1 = new ESPPointEmitter();
+    iceDisperseEffect1->SetNumParticleLives(1);
+    iceDisperseEffect1->SetSpawnDelta(ESPInterval(0.01f, 0.015f));
+    iceDisperseEffect1->SetInitialSpd(ESPInterval(1.5f, 2.0f));
+    iceDisperseEffect1->SetParticleLife(ESPInterval(1.0f, 1.25f));
+    iceDisperseEffect1->SetParticleSize(ESPInterval(1.0f*scaleFactor, 1.5f*scaleFactor));
+    iceDisperseEffect1->SetEmitAngleInDegrees(180);
+    iceDisperseEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*scaleFactor), 
+        ESPInterval(0.0f, 0.9f*scaleFactor), ESPInterval(0.0f));
+    iceDisperseEffect1->SetEmitPosition(pos);
+    iceDisperseEffect1->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    iceDisperseEffect1->AddEffector(&this->particleLargeGrowth);
+    iceDisperseEffect1->AddEffector(&this->particleWaterVapourColourFader);
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        iceDisperseEffect1->AddEffector(&this->smokeRotatorCW);
+    }
+    else {
+        iceDisperseEffect1->AddEffector(&this->smokeRotatorCCW);
+    }
+    iceDisperseEffect1->SetRandomTextureEffectParticles(12, &this->iceBlasterCloudEffect, this->cloudTextures);
+
+    ESPPointEmitter* iceDisperseEffect2 = new ESPPointEmitter();
+    iceDisperseEffect2->SetNumParticleLives(1);
+    iceDisperseEffect2->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    iceDisperseEffect2->SetInitialSpd(ESPInterval(2.5f, 3.5f));
+    iceDisperseEffect2->SetParticleLife(ESPInterval(0.75f, 1.5f));
+    iceDisperseEffect2->SetParticleSize(ESPInterval(0.4f*scaleFactor, 1.1f*scaleFactor));
+    iceDisperseEffect2->SetEmitAngleInDegrees(180);
+    iceDisperseEffect2->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    iceDisperseEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*scaleFactor), 
+        ESPInterval(0.0f, 0.9f*scaleFactor), ESPInterval(0.0f));
+    iceDisperseEffect2->SetEmitPosition(pos);
+    iceDisperseEffect2->AddEffector(&this->particleWaterVapourColourFader);
+    iceDisperseEffect2->AddEffector(&this->particleMediumGrowth);
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        iceDisperseEffect2->AddEffector(&this->smokeRotatorCW);
+    }
+    else {
+        iceDisperseEffect2->AddEffector(&this->smokeRotatorCCW);
+    }
+    iceDisperseEffect2->SetRandomTextureParticles(10, this->smokeTextures);
+
+    ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
+    haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    haloExpandingAura->SetInitialSpd(ESPInterval(0));
+    haloExpandingAura->SetParticleLife(ESPInterval(1.33f));
+    haloExpandingAura->SetParticleSize(ESPInterval(1.5f*scaleFactor));
+    haloExpandingAura->SetEmitAngleInDegrees(0);
+    haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+    haloExpandingAura->SetEmitPosition(pos);
+    haloExpandingAura->AddEffector(&this->particleSuperGrowth);
+    haloExpandingAura->AddEffector(&this->particleWaterVapourColourFader);
+    haloExpandingAura->SetParticles(1, this->haloTex);
+
+    this->activeGeneralEmitters.push_back(haloExpandingAura);
     this->activeGeneralEmitters.push_back(iceDisperseEffect1);
     this->activeGeneralEmitters.push_back(iceDisperseEffect2);
 }
@@ -3170,6 +3349,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile:
             return;
 
 		default:
@@ -3326,7 +3506,12 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 
         case Projectile::PaddleFlameBlastProjectile:
             this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
-            // Paddle catches on fire briefly?
+            // TODO: Paddle catches on fire briefly
+            break;
+
+        case Projectile::PaddleIceBlastProjectile:
+            this->AddIceBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            // TODO: Paddle gets frozen in ice briefly
             break;
 
 		case Projectile::PaddleRocketBulletProjectile:
@@ -3711,6 +3896,10 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
             this->AddFlameBlastProjectileEffects(gameModel, *static_cast<const PaddleFlameBlasterProjectile*>(&projectile));
             break;
 
+        case Projectile::PaddleIceBlastProjectile:
+            this->AddIceBlastProjectileEffects(gameModel, *static_cast<const PaddleIceBlasterProjectile*>(&projectile));
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -3723,13 +3912,14 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 void GameESPAssets::RemoveProjectileEffect(const Projectile& projectile) {
 	// Special types of projectiles may be removed in special ways...
     switch (projectile.GetType()) {
-        
-        case Projectile::PaddleFlameBlastProjectile: {
-            // Special stuff for flame blasts: only delete the first effect for the projectile and let the rest
+
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile: {
+            // Special stuff for blast projectiles: only delete the first effect for the projectile and let the rest
             // diminish as active general effects with zero lives left on their particles...
 
-            ProjectileEmitterMapIter projIter = this->activeFlameBlasterFlames.find(&projectile);
-            if (projIter != this->activeFlameBlasterFlames.end()) {
+            ProjectileEmitterMapIter projIter = this->activeBlasterProjectileEffects.find(&projectile);
+            if (projIter != this->activeBlasterProjectileEffects.end()) {
 
                 ProjectileEmitterCollection& projEffects = projIter->second;
                 if (!projEffects.empty()) {
@@ -3749,7 +3939,7 @@ void GameESPAssets::RemoveProjectileEffect(const Projectile& projectile) {
                     }
                 }
                 projEffects.clear();
-                this->activeFlameBlasterFlames.erase(projIter);
+                this->activeBlasterProjectileEffects.erase(projIter);
             }
 
             break;
@@ -3798,7 +3988,7 @@ void GameESPAssets::RemoveProjectileEffectFromMap(const Projectile& projectile, 
 
 void GameESPAssets::RemoveAllProjectileEffects() {
     this->RemoveAllProjectileEffectsFromMap(this->activeProjectileEmitters);
-    this->RemoveAllProjectileEffectsFromMap(this->activeFlameBlasterFlames);
+    this->RemoveAllProjectileEffectsFromMap(this->activeBlasterProjectileEffects);
 }
 
 /**
@@ -4699,7 +4889,6 @@ void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel,
     fireTrail->SetParticleLife(ESPInterval(0.4f, 0.8f));
     fireTrail->SetParticleSize(ESPInterval(1.4f*projectile.GetWidth()));
     fireTrail->SetEmitAngleInDegrees(5);
-    //fireTrail->SetParticleRotation(ESPInterval(180));
     fireTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     fireTrail->SetEmitPosition(projectilePos);
     fireTrail->SetEmitDirection(Vector3D(0, -1, 0));
@@ -4711,9 +4900,9 @@ void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel,
     ESPPointEmitter* fireBits = new ESPPointEmitter();
     fireBits->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
     fireBits->SetSpawnDelta(ESPInterval(0.015f, 0.03f));
-    fireBits->SetInitialSpd(ESPInterval(0.25f * projectile.GetVelocityMagnitude(), 1.1f * projectile.GetVelocityMagnitude()));
+    fireBits->SetInitialSpd(ESPInterval(0.5f * projectile.GetVelocityMagnitude(), 1.1f * projectile.GetVelocityMagnitude()));
     fireBits->SetParticleLife(ESPInterval(0.8f, 1.6f));
-    fireBits->SetParticleSize(ESPInterval(0.125f*projectile.GetWidth(), 0.3f*projectile.GetWidth()));
+    fireBits->SetParticleSize(ESPInterval(0.2f*projectile.GetWidth(), 0.4f*projectile.GetWidth()));
     fireBits->SetEmitAngleInDegrees(30);
     fireBits->SetParticleRotation(ESPInterval(0, 359.999f));
     fireBits->SetRadiusDeviationFromCenter(
@@ -4760,8 +4949,8 @@ void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel,
     shimmerTrailEmitter->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCCW : &this->smokeRotatorCW);
     shimmerTrailEmitter->SetParticles(10, &this->refractFireEffect);
 
-    ProjectileEmitterCollection& emitters = this->activeFlameBlasterFlames[&projectile];
-    emitters.push_back(fireParticle);
+    ProjectileEmitterCollection& emitters = this->activeBlasterProjectileEffects[&projectile];
+    emitters.push_back(fireParticle); // Particle always goes first!!
     emitters.push_back(shimmerTrailEmitter);
     emitters.push_back(smokeTrail);
     emitters.push_back(fireTrail);
@@ -4822,6 +5011,146 @@ void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel,
 
         this->activeGeneralEmitters.push_back(shotOnoEffect);
     }
+}
+
+void GameESPAssets::AddIceBlastProjectileEffects(const GameModel& gameModel, const PaddleIceBlasterProjectile& projectile) {
+    
+    const Point3D projectilePos(projectile.GetPosition(), projectile.GetZOffset());
+    const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+
+    ESPPointEmitter* iceParticle = new ESPPointEmitter();
+    iceParticle->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    iceParticle->SetInitialSpd(ESPInterval(0));
+    iceParticle->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    iceParticle->SetParticleSize(ESPInterval(1.15f*projectile.GetWidth()));
+    iceParticle->SetParticleRotation(ESPInterval(180));
+    iceParticle->SetParticleAlignment(ESP::ScreenAligned);
+    iceParticle->SetEmitPosition(projectilePos);
+    iceParticle->SetEmitDirection(Vector3D(0,1,0));
+    iceParticle->SetParticles(1, &this->iceBlasterParticleEffect);
+
+    ESPPointEmitter* iceCloudTrail = new ESPPointEmitter();
+    iceCloudTrail->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+    iceCloudTrail->SetSpawnDelta(ESPInterval(0.015f, 0.02f));
+    iceCloudTrail->SetInitialSpd(ESPInterval(1.5f, 2.25f));
+    iceCloudTrail->SetParticleLife(ESPInterval(0.4f, 0.8f));
+    iceCloudTrail->SetParticleSize(ESPInterval(1.2f*projectile.GetWidth(), 1.4f*projectile.GetWidth()));
+    iceCloudTrail->SetEmitAngleInDegrees(6);
+    iceCloudTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f*projectile.GetWidth()));
+    iceCloudTrail->SetEmitPosition(projectilePos);
+    iceCloudTrail->SetEmitDirection(Vector3D(0, -1, 0));
+    iceCloudTrail->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+    iceCloudTrail->SetParticleAlignment(ESP::ScreenAligned);
+    iceCloudTrail->AddEffector(&this->particleMediumShrink);
+    iceCloudTrail->AddEffector(&this->iceBallColourFader);
+    iceCloudTrail->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
+    iceCloudTrail->SetRandomTextureEffectParticles(18, &this->iceBlasterCloudEffect, this->cloudTextures);
+
+    ESPPointEmitter* iceBits = new ESPPointEmitter();
+    iceBits->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+    iceBits->SetSpawnDelta(ESPInterval(0.015f, 0.03f));
+    iceBits->SetInitialSpd(ESPInterval(0.75f * projectile.GetVelocityMagnitude(), 1.15f * projectile.GetVelocityMagnitude()));
+    iceBits->SetParticleLife(ESPInterval(0.8f, 1.5f));
+    iceBits->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 1.0f*projectile.GetWidth()));
+    iceBits->SetEmitAngleInDegrees(30);
+    iceBits->SetParticleRotation(ESPInterval(0, 359.999f));
+    iceBits->SetRadiusDeviationFromCenter(
+        ESPInterval(0.0f, 0.5f*projectile.GetHalfWidth()), 
+        ESPInterval(0.0f, 0.5f*projectile.GetHalfHeight()),
+        ESPInterval(0.0f));
+    iceBits->SetParticleColour(
+        ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f), 
+        ESPInterval(iceColour.B()), ESPInterval(1.0f));
+    iceBits->SetEmitPosition(projectilePos);
+    iceBits->SetEmitDirection(Vector3D(0, 1, 0));
+    iceBits->SetParticleAlignment(ESP::ScreenAligned);
+    iceBits->AddEffector(&this->particleShrinkToNothing);
+    iceBits->AddEffector(&this->gravity);
+    iceBits->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
+    iceBits->SetParticles(15, this->sparkleTex);
+
+    ESPPointEmitter* snowflakeTrail = new ESPPointEmitter();
+    snowflakeTrail->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+    snowflakeTrail->SetSpawnDelta(ESPInterval(0.075f, 0.15f));
+    snowflakeTrail->SetInitialSpd(ESPInterval(1.8f, 2.5f));
+    snowflakeTrail->SetParticleLife(ESPInterval(0.6f, 1.0f));
+    snowflakeTrail->SetParticleSize(ESPInterval(0.25f*projectile.GetWidth(), 0.8f*projectile.GetWidth()));
+    snowflakeTrail->SetEmitAngleInDegrees(20);
+    snowflakeTrail->SetParticleRotation(ESPInterval(0.0f, 359.99f));
+    snowflakeTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    snowflakeTrail->SetEmitPosition(projectilePos);
+    snowflakeTrail->SetEmitDirection(Vector3D(0, -1, 0));
+    snowflakeTrail->SetParticleAlignment(ESP::ScreenAligned);
+    snowflakeTrail->SetParticleColour(
+        ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f), 
+        ESPInterval(iceColour.B()), ESPInterval(1.0f));
+    snowflakeTrail->AddEffector(&this->particleLargeGrowth);
+    snowflakeTrail->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCCW : &this->smokeRotatorCW);
+    snowflakeTrail->AddEffector(&this->particleFader);
+    snowflakeTrail->SetRandomTextureParticles(10, this->snowflakeTextures);
+
+    ProjectileEmitterCollection& emitters = this->activeBlasterProjectileEffects[&projectile];
+    emitters.push_back(iceParticle);   // Particle always goes first!!
+    emitters.push_back(iceCloudTrail);
+    emitters.push_back(snowflakeTrail);
+    emitters.push_back(iceBits);
+    
+    const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+    if (!paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
+
+        // Add the effect for the actual shot
+        ESPPointEmitter* shotEmitter = new ESPPointEmitter();
+        shotEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+        shotEmitter->SetNumParticleLives(1);
+        shotEmitter->SetInitialSpd(ESPInterval(3.0f, 6.0f));
+        shotEmitter->SetParticleLife(ESPInterval(0.8f, 1.5f));
+        shotEmitter->SetEmitAngleInDegrees(70);
+        shotEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.15f*projectile.GetWidth()),
+            ESPInterval(0.0f), ESPInterval(0.0f));
+        shotEmitter->SetParticleSize(ESPInterval(0.1f*projectile.GetWidth(), 0.25f*projectile.GetWidth()));
+        shotEmitter->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+        shotEmitter->SetParticleRotation(ESPInterval(180.0f));
+        shotEmitter->SetEmitPosition(projectilePos);
+        shotEmitter->AddEffector(&this->iceBallColourFader);
+        shotEmitter->AddEffector(&this->particleLargeGrowth);
+        shotEmitter->SetParticles(8, this->cleanCircleGradientTex);
+
+        this->activeGeneralEmitters.push_back(shotEmitter);
+
+        // .. and the onomatopoeia for it
+        ESPPointEmitter* shotOnoEffect = new ESPPointEmitter();
+        // Set up the emitter...
+        shotOnoEffect->SetSpawnDelta(ESPInterval(-1));
+        shotOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
+        shotOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
+        shotOnoEffect->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 0.75f*projectile.GetWidth()));
+        shotOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+        shotOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+        shotOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+        shotOnoEffect->SetEmitPosition(projectilePos);
+        shotOnoEffect->SetEmitDirection(Vector3D(projectile.GetVelocityDirection(), 0.0f));
+        shotOnoEffect->SetEmitAngleInDegrees(45);
+        shotOnoEffect->SetParticleColour(ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+
+        // Add effectors...
+        shotOnoEffect->AddEffector(&this->particleFader);
+        shotOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+        // Add the single particle to the emitter...
+        DropShadow dpTemp;
+        dpTemp.colour = Colour(1,1,1);
+        dpTemp.amountPercentage = 0.10f;
+        ESPOnomataParticle* shotParticle = 
+            new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+            GameFontAssetsManager::Small));
+        shotParticle->SetColour(0, 0, 0, 1);
+        shotParticle->SetDropShadow(dpTemp);
+        shotParticle->SetOnomatoplexSound(Onomatoplex::SHOT, Onomatoplex::GOOD);
+        shotOnoEffect->AddParticle(shotParticle);
+
+        this->activeGeneralEmitters.push_back(shotOnoEffect);
+    }
+
 }
 
 // Effects for when a mine is fired from the player paddle.
@@ -5225,6 +5554,10 @@ void GameESPAssets::AddHitWallEffect(const Projectile& projectile, const Point2D
             this->AddFlameBlastHitWallEffect(projectile.GetWidth(), hitPos);
             break;
 
+        case Projectile::PaddleIceBlastProjectile:
+            this->AddIceBlastHitWallEffect(projectile.GetWidth(), hitPos);
+            break;
+
         default:
             assert(false);
             return;
@@ -5341,10 +5674,54 @@ void GameESPAssets::AddFlameBlastHitWallEffect(float size, const Point2D& loc) {
     particleClouds->SetParticleLife(ESPInterval(0.6f, 1.25f));
     particleClouds->SetParticleSize(ESPInterval(size / 2.0f, size / 1.15f));
     particleClouds->SetEmitAngleInDegrees(180);
+    particleClouds->SetParticleRotation(ESPInterval(0, 259.9999f));
     particleClouds->SetEmitPosition(EMITTER_LOCATION);
     particleClouds->AddEffector(&this->particleFireFastColourFader);
     particleClouds->AddEffector(&this->particleMediumGrowth);
+    particleClouds->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
     particleClouds->SetRandomTextureParticles(8, this->smokeTextures);
+
+    this->activeGeneralEmitters.push_back(particleClouds);
+    this->activeGeneralEmitters.push_back(particleSparks);
+}
+
+void GameESPAssets::AddIceBlastHitWallEffect(float size, const Point2D& loc) {
+    const Point3D EMITTER_LOCATION(loc[0], loc[1], 0.0f);
+
+    const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+
+    // Create a dispersion of particle bits
+    ESPPointEmitter* particleSparks = new ESPPointEmitter();
+    particleSparks->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+    particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    particleSparks->SetInitialSpd(ESPInterval(2.5f, 4.0f));
+    particleSparks->SetParticleLife(ESPInterval(1.0f, 1.5f));
+    particleSparks->SetParticleSize(ESPInterval(size / 7.0f, size / 2.0f));
+    particleSparks->SetParticleColour(
+        ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f), 
+        ESPInterval(iceColour.B()), ESPInterval(1.0f));
+    particleSparks->SetEmitDirection(Vector3D(0,1,0));
+    particleSparks->SetEmitAngleInDegrees(180);
+    particleSparks->SetParticleRotation(ESPInterval(180));
+    particleSparks->SetEmitPosition(EMITTER_LOCATION);
+    particleSparks->SetParticleAlignment(ESP::ScreenAligned);
+    particleSparks->AddEffector(&this->particleFader);
+    particleSparks->AddEffector(&this->particleLargeGrowth);
+    particleSparks->SetRandomTextureParticles(8, this->snowflakeTextures);
+
+    ESPPointEmitter* particleClouds = new ESPPointEmitter();
+    particleClouds->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+    particleClouds->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    particleClouds->SetInitialSpd(ESPInterval(1.5f, 2.0f));
+    particleClouds->SetParticleLife(ESPInterval(0.6f, 1.25f));
+    particleClouds->SetParticleSize(ESPInterval(size / 1.5f, size));
+    particleClouds->SetEmitAngleInDegrees(180);
+    particleClouds->SetParticleRotation(ESPInterval(0, 259.9999f));
+    particleClouds->SetEmitPosition(EMITTER_LOCATION);
+    particleClouds->AddEffector(&this->iceBallColourFader);
+    particleClouds->AddEffector(&this->particleLargeGrowth);
+    particleClouds->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
+    particleClouds->SetRandomTextureEffectParticles(8, &this->iceBlasterCloudEffect, this->cloudTextures);
 
     this->activeGeneralEmitters.push_back(particleClouds);
     this->activeGeneralEmitters.push_back(particleSparks);
@@ -5358,7 +5735,7 @@ void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Poin
     // Shockwave
     ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(EMITTER_LOCATION, projectile.GetWidth(), 0.33f);
     
-	// Create a dispertion of particle bits
+	// Create a dispersion of particle bits
 	ESPPointEmitter* particleSparks = new ESPPointEmitter();
 	particleSparks->SetSpawnDelta(ESPInterval(0.02f, 0.03f));
 	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
@@ -6610,6 +6987,11 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
             break;
         }
 
+        case GameItem::IceBlasterPaddleItem: {
+            this->paddleIceBlasterOrigin->Reset();
+            break;
+        }
+
 		case GameItem::CrazyBallItem:
 			this->crazyBallAura->Reset();
 			break;
@@ -6703,7 +7085,7 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 		}
 	}
 
-    this->DrawPaddleFireBlasterProjectiles(dT, camera);
+    this->DrawPaddleBlasterProjectiles(dT, camera);
 }
 
 /**
@@ -6746,10 +7128,10 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera,
     }
 }
 
-void GameESPAssets::DrawPaddleFlamethrowerEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+void GameESPAssets::DrawPaddleFlameBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 
     float scaleFactor = paddle.GetPaddleScaleFactor();
-    Point3D emitPos(0, PaddleFlameBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_FLAME, -paddle.GetHalfDepthTotal());
+    Point3D emitPos(0, PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE, -paddle.GetHalfDepthTotal());
     this->paddleFlameBlasterOrigin->SetEmitPosition(emitPos);
     this->paddleFlameBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
     this->paddleFlameBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
@@ -6757,43 +7139,53 @@ void GameESPAssets::DrawPaddleFlamethrowerEffects(double dT, const Camera& camer
     this->paddleFlameBlasterOrigin->Draw(camera);
 }
 
-void GameESPAssets::DrawPaddleFireBlasterProjectiles(double dT, const Camera& camera) {
+void GameESPAssets::DrawPaddleIceBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+    float scaleFactor = paddle.GetPaddleScaleFactor();
+    Point3D emitPos(0, PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE, -paddle.GetHalfDepthTotal());
+    this->paddleIceBlasterOrigin->SetEmitPosition(emitPos);
+    this->paddleIceBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
+    this->paddleIceBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
+    this->paddleIceBlasterOrigin->Tick(dT);
+    this->paddleIceBlasterOrigin->Draw(camera);
+}
 
-    for (ProjectileEmitterMapIter iter = this->activeFlameBlasterFlames.begin();
-         iter != this->activeFlameBlasterFlames.end(); ++iter) {
+void GameESPAssets::DrawPaddleBlasterProjectiles(double dT, const Camera& camera) {
 
-        const PaddleFlameBlasterProjectile* currProjectile = static_cast<const PaddleFlameBlasterProjectile*>(iter->first);
-        if (currProjectile->IsLoadedInCannonBlock()) {
-            continue;
-        }
+    for (ProjectileEmitterMapIter iter = this->activeBlasterProjectileEffects.begin();
+        iter != this->activeBlasterProjectileEffects.end(); ++iter) {
 
-        Point3D projectilePos3d(currProjectile->GetPosition());
-        const Vector3D projectileOppositeDir(-currProjectile->GetVelocityDirection(), 0.0f);
+            const PaddleBlasterProjectile* currProjectile = static_cast<const PaddleBlasterProjectile*>(iter->first);
+            if (currProjectile->IsLoadedInCannonBlock()) {
+                continue;
+            }
 
-        ProjectileEmitterCollection& projEmitters = iter->second;
+            Point3D projectilePos3d(currProjectile->GetPosition());
+            const Vector3D projectileOppositeDir(-currProjectile->GetVelocityDirection(), 0.0f);
 
-        assert(currProjectile != NULL);
-        assert(!projEmitters.empty());
-        ProjectileEmitterCollectionIter emitIter = projEmitters.begin();
+            ProjectileEmitterCollection& projEmitters = iter->second;
 
-        // First emitter is just the projectile for a flame
-        ESPPointEmitter* flameEmitter = *emitIter;
-        
-        // All others come off that flame...
-        ++emitIter;
-        for (; emitIter != projEmitters.end(); ++emitIter) {
+            assert(currProjectile != NULL);
+            assert(!projEmitters.empty());
+            ProjectileEmitterCollectionIter emitIter = projEmitters.begin();
 
-            ESPPointEmitter* currEmitter = *emitIter;
-            
-            currEmitter->SetEmitPosition(projectilePos3d);
-            currEmitter->SetEmitDirection(projectileOppositeDir);
-            currEmitter->Tick(dT);
-            currEmitter->Draw(camera);
-        }
+            // First emitter is just the projectile for the actual projectile
+            ESPPointEmitter* primaryEmitter = *emitIter;
 
-        flameEmitter->Tick(dT);
-        flameEmitter->SetAliveParticlePosition(currProjectile->GetPosition()[0], currProjectile->GetPosition()[1], 0.0f);
-        flameEmitter->Draw(camera);
+            // All others come off that flame...
+            ++emitIter;
+            for (; emitIter != projEmitters.end(); ++emitIter) {
+
+                ESPPointEmitter* currEmitter = *emitIter;
+
+                currEmitter->SetEmitPosition(projectilePos3d);
+                currEmitter->SetEmitDirection(projectileOppositeDir);
+                currEmitter->Tick(dT);
+                currEmitter->Draw(camera);
+            }
+
+            primaryEmitter->Tick(dT);
+            primaryEmitter->SetAliveParticlePosition(currProjectile->GetPosition()[0], currProjectile->GetPosition()[1], 0.0f);
+            primaryEmitter->Draw(camera);
     }
 }
 

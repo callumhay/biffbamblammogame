@@ -127,6 +127,7 @@ bool SwitchBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 
 		case Projectile::FireGlobProjectile:
         case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile:
             return false;
 
 		default:
@@ -242,6 +243,10 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
                 this->SwitchPressed(gameModel);
             }
 			break;
+
+        case Projectile::PaddleIceBlastProjectile:
+            this->FreezePieceInIce(gameModel);
+            break;
 
 		default:
 			assert(false);

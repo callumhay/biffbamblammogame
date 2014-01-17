@@ -202,6 +202,11 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
             this->LightPieceOnFire(gameModel, false);
             this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::FireDestruction);
             break;
+
+        case Projectile::PaddleIceBlastProjectile:
+            this->FreezePieceInIce(gameModel);
+            break;
+
 		default:
 			assert(false);
 			break;

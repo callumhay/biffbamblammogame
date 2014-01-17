@@ -2225,6 +2225,7 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
         case Projectile::LaserTurretBulletProjectile:
         case Projectile::FireGlobProjectile:
         case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile:
             return false;
         
         case Projectile::CollateralBlockProjectile:

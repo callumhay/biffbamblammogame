@@ -20,6 +20,7 @@
 #include "PaddleRemoteControlRocketProjectile.h"
 #include "FireGlobProjectile.h"
 #include "PaddleFlameBlasterProjectile.h"
+#include "PaddleIceBlasterProjectile.h"
 #include "PaddleLaserBeam.h"
 #include "BossBodyPart.h"
 
@@ -63,7 +64,8 @@ const int PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE = 18.0f;
 
 // Delay between shots of the laser
 const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
-const double PlayerPaddle::PADDLE_FLAME_BLAST_DELAY = 0.5;
+const double PlayerPaddle::PADDLE_FLAME_BLAST_DELAY  = 0.5;
+const double PlayerPaddle::PADDLE_ICE_BLAST_DELAY    = 0.5;
 const double PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY  = 0.75;
 
 // The default amount of damage the the paddle shield does to a block, when colliding with the block, per second
@@ -80,7 +82,7 @@ PlayerPaddle::PlayerPaddle() :
 centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 
 maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
-timeSinceLastFlameBlast(PlayerPaddle::PADDLE_FLAME_BLAST_DELAY), timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
+timeSinceLastBlastShot(PADDLE_FLAME_BLAST_DELAY + PADDLE_ICE_BLAST_DELAY), timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
 impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), 
@@ -94,7 +96,7 @@ PlayerPaddle::~PlayerPaddle() {
 // Reset the dimensions and position of this paddle (e.g., after death, start of a level).
 void PlayerPaddle::ResetPaddle() {
 	this->timeSinceLastLaserBlast = 0.0;
-    this->timeSinceLastFlameBlast = 0.0;
+    this->timeSinceLastBlastShot = 0.0;
     this->timeSinceLastMineLaunch = 0.0;
 	this->laserBeamTimer = 0.0;
 	this->currSize = PlayerPaddle::NormalSize;
@@ -383,7 +385,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	// Increment seconds since the various types of previous weapon shots
 	// This makes sure the user can't consecutively fire various weapons like crazy
 	this->timeSinceLastLaserBlast += seconds;
-    this->timeSinceLastFlameBlast += seconds;
+    this->timeSinceLastBlastShot  += seconds;
     this->timeSinceLastMineLaunch += seconds;
 
 	// Figure out what the current acceleration is based on whether the player
@@ -760,14 +762,25 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 
         // Check for the flame blaster paddle (shoots blasts of fire)
         if (this->HasPaddleType(PlayerPaddle::FlameBlasterPaddle)) {
-            if (this->timeSinceLastFlameBlast >= PADDLE_FLAME_BLAST_DELAY) {
+            if (this->timeSinceLastBlastShot >= PADDLE_FLAME_BLAST_DELAY) {
 
                 PaddleFlameBlasterProjectile* fireProjectile = new PaddleFlameBlasterProjectile(*this);
                 gameModel->AddProjectile(fireProjectile);
 
-                this->timeSinceLastFlameBlast = 0.0;
+                this->timeSinceLastBlastShot = 0.0;
 
-                // EVENT: Paddle just fired a bit of flame...
+                // EVENT: Paddle just fired a blast of flame...
+                GameEventManager::Instance()->ActionPaddleWeaponFired();
+            }
+        }
+        else if (this->HasPaddleType(PlayerPaddle::IceBlasterPaddle)) {
+            if (this->timeSinceLastBlastShot >= PADDLE_ICE_BLAST_DELAY) {
+                PaddleIceBlasterProjectile* iceProjectile = new PaddleIceBlasterProjectile(*this);
+                gameModel->AddProjectile(iceProjectile);
+
+                this->timeSinceLastBlastShot = 0.0;
+
+                // EVENT: Paddle just fired a blast of ice...
                 GameEventManager::Instance()->ActionPaddleWeaponFired();
             }
         }
@@ -1021,6 +1034,10 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 
         case Projectile::PaddleFlameBlastProjectile:
             this->FlameBlastProjectileCollision(*static_cast<const PaddleFlameBlasterProjectile*>(&projectile));
+            break;
+
+        case Projectile::PaddleIceBlastProjectile:
+            this->IceBlastProjectileCollision(*static_cast<const PaddleIceBlasterProjectile*>(&projectile));
             break;
 
 		default:
@@ -1440,6 +1457,17 @@ void PlayerPaddle::FlameBlastProjectileCollision(const PaddleFlameBlasterProject
     this->lastEntityThatHurtHitPaddle = &flameBlastProjectile;
 }
 
+void PlayerPaddle::IceBlastProjectileCollision(const PaddleIceBlasterProjectile& iceBlastProjectile) {
+
+    float multiplier = iceBlastProjectile.GetSizeMultiplier();
+    float currHeight = 2.0f * this->GetHalfHeight();
+
+    this->SetPaddleHitByProjectileAnimation(iceBlastProjectile.GetPosition(), 
+        multiplier * 1.0f, multiplier * currHeight * 1.2f, currHeight, 30.0f);
+
+    this->lastEntityThatHurtHitPaddle = &iceBlastProjectile;
+}
+
 void PlayerPaddle::BeamCollision(const Beam& beam, const BeamSegment& beamSegment) {
     UNUSED_PARAMETER(beam);
 
@@ -1739,7 +1767,9 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, co
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
-        case Projectile::BossRocketBulletProjectile: {
+        case Projectile::BossRocketBulletProjectile:
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile: {
 
             // These projectiles can only collide with the paddle if they're NOT going upwards from the paddle
             if (Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector()) <= EPSILON ) {
@@ -1781,6 +1811,7 @@ bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
             case Projectile::MineTurretBulletProjectile:
             case Projectile::BossRocketBulletProjectile:
             case Projectile::PaddleFlameBlastProjectile:
+            case Projectile::PaddleIceBlastProjectile:
                 return true;
             default:
                 break;

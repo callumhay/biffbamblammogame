@@ -22,7 +22,7 @@ E E S E E E R R Y G Y R R E E E S E E
 E E S E E E O O Y G Y O O E E E S E E 
 E E S E E E O O Y G Y O O E E E S E E 
 E E S E E E O O Y G Y O O E E E S E E 
-E E S E E E S S S D(IceBall,IceBall,IceBall) S S S E E E S E E 
+E E S E E E S S S D(IceBall,IceBall,IceBlasterPaddle,IceBlasterPaddle) S S S E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E S E E 
@@ -41,34 +41,36 @@ STARS:
 32000
 
 PaddleGrow 0
-PoisonPaddle 0
-Blackout 0
-BallSafetyNet 0
-BallGrow 0
-UberBall 0
-StickyPaddle 0
-ShieldPaddle 0
+PoisonPaddle 3
+Blackout 3
+BallSafetyNet 1
+UberBall 1
+BallGrow 1
+StickyPaddle 1
+ShieldPaddle 2
 LaserBulletPaddle 0
-PaddleShrink 0
-InvisiPaddle 0
-InvisiBall 0
+PaddleShrink 3
+InvisiPaddle 3
+InvisiBall 3
 LaserBeamPaddle 0
-OmniLaserBall 0
-FireBall 0
+OmniLaserBall 1
+FlameBlasterPaddle 2
+FireBall 2
 RocketPaddle 0
 GhostBall 0
-BallShrink 0
-UpsideDown 0
-MultiBall5 0
+BallShrink 2
+UpsideDown 3
+MultiBall5 1
 BallCam 0
-MagnetPaddle 0
-MultiBall3 0
+MagnetPaddle 2
+MultiBall3 1
 RemoteControlRocket 0
 IceBall 0
+IceBlasterPaddle 0
 MineLauncherPaddle 0
-SlowBall 0
-GravityBall 0
-CrazyBall 0
-Random 0
-FastBall 0
+SlowBall 1
+FastBall 3
+GravityBall 2
+CrazyBall 2
+Random 2
 PaddleCam 0

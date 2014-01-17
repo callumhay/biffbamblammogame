@@ -2301,6 +2301,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\IceBlasterPaddleItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\InvisiBallItem.h"
 						>
 					</File>
@@ -2434,6 +2438,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\IceBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\IceBlasterPaddleItem.cpp"
 						>
 					</File>
 					<File
@@ -2577,7 +2585,15 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleBlasterProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleFlameBlasterProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleIceBlasterProjectile.h"
 						>
 					</File>
 					<File
@@ -2673,7 +2689,15 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleBlasterProjectile.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleFlameBlasterProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleIceBlasterProjectile.cpp"
 						>
 					</File>
 					<File

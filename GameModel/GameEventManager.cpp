@@ -251,20 +251,34 @@ void GameEventManager::ActionGamePauseStateChanged(int32_t oldPauseState, int32_
     }	
 }
 
-// Action for when a fireball is cancelled by the player acquiring an iceball item
-void GameEventManager::ActionFireBallCancelledByIceBall(const GameBall& ball) {
+// Action for when a fireball is canceled by the player acquiring an iceball item
+void GameEventManager::ActionFireBallCanceledByIceBall(const GameBall& ball) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->FireBallCancelledByIceBallEvent(ball);
+		(*listenerIter)->FireBallCanceledByIceBallEvent(ball);
 	}	
 }
 
-// Action for when an iceball is cancelled by the player acquiring a fireball item
-void GameEventManager::ActionIceBallCancelledByFireBall(const GameBall& ball) {
+// Action for when an iceball is canceled by the player acquiring a fireball item
+void GameEventManager::ActionIceBallCanceledByFireBall(const GameBall& ball) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->IceBallCancelledByFireBallEvent(ball);
+		(*listenerIter)->IceBallCanceledByFireBallEvent(ball);
 	}
+}
+
+void GameEventManager::ActionPaddleIceBlasterCanceledByFireBlaster(const PlayerPaddle& paddle) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleIceBlasterCanceledByFireBlasterEvent(paddle);
+    }
+}
+
+void GameEventManager::ActionPaddleFireBlasterCanceledByIceBlaster(const PlayerPaddle& paddle) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleFireBlasterCanceledByIceBlasterEvent(paddle);
+    }
 }
 
 // Action for when the ball collides with the player paddle

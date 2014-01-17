@@ -239,6 +239,10 @@ LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
             this->LightPieceOnFire(gameModel);
             break;
 
+        case Projectile::PaddleIceBlastProjectile:
+            this->FreezePieceInIce(gameModel);
+            break;
+
 		default:
 			assert(false);
 			break;

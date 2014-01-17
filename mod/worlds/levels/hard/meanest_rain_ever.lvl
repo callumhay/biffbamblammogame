@@ -39,8 +39,8 @@ PaddleGrow 1
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 1
-BallGrow 0
 UberBall 0
+BallGrow 0
 StickyPaddle 1
 ShieldPaddle 1
 LaserBulletPaddle 0
@@ -49,6 +49,7 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 0
 OmniLaserBall 1
+FlameBlasterPaddle 1
 FireBall 1
 RocketPaddle 0
 GhostBall 0
@@ -60,10 +61,11 @@ MagnetPaddle 3
 MultiBall3 3
 RemoteControlRocket 0
 IceBall 1
+IceBlasterPaddle 1
 MineLauncherPaddle 0
 SlowBall 1
+FastBall 2
 GravityBall 1
 CrazyBall 0
 Random 2
-FastBall 2
 PaddleCam 0

@@ -387,16 +387,27 @@ public:
      * Event triggered when a ball loses the fireball ability due to the player acquiring the iceball ability.
 	 * Arguments: ball - The ball that lost the fireball ability.
      */
-    virtual void FireBallCancelledByIceBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
+    virtual void FireBallCanceledByIceBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
     
     /**
      * Event triggered when a ball loses the iceball ability due to the player acquiring the fireball ability.
 	 * Arguments: ball - The ball that lost the iceball ability.
      */
-    virtual void IceBallCancelledByFireBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
+    virtual void IceBallCanceledByFireBallEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
+
+    /**
+    * Event triggered when the paddle loses the ice blaster ability due to the player acquiring the fire blaster ability.
+    * Arguments: paddle - The paddle that lost the ice blaster ability.
+     */
+    virtual void PaddleIceBlasterCanceledByFireBlasterEvent(const PlayerPaddle& paddle) { UNUSED_PARAMETER(paddle); }
+
+    /**
+    * Event triggered when the paddle loses the fire blaster ability due to the player acquiring the ice blaster ability.
+    * Arguments: paddle - The paddle that lost the fire blaster ability.
+     */
+    virtual void PaddleFireBlasterCanceledByIceBlasterEvent(const PlayerPaddle& paddle) { UNUSED_PARAMETER(paddle); }
 
 	// Misc Events (Destruction, Combos, etc.) ************************************************
-
 
     virtual void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
         UNUSED_PARAMETER(block);

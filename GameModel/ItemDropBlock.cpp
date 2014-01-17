@@ -201,6 +201,10 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
             this->LightPieceOnFire(gameModel, false);
             break;
 
+        case Projectile::PaddleIceBlastProjectile:
+            this->FreezePieceInIce(gameModel);
+            break;
+
 		default:
 			assert(false);
 			break;
