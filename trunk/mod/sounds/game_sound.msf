@@ -411,6 +411,14 @@ FlameBlasterHitEvent {
 	file = resources/FlameBlasterHitEvent.ogg
 }
 
+IceBlasterShotEvent {
+	file = resources/IceBlasterShotEvent.ogg
+}
+
+IceBlasterHitEvent {
+	file = resources/IceBlasterHitEvent.ogg
+}
+
 LaserBulletShotEvent {
 	file = resources/LaserBulletShotEvent.ogg
 }

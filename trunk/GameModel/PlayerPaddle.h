@@ -31,6 +31,7 @@ class MineTurretProjectile;
 class MineProjectile;
 class FireGlobProjectile;
 class PaddleFlameBlasterProjectile;
+class PaddleIceBlasterProjectile;
 class BossBodyPart;
 class Beam;
 class BeamSegment;
@@ -56,6 +57,7 @@ public:
 
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
     static const double PADDLE_FLAME_BLAST_DELAY;   // Delay between shots of the flame blaster
+    static const double PADDLE_ICE_BLAST_DELAY;     // Delay between shots of the ice blaster
     static const double PADDLE_MINE_LAUNCH_DELAY;   // Delay between launches of mines
 
 	static const Vector2D DEFAULT_PADDLE_UP_VECTOR;
@@ -67,11 +69,12 @@ public:
     static const float MAX_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
     static const float DIFF_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
 
+    // WARNING: The PaddleType is a bit-wise mask, make sure all enumerations are bit-wise mutually exclusive!
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000002, 
                       StickyPaddle = 0x00000004, LaserBeamPaddle = 0x00000008, RocketPaddle = 0x00000010, 
                       ShieldPaddle = 0x00000020, InvisiPaddle = 0x00000040, MagnetPaddle = 0x00000080,
                       MineLauncherPaddle = 0x00000100, RemoteControlRocketPaddle = 0x00000200, 
-                      FlameBlasterPaddle = 0x00000400 };
+                      FlameBlasterPaddle = 0x00000400, IceBlasterPaddle = 0x00000800 };
 
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
@@ -381,7 +384,7 @@ private:
 	
     double timeSinceLastMineLaunch; // Time since the last launch of a mine projectile
 	double timeSinceLastLaserBlast;	// Time since the last laser projectile/bullet was fired
-    double timeSinceLastFlameBlast; // Time since the last fire blast projectile was fired
+    double timeSinceLastBlastShot; // Time since the last fire blast projectile was fired
 	double laserBeamTimer;          // Time left on the laser beam power-up
 
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
@@ -412,6 +415,7 @@ private:
     void MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile);
 	void FireGlobProjectileCollision(const FireGlobProjectile& fireGlobProjectile);
     void FlameBlastProjectileCollision(const PaddleFlameBlasterProjectile& flameBlastProjectile);
+    void IceBlastProjectileCollision(const PaddleIceBlasterProjectile& iceBlastProjectile);
     void BeamCollision(const Beam& beam, const BeamSegment& beamSegment);
 
 	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);

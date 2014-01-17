@@ -53,7 +53,8 @@ InvisiPaddle 2
 InvisiBall 3
 LaserBeamPaddle 1
 OmniLaserBall 1
-FireBall 2
+FlameBlasterPaddle 1
+FireBall 1
 RocketPaddle 0
 GhostBall 3
 BallShrink 2
@@ -64,10 +65,11 @@ MagnetPaddle 3
 MultiBall3 0
 RemoteControlRocket 0
 IceBall 2
+IceBlasterPaddle 2
 MineLauncherPaddle 0
 SlowBall 1
+FastBall 3
 GravityBall 2
 CrazyBall 2
 Random 2
-FastBall 3
 PaddleCam 0

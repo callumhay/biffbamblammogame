@@ -220,6 +220,10 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
             this->LightPieceOnFire(gameModel, false);
             break;
 
+        case Projectile::PaddleIceBlastProjectile:
+            this->FreezePieceInIce(gameModel);
+            break;
+
 		default:
 			assert(false);
 			break;

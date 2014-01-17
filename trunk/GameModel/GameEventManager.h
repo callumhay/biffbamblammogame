@@ -93,8 +93,11 @@ public:
 
     void ActionGamePauseStateChanged(int32_t oldPauseState, int32_t newPauseState);
 
-    void ActionFireBallCancelledByIceBall(const GameBall& ball);
-    void ActionIceBallCancelledByFireBall(const GameBall& ball);
+    void ActionFireBallCanceledByIceBall(const GameBall& ball);
+    void ActionIceBallCanceledByFireBall(const GameBall& ball);
+
+    void ActionPaddleIceBlasterCanceledByFireBlaster(const PlayerPaddle& paddle);
+    void ActionPaddleFireBlasterCanceledByIceBlaster(const PlayerPaddle& paddle);
 
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside);
 	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);

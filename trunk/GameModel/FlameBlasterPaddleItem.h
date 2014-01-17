@@ -16,8 +16,8 @@
 
 class FlameBlasterPaddleItem : public GameItem {
 public:
-    static const char* FLAMETHROWER_PADDLE_ITEM_NAME;
-    static const double FLAMETHROWER_PADDLE_TIMER_IN_SECS;
+    static const char* FLAME_BLASTER_PADDLE_ITEM_NAME;
+    static const double FLAME_BLASTER_PADDLE_TIMER_IN_SECS;
 
     FlameBlasterPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
     ~FlameBlasterPaddleItem();

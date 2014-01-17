@@ -36,7 +36,7 @@ class PlayerPaddle;
 class GameModel;
 class GameLevel;
 class Beam;
-class PaddleFlameBlasterProjectile;
+class PaddleBlasterProjectile;
 struct ESPInterval;
 
 class PuffOfSmokeEffectInfo;
@@ -88,8 +88,10 @@ private:
     ESPParticleColourEffector flashColourFader;
     ESPParticleColourEffector slowBallColourFader;
     ESPParticleColourEffector fastBallColourFader;
+    ESPParticleColourEffector iceOriginColourEffector;
     ESPMultiColourEffector starColourFlasher;
     ESPMultiColourEffector fireOriginColourEffector;
+    
 
 	ESPParticleScaleEffector particlePulseUberballAura;
 	ESPParticleScaleEffector particlePulseItemDropAura;
@@ -227,10 +229,11 @@ private:
 	BeamSegEmitterMap beamFlareEmitters;
     // -------------------------------------------------------------------------
 
-    // Cached flamethrower effects ---------------------------------------------
+    // Cached flame blaster and ice blaster effects ----------------------------
     ESPPointEmitter* paddleFlameBlasterOrigin;
+    ESPPointEmitter* paddleIceBlasterOrigin;
 
-    ProjectileEmitterMap  activeFlameBlasterFlames;
+    ProjectileEmitterMap  activeBlasterProjectileEffects;
     // -------------------------------------------------------------------------
 
 	CgFxVolumetricEffect ghostBallSmoke;
@@ -240,6 +243,8 @@ private:
     CgFxVolumetricEffect flameBlasterOriginFireEffect;
     CgFxVolumetricEffect flameBlasterFireEffect;
     CgFxFireBallEffect   flameBlasterParticleEffect;
+    CgFxVolumetricEffect iceBlasterParticleEffect;
+    CgFxVolumetricEffect iceBlasterCloudEffect;
 
     CgFxPostRefract refractFireEffect;
 	CgFxPostRefract normalTexRefractEffect;
@@ -267,7 +272,7 @@ private:
 	void AddLifeUpEffect(const PlayerPaddle* paddle);
 
 	void InitLaserPaddleESPEffects();
-    void InitFlamethrowerPaddleESPEffects();
+    void InitPaddleBlasterESPEffects();
 
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
@@ -276,6 +281,7 @@ private:
 	void AddRocketProjectileEffects(const RocketProjectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
     void AddFlameBlastProjectileEffects(const GameModel& gameModel, const PaddleFlameBlasterProjectile& projectile);
+    void AddIceBlastProjectileEffects(const GameModel& gameModel, const PaddleIceBlasterProjectile& projectile);
     void AddPaddleMineFiredEffects(const GameModel& gameModel, const PaddleMineProjectile& projectile);
     void AddPaddleMineAttachedEffects(const Projectile& projectile);
 
@@ -297,6 +303,7 @@ private:
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
     void AddFlameBlastHitWallEffect(float size, const Point2D& loc);
+    void AddIceBlastHitWallEffect(float size, const Point2D& loc);
 	void AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc, const Colour& baseColour, const Colour& brightColour);
     void AddLightningBoltHitWallEffect(float width, float height, const Point2D& loc);
     void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
@@ -385,8 +392,10 @@ public:
     void AddIceMeltedByFireEffect(const LevelPiece& block);
     void AddFirePutOutByIceEffect(const LevelPiece& block);
 
-    void AddFireballCancelledEffect(const GameBall* ball);
-    void AddIceballCancelledEffect(const GameBall* ball);
+    void AddFireballCanceledEffect(const GameBall& ball);
+    void AddIceballCanceledEffect(const GameBall& ball);
+    void AddFireBlasterCanceledEffect(const PlayerPaddle& paddle);
+    void AddIceBlasterCanceledEffect(const PlayerPaddle& paddle);
 
     void AddFireGlobDestroyedEffect(const Projectile& projectile);
 
@@ -431,8 +440,10 @@ public:
 	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawBeamEffects(double dT, const Camera& camera);
 	void DrawProjectileEffects(double dT, const Camera& camera);
-    void DrawPaddleFlamethrowerEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
-    void DrawPaddleFireBlasterProjectiles(double dT, const Camera& camera);
+    
+    void DrawPaddleFlameBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+    void DrawPaddleIceBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+    void DrawPaddleBlasterProjectiles(double dT, const Camera& camera);
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 

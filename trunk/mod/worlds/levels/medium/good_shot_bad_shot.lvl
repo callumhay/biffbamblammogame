@@ -4,7 +4,7 @@ C(180) E E E E C(270) E G E C(90) E E E E C(180)
 E E E E G E E Q(i) E E G E E E E 
 C(180) E E E E E C(270) Q(i) C(90) E E E E E C(180) 
 E E E E Q(i) E E Q(i) E E Q(i) E E E E 
-E S S D(MineLauncherPaddle) N N N N N N N D(RocketPaddle) S S E 
+E S S D(MineLauncherPaddle) N N N N N N N D(RocketPaddle,RocketPaddle,RocketPaddle) S S E 
 E S E E E E E Q(i) E E E E E S E 
 E S E K(PaddleShrink,PaddleShrink,PaddleShrink) E K(PaddleShrink,PaddleShrink,PaddleShrink) E E E K(PaddleShrink,PaddleShrink,PaddleShrink) E K(PaddleShrink,PaddleShrink,PaddleShrink) E S E 
 E S E E E E E I E E E E E S E 
@@ -55,6 +55,7 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 1
 OmniLaserBall 2
+FlameBlasterPaddle 2
 FireBall 2
 RocketPaddle 0
 GhostBall 0
@@ -66,10 +67,11 @@ MagnetPaddle 2
 MultiBall3 2
 RemoteControlRocket 0
 IceBall 2
+IceBlasterPaddle 2
 MineLauncherPaddle 2
 SlowBall 2
+FastBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
-FastBall 2
 PaddleCam 0

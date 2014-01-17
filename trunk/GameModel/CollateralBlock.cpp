@@ -197,6 +197,10 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
             }
 			break;
 		
+        case Projectile::PaddleIceBlastProjectile:
+            this->FreezePieceInIce(gameModel);
+            break;
+
 		default:
 			assert(false);
 			break;

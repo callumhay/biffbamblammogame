@@ -64,7 +64,8 @@ CannonBlock::~CannonBlock() {
 
 // Determine whether the given projectile will pass through this block...
 bool CannonBlock::ProjectilePassesThrough(const Projectile* projectile) const {
-    return projectile->IsRocket() || projectile->GetType() == Projectile::PaddleFlameBlastProjectile;
+    return projectile->IsRocket() || projectile->GetType() == Projectile::PaddleFlameBlastProjectile || 
+        projectile->GetType() == Projectile::PaddleIceBlastProjectile;
 }
 
 LevelPiece* CannonBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
@@ -236,10 +237,11 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile:
             // If the cannon isn't already loaded with a projectile then
             // the blast gets captured by the cannon block and shot somewhere else...
             if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {
-                PaddleFlameBlasterProjectile* blastProjectile = static_cast<PaddleFlameBlasterProjectile*>(projectile);
+                PaddleBlasterProjectile* blastProjectile = static_cast<PaddleBlasterProjectile*>(projectile);
                 this->SetupRandomCannonFireTimeAndDirection();
                 blastProjectile->LoadIntoCannonBlock(this);
                 blastProjectile->SetLastThingCollidedWith(this);

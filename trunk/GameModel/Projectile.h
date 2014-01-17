@@ -35,9 +35,10 @@ public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, PaddleRemoteCtrlRocketBulletProjectile,
                           RocketTurretBulletProjectile, FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
-                          PaddleFlameBlastProjectile,
+                          PaddleFlameBlastProjectile, PaddleIceBlastProjectile,
                           BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile, 
-                          BossLightningBoltBulletProjectile };
+                          BossLightningBoltBulletProjectile
+    };
 
 	virtual ~Projectile();
 

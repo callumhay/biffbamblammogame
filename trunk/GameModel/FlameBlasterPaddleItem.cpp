@@ -13,11 +13,11 @@
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
-const char* FlameBlasterPaddleItem::FLAMETHROWER_PADDLE_ITEM_NAME      = "FlameBlasterPaddle";
-const double FlameBlasterPaddleItem::FLAMETHROWER_PADDLE_TIMER_IN_SECS = 17.0f;
+const char* FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_ITEM_NAME      = "FlameBlasterPaddle";
+const double FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_TIMER_IN_SECS = 17.0f;
 
 FlameBlasterPaddleItem::FlameBlasterPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(FlameBlasterPaddleItem::FLAMETHROWER_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+GameItem(FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
 }
 
 FlameBlasterPaddleItem::~FlameBlasterPaddleItem() {
@@ -28,14 +28,29 @@ double FlameBlasterPaddleItem::Activate() {
     PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
     assert(paddle != NULL);
 
-    // Remove all currently active paddle flamethrower items
+
+    // Kill other fire blaster timers
     std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
     for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end();) {
         GameItemTimer* currTimer = *iter;
+
+        // Remove the fire blaster timers from the list of active timers
         if (currTimer->GetTimerItemType() == GameItem::FlameBlasterPaddleItem) {
             iter = activeTimers.erase(iter);
             delete currTimer;
             currTimer = NULL;
+        }
+        else if (currTimer->GetTimerItemType() == GameItem::IceBlasterPaddleItem) {
+
+            // EVENT: An ice blaster is being canceled by a fire blaster 
+            GameEventManager::Instance()->ActionPaddleIceBlasterCanceledByFireBlaster(*this->gameModel->GetPlayerPaddle());
+
+            // If there's an ice blaster item going right now then the effects just cancel each other out
+            iter = activeTimers.erase(iter);
+            delete currTimer;
+            currTimer = NULL;
+
+            return 0.0;
         }
         else {
             ++iter;
@@ -46,7 +61,7 @@ double FlameBlasterPaddleItem::Activate() {
     paddle->AddPaddleType(PlayerPaddle::FlameBlasterPaddle);
 
     GameItem::Activate();
-    return FlameBlasterPaddleItem::FLAMETHROWER_PADDLE_TIMER_IN_SECS;
+    return FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_TIMER_IN_SECS;
 }
 
 void FlameBlasterPaddleItem::Deactivate() {

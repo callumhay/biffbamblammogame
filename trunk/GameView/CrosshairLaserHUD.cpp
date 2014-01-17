@@ -76,7 +76,7 @@ CrosshairLaserHUD::~CrosshairLaserHUD() {
 }
 
 /**
- * Draw the crosshair on the screen as a HUD element (ontop of everything,
+ * Draw the crosshair on the screen as a HUD element (on top of everything,
  * in screen coordinates, directly in the middle).
  */
 void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int screenHeight, float alpha) const {
@@ -84,7 +84,7 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 
 	// Don't draw anything if there's significant paddle effect active
 	bool beamIsActive   = paddle->HasPaddleType(PlayerPaddle::LaserBeamPaddle);
-    bool bulletIsActive = paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::FlameBlasterPaddle);
+    bool bulletIsActive = paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle | PlayerPaddle::FlameBlasterPaddle | PlayerPaddle::IceBlasterPaddle);
     bool rocketIsActive = paddle->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle);
     bool mineIsActive   = paddle->HasPaddleType(PlayerPaddle::MineLauncherPaddle);
 	if (!beamIsActive && !bulletIsActive && !rocketIsActive && !mineIsActive) {

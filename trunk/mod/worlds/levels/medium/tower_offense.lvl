@@ -24,7 +24,7 @@ S E G G G E S G K(UpsideDown) G S E G G G E S
 S E G G G E S E E E S E G G G E S 
 S E G G E E S Q(f) Q(f) Q(f) S E E G G E S 
 S E E E E S E E E E E S E E E E S 
-S S S S S K(RocketPaddle) E E E E E K(LaserBeamPaddle) S S S S S 
+S S S S S K(FlameBlasterPaddle,FlameBlasterPaddle,FlameBlasterPaddle) E E E E E K(IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle) S S S S S 
 S E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E S 
@@ -45,8 +45,8 @@ PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -55,6 +55,7 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
+FlameBlasterPaddle 2
 FireBall 2
 RocketPaddle 2
 GhostBall 0
@@ -66,10 +67,11 @@ MagnetPaddle 2
 MultiBall3 2
 RemoteControlRocket 0
 IceBall 2
+IceBlasterPaddle 2
 MineLauncherPaddle 0
 SlowBall 2
+FastBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
-FastBall 2
 PaddleCam 0

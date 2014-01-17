@@ -148,6 +148,8 @@ public:
         MineLatchedOnEvent,
         FlameBlasterShotEvent,
         FlameBlasterHitEvent,
+        IceBlasterShotEvent,
+        IceBlasterHitEvent,
         LaserBulletShotEvent,
 		LaserBeamFiringLoop,
         LaserDeflectedByShieldEvent,

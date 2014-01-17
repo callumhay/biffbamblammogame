@@ -47,7 +47,7 @@ double FireBallItem::Activate() {
 
                 const GameBall* currBall = *ballIter;
                 assert(currBall != NULL);
-                GameEventManager::Instance()->ActionIceBallCancelledByFireBall(*currBall);
+                GameEventManager::Instance()->ActionIceBallCanceledByFireBall(*currBall);
             }
 
 			// If there's an ice ball item going right now then the effects just cancel each other out

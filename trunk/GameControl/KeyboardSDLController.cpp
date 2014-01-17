@@ -572,7 +572,7 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                     break;
                 case SDLK_EQUALS:
                 case SDLK_PLUS:
-                    // ... TODO: this->model->DropItem(GameItem::IceBeamPaddleItem);
+                    this->model->DropItem(GameItem::IceBlasterPaddleItem);
                     break;
 
                 case SDLK_BACKSLASH:
