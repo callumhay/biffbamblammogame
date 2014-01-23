@@ -208,6 +208,13 @@ PaddleHitWallEvent {
 	file = resources/PaddleHitWallEvent_01.ogg | resources/PaddleHitWallEvent_02.ogg | resources/PaddleHitWallEvent_03.ogg | resources/PaddleHitWallEvent_04.ogg
 }
 
+PaddleFrozenEvent {
+	file = resources/BlockFrozenEvent.ogg
+}
+
+PaddleOnFireEvent {
+	file = resources/PaddleOnFireEvent.ogg
+}
 
 // Ball Events ***************************************************************
 

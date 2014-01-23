@@ -38,12 +38,13 @@ private:
 	GLuint cubeDL;
 	GLuint lineCircleDL;
     GLuint sphereDL;
-    
+    GLuint basicPaddleDL;
 
 	bool InitializeQuadDL();
 	bool InitializeCubeDL();
     bool InitializeLineCircleDL();
 	bool InitializeSphereDL();
+    bool InitializeBasicPaddleDL();
 
     static const int CIRCLE_TESSELATION;
 	static const int TUNNEL_TESSELATION;
@@ -89,6 +90,10 @@ public:
 	inline void DrawSphere() const { glCallList(this->sphereDL); }
 	inline GLuint GetSphereDL() const { return this->sphereDL; }
 	static GLuint CreateSphereDL(float horizRadius, float vertRadius, unsigned int stacks, unsigned int slices);
+
+    void DrawRawBasicPaddle();
+    inline void DrawBasicPaddle() const { glCallList(this->basicPaddleDL); }
+    inline GLuint GetBasicPaddleDL() const { return this->basicPaddleDL; }
 
     inline void DrawFullScreenQuadNoDepth(int width, int height, const ColourRGBA& colour = ColourRGBA(1,1,1,1)) {
 		glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);

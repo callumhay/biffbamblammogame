@@ -31,6 +31,7 @@
 #include "ESPEmitter.h"
 #include "ESPPointEmitter.h"
 #include "ESPVolumeEmitter.h"
+#include "ESPLineEmitter.h"
 #include "ESPPointToPointBeam.h"
 #include "ESPBeam.h"
 #include "ESPParticle.h"

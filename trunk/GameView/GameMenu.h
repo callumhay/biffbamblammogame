@@ -135,6 +135,23 @@ public:
 		return this->menuItems.size() - 1;
 	}
 
+    bool RemoveMenuItem(int idx) {
+        if (idx >= 0 && idx < static_cast<int>(this->menuItems.size())) {
+            delete this->menuItems[idx];
+            this->menuItems.erase(this->menuItems.begin()+idx);
+
+            if (this->selectedMenuItemIndex >= idx) {
+                this->selectedMenuItemIndex--;
+                if (this->selectedMenuItemIndex < 0 && !this->menuItems.empty()) {
+                    this->selectedMenuItemIndex = 0;
+                }
+            }
+
+            return true;
+        }
+        return false;
+    }
+
     const GameMenuItem* GetMenuItemAt(int index) const { return this->menuItems[index]; };
 
 	// Sets the padding between menu items, measured in pixels

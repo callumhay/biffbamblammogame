@@ -44,12 +44,6 @@ const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.7f;
 // (bigger is slower, smaller is faster)
 const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 
-// Flamethrower constants
-const float PlayerPaddle::MIN_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS = 0.06;
-const float PlayerPaddle::MAX_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS = 0.2;
-const float PlayerPaddle::DIFF_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS     = 
-    MAX_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS - MIN_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
-
 // Default speed of the paddle (units/sec)
 const float PlayerPaddle::DEFAULT_MAX_SPEED = 27.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
@@ -71,6 +65,9 @@ const double PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY  = 0.75;
 // The default amount of damage the the paddle shield does to a block, when colliding with the block, per second
 const int PlayerPaddle::DEFAULT_SHIELD_DMG_PER_SECOND = 90;
 
+const double PlayerPaddle::PADDLE_FROZEN_TIME_IN_SECS  = 1.7;
+const double PlayerPaddle::PADDLE_ON_FIRE_TIME_IN_SECS = 2.0;
+
 bool PlayerPaddle::paddleBallReleaseTimerEnabled = true;
 bool PlayerPaddle::paddleBallReleaseEnabled      = true;
 
@@ -83,10 +80,10 @@ centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDire
 maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 timeSinceLastBlastShot(PADDLE_FLAME_BLAST_DELAY + PADDLE_ICE_BLAST_DELAY), timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
-moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
+moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), currSpecialStatus(PlayerPaddle::NoStatus),
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
 impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), 
-levelBoundsCheckingOn(true), startingXPos(0.0) {
+levelBoundsCheckingOn(true), startingXPos(0.0), frozenCountdown(0.0), onFireCountdown(0.0) {
 	this->ResetPaddle();
 }
 
@@ -99,10 +96,12 @@ void PlayerPaddle::ResetPaddle() {
     this->timeSinceLastBlastShot = 0.0;
     this->timeSinceLastMineLaunch = 0.0;
 	this->laserBeamTimer = 0.0;
+    this->frozenCountdown = 0.0;
+    this->onFireCountdown = 0.0;
 	this->currSize = PlayerPaddle::NormalSize;
 	this->centerPos = this->GetDefaultCenterPosition();
 	this->currType = PlayerPaddle::NormalPaddle;
-    this->currSpecialStatus = PlayerPaddle::NoStatus;
+    this->ClearSpecialStatus();
 	this->colour = ColourRGBA(1, 1, 1, 1);
 	this->isFiringBeam = false;
 	this->hitWall = false;
@@ -185,7 +184,7 @@ void PlayerPaddle::RegenerateBounds() {
 		lineBounds.push_back(l1);
 		lineNorms.push_back(n1);
 
-		// Side boundries
+		// Side boundaries
 		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
 		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
 		lineBounds.push_back(sideLine1);
@@ -293,7 +292,7 @@ void PlayerPaddle::FireAttachedBall() {
         newReleaseDir = Vector2D::Rotate(NumberFuncs::SignOf(Vector3D::cross(ballReleaseDir, avgPaddleVelDir)[2]) * 90, ballReleaseDir);
     }
 
-	// Set the ball velocity (tragectory it will leave the paddle on)
+	// Set the ball velocity (trajectory it will leave the paddle on)
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), newReleaseDir);
     
     // Add a brief impulse to the ball's velocity to give the launch a more viseral feeling
@@ -339,7 +338,7 @@ void PlayerPaddle::FireAttachedProjectile() {
 
 /**
  * Private helper function used to solve the issue where a ball that is attached
- * to the paddle when the paddle boundries change doesn't get moved to the new boundries.
+ * to the paddle when the paddle boundaries change doesn't get moved to the new boundaries.
  * e.g., when in paddle cam mode and then changing back while the sticky paddle is active.
  */
 void PlayerPaddle::MoveAttachedObjectsToNewBounds(double dT) {
@@ -372,21 +371,44 @@ void PlayerPaddle::MoveAttachedObjectsToNewBounds(double dT) {
 void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gameModel) {
 
 	Point2D startingCenterPos = this->centerPos;
-	Point2D defaultCenterPos = this->GetDefaultCenterPosition();
-
-	// If the beam is firing its laser then we want to animate it being pushed down
+	Point2D defaultCenterPos  = this->GetDefaultCenterPosition();
 	this->centerPos[1] = defaultCenterPos[1] - this->moveDownAnimation.GetInterpolantValue();
-	this->moveDownAnimation.Tick(seconds);
-
-	// If the paddle is rotating (might have been hit or knocked around) we want to animate that rotation
-	float startingZRotation = this->rotAngleZAnimation.GetInterpolantValue();
-	this->rotAngleZAnimation.Tick(seconds);
 
 	// Increment seconds since the various types of previous weapon shots
 	// This makes sure the user can't consecutively fire various weapons like crazy
 	this->timeSinceLastLaserBlast += seconds;
     this->timeSinceLastBlastShot  += seconds;
     this->timeSinceLastMineLaunch += seconds;
+
+    // If the paddle is on fire then tick down the on-fire countdown
+    if (this->HasSpecialStatus(PlayerPaddle::OnFireStatus)) {
+        if (this->onFireCountdown <= 0.0) {
+            this->RemoveSpecialStatus(PlayerPaddle::OnFireStatus);
+        }
+        else {
+            this->onFireCountdown -= seconds;
+        }
+    }
+
+    // If the paddle is frozen then it can't be moved by the player until it unfreezes
+    if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+        
+        if (this->frozenCountdown <= 0.0) {
+            this->RemoveSpecialStatus(PlayerPaddle::FrozenInIceStatus);
+            this->RecoverFromFrozenPaddle();
+        }
+        else {
+            this->frozenCountdown -= seconds;
+            this->RegenerateBounds();
+            return;
+        }
+    }
+
+    this->moveDownAnimation.Tick(seconds);
+
+    // If the paddle is rotating (might have been hit or knocked around) we want to animate that rotation
+    float startingZRotation = this->rotAngleZAnimation.GetInterpolantValue();
+    this->rotAngleZAnimation.Tick(seconds);
 
 	// Figure out what the current acceleration is based on whether the player
 	// is currently telling the paddle to move or not
@@ -439,7 +461,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 		float ballMaxX = ballX + slightlyBiggerRadius;
 		
 		// If it's the case that the ball increases the size of the paddle on the -x dir
-		// then accomodate this, same goes for +x direction
+		// then accommodate this, same goes for +x direction
 		if (ballMinX < minNewXPos) {
 			halfWidthTotalWithAttachedMin += (minNewXPos - ballMinX);
 			minNewXPos = ballMinX;
@@ -468,7 +490,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             projectileMaxX = projectileX + slightlyBiggerHalfWidth;
 
 		    // If it's the case that the projectile increases the size of the paddle on the -x dir
-		    // then accomodate this, same goes for +x direction
+		    // then accommodate this, same goes for +x direction
 		    if (projectileMinX < minNewXPos) {
 			    halfWidthTotalWithAttachedMin += (minNewXPos - projectileMinX);
 			    minNewXPos = projectileMinX;
@@ -578,7 +600,11 @@ bool PlayerPaddle::IncreasePaddleSize() {
 	}
 	
 	this->SetPaddleSize(static_cast<PaddleSize>(this->currSize + 1));
-	return true;
+
+    // Paddle getting bigger shatters the ice it might be frozen in
+    this->RemoveSpecialStatus(PlayerPaddle::FrozenInIceStatus);
+	
+    return true;
 }
 
 /**
@@ -600,6 +626,59 @@ void PlayerPaddle::AddPaddleType(const PaddleType& type) {
 
 void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
 	this->currType = this->currType & ~type;
+}
+
+void PlayerPaddle::AddSpecialStatus(int32_t status) { 
+    int32_t statusBefore = this->currSpecialStatus;
+    this->currSpecialStatus = this->currSpecialStatus | status;
+
+    // Check for special case where the frozen paddle is canceled by fire or vice-versa
+    bool frozenChange = (statusBefore & PlayerPaddle::FrozenInIceStatus) == 0x0 && this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus);
+    bool onFireChange = (statusBefore & PlayerPaddle::OnFireStatus) == 0x0 && this->HasSpecialStatus(PlayerPaddle::OnFireStatus);
+
+    if (frozenChange && (statusBefore & PlayerPaddle::OnFireStatus)) {
+        this->CancelFireStatusWithIce();
+        return;
+    }
+    
+    if (onFireChange && (statusBefore & PlayerPaddle::FrozenInIceStatus)) {
+        this->CancelFrozenStatusWithFire();
+        return;
+    }
+
+    // Check whether the paddle was just frozen
+    if (frozenChange) {
+        this->frozenCountdown = PADDLE_FROZEN_TIME_IN_SECS;
+        // EVENT: Paddle was just frozen
+        GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::FrozenInIceStatus, true);
+    }
+    // Check whether the paddle was just set on fire
+    if (onFireChange) {
+        this->onFireCountdown = PADDLE_ON_FIRE_TIME_IN_SECS;
+        // EVENT: Paddle was just set on fire
+        GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::OnFireStatus, true);
+    }
+}
+
+void PlayerPaddle::RemoveSpecialStatus(int32_t status) {
+    int32_t statusBefore = this->currSpecialStatus;
+    this->currSpecialStatus = this->currSpecialStatus & ~status;
+
+    // Check to see whether the paddle was just unfrozen
+    if ((statusBefore & PlayerPaddle::FrozenInIceStatus) != 0x0 && !this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+
+        this->frozenCountdown = 0.0;
+        // EVENT: Paddle was just unfrozen
+        GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::FrozenInIceStatus, false);
+    }
+
+    // Check whether the paddle is no longer on fire
+    if ((statusBefore & PlayerPaddle::OnFireStatus) != 0x0 && !this->HasSpecialStatus(PlayerPaddle::OnFireStatus)) {
+
+        this->onFireCountdown = 0.0;
+        // EVENT: Paddle stopped being on fire
+        GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::OnFireStatus, false);
+    }
 }
 
 // Tells the paddle that it has started to fire the laser beam (or has stopped firing the laser beam)
@@ -630,6 +709,13 @@ void PlayerPaddle::ContinuousShoot(double dT, GameModel* gameModel, float magnit
 
     assert(gameModel != NULL);
     assert(magnitudePercent >= 0.0f && magnitudePercent <= 1.0f);
+
+    // TODO: If I ever implement this function...
+    // If the paddle is frozen or on fire it can't shoot
+    //if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus | PlayerPaddle::OnFireStatus)) {
+    //    return;
+    //}
+
 }
 
 /**
@@ -638,6 +724,11 @@ void PlayerPaddle::ContinuousShoot(double dT, GameModel* gameModel, float magnit
  */
 void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
     assert(gameModel != NULL);
+
+    // If the paddle is frozen or on fire it can't shoot
+    if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus | PlayerPaddle::OnFireStatus)) {
+        return;
+    }
 
     const GameLevel* currentLevel = gameModel->GetCurrentLevel();
     assert(currentLevel != NULL);
@@ -888,6 +979,17 @@ void PlayerPaddle::DetachProjectile(Projectile* projectile){
     this->attachedProjectiles.remove(projectile);
 }
 
+void PlayerPaddle::HitByBall(const GameBall& ball) {
+    // If the ball is a fireball or iceball and this paddle is frozen or on-fire, respectively
+    // then the effect will be canceled for the paddle...
+    if (ball.HasBallType(GameBall::IceBall) && this->HasSpecialStatus(PlayerPaddle::OnFireStatus)) {
+        this->CancelFireStatusWithIce();
+    }
+    else if (ball.HasBallType(GameBall::FireBall) && this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+        this->CancelFrozenStatusWithFire();
+    }
+}
+
 void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 
     Collision::AABB2D bossAABB = bossPart.GenerateWorldAABB();
@@ -1030,14 +1132,22 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 
 		case Projectile::FireGlobProjectile:
 			this->FireGlobProjectileCollision(*static_cast<const FireGlobProjectile*>(&projectile));
+            this->AddSpecialStatus(PlayerPaddle::OnFireStatus);
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
-            this->FlameBlastProjectileCollision(*static_cast<const PaddleFlameBlasterProjectile*>(&projectile));
+            // If the paddle is frozen then the flame doesn't hurt the paddle, it just unfreezes it
+            if (!this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+                this->FlameBlastProjectileCollision(*static_cast<const PaddleFlameBlasterProjectile*>(&projectile));
+            }
+            this->AddSpecialStatus(PlayerPaddle::OnFireStatus);
             break;
 
         case Projectile::PaddleIceBlastProjectile:
-            this->IceBlastProjectileCollision(*static_cast<const PaddleIceBlasterProjectile*>(&projectile));
+            if (!this->HasSpecialStatus(PlayerPaddle::OnFireStatus)) {
+                this->IceBlastProjectileCollision(*static_cast<const PaddleIceBlasterProjectile*>(&projectile));
+            }
+            this->AddSpecialStatus(PlayerPaddle::FrozenInIceStatus);
             break;
 
 		default:
@@ -1452,7 +1562,11 @@ void PlayerPaddle::FlameBlastProjectileCollision(const PaddleFlameBlasterProject
     float currHeight = 2.0f * this->GetHalfHeight();
 
     this->SetPaddleHitByProjectileAnimation(flameBlastProjectile.GetPosition(), 
-        multiplier * 3.0f, multiplier * currHeight * 2.5f, currHeight * 2.0f, 80.0f);
+        multiplier * 3.0f, multiplier * currHeight, currHeight * 2.0f, 60.0f);
+
+    float force = NumberFuncs::SignOf(this->GetCenterPosition()[0] - flameBlastProjectile.GetPosition()[0]) *
+        0.5f * PlayerPaddle::DEFAULT_MAX_SPEED;
+    this->ApplyImpulseForce(force, 2.5*force);
 
     this->lastEntityThatHurtHitPaddle = &flameBlastProjectile;
 }
@@ -1462,9 +1576,20 @@ void PlayerPaddle::IceBlastProjectileCollision(const PaddleIceBlasterProjectile&
     float multiplier = iceBlastProjectile.GetSizeMultiplier();
     float currHeight = 2.0f * this->GetHalfHeight();
 
-    this->SetPaddleHitByProjectileAnimation(iceBlastProjectile.GetPosition(), 
-        multiplier * 1.0f, multiplier * currHeight * 1.2f, currHeight, 30.0f);
+    float totalRotationAmt;
+    float totalMaxMoveDown;
+    this->GetPaddleHitByProjectileEffect(iceBlastProjectile.GetPosition(), 30.0f, multiplier * currHeight * 1.2f, 
+        currHeight, totalMaxMoveDown, totalRotationAmt);
 
+    // Apply instantaneous effect to the paddle's rotation and downwards movement
+    totalMaxMoveDown += this->moveDownAnimation.GetInterpolantValue();
+    this->moveDownAnimation.ClearLerp();
+    this->moveDownAnimation.SetInterpolantValue(totalMaxMoveDown);
+
+    totalRotationAmt += this->rotAngleZAnimation.GetInterpolantValue();
+    this->rotAngleZAnimation.ClearLerp();
+    this->rotAngleZAnimation.SetInterpolantValue(totalRotationAmt);
+    
     this->lastEntityThatHurtHitPaddle = &iceBlastProjectile;
 }
 
@@ -1487,7 +1612,7 @@ void PlayerPaddle::BeamCollision(const Beam& beam, const BeamSegment& beamSegmen
 // where 0 is a far away from the center as possible and 1 is at the center. Also returns the value
 // of distFromCenter which is assigned a negative/positive value based on the distance from the center
 // of the paddle on the left/right side respectively.
-float PlayerPaddle::GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter) {
+float PlayerPaddle::GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter) const {
 	// Figure out what side of the paddle the projectile is hitting...
 	// Use a line test...
 	Vector2D vecToProjectile = projectileCenter - this->GetCenterPosition();
@@ -1502,6 +1627,20 @@ float PlayerPaddle::GetPercentNearPaddleCenter(const Point2D& projectileCenter, 
 	return percentNearCenter;
 }
 
+void PlayerPaddle::GetPaddleHitByProjectileEffect(const Point2D& projectileCenter, float maxRotationInDegs, float minMoveDown, 
+                                                   float closeToCenterCoeff, float& totalMoveDownAmt, float& totalRotationInDegs) const {
+    float distFromCenter = 0.0;
+    float percentNearCenter = this->GetPercentNearPaddleCenter(projectileCenter, distFromCenter);
+    float percentNearEdge = 1.0 - percentNearCenter;
+    totalRotationInDegs = percentNearEdge * maxRotationInDegs;
+    if (distFromCenter > 0.0) {
+        // The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
+        totalRotationInDegs *= -1.0f;
+    }
+
+    totalMoveDownAmt = minMoveDown + percentNearCenter * closeToCenterCoeff;
+}
+
 // Helper function for setting the animation for when a projectile hits the paddle
 // projectileCenter    - position where the projectile is
 // totalHitEffectTime  - total time of the animation
@@ -1513,15 +1652,16 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
                                                      float minMoveDown, 
                                                      float closeToCenterCoeff, float maxRotationInDegs) {
 	
-	// Find percent distance from edge to center of the paddle
-	float distFromCenter = 0.0;
-	float percentNearCenter = this->GetPercentNearPaddleCenter(projectileCenter, distFromCenter);
-	float percentNearEdge = 1.0 - percentNearCenter;
-	float rotationAmount = percentNearEdge * maxRotationInDegs;
-	if (distFromCenter > 0.0) {
-		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
-		rotationAmount *= -1.0f;
-	}
+    // If the paddle is currently frozen then there is no effect...
+    if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+        return;
+    }
+
+    // Get the maximum effect of the projectile's collision
+    // in terms of movement downward and the rotation for the paddle
+	float rotationAmount;
+    float totalMaxMoveDown;
+    this->GetPaddleHitByProjectileEffect(projectileCenter, maxRotationInDegs, minMoveDown, closeToCenterCoeff, totalMaxMoveDown, rotationAmount);
 
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
 	std::vector<double> times;
@@ -1529,8 +1669,6 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 	times.push_back(0.0f);
 	times.push_back(0.05f);
 	times.push_back(totalHitEffectTime);
-
-	float totalMaxMoveDown = minMoveDown + percentNearCenter * closeToCenterCoeff;
 
 	std::vector<float> moveDownValues;
 	moveDownValues.reserve(3);
@@ -1550,7 +1688,7 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 }
 
 /**
- * When the paddle magnet is active this routine will potentitally modify the given vector so that the object associated
+ * When the paddle magnet is active this routine will potentially modify the given vector so that the object associated
  * with it (as its velocity) and the given center position will start to migrate towards the paddle
  * as if being attracted by it.
  */
@@ -1881,4 +2019,39 @@ void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, flo
     }
 
     spawnPos = this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * height);
+}
+
+void PlayerPaddle::CancelFireStatusWithIce() {
+    // Cancel the fire
+    this->currSpecialStatus &= ~PlayerPaddle::OnFireStatus;
+    this->onFireCountdown = 0.0;
+
+    // EVENT: The On-fire paddle is no longer...
+    GameEventManager::Instance()->ActionOnFirePaddleCanceledByIce(*this);
+}
+
+void PlayerPaddle::CancelFrozenStatusWithFire() {
+    // Cancel the ice
+    this->currSpecialStatus &= ~PlayerPaddle::FrozenInIceStatus;
+    this->frozenCountdown = 0.0;
+    this->RecoverFromFrozenPaddle();
+
+    // EVENT: The frozen paddle is no longer...
+    GameEventManager::Instance()->ActionFrozenPaddleCanceledByFire(*this);
+}
+
+void PlayerPaddle::RecoverFromFrozenPaddle() {
+    static const double PADDLE_RECOVER_TIME_IN_SECS = 0.2;
+    if (!this->rotAngleZAnimation.GetHasInterpolationSet() || 
+        this->rotAngleZAnimation.GetFinalInterpolationValue() != 0.0f) {
+
+            this->rotAngleZAnimation.SetLerp(0.0, PADDLE_RECOVER_TIME_IN_SECS, 
+                this->rotAngleZAnimation.GetInterpolantValue(), 0.0f);
+    }
+    if (!this->moveDownAnimation.GetHasInterpolationSet() || 
+        this->moveDownAnimation.GetFinalInterpolationValue() != 0.0f) {
+
+            this->moveDownAnimation.SetLerp(0.0, PADDLE_RECOVER_TIME_IN_SECS, 
+                this->moveDownAnimation.GetInterpolantValue(), 0.0f);
+    } 
 }

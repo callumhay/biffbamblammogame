@@ -31,11 +31,6 @@ public:
 
 class DecoratorOverlayPane {
 public:
-    static const float X_BORDER;
-    static const float Y_BORDER;
-    static const float ITEM_Y_SPACING;
-    static const float ITEM_X_SPACING;
-
     DecoratorOverlayPane(OverlayPaneEventHandler* handler, size_t width, const Colour& bgColour);
     ~DecoratorOverlayPane();
 
@@ -70,8 +65,13 @@ public:
     std::string GetSelectedOptionStr() const { return this->selectableOptions[this->selectedIdx]->GetText(); }
 
 private:
-    static const float X_OPTION_GAP;
-    static const float COL_GAP;
+    const float X_BORDER;
+    const float Y_BORDER;
+    const float ITEM_Y_SPACING;
+    const float ITEM_X_SPACING;
+
+    const float X_OPTION_GAP;
+    const float COL_GAP;
     
     const Colour OPTION_IDLE_COLOUR;
     const Colour OPTION_SEL_COLOUR;	

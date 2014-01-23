@@ -38,118 +38,6 @@ class FBObj;
  */
 class MainMenuDisplayState : public DisplayState {
 
-private:
-	// Menu text
-	static const char* NEW_GAME_MENUITEM;
-    static const char* CONTINUE_MENUITEM;
-	static const char* PLAY_LEVEL_MENUITEM;
-    static const char* BLAMMOPEDIA_MENUITEM;
-	static const char* OPTIONS_MENUITEM;
-    static const char* CREDITS_MENUITEM;
-	static const char* EXIT_MENUITEM;
-
-	static const Colour MENU_ITEM_IDLE_COLOUR;
-	static const Colour MENU_ITEM_SEL_COLOUR;
-	static const Colour MENU_ITEM_ACTIVE_COLOUR;
-	static const Colour MENU_ITEM_GREYED_COLOUR;
-	static const Colour SUBMENU_ITEM_IDLE_COLOUR;
-	static const Colour SUBMENU_ITEM_ACTIVE_COLOUR;
-
-	static const int MENU_SEL_ON_INDEX;
-	static const int MENU_SEL_OFF_INDEX;
-
-	static const float CAM_DIST_FROM_ORIGIN;
-
-    static const double FADE_IN_TIME_IN_SECS;
-    static const double FADE_OUT_TIME_IN_SECS;
-
-	// The configuration options for the game
-	ConfigOptions cfgOptions;
-
-	// Indices for the main menu
-	int startGameMenuItemIndex;
-	int playLevelMenuItemIndex;
-	int optionsMenuItemIndex;
-    int blammopediaItemIndex;
-    int creditsItemIndex;
-	int exitGameMenuItemIndex;
-
-	// Indices for the options submenu
-	int optionsBackIndex;
-	int optionsFullscreenIndex;
-	int optionsVSyncIndex;
-	int optionsResolutionIndex;
-	int optionsMusicVolumeIndex;
-    int optionsSFXVolumeIndex;
-    //int optionsControllerSensitivityIndex;
-    int optionsInvertBallBoostIndex;
-    int optionsBallBoostModeIndex;
-    int optionsDifficultyIndex;
-    int optionsEraseProgressIndex;
-
-    PopupTutorialHint* eraseSuccessfulPopup;
-    PopupTutorialHint* eraseFailedPopup;
-
-	// Indents and spacing
-	static const unsigned int MENU_X_INDENT = 50;
-	static const unsigned int MENU_Y_INDENT = 320;
-	static const unsigned int MENU_ITEM_PADDING = 15;
-
-	FBObj* menuFBO;
-    FBObj* postMenuFBObj;
-
-    TextLabel2D madeByTextLabel;
-    TextLabel2D licenseLabel;
-
-	ESPMultiColourEffector particleFadeInAndOut;
-	ESPParticleScaleEffector particleSmallGrowth;
-	ESPParticleScaleEffector particleMediumGrowth;
-
-	std::vector<Texture*> bangTextures;
-	
-    BBBTitleDisplay titleDisplay;
-
-	GameMenu* mainMenu;             // Main (top-most/parent) menu
-	GameSubMenu* optionsSubMenu;    // Options sub-menu
-
-    GameMenuItem* startGameMenuItem;
-
-	// Pointers for tracking the menu items in the options menu
-	SelectionListMenuItem*  fullscreenMenuItem;
-	SelectionListMenuItem*  resolutionMenuItem;
-	SelectionListMenuItem*  vSyncMenuItem;
-	AmountScrollerMenuItem* musicVolumeMenuItem;
-    AmountScrollerMenuItem* sfxVolumeMenuItem;
-    SelectionListMenuItem*  invertBallBoostItem;
-    SelectionListMenuItem*  ballBoostModeItem;
-    SelectionListMenuItem*  difficultyItem;
-    //AmountScrollerMenuItem* controllerSensitivityItem;
-
-    bool doAnimatedFadeIn;
-	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
-
-	bool changeToPlayGameState;
-    bool changeToBlammopediaState;
-    bool changeToLevelSelectState;
-    bool changeToCreditsState;
-
-    //TODO? static const int BG_SOUND_FADEOUT_IN_MILLISECS = 1000;
-    SoundID bgLoopedSoundID;
-
-	void InitializeESPEffects();
-	void InitializeMainMenu();
-	void InitializeOptionsSubMenu();
-
-	void RenderBackgroundEffects(double dT, Camera& menuCam);
-
-	void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
-
-	static const size_t TOTAL_NUM_BANG_EFFECTS;
-	std::list<ESPPointEmitter*> aliveBangEffects;
-	std::list<ESPPointEmitter*> aliveOnoEffects;
-	std::list<ESPPointEmitter*> deadBangEffects;
-	std::list<ESPPointEmitter*> deadOnoEffects;
-
 public:
 	MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info = DisplayStateInfo());
 	~MainMenuDisplayState();
@@ -259,6 +147,118 @@ private:
     BangParticleEventHandler* particleEventHandler;         // Event handler for the sound particles
     QuitVerifyEventHandler* quitVerifyHandler;
     EraseProgressVerifyEventHandler* eraseProgVerifyHandler;
+
+    // Menu text
+    static const char* NEW_GAME_MENUITEM;
+    static const char* CONTINUE_MENUITEM;
+    static const char* PLAY_LEVEL_MENUITEM;
+    static const char* BLAMMOPEDIA_MENUITEM;
+    static const char* OPTIONS_MENUITEM;
+    static const char* CREDITS_MENUITEM;
+    static const char* EXIT_MENUITEM;
+
+    static const Colour MENU_ITEM_IDLE_COLOUR;
+    static const Colour MENU_ITEM_SEL_COLOUR;
+    static const Colour MENU_ITEM_ACTIVE_COLOUR;
+    static const Colour MENU_ITEM_GREYED_COLOUR;
+    static const Colour SUBMENU_ITEM_IDLE_COLOUR;
+    static const Colour SUBMENU_ITEM_ACTIVE_COLOUR;
+
+    static const int MENU_SEL_ON_INDEX;
+    static const int MENU_SEL_OFF_INDEX;
+
+    static const float CAM_DIST_FROM_ORIGIN;
+
+    static const double FADE_IN_TIME_IN_SECS;
+    static const double FADE_OUT_TIME_IN_SECS;
+
+    // The configuration options for the game
+    ConfigOptions cfgOptions;
+
+    // Indices for the main menu
+    int startGameMenuItemIndex;
+    int playLevelMenuItemIndex;
+    int optionsMenuItemIndex;
+    int blammopediaItemIndex;
+    int creditsItemIndex;
+    int exitGameMenuItemIndex;
+
+    // Indices for the options submenu
+    int optionsBackIndex;
+    int optionsFullscreenIndex;
+    int optionsVSyncIndex;
+    int optionsResolutionIndex;
+    int optionsMusicVolumeIndex;
+    int optionsSFXVolumeIndex;
+    //int optionsControllerSensitivityIndex;
+    int optionsInvertBallBoostIndex;
+    int optionsBallBoostModeIndex;
+    int optionsDifficultyIndex;
+    int optionsEraseProgressIndex;
+
+    PopupTutorialHint* eraseSuccessfulPopup;
+    PopupTutorialHint* eraseFailedPopup;
+
+    // Indents and spacing
+    static const unsigned int MENU_X_INDENT = 50;
+    static const unsigned int MENU_Y_INDENT = 320;
+    static const unsigned int MENU_ITEM_PADDING = 15;
+
+    FBObj* menuFBO;
+    FBObj* postMenuFBObj;
+
+    TextLabel2D madeByTextLabel;
+    TextLabel2D licenseLabel;
+
+    ESPMultiColourEffector particleFadeInAndOut;
+    ESPParticleScaleEffector particleSmallGrowth;
+    ESPParticleScaleEffector particleMediumGrowth;
+
+    static const size_t TOTAL_NUM_BANG_EFFECTS;
+    std::list<ESPPointEmitter*> aliveBangEffects;
+    std::list<ESPPointEmitter*> aliveOnoEffects;
+    std::list<ESPPointEmitter*> deadBangEffects;
+    std::list<ESPPointEmitter*> deadOnoEffects;
+
+    std::vector<Texture*> bangTextures;
+
+    BBBTitleDisplay titleDisplay;
+
+    GameMenu* mainMenu;             // Main (top-most/parent) menu
+    GameSubMenu* optionsSubMenu;    // Options sub-menu
+
+    GameMenuItem* startGameMenuItem;
+
+    // Pointers for tracking the menu items in the options menu
+    SelectionListMenuItem*  fullscreenMenuItem;
+    SelectionListMenuItem*  resolutionMenuItem;
+    SelectionListMenuItem*  vSyncMenuItem;
+    AmountScrollerMenuItem* musicVolumeMenuItem;
+    AmountScrollerMenuItem* sfxVolumeMenuItem;
+    SelectionListMenuItem*  invertBallBoostItem;
+    SelectionListMenuItem*  ballBoostModeItem;
+    SelectionListMenuItem*  difficultyItem;
+    //AmountScrollerMenuItem* controllerSensitivityItem;
+
+    bool doAnimatedFadeIn;
+    AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
+
+    bool changeToPlayGameState;
+    bool changeToBlammopediaState;
+    bool changeToLevelSelectState;
+    bool changeToCreditsState;
+
+    //TODO? static const int BG_SOUND_FADEOUT_IN_MILLISECS = 1000;
+    SoundID bgLoopedSoundID;
+
+    void InitializeESPEffects();
+    void InitializeMainMenu();
+    void InitializeOptionsSubMenu();
+    void EraseLevelSelectMenuItem();
+
+    void RenderBackgroundEffects(double dT, Camera& menuCam);
+
+    void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
 
 	DISALLOW_COPY_AND_ASSIGN(MainMenuDisplayState);
 };

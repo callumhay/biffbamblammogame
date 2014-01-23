@@ -18,6 +18,7 @@
 
 const char* CgFxFireBallEffect::BASIC_TECHNIQUE_NAME              = "FireBall";
 const char* CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME = "FireBallNoDepthWithMask";
+const char* CgFxFireBallEffect::PADDLE_ON_FIRE_TECHNIQUE_NAME     = "PaddleOnFire";
 
 CgFxFireBallEffect::CgFxFireBallEffect() : 
 CgFxTextureEffectBase(GameViewConstants::GetInstance()->CGFX_FIREBALL_SHADER), 

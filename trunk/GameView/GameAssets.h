@@ -67,6 +67,7 @@ class GameESPAssets;
 class GameFBOAssets;
 class PaddleMineLauncher;
 class PaddleBeamAttachment;
+class PaddleStatusEffectRenderer;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -123,7 +124,15 @@ public:
 	void ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem);
 	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item);
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item, bool gameIsInPlay);
-	void DeactivateMiscEffects();
+    
+    void ActivatePaddleStatusEffect(const GameModel& gameModel, Camera& camera, PlayerPaddle::PaddleSpecialStatus status);
+    void DeactivatePaddleStatusEffect(const GameModel& gameModel, Camera& camera, PlayerPaddle::PaddleSpecialStatus status);
+    
+    void CancelFrozenPaddleWithFireEffect(const PlayerPaddle& paddle);
+    void CancelOnFirePaddleWithIceEffect(const PlayerPaddle& paddle);
+
+    void DeactivateMiscEffects();
+
 
     double ActivateBossIntro();
     double ActivateBossExplodingFlashEffects(double delayInSecs,
@@ -189,7 +198,7 @@ public:
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectile(const GameModel& gameModel, const Projectile& projectile);
 
-	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
+	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile, Camera& camera);
     void PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
     void PaddleHurtByBossBodyPart(const GameModel& gameModel, const PlayerPaddle& paddle, const Boss& boss, const BossBodyPart& bossPart);
 
@@ -238,6 +247,8 @@ private:
 	PaddleGunAttachment* paddleGunAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 	PaddleShield* paddleShield;                 // Refractive glowy shield for the paddle
+
+    PaddleStatusEffectRenderer* paddleStatusEffectRenderer;
 
 	// Misc. display lists and meshes for other geometry activated by items and such
 	BallSafetyNetMesh* ballSafetyNet;

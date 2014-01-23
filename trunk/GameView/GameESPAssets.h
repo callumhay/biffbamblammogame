@@ -38,6 +38,7 @@ class GameLevel;
 class Beam;
 class PaddleBlasterProjectile;
 struct ESPInterval;
+class GameSound;
 
 class PuffOfSmokeEffectInfo;
 class ShockwaveEffectInfo;
@@ -299,11 +300,11 @@ private:
     
     void AddLightningBoltESPEffects(const GameModel& gameModel, const Projectile& projectile);
 
-    void AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos);
+    void AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos, GameSound* sound);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
-    void AddFlameBlastHitWallEffect(float size, const Point2D& loc);
-    void AddIceBlastHitWallEffect(float size, const Point2D& loc);
+    void AddFlameBlastHitWallEffect(float size, const Point2D& loc, GameSound* sound);
+    void AddIceBlastHitWallEffect(float size, const Point2D& loc, GameSound* sound);
 	void AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc, const Colour& baseColour, const Colour& brightColour);
     void AddLightningBoltHitWallEffect(float width, float height, const Point2D& loc);
     void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
@@ -373,9 +374,9 @@ public:
     void AddMiscBallPieceCollisionEffect(const GameBall& ball, const LevelPiece& block);
 	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside);
 	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);
-	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
-    void AddSafetyNetHitByProjectileEffect(const Projectile& projectile);
-    void AddBossHitByProjectileEffect(const Projectile& projectile, const BossBodyPart& collisionPart); 
+	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block, GameSound* sound);
+    void AddSafetyNetHitByProjectileEffect(const Projectile& projectile, GameSound* sound);
+    void AddBossHitByProjectileEffect(const Projectile& projectile, const BossBodyPart& collisionPart, GameSound* sound); 
 	void AddBallHitLightningArcEffect(const GameBall& ball);
 
 	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
@@ -387,10 +388,10 @@ public:
 
     void AddBlockDisintegrationEffect(const LevelPiece& block);
 
-	void AddIceBitsBreakEffect(const LevelPiece& block);
-	void AddIceCubeBlockBreakEffect(const LevelPiece& block, const Colour& colour);
-    void AddIceMeltedByFireEffect(const LevelPiece& block);
-    void AddFirePutOutByIceEffect(const LevelPiece& block);
+	void AddIceBitsBreakEffect(const Point2D& pos, float baseSize);
+	void AddIceCubeBreakEffect(const Point2D& pos, float baseSize, const Colour& colour, float intensityMultiplier = 1.0f);
+    void AddIceMeltedByFireEffect(const Point3D& pos, float width, float height);
+    void AddFirePutOutByIceEffect(const Point3D& pos, float width, float height);
 
     void AddFireballCanceledEffect(const GameBall& ball);
     void AddIceballCanceledEffect(const GameBall& ball);
@@ -402,9 +403,12 @@ public:
 	void AddBallSafetyNetDestroyedEffect(const Point2D& pos);
 	void AddBallExplodedEffect(const GameBall* ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
-	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
+	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile, GameSound* sound);
     void AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const BeamSegment& beamSegment);
     void AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
+    void AddPaddleFrozeEffect(const PlayerPaddle& paddle);
+    void AddPaddleUnfrozeEffect(const PlayerPaddle& paddle);
+    //void AddPaddleOnFireEffect(const PlayerPaddle& paddle);
 
 	ESPPointEmitter* CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item);
     void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);

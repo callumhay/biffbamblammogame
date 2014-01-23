@@ -49,7 +49,7 @@ TEXTURE_DIR(TEXTURE_DIRECTORY),
 SOUND_DIR(SOUND_DIRECTORY),
 
 GAME_CREDITS_TEXT("A game by Callum Hay"),
-LICENSE_TEXT("(CC) BY-NC, 2013"),
+LICENSE_TEXT("(CC) BY-NC, 2014"),
 
 // Shader Asset Paths
 CGFX_CEL_SHADER(SHADER_DIRECTORY                    "/CelShading.cgfx"),

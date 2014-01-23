@@ -364,6 +364,9 @@ void MSFReader::InitSoundTypeMapping() {
 	INSERT_MAPPING_PAIR(GameSound, WorldBackgroundLoop, true);
 
 	INSERT_MAPPING_PAIR(GameSound, PaddleHitWallEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleFrozenEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleOnFireEvent, false);
+
 	INSERT_MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent, false);
 	INSERT_MAPPING_PAIR(GameSound, LastBallExplodedEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BallBallCollisionEvent, false);

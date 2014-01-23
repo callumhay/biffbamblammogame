@@ -32,6 +32,10 @@
 ResourceManager* ResourceManager::instance = NULL;
 ConfigOptions* ResourceManager::configOptions = NULL;
 
+// Initialization Constants for the application
+const char* ResourceManager::RESOURCE_ZIP     = "BBBResources.zip";
+const char* ResourceManager::BLAMMOPEDIA_FILE = "blammopedia.dat";
+
 const char* ResourceManager::RESOURCE_DIRECTORY			= "resources";
 const char* ResourceManager::TEXTURE_DIRECTORY			= "textures";
 const char* ResourceManager::BLAMMOPEDIA_DIRECTORY	= "blammopedia";
@@ -181,6 +185,7 @@ void ResourceManager::InitResourceManager(const std::string& resourceZip, const 
 bool ResourceManager::LoadBlammopedia(const std::string& blammopediaFile) {
 	if (this->blammopedia != NULL) {
 		delete this->blammopedia;
+        this->blammopedia = NULL;
 	}
 
 	// Initialize blammopedia

@@ -16,12 +16,11 @@
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Vector.h"
 
-
 class CgFxFireBallEffect : public CgFxTextureEffectBase {
 public:
-	// Constants used for loading the CelShading effect
 	static const char* BASIC_TECHNIQUE_NAME;
 	static const char* NO_DEPTH_WITH_MASK_TECHNIQUE_NAME;
+    static const char* PADDLE_ON_FIRE_TECHNIQUE_NAME;
 
 	CgFxFireBallEffect();
 	~CgFxFireBallEffect();
@@ -43,6 +42,9 @@ public:
 	void SetScale(float scale) {
 		this->scale = scale;
 	}
+    void SetFrequency(float freq) {
+        this->freq = freq;
+    }
 
 protected:
 	void SetupBeforePasses(const Camera& camera);
@@ -55,10 +57,10 @@ private:
 	CGparameter noiseSamplerParam;
 	CGparameter maskSamplerParam;
 
-	// Timer paramter
+	// Timer parameter
 	CGparameter timerParam;
 
-	// Tweakable params
+	// Tweak-able params
 	CGparameter scaleParam;
 	CGparameter freqParam;
 	CGparameter flowDirectionParam;

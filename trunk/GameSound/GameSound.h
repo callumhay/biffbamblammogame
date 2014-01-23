@@ -90,6 +90,8 @@ public:
         // In-game event sounds
         // -> Paddle-only sounds
 		PaddleHitWallEvent,
+        PaddleFrozenEvent,
+        PaddleOnFireEvent,
 		
         // -> Ball-only sounds
         PlayerLostABallButIsStillAliveEvent,

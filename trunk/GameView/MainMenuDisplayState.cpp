@@ -489,6 +489,25 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->optionsSubMenu->SetSelectedMenuItem(this->optionsFullscreenIndex, false);
 }
 
+void MainMenuDisplayState::EraseLevelSelectMenuItem() {
+    
+    if (!this->mainMenu->RemoveMenuItem(this->playLevelMenuItemIndex)) {
+        return;
+    }
+
+#define DECREMENT_OR_NOT(itemIdx) if (itemIdx > this->playLevelMenuItemIndex) { itemIdx--; }
+
+    DECREMENT_OR_NOT(this->startGameMenuItemIndex);
+    DECREMENT_OR_NOT(this->optionsMenuItemIndex);
+    DECREMENT_OR_NOT(this->blammopediaItemIndex);
+    DECREMENT_OR_NOT(this->creditsItemIndex);
+    DECREMENT_OR_NOT(this->exitGameMenuItemIndex);
+
+#undef DECREMENT_OR_NOT
+
+    this->playLevelMenuItemIndex = -1;
+}
+
 /**
  * Render the menu and any other stuff associated with it.
  */
@@ -952,7 +971,7 @@ void MainMenuDisplayState::MainMenuEventHandler::EscMenu() {
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	UNUSED_PARAMETER(itemIndex);
 
-    // Play the sound effect assoicated with menu item changing/being highlighted by the user
+    // Play the sound effect associated with menu item changing/being highlighted by the user
     GameSound* sound = this->mainMenuState->display->GetSound();
     sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false);
 }
@@ -982,8 +1001,6 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEven
  * Handle changes in the options for the game.
  */
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
-
-	//GameSound* sound = this->mainMenuState->display->GetSound();
 
 	if (itemIndex == this->mainMenuState->optionsFullscreenIndex) {
 		int currSelectionIdx = this->mainMenuState->fullscreenMenuItem->GetSelectedItemIndex();
@@ -1189,11 +1206,20 @@ mainMenuState(mainMenuState) {
 void MainMenuDisplayState::EraseProgressVerifyEventHandler::MenuItemConfirmed() {
     // The player has decided to decimate all of their progress...
     bool success = GameProgressIO::WipeoutGameProgress(this->mainMenuState->display->GetModel());
+
+    Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
+    assert(blammopedia != NULL);
+
+    blammopedia->ClearProgressData();
+    success &= blammopedia->WriteAsEntryStatusFile();
     
     if (success) {
         this->mainMenuState->eraseSuccessfulPopup->Show(0.0, 0.5);
         // Set the start game menu item to be "New Game"
         this->mainMenuState->startGameMenuItem->SetText(MainMenuDisplayState::NEW_GAME_MENUITEM);
+
+        // Get rid of the level selection item...
+        this->mainMenuState->EraseLevelSelectMenuItem();
     }
     else {
         this->mainMenuState->eraseFailedPopup->Show(0.0, 0.5);
@@ -1201,13 +1227,13 @@ void MainMenuDisplayState::EraseProgressVerifyEventHandler::MenuItemConfirmed() 
 }
 
 /**
- * Triggered event when a sound onomatopiea particle spawns for the background 'bang' particle effects.
+ * Triggered event when a sound onomatopoeia particle spawns for the background 'bang' particle effects.
  */
 void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const ESPParticle* particle) {
 	const ESPOnomataParticle* soundParticle = static_cast<const ESPOnomataParticle*>(particle);
 	assert(soundParticle != NULL);
 
-	// Based on the extremeness of the onomata particle just spawned, we signify a sound event
+	// Based on the extremeness of the onomatopoeia particle just spawned, we signify a sound event
 	//GameSound* sound = this->mainMenuState->display->GetSound();
 	switch (soundParticle->GetSoundExtremeness()) {
 

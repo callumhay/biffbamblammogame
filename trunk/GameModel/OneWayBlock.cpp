@@ -2,7 +2,7 @@
  * OneWayBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2014
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -10,13 +10,12 @@
  */
 
 #include "OneWayBlock.h"
-
 #include "EmptySpaceBlock.h"
 #include "Projectile.h"
 #include "GameModel.h"
 #include "GameEventManager.h"
 
-const float OneWayBlock::ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS = M_PI / 180.0f * 82.0f; // (82 degrees)
+const float OneWayBlock::ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS = M_PI / 180.0f * 89.0f; // (89 degrees)
 
 OneWayBlock::OneWayBlock(const OneWayDir& dir, unsigned int wLoc, unsigned int hLoc) :
 LevelPiece(wLoc, hLoc), dirType(dir) {
@@ -118,7 +117,7 @@ LevelPiece* OneWayBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruc
 	    assert(success);
 	}
 
-    // Only collateral blocks, tesla lightning and disintegration can destroy a one-way block
+    // Only collateral blocks, Tesla lightning and disintegration can destroy a one-way block
     if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction &&
         method != LevelPiece::DisintegrationDestruction) {
         return this;

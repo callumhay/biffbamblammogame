@@ -164,6 +164,8 @@ public:
     bool HasUnviewedBlocks() const;
     bool HasUnviewedItems() const;
 
+    void ClearProgressData();
+
     static Blammopedia* BuildFromBlammopediaFile(const std::string &filepath);
 	bool WriteAsEntryStatusFile() const;
 

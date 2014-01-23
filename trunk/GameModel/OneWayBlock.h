@@ -2,7 +2,7 @@
  * OneWayBlock.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2014
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -187,8 +187,8 @@ inline bool OneWayBlock::IsGoingTheOneWay(const Vector2D& v) const {
     // Make sure the given direction is going in relatively the same way as the one
     // way direction for this block...
     float dot = Vector2D::Dot(this->oneWayDir, v);
-    if (dot > EPSILON) {
-        float angleToOneWayInRads = acos(std::min<float>(1.0f, std::max<float>(-1.0f, dot)));
+    if (dot >= 0.0) {
+        float angleToOneWayInRads = acos(std::min<float>(1.0f, dot));
         return (angleToOneWayInRads <= ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS);
     }
     

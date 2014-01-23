@@ -65,9 +65,8 @@ public:
 
 	static const int DEFAULT_SHIELD_DMG_PER_SECOND;
 
-    static const float MIN_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
-    static const float MAX_BASE_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
-    static const float DIFF_TIME_BETWEEN_FLAMETHROWER_FLAMES_IN_SECS;
+    static const double PADDLE_FROZEN_TIME_IN_SECS;
+    static const double PADDLE_ON_FIRE_TIME_IN_SECS;
 
     // WARNING: The PaddleType is a bit-wise mask, make sure all enumerations are bit-wise mutually exclusive!
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000002, 
@@ -78,8 +77,12 @@ public:
 
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
-    enum PaddleSpecialStatus { NoStatus = 0x00000000, InvisibleRocketStatus = 0x00000001, InvisibleMineStatus = 0x00000002,
-                               AllInvisibleStatus = InvisibleRocketStatus | InvisibleMineStatus};
+    enum PaddleSpecialStatus { 
+        NoStatus = 0x00000000, InvisibleRocketStatus = 0x00000001, InvisibleMineStatus = 0x00000002,
+        AllInvisibleStatus = InvisibleRocketStatus | InvisibleMineStatus,
+        FrozenInIceStatus = 0x00000004, OnFireStatus = 0x00000008,
+        AllStatus = 0xFFFFFFFF
+    };
 
     static const float DEFAULT_PADDLE_SCALE;
     static void SetNormalScale(float scale) { assert(scale > 0.0f); PlayerPaddle::NormalSizeScale = scale; };
@@ -219,9 +222,9 @@ public:
 
     int32_t GetPaddleSpecialStatus() const { return this->currSpecialStatus; }
     bool HasSpecialStatus(int32_t status) const { return ((this->currSpecialStatus & status) != 0x0); }
-
-    void AddSpecialStatus(int32_t status) { this->currSpecialStatus = this->currSpecialStatus | status; }
-    void RemoveSpecialStatus(int32_t status) { this->currSpecialStatus = this->currSpecialStatus & ~status; }
+    void AddSpecialStatus(int32_t status);
+    void RemoveSpecialStatus(int32_t status);
+    void ClearSpecialStatus() { this->RemoveSpecialStatus(PlayerPaddle::AllStatus); }
 
 	// Paddle camera set/get functions
 	void SetPaddleCamera(bool isPaddleCamOn, double dT) {
@@ -268,6 +271,7 @@ public:
         return !this->attachedProjectiles.empty();
     }
 
+    void HitByBall(const GameBall& ball);
     void HitByBoss(const BossBodyPart& bossPart);
 	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
     void HitByBeam(const Beam& beam, const BeamSegment& beamSegment);
@@ -326,6 +330,9 @@ public:
         return this->hitWall;
     }
     bool GetIsCloseToAWall() const;
+
+    double GetTimeUntilUnfrozen() const { return this->frozenCountdown; }
+    double GetTimeUntilNotOnFire() const { return this->onFireCountdown; }
 
 #ifdef _DEBUG
     void DebugDraw() const;
@@ -387,6 +394,9 @@ private:
     double timeSinceLastBlastShot; // Time since the last fire blast projectile was fired
 	double laserBeamTimer;          // Time left on the laser beam power-up
 
+    double frozenCountdown; // Keeps track of time that the paddle is frozen
+    double onFireCountdown; // Keeps track of time that the paddle is on fire
+
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
     std::list<Projectile*> attachedProjectiles;
@@ -418,7 +428,9 @@ private:
     void IceBlastProjectileCollision(const PaddleIceBlasterProjectile& iceBlastProjectile);
     void BeamCollision(const Beam& beam, const BeamSegment& beamSegment);
 
-	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);
+	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter) const;
+    void GetPaddleHitByProjectileEffect(const Point2D& projectileCenter, float maxRotationInDegs, float minMoveDown,
+        float closeToCenterCoeff, float& totalMoveDownAmt, float& totalRotationInDegs) const;
 	void SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
                                            float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs);
 
@@ -429,6 +441,10 @@ private:
         int diffFromNormalSize = static_cast<int>(size) - static_cast<int>(PlayerPaddle::NormalSize);
         return PlayerPaddle::NormalSizeScale * (PADDLE_WIDTH_TOTAL + diffFromNormalSize * PlayerPaddle::WIDTH_DIFF_PER_SIZE) / PADDLE_WIDTH_TOTAL;
     }
+
+    void CancelFireStatusWithIce();
+    void CancelFrozenStatusWithFire();
+    void RecoverFromFrozenPaddle();
 
     DISALLOW_COPY_AND_ASSIGN(PlayerPaddle);
 };
