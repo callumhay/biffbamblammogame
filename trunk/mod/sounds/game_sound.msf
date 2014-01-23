@@ -219,7 +219,7 @@ PaddleOnFireEvent {
 // Ball Events ***************************************************************
 
 PlayerLostABallButIsStillAliveEvent {
-	file = resources/lost_ball.ogg
+	file = resources/NOT_IMPLEMENTED
 }
 
 BallBallCollisionEvent {

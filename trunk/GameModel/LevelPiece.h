@@ -149,6 +149,8 @@ public:
     void DetachProjectile(MineProjectile* p);
     void DetachAllProjectiles();
 
+    virtual void DrawWireframe() const;
+
 	// Debug Stuffs
 	void DebugDraw() const;
 
@@ -343,6 +345,10 @@ inline void LevelPiece::Triggered(GameModel* gameModel) {
 // Draws the boundary lines and normals for this level piece.
 inline void LevelPiece::DebugDraw() const {
 	this->bounds.DebugDraw();
+}
+
+inline void LevelPiece::DrawWireframe() const {
+    this->bounds.DrawSimpleBounds();
 }
 
 inline bool LevelPiece::HasStatus(int32_t statusMask) const {

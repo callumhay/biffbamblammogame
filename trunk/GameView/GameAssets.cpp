@@ -349,8 +349,9 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 	// Average values used to calculate the colour and position of the ball light
 	Point3D avgBallPosition(0,0,0);
-	Colour avgBallColour(0,0,0);
-	int visibleBallCount = 0;
+	Vector3D avgBallColourVec(0,0,0);
+
+	int visibleBallCount        = 0;
     bool ballWithOmniLaserDrawn = false;
 
 	// Go through each ball in the game, draw it accordingly
@@ -368,22 +369,30 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 		bool ballIsInvisible = (currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall;
 		CgFxEffectBase* ballEffectTemp = NULL;
-		Colour currBallColour(0,0,0);
+		Vector3D currBallColourVec(0,0,0);
 
 		const Point2D& ballPos = currBall->GetCenterPosition2D();
 
 		if (currBall->GetBallType() == GameBall::NormalBall) {
 			// Normal ball with a regular light
-			avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0);
-			avgBallColour   = avgBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
+			avgBallPosition += Vector3D(ballPos[0], ballPos[1], 0);
+			avgBallColourVec   += GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR.GetAsVector3D();
 			visibleBallCount++;
 		}
 		else {
 			// The ball has an item in effect on it... figure out what effect(s) and render it/them appropriately
 
-			int numColoursApplied = 0;
-			
-            if (!ballIsInvisible) {
+            if (ballIsInvisible) {
+                // INVISIBALL:
+                // Obtain the POST full screen rendering from the previous frame - this is
+                // a bit of a hack but it saves us from reading/writing to the same FBO simultaneously
+                this->invisibleEffect->SetFBOTexture(this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+                ballEffectTemp = this->invisibleEffect;
+            }
+            // We only apply special colour/misc. effects if the ball camera is not on OR
+            // if the ball camera is on and the current ball has the camera
+            else if (!GameBall::GetIsBallCameraOn() || currBall->HasBallCameraActive()) {
+                int numColoursApplied = 0;
 
                 // SLOW AND FAST BALL CHECK
                 if ((currBall->GetBallType() & GameBall::SlowBall) == GameBall::SlowBall) {
@@ -391,7 +400,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
                         this->espAssets->DrawSlowBallEffects(dT, camera, *currBall);
 				    }
-                    currBallColour = currBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
+                    currBallColourVec += GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR.GetAsVector3D();
                     numColoursApplied++;
                 }
                 else if ((currBall->GetBallType() & GameBall::FastBall) == GameBall::FastBall) {
@@ -399,41 +408,36 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
                         this->espAssets->DrawFastBallEffects(dT, camera, *currBall);
 				    }
-                    currBallColour = currBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
+                    currBallColourVec += GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR.GetAsVector3D();
                     numColoursApplied++;
                 }
 
 			    // GHOST BALL CHECK
 			    if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall) {
-    				
-				    // Draw when the ghost ball is not an invisiball...	
-				    ballEffectTemp = this->ghostBallEffect;
-
 				    // We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
 					    this->espAssets->DrawGhostBallEffects(dT, camera, *currBall);
 				    }
     				
-				    currBallColour = currBallColour + GameModelConstants::GetInstance()->GHOST_BALL_COLOUR;
+                    ballEffectTemp = this->ghostBallEffect;
+				    currBallColourVec += GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.GetAsVector3D();
 				    numColoursApplied++;
 			    }
 
 			    // UBER BALL CHECK
 			    if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
-    				
 				    // Draw when uber ball and not invisiball...
 				    // We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
 					    this->espAssets->DrawUberBallEffects(dT, camera, *currBall);
 				    }
 
-				    currBallColour = currBallColour + GameModelConstants::GetInstance()->UBER_BALL_COLOUR;
+				    currBallColourVec += GameModelConstants::GetInstance()->UBER_BALL_COLOUR.GetAsVector3D();
 				    numColoursApplied++;
 			    }
 
 			    // GRAVITY BALL CHECK
 			    if ((currBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall) {
-
 				    // Draw when gravity ball and not invisiball...
 				    // We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
@@ -441,46 +445,42 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					    this->espAssets->DrawGravityBallEffects(dT, camera, *currBall, gravityDir);
 				    }
     				
-				    currBallColour = currBallColour + GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR;
+				    currBallColourVec += GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR.GetAsVector3D();
 				    numColoursApplied++;
 			    }
 
 			    // CRAZY BALL CHECK
 			    if ((currBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
-
 				    // Draw when crazy ball when not invisible...
 				    // We don't draw any of the effects if we're in ball camera mode
 				    if (!GameBall::GetIsBallCameraOn()) {				
 					    this->espAssets->DrawCrazyBallEffects(dT, camera, *currBall);
 				    }
     				
-				    currBallColour = currBallColour + GameModelConstants::GetInstance()->CRAZY_BALL_COLOUR;
+				    currBallColourVec += GameModelConstants::GetInstance()->CRAZY_BALL_COLOUR.GetAsVector3D();
 				    numColoursApplied++;
 			    }
 
 			    // FIRE BALL CHECK
 			    if ((currBall->GetBallType() & GameBall::FireBall) == GameBall::FireBall) {
-				    ballEffectTemp = this->fireBallEffect;
-
 				    // Draw the fire ball when not invisible
 				    // We don't draw any of the effects if we're in a ball camera mode or inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {				
 					    this->espAssets->DrawFireBallEffects(dT, camera, *currBall);
 				    }
-				    currBallColour = currBallColour + GameModelConstants::GetInstance()->FIRE_BALL_COLOUR;
+                    ballEffectTemp = this->fireBallEffect;
+				    currBallColourVec += GameModelConstants::GetInstance()->FIRE_BALL_COLOUR.GetAsVector3D();
 				    numColoursApplied++;
 			    }
 
 			    // ICE BALL CHECK
 			    if ((currBall->GetBallType() & GameBall::IceBall) == GameBall::IceBall) {
-				    //ballEffectTemp = this->iceBallEffect;
-
 				    // Draw the ice ball when not invisible
 				    // We don't draw any of the effects if we're in a ball camera mode or inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
 					    this->espAssets->DrawIceBallEffects(dT, camera, *currBall);
 				    }
-				    currBallColour = currBallColour + GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+				    currBallColourVec += GameModelConstants::GetInstance()->ICE_BALL_COLOUR.GetAsVector3D();
 				    numColoursApplied++;
 			    }
 
@@ -490,7 +490,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					    this->omniLaserBallEffect->Draw(dT, !ballWithOmniLaserDrawn, camera, *currBall);
                         ballWithOmniLaserDrawn = true;
 				    }
-                    currBallColour = currBallColour + GameModelConstants::GetInstance()->OMNI_LASER_BALL_COLOUR;
+                    currBallColourVec += GameModelConstants::GetInstance()->OMNI_LASER_BALL_COLOUR.GetAsVector3D();
                     numColoursApplied++;
                 }
 
@@ -498,18 +498,9 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0);
 			
 				numColoursApplied = std::max<int>(1, numColoursApplied);
-				avgBallColour = avgBallColour + (currBallColour / numColoursApplied);
+				avgBallColourVec += (currBallColourVec / numColoursApplied);
 
 				visibleBallCount++;
-            }
-            else {
-                // ballIsInvisible == true
-
-                // INVISIBALL:
-                // Obtain the POST full screen rendering from the previous frame - this is
-				// a bit of a hack but it saves us from reading/writing to the same FBO simultaneously
-                this->invisibleEffect->SetFBOTexture(this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
-				ballEffectTemp = this->invisibleEffect;
             }
 		}
 
@@ -554,33 +545,53 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		else {
 			this->ball->Draw(camera, ballEffectTemp, ballKeyLight, ballFillLight);
 		}
-        glPopAttrib();
 
+        glPopAttrib();
 		glPopMatrix();
 	}
 
-    // If the ball boost direction is being decided then we need to draw the boost effect
-    this->DrawGameBallsBoostPostEffects(dT, gameModel, camera);
+    // Deal with the special case of the ball camera...
+    const GameBall* camBall = GameBall::GetBallCameraBall();
+    if (camBall == NULL) {
 
-	// Calculate the average position and colour of all the visible balls in the game
-	if (visibleBallCount > 0) {
-		avgBallPosition = avgBallPosition / visibleBallCount;
-		avgBallPosition = avgBallPosition + Vector3D(worldT[0], worldT[1], 0.0f);
-		avgBallColour = avgBallColour / visibleBallCount;
-		
-		// Grab a transform matrix from the game model to say where the ball light is
-		// if the level is flipped or some such thing
-		Point3D newAvgBallPos =  gameModel.GetTransformInfo()->GetGameXYZTransform() * avgBallPosition;
+        // If the ball boost direction is being decided then we need to draw the boost effect
+        this->DrawGameBallsBoostPostEffects(dT, gameModel, camera);
 
-		// Set the ball light to the correct position
-        this->lightAssets->GetBallLight().SetPosition(newAvgBallPos);
-	}
-	else {
-		avgBallColour = Colour(0,0,0);
-	}
+	    // Calculate the average position and colour of all the visible balls in the game
+	    if (visibleBallCount > 0) {
+	        avgBallPosition  /= static_cast<float>(visibleBallCount);
+	        avgBallPosition  += Vector3D(worldT[0], worldT[1], 0.0f);
+	        avgBallColourVec /= static_cast<float>(visibleBallCount);
+    		
+	        // Grab a transform matrix from the game model to say where the ball light is
+	        // if the level is flipped or some such thing
+	        avgBallPosition = gameModel.GetTransformInfo()->GetGameXYZTransform() * avgBallPosition;
+
+            // Set the ball light to the correct position
+            this->lightAssets->GetBallLight().SetPosition(avgBallPosition);
+	    }
+	    else {
+		    avgBallColourVec = Vector3D(0,0,0);
+	    }
+    }
+    else {
+        // No averaging of position or colour and we ignore anything concerning "visible ball counts", 
+        // we want the ball camera to have good illumination at all times or it will drive players
+        // even more insane than it already does
+        assert(avgBallPosition == camBall->GetCenterPosition());
+
+        avgBallPosition += Vector3D(worldT[0], worldT[1], 0.0f);
+        avgBallPosition  = gameModel.GetTransformInfo()->GetGameXYZTransform() * avgBallPosition;
+        
+        // Set the FG key light to the same position as the ball...    
+        this->lightAssets->GetFGKeyLight().SetPosition(avgBallPosition);
+
+        // Set the ball light to the correct position
+        this->lightAssets->GetBallLight().SetPosition(avgBallPosition);
+    }
 
 	// Set the ball light to the correct diffuse colour
-	this->lightAssets->GetBallLight().SetDiffuseColour(avgBallColour);
+	this->lightAssets->GetBallLight().SetDiffuseColour(Colour(avgBallColourVec));
 	debug_opengl_state();
 }
 
@@ -1838,18 +1849,6 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		}
 
 		case GameItem::BallCamItem: {
-			// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
-			// NOTE that this is not permanent and just does so for any currently falling items
-			this->espAssets->TurnOffCurrentItemDropStars();
-
-			// Change the position of the key light so that it is facing down with the ball
-			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
-
-			Point3D newFGKeyLightPos(0.0f, (halfLevelHeight + 10.0f), -5.0f);
-			Point3D newFGFillLightPos(0.0f, -(halfLevelHeight + 10.0f), -10.0f);
-			
-			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight, newFGKeyLightPos, 0.08f, 1.5f);
-			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
 
             // Stop any sound associated with the cannon rotating if the ball that has the ball camera associated with it
             // is inside a cannon that was previously rotating
@@ -1859,6 +1858,20 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
                 assert(cannon != NULL);
                 this->sound->DetachAndStopSound(cannon, GameSound::CannonBlockRotatingLoop);
             }
+
+			// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
+			// NOTE that this is not permanent and just does so for any currently falling items
+			this->espAssets->TurnOffCurrentItemDropStars();
+
+			// Change the position of the key light so that it is facing down with the ball
+			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+
+            const Point2D& cameraBallPos = cameraBall->GetCenterPosition2D();
+			Point3D newFGKeyLightPos(cameraBallPos[0], cameraBallPos[1], BallCamHUD::BALL_CAM_FG_KEY_LIGHT_Z_POS);
+			Point3D newFGFillLightPos(0.0f, -halfLevelHeight, BallCamHUD::BALL_CAM_FG_FILL_LIGHT_Z_POS);
+			
+			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight,  newFGKeyLightPos,  0.08f, 1.5f);
+			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
 
 			// Fade out the background...
 			this->worldAssets->FadeBackground(true, 2.0f);

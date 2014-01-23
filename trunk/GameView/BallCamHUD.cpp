@@ -24,6 +24,9 @@ const double BallCamHUD::LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME = 0.5;
 const char* BallCamHUD::BOOST_MALFUNCTION_TEXT              = ">>WARNING:\n>>BOOST MALFUNCTION?!";
 const char* BallCamHUD::CANNON_OBSTRUCTION_MALFUNCTION_TEXT = ">>ERROR:\n>>OBSTRUCTION DETECTED!";
 
+const float BallCamHUD::BALL_CAM_FG_KEY_LIGHT_Z_POS  = 0.0f;   // This should always be zero!!! (otherwise there will be a mismatch between the ball light and key light)
+const float BallCamHUD::BALL_CAM_FG_FILL_LIGHT_Z_POS = -10.0f;
+
 BallCamHUD::BallCamHUD(GameAssets& assets) :
 boostMalfunctionHUD(NULL), cannonObstructionHUD(NULL), cannon(NULL),
 cannonRotateHint(assets.GetTutorialAssets(), "Rotate Cannon"),
@@ -164,7 +167,7 @@ void BallCamHUD::ToggleCannonHUD(bool activate, const CannonBlock* cannon) {
         this->boostMalfunctionHUD->Deactivate();
         this->cannonObstructionHUD->Deactivate();
 
-        this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME, 0.0f);
+        //this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME, 0.0f);
     }
     else {
 
@@ -179,7 +182,7 @@ void BallCamHUD::ToggleCannonHUD(bool activate, const CannonBlock* cannon) {
         this->cannonHUDActive = false;
         this->cannonObstructionHUD->Deactivate();
 
-        this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_IN_ANIMATE_TIME, 1.0f);
+        //this->levelDisplayFadeAnim.SetLerp(LEVEL_DISPLAY_FADE_IN_ANIMATE_TIME, 1.0f);
     }
 }
 
@@ -455,7 +458,7 @@ void BallCamHUD::DrawLevelDisplayHUD(double dT, const GameModel& gameModel) {
         const std::vector<LevelPiece*>& setOfPieces = pieces[i];
         for (size_t j = 0; j < setOfPieces.size(); j++) {
             const LevelPiece* currPiece = setOfPieces[j];
-            currPiece->GetBounds().DrawSimpleBounds();
+            currPiece->DrawWireframe();
         }
     }
 

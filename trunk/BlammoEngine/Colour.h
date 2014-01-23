@@ -14,77 +14,88 @@
 
 #include "BasicIncludes.h"
 #include "Algebra.h"
+#include "Vector.h"
 
 class Colour {
 protected:
-  float colours[3];
+    float colours[3];
 
 public:
-	Colour() {
-		colours[0] = colours[1] = colours[2] = 1;
-	}
-  Colour(float r, float g, float b) {
-    colours[0] = r;
-    colours[1] = g;
-    colours[2] = b;
-  }
-  Colour(int hexColour) {
-    colours[0] = static_cast<float>((hexColour & 0xFF0000) >> 16) / 255.0f;
-    colours[1] = static_cast<float>((hexColour & 0x00FF00) >>  8) / 255.0f;
-    colours[2] = static_cast<float>((hexColour & 0x0000FF)) / 255.0f;
-  }
-  Colour(const Colour& other) {
-    colours[0] = other.colours[0];
-    colours[1] = other.colours[1];
-    colours[2] = other.colours[2];
-  }
+    Colour() {
+        colours[0] = colours[1] = colours[2] = 1;
+    }
+    Colour(float r, float g, float b) {
+        colours[0] = r;
+        colours[1] = g;
+        colours[2] = b;
+    }
+    explicit Colour(int hexColour) {
+        colours[0] = static_cast<float>((hexColour & 0xFF0000) >> 16) / 255.0f;
+        colours[1] = static_cast<float>((hexColour & 0x00FF00) >>  8) / 255.0f;
+        colours[2] = static_cast<float>((hexColour & 0x0000FF)) / 255.0f;
+    }
+    explicit Colour(const Vector3D& vec) {
+        colours[0] = std::min<float>(1.0f, std::max<float>(0.0f, vec[0]));
+        colours[1] = std::min<float>(1.0f, std::max<float>(0.0f, vec[1]));
+        colours[2] = std::min<float>(1.0f, std::max<float>(0.0f, vec[2]));
+    }
 
-  Colour& operator =(const Colour& other) {
-    colours[0] = other.colours[0];
-    colours[1] = other.colours[1];
-    colours[2] = other.colours[2];
-    return *this;
-  }
-	
-	const float* begin() const {
-		return colours;
-	}
+    Colour(const Colour& other) {
+        colours[0] = other.colours[0];
+        colours[1] = other.colours[1];
+        colours[2] = other.colours[2];
+    }
 
-	float& operator[](size_t idx) {
-		assert(idx < 3);
-    return this->colours[ idx ];
-  }
+    Colour& operator =(const Colour& other) {
+        colours[0] = other.colours[0];
+        colours[1] = other.colours[1];
+        colours[2] = other.colours[2];
+        return *this;
+    }
 
-  float operator[](size_t idx) const {
-		assert(idx < 3);
-    return this->colours[ idx ];
-  }
+    const float* begin() const {
+        return colours;
+    }
 
-  float R() const { 
-    return colours[0];
-  }
-  float G() const { 
-    return colours[1];
-  }
-  float B() const { 
-    return colours[2];
-  }
+    float& operator[](size_t idx) {
+        assert(idx < 3);
+        return this->colours[ idx ];
+    }
 
-  float GetLuminance() const {
-      return this->R() * 0.3f + this->G() * 0.59f + this->B() * 0.11f;
-  }
+    float operator[](size_t idx) const {
+        assert(idx < 3);
+        return this->colours[ idx ];
+    }
 
-  float GetGreyscaleAmt() const {
-    return (this->R() + this->G() + this->B()) / 3.0f;
-  }
+    float R() const { 
+        return colours[0];
+    }
+    float G() const { 
+        return colours[1];
+    }
+    float B() const { 
+        return colours[2];
+    }
 
-	Colour GetComplementaryColour() const {
-		return Colour(1.0f - this->colours[0], 1.0f - this->colours[1], 1.0f - this->colours[2]);
-	}
+    float GetLuminance() const {
+        return this->R() * 0.3f + this->G() * 0.59f + this->B() * 0.11f;
+    }
 
-  const float* getColourVector() const {
-    return colours;
-  }
+    float GetGreyscaleAmt() const {
+        return (this->R() + this->G() + this->B()) / 3.0f;
+    }
+
+    Colour GetComplementaryColour() const {
+        return Colour(1.0f - this->colours[0], 1.0f - this->colours[1], 1.0f - this->colours[2]);
+    }
+
+    Vector3D GetAsVector3D() const {
+        return Vector3D(this->colours[0], this->colours[1], this->colours[2]);
+    }
+
+    const float* GetColourValues() const {
+        return colours;
+    }
 };
 
 class ColourRGBA : public Colour {
