@@ -103,6 +103,8 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
+    void DrawWireframe() const;
+
     void SetRotationSpeed(int dir, float magnitudePercent);
     void Fire();
     void InitBallCameraInCannonValues(bool changeRotation, const GameBall& ball);

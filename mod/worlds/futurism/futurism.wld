@@ -5,9 +5,18 @@ Futurism
 resources/textures/futurism_world_select_256x256.jpg
 
 
-# Camera Ball/Paddle Item intro level
+# Camera Ball Item intro
 resources/worlds/levels/medium/a_change_of_view.lvl
 
+resources/worlds/levels/hard/shoot_the_void.lvl
+
+
+# Camera Paddle Item intro
+# TODO
+
+
+
+# Portal Block Item intro
 
 
 

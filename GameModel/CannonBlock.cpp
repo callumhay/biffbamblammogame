@@ -105,6 +105,46 @@ void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
         bottomLeftNeighbor);
 }
 
+void CannonBlock::DrawWireframe() const {
+    LevelPiece::DrawWireframe();
+
+    // Draw an arrow showing the direction the cannon is pointing in if this cannon has the ball camera
+    // ball inside it...
+    if (GameBall::GetBallCameraBall() == this->loadedBall) {
+        const Point2D& center = this->GetCenter();
+        Vector2D dir = 1.5f * HALF_CANNON_BARREL_LENGTH * this->GetCurrentCannonDirection();
+        
+        Point2D arrowBase = center + dir;
+        Point2D arrowEnd  = arrowBase + dir;
+        
+        Point2D pointerLoc = arrowBase + 0.6f * dir;
+        Vector2D perpVec = arrowEnd - arrowBase;
+        perpVec.Rotate(90);
+        perpVec *= 0.25f;
+
+        glPushAttrib(GL_CURRENT_BIT);
+        glColor3f(0, 1, 0);
+
+        glBegin(GL_LINES);
+        
+        // Arrow shaft
+        glVertex2f(arrowBase[0], arrowBase[1]);
+        glVertex2f(arrowEnd[0], arrowEnd[1]);
+
+        // Arrow angled pointer lines
+        glVertex2f(arrowEnd[0], arrowEnd[1]);
+        glVertex2f(pointerLoc[0] + perpVec[0], pointerLoc[1] + perpVec[1]);
+
+        glVertex2f(arrowEnd[0], arrowEnd[1]);
+        glVertex2f(pointerLoc[0] - perpVec[0], pointerLoc[1] - perpVec[1]);
+
+        glEnd();
+
+        glPopAttrib();
+    }
+}
+
+
 /**
  * Build default position (facing in x axis direction) bounding lines for this cannon block.
  */
@@ -273,6 +313,10 @@ void CannonBlock::InitBallCameraInCannonValues(bool changeRotation, const GameBa
         else {
             this->currRotationFromXInDegs = Trig::radiansToDegrees(atan2f(-ballDir[1], -ballDir[0]));
         }
+
+        // Rebuild the bounds of this cannon to conform to the new rotation
+        this->bounds = this->BuildBounds();
+        this->bounds.RotateLinesAndNormals(this->currRotationFromXInDegs, this->center);
     }
 }
 
@@ -290,9 +334,10 @@ bool CannonBlock::RotateAndEventuallyFire(double dT, bool overrideFireRotation) 
 		// is set to exactly the firing angle when we fire...
 		if (!this->GetHasRandomRotation() && !overrideFireRotation) {
             this->currRotationFromXInDegs = this->fixedRotationXInDegs;
-			this->bounds = this->BuildBounds();
-			this->bounds.RotateLinesAndNormals(this->currRotationFromXInDegs, this->center);
 		}
+
+        this->bounds = this->BuildBounds();
+        this->bounds.RotateLinesAndNormals(this->currRotationFromXInDegs, this->center);
 
         // Shoot the ball!
 		this->elapsedRotationTime = this->totalRotationTime;

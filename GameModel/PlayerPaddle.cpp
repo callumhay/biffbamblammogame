@@ -56,7 +56,7 @@ const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEE
 // The coefficient angle change of the ball when deflected by a moving paddle
 const int PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE = 18.0f;
 
-// Delay between shots of the laser
+// Delay between shots of the laservent
 const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
 const double PlayerPaddle::PADDLE_FLAME_BLAST_DELAY  = 0.5;
 const double PlayerPaddle::PADDLE_ICE_BLAST_DELAY    = 0.5;

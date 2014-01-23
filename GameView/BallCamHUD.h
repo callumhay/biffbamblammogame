@@ -21,7 +21,10 @@ class FBObj;
 
 class BallCamHUD {
 public:
-    BallCamHUD(GameAssets& assets);
+    static const float BALL_CAM_FG_KEY_LIGHT_Z_POS;
+    static const float BALL_CAM_FG_FILL_LIGHT_Z_POS;
+
+    explicit BallCamHUD(GameAssets& assets);
     ~BallCamHUD();
 
     bool GetIsBoostMalfunctionHUDActive() const;

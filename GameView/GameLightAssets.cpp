@@ -132,7 +132,8 @@ void GameLightAssets::StopStrobeLight(GameLightType lightType) {
  * Moves the given light from its current position to the new position provided
  * in the amount of time given.
  */
-void GameLightAssets::ChangeLightPositionAndAttenuation(GameLightType lightType, const Point3D& newPosition, float newAtten, float changeTime) {
+void GameLightAssets::ChangeLightPositionAndAttenuation(GameLightType lightType, const Point3D& newPosition, 
+                                                        float newAtten, float changeTime) {
 	assert(changeTime >= 0.0f);
 	assert(lightType != GameLightAssets::FGBallLight);
 

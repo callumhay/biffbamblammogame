@@ -21,7 +21,6 @@
  * controlling all animations, attributes and events associated with lights as the game plays.
  */
 class GameLightAssets {
-	
 public:
     static const float DEFAULT_LIGHT_TOGGLE_TIME;
 
@@ -57,7 +56,9 @@ public:
 	void GetPaddleAffectingLights(BasicPointLight& paddleKeyLight, BasicPointLight& paddleFillLight, BasicPointLight& ballLight) const;
 	void GetBossAffectingLights(BasicPointLight& bossKeyLight, BasicPointLight& bossFillLight, BasicPointLight& ballLight) const;
     void GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const;
-	PointLight& GetBallLight() { return this->ballLight; };
+	
+    PointLight& GetBallLight() { return this->ballLight; }
+    PointLight& GetFGKeyLight() { return this->fgKeyLight; }
 
     void SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes, const BasicPointLight& bgFillAttributes);
     void SetForegroundLightDefaults(const BasicPointLight& fgKeyAttributes, const BasicPointLight& fgFillAttributes);

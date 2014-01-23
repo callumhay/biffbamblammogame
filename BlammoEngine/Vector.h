@@ -20,58 +20,58 @@ class Matrix4x4;
 // 2D Vector -----------------------------------------------------
 class Vector2D {
 private:
-    float v_[2];
+    float values[2];
 
 public:
     Vector2D() {
-        v_[0] = 0.0f;
-        v_[1] = 0.0f;
+        values[0] = 0.0f;
+        values[1] = 0.0f;
     }
 
     explicit Vector2D(float f) {
-        v_[0] = v_[1] = f;
+        values[0] = values[1] = f;
     }
 
     Vector2D(float x, float y) { 
-        v_[0] = x;
-        v_[1] = y;
+        values[0] = x;
+        values[1] = y;
     }
 
     Vector2D(const Vector2D& other) {
-        v_[0] = other.v_[0];
-        v_[1] = other.v_[1];
+        values[0] = other.values[0];
+        values[1] = other.values[1];
     }
 
     Vector2D& operator =(const Vector2D& other) {
-        v_[0] = other.v_[0];
-        v_[1] = other.v_[1];
+        values[0] = other.values[0];
+        values[1] = other.values[1];
         return *this;
     }
 
     bool IsZero() const;
 
     const float* begin() const {
-        return v_;
+        return values;
     }
 
     float& operator[](size_t idx) {
         assert(idx < 2);
-        return v_[ idx ];
+        return values[ idx ];
     }
 
     float operator[](size_t idx) const {
         assert(idx < 2);
-        return v_[ idx ];
+        return values[ idx ];
     }
 
     Vector2D& operator*=(float f) {
-        v_[0] *= f;
-        v_[1] *= f;
+        values[0] *= f;
+        values[1] *= f;
         return (*this);
     }
     Vector2D& operator+=(const Vector2D& v) {
-        v_[0] += v[0];
-        v_[1] += v[1];
+        values[0] += v[0];
+        values[1] += v[1];
         return (*this);
     }
 
@@ -103,8 +103,8 @@ public:
     void Normalize() {
         float magnitude = Vector2D::Magnitude(*this);
         assert(magnitude != 0);
-        this->v_[0] /= magnitude;
-        this->v_[1] /= magnitude;
+        this->values[0] /= magnitude;
+        this->values[1] /= magnitude;
     }
 
 };
@@ -157,11 +157,11 @@ inline void Vector2D::Rotate(float angInDegs) {
 
     float c = cosf(angInRads);
     float s = sinf(angInRads);
-    float x = c * v_[0] - s * v_[1];
-    float y = s * v_[0] + c * v_[1];
+    float x = c * values[0] - s * values[1];
+    float y = s * values[0] + c * values[1];
 
-    v_[0] = x;
-    v_[1] = y;
+    values[0] = x;
+    values[1] = y;
 }
 
 inline bool Vector2D::IsZero() const {
@@ -172,78 +172,90 @@ inline bool Vector2D::IsZero() const {
 // 3D Vector -----------------------------------------------------
 class Vector3D {
 private:
-    float v_[3];
+    float values[3];
 
 public:
     Vector3D() {
-        v_[0] = 0.0f;
-        v_[1] = 0.0f;
-        v_[2] = 0.0f;
+        values[0] = 0.0f;
+        values[1] = 0.0f;
+        values[2] = 0.0f;
     }
 
     explicit Vector3D(float f) {
-        v_[0] = v_[1] = v_[2] = f;
+        values[0] = values[1] = values[2] = f;
     }
 
     Vector3D(float x, float y, float z) { 
-        v_[0] = x;
-        v_[1] = y;
-        v_[2] = z;
+        values[0] = x;
+        values[1] = y;
+        values[2] = z;
     }
 
     Vector3D(const Vector2D& v, float z) {
-        v_[0] = v[0];
-        v_[1] = v[1];
-        v_[2] = z;
+        values[0] = v[0];
+        values[1] = v[1];
+        values[2] = z;
     }
 
     explicit Vector3D(const Vector2D& v) {
-        v_[0] = v[0];
-        v_[1] = v[1];
-        v_[2] = 0.0f;
+        values[0] = v[0];
+        values[1] = v[1];
+        values[2] = 0.0f;
     }
 
     Vector3D(const Vector3D& other) {
-        v_[0] = other.v_[0];
-        v_[1] = other.v_[1];
-        v_[2] = other.v_[2];
+        values[0] = other.values[0];
+        values[1] = other.values[1];
+        values[2] = other.values[2];
     }
 
     Vector3D& operator =(const Vector3D& other) {
-        v_[0] = other.v_[0];
-        v_[1] = other.v_[1];
-        v_[2] = other.v_[2];
+        values[0] = other.values[0];
+        values[1] = other.values[1];
+        values[2] = other.values[2];
         return *this;
     }
 
     const float* begin() const {
-        return v_;
+        return values;
     }
 
     float& operator[](size_t idx) {
         assert(idx < 3);
-        return v_[ idx ];
+        return values[idx];
     }
 
     float operator[](size_t idx) const {
         assert(idx < 3);
-        return v_[ idx ];
+        return values[idx];
     }
 
     Vector3D& operator*=(float s) {
-        v_[0] *= s;
-        v_[1] *= s;
-        v_[2] *= s;
+        values[0] *= s;
+        values[1] *= s;
+        values[2] *= s;
+        return *this;
+    }
+    Vector3D& operator/=(float s) {
+        values[0] /= s;
+        values[1] /= s;
+        values[2] /= s;
+        return *this;
+    }
+    Vector3D& operator+=(const Vector3D& otherVec) {
+        values[0] += otherVec[0];
+        values[1] += otherVec[1];
+        values[2] += otherVec[2];
         return *this;
     }
 
     bool IsZero() const;
 
     float dot(const Vector3D& other) const {
-        return v_[0]*other.v_[0] + v_[1]*other.v_[1] + v_[2]*other.v_[2];
+        return values[0]*other.values[0] + values[1]*other.values[1] + values[2]*other.values[2];
     }	
     float length2() const {
-        return v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2];
+        return values[0]*values[0] + values[1]*values[1] + values[2]*values[2];
     }
 
     float length() const {
@@ -251,32 +263,32 @@ public:
     }
 
     void Abs() {
-        this->v_[0] = fabs(this->v_[0]);
-        this->v_[1] = fabs(this->v_[1]);
-        this->v_[2] = fabs(this->v_[2]);
+        this->values[0] = fabs(this->values[0]);
+        this->values[1] = fabs(this->values[1]);
+        this->values[2] = fabs(this->values[2]);
     }
 
     Vector2D ToVector2D() {
-        return Vector2D(this->v_[0], this->v_[1]);
+        return Vector2D(this->values[0], this->values[1]);
     }
 
     void Normalize() {
         float magnitude = this->length();
         if (magnitude < 0.000000001f) {
             assert(false);
-            this->v_[0] = this->v_[1] = this->v_[2] = 0;			
+            this->values[0] = this->values[1] = this->values[2] = 0;			
         }
         else {
-            this->v_[0] /= magnitude;
-            this->v_[1] /= magnitude;
-            this->v_[2] /= magnitude;
+            this->values[0] /= magnitude;
+            this->values[1] /= magnitude;
+            this->values[2] /= magnitude;
         }
     }
 
     Vector3D cross(const Vector3D& other) const {
-        return Vector3D(v_[1]*other[2] - v_[2]*other[1],
-            v_[2]*other[0] - v_[0]*other[2],
-            v_[0]*other[1] - v_[1]*other[0]);
+        return Vector3D(values[1]*other[2] - values[2]*other[1],
+            values[2]*other[0] - values[0]*other[2],
+            values[0]*other[1] - values[1]*other[0]);
     }
 
     static Vector3D cross(const Vector3D& v1, const Vector3D& v2) {
@@ -419,45 +431,45 @@ Vector3D transNorm(const Matrix4x4& M, const Vector3D& n);
 class Vector4D {
 
 private:
-    float v_[4];
+    float values[4];
 
 public:
     Vector4D() {
-        v_[0] = 0.0;
-        v_[1] = 0.0;
-        v_[2] = 0.0;
-        v_[3] = 0.0;
+        values[0] = 0.0;
+        values[1] = 0.0;
+        values[2] = 0.0;
+        values[3] = 0.0;
     } 
     Vector4D(float x, float y, float z, float w) { 
-        v_[0] = x;
-        v_[1] = y;
-        v_[2] = z;
-        v_[3] = w;
+        values[0] = x;
+        values[1] = y;
+        values[2] = z;
+        values[3] = w;
     }
 
     Vector4D(const Vector4D& other) {
-        v_[0] = other.v_[0];
-        v_[1] = other.v_[1];
-        v_[2] = other.v_[2];
-        v_[3] = other.v_[3];
+        values[0] = other.values[0];
+        values[1] = other.values[1];
+        values[2] = other.values[2];
+        values[3] = other.values[3];
     }
 
     Vector4D& operator =(const Vector4D& other) {
-        v_[0] = other.v_[0];
-        v_[1] = other.v_[1];
-        v_[2] = other.v_[2];
-        v_[3] = other.v_[3];
+        values[0] = other.values[0];
+        values[1] = other.values[1];
+        values[2] = other.values[2];
+        values[3] = other.values[3];
         return *this;
     }
 
     float& operator[](size_t idx) {
         assert(idx < 4);
-        return v_[ idx ];
+        return values[ idx ];
     }
 
     float operator[](size_t idx) const {
         assert(idx < 4);
-        return v_[ idx ];
+        return values[ idx ];
     }
 
     static float Dot(const Vector4D& v1, const Vector4D& v2) {
