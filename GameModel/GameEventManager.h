@@ -72,6 +72,10 @@ public:
     void ActionPaddleHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
     void ActionPaddleShieldHitByBeam(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
     void ActionPaddleHitByBoss(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
+    void ActionPaddleStatusUpdate(const PlayerPaddle& paddle, PlayerPaddle::PaddleSpecialStatus status, bool isActive);
+    void ActionFrozenPaddleCanceledByFire(const PlayerPaddle& paddle);
+    void ActionOnFirePaddleCanceledByIce(const PlayerPaddle& paddle);
+
 	void ActionBallDied(const GameBall& deadBall);
 	void ActionLastBallAboutToDie(const GameBall& ballAboutToDie);
 	void ActionLastBallExploded(const GameBall& explodedBall, bool wasSkipped);

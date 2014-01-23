@@ -36,9 +36,6 @@
 #include "WindowManager.h"
 #include "ConfigOptions.h"
 
-// Initialization Constants for the application
-static const char* RESOURCE_ZIP = "BBBResources.zip";
-
 static GameSound* sound     = NULL;
 static GameModel* model     = NULL;
 static GameDisplay* display = NULL;
@@ -176,7 +173,7 @@ int main(int argc, char *argv[]) {
         ResourceManager::WriteConfigurationOptionsToFile(initCfgOptions);
 
 		// Establish the resource manager
-		ResourceManager::InitResourceManager(ResourceManager::GetLoadDir() + std::string(RESOURCE_ZIP), argv[0]);
+        ResourceManager::InitResourceManager(ResourceManager::GetLoadDir() + std::string(ResourceManager::RESOURCE_ZIP), argv[0]);
 
 		// Load extensions
 		GLenum err = glewInit();
@@ -200,7 +197,9 @@ int main(int argc, char *argv[]) {
 
 		// Load the blammopedia...
 		LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
-        if (!ResourceManager::GetInstance()->LoadBlammopedia(ResourceManager::GetLoadDir() + std::string("blammopedia.dat"))) {
+        if (!ResourceManager::GetInstance()->LoadBlammopedia(ResourceManager::GetLoadDir() + 
+            std::string(ResourceManager::BLAMMOPEDIA_FILE))) {
+
 			quitGame = true;
 			break;
 		}

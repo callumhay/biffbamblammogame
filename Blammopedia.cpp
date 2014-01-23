@@ -149,6 +149,18 @@ bool Blammopedia::HasUnviewedItems() const {
     return false;
 }
 
+void Blammopedia::ClearProgressData() {
+    // Clear the blammopedia of all progress data...
+    for (BlockEntryMapIter iter = this->blockEntries.begin(); iter != blockEntries.end(); ++iter) {
+        AbstractBlockEntry* blockEntry = iter->second;
+        blockEntry->SetIsLocked(true);
+    }
+    for (ItemEntryMapIter iter = this->itemEntries.begin(); iter != this->itemEntries.end(); ++iter) {
+        ItemEntry* itemEntry = iter->second;
+        itemEntry->SetIsLocked(true);
+    }
+}
+
 Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) {
     bool success = true;
     
@@ -161,7 +173,6 @@ Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) 
 
         success &= Blammopedia::ReadItemEntires(inFile, itemStatusMap);
 		success &= Blammopedia::ReadBlockEntries(inFile, blockStatusMap);
-        //success &= Blammopedia::ReadMiscEntries(inFile, miscEntries);
 
         inFile.close();
     }
@@ -410,15 +421,6 @@ bool Blammopedia::ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::
     
     return true;
 }
-
-/*
-bool Blammopedia::ReadMiscEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& miscStatusMap) {
-	UNUSED_PARAMETER(inStream);
-	UNUSED_PARAMETER(miscStatusMap);
-	assert(false);
-	return false;
-}
-*/
 
 // Populates basic entry values from the given stream
 bool Blammopedia::Entry::PopulateBaseValuesFromStream(std::istream& inStream) {

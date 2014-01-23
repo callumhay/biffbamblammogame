@@ -101,6 +101,29 @@ void GameEventManager::ActionPaddleHitByBoss(const PlayerPaddle& paddle, const B
     }	
 }
 
+void GameEventManager::ActionPaddleStatusUpdate(const PlayerPaddle& paddle, 
+                                                PlayerPaddle::PaddleSpecialStatus status, bool isActive) {
+
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleStatusUpdateEvent(paddle, status, isActive);
+    }	
+}
+
+void GameEventManager::ActionFrozenPaddleCanceledByFire(const PlayerPaddle& paddle) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->FrozenPaddleCanceledByFireEvent(paddle);
+    }	
+}
+
+void GameEventManager::ActionOnFirePaddleCanceledByIce(const PlayerPaddle& paddle) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->OnFirePaddleCanceledByIceEvent(paddle);
+    }	
+}
+
 // Action for when a ball has died (gone out of bounds)
 void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
@@ -109,7 +132,7 @@ void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	}	
 }
 
-// Action for when the last ball left is about to die - (before its spiralling death animations and explosion)
+// Action for when the last ball left is about to die - (before its spiraling death animations and explosion)
 void GameEventManager::ActionLastBallAboutToDie(const GameBall& ballAboutToDie) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {

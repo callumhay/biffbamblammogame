@@ -41,6 +41,9 @@ public:
     void PaddleHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
     void PaddleShieldHitByBeamEvent(const PlayerPaddle& paddle, const Beam& beam, const BeamSegment& beamSegment);
     void PaddleHitByBossEvent(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
+    void PaddleStatusUpdateEvent(const PlayerPaddle& paddle, PlayerPaddle::PaddleSpecialStatus status, bool isActive);
+    void FrozenPaddleCanceledByFireEvent(const PlayerPaddle& paddle);
+    void OnFirePaddleCanceledByIceEvent(const PlayerPaddle& paddle);
 
 	// Ball/Block related events
 	void BallDiedEvent(const GameBall& deadBall);

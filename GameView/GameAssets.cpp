@@ -39,6 +39,7 @@
 #include "MineMeshManager.h"
 #include "PaddleMineLauncher.h"
 #include "PaddleBeamAttachment.h"
+#include "PaddleStatusEffectRenderer.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
@@ -104,6 +105,7 @@ paddleMineAttachment(NULL),
 paddleGunAttachment(NULL),
 paddleStickyAttachment(NULL),
 paddleShield(NULL),
+paddleStatusEffectRenderer(NULL),
 ballSafetyNet(NULL),
 
 invisibleEffect(NULL), 
@@ -202,6 +204,9 @@ GameAssets::~GameAssets() {
 	this->paddleStickyAttachment = NULL;
 	delete this->paddleShield;
 	this->paddleShield = NULL;
+
+    delete this->paddleStatusEffectRenderer;
+    this->paddleStatusEffectRenderer = NULL;
 
     delete this->paddleBeamAttachment;
     this->paddleBeamAttachment = NULL;
@@ -648,6 +653,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
         this->espAssets->TickButDontDrawBackgroundPaddleEffects(dT);
     }
     else {
+        paddleReplacementMat = this->paddleStatusEffectRenderer->GetPaddleStatusMaterial();
 	    // Draw any effects on the paddle (e.g., item acquiring effects)
 	    this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
     }
@@ -780,6 +786,9 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
     else if (paddle->HasPaddleType(PlayerPaddle::IceBlasterPaddle)) {
         this->espAssets->DrawPaddleIceBlasterEffects(dT, camera, *paddle);
     }
+
+    // Status effects for the paddle...
+    this->paddleStatusEffectRenderer->Draw(dT, camera, *paddle, sceneFBO->GetFBOTexture());
 
     glPopMatrix();
 
@@ -1237,6 +1246,10 @@ void GameAssets::LoadRegularEffectAssets() {
 	if (this->paddleShield == NULL) {
 		this->paddleShield = new PaddleShield();
 	}
+
+    if (this->paddleStatusEffectRenderer == NULL) {
+        this->paddleStatusEffectRenderer = new PaddleStatusEffectRenderer(this->espAssets, this->sound);
+    }
 }
 
 void GameAssets::DeleteRegularEffectAssets() {
@@ -1494,10 +1507,10 @@ void GameAssets::FireRocket(const GameModel& gameModel, const RocketProjectile& 
  * Notifies the assets that the paddle has been hurt so that the appropriate effects can
  * occur to show the hurting.
  */
-void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile) {
+void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile, Camera& camera) {
 
 	// Add the sprite/particle effect
-	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile);
+	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile, this->sound);
 
 	PlayerHurtHUD::PainIntensity intensity = PlayerHurtHUD::MinorPain;
 	switch (projectile.GetType()) {
@@ -1553,24 +1566,20 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
         case Projectile::PaddleFlameBlastProjectile: {
             intensity = PlayerHurtHUD::MajorPain;
-            this->sound->PlaySoundAtPosition(GameSound::FlameBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
-            //this->sound->PlaySoundAtPosition(GameSound::PaddleBriefOnFireEvent ...);
 
             float multiplier = static_cast<const PaddleFlameBlasterProjectile*>(&projectile)->GetSizeMultiplier();
+            camera.ApplyCameraShake(multiplier * 1.0, Vector3D(1.5f*projectile.GetVelocityDirection(), 0.25f), 90);
             GameControllerManager::GetInstance()->VibrateControllers(multiplier * 0.33f,
-                BBBGameController::SoftVibration, BBBGameController::MediumVibration);
+                BBBGameController::MediumVibration, BBBGameController::MediumVibration);
 
             break;
         }
 
         case Projectile::PaddleIceBlastProjectile: {
             intensity = PlayerHurtHUD::MinorPain;
-            this->sound->PlaySoundAtPosition(GameSound::IceBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
-            
-            // TODO: Encase the paddle in ice!!!
-            //this->sound->PlaySoundAtPosition(GameSound::PaddleBriefFrozenInIceEvent, ...);
 
             float multiplier = static_cast<const PaddleFlameBlasterProjectile*>(&projectile)->GetSizeMultiplier();
+            camera.ApplyCameraShake(multiplier * 0.25, Vector3D(projectile.GetVelocityDirection(), 0.1f), 30);
             GameControllerManager::GetInstance()->VibrateControllers(multiplier * 0.25f,
                 BBBGameController::SoftVibration, BBBGameController::SoftVibration);
 
@@ -1744,6 +1753,8 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 
 void GameAssets::ReinitializeAssets() {
 	this->worldAssets->ResetToInitialState();
+
+    this->paddleStatusEffectRenderer->Reinitialize();
 
 	// Reinitialize the life HUD elements
 	this->lifeHUD->Reinitialize();
@@ -1977,6 +1988,88 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		default:
 			break;
 	}
+}
+
+void GameAssets::ActivatePaddleStatusEffect(const GameModel& gameModel, Camera& camera, 
+                                            PlayerPaddle::PaddleSpecialStatus status) {
+    UNUSED_PARAMETER(camera);
+    const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+
+    switch(status) {
+
+        case PlayerPaddle::FrozenInIceStatus: {
+            this->paddleStatusEffectRenderer->ToggleFrozen(*paddle, true);
+            this->espAssets->AddPaddleFrozeEffect(*paddle);
+            this->flashHUD->Activate(0.25, 1.0f);
+            break;
+        }
+
+        case PlayerPaddle::OnFireStatus: {
+            this->paddleStatusEffectRenderer->ToggleOnFire(*paddle, true);
+            break;
+        }
+
+        default:
+            break;
+    }
+
+}
+
+void GameAssets::DeactivatePaddleStatusEffect(const GameModel& gameModel, Camera& camera, 
+                                              PlayerPaddle::PaddleSpecialStatus status) {
+
+    const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+
+    switch(status) {
+
+        case PlayerPaddle::FrozenInIceStatus: {
+            this->paddleStatusEffectRenderer->ToggleFrozen(*paddle, false);
+            this->espAssets->AddPaddleUnfrozeEffect(*paddle);
+
+            float scaleFactor = paddle->GetPaddleScaleFactor();
+
+            camera.ApplyCameraShake(scaleFactor * 0.5, Vector3D(0.25f, 0.9f, 0.1f), 50);
+            GameControllerManager::GetInstance()->VibrateControllers(scaleFactor * 0.2,
+                BBBGameController::SoftVibration, BBBGameController::SoftVibration);
+
+            this->flashHUD->Activate(0.25, 0.75f);
+            break;
+        }
+
+        case PlayerPaddle::OnFireStatus: {
+            this->paddleStatusEffectRenderer->ToggleOnFire(*paddle, false);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+void GameAssets::CancelFrozenPaddleWithFireEffect(const PlayerPaddle& paddle) {
+
+    Point3D paddlePos3d = paddle.GetPosition3D();
+
+    this->sound->PlaySoundAtPosition(GameSound::IceMeltedEvent, false, 
+        paddlePos3d, true, true, true);
+
+    this->espAssets->AddIceMeltedByFireEffect(
+        paddlePos3d, 2.0f*paddle.GetHalfWidthTotal(), 2.0f*paddle.GetHalfHeight());
+
+    this->paddleStatusEffectRenderer->CancelFrozenWithOnFire();
+}
+
+void GameAssets::CancelOnFirePaddleWithIceEffect(const PlayerPaddle& paddle) {
+    
+    Point3D paddlePos3d = paddle.GetPosition3D();
+    
+    this->sound->PlaySoundAtPosition(GameSound::FireFrozeEvent, false, 
+        paddlePos3d, true, true, true);
+
+    this->espAssets->AddFirePutOutByIceEffect(
+        paddlePos3d, 2.0f*paddle.GetHalfWidthTotal(), 2.0f*paddle.GetHalfHeight());
+
+    this->paddleStatusEffectRenderer->CancelOnFireWithFrozen();
 }
 
 /**

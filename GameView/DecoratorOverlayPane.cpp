@@ -16,16 +16,17 @@
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
-const float DecoratorOverlayPane::X_BORDER     = 30;
-const float DecoratorOverlayPane::Y_BORDER     = 30;
-const float DecoratorOverlayPane::ITEM_Y_SPACING = 20;
-const float DecoratorOverlayPane::ITEM_X_SPACING = 15;
-const float DecoratorOverlayPane::X_OPTION_GAP = 50;
-const float DecoratorOverlayPane::COL_GAP      = 20;
+
 
 DecoratorOverlayPane::DecoratorOverlayPane(OverlayPaneEventHandler* handler,
                                            size_t width, const Colour& bgColour) :
 eventHandler(handler), width(width),
+X_BORDER(GameDisplay::GetTextScalingFactor()*30),
+Y_BORDER(GameDisplay::GetTextScalingFactor()*30),
+ITEM_Y_SPACING(GameDisplay::GetTextScalingFactor()*20),
+ITEM_X_SPACING(GameDisplay::GetTextScalingFactor()*15),
+X_OPTION_GAP(GameDisplay::GetTextScalingFactor()*50),
+COL_GAP(GameDisplay::GetTextScalingFactor()*20),
 currYPos(-Y_BORDER + ITEM_Y_SPACING),
 currXPos(X_BORDER),
 currImgYPos(-Y_BORDER + ITEM_Y_SPACING),
@@ -166,7 +167,7 @@ void DecoratorOverlayPane::AddText(const std::string& text, const Colour& colour
             labelWidth = this->width - 2*X_BORDER;
             break;
         case TwoColumn:
-            labelWidth = (this->width - 2*X_BORDER - COL_GAP - 256);
+            labelWidth = (this->width - 2*X_BORDER - COL_GAP - GameDisplay::GetTextScalingFactor()*256);
             break;
         default:
             assert(false);
@@ -244,7 +245,7 @@ void DecoratorOverlayPane::AddImage(size_t width, const Texture* image, bool kee
                 this->currImgYPos -= 2*ITEM_Y_SPACING;
             }
             
-            float xPos =  this->width - X_BORDER - 256;
+            float xPos =  this->width - X_BORDER - GameDisplay::GetTextScalingFactor()*256;
             Image* newImage = new Image(xPos, this->currImgYPos, width, static_cast<size_t>(height), image);
             this->images.push_back(newImage);
             

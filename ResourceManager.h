@@ -31,6 +31,9 @@ class Blammopedia;
  */
 class ResourceManager {
 public:
+    static const char* RESOURCE_ZIP;
+    static const char* BLAMMOPEDIA_FILE;
+
 	static ResourceManager* GetInstance() {
 		if (ResourceManager::instance == NULL) {
 			debug_output("ERROR: Did not properly initialize resource manager before querying instance.");
@@ -50,7 +53,7 @@ public:
 	static void InitResourceManager(const std::string& resourceZip, const char* argv0);
 
 	// Resource Management and loading functions *******************************************************************************
-	bool LoadBlammopedia(const std::string& blammopediaFile);	
+	bool LoadBlammopedia(const std::string& blammopediaFile);
 	Blammopedia* GetBlammopedia() const;
 
 	// Mesh Resource Functions
@@ -103,7 +106,7 @@ private:
 	std::map<std::string, Mesh*> loadedMeshes;	// Meshes already loaded into the blammo engine from file
     std::map<Mesh*, unsigned int> numRefPerMesh; // Number of references per mesh handed out
 
-	// Independant meshes for specific special-material things in the game
+	// Independent meshes for specific special-material things in the game
 	Mesh* inkBlockMesh;
 	Mesh* portalBlockMesh;
 

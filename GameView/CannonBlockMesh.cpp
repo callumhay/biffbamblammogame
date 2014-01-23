@@ -23,7 +23,8 @@ activeCannonEffectEmitter(NULL) {
 	this->LoadMesh();
 
 	assert(this->haloTexture == NULL);
-	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->haloTexture != NULL);
 
 	// Halo effect that pulses outwards
@@ -31,12 +32,15 @@ activeCannonEffectEmitter(NULL) {
 	this->activeCannonEffectEmitter->SetSpawnDelta(ESPInterval(0.5f));
 	this->activeCannonEffectEmitter->SetInitialSpd(ESPInterval(0));
 	this->activeCannonEffectEmitter->SetParticleLife(ESPInterval(0.5f));
-	this->activeCannonEffectEmitter->SetParticleSize(ESPInterval(CannonBlock::CANNON_BARREL_LENGTH), ESPInterval(CannonBlock::CANNON_BARREL_LENGTH));
+	this->activeCannonEffectEmitter->SetParticleSize(
+        ESPInterval(CannonBlock::CANNON_BARREL_LENGTH), 
+        ESPInterval(CannonBlock::CANNON_BARREL_LENGTH));
 	this->activeCannonEffectEmitter->SetEmitAngleInDegrees(0);
 	this->activeCannonEffectEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->activeCannonEffectEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	this->activeCannonEffectEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	this->activeCannonEffectEmitter->SetEmitPosition(Point3D(0,0,0));
-	this->activeCannonEffectEmitter->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	this->activeCannonEffectEmitter->SetParticleColour(
+        ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->activeCannonEffectEmitter->AddEffector(&this->haloExpandPulse);
 	this->activeCannonEffectEmitter->AddEffector(&this->haloFader);
 	bool result = this->activeCannonEffectEmitter->SetParticles(1, this->haloTexture);

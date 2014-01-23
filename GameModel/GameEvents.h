@@ -263,6 +263,31 @@ public:
         UNUSED_PARAMETER(bossPart);
     }
 
+    /**
+     * Event triggered when the paddle has a status activated or deactivated. Occurs right after the effect activates/deactivates.
+     * Arguments: paddle   - The paddle that was frozen/unfrozen.
+     *            status   - The status that was activated or deactivated.
+     *            isActive - Whether the paddle status is now active (true) or not (false).
+     */
+    virtual void PaddleStatusUpdateEvent(const PlayerPaddle& paddle, PlayerPaddle::PaddleSpecialStatus status, bool isActive) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(status);
+        UNUSED_PARAMETER(isActive);
+    }
+
+    /**
+     * Event triggered when a frozen paddle is unfrozen due to fire.
+     * Arguments: paddle - The paddle that was unfrozen.
+     */
+    virtual void FrozenPaddleCanceledByFireEvent(const PlayerPaddle& paddle) { UNUSED_PARAMETER(paddle); }
+    
+    /**
+     * Event triggered when a on-fire paddle is put out due to ice.
+     * Arguments: paddle - The paddle that had its fire canceled.
+     */
+    virtual void OnFirePaddleCanceledByIceEvent(const PlayerPaddle& paddle) { UNUSED_PARAMETER(paddle); }
+
+
 	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
 	 * collides with the paddle.

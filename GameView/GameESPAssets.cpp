@@ -40,6 +40,8 @@
 #include "../GameModel/DebrisEffectInfo.h"
 #include "../GameModel/ShortCircuitEffectInfo.h"
 
+#include "../GameSound/GameSound.h"
+
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
 
@@ -1688,7 +1690,8 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
 /**
  * Add effects based on what happens when a given projectile hits a given level piece.
  */
-void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block) {
+void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block, 
+                                                  GameSound* sound) {
 
 #define BUILD_PROJECTILE_POS() \
     projectile.GetPosition() + 0.25f*projectile.GetHeight() * projectile.GetVelocityDirection() + \
@@ -1735,7 +1738,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 					}
 					else {
 						// A laser just hit a block and was dissipated by it... show the particle disintegrate
-						this->AddHitWallEffect(projectile, midPoint);
+						this->AddHitWallEffect(projectile, midPoint, sound);
 					}
 					break;
                 }
@@ -1785,17 +1788,44 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
                     bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
                     if (blockIsFrozen) {
                         Point2D midPoint = BUILD_PROJECTILE_POS();
-                        this->AddHitWallEffect(projectile, midPoint);
+                        this->AddHitWallEffect(projectile, midPoint, sound);
                     }
                     break;
                 }
                 default: {
                     Point2D midPoint = BUILD_PROJECTILE_POS();
-                    this->AddHitWallEffect(projectile, midPoint);
+                    this->AddHitWallEffect(projectile, midPoint, sound);
                     break;
                 }
             }
             break;
+
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile: {
+
+            switch (block.GetType()) {
+                case LevelPiece::Empty:
+                case LevelPiece::Portal:
+                case LevelPiece::Cannon:
+                    break;
+
+                case LevelPiece::NoEntry: {
+                    bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+                    if (blockIsFrozen) {
+                        Point2D midPoint = BUILD_PROJECTILE_POS();
+                        this->AddHitWallEffect(projectile, midPoint, sound);
+                    }
+                    break;
+                }
+
+                default: {
+                    Point2D midPoint = BUILD_PROJECTILE_POS();
+                    this->AddHitWallEffect(projectile, midPoint, sound);
+                    break;
+                }
+            }
+            break;
+        }
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
@@ -1818,13 +1848,6 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 		case Projectile::FireGlobProjectile:
 			break;
 
-        case Projectile::PaddleFlameBlastProjectile:
-        case Projectile::PaddleIceBlastProjectile: {
-            Point2D midPoint = BUILD_PROJECTILE_POS();
-            this->AddHitWallEffect(projectile, midPoint);
-            break;
-        }
-
 		default:
 			debug_output("GameESPAssets: There's no implementation for the effects for this type of projectile when it hits any block!");
 			assert(false);
@@ -1834,7 +1857,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 #undef BUILD_PROJECTILE_POS
 }
 
-void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projectile) {
+void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projectile, GameSound* sound) {
     switch (projectile.GetType()) {
 
         case Projectile::BossOrbBulletProjectile:
@@ -1855,11 +1878,11 @@ void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projecti
             break;
 
         case Projectile::PaddleFlameBlastProjectile:
-            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition(), sound);
             break;
 
         case Projectile::PaddleIceBlastProjectile:
-            this->AddIceBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            this->AddIceBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition(), sound);
             break;
 
         case Projectile::PaddleMineBulletProjectile:
@@ -1872,7 +1895,8 @@ void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projecti
     }
 }
 
-void GameESPAssets::AddBossHitByProjectileEffect(const Projectile& projectile, const BossBodyPart& collisionPart) {
+void GameESPAssets::AddBossHitByProjectileEffect(const Projectile& projectile, 
+                                                 const BossBodyPart& collisionPart, GameSound* sound) {
     switch (projectile.GetType()) {
         case Projectile::BallLaserBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
@@ -1884,7 +1908,7 @@ void GameESPAssets::AddBossHitByProjectileEffect(const Projectile& projectile, c
             }
             else {
                 Point2D hitPos = projectile.GetPosition() + 0.9f * projectile.GetHalfHeight() * projectile.GetVelocityDirection();
-                this->AddHitWallEffect(projectile, hitPos);
+                this->AddHitWallEffect(projectile, hitPos, sound);
             }
             break;
         }
@@ -1895,6 +1919,13 @@ void GameESPAssets::AddBossHitByProjectileEffect(const Projectile& projectile, c
                 this->AddPaddleMineAttachedEffects(projectile);
             }
             break;
+
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile: {
+            Point2D hitPos = projectile.GetPosition() + 0.9f * projectile.GetHalfHeight() * projectile.GetVelocityDirection();
+            this->AddHitWallEffect(projectile, hitPos, sound);
+            break;
+        }
 
         default:
             break;
@@ -2769,12 +2800,9 @@ void GameESPAssets::AddBlockDisintegrationEffect(const LevelPiece& block) {
 
 // Adds JUST the bits of snowflakey ice that come off the block when its frozen and gets hit
 // by a ball...
-void GameESPAssets::AddIceBitsBreakEffect(const LevelPiece& block) {
+void GameESPAssets::AddIceBitsBreakEffect(const Point2D& pos, float baseSize) {
 	const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
-	const Point2D& blockCenter = block.GetCenter();
-	Point3D emitCenter(blockCenter, 0.0f);
-
-	bool result = false;
+	Point3D emitCenter(pos, 0.0f);
 
 	ESPPointEmitter* snowflakeBitsEffect = new ESPPointEmitter();
 	snowflakeBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
@@ -2782,42 +2810,46 @@ void GameESPAssets::AddIceBitsBreakEffect(const LevelPiece& block) {
 	snowflakeBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
 	snowflakeBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
 	snowflakeBitsEffect->SetEmitAngleInDegrees(180);
-	snowflakeBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 5.0f, LevelPiece::PIECE_WIDTH / 1.5f));
+	snowflakeBitsEffect->SetParticleSize(ESPInterval(baseSize / 4.0f, baseSize / 1.5f));
 	snowflakeBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
-	snowflakeBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 2.5f));
+	snowflakeBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, baseSize / 2.5f));
 	snowflakeBitsEffect->SetEmitPosition(emitCenter);
 	snowflakeBitsEffect->SetParticleAlignment(ESP::ScreenAligned);
-	snowflakeBitsEffect->SetParticleColour(ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f),
-																		     ESPInterval(iceColour.B(), 1.0f), ESPInterval(1.0f));
+	snowflakeBitsEffect->SetParticleColour(
+        ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f),
+        ESPInterval(iceColour.B(), 1.0f), ESPInterval(1.0f));
 	snowflakeBitsEffect->AddEffector(&this->particleFader);
+
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		snowflakeBitsEffect->AddEffector(&this->smokeRotatorCCW);
 	}
 	else {
 		snowflakeBitsEffect->AddEffector(&this->smokeRotatorCW);
 	}
-	result = snowflakeBitsEffect->SetRandomTextureParticles(10, this->snowflakeTextures);
-	assert(result);
+	snowflakeBitsEffect->SetRandomTextureParticles(10, this->snowflakeTextures);
+
+
 	this->activeGeneralEmitters.push_back(snowflakeBitsEffect);
 }
 
 // When a block frozen in an ice cube gets smashed we use this effect instead of the typical block break effect
 // for that particular block type
-void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Colour& colour) {
+void GameESPAssets::AddIceCubeBreakEffect(const Point2D& pos, float baseSize, const Colour& colour, 
+                                          float intensityMultiplier) {
+
 	const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
-	const Point2D& blockCenter = block.GetCenter();
-	Point3D emitCenter(blockCenter, 0.0f);
+	Point3D emitCenter(pos, 0.0f);
 
 	// Create the smashy block bits
 	ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
 	smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-	smashBitsEffect->SetInitialSpd(ESPInterval(2.0f, 5.0f));
+	smashBitsEffect->SetInitialSpd(ESPInterval(intensityMultiplier*2.0f, intensityMultiplier*5.0f));
 	smashBitsEffect->SetParticleLife(ESPInterval(1.25f, 2.75f));
 	smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
 	smashBitsEffect->SetEmitAngleInDegrees(180);
-	smashBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 14.0f, LevelPiece::PIECE_WIDTH / 3.0f));
+	smashBitsEffect->SetParticleSize(ESPInterval(baseSize / 14.0f, baseSize / 3.0f));
 	smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
-	smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 3.0f));
+	smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, baseSize / 3.0f));
 	smashBitsEffect->SetEmitPosition(emitCenter);
 	smashBitsEffect->SetParticleAlignment(ESP::ScreenAligned);
 	smashBitsEffect->SetParticleColour(ESPInterval(0.5f * colour.R(), 0.75f * colour.R()), ESPInterval(0.5f * colour.G(), 0.75f * colour.G()),
@@ -2837,13 +2869,13 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	snowflakeBackingEffect->SetEmitPosition(emitCenter);
 	snowflakeBackingEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	snowflakeBackingEffect->SetParticleRotation(ESPInterval(-180, 180));
-	snowflakeBackingEffect->SetParticleSize(ESPInterval(1.5f * LevelPiece::PIECE_WIDTH));
+	snowflakeBackingEffect->SetParticleSize(ESPInterval(1.5f * baseSize));
 	snowflakeBackingEffect->AddEffector(&this->particleFader);
 	snowflakeBackingEffect->AddEffector(&this->particleMediumGrowth);
     snowflakeBackingEffect->SetRandomTextureParticles(1, this->snowflakeTextures);
 	this->activeGeneralEmitters.push_back(snowflakeBackingEffect);
 
-	// Create an emitter for the sound of onomatopeia of shattering block
+	// Create an emitter for the sound of onomatopoeia of shattering block
 	ESPPointEmitter* iceSmashOnoEffect = new ESPPointEmitter();
 	// Set up the emitter...
 	iceSmashOnoEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
@@ -2861,7 +2893,7 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	iceSmashOnoEffect->AddEffector(&this->particleFader);
 	iceSmashOnoEffect->AddEffector(&this->particleSmallGrowth);
 
-	// Set the onomata particle
+	// Set the onomatopoeia particle
 	TextLabel2D smashTextLabel(GameFontAssetsManager::GetInstance()->GetFont(
         GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
 	smashTextLabel.SetColour(iceColour);
@@ -2873,7 +2905,9 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	this->activeGeneralEmitters.push_back(iceSmashOnoEffect);
 }
 
-void GameESPAssets::AddIceMeltedByFireEffect(const LevelPiece& block) {
+void GameESPAssets::AddIceMeltedByFireEffect(const Point3D& pos, float width, float height) {
+
+    float halfHeight = height / 2.0f;
 
     // Puff of water vapour
 	ESPPointEmitter* waterVapourEffect = new ESPPointEmitter();
@@ -2881,12 +2915,12 @@ void GameESPAssets::AddIceMeltedByFireEffect(const LevelPiece& block) {
 	waterVapourEffect->SetSpawnDelta(ESPInterval(0.01f, 0.05f));
 	waterVapourEffect->SetInitialSpd(ESPInterval(1.5f, 3.0f));
 	waterVapourEffect->SetParticleLife(ESPInterval(0.8f, 1.5f));
-    waterVapourEffect->SetParticleSize(ESPInterval(0.5f * LevelPiece::PIECE_WIDTH, 0.75f * LevelPiece::PIECE_WIDTH));
+    waterVapourEffect->SetParticleSize(ESPInterval(0.5f * width, 0.75f * width));
     waterVapourEffect->SetEmitDirection(Vector3D(0, 1, 0));
 	waterVapourEffect->SetEmitAngleInDegrees(85);
-    waterVapourEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*LevelPiece::HALF_PIECE_HEIGHT), 
-        ESPInterval(0.0f, 0.9f*LevelPiece::HALF_PIECE_HEIGHT), ESPInterval(0.0f));
-    waterVapourEffect->SetEmitPosition(Point3D(block.GetCenter(), 0));
+    waterVapourEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*halfHeight), 
+        ESPInterval(0.0f, 0.9f*halfHeight), ESPInterval(0.0f));
+    waterVapourEffect->SetEmitPosition(pos);
 	waterVapourEffect->AddEffector(&this->particleWaterVapourColourFader);
     waterVapourEffect->AddEffector(&this->particleMediumGrowth);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -2906,10 +2940,10 @@ void GameESPAssets::AddIceMeltedByFireEffect(const LevelPiece& block) {
 	waterDropletRainEffect->SetEmitAngleInDegrees(180);
     waterDropletRainEffect->SetParticleRotation(ESPInterval(180.0f));
     waterDropletRainEffect->SetToggleEmitOnPlane(true);
-	waterDropletRainEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 5.0f, LevelPiece::PIECE_WIDTH / 2.5f));
-	waterDropletRainEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::HALF_PIECE_HEIGHT), 
-        ESPInterval(0.0f, LevelPiece::HALF_PIECE_HEIGHT), ESPInterval(0.0f));
-	waterDropletRainEffect->SetEmitPosition(Point3D(block.GetCenter(), 0));
+	waterDropletRainEffect->SetParticleSize(ESPInterval(width / 5.0f, width / 2.5f));
+	waterDropletRainEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, halfHeight), 
+        ESPInterval(0.0f, halfHeight), ESPInterval(0.0f));
+	waterDropletRainEffect->SetEmitPosition(pos);
     waterDropletRainEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	waterDropletRainEffect->SetParticleColour(ESPInterval(0.68f, 0.72f), ESPInterval(0.85f, 0.9f),
         ESPInterval(0.9f, 1.0f), ESPInterval(1.0f)); // Varying light shades of blue
@@ -2921,19 +2955,22 @@ void GameESPAssets::AddIceMeltedByFireEffect(const LevelPiece& block) {
     this->activeGeneralEmitters.push_back(waterVapourEffect);
 }
 
-void GameESPAssets::AddFirePutOutByIceEffect(const LevelPiece& block) {
+void GameESPAssets::AddFirePutOutByIceEffect(const Point3D& pos, float width, float height) {
+
+    float halfHeight = height / 2.0f;
+
     // Puff of smoke
 	ESPPointEmitter* puffOfSmokeEffect1 = new ESPPointEmitter();
     puffOfSmokeEffect1->SetNumParticleLives(1);
 	puffOfSmokeEffect1->SetSpawnDelta(ESPInterval(0.01f, 0.05f));
 	puffOfSmokeEffect1->SetInitialSpd(ESPInterval(1.5f, 2.5f));
 	puffOfSmokeEffect1->SetParticleLife(ESPInterval(1.25f, 2.0f));
-    puffOfSmokeEffect1->SetParticleSize(ESPInterval(0.5f * LevelPiece::PIECE_WIDTH, 0.75f * LevelPiece::PIECE_WIDTH));
+    puffOfSmokeEffect1->SetParticleSize(ESPInterval(0.5f * width, 0.75f * width));
     puffOfSmokeEffect1->SetEmitDirection(Vector3D(0, 1, 0));
 	puffOfSmokeEffect1->SetEmitAngleInDegrees(85);
-    puffOfSmokeEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*LevelPiece::HALF_PIECE_HEIGHT), 
-        ESPInterval(0.0f, 0.9f*LevelPiece::HALF_PIECE_HEIGHT), ESPInterval(0.0f));
-    puffOfSmokeEffect1->SetEmitPosition(Point3D(block.GetCenter(), 0));
+    puffOfSmokeEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*halfHeight), 
+        ESPInterval(0.0f, 0.9f*halfHeight), ESPInterval(0.0f));
+    puffOfSmokeEffect1->SetEmitPosition(pos);
 	puffOfSmokeEffect1->AddEffector(&this->particleSmokeColourFader);
     puffOfSmokeEffect1->AddEffector(&this->particleLargeGrowth);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -2949,12 +2986,12 @@ void GameESPAssets::AddFirePutOutByIceEffect(const LevelPiece& block) {
 	puffOfSmokeEffect2->SetSpawnDelta(ESPInterval(0.02f, 0.075f));
 	puffOfSmokeEffect2->SetInitialSpd(ESPInterval(2.0f, 4.0f));
 	puffOfSmokeEffect2->SetParticleLife(ESPInterval(1.0f, 1.75f));
-    puffOfSmokeEffect2->SetParticleSize(ESPInterval(0.5f * LevelPiece::PIECE_WIDTH, 0.75f * LevelPiece::PIECE_WIDTH));
+    puffOfSmokeEffect2->SetParticleSize(ESPInterval(0.5f * width, 0.75f * width));
     puffOfSmokeEffect2->SetEmitDirection(Vector3D(0, 1, 0));
 	puffOfSmokeEffect2->SetEmitAngleInDegrees(180);
-    puffOfSmokeEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*LevelPiece::HALF_PIECE_HEIGHT), 
-        ESPInterval(0.0f, 0.9f*LevelPiece::HALF_PIECE_HEIGHT), ESPInterval(0.0f));
-    puffOfSmokeEffect2->SetEmitPosition(Point3D(block.GetCenter(), 0));
+    puffOfSmokeEffect2->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.9f*halfHeight), 
+        ESPInterval(0.0f, 0.9f*halfHeight), ESPInterval(0.0f));
+    puffOfSmokeEffect2->SetEmitPosition(pos);
 	puffOfSmokeEffect2->AddEffector(&this->particleSmokeColourFader);
     puffOfSmokeEffect2->AddEffector(&this->particleMediumGrowth);
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -3485,7 +3522,8 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 /**
  * Adds an effect for when the paddle is struck by a projectile.
  */
-void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile) {
+void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, 
+                                                   const Projectile& projectile, GameSound* sound) {
 	// No effect if the paddle camera is on
 	if (paddle.GetIsPaddleCameraOn()) {
 		return;
@@ -3505,12 +3543,12 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
-            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition(), sound);
             // TODO: Paddle catches on fire briefly
             break;
 
         case Projectile::PaddleIceBlastProjectile:
-            this->AddIceBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition());
+            this->AddIceBlastHitWallEffect(projectile.GetWidth(), projectile.GetPosition(), sound);
             // TODO: Paddle gets frozen in ice briefly
             break;
 
@@ -3694,6 +3732,50 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
     this->activeGeneralEmitters.push_back(starEmitter);
     this->activeGeneralEmitters.push_back(bangEffect);
     this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
+void GameESPAssets::AddPaddleFrozeEffect(const PlayerPaddle& paddle) {
+    
+    Point3D paddlePos(paddle.GetCenterPosition(), 0.0f);
+    float size = 2.0f * paddle.GetHalfWidthTotal();
+
+    // Freeze flare and flash
+    ESPPointEmitter* flareEffect = new ESPPointEmitter();
+    flareEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    flareEffect->SetInitialSpd(ESPInterval(0.0f));
+    flareEffect->SetParticleLife(ESPInterval(0.75f));
+    flareEffect->SetParticleSize(ESPInterval(size));
+    flareEffect->SetParticleRotation(ESPInterval(0, 259.9999f));
+    flareEffect->SetEmitPosition(paddlePos);
+    flareEffect->SetParticleColour(Colour(1,1,1));
+    flareEffect->AddEffector(&this->particleFader);
+    flareEffect->AddEffector(&this->particleSuperGrowth);
+    flareEffect->SetParticles(1, this->flareTex);
+
+    // Cloudy stuffs
+    ESPPointEmitter* particleClouds = new ESPPointEmitter();
+    particleClouds->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    particleClouds->SetInitialSpd(ESPInterval(1.75f, 2.0f));
+    particleClouds->SetParticleLife(ESPInterval(0.6f, 1.0f));
+    particleClouds->SetParticleSize(ESPInterval(size / 2.0f, size / 1.5f));
+    particleClouds->SetEmitAngleInDegrees(100);
+    particleClouds->SetEmitDirection(Vector3D(0,1,0));
+    particleClouds->SetParticleRotation(ESPInterval(0, 259.9999f));
+    particleClouds->SetEmitPosition(paddlePos);
+    particleClouds->AddEffector(&this->iceOriginColourEffector);
+    particleClouds->AddEffector(&this->particleLargeGrowth);
+    particleClouds->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
+    particleClouds->SetRandomTextureEffectParticles(8, &this->iceBlasterCloudEffect, this->cloudTextures);
+
+    this->activeGeneralEmitters.push_back(particleClouds);
+    this->activeGeneralEmitters.push_back(flareEffect);
+}
+
+void GameESPAssets::AddPaddleUnfrozeEffect(const PlayerPaddle& paddle) {
+    // Frozen bits fall off the paddle...
+    this->AddIceBitsBreakEffect(paddle.GetCenterPosition(), 2.25f * paddle.GetHalfWidthTotal());
+    this->AddIceCubeBreakEffect(paddle.GetCenterPosition(), 2.0f * paddle.GetHalfWidthTotal(), 
+        1.5f*GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 5.0f);  
 }
 
 /**
@@ -5532,7 +5614,9 @@ void GameESPAssets::AddLightningBoltESPEffects(const GameModel& gameModel, const
     this->activeProjectileEmitters[&projectile].push_back(lensFlareEmitter);
 }
 
-void GameESPAssets::AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos) {
+void GameESPAssets::AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos, 
+                                     GameSound* sound) {
+
     switch (projectile.GetType()) {
         case Projectile::BossOrbBulletProjectile:
             this->AddOrbHitWallEffect(projectile, hitPos, GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
@@ -5551,11 +5635,11 @@ void GameESPAssets::AddHitWallEffect(const Projectile& projectile, const Point2D
             break;
 
         case Projectile::PaddleFlameBlastProjectile:
-            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), hitPos);
+            this->AddFlameBlastHitWallEffect(projectile.GetWidth(), hitPos, sound);
             break;
 
         case Projectile::PaddleIceBlastProjectile:
-            this->AddIceBlastHitWallEffect(projectile.GetWidth(), hitPos);
+            this->AddIceBlastHitWallEffect(projectile.GetWidth(), hitPos, sound);
             break;
 
         default:
@@ -5645,12 +5729,11 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	this->activeGeneralEmitters.push_back(particleSparks);
 }
 
-void GameESPAssets::AddFlameBlastHitWallEffect(float size, const Point2D& loc) {
+void GameESPAssets::AddFlameBlastHitWallEffect(float size, const Point2D& loc, GameSound* sound) {
     const Point3D EMITTER_LOCATION(loc[0], loc[1], 0.0f);
 
     // Create a dispersion of particle bits
     ESPPointEmitter* particleSparks = new ESPPointEmitter();
-    particleSparks->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
     particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     particleSparks->SetInitialSpd(ESPInterval(2.5f, 6.0f));
     particleSparks->SetParticleLife(ESPInterval(1.0f, 1.5f));
@@ -5668,7 +5751,6 @@ void GameESPAssets::AddFlameBlastHitWallEffect(float size, const Point2D& loc) {
     particleSparks->SetRandomTextureParticles(8, this->fireGlobTextures);
 
     ESPPointEmitter* particleClouds = new ESPPointEmitter();
-    particleClouds->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
     particleClouds->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     particleClouds->SetInitialSpd(ESPInterval(1.5f, 5.0f));
     particleClouds->SetParticleLife(ESPInterval(0.6f, 1.25f));
@@ -5683,16 +5765,17 @@ void GameESPAssets::AddFlameBlastHitWallEffect(float size, const Point2D& loc) {
 
     this->activeGeneralEmitters.push_back(particleClouds);
     this->activeGeneralEmitters.push_back(particleSparks);
+
+    sound->PlaySoundAtPosition(GameSound::FlameBlasterHitEvent, false, EMITTER_LOCATION, true, true, true);
 }
 
-void GameESPAssets::AddIceBlastHitWallEffect(float size, const Point2D& loc) {
+void GameESPAssets::AddIceBlastHitWallEffect(float size, const Point2D& loc, GameSound* sound) {
     const Point3D EMITTER_LOCATION(loc[0], loc[1], 0.0f);
 
     const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
 
     // Create a dispersion of particle bits
     ESPPointEmitter* particleSparks = new ESPPointEmitter();
-    particleSparks->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
     particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     particleSparks->SetInitialSpd(ESPInterval(2.5f, 4.0f));
     particleSparks->SetParticleLife(ESPInterval(1.0f, 1.5f));
@@ -5710,7 +5793,6 @@ void GameESPAssets::AddIceBlastHitWallEffect(float size, const Point2D& loc) {
     particleSparks->SetRandomTextureParticles(8, this->snowflakeTextures);
 
     ESPPointEmitter* particleClouds = new ESPPointEmitter();
-    particleClouds->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
     particleClouds->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     particleClouds->SetInitialSpd(ESPInterval(1.5f, 2.0f));
     particleClouds->SetParticleLife(ESPInterval(0.6f, 1.25f));
@@ -5725,6 +5807,8 @@ void GameESPAssets::AddIceBlastHitWallEffect(float size, const Point2D& loc) {
 
     this->activeGeneralEmitters.push_back(particleClouds);
     this->activeGeneralEmitters.push_back(particleSparks);
+
+    sound->PlaySoundAtPosition(GameSound::IceBlasterHitEvent, false, EMITTER_LOCATION, true, true, true);
 }
 
 void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc,
@@ -7129,6 +7213,9 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera,
 }
 
 void GameESPAssets::DrawPaddleFlameBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+    if (paddle.HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+        return;
+    }
 
     float scaleFactor = paddle.GetPaddleScaleFactor();
     Point3D emitPos(0, PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE, -paddle.GetHalfDepthTotal());
@@ -7140,6 +7227,10 @@ void GameESPAssets::DrawPaddleFlameBlasterEffects(double dT, const Camera& camer
 }
 
 void GameESPAssets::DrawPaddleIceBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+    if (paddle.HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+        return;
+    }
+
     float scaleFactor = paddle.GetPaddleScaleFactor();
     Point3D emitPos(0, PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE, -paddle.GetHalfDepthTotal());
     this->paddleIceBlasterOrigin->SetEmitPosition(emitPos);

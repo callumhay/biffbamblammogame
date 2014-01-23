@@ -26,6 +26,7 @@
 #include "PaddleMineProjectile.h"
 #include "PaddleRemoteControlRocketProjectile.h"
 #include "GameTransformMgr.h"
+#include "CannonBlock.h"
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../GameSound/GameSound.h"
@@ -928,6 +929,13 @@ void GameModel::DoProjectileCollisions(double dT) {
                         break;
 				    }
                     else {
+                        // Check to see if the piece is a cannon and whether it now has the projectile loaded in it, in which case we
+                        // exit from this loop immediately
+                        if (currPiece->GetType() == LevelPiece::Cannon && static_cast<const CannonBlock*>(currPiece)->IsProjectileLoaded(currProjectile)) {
+                            alreadyCollidedWithPieces.insert(currPiece);
+                            break;
+                        }
+
                         // NOTE: We need to be careful since some blocks may no longer exist after a collision at this
                         // point so we re-populate the set of pieces to check and keep track of the ones we've already collided with
                         collisionPieces = currLevel->GetLevelPieceCollisionCandidates(

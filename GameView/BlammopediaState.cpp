@@ -480,9 +480,10 @@ ItemListView* BlammopediaState::BuildTutorialListView() {
     GameTutorialAssets* tutorialAssets = this->display->GetAssets()->GetTutorialAssets();
     ItemListView* itemsListView = new ItemListView(Camera::GetWindowWidth(), Camera::GetWindowHeight() - TOTAL_MENU_HEIGHT);
 
-    static const float TITLE_TEXT_SCALE = 1.33f;
-    static const float BODY_TEXT_SCALE  = 0.75f;
-    static const size_t POPUP_TUTORIAL_HINT_WIDTH = 700;
+    float scaling = GameDisplay::GetTextScalingFactor();
+    const float TITLE_TEXT_SCALE           = 1.33f;
+    const float BODY_TEXT_SCALE            = 0.75f;
+    const size_t POPUP_TUTORIAL_HINT_WIDTH = 700;
 
     // Tutorial item: Life and Death
     PopupTutorialHint* lifePopupHint = new PopupTutorialHint(POPUP_TUTORIAL_HINT_WIDTH);
@@ -497,14 +498,14 @@ ItemListView* BlammopediaState::BuildTutorialListView() {
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* lifeHUDImg = tutorialAssets->GetLifeTutorialHUDTexture();
-    lifePopupPane->AddImage(256, lifeHUDImg);
+    lifePopupPane->AddImage(scaling*256, lifeHUDImg);
 
     lifePopupPane->AddText(
         std::string("If you're running low on life, you can drop a Life-UP item by achieving a 4x multiplier."),
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* dropingLifeItemImg = tutorialAssets->GetLifeTutorialItemDropTexture();
-    lifePopupPane->AddImage(256, dropingLifeItemImg);
+    lifePopupPane->AddImage(scaling*256, dropingLifeItemImg);
 
     ItemListView::ListItem* lifeTutorialItem = itemsListView->AddTutorialItem(
         "Tutorial: Life and Death", tutorialAssets->GetLifeTutorialItemTexture(), lifePopupHint);
@@ -522,7 +523,7 @@ ItemListView* BlammopediaState::BuildTutorialListView() {
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* boostHUDImg = tutorialAssets->GetBoostTutorialHUDTexture();
-    boostPopupPane->AddImage(256, boostHUDImg);
+    boostPopupPane->AddImage(scaling*256, boostHUDImg);
 
     boostPopupPane->AddText(
         std::string("Activate a boost by holding down the right analog stick or the left mouse button, letting go will cancel the boost.") +
@@ -530,7 +531,7 @@ ItemListView* BlammopediaState::BuildTutorialListView() {
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* boostDirImg = tutorialAssets->GetBoostTutorialDirTexture();
-    boostPopupPane->AddImage(256, boostDirImg);
+    boostPopupPane->AddImage(scaling*256, boostDirImg);
 
     boostPopupPane->AddText(
         std::string("While time is slowed, you may immediately activate the boost by pressing the left/right trigger or the right mouse button."),
@@ -552,7 +553,7 @@ ItemListView* BlammopediaState::BuildTutorialListView() {
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* multiplierImg = tutorialAssets->GetMultiplierTutorialTexture();
-    multPopupPane->AddImage(256, multiplierImg);
+    multPopupPane->AddImage(scaling*256, multiplierImg);
 
     multPopupPane->AddText(
         std::string("Any multiplier will reset when a ball hits the paddle or when you lose your balls."),

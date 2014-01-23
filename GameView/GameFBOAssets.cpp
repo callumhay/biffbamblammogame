@@ -288,6 +288,19 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			outputFBO = swapFBO;
 		}
 
+        if (paddle->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+            // The paddle camera is on and the paddle is frozen in ice, make everything frozen/frosty for the player...
+            // We take inverse of the alpha of the paddle to fade the effect properly while in paddle cam mode
+            float icyAlpha = 1.0f - paddle->GetColour().A();
+            this->icyCamEffect->SetFadeAlpha(icyAlpha);
+            this->icyCamEffect->SetInputFBO(inputFBO);
+            this->icyCamEffect->SetOutputFBO(outputFBO);
+            this->icyCamEffect->Draw(width, height, dT);
+
+            swapFBO = inputFBO;
+            inputFBO = outputFBO;
+            outputFBO = swapFBO;
+        }
 	}
 	else if (GameBall::GetIsBallCameraOn()) {
 		const GameBall* camBall = GameBall::GetBallCameraBall();

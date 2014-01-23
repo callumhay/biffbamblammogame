@@ -26,6 +26,7 @@
 #include "BallCamHUD.h"
 #include "BallSafetyNetMesh.h"
 #include "BossMesh.h"
+#include "PaddleStatusEffectRenderer.h"
 
 // GameModel Includes
 #include "../GameModel/GameModel.h"
@@ -335,7 +336,7 @@ void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, 
     }
 
     // Add the hurting effects...
-	this->display->GetAssets()->PaddleHurtByProjectile(paddle, projectile);
+	this->display->GetAssets()->PaddleHurtByProjectile(paddle, projectile, this->display->GetCamera());
 
 	debug_output("EVENT: Paddle hit by projectile");
 }
@@ -391,6 +392,32 @@ void GameEventsListener::PaddleHitByBossEvent(const PlayerPaddle& paddle, const 
     debug_output("EVENT: Paddle hit by boss");
 }
 
+void GameEventsListener::PaddleStatusUpdateEvent(const PlayerPaddle& paddle, PlayerPaddle::PaddleSpecialStatus status, bool isActive) {
+    UNUSED_PARAMETER(paddle);
+
+    GameAssets* assets = this->display->GetAssets();
+    if (isActive) {
+        assets->ActivatePaddleStatusEffect(*this->display->GetModel(), 
+            this->display->GetCamera(), status);
+    }
+    else {
+        assets->DeactivatePaddleStatusEffect(*this->display->GetModel(), 
+            this->display->GetCamera(), status);
+    }
+}
+
+void GameEventsListener::FrozenPaddleCanceledByFireEvent(const PlayerPaddle& paddle) {
+    this->display->GetAssets()->CancelFrozenPaddleWithFireEffect(paddle);
+
+    debug_output("EVENT: Frozen paddle canceled by fire");
+}
+
+void GameEventsListener::OnFirePaddleCanceledByIceEvent(const PlayerPaddle& paddle) {
+    this->display->GetAssets()->CancelOnFirePaddleWithIceEffect(paddle);
+
+    debug_output("EVENT: Frozen paddle canceled by fire");
+}
+
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);
@@ -403,7 +430,7 @@ void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 }
 
 void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) {
-	debug_output("EVENT: Last ball is about to die.");
+	debug_output("EVENT: Last ball is about to die");
 
     GameAssets* assets = this->display->GetAssets();
 	assets->ActivateLastBallDeathEffects(lastBallToDie);
@@ -543,21 +570,8 @@ void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& project
     }
 
     if (doEffect) {
-	    // Add any visual effects required for when a projectile hits the block
-	    this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
-
-        GameSound* sound = this->display->GetSound();
-        switch (projectile.GetType()) {
-            case Projectile::PaddleFlameBlastProjectile:
-                sound->PlaySoundAtPosition(GameSound::FlameBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
-                break;
-            case Projectile::PaddleIceBlastProjectile:
-                sound->PlaySoundAtPosition(GameSound::IceBlasterHitEvent, false, projectile.GetPosition3D(), true, true, true);
-                break;
-            default:
-                break;
-        }
-
+	    // Add any visual and sound effects required for when a projectile hits the block
+	    this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block, this->display->GetSound());
         debug_output("EVENT: Projectile-block collision");
     }
 }
@@ -566,16 +580,18 @@ void GameEventsListener::ProjectileSafetyNetCollisionEvent(const Projectile& pro
     UNUSED_PARAMETER(safetyNet);
 
     // Add any visual effects for the collision
-    this->display->GetAssets()->GetESPAssets()->AddSafetyNetHitByProjectileEffect(projectile);
+    this->display->GetAssets()->GetESPAssets()->AddSafetyNetHitByProjectileEffect(projectile, this->display->GetSound());
 
     debug_output("EVENT: Projectile-safety net collision");
 }
 
-void GameEventsListener::ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart) {
+void GameEventsListener::ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, 
+                                                      const BossBodyPart& collisionPart) {
     UNUSED_PARAMETER(boss);
 
     // Add visual effects for the collision
-    this->display->GetAssets()->GetESPAssets()->AddBossHitByProjectileEffect(projectile, collisionPart);
+    this->display->GetAssets()->GetESPAssets()->AddBossHitByProjectileEffect(
+        projectile, collisionPart, this->display->GetSound());
 
     debug_output("EVENT: Projectile-boss collision");
 }
@@ -998,7 +1014,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
             case LevelPiece::NoEntry:
 			    if (wasFrozen) {
 				    // Add ice break effect
-				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+                    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, block.GetColour());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -1013,7 +1029,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
                 this->display->GetAssets()->GetESPAssets()->AddRegenBlockSpecialBreakEffect(regenBlock); // Make the counter on the block go exploding out
 			    if (wasFrozen) {
 				    // Add ice break effect
-				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, block.GetColour());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -1029,7 +1045,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
             case LevelPiece::MineTurret:
 			    if (wasFrozen) {
 				    // Add ice break effect
-				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, block.GetColour());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -1042,7 +1058,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		    case LevelPiece::ItemDrop:
 			    if (wasFrozen) {
 				    // Add ice break effect
-				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.9f, 0.45f, 0.0f));
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, Colour(0.9f, 0.45f, 0.0f));
 			    }
 			    else {
 				    // Typical break effect
@@ -1055,7 +1071,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
             case LevelPiece::AlwaysDrop:
 			    if (wasFrozen) {
 				    // Add ice break effect
-				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, block.GetColour());
 			    }
 			    else {
 				    // Typical break effect for basic breakable blocks
@@ -1068,7 +1084,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		    case LevelPiece::Bomb:
 			    if (wasFrozen) {
 				    // Add ice break effect
-				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, Colour(0.66f, 0.66f, 0.66f));
 			    }
 			    else {
 				    // Bomb effect - big explosion!
@@ -1091,7 +1107,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 
 		        if (wasFrozen) {
 		    	    // Add ice break effect
-		    	    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
+		    	    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
 		        }
 		        else {
 		    	    // Emit goo from ink block and make onomatopoeia effects
@@ -1125,7 +1141,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		    case LevelPiece::Collateral: {
                 if (wasFrozen) {
 				    // Add ice break effect
-				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.5f, 0.5f, 0.5f));
+				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, Colour(0.5f, 0.5f, 0.5f));
 			    }
                 else {
 
@@ -1832,27 +1848,31 @@ void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
     this->display->GetSound()->PlaySoundAtPosition(GameSound::IceShatterEvent, false, 
         block.GetPosition3D(), true, true, true);
 
-	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block);
+	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH);
 
 	debug_output("EVENT: Ice shattered");
 }
 
 void GameEventsListener::BlockIceCancelledWithFireEvent(const LevelPiece& block) {
 
+    Point3D blockPos3d = block.GetPosition3D();
     this->display->GetSound()->PlaySoundAtPosition(GameSound::IceMeltedEvent, false, 
-        block.GetPosition3D(), true, true, true);
+        blockPos3d, true, true, true);
 
-    this->display->GetAssets()->GetESPAssets()->AddIceMeltedByFireEffect(block);
+    this->display->GetAssets()->GetESPAssets()->AddIceMeltedByFireEffect(
+        blockPos3d, LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
 
     debug_output("EVENT: Frozen block canceled-out");
 }
 
 void GameEventsListener::BlockFireCancelledWithIceEvent(const LevelPiece& block) {
 
+    Point3D blockPos3d = block.GetPosition3D();
     this->display->GetSound()->PlaySoundAtPosition(GameSound::FireFrozeEvent, false, 
-        block.GetPosition3D(), true, true, true);
+        blockPos3d, true, true, true);
 
-    this->display->GetAssets()->GetESPAssets()->AddFirePutOutByIceEffect(block);
+    this->display->GetAssets()->GetESPAssets()->AddFirePutOutByIceEffect(
+        blockPos3d, LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
 
     debug_output("EVENT: Block on fire canceled-out");
 }

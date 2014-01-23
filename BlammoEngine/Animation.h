@@ -343,6 +343,15 @@ public:
 		this->timePts = times;
 		this->interpolationPts = interpolations;
 	}
+    void SetLerp(double t0, double t1, const T& v0, const T& v1) {
+
+        this->x = 0.0;
+        this->tracker = 0;
+        this->timePts.resize(2);
+        this->timePts[0] = t0; this->timePts[1] = t1;
+        this->interpolationPts.resize(2);
+        this->interpolationPts[0] = v0; this->interpolationPts[1] = v1;
+    }
     void SetLerp(double t0, double t1, double t2, const T& v0, const T& v1, const T& v2) {
 
         this->x = 0.0;

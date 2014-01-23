@@ -358,9 +358,9 @@ void BallInPlayState::Tick(double seconds) {
 				    if (paddle->GetAttachedBall() == currBall) {
 					    continue;
 				    }
+                    paddle->HitByBall(*currBall);
 
                     bool ballHitPaddleundercarriage = (paddle->GetBottomCollisionNormal() == n);
-
 				    // EVENT: Ball-paddle collision
 				    GameEventManager::Instance()->ActionBallPaddleCollision(*currBall, *paddle, ballHitPaddleundercarriage);
 

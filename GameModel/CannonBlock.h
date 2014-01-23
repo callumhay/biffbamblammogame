@@ -122,6 +122,8 @@ public:
     double GetElapsedRotationTime() const;
     double GetTotalRotationTime() const;
 
+    bool IsProjectileLoaded(const Projectile* p) const { return p == this->loadedProjectile; }
+
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
 	static const double MAX_ROTATION_TIME_IN_SECS;
