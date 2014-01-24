@@ -701,6 +701,13 @@ void GameEventManager::ActionLevelCompleted(const GameWorld& world, const GameLe
 	}	
 }
 
+void GameEventManager::ActionLevelResetting() {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->LevelResettingEvent();
+    }	
+}
+
 // Action for when the number of player lives changes
 void GameEventManager::ActionLivesChanged(int livesLeftBefore, int livesLeftAfter) {
 	assert(livesLeftBefore != livesLeftAfter);

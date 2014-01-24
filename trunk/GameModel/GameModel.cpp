@@ -298,6 +298,9 @@ void GameModel::StartGameAtWorldAndLevel(int worldIdx, int levelIdx) {
 }
 
 void GameModel::ResetCurrentLevel() {
+    // EVENT: Level is resetting
+    GameEventManager::Instance()->ActionLevelResetting();
+
     this->SetNextState(GameState::LevelStartStateType);
     
     this->ClearBallsToOne();
@@ -918,7 +921,22 @@ void GameModel::DoProjectileCollisions(double dT) {
                     // currPiece may already be destroyed.
 				    destroyProjectile = currPiece->ProjectileIsDestroyedOnCollision(currProjectile);
 
-                    this->CollisionOccurred(currProjectile, currPiece);	
+                    // Check to see if the piece is a cannon and whether it now has the projectile loaded in it, in which case we
+                    // exit from this loop immediately
+                    if (!destroyProjectile && currPiece->GetType() == LevelPiece::Cannon) {
+                        
+                        this->CollisionOccurred(currProjectile, currPiece);
+                        // currPiece may now be destroyed...
+
+                        if (static_cast<const CannonBlock*>(currPiece)->IsProjectileLoaded(currProjectile)) {
+                            alreadyCollidedWithPieces.insert(currPiece);
+                            break;
+                        }
+                    }
+                    else {
+                        this->CollisionOccurred(currProjectile, currPiece);	
+                        // currPiece may now be destroyed...
+                    }
 
 				    // Check to see if the collision is supposed to destroy the projectile
 				    if (destroyProjectile) {
@@ -929,13 +947,6 @@ void GameModel::DoProjectileCollisions(double dT) {
                         break;
 				    }
                     else {
-                        // Check to see if the piece is a cannon and whether it now has the projectile loaded in it, in which case we
-                        // exit from this loop immediately
-                        if (currPiece->GetType() == LevelPiece::Cannon && static_cast<const CannonBlock*>(currPiece)->IsProjectileLoaded(currProjectile)) {
-                            alreadyCollidedWithPieces.insert(currPiece);
-                            break;
-                        }
-
                         // NOTE: We need to be careful since some blocks may no longer exist after a collision at this
                         // point so we re-populate the set of pieces to check and keep track of the ones we've already collided with
                         collisionPieces = currLevel->GetLevelPieceCollisionCandidates(

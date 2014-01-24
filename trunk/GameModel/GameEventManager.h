@@ -161,7 +161,8 @@ public:
 	void ActionLevelStarted(const GameWorld& world, const GameLevel& level);
 	void ActionLevelAlmostComplete(const GameLevel& level);
     void ActionLevelCompleted(const GameWorld& world, const GameLevel& level, int furthestLevelIdxBefore, int furthestLevelIdxAfter);
-	
+	void ActionLevelResetting();
+
 	void ActionLivesChanged(int livesLeftBefore, int livesLeftAfter);
 
 	void ActionBlockIceShattered(const LevelPiece& block);

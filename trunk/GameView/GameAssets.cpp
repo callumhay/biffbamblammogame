@@ -596,7 +596,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 }
 
 /**
- * Draw the effects that take place after drawing everything (Except final fullscreen effects).
+ * Draw the effects that take place after drawing everything (Except final full screen effects).
  */
 void GameAssets::DrawGameBallsPostEffects(double dT, GameModel& gameModel, const Camera& camera) {
 	

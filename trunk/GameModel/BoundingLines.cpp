@@ -240,7 +240,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
     closestPts.reserve(this->GetNumLines());
     
     bool isCollision = false;
-    timeUntilCollision = dT;
+    int closestLineIdx = -1;
+    double minTimeUntilCollision = std::numeric_limits<double>::max();
 
     // Solution for moving circle to static-line collision, found here:
     // http://ericleong.me/research/circle-line
@@ -255,7 +256,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
             
             collisionLineIdxs.push_back(lineIdx);
             closestPts.push_back(point1);
-            timeUntilCollision = 0.0;
+            closestLineIdx = lineIdx;
+            minTimeUntilCollision = 0.0;
             isCollision = true;
 
             continue;
@@ -305,8 +307,10 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
                 // Check to see if pointC is actually on the bounding line, if not then the circle must have collided
                 // with an end point of the bounding line...
 
+                double tempTime;
                 if (Collision::ClosestPointMustBeOnSegment(point2, currBoundsLine, pointC)) {
-                    timeUntilCollision = std::min<double>(timeUntilCollision, (point2 - circle.Center()).Magnitude() / velocityMag);
+
+                    tempTime = (point2 - circle.Center()).Magnitude() / velocityMag;
                 }
                 else {
                     // Deal with the special case of end point collisions...
@@ -318,7 +322,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
                     tempDiff = pointC - tempPt2D;
                     tempPt2D -= sqrt(std::max<float>(0.0f, (sqrRadius - tempDiff.SqrMagnitude()))) * nVelocity;
 
-                    timeUntilCollision = std::min<double>(timeUntilCollision, (tempPt2D - circle.Center()).Magnitude() / velocityMag);
+                    tempTime = (tempPt2D - circle.Center()).Magnitude() / velocityMag;
+                }
+
+                if (tempTime < minTimeUntilCollision) {
+                    minTimeUntilCollision = tempTime;
+                    closestLineIdx = lineIdx;
                 }
 
                 collisionLineIdxs.push_back(lineIdx);
@@ -353,8 +362,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
                 tempDiff = pointC - tempPt2D;
                 tempPt2D -= sqrt(std::max<float>(0.0f, (sqrRadius - tempDiff.SqrMagnitude()))) * nVelocity;
 
-                timeUntilCollision = std::min<double>(timeUntilCollision, (tempPt2D - circle.Center()).Magnitude() / velocityMag);
-
+                double tempTime = (tempPt2D - circle.Center()).Magnitude() / velocityMag;
+                if (tempTime < minTimeUntilCollision) {
+                    minTimeUntilCollision = tempTime;
+                    closestLineIdx = lineIdx;
+                }
+ 
                 collisionLineIdxs.push_back(lineIdx);
                 closestPts.push_back(pointC);
                 isCollision = true;
@@ -362,14 +375,16 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
         }
     }
 
-    if (!isCollision) {
+    assert(minTimeUntilCollision >= 0.0);
+    if (!isCollision || minTimeUntilCollision > dT) {
         return false;
     }
 
     assert(!collisionLineIdxs.empty());
-    assert((timeUntilCollision - dT) <= EPSILON);
 
+    timeUntilCollision = minTimeUntilCollision;
     cPointOfCollision = circle.Center() + timeUntilCollision * velocity;
+
     if (zeroVelocity || collisionLineIdxs.size() == 1) {
         n = this->normals[collisionLineIdxs.front()];
         collisionLine = this->lines[collisionLineIdxs.front()];

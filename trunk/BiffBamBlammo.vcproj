@@ -1173,6 +1173,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\OneWayBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\PortalBlockMesh.h"
 						>
 					</File>
@@ -1234,6 +1238,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\MineTurretBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\OneWayBlockMesh.cpp"
 						>
 					</File>
 					<File

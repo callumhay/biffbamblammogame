@@ -45,9 +45,13 @@ private:
 
 	// Effects for drawing attention to active cannon blocks
 	ESPParticleScaleEffector haloExpandPulse;
+    ESPParticleScaleEffector attentionExpandPulse;
 	ESPParticleColourEffector haloFader;
+    ESPParticleColourEffector attentionFader;
 	Texture2D* haloTexture;
+
 	ESPPointEmitter* activeCannonEffectEmitter;
+    ESPPointEmitter* ballCamAttentionEffectEmitter;
 
 	void LoadMesh();
 

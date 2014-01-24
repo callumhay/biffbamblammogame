@@ -170,7 +170,8 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
             hasBound = true;
             isOnInside = (leftNeighbor == NULL || leftNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-                leftNeighbor->GetType() == LevelPiece::NoEntry);
+                leftNeighbor->GetType() == LevelPiece::NoEntry || leftNeighbor->GetType() == LevelPiece::Switch ||
+                leftNeighbor->GetType() == LevelPiece::Solid);
 
             if (leftNeighbor->GetType() == LevelPiece::OneWay && !leftNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
                 if (static_cast<const OneWayBlock*>(leftNeighbor)->GetDirType() != this->GetDirType()) {
@@ -201,7 +202,8 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
             hasBound = true;
             isOnInside = (bottomNeighbor == NULL || bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-                bottomNeighbor->GetType() == LevelPiece::NoEntry);
+                bottomNeighbor->GetType() == LevelPiece::NoEntry || bottomNeighbor->GetType() == LevelPiece::Switch ||
+                bottomNeighbor->GetType() == LevelPiece::Solid);
 
             if (bottomNeighbor->GetType() == LevelPiece::OneWay && !bottomNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
                 if (static_cast<const OneWayBlock*>(bottomNeighbor)->GetDirType() != this->GetDirType()) {
@@ -232,7 +234,8 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
             hasBound = true;
             isOnInside = (rightNeighbor == NULL || rightNeighbor->HasStatus(LevelPiece::IceCubeStatus) ||
-                rightNeighbor->GetType() == LevelPiece::NoEntry);
+                rightNeighbor->GetType() == LevelPiece::NoEntry || rightNeighbor->GetType() == LevelPiece::Switch ||
+                rightNeighbor->GetType() == LevelPiece::Solid);
 
             if (rightNeighbor->GetType() == LevelPiece::OneWay && !rightNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
                 if (static_cast<const OneWayBlock*>(rightNeighbor)->GetDirType() != this->GetDirType()) {
@@ -263,7 +266,8 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 
             hasBound = true;
             isOnInside = (topNeighbor == NULL || topNeighbor->HasStatus(LevelPiece::IceCubeStatus | LevelPiece::OnFireStatus) ||
-                topNeighbor->GetType() == LevelPiece::NoEntry);
+                topNeighbor->GetType() == LevelPiece::NoEntry || topNeighbor->GetType() == LevelPiece::Switch ||
+                topNeighbor->GetType() == LevelPiece::Solid);
 
             if (topNeighbor->GetType() == LevelPiece::OneWay && !topNeighbor->HasStatus(LevelPiece::IceCubeStatus)) {
                 if (static_cast<const OneWayBlock*>(topNeighbor)->GetDirType() != this->GetDirType()) {
