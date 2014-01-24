@@ -177,7 +177,7 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
             LevelPiece* currPiece = this->currentLevelPieces[row][col];
             
             if (currPiece->GetHasTriggerID()) {
-                this->triggerablePieces.insert(std::make_pair(currPiece->GetTriggerID(), currPiece));
+                this->triggerablePieces[currPiece->GetTriggerID()].push_back(currPiece);
             }
             if (currPiece->IsAIPiece()) {
                 aiEntities.insert(currPiece);
@@ -1361,8 +1361,7 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
         // Check to see if the piece is inside the list of trigger-ables...
         if (pieceBefore->GetHasTriggerID()) {
             // Remove it from the trigger list
-            std::map<LevelPiece::TriggerID, LevelPiece*>::iterator findIter =
-                this->triggerablePieces.find(pieceBefore->GetTriggerID());
+            TriggerPiecesMapIter findIter = this->triggerablePieces.find(pieceBefore->GetTriggerID());
             assert(findIter != this->triggerablePieces.end());
             this->triggerablePieces.erase(findIter);
         }
@@ -1648,17 +1647,20 @@ void GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine) 
 }
 
 /**
- * Activates the triggerable level piece with the given trigger ID (if it exists).
+ * Activates the trigger-able level piece with the given trigger ID (if it exists).
  */
 void GameLevel::ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel) {
-    std::map<LevelPiece::TriggerID, LevelPiece*>::iterator findIter = this->triggerablePieces.find(triggerID);
+    TriggerPiecesMapIter findIter = this->triggerablePieces.find(triggerID);
     if (findIter == this->triggerablePieces.end()) {
         return;
     }
 
-    LevelPiece* triggerPiece = findIter->second;
-    assert(triggerPiece != NULL);
-    triggerPiece->Triggered(gameModel);
+    const std::vector<LevelPiece*>& triggerPieces = findIter->second;
+    for (std::vector<LevelPiece*>::const_iterator iter = triggerPieces.begin(); iter != triggerPieces.end(); ++iter) {
+        LevelPiece* triggerPiece = *iter;
+        assert(triggerPiece != NULL);
+        triggerPiece->Triggered(gameModel);
+    }
 }
 
 /**

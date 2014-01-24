@@ -8,6 +8,12 @@ resources/textures/futurism_world_select_256x256.jpg
 # Camera Ball Item intro
 resources/worlds/levels/medium/a_change_of_view.lvl
 
+# Combination of camera ball with other items to clear obstacles from
+# the paths of cannons to get hard to reach blocks
+resources/worlds/levels/hard/thinking_outside_the_box.lvl
+
+
+# A really tough camera ball + cannon timing level
 resources/worlds/levels/hard/shoot_the_void.lvl
 
 

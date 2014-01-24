@@ -201,7 +201,7 @@ public:
     void MineExplosion(GameModel* gameModel, const MineProjectile* mine);
 
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
-    const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
+    const std::vector<LevelPiece*>* GetTriggerableLevelPieces(const LevelPiece::TriggerID& triggerID) const;
 
     bool GetIsLevelPassedWithScore() const;
     long GetPrevHighScore() const;
@@ -243,7 +243,12 @@ private:
     void RebuildTeslaLightningBoundingLines();
 
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
-    std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
+
+    typedef std::map<LevelPiece::TriggerID, std::vector<LevelPiece*> > TriggerPiecesMap;
+    typedef TriggerPiecesMap::const_iterator TriggerPiecesMapConstIter;
+    typedef TriggerPiecesMap::iterator TriggerPiecesMapIter;
+
+    TriggerPiecesMap triggerablePieces;
 
     std::set<LevelPiece*> aiEntities;
 
@@ -295,12 +300,12 @@ private:
     DISALLOW_COPY_AND_ASSIGN(GameLevel);
 };
 
-inline const LevelPiece* GameLevel::GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const {
-    std::map<LevelPiece::TriggerID, LevelPiece*>::const_iterator findIter = this->triggerablePieces.find(triggerID);
+inline const std::vector<LevelPiece*>* GameLevel::GetTriggerableLevelPieces(const LevelPiece::TriggerID& triggerID) const {
+    TriggerPiecesMapConstIter findIter = this->triggerablePieces.find(triggerID);
     if (findIter == this->triggerablePieces.end()) {
         return NULL;
     }
-    return findIter->second;
+    return &findIter->second;
 }
 
 inline bool GameLevel::GetIsLevelPassedWithScore() const {

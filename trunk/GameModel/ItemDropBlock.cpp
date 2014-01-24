@@ -32,6 +32,19 @@ timeOfLastDrop(0), hasSparkleEffect(true) {
 ItemDropBlock::~ItemDropBlock() {
 }
 
+void ItemDropBlock::Triggered(GameModel* gameModel) {
+    // If this block is frozen then it doesn't drop items when it's triggered
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // EVENT: Couldn't drop an item...
+        GameEventManager::Instance()->ActionItemDropBlockLocked(*this);
+        return;
+    }
+
+    // When triggered, an item drop block will try to drop an item
+    this->AttemptToDropAnItem(gameModel);
+}
+
+
 bool ItemDropBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 		
@@ -260,10 +273,14 @@ LevelPiece* ItemDropBlock::TickPaddleShieldCollision(double dT, const PlayerPadd
 
 // Update the nextDropItemType of this to be some random item type from the list of allowable item drops
 void ItemDropBlock::ChangeToNextItemDropType(bool doEvent) {
-   
+    
     // Choose an item that hasn't dropped yet...
-    int randomIdx = (this->nextDropItemTypeIdx + 1 + (Randomizer::GetInstance()->RandomUnsignedInt() % 
-        static_cast<int>(this->allowedItemDropTypes.size())-1)) % static_cast<int>(this->allowedItemDropTypes.size());
+    int randomIdx = 0;
+    if (this->allowedItemDropTypes.size() > 1) {
+        randomIdx = (this->nextDropItemTypeIdx + 1 + 
+            (Randomizer::GetInstance()->RandomUnsignedInt() % (static_cast<int>(this->allowedItemDropTypes.size())-1))) % 
+            static_cast<int>(this->allowedItemDropTypes.size());
+    }
 	this->SetNextItemDropTypeIndex(randomIdx);
 	
     this->timeOfLastDrop = BlammoTime::GetSystemTimeInMillisecs();
@@ -272,4 +289,12 @@ void ItemDropBlock::ChangeToNextItemDropType(bool doEvent) {
 		// EVENT: Item drop type changed
 		GameEventManager::Instance()->ActionItemDropBlockItemChange(*this);
 	}
+}
+
+void ItemDropBlock::AttemptToDropAnItem(GameModel* gameModel) {
+    // Drop an item if the item drop timer allows it...
+    if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
+        gameModel->AddItemDrop(this->GetCenter(), this->GetNextItemDropType());
+        this->ChangeToNextItemDropType(true);
+    }
 }

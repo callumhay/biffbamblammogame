@@ -1,0 +1,74 @@
+Thinking Outside the Box
+21 30
+E E E E E E C(270) E G E G E G E T(G,ur) E G E C(90) E E 
+E E E E E E E E E E E E E E E E E E E E E 
+E E D(FlameBlasterPaddle,FlameBlasterPaddle,FlameBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle){1} E S S C(180) S F(d) F(d) F(d) D(BallCam,BallCam,BallCam){1} F(d) F(d) F(d) S S E G E E 
+E E S E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E F(r) E E E E E E E E E E E N E E E E 
+E E C(90) E F(r) E E E E E E E E E E E N E Q(i) D(LaserBeamPaddle) E 
+E E E E F(r) E E E E E E E E E E E N E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E T(G,ul) E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E E S S C(170-190) S S 
+E E E E S E E E E E E E E E E E E E E E S 
+E E E E S E E E E E E E E E E E E E E E S 
+E E E E S E E E E E E E E E E E E E E E S 
+E E E E S E E E E E E E E E E E E E E E S 
+E E E E S E E E E E E E E E E E E E E E S 
+E E E E S E E E E E E E E E E E E E E E S 
+E E E E N E E E E E E E E E E E E E E E S 
+E E E E N E E E E E E E E E E E E E E E S 
+W(1) E E E N E E E E E E E E E E E E E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 0
+PoisonPaddle 2
+Blackout 2
+BallSafetyNet 2
+UberBall 2
+BallGrow 0
+ShieldPaddle 2
+StickyPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 1
+FlameBlasterPaddle 2
+FireBall 2
+RocketPaddle 2
+GhostBall 1
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MagnetPaddle 1
+MultiBall3 2
+RemoteControlRocket 2
+IceBall 2
+IceBlasterPaddle 2
+MineLauncherPaddle 2
+SlowBall 2
+FastBall 2
+Random 2
+CrazyBall 1
+GravityBall 2
+PaddleCam 0

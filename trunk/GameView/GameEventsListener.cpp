@@ -346,8 +346,16 @@ void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, 
 
 void GameEventsListener::PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
 	UNUSED_PARAMETER(paddle);
-	UNUSED_PARAMETER(projectile);
-	// TODO ?
+
+    switch (projectile.GetType()) {
+        case Projectile::FireGlobProjectile:
+            this->display->GetSound()->PlaySoundAtPosition(GameSound::FireGlobShieldCollisionEvent, 
+                false, projectile.GetPosition3D(), true, true, true);
+            break;
+        default:
+            break;
+    }
+
 	debug_output("EVENT: Paddle shield hit by projectile");
 }
 
@@ -364,6 +372,10 @@ void GameEventsListener::ProjectileDeflectedByPaddleShieldEvent(const Projectile
         // If it's a laser/light projectile we play the deflection sound for it
         sound->PlaySoundAtPosition(GameSound::LaserDeflectedByShieldEvent, false, projectile.GetPosition3D(), true, true, true);
     }
+    else {
+        // For ice/fire blasts and other projectiles...
+        sound->PlaySoundAtPosition(GameSound::BlastDeflectedByShieldEvent, false, projectile.GetPosition3D(), true, true, true);
+    } 
 
 	debug_output("EVENT: Paddle shield deflected projectile");
 }
@@ -1472,6 +1484,14 @@ void GameEventsListener::ItemDropBlockItemChangeEvent(const ItemDropBlock& dropB
 	this->display->GetAssets()->GetCurrentLevelMesh()->UpdateItemDropBlock(*itemAssets, dropBlock);
 
 	debug_output("EVENT: Item drop block item type changed");
+}
+
+void GameEventsListener::ItemDropBlockLockedEvent(const ItemDropBlock& dropBlock) {
+    
+    this->display->GetSound()->PlaySoundAtPosition(
+        GameSound::ItemDropBlockLockedEvent, false, dropBlock.GetPosition3D(), true, true, true);
+
+    debug_output("EVENT: Item drop block failed to drop item because it's locked");
 }
 
 void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBlock) {

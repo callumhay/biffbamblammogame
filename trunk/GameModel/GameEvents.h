@@ -646,6 +646,13 @@ public:
 	 * Arguments: dropBlock - the drop block that changed.
 	 */
     virtual void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock) { UNUSED_PARAMETER(dropBlock); }
+	
+    /**
+	 * Event triggered when an item drop block fails to drop an item after its triggered, due to being locked (typically
+     * because it's frozen in ice).
+	 * Arguments: dropBlock - the drop block that is locked.
+	 */
+    virtual void ItemDropBlockLockedEvent(const ItemDropBlock& dropBlock) { UNUSED_PARAMETER(dropBlock); }
 
     /**
      * Event triggered when a switch block is initially activated. Occurs once just after the switch

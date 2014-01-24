@@ -142,7 +142,7 @@ void ItemDropBlockMesh::DrawEffects(const Vector3D& worldTranslation, double dT,
          iter != this->itemDropBlockToItemTexMap.end(); ++iter) {
 
         const ItemDropBlock* currItemDropBlock = iter->first;
-        if (!currItemDropBlock->GetHasSparkleEffect()) {
+        if (!currItemDropBlock->GetHasSparkleEffect() || currItemDropBlock->HasStatus(LevelPiece::IceCubeStatus)) {
             continue;
         }
 

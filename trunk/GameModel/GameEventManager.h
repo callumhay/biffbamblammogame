@@ -126,6 +126,7 @@ public:
 	void ActionItemTimerStarted(const GameItemTimer& itemTimer);
 	void ActionItemTimerStopped(const GameItemTimer& itemTimer, bool didExpire);
 	void ActionItemDropBlockItemChange(const ItemDropBlock& dropBlock);
+    void ActionItemDropBlockLocked(const ItemDropBlock& dropBlock);
     void ActionSwitchBlockActivated(const SwitchBlock& switchBlock);
     void ActionBulletTimeStateChanged(const BallBoostModel& boostModel);
     void ActionBallBoostExecuted(const BallBoostModel& boostModel);

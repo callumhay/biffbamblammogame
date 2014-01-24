@@ -137,11 +137,6 @@ inline bool ItemDropBlock::IsLightReflectorRefractor() const {
 	return false;
 }
 
-inline void ItemDropBlock::Triggered(GameModel* gameModel) {
-    // When triggered, an item drop block will try to drop an item
-    this->AttemptToDropAnItem(gameModel);
-}
-
 inline bool ItemDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
 	UNUSED_PARAMETER(dT);
 	UNUSED_PARAMETER(gameModel);
@@ -163,14 +158,6 @@ inline void ItemDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Le
 
     LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-}
-
-inline void ItemDropBlock::AttemptToDropAnItem(GameModel* gameModel) {
-	// Drop an item if the item drop timer allows it...
-	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
-        gameModel->AddItemDrop(this->GetCenter(), this->GetNextItemDropType());
-		this->ChangeToNextItemDropType(true);
-	}
 }
 
 // Get what the next item drop will be
