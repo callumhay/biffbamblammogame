@@ -46,6 +46,7 @@ class LaserTurretBlockMesh;
 class RocketTurretBlockMesh;
 class MineTurretBlockMesh;
 class AlwaysDropBlockMesh;
+class OneWayBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 class BossMesh;
@@ -64,6 +65,8 @@ public:
     void DrawPiecesPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     void DrawNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawTransparentNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
@@ -122,11 +125,8 @@ private:
     MineTurretBlockMesh* mineTurretBlock;
     AlwaysDropBlockMesh* alwaysDropBlock;
     RegenBlockMesh* regenBlock;
+    OneWayBlockMesh* oneWayBlock;
     Mesh* noEntryBlock;
-    Mesh* oneWayUpBlock;
-    Mesh* oneWayDownBlock;
-    Mesh* oneWayLeftBlock;
-    Mesh* oneWayRightBlock;
 
 	// Style-specific level pieces
 	Mesh* styleBlock;

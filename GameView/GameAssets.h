@@ -310,7 +310,9 @@ inline void GameAssets::DrawNoBloomLevelPieces(double dT, const Camera& camera) 
 
     BasicPointLight fgKeyLight, fgFillLight, ballLight;
     this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-    this->GetCurrentLevelMesh()->DrawNoBloomPieces(dT, camera, fgKeyLight, fgFillLight, ballLight);
+    LevelMesh* lvlMesh = this->GetCurrentLevelMesh();
+    lvlMesh->DrawNoBloomPieces(dT, camera, fgKeyLight, fgFillLight, ballLight);
+    lvlMesh->DrawTransparentNoBloomPieces(dT, camera, fgKeyLight, fgFillLight, ballLight);
 }
 
 inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {

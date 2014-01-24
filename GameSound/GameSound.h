@@ -303,6 +303,7 @@ public:
     void StopAllSoundsWithType(const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);
 
     void SetIgnorePlaySound(bool ignore);
+    bool GetIgnorePlaySound() const { return this->ignorePlaySounds; }
 
     // Game object positional sound attaching/detaching functions
     SoundID AttachAndPlaySound(const IPositionObject* posObj, const GameSound::SoundType& soundType, bool isLooped, 

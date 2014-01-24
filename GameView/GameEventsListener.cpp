@@ -255,6 +255,9 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 	debug_output("EVENT: Level completed");
 }
 
+void GameEventsListener::LevelResettingEvent() {
+    this->teslaLightningSoundIDs.clear();
+}
 
 void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc) {
 	std::string soundText = Onomatoplex::Generator::GetInstance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
@@ -1178,6 +1181,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
         case LevelPiece::AlwaysDrop:
 		case LevelPiece::Cannon:
 		case LevelPiece::Collateral:
+        case LevelPiece::OneWay:
 			this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
             break;
 
@@ -1187,7 +1191,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		case LevelPiece::SolidTriangle:
 		case LevelPiece::Tesla:
         case LevelPiece::Switch:
-        case LevelPiece::OneWay:
         case LevelPiece::NoEntry:
 		case LevelPiece::Bomb:
 		case LevelPiece::Ink:
@@ -1792,10 +1795,24 @@ void GameEventsListener::TeslaLightningBarrierSpawnedEvent(const TeslaBlock& new
 
     // Attach a sound for the lightning...
     Point3D midPt = Point3D::GetMidPoint(newlyOnTeslaBlock.GetPosition3D(), previouslyOnTeslaBlock.GetPosition3D());
+    
+    // Don't allow Tesla barrier sounds to be ignored -- this is a hack, because if we
+    // restart a level we set ignore playing sounds to true to avoid getting all the odd
+    // sounds of blocks being destroyed etc., but we still want Tesla barriers to make noise
+    // on the newly spawned level!
+    bool soundDisabled = sound->GetIgnorePlaySound();
+    if (soundDisabled) {
+        sound->SetIgnorePlaySound(false);
+    }
+
     SoundID lightningSoundID = sound->PlaySoundAtPosition(GameSound::TeslaLightningArcLoop, true, midPt, 
         true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, 0.25f);
     this->teslaLightningSoundIDs.insert(std::make_pair(
         std::make_pair(&newlyOnTeslaBlock, &previouslyOnTeslaBlock), lightningSoundID));
+
+    if (soundDisabled) {
+        sound->SetIgnorePlaySound(true);
+    }
 
 	Vector3D negHalfLevelDim(-0.5 * this->display->GetModel()->GetLevelUnitDimensions(), 0.0f);
 	this->display->GetAssets()->GetESPAssets()->AddTeslaLightningBarrierEffect(newlyOnTeslaBlock, previouslyOnTeslaBlock, negHalfLevelDim);

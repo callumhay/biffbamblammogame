@@ -32,6 +32,7 @@ public:
     void LevelAlmostCompleteEvent(const GameLevel& level);
 	void LevelCompletedEvent(const GameWorld& world, const GameLevel& level,
         int furthestLevelIdxBefore, int furthestLevelIdxAfter);
+    void LevelResettingEvent();
 
 	// Paddle related events
 	void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc);

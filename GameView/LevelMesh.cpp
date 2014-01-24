@@ -20,6 +20,7 @@
 #include "TeslaBlockMesh.h"
 #include "SwitchBlockMesh.h"
 #include "AlwaysDropBlockMesh.h"
+#include "OneWayBlockMesh.h"
 #include "BossMesh.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
@@ -40,12 +41,13 @@
 #include "../GameModel/RocketTurretBlock.h"
 #include "../GameModel/AlwaysDropBlock.h"
 #include "../GameModel/RegenBlock.h"
+#include "../GameModel/OneWayBlock.h"
 
 LevelMesh::LevelMesh(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) :
 currLevel(NULL), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collateralBlock(NULL),
-teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
-oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL), regenBlock(NULL),
+teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayBlock(NULL), 
+laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL), regenBlock(NULL),
 statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
 remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
 	
@@ -73,11 +75,8 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
     this->mineTurretBlock               = new MineTurretBlockMesh();
     this->alwaysDropBlock               = new AlwaysDropBlockMesh();
     this->regenBlock                    = new RegenBlockMesh();
+    this->oneWayBlock                   = new OneWayBlockMesh();
     this->noEntryBlock                  = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NO_ENTRY_BLOCK_MESH);
-    this->oneWayUpBlock                 = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_UP_MESH);
-    this->oneWayDownBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_DOWN_MESH);
-    this->oneWayLeftBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_LEFT_MESH);
-    this->oneWayRightBlock              = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_RIGHT_MESH);
 
 	// Add the typical level meshes to the list of materials...
 #define INSERT_MATERIAL_GRPS(block, allowDuplicateMaterials) { const std::map<std::string, MaterialGroup*>& matGrps = block->GetMaterialGroups(); \
@@ -95,7 +94,6 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
     INSERT_MATERIAL_GRPS(this->prismBlockDiamond, false);
     INSERT_MATERIAL_GRPS(this->prismBlockTriangleUR, false);
     INSERT_MATERIAL_GRPS(this->portalBlock, false);
-    INSERT_MATERIAL_GRPS(this->cannonBlock, false);
     INSERT_MATERIAL_GRPS(this->teslaBlock, false);
     INSERT_MATERIAL_GRPS(this->itemDropBlock, false);
     INSERT_MATERIAL_GRPS(this->switchBlock, false);
@@ -103,10 +101,6 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
     INSERT_MATERIAL_GRPS(this->rocketTurretBlock, true);
     INSERT_MATERIAL_GRPS(this->mineTurretBlock, true);
     INSERT_MATERIAL_GRPS(this->noEntryBlock, false);
-    INSERT_MATERIAL_GRPS(this->oneWayUpBlock, false);
-    INSERT_MATERIAL_GRPS(this->oneWayDownBlock, false);
-    INSERT_MATERIAL_GRPS(this->oneWayLeftBlock, false);
-    INSERT_MATERIAL_GRPS(this->oneWayRightBlock, false);
     INSERT_MATERIAL_GRPS(this->regenBlock, false);
 
 #pragma warning(pop)
@@ -151,18 +145,12 @@ LevelMesh::~LevelMesh() {
     this->alwaysDropBlock = NULL;
     delete this->regenBlock;
     this->regenBlock = NULL;
+    delete this->oneWayBlock;
+    this->oneWayBlock = NULL;
 
     // Release all resources
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->noEntryBlock);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayUpBlock);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayDownBlock);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayLeftBlock);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayRightBlock);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->basicBlock);
     assert(success);
@@ -247,6 +235,7 @@ void LevelMesh::Flush() {
     this->mineTurretBlock->Flush();
     this->alwaysDropBlock->Flush();
     this->regenBlock->Flush();
+    this->oneWayBlock->Flush();
 
     // Clear any boss mesh
     if (this->bossMesh != NULL) {
@@ -383,6 +372,12 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
                     break;
                 }
 
+                case LevelPiece::OneWay: {
+                    OneWayBlock* oneWayLvlPiece = static_cast<OneWayBlock*>(currPiece);
+                    this->oneWayBlock->AddOneWayBlock(oneWayLvlPiece);
+                    break;
+                }
+
                 default:
                     break;
             }
@@ -444,6 +439,8 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 			case LevelPiece::Collateral:
 				break;
             case LevelPiece::AlwaysDrop:
+                break;
+            case LevelPiece::OneWay:
                 break;
 			default:
 				assert(false);
@@ -529,6 +526,12 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
             this->regenBlock->RemoveRegenBlock(regenPiece);
             break;
         }
+        
+        case LevelPiece::OneWay: {
+            const OneWayBlock* oneWayPiece = static_cast<const OneWayBlock*>(&piece);
+            this->oneWayBlock->RemoveOneWayBlock(oneWayPiece);
+            break;
+        }
 
 		default:
 			break;
@@ -579,7 +582,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
 	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-	//this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
@@ -603,8 +605,14 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 
 void LevelMesh::DrawNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                   const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
     this->itemDropBlock->DrawNoBloomPass(dT, camera, keyLight, fillLight, ballLight);
     this->alwaysDropBlock->DrawNoBloomPass(dT, camera, keyLight, fillLight, ballLight);
+}
+
+void LevelMesh::DrawTransparentNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+                                             const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    this->oneWayBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 }
 
 void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
@@ -637,7 +645,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 
 		CgFxMaterialEffect* currMaterial = currMaterialIter->second;
 		PolygonGroup* currPolyGrp        = iter->second->GetPolygonGroup();
-		const ColourRGBA& currColour         = piece->GetColour();
+		const ColourRGBA& currColour     = piece->GetColour();
 
 		assert(currMaterial != NULL);
 		assert(currPolyGrp != NULL);
@@ -738,7 +746,7 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 			return &this->portalBlock->GetMaterialGroups();
 
 		case LevelPiece::Cannon:
-			return &this->cannonBlock->GetMaterialGroups();
+			break;
 
 		case LevelPiece::Tesla:
 			return &this->teslaBlock->GetMaterialGroups();
@@ -765,23 +773,6 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 			break;
 
         case LevelPiece::OneWay:
-            {
-                const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(piece);
-                assert(oneWayBlock != NULL);
-                switch (oneWayBlock->GetDirType()) {
-                    case OneWayBlock::OneWayUp:
-                        return &this->oneWayUpBlock->GetMaterialGroups();
-                    case OneWayBlock::OneWayDown:
-                        return &this->oneWayDownBlock->GetMaterialGroups();
-                    case OneWayBlock::OneWayLeft:
-                        return &this->oneWayLeftBlock->GetMaterialGroups();
-                    case OneWayBlock::OneWayRight:
-                        return &this->oneWayRightBlock->GetMaterialGroups();
-                    default:
-                        assert(false);
-                        break;
-                }
-            }
             break;
 
 		case LevelPiece::Empty:
@@ -916,6 +907,7 @@ void LevelMesh::SetLevelAlpha(float alpha) {
     this->mineTurretBlock->SetAlphaMultiplier(alpha);
     this->alwaysDropBlock->SetAlphaMultiplier(alpha);
     this->regenBlock->SetAlphaMultiplier(alpha);
+    this->oneWayBlock->SetAlphaMultiplier(alpha);
 }
 
 void LevelMesh::UpdateNoEntryBlock(bool remoteControlRocketOn) {

@@ -308,10 +308,10 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
     // Item drop blocks (draw them without bloom because otherwise it's hard to see
     // what item they're dropping)
     assets->DrawNoBloomLevelPieces(dT, camera);
-    
+
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    // Draw the dropping items if in the last pass
+    // Draw dropping items
     if (fboAssets->DrawItemsInLastPass()) {
         std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
         for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); ++iter) {
@@ -326,6 +326,8 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
 
 	// Absolute post effects call for various object effects
 	assets->DrawGameBallsPostEffects(dT, *gameModel, camera);
+
+
 
     // Add outlines to the scene...
     {

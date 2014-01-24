@@ -98,6 +98,10 @@ public:
         UNUSED_PARAMETER(furthestLevelIdxAfter);
     }
 
+    /**
+     * Event occurs right before a level is reset.
+     */
+    virtual void LevelResettingEvent() {}
 
 	// Paddle related events *************************************************************
 	
