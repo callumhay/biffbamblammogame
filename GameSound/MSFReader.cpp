@@ -399,6 +399,7 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, CannonBlockRotatingPart, false);
     INSERT_MAPPING_PAIR(GameSound, TeslaLightningArcLoop, false);
     INSERT_MAPPING_PAIR(GameSound, SwitchBlockActivated, false);
+    INSERT_MAPPING_PAIR(GameSound, ItemDropBlockLockedEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BlockFrozenEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BlockOnFireLoop, false);
     INSERT_MAPPING_PAIR(GameSound, IceShatterEvent, false);
@@ -426,6 +427,8 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, LaserBeamFiringLoop, false);
     INSERT_MAPPING_PAIR(GameSound, LaserDeflectedByShieldEvent, false);
     INSERT_MAPPING_PAIR(GameSound, RocketOrMineDeflectedByShieldEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BlastDeflectedByShieldEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FireGlobShieldCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleLaserBulletCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleLaserBeamCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleCollateralBlockCollisionEvent, false);

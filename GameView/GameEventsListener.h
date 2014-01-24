@@ -96,6 +96,7 @@ public:
 	void ItemTimerStartedEvent(const GameItemTimer& itemTimer);
 	void ItemTimerStoppedEvent(const GameItemTimer& itemTimer, bool didExpire);
 	void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock);
+    void ItemDropBlockLockedEvent(const ItemDropBlock& dropBlock);
     void SwitchBlockActivatedEvent(const SwitchBlock& switchBlock);
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
     void BallBoostExecutedEvent(const BallBoostModel& boostModel);

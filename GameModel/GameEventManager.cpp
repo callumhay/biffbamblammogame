@@ -477,6 +477,13 @@ void GameEventManager::ActionItemDropBlockItemChange(const ItemDropBlock& dropBl
 	}	
 }
 
+void GameEventManager::ActionItemDropBlockLocked(const ItemDropBlock& dropBlock) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->ItemDropBlockLockedEvent(dropBlock);
+    }
+}
+
 // Action for when a switch block is initially turned on
 void GameEventManager::ActionSwitchBlockActivated(const SwitchBlock& switchBlock) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

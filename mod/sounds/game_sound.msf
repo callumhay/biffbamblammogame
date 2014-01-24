@@ -349,6 +349,10 @@ SwitchBlockActivated {
 	file = resources/SwitchBlockActivated.ogg
 }
 
+ItemDropBlockLockedEvent {
+	file = resources/MalfunctioningEvent.ogg
+}
+
 BlockFrozenEvent {
 	file = resources/BlockFrozenEvent.ogg
 }
@@ -440,6 +444,14 @@ LaserDeflectedByShieldEvent {
 
 RocketOrMineDeflectedByShieldEvent {
 	file = resources/RocketOrMineDeflectedByShieldEvent.ogg
+}
+
+BlastDeflectedByShieldEvent {
+	file = resources/BlastDeflectedByShieldEvent.ogg
+}
+
+FireGlobShieldCollisionEvent {
+	file = resources/FlameBlasterHitEvent.ogg
 }
 
 PaddleLaserBulletCollisionEvent {

@@ -843,7 +843,16 @@ void LevelMesh::LevelIsAlmostComplete() {
 }
 
 void LevelMesh::SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel) {
-    this->switchBlock->SwitchBlockActivated(block, currLevel->GetTriggerableLevelPiece(block->GetIDTriggeredBySwitch()));
+    const std::vector<LevelPiece*>* activatedPieces = currLevel->GetTriggerableLevelPieces(block->GetIDTriggeredBySwitch());
+    if (activatedPieces == NULL) {
+        return;
+    }
+
+    for (std::vector<LevelPiece*>::const_iterator iter = activatedPieces->begin();
+         iter != activatedPieces->end(); ++iter) {
+
+        this->switchBlock->SwitchBlockActivated(block, *iter);
+    }
 }
 
 void LevelMesh::LaserTurretAIStateChanged(const LaserTurretBlock* block,

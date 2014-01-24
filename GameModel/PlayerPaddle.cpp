@@ -1201,7 +1201,9 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
             case Projectile::BossRocketBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
             case Projectile::PaddleMineBulletProjectile:
-            case Projectile::MineTurretBulletProjectile: {
+            case Projectile::MineTurretBulletProjectile:
+            case Projectile::PaddleFlameBlastProjectile:
+            case Projectile::PaddleIceBlastProjectile: {
 
 		        // If the projectile is moving generally upwards and away from the paddle then we ignore this entirely...
 		        if (acos(std::max<float>(-1.0f, std::min<float>(1.0f, 

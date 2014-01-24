@@ -11,12 +11,11 @@
 
 #include "FuturismWorldAssets.h"
 #include "GameViewConstants.h"
-
-// TODO: Get rid of this
+#include "GameAssets.h"
 #include "Skybox.h"
 
 #define STARTING_BACK_BEAM_ANGLE  18.0f
-#define STARTING_FRONT_BEAM_ANGLE -15.0f
+//#define STARTING_FRONT_BEAM_ANGLE -15.0f
 
 FuturismWorldAssets::FuturismWorldAssets(GameAssets* assets) :
 GameWorldAssets(assets, new Skybox(),
@@ -25,8 +24,6 @@ GameWorldAssets(assets, new Skybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->FUTURISM_BLOCK_MESH)),
 
 beamMesh(ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SKYBEAM_MESH)),
-backBeamEffect(new CgFxVolumetricEffect()),
-frontBeamEffect(new CgFxVolumetricEffect()),
 
 rotBackLeftBeam1(STARTING_BACK_BEAM_ANGLE),
 rotBackLeftBeam2(STARTING_BACK_BEAM_ANGLE),
@@ -34,14 +31,14 @@ rotBackLeftBeam3(STARTING_BACK_BEAM_ANGLE),
 rotBackRightBeam1(-STARTING_BACK_BEAM_ANGLE),
 rotBackRightBeam2(-STARTING_BACK_BEAM_ANGLE),
 rotBackRightBeam3(-STARTING_BACK_BEAM_ANGLE),
-
+/*
 rotFrontLeftBeam1(STARTING_FRONT_BEAM_ANGLE),
 rotFrontLeftBeam2(STARTING_FRONT_BEAM_ANGLE),
 rotFrontLeftBeam3(STARTING_FRONT_BEAM_ANGLE),
 rotFrontRightBeam1(-STARTING_FRONT_BEAM_ANGLE),
 rotFrontRightBeam2(-STARTING_FRONT_BEAM_ANGLE),
 rotFrontRightBeam3(-STARTING_FRONT_BEAM_ANGLE),
-
+*/
 futurismTriangleTex(NULL),
 triangleFader(0.0f, 1.0f)
 {
@@ -72,17 +69,17 @@ triangleFader(0.0f, 1.0f)
     this->outlineOffset      = 0.3f;
 
 	// Setup the beam effects
-	this->backBeamEffect->SetColour(Colour(1, 1, 1));
-	this->backBeamEffect->SetFadeExponent(1.5f);
-	this->backBeamEffect->SetScale(0.025f);
-	this->backBeamEffect->SetFrequency(3.0f);
-	this->backBeamEffect->SetAlphaMultiplier(0.7f);
+	this->backBeamEffect.SetColour(Colour(1, 1, 1));
+	this->backBeamEffect.SetFadeExponent(1.5f);
+	this->backBeamEffect.SetScale(0.025f);
+	this->backBeamEffect.SetFrequency(3.0f);
+	this->backBeamEffect.SetAlphaMultiplier(0.7f);
 
-	this->frontBeamEffect->SetColour(Colour(1, 1, 1));
-	this->frontBeamEffect->SetFadeExponent(2.25f);
-	this->frontBeamEffect->SetScale(0.05f);
-	this->frontBeamEffect->SetFrequency(4.0f);
-	this->frontBeamEffect->SetAlphaMultiplier(0.45f);
+	//this->frontBeamEffect->SetColour(Colour(1, 1, 1));
+	//this->frontBeamEffect->SetFadeExponent(2.25f);
+	//this->frontBeamEffect->SetScale(0.05f);
+	//this->frontBeamEffect->SetFrequency(4.0f);
+	//this->frontBeamEffect->SetAlphaMultiplier(0.45f);
 
     this->InitializeTextures();
     this->InitializeEmitters();
@@ -92,13 +89,6 @@ triangleFader(0.0f, 1.0f)
 FuturismWorldAssets::~FuturismWorldAssets() {
     bool success = true;
     
-    // Clean up effects
-    delete this->backBeamEffect;
-    this->backBeamEffect = NULL;
-
-    delete this->frontBeamEffect;
-    this->frontBeamEffect = NULL;
-
     // Clean up animations
     for (int i = 0; i < static_cast<int>(this->beamAnimators.size()); i++) {
         AnimationMultiLerp<float>* animator = this->beamAnimators[i];
@@ -167,6 +157,7 @@ void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 
     glPopMatrix();
 
+    /*
     // Front beams (3 beams on each side, infront of buildings)
     glPushMatrix();
     glTranslatef(-FRONT_BEAM_X_OFFSET, -50.0f, FRONT_BEAM_Z_OFFSET);
@@ -189,6 +180,7 @@ void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 
 
     glPopMatrix();
+    */
     
     glPopAttrib();
 }
@@ -213,8 +205,11 @@ void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicP
 }
 
 void FuturismWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKeyPosOffset, const Vector3D& fgFillPosOffset) const {
-    GameWorldAssets::LoadFGLighting(assets, fgKeyPosOffset, fgFillPosOffset);
-    // TODO?
+    assets->GetLightAssets()->SetForegroundLightDefaults(
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgKeyPosOffset, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.022f),
+        BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION + fgFillPosOffset, 
+        GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.015f));
 }
 
 void FuturismWorldAssets::LoadBGLighting(GameAssets* assets) const {
@@ -414,6 +409,7 @@ void FuturismWorldAssets::InitializeAnimations() {
         this->beamAnimators.push_back(animation);
     }
     
+   /*
     static const float FRONT_BEAM_SWEAP_ANGLE_MAX = 45.0f;
 
     std::vector<double> frontTimes3;
@@ -540,5 +536,5 @@ void FuturismWorldAssets::InitializeAnimations() {
         animation->SetRepeat(true);
         this->beamAnimators.push_back(animation);
     }
-
+    */
 }

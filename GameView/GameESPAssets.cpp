@@ -1282,7 +1282,7 @@ void GameESPAssets::InitPaddleBlasterESPEffects() {
     this->paddleFlameBlasterOrigin->SetEmitDirection(Vector3D(0,1,0));
     this->paddleFlameBlasterOrigin->SetEmitAngleInDegrees(100);
     this->paddleFlameBlasterOrigin->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    this->paddleFlameBlasterOrigin->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->paddleFlameBlasterOrigin->SetParticleAlignment(ESP::ScreenAligned);
     this->paddleFlameBlasterOrigin->AddEffector(&this->particleMediumShrink);
     this->paddleFlameBlasterOrigin->AddEffector(&this->smokeRotatorCW);
     this->paddleFlameBlasterOrigin->AddEffector(&this->fireOriginColourEffector);
@@ -1298,7 +1298,7 @@ void GameESPAssets::InitPaddleBlasterESPEffects() {
     this->paddleIceBlasterOrigin->SetEmitDirection(Vector3D(0,1,0));
     this->paddleIceBlasterOrigin->SetEmitAngleInDegrees(100);
     this->paddleIceBlasterOrigin->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    this->paddleIceBlasterOrigin->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->paddleIceBlasterOrigin->SetParticleAlignment(ESP::ScreenAligned);
     this->paddleIceBlasterOrigin->AddEffector(&this->particleMediumShrink);
     this->paddleIceBlasterOrigin->AddEffector(&this->smokeRotatorCCW);
     this->paddleIceBlasterOrigin->AddEffector(&this->iceOriginColourEffector);
