@@ -53,6 +53,11 @@ public:
 	void SetAlphaMultiplier(float alpha);
 
 private:
+    static const float HALO_FADER_START;
+    static const float HALO_FADER_END;
+    static const float PARTICLE_FADER_START;
+    static const float PARTICLE_FADER_END;
+
 	// Mesh variables
 	Mesh* portalBlockGeometry;
 	CgFxPortalBlock* portalEffect;
@@ -61,6 +66,11 @@ private:
 	ESPParticleScaleEffector haloExpandPulse;
 	ESPParticleColourEffector haloFader;
 	Texture2D* haloTexture;
+
+    ESPParticleColourEffector particleFader;
+    ESPParticleScaleEffector particleMediumGrowth;
+    Texture2D* circleTex;
+    Texture2D* hoopTex;
 
 	void LoadMesh();
 

@@ -40,7 +40,7 @@ const char* MaterialProperties::MATERIAL_GEOM_FG_TYPE = "fg";
 const char* MaterialProperties::MATERIAL_GEOM_BG_TYPE = "bg";
 
 CgFxMaterialEffect::CgFxMaterialEffect(const std::string& effectPath, MaterialProperties* props) : 
-CgFxEffectBase(effectPath), properties(props),
+CgFxAbstractMaterialEffect(effectPath), properties(props),
 
 keyLight(Point3D(-25.0f, 20.0f, 50.0f), Colour(0.932f, 1.0f, 0.755f), 0.0f),
 fillLight(Point3D(30.0f, 30.0f, 50.0f), Colour(1.0f, 0.434f, 0.92f), 0.03f),

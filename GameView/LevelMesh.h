@@ -139,12 +139,12 @@ private:
     ESPParticleScaleEffector remainingPiecePulser;
 
 	// The unique identifiers of, and associated materials of the level piece meshes
-	std::map<std::string, CgFxMaterialEffect*> levelMaterials;
+	std::map<std::string, CgFxAbstractMaterialEffect*> levelMaterials;
 
 	// Which display lists correspond to a given material
-	std::map<CgFxMaterialEffect*, std::vector<GLuint> > displayListsPerMaterial;
+	std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> > displayListsPerMaterial;
 	// The display lists associated with each level piece
-	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint> > pieceDisplayLists;
+	std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> > pieceDisplayLists;
 	// Special effects always present for specific level pieces
 	std::map<const LevelPiece*, std::list<ESPEmitter*> > pieceEmitterEffects;
     // Effects for the last couple of pieces left in the level, to highlight them for the player

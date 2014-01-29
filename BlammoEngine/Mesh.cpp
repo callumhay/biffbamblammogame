@@ -141,9 +141,8 @@ void Mesh::SetColour(const Colour& c) {
 	// change their diffuse colour.
 	std::map<std::string, MaterialGroup*>::iterator matGrpIter = this->matGrps.begin();
 	for (; matGrpIter != matGrps.end(); matGrpIter++) {
-		CgFxMaterialEffect* currMaterial = matGrpIter->second->GetMaterial();
-		MaterialProperties* currMatProps = currMaterial->GetProperties();
-		currMatProps->diffuse = c;
+		CgFxAbstractMaterialEffect* currMaterial = matGrpIter->second->GetMaterial();
+        currMaterial->SetDiffuseColour(c);
 	}
 }
 
@@ -152,7 +151,7 @@ void Mesh::SetAlpha(float alpha) {
          iter != this->matGrps.end(); ++iter) {
 
 	    MaterialGroup* matGrp = iter->second;
-	    matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
+        matGrp->GetMaterial()->SetAlphaMultiplier(alpha);
     }
 }
 
@@ -168,9 +167,8 @@ void Mesh::SetTextureForMaterial(const std::string& matGrpName, Texture* texToSe
 	// Change the texture for the found material group
 	MaterialGroup* foundMatGrp = foundMatGrpIter->second;
 	assert(foundMatGrp != NULL);
-	CgFxMaterialEffect* matEffect = foundMatGrp->GetMaterial();
-	MaterialProperties* matProps = matEffect->GetProperties();
-	matProps->diffuseTexture = texToSet;
+	CgFxAbstractMaterialEffect* matEffect = foundMatGrp->GetMaterial();
+    matEffect->SetDiffuseTexture(texToSet);
 }
 
 /**
@@ -185,15 +183,14 @@ void Mesh::SetColourForMaterial(const std::string& matGrpName, const Colour& c) 
 	MaterialGroup* foundMatGrp = foundMatGrpIter->second;
 	assert(foundMatGrp != NULL);
 
-	CgFxMaterialEffect* matEffect = foundMatGrp->GetMaterial();
-	MaterialProperties* matProps = matEffect->GetProperties();
-	matProps->diffuse = c;
+	CgFxAbstractMaterialEffect* matEffect = foundMatGrp->GetMaterial();
+    matEffect->SetDiffuseColour(c);
 }
 
 /**
  * Replace the one and only material group in this mesh with the given material group.
  */
-void Mesh::ReplaceMaterial(CgFxMaterialEffect* replacementMat) {
+void Mesh::ReplaceMaterial(CgFxAbstractMaterialEffect* replacementMat) {
 	assert(replacementMat != NULL);
 	assert(this->matGrps.size() == 1);
 	this->matGrps.begin()->second->ReplaceMaterialEffect(replacementMat);

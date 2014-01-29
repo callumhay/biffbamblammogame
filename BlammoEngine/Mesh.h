@@ -73,18 +73,18 @@ class MaterialGroup {
 
 private:
 	PolygonGroup* polyGrp;
-	CgFxMaterialEffect* material;
+	CgFxAbstractMaterialEffect* material;
 	GLuint displayListID;
 
 	// Deletes only the effect/material for this material group
-	void ReplaceMaterialEffect(CgFxMaterialEffect* material) {
+	void ReplaceMaterialEffect(CgFxAbstractMaterialEffect* material) {
 		assert(material != NULL);
 		delete this->material;
 		this->material = material;
 	}
 
 public:
-	MaterialGroup(CgFxMaterialEffect* mat) : material(mat), displayListID(0), polyGrp(NULL) {}
+	MaterialGroup(CgFxAbstractMaterialEffect* mat) : material(mat), displayListID(0), polyGrp(NULL) {}
 	
 	~MaterialGroup() {
 		if (this->polyGrp != NULL) {
@@ -147,7 +147,7 @@ public:
 		glCallList(this->displayListID);
 	}
 
-	CgFxMaterialEffect* GetMaterial() const {
+	CgFxAbstractMaterialEffect* GetMaterial() const {
 		return this->material;
 	}
 
@@ -281,7 +281,7 @@ public:
 	void SetColour(const Colour& c);
     void SetAlpha(float alpha);
 
-	void ReplaceMaterial(CgFxMaterialEffect* replacementMat);
+	void ReplaceMaterial(CgFxAbstractMaterialEffect* replacementMat);
 	void Flush();
 
 

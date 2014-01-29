@@ -3133,7 +3133,7 @@ void GameESPAssets::AddIceballCanceledEffect(const GameBall& ball) {
 void GameESPAssets::AddFireBlasterCanceledEffect(const PlayerPaddle& paddle) {
 
     const Point3D pos(paddle.GetCenterPosition() + Vector2D(0.0f, paddle.GetHalfHeight() + 
-        PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE), 0.0f);
+        PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle)), 0.0f);
     const float scaleFactor = paddle.GetPaddleScaleFactor();
 
     ESPPointEmitter* fireDisperseEffect1 = new ESPPointEmitter();
@@ -3199,7 +3199,7 @@ void GameESPAssets::AddFireBlasterCanceledEffect(const PlayerPaddle& paddle) {
 void GameESPAssets::AddIceBlasterCanceledEffect(const PlayerPaddle& paddle) {
 
     const Point3D pos(paddle.GetCenterPosition() + Vector2D(0.0f, paddle.GetHalfHeight() + 
-        PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE), 0.0f);
+        PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle)), 0.0f);
     const float scaleFactor = paddle.GetPaddleScaleFactor();
 
     ESPPointEmitter* iceDisperseEffect1 = new ESPPointEmitter();
@@ -7218,7 +7218,7 @@ void GameESPAssets::DrawPaddleFlameBlasterEffects(double dT, const Camera& camer
     }
 
     float scaleFactor = paddle.GetPaddleScaleFactor();
-    Point3D emitPos(0, PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE, -paddle.GetHalfDepthTotal());
+    Point3D emitPos(0, PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle), -paddle.GetHalfDepthTotal());
     this->paddleFlameBlasterOrigin->SetEmitPosition(emitPos);
     this->paddleFlameBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
     this->paddleFlameBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
@@ -7232,7 +7232,7 @@ void GameESPAssets::DrawPaddleIceBlasterEffects(double dT, const Camera& camera,
     }
 
     float scaleFactor = paddle.GetPaddleScaleFactor();
-    Point3D emitPos(0, PaddleBlasterProjectile::DIST_FROM_TOP_OF_PADDLE_TO_PROJECTILE, -paddle.GetHalfDepthTotal());
+    Point3D emitPos(0, PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle), -paddle.GetHalfDepthTotal());
     this->paddleIceBlasterOrigin->SetEmitPosition(emitPos);
     this->paddleIceBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
     this->paddleIceBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());

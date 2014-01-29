@@ -1185,6 +1185,8 @@ bool GameLevel::ReadItemList(std::stringstream& inFile, std::vector<GameItem::It
 	    return false;
     }
 
+    items.clear();
+
     // Figure out the item types from the names...
     for (std::vector<std::string>::const_iterator iter = itemNames.begin(); iter != itemNames.end(); ++iter) {
 	    std::string currItemName = stringhelper::trim(*iter);
@@ -1220,6 +1222,50 @@ bool GameLevel::ReadItemList(std::stringstream& inFile, std::vector<GameItem::It
     		
 		    items.push_back(GameItemFactory::GetInstance()->GetItemTypeFromName(currItemName));
 	    }
+    }
+
+    if (items.empty()) {
+        assert(false);
+        debug_output("Failed to find any valid items in item list.");
+        return false;
+    }
+
+    // Count the number of each item in the vector, if they're all the same 
+    // then we can reduce the size of the vector and avoid duplicates
+    
+    std::map<GameItem::ItemType, int> countMap;  
+    for (std::vector<GameItem::ItemType>::iterator iter = items.begin(); iter != items.end(); ++iter) {
+        std::map<GameItem::ItemType, int>::iterator findIter = countMap.find(*iter);
+        if (findIter == countMap.end()) {
+            countMap[*iter] = 1;
+        }
+        else {
+            findIter->second++;
+        }
+    }
+
+    assert(!countMap.empty());
+    std::map<GameItem::ItemType, int>::const_iterator mapIter = countMap.begin();
+    
+    bool countIsTheSame = true;
+    int lastCount = mapIter->second;
+    ++mapIter;
+
+    for (; mapIter != countMap.end(); ++mapIter) {
+        if (lastCount != mapIter->second) {
+            countIsTheSame = false;
+            break;
+        }
+    }
+
+    if (countIsTheSame && lastCount > 1) {
+        items.clear();
+        items.resize(countMap.size());
+        int count = 0;
+        // Simplify the items vector by having one of each item in it...
+        for (mapIter = countMap.begin(); mapIter != countMap.end(); ++mapIter, count++) {
+            items[count] = mapIter->first;
+        }
     }
 
     return true;

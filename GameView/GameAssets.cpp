@@ -1557,16 +1557,28 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 			break;
 
 		case Projectile::FireGlobProjectile: {
+
 				const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
-				switch (fireGlobProjectile->GetRelativeSize()) {
+			    float multiplier = 1.0f / paddle.GetPaddleScaleFactor();
+                
+                switch (fireGlobProjectile->GetRelativeSize()) {
 					case FireGlobProjectile::Small:
 						intensity = PlayerHurtHUD::MinorPain;
+                        camera.ApplyCameraShake(multiplier*0.33, Vector3D(multiplier*1.5f*projectile.GetVelocityDirection(), multiplier*0.25f), 90);
+                        GameControllerManager::GetInstance()->VibrateControllers(multiplier*0.33,
+                            BBBGameController::SoftVibration, BBBGameController::VerySoftVibration);
 						break;
 					case FireGlobProjectile::Medium:
 						intensity = PlayerHurtHUD::ModeratePain;
+                        camera.ApplyCameraShake(multiplier*0.5, Vector3D(multiplier*1.75f*projectile.GetVelocityDirection(), multiplier*0.33f), 100);
+                        GameControllerManager::GetInstance()->VibrateControllers(multiplier*0.5,
+                            BBBGameController::MediumVibration, BBBGameController::SoftVibration);
 						break;
 					case FireGlobProjectile::Large:
 						intensity = PlayerHurtHUD::MajorPain;
+                        camera.ApplyCameraShake(multiplier*0.8, Vector3D(multiplier*2.0f*projectile.GetVelocityDirection(), multiplier*0.5f), 110);
+                        GameControllerManager::GetInstance()->VibrateControllers(multiplier*0.8,
+                            BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
 						break;
 					default:
 						assert(false);

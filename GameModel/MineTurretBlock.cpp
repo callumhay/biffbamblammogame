@@ -194,7 +194,7 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 
         case Projectile::PaddleFlameBlastProjectile:
             this->LightPieceOnFire(gameModel, false);
-            this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::FireDestruction);
+            newPiece = this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::FireDestruction);
             break;
 
         case Projectile::PaddleIceBlastProjectile:

@@ -17,7 +17,7 @@ const float FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY			= 2.5f;
 const float FireGlobProjectile::FIRE_GLOB_MAX_ADD_VELOCITY	= 1.25f;
 
 FireGlobProjectile::FireGlobProjectile(const Point2D& spawnLoc, float size, const Vector2D& gravityDir) : 
-Projectile(spawnLoc, size, size), totalTickTime(0.0) {
+Projectile(spawnLoc, size, size), totalTickTime(0.0), hasClearedLastThingCollided(false) {
 
 	this->SetVelocity(gravityDir, FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY);
 	this->xMovementVariation = 0.8f * size;
@@ -49,8 +49,9 @@ void FireGlobProjectile::Tick(double seconds, const GameModel& model) {
 	this->totalTickTime += seconds;
 
     // Keep clearing the last thing this collided with once it's fallen from the block that spawned it
-    if (this->totalTickTime > 1.0) {
+    if (!this->hasClearedLastThingCollided && this->totalTickTime > 1.0) {
         this->SetLastThingCollidedWith(NULL);
+        this->hasClearedLastThingCollided = true;
     }
 }
 
