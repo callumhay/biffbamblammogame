@@ -82,7 +82,7 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
 #define INSERT_MATERIAL_GRPS(block, allowDuplicateMaterials) { const std::map<std::string, MaterialGroup*>& matGrps = block->GetMaterialGroups(); \
     for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) { \
     if (this->levelMaterials.find(iter->first) != this->levelMaterials.end()) { if (allowDuplicateMaterials) { continue; } else { assert(false); } } \
-    this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial())); } }
+    this->levelMaterials.insert(std::make_pair<std::string, CgFxAbstractMaterialEffect*>(iter->first, iter->second->GetMaterial())); } }
 
 #pragma warning(push)
 #pragma warning(disable: 4127)
@@ -181,7 +181,7 @@ void LevelMesh::Flush() {
 		for (std::map<std::string, MaterialGroup*>::iterator iter = styleBlockMatGrps.begin(); iter != styleBlockMatGrps.end(); iter++) {
 			
 			// Make sure the material group can be found
-			std::map<std::string, CgFxMaterialEffect*>::iterator foundMaterial = this->levelMaterials.find(iter->first);
+			std::map<std::string, CgFxAbstractMaterialEffect*>::iterator foundMaterial = this->levelMaterials.find(iter->first);
 			assert(foundMaterial != this->levelMaterials.end());
 
 			this->levelMaterials.erase(foundMaterial);
@@ -190,7 +190,7 @@ void LevelMesh::Flush() {
 	
 	// Delete each of the display lists loaded for the previous level and clear up the
 	// relevant mappings to those display lists.
-	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
+	for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
 		iter != this->displayListsPerMaterial.end(); ++iter) {
 		
 		for (std::vector<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); ++dispListIter) {
@@ -265,7 +265,7 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
 	// Load the materials for the style block...
 	std::map<std::string, MaterialGroup*> styleBlockMatGrps  = this->styleBlock->GetMaterialGroups();
 	for (std::map<std::string, MaterialGroup*>::iterator iter = styleBlockMatGrps.begin(); iter != styleBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxAbstractMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 
 	// Load the actual level meshes as precomputed batches for speed...
@@ -401,13 +401,13 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
 void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 
 	// Find the changed piece and change its display list...
-	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint> >::iterator pieceInfoIter =
+	std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> >::iterator pieceInfoIter =
         this->pieceDisplayLists.find(&pieceBefore);
 
 	if (pieceInfoIter != this->pieceDisplayLists.end()) {
 		
         // Go through each of the materials and clear up previous display lists and materials...
-		for (std::map<CgFxMaterialEffect*, GLuint>::iterator iter = pieceInfoIter->second.begin();
+		for (std::map<CgFxAbstractMaterialEffect*, GLuint>::iterator iter = pieceInfoIter->second.begin();
 			iter != pieceInfoIter->second.end(); ++iter) {
 			
 			// Delete any previous display list...
@@ -567,8 +567,8 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->itemDropBlock->DrawEffects(worldTranslation, dT, camera);
 
 	// Go through each material and draw all the display lists corresponding to it
-	CgFxMaterialEffect* currEffect = NULL;
-	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
+	CgFxAbstractMaterialEffect* currEffect = NULL;
+	for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
 		iter != this->displayListsPerMaterial.end(); ++iter) {
 		
 		currEffect = iter->first;
@@ -640,10 +640,10 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = pieceMatGrps->begin(); iter != pieceMatGrps->end(); ++iter) {
 		
 		// Make sure that the material exists in our set of available level materials
-		std::map<std::string, CgFxMaterialEffect*>::iterator currMaterialIter = this->levelMaterials.find(iter->first);
+		std::map<std::string, CgFxAbstractMaterialEffect*>::iterator currMaterialIter = this->levelMaterials.find(iter->first);
 		assert(currMaterialIter != this->levelMaterials.end());
 
-		CgFxMaterialEffect* currMaterial = currMaterialIter->second;
+		CgFxAbstractMaterialEffect* currMaterial = currMaterialIter->second;
 		PolygonGroup* currPolyGrp        = iter->second->GetPolygonGroup();
 		const ColourRGBA& currColour     = piece->GetColour();
 
@@ -673,8 +673,8 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		currPolyGrp->Transform(fullInvTransform);
 	
 		// Insert the new display list into the list of display lists...
-		std::map<CgFxMaterialEffect*, GLuint>& currPieceMatMap = this->pieceDisplayLists[piece];
-        currPieceMatMap.insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
+		std::map<CgFxAbstractMaterialEffect*, GLuint>& currPieceMatMap = this->pieceDisplayLists[piece];
+        currPieceMatMap.insert(std::make_pair<CgFxAbstractMaterialEffect*, GLuint>(currMaterial, newDisplayList));
 		
         std::vector<GLuint>& currDisplayListVec = this->displayListsPerMaterial[currMaterial];
         currDisplayListVec.push_back(newDisplayList);
@@ -890,11 +890,10 @@ void LevelMesh::SetLevelAlpha(float alpha) {
     this->levelAlpha = alpha;
 
 	// First go through each stored material effect and change its alpha multiplier
-	std::map<CgFxMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
+	std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
 	for (; iter != this->displayListsPerMaterial.end(); ++iter) {
-		CgFxMaterialEffect* currMatEffect = iter->first;
-		MaterialProperties* matProperties = currMatEffect->GetProperties();
-		matProperties->alphaMultiplier = alpha;
+		CgFxAbstractMaterialEffect* currMatEffect = iter->first;
+        currMatEffect->SetAlphaMultiplier(alpha);
 	}
 
     for (std::map<const LevelPiece*, ESPEmitter*>::iterator iter = this->lastPieceEffects.begin();

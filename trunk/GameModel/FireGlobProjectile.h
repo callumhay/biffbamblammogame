@@ -37,9 +37,12 @@ private:
 	static const float FIRE_GLOB_MIN_VELOCITY;
 	static const float FIRE_GLOB_MAX_ADD_VELOCITY;
 
-	float xMovementVariation;		// The variation of the x-axis movement as the fire glob falls
-	double totalTickTime;				// The total time ticked on this projectile so far
-	RelativeSize relativeSize;  // The relative size of this fire glob
+	float xMovementVariation;           // The variation of the x-axis movement as the fire glob falls
+	double totalTickTime;               // The total time ticked on this projectile so far
+	RelativeSize relativeSize;          // The relative size of this fire glob
+    bool hasClearedLastThingCollided;   // Whether or not we've cleared the initial collided with thing or not
+                                        // NOTE: Bit of a hack, just makes sure that we can re-collide with the block that spawned this
+                                        // and that we don't keep clearing the last thing it collided with so portals still work properly
 
 	DISALLOW_COPY_AND_ASSIGN(FireGlobProjectile);
 };

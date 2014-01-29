@@ -12,9 +12,11 @@ resources/worlds/levels/medium/a_change_of_view.lvl
 # the paths of cannons to get hard to reach blocks
 resources/worlds/levels/hard/thinking_outside_the_box.lvl
 
-
 # A really tough camera ball + cannon timing level
 resources/worlds/levels/hard/shoot_the_void.lvl
+
+
+
 
 
 # Camera Paddle Item intro
@@ -22,7 +24,9 @@ resources/worlds/levels/hard/shoot_the_void.lvl
 
 
 
-# Portal Block Item intro
+# Portal block intro levels
+resources/worlds/levels/medium/like_plinko_but_with_teleportation.lvl 
+resources/worlds/levels/medium/shutin.lvl
 
 
 
@@ -32,10 +36,7 @@ resources/worlds/levels/hard/shoot_the_void.lvl
 
 
 
-# Portal block intro levels
-# Rename "checker portals" to "Like Plinko... but with teleportation"
-resources/worlds/levels/medium/checker_portals.lvl 
-resources/worlds/levels/medium/shutin.lvl
+
 
 
 # Portal + Cannon

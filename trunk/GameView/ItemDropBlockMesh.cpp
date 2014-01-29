@@ -197,9 +197,8 @@ void ItemDropBlockMesh::Draw(const ItemDropBlock* currItemDropBlock, Texture* it
                              const Camera& camera, const BasicPointLight& keyLight, 
                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
-     CgFxMaterialEffect* matEffect = this->itemDropTypeMatGrp->GetMaterial();
-     MaterialProperties* matProps  = matEffect->GetProperties();
-     matProps->diffuseTexture = itemTexture;
+     CgFxAbstractMaterialEffect* matEffect = this->itemDropTypeMatGrp->GetMaterial();
+     matEffect->SetDiffuseTexture(itemTexture);
 
      const Point2D& blockCenter = currItemDropBlock->GetCenter();
      glPushMatrix();

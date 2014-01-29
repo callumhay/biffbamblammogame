@@ -253,10 +253,29 @@ private:
     DISALLOW_COPY_AND_ASSIGN(CgFxTextureEffectBase);
 };
 
+class CgFxAbstractMaterialEffect : public CgFxEffectBase {
+public:
+    CgFxAbstractMaterialEffect(const std::string& effectPath) : CgFxEffectBase(effectPath) {}
+    virtual ~CgFxAbstractMaterialEffect() {}
+
+    virtual MaterialProperties* GetProperties() { return NULL; }
+
+    virtual void SetDiffuseColour(const Colour& c) { UNUSED_PARAMETER(c); }
+    virtual void SetAlphaMultiplier(float a)       { UNUSED_PARAMETER(a); }
+    virtual void SetDiffuseTexture(Texture* t)     { UNUSED_PARAMETER(t); }
+
+    virtual void SetKeyLight(const BasicPointLight& keyLight)   { UNUSED_PARAMETER(keyLight); }
+    virtual void SetFillLight(const BasicPointLight& fillLight) { UNUSED_PARAMETER(fillLight); }
+    virtual void SetBallLight(const BasicPointLight& ballLight) { UNUSED_PARAMETER(ballLight); }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(CgFxAbstractMaterialEffect);
+};
+
 /**
  * Base class for loading and dealing with CgFx material shaders.
  */
-class CgFxMaterialEffect : public CgFxEffectBase {	
+class CgFxMaterialEffect : public CgFxAbstractMaterialEffect {	
 public:
 	CgFxMaterialEffect(const std::string& effectPath, MaterialProperties* props);
 	virtual ~CgFxMaterialEffect();
@@ -264,6 +283,16 @@ public:
 	MaterialProperties* GetProperties() {
 		return this->properties;
 	}
+
+    void SetDiffuseColour(const Colour& c) {
+        this->properties->diffuse = c;
+    }
+    void SetAlphaMultiplier(float a) { 
+        this->properties->alphaMultiplier = a;
+    }
+    void SetDiffuseTexture(Texture* t) {
+        this->properties->diffuseTexture = t;
+    }
 
 	void SetKeyLight(const BasicPointLight& keyLight) {
         this->keyLight = keyLight;

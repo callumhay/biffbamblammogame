@@ -1,42 +1,40 @@
 Thinking Outside the Box
-21 30
-E E E E E E C(270) E G E G E G E T(G,ur) E G E C(90) E E 
-E E E E E E E E E E E E E E E E E E E E E 
-E E D(FlameBlasterPaddle,FlameBlasterPaddle,FlameBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle){1} E S S C(180) S F(d) F(d) F(d) D(BallCam,BallCam,BallCam){1} F(d) F(d) F(d) S S E G E E 
-E E S E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E F(r) E E E E E E E E E E E N E E E E 
-E E C(90) E F(r) E E E E E E E E E E E N E Q(i) D(LaserBeamPaddle) E 
-E E E E F(r) E E E E E E E E E E E N E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E T(G,ul) E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S S C(170-190) S S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E S E E E E E E E E E E E E E E E S 
-E E E E N E E E E E E E E E E E E E E E S 
-E E E E N E E E E E E E E E E E E E E E S 
-W(1) E E E N E E E E E E E E E E E E E E E S 
+20 28
+E E E E E E C(270) E E T(G,lr) E E E T(G,lr) E E E C(90) E E 
+E E E E E E E E E E E E E E E E E E E E 
+E E D(FlameBlasterPaddle,FlameBlasterPaddle,FlameBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle){1} E S S C(180) S F(d) F(d) F(d) D(BallCam,BallCam,BallCam){2} F(d) F(d) F(d) S E G E E 
+E E S E S E E E E E E E E E E S E E E E 
+E E E E S E E E E E E E E E E S E E E E 
+E E E E S G G E E G G E E G G S E E E E 
+E E E E S G G E E G G E E G G S E E E E 
+E E E E F(r) E E E E E E E E E E N E E E E 
+E E C(90) E F(r) E Q(f) J I E E I Q(f) M E N E Q(i) D(LaserBeamPaddle) E 
+E E E E F(r) E E E E E E E E E E N E E E E 
+E E E E S G G E E G Y E E G G S E E E E 
+E E E E S G O E E Y G E E O G S E E E E 
+E E E E S E E E E E E E E E E S E E E E 
+E E E E S E E G Y E E Y G E E S E T(G,ul) E E 
+E E E E S E E R G E E G R E E S E E E E 
+E E E E S E E G Y E E Y G E E S E E E E 
+E E E E S E E E E E E E E E E S E E E E 
+E E E E S G O E E Y G E E O G S E E E E 
+E E E E S G G E E G Y E E G G S S C(170-190) S S 
+E E E E S E E E E E E E E E E Q(f) E E E S 
+E E E E S E E E E E E E E E E Q(f) E E E S 
+E E E E S E E E E E E E E E E Q(f) E E E S 
+E E E E S E E E E E E E E E E Q(f) E E E S 
+E E E E S E E E E E E E E E E Q(f) E E E S 
+E E E E S E E E E E E E E E E Q(f) E E E S 
+E E E E N E E E E E E E E E E E E E E S 
+E E E E N E E E E E E E E E E E E E E S 
+W(1) E E E N E E E E E E E E E E E E E E W(2) 
 
 STARS:
-100
-500
-1000
-2000
-5000
+8000
+13000
+17000
+21000
+26000
 
 PaddleGrow 0
 PoisonPaddle 2
@@ -44,8 +42,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 2
 BallGrow 0
-ShieldPaddle 2
 StickyPaddle 2
+ShieldPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
@@ -54,21 +52,21 @@ LaserBeamPaddle 2
 OmniLaserBall 1
 FlameBlasterPaddle 2
 FireBall 2
-RocketPaddle 2
+RocketPaddle 0
 GhostBall 1
 BallShrink 2
 UpsideDown 2
-MultiBall5 2
+MultiBall5 1
 BallCam 2
 MagnetPaddle 1
 MultiBall3 2
-RemoteControlRocket 2
+RemoteControlRocket 1
 IceBall 2
 IceBlasterPaddle 2
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 2
-Random 2
+GravityBall 1
 CrazyBall 1
-GravityBall 2
+Random 2
 PaddleCam 0

@@ -102,13 +102,11 @@ void AlwaysDropBlockMesh::SetAlphaMultiplier(float alpha) {
 void AlwaysDropBlockMesh::Draw(const AlwaysDropBlock* currBlock, Texture* currTex, const Camera& camera, const BasicPointLight& keyLight,
                                const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
-    CgFxMaterialEffect* itemTexMatEffect = this->dropTypeMatGrp->GetMaterial();
-    MaterialProperties* itemTexMatProps  = itemTexMatEffect->GetProperties();
-    itemTexMatProps->diffuseTexture = currTex;
+    CgFxAbstractMaterialEffect* itemTexMatEffect = this->dropTypeMatGrp->GetMaterial();
+    itemTexMatEffect->SetDiffuseTexture(currTex);
 
-    CgFxMaterialEffect* itemColourMatEffect = this->dropColourMatGrp->GetMaterial();
-    MaterialProperties* itemColourMatProps  = itemColourMatEffect->GetProperties();
-    itemColourMatProps->diffuse = GameViewConstants::GetInstance()->GetItemColourFromDisposition(currBlock->GetNextDropItemDisposition());
+    CgFxAbstractMaterialEffect* itemColourMatEffect = this->dropColourMatGrp->GetMaterial();
+    itemColourMatEffect->SetDiffuseColour(GameViewConstants::GetInstance()->GetItemColourFromDisposition(currBlock->GetNextDropItemDisposition()));
 
     const Point2D& blockCenter = currBlock->GetCenter();
     glPushMatrix();

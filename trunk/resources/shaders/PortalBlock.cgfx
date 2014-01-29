@@ -13,84 +13,6 @@ float4x4 WvpXf     : WorldViewProjection < string UIWidget="None"; >;
 float4x4 WorldXf   : World < string UIWidget="None"; >;
 float4x4 ViewIXf   : ViewInverse < string UIWidget="None"; >;
 
-// Key Point Light ----------------------------------
-float3 KeyPointLightPos : Position <
-    string Object = "PointLight0";
-    string UIName =  "Diffuse Light Position";
-    string Space = "World";
-> = {-0.5f,2.0f,1.25f};
-
-float3 KeyPointLightColour : Specular <
-    string UIName =  "Diffuse Light";
-    string Object = "Pointlight0";
-    string UIWidget = "Color";
-> = {1.0f,1.0f,1.0f};
-// --------------------------------------------------
-
-// Fill Point Light ---------------------------------
-float3 FillPointLightPos : Position <
-    string Object = "PointLight1";
-    string UIName =  "Diffuse Light Position";
-    string Space = "World";
-> = {-0.5f,2.0f,1.25f};
-
-float3 FillPointLightColour : Specular <
-    string UIName =  "Diffuse Light";
-    string Object = "Pointlight1";
-    string UIWidget = "Color";
-> = {1.0f,1.0f,1.0f};
-
-float FillPointLightLinearAtten <
-    string UIName =  "Fill Light Linear Attenuation";
-    float UIMin = 0.0;
-    float UIMax = 1.0;
-    float UIStep = 0.001;
-    string UIWidget = "Slider";
-> = 1.0f;
-// --------------------------------------------------
-
-// Ball Point Light ---------------------------------
-float3 BallPointLightPos : Position <
-    string Object = "PointLight2";
-    string UIName =  "Diffuse Light Position";
-    string Space = "World";
-> = {-0.5f,2.0f,1.25f};
-
-float3 BallPointLightDiffuse : Specular <
-    string UIName =  "Diffuse Light";
-    string Object = "Pointlight2";
-    string UIWidget = "Color";
-> = {1.0f,1.0f,1.0f};
-
-float BallPointLightLinearAtten <
-    string UIName =  "Ball Light Linear Attenuation";
-    float UIMin = 0.0;
-    float UIMax = 1.0;
-    float UIStep = 0.001;
-    string UIWidget = "Slider";
-> = 1.0f;
-// --------------------------------------------------
-
-// The colour of the material
-float3 DiffuseColour <
-    string UIName =  "Prism Colour";
-    string UIWidget = "Color";
-> = {0.9f,0.90f,0.90f};
-
-float3 SpecularColour <
-    string UIName =  "Specular Colour";
-    string UIWidget = "Color";
-> = {0.30f,0.30f,0.30f};
-
-// Specular exponent for the material
-float Shininess <
-    string UIWidget = "slider";
-    float UIMin = 1.0;
-    float UIMax = 128.0;
-    float UIStep = 1.0;
-    string UIName =  "Shininess";
-> = 128.0;
-
 float AlphaMultiplier <
     string UIWidget = "slider";
     float UIMin = 0.0;
@@ -160,17 +82,7 @@ float3 FlowDir <
     string UIName = "Flow Direction";
 > = {0, 1, 1};
 
-//////// TEXTURE /////////////////////
-texture ColourTexture  <
-    string ResourceName = "default_color.dds";
-    string UIName =  "Diffuse Texture";
-    string ResourceType = "2D";
->;
-
-sampler2D ColourSampler = sampler_state {
-    Texture = <ColourTexture>;
-};  
-
+//////// TEXTURES /////////////////////
 texture SceneTexture <
     string ResourceName = "scene_background_test.jpg";
     string UIName =  "Scene Texture";
@@ -255,7 +167,7 @@ float2 GetRefractBGOffset(float3 nWorldView, float3 nWorldNormal) {
     
     // Obtain the lookup vector which will be scaled/warped to get an offset for looking up
     // the background/scene texture
-    float2 lookupVec = fresnelCoeff*reflectionVec.xy + (1-fresnelCoeff)*refractionVec.xy;
+    float2 lookupVec = fresnelCoeff*reflectionVec.xy + (1.0-fresnelCoeff)*refractionVec.xy;
     
     // Use the refraction and scale it to the screen size to get an offset for looking
     // up the texel in the scene texture
@@ -285,12 +197,12 @@ float4 PortalBlock_PS(vertexOutputPortalBlock IN) : COLOR {
     float3 dF = (bumpGrad.yzw - bumpGrad.xxx) / epsilon;
     float3 bumpedNormal = normalize(nWorldNormal - dF);
 
-    float2 lookupOffset = GetRefractBGOffset(nWorldView, bumpedNormal);
+    float2 lookupOffset  = GetRefractBGOffset(nWorldView, bumpedNormal);
     float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
-    float3 haloColour = lerp(IN.Colour.rgb, float3(0.0f), UnmodifiedNoiseVal.x);
-    float haloFade = abs(pow(dot(nWorldView, nWorldNormal), 2.0f));
+    float3 haloColour    = lerp(IN.Colour.rgb, float3(0.0f), UnmodifiedNoiseVal.x);
+    float  haloFade      = abs(pow(dot(nWorldView, nWorldNormal), 0.5f));
     
-    return float4(haloColour + textureColour, haloFade * IN.Colour.a);
+    return float4(haloColour * textureColour + textureColour, haloFade * IN.Colour.a);
 }
 
 technique PortalBlock {
