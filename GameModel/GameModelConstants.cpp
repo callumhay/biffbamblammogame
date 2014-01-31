@@ -2,7 +2,7 @@
  * GameModelConstants.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2014
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,8 +16,8 @@ GameModelConstants* GameModelConstants::Instance = NULL;
 GameModelConstants::GameModelConstants() :
 RESOURCE_DIR("resources"),
 WORLD_DIR("worlds"),
-PROB_OF_ITEM_DROP(0.14987654321),
-PROB_OF_CONSECTUIVE_ITEM_DROP(0.85555555),
+PROB_OF_ITEM_DROP(0.138),
+PROB_OF_CONSECTUIVE_ITEM_DROP(0.8444444),
 PROB_OF_CONSECUTIVE_SAME_ITEM_DROP(0.10),
 MAX_LIVE_ITEMS(3),
 PROB_OF_GHOSTBALL_BLOCK_MISS(0.322222222),

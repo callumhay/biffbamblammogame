@@ -1731,6 +1731,10 @@ void GameAssets::FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info,
     this->flashHUD->Activate(info.GetTime(), 1.0f * flashMultiplier);
 }
 
+void GameAssets::FullscreenFlash(double durationInS, float intensity) {
+    this->flashHUD->Activate(durationInS, intensity);
+}
+
 void GameAssets::ToggleSkipLabel(bool activate) {
     if (activate) {
         this->skipLabel->Show(0.0, 0.5);

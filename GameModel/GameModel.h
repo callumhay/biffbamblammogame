@@ -88,6 +88,7 @@ public:
     bool IsOutOfGameBoundsForProjectile(const Point2D& pos) const;
     bool IsOutOfPaddedLevelBounds(const Point2D& pos, float padding) const;
     bool IsOutOfPaddedLevelBounds(const Point2D& pos, float xPadding, float yPadding) const;
+    bool IsOutOfPaddedLevelBounds(const Point2D& pos, float minXPadding, float minYPadding, float maxXPadding, float maxYPadding) const;
     
     Collision::AABB2D GenerateLevelProjectileBoundaries() const;
 
@@ -685,6 +686,10 @@ inline bool GameModel::IsOutOfGameBoundsForProjectile(const Point2D& pos) const 
 
 inline bool GameModel::IsOutOfPaddedLevelBounds(const Point2D& pos, float padding) const {
     return this->IsOutOfPaddedLevelBounds(pos, padding, padding);
+}
+
+inline bool GameModel::IsOutOfPaddedLevelBounds(const Point2D& pos, float xPadding, float yPadding) const {
+    return this->IsOutOfPaddedLevelBounds(pos, xPadding, yPadding, xPadding, yPadding);
 }
 
 inline Collision::AABB2D GameModel::GenerateLevelProjectileBoundaries() const {

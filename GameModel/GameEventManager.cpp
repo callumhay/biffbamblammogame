@@ -226,6 +226,13 @@ void GameEventManager::ActionProjectilePortalBlockTeleport(const Projectile& pro
 	}	
 }
 
+void GameEventManager::ActionItemPortalBlockTeleport(const GameItem& item, const PortalBlock& enterPortal) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->ItemPortalBlockTeleportEvent(item, enterPortal);
+    }
+}
+
 // Action when a ball enters a cannon block
 void GameEventManager::ActionBallEnteredCannon(const GameBall& ball, const CannonBlock& cannonBlock, 
                                                bool canShootWithoutObstruction) {

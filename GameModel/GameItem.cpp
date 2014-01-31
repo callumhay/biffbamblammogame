@@ -11,6 +11,7 @@
 
 #include "GameItem.h"
 #include "GameModel.h"
+#include "PortalBlock.h"
 
 // Width and Height constants for items
 const float GameItem::ITEM_WIDTH	= 2.45f;
@@ -65,6 +66,27 @@ void GameItem::Tick(double seconds, const GameModel& model) {
 
 	// Tick any item-related animations
 	this->colourAnimation.Tick(seconds);
+
+    // Check to see whether the item collided with a portal block, if it
+    // did then we need it to teleport...
+    const LevelPiece* piece = model.GetCurrentLevel()->GetLevelPieceAt(this->center);
+    if (piece != NULL && piece->GetType() == LevelPiece::Portal && 
+        this->portalsEntered.find(piece) == this->portalsEntered.end()) {
+        
+        const PortalBlock* portal        = static_cast<const PortalBlock*>(piece);
+        const PortalBlock* siblingPortal = portal->GetSiblingPortal();
+
+        // EVENT: An item will be teleported between portal blocks
+        GameEventManager::Instance()->ActionItemPortalBlockTeleport(*this, *portal);
+
+        // Teleport: set the new position for this item at the sibling portal...
+        Vector2D posDiff = this->center - piece->GetCenter();
+        this->center = siblingPortal->GetCenter() + posDiff;
+
+        // Keep track of the portals that this item has been through so that it doesn't teleport forever
+        this->portalsEntered.insert(portal);
+        this->portalsEntered.insert(siblingPortal);
+    }
 
 	// With every tick we simply move the item down at its
 	// descent speed, all other activity (e.g., player paddle collision) 

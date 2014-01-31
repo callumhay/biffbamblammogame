@@ -116,12 +116,13 @@ public:
     static void BuildCollisionBoundsCombinationAndMap(const std::vector<LevelPiece*>& pieces,
         std::map<size_t, LevelPiece*>& boundsIdxMap, BoundingLines& combinationBounds);
 
+    LevelPiece* GetLevelPieceAt(const Point2D& p) const;
     LevelPiece* GetLevelPieceColliderFast(const Collision::Ray2D& ray, float toleranceRadius = 0.0f) const;
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
         const std::set<const LevelPiece*>& ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
     void GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
         const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::list<LevelPiece*>& result, float toleranceRadius = 0.0f) const;
-
+    
 	// Ability to add/remove tesla lightning barriers
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
@@ -146,12 +147,18 @@ public:
 	float GetPaddleMinBound() const;
 	float GetPaddleMaxBound() const;
 
+    float GetPaddleMinBound(float paddleStartingPos) const;
+    float GetPaddleMaxBound(float paddleStartingPos) const;
+
     float GetPaddleStartingXPosition() const {
         return this->paddleStartXPos;
     }
 
     LevelPiece* GetMinPaddleBoundPiece() const;
     LevelPiece* GetMaxPaddleBoundPiece() const;
+
+    LevelPiece* GetMinPaddleBoundPiece(int startingColIdx) const;
+    LevelPiece* GetMaxPaddleBoundPiece(int startingColIdx) const;
 
 	float GetLevelUnitWidth() const {
 		return this->width * LevelPiece::PIECE_WIDTH;
@@ -232,6 +239,14 @@ public:
 
     Vector3D GetTranslationToMiddle() const {
         return Vector3D(-0.5f * this->GetLevelUnitWidth(), -0.5f * this->GetLevelUnitHeight(), 0.0f);
+    }
+    Vector2D GetTranslationToMiddle2D() const {
+        return Vector2D(-0.5f * this->GetLevelUnitWidth(), -0.5f * this->GetLevelUnitHeight());
+    }
+
+    void GetLevelAABB(Collision::AABB2D& levelAABB) const {
+        levelAABB.SetMin(Point2D(0, 0));
+        levelAABB.SetMax(Point2D(this->GetLevelUnitWidth(), this->GetLevelUnitHeight()));
     }
 
 private:

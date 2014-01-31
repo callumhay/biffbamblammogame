@@ -668,6 +668,16 @@ void ESPEmitter::SetAliveParticlePosition(float x, float y, float z) {
         currParticle->SetPosition(x, y, z);
     }
 }
+
+void ESPEmitter::TranslateAliveParticlePosition(const Vector3D& t) {
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+        iter != this->aliveParticles.end(); ++iter) {
+
+        ESPParticle* currParticle = *iter;
+        currParticle->SetPosition(currParticle->GetPosition() + t);
+    }
+}
+
 void ESPEmitter::SetAliveParticleScale(const ESPInterval& sX, const ESPInterval& sY) {
     for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
         iter != this->aliveParticles.end(); ++iter) {

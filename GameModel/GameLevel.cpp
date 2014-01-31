@@ -101,7 +101,7 @@ levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropType
 randomItemProbabilityNum(randomItemProbabilityNum), piecesLeft(numBlocks),
 filepath(filepath), levelName(levelName), prevHighScore(0), highScore(0),
 levelAlmostCompleteSignaled(false), boss(NULL), numStarsRequiredToUnlock(numStarsToUnlock), 
-areUnlockStarsPaidFor(false) {
+areUnlockStarsPaidFor(false), paddleStartXPos(-1) {
 
 	assert(!filepath.empty());
 	
@@ -124,7 +124,7 @@ levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropType
 randomItemProbabilityNum(randomItemProbabilityNum),
 piecesLeft(0), filepath(filepath), levelName(levelName), highScore(0),
 levelAlmostCompleteSignaled(false), boss(boss), numStarsRequiredToUnlock(numStarsToUnlock), 
-areUnlockStarsPaidFor(false) {
+areUnlockStarsPaidFor(false), paddleStartXPos(-1) {
 
     assert(!filepath.empty());
 	assert(boss != NULL);
@@ -242,8 +242,8 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
 
 void GameLevel::SetPaddleStartXPos(float xPos) {
     // Setup the paddle start x position...
-    float minBound = this->GetPaddleMinBound();
-    float maxBound = this->GetPaddleMaxBound();
+    float minBound = this->GetPaddleMinBound(xPos);
+    float maxBound = this->GetPaddleMaxBound(xPos);
     if (xPos < 0) {
         this->paddleStartXPos = (maxBound + minBound) / 2.0f;
     }
@@ -324,7 +324,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 	// Reset the colours for the portal blocks
 	PortalBlock::ResetPortalColourGenerator();
 
-	// Keep track of named tesla blocks...
+	// Keep track of named Tesla blocks...
 	std::map<char, TeslaBlock*> teslaBlocks;
 
 	// Read in the values that make up the level
@@ -689,7 +689,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 							currentPortalBlock->SetSiblingPortal(siblingPortalBlock);
 
 							// Set the same colour for both the current and sibling portal blocks
-							const Colour& portalBlockColour = PortalBlock::GeneratePortalColour();
+							Colour portalBlockColour = PortalBlock::GeneratePortalColour();
 							currentPortalBlock->SetColour(ColourRGBA(portalBlockColour, 1.0f));
 							siblingPortalBlock->SetColour(ColourRGBA(portalBlockColour, 1.0f));
 						}
@@ -1969,6 +1969,17 @@ void GameLevel::BuildCollisionBoundsCombinationAndMap(const std::vector<LevelPie
     }
 }
 
+LevelPiece* GameLevel::GetLevelPieceAt(const Point2D& p) const {
+    float xIndex = floorf(p[0] / LevelPiece::PIECE_WIDTH);
+    float yIndex = floorf(p[1] / LevelPiece::PIECE_HEIGHT);
+
+    if (xIndex >= static_cast<float>(this->width) || yIndex >= static_cast<float>(this->height) || xIndex < 0.0f || yIndex < 0.0f) {
+        return NULL;
+    }
+
+    return this->currentLevelPieces[yIndex][xIndex];
+}
+
 LevelPiece* GameLevel::GetLevelPieceColliderFast(const Collision::Ray2D& ray,  
                                                  float toleranceRadius) const {
 
@@ -2311,7 +2322,25 @@ void GameLevel::InitAfterLevelLoad(GameModel* model) {
 }
 
 LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
-    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
+    if (this->paddleStartXPos < 0) {
+        return this->GetMinPaddleBoundPiece(static_cast<int>(this->currentLevelPieces[0].size()) / 2);
+    }
+    else {
+        return this->GetMinPaddleBoundPiece(static_cast<int>(this->paddleStartXPos/LevelPiece::PIECE_WIDTH));
+    }
+}
+
+LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
+    if (this->paddleStartXPos < 0) {
+        return this->GetMaxPaddleBoundPiece(static_cast<int>(this->currentLevelPieces[0].size()) / 2);
+    }
+    else {
+        return this->GetMaxPaddleBoundPiece(static_cast<int>(this->paddleStartXPos/LevelPiece::PIECE_WIDTH));
+    }
+}
+
+LevelPiece* GameLevel::GetMinPaddleBoundPiece(int startingColIdx) const {
+    int col = startingColIdx;
     for (; col > 0; col--) {
         const LevelPiece* currPiece = this->currentLevelPieces[0][col];
         if (currPiece->GetType() == LevelPiece::Solid ||
@@ -2319,7 +2348,7 @@ LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
             currPiece->GetType() == LevelPiece::Prism ||
             currPiece->GetType() == LevelPiece::PrismTriangle ||
             currPiece->GetType() == LevelPiece::Switch) {
-            break;
+                break;
         }
         else if (currPiece->GetType() == LevelPiece::OneWay) {
             const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(currPiece);
@@ -2331,8 +2360,8 @@ LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
     return this->currentLevelPieces[0][col];
 }
 
-LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
-    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
+LevelPiece* GameLevel::GetMaxPaddleBoundPiece(int startingColIdx) const {
+    int col = startingColIdx;
     for (; col < static_cast<int>(this->currentLevelPieces[0].size())-1; col++) {
         const LevelPiece* currPiece = this->currentLevelPieces[0][col];
         if (currPiece->GetType() == LevelPiece::Solid ||
@@ -2340,7 +2369,7 @@ LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
             currPiece->GetType() == LevelPiece::Prism ||
             currPiece->GetType() == LevelPiece::PrismTriangle ||
             currPiece->GetType() == LevelPiece::Switch) {
-            break;
+                break;
         }
         else if (currPiece->GetType() == LevelPiece::OneWay) {
             const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(currPiece);
@@ -2371,5 +2400,35 @@ float GameLevel::GetPaddleMaxBound() const {
     }
     else {
 	    return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+    }
+}
+
+float GameLevel::GetPaddleMinBound(float paddleStartingPos) const {
+    if (paddleStartingPos < 0) {
+        return this->GetPaddleMinBound();
+    }
+    else {
+        LevelPiece* temp = this->GetMinPaddleBoundPiece(static_cast<int>(paddleStartingPos / LevelPiece::PIECE_WIDTH));
+        if (temp->IsNoBoundsPieceType()) {
+            return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+        }
+        else {
+            return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+        }
+    }
+}
+
+float GameLevel::GetPaddleMaxBound(float paddleStartingPos) const {
+    if (paddleStartingPos < 0) {
+        return this->GetPaddleMaxBound();
+    }
+    else {
+        LevelPiece* temp = this->GetMaxPaddleBoundPiece(static_cast<int>(paddleStartingPos / LevelPiece::PIECE_WIDTH));
+        if (temp->IsNoBoundsPieceType()) {
+            return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+        }
+        else {
+            return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+        }
     }
 }

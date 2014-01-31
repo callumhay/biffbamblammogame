@@ -33,12 +33,16 @@ const double GameTransformMgr::SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM = 0.033;
 // .. applies to the ball death cam
 const double GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM = 0.015;
 
+// Interpolation time to go from the current camera position to the outer edges of the level in
+// order to follow the ball on the outskirts of a level
+const double GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS = 1.0;
+
 // Distance between the camera and ball when in ball death camera mode
 const float GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL = 20.0f;
 
 GameTransformMgr::GameTransformMgr() : paddleWithCamera(NULL), ballWithCamera(NULL), 
 remoteControlRocketWithCamera(NULL), currGameDegRotX(0), currGameDegRotY(0), currGameDegRotZ(0), 
-lastBallCamZRot(0), currBallCamZRot(0) {
+lastBallCamZRot(0), currBallCamZRot(0), followBallTimeCounter(0), unfollowBallTimeCounter(0) {
 	this->Reset();
 }
 
@@ -66,6 +70,8 @@ void GameTransformMgr::ClearSpecialCamEffects() {
     this->storedCamFOVBeforeRemoteControlRocketCam = Camera::FOV_ANGLE_IN_DEGS;
     this->storedCamOriBeforeRemoteControlRocketCam = this->defaultCamOrientation;
     
+    this->storedOriBeforeBulletTimeCam = this->defaultCamOrientation;
+    
 	this->paddleCamAnimations.clear();
 	this->ballCamAnimations.clear();
 	this->camFOVAnimations.clear();
@@ -85,6 +91,10 @@ void GameTransformMgr::Reset() {
 	this->isBallDeathCamIsOn = false;
     this->lastBallCamZRot = 0.0f;
     this->currBallCamZRot = 0.0f;
+    this->followBallTimeCounter = 0.0f;
+    this->unfollowBallTimeCounter = 0.0f;
+    this->camTAtStartOfFollow = this->defaultCamOrientation.GetTranslation();
+    this->camTAtStartOfUnfollow = this->defaultCamOrientation.GetTranslation();
 
 	this->ClearSpecialCamEffects();
 	this->levelFlipAnimations.clear();
@@ -237,6 +247,12 @@ void GameTransformMgr::SetBulletTimeCamera(bool turnOnBulletTimeCam) {
         GameTransformMgr::TransformAnimationType type = iter->type;
         if (type == GameTransformMgr::ToBulletTimeCamAnimation ||
             type == GameTransformMgr::FromBulletTimeCamAnimation) {
+
+            if (!iter->hasStarted) {
+                // Make sure the stored orientation is initialized properly
+                this->storedOriBeforeBulletTimeCam = this->currCamOrientation;
+            }
+
             iter = this->animationQueue.erase(iter);
         }
         else {
@@ -364,14 +380,14 @@ float GameTransformMgr::GetCameraZDistance(float rotInDegs, const GameLevel& lev
     viewAABB.AddPoint(Point2D(pt2[0], pt2[1]));
     viewAABB.AddPoint(Point2D(pt3[0], pt3[1]));
 
-    // Using the AABB, figure out the distance that the camera needs to be in order to fit it all into the viewport...
+    // Using the AABB, figure out the distance that the camera needs to be in order to fit it all into the view port...
     float addToWidth  = GameTransformMgr::GetLevelCameraSetupAddToWidth(level);
     float addToHeight = GameTransformMgr::GetLevelCameraSetupAddToHeight(level);
     return GameTransformMgr::GetCameraZDistanceToFitAABB(viewAABB, addToWidth, addToHeight);
 }
 
 /// <summary>
-/// Gets the distance along the z-axis that the camera must be in to fit the given AABB in the viewport.
+/// Gets the distance along the z-axis that the camera must be in to fit the given AABB in the view port.
 /// </summary>
 /// <returns> The required z distance. </returns>
 float GameTransformMgr::GetCameraZDistanceToFitAABB(const Collision::AABB2D& aabb, 
@@ -449,7 +465,7 @@ float GameTransformMgr::GetLevelCameraSetupAddToHeight(const GameLevel& level) {
  */
 void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 
-	// Figure out the next animation we should be animating, and animate it (if there are any)
+	// Figure out the next animation and animate it (if there are any)
 	if (this->animationQueue.size() > 0) {
 		TransformAnimation currAnimation = this->animationQueue.front();
 		switch (currAnimation.type) {
@@ -604,6 +620,68 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                 // Exponential decay towards the last z rotation from the current one...
                 this->currBallCamZRot = NumberFuncs::LerpOverTime(0.0, 0.1, this->currBallCamZRot, this->lastBallCamZRot, dT);
 	        }
+            else {
+                // Check to see if the ball is currently out of bounds of the level, if it is then the camera follows it a bit,
+                // in order to keep it on the screen...
+                
+                // Check to see if there's only one ball and that there are no active animations...
+                const std::list<GameBall*>& balls = gameModel.GetGameBalls();
+                if (balls.size() == 1 && this->animationQueue.empty()) {
+                    
+                    const GameBall* ball = balls.front();
+                    assert(ball != NULL);
+
+                    // Check whether the one ball is close to the edge of the screen/level...
+                    if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType &&
+                        gameModel.IsOutOfPaddedLevelBounds(ball->GetCenterPosition2D(), 0.0f, 3.0f*PlayerPaddle::PADDLE_HEIGHT_TOTAL, 0.0f, 0.0f)) {
+                        
+                        const GameLevel* currLevel = gameModel.GetCurrentLevel();
+                        assert(currLevel != NULL);
+
+                        // Calculate a point on the edge of the boundaries of the level where the camera will move to
+                        // in the XY plane in order to follow the ball
+                        Collision::AABB2D levelAABB;
+                        currLevel->GetLevelAABB(levelAABB);
+                        Point2D closestPt;
+                        Collision::ClosestPoint(ball->GetCenterPosition2D(), levelAABB, closestPt);
+                        closestPt = Point2D::GetMidPoint(closestPt, ball->GetCenterPosition2D());
+                        
+                        // Transform the point into the level space...
+                        closestPt += currLevel->GetTranslationToMiddle2D();
+                        closestPt = this->GetGameXYZTransform()* closestPt;
+                        
+                        // Start following...
+                        if (this->followBallTimeCounter == 0.0) {
+                            this->camTAtStartOfFollow = this->currCamOrientation.GetTranslation();
+                        }
+                        this->followBallTimeCounter = std::min<double>(this->followBallTimeCounter + dT, GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
+                        Vector2D newTranslation = NumberFuncs::LerpOverTime<Vector2D>(0.0, 
+                            GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfFollow.ToVector2D(), 
+                            Vector2D(closestPt[0], closestPt[1]), this->followBallTimeCounter);
+
+                        this->currCamOrientation.SetTranslation(Vector3D(newTranslation, this->currCamOrientation.GetTZ()));
+                        this->unfollowBallTimeCounter = 0.0;
+                    }
+                    else {
+                        // Reset the position of the camera to the default
+
+                        if (this->unfollowBallTimeCounter < GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS) {
+                            if (this->unfollowBallTimeCounter == 0.0) {
+                                this->camTAtStartOfUnfollow = this->currCamOrientation.GetTranslation();
+                            }
+
+                            this->unfollowBallTimeCounter = std::min<double>(this->unfollowBallTimeCounter + dT, GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
+                            Vector2D newTranslation = NumberFuncs::LerpOverTime<Vector2D>(0.0, 
+                                GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfUnfollow.ToVector2D(), 
+                                this->defaultCamOrientation.GetTranslation2D(), this->unfollowBallTimeCounter);
+                            
+                            this->currCamOrientation.SetTranslation(Vector3D(newTranslation, this->currCamOrientation.GetTZ()));
+                        }
+
+                        this->followBallTimeCounter = 0.0;
+                    }
+                }
+            }
         }
     }
 }
@@ -1400,9 +1478,10 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
 
         this->bulletTimeCamAnimation.SetLerp(timeVals, orientVals);
         this->bulletTimeCamAnimation.SetRepeat(false);
+        this->storedOriBeforeBulletTimeCam = this->currCamOrientation;
     }
     else {
-        this->bulletTimeCamAnimation.SetLerp(BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS, this->defaultCamOrientation);
+        this->bulletTimeCamAnimation.SetLerp(BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS, this->storedOriBeforeBulletTimeCam);
         this->bulletTimeCamAnimation.SetRepeat(false);
     }
     bulletTimeAnim.hasStarted = true;

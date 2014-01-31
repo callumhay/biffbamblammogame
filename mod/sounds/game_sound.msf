@@ -329,8 +329,16 @@ CannonObstructionMalfunctionEvent {
 
 // CannonBlockLoadedWithBallCamBallEvent
 
-PortalTeleportEvent {
-	file = resources/PortalTeleportEvent.ogg
+BallPortalTeleportEvent {
+	file = resources/BallPortalTeleportEvent.ogg
+}
+
+EnergyProjectilePortalTeleportEvent {
+	file = resources/EnergyProjectilePortalTeleportEvent.ogg
+}
+
+NonBallObjectPortalTeleportEvent {
+	file = resources/NonBallObjectPortalTeleportEvent.ogg
 }
 
 CollateralBlockFlashingLoop {

@@ -64,6 +64,9 @@ public:
 	Vector3D GetTranslation() const {
 		return Vector3D(this->translation[0], this->translation[1], this->translation[2]);
 	}
+    Vector2D GetTranslation2D() const {
+        return Vector2D(this->translation[0], this->translation[1]);
+    }
 	Vector3D GetXYZRotation() const {
         Eigen::Vector3f eulerAngles = this->rotation.eulerAngles(0, 1, 2);
         return Vector3D(

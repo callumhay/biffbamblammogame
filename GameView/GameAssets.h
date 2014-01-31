@@ -206,6 +206,7 @@ public:
     void MineExplosion(const MineProjectile& mine, Camera& camera, const GameModel* gameModel);
 
     void FullscreenFlashExplosion(const FullscreenFlashEffectInfo& info, Camera& camera, const GameModel* gameModel);
+    void FullscreenFlash(double durationInS, float intensity);
 
     void ToggleSkipLabel(bool activate);
     void ReinitializeSkipLabel();

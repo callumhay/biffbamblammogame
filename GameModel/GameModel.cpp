@@ -977,14 +977,14 @@ void GameModel::DoProjectileCollisions(double dT) {
     this->PerformLevelCompletionChecks();
 }
 
-bool GameModel::IsOutOfPaddedLevelBounds(const Point2D& pos, float xPadding, float yPadding) const {
+bool GameModel::IsOutOfPaddedLevelBounds(const Point2D& pos, float minXPadding, float minYPadding, float maxXPadding, float maxYPadding) const {
     const GameLevel* currLevel = this->GetCurrentLevel();
-    float levelWidthBounds	= currLevel->GetLevelUnitWidth()  + xPadding;
-    float levelHeightBounds = currLevel->GetLevelUnitHeight() + yPadding;
+    float levelWidthBounds	= currLevel->GetLevelUnitWidth()  + maxXPadding;
+    float levelHeightBounds = currLevel->GetLevelUnitHeight() + maxYPadding;
 
-    return pos[1] <= -yPadding || 
+    return pos[1] <= -minYPadding || 
         pos[1] >= levelHeightBounds ||
-        pos[0] <= -xPadding ||
+        pos[0] <= -minXPadding ||
         pos[0] >= levelWidthBounds;
 }
 

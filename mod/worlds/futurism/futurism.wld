@@ -15,6 +15,17 @@ resources/worlds/levels/hard/thinking_outside_the_box.lvl
 # A really tough camera ball + cannon timing level
 resources/worlds/levels/hard/shoot_the_void.lvl
 
+# A totally different level just to mix things up a bit, give the player a 
+# bit of a breather from the camera ball
+resources/worlds/levels/hard/killing_your_comfort_zone.lvl
+
+
+# Portal block intro levels
+resources/worlds/levels/medium/like_plinko_but_with_teleportation.lvl
+
+
+# TODO: ...
+resources/worlds/levels/medium/shutin.lvl
 
 
 
@@ -22,11 +33,6 @@ resources/worlds/levels/hard/shoot_the_void.lvl
 # Camera Paddle Item intro
 # TODO
 
-
-
-# Portal block intro levels
-resources/worlds/levels/medium/like_plinko_but_with_teleportation.lvl 
-resources/worlds/levels/medium/shutin.lvl
 
 
 

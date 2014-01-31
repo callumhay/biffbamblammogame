@@ -206,24 +206,28 @@ GameESPAssets::~GameESPAssets() {
 	
 	for (std::vector<Texture2D*>::iterator iter = this->boltTextures.begin();
 		iter != this->boltTextures.end(); ++iter) {
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);	
+
+		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		assert(removed);
 	}
 	this->boltTextures.clear();
 
 	for (std::vector<Texture2D*>::iterator iter = this->rockTextures.begin(); iter != this->rockTextures.end(); ++iter) {
+
 		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);
 	}
 	this->rockTextures.clear();
 
     for (std::vector<Texture2D*>::iterator iter = this->cloudTextures.begin(); iter != this->cloudTextures.end(); ++iter) {
+
         removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
         assert(removed);
     }
     this->cloudTextures.clear();
 
     for (std::vector<Texture2D*>::iterator iter = this->fireGlobTextures.begin(); iter != this->fireGlobTextures.end(); ++iter) {
+
         removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
         assert(removed);
     }
@@ -1999,9 +2003,49 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 	this->activeGeneralEmitters.push_back(boltOnoEffect);
 }
 
-ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling) {
-	const Colour& portalColour = block.GetColour();
-	// Create an emitter for the spirally teleportation texture
+void GameESPAssets::AddSingleEnergyProjectilePortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, 
+                                                                  const PortalBlock& block, bool isSibling) {
+    
+    float sparkleSize = std::min<float>(std::max<float>(sizeX, sizeY), LevelPiece::PIECE_HEIGHT);
+    
+    UNUSED_PARAMETER(block);
+    //const Colour& portalColour = block.GetColour().GetColour();
+    //Colour sparkleColour = portalColour + Colour(0.75f, 0.75f, 0.75f);
+
+    // Create an emitter for the spirally teleportation texture
+    ESPPointEmitter* sparkleEffect = new ESPPointEmitter();
+    sparkleEffect->SetSpawnDelta(ESPInterval(-1, -1));
+    sparkleEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    sparkleEffect->SetParticleLife(1.0f);
+    sparkleEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    sparkleEffect->SetParticleAlignment(ESP::ScreenAligned);
+    sparkleEffect->SetEmitPosition(Point3D(center));
+    sparkleEffect->SetParticleRotation(ESPInterval(0.0f, 359.999999f));
+    sparkleEffect->SetParticleSize(ESPInterval(sparkleSize));
+    sparkleEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+    sparkleEffect->AddEffector(&this->particleFader);
+    sparkleEffect->AddEffector(&this->particleSuperGrowth);
+    sparkleEffect->SetParticles(1, this->sparkleTex);
+
+    // Do anything special for if it's a sibling or not...
+    if (isSibling) {
+        sparkleEffect->AddEffector(&this->smokeRotatorCCW);
+    }
+    else {
+        sparkleEffect->AddEffector(&this->smokeRotatorCW);
+    }
+
+    this->activeGeneralEmitters.push_back(sparkleEffect);
+}
+
+void GameESPAssets::AddSingleObjectPortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, 
+                                                        const PortalBlock& block, bool isSibling) {
+
+	const Colour& portalColour = block.GetColour().GetColour();
+	
+    float spiralSize = std::min<float>(sizeY, LevelPiece::PIECE_HEIGHT);
+
+    // Create an emitter for the spirally teleportation texture
 	ESPPointEmitter* spiralEffect = new ESPPointEmitter();
 	spiralEffect->SetSpawnDelta(ESPInterval(-1, -1));
 	spiralEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -2010,25 +2054,39 @@ ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, cons
 	spiralEffect->SetParticleAlignment(ESP::ScreenAligned);
 	spiralEffect->SetEmitPosition(Point3D(center));
 	spiralEffect->SetParticleRotation(ESPInterval(0.0f, 359.999999f));
-	spiralEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_HEIGHT));
+    spiralEffect->SetParticleSize(ESPInterval(spiralSize));
 	spiralEffect->SetParticleColour(ESPInterval(1.2f*portalColour.R()), ESPInterval(1.2f*portalColour.G()), ESPInterval(1.2f*portalColour.B()), ESPInterval(1));
 	spiralEffect->AddEffector(&this->particleFader);
 	spiralEffect->AddEffector(&this->particleLargeGrowth);
+    spiralEffect->SetParticles(1, this->spiralTex);
 
+    // Add a flare effect as well...
+    ESPPointEmitter* flareEffect = new ESPPointEmitter();
+    flareEffect->SetSpawnDelta(ESPInterval(-1, -1));
+    flareEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    flareEffect->SetParticleLife(1.0f);
+    flareEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    flareEffect->SetParticleAlignment(ESP::ScreenAligned);
+    flareEffect->SetEmitPosition(Point3D(center));
+    flareEffect->SetParticleRotation(ESPInterval(0.0f, 359.999999f));
+    flareEffect->SetParticleSize(ESPInterval(1.2f*sizeX), ESPInterval(1.2f*sizeY));
+    Colour flareColour = portalColour + Colour(0.75f, 0.75f, 0.75f);
+    flareEffect->SetParticleColour(ESPInterval(flareColour.R()), 
+        ESPInterval(flareColour.G()), ESPInterval(flareColour.B()), ESPInterval(1.0f));
+    flareEffect->AddEffector(&this->particleFader);
+    flareEffect->AddEffector(&this->particleLargeGrowth);
+    flareEffect->SetParticles(1, this->flareTex);
+
+    // Do anything special for if it's a sibling or not...
 	if (isSibling) {
 		spiralEffect->AddEffector(&this->smokeRotatorCCW);
 	}
 	else {
 		spiralEffect->AddEffector(&this->smokeRotatorCW);
 	}
-
-	bool result = spiralEffect->SetParticles(1, spiralTex);
-	assert(result);
-	if (!result) {
-		delete spiralEffect;
-		spiralEffect = NULL;
-	}
-	return spiralEffect;
+	
+    this->activeGeneralEmitters.push_back(flareEffect);
+	this->activeGeneralEmitters.push_back(spiralEffect);
 }
 
 // Updates any required values that need to be refreshed every frame
@@ -2063,26 +2121,58 @@ ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, flo
 	return shockwaveEffect;
 }
 
+void GameESPAssets::AddEnergyProjectilePortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block) {
+    Vector2D toEnterPtFromBlock = enterPt - block.GetCenter();
+    this->AddSingleEnergyProjectilePortalTeleportEffect(enterPt, sizeX, sizeY, block, false);
+    this->AddSingleEnergyProjectilePortalTeleportEffect(block.GetSiblingPortal()->GetCenter() + toEnterPtFromBlock, 
+        sizeX, sizeY, *block.GetSiblingPortal(), true);
+}
+
 /**
  * Add an effect to bring the user's attention to the fact that something just went though
  * a portal block and got teleported to its sibling.
  */
-void GameESPAssets::AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block) {
+void GameESPAssets::AddObjectPortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block) {
 
-	ESPPointEmitter* enterEffect = this->CreateTeleportEffect(enterPt, block, false);
-	if (enterEffect == NULL) {
-		return;
-	}
+    Vector2D toEnterPtFromBlock = enterPt - block.GetCenter();
+	this->AddSingleObjectPortalTeleportEffect(enterPt, sizeX, sizeY, block, false);
+	this->AddSingleObjectPortalTeleportEffect(block.GetSiblingPortal()->GetCenter() + toEnterPtFromBlock, sizeX, sizeY, *block.GetSiblingPortal(), true);
+}
 
-	Vector2D toBallFromBlock = enterPt - block.GetCenter();
-	ESPPointEmitter* exitEffect = this->CreateTeleportEffect(block.GetSiblingPortal()->GetCenter() + toBallFromBlock, *block.GetSiblingPortal(), true);
-	if (exitEffect == NULL) {
-		delete enterEffect;
-		return;
-	}
+void GameESPAssets::ItemEnteredPortalBlockEffects(const GameItem& item, const PortalBlock& block) {
+    
+    std::map<const GameItem*, std::list<ESPEmitter*> >::iterator findIter = this->activeItemDropEmitters.find(&item);
+    if (findIter == this->activeItemDropEmitters.end()) {
+        // Pretty odd ... this shouldn't happen but not a big deal if it does --
+        // it means that we cleaned up the item drop emitters before the item was done interacting with the level
+        return;
+    }
 
-	this->activeGeneralEmitters.push_back(enterEffect);
-	this->activeGeneralEmitters.push_back(exitEffect);
+    std::list<ESPEmitter*>& itemEmitters = findIter->second;
+    
+    // The first two emitters are the glowing pulses at either side of the item, the other two are the faces,
+    // we want to remove and replace all the faces so that they fade at the site of the portal block, but are still
+    // present on the item
+    if (itemEmitters.size() <= 2) {
+        return;
+    } 
+
+    std::list<ESPEmitter*>::iterator iter = itemEmitters.begin();
+    ++iter;++iter;
+    for (; iter != itemEmitters.end();) {
+        ESPEmitter* currEmitter = *iter;
+        currEmitter->SetNumParticleLives(0);
+        currEmitter->TranslateAliveParticlePosition(Vector3D(item.GetCenter()[0], item.GetCenter()[1], 0.0f));
+
+        this->activeGeneralEmitters.push_back(currEmitter);
+        iter = itemEmitters.erase(iter);
+    }
+
+    // Re-add the face particles to the item...
+    this->AddItemDropFaceEmitters(item);
+
+    // Now let's add some actual effects...
+    this->AddObjectPortalTeleportEffect(item.GetCenter(), GameItem::ITEM_WIDTH, GameItem::ITEM_HEIGHT, block);
 }
 
 /**
@@ -3785,7 +3875,6 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 
     GameItem::ItemDisposition disposition = item.GetItemDisposition();
     float itemAlpha = item.GetItemColour().A();
-	ESPInterval alpha(itemAlpha*0.75f);
 
     ESPInterval redRandomColour(0.1f, 1.0f);
     ESPInterval greenRandomColour(0.1f, 1.0f);
@@ -3793,12 +3882,6 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
     ESPInterval redColour(0), greenColour(0), blueColour(0);
     GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(disposition, 
         redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
-
-	// We choose a specific kind of sprite graphic based on the type of item that's dropping
-	Texture2D* itemSpecificFillShapeTex    = NULL;
-	Texture2D* itemSpecificOutlineShapeTex = NULL;
-    Texture2D* itemSepecificFaceTex        = NULL;
-    this->ChooseDispositionTextures(disposition, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
 
 	// Aura around the ends of the dropping item
 	ESPPointEmitter* itemDropEmitterAura1 = new ESPPointEmitter();
@@ -3831,48 +3914,8 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura1);
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura2);
 
-
 	if (showParticles) {
-
-        if (item.GetItemType() == GameItem::RandomItem) {
-
-            // Neutral...
-            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
-                redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
-           
-            // Good...
-            redRandomColour   = ESPInterval(0.1f, 1.0f);
-            greenRandomColour = ESPInterval(0.1f, 1.0f);
-            blueRandomColour  = ESPInterval(0.1f, 1.0f);
-            redColour   = ESPInterval(0);
-            greenColour = ESPInterval(0);
-            blueColour  = ESPInterval(0);
-
-            GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(GameItem::Good, 
-                redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
-            this->ChooseDispositionTextures(GameItem::Good, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
-            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
-                redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
-
-            // Bad...
-            redRandomColour   = ESPInterval(0.1f, 1.0f);
-            greenRandomColour = ESPInterval(0.1f, 1.0f);
-            blueRandomColour  = ESPInterval(0.1f, 1.0f);
-            redColour   = ESPInterval(0);
-            greenColour = ESPInterval(0);
-            blueColour  = ESPInterval(0);
-
-            GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(GameItem::Bad, 
-                redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
-            this->ChooseDispositionTextures(GameItem::Bad, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
-            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
-                redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
-
-        }
-        else {
-            this->AddItemDropEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
-                redRandomColour, greenRandomColour, blueRandomColour, alpha, 11);
-        }
+        this->AddItemDropFaceEmitters(item);
 	}
 }
 
@@ -7347,10 +7390,67 @@ void GameESPAssets::ChooseDispositionTextures(const GameItem::ItemDisposition& i
     }
 }
 
-void GameESPAssets::AddItemDropEmitters(const GameItem& item, Texture2D* itemSpecificFillShapeTex,
-                                        Texture2D* itemSpecificOutlineShapeTex, Texture2D* itemSepecificFaceTex,
-                                        const ESPInterval& redRandomColour, const ESPInterval& greenRandomColour, const ESPInterval& blueRandomColour,
-                                        const ESPInterval& alpha, int numParticlesPerEmitter) {
+void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item) {
+    GameItem::ItemDisposition disposition = item.GetItemDisposition();
+
+    // We choose a specific kind of sprite graphic based on the type of item that's dropping
+    Texture2D* itemSpecificFillShapeTex    = NULL;
+    Texture2D* itemSpecificOutlineShapeTex = NULL;
+    Texture2D* itemSepecificFaceTex        = NULL;
+    this->ChooseDispositionTextures(disposition, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
+
+    ESPInterval redRandomColour(0.1f, 1.0f);
+    ESPInterval greenRandomColour(0.1f, 1.0f);
+    ESPInterval blueRandomColour(0.1f, 1.0f);
+    ESPInterval redColour(0), greenColour(0), blueColour(0);
+    GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(disposition, 
+        redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
+
+    float itemAlpha = item.GetItemColour().A();
+    ESPInterval alpha(itemAlpha*0.75f);
+
+    if (item.GetItemType() == GameItem::RandomItem) {
+        this->AddItemDropFaceEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+            redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
+
+        redRandomColour   = ESPInterval(0.1f, 1.0f);
+        greenRandomColour = ESPInterval(0.1f, 1.0f);
+        blueRandomColour  = ESPInterval(0.1f, 1.0f);
+        redColour   = ESPInterval(0);
+        greenColour = ESPInterval(0);
+        blueColour  = ESPInterval(0);
+
+        GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(GameItem::Good, 
+            redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
+        this->ChooseDispositionTextures(GameItem::Good, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
+        this->AddItemDropFaceEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+            redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
+
+        // Bad...
+        redRandomColour   = ESPInterval(0.1f, 1.0f);
+        greenRandomColour = ESPInterval(0.1f, 1.0f);
+        blueRandomColour  = ESPInterval(0.1f, 1.0f);
+        redColour   = ESPInterval(0);
+        greenColour = ESPInterval(0);
+        blueColour  = ESPInterval(0);
+
+        GameViewConstants::GetInstance()->GetItemColourRandomnessFromDisposition(GameItem::Bad, 
+            redRandomColour, greenRandomColour, blueRandomColour, redColour, greenColour, blueColour);
+        this->ChooseDispositionTextures(GameItem::Bad, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex);
+        this->AddItemDropFaceEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+            redRandomColour, greenRandomColour, blueRandomColour, alpha, 4);
+
+    }
+    else {
+        this->AddItemDropFaceEmitters(item, itemSpecificFillShapeTex, itemSpecificOutlineShapeTex, itemSepecificFaceTex, 
+            redRandomColour, greenRandomColour, blueRandomColour, alpha, 11);
+    }
+}
+
+void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* itemSpecificFillShapeTex,
+                                            Texture2D* itemSpecificOutlineShapeTex, Texture2D* itemSepecificFaceTex,
+                                            const ESPInterval& redRandomColour, const ESPInterval& greenRandomColour, const ESPInterval& blueRandomColour,
+                                            const ESPInterval& alpha, int numParticlesPerEmitter) {
 
     const float fractionAmt = static_cast<float>(numParticlesPerEmitter) / 11.0f;
     const float invFractionAmt = 1.0f / fractionAmt;
@@ -7362,7 +7462,7 @@ void GameESPAssets::AddItemDropEmitters(const GameItem& item, Texture2D* itemSpe
     randomItemTextures.push_back(itemSpecificOutlineShapeTex);
 
     const ESPInterval spdInterval(2.25f, 5.25f);
-    const ESPInterval lifeInterval(1.25f, 2.5f);
+    const ESPInterval lifeInterval(1.25f, 2.3f);
     const ESPInterval sizeInterval(0.25f, 1.25f);
     const ESPInterval spawnDeltaInterval(invFractionAmt*0.1f, invFractionAmt*0.2f);
 
@@ -7413,9 +7513,11 @@ void GameESPAssets::AddItemDropEmitters(const GameItem& item, Texture2D* itemSpe
     itemDropEmitterTrail3->SetRandomTextureParticles(numParticlesPerEmitter, randomItemTextures);
 
     // Add all the star emitters
-    this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
-    this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail2);
-    this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail3);
+    std::list<ESPEmitter*>& emitterList = this->activeItemDropEmitters[&item];
+    assert(emitterList.size() >= 2); // THIS IS TO ENFORCE THE STRUCTURE OF EMITTERS FOR ITEM DROPS
+    emitterList.push_back(itemDropEmitterTrail1);
+    emitterList.push_back(itemDropEmitterTrail2);
+    emitterList.push_back(itemDropEmitterTrail3);
 }
 
 /**

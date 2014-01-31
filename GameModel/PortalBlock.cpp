@@ -191,12 +191,12 @@ void PortalBlock::ResetPortalColourGenerator() {
  * Static function that assigns portal colours to a portal and its sibling
  * this helps distinguish, to the user, what portals match up.... and it looks prettier.
  */
-const Colour& PortalBlock::GeneratePortalColour() {
+Colour PortalBlock::GeneratePortalColour() {
 	static const int MAX_PORTAL_COLOURS = 8;
 	
 	static std::vector<Colour> nonUsedPortalColours;
 	static std::vector<Colour> usedPortalColours;
-	if (PortalBlock::portalGeneratorReset ) {
+	if (PortalBlock::portalGeneratorReset) {
 		nonUsedPortalColours.clear();
 		nonUsedPortalColours.reserve(MAX_PORTAL_COLOURS);
 		usedPortalColours.clear();
@@ -205,13 +205,13 @@ const Colour& PortalBlock::GeneratePortalColour() {
 		// We multiply all the colours by fractions to make sure they aren't over
 		// saturated when rendered
 		nonUsedPortalColours.push_back(0.8f * Colour(0.8627f, 0.07843f, 0.2353f));	// 1 Crimson
-		nonUsedPortalColours.push_back(0.8f * Colour(0.58f, 0.0f, 0.8274f));				// 2 Dark Violet
-		nonUsedPortalColours.push_back(0.8f * Colour(0.4117f, 0.3490f, 0.8039f));		// 3 Blueish-Purple
-		nonUsedPortalColours.push_back(0.8f * Colour(0.3882f, 0.72157f, 1.0f));			// 4 Steely-sky Blue
-		nonUsedPortalColours.push_back(0.8f * Colour(0.0f, 0.8078f, 0.8196f));			// 5 Dark Turquoise
-		nonUsedPortalColours.push_back(0.8f * Colour(0.0f, 0.788f, 0.3412f));				// 6 Emerald Green
-		nonUsedPortalColours.push_back(0.7f * Colour(1.0f, 0.7568f, 0.1451f));			// 7 Orangish-yellow
-		nonUsedPortalColours.push_back(0.7f * Colour(0.7529f, 1.0f, 0.2431f));			// 8 Yellowish-green
+		nonUsedPortalColours.push_back(0.8f * Colour(0.58f, 0.0f, 0.8274f));        // 2 Dark Violet
+		nonUsedPortalColours.push_back(0.8f * Colour(0.4117f, 0.3490f, 0.8039f));   // 3 Blueish-Purple
+		nonUsedPortalColours.push_back(0.8f * Colour(0.3882f, 0.72157f, 1.0f));	    // 4 Steely-sky Blue
+		nonUsedPortalColours.push_back(0.8f * Colour(0.0f, 0.8078f, 0.8196f));      // 5 Dark Turquoise
+		nonUsedPortalColours.push_back(0.8f * Colour(0.0f, 0.788f, 0.3412f));       // 6 Emerald Green
+		nonUsedPortalColours.push_back(0.7f * Colour(1.0f, 0.65f, 0.12f));          // 7 Orangish-yellow
+		nonUsedPortalColours.push_back(0.7f * Colour(0.7529f, 1.0f, 0.2431f));      // 8 Yellowish-green
 
 		PortalBlock::portalGeneratorReset = false;
 	}
@@ -225,8 +225,8 @@ const Colour& PortalBlock::GeneratePortalColour() {
 	}
 
 	// Choose a random colour from the set of portal colours not used yet...
-	unsigned int randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % nonUsedPortalColours.size();
-	const Colour& colourToUse = nonUsedPortalColours[randomIndex];
+	int randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % nonUsedPortalColours.size();
+	Colour colourToUse = nonUsedPortalColours[randomIndex];
 	nonUsedPortalColours.erase(nonUsedPortalColours.begin() + randomIndex);
 	usedPortalColours.push_back(colourToUse);
 

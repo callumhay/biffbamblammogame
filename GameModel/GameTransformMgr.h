@@ -108,7 +108,8 @@ private:
 	static const double SECONDS_PER_UNIT_BALLCAM;
     static const double SECONDS_PER_UNIT_REMOTE_CTRL_ROCKETCAM;
 	static const double SECONDS_PER_UNIT_DEATHCAM;
-	
+	static const double SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS;
+
 	static const float BALL_DEATH_CAM_DIST_TO_BALL;
 
 	bool isBallDeathCamIsOn;
@@ -118,6 +119,13 @@ private:
     GameBall* ballWithCamera;       // Will be the ball where the camera is in ball cam mode, NULL otherwise
     float currBallCamZRot;
     float lastBallCamZRot;
+
+    double followBallTimeCounter;
+    Vector3D camTAtStartOfFollow;
+    double unfollowBallTimeCounter;
+    Vector3D camTAtStartOfUnfollow;
+
+    Orientation3D storedOriBeforeBulletTimeCam;
 
 	PaddleRemoteControlRocketProjectile* remoteControlRocketWithCamera; // The rocket where the camera is following it or inside it, NULL otherwise.
     Orientation3D storedCamOriBeforeRemoteControlRocketCam;
