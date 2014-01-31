@@ -62,6 +62,7 @@ public:
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
 	void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal);
+    void ItemPortalBlockTeleportEvent(const GameItem& item, const PortalBlock& enterPortal);
 	void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock, bool canShootWithoutObstruction);
     void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
 	void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock);

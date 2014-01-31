@@ -323,6 +323,19 @@ namespace Collision {
 		return sqDist;
 	}
 
+    inline void ClosestPoint(const Point2D& p, const Collision::AABB2D& aabb, Point2D& closestPt) {
+        for (int i = 0; i < 2; i++) {
+            float v = p[i];
+            if (v < aabb.GetMin()[i]) { 
+                v = aabb.GetMin()[i];
+            }
+            if (v > aabb.GetMax()[i]) {
+                v = aabb.GetMax()[i];
+            }
+            closestPt[i] = v;
+        }
+    }
+
 	/**
 	 * Figures out whether two 2D AABBs collide or not.
 	 * Returns: true on collision, false otherwise.

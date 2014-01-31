@@ -124,7 +124,10 @@ public:
         CannonBlockRotatingPart,
         CannonBlockFiredEvent,
         CannonObstructionMalfunctionEvent,
-		PortalTeleportEvent,
+		BallPortalTeleportEvent,
+        EnergyProjectilePortalTeleportEvent,
+        NonBallObjectPortalTeleportEvent,
+
 		CollateralBlockFlashingLoop,
 		CollateralBlockFallingLoop,
         TeslaLightningArcLoop,

@@ -22,6 +22,7 @@ class PlayerPaddle;
 class GameModel;
 class GameItemTimer;
 class GameBall;
+class LevelPiece;
 
 class GameItem : public IPositionObject {
 public:
@@ -134,14 +135,16 @@ public:
 protected:
 	std::string name;            // Name of this item
 	GameModel* gameModel;        // Items have to be able to manipulate what happens in the game...
-	Point2D center;              // The center x,y coord that this item is located at
+	Point2D center;              // The center x,y coordinate that this item is located at
 	ItemDisposition disposition; // The disposition of the item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
-	bool isActive;               // Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
+	bool isActive;               // Whether or not this item is currently active (i.e., has been acquired and is effecting the game play)
 	Vector2D currVelocityDir;    // The direction that this item is moving in
 
-	ColourRGBA colour;													// Colour multiply of the item
+	ColourRGBA colour;                          // Colour multiply of the item
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 	
+    std::set<const LevelPiece*> portalsEntered; // Keep track of all the portals that this item has teleported through
+
 	// Speed of descent for items
 	static const float SPEED_OF_DESCENT;
 

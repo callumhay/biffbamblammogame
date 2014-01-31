@@ -54,12 +54,11 @@ particleGrowth(1.0f, 1.8f), particleEnergyInAndOut(NULL), alpha(1.0f) {
 
 	this->particleEnergyInAndOut->SetEmitAngleInDegrees(180);
 	this->particleEnergyInAndOut->SetParticleAlignment(ESP::ScreenAligned);
-	
 	this->particleEnergyInAndOut->SetEmitPosition(Point3D(0, 0, 0));
 	this->particleEnergyInAndOut->AddEffector(&this->particleFader);
 	this->particleEnergyInAndOut->AddEffector(&this->particleShrink);
-	bool result = this->particleEnergyInAndOut->SetParticles(35, this->sparkleTex);
-	assert(result);
+	this->particleEnergyInAndOut->SetParticles(35, this->sparkleTex);
+
 
     std::vector<double> timeVals;
     timeVals.reserve(3);

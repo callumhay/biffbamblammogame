@@ -346,6 +346,17 @@ public:
         UNUSED_PARAMETER(enterPortal);
     }
 
+	/**
+	 * Event triggered when an item is teleported by a portal block. Only occurs once per item,
+	 * occurs one frame before the projectile is shown coming out of the sibling portal.
+	 * Arguments: item        - The item teleported.
+	 *            enterPortal - The portal entered by the projectile.
+	 */
+    virtual void ItemPortalBlockTeleportEvent(const GameItem& item, const PortalBlock& enterPortal) {
+        UNUSED_PARAMETER(item);
+        UNUSED_PARAMETER(enterPortal);
+    }
+
     /**
 	 * Event triggered when a ball enters a cannon block. Only occurs once as the ball is JUST entering.
 	 * Arguments: ball        - The ball entering the cannon.

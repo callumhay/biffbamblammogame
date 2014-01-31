@@ -770,12 +770,17 @@ void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const Gam
 
 void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) {
     // Play the ball teleportation sound
-    this->display->GetSound()->PlaySoundAtPosition(GameSound::PortalTeleportEvent, false, 
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::BallPortalTeleportEvent, false, 
         enterPortal.GetPosition3D(), true, true, true);
 
     // Add the teleportation effect
     if (!ball.HasBallCameraActive()) {
-	    this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball.GetBounds().Center(), enterPortal);
+        float ballSize = 2*ball.GetBounds().Radius();
+	    this->display->GetAssets()->GetESPAssets()->AddObjectPortalTeleportEffect(
+            ball.GetBounds().Center(), ballSize, ballSize, enterPortal);
+    }
+    else {
+        this->display->GetAssets()->FullscreenFlash(0.25, 1.0f);
     }
 
 	debug_output("EVENT: Ball teleported by portal block");
@@ -783,6 +788,11 @@ void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, cons
 
 void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal) {
 	
+    GameAssets* assets = this->display->GetAssets();
+    GameSound* sound = this->display->GetSound();
+
+    Point2D projectileTeleportPos = projectile.GetPosition() + projectile.GetHalfHeight() * projectile.GetVelocityDirection();
+
     switch (projectile.GetType()) {
 
         case Projectile::BossOrbBulletProjectile:
@@ -793,19 +803,38 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
         case Projectile::LaserTurretBulletProjectile:
         case Projectile::FireGlobProjectile:
         case Projectile::PaddleFlameBlastProjectile:
-        case Projectile::PaddleIceBlastProjectile:
-			// TODO: Maybe a rotating sparkle or something?
+        case Projectile::PaddleIceBlastProjectile: {
+            sound->PlaySoundAtPosition(GameSound::EnergyProjectilePortalTeleportEvent, false, 
+                Point3D(projectileTeleportPos), true, true, true);
+            assets->GetESPAssets()->AddEnergyProjectilePortalTeleportEffect(projectileTeleportPos, 
+                projectile.GetWidth(), projectile.GetHeight(), enterPortal);
 			break;
+        }
+
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile: {
+            sound->PlaySoundAtPosition(GameSound::NonBallObjectPortalTeleportEvent, false, 
+                Point3D(projectileTeleportPos), true, true, true);
+
+            assets->GetESPAssets()->AddObjectPortalTeleportEffect(projectileTeleportPos, 
+                projectile.GetWidth(), projectile.GetHeight(), enterPortal);
+            
+            // Make the whole screen flash...
+            assets->FullscreenFlash(0.25, 1.0f);
+
+            break;
+        }
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
 		case Projectile::PaddleRocketBulletProjectile:
-        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
 		case Projectile::CollateralBlockProjectile: {
-		    Point2D projectileTeleportPos = projectile.GetPosition() + projectile.GetHalfHeight() * projectile.GetVelocityDirection();
-		    this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(projectileTeleportPos, enterPortal);
+            sound->PlaySoundAtPosition(GameSound::NonBallObjectPortalTeleportEvent, false, 
+                Point3D(projectileTeleportPos), true, true, true);
+
+		    assets->GetESPAssets()->AddObjectPortalTeleportEffect(projectileTeleportPos, 
+                projectile.GetWidth(), projectile.GetHeight(), enterPortal);
             break;
         }
 
@@ -814,6 +843,17 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 			break;
 	}
 	debug_output("EVENT: Projectile teleported by portal block");
+}
+
+void GameEventsListener::ItemPortalBlockTeleportEvent(const GameItem& item, const PortalBlock& enterPortal) {
+
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::NonBallObjectPortalTeleportEvent, false, 
+        item.GetPosition3D(), true, true, true);
+    
+    // Attach a dying copy of the current item emitter to the entered portal block and re-spawn a new emitter for the item...
+    this->display->GetAssets()->GetESPAssets()->ItemEnteredPortalBlockEffects(item, enterPortal);
+
+    debug_output("EVENT: Item teleported by portal block");
 }
 
 void GameEventsListener::BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock,

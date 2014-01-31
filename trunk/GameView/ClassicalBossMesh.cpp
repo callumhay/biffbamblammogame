@@ -33,7 +33,7 @@ leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL), pedimentExploding
 eyeExplodingEmitter(NULL), eyeSmokeEmitter(NULL), eyeFireEmitter(NULL),
 particleGrowToSize(0.001f, 1.0f), particleFader(1.0f, 0.0f),
 particleTwirl(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 1, ESPParticleRotateEffector::CLOCKWISE),
-eyeGlowPulser(ScaleEffect(1.0f, 1.5f)), sparkleSoundID(INVALID_SOUND_ID), glowSoundID(INVALID_SOUND_ID) {
+eyeGlowPulser(ScaleEffect(1.0f, 1.5f)), sparkleSoundID(INVALID_SOUND_ID+1), glowSoundID(INVALID_SOUND_ID+1) {
 
     assert(boss != NULL);
 
@@ -200,6 +200,9 @@ double ClassicalBossMesh::ActivateIntroAnimation() {
 
     //GameLightAssets::GetBlackoutToLightsOnPieceAffectingLights(this->eyeIntroKeyLight, this->eyeIntroFillLight,
     //    INTRO_TIME_IN_SECS - SPARKLE_TIME_IN_SECS);
+
+    this->sparkleSoundID = INVALID_SOUND_ID;
+    this->glowSoundID    = INVALID_SOUND_ID;
 
     this->introTimeCountdown = INTRO_TIME_IN_SECS;
     return this->introTimeCountdown;

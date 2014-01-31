@@ -114,8 +114,10 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 
+    void DrawWireframe() const;
+
 	static void ResetPortalColourGenerator();
-	static const Colour& GeneratePortalColour();
+	static Colour GeneratePortalColour();
 
 protected:
     static const unsigned long TIME_BETWEEN_BALL_USES_IN_MILLISECONDS;
@@ -135,5 +137,13 @@ inline bool PortalBlock::CollisionCheck(const BoundingLines& boundingLines, doub
 	return this->bounds.CollisionCheck(boundingLines, dT, velocity);
 }
 
+inline void PortalBlock::DrawWireframe() const {
+    // Draw the portal as an ellipse...
+    glPushMatrix();
+    glTranslatef(this->GetCenter()[0], this->GetCenter()[1], 0.0f);
+    glScalef(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT, 1.0f);
+    GeometryMaker::GetInstance()->DrawLineCircle();
+    glPopMatrix();
+}
 
 #endif // __PORTALBLOCK_H__

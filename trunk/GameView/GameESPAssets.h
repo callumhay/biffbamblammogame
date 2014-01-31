@@ -276,7 +276,9 @@ private:
     void InitPaddleBlasterESPEffects();
 
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
-	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
+	
+    void AddSingleEnergyProjectilePortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, const PortalBlock& block, bool isSibling);
+    void AddSingleObjectPortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, const PortalBlock& block, bool isSibling);
 	
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const RocketProjectile& projectile);
@@ -330,7 +332,8 @@ private:
     void ChooseDispositionTextures(const GameItem::ItemDisposition& itemDisposition, Texture2D*& itemSpecificFillShapeTex,
         Texture2D*& itemSpecificOutlineShapeTex, Texture2D*& itemSepecificFaceTex) const;
 
-    void AddItemDropEmitters(const GameItem& item, Texture2D* itemSpecificFillShapeTex,
+    void AddItemDropFaceEmitters(const GameItem& item);
+    void AddItemDropFaceEmitters(const GameItem& item, Texture2D* itemSpecificFillShapeTex,
         Texture2D* itemSpecificOutlineShapeTex, Texture2D* itemSepecificFaceTex,
         const ESPInterval& redRandomColour, const ESPInterval& greenRandomColour, const ESPInterval& blueRandomColour,
         const ESPInterval& alpha, int numParticlesPerEmitter);
@@ -379,7 +382,9 @@ public:
     void AddBossHitByProjectileEffect(const Projectile& projectile, const BossBodyPart& collisionPart, GameSound* sound); 
 	void AddBallHitLightningArcEffect(const GameBall& ball);
 
-	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
+    void AddEnergyProjectilePortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block);
+	void AddObjectPortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block);
+    void ItemEnteredPortalBlockEffects(const GameItem& item, const PortalBlock& block);
 	void AddCannonFireEffect(const Point3D& endOfCannonPt, const Vector2D& fireDir);
 	void AddBasicBlockBreakEffect(const LevelPiece& block);
 	void AddBombBlockBreakEffect(const LevelPiece& bomb);
