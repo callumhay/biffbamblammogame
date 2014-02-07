@@ -32,8 +32,8 @@ void BreakableTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const 
 
     // If the triangle block is in ice then its bounds are a basic rectangle...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-                                 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+		LevelPiece::UpdateBreakableBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+            topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	}
 	else {
         this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, 
@@ -75,7 +75,7 @@ void SolidTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Leve
 
 	// If the triangle block is in ice then its bounds are a basic rectangle...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+		LevelPiece::UpdateSolidRectBlockBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
             topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	}
 	else {

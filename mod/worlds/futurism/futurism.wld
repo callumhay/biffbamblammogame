@@ -23,6 +23,15 @@ resources/worlds/levels/hard/killing_your_comfort_zone.lvl
 # Portal block intro levels
 resources/worlds/levels/medium/like_plinko_but_with_teleportation.lvl
 
+# Portal + Prism + One-way + Item-drop
+resources/worlds/levels/medium/obscured_enlightenment.lvl
+
+# Portals + Remote Control Rocket
+resources/worlds/levels/medium/choose_your_own_adventure.lvl : 333
+
+# Portals + One-way + Ice
+resources/worlds/levels/medium/not_burning_any_bridges.lvl
+
 
 # TODO: ...
 resources/worlds/levels/medium/shutin.lvl
@@ -34,6 +43,10 @@ resources/worlds/levels/medium/shutin.lvl
 # TODO
 
 
+
+# Tough level, where you use portal blocks to loop the ball, gaining boosts and
+# repeating to get to an otherwise impossible to reach area
+resources/worlds/levels/hard/loop_booster.lvl
 
 
 
@@ -49,13 +62,7 @@ resources/worlds/levels/medium/shutin.lvl
 resources/worlds/levels/medium/center_on_target.lvl
 
 
-# Portals + Tesla + Collateral + One-way
-# Rename this one...
-resources/worlds/levels/hard/portals_and_tesla_coils.lvl
 
-
-# Portal + Prism + One-way + Item-drop
-resources/worlds/levels/medium/obscured_enlightenment.lvl
 
 
 # Portal + Cannon + Tesla... this one looks pretty boring though...

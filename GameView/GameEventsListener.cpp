@@ -1350,7 +1350,7 @@ void GameEventsListener::LevelPieceStatusRemovedEvent(const LevelPiece& piece, c
             break;
     }
 
-	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceAllStatusRemoved(piece);
+	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceStatusRemoved(piece, removedStatus);
 	debug_output("EVENT: LevelPiece status removed");
 }
 

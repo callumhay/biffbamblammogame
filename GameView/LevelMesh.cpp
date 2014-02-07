@@ -393,6 +393,20 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
 
 }
 
+void LevelMesh::LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {
+    this->statusEffectRenderer->AddLevelPieceStatus(piece, status);
+    if (piece.GetType() == LevelPiece::OneWay) {
+        this->oneWayBlock->IceCubeStatusAdded(static_cast<const OneWayBlock*>(&piece));
+    }
+}
+
+void LevelMesh::LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {
+    this->statusEffectRenderer->RemoveLevelPieceStatus(piece, status);
+    if (piece.GetType() == LevelPiece::OneWay) {
+        this->oneWayBlock->IceCubeStatusRemoved(static_cast<const OneWayBlock*>(&piece));
+    }
+}
+
 /**
  * Adjust the level mesh to change the given piece.
  * Please note that this can be an EXPENSIVE operation!!
@@ -589,6 +603,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->regenBlock->Draw(dT, camera, gameModel, keyLight, fillLight, ballLight);
     this->itemDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
     this->alwaysDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
+    this->oneWayBlock->DrawRegularPass(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
@@ -612,7 +627,7 @@ void LevelMesh::DrawNoBloomPieces(double dT, const Camera& camera, const BasicPo
 
 void LevelMesh::DrawTransparentNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
-    this->oneWayBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->oneWayBlock->DrawTransparentNoBloomPass(dT, camera, keyLight, fillLight, ballLight);
 }
 
 void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,

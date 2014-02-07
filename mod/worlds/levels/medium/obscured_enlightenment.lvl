@@ -1,59 +1,62 @@
 Obscured Enlightenment
-17 30
-E X(a,b) E S S S S S S S S S S S R E E 
-E E E S E E E E D(LaserBulletPaddle) E E E E S E E E 
-E E E N E E E G E G E E E N E E E 
-E E T(P,ul) N E E G E G E G E E N T(P,lr) E E 
-E E E N E G E G E G E G E N E E E 
-E T(P,ll) E N G E G E G E G E G N E T(P,ur) E 
-E E E N E Y E Y E Y E Y E N E E E 
-E E T(P,ll) N Y E Y E Y E Y E Y N T(P,ur) E E 
-E E E N O R O R O R O R O N E E E 
-E T(P,ul) E N G G G G G G G G G N E T(P,lr) E 
-E E E N G G G G G G G G G N E E E 
-E E T(P,ul) N O O O O O O O O O N T(P,lr) E E 
-E E E N Y Y Y Y Y Y Y Y Y N E E E 
-E T(P,ll) E N E G E G E G E G E N E T(P,ur) E 
-E E E N G E G E G E G E G N E E E 
-E E T(P,ll) N E G E G E G E G E N T(P,ur) E E 
-E E E N Y Y Y Y Y Y Y Y Y N E E E 
-E T(P,ul) E N O O O O O O O O O N E T(P,lr) E 
-E E E N G G G G G G G G G N E E E 
-E E T(P,ul) N G G G G G G G G G N T(P,lr) E E 
-E E E N E E E E E E E E E N E E E 
-E T(P,ll) E N E E E E E E E E E N E T(P,ur) E 
-E E E N E E E E E E E E E N E E E 
-E E T(P,ll) N E E E E E E E E E N T(P,ur) E E 
-E E E N E E E E E E E E E N E E E 
-E T(P,ul) E N E E E E E E E E E N E T(P,lr) E 
-E E E N E E E E E E E E E N X(b,a) E E 
-S F(u) S N E E E E E E E E E N S S S 
-S E E N E E E E E E E E E N E E S 
-S E E N E E E E E E E E E N E E S 
+19 32
+C(90) E E E E E E C(180) E E E T(P,ul) E E E E E E T(P,ur) 
+E E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E S D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle){1} S E E 
+E E X(a,b) E S N N N N N N N N N S Q(f) S E E 
+E E E E N E E E E E E E E E N E S E E 
+E E E T(P,ul) N G G G G G G Q(f) G G N T(P,lr) S E E 
+E E E E N G G G G K(UberBall,UberBall,UberBall) G G G G N E E E E 
+E E T(P,ll) E N G G G G G G Q(f) G G N E T(P,ur) E E 
+E E E E N E E E E E E E E E N E E E E 
+E E E T(P,ll) N Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) D(IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle) Q(i) Q(i) N T(P,ur) E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E T(P,ul) E N G G G G G G G G G N E T(P,lr) E E 
+E E E E N G K(MagnetPaddle,MagnetPaddle,MagnetPaddle) G K(MagnetPaddle,MagnetPaddle,MagnetPaddle) G K(MagnetPaddle,MagnetPaddle,MagnetPaddle) G K(MagnetPaddle,MagnetPaddle,MagnetPaddle) G N E E E E 
+E E E T(P,ul) N G G G G G G G G G N T(P,lr) E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E T(P,ll) E N Q(i) Q(i) S Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) N E T(P,ur) E E 
+E E E E N E E E E E E E E E N E E E E 
+E E E T(P,ll) N G G Q(f) G R G Q(f) G G N T(P,ur) E E E 
+E E E E N G G G G G G G G G N E E E E 
+E E T(P,ul) E N G R G G Q(f) G G R G N E T(P,lr) E E 
+E E E E N G G G G G G G G G N E E E E 
+E E E T(P,ul) N R G Q(f) G R G Q(f) G R N T(P,lr) E E E 
+E E E E N G G G G G G G G G N E E E E 
+E E E E N G R G G Q(f) G G R G N E E E E 
+E E E E N G G G G G G G G G N E E E E 
+E E E T(P,ll) N G G Q(f) G R G Q(f) G G N T(P,ur) E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E E X(c,d) N E E E E E E E E E N X(b,a) X(e,f) E E 
+E E E E N E E E E E E E E E N E E E E 
+X(f,e) E E E N E E E E E E E E E N E E E X(d,c) 
+S E E E N E E E E E E E E E N E E E W(1) 
 
 STARS:
 10000
-13000
-16000
-18000
+15000
 20000
+33000
+36000
 
 PaddleGrow 0
 PoisonPaddle 2
-BallSafetyNet 2
 Blackout 2
+BallSafetyNet 2
 UberBall 2
 BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
-LaserBulletPaddle 2
+LaserBulletPaddle 1
 PaddleShrink 2
 InvisiPaddle 2
 InvisiBall 2
-LaserBeamPaddle 0
-OmniLaserBall 2
+LaserBeamPaddle 1
+OmniLaserBall 1
+FlameBlasterPaddle 1
 FireBall 2
-RocketPaddle 2
+RocketPaddle 0
 GhostBall 2
 BallShrink 2
 UpsideDown 2
@@ -61,10 +64,13 @@ MultiBall5 2
 BallCam 2
 MagnetPaddle 2
 MultiBall3 2
-IceBall 2
+RemoteControlRocket 0
+IceBall 0
+IceBlasterPaddle 0
+MineLauncherPaddle 0
 SlowBall 2
+FastBall 2
 GravityBall 2
 CrazyBall 2
 Random 2
-FastBall 2
-PaddleCam 2
+PaddleCam 0
