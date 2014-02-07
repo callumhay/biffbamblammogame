@@ -2,7 +2,7 @@
  * PortalBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 License
- * Callum Hay, 2011
+ * Callum Hay, 2011-2014
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -13,6 +13,7 @@
 #include "Projectile.h"
 #include "GameBall.h"
 #include "GameEventManager.h"
+#include "GameModel.h"
 
 const unsigned long PortalBlock::TIME_BETWEEN_BALL_USES_IN_MILLISECONDS = 650;
 
@@ -118,6 +119,11 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	UNUSED_PARAMETER(gameModel);
 
+    // If the ball is looping through portal blocks then increase the ball's boost faster...
+    if (ball.IsLastPieceCollidedWith(this->sibling)) {
+        gameModel->AddPercentageToBoostMeter(0.25);
+    }
+
 	// Tell the ball what the last piece it collided with was the sibling so it doesn't
 	// keep teleporting back and forth between this and its sibling...
 	ball.SetLastPieceCollidedWith(this->sibling);
@@ -192,7 +198,7 @@ void PortalBlock::ResetPortalColourGenerator() {
  * this helps distinguish, to the user, what portals match up.... and it looks prettier.
  */
 Colour PortalBlock::GeneratePortalColour() {
-	static const int MAX_PORTAL_COLOURS = 8;
+	static const int MAX_PORTAL_COLOURS = 9;
 	
 	static std::vector<Colour> nonUsedPortalColours;
 	static std::vector<Colour> usedPortalColours;
@@ -205,13 +211,14 @@ Colour PortalBlock::GeneratePortalColour() {
 		// We multiply all the colours by fractions to make sure they aren't over
 		// saturated when rendered
 		nonUsedPortalColours.push_back(0.8f * Colour(0.8627f, 0.07843f, 0.2353f));	// 1 Crimson
-		nonUsedPortalColours.push_back(0.8f * Colour(0.58f, 0.0f, 0.8274f));        // 2 Dark Violet
+		nonUsedPortalColours.push_back(0.8f * Colour(0.8274f, 0.0f, 0.8274f));      // 2 Magenta
 		nonUsedPortalColours.push_back(0.8f * Colour(0.4117f, 0.3490f, 0.8039f));   // 3 Blueish-Purple
 		nonUsedPortalColours.push_back(0.8f * Colour(0.3882f, 0.72157f, 1.0f));	    // 4 Steely-sky Blue
 		nonUsedPortalColours.push_back(0.8f * Colour(0.0f, 0.8078f, 0.8196f));      // 5 Dark Turquoise
 		nonUsedPortalColours.push_back(0.8f * Colour(0.0f, 0.788f, 0.3412f));       // 6 Emerald Green
-		nonUsedPortalColours.push_back(0.7f * Colour(1.0f, 0.65f, 0.12f));          // 7 Orangish-yellow
+		nonUsedPortalColours.push_back(0.7f * Colour(1.0f, 0.65f, 0.12f));          // 7 Orangeish-yellow
 		nonUsedPortalColours.push_back(0.7f * Colour(0.7529f, 1.0f, 0.2431f));      // 8 Yellowish-green
+        nonUsedPortalColours.push_back(0.8f * Colour(0x33CC2B));                    // 9 Deep Green
 
 		PortalBlock::portalGeneratorReset = false;
 	}

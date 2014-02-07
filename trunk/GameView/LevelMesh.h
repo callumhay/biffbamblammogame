@@ -20,6 +20,7 @@
 #include "LaserTurretBlockMesh.h"
 #include "MineTurretBlockMesh.h"
 #include "RocketTurretBlockMesh.h"
+#include "OneWayBlockMesh.h"
 
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/ObjReader.h"
@@ -46,7 +47,6 @@ class LaserTurretBlockMesh;
 class RocketTurretBlockMesh;
 class MineTurretBlockMesh;
 class AlwaysDropBlockMesh;
-class OneWayBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 class BossMesh;
@@ -175,16 +175,9 @@ inline void LevelMesh::DrawPiecesPostEffects(double dT, const Camera& camera, co
     this->rocketTurretBlock->DrawPostEffects(dT, camera);
 }
 
-inline void LevelMesh::LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {
-	this->statusEffectRenderer->AddLevelPieceStatus(piece, status);
-}
-
-inline void LevelMesh::LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {
-	this->statusEffectRenderer->RemoveLevelPieceStatus(piece, status);
-}
-
 inline void LevelMesh::LevelPieceAllStatusRemoved(const LevelPiece& piece) {
-	this->statusEffectRenderer->RemoveAllLevelPieceStatus(piece);
+    this->statusEffectRenderer->RemoveAllLevelPieceStatus(piece);
+    this->oneWayBlock->IceCubeStatusRemoved(&piece);
 }
 
 inline void LevelMesh::DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture) {

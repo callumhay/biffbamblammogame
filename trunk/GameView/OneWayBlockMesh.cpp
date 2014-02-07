@@ -30,18 +30,36 @@ OneWayBlockMesh::~OneWayBlockMesh() {
     UNUSED_VARIABLE(success);
 }
 
-void OneWayBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+void OneWayBlockMesh::DrawRegularPass(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                                      const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    UNUSED_PARAMETER(dT);
+
+    for (std::map<const LevelPiece*, Mesh*>::const_iterator iter = this->frozenOneWayBlocks.begin();
+        iter != this->frozenOneWayBlocks.end(); ++iter) {
+
+            const LevelPiece* block = iter->first;
+            const Point2D& blockCenter = block->GetCenter();
+            Mesh* currMesh = iter->second;
+
+            glPushMatrix();
+            // Translate to the piece location in the game model...
+            glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+            currMesh->Draw(camera, keyLight, fillLight, ballLight);
+            glPopMatrix();
+    }
+}
+
+void OneWayBlockMesh::DrawTransparentNoBloomPass(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     UNUSED_PARAMETER(dT);
 
     glPushAttrib(GL_CURRENT_BIT);
-    glColor4f(1, 1, 1, 0.75f); // One way blocks are partially transparent
+    glColor4f(1, 1, 1, 0.75f); // One way blocks are partially transparent in this pass
 
-    for (std::map<const OneWayBlock*, Mesh*>::const_iterator iter = this->oneWayBlocks.begin();
-         iter != this->oneWayBlocks.end(); ++iter) {
+    for (std::map<const LevelPiece*, Mesh*>::const_iterator iter = this->notFrozenOneWayBlocks.begin();
+         iter != this->notFrozenOneWayBlocks.end(); ++iter) {
 
-        const OneWayBlock* block = iter->first;
-        assert(block != NULL);
+        const LevelPiece* block = iter->first;
         const Point2D& blockCenter = block->GetCenter();
         Mesh* currMesh = iter->second;
 

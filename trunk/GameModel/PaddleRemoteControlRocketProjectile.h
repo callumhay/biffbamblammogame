@@ -14,6 +14,8 @@
 
 #include "RocketProjectile.h"
 
+class PortalBlock;
+
 /**
  * Projectile for the rocket shot from the player paddle when the player acquires a rocket paddle item.
  */
@@ -32,6 +34,8 @@ public:
     PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy);
 	~PaddleRemoteControlRocketProjectile();
     
+    void LevelPieceCollisionOccurred(LevelPiece* block);
+
     void Setup(GameModel& gameModel);
     void Teardown(GameModel& gameModel);
 
@@ -80,6 +84,8 @@ private:
     static const double RATE_OF_FUEL_CONSUMPTION;
     static const float FUEL_AMOUNT_TO_START_FLASHING;
 
+    static const double PORTAL_COLLISION_RESET_TIME;
+
     double fuelTimeCountdown; // Time until fuel runs out
     float currFuelAmt;        // [0, 100] level of the fuel left in this rocket, when fuel runs out it explodes
     float currFlashColourAmt; // [0, 1] Amount of colour to apply to flashing
@@ -91,6 +97,9 @@ private:
 
     float currAppliedThrust;           // The current applied thrust magnitude
     double timeUntilThrustIsAvailable; // Countdown until when thrust can be used again
+
+    double resetPortalRecollisionCountdown;
+    PortalBlock* lastPortalCollidedWith;
 
     Vector2D GetAppliedAcceleration() const { return this->currAppliedAccelMag * this->currAppliedAccelDir; }
     void SetAppliedAcceleration(const Vector2D& accel);

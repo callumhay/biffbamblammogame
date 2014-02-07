@@ -647,13 +647,13 @@ void PlayerPaddle::AddSpecialStatus(int32_t status) {
     }
 
     // Check whether the paddle was just frozen
-    if (frozenChange) {
+    if ((status & PlayerPaddle::FrozenInIceStatus) != 0x0) {
         this->frozenCountdown = PADDLE_FROZEN_TIME_IN_SECS;
         // EVENT: Paddle was just frozen
         GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::FrozenInIceStatus, true);
     }
     // Check whether the paddle was just set on fire
-    if (onFireChange) {
+    if ((status & PlayerPaddle::OnFireStatus) != 0x0) {
         this->onFireCountdown = PADDLE_ON_FIRE_TIME_IN_SECS;
         // EVENT: Paddle was just set on fire
         GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::OnFireStatus, true);

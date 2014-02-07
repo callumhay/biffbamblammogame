@@ -12,6 +12,7 @@
 #include "PaddleRemoteControlRocketProjectile.h"
 #include "GameModel.h"
 #include "GameTransformMgr.h"
+#include "PortalBlock.h"
 
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_HEIGHT_DEFAULT = 1.5f;
 const float PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT  = 0.69f;
@@ -21,7 +22,7 @@ const double PaddleRemoteControlRocketProjectile::TIME_BEFORE_FUEL_RUNS_OUT_IN_S
 const float PaddleRemoteControlRocketProjectile::MAX_VELOCITY_BEFORE_THRUST = 4.5f;
 const float PaddleRemoteControlRocketProjectile::MAX_VELOCITY_WITH_THRUST   = 14.0f;
 
-const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_ACCELERATION       = 9.0f; 
+const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_ACCELERATION       = 10.0f; 
 const float PaddleRemoteControlRocketProjectile::DECELLERATION_OF_APPLIED_ACCEL = 16.0f;
 
 const float PaddleRemoteControlRocketProjectile::MAX_APPLIED_THRUST        = 50.0f; 
@@ -32,20 +33,37 @@ const float PaddleRemoteControlRocketProjectile::STARTING_FUEL_AMOUNT          =
 const double PaddleRemoteControlRocketProjectile::RATE_OF_FUEL_CONSUMPTION     = STARTING_FUEL_AMOUNT / TIME_BEFORE_FUEL_RUNS_OUT_IN_SECS;
 const float PaddleRemoteControlRocketProjectile::FUEL_AMOUNT_TO_START_FLASHING = 33.0f;
 
+const double PaddleRemoteControlRocketProjectile::PORTAL_COLLISION_RESET_TIME = LevelPiece::HALF_PIECE_WIDTH;
+
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(
     const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height) :
 RocketProjectile(spawnLoc, rocketVelDir, width, height), currAppliedAccelDir(0.0f, 0.0f), currAppliedAccelMag(0.0f),
 currAppliedThrust(0.0f), currFuelAmt(STARTING_FUEL_AMOUNT), currFlashColourAmt(0.0f), currFlashFreq(0), flashTimeCounter(0),
-timeUntilThrustIsAvailable(0.0) {
+timeUntilThrustIsAvailable(0.0), resetPortalRecollisionCountdown(-1), lastPortalCollidedWith(NULL) {
 }
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy) : 
 RocketProjectile(copy), currAppliedAccelDir(copy.currAppliedAccelDir), currAppliedAccelMag(copy.currAppliedAccelMag),
 currAppliedThrust(copy.currAppliedThrust), currFuelAmt(copy.currFuelAmt), currFlashColourAmt(copy.currFlashColourAmt), 
-currFlashFreq(copy.currFlashFreq), flashTimeCounter(copy.flashTimeCounter), timeUntilThrustIsAvailable(copy.timeUntilThrustIsAvailable) {
+currFlashFreq(copy.currFlashFreq), flashTimeCounter(copy.flashTimeCounter), timeUntilThrustIsAvailable(copy.timeUntilThrustIsAvailable),
+resetPortalRecollisionCountdown(copy.resetPortalRecollisionCountdown), lastPortalCollidedWith(copy.lastPortalCollidedWith) {
 }
 
 PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
+}
+
+void PaddleRemoteControlRocketProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
+    // If we collide with a portal block then we'll need to set a timer to get rid of the last thing this
+    // rocket collided with since the player could redirect the rocket back through the portal block and we want
+    // to allow this...
+    if (block->GetType() == LevelPiece::Portal) {
+        this->resetPortalRecollisionCountdown = PORTAL_COLLISION_RESET_TIME;
+        this->lastPortalCollidedWith = static_cast<PortalBlock*>(block)->GetSiblingPortal();
+    }
+    else {
+        this->resetPortalRecollisionCountdown = -1;
+        this->lastPortalCollidedWith = NULL;
+    }
 }
 
 /// <summary>
@@ -108,6 +126,24 @@ void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& 
         this->timeUntilThrustIsAvailable -= seconds;
         if (this->timeUntilThrustIsAvailable < 0.0) {
             this->timeUntilThrustIsAvailable = 0.0;
+        }
+
+        // Check to see if we should reset the last portal collision 
+        if (this->resetPortalRecollisionCountdown != -1) {
+            if (this->resetPortalRecollisionCountdown <= 0.0) {
+
+                assert(this->lastPortalCollidedWith != NULL);
+                if (this->lastThingCollidedWith == this->lastPortalCollidedWith ||
+                    this->lastThingCollidedWith == this->lastPortalCollidedWith->GetSiblingPortal()) {
+                    this->SetLastThingCollidedWith(NULL);
+                }
+
+                this->lastPortalCollidedWith = NULL;
+                this->resetPortalRecollisionCountdown = -1;
+            }
+            else {
+                this->resetPortalRecollisionCountdown -= seconds;
+            }
         }
     }
 

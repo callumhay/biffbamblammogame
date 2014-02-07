@@ -270,30 +270,6 @@ void Bezier::GeneratePointsAlongBezier2D(const std::vector<Point2D>& bezierContr
             t += step;
         }
     }
-
-    /*
-    double t = 0;
-    double step = 1.0 / static_cast<double>(numPointsToGenerate - 1);
-    int numOfKnots = static_cast<int>(bezierControlPts.size()) / 2;
- 
-    for (int i1 = 0; i1 != numPointsToGenerate; i1++) {
-        
-        if ((1.0 - t) < 5e-6) {
-            t = 1.0;
-        }
- 
-        Point2D newPoint(0.0, 0.0);
-        for (int i = 0; i != numOfKnots; i++) {
-
-            double basis = Bernstein(numOfKnots-1, i, t);
-            newPoint[0] += basis * bezierControlPts[i][0];
-            newPoint[1] += basis * bezierControlPts[i][1];
-        }
-        generatedPointsOnCurve.push_back(newPoint);
- 
-        t += step;
-    }
-    */
 }
 
 double Bezier::Ni(int n, int i) {

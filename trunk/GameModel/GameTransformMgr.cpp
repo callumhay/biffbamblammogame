@@ -242,17 +242,16 @@ void GameTransformMgr::SetBulletTimeCamera(bool turnOnBulletTimeCam) {
         animType = GameTransformMgr::FromBulletTimeCamAnimation;
     }
 
+    TransformAnimation transformAnim(animType);
+    transformAnim.data = &this->currCamOrientation;
+
     // Remove any existing bullet time animations from the animation queue
     for (std::list<TransformAnimation>::iterator iter = this->animationQueue.begin(); iter != this->animationQueue.end();) {
         GameTransformMgr::TransformAnimationType type = iter->type;
         if (type == GameTransformMgr::ToBulletTimeCamAnimation ||
             type == GameTransformMgr::FromBulletTimeCamAnimation) {
 
-            if (!iter->hasStarted) {
-                // Make sure the stored orientation is initialized properly
-                this->storedOriBeforeBulletTimeCam = this->currCamOrientation;
-            }
-
+            transformAnim.data = &this->storedOriBeforeBulletTimeCam;
             iter = this->animationQueue.erase(iter);
         }
         else {
@@ -260,7 +259,6 @@ void GameTransformMgr::SetBulletTimeCamera(bool turnOnBulletTimeCam) {
         }
     }
 
-	TransformAnimation transformAnim(animType);
 	this->animationQueue.push_front(transformAnim);
 }
 
@@ -654,7 +652,8 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                         if (this->followBallTimeCounter == 0.0) {
                             this->camTAtStartOfFollow = this->currCamOrientation.GetTranslation();
                         }
-                        this->followBallTimeCounter = std::min<double>(this->followBallTimeCounter + dT, GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
+                        this->followBallTimeCounter = std::min<double>(this->followBallTimeCounter + (ball->GetSpeed()/GameBall::GetNormalSpeed())*dT, 
+                            GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
                         Vector2D newTranslation = NumberFuncs::LerpOverTime<Vector2D>(0.0, 
                             GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfFollow.ToVector2D(), 
                             Vector2D(closestPt[0], closestPt[1]), this->followBallTimeCounter);
@@ -670,12 +669,13 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                                 this->camTAtStartOfUnfollow = this->currCamOrientation.GetTranslation();
                             }
 
-                            this->unfollowBallTimeCounter = std::min<double>(this->unfollowBallTimeCounter + dT, GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
+                            this->unfollowBallTimeCounter = std::min<double>(this->unfollowBallTimeCounter + (ball->GetSpeed()/GameBall::GetNormalSpeed())*dT, 
+                                GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
                             Vector2D newTranslation = NumberFuncs::LerpOverTime<Vector2D>(0.0, 
                                 GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfUnfollow.ToVector2D(), 
                                 this->defaultCamOrientation.GetTranslation2D(), this->unfollowBallTimeCounter);
                             
-                            this->currCamOrientation.SetTranslation(Vector3D(newTranslation, this->currCamOrientation.GetTZ()));
+                            this->currCamOrientation.SetTranslation(Vector3D(newTranslation, this->defaultCamOrientation.GetTZ()));
                         }
 
                         this->followBallTimeCounter = 0.0;
@@ -1478,7 +1478,7 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
 
         this->bulletTimeCamAnimation.SetLerp(timeVals, orientVals);
         this->bulletTimeCamAnimation.SetRepeat(false);
-        this->storedOriBeforeBulletTimeCam = this->currCamOrientation;
+        this->storedOriBeforeBulletTimeCam = *static_cast<Orientation3D*>(bulletTimeAnim.data);
     }
     else {
         this->bulletTimeCamAnimation.SetLerp(BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS, this->storedOriBeforeBulletTimeCam);
