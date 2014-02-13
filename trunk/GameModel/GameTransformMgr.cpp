@@ -57,7 +57,7 @@ void GameTransformMgr::ClearSpecialCamEffects() {
 	}
 
 	if (this->paddleWithCamera != NULL) {
-		this->paddleWithCamera->SetPaddleCamera(false, 0);
+		this->paddleWithCamera->SetPaddleCamera(false);
 		this->paddleWithCamera = NULL;
 	}
 
@@ -148,6 +148,7 @@ void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
 		
         if (previousType == GameTransformMgr::ToPaddleCamAnimation || 
             previousType == GameTransformMgr::FromPaddleCamAnimation) {
+
 			this->animationQueue.pop_back();
 		}
         else if (previousType == GameTransformMgr::ToBulletTimeCamAnimation || 
@@ -700,7 +701,11 @@ void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, fl
 	Vector3D worldSpaceTranslation(worldSpacePaddlePos[0], worldSpacePaddlePos[1], 0.0f);
 	
 	paddleCamPos = this->GetGameXYZTransform() * worldSpaceTranslation;
-	fov = 2.0f * Trig::radiansToDegrees(atan(paddle.GetHalfWidthTotal() / DIST_FROM_PADDLE));
+
+    // N.B., We take a fraction of the half width so that the FOV covers a little bit less than the
+    // total width of the paddle, this gives the player a bit of leeway if the ball is just on or slightly off the edge
+    // of the screen when it's coming down to the paddle in paddle camera mode
+	fov = 2.0f * Trig::radiansToDegrees(atan(0.85f * paddle.GetHalfWidthTotal() / DIST_FROM_PADDLE));
 }
 
 /**
@@ -1033,6 +1038,8 @@ bool GameTransformMgr::TickPaddleCamAnimation(double dT, GameModel& gameModel) {
  * the current paddle camera animation from the animation queue as well.
  */
 void GameTransformMgr::FinishPaddleCamAnimation(double dT, GameModel& gameModel) {
+    UNUSED_PARAMETER(dT);
+
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& paddleCamAnim = this->animationQueue.front();
 	assert(paddleCamAnim.type == GameTransformMgr::ToPaddleCamAnimation || paddleCamAnim.type == GameTransformMgr::FromPaddleCamAnimation);
@@ -1043,10 +1050,10 @@ void GameTransformMgr::FinishPaddleCamAnimation(double dT, GameModel& gameModel)
 	// Tell the paddle whether it's in or out of paddle camera mode
 	if (paddleCamAnim.type == GameTransformMgr::ToPaddleCamAnimation) {
 		this->paddleWithCamera = gameModel.GetPlayerPaddle();
-		this->paddleWithCamera->SetPaddleCamera(true, dT);
+		this->paddleWithCamera->SetPaddleCamera(true);
 	}
 	else {
-		gameModel.GetPlayerPaddle()->SetPaddleCamera(false, dT);
+		gameModel.GetPlayerPaddle()->SetPaddleCamera(false);
 		this->paddleWithCamera = NULL;
 	}
 

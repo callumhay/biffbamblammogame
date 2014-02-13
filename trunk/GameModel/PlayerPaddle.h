@@ -227,16 +227,7 @@ public:
     void ClearSpecialStatus() { this->RemoveSpecialStatus(PlayerPaddle::AllStatus); }
 
 	// Paddle camera set/get functions
-	void SetPaddleCamera(bool isPaddleCamOn, double dT) {
-		this->isPaddleCamActive = isPaddleCamOn;
-		
-		// When the paddle camera is on, we change the collision boundaries to
-		// be more natural to the vision of the paddle cam
-		this->SetDimensions(this->currSize);
-		if (!isPaddleCamOn) {
-			this->MoveAttachedObjectsToNewBounds(dT);
-		}
-	}
+	void SetPaddleCamera(bool isPaddleCamOn);
 	bool GetIsPaddleCameraOn() const {
 		return this->isPaddleCamActive;
 	}
@@ -282,7 +273,7 @@ public:
 	void UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision);
 
     const Collision::LineSeg2D& GetBottomCollisionLine() const { return this->bounds.GetLine(3); }
-    const Vector2D& GetBottomCollisionNormal() const { return this->bounds.GetNormal(3); }
+    const Vector2D& GetBottomCollisionNormal() const {return this->bounds.GetNormal(3); }
 
 	// TODO: Add the parameter: "bool includeAttachedBallCheck" to all paddle collision checks...
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, 
@@ -415,7 +406,7 @@ private:
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
 	void FireAttachedBall();
     void FireAttachedProjectile();
-	void MoveAttachedObjectsToNewBounds(double dT);
+	void MoveAttachedObjectsToNewBounds();
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
     void OrbProjectileCollision(const Projectile& projectile);

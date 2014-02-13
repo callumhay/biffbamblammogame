@@ -46,9 +46,6 @@ private:
     static const double LEVEL_DISPLAY_FADE_IN_ANIMATE_TIME;
     static const double LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME;
 
-    static const char* BOOST_MALFUNCTION_TEXT;
-    static const char* CANNON_OBSTRUCTION_MALFUNCTION_TEXT;
-
     MalfunctionTextHUD* boostMalfunctionHUD;
     MalfunctionTextHUD* cannonObstructionHUD; 
    

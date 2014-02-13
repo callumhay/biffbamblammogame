@@ -451,6 +451,11 @@ public:
     // FUTURISM BOSS
     // TODO
 
+
+    // Static Constants
+    static const char* BOOST_MALFUNCTION_TEXT;
+    static const char* CANNON_OBSTRUCTION_MALFUNCTION_TEXT;
+
     const Colour& GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const;
     const Colour& GetMultiplierColour(int multiplier);
     

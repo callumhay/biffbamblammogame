@@ -377,6 +377,9 @@ void BallInPlayState::Tick(double seconds) {
 						        continue;
 					        }
                         }
+                        else {
+                            currBall->SetLastThingCollidedWith(paddle);
+                        }
 				    }
 
 				    // Do ball-paddle collision

@@ -140,6 +140,8 @@ public:
     void ActionBallCameraCannonRotation(const GameBall& ball, const CannonBlock& cannon, bool canShootWithoutObstruction);
     void ActionCantFireBallCamFromCannon();
 
+    void ActionPaddleCameraSetOrUnset(const PlayerPaddle& paddle, bool isSet);
+
     void ActionReleaseTimerStarted();
 
 	void ActionProjectileSpawned(const Projectile& projectile);

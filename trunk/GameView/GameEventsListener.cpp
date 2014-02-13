@@ -24,6 +24,7 @@
 #include "BallBoostHUD.h"
 #include "BallReleaseHUD.h"
 #include "BallCamHUD.h"
+#include "PaddleCamHUD.h"
 #include "BallSafetyNetMesh.h"
 #include "BossMesh.h"
 #include "PaddleStatusEffectRenderer.h"
@@ -1648,12 +1649,12 @@ void GameEventsListener::BallBoostLostEvent(bool allBoostsLost) {
 void GameEventsListener::BoostFailedDueToNoBallsAvailableEvent() {
     GameAssets* assets = this->display->GetAssets();
     
+    long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+    bool doSound = (currSystemTime - this->timeOfLastBoostMalfunctionInMS) > 
+        SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS;
+
     // Check to see if the ball / paddle camera is on...
     if (GameBall::GetIsBallCameraOn()) {
-
-        long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-        bool doSound = (currSystemTime - this->timeOfLastBoostMalfunctionInMS) > 
-            SOUND_WAIT_TIME_BETWEEN_BOOST_MALFUNCTIONS_IN_MS;
 
         if (assets->GetBallCamHUD()->GetIsBoostMalfunctionHUDActive() && doSound) {
             // Play the sound for when a ball can't boost due to malfunction
@@ -1664,7 +1665,14 @@ void GameEventsListener::BoostFailedDueToNoBallsAvailableEvent() {
         assets->GetBallCamHUD()->ActivateBoostMalfunctionHUD();
     }
     else if (this->display->GetModel()->GetPlayerPaddle()->GetIsPaddleCameraOn()) {
-        //assets->GetPaddleCamHUD()->ActivateBoostMalfunctionHUD();
+        
+        if (assets->GetPaddleCamHUD()->GetIsBoostMalfunctionHUDActive() && doSound) {
+            // Play the sound for when a ball can't boost due to malfunction
+            this->display->GetSound()->PlaySound(GameSound::BoostAttemptWhileMalfunctioningEvent, false, true, 1.0f);
+            this->timeOfLastBoostMalfunctionInMS = currSystemTime;
+        }
+
+        assets->GetPaddleCamHUD()->ActivateBoostMalfunctionHUD();
     }
 }
 
@@ -1724,6 +1732,20 @@ void GameEventsListener::CantFireBallCamFromCannonEvent() {
         assets->GetBallCamHUD()->ActivateCannonObstructionHUD();
     }
     debug_output("EVENT: Can't shoot ball from cannon due to obstruction.");
+}
+
+void GameEventsListener::PaddleCameraSetOrUnsetEvent(const PlayerPaddle& paddle, bool isSet) {
+    UNUSED_PARAMETER(paddle);
+
+    GameAssets* assets = this->display->GetAssets();
+    if (isSet) {
+        assets->GetPaddleCamHUD()->Activate();
+        debug_output("EVENT: Paddle camera set");
+    }
+    else {
+        assets->GetPaddleCamHUD()->Deactivate();
+        debug_output("EVENT: Paddle camera unset");
+    }
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

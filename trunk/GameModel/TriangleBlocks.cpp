@@ -69,13 +69,13 @@ bool SolidTriangleBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT
 }
 
 void SolidTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-																			const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-																			const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-																			const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                                      const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                      const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	// If the triangle block is in ice then its bounds are a basic rectangle...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		LevelPiece::UpdateSolidRectBlockBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+		LevelPiece::UpdateSolidRectBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
             topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	}
 	else {

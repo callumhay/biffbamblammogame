@@ -566,6 +566,13 @@ void GameEventManager::ActionCantFireBallCamFromCannon() {
     }
 }
 
+void GameEventManager::ActionPaddleCameraSetOrUnset(const PlayerPaddle& paddle, bool isSet) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleCameraSetOrUnsetEvent(paddle, isSet);
+    }
+}
+
 // Action for when the release timer starts up
 void GameEventManager::ActionReleaseTimerStarted() {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

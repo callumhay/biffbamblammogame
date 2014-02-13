@@ -43,7 +43,8 @@ public:
 		this->idleAlpha = alpha;
 	}
 	
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void Tick(double dT);
+	void Draw(const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
     const Point2D& GetSafetyNetCenterPosition() const;
 

@@ -20,6 +20,7 @@
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
 #include "BallCamHUD.h"
+#include "PaddleCamHUD.h"
 #include "MenuBackgroundRenderer.h"
 
 #include "../ESPEngine/ESPPointEmitter.h"
@@ -135,6 +136,7 @@ paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
     assets->GetBoostHUD()->Reinitialize();
     assets->GetPointsHUD()->Reinitialize();
     assets->GetBallCamHUD()->Reinitialize();
+    assets->GetPaddleCamHUD()->Reinitialize();
     assets->ReinitializeSkipLabel();
 
     // Special case: If the level is a boss level then all the lights start off and no music plays...

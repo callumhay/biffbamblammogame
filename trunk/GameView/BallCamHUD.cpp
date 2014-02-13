@@ -11,6 +11,7 @@
 
 #include "BallCamHUD.h"
 #include "GameAssets.h"
+#include "GameViewConstants.h"
 
 #include "../BlammoEngine/FBObj.h"
 #include "../GameModel/CannonBlock.h"
@@ -20,9 +21,6 @@ const float BallCamHUD::ROTATE_HINT_BOTTOM_FROM_SCREEN_BOTTOM = 150.0f;
 
 const double BallCamHUD::LEVEL_DISPLAY_FADE_IN_ANIMATE_TIME  = 1.0;
 const double BallCamHUD::LEVEL_DISPLAY_FADE_OUT_ANIMATE_TIME = 0.5;
-
-const char* BallCamHUD::BOOST_MALFUNCTION_TEXT              = ">>WARNING:\n>>BOOST MALFUNCTION?!";
-const char* BallCamHUD::CANNON_OBSTRUCTION_MALFUNCTION_TEXT = ">>ERROR:\n>>OBSTRUCTION DETECTED!";
 
 const float BallCamHUD::BALL_CAM_FG_KEY_LIGHT_Z_POS  = 0.0f;   // This should always be zero!!! (otherwise there will be a mismatch between the ball light and key light)
 const float BallCamHUD::BALL_CAM_FG_FILL_LIGHT_Z_POS = -10.0f;
@@ -34,8 +32,8 @@ cannonFireHint(assets.GetTutorialAssets(), "Fire Cannon"),
 cannonCountdown(CannonBlock::BALL_CAMERA_ROTATION_TIME_IN_SECS), 
 cannonHUDActive(false), canShootCannon(false) {
 
-    this->boostMalfunctionHUD  = new MalfunctionTextHUD(BOOST_MALFUNCTION_TEXT, assets.GetSound());
-    this->cannonObstructionHUD = new MalfunctionTextHUD(CANNON_OBSTRUCTION_MALFUNCTION_TEXT, assets.GetSound());
+    this->boostMalfunctionHUD  = new MalfunctionTextHUD(GameViewConstants::BOOST_MALFUNCTION_TEXT, assets.GetSound());
+    this->cannonObstructionHUD = new MalfunctionTextHUD(GameViewConstants::CANNON_OBSTRUCTION_MALFUNCTION_TEXT, assets.GetSound());
 
     this->levelOverlayHUDWidth  = static_cast<int>(GameDisplay::GetTextScalingFactor()*360);
     this->levelOverlayHUDHeight = static_cast<int>(GameDisplay::GetTextScalingFactor()*270);

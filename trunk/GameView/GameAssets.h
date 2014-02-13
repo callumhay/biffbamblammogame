@@ -51,6 +51,7 @@ class BallBoostHUD;
 class BallReleaseHUD;
 class RemoteControlRocketHUD;
 class BallCamHUD;
+class PaddleCamHUD;
 class MalfunctionTextHUD;
 class ButtonTutorialHint;
 class StickyPaddleGoo;
@@ -79,7 +80,7 @@ public:
 	void Tick(double dT, const GameModel& gameModel);
 
 	// Draw functions ******************************************************************************
-	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera);
+	void DrawPaddle(double dT, const GameModel& gameModel, const Camera& camera);
 	void DrawPaddlePostEffects(double dT, GameModel& gameModel, const Camera& camera, FBObj* sceneFBO);
 
 	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Vector2D& worldT);
@@ -190,6 +191,9 @@ public:
     BallCamHUD* GetBallCamHUD() const {
         return this->ballCamHUD;
     }
+    PaddleCamHUD* GetPaddleCamHUD() const {
+        return this->paddleCamHUD;
+    }
 
     GameSound* GetSound() const {
         return this->sound;
@@ -230,6 +234,7 @@ private:
     BallReleaseHUD* ballReleaseHUD;
     RemoteControlRocketHUD* remoteControlRocketHUD;
     BallCamHUD* ballCamHUD;
+    PaddleCamHUD* paddleCamHUD;
 
     ButtonTutorialHint* skipLabel;
 
@@ -314,21 +319,6 @@ inline void GameAssets::DrawNoBloomLevelPieces(double dT, const Camera& camera) 
     LevelMesh* lvlMesh = this->GetCurrentLevelMesh();
     lvlMesh->DrawNoBloomPieces(dT, camera, fgKeyLight, fgFillLight, ballLight);
     lvlMesh->DrawTransparentNoBloomPieces(dT, camera, fgKeyLight, fgFillLight, ballLight);
-}
-
-inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {
-	BasicPointLight fgKeyLight, fgFillLight, ballLight;
-	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-
-	// If the ball safety net is active then we draw it
-	if (gameModel.IsSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
-        GameLevel* currLevel = gameModel.GetCurrentLevel();
-        
-        glPushMatrix();
-		glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + SafetyNet::SAFETY_NET_HALF_HEIGHT + 0.1f), 0.0f);
-		this->ballSafetyNet->Draw(dT, camera, fgKeyLight, fgFillLight, ballLight);
-		glPopMatrix();
-	}
 }
 
 // Draw the block status effects
