@@ -249,13 +249,45 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float d
 	this->currAnimation = BallSafetyNetMesh::DestructionAnimation;
 }
 
+void BallSafetyNetMesh::Tick(double dT) {
+  
+    // Check to see whether we're playing an animation or just drawing the safety net normally
+    switch (this->currAnimation) {
+
+        case BallSafetyNetMesh::CreationAnimation:{
+            bool creationAnimComplete = this->pieceFadeAnim.Tick(dT);
+            if (creationAnimComplete) {
+                this->currAnimation = BallSafetyNetMesh::Idle;
+            }
+            break;
+        }
+            
+        case BallSafetyNetMesh::DestructionAnimation: {
+            bool leftFinished  = this->leftPieceAnim.Tick(dT);
+            bool rightFinished = this->rightPieceAnim.Tick(dT);
+            this->pieceFadeAnim.Tick(dT);
+
+            if (leftFinished && rightFinished) {
+                this->currAnimation = BallSafetyNetMesh::Dead;
+            }
+            break;
+        }
+
+        case BallSafetyNetMesh::Idle:
+        case BallSafetyNetMesh::Dead:
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+}
+
 /**
  * Draw the active display lists for this mesh.
  */
-void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+void BallSafetyNetMesh::Draw(const Camera& camera, const BasicPointLight& keyLight, 
                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
-
-	// TODO: Creation animation?
 
 	// Set the appropriate light values for the shading material
 	this->shadingMaterial->SetKeyLight(keyLight);
@@ -279,12 +311,6 @@ void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const BasicPointLi
 			glPushAttrib(GL_CURRENT_BIT);
 			glColor4f(1.0f, 1.0f, 1.0f, this->pieceAlpha);
 			this->shadingMaterial->Draw(camera, this->displayListID);	
-			{
-				bool creationAnimComplete = this->pieceFadeAnim.Tick(dT);
-				if (creationAnimComplete) {
-					this->currAnimation = BallSafetyNetMesh::Idle;
-				}
-			}
 			glPopAttrib();
 			break;
 
@@ -308,17 +334,6 @@ void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const BasicPointLi
 			glRotatef(this->rightPieceOrient.GetRZ(), 0, 0, 1);
 			this->shadingMaterial->Draw(camera, this->rightPieceDispListID);
 			glPopMatrix();
-			
-			{
-				bool leftFinished  = this->leftPieceAnim.Tick(dT);
-				bool rightFinished = this->rightPieceAnim.Tick(dT);
-				this->pieceFadeAnim.Tick(dT);
-
-				if (leftFinished && rightFinished) {
-					this->currAnimation = BallSafetyNetMesh::Dead;
-				}
-			}
-
 			glPopAttrib();
 			break;
 

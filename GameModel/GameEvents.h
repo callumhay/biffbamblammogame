@@ -529,6 +529,17 @@ public:
      */
     virtual void CantFireBallCamFromCannonEvent() {}
 
+    /** 
+     * Event triggered when the paddle camera has been set or unset (this is after the full animation into or out of
+     * the paddle has been completed, respectively).
+     * Arguments: paddle - The paddle that has or had the camera in it.
+     *            isSet  - true if paddle camera mode was just fully activated, false if not.
+     */
+    virtual void PaddleCameraSetOrUnsetEvent(const PlayerPaddle& paddle, bool isSet) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(isSet);
+    }
+
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same
 	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side

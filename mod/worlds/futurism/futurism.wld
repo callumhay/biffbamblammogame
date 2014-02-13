@@ -33,15 +33,16 @@ resources/worlds/levels/medium/choose_your_own_adventure.lvl : 333
 resources/worlds/levels/medium/not_burning_any_bridges.lvl
 
 
-# TODO: ...
-resources/worlds/levels/medium/shutin.lvl
-
-
-
-
 # Camera Paddle Item intro
-# TODO
+resources/worlds/levels/hard/disorientation_precipitation_station.lvl
 
+# 10
+
+# 11
+
+# 12
+
+# 13
 
 
 # Tough level, where you use portal blocks to loop the ball, gaining boosts and
@@ -50,30 +51,21 @@ resources/worlds/levels/hard/loop_booster.lvl
 
 
 
+
+
+
+# Boss
+# TODO
+
+
 # FIND A PLACE FOR ALL OF THE BELOW LEVELS!!! **********************************************
 
 
-
-
-
-
+resources/worlds/levels/medium/shutin.lvl
 
 # Portal + Cannon
 resources/worlds/levels/medium/center_on_target.lvl
 
-
-
-
-
 # Portal + Cannon + Tesla... this one looks pretty boring though...
 resources/worlds/levels/medium/electric_fencing.lvl
 
-# Testing ------------------------------------------
-resources/worlds/testing/see_the_background.lvl
-resources/worlds/testing/an_almost_empty_level.lvl
-resources/worlds/testing/fast_points.lvl
-resources/worlds/testing/block_test.lvl
-resources/worlds/testing/turret_test.lvl
-resources/worlds/testing/block_outer_barrier_test.lvl
-resources/worlds/testing/regen_block_test.lvl
-# End Testing --------------------------------------

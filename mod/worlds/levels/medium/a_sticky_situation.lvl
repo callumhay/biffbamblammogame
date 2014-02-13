@@ -1,34 +1,42 @@
 A Sticky Situation
-16 22
-S S S S S S S S S S S S S S S S 
-S E E E E S R B O G D(StickyPaddle) G O B R S 
-S E E E E S R O Y G G G Y O R S 
-S E E E E S R O Y G G G Y O R S 
-S E E E E S I B O G G G O B I S 
-S E E E E S R O Y G G G Y O R S 
-S E E E E S R O Y Y I Y Y O R S 
-S E E E E S R B O O B O O B R S 
-S E G G E S R R R R R R R R R S 
-S E G G E S E E E E E E E E E S 
-S E E I E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E G E E G E E G E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E S E E E E E E E E E S 
-S E E E E E E E E E E E E E E S 
+23 30
+E E E E E E E E E E E E S S S S S S S S S S S 
+E E E E E E E E E E E E S R B O G D(StickyPaddle) G O B R S 
+E E E E E E E E E E E E S R O Y G G G Y O R S 
+S S S S S S S S S S S S S R O Y G G G Y O R S 
+S E E E S E E E S E E E S I B O G G G O B I S 
+S E K(StickyPaddle,StickyPaddle,StickyPaddle) E S E K(StickyPaddle,StickyPaddle,StickyPaddle) E S E K(StickyPaddle,StickyPaddle,StickyPaddle) E S R O Y G G G Y O R S 
+S E E E S E E E S E E E S R O Y Y I Y Y O R S 
+S E E E S E E E S E E E S R B O O B O O B R S 
+S E E E S E E E S E E E S R R R R R R R R R S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E G E S E G E S E G E S E G E E K(StickyPaddle,StickyPaddle,StickyPaddle) E E G E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S R R R R R R R R R S 
+S E E E S E E E S E E E S R B O O B O O B R S 
+S E E E S E E E S E E E S R O Y Y I Y Y O R S 
+S E G E S E G E S E G E S R O Y G G G Y O R S 
+S E E E S E E E S E E E S I B Y G G G Y B I S 
+S E E E S E E E S E E E S R O Y G G G Y O R S 
+S E E E S E E E S E E E S R O Y G G G Y O R S 
+S F(d) E F(d) S F(d) E F(d) S F(d) E F(d) S R B Y G K(StickyPaddle,StickyPaddle,StickyPaddle) G Y B R S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E S E E E S E E E S E E E E E E E E E S 
+S E E E E E E E E E E E S E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E E E E E E S 
 
 STARS:
-6000
-10500
-11500
-14000
-18000
+10000
+16500
+25000
+32000
+37500
 
 PaddleGrow 0
 PoisonPaddle 2
@@ -36,14 +44,15 @@ Blackout 2
 BallSafetyNet 2
 UberBall 2
 BallGrow 0
-StickyPaddle 0
 ShieldPaddle 2
+StickyPaddle 0
 LaserBulletPaddle 0
 PaddleShrink 3
 InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 0
 OmniLaserBall 1
+FlameBlasterPaddle 0
 FireBall 0
 RocketPaddle 0
 GhostBall 2
@@ -55,12 +64,13 @@ MagnetPaddle 0
 MultiBall3 0
 RemoteControlRocket 0
 IceBall 0
+IceBlasterPaddle 0
 MineLauncherPaddle 0
 SlowBall 2
-GravityBall 2
-CrazyBall 2
-Random 2
 FastBall 2
+Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 0
 
-PADDLESTARTXPOS: 26.25
+PADDLESTARTXPOS: 43.75

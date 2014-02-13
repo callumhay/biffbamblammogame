@@ -38,6 +38,9 @@ GameViewConstants* GameViewConstants::Instance = NULL;
 #define FUTURISM_MESH_DIRECTORY MESH_DIRECTORY "/futurism"
 #define FUTURISM_BOSS_MESH_DIRECTORY FUTURISM_MESH_DIRECTORY BOSS_DIRECTORY
 
+// Static constants
+const char* GameViewConstants::BOOST_MALFUNCTION_TEXT              = ">>WARNING:\n>>BOOST MALFUNCTION?!";
+const char* GameViewConstants::CANNON_OBSTRUCTION_MALFUNCTION_TEXT = ">>ERROR:\n>>OBSTRUCTION DETECTED!";
 
 GameViewConstants::GameViewConstants() :
 // Basic Asset Paths

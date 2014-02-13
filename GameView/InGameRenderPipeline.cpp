@@ -21,6 +21,7 @@
 #include "BallReleaseHUD.h"
 #include "RemoteControlRocketHUD.h"
 #include "BallCamHUD.h"
+#include "PaddleCamHUD.h"
 #include "CgFxCelOutlines.h"
 #include "MouseRenderer.h"
 
@@ -209,7 +210,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     this->DrawSpecialEmbeddedLabels(dT);
 
     // Paddle
-	assets->DrawPaddle(dT, *gameModel->GetPlayerPaddle(), camera);
+	assets->DrawPaddle(dT, *gameModel, camera);
 
     // Render the beam effects
     assets->DrawBeams(*gameModel, camera);
@@ -387,6 +388,8 @@ void InGameRenderPipeline::RenderHUD(double dT) {
     rocketHUD->Draw(dT, camera);
     BallCamHUD* ballCamHUD = gameAssets->GetBallCamHUD();
     ballCamHUD->Draw(dT, camera, *gameModel);
+    PaddleCamHUD* paddleCamHUD = gameAssets->GetPaddleCamHUD();
+    paddleCamHUD->Draw(dT, camera, *gameModel);
 
     // Draw the timers that are currently in existence
 	gameAssets->DrawTimers(dT, camera, *gameModel);

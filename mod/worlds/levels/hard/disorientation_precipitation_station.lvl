@@ -1,0 +1,72 @@
+Disorientation Precipitation Station
+21 28
+N N N N N N N N N N N N N N N N N E E E E 
+N E E E E E E E E E E E E E E E N E E E E 
+N E E E Q(f) E E E Q(f) E E E Q(f) E E E N E D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket){2} E E 
+N E E E D(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown){3} E E E D(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown){4} E E E D(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown){5} E E E N E E E E 
+S S D(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown){1} S S S D(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown){1} S S S D(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown){1} S S S D(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown){1} S S S S S E 
+S E E E E E E E E E E E E E E E F(r) E E T(S,ur) S 
+S E E E E E E E E E E E E E E E F(r) E E E W(1) 
+S E E E E E E E E E E E E E E E F(r) E E E S 
+S G G R R R R R R R R R R R R R S E E E S 
+S G G O O O O O O O O O O O O R S E E E W(3) 
+S G G Y Y Y Y Y Y Y Y Y Y Y O R W(5) E E E S 
+S G G E E E E E E E E E E E E E S E E E S 
+S G G G G G G G G G G G G G G G S E T(G,lr) E W(4) 
+S K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) G K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) G K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) G K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) G K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) G K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) G K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) G K(PaddleCam,PaddleCam,PaddleCam,BallCam,BallCam,BallCam,UpsideDown,UpsideDown,UpsideDown) W(4) E E E S 
+S G G G G G G G G G G G G G G G S E E E S 
+S E E E E E E E E E E E E E G G S E E E W(5) 
+S Y Y Y Y Y Y Y Y Y Y Y Y Y G G W(3) E E E S 
+S O O O O O O O O O O O O O G G S E E E S 
+S R R R R R R R R R R R R R G G S F(d) F(d) F(d) S 
+S E E E E E E E E E E E E E E E F(l) E E E S 
+S E E E E E E E E E E E E E E E F(l) E E E S 
+S E E E E E E E E E E E E E E E F(l) E E E S 
+S E E E E E E E E E E E E E E E F(l) E E E S 
+S E E E E E E E E E E E E E E E F(l) E E W(2) S 
+S E E E E E E E E E E E E E E E S S S S S 
+S E E E E E E E E E E E E E E E N E E E S 
+S E E E E E E E E E E E E E E E N E E E S 
+W(1) E E E E E E E E E E E E E E E N E E E S 
+
+STARS:
+9000
+16000
+22000
+30000
+35000
+
+PaddleGrow 0
+PoisonPaddle 0
+Blackout 2
+BallSafetyNet 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FlameBlasterPaddle 2
+FireBall 2
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 3
+MultiBall5 1
+BallCam 3
+MagnetPaddle 1
+MultiBall3 2
+RemoteControlRocket 0
+IceBall 2
+IceBlasterPaddle 2
+MineLauncherPaddle 2
+SlowBall 2
+FastBall 2
+GravityBall 0
+CrazyBall 0
+Random 2
+PaddleCam 3

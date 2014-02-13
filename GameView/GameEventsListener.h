@@ -109,6 +109,8 @@ public:
     void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon, bool canShootWithoutObstruction);
     void CantFireBallCamFromCannonEvent();
 
+    void PaddleCameraSetOrUnsetEvent(const PlayerPaddle& paddle, bool isSet);
+
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
 	void RocketExplodedEvent(const RocketProjectile& rocket);

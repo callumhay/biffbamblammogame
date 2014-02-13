@@ -29,6 +29,7 @@
 #include "RemoteControlRocketHUD.h"
 #include "MalfunctionTextHUD.h"
 #include "BallCamHUD.h"
+#include "PaddleCamHUD.h"
 #include "ButtonTutorialHint.h"
 #include "StickyPaddleGoo.h"
 #include "PaddleGunAttachment.h"
@@ -93,6 +94,7 @@ ballReleaseHUD(NULL),
 remoteControlRocketHUD(NULL),
 
 ballCamHUD(NULL),
+paddleCamHUD(NULL),
 
 skipLabel(NULL),
 
@@ -152,8 +154,8 @@ magnetPaddleEffect(NULL)
     this->ballReleaseHUD = new BallReleaseHUD(this->sound);
     this->remoteControlRocketHUD = new RemoteControlRocketHUD(*this);
 
-    this->ballCamHUD = new BallCamHUD(*this);
-    //this->paddleCamHUD = new PaddleCamHUD(*this);
+    this->ballCamHUD   = new BallCamHUD(*this);
+    this->paddleCamHUD = new PaddleCamHUD(*this);
 
     this->skipLabel = new ButtonTutorialHint(this->tutorialAssets, "Skip");
     this->skipLabel->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
@@ -248,8 +250,8 @@ GameAssets::~GameAssets() {
     
     delete this->ballCamHUD;
     this->ballCamHUD = NULL;
-    //delete this->paddleCamHUD;
-    //this->paddleCamHUD = NULL;
+    delete this->paddleCamHUD;
+    this->paddleCamHUD = NULL;
 
     delete this->skipLabel;
     this->skipLabel = NULL;
@@ -635,8 +637,9 @@ void GameAssets::Tick(double dT, const GameModel& gameModel) {
 /**
  * Draw the player paddle mesh with materials and in correct position.
  */
-void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) {
+void GameAssets::DrawPaddle(double dT, const GameModel& gameModel, const Camera& camera) {
 	
+    const PlayerPaddle& p = *gameModel.GetPlayerPaddle();
     const Point2D& paddleCenter = p.GetCenterPosition();	
 	float paddleScaleFactor = p.GetPaddleScaleFactor();
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
@@ -728,6 +731,16 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
         glPopMatrix();
         glPopAttrib();
 	}
+    else if (p.GetIsPaddleCameraOn()) {
+        // When the paddle camera is on we want to move the foreground key light around with the paddle
+
+        Point3D keyLightPos(p.GetCenterPosition(), 0.0f);
+        keyLightPos[1] += PaddleCamHUD::PADDLE_CAM_FG_KEY_LIGHT_Y_OFFSET;
+        keyLightPos += gameModel.GetCurrentLevelTranslation();
+        keyLightPos  = gameModel.GetTransformInfo()->GetGameXYZTransform() * keyLightPos;
+
+        this->lightAssets->GetFGKeyLight().SetPosition(keyLightPos);
+    }
 
 	glPopMatrix();
 	debug_opengl_state();
@@ -865,6 +878,41 @@ void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& c
 	    this->lightAssets->GetBossAffectingLights(fgKeyLight, fgFillLight, ballLight);
         this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight, this);
 
+        glPopMatrix();
+    }
+}
+
+void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {
+
+    if (gameModel.IsSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
+
+        this->ballSafetyNet->Tick(dT);
+
+        // Deal with the special case of paddle camera mode: we don't want the safety net to not appear in paddle camera mode
+        // and we want it to fade out/in when going into/out of paddle camera mode
+        const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+        if (paddle->GetIsPaddleCameraOn() || gameModel.GetTransformInfo()->GetIsPaddleCamAnimationActive()) {
+            float paddleAlpha = paddle->GetAlpha();
+            if (paddleAlpha <= 0.0f) {
+                // Don't draw the safety net if the paddle is invisible and we're in paddle camera mode
+                return;
+            }
+            else {
+                this->ballSafetyNet->SetAlpha(paddleAlpha);
+            }
+        }
+        else {
+            this->ballSafetyNet->SetAlpha(1.0f);
+        }
+
+        BasicPointLight fgKeyLight, fgFillLight, ballLight;
+        this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+
+        GameLevel* currLevel = gameModel.GetCurrentLevel();
+
+        glPushMatrix();
+        glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + SafetyNet::SAFETY_NET_HALF_HEIGHT + 0.1f), 0.0f);
+        this->ballSafetyNet->Draw(camera, fgKeyLight, fgFillLight, ballLight);
         glPopMatrix();
     }
 }
@@ -1848,14 +1896,24 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
             // useful to avoid obstruction of the player's viewpoint e.g., when in paddle camera mode.
             this->ballSafetyNet->SetAlpha(0.5f);
 
-			// Move the key light in the foreground so that it is behind the camera when it goes into
-			// paddle cam mode.
+			// Move the key light in the foreground so that it is behind the camera when it goes into paddle cam mode.
 			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
 			float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
 
-			Point3D newFGKeyLightPos(halfLevelWidth, -(halfLevelHeight + 10.0f), 10.0f);
+            const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+            const Point2D& paddlePos = paddle->GetCenterPosition();
+
+			Point3D newFGKeyLightPos(paddlePos[0], paddlePos[1] + PaddleCamHUD::PADDLE_CAM_FG_KEY_LIGHT_Y_OFFSET, 0.0f);
 			Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 10.0f), -5.0f);
-			
+
+            Matrix4x4 gameXYZTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
+            Vector3D gameTranslation   = gameModel.GetCurrentLevelTranslation();
+
+            newFGKeyLightPos  += gameTranslation;
+            newFGKeyLightPos   = gameXYZTransform * newFGKeyLightPos;
+            newFGFillLightPos += gameTranslation;
+            newFGFillLightPos  = gameXYZTransform * newFGFillLightPos;
+
 			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight, newFGKeyLightPos, 0.08f, 1.5f);
 			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
 
@@ -1886,6 +1944,14 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			Point3D newFGKeyLightPos(cameraBallPos[0], cameraBallPos[1], BallCamHUD::BALL_CAM_FG_KEY_LIGHT_Z_POS);
 			Point3D newFGFillLightPos(0.0f, -halfLevelHeight, BallCamHUD::BALL_CAM_FG_FILL_LIGHT_Z_POS);
 			
+            Matrix4x4 gameXYZTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
+            Vector3D gameTranslation   = gameModel.GetCurrentLevelTranslation();
+
+            newFGKeyLightPos  += gameTranslation;
+            newFGKeyLightPos   = gameXYZTransform * newFGKeyLightPos;
+            newFGFillLightPos += gameTranslation;
+            newFGFillLightPos  = gameXYZTransform * newFGFillLightPos;
+
 			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight,  newFGKeyLightPos,  0.08f, 1.5f);
 			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
 

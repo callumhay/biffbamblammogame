@@ -147,62 +147,48 @@ void PlayerPaddle::SetupAnimations() {
 // Regenerate the bounding lines of the player paddle so that they adhere to the size, position and rotation
 // of the paddle as it currently lies.
 void PlayerPaddle::RegenerateBounds() {
-	std::vector<Collision::LineSeg2D> lineBounds;
-	std::vector<Vector2D> lineNorms;
+
+    static const int MAX_NUM_LINES = 4;
+    Collision::LineSeg2D boundingLines[MAX_NUM_LINES];
+    Vector2D boundingNorms[MAX_NUM_LINES];
 
 	if (this->isPaddleCamActive) {
 		// When the paddle camera is active we compress the collision boundaries down to the bottom of the paddle
 		// this help make for a better game experience since the collision seems more natural when it's on the camera's view plane
 
-		lineBounds.reserve(3);
-		lineNorms.reserve(3);
+        float bottomY = -2*this->currHalfHeight;
 
 		// 'Top' (flat) boundary
-		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthFlat, -this->currHalfHeight));
-		Vector2D n1(0, 1);
-		lineBounds.push_back(l1);
-		lineNorms.push_back(n1);
+		boundingLines[0] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthFlat, -this->currHalfHeight));
+		boundingNorms[0] = Vector2D(0, 1);
 
 		// 'Side' (oblique) boundaries
-		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine1);
-		lineNorms.push_back(sideNormal1);
-		
-		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine2);
-		lineNorms.push_back(sideNormal2);
+		boundingLines[1] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, bottomY));
+		boundingNorms[1] = Vector2D(1, 1) / SQRT_2;
+		boundingLines[2] = Collision::LineSeg2D(Point2D(-this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, bottomY));
+		boundingNorms[2] = Vector2D(-1, 1) / SQRT_2;
+
+        // Bottom boundary is even further down now...
+        boundingLines[3] = Collision::LineSeg2D(Point2D(this->currHalfWidthTotal, bottomY), Point2D(-this->currHalfWidthTotal, bottomY));
+        boundingNorms[3] = Vector2D(0, -1);
 	}
 	else {
-		lineBounds.reserve(4);
-		lineNorms.reserve(4);
-
 		// Top boundary
-		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
-		Vector2D n1(0, 1);
-		lineBounds.push_back(l1);
-		lineNorms.push_back(n1);
+		boundingLines[0] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
+		boundingNorms[0] = Vector2D(0, 1);
 
 		// Side boundaries
-		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine1);
-		lineNorms.push_back(sideNormal1);
-		
-		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine2);
-		lineNorms.push_back(sideNormal2);
+		boundingLines[1] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
+		boundingNorms[1] = Vector2D(1, 1) / SQRT_2;
+		boundingLines[2] = Collision::LineSeg2D(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		boundingNorms[2] = Vector2D(-1, 1) / SQRT_2;
 
 		// Bottom boundary
-		Collision::LineSeg2D bottomLine(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D bottomNormal(0, -1);
-		lineBounds.push_back(bottomLine);
-		lineNorms.push_back(bottomNormal);
+		boundingLines[3] = Collision::LineSeg2D(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		boundingNorms[3] = Vector2D(0, -1);
 	}
 
-	this->bounds = BoundingLines(lineBounds, lineNorms);
+	this->bounds = BoundingLines(MAX_NUM_LINES, boundingLines, boundingNorms);
 	// Rotate the bounds (in the case where the paddle rotation has changed)
 	this->bounds.RotateLinesAndNormals(this->rotAngleZAnimation.GetInterpolantValue(), Point2D(0,0));
 	// Translate the bounds into game space
@@ -341,9 +327,7 @@ void PlayerPaddle::FireAttachedProjectile() {
  * to the paddle when the paddle boundaries change doesn't get moved to the new boundaries.
  * e.g., when in paddle cam mode and then changing back while the sticky paddle is active.
  */
-void PlayerPaddle::MoveAttachedObjectsToNewBounds(double dT) {
-	UNUSED_PARAMETER(dT);
-
+void PlayerPaddle::MoveAttachedObjectsToNewBounds() {
 	if (this->HasBallAttached()) {
 	    // Make sure the attached ball is sitting on the bounding lines and not inside the paddle...
 	    // Move the ball along the up vector until its no longer hitting...
@@ -678,6 +662,28 @@ void PlayerPaddle::RemoveSpecialStatus(int32_t status) {
         this->onFireCountdown = 0.0;
         // EVENT: Paddle stopped being on fire
         GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::OnFireStatus, false);
+    }
+}
+
+void PlayerPaddle::SetPaddleCamera(bool isPaddleCamOn) {
+
+    bool wasPaddleCamActive = this->isPaddleCamActive;
+    this->isPaddleCamActive = isPaddleCamOn;
+
+    // When the paddle camera is on, we change the collision boundaries to
+    // be more natural to the vision of the paddle cam
+    this->SetDimensions(this->currSize);
+    if (!isPaddleCamOn) {
+        this->MoveAttachedObjectsToNewBounds();
+    }
+
+    if (!wasPaddleCamActive && this->isPaddleCamActive) {
+        // EVENT: Paddle camera is now set
+        GameEventManager::Instance()->ActionPaddleCameraSetOrUnset(*this, true);
+    }
+    else if (wasPaddleCamActive && !this->isPaddleCamActive) {
+        // EVENT: Ball camera is now unset
+        GameEventManager::Instance()->ActionPaddleCameraSetOrUnset(*this, false);
     }
 }
 

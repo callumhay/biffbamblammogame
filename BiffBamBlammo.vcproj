@@ -1613,6 +1613,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\PaddleCamHUD.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\PlayerHurtHUD.h"
 						>
 					</File>
@@ -1658,6 +1662,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\MalfunctionTextHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PaddleCamHUD.cpp"
 						>
 					</File>
 					<File
