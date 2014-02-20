@@ -126,6 +126,10 @@ Cannon
 cannon.png
 C
 
+One-Shot Cannon
+one_shot_cannon.png
+C1
+
 Collateral
 collateral.png
 L

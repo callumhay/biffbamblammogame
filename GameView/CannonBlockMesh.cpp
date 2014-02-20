@@ -16,64 +16,20 @@
 #include "../GameModel/CannonBlock.h"
 #include "../ResourceManager.h"
 
-CannonBlockMesh::CannonBlockMesh() : cannonBlockBaseGeometry(NULL),
-cannonBlockBarrelGeometry(NULL), haloTexture(NULL),
-haloExpandPulse(1.0f, 2.75f), attentionExpandPulse(1.0f, 2.0f), haloFader(1.0f, 0.10f), attentionFader(1.0f, 0.0f),
-activeCannonEffectEmitter(NULL) {
+CannonBlockMesh::CannonBlockMesh() : AbstractCannonBlockMesh(), cannonBlockBaseGeometry(NULL),
+cannonBlockBarrelGeometry(NULL) {
 
 	this->LoadMesh();
-
-	assert(this->haloTexture == NULL);
-	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
-	assert(this->haloTexture != NULL);
-
-	// Halo effect that pulses outwards
-	this->activeCannonEffectEmitter = new ESPPointEmitter();
-	this->activeCannonEffectEmitter->SetSpawnDelta(ESPInterval(0.5f));
-	this->activeCannonEffectEmitter->SetInitialSpd(ESPInterval(0));
-	this->activeCannonEffectEmitter->SetParticleLife(ESPInterval(0.5f));
-	this->activeCannonEffectEmitter->SetParticleSize(ESPInterval(CannonBlock::CANNON_BARREL_LENGTH));
-	this->activeCannonEffectEmitter->SetEmitAngleInDegrees(0);
-	this->activeCannonEffectEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->activeCannonEffectEmitter->SetParticleAlignment(ESP::ScreenAligned);
-	this->activeCannonEffectEmitter->SetEmitPosition(Point3D(0,0,0));
-	this->activeCannonEffectEmitter->SetParticleColour(
-        ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-	this->activeCannonEffectEmitter->AddEffector(&this->haloExpandPulse);
-	this->activeCannonEffectEmitter->AddEffector(&this->haloFader);
-	this->activeCannonEffectEmitter->SetParticles(1, this->haloTexture);
-
-    this->ballCamAttentionEffectEmitter = new ESPPointEmitter();
-    this->ballCamAttentionEffectEmitter->SetSpawnDelta(ESPInterval(1.25f));
-    this->ballCamAttentionEffectEmitter->SetInitialSpd(ESPInterval(0));
-    this->ballCamAttentionEffectEmitter->SetParticleLife(ESPInterval(1.25f));
-    this->ballCamAttentionEffectEmitter->SetParticleSize(ESPInterval(1.5f*CannonBlock::CANNON_BARREL_LENGTH));
-    this->ballCamAttentionEffectEmitter->SetEmitAngleInDegrees(0);
-    this->ballCamAttentionEffectEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    this->ballCamAttentionEffectEmitter->SetParticleAlignment(ESP::ScreenAligned);
-    this->ballCamAttentionEffectEmitter->SetEmitPosition(Point3D(0,0,0));
-    this->ballCamAttentionEffectEmitter->SetParticleColour(
-        ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-    this->ballCamAttentionEffectEmitter->AddEffector(&this->attentionExpandPulse);
-    this->ballCamAttentionEffectEmitter->AddEffector(&this->attentionFader);
-    this->ballCamAttentionEffectEmitter->SetParticles(1, this->haloTexture);
 }
 
 CannonBlockMesh::~CannonBlockMesh() {
-	bool success = ResourceManager::GetInstance()->ReleaseMeshResource(this->cannonBlockBarrelGeometry);
+	bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->cannonBlockBarrelGeometry);
 	assert(success);
 	success = ResourceManager::GetInstance()->ReleaseMeshResource(this->cannonBlockBaseGeometry);
 	assert(success);
-	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTexture);
-	assert(success);
-
-	delete this->activeCannonEffectEmitter;
-	this->activeCannonEffectEmitter = NULL;
-    delete this->ballCamAttentionEffectEmitter;
-    this->ballCamAttentionEffectEmitter = NULL;
+    UNUSED_VARIABLE(success);
 }
-
 
 void CannonBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                            const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
@@ -163,28 +119,13 @@ void CannonBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
 	}
 }
 
-void CannonBlockMesh::SetAlphaMultiplier(float alpha) {
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = this->materialGroups.begin(); 
-         iter != this->materialGroups.end(); ++iter) {
-
-		MaterialGroup* matGrp = iter->second;
-		matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
-	}
-}
-
 void CannonBlockMesh::LoadMesh() {
 	assert(this->cannonBlockBaseGeometry == NULL);
 	assert(this->cannonBlockBarrelGeometry == NULL);
 	
 	this->cannonBlockBaseGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CANNON_BLOCK_BASE_MESH);
-	assert(this->cannonBlockBaseGeometry != NULL);
-
-    const std::map<std::string, MaterialGroup*>&  baseMatGrps = this->cannonBlockBaseGeometry->GetMaterialGroups();
-    this->materialGroups.insert(baseMatGrps.begin(), baseMatGrps.end());
-
 	this->cannonBlockBarrelGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CANNON_BLOCK_BARREL_MESH);
-	assert(this->cannonBlockBarrelGeometry != NULL);
 
-    const std::map<std::string, MaterialGroup*>&  barrelMatGrps = this->cannonBlockBarrelGeometry->GetMaterialGroups();
-    this->materialGroups.insert(barrelMatGrps.begin(), barrelMatGrps.end());
+    assert(this->cannonBlockBaseGeometry != NULL);
+	assert(this->cannonBlockBarrelGeometry != NULL);
 }

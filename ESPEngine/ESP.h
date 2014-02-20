@@ -40,3 +40,4 @@
 #include "ESPAnimatedSpriteParticle.h"
 #include "ESPRandomTextureParticle.h"
 #include "ESPAnimatedCurveParticle.h"
+#include "ESPMeshParticle.h"

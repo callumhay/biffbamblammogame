@@ -392,6 +392,7 @@ void MSFReader::InitSoundTypeMapping() {
 	INSERT_MAPPING_PAIR(GameSound, CannonBlockLoadedEvent, false);
 	INSERT_MAPPING_PAIR(GameSound, CannonBlockFiredEvent, false);
     INSERT_MAPPING_PAIR(GameSound, CannonObstructionMalfunctionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FragileCannonDestroyedEvent, false);
 	INSERT_MAPPING_PAIR(GameSound, BallPortalTeleportEvent, false);
     INSERT_MAPPING_PAIR(GameSound, EnergyProjectilePortalTeleportEvent, false);
     INSERT_MAPPING_PAIR(GameSound, NonBallObjectPortalTeleportEvent, false);

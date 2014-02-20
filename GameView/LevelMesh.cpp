@@ -16,6 +16,7 @@
 #include "PrismBlockMesh.h"
 #include "PortalBlockMesh.h"
 #include "CannonBlockMesh.h"
+#include "FragileCannonBlockMesh.h"
 #include "CollateralBlockMesh.h"
 #include "TeslaBlockMesh.h"
 #include "SwitchBlockMesh.h"
@@ -33,6 +34,7 @@
 
 #include "../GameModel/GameBall.h"
 #include "../GameModel/CannonBlock.h"
+#include "../GameModel/FragileCannonBlock.h"
 #include "../GameModel/CollateralBlock.h"
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/SwitchBlock.h"
@@ -45,7 +47,7 @@
 
 LevelMesh::LevelMesh(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) :
 currLevel(NULL), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
-prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collateralBlock(NULL),
+prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), fragileCannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayBlock(NULL), 
 laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL), regenBlock(NULL),
 statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
@@ -66,6 +68,7 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
 	this->inkBlock						= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 	this->portalBlock					= new PortalBlockMesh();
 	this->cannonBlock					= new CannonBlockMesh();
+    this->fragileCannonBlock            = new FragileCannonBlockMesh();
 	this->collateralBlock				= new CollateralBlockMesh();
 	this->teslaBlock                    = new TeslaBlockMesh();
 	this->itemDropBlock					= new ItemDropBlockMesh();
@@ -127,6 +130,8 @@ LevelMesh::~LevelMesh() {
 	this->portalBlock = NULL;
 	delete this->cannonBlock;
 	this->cannonBlock = NULL;
+    delete this->fragileCannonBlock;
+    this->fragileCannonBlock = NULL;
 	delete this->collateralBlock;
 	this->collateralBlock = NULL;
 	delete this->teslaBlock;
@@ -226,6 +231,7 @@ void LevelMesh::Flush() {
     this->lastPieceEffects.clear();
 
 	this->cannonBlock->Flush();
+    this->fragileCannonBlock->Flush();
 	this->collateralBlock->Flush();
 	this->teslaBlock->Flush();
 	this->itemDropBlock->Flush();
@@ -293,7 +299,7 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
 			// Special cases:
             switch (currPiece->GetType()) {
 
-			    // 1) Case of a cannon block - we need to store all the cannon blocks we can
+			    // Case of a cannon block - we need to store all the cannon blocks we can
 			    // properly draw their barrels oriented unique for each one
                 case LevelPiece::Cannon: {
 				    const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(currPiece);
@@ -301,7 +307,13 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
                     break;
 			    }
 
-			    // 2) Collateral block - we need to store all of them so that they can be drawn dynamically
+                case LevelPiece::FragileCannon: {
+                    const FragileCannonBlock* fragileCannonLvlPiece = static_cast<const FragileCannonBlock*>(currPiece);
+                    this->fragileCannonBlock->AddFragileCannonBlock(fragileCannonLvlPiece);
+                    break;
+                }
+
+			    // Collateral block - we need to store all of them so that they can be drawn dynamically
 			    // when the go into collateral mode
                 case LevelPiece::Collateral: {
 				    const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(currPiece);
@@ -309,7 +321,7 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
                     break;
 			    }
 
-			    // 3) Tesla block - similar to the cannon block, we store all of them to draw certain
+			    // Tesla block - similar to the cannon block, we store all of them to draw certain
 			    // parts of the block oriented differently / animating
                 case LevelPiece::Tesla: {
 				    TeslaBlock* telsaLvlPiece = static_cast<TeslaBlock*>(currPiece);
@@ -317,7 +329,7 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
                     break;
 			    }
 
-			    // 4) Item drop block - like the above - since we need to set the texture for the item
+			    // Item drop block - like the above - since we need to set the texture for the item
 			    // each block will drop next, we need to store them in a separate container object
                 case LevelPiece::ItemDrop: {
 				    const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(currPiece);
@@ -328,35 +340,35 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
                     break;
 			    }
 
-                // 5) Switch block
+                // Switch block
                 case LevelPiece::Switch: {
                     const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(currPiece);
                     this->switchBlock->AddSwitchBlock(switchPiece);
                     break;
                 }
                 
-                // 6) Laser Turret Block
+                // Laser Turret Block
                 case LevelPiece::LaserTurret: {
 				    const LaserTurretBlock* laserTurretLvlPiece = static_cast<const LaserTurretBlock*>(currPiece);
 				    this->laserTurretBlock->AddLaserTurretBlock(laserTurretLvlPiece);
                     break;
                 }
 
-                // 7) Rocket Turret Block
+                // Rocket Turret Block
                 case LevelPiece::RocketTurret: {
                     const RocketTurretBlock* rocketTurretLvlPiece = static_cast<const RocketTurretBlock*>(currPiece);
                     this->rocketTurretBlock->AddRocketTurretBlock(rocketTurretLvlPiece);
                     break;
                 }
 
-                // 8) Mine Turret Block
+                // Mine Turret Block
                 case LevelPiece::MineTurret: {
                     const MineTurretBlock* mineTurretLvlPiece = static_cast<const MineTurretBlock*>(currPiece);
                     this->mineTurretBlock->AddMineTurretBlock(mineTurretLvlPiece);
                     break;
                 }
 
-                // 9) Always Drop Block
+                // Always Drop Block
                 case LevelPiece::AlwaysDrop: {
                     const AlwaysDropBlock* alwaysDropLvlPiece = static_cast<const AlwaysDropBlock*>(currPiece);
 
@@ -365,7 +377,7 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
                     break;
                 }
 
-                // 10) Regen Block
+                // Regen Block
                 case LevelPiece::Regen: {
                     RegenBlock* regenLvlPiece = static_cast<RegenBlock*>(currPiece);
                     this->regenBlock->AddRegenBlock(regenLvlPiece);
@@ -450,6 +462,8 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 		switch (pieceBefore.GetType()) {
 			case LevelPiece::Cannon:
 				break;
+            case LevelPiece::FragileCannon:
+                break;
 			case LevelPiece::Collateral:
 				break;
             case LevelPiece::AlwaysDrop:
@@ -485,6 +499,12 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 			const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(&piece);
 			this->cannonBlock->RemoveCannonBlock(cannonLvlPiece);
 			break;
+        }
+
+        case LevelPiece::FragileCannon: {
+            const FragileCannonBlock* fragileCannonLvlPiece = static_cast<const FragileCannonBlock*>(&piece);
+            this->fragileCannonBlock->RemoveFragileCannonBlock(fragileCannonLvlPiece);
+            break;
         }
 
 		case LevelPiece::Collateral: {
@@ -595,6 +615,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	glPushMatrix();
 	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
 	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->fragileCannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
@@ -762,6 +783,8 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 
 		case LevelPiece::Cannon:
 			break;
+        case LevelPiece::FragileCannon:
+            break;
 
 		case LevelPiece::Tesla:
 			return &this->teslaBlock->GetMaterialGroups();
@@ -921,6 +944,7 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 	// Make sure all other materials (inside certain special meshes) also get their alpha multiplier set
 	this->portalBlock->SetAlphaMultiplier(alpha);
 	this->cannonBlock->SetAlphaMultiplier(alpha);
+    this->fragileCannonBlock->SetAlphaMultiplier(alpha);
 	this->collateralBlock->SetAlphaMultiplier(alpha);
 	this->teslaBlock->SetAlphaMultiplier(alpha);
 	this->itemDropBlock->SetAlphaMultiplier(alpha);

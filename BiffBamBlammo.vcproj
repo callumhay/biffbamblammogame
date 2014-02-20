@@ -622,6 +622,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPMeshParticle.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPOnomataParticle.h"
 					>
 				</File>
@@ -687,6 +691,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPLineEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPMeshParticle.cpp"
 					>
 				</File>
 				<File
@@ -1145,6 +1153,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameView\AbstractCannonBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\AlwaysDropBlockMesh.h"
 						>
 					</File>
@@ -1158,6 +1170,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CollateralBlockMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\FragileCannonBlockMesh.h"
 						>
 					</File>
 					<File
@@ -1213,6 +1229,10 @@
 					Name="Source Files"
 					>
 					<File
+						RelativePath=".\GameView\AbstractCannonBlockMesh.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\AlwaysDropBlockMesh.cpp"
 						>
 					</File>
@@ -1226,6 +1246,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CollateralBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\FragileCannonBlockMesh.cpp"
 						>
 					</File>
 					<File
@@ -2025,6 +2049,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\FragileCannonBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\InkBlock.h"
 						>
 					</File>
@@ -2110,6 +2138,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\CollateralBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\FragileCannonBlock.cpp"
 						>
 					</File>
 					<File

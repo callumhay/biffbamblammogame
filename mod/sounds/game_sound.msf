@@ -327,7 +327,10 @@ CannonObstructionMalfunctionEvent {
 	file = resources/MalfunctioningEvent.ogg
 }
 
-// CannonBlockLoadedWithBallCamBallEvent
+FragileCannonDestroyedEvent {
+	file = resources/FragileCannonDestroyedEvent.ogg
+}
+
 
 BallPortalTeleportEvent {
 	file = resources/BallPortalTeleportEvent.ogg

@@ -122,8 +122,6 @@ private:
     MaterialGroup* baseMetalMaterialGrp;
     Colour initialBaseMetalDiffuseColour;
 
-    
-
     BlockCollection blocks;
 
     void LoadMesh();

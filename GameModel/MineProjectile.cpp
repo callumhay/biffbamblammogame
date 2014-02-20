@@ -92,25 +92,7 @@ void MineProjectile::Land(const Point2D& landingPt) {
 
 void MineProjectile::Tick(double seconds, const GameModel& model) {
 
-	if (this->cannonBlock != NULL) {
-		// 'Tick' the cannon to spin the rocket around inside it... eventually the function will say
-		// it has fired the rocket
-		bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);
-		if (cannonHasFired) {
-			// Set the velocity in the direction the cannon has fired in
-            this->velocityMag = this->GetMaxVelocityMagnitude();
-			this->velocityDir = this->cannonBlock->GetCurrentCannonDirection();
-            this->acceleration = 0.0;
-			this->position = this->cannonBlock->GetCenter() + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
-
-			// EVENT: Mine has officially been fired from the cannon
-			GameEventManager::Instance()->ActionProjectileFiredFromCannon(*this, *this->cannonBlock);
-
-            this->SetLastThingCollidedWith(this->cannonBlock);
-			this->cannonBlock = NULL;
-		}
-	}
-	else {
+	if (this->cannonBlock == NULL) {
 
         // Make sure that there's a velocity or magnitude before doing all the calculations for those things...
         if (this->GetVelocityMagnitude() != 0.0f || this->GetAccelerationMagnitude() != 0.0f) {
@@ -224,6 +206,34 @@ bool MineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
     // The mine will only make modifications to the level (i.e., act as a mine and possibly explode)
     // when it is armed and not inside a cannon block, otherwise we just exit immediately
     if (!this->GetIsArmed() || this->IsLoadedInCannonBlock()) {
+
+        // Check whether the mine is inside a cannon block and whether we should fire it...
+        if (this->cannonBlock != NULL) {
+            // Start by doing a test to see if the cannon will actually fire...
+            bool willCannonFire = this->cannonBlock->TestRotateAndFire(dT, false, this->velocityDir);
+            if (willCannonFire) {
+                // Set the remaining kinematics parameters of the projectile so that it is fired
+                this->position = this->cannonBlock->GetCenter() + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
+                this->velocityMag = this->GetMaxVelocityMagnitude();
+                this->acceleration = 0.0;
+
+                // NOTE: We must do this event before calling RotateAndFire since the cannon can be destroyed in the process
+                // EVENT: Mine is being fired from the cannon
+                GameEventManager::Instance()->ActionProjectileFiredFromCannon(*this, *this->cannonBlock);
+            }
+
+            // 'Tick' the cannon to spin the rocket around inside it... eventually the function will say
+            // it has fired the rocket
+            // WARNING: This function can destroy the cannon!
+            std::pair<LevelPiece*, bool> cannonFiredPair = this->cannonBlock->RotateAndFire(dT, &model, false);
+
+            if (willCannonFire) {
+                assert(cannonFiredPair.second);
+                this->cannonBlock = NULL;
+                this->SetLastThingCollidedWith(cannonFiredPair.first);
+            }
+        }
+
         return false;
     }
 
@@ -333,7 +343,7 @@ void MineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
 
     // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
     // or if it just can't collide with the block
-    if (block->GetType() == LevelPiece::Cannon || block->IsNoBoundsPieceType() ||
+    if (block->GetType() == LevelPiece::Cannon || block->GetType() == LevelPiece::FragileCannon || block->IsNoBoundsPieceType() ||
         (block->GetType() == LevelPiece::NoEntry && !block->HasStatus(LevelPiece::IceCubeStatus))) {
 
         return;

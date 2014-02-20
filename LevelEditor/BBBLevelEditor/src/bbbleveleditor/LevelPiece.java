@@ -11,6 +11,7 @@ public class LevelPiece {
 	public static final String ITEM_DROP_PIECE_SYMBOL = "D";
 	public static final String ALWAYS_DROP_PIECE_SYMBOL = "K";
 	public static final String CANNON_PIECE_SYMBOL    = "C";
+	public static final String ONE_SHOT_CANNON_PIECE_SYMBOL    = "C1";
 	public static final String SWITCH_PIECE_SYMBOL     = "W";
 	public static final String ITEM_DROP_PIECE_NAME   = "Item Drop";
 	

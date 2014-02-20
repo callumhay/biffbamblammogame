@@ -927,6 +927,9 @@ void GameEventsListener::ProjectileEnteredCannonEvent(const Projectile& projecti
 
 void GameEventsListener::ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
 
+    // WARNING: DO NOT ALLOW THE CANNON BLOCK OBJECT TO PERSIST!!! 
+    // IT CAN BE DESTROYED RIGHT AFTER THIS FUNCTION CALL!!!
+
 	// Add the blast effect of the rocket exiting the cannon
 	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(
         Point3D(cannonBlock.GetEndOfBarrelPoint()), cannonBlock.GetCurrentCannonDirection());
@@ -1194,6 +1197,21 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 			    break;
             }
 
+            case LevelPiece::FragileCannon: {
+
+                // Extraneous effects...
+                this->display->GetAssets()->FullscreenFlashExplosion(FullscreenFlashEffectInfo(0.33, 1.0f), 
+                    this->display->GetCamera(), this->display->GetModel());
+
+                // Visual effects...
+                this->display->GetAssets()->GetESPAssets()->AddFragileCannonBreakEffect(block);
+
+                // Sound effects...
+                sound->PlaySoundAtPosition(GameSound::FragileCannonDestroyedEvent, false, block.GetPosition3D(), 
+                    true, true, true, GameSound::DEFAULT_MIN_3D_SOUND_DIST, destructionVol);
+                break;
+            }
+
 		    case LevelPiece::Collateral: {
                 if (wasFrozen) {
 				    // Add ice break effect
@@ -1233,6 +1251,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 		case LevelPiece::ItemDrop:
         case LevelPiece::AlwaysDrop:
 		case LevelPiece::Cannon:
+        case LevelPiece::FragileCannon:
 		case LevelPiece::Collateral:
         case LevelPiece::OneWay:
 			this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);

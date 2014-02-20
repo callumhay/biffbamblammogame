@@ -44,6 +44,7 @@ public:
 	static const char PRISM_BLOCK_CHAR;
 	static const char PORTAL_BLOCK_CHAR;
 	static const char CANNON_BLOCK_CHAR;
+    static const char ONE_SHOT_CANNON_BLOCK_QUALIFIER_CHAR;
 	static const char COLLATERAL_BLOCK_CHAR;
 	static const char TESLA_BLOCK_CHAR;
 	static const char ITEM_DROP_BLOCK_CHAR;

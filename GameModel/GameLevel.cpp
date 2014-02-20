@@ -24,6 +24,7 @@
 #include "PrismBlock.h"
 #include "PortalBlock.h"
 #include "CannonBlock.h"
+#include "FragileCannonBlock.h"
 #include "CollateralBlock.h"
 #include "TeslaBlock.h"
 #include "ItemDropBlock.h"
@@ -59,6 +60,7 @@ const char GameLevel::INKBLOCK_CHAR             = 'I';
 const char GameLevel::PRISM_BLOCK_CHAR          = 'P';
 const char GameLevel::PORTAL_BLOCK_CHAR         = 'X';
 const char GameLevel::CANNON_BLOCK_CHAR         = 'C';
+const char GameLevel::ONE_SHOT_CANNON_BLOCK_QUALIFIER_CHAR = '1';
 const char GameLevel::COLLATERAL_BLOCK_CHAR	    = 'L';
 const char GameLevel::TESLA_BLOCK_CHAR          = 'A';
 const char GameLevel::ITEM_DROP_BLOCK_CHAR      = 'D';
@@ -374,72 +376,88 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 					break;
 
 				case CANNON_BLOCK_CHAR: {
-						// C(d[-e]) - Cannon block
-                        // d: The direction to always fire the cannon block in (or specify random firing direction)
-                        //    the value can be any degree angle starting at 0 going to 359.
-                        // The angle starts by firing directly upwards and moves around the circle
-                        // of angles clockwise (e.g., 90 will always fire the ball perfectly to the right of the cannon, 180 will always
-                        // fire the ball downwards from the cannon, ...). 
-                        // [-e]: is optional - it allows the specification of a angle range from d to e, inclusive.
-						char tempChar;
 
-						// Beginning bracket
-						*inFile >> tempChar;
-						if (tempChar != '(') {
-							debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
-							break;
-						}
+                    bool isOneShotCannon = false;
+                    char tempChar;
+                    *inFile >> tempChar;
 
-						// Degree angle value (or random -1)
-						int rotationValue1 = 0;
-						int rotationValue2 = 0;
-                        *inFile >> rotationValue1;
-						if (rotationValue1 != -1 && (rotationValue1 < 0 || rotationValue1 > 720)) {
-							debug_output("ERROR: poorly formed cannon block syntax, first degree angle must either be -1 or in [0,720]");
-							break;
-						}
+                    // This might be the one-shot cannon block...
+                    if (tempChar == ONE_SHOT_CANNON_BLOCK_QUALIFIER_CHAR) {
+                        isOneShotCannon = true;
+                        *inFile >> tempChar;
+                    }
 
-                        if (rotationValue1 == -1) {
-                            rotationValue1 = 0;
-                            rotationValue2 = 359;
+                    // C1(d[-e]) - One-shot cannon block
+					// C(d[-e])  - Cannon block
+                    // d: The direction to always fire the cannon block in (or specify random firing direction)
+                    //    the value can be any degree angle starting at 0 going to 359.
+                    // The angle starts by firing directly upwards and moves around the circle
+                    // of angles clockwise (e.g., 90 will always fire the ball perfectly to the right of the cannon, 180 will always
+                    // fire the ball downwards from the cannon, ...). 
+                    // [-e]: is optional - it allows the specification of a angle range from d to e, inclusive.
+					
+					// Beginning bracket
+					if (tempChar != '(') {
+						debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+						break;
+					}
 
-						    // Closing bracket
-						    *inFile >> tempChar;
-						    if (tempChar != ')') {
-							    debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
-							    break;
-						    }
-                        }
+					// Degree angle value (or random -1)
+					int rotationValue1 = 0;
+					int rotationValue2 = 0;
+                    *inFile >> rotationValue1;
+					if (rotationValue1 != -1 && (rotationValue1 < 0 || rotationValue1 > 720)) {
+						debug_output("ERROR: poorly formed cannon block syntax, first degree angle must either be -1 or in [0,720]");
+						break;
+					}
+
+                    if (rotationValue1 == -1) {
+                        rotationValue1 = 0;
+                        rotationValue2 = 359;
+
+					    // Closing bracket
+					    *inFile >> tempChar;
+					    if (tempChar != ')') {
+						    debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+						    break;
+					    }
+                    }
+                    else {
+                        // Check for '-'
+					    *inFile >> tempChar;
+					    if (tempChar == '-') {
+                            *inFile >> rotationValue2;
+					        if (rotationValue2 != -1 && (rotationValue2 < 0 || rotationValue2 > 720)) {
+						        debug_output("ERROR: poorly formed cannon block syntax, second degree angle must either be -1 or in [0,720]");
+						        break;
+					        }
+
+                            *inFile >> tempChar;
+                            if (tempChar != ')') {
+						        debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+						        break;
+                            }
+					    }
                         else {
-                            // Check for '-'
-						    *inFile >> tempChar;
-						    if (tempChar == '-') {
-                                *inFile >> rotationValue2;
-						        if (rotationValue2 != -1 && (rotationValue2 < 0 || rotationValue2 > 720)) {
-							        debug_output("ERROR: poorly formed cannon block syntax, second degree angle must either be -1 or in [0,720]");
-							        break;
-						        }
-
-                                *inFile >> tempChar;
-                                if (tempChar != ')') {
-							        debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
-							        break;
-                                }
-						    }
+                            if (tempChar != ')') {
+						        debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+						        break;
+                            }
                             else {
-                                if (tempChar != ')') {
-							        debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
-							        break;
-                                }
-                                else {
-                                    rotationValue2 = rotationValue1;
-                                }
+                                rotationValue2 = rotationValue1;
                             }
                         }
+                    }
 
+                    if (isOneShotCannon) {
+                        newPiece = new FragileCannonBlock(pieceWLoc, pieceHLoc, std::make_pair(rotationValue1, rotationValue2));
+                    }
+                    else {
                         newPiece = new CannonBlock(pieceWLoc, pieceHLoc, std::make_pair(rotationValue1, rotationValue2));
-					}
-					break;
+                    }
+                    break;
+				}
+				
 
 				case TESLA_BLOCK_CHAR: {
                         // A([1|0], [1|0], a, b) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
@@ -1419,11 +1437,13 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
             UNUSED_VARIABLE(numErased);
         }
 
-		// If the piece is in any auxillary lists within the game model then we need to remove it
+		// If the piece is in any auxiliary lists within the game model then we need to remove it
 		gameModel->WipePieceFromAuxLists(pieceBefore);
 
 	    // The replaced piece has officially been destroyed, increase the number of destroyed blocks in the model
-        if (pieceBefore->GetType() != LevelPiece::Empty && pieceAfter->GetType() == LevelPiece::Empty) {
+        if (pieceBefore->GetType() != LevelPiece::Empty && pieceBefore->GetType() != LevelPiece::FragileCannon &&
+            pieceAfter->GetType() == LevelPiece::Empty) {
+
             gameModel->IncrementNumInterimBlocksDestroyed(pieceBefore->GetCenter());
         }
 	}

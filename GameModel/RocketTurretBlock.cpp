@@ -508,6 +508,7 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
         ignoreTypes.insert(LevelPiece::NoEntry);
         ignoreTypes.insert(LevelPiece::Empty);
         ignoreTypes.insert(LevelPiece::Cannon);
+        ignoreTypes.insert(LevelPiece::FragileCannon);
         ignoreTypes.insert(LevelPiece::Portal);
         ignoreTypes.insert(LevelPiece::OneWay);
         ignoreTypes.insert(LevelPiece::Switch);
