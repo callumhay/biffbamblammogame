@@ -607,7 +607,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						outputStr = outputStr + ")";
 						levelFileWriter.write(outputStr);
 					}
-					else if (currPieceLbl.getIsCannonBlock()) {
+					else if (currPieceLbl.getIsCannonBlock() || currPieceLbl.getIsOneShotCannonBlock()) {
 						
 						String outputStr = currLvlPiece.getSymbol() + "(";
 						if (currPieceLbl.getCannonBlockDegAngle1() == currPieceLbl.getCannonBlockDegAngle2()) {

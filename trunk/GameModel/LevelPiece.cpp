@@ -74,6 +74,7 @@ bool LevelPiece::IsValidLevelPieceType(int pieceType) {
         case LevelPiece::Portal:
         case LevelPiece::PrismTriangle:
         case LevelPiece::Cannon:
+        case LevelPiece::FragileCannon:
         case LevelPiece::Collateral:
         case LevelPiece::Tesla:
         case LevelPiece::ItemDrop:

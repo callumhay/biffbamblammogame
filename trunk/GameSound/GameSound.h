@@ -124,6 +124,7 @@ public:
         CannonBlockRotatingPart,
         CannonBlockFiredEvent,
         CannonObstructionMalfunctionEvent,
+        FragileCannonDestroyedEvent,
 		BallPortalTeleportEvent,
         EnergyProjectilePortalTeleportEvent,
         NonBallObjectPortalTeleportEvent,

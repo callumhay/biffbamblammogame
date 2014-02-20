@@ -34,19 +34,22 @@ const double PaddleRemoteControlRocketProjectile::RATE_OF_FUEL_CONSUMPTION     =
 const float PaddleRemoteControlRocketProjectile::FUEL_AMOUNT_TO_START_FLASHING = 33.0f;
 
 const double PaddleRemoteControlRocketProjectile::PORTAL_COLLISION_RESET_TIME = LevelPiece::HALF_PIECE_WIDTH;
+const double PaddleRemoteControlRocketProjectile::CANNON_COLLISION_RESET_TIME = LevelPiece::HALF_PIECE_WIDTH;
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(
     const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height) :
 RocketProjectile(spawnLoc, rocketVelDir, width, height), currAppliedAccelDir(0.0f, 0.0f), currAppliedAccelMag(0.0f),
 currAppliedThrust(0.0f), currFuelAmt(STARTING_FUEL_AMOUNT), currFlashColourAmt(0.0f), currFlashFreq(0), flashTimeCounter(0),
-timeUntilThrustIsAvailable(0.0), resetPortalRecollisionCountdown(-1), lastPortalCollidedWith(NULL) {
+timeUntilThrustIsAvailable(0.0), resetPortalRecollisionCountdown(-1), lastPortalCollidedWith(NULL),
+resetCannonRecollisionCountdown(-1), lastCannonCollidedWith(NULL) {
 }
 
 PaddleRemoteControlRocketProjectile::PaddleRemoteControlRocketProjectile(const PaddleRemoteControlRocketProjectile& copy) : 
 RocketProjectile(copy), currAppliedAccelDir(copy.currAppliedAccelDir), currAppliedAccelMag(copy.currAppliedAccelMag),
 currAppliedThrust(copy.currAppliedThrust), currFuelAmt(copy.currFuelAmt), currFlashColourAmt(copy.currFlashColourAmt), 
 currFlashFreq(copy.currFlashFreq), flashTimeCounter(copy.flashTimeCounter), timeUntilThrustIsAvailable(copy.timeUntilThrustIsAvailable),
-resetPortalRecollisionCountdown(copy.resetPortalRecollisionCountdown), lastPortalCollidedWith(copy.lastPortalCollidedWith) {
+resetPortalRecollisionCountdown(copy.resetPortalRecollisionCountdown), lastPortalCollidedWith(copy.lastPortalCollidedWith),
+resetCannonRecollisionCountdown(copy.resetCannonRecollisionCountdown), lastCannonCollidedWith(copy.lastCannonCollidedWith) {
 }
 
 PaddleRemoteControlRocketProjectile::~PaddleRemoteControlRocketProjectile() {
@@ -104,6 +107,8 @@ void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& 
         // Remove all applied acceleration if the rocket is inside a cannon block...
         this->SetAppliedAcceleration(Vector2D(0,0));
         this->currAppliedThrust = 0.0f;
+        this->resetCannonRecollisionCountdown = CANNON_COLLISION_RESET_TIME;
+        this->lastCannonCollidedWith = this->cannonBlock;
     }
     else {
         // Update the acceleration/velocity/position of the rocket based on the current steering
@@ -145,6 +150,19 @@ void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& 
                 this->resetPortalRecollisionCountdown -= seconds;
             }
         }
+        // Check whether we should reset the last cannon collision
+        if (this->resetCannonRecollisionCountdown != -1) {
+            if (this->resetCannonRecollisionCountdown <= 0.0) {
+                if (this->lastThingCollidedWith == this->lastCannonCollidedWith) {
+                    this->SetLastThingCollidedWith(NULL);
+                }
+                this->lastCannonCollidedWith = NULL;
+                this->resetCannonRecollisionCountdown = -1;
+            }
+            else {
+                this->resetCannonRecollisionCountdown -= seconds;
+            }
+        }
     }
 
     RocketProjectile::Tick(seconds, model);
@@ -154,8 +172,9 @@ void PaddleRemoteControlRocketProjectile::Tick(double seconds, const GameModel& 
 /// <summary> Update the level based on changes to this projectile that can result in level changes. </summary>
 /// <returns> true if this projectile has been destroyed/removed from the game, false otherwise.</returns>
 bool PaddleRemoteControlRocketProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
+    
     // If the fuel is already gone then we do nothing: This rocket is already dead/exploded
-    if (this->currFuelAmt <= 0.0f) {
+    if (RocketProjectile::ModifyLevelUpdate(dT, model) || this->currFuelAmt <= 0.0f) {
         return true;
     }
 

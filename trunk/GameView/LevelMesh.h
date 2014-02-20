@@ -40,6 +40,7 @@ class Mesh;
 class PrismBlockMesh;
 class PortalBlockMesh;
 class CannonBlockMesh;
+class FragileCannonBlockMesh;
 class CollateralBlockMesh;
 class TeslaBlockMesh;
 class SwitchBlockMesh;
@@ -116,6 +117,7 @@ private:
 	PrismBlockMesh* prismBlockDiamond;		// Prism diamond block
 	PrismBlockMesh* prismBlockTriangleUR;	// Prism triangle block in upper-right corner position
 	CannonBlockMesh* cannonBlock;
+    FragileCannonBlockMesh* fragileCannonBlock;
 	CollateralBlockMesh* collateralBlock;
 	TeslaBlockMesh* teslaBlock;
 	ItemDropBlockMesh* itemDropBlock;

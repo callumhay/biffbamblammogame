@@ -923,7 +923,8 @@ void GameModel::DoProjectileCollisions(double dT) {
 
                     // Check to see if the piece is a cannon and whether it now has the projectile loaded in it, in which case we
                     // exit from this loop immediately
-                    if (!destroyProjectile && currPiece->GetType() == LevelPiece::Cannon) {
+                    if (!destroyProjectile && currPiece->GetType() == LevelPiece::Cannon && 
+                        currPiece->GetType() != LevelPiece::FragileCannon) {
                         
                         this->CollisionOccurred(currProjectile, currPiece);
                         // currPiece may now be destroyed...

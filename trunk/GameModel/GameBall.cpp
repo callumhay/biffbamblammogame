@@ -195,7 +195,7 @@ bool GameBall::CanShootBallCamOutOfCannon(const CannonBlock& cannon, const GameL
 
         const LevelPiece *currPiece = *pieceIter;
         if (!currPiece->CanBeDestroyedByBall() &&
-            currPiece->GetType() != LevelPiece::Cannon && 
+            currPiece->GetType() != LevelPiece::Cannon && currPiece->GetType() != LevelPiece::FragileCannon &&
             currPiece->GetBounds().CollisionCheck(testBallBounds)) {
 
             return false;

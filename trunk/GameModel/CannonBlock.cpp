@@ -108,40 +108,43 @@ void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 void CannonBlock::DrawWireframe() const {
     LevelPiece::DrawWireframe();
 
-    // Draw an arrow showing the direction the cannon is pointing in if this cannon has the ball camera
-    // ball inside it...
+    // Draw an arrow showing the direction the cannon is pointing in if this cannon has the ball camera ball inside it...
     if (GameBall::GetBallCameraBall() == this->loadedBall) {
-        const Point2D& center = this->GetCenter();
-        Vector2D dir = 1.5f * HALF_CANNON_BARREL_LENGTH * this->GetCurrentCannonDirection();
-        
-        Point2D arrowBase = center + dir;
-        Point2D arrowEnd  = arrowBase + dir;
-        
-        Point2D pointerLoc = arrowBase + 0.6f * dir;
-        Vector2D perpVec = arrowEnd - arrowBase;
-        perpVec.Rotate(90);
-        perpVec *= 0.25f;
-
-        glPushAttrib(GL_CURRENT_BIT);
-        glColor3f(0, 1, 0);
-
-        glBegin(GL_LINES);
-        
-        // Arrow shaft
-        glVertex2f(arrowBase[0], arrowBase[1]);
-        glVertex2f(arrowEnd[0], arrowEnd[1]);
-
-        // Arrow angled pointer lines
-        glVertex2f(arrowEnd[0], arrowEnd[1]);
-        glVertex2f(pointerLoc[0] + perpVec[0], pointerLoc[1] + perpVec[1]);
-
-        glVertex2f(arrowEnd[0], arrowEnd[1]);
-        glVertex2f(pointerLoc[0] - perpVec[0], pointerLoc[1] - perpVec[1]);
-
-        glEnd();
-
-        glPopAttrib();
+        CannonBlock::DrawCannonDirIntoWireframe(this->GetCenter(), this->GetCurrentCannonDirection());
     }
+}
+
+void CannonBlock::DrawCannonDirIntoWireframe(const Point2D& center, const Vector2D& cannonDir) {
+
+    Vector2D dir = 1.5f * HALF_CANNON_BARREL_LENGTH * cannonDir;
+
+    Point2D arrowBase = center + dir;
+    Point2D arrowEnd  = arrowBase + dir;
+
+    Point2D pointerLoc = arrowBase + 0.6f * dir;
+    Vector2D perpVec = arrowEnd - arrowBase;
+    perpVec.Rotate(90);
+    perpVec *= 0.25f;
+
+    glPushAttrib(GL_CURRENT_BIT);
+    glColor3f(0, 1, 0);
+
+    glBegin(GL_LINES);
+
+    // Arrow shaft
+    glVertex2f(arrowBase[0], arrowBase[1]);
+    glVertex2f(arrowEnd[0], arrowEnd[1]);
+
+    // Arrow angled pointer lines
+    glVertex2f(arrowEnd[0], arrowEnd[1]);
+    glVertex2f(pointerLoc[0] + perpVec[0], pointerLoc[1] + perpVec[1]);
+
+    glVertex2f(arrowEnd[0], arrowEnd[1]);
+    glVertex2f(pointerLoc[0] - perpVec[0], pointerLoc[1] - perpVec[1]);
+
+    glEnd();
+
+    glPopAttrib();
 }
 
 
@@ -212,7 +215,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 }
 
 /**
- * Call this when a collision has actually occured with a projectile and this block.
+ * Call this when a collision has actually occurred with a projectile and this block.
  * Returns: The resulting level piece that this has become.
  */
 LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
@@ -321,11 +324,42 @@ void CannonBlock::InitBallCameraInCannonValues(bool changeRotation, const GameBa
 }
 
 /**
+ * Simulates the results of the RotateAndFire function without having any impact on this block.
+ */
+bool CannonBlock::TestRotateAndFire(double dT, bool overrideFireRotation, Vector2D& firingDir) const {
+    
+    if (this->elapsedRotationTime >= this->totalRotationTime) {
+        float firingRotationDegsFromX = this->currRotationFromXInDegs;
+        if (!this->GetHasRandomRotation() && !overrideFireRotation) {
+            firingRotationDegsFromX = this->fixedRotationXInDegs;
+        }
+
+        firingDir = CannonBlock::GetDirectionFromRotationInDegs(firingRotationDegsFromX);
+        return true;
+    }
+
+    float firingRotationDegsFromX = this->currRotationFromXInDegs + static_cast<float>(this->currRotationSpeed * dT);
+    if (firingRotationDegsFromX >= 360.0f) {
+        firingRotationDegsFromX -= 360.0f;
+    }
+    else if (firingRotationDegsFromX <= -360.0f) {
+        firingRotationDegsFromX += 360.0f;
+    }
+    assert(firingRotationDegsFromX < 360);
+    assert(firingRotationDegsFromX > -360);
+
+    firingDir = CannonBlock::GetDirectionFromRotationInDegs(firingRotationDegsFromX);
+    return false;
+}
+
+/**
  * Tell the cannon block to continually rotate (ONLY IF IT HAS A BALL INSIDE) and eventually
  * fire based on some random time.
- * Returns: true if the ball has fired, false if still rotating.
+ * Returns: A pair:
+ *          - first:  A LevelPiece of whatever piece is now residing in this pieces place after this function call
+ *          - second: A boolean of true if the ball has fired, false if still rotating.
  */
-bool CannonBlock::RotateAndEventuallyFire(double dT, bool overrideFireRotation) {
+std::pair<LevelPiece*, bool> CannonBlock::RotateAndFire(double dT, GameModel* gameModel, bool overrideFireRotation) {
 	assert(this->totalRotationTime > 0.0);
 
     // If we're done rotating then reset the cannon...
@@ -343,7 +377,7 @@ bool CannonBlock::RotateAndEventuallyFire(double dT, bool overrideFireRotation) 
 		this->elapsedRotationTime = this->totalRotationTime;
 		this->loadedBall = NULL;
 		this->loadedProjectile = NULL;
-		return true;
+        return std::make_pair(this->CannonWasFired(gameModel), true);
 	}
 
 	// Increment the rotation...
@@ -363,7 +397,7 @@ bool CannonBlock::RotateAndEventuallyFire(double dT, bool overrideFireRotation) 
 	
 	this->elapsedRotationTime += dT;
 
-	return false;
+    return std::make_pair(this, false);
 }
 
 void CannonBlock::SetupRandomCannonFireTimeAndDirection() {

@@ -66,7 +66,7 @@ public:
 	 * Obtain a random extremeness in the given interval of min and max extremenesses.
 	 * Result: random extremeness value in [min, max].
 	 */
-	inline Extremeness Generator::GetRandomExtremeness(Extremeness min, Extremeness max) {
+	static inline Extremeness Generator::GetRandomExtremeness(Extremeness min, Extremeness max) {
 		assert(min < max);
 		return static_cast<Extremeness>(min + (Randomizer::GetInstance()->RandomUnsignedInt() % (max - min + 1)));
 	}

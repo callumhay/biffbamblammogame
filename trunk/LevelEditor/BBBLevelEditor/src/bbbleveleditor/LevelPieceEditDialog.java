@@ -274,7 +274,7 @@ public class LevelPieceEditDialog extends JDialog {
 	        buttonPanel.add(this.teslaChangable);
 	        
         }
-        else if (this.levelPieceLbl.getIsCannonBlock()) {
+        else if (this.levelPieceLbl.getIsCannonBlock() || this.levelPieceLbl.getIsOneShotCannonBlock()) {
         	this.randomCannonAngleRadio  = new JRadioButton("Random Angle");
         	this.randomCannonAngleRadio.setEnabled(true);
         	this.randomCannonAngleRadio.addActionListener( new ActionListener() {

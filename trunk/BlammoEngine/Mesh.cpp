@@ -17,7 +17,7 @@ normalStream(other.normalStream), texCoordStream(other.texCoordStream), indices(
 }
 
 PolygonGroup::PolygonGroup(const PolyGrpIndexer& faceIndexer, const std::vector<Point3D>& vertexStream, 
-													 const std::vector<Vector3D>& normalStream, const std::vector<Point2D>& texCoordStream) {
+                           const std::vector<Vector3D>& normalStream, const std::vector<Point2D>& texCoordStream) {
 	assert(faceIndexer.vertexIndices.size () >= 3);
 	assert(faceIndexer.normalIndices.size() == faceIndexer.vertexIndices.size());
 	assert(faceIndexer.vertexIndices.size() == faceIndexer.texCoordIndices.size());

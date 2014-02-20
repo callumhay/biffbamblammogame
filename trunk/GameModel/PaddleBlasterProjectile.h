@@ -27,6 +27,8 @@ public:
     bool IsRefractableOrReflectable() const { return false; }
 
     void Tick(double seconds, const GameModel& model);
+    bool ModifyLevelUpdate(double dT, GameModel& model);
+
     BoundingLines BuildBoundingLines() const;
 
     virtual float GetSizeMultiplier() const = 0;

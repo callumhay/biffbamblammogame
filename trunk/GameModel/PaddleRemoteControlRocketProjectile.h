@@ -85,6 +85,7 @@ private:
     static const float FUEL_AMOUNT_TO_START_FLASHING;
 
     static const double PORTAL_COLLISION_RESET_TIME;
+    static const double CANNON_COLLISION_RESET_TIME;
 
     double fuelTimeCountdown; // Time until fuel runs out
     float currFuelAmt;        // [0, 100] level of the fuel left in this rocket, when fuel runs out it explodes
@@ -100,6 +101,8 @@ private:
 
     double resetPortalRecollisionCountdown;
     PortalBlock* lastPortalCollidedWith;
+    double resetCannonRecollisionCountdown;
+    CannonBlock* lastCannonCollidedWith;
 
     Vector2D GetAppliedAcceleration() const { return this->currAppliedAccelMag * this->currAppliedAccelDir; }
     void SetAppliedAcceleration(const Vector2D& accel);

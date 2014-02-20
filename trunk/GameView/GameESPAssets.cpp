@@ -28,6 +28,7 @@
 #include "../GameModel/BallBoostModel.h"
 #include "../GameModel/PortalBlock.h"
 #include "../GameModel/CannonBlock.h"
+#include "../GameModel/FragileCannonBlock.h"
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/RegenBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
@@ -119,6 +120,8 @@ fastRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 4.0f, ESPPar
 fastRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 4.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 loopRotateEffectorCW(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 loopRotateEffectorCCW(90.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+moderateSpdLoopRotateEffectorCW(180.0f, ESPParticleRotateEffector::CLOCKWISE),
+moderateSpdLoopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 
 cleanCircleGradientTex(NULL),
 circleGradientTex(NULL), 
@@ -138,6 +141,7 @@ spiralTex(NULL),
 sideBlastTex(NULL),
 hugeExplosionTex(NULL),
 bubblyExplosionTex(NULL),
+cloudRayExplosionTex(NULL),
 lightningBoltTex(NULL),
 sphereNormalsTex(NULL),
 cloudNormalTex(NULL),
@@ -158,10 +162,15 @@ xTex(NULL),
 xOutlineTex(NULL),
 lightningAnimTex(NULL),
 leftHalfBrokenPadlockTex(NULL),
-rightHalfBrokenPadlockTex(NULL)
+rightHalfBrokenPadlockTex(NULL),
+
+fragileCannonBarrelMesh(NULL),
+fragileCannonBasePostMesh(NULL),
+fragileCannonBaseBarMesh(NULL)
 {
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
+    this->InitMeshes();
 }
 
 GameESPAssets::~GameESPAssets() {
@@ -277,6 +286,8 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->bubblyExplosionTex);
     assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudRayExplosionTex);
+    assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningBoltTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
@@ -321,6 +332,16 @@ GameESPAssets::~GameESPAssets() {
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->leftHalfBrokenPadlockTex);
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->rightHalfBrokenPadlockTex);
+    assert(removed);
+
+   
+
+    // Clean up any meshes
+    removed = ResourceManager::GetInstance()->ReleaseMeshResource(this->fragileCannonBarrelMesh);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseMeshResource(this->fragileCannonBaseBarMesh);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseMeshResource(this->fragileCannonBasePostMesh);
     assert(removed);
 
     UNUSED_VARIABLE(removed);
@@ -757,6 +778,11 @@ void GameESPAssets::InitESPTextures() {
         this->bubblyExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
             GameViewConstants::GetInstance()->TEXTURE_BUBBLY_EXPLOSION, Texture::Trilinear));
 		assert(this->bubblyExplosionTex != NULL);
+    }
+    if (this->cloudRayExplosionTex == NULL) {
+        this->cloudRayExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+            GameViewConstants::GetInstance()->TEXTURE_CLOUD_RAY_EXPLOSION, Texture::Trilinear));
+        assert(this->cloudRayExplosionTex != NULL);
     }
 	if (this->lightningBoltTex == NULL) {
 		this->lightningBoltTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -1509,6 +1535,23 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	//this->iceRefractEffect.SetNormalTexture(this->rectPrismTexture);
 }
 
+void GameESPAssets::InitMeshes() {
+    assert(this->fragileCannonBaseBarMesh == NULL);
+    assert(this->fragileCannonBasePostMesh == NULL);
+    assert(this->fragileCannonBarrelMesh == NULL);
+
+    this->fragileCannonBarrelMesh = ResourceManager::GetInstance()->GetObjMeshResource(
+        GameViewConstants::GetInstance()->FRAGILE_CANNON_BLOCK_BARREL_MESH);
+    this->fragileCannonBaseBarMesh = ResourceManager::GetInstance()->GetObjMeshResource(
+        GameViewConstants::GetInstance()->FRAGILE_CANNON_BLOCK_BASE_BAR_MESH);
+    this->fragileCannonBasePostMesh = ResourceManager::GetInstance()->GetObjMeshResource(
+        GameViewConstants::GetInstance()->FRAGILE_CANNON_BLOCK_BASE_POST_MESH);
+
+    assert(this->fragileCannonBaseBarMesh  != NULL);
+    assert(this->fragileCannonBasePostMesh != NULL);
+    assert(this->fragileCannonBarrelMesh   != NULL);
+}
+
 /**
  * Creator method for making the onomata particle effect for when the ball hits various things.
  */
@@ -1726,6 +1769,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::BreakableTriangle: 
 				case LevelPiece::Tesla:
 				case LevelPiece::Cannon:
+                case LevelPiece::FragileCannon:
 				case LevelPiece::ItemDrop:
 				case LevelPiece::Collateral:
                 case LevelPiece::Switch:
@@ -1811,6 +1855,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
                 case LevelPiece::Empty:
                 case LevelPiece::Portal:
                 case LevelPiece::Cannon:
+                case LevelPiece::FragileCannon:
                     break;
 
                 case LevelPiece::NoEntry: {
@@ -1840,8 +1885,9 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
-            if (!block.ProjectileIsDestroyedOnCollision(&projectile) && 
-                projectile.GetVelocityMagnitude() == 0.0f) {
+            if (!block.ProjectileIsDestroyedOnCollision(&projectile) && projectile.GetVelocityMagnitude() == 0.0f &&
+                block.GetType() != LevelPiece::Cannon && block.GetType() != LevelPiece::FragileCannon) {
+
                 this->AddPaddleMineAttachedEffects(projectile);
             }
             break;
@@ -2330,8 +2376,8 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
 		case LevelPiece::PrismTriangle:
 			type = Onomatoplex::SHATTER;
 			severity = Onomatoplex::AWESOME;
-			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.0f), 
-																						ESPInterval(0.1f, 1.0f), ESPInterval(0.5f, 1.0f)));
+			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(
+                emitCenter, ESPInterval(0.0f), ESPInterval(0.1f, 1.0f), ESPInterval(0.5f, 1.0f)));
 			break;
 
 		case LevelPiece::ItemDrop:
@@ -2342,14 +2388,15 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
         case LevelPiece::RocketTurret:
         case LevelPiece::MineTurret:
 			severity = Onomatoplex::SUPER_AWESOME;
-			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
-												  ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
+			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(
+                emitCenter, ESPInterval(0.6f, 1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
 			break;
 
 		case LevelPiece::Cannon:
+        case LevelPiece::FragileCannon:
 			severity = Onomatoplex::AWESOME;
-			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
-																						ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.0f)));
+			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(
+                emitCenter, ESPInterval(0.8f, 1.0f), ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.0f)));
 			break;
 
 		default:
@@ -2846,10 +2893,105 @@ void GameESPAssets::AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock
     this->activeGeneralEmitters.push_back(lifeInfoEmitter);
 }
 
+void GameESPAssets::AddFragileCannonBreakEffect(const LevelPiece& block) {
+    
+    assert(block.GetType() == LevelPiece::FragileCannon);
+    const FragileCannonBlock& fragileCannonBlock = static_cast<const FragileCannonBlock&>(block);
+
+    Point3D emitCenter(block.GetCenter(), 0);
+
+    // Build emitters with mesh particles for all the pieces of the fragile cannon block...
+    ESPPointEmitter* smashedCannonPieceEmitter = new ESPPointEmitter();
+    smashedCannonPieceEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+    smashedCannonPieceEmitter->SetInitialSpd(ESPInterval(5.0f, 8.0f));
+    smashedCannonPieceEmitter->SetParticleLife(ESPInterval(2.0f, 3.0f));
+    smashedCannonPieceEmitter->SetEmitDirection(Vector3D(-fragileCannonBlock.GetCurrentCannonDirection(), 0));
+    smashedCannonPieceEmitter->SetEmitAngleInDegrees(50);
+    smashedCannonPieceEmitter->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+    smashedCannonPieceEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 2.25f), ESPInterval(0), ESPInterval(0));
+    smashedCannonPieceEmitter->SetEmitPosition(emitCenter);
+    smashedCannonPieceEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+    smashedCannonPieceEmitter->AddEffector(&this->gravity);
+    smashedCannonPieceEmitter->AddEffector(&this->particleFader);
+    smashedCannonPieceEmitter->AddEffector(
+        Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->moderateSpdLoopRotateEffectorCW : &this->moderateSpdLoopRotateEffectorCCW);
+   
+    smashedCannonPieceEmitter->AddParticle(new ESPMeshParticle(this->fragileCannonBaseBarMesh));
+    smashedCannonPieceEmitter->AddParticle(new ESPMeshParticle(this->fragileCannonBasePostMesh));
+    smashedCannonPieceEmitter->AddParticle(new ESPMeshParticle(this->fragileCannonBasePostMesh));
+
+    ESPPointEmitter* smashedCannonBarrelEmitter = new ESPPointEmitter();
+    smashedCannonBarrelEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+    smashedCannonBarrelEmitter->SetInitialSpd(ESPInterval(9.0f, 10.0f));
+    smashedCannonBarrelEmitter->SetParticleLife(ESPInterval(2.5f, 3.0f));
+    smashedCannonBarrelEmitter->SetEmitDirection(Vector3D(-fragileCannonBlock.GetCurrentCannonDirection(), 0));
+    smashedCannonBarrelEmitter->SetEmitAngleInDegrees(10);
+    smashedCannonBarrelEmitter->SetParticleRotation(ESPInterval(fragileCannonBlock.GetCurrentCannonAngleInDegs()));
+    smashedCannonBarrelEmitter->SetRadiusDeviationFromCenter(ESPInterval(0), ESPInterval(0), ESPInterval(0));
+    smashedCannonBarrelEmitter->SetEmitPosition(emitCenter);
+    smashedCannonBarrelEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+    smashedCannonBarrelEmitter->AddEffector(&this->gravity);
+    smashedCannonBarrelEmitter->AddEffector(&this->particleFader);
+    smashedCannonBarrelEmitter->AddEffector(
+        Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->loopRotateEffectorCW : &this->loopRotateEffectorCCW);
+
+    smashedCannonBarrelEmitter->AddParticle(new ESPMeshParticle(this->fragileCannonBarrelMesh));
+
+    ESPInterval bangLifeInterval	= ESPInterval(1.2f);
+    ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
+
+    // Build emitters for the explosion of the fragile cannon block
+    ESPPointEmitter* explosionEffect = new ESPPointEmitter();
+    explosionEffect->SetSpawnDelta(ESPInterval(-1));
+    explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    explosionEffect->SetParticleLife(bangLifeInterval);
+    explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    explosionEffect->SetParticleAlignment(ESP::ScreenAligned);
+    explosionEffect->SetEmitPosition(emitCenter);
+    explosionEffect->SetParticleRotation(ESPInterval(-30.0, 30.0f));
+    explosionEffect->SetParticleSize(ESPInterval(1.4f*LevelPiece::PIECE_WIDTH));
+    explosionEffect->AddEffector(&this->particleFader);
+    explosionEffect->AddEffector(&this->particleMediumGrowth);
+    explosionEffect->SetParticles(1, this->cloudRayExplosionTex);
+
+    // Create an emitter for the sound of onomatopoeia of the breaking block
+    ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
+    // Set up the emitter...
+    bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
+    bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
+    bangOnoEffect->SetParticleSize(ESPInterval(1.2f));
+    bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+    bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+    bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangOnoEffect->SetEmitPosition(emitCenter);
+    bangOnoEffect->AddEffector(&this->particleFader);
+    bangOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+    // Add the single text particle to the emitter with the severity of the effect...
+    TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+    bangTextLabel.SetColour(Colour(1, 1, 1));
+    bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.075f);
+
+    bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, 
+        Onomatoplex::Generator::GetRandomExtremeness(Onomatoplex::GOOD, Onomatoplex::SUPER_AWESOME));
+
+    // Add shockwave
+    ESPPointEmitter* shockwave = this->CreateShockwaveEffect(emitCenter, LevelPiece::PIECE_WIDTH, 0.75f);
+    assert(shockwave != NULL);
+
+    this->activeGeneralEmitters.push_back(shockwave);
+    this->activeGeneralEmitters.push_back(smashedCannonPieceEmitter);
+    this->activeGeneralEmitters.push_back(smashedCannonBarrelEmitter);
+    this->activeGeneralEmitters.push_back(explosionEffect);
+    this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
 void GameESPAssets::AddBlockDisintegrationEffect(const LevelPiece& block) {
     const Colour& colour = block.GetColour();
 
-    // Disintegration results in chared bits of the block and a puff of smoke
+    // Disintegration results in charred bits of the block and a puff of smoke
 	ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
 	smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
 	smashBitsEffect->SetInitialSpd(ESPInterval(2.0f, 5.0f));

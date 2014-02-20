@@ -41,24 +41,7 @@ PaddleBlasterProjectile::~PaddleBlasterProjectile() {
 }
 
 void PaddleBlasterProjectile::Tick(double seconds, const GameModel& model) {
-    if (this->cannonBlock != NULL) {
-        // 'Tick' the cannon to spin the rocket around inside it... eventually the function will say
-        // it has fired the rocket
-        bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);
-        if (cannonHasFired) {
-            // Set the velocity in the direction the cannon has fired in
-            this->velocityMag = this->defaultVelocityMagnitude;
-            this->velocityDir = this->cannonBlock->GetCurrentCannonDirection();
-            this->position    = this->cannonBlock->GetCenter() + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
-
-            // EVENT: This blast has officially been fired from the cannon
-            GameEventManager::Instance()->ActionProjectileFiredFromCannon(*this, *this->cannonBlock);
-
-            this->SetLastThingCollidedWith(this->cannonBlock);
-            this->cannonBlock = NULL;
-        }
-    }
-    else {
+    if (this->cannonBlock == NULL) {
         this->AugmentDirectionOnPaddleMagnet(seconds, model, 40.0f);
 
         // Update the laser's position
@@ -66,6 +49,33 @@ void PaddleBlasterProjectile::Tick(double seconds, const GameModel& model) {
     }
 }
 
+bool PaddleBlasterProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
+    if (this->cannonBlock != NULL) {
+
+        // Start by doing a test to see if the cannon will actually fire...
+        bool willCannonFire = this->cannonBlock->TestRotateAndFire(dT, false, this->velocityDir);
+        if (willCannonFire) {
+            // Set the remaining kinematics properties of the projectile so that it's fired
+            this->velocityMag = this->defaultVelocityMagnitude;
+            this->position    = this->cannonBlock->GetCenter() + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
+
+            // EVENT: This blast has officially been fired from the cannon
+            GameEventManager::Instance()->ActionProjectileFiredFromCannon(*this, *this->cannonBlock);
+        }
+
+        // 'Tick' the cannon to spin the rocket around inside it... eventually the function will say
+        // it has fired the rocket
+        // WARNING: The cannon block may no longer exist after this function call!
+        std::pair<LevelPiece*, bool> cannonFiredPair = this->cannonBlock->RotateAndFire(dT, &model, false);
+        if (willCannonFire) {
+            assert(cannonFiredPair.second);
+            this->cannonBlock = NULL;
+            this->SetLastThingCollidedWith(cannonFiredPair.first);
+        }
+    }
+
+    return false;
+}
 
 BoundingLines PaddleBlasterProjectile::BuildBoundingLines() const {
 

@@ -50,11 +50,12 @@ public:
     enum DestructionMethod { 
         NotApplicableDestruction, RegularDestruction, LaserProjectileDestruction, RocketDestruction, LaserBeamDestruction,
         CollateralDestruction, PaddleShieldDestruction, BombDestruction, FireDestruction,
-        TeslaDestruction, MineDestruction, IceShatterDestruction, DisintegrationDestruction, BasicProjectileDestruction
+        TeslaDestruction, MineDestruction, IceShatterDestruction, DisintegrationDestruction, BasicProjectileDestruction,
+        SelfDestruction
     }; 
 
 	enum LevelPieceType {
-        Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle, Cannon,
+        Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle, Cannon, FragileCannon,
         Collateral, Tesla, ItemDrop, Switch, OneWay, NoEntry, LaserTurret, RocketTurret, MineTurret, AlwaysDrop, Regen
     };
 

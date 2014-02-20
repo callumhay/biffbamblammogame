@@ -52,26 +52,37 @@ void InCannonBallState::Tick(bool simulateMovement, double seconds, const Vector
     UNUSED_PARAMETER(gameModel);
 	UNUSED_PARAMETER(worldSpaceGravityDir);
 
-    bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds, this->gameBall->HasBallCameraActive());
-	if (cannonHasFired) {
-		
-		// Set the velocity in the direction the cannon has fired in
-		Vector2D cannonFireDir = this->cannonBlock->GetCurrentCannonDirection();
-		this->gameBall->SetVelocity(this->gameBall->GetSpeed(), cannonFireDir);
+    // Start by doing a test to see if the cannon will actually fire...
+    Vector2D cannonFireDir;
+    bool isBallCameraActive = this->gameBall->HasBallCameraActive();
+    bool willCannonFire = this->cannonBlock->TestRotateAndFire(seconds, isBallCameraActive, cannonFireDir);
+    if (willCannonFire) {
+        
+        // Set the velocity in the direction the cannon has fired in
+        this->gameBall->SetVelocity(this->gameBall->GetSpeed(), cannonFireDir);
 
-		// Move the ball so that it's outside the barrel of the cannon entirely - it will
-		// currently be perfectly centered inside the cannon, so just move it along the cannon
-		// firing vector by the correct amount...
-		//const Collision::Circle2D& ballBounds = this->gameBall->GetBounds();
+        // Move the ball so that it's outside the barrel of the cannon entirely - it will
+        // currently be perfectly centered inside the cannon, so just move it along the cannon
+        // firing vector by the correct amount...
+        //const Collision::Circle2D& ballBounds = this->gameBall->GetBounds();
         this->gameBall->SetCenterPosition(this->cannonBlock->GetCenter() + 
             CannonBlock::HALF_CANNON_BARREL_LENGTH * cannonFireDir);
 
-		// Restore ball state information that was changed during this state's operations
-		this->gameBall->SetBallBallCollisionsEnabled();
-		this->gameBall->SetBallBlockAndBossCollisionsEnabled();
+        // Restore ball state information that was changed during this state's operations
+        this->gameBall->SetBallBallCollisionsEnabled();
+        this->gameBall->SetBallBlockAndBossCollisionsEnabled();
 
-		// EVENT: Ball has officially been fired from the cannon
-		GameEventManager::Instance()->ActionBallFiredFromCannon(*this->gameBall, *this->cannonBlock);
+        // EVENT: Ball has officially been fired from the cannon
+        GameEventManager::Instance()->ActionBallFiredFromCannon(*this->gameBall, *this->cannonBlock);
+    }
+
+    // 'Tick' the cannon to spin the rocket around inside it... eventually the function will say
+    // it has fired the rocket
+    // WARNING: This function can destroy the cannon!
+    std::pair<LevelPiece*, bool> cannonFiredPair = this->cannonBlock->RotateAndFire(seconds, gameModel, isBallCameraActive);
+    UNUSED_VARIABLE(cannonFiredPair);
+	if (willCannonFire) {
+        assert(cannonFiredPair.second);
 
 		// We use this to ensure that the destructor knows not to delete the previous state as well
 		BallState* prevStateTemp = this->previousState;

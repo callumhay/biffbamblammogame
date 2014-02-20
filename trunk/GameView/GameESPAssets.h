@@ -126,6 +126,8 @@ private:
     ESPParticleRotateEffector fastRotatorCCW;
 	ESPParticleRotateEffector loopRotateEffectorCW;
 	ESPParticleRotateEffector loopRotateEffectorCCW;
+    ESPParticleRotateEffector moderateSpdLoopRotateEffectorCW;
+    ESPParticleRotateEffector moderateSpdLoopRotateEffectorCCW;
 
 	ESPParticleColourEffector beamBlastColourEffector;
 
@@ -158,6 +160,7 @@ private:
 	Texture2D* sideBlastTex;
 	Texture2D* hugeExplosionTex;
     Texture2D* bubblyExplosionTex;
+    Texture2D* cloudRayExplosionTex;
 	Texture2D* lightningBoltTex;
 	Texture2D* sphereNormalsTex;
     Texture2D* cloudNormalTex;
@@ -183,6 +186,10 @@ private:
 
     Texture2D* leftHalfBrokenPadlockTex;
     Texture2D* rightHalfBrokenPadlockTex;
+
+    Mesh* fragileCannonBarrelMesh;
+    Mesh* fragileCannonBasePostMesh;
+    Mesh* fragileCannonBaseBarMesh;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // Stores each balls set of item-related (defined by unique ID) effects
@@ -254,6 +261,7 @@ private:
 	// Initialization functions for effect stuffs
 	void InitESPTextures();
 	void InitStandaloneESPEffects();
+    void InitMeshes();
 
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
@@ -390,6 +398,7 @@ public:
 	void AddBombBlockBreakEffect(const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
 	void AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock);
+    void AddFragileCannonBreakEffect(const LevelPiece& block);
 
     void AddBlockDisintegrationEffect(const LevelPiece& block);
 

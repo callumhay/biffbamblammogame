@@ -13,45 +13,31 @@
 #define __CANNONBLOCKMESH_H__
 
 #include "../BlammoEngine/Mesh.h"
-#include "../BlammoEngine/Texture2D.h"
-
-#include "../ESPEngine/ESPParticleScaleEffector.h"
-#include "../ESPEngine/ESPParticleColourEffector.h"
+#include "AbstractCannonBlockMesh.h"
 
 class CannonBlock;
 class ESPPointEmitter;
 
-class CannonBlockMesh {
+class CannonBlockMesh : public AbstractCannonBlockMesh {
 public:
-
 	CannonBlockMesh();
 	~CannonBlockMesh();
 
 	void Flush();
-	void AddCannonBlock(const CannonBlock* cannonBlock);
+	
+    void AddCannonBlock(const CannonBlock* cannonBlock);
 	void RemoveCannonBlock(const CannonBlock* cannonBlock);
-	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
+	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 	
 	void SetAlphaMultiplier(float alpha);
 
 private:
 	Mesh* cannonBlockBaseGeometry;
 	Mesh* cannonBlockBarrelGeometry;
-	std::map<std::string, MaterialGroup*> materialGroups;
 
 	std::set<const CannonBlock*> cannonBlocks;	// A list of all the cannon blocks that are currently present in the game
-
-	// Effects for drawing attention to active cannon blocks
-	ESPParticleScaleEffector haloExpandPulse;
-    ESPParticleScaleEffector attentionExpandPulse;
-	ESPParticleColourEffector haloFader;
-    ESPParticleColourEffector attentionFader;
-	Texture2D* haloTexture;
-
-	ESPPointEmitter* activeCannonEffectEmitter;
-    ESPPointEmitter* ballCamAttentionEffectEmitter;
 
 	void LoadMesh();
 
@@ -68,13 +54,15 @@ inline void CannonBlockMesh::AddCannonBlock(const CannonBlock* cannonBlock) {
 }
 
 inline void CannonBlockMesh::RemoveCannonBlock(const CannonBlock* cannonBlock) {
+    assert(cannonBlock != NULL);
 	size_t numRemoved = this->cannonBlocks.erase(cannonBlock);
     UNUSED_VARIABLE(numRemoved);
 	assert(numRemoved == 1);
 }
 
-inline const std::map<std::string, MaterialGroup*>& CannonBlockMesh::GetMaterialGroups() const {
-	return this->materialGroups;
+inline void CannonBlockMesh::SetAlphaMultiplier(float alpha) {
+    this->cannonBlockBarrelGeometry->SetAlpha(alpha);
+    this->cannonBlockBaseGeometry->SetAlpha(alpha);
 }
 
 #endif // __CANNONBLOCKMESH_H__

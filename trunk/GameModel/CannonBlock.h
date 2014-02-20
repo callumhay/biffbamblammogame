@@ -30,9 +30,9 @@ public:
 
 	CannonBlock(unsigned int wLoc, unsigned int hLoc, int setRotation);
     CannonBlock(unsigned int wLoc, unsigned int hLoc, const std::pair<int, int>& rotationInterval);
-	~CannonBlock();
+	virtual ~CannonBlock();
 
-	LevelPieceType GetType() const { 
+	virtual LevelPieceType GetType() const { 
 		return LevelPiece::Cannon;
 	}
 
@@ -63,19 +63,12 @@ public:
     bool CanChangeSelfOrOtherPiecesWhenHit() const {
         return false;
     }
-	
-	// Even the uber-ball just bounces off like a solid block
-	bool BallBlastsThrough(const GameBall& b) const {
-        UNUSED_PARAMETER(b);
+	bool BallBlastsThrough(const GameBall&) const {
 		return false;
 	}
-
-	// Ghost ball may pass through
 	bool GhostballPassesThrough() const {
 		return false;
 	}
-
-	// Light beams will extinguish on contact
 	bool IsLightReflectorRefractor() const {
 		return false;
 	}
@@ -86,8 +79,8 @@ public:
         return 0; 
     }
 
-	// The cannon block cannot be destroyed
-	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
+	// The regular cannon block cannot be destroyed
+	virtual LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 	
     bool SecondaryCollisionCheck(double dT, const GameBall& ball) const;
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, 
@@ -104,13 +97,16 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
     void DrawWireframe() const;
+    static void DrawCannonDirIntoWireframe(const Point2D& center, const Vector2D& cannonDir);
 
     void SetRotationSpeed(int dir, float magnitudePercent);
     void Fire();
     void InitBallCameraInCannonValues(bool changeRotation, const GameBall& ball);
 
-	bool RotateAndEventuallyFire(double dT, bool overrideFireRotation = false);
+    bool TestRotateAndFire(double dT, bool overrideFireRotation, Vector2D& firingDir) const;
+    std::pair<LevelPiece*, bool> RotateAndFire(double dT, GameModel* gameModel, bool overrideFireRotation);
 
+    static Vector2D GetDirectionFromRotationInDegs(float rotFromXInDegs);
 	Vector2D GetCurrentCannonDirection() const;
 	float GetCurrentCannonAngleInDegs() const;
 	Point2D GetEndOfBarrelPoint() const;
@@ -125,6 +121,9 @@ public:
     double GetTotalRotationTime() const;
 
     bool IsProjectileLoaded(const Projectile* p) const { return p == this->loadedProjectile; }
+
+protected:
+    virtual LevelPiece* CannonWasFired(GameModel*) { return this; }
 
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
@@ -181,9 +180,17 @@ inline void CannonBlock::SetRotationSpeed(int dir, float magnitudePercent) {
     this->fixedRotationXInDegs = this->currRotationFromXInDegs;
 }
 
+// NOTE: This will not immediately fire this cannon block, it will set it up so that the next time
+// "RotateAndFire" is called, it will definitely fire.
 inline void CannonBlock::Fire() {
     this->elapsedRotationTime  = this->totalRotationTime;
     this->fixedRotationXInDegs = this->currRotationFromXInDegs;
+}
+
+inline Vector2D CannonBlock::GetDirectionFromRotationInDegs(float rotFromXInDegs) {
+    Vector2D dirVec(1, 0);
+    dirVec.Rotate(rotFromXInDegs);
+    return dirVec;
 }
 
 /**
@@ -191,9 +198,7 @@ inline void CannonBlock::Fire() {
  * Returns: The normalized direction the cannon is currently pointing in.
  */
 inline Vector2D CannonBlock::GetCurrentCannonDirection() const {
-	static const Vector2D X_DIR(1, 0);
-	Vector2D dir = Vector2D::Rotate(this->currRotationFromXInDegs, X_DIR);
-	return Vector2D::Normalize(dir);
+    return CannonBlock::GetDirectionFromRotationInDegs(this->currRotationFromXInDegs);
 }
 
 inline float CannonBlock::GetCurrentCannonAngleInDegs() const {

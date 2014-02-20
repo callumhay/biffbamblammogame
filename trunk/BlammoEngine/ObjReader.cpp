@@ -212,6 +212,19 @@ Mesh* ObjReader::ReadMeshFromStream(const std::string &filepath, std::istream &i
 		currMatGrp->AddFaces(polyGrpIter->second, vertices, normals, texCoords);
 	}
 
+    // Check to see what materials are in the matGrps, if not all of the materials were used from the MTL file then we release the
+    // resources for the materials we aren't using
+    for (std::map<std::string, CgFxMaterialEffect*>::iterator iter = meshMaterials.begin(); iter != meshMaterials.end();) {
+        if (matGrps.find(iter->first) == matGrps.end()) {
+            delete iter->second;
+            iter = meshMaterials.erase(iter);
+        }
+        else {
+             ++iter;
+        }
+    }
+
+
 	return new Mesh(filepath, matGrps);
 }
 

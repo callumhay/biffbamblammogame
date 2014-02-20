@@ -107,23 +107,13 @@ public class LevelPieceImageLabel extends JLabel {
 			
 			justTheSymbol = pieceSymbol.substring(0,1);
 		}
-		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.CANNON_PIECE_SYMBOL + "(")) {
-
-			String angleValue1, angleValue2;
-			int indexOfHyphen = pieceSymbol.indexOf('-');
-			
-			if (indexOfHyphen != -1 && indexOfHyphen != 2) {
-				angleValue1 = pieceSymbol.substring(2, indexOfHyphen);
-				angleValue2 = pieceSymbol.substring(indexOfHyphen+1, pieceSymbol.length()-1);
-			}
-			else {
-				angleValue1 = pieceSymbol.substring(2, pieceSymbol.length()-1);
-				angleValue2 = angleValue1;
-			}
-			
-			this.setCannonBlockDegAngle1(Integer.parseInt(angleValue1));
-			this.setCannonBlockDegAngle2(Integer.parseInt(angleValue2));
+		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.CANNON_PIECE_SYMBOL + "(")) {
+			this.ReadCannonInfo(pieceSymbol, 2);
 			justTheSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
+		}
+		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 3).equals(LevelPiece.ONE_SHOT_CANNON_PIECE_SYMBOL + "(")) {
+			this.ReadCannonInfo(pieceSymbol, 3);
+			justTheSymbol = LevelPiece.ONE_SHOT_CANNON_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.SWITCH_PIECE_SYMBOL + "(")) {
 			int endSubstringIdx;
@@ -153,6 +143,23 @@ public class LevelPieceImageLabel extends JLabel {
 		}
 	}
 
+	private void ReadCannonInfo(String pieceSymbol, int startIdx) {
+		String angleValue1, angleValue2;
+		int indexOfHyphen = pieceSymbol.indexOf('-');
+		
+		if (indexOfHyphen != -1 && indexOfHyphen != startIdx) {
+			angleValue1 = pieceSymbol.substring(startIdx, indexOfHyphen);
+			angleValue2 = pieceSymbol.substring(indexOfHyphen+1, pieceSymbol.length()-1);
+		}
+		else {
+			angleValue1 = pieceSymbol.substring(startIdx, pieceSymbol.length()-1);
+			angleValue2 = angleValue1;
+		}
+		
+		this.setCannonBlockDegAngle1(Integer.parseInt(angleValue1));
+		this.setCannonBlockDegAngle2(Integer.parseInt(angleValue2));
+	}
+	
 	public void setLevelPiece(LevelPiece piece) {
 		assert(piece != null);
 		ImageIcon icon = piece.getImageIcon();
@@ -248,6 +255,9 @@ public class LevelPieceImageLabel extends JLabel {
 	}
 	public boolean getIsCannonBlock() {
 		return piece.getSymbol().equals(LevelPiece.CANNON_PIECE_SYMBOL);
+	}
+	public boolean getIsOneShotCannonBlock() {
+		return piece.getSymbol().equals(LevelPiece.ONE_SHOT_CANNON_PIECE_SYMBOL);
 	}
 	public boolean getIsSwitchBlock() {
 		return piece.getSymbol().equals(LevelPiece.SWITCH_PIECE_SYMBOL);
