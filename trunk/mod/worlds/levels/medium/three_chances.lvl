@@ -1,0 +1,73 @@
+Three Chances
+21 27
+E E E E E E E X(a,b) C1(90) E E E E E E E X(b,a) E E E E 
+E E E E E X(f,e) E E E E E E E E E E E E E E E 
+E E E E E E E E E E S S S F(d) F(d) F(d) S S S E E 
+E E E E E E E E E E S E E E E E E E S E E 
+E E E E E E E E E E S E E E E E E E S E E 
+E E E E E E E E E E F(r) E O Y R Y O E F(l) E E 
+E E C1(90) E E C1(0) E E E E F(r) E O O G O O E F(l) C1(270) C1(270) 
+E E E E E E E E E E F(r) E R Y I Y R E F(l) E E 
+E E E E E E E E E E S E O Y G Y O E S E E 
+E E E E E E E E E E S E Y G E G Y E S E E 
+E E E E E X(e,f) E E E E S E G E Y E G E S E E 
+E E E E E E E E E E S E Y G E G Y E S E E 
+E E E E E X(d,c) E E E E S I O G Q(f) G O I S E E 
+E E E E E E E E E E S E Y G E G Y E S E E 
+E E E E E E E E E E S E G E Y E G E S E E 
+E E E E E E E E E E F(r) E Y G E G Y E S E E 
+E E C1(90) E E C1(0) E E E E F(r) E O Y G Y O E S E E 
+E E E E E E E E E E F(r) E R Y I Y R E S E E 
+E E E E E E E E E E S E O O G O O E S E E 
+E E E E E E E E E E S E O Y R Y O E S E E 
+E E E E E E E E E E S E E E E E E E S E E 
+E E E E E X(c,d) E E E E S E E E E E E E S E E 
+E E E E E E E E E E S S S F(d) F(d) F(d) S S S E C(0) 
+E E E E S S S E E E S E E E E E E E E E E 
+E E E E E E E E E E S E E E E E E E E E E 
+E E E E E E E E E E S E E E C(90) E E E E C1(0) E 
+S E E E E E E E E E S E E E E E E E E E E 
+
+STARS:
+10000
+20000
+25000
+31000
+33000
+
+PaddleGrow 0
+PoisonPaddle 0
+Blackout 0
+BallSafetyNet 0
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FlameBlasterPaddle 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+RemoteControlRocket 0
+IceBall 0
+IceBlasterPaddle 0
+MineLauncherPaddle 0
+SlowBall 0
+FastBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+PaddleCam 0
+
+PADDLESTARTXPOS: 12.5

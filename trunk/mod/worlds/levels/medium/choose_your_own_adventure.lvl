@@ -6,7 +6,7 @@ E E S S S E E E S E E E E E S E E E S S S E E
 E S E E E E X(j,i) E S E E E E E S E X(k,l) E E E E S E 
 E S E R E E E E S E E Q(i) E E S E E E E R E S E 
 E S E E E E E E S E Q(i) E Q(i) E S E E E E E E S E 
-E S E E E E C(300) E S E Q(i) E Q(i) E S E C(60) E E E E S E 
+E S E E E E C1(300) E S E Q(i) E Q(i) E S E C1(60) E E E E S E 
 S S S S S E E E S X(f,e) S X(i,j) S X(g,h) S E E E S S S S S 
 S E E E S S S S S S S D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S S E E E S 
 S E X(m,n) E E S E E E E E E E E E E E F(l) E E X(h,g) E S 

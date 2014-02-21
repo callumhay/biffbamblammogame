@@ -11,7 +11,7 @@ S T(S,ll) E T(S,lr) S E E L E E E E E L E E S T(S,ll) E T(S,lr) S
 E S S S S G G G G G G G G G G G S S S S E 
 E E E E S G G G K(RocketPaddle,RocketPaddle,RocketPaddle) G G G K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) G G G S E E E E 
 E E E E F(r) E E E E E E E E E E E F(l) E E E E 
-E E C(90) E F(r) E J E E E M E E E J E F(l) E C(270) E E 
+E E C1(90) E F(r) E J E E E M E E E J E F(l) E C1(270) E E 
 E E E E F(r) E E E E E E E E E E E F(l) E E E E 
 E E E E S G N Y G O N Y G O N G S E E E E 
 E E E E S E E E E E E E E E E E S E E E E 
@@ -44,8 +44,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 2
 BallGrow 0
-StickyPaddle 2
 ShieldPaddle 3
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
@@ -68,7 +68,7 @@ IceBlasterPaddle 2
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 0

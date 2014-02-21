@@ -632,7 +632,8 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 
                     // Check whether the one ball is close to the edge of the screen/level...
                     if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType &&
-                        gameModel.IsOutOfPaddedLevelBounds(ball->GetCenterPosition2D(), 0.0f, 3.0f*PlayerPaddle::PADDLE_HEIGHT_TOTAL, 0.0f, 0.0f)) {
+                        gameModel.IsOutOfPaddedLevelBounds(ball->GetCenterPosition2D(), LevelPiece::PIECE_WIDTH/2.0f, 3.0f*PlayerPaddle::PADDLE_HEIGHT_TOTAL, 
+                        LevelPiece::PIECE_WIDTH/2.0f, LevelPiece::PIECE_HEIGHT)) {
                         
                         const GameLevel* currLevel = gameModel.GetCurrentLevel();
                         assert(currLevel != NULL);
@@ -653,7 +654,8 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                         if (this->followBallTimeCounter == 0.0) {
                             this->camTAtStartOfFollow = this->currCamOrientation.GetTranslation();
                         }
-                        this->followBallTimeCounter = std::min<double>(this->followBallTimeCounter + (ball->GetSpeed()/GameBall::GetNormalSpeed())*dT, 
+                        this->followBallTimeCounter = std::min<double>(
+                            this->followBallTimeCounter + std::max<float>(ball->GetSpeed()/GameBall::GetNormalSpeed(), 1.0)*dT, 
                             GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
                         Vector2D newTranslation = NumberFuncs::LerpOverTime<Vector2D>(0.0, 
                             GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfFollow.ToVector2D(), 
@@ -670,13 +672,17 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                                 this->camTAtStartOfUnfollow = this->currCamOrientation.GetTranslation();
                             }
 
-                            this->unfollowBallTimeCounter = std::min<double>(this->unfollowBallTimeCounter + (ball->GetSpeed()/GameBall::GetNormalSpeed())*dT, 
+                            this->unfollowBallTimeCounter = std::min<double>(
+                                this->unfollowBallTimeCounter + std::max<float>(ball->GetSpeed()/GameBall::GetNormalSpeed(), 1.0)*dT, 
                                 GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
                             Vector2D newTranslation = NumberFuncs::LerpOverTime<Vector2D>(0.0, 
                                 GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfUnfollow.ToVector2D(), 
                                 this->defaultCamOrientation.GetTranslation2D(), this->unfollowBallTimeCounter);
                             
                             this->currCamOrientation.SetTranslation(Vector3D(newTranslation, this->defaultCamOrientation.GetTZ()));
+                        }
+                        else {
+                            this->currCamOrientation = this->defaultCamOrientation;
                         }
 
                         this->followBallTimeCounter = 0.0;

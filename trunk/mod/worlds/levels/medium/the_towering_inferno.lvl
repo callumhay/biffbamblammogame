@@ -1,7 +1,7 @@
 The Towering Inferno
 19 31
 S S S S S S S S S S S S S S S S S S S 
-S E E F(r) E R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R E F(l) E E S 
+S C1(90) E F(r) E R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R K(FireBall,FireBall,FireBall) R E F(l) E C1(270) S 
 S E E F(r) E E E R E R E R E E E F(l) E E S 
 S E E S E E E E E E E E E E E S E E S 
 S E E F(l) E E E E E E E E E E E F(r) E E S 
@@ -30,7 +30,7 @@ S E E S E E E E E E E E E E E S E E S
 S E E S E E E E E E E E E E E S E E S 
 S E E N E E E E E E E E E E E N E E S 
 E E E N E E E E E E E E E E E N E E E 
-E E E N E E E E E E E E E E E N E E E 
+C1(60) E E N E E E E E E E E E E E N E E C1(300) 
 
 STARS:
 12000
@@ -45,8 +45,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 1
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 0
+StickyPaddle 2
 LaserBulletPaddle 0
 PaddleShrink 2
 InvisiPaddle 2
@@ -69,7 +69,7 @@ IceBlasterPaddle 0
 MineLauncherPaddle 0
 SlowBall 2
 FastBall 2
-GravityBall 1
-CrazyBall 1
 Random 2
+CrazyBall 1
+GravityBall 1
 PaddleCam 0
