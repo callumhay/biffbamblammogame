@@ -934,6 +934,7 @@ void SelectLevelMenuState::SetupLevelPages(const DisplayStateInfo& info) {
         temp = NULL;
     }
 
+    int rowsOnCurrPage = 0;
     for (int row = 0; row < numRows; row++) {
         for (int col = 0; col < numItemsPerRow; col++) {
 
@@ -985,11 +986,17 @@ void SelectLevelMenuState::SetupLevelPages(const DisplayStateInfo& info) {
         itemY -= ITEM_Y_GAP_SIZE + standardHeight;
 
         // Check to see if we've exceeded the size of the page so that we make the next page...
-        if (row != numRows-1 && (itemY - standardHeight) <= (this->keyEscLabel->GetHeight() + VERTICAL_TITLE_GAP)) {
-            itemY = Camera::GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
-            
-            this->pages.back()->SetNumRows(row+1);
-            this->pages.push_back(new LevelMenuPage());
+        rowsOnCurrPage++;
+        if ((itemY - standardHeight) <= (this->keyEscLabel->GetHeight() + VERTICAL_TITLE_GAP)) {
+
+            this->pages.back()->SetNumRows(rowsOnCurrPage);
+
+            // As long as this isn't the last page we keep making more pages...
+            if (row != numRows-1) {
+                itemY = Camera::GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
+                this->pages.push_back(new LevelMenuPage());
+                rowsOnCurrPage = 0;
+            }
         }
     }
 

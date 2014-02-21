@@ -2937,7 +2937,7 @@ void GameESPAssets::AddFragileCannonBreakEffect(const LevelPiece& block) {
 
     smashedCannonBarrelEmitter->AddParticle(new ESPMeshParticle(this->fragileCannonBarrelMesh));
 
-    ESPInterval bangLifeInterval	= ESPInterval(1.2f);
+    ESPInterval bangLifeInterval	= ESPInterval(1.5f);
     ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
 
     // Build emitters for the explosion of the fragile cannon block

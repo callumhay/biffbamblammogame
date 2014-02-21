@@ -26,7 +26,7 @@ S E E E Y Y Y Y E E E F(l) E E E S E E E E
 S E E E E G G E E E E S F(d) F(d) F(d) S E E E E 
 S E E E E E E E E E E S E E E S E E E E 
 S E E E E E E E E E E S E E E F(r) E E E S 
-S E E E E E E E E E E S C(90) E E F(r) E E E S 
+S E E E E E E E E E E S C(90) E E F(r) E C1(0) E S 
 S E E E E E E E E E E S E E E F(r) E E E S 
 S E E E E E E E E E E S E E E S E X(a,b) E S 
 S E E E E E E E E E E S E E E S E E E S 
@@ -37,7 +37,7 @@ STARS:
 30000
 48000
 58000
-66000
+66500
 
 PaddleGrow 1
 PoisonPaddle 3
@@ -45,8 +45,8 @@ Blackout 3
 BallSafetyNet 1
 UberBall 2
 BallGrow 0
-StickyPaddle 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 1
 PaddleShrink 3
 InvisiPaddle 3
@@ -69,7 +69,7 @@ IceBlasterPaddle 1
 MineLauncherPaddle 1
 SlowBall 1
 FastBall 3
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 3

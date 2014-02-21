@@ -37,9 +37,10 @@ resources/worlds/levels/medium/not_burning_any_bridges.lvl
 resources/worlds/levels/hard/disorientation_precipitation_station.lvl
 
 
-resources/worlds/testing/test_one_shot_cannon.lvl
+resources/worlds/levels/medium/three_chances.lvl
 
 # 10
+
 
 # 11
 
@@ -48,27 +49,19 @@ resources/worlds/testing/test_one_shot_cannon.lvl
 # 13
 
 
+
+
 # Tough level, where you use portal blocks to loop the ball, gaining boosts and
 # repeating to get to an otherwise impossible to reach area
 resources/worlds/levels/hard/loop_booster.lvl
 
 
-
+# Really tough level where you are constantly balancing the ball while shooting
+# the laser beam through portals
+resources/worlds/levels/hard/frikin_laser_beams_part_2.lvl
 
 
 
 # Boss
 # TODO
-
-
-# FIND A PLACE FOR ALL OF THE BELOW LEVELS!!! **********************************************
-
-
-resources/worlds/levels/medium/shutin.lvl
-
-# Portal + Cannon
-resources/worlds/levels/medium/center_on_target.lvl
-
-# Portal + Cannon + Tesla... this one looks pretty boring though...
-resources/worlds/levels/medium/electric_fencing.lvl
 

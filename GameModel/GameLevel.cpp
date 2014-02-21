@@ -2325,7 +2325,7 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
 }
 
 void GameLevel::InitAfterLevelLoad(GameModel* model) {
-	// Initialize the tesla lightning barriers already in existance...
+	// Initialize the Tesla lightning barriers already in existence...
 	for (size_t h = 0; h < this->currentLevelPieces.size(); h++) {
 		for (size_t w = 0; w < this->currentLevelPieces[h].size(); w++) {
 			LevelPiece* currPiece = this->currentLevelPieces[h][w];
@@ -2367,7 +2367,9 @@ LevelPiece* GameLevel::GetMinPaddleBoundPiece(int startingColIdx) const {
             currPiece->GetType() == LevelPiece::SolidTriangle ||
             currPiece->GetType() == LevelPiece::Prism ||
             currPiece->GetType() == LevelPiece::PrismTriangle ||
-            currPiece->GetType() == LevelPiece::Switch) {
+            currPiece->GetType() == LevelPiece::Switch || 
+            currPiece->GetType() == LevelPiece::Cannon ||
+            currPiece->GetType() == LevelPiece::FragileCannon) {
                 break;
         }
         else if (currPiece->GetType() == LevelPiece::OneWay) {
@@ -2388,7 +2390,9 @@ LevelPiece* GameLevel::GetMaxPaddleBoundPiece(int startingColIdx) const {
             currPiece->GetType() == LevelPiece::SolidTriangle ||
             currPiece->GetType() == LevelPiece::Prism ||
             currPiece->GetType() == LevelPiece::PrismTriangle ||
-            currPiece->GetType() == LevelPiece::Switch) {
+            currPiece->GetType() == LevelPiece::Switch ||
+            currPiece->GetType() == LevelPiece::Cannon ||
+            currPiece->GetType() == LevelPiece::FragileCannon) {
                 break;
         }
         else if (currPiece->GetType() == LevelPiece::OneWay) {
@@ -2404,7 +2408,7 @@ LevelPiece* GameLevel::GetMaxPaddleBoundPiece(int startingColIdx) const {
 
 float GameLevel::GetPaddleMinBound() const {
 	LevelPiece* temp = this->GetMinPaddleBoundPiece();
-    if (temp->IsNoBoundsPieceType()) {
+    if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
         return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
     }
     else {
@@ -2415,7 +2419,7 @@ float GameLevel::GetPaddleMinBound() const {
 float GameLevel::GetPaddleMaxBound() const {
     LevelPiece* temp = this->GetMaxPaddleBoundPiece();
 
-    if (temp->IsNoBoundsPieceType()) {
+    if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
         return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
     }
     else {
@@ -2429,7 +2433,7 @@ float GameLevel::GetPaddleMinBound(float paddleStartingPos) const {
     }
     else {
         LevelPiece* temp = this->GetMinPaddleBoundPiece(static_cast<int>(paddleStartingPos / LevelPiece::PIECE_WIDTH));
-        if (temp->IsNoBoundsPieceType()) {
+        if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
             return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
         }
         else {
@@ -2444,7 +2448,7 @@ float GameLevel::GetPaddleMaxBound(float paddleStartingPos) const {
     }
     else {
         LevelPiece* temp = this->GetMaxPaddleBoundPiece(static_cast<int>(paddleStartingPos / LevelPiece::PIECE_WIDTH));
-        if (temp->IsNoBoundsPieceType()) {
+        if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
             return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
         }
         else {

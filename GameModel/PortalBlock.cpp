@@ -81,8 +81,8 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
-	static const float FRACTION_HALF_PIECE_WIDTH  = 0.75f * LevelPiece::HALF_PIECE_WIDTH;
-	static const float FRACTION_HALF_PIECE_HEIGHT = 0.75f * LevelPiece::HALF_PIECE_HEIGHT;
+	static const float FRACTION_HALF_PIECE_WIDTH  = 0.9f * LevelPiece::HALF_PIECE_WIDTH;
+	static const float FRACTION_HALF_PIECE_HEIGHT = 0.9f * LevelPiece::HALF_PIECE_HEIGHT;
 
 	// Left boundary of the piece
 	Collision::LineSeg2D l1(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT), 
@@ -121,7 +121,7 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 
     // If the ball is looping through portal blocks then increase the ball's boost faster...
     if (ball.IsLastPieceCollidedWith(this->sibling)) {
-        gameModel->AddPercentageToBoostMeter(0.25);
+        gameModel->AddPercentageToBoostMeter(0.34);
     }
 
 	// Tell the ball what the last piece it collided with was the sibling so it doesn't
