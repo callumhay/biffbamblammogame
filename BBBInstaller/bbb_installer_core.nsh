@@ -45,7 +45,7 @@ Var LibInstall
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE cc_license.txt
+!insertmacro MUI_PAGE_LICENSE ../licenses/bbb_license.txt
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuGroup
@@ -69,7 +69,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} ProductVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} CompanyName "${COMPANY}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} FileVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} FileDescription ""
-VIAddVersionKey /LANG=${LANG_ENGLISH} LegalCopyright "(cc) BY-NC, 2013"
+VIAddVersionKey /LANG=${LANG_ENGLISH} LegalCopyright "Copyright (c) 2014"
 InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
@@ -106,6 +106,7 @@ Section "Biff! Bam!! Blammo!?!" SEC0000
     File ..\BBBResources.zip
     File ..\BiffBamBlammoIcon.bmp
     File "..\BiffBamBlammo.ico"
+    File /r "..\licenses"
     File "${BBB_EXE_DIR}\BiffBamBlammo.exe"
     WriteRegStr HKLM "${REGKEY}\Components" "Biff! Bam!! Blammo!?! Install" 1
 SectionEnd
@@ -156,6 +157,7 @@ Section /o "-un.Biff! Bam!! Blammo!?! Install" UNSEC0000
     Delete /REBOOTOK $INSTDIR\XInput9_1_0.dll
     Delete /REBOOTOK "$INSTDIR\${BBB_MSVCR_FILE}"
     Delete /REBOOTOK "$INSTDIR\${BBB_MSVCP_FILE}"
+    RMDir /r /REBOOTOK "$INSTDIR\licenses"
 
     MessageBox MB_YESNO "Would you like to keep all game progress and configuration files? (Warning: By clicking 'No' you will delete all game progress you've made in Biff! Bam!! Blammo!?!)." IDNO delete_progress IDYES keep_progress
     delete_progress:
@@ -178,8 +180,8 @@ Section -un.post UNSEC0002
     DeleteRegValue HKLM "${REGKEY}" Path
     DeleteRegKey /IfEmpty HKLM "${REGKEY}\Components"
     DeleteRegKey /IfEmpty HKLM "${REGKEY}"
-    RmDir /r /REBOOTOK $SMPROGRAMS\$StartMenuGroup
-    RmDir /REBOOTOK $INSTDIR
+    RMDir /r /REBOOTOK $SMPROGRAMS\$StartMenuGroup
+    RMDir /REBOOTOK $INSTDIR
     Push $R0
     StrCpy $R0 $StartMenuGroup 1
     StrCmp $R0 ">" no_smgroup
