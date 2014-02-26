@@ -39,12 +39,18 @@ private:
     class CreditLabel {
     public:
         CreditLabel(const char* title, const char* names, float maxWidth);
+        CreditLabel(const TextureFontSet* titleFont, const char* title, const char* names, float maxWidth);
         ~CreditLabel();
 
-        void SetAlpha(float alpha);
-        void SetYPos(float y);
+        static void SetCreditsYVelocity(float yVel) { CreditLabel::creditsYVelocity = yVel; }
 
-        void Draw();
+        bool GetIsNeverToBeVisibleAgain() const { return this->currState == NeverToBeVisibleAgain; }
+
+        void StartFadeIn(double startTime, double endTime);
+        void StartFadeOut(double startTime, double endTime);
+
+        void SetYPos(float yPos);
+        void Draw(CreditsDisplayState* state, double dT);
 
         float GetHeight() const;
         float GetTitleToNameGap() const;
@@ -52,35 +58,77 @@ private:
     private:
         static const int TITLE_NAMES_V_GAP = 10;
 
+        enum State { NotVisibleState, FadingInState, VisibleState, FadingOutState, NeverToBeVisibleAgain };
+
+        State currState;
+        float currYPos;
+        AnimationLerp<float>  fadeAnim;
         TextLabel2DFixedWidth titleLabel;
         TextLabel2DFixedWidth namesLabel;
+
+        static float creditsYVelocity;
+
+        void SetState(State newState);
+        void SetAlpha(float alpha);
 
         DISALLOW_COPY_AND_ASSIGN(CreditLabel);
     };
 
     static const int GAP_BETWEEN_CREDITS_LABELS = 75;
 
-    static const char* CREDITS_1_TITLE_TEXT;
-    static const char* CREDITS_1_NAMES_TEXT;
-    static const char* CREDITS_2_TITLE_TEXT;
-    static const char* CREDITS_2_NAMES_TEXT;
-    static const char* SPECIAL_THANKS_TITLE_TEXT;
-    static const char* SPECIAL_THANKS_NAMES_TEXT;
+    static const double FADE_OUT_TIME_ON_BUTTON_PRESS;
+    static const float CREDIT_SCROLLING_VELOCITY;
+
+    static const char* CORE_CREDITS_1_TITLE_TEXT;
+    static const char* CORE_CREDITS_1_NAMES_TEXT;
+    static const char* CORE_CREDITS_2_TITLE_TEXT;
+    static const char* CORE_CREDITS_2_NAMES_TEXT;
+    static const char* CORE_CREDITS_SPECIAL_THANKS_TITLE_TEXT;
+    static const char* CORE_CREDITS_SPECIAL_THANKS_NAMES_TEXT;
+
+    static const char* FONT_CREDITS_CATEGORY_TITLE_TEXT;
+    static const char* FONT_CREDITS_1_TITLE_TEXT;
+    static const char* FONT_CREDITS_1_NAMES_TEXT;
+    static const char* FONT_CREDITS_2_TITLE_TEXT;
+    static const char* FONT_CREDITS_2_NAMES_TEXT;
+    static const char* FONT_CREDITS_3_TITLE_TEXT;
+    static const char* FONT_CREDITS_3_NAMES_TEXT;
+    static const char* FONT_CREDITS_4_TITLE_TEXT;
+    static const char* FONT_CREDITS_4_NAMES_TEXT;
+
+    static const char* THIRD_PARTY_SW_CATEGORY_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_1_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_1_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_2_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_2_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_3_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_3_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_4_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_4_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_5_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_5_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_6_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_6_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_7_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_7_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_8_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_8_NAMES_TEXT;
+    static const char* THIRD_PARTY_SW_9_TITLE_TEXT;
+    static const char* THIRD_PARTY_SW_9_NAMES_TEXT;
+
+    typedef std::list<CreditLabel*> CreditLabelContainer;
+    typedef CreditLabelContainer::iterator CreditLabelContainerIter;
 
     Texture2D* bbbLogoTex;
-
-    CreditLabel creditLabel1;
-    CreditLabel creditLabel2;
-    CreditLabel specialThanksLabel;
-
-    AnimationLerp<float> logoFadeinAnim;
-    AnimationLerp<float> fadeInCreditLabel1Anim;
-    AnimationLerp<float> fadeInCreditLabel2Anim;
-    AnimationLerp<float> fadeInSpecialThanksAnim;
-
-    AnimationLerp<float> fadeoutAnim;
-
+    CreditLabelContainer creditLabels;
+    AnimationLerp<float> logoFadeAnim;
+    double countdownToScrollCredits;
+    float bottomYCoordinateForFadeIn;
+    float topYCoordinateForFadeOut;
     bool exitState;
+
+    float GetBottomYCoordinateToStartFadingInAt() const;
+    float GetTopYCoordinateToStartFadingOutAt() const;
     
     DISALLOW_COPY_AND_ASSIGN(CreditsDisplayState);
 };
@@ -92,6 +140,14 @@ inline void CreditsDisplayState::DisplaySizeChanged(int width, int height) {
 
 inline DisplayState::DisplayStateType CreditsDisplayState::GetType() const {
     return DisplayState::Credits;
+}
+
+inline float CreditsDisplayState::GetBottomYCoordinateToStartFadingInAt() const {
+    return this->bottomYCoordinateForFadeIn;
+}
+
+inline float CreditsDisplayState::GetTopYCoordinateToStartFadingOutAt() const {
+    return this->topYCoordinateForFadeOut;
 }
 
 #endif // __CREDITSDISPLAYSTATE_H__
