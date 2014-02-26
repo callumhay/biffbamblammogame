@@ -36,13 +36,14 @@ resources/worlds/levels/medium/not_burning_any_bridges.lvl
 # Camera Paddle Item intro
 resources/worlds/levels/hard/disorientation_precipitation_station.lvl
 
-
+# A level where you just rely on manipulating the ball via boosts
 resources/worlds/levels/medium/three_chances.lvl
 
-# 10
 
+# Tough level, where you use portal blocks to loop the ball, gaining boosts and
+# repeating to get to an otherwise impossible to reach area
+resources/worlds/levels/hard/loop_booster.lvl
 
-# 11
 
 # 12
 
@@ -51,9 +52,7 @@ resources/worlds/levels/medium/three_chances.lvl
 
 
 
-# Tough level, where you use portal blocks to loop the ball, gaining boosts and
-# repeating to get to an otherwise impossible to reach area
-resources/worlds/levels/hard/loop_booster.lvl
+
 
 
 # Really tough level where you are constantly balancing the ball while shooting

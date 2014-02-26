@@ -9,6 +9,7 @@ allFileNames += glob.glob("ESPEngine/*.h") + glob.glob("ESPEngine/*.cpp")
 allFileNames += glob.glob("GameModel/*.h") + glob.glob("GameModel/*.cpp")
 allFileNames += glob.glob("GameView/*.h") + glob.glob("GameView/*.cpp")
 allFileNames += glob.glob("GameControl/*.h") + glob.glob("GameControl/*.cpp")
+allFileNames += glob.glob("GameSound/*.h") + glob.glob("GameSound/*.cpp")
 
 # Get the license Info...
 licenseTextLines = None
@@ -34,6 +35,5 @@ for fileName in allFileNames:
 		file.write(modifiedFileText)
 		file.truncate()
 		file.close()
-		
-		exit()
+
 		
