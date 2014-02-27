@@ -150,7 +150,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 			assert(success);
 
             if (isFireBall) {
-                // EVENT: Frozen block cancelled-out by fire
+                // EVENT: Frozen block canceled-out by fire
                 GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
             }
 		}
@@ -162,6 +162,28 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 	// Tell the ball that it collided with this block
 	ball.SetLastPieceCollidedWith(this);
 	return this;
+}
+
+LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    if (paddle.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        
+        bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
+        assert(success);
+    }
+    else {
+        this->AttemptToDropAnItem(gameModel);
+    }
+
+    paddle.SetLastPieceCollidedWith(this);
+
+    return this;
 }
 
 // When projectiles collide with the item drop block it causes an item to fall from the block

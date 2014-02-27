@@ -126,6 +126,13 @@ public:
 		return this;
 	}
 
+    LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+        UNUSED_PARAMETER(gameModel);
+        UNUSED_PARAMETER(paddle);
+        // Nothing happens when there's nothing to collide with...
+        return this;
+    }
+
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 		UNUSED_PARAMETER(gameModel);
 		UNUSED_PARAMETER(projectile);

@@ -116,7 +116,7 @@ LevelPiece* TurretBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
                 UNUSED_VARIABLE(success);
 			    assert(success);
                 
-                // EVENT: Frozen block cancelled-out by fire
+                // EVENT: Frozen block canceled-out by fire
                 GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
             }
             else {
@@ -133,6 +133,26 @@ LevelPiece* TurretBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	}
 
     ball.SetLastPieceCollidedWith(resultingPiece);
+    return resultingPiece;
+}
+
+LevelPiece* TurretBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    if (paddle.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
+
+    LevelPiece* resultingPiece = this;
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        resultingPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
+    }
+    else {
+        resultingPiece = this->DiminishPiece(paddle.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);
+        if (resultingPiece->GetType() != LevelPiece::Empty) {
+            paddle.SetLastPieceCollidedWith(resultingPiece);
+        }
+    }
+
     return resultingPiece;
 }
 

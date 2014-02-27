@@ -172,7 +172,7 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
                 UNUSED_VARIABLE(success);
 				assert(success);
 
-                // EVENT: Frozen block cancelled-out by fire
+                // EVENT: Frozen block canceled-out by fire
                 GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 			}
             else {
@@ -187,6 +187,13 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 
     ball.SetLastPieceCollidedWith(resultingPiece);
 	return resultingPiece;
+}
+
+LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(paddle);
+
+    return this->Destroy(gameModel, 
+        this->HasStatus(LevelPiece::IceCubeStatus) ? LevelPiece::IceShatterDestruction : LevelPiece::RegularDestruction);
 }
 
 LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

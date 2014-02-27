@@ -105,6 +105,7 @@ void BoundingLines::AddBounds(const BoundingLines& bounds) {
 
 Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
     if (this->lines.empty()) {
+        assert(false);
         return Collision::AABB2D();
     }
 
@@ -703,16 +704,29 @@ bool BoundingLines::CollisionCheck(const Collision::LineSeg2D& lineSeg) const {
 int BoundingLines::CollisionCheckIndex(const BoundingLines& other) const {
 	int count = 0;
 
+    Collision::AABB2D currLineAABB;
+    Collision::AABB2D otherLineAABB;
+
 	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
 	for (size_t i = 0; i < this->lines.size(); ++i) {
 		const Collision::LineSeg2D& currThisLine = this->lines[i];
+        currThisLine.BuildAABB(currLineAABB);
 
 		for (size_t j = 0; j < other.lines.size(); ++j) {
 			const Collision::LineSeg2D& currOtherLine = other.lines[j];
+            currOtherLine.BuildAABB(otherLineAABB);
+            
+            // First do a test of the bounding boxes for the two lines
+            if (Collision::IsCollision(currLineAABB, otherLineAABB)) {
+                const Vector2D& currOtherNormal = other.normals[j];
 
-			if (Collision::IsCollision(currThisLine, currOtherLine)) {
-				return count;
-			}
+                // Now do a more thorough test
+                float t = Vector2D::Dot(currOtherNormal, (currOtherLine.P1() - currThisLine.P1())) /
+                    Vector2D::Dot(currOtherNormal, (currThisLine.P2() - currThisLine.P1()));
+                if (t >= 0.0f && t <= 1.0f) {
+                    return count;
+                }
+            }
 		}
 
 		count++;

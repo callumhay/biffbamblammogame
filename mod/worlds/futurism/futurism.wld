@@ -39,19 +39,18 @@ resources/worlds/levels/hard/disorientation_precipitation_station.lvl
 # A level where you just rely on manipulating the ball via boosts
 resources/worlds/levels/medium/three_chances.lvl
 
-
 # Tough level, where you use portal blocks to loop the ball, gaining boosts and
 # repeating to get to an otherwise impossible to reach area
 resources/worlds/levels/hard/loop_booster.lvl
 
 
 # 12
+resources/worlds/levels/medium/a_pillar_too_far.lvl
+
 
 # 13
 
-
-
-
+resources/worlds/testing/paddle_block_collisions_test.lvl
 
 
 

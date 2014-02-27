@@ -87,6 +87,10 @@ public:
     const float MAX_BALL_DAMAGE_MULTIPLIER;  // The maximum damage multiplier a ball can have
     const float UBER_BALL_DAMAGE_MULTIPLIER; // Multiplier damage that the uberball adds to a ball
 
+    const int DEFAULT_DAMAGE_ON_PADDLE_HIT;  // Default damage that a paddle tends to do when it hits stuff
+    const float MIN_PADDLE_DAMAGE_MULTIPLIER;  // The minimum damage multiplier a paddle can have
+    const float MAX_PADDLE_DAMAGE_MULTIPLIER;  // The maximum damage multiplier a paddle can have
+
     const int MAX_MULTIPLIER;
 
     const int TWO_TIMES_MULTIPLIER_NUM_BLOCKS;      // The number of blocks that must be destroyed between paddle hits to get a 2x multiplier

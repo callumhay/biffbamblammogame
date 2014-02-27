@@ -176,6 +176,7 @@ public:
     LevelPiece* GetMinPaddleBoundPiece() const;
     LevelPiece* GetMaxPaddleBoundPiece() const;
 
+    bool IsPaddleBoundPiece(const LevelPiece* piece) const;
     LevelPiece* GetMinPaddleBoundPiece(int startingColIdx) const;
     LevelPiece* GetMaxPaddleBoundPiece(int startingColIdx) const;
 

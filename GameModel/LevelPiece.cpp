@@ -619,7 +619,7 @@ void LevelPiece::LightPieceOnFire(GameModel* gameModel, bool canCatchOnFire) {
         UNUSED_VARIABLE(success);
 		assert(success);
 
-        // EVENT: Frozen block cancelled-out by fire
+        // EVENT: Frozen block canceled-out by fire
         GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 	}
 	else if (canCatchOnFire) {
@@ -638,7 +638,7 @@ void LevelPiece::FreezePieceInIce(GameModel* gameModel, bool canBeFrozen) {
         UNUSED_VARIABLE(success);
 		assert(success);
 
-        // EVENT: On-fire block cancelled-out by ice
+        // EVENT: On-fire block canceled-out by ice
         GameEventManager::Instance()->ActionBlockFireCancelledWithIce(*this);
 	}
 	else if (canBeFrozen) {

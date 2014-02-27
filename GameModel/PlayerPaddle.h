@@ -189,6 +189,9 @@ public:
     void SetUnremoveFromGameVisibility(double fadeInTime);
     bool HasBeenPausedAndRemovedFromGame(int pauseBitField) const;
 
+    float GetCollisionDamage() const;
+    float GetDamageMultiplier() const;
+
 	float GetSpeed() const {
         float tempSpd = this->currSpeed;
         if (this->HasPaddleType(PlayerPaddle::PoisonPaddle)) {
@@ -343,6 +346,13 @@ public:
     double GetTimeUntilUnfrozen() const { return this->frozenCountdown; }
     double GetTimeUntilNotOnFire() const { return this->onFireCountdown; }
 
+    void SetLastPieceCollidedWith(const LevelPiece* p) { 
+        this->lastThingCollidedWith = p; 
+    }
+    bool IsLastPieceCollidedWith(const LevelPiece* p) const { 
+        return this->lastThingCollidedWith == p; 
+    }
+
 #ifdef _DEBUG
     void DebugDraw() const;
 #endif
@@ -394,7 +404,9 @@ private:
 	AnimationLerp<ColourRGBA> colourAnimation;			// Animation associated with the colour
 	AnimationMultiLerp<float> moveDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)
 	AnimationMultiLerp<float> rotAngleZAnimation;		// Animation for rotating the paddle on the plane that the game is played, default angle is zero (pointing up)
+    
     const void* lastEntityThatHurtHitPaddle;            // Pointer to the last entity that hit the paddle
+    const void* lastThingCollidedWith;
 
 	BoundingLines bounds; // Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
@@ -475,6 +487,20 @@ inline void PlayerPaddle::Animate(double seconds) {
 // the paddle.
 inline Collision::Circle2D PlayerPaddle::CreatePaddleShieldBounds() const {
 	return Collision::Circle2D(this->GetCenterPosition(), this->GetHalfWidthTotal());
+}
+
+inline void PlayerPaddle::SetRemoveFromGameVisibility(double fadeOutTime) {
+    // This will ensure that the paddle is immediately qualified as removed from the game...
+    this->SetAlpha(std::min<float>(this->GetAlpha(), 1.0f - EPSILON));
+    this->AnimateFade(true, fadeOutTime);
+}
+
+inline void PlayerPaddle::SetUnremoveFromGameVisibility(double fadeInTime) {
+    this->AnimateFade(false, fadeInTime);
+}
+
+inline float PlayerPaddle::GetCollisionDamage() const {
+    return this->GetDamageMultiplier() * GameModelConstants::GetInstance()->DEFAULT_DAMAGE_ON_PADDLE_HIT;
 }
 
 #endif

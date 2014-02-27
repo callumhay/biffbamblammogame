@@ -101,6 +101,7 @@ public:
 
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);	
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
+    LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);

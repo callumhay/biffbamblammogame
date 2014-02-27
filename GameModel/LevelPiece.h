@@ -122,8 +122,8 @@ public:
 	    const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) = 0;
+    virtual LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) = 0;
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) = 0;
-    virtual LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
 
 	virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	virtual LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
@@ -296,12 +296,6 @@ inline bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, const Vecto
 		return false;
 	}
 	return Collision::IsCollision(this->GetAABB(), c);
-}
-
-inline LevelPiece* LevelPiece::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
-    UNUSED_PARAMETER(gameModel);
-    UNUSED_PARAMETER(paddle);
-    return this;
 }
 
 /**

@@ -158,6 +158,15 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	return this;
 }
 
+LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(paddle);
+
+    // TODO... Have the paddle teleport...
+
+    return this;
+}
+
 /**
  * Call when a projectile hits the portal block. This tends to cause the projectile to
  * be teleported to the sibling portal.

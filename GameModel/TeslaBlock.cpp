@@ -156,7 +156,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 		return this;
 	}
 
-	// Toggle the electricity to the tesla block
+	// Toggle the electricity to the Tesla block
 	GameLevel* currLevel = gameModel->GetCurrentLevel();
 	this->ToggleElectricity(*gameModel, *currLevel);
 
@@ -166,12 +166,25 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 	return this;
 }
 
+LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    if (paddle.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
+
+    GameLevel* currLevel = gameModel->GetCurrentLevel();
+    this->ToggleElectricity(*gameModel, *currLevel);
+
+    paddle.SetLastPieceCollidedWith(this);
+
+    return this;
+}
+
 /**
- * Called when the tesla block is hit by a projectile. Tends to cause the projectile to
- * extinguish - all projectiles also tend to activate/deactivate the tesla block.
+ * Called when the Tesla block is hit by a projectile. Tends to cause the projectile to
+ * extinguish - all projectiles also tend to activate/deactivate the Tesla block.
  */
 LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	// TODO: Tell the game model to recalculate it's tesla lightning arcs...
+	// TODO: Tell the game model to recalculate it's Tesla lightning arcs...
 
 	GameLevel* currLevel = gameModel->GetCurrentLevel();
 	switch (projectile->GetType()) {

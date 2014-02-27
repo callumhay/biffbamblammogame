@@ -87,7 +87,7 @@ LevelPiece* AlwaysDropBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel*
 }
 
 /**
- * Call this when a collision has actually occured with the ball and this block.
+ * Call this when a collision has actually occurred with the ball and this block.
  * Returns: The resulting level piece that this has become.
  */
 LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
@@ -126,6 +126,23 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 	ball.SetLastPieceCollidedWith(newPiece);
 
 	return newPiece;
+}
+
+LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(paddle);
+
+    LevelPiece* newPiece = this;
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        newPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
+    }
+    else {
+        newPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
+    }
+
+    return newPiece;
 }
 
 /**

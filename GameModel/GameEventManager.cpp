@@ -764,7 +764,7 @@ void GameEventManager::ActionBlockIceShattered(const LevelPiece& block) {
 	}	
 }
 
-// Action for when a block that is frozen is cancelled-out by something firey hitting it
+// Action for when a block that is frozen is canceled-out by something firey hitting it
 void GameEventManager::ActionBlockIceCancelledWithFire(const LevelPiece& block) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
@@ -772,7 +772,7 @@ void GameEventManager::ActionBlockIceCancelledWithFire(const LevelPiece& block) 
 	}
 }
 
-// Action for when a block that is on fire is cancelled-out by something icy hitting it
+// Action for when a block that is on fire is canceled-out by something icy hitting it
 void GameEventManager::ActionBlockFireCancelledWithIce(const LevelPiece& block) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {

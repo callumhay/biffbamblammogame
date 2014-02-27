@@ -74,7 +74,7 @@ const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEE
 // The coefficient angle change of the ball when deflected by a moving paddle
 const int PlayerPaddle::MAX_DEFLECTION_DEGREE_ANGLE = 18.0f;
 
-// Delay between shots of the laservent
+// Delay between shots of the laser-vent
 const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
 const double PlayerPaddle::PADDLE_FLAME_BLAST_DELAY  = 0.5;
 const double PlayerPaddle::PADDLE_ICE_BLAST_DELAY    = 0.5;
@@ -100,7 +100,7 @@ decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADD
 timeSinceLastBlastShot(PADDLE_FLAME_BLAST_DELAY + PADDLE_ICE_BLAST_DELAY), timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), currSpecialStatus(PlayerPaddle::NoStatus),
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
-impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), 
+impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), lastThingCollidedWith(NULL),
 levelBoundsCheckingOn(true), startingXPos(0.0), frozenCountdown(0.0), onFireCountdown(0.0) {
 	this->ResetPaddle();
 }
@@ -132,6 +132,7 @@ void PlayerPaddle::ResetPaddle() {
     this->impulseDeceleration = 0.0f;
     this->impulseSpdDecreaseCounter = 0.0f;
     this->lastEntityThatHurtHitPaddle = NULL;
+    this->lastThingCollidedWith = NULL;
     this->levelBoundsCheckingOn = true;
     this->attachedProjectiles.clear();
 
@@ -454,7 +455,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	float halfWidthTotalWithAttachedMax = this->currHalfWidthTotal;
 
 	// If a ball or projectile is attached, it could affect the min and max x boundries of the paddle so 
-	// adjust the boundries based on the position of the object(s) on the paddle
+	// adjust the boundaries based on the position of the object(s) on the paddle
     if (this->HasBallAttached()) {
         
 		float ballX = this->attachedBall->GetBounds().Center()[0] + distanceTravelled;
@@ -513,10 +514,13 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 		    if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
                 
                 if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
+                    
                     LevelPiece* piece = gameModel.GetCurrentLevel()->GetMinPaddleBoundPiece();
                     LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
-                    UNUSED_VARIABLE(resultingPiece);
-                    assert(resultingPiece == piece);
+
+                    if (resultingPiece != piece) {
+                        gameModel.PerformLevelCompletionChecks();
+                    }
                 }
 
 			    // EVENT: paddle hit left wall for first time
@@ -538,8 +542,10 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
                     // Make sure the piece is actually being collided with
                     if (fabs(this->maxBound - gameModel.GetCurrentLevel()->GetPaddleMaxBound()) < EPSILON) {
                         LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
-                        UNUSED_VARIABLE(resultingPiece);
-                        assert(resultingPiece == piece);
+
+                        if (resultingPiece != piece) {
+                            gameModel.PerformLevelCompletionChecks();
+                        }
                     }
                 }
 
@@ -551,6 +557,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	    else {
 		    this->centerPos[0] = newCenterX;
 		    this->hitWall = false;
+            this->SetLastPieceCollidedWith(NULL);
 	    }
 	}
 	else {
@@ -1834,7 +1841,10 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 		didCollide = bounds.CollisionCheck(this->CreatePaddleShieldBounds());
 	}
 	else {
-		didCollide = this->bounds.CollisionCheck(bounds);
+        // First check to see if the AABBs are overlapping
+        //if (Collision::IsCollision(bounds.GenerateAABBFromLines(), this->GetPaddleAABB(false)) {
+		    didCollide = this->bounds.CollisionCheck(bounds);
+        //}
 	}
 
 	if (includeAttachedBallCheck && !didCollide && this->HasBallAttached()) {
@@ -1995,17 +2005,16 @@ bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile
     }
 
     return !this->ProjectilePassesThrough(projectile); 
-
 }
 
-void PlayerPaddle::SetRemoveFromGameVisibility(double fadeOutTime) {
-    // This will ensure that the paddle is immediately qualified as removed from the game...
-    this->SetAlpha(std::min<float>(this->GetAlpha(), 1.0f - EPSILON));
-    this->AnimateFade(true, fadeOutTime);
-}
+/**
+ * Get the damage multiplier for this ball based on its current state and attributes.
+ */
+float PlayerPaddle::GetDamageMultiplier() const {
 
-void PlayerPaddle::SetUnremoveFromGameVisibility(double fadeInTime) {
-    this->AnimateFade(false, fadeInTime);
+    return std::max<float>(GameModelConstants::GetInstance()->MIN_PADDLE_DAMAGE_MULTIPLIER, 
+        std::min<float>(GameModelConstants::GetInstance()->MAX_PADDLE_DAMAGE_MULTIPLIER,
+        this->GetPaddleScaleFactor()));
 }
 
 bool PlayerPaddle::HasBeenPausedAndRemovedFromGame(int pauseBitField) const {
