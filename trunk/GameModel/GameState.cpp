@@ -122,9 +122,9 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 			paddle->UpdateBoundsByPieceCollision(*currPiece, doAttachedBallCollision);
             
             LevelPiece* resultingPiece = currPiece->CollisionOccurred(this->gameModel, *paddle);
-            UNUSED_VARIABLE(resultingPiece);
-            assert(resultingPiece == currPiece);
-
+            if (resultingPiece != currPiece) {
+                this->gameModel->PerformLevelCompletionChecks();
+            }
             didCollideWithAnyPiece = true;
 		}
 	}

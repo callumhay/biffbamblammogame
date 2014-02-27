@@ -194,12 +194,16 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
     // Make sure we don't do a double collision - check to make sure the ball hasn't already
     // collided with this block and also that we're not in the same game time tick since the last
     // collision of the ball
-    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < (BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS/1000.0)) {
+    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < 
+        (BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS/1000.0)) {
+
         this->timeOfLastBallCollision = currSystemTime;
         return this;
     }
     
-    if ((currSystemTime - this->timeOfLastBallCollision) < BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS) {
+    if ((currSystemTime - this->timeOfLastBallCollision) < 
+         BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS) {
+
         this->timeOfLastBallCollision = currSystemTime;
         return this;
     }
@@ -243,8 +247,33 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 	return newPiece;
 }
 
+LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+
+    if (paddle.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
+
+    LevelPiece* newPiece = this;
+    
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        // If the piece is frozen it shatters and is immediately destroyed on ball impact
+        newPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
+    }
+    else {
+        newPiece = this->DiminishPiece(gameModel, LevelPiece::RegularDestruction);
+
+        if (newPiece->GetType() != LevelPiece::Empty) {
+            paddle.SetLastPieceCollidedWith(newPiece);
+        }
+    }
+
+    return newPiece;
+}
+
 /**
- * Call this when a collision has actually occured with a projectile and this block.
+ * Call this when a collision has actually occurred with a projectile and this block.
  * Returns: The resulting level piece that this has become.
  */
 LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

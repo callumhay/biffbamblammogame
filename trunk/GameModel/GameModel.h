@@ -531,6 +531,8 @@ public:
 	bool AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status);
 	bool RemoveStatusForLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status);
 
+    void PerformLevelCompletionChecks();
+
 	// Debug functions
 #ifdef _DEBUG
 	void DropItem(GameItem::ItemType itemType);
@@ -658,8 +660,6 @@ private:
     void ResetLevelValues(int numLives);
 
     void LoadWorldsFromFile();
-
-    void PerformLevelCompletionChecks();
 
     PaddleRemoteControlRocketProjectile* GetActiveRemoteControlRocket() const;
 };

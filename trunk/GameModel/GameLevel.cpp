@@ -2377,24 +2377,51 @@ LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
     }
 }
 
+bool GameLevel::IsPaddleBoundPiece(const LevelPiece* piece) const {
+    if (!piece->IsNoBoundsPieceType() || piece->HasStatus(LevelPiece::IceCubeStatus) ||
+        piece->GetType() == LevelPiece::Cannon || piece->GetType() == LevelPiece::FragileCannon) {
+
+        if (piece->GetType() == LevelPiece::NoEntry && piece->HasStatus(LevelPiece::IceCubeStatus)) {
+            return true;
+        }
+        else if (piece->GetType() == LevelPiece::OneWay) {
+            const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(piece);
+            if (oneWayBlock->GetDirType() != OneWayBlock::OneWayRight) {
+                return true;
+            }
+        }
+        else {
+            return piece->GetType() != LevelPiece::NoEntry;
+        }
+    }
+
+    /*
+    if (piece->HasStatus(LevelPiece::IceCubeStatus) ||
+        piece->GetType() == LevelPiece::Solid ||
+        piece->GetType() == LevelPiece::SolidTriangle ||
+        piece->GetType() == LevelPiece::Prism ||
+        piece->GetType() == LevelPiece::PrismTriangle ||
+        piece->GetType() == LevelPiece::Switch ||
+        piece->GetType() == LevelPiece::Cannon ||
+        piece->GetType() == LevelPiece::FragileCannon) {
+            return true;
+    }
+    else if (piece->GetType() == LevelPiece::OneWay) {
+        const OneWayBlock& oneWayBlock = static_cast<const OneWayBlock&>(piece);
+        if (oneWayBlock.GetDirType() != OneWayBlock::OneWayRight) {
+            return true;
+        }
+    }
+    */
+    return false;
+}
+
 LevelPiece* GameLevel::GetMinPaddleBoundPiece(int startingColIdx) const {
     int col = startingColIdx;
     for (; col > 0; col--) {
         const LevelPiece* currPiece = this->currentLevelPieces[0][col];
-        if (currPiece->GetType() == LevelPiece::Solid ||
-            currPiece->GetType() == LevelPiece::SolidTriangle ||
-            currPiece->GetType() == LevelPiece::Prism ||
-            currPiece->GetType() == LevelPiece::PrismTriangle ||
-            currPiece->GetType() == LevelPiece::Switch || 
-            currPiece->GetType() == LevelPiece::Cannon ||
-            currPiece->GetType() == LevelPiece::FragileCannon) {
-                break;
-        }
-        else if (currPiece->GetType() == LevelPiece::OneWay) {
-            const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(currPiece);
-            if (oneWayBlock->GetDirType() != OneWayBlock::OneWayLeft) {
-                break;
-            }
+        if (this->IsPaddleBoundPiece(currPiece)) {
+            break;
         }
     }
     return this->currentLevelPieces[0][col];
@@ -2404,20 +2431,8 @@ LevelPiece* GameLevel::GetMaxPaddleBoundPiece(int startingColIdx) const {
     int col = startingColIdx;
     for (; col < static_cast<int>(this->currentLevelPieces[0].size())-1; col++) {
         const LevelPiece* currPiece = this->currentLevelPieces[0][col];
-        if (currPiece->GetType() == LevelPiece::Solid ||
-            currPiece->GetType() == LevelPiece::SolidTriangle ||
-            currPiece->GetType() == LevelPiece::Prism ||
-            currPiece->GetType() == LevelPiece::PrismTriangle ||
-            currPiece->GetType() == LevelPiece::Switch ||
-            currPiece->GetType() == LevelPiece::Cannon ||
-            currPiece->GetType() == LevelPiece::FragileCannon) {
-                break;
-        }
-        else if (currPiece->GetType() == LevelPiece::OneWay) {
-            const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(currPiece);
-            if (oneWayBlock->GetDirType() != OneWayBlock::OneWayRight) {
-                break;
-            }
+        if (this->IsPaddleBoundPiece(currPiece)) {
+            break;
         }
     }
 

@@ -143,13 +143,32 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 			assert(success);
 
             if (isFireBall) {
-                // EVENT: Frozen block cancelled-out by fire
+                // EVENT: Frozen block canceled-out by fire
                 GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
             }
 		}
 	}
 
 	return this;
+}
+
+LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    if (paddle.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+
+        bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
+        assert(success);
+
+        paddle.SetLastPieceCollidedWith(this);
+    }
+
+    return this;
 }
 
 /**

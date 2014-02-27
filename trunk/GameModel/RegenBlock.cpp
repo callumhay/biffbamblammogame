@@ -129,7 +129,7 @@ LevelPiece* RegenBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
         // Infinite life regen blocks may only be destroyed by being shattered or via a collateral block clobbering them
         if (method != LevelPiece::IceShatterDestruction && method != LevelPiece::CollateralDestruction &&
             method != LevelPiece::TeslaDestruction && method != LevelPiece::RocketDestruction && 
-            method != LevelPiece::MineDestruction) {
+            method != LevelPiece::MineDestruction && method != LevelPiece::BombDestruction) {
 
             // EVENT: The block has been 'perturbed'
             GameEventManager::Instance()->ActionRegenBlockPreturbed(*this);
@@ -199,8 +199,32 @@ LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 	return newPiece;
 }
 
+LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    if (paddle.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
+
+    LevelPiece* newPiece = this;
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        // If the piece is frozen it shatters and is immediately destroyed on ball impact
+        newPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
+    }
+    else {
+        newPiece = this->HurtPiece(paddle.GetCollisionDamage(), gameModel, LevelPiece::RegularDestruction);
+
+        if (newPiece->GetType() != LevelPiece::Empty) {
+            paddle.SetLastPieceCollidedWith(newPiece);
+        }
+    }
+
+    return newPiece;
+}
+
 /**
- * Call this when a collision has actually occured with a projectile and this block.
+ * Call this when a collision has actually occurred with a projectile and this block.
  * Returns: The resulting level piece that this has become.
  */
 LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

@@ -112,6 +112,7 @@ public:
 										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
+    LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
     void DrawWireframe() const;
@@ -191,6 +192,12 @@ inline bool CannonBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT
 
 inline bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines, double dT, const Vector2D& velocity) const {
 	return this->bounds.CollisionCheck(boundingLines, dT, velocity);
+}
+
+inline LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(paddle);
+    return this;
 }
 
 inline void CannonBlock::SetRotationSpeed(int dir, float magnitudePercent) {

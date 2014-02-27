@@ -1,0 +1,74 @@
+A Pillar Too Far
+21 30
+E E E E E E E E E E E E S S S S S S D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle){1} S S 
+E E E E E E E E E E E E S E E E S E E E S 
+E E T(P,ul) E E E E D(IceBall,IceBall,IceBall) E E E E S E X(a,b) E S E L E S 
+E E E E E E E E E E E E S E E E S E E E S 
+E E E E S S S S S S S S S S N S S E E E S 
+E E E E Q(i) G G G Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) G G G Y O R R E E S G S E E E S 
+E E E E Q(i) G G G Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) G G G Y O R R E E S G S E E E S 
+E E E E Q(i) G G G Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) G G G Y O R R E E S G S E E E S 
+E E E E Q(i) G G G Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) G G G Y O R R E E S G S E E E S 
+E E P E Q(i) G G G Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) G G G Y O R R E E S G S E E E S 
+E E E E Q(i) G G G Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) G G G Y O R R E E S G S E E E S 
+E E E E Q(i) G G G Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) G G G Y O R R E E S G S E E E S 
+E E E E Q(i) Y Y Y Y O R Q(f) E E S G S E E E S 
+E E E E Q(i) O O O O O R R E E S G S E E E S 
+E E E E Q(i) R R R R R R Q(f) E E S S S E E E S 
+E E E E Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) Q(i) E E S S S E E E S 
+E E E E S E E E E E E E E E E E S E E E S 
+E E E E S E E E E E E E E E E E S E E E S 
+E E E E S E E E E E E E E E E E S E E E S 
+E E E E S E E E E E E E E E E E S E E E S 
+E E E E N E E E E E E E E E E E S E X(b,a) E S 
+E E E E N E E E E E E E E E E E S E E E S 
+W(1) E E E N E E E E E E E E E E E S S S S S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+Blackout 2
+BallSafetyNet 2
+UberBall 2
+BallGrow 2
+ShieldPaddle 2
+StickyPaddle 2
+LaserBulletPaddle 0
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 0
+OmniLaserBall 2
+FlameBlasterPaddle 2
+FireBall 2
+RocketPaddle 1
+GhostBall 2
+BallShrink 2
+UpsideDown 0
+MultiBall5 2
+BallCam 2
+MagnetPaddle 0
+MultiBall3 2
+RemoteControlRocket 1
+IceBall 0
+IceBlasterPaddle 2
+MineLauncherPaddle 2
+SlowBall 2
+FastBall 2
+Random 2
+CrazyBall 2
+GravityBall 2
+PaddleCam 2

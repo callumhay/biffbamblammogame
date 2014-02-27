@@ -178,7 +178,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 			assert(success);
 
             if (isFireBall) {
-                // EVENT: Frozen block cancelled-out by fire
+                // EVENT: Frozen block canceled-out by fire
                 GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
             }
 
@@ -189,6 +189,26 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	}
 
     ball.SetLastPieceCollidedWith(this);
+    return this;
+}
+
+LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    if (paddle.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
+        assert(success);
+    }
+    else {
+        this->SwitchPressed(gameModel);
+    }
+
+    paddle.SetLastPieceCollidedWith(this);
+
     return this;
 }
 
@@ -272,21 +292,6 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 	}
 
 	return resultingPiece;
-}
-
-LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
-    UNUSED_PARAMETER(paddle);
-
-    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-	    GameEventManager::Instance()->ActionBlockIceShattered(*this);
-		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-        UNUSED_VARIABLE(success);
-		assert(success);
-    }
-    else {
-        this->SwitchPressed(gameModel);
-    }
-    return this;
 }
 
 LevelPiece* SwitchBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {

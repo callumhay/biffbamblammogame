@@ -45,7 +45,8 @@ namespace Collision {
 	private:
 		Point2D minCoord, maxCoord;
 	public:
-        AABB2D() : minCoord(0, 0), maxCoord(0, 0) {}
+        AABB2D() : minCoord(0,0), maxCoord(0, 0) {}
+        AABB2D(const Point2D &pt): minCoord(pt), maxCoord(pt) {}
         AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
 		~AABB2D() {}
 
@@ -134,6 +135,13 @@ namespace Collision {
 		const Point2D& P2() const {
 			return this->p2;
 		}
+
+        void BuildAABB(AABB2D& aabb) const {
+            aabb.SetMin(Point2D(this->p1[0] < this->p2[0] ? this->p1[0] : this->p2[0], 
+                this->p1[1] < this->p2[1] ? this->p1[1] : this->p2[1]));
+            aabb.SetMax(Point2D(this->p1[0] > this->p2[0] ? this->p1[0] : this->p2[0], 
+                this->p1[1] > this->p2[1] ? this->p1[1] : this->p2[1]));
+        }
 
         Vector2D GetNormalToLine() const;
 		void Rotate(float angleInDegs, const Point2D& rotationCenter);
@@ -308,7 +316,7 @@ namespace Collision {
 
 		// Cases where c projects outside of ab
 		float e = Vector2D::Dot(ac, ab);
-		if (e <= EPSILON) { 
+		if (e <= 0.0f) { 
 			return Vector2D::Dot(ac, ac);
 		}
 

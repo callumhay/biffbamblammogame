@@ -121,6 +121,11 @@ public:
         ball.SetLastPieceCollidedWith(NULL);
         return this;
     }
+    LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+        UNUSED_PARAMETER(gameModel);
+        UNUSED_PARAMETER(paddle);
+        return this;
+    }
 
     bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 

@@ -139,7 +139,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
             UNUSED_VARIABLE(success);
 			assert(success);
 
-            // EVENT: Frozen block cancelled-out by fire
+            // EVENT: Frozen block canceled-out by fire
             GameEventManager::Instance()->ActionBlockIceCancelledWithFire(*this);
 		}
         else {
@@ -153,6 +153,26 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 
 	ball.SetLastPieceCollidedWith(resultingPiece);
 	return resultingPiece;
+}
+
+LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(paddle);
+
+    LevelPiece* resultingPiece = this;
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+        // EVENT: Ice was shattered
+        GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        // If the piece is frozen it shatters and is immediately destroyed on paddle impact
+        resultingPiece = this->Destroy(gameModel, LevelPiece::IceShatterDestruction);
+    }
+    else {
+        // Being hit by the paddle, when not frozen, causes the collateral block to detonate and
+        // go into warning/collateral mode
+        resultingPiece = this->Detonate(gameModel);
+    }
+
+    return resultingPiece;
 }
 
 /**

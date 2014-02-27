@@ -106,8 +106,8 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
             
             #define CHECK_FOR_BOMB_AND_ADD_TO_STACK(hIdxOffset, wIdxOffset) { \
                 LevelPiece* levelPiece = level->GetLevelPieceFromCurrentLayout(currDestroyedBomb->GetHeightIndex() + hIdxOffset, currDestroyedBomb->GetWidthIndex() + wIdxOffset); \
-                if (levelPiece->GetType() == LevelPiece::Bomb) { if (destroyedBombSet.find(levelPiece) == destroyedBombSet.end()) { destroyedBombStack.push_back(levelPiece); } } \
-                else { destroyedNonBombSet.insert(levelPiece); } }
+                if (levelPiece != NULL) { if (levelPiece->GetType() == LevelPiece::Bomb) { if (destroyedBombSet.find(levelPiece) == destroyedBombSet.end()) { destroyedBombStack.push_back(levelPiece); } } \
+                else { destroyedNonBombSet.insert(levelPiece); } } }
 
             CHECK_FOR_BOMB_AND_ADD_TO_STACK(1, 0);
             CHECK_FOR_BOMB_AND_ADD_TO_STACK(1, -1);
@@ -207,6 +207,14 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 
     ball.SetLastPieceCollidedWith(resultingPiece);   
 	return resultingPiece;
+}
+
+LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(paddle);
+
+    LevelPiece* resultingPiece = this->Destroy(gameModel, 
+        this->HasStatus(LevelPiece::IceCubeStatus) ? LevelPiece::IceShatterDestruction : LevelPiece::RegularDestruction);
+    return resultingPiece;
 }
 
 /**

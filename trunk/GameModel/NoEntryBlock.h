@@ -74,6 +74,7 @@ public:
                       const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
+    LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
     void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
