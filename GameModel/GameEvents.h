@@ -130,7 +130,21 @@ public:
 	 * Arguments: paddle - The paddle that just hit the wall.
 	 *             hitLoc - The central location where the paddle smacked into the wall.
 	 */
-    virtual void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc) { UNUSED_PARAMETER(paddle); UNUSED_PARAMETER(hitLoc); }
+    virtual void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(hitLoc);
+    }
+
+	/**
+	 * Event triggered when the paddle is teleported by a portal block. Only occurs once one frame 
+     * before the paddle is shown coming out of the sibling portal.
+	 * Arguments: paddle      - The paddle teleported.
+	 *            enterPortal - The portal entered by the paddle.
+	 */
+    virtual void PaddlePortalBlockTeleportEvent(const PlayerPaddle& paddle, const PortalBlock& enterPortal) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(enterPortal);
+    }
 
 	/**
 	 * This event occurs when the player paddle gets hit by a projectile - it only happens once
@@ -138,7 +152,10 @@ public:
 	 * Arguments: paddle     - The paddle that just got hit by the projectile.
 	 *            projectile - The projectile that just hit the paddle.
 	 */
-    virtual void PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) { UNUSED_PARAMETER(paddle); UNUSED_PARAMETER(projectile); }
+    virtual void PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(projectile);
+    }
 
 	/**
 	 * This event occurs when the player paddle's shield gets hit by a projectile - it only happens once
@@ -146,7 +163,10 @@ public:
 	 * Arguments: paddle     - The paddle whose shield just got hit by the projectile.
 	 *            projectile - The projectile that just hit the paddle.
 	 */
-    virtual void PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) { UNUSED_PARAMETER(paddle); UNUSED_PARAMETER(projectile); }
+    virtual void PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(projectile);
+    }
 
 	// Ball related events ***************************************************************
 

@@ -89,7 +89,7 @@ void GameState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
 
 /**
  * This should only be called when the state allows the player to control the paddle...
- * This function updates the paddle boundries so that it hits blocks around it.
+ * This function updates the paddle boundaries so that it hits blocks around it.
  */
 bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttachedBallCollision) {
 	UNUSED_PARAMETER(dT);
@@ -112,15 +112,18 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 	std::set<LevelPiece*> collisionCandidatePieces = currentLevel->GetLevelPieceCollisionCandidates(*paddle, doAttachedBallCollision);
 	for (std::set<LevelPiece*>::iterator iter = collisionCandidatePieces.begin(); iter != collisionCandidatePieces.end(); ++iter) {
 		LevelPiece* currPiece = *iter;
-		if (currPiece->IsNoBoundsPieceType()) {
+        if (currPiece->IsNoBoundsPieceType() && currPiece->GetType() != LevelPiece::Portal) {
 			continue;
 		}
 
 		// First check to see if the paddle actually collides with the piece...
 		didCollideWithCurrentPiece = paddle->CollisionCheck(currPiece->GetBounds(), doAttachedBallCollision);
 		if (didCollideWithCurrentPiece) {
-			paddle->UpdateBoundsByPieceCollision(*currPiece, doAttachedBallCollision);
             
+            if (!currPiece->IsNoBoundsPieceType()) {
+			    paddle->UpdateBoundsByPieceCollision(*currPiece, doAttachedBallCollision);
+            }
+
             LevelPiece* resultingPiece = currPiece->CollisionOccurred(this->gameModel, *paddle);
             if (resultingPiece != currPiece) {
                 this->gameModel->PerformLevelCompletionChecks();
@@ -131,7 +134,9 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 
     if (!didCollideWithAnyPiece) {
 	    // Set the paddle boundaries to be the innermost solid blocks on the paddle level of blocks
-	    paddle->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
+	    paddle->UpdatePaddleBounds(
+            currentLevel->GetPaddleMinXBound(paddle->GetCenterPosition()[0], paddle->GetDefaultYPosition()), 
+            currentLevel->GetPaddleMaxXBound(paddle->GetCenterPosition()[0], paddle->GetDefaultYPosition()));
     }
 
 	return false;

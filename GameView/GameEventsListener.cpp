@@ -348,6 +348,24 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
 
+void GameEventsListener::PaddlePortalBlockTeleportEvent(const PlayerPaddle& paddle, const PortalBlock& enterPortal) {
+    // Play the paddle teleportation sound
+    this->display->GetSound()->PlaySoundAtPosition(GameSound::PaddlePortalTeleportEvent, false, 
+        enterPortal.GetPosition3D(), true, true, true);
+
+    // Add the teleportation effect
+    if (!paddle.GetIsPaddleCameraOn()) {
+        float paddleSize = paddle.GetHalfWidthTotal();
+        this->display->GetAssets()->GetESPAssets()->AddObjectPortalTeleportEffect(
+            paddle.GetCenterPosition(), paddleSize, paddleSize, enterPortal);
+    }
+    else {
+        this->display->GetAssets()->FullscreenFlash(0.25, 1.0f);
+    }
+
+    debug_output("EVENT: Paddle teleported");
+}
+
 void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
 	
     // No hurting effects if paddle has sticky effect and the projectile is a mine...
@@ -485,6 +503,8 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
     exceptTypes.insert(GameSound::BossAngryBackgroundLoop);
     exceptTypes.insert(GameSound::BossBackgroundLoopTransition);
     exceptTypes.insert(GameSound::TeslaLightningArcLoop);
+    exceptTypes.insert(GameSound::CollateralBlockFallingLoop);
+    exceptTypes.insert(GameSound::CollateralBlockFlashingLoop);
 
     sound->StopAllSoundsExcept(exceptTypes, 0.5f);
     sound->SetSoundTypeVolume(GameSound::WorldBackgroundLoop, 0.5f);
@@ -492,6 +512,8 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
     sound->SetSoundTypeVolume(GameSound::BossAngryBackgroundLoop, 0.5f);
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoopTransition, 0.5f);
     sound->SetSoundTypeVolume(GameSound::TeslaLightningArcLoop, 0.1f);
+    sound->SetSoundTypeVolume(GameSound::CollateralBlockFallingLoop, 0.5f);
+    sound->SetSoundTypeVolume(GameSound::CollateralBlockFlashingLoop, 0.5f);
 
 	sound->PlaySound(GameSound::LastBallSpiralingToDeathLoop, false, true, true);
 
@@ -529,6 +551,8 @@ void GameEventsListener::LastBallExplodedEvent(const GameBall& explodedBall, boo
     sound->SetSoundTypeVolume(GameSound::BossAngryBackgroundLoop, 1.0f);
     sound->SetSoundTypeVolume(GameSound::BossBackgroundLoopTransition, 1.0f);
     sound->SetSoundTypeVolume(GameSound::TeslaLightningArcLoop, 0.25f);
+    sound->SetSoundTypeVolume(GameSound::CollateralBlockFallingLoop, 1.0f);
+    sound->SetSoundTypeVolume(GameSound::CollateralBlockFlashingLoop, 1.0f);
 
     debug_output("EVENT: Last ball exploded.");
 }

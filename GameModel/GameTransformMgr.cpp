@@ -693,11 +693,11 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                             this->unfollowBallTimeCounter = std::min<double>(
                                 this->unfollowBallTimeCounter + std::max<float>(ball->GetSpeed()/GameBall::GetNormalSpeed(), 1.0)*dT, 
                                 GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS);
-                            Vector2D newTranslation = NumberFuncs::LerpOverTime<Vector2D>(0.0, 
-                                GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfUnfollow.ToVector2D(), 
-                                this->defaultCamOrientation.GetTranslation2D(), this->unfollowBallTimeCounter);
+                            Vector3D newTranslation = NumberFuncs::LerpOverTime<Vector3D>(0.0, 
+                                GameTransformMgr::SECONDS_TO_FOLLOW_BALL_OUT_OF_BOUNDS, this->camTAtStartOfUnfollow, 
+                                this->defaultCamOrientation.GetTranslation(), this->unfollowBallTimeCounter);
                             
-                            this->currCamOrientation.SetTranslation(Vector3D(newTranslation, this->defaultCamOrientation.GetTZ()));
+                            this->currCamOrientation.SetTranslation(newTranslation);
                         }
                         else {
                             this->currCamOrientation = this->defaultCamOrientation;

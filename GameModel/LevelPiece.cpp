@@ -29,6 +29,7 @@
 
 #include "LevelPiece.h"
 #include "BreakableBlock.h"
+#include "RegenBlock.h"
 #include "TriangleBlocks.h"
 #include "GameEventManager.h"
 #include "GameBall.h"
@@ -458,11 +459,14 @@ void LevelPiece::UpdateSolidRectBlockBounds(LevelPiece* thePiece,
             leftNeighbor->GetType() != LevelPiece::Switch &&
             leftNeighbor->GetType() != LevelPiece::ItemDrop) {
 
-                shouldGenBounds = true;
-                if (TriangleBlock::GetOrientation(leftNeighbor, triOrientation)) {
-                    shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight) ||
-                        leftNeighbor->GetType() == LevelPiece::PrismTriangle;
-                }
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(leftNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::LowerRight) ||
+                    leftNeighbor->GetType() == LevelPiece::PrismTriangle;
+            }
+            else if (leftNeighbor->GetType() == LevelPiece::Regen) {
+                shouldGenBounds = !static_cast<const RegenBlock*>(leftNeighbor)->HasInfiniteLife();
+            }
         }
     }
     else {
@@ -493,11 +497,14 @@ void LevelPiece::UpdateSolidRectBlockBounds(LevelPiece* thePiece,
             bottomNeighbor->GetType() != LevelPiece::Switch &&
             bottomNeighbor->GetType() != LevelPiece::ItemDrop) {
 
-                shouldGenBounds = true;
-                if (TriangleBlock::GetOrientation(bottomNeighbor, triOrientation)) {
-                    shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft) ||
-                        bottomNeighbor->GetType() == LevelPiece::PrismTriangle;
-                }
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(bottomNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperRight || triOrientation == TriangleBlock::UpperLeft) ||
+                    bottomNeighbor->GetType() == LevelPiece::PrismTriangle;
+            }
+            else if (bottomNeighbor->GetType() == LevelPiece::Regen) {
+                shouldGenBounds = !static_cast<const RegenBlock*>(bottomNeighbor)->HasInfiniteLife();
+            }
         }
     }
     else {
@@ -527,11 +534,14 @@ void LevelPiece::UpdateSolidRectBlockBounds(LevelPiece* thePiece,
             rightNeighbor->GetType() != LevelPiece::Switch &&
             rightNeighbor->GetType() != LevelPiece::ItemDrop) {
 
-                shouldGenBounds = true;
-                if (TriangleBlock::GetOrientation(rightNeighbor, triOrientation)) {
-                    shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft) ||
-                        rightNeighbor->GetType() == LevelPiece::PrismTriangle;
-                }
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(rightNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::UpperLeft || triOrientation == TriangleBlock::LowerLeft) ||
+                    rightNeighbor->GetType() == LevelPiece::PrismTriangle;
+            }
+            else if (rightNeighbor->GetType() == LevelPiece::Regen) {
+                shouldGenBounds = !static_cast<const RegenBlock*>(rightNeighbor)->HasInfiniteLife();
+            }
         }
     }
     else {
@@ -561,11 +571,14 @@ void LevelPiece::UpdateSolidRectBlockBounds(LevelPiece* thePiece,
             topNeighbor->GetType() != LevelPiece::Switch &&
             topNeighbor->GetType() != LevelPiece::ItemDrop) {
 
-                shouldGenBounds = true;
-                if (TriangleBlock::GetOrientation(topNeighbor, triOrientation)) {
-                    shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft) ||
-                        topNeighbor->GetType() == LevelPiece::PrismTriangle;
-                }
+            shouldGenBounds = true;
+            if (TriangleBlock::GetOrientation(topNeighbor, triOrientation)) {
+                shouldGenBounds = !(triOrientation == TriangleBlock::LowerRight || triOrientation == TriangleBlock::LowerLeft) ||
+                    topNeighbor->GetType() == LevelPiece::PrismTriangle;
+            }
+            else if (topNeighbor->GetType() == LevelPiece::Regen) {
+                shouldGenBounds = !static_cast<const RegenBlock*>(topNeighbor)->HasInfiniteLife();
+            }
         }
     }
     else {

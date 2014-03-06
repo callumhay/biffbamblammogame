@@ -185,8 +185,8 @@ void BallSafetyNetMesh::DrawSafetyNetMesh(float minXCoord, float maxXCoord, floa
 void BallSafetyNetMesh::Regenerate(const GameLevel& currLevel) {
 	assert(this->displayListID != 0);
 
-    const LevelPiece* maxBoundPiece = currLevel.GetMaxPaddleBoundPiece();
-    const LevelPiece* minBoundPiece = currLevel.GetMinPaddleBoundPiece();
+    const LevelPiece* maxBoundPiece = currLevel.GetMaxXPaddleBoundPiece(0);
+    const LevelPiece* minBoundPiece = currLevel.GetMinXPaddleBoundPiece(0);
     
     const float minX = minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
     const float maxX = maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
@@ -225,8 +225,8 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float d
 	// Make sure that both display lists for the broken pieces get initialized
 	assert(this->leftPieceDispListID != 0 && this->rightPieceDispListID != 0);
 
-    const LevelPiece* maxBoundPiece = currLevel.GetMaxPaddleBoundPiece();
-    const LevelPiece* minBoundPiece = currLevel.GetMinPaddleBoundPiece();
+    const LevelPiece* maxBoundPiece = currLevel.GetMaxXPaddleBoundPiece(0);
+    const LevelPiece* minBoundPiece = currLevel.GetMinXPaddleBoundPiece(0);
 
 	// (Re)compile the 2 new display lists of the broken pieces of the safety net
 	const float minX = minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;

@@ -1477,8 +1477,8 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
     // if it is then we exit -- don't want to drop items that just frustrate the player
     const GameLevel* currLevel = this->GetCurrentLevel();
     assert(currLevel != NULL);
-    const LevelPiece* minBoundPiece = currLevel->GetMinPaddleBoundPiece();
-    const LevelPiece* maxBoundPiece = currLevel->GetMaxPaddleBoundPiece();
+    const LevelPiece* minBoundPiece = currLevel->GetMinXPaddleBoundPiece(this->playerPaddle->GetDefaultYPosition());
+    const LevelPiece* maxBoundPiece = currLevel->GetMaxXPaddleBoundPiece(this->playerPaddle->GetDefaultYPosition());
     
     if (p.GetWidthIndex() <= minBoundPiece->GetWidthIndex() ||
         p.GetWidthIndex() >= maxBoundPiece->GetWidthIndex()) {

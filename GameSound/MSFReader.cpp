@@ -385,6 +385,8 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, PaddleFrozenEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleOnFireEvent, false);
 
+    INSERT_MAPPING_PAIR(GameSound, PaddlePortalTeleportEvent, false);
+
 	INSERT_MAPPING_PAIR(GameSound, PlayerLostABallButIsStillAliveEvent, false);
 	INSERT_MAPPING_PAIR(GameSound, LastBallExplodedEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BallBallCollisionEvent, false);
@@ -402,6 +404,7 @@ void MSFReader::InitSoundTypeMapping() {
     
 	INSERT_MAPPING_PAIR(GameSound, BallBlockBasicBounceEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BallBlockCollisionColourChange, false);
+    INSERT_MAPPING_PAIR(GameSound, BallPortalTeleportEvent, false);
 	
 	INSERT_MAPPING_PAIR(GameSound, BombBlockDestroyedEvent, false);
 	INSERT_MAPPING_PAIR(GameSound, InkBlockDestroyedEvent, false);
@@ -411,7 +414,6 @@ void MSFReader::InitSoundTypeMapping() {
 	INSERT_MAPPING_PAIR(GameSound, CannonBlockFiredEvent, false);
     INSERT_MAPPING_PAIR(GameSound, CannonObstructionMalfunctionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FragileCannonDestroyedEvent, false);
-	INSERT_MAPPING_PAIR(GameSound, BallPortalTeleportEvent, false);
     INSERT_MAPPING_PAIR(GameSound, EnergyProjectilePortalTeleportEvent, false);
     INSERT_MAPPING_PAIR(GameSound, NonBallObjectPortalTeleportEvent, false);
 

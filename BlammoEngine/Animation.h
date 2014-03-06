@@ -281,6 +281,9 @@ public:
 	std::vector<T> GetInterpolationValues() const {
 		return this->interpolationPts;
 	}
+    std::vector<T>& GetEditableInterpolationValues() {
+        return this->interpolationPts;
+    }
     bool GetHasInterpolationSet() const {
         return !this->interpolationPts.empty();
     }

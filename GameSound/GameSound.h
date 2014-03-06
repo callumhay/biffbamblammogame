@@ -110,6 +110,9 @@ public:
 		PaddleHitWallEvent,
         PaddleFrozenEvent,
         PaddleOnFireEvent,
+
+        // -> Paddle/block sounds
+        PaddlePortalTeleportEvent,
 		
         // -> Ball-only sounds
         PlayerLostABallButIsStillAliveEvent,
@@ -131,6 +134,7 @@ public:
         // -> Ball/block sounds
 		BallBlockBasicBounceEvent,
         BallBlockCollisionColourChange,
+        BallPortalTeleportEvent,
 		
 		// -> Block-only sounds
 		BombBlockDestroyedEvent,
@@ -143,7 +147,6 @@ public:
         CannonBlockFiredEvent,
         CannonObstructionMalfunctionEvent,
         FragileCannonDestroyedEvent,
-		BallPortalTeleportEvent,
         EnergyProjectilePortalTeleportEvent,
         NonBallObjectPortalTeleportEvent,
 

@@ -190,7 +190,7 @@ void BallOnPaddleState::ShootActionReleaseUse() {
         // Update the paddle boundaries
         PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
         const GameLevel* currLevel = this->gameModel->GetCurrentLevel(); 
-        paddle->UpdatePaddleBounds(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
+        paddle->UpdatePaddleBounds(currLevel->GetPaddleMinXBound(0), currLevel->GetPaddleMaxXBound(0));
     }
 }
 

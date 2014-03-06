@@ -117,7 +117,7 @@ void PaddleMineLauncher::DrawEffects(double dT, const PlayerPaddle& paddle) {
 
     glPushMatrix();
     glTranslatef(0, 0, negHalfPaddleDepth);
-    glRotatef(0,0,1, paddle.GetZRotation());
+    glRotatef(paddle.GetZRotation(), 0.0f, 0.0f, 1.0f);
 
     glBegin(GL_QUADS);
 

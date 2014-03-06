@@ -142,9 +142,14 @@ inline void RegenBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Level
                                      const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
                                      const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
                                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
-
-    LevelPiece::UpdateBreakableBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
-        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+    if (this->HasInfiniteLife()) {
+        LevelPiece::UpdateSolidRectBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+            topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+    }
+    else {
+        LevelPiece::UpdateBreakableBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+            topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+    }
 }
 
 // Get whether or not this regen block has infinite life

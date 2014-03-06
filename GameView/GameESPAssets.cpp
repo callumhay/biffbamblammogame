@@ -2667,7 +2667,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	bombExplodeFireEffect2->SetParticleLife(ESPInterval(1.25f, 2.75f));
 	bombExplodeFireEffect2->SetParticleSize(ESPInterval(1.0f, 2.8f));
 	bombExplodeFireEffect2->SetRadiusDeviationFromCenter(ESPInterval(1.0f));
-	bombExplodeFireEffect2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	bombExplodeFireEffect2->SetParticleAlignment(ESP::ScreenAligned);
 	bombExplodeFireEffect2->SetEmitPosition(emitCenter);
 	bombExplodeFireEffect2->SetEmitAngleInDegrees(180);
 	bombExplodeFireEffect2->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_CLOUD_PARTICLES, this->explosionTex);
@@ -3921,7 +3921,7 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
     bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
     bangEffect->SetParticleLife(bangLifeInterval);
     bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-    bangEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    bangEffect->SetParticleAlignment(ESP::ScreenAligned);
     bangEffect->SetEmitPosition(emitCenter);
 
     // Figure out some random proper orientation...
@@ -3966,7 +3966,7 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
     starEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
     starEmitter->SetEmitAngleInDegrees(180);
     starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    starEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    starEmitter->SetParticleAlignment(ESP::ScreenAligned);
     starEmitter->SetEmitDirection(Vector3D(-bossPart.GetCollisionVelocity(), 0.0f));
     starEmitter->SetEmitPosition(emitCenter);
 
@@ -4157,7 +4157,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
             assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
-			this->AddRocketProjectileEffects(*static_cast<const RocketProjectile*>(&projectile));
+			this->AddRocketProjectileEffects(gameModel, *static_cast<const RocketProjectile*>(&projectile));
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
@@ -5001,7 +5001,8 @@ void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile)
 }
 
 // Add effects for the rocket projectile (e.g., fire trail and smoke)
-void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectile) {
+void GameESPAssets::AddRocketProjectileEffects(const GameModel& gameModel, const RocketProjectile& projectile) {
+    UNUSED_PARAMETER(gameModel);
 
     CgFxEffectBase* fireTrailEffect = &this->fireEffect;
     std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
@@ -5642,7 +5643,7 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	}
 	laserBeamEmitter->SetEmitAngleInDegrees(0);
 	laserBeamEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserBeamEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	laserBeamEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	laserBeamEmitter->SetEmitPosition(Point3D(0,0,0));
     laserBeamEmitter->SetParticleColour(ESPInterval(baseColour.R()),
         ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
@@ -5662,7 +5663,7 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	
 	laserAuraEmitter->SetEmitAngleInDegrees(0);
 	laserAuraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserAuraEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	laserAuraEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	laserAuraEmitter->SetEmitPosition(Point3D(0,0,0));
 	laserAuraEmitter->SetParticleColour(ESPInterval(1.3f * baseColour.R()), ESPInterval(1.3f * baseColour.G()),
         ESPInterval(1.3f * baseColour.B()), ESPInterval(1.0f));
@@ -5687,7 +5688,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	orbEmitter->SetParticleSize(ESPInterval(projectile.GetWidth()));
 	orbEmitter->SetEmitAngleInDegrees(0);
 	orbEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	orbEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	orbEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	orbEmitter->SetEmitPosition(Point3D(0,0,0));
     orbEmitter->SetParticleColour(ESPInterval(baseColour.R()),
         ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
@@ -5702,7 +5703,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	auraEmitter->SetParticleSize(ESPInterval(1.2f * projectile.GetWidth()));
 	auraEmitter->SetEmitAngleInDegrees(0);
 	auraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	auraEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	auraEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	auraEmitter->SetEmitPosition(Point3D(0,0,0));
 	auraEmitter->SetParticleColour(ESPInterval(brightColour.R()), ESPInterval(brightColour.G()),
         ESPInterval(brightColour.B()), ESPInterval(1.0f));
@@ -5717,7 +5718,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	lensFlareEmitter->SetParticleSize(ESPInterval(3.0f*projectile.GetWidth()));
 	lensFlareEmitter->SetEmitAngleInDegrees(0);
 	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	lensFlareEmitter->SetEmitPosition(Point3D(0,0,0));
 	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.5f));
 	lensFlareEmitter->AddEffector(&this->loopRotateEffectorCW);

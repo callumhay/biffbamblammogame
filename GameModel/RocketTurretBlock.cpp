@@ -534,7 +534,7 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
 
         std::list<LevelPiece*> collisionPieces;
         model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes,
-            collisionPieces, 0.525f * RocketTurretProjectile::TURRETROCKET_WIDTH_DEFAULT);
+            collisionPieces, paddleRayT, 0.525f * RocketTurretProjectile::TURRETROCKET_WIDTH_DEFAULT);
 
         if (collisionPieces.empty()) {
             // The ray is unimpeded, fire ze lasers!

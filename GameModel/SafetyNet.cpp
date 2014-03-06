@@ -36,8 +36,8 @@ const float SafetyNet::SAFETY_NET_HALF_HEIGHT = SafetyNet::SAFETY_NET_HEIGHT / 2
 
 SafetyNet::SafetyNet(const GameLevel& currLevel) {
 
-    const LevelPiece* maxBoundPiece = currLevel.GetMaxPaddleBoundPiece();
-    const LevelPiece* minBoundPiece = currLevel.GetMinPaddleBoundPiece();
+    const LevelPiece* maxBoundPiece = currLevel.GetMaxXPaddleBoundPiece(0);
+    const LevelPiece* minBoundPiece = currLevel.GetMinXPaddleBoundPiece(0);
 
 	// Create the safety net bounding line for this level
 	std::vector<Collision::LineSeg2D> lines;

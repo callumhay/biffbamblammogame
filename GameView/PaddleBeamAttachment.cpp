@@ -71,9 +71,7 @@ void PaddleBeamAttachment::DrawEffects(const PlayerPaddle& paddle) {
 
     glPushMatrix();
     glTranslatef(0, 0, -paddle.GetHalfDepthTotal());
-    glRotatef(0,0,1, paddle.GetZRotation());
-
-    
+    glRotatef(paddle.GetZRotation(), 0.0f, 0.0f, 1.0f);
 
     // Draw the highlight pre-beam(s) coming out of the paddle...
 

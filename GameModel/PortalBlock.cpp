@@ -35,8 +35,11 @@
 
 const unsigned long PortalBlock::TIME_BETWEEN_BALL_USES_IN_MILLISECONDS = 650;
 
+const float PortalBlock::FRACTION_HALF_PIECE_WIDTH  = 0.9f * LevelPiece::HALF_PIECE_WIDTH;
+const float PortalBlock::FRACTION_HALF_PIECE_HEIGHT = 0.9f * LevelPiece::HALF_PIECE_HEIGHT;
+
 PortalBlock::PortalBlock(unsigned int wLoc, unsigned int hLoc, PortalBlock* sibling) :
-LevelPiece(wLoc, hLoc), sibling(sibling), timeOfLastBallCollision(0) {
+LevelPiece(wLoc, hLoc), sibling(sibling), timeOfLastBallCollision(0), paddleTeleportLine(NoPaddleLine) {
 }
 
 PortalBlock::~PortalBlock() {
@@ -99,9 +102,6 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
-	static const float FRACTION_HALF_PIECE_WIDTH  = 0.9f * LevelPiece::HALF_PIECE_WIDTH;
-	static const float FRACTION_HALF_PIECE_HEIGHT = 0.9f * LevelPiece::HALF_PIECE_HEIGHT;
-
 	// Left boundary of the piece
 	Collision::LineSeg2D l1(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT), 
 							 this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
@@ -159,10 +159,57 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 }
 
 LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
-    UNUSED_PARAMETER(gameModel);
-    UNUSED_PARAMETER(paddle);
+    assert(this->paddleTeleportLine != NoPaddleLine);
 
-    // TODO... Have the paddle teleport...
+    // If the paddle is in the midst of being attacked/hurt/pushed-down then
+    // we ignore this collision for the time being
+    if (!paddle.GetIsStableForGoingThroughPortals()) {
+        return this;
+    }
+
+    // Figure out what side of the teleportation line the paddle is on...
+    bool onLeft = true;
+    if (paddle.GetCenterPosition()[0] > this->center[0]) {
+        onLeft = false;
+    }
+
+    // Check to see if the paddle is even teleporting yet
+    if ((this->paddleTeleportLine == ComingFromRightPaddleLine || !onLeft) &&
+        (this->paddleTeleportLine == ComingFromLeftPaddleLine || onLeft)) {
+
+        // EVENT: The paddle is about to officially be teleported
+        GameEventManager::Instance()->ActionPaddlePortalBlockTeleport(paddle, *this);
+
+        // The paddle has already officially teleported, it should be located at its sibling portal
+        // since that isn't the case, make it so!
+        Point2D newPaddleCenter = sibling->GetCenter() + (paddle.GetCenterPosition() - this->GetCenter());
+        paddle.SetCenterPosition(newPaddleCenter);
+        paddle.RegenerateBounds();
+
+        paddle.SetDefaultYPosition(sibling->GetCenter()[1] - LevelPiece::HALF_PIECE_HEIGHT + paddle.GetHalfHeight());
+        
+        // We'll need to update the min and max X boundaries of the paddle as well...
+        const GameLevel* currLevel = gameModel->GetCurrentLevel();
+        paddle.UpdatePaddleBounds(
+            currLevel->GetPaddleMinXBound(sibling->GetCenter()[0], paddle.GetDefaultYPosition()),
+            currLevel->GetPaddleMaxXBound(sibling->GetCenter()[0], paddle.GetDefaultYPosition()));
+    }
+
+    // NOTE: If we ever want to actually divide the paddle between the portals then this code has
+    // to be implemented (among other things...)
+    /*
+    // Test collision of the paddle bounds with the portal's paddle teleport line
+    Collision::LineSeg2D paddleTeleportLine = this->GetPaddleTeleportLine();
+    if (!paddle.GetBounds().CollisionCheck(paddleTeleportLine)) {
+        // No teleportation effects have happened yet
+        return this;
+    }
+
+    // Inline: The paddle is partially teleported, let the paddle know this so that
+    // it can setup its bounds and other properties appropriately
+
+    // TODO
+    */
 
     return this;
 }
@@ -209,6 +256,45 @@ void PortalBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vec
 	// The new ray is simply the old one coming out of the sibling portal
 	Point2D newPosition = this->sibling->GetCenter() + toHitVec;
 	rays.push_back(Collision::Ray2D(newPosition, impactDir));
+}
+
+void PortalBlock::DebugDraw() const {
+    this->bounds.DebugDraw();
+    
+    // Draw any paddle lines as well
+    switch (this->paddleTeleportLine) {
+
+        case ComingFromRightPaddleLine:
+            glPushAttrib(GL_CURRENT_BIT);
+            glColor3f(1.0f, 0.5f, 0.0f);
+            glBegin(GL_LINES);
+            glVertex2f(this->center[0], this->center[1] + LevelPiece::PIECE_HEIGHT);
+            glVertex2f(this->center[0], this->center[1] - LevelPiece::PIECE_HEIGHT);
+            glVertex2f(this->center[0] + FRACTION_HALF_PIECE_WIDTH, this->center[1] + LevelPiece::PIECE_HEIGHT);
+            glVertex2f(this->center[0] + FRACTION_HALF_PIECE_WIDTH, this->center[1] - LevelPiece::PIECE_HEIGHT);
+            glEnd();
+            glPopAttrib();
+            break;
+
+        case ComingFromLeftPaddleLine:
+            glPushAttrib(GL_CURRENT_BIT);
+            glColor3f(1.0f, 0.5f, 0.0f);
+            glBegin(GL_LINES);
+            glVertex2f(this->center[0], this->center[1] + LevelPiece::PIECE_HEIGHT);
+            glVertex2f(this->center[0], this->center[1] - LevelPiece::PIECE_HEIGHT);
+            glVertex2f(this->center[0] - FRACTION_HALF_PIECE_WIDTH, this->center[1] + LevelPiece::PIECE_HEIGHT);
+            glVertex2f(this->center[0] - FRACTION_HALF_PIECE_WIDTH, this->center[1] - LevelPiece::PIECE_HEIGHT);
+            glEnd();
+            glPopAttrib();
+            break;
+
+        case NoPaddleLine:
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
 }
 
 // Whether or not the portal colour generator will reset

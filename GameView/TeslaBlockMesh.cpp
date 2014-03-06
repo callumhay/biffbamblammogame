@@ -176,6 +176,7 @@ void TeslaBlockMesh::DrawPostEffects(double dT, const Camera& camera, const Basi
 void TeslaBlockMesh::SetAlphaMultiplier(float alpha) {
 	this->teslaCoilMesh->SetAlpha(alpha);
 	this->teslaCenterFlare->SetParticleAlpha(ESPInterval(alpha));
+    this->shieldEmitter->SetAliveParticleAlphaMax(alpha);
 }
 
 void TeslaBlockMesh::LoadMesh() {

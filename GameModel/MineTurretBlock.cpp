@@ -535,7 +535,7 @@ void MineTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSee
 
         std::list<LevelPiece*> collisionPieces;
         model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes,
-            collisionPieces, 0.525f * MineTurretProjectile::WIDTH_DEFAULT);
+            collisionPieces, paddleRayT, 0.525f * MineTurretProjectile::WIDTH_DEFAULT);
 
         if (collisionPieces.empty()) {
             // The ray is unimpeded, fire ze lasers!

@@ -171,7 +171,7 @@ public:
     virtual void DrawWireframe() const;
 
 	// Debug Stuffs
-	void DebugDraw() const;
+	virtual void DebugDraw() const;
 
 protected:
 	ColourRGBA colour;        // The colour of this level piece

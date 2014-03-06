@@ -191,7 +191,7 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
     float unitHeight = this->GetLevelUnitHeight();
     this->levelHypotenuse = sqrt(unitWidth * unitWidth + unitHeight * unitHeight);
 
-    // Initialize triggerable and AI pieces...
+    // Initialize trigger-able and AI pieces...
     for (size_t row = 0; row < this->height; row++) {
         for (size_t col = 0; col < this->width; col++) {
             LevelPiece* currPiece = this->currentLevelPieces[row][col];
@@ -218,7 +218,7 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
     for (int i = paddleStartingIdx+1; i < static_cast<int>(this->width); i++) {
         
         LevelPiece* currPiece = this->currentLevelPieces[0][i];
-        if (!currPiece->IsNoBoundsPieceType() && currPiece->GetType() != LevelPiece::NoEntry) {
+        if (!currPiece->CanBeDestroyedByBall() && currPiece->GetType() != LevelPiece::NoEntry) {
             break;
         }
         else if (currPiece->GetType() == LevelPiece::NoEntry) {
@@ -240,7 +240,7 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
 
     for (int i = paddleStartingIdx-1; i >= 0; i--) {
         LevelPiece* currPiece = this->currentLevelPieces[0][i];
-        if (!currPiece->IsNoBoundsPieceType() && currPiece->GetType() != LevelPiece::NoEntry) {
+        if (!currPiece->CanBeDestroyedByBall() && currPiece->GetType() != LevelPiece::NoEntry) {
             break;
         }
         else if (currPiece->GetType() == LevelPiece::NoEntry) {
@@ -258,12 +258,72 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
             }
         }
     }
+
+    {
+        // Check for portals and set them up to have special paddle boundaries for 
+        // dealing with when the paddle teleports...
+        std::set<PortalBlock*> visitedPortals;
+        int currHeightIdx = 0;
+
+        // Find the first portal encountered to the right of the current starting index
+        for (int i = paddleStartingIdx+1; i < static_cast<int>(this->width); i++) {
+            LevelPiece* currPiece = this->currentLevelPieces[currHeightIdx][i];
+            if (currPiece->GetType() == LevelPiece::Portal) {
+
+                PortalBlock* currPortal = static_cast<PortalBlock*>(currPiece);
+                // Check to see if we've already visited this portal, if so then we just exit
+                if (visitedPortals.find(currPortal) != visitedPortals.end()) {
+                    break;
+                }
+                
+                currPortal->SetPaddleTeleportLine(false);
+                visitedPortals.insert(currPortal);
+
+                PortalBlock* currSiblingPortal = currPortal->GetSiblingPortal();
+                assert(currSiblingPortal != NULL);
+
+                currSiblingPortal->SetPaddleTeleportLine(true);
+                visitedPortals.insert(currSiblingPortal);
+
+                i = currSiblingPortal->GetWidthIndex()+1;
+                currHeightIdx = currSiblingPortal->GetHeightIndex();
+                continue;
+            }
+        }
+        
+        // Find the first portal encountered to the left of the paddle starting position
+        currHeightIdx = 0;
+        for (int i = paddleStartingIdx-1; i >= 0; i--) {
+            LevelPiece* currPiece = this->currentLevelPieces[currHeightIdx][i];
+            if (currPiece->GetType() == LevelPiece::Portal) {
+
+                PortalBlock* currPortal = static_cast<PortalBlock*>(currPiece);
+                // Check to see if we've already visited this portal, if so then we just exit
+                if (visitedPortals.find(currPortal) != visitedPortals.end()) {
+                    break;
+                }
+
+                currPortal->SetPaddleTeleportLine(true);
+                visitedPortals.insert(currPortal);
+
+                PortalBlock* currSiblingPortal = currPortal->GetSiblingPortal();
+                assert(currSiblingPortal != NULL);
+
+                currSiblingPortal->SetPaddleTeleportLine(false);
+                visitedPortals.insert(currSiblingPortal);
+
+                i = currSiblingPortal->GetWidthIndex()-1;
+                currHeightIdx = currSiblingPortal->GetHeightIndex();
+                continue;
+            }
+        }
+    }
 }
 
 void GameLevel::SetPaddleStartXPos(float xPos) {
     // Setup the paddle start x position...
-    float minBound = this->GetPaddleMinBound(xPos);
-    float maxBound = this->GetPaddleMaxBound(xPos);
+    float minBound = this->GetPaddleMinXBound(xPos, PlayerPaddle::PADDLE_HALF_HEIGHT);
+    float maxBound = this->GetPaddleMaxXBound(xPos, PlayerPaddle::PADDLE_HALF_HEIGHT);
     if (xPos < 0) {
         this->paddleStartXPos = (maxBound + minBound) / 2.0f;
     }
@@ -1755,8 +1815,8 @@ void GameLevel::ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& trigg
 bool GameLevel::CollideBossWithLevel(const Collision::AABB2D& bossAABB, Vector2D& correctionVec) const {
     
     // Get the simplified boundaries of the level
-    float minXBound = this->GetPaddleMinBound();
-    float maxXBound = this->GetPaddleMaxBound();
+    float minXBound = this->GetPaddleMinXBound(0);
+    float maxXBound = this->GetPaddleMaxXBound(0);
     float minYBound = LevelPiece::PIECE_HEIGHT;
     float maxYBound = this->GetLevelUnitHeight() - LevelPiece::PIECE_HEIGHT;
 
@@ -2131,7 +2191,7 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 
 void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
                                        const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes,
-                                       std::list<LevelPiece*>& result, float toleranceRadius) const {
+                                       std::list<LevelPiece*>& result, float cutoffRayT, float toleranceRadius) const {
     result.clear();
 
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
@@ -2148,7 +2208,13 @@ void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::s
     Point2D currSamplePoint;
     float rayT;
 	for (int i = 0; i < NUM_STEPS; i++) {
-		currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
+
+        rayT = i * STEP_SIZE;
+        if (rayT >= cutoffRayT) {
+            break;
+        }
+
+		currSamplePoint = ray.GetPointAlongRayFromOrigin(rayT);
 
         // Exit the loop if the ray is out of bounds of all level pieces
         if (currSamplePoint[0] > this->GetLevelUnitWidth() || currSamplePoint[0] < 0.0f ||
@@ -2359,21 +2425,24 @@ void GameLevel::InitAfterLevelLoad(GameModel* model) {
 	}
 }
 
-LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
+LevelPiece* GameLevel::GetMinXPaddleBoundPiece(float paddleYPos) const {
+    int paddleRowIdx = static_cast<int>(paddleYPos / LevelPiece::PIECE_HEIGHT);
+
     if (this->paddleStartXPos < 0) {
-        return this->GetMinPaddleBoundPiece(static_cast<int>(this->currentLevelPieces[0].size()) / 2);
+        return this->GetMinXPaddleBoundPiece(paddleRowIdx, static_cast<int>(this->currentLevelPieces[0].size()) / 2);
     }
     else {
-        return this->GetMinPaddleBoundPiece(static_cast<int>(this->paddleStartXPos/LevelPiece::PIECE_WIDTH));
+        return this->GetMinXPaddleBoundPiece(paddleRowIdx, static_cast<int>(this->paddleStartXPos/LevelPiece::PIECE_WIDTH));
     }
 }
 
-LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
+LevelPiece* GameLevel::GetMaxXPaddleBoundPiece(float paddleYPos) const {
+    int paddleRowIdx = static_cast<int>(paddleYPos / LevelPiece::PIECE_HEIGHT);
     if (this->paddleStartXPos < 0) {
-        return this->GetMaxPaddleBoundPiece(static_cast<int>(this->currentLevelPieces[0].size()) / 2);
+        return this->GetMaxXPaddleBoundPiece(paddleRowIdx, static_cast<int>(this->currentLevelPieces[0].size()) / 2);
     }
     else {
-        return this->GetMaxPaddleBoundPiece(static_cast<int>(this->paddleStartXPos/LevelPiece::PIECE_WIDTH));
+        return this->GetMaxXPaddleBoundPiece(paddleRowIdx, static_cast<int>(this->paddleStartXPos/LevelPiece::PIECE_WIDTH));
     }
 }
 
@@ -2395,52 +2464,34 @@ bool GameLevel::IsPaddleBoundPiece(const LevelPiece* piece) const {
         }
     }
 
-    /*
-    if (piece->HasStatus(LevelPiece::IceCubeStatus) ||
-        piece->GetType() == LevelPiece::Solid ||
-        piece->GetType() == LevelPiece::SolidTriangle ||
-        piece->GetType() == LevelPiece::Prism ||
-        piece->GetType() == LevelPiece::PrismTriangle ||
-        piece->GetType() == LevelPiece::Switch ||
-        piece->GetType() == LevelPiece::Cannon ||
-        piece->GetType() == LevelPiece::FragileCannon) {
-            return true;
-    }
-    else if (piece->GetType() == LevelPiece::OneWay) {
-        const OneWayBlock& oneWayBlock = static_cast<const OneWayBlock&>(piece);
-        if (oneWayBlock.GetDirType() != OneWayBlock::OneWayRight) {
-            return true;
-        }
-    }
-    */
     return false;
 }
 
-LevelPiece* GameLevel::GetMinPaddleBoundPiece(int startingColIdx) const {
+LevelPiece* GameLevel::GetMinXPaddleBoundPiece(int startingRowIdx, int startingColIdx) const {
     int col = startingColIdx;
     for (; col > 0; col--) {
-        const LevelPiece* currPiece = this->currentLevelPieces[0][col];
+        const LevelPiece* currPiece = this->currentLevelPieces[startingRowIdx][col];
         if (this->IsPaddleBoundPiece(currPiece)) {
             break;
         }
     }
-    return this->currentLevelPieces[0][col];
+    return this->currentLevelPieces[startingRowIdx][col];
 }
 
-LevelPiece* GameLevel::GetMaxPaddleBoundPiece(int startingColIdx) const {
+LevelPiece* GameLevel::GetMaxXPaddleBoundPiece(int startingRowIdx, int startingColIdx) const {
     int col = startingColIdx;
     for (; col < static_cast<int>(this->currentLevelPieces[0].size())-1; col++) {
-        const LevelPiece* currPiece = this->currentLevelPieces[0][col];
+        const LevelPiece* currPiece = this->currentLevelPieces[startingRowIdx][col];
         if (this->IsPaddleBoundPiece(currPiece)) {
             break;
         }
     }
 
-    return this->currentLevelPieces[0][col];
+    return this->currentLevelPieces[startingRowIdx][col];
 }
 
-float GameLevel::GetPaddleMinBound() const {
-	LevelPiece* temp = this->GetMinPaddleBoundPiece();
+float GameLevel::GetPaddleMinXBound(float paddleYPos) const {
+	LevelPiece* temp = this->GetMinXPaddleBoundPiece(paddleYPos);
     if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
         return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
     }
@@ -2449,8 +2500,8 @@ float GameLevel::GetPaddleMinBound() const {
     }
 }
 
-float GameLevel::GetPaddleMaxBound() const {
-    LevelPiece* temp = this->GetMaxPaddleBoundPiece();
+float GameLevel::GetPaddleMaxXBound(float paddleYPos) const {
+    LevelPiece* temp = this->GetMaxXPaddleBoundPiece(paddleYPos);
 
     if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
         return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
@@ -2460,12 +2511,15 @@ float GameLevel::GetPaddleMaxBound() const {
     }
 }
 
-float GameLevel::GetPaddleMinBound(float paddleStartingPos) const {
-    if (paddleStartingPos < 0) {
-        return this->GetPaddleMinBound();
+float GameLevel::GetPaddleMinXBound(float paddleStartingXPos, float paddleStartingYPos) const {
+    if (paddleStartingXPos < 0) {
+        return this->GetPaddleMinXBound(paddleStartingYPos);
     }
     else {
-        LevelPiece* temp = this->GetMinPaddleBoundPiece(static_cast<int>(paddleStartingPos / LevelPiece::PIECE_WIDTH));
+        LevelPiece* temp = this->GetMinXPaddleBoundPiece(
+            static_cast<int>(paddleStartingYPos / LevelPiece::PIECE_HEIGHT),
+            static_cast<int>(paddleStartingXPos / LevelPiece::PIECE_WIDTH));
+
         if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
             return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
         }
@@ -2475,12 +2529,15 @@ float GameLevel::GetPaddleMinBound(float paddleStartingPos) const {
     }
 }
 
-float GameLevel::GetPaddleMaxBound(float paddleStartingPos) const {
-    if (paddleStartingPos < 0) {
-        return this->GetPaddleMaxBound();
+float GameLevel::GetPaddleMaxXBound(float paddleStartingXPos, float paddleStartingYPos) const {
+    if (paddleStartingXPos < 0) {
+        return this->GetPaddleMaxXBound(paddleStartingYPos);
     }
     else {
-        LevelPiece* temp = this->GetMaxPaddleBoundPiece(static_cast<int>(paddleStartingPos / LevelPiece::PIECE_WIDTH));
+        LevelPiece* temp = this->GetMaxXPaddleBoundPiece(
+            static_cast<int>(paddleStartingYPos / LevelPiece::PIECE_HEIGHT),
+            static_cast<int>(paddleStartingXPos / LevelPiece::PIECE_WIDTH));
+
         if (temp->IsNoBoundsPieceType() && temp->GetType() != LevelPiece::Cannon && temp->GetType() != LevelPiece::FragileCannon) {
             return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
         }

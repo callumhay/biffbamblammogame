@@ -54,6 +54,7 @@ public:
 
 	// Paddle related events
 	void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc);
+    void PaddlePortalBlockTeleportEvent(const PlayerPaddle& paddle, const PortalBlock& enterPortal);
 	void PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile);
 	void PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ProjectileDeflectedByPaddleShieldEvent(const Projectile& projectile, const PlayerPaddle& paddle);

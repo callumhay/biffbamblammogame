@@ -94,6 +94,7 @@ public:
     static const char* STAR_POINT_MILESTONE_KEYWORD;
 
     static const char* PADDLE_STARTING_X_POS;
+    static const int MIN_Y_BOUND_BUFFER_SPACE_FOR_PADDLE = 8;
     static const int DEFAULT_PADDLE_START_IDX = -1;
 
     static const int OUT_OF_BOUNDS_X_BUFFER_SPACE_FOR_BALL = 16;
@@ -140,9 +141,10 @@ public:
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
         const std::set<const LevelPiece*>& ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
     void GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
-        const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::list<LevelPiece*>& result, float toleranceRadius = 0.0f) const;
+        const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::list<LevelPiece*>& result, 
+        float cutoffRayT, float toleranceRadius = 0.0f) const;
     
-	// Ability to add/remove tesla lightning barriers
+	// Ability to add/remove Tesla lightning barriers
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
 	bool TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, 
@@ -163,22 +165,22 @@ public:
 		return this->currentLevelPieces[hIndex][wIndex];
 	}
 
-	float GetPaddleMinBound() const;
-	float GetPaddleMaxBound() const;
+	float GetPaddleMinXBound(float paddleYPos) const;
+	float GetPaddleMaxXBound(float paddleYPos) const;
 
-    float GetPaddleMinBound(float paddleStartingPos) const;
-    float GetPaddleMaxBound(float paddleStartingPos) const;
+    float GetPaddleMinXBound(float paddleStartingXPos, float paddleStartingYPos) const;
+    float GetPaddleMaxXBound(float paddleStartingXPos, float paddleStartingYPos) const;
 
     float GetPaddleStartingXPosition() const {
         return this->paddleStartXPos;
     }
 
-    LevelPiece* GetMinPaddleBoundPiece() const;
-    LevelPiece* GetMaxPaddleBoundPiece() const;
+    LevelPiece* GetMinXPaddleBoundPiece(float paddleYPos) const;
+    LevelPiece* GetMaxXPaddleBoundPiece(float paddleYPos) const;
 
     bool IsPaddleBoundPiece(const LevelPiece* piece) const;
-    LevelPiece* GetMinPaddleBoundPiece(int startingColIdx) const;
-    LevelPiece* GetMaxPaddleBoundPiece(int startingColIdx) const;
+    LevelPiece* GetMinXPaddleBoundPiece(int startingRowIdx, int startingColIdx) const;
+    LevelPiece* GetMaxXPaddleBoundPiece(int startingRowIdx, int startingColIdx) const;
 
 	float GetLevelUnitWidth() const {
 		return this->width * LevelPiece::PIECE_WIDTH;
