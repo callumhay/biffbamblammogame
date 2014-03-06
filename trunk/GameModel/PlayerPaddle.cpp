@@ -41,6 +41,7 @@
 #include "PaddleIceBlasterProjectile.h"
 #include "PaddleLaserBeam.h"
 #include "BossBodyPart.h"
+#include "OneWayBlock.h"
 
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
@@ -94,14 +95,14 @@ const float PlayerPaddle::DEFAULT_PADDLE_SCALE = 1.0f;
 float PlayerPaddle::NormalSizeScale = PlayerPaddle::DEFAULT_PADDLE_SCALE;
 
 PlayerPaddle::PlayerPaddle() : 
-centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 
+centerPos(0.0f, 0.0f), minXBound(0.0f), maxXBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 
 maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 timeSinceLastBlastShot(PADDLE_FLAME_BLAST_DELAY + PADDLE_ICE_BLAST_DELAY), timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), currSpecialStatus(PlayerPaddle::NoStatus),
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
 impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), lastThingCollidedWith(NULL),
-levelBoundsCheckingOn(true), startingXPos(0.0), frozenCountdown(0.0), onFireCountdown(0.0) {
+levelBoundsCheckingOn(true), startingXPos(0.0), defaultYPos(0.0), frozenCountdown(0.0), onFireCountdown(0.0) {
 	this->ResetPaddle();
 }
 
@@ -117,7 +118,8 @@ void PlayerPaddle::ResetPaddle() {
     this->frozenCountdown = 0.0;
     this->onFireCountdown = 0.0;
 	this->currSize = PlayerPaddle::NormalSize;
-	this->centerPos = this->GetDefaultCenterPosition();
+    this->SetDefaultYPosition(PlayerPaddle::PADDLE_HALF_HEIGHT);
+	this->centerPos   = this->GetDefaultCenterPosition();
 	this->currType = PlayerPaddle::NormalPaddle;
     this->ClearSpecialStatus();
 	this->colour = ColourRGBA(1, 1, 1, 1);
@@ -137,8 +139,14 @@ void PlayerPaddle::ResetPaddle() {
     this->attachedProjectiles.clear();
 
 	this->SetupAnimations();
+
 	// This will set the dimensions the the default and regenerate the bounds of the paddle
 	this->SetDimensions(PlayerPaddle::NormalSize);
+}
+
+void PlayerPaddle::SetDefaultYPosition(float yPos) {
+    this->defaultYPos = yPos;
+    this->minYBound   = yPos - GameLevel::MIN_Y_BOUND_BUFFER_SPACE_FOR_PADDLE;
 }
 
 /**
@@ -170,21 +178,21 @@ void PlayerPaddle::RegenerateBounds() {
     static const int MAX_NUM_LINES = 4;
     Collision::LineSeg2D boundingLines[MAX_NUM_LINES];
     Vector2D boundingNorms[MAX_NUM_LINES];
+    float bottomY = -this->currHalfHeight + EPSILON;
 
 	if (this->isPaddleCamActive) {
 		// When the paddle camera is active we compress the collision boundaries down to the bottom of the paddle
 		// this help make for a better game experience since the collision seems more natural when it's on the camera's view plane
-
-        float bottomY = -2*this->currHalfHeight;
-
+        float topY = -0.5f*this->currHalfHeight;
+        
 		// 'Top' (flat) boundary
-		boundingLines[0] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthFlat, -this->currHalfHeight));
+		boundingLines[0] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, topY), Point2D(-this->currHalfWidthFlat, topY));
 		boundingNorms[0] = Vector2D(0, 1);
 
 		// 'Side' (oblique) boundaries
-		boundingLines[1] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, bottomY));
+		boundingLines[1] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, topY), Point2D(this->currHalfWidthTotal, bottomY));
 		boundingNorms[1] = Vector2D(1, 1) / SQRT_2;
-		boundingLines[2] = Collision::LineSeg2D(Point2D(-this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, bottomY));
+		boundingLines[2] = Collision::LineSeg2D(Point2D(-this->currHalfWidthFlat, topY), Point2D(-this->currHalfWidthTotal, bottomY));
 		boundingNorms[2] = Vector2D(-1, 1) / SQRT_2;
 
         // Bottom boundary is even further down now...
@@ -192,18 +200,20 @@ void PlayerPaddle::RegenerateBounds() {
         boundingNorms[3] = Vector2D(0, -1);
 	}
 	else {
+        float topY = this->currHalfHeight;
+
 		// Top boundary
-		boundingLines[0] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
+		boundingLines[0] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, topY), Point2D(-this->currHalfWidthFlat, topY));
 		boundingNorms[0] = Vector2D(0, 1);
 
 		// Side boundaries
-		boundingLines[1] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
+		boundingLines[1] = Collision::LineSeg2D(Point2D(this->currHalfWidthFlat, topY), Point2D(this->currHalfWidthTotal, bottomY));
 		boundingNorms[1] = Vector2D(1, 1) / SQRT_2;
-		boundingLines[2] = Collision::LineSeg2D(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		boundingLines[2] = Collision::LineSeg2D(Point2D(-this->currHalfWidthFlat, topY), Point2D(-this->currHalfWidthTotal, bottomY));
 		boundingNorms[2] = Vector2D(-1, 1) / SQRT_2;
 
 		// Bottom boundary
-		boundingLines[3] = Collision::LineSeg2D(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		boundingLines[3] = Collision::LineSeg2D(Point2D(this->currHalfWidthTotal, bottomY), Point2D(-this->currHalfWidthTotal, bottomY));
 		boundingNorms[3] = Vector2D(0, -1);
 	}
 
@@ -227,7 +237,7 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	this->currHalfWidthTotal = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_WIDTH;
 	this->currHalfWidthFlat	 = this->currScaleFactor * PlayerPaddle::PADDLE_WIDTH_FLAT_TOP * 0.5f;
 	this->currHalfDepthTotal = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_DEPTH;
-	
+
 	// The momentum of the paddle will change as well - we do a physics hack here where the acceleration/decceleration
 	// are effected directly by the inverse scale factor of the paddle
 	if (this->currScaleFactor != PlayerPaddle::NormalSizeScale) {
@@ -282,8 +292,8 @@ void PlayerPaddle::FireAttachedBall() {
     // Check to see if the paddle has crashed into a wall or is touching it, in this case we reduce
     // the paddle velocity to zero
     float absPaddleSpd = fabs(avgPaddleVelDir[0]);
-    if (this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal()) ||
-        this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal()) ||
+    if (this->centerPos[0] >= (this->maxXBound - this->GetHalfWidthTotal()) ||
+        this->centerPos[0] <= (this->minXBound + this->GetHalfWidthTotal()) ||
         !this->GetIsMoveButtonDown()) {
 
         avgPaddleVelDir[0] = 0.0f;
@@ -454,7 +464,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	float halfWidthTotalWithAttachedMin = this->currHalfWidthTotal;
 	float halfWidthTotalWithAttachedMax = this->currHalfWidthTotal;
 
-	// If a ball or projectile is attached, it could affect the min and max x boundries of the paddle so 
+	// If a ball or projectile is attached, it could affect the min and max x boundaries of the paddle so 
 	// adjust the boundaries based on the position of the object(s) on the paddle
     if (this->HasBallAttached()) {
         
@@ -506,16 +516,31 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
         }
     }
     if (this->levelBoundsCheckingOn) {
-	    if (minNewXPos <= this->minBound) {
+        Collision::AABB2D paddleAABB = this->bounds.GenerateAABBFromLines();
+        if (paddleAABB.GetMin()[1] < this->minYBound) {
+
+            this->centerPos[1] = this->centerPos[1] + this->minYBound - paddleAABB.GetMin()[1];
+            float maxMoveDownAmt = fabs(this->defaultYPos - this->centerPos[1]);
+
+            // We have to make sure that any movement animation also accommodates the lower Y boundary...
+            std::vector<float>& interpolationValues = this->moveDownAnimation.GetEditableInterpolationValues();
+            for (std::vector<float>::iterator iter = interpolationValues.begin(); iter != interpolationValues.end(); ++iter) {
+                if (*iter > maxMoveDownAmt) {
+                    *iter = maxMoveDownAmt;
+                }
+            }
+        }
+
+	    if (minNewXPos <= this->minXBound) {
 		    // The paddle bumped into the left wall
-		    this->centerPos[0] = this->minBound + halfWidthTotalWithAttachedMin;
+		    this->centerPos[0] = this->minXBound + halfWidthTotalWithAttachedMin;
     		
 		    // Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
 		    if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
                 
                 if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
                     
-                    LevelPiece* piece = gameModel.GetCurrentLevel()->GetMinPaddleBoundPiece();
+                    LevelPiece* piece = gameModel.GetCurrentLevel()->GetMinXPaddleBoundPiece(this->defaultYPos);
                     LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
 
                     if (resultingPiece != piece) {
@@ -529,18 +554,18 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 
 		    this->hitWall = true;
 	    }
-	    else if (maxNewXPos >= this->maxBound) {
+	    else if (maxNewXPos >= this->maxXBound) {
 		    // The paddle bumped into the right wall
-		    this->centerPos[0] = this->maxBound - halfWidthTotalWithAttachedMax;
+		    this->centerPos[0] = this->maxXBound - halfWidthTotalWithAttachedMax;
     		
 		    // Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
 		    if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
 
                 if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
-                    LevelPiece* piece = gameModel.GetCurrentLevel()->GetMaxPaddleBoundPiece();
+                    LevelPiece* piece = gameModel.GetCurrentLevel()->GetMaxXPaddleBoundPiece(this->defaultYPos);
                     
                     // Make sure the piece is actually being collided with
-                    if (fabs(this->maxBound - gameModel.GetCurrentLevel()->GetPaddleMaxBound()) < EPSILON) {
+                    if (fabs(this->maxXBound - gameModel.GetCurrentLevel()->GetPaddleMaxXBound(this->defaultYPos)) < EPSILON) {
                         LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
 
                         if (resultingPiece != piece) {
@@ -767,12 +792,16 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 	// If there's a ball attached to the paddle then we release it and exit
 	if (this->HasBallAttached()) {
 		this->FireAttachedBall();
-        this->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
+        this->UpdatePaddleBounds(
+            currentLevel->GetPaddleMinXBound(this->centerPos[0], this->defaultYPos), 
+            currentLevel->GetPaddleMaxXBound(this->centerPos[0], this->defaultYPos));
 		return;
 	}
     else if (this->HasProjectileAttached()) {
         this->FireAttachedProjectile();
-        this->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
+        this->UpdatePaddleBounds(
+            currentLevel->GetPaddleMinXBound(this->centerPos[0], this->defaultYPos), 
+            currentLevel->GetPaddleMaxXBound(this->centerPos[0], this->defaultYPos));
         return;
     }
 
@@ -942,7 +971,9 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 
 
     if (updateBoundsAfterShooting) {
-        this->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
+        this->UpdatePaddleBounds(
+            currentLevel->GetPaddleMinXBound(this->centerPos[0], this->defaultYPos), 
+            currentLevel->GetPaddleMaxXBound(this->centerPos[0], this->defaultYPos));
     }
 }
 
@@ -1278,47 +1309,68 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
             p.GetBounds().GetCollisionPoints(this->CreatePaddleShieldBounds(), collisionPts)) {
 
             // Separate points into those to the left and right of the paddle center, closest to the paddle center...
-	        bool collisionOnLeft  = false;
-	        bool collisionOnRight = false;
+	        bool collisionOnMinX  = false;
+	        bool collisionOnMaxX = false;
+            bool collisionUnder   = false;
+
+            bool isOneWayDown = (p.GetType() == LevelPiece::OneWay) && (static_cast<const OneWayBlock&>(p).GetDirType() == OneWayBlock::OneWayDown);
+            float paddleYCollisionCoord = this->defaultYPos - (this->currHalfHeight - EPSILON);
 
 	        for (std::list<Point2D>::iterator iter = collisionPts.begin(); iter != collisionPts.end(); ++iter) {
 		        const Point2D& currPt = *iter;
 		        // Check to see where the point is relative to the center of the paddle...
 		        if (currPt[0] < this->GetCenterPosition()[0]) {
 			        // Point is on the left of the paddle...
-			        collisionOnLeft = true;
+			        collisionOnMinX = true;
 		        }
 		        else {
-			        // Point is on the right of the paddle (or centerish)...
-			        collisionOnRight = true;
+			        // Point is on the right of the paddle (or center-ish)...
+			        collisionOnMaxX = true;
 		        }
+
+
+                if (currPt[1] < paddleYCollisionCoord) {
+                    collisionUnder = true;
+                    if (!isOneWayDown) {
+                        this->minYBound = std::max<float>(this->minYBound, currPt[1]);
+                    }
+                }
 	        }
 
-            if (collisionOnRight && collisionOnLeft) {
+            if (collisionUnder || (collisionOnMaxX && collisionOnMinX)) {
                 return;
             }
 
-	        if (collisionOnLeft) {
-		        this->minBound = std::max<float>(this->minBound, this->GetCenterPosition()[0] - this->GetHalfWidthTotal());
-	        }
+	        if (collisionOnMinX) {
+		        this->minXBound = std::max<float>(this->minXBound, this->GetCenterPosition()[0] - this->GetHalfWidthTotal());
+	        } 
 	        else {
-		        this->maxBound = std::min<float>(this->maxBound, this->GetCenterPosition()[0] + this->GetHalfWidthTotal());
+		        this->maxXBound = std::min<float>(this->maxXBound, this->GetCenterPosition()[0] + this->GetHalfWidthTotal());
 	        }	
 
             return;
 	    }
         else {
             Collision::AABB2D pieceAABB = p.GetAABB();
+
             if (this->bounds.CollisionCheck(pieceAABB)) {
 	            
+                bool isOneWayDown = (p.GetType() == LevelPiece::OneWay) && 
+                    (static_cast<const OneWayBlock&>(p).GetDirType() == OneWayBlock::OneWayDown);
+                if (!isOneWayDown && p.GetCenter()[1] < this->defaultYPos-this->currHalfHeight+EPSILON) {
+                    // Update the y bounds of the paddle...
+                    this->minYBound = pieceAABB.GetMax()[1];
+                    return;
+                }
+
                 // We need to find the location of the collision so we can make the paddle stop (by updating its bounds)...
                 if (this->GetCenterPosition()[0] < p.GetCenter()[0]) {
-                    this->maxBound = pieceAABB.GetMin()[0];
+                    this->maxXBound = pieceAABB.GetMin()[0];
                 }
                 else {
-                    this->minBound = pieceAABB.GetMax()[0];
+                    this->minXBound = pieceAABB.GetMax()[0];
                 }
-                
+
                 return;
             }
 	        // If there's a rocket attached we need to check its bounds too...
@@ -1332,10 +1384,10 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
                 if (Collision::IsCollision(pieceAABB, rocketAABB)) {
 
                     if (rocketAABB.GetCenter()[0] < p.GetCenter()[0]) {
-                        this->maxBound = pieceAABB.GetMin()[0] + (this->GetCenterPosition()[0] + this->GetHalfWidthTotal()) - rocketAABB.GetMax()[0];
+                        this->maxXBound = pieceAABB.GetMin()[0] + (this->GetCenterPosition()[0] + this->GetHalfWidthTotal()) - rocketAABB.GetMax()[0];
                     }
                     else {
-                        this->minBound = pieceAABB.GetMax()[0] + (this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) - rocketAABB.GetMin()[0];
+                        this->minXBound = pieceAABB.GetMax()[0] + (this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) - rocketAABB.GetMin()[0];
                     }
 
                     return;
@@ -1348,6 +1400,12 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
 	if (!doAttachedBallCollision || !this->HasBallAttached()) {
         return;
     }
+
+    // Don't let the piece interfere if it's below the paddle
+    if (p.GetCenter()[1] < this->defaultYPos-this->currHalfHeight+EPSILON) {
+        return;
+    }
+
     const GameBall* attachedBall = this->GetAttachedBall();
     assert(attachedBall != NULL);
     if (!p.GetBounds().CollisionCheck(attachedBall->GetBounds())) {
@@ -1358,13 +1416,13 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
         float xDistFromBallEdgeToPaddleEdge = (this->GetCenterPosition()[0] + this->GetHalfWidthTotal()) - 
             (this->GetAttachedBall()->GetCenterPosition2D()[0] + this->GetAttachedBall()->GetBounds().Radius());
         
-		this->maxBound = p.GetAABB().GetMin()[0] + xDistFromBallEdgeToPaddleEdge;
+		this->maxXBound = p.GetAABB().GetMin()[0] + xDistFromBallEdgeToPaddleEdge;
     }
     else {
         float xDistFromBallEdgeToPaddleEdge = std::min(0.0f, (this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) - 
             (this->GetAttachedBall()->GetCenterPosition2D()[0] - this->GetAttachedBall()->GetBounds().Radius()));
         
-        this->minBound = p.GetAABB().GetMax()[0] + xDistFromBallEdgeToPaddleEdge;
+        this->minXBound = p.GetAABB().GetMax()[0] + xDistFromBallEdgeToPaddleEdge;
     }
 }
 
@@ -1384,6 +1442,10 @@ void PlayerPaddle::AnimateFade(bool fadeOut, double duration) {
 	this->colourAnimation.SetLerp(duration, finalColour);
 }
 
+bool PlayerPaddle::GetIsStableForGoingThroughPortals() const {
+    return fabs(this->centerPos[1] - this->defaultYPos) < 0.01f;
+}
+
 #ifdef _DEBUG
 void PlayerPaddle::DebugDraw() const {
 	this->bounds.DebugDraw();
@@ -1396,8 +1458,8 @@ float PlayerPaddle::GetMineProjectileStartingHeightRelativeToPaddle() const {
 
 bool PlayerPaddle::GetIsCloseToAWall() const {
     static const float CLOSE_DIST = GameBall::DEFAULT_BALL_RADIUS * 0.1;
-    return (this->GetCenterPosition()[0] - this->minBound) <= CLOSE_DIST ||
-           (this->maxBound - this->GetCenterPosition()[0]) <= CLOSE_DIST;
+    return (this->GetCenterPosition()[0] - this->minXBound) <= CLOSE_DIST ||
+           (this->maxXBound - this->GetCenterPosition()[0]) <= CLOSE_DIST;
 }
 
 /**
@@ -1491,9 +1553,6 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
 		rotationAmount *= -1.0f;
 	}
-	//else {
-		// The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
-	//}
 
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
 	const double HIT_EFFECT_TIME = 5.0 * projectile.GetForcePercentageFactor();
@@ -1696,6 +1755,9 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
     float totalMaxMoveDown;
     this->GetPaddleHitByProjectileEffect(projectileCenter, maxRotationInDegs, minMoveDown, closeToCenterCoeff, totalMaxMoveDown, rotationAmount);
 
+    // When the paddle moves down make sure it doesn't collide with blocks along the way...
+
+
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
 	std::vector<double> times;
 	times.reserve(3);
@@ -1841,10 +1903,7 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 		didCollide = bounds.CollisionCheck(this->CreatePaddleShieldBounds());
 	}
 	else {
-        // First check to see if the AABBs are overlapping
-        //if (Collision::IsCollision(bounds.GenerateAABBFromLines(), this->GetPaddleAABB(false)) {
-		    didCollide = this->bounds.CollisionCheck(bounds);
-        //}
+		didCollide = this->bounds.CollisionCheck(bounds);
 	}
 
 	if (includeAttachedBallCheck && !didCollide && this->HasBallAttached()) {
@@ -1874,47 +1933,39 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                   Collision::LineSeg2D& collisionLine, 
                                   double& timeUntilCollision, Point2D& pointOfCollision) {
 
-     if (ball.IsLastThingCollidedWith(this)) {
-         return false;
-     }
+    if (ball.IsLastThingCollidedWith(this)) {
+        return false;
+    }
 
-     // If the paddle has a shield around it do the collision with the shield
-     if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
-         Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
-         Point2D shieldPtOfCollision;
-         return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n,
-             collisionLine, timeUntilCollision, pointOfCollision, shieldPtOfCollision, this->GetVelocity());
-     }
-     else {
+    // If the paddle has a shield around it do the collision with the shield
+    if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
+      Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
+      Point2D shieldPtOfCollision;
+      return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n,
+          collisionLine, timeUntilCollision, pointOfCollision, shieldPtOfCollision, this->GetVelocity());
+    }
+    else {
+        assert(this->bounds.GetNumLines() == 4);
 
-         if (this->bounds.GetNumLines() == 3) {
-             return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
-                 collisionLine, timeUntilCollision, pointOfCollision, this->GetVelocity());
-         }
-         else {
+        if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight() - 0.9f*ball.GetBounds().Radius())) &&
+          Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
 
-             // Don't allow the bottom paddle collision boundary line to factor into the collision if the ball is traveling downward
-             // at the paddle or the ball is above the paddle
-             assert(this->bounds.GetNumLines() == 4);
+              // Ball is traveling upwards at the paddle from below it...
+              return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, 
+                  timeUntilCollision, pointOfCollision, this->GetVelocity());
+        }
+        else {
 
-             if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight() - 0.9f*ball.GetBounds().Radius())) &&
-                 Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
-                     // Ball is traveling upwards at the paddle from below it...
-                     return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, 
-                         timeUntilCollision, pointOfCollision, this->GetVelocity());
-             }
-             else {
-                 // Ball is traveling downwards/parallel at the paddle
-                 const Collision::LineSeg2D& bottomLine = this->GetBottomCollisionLine();
-                 const Vector2D& bottomNormal = this->GetBottomCollisionNormal();
-                 this->bounds.PopLast();
-                 bool wasCollision = this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
-                     collisionLine, timeUntilCollision, pointOfCollision, this->GetVelocity());
-                 this->bounds.Push(bottomLine, bottomNormal);
-                 return wasCollision;
-             }
-         }
-     }
+          // Ball is traveling downwards/parallel at the paddle
+          BoundingLines boundsNoBottom;
+          this->GetBoundsWithoutBottomCollisionLine(boundsNoBottom);
+
+          bool wasCollision = boundsNoBottom.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
+              collisionLine, timeUntilCollision, pointOfCollision, this->GetVelocity());
+
+          return wasCollision;
+        }
+    }
 }
 
 bool PlayerPaddle::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
@@ -2022,7 +2073,7 @@ bool PlayerPaddle::HasBeenPausedAndRemovedFromGame(int pauseBitField) const {
 }
 
 void PlayerPaddle::UpdateLevel(const GameLevel& level) {
-    this->UpdatePaddleBounds(level.GetPaddleMinBound(), level.GetPaddleMaxBound());
+    this->UpdatePaddleBounds(level.GetPaddleMinXBound(0), level.GetPaddleMaxXBound(0));
     this->startingXPos = level.GetPaddleStartingXPosition();
 
     // Reset the paddle to the center of the new bounds
@@ -2089,4 +2140,21 @@ void PlayerPaddle::RecoverFromFrozenPaddle() {
             this->moveDownAnimation.SetLerp(0.0, PADDLE_RECOVER_TIME_IN_SECS, 
                 this->moveDownAnimation.GetInterpolantValue(), 0.0f);
     } 
+}
+
+void PlayerPaddle::GetBoundsWithoutBottomCollisionLine(BoundingLines& boundsNoBottom) const {
+    boundsNoBottom.Clear();
+
+    boundsNoBottom.AddBound(this->bounds.GetLine(0), this->bounds.GetNormal(0), this->bounds.GetOnInside(0));
+    boundsNoBottom.AddBound(this->bounds.GetLine(1), this->bounds.GetNormal(1), this->bounds.GetOnInside(1));
+    boundsNoBottom.AddBound(this->bounds.GetLine(2), this->bounds.GetNormal(2), this->bounds.GetOnInside(2));
+
+    /*
+    if (this->bounds.GetNumLines() > 4) {
+        assert(this->bounds.GetNumLines() == 8);
+        boundsNoBottom.AddBound(this->bounds.GetLine(4), this->bounds.GetNormal(4), this->bounds.GetOnInside(4));
+        boundsNoBottom.AddBound(this->bounds.GetLine(5), this->bounds.GetNormal(5), this->bounds.GetOnInside(5));
+        boundsNoBottom.AddBound(this->bounds.GetLine(6), this->bounds.GetNormal(6), this->bounds.GetOnInside(6));
+    }
+    */
 }

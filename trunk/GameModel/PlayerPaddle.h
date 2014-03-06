@@ -112,12 +112,12 @@ public:
 		assert(min < max);
 		assert((max - min) > PADDLE_WIDTH_TOTAL);
         if (overrideNoMatterWhat) {
-		    this->minBound = min;
-		    this->maxBound = max;
+		    this->minXBound = min;
+		    this->maxXBound = max;
         }
         else {
-            this->minBound = std::max<float>(this->minBound, min);
-            this->maxBound = std::min<float>(this->maxBound, max);
+            this->minXBound = std::max<float>(this->minXBound, min);
+            this->maxXBound = std::min<float>(this->maxXBound, max);
         }
 	}
 
@@ -131,8 +131,11 @@ public:
     Point3D GetPosition3D() const {
         return Point3D(this->GetCenterPosition(), 0.0f);
     }
+    void SetDefaultYPosition(float yPos);
+    float GetDefaultYPosition() const { return this->defaultYPos; }
+
 	Point2D GetDefaultCenterPosition() const {
-		return Point2D(this->startingXPos, this->currHalfHeight);
+		return Point2D(this->startingXPos, this->defaultYPos);
 	}
 	void SetCenterPosition(const Point2D& center) {
         if (this->attachedBall != NULL) {
@@ -293,7 +296,6 @@ public:
 
 	void UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision);
 
-    const Collision::LineSeg2D& GetBottomCollisionLine() const { return this->bounds.GetLine(3); }
     const Vector2D& GetBottomCollisionNormal() const {return this->bounds.GetNormal(3); }
 
 	// TODO: Add the parameter: "bool includeAttachedBallCheck" to all paddle collision checks...
@@ -353,6 +355,10 @@ public:
         return this->lastThingCollidedWith == p; 
     }
 
+    bool GetIsStableForGoingThroughPortals() const;
+
+    void RegenerateBounds();
+
 #ifdef _DEBUG
     void DebugDraw() const;
 #endif
@@ -382,10 +388,12 @@ private:
 	float currHalfWidthFlat;    // Half of the flat portion of the paddle
 	float currHalfWidthTotal;   // Half of the total width of the paddle
 	float currHalfDepthTotal;   // Half of the total depth of the paddle
-	float minBound, maxBound;   // The current level's boundaries along its width for the paddle
 	float currScaleFactor;      // The scale difference between the paddle's current size and its default size
-	
-    float startingXPos; // Starting position of the paddle when the level begins or the ball dies and is revived
+
+    float minXBound, maxXBound, minYBound; // The current level's boundaries along its width for the paddle
+
+    float defaultYPos;   // The current default y position of the paddle
+    float startingXPos;  // Starting position of the paddle when the level begins or the ball dies and is revived
 
 	// Movement 
 	float acceleration;	  // The paddle's acceleration in units / second^2 (always positive)
@@ -429,8 +437,6 @@ private:
 
 	void SetupAnimations();
 
-	void RegenerateBounds();
-
 	void SetDimensions(float newScaleFactor);
 	void SetDimensions(PlayerPaddle::PaddleSize size);
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
@@ -466,6 +472,9 @@ private:
     void CancelFireStatusWithIce();
     void CancelFrozenStatusWithFire();
     void RecoverFromFrozenPaddle();
+
+    const Collision::LineSeg2D& GetBottomCollisionLine() const { return this->bounds.GetLine(3); }
+    void GetBoundsWithoutBottomCollisionLine(BoundingLines& boundsNoBottom) const;
 
     DISALLOW_COPY_AND_ASSIGN(PlayerPaddle);
 };

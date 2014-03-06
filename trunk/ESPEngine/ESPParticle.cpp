@@ -168,10 +168,11 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
             alignUpVec     = Vector3D(0, 1, 0);
             alignRightVec  = Vector3D::cross(alignUpVec, alignNormalVec);
             if (alignRightVec.IsZero()) {
-                alignUpVec    = Vector3D(0, 0, 1);
+                alignUpVec    = Vector3D(0, 0, -1);
                 alignRightVec = Vector3D::cross(alignUpVec, alignNormalVec);
                 assert(!alignRightVec.IsZero());
             }
+
             alignRightVec.Normalize();
 
             break;

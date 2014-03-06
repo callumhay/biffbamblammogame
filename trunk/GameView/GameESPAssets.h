@@ -307,7 +307,7 @@ private:
     void AddSingleObjectPortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, const PortalBlock& block, bool isSibling);
 	
 	void AddCollateralProjectileEffects(const Projectile& projectile);
-	void AddRocketProjectileEffects(const RocketProjectile& projectile);
+	void AddRocketProjectileEffects(const GameModel& gameModel, const RocketProjectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
     void AddFlameBlastProjectileEffects(const GameModel& gameModel, const PaddleFlameBlasterProjectile& projectile);
     void AddIceBlastProjectileEffects(const GameModel& gameModel, const PaddleIceBlasterProjectile& projectile);

@@ -134,16 +134,28 @@ public:
 	void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 
     void DrawWireframe() const;
+    void DebugDraw() const;
+
+    void SetPaddleTeleportLine(bool fromRight);
 
 	static void ResetPortalColourGenerator();
 	static Colour GeneratePortalColour();
 
-protected:
+private:
     static const unsigned long TIME_BETWEEN_BALL_USES_IN_MILLISECONDS;
-	PortalBlock* sibling;
+
+    static const float FRACTION_HALF_PIECE_WIDTH;
+    static const float FRACTION_HALF_PIECE_HEIGHT;
+    
+    PortalBlock* sibling;
 
 	static bool portalGeneratorReset;
     unsigned long timeOfLastBallCollision;
+
+    enum PaddleTeleportLineType { ComingFromLeftPaddleLine, ComingFromRightPaddleLine, NoPaddleLine };
+    PaddleTeleportLineType paddleTeleportLine;
+
+    Collision::LineSeg2D GetPaddleTeleportLine() const;
 
     DISALLOW_COPY_AND_ASSIGN(PortalBlock);
 };
@@ -163,6 +175,20 @@ inline void PortalBlock::DrawWireframe() const {
     glScalef(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT, 1.0f);
     GeometryMaker::GetInstance()->DrawLineCircle();
     glPopMatrix();
+}
+
+inline void PortalBlock::SetPaddleTeleportLine(bool fromRight) {
+    if (fromRight) {
+        this->paddleTeleportLine = ComingFromRightPaddleLine;
+    }
+    else {
+        this->paddleTeleportLine = ComingFromLeftPaddleLine;
+    }
+}
+
+inline Collision::LineSeg2D PortalBlock::GetPaddleTeleportLine() const {
+    Vector2D halfHeightVec(0, LevelPiece::HALF_PIECE_HEIGHT);
+    return Collision::LineSeg2D(this->center + halfHeightVec, this->center - halfHeightVec);
 }
 
 #endif // __PORTALBLOCK_H__

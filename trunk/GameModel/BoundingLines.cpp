@@ -718,7 +718,7 @@ int BoundingLines::CollisionCheckIndex(const BoundingLines& other) const {
             
             // First do a test of the bounding boxes for the two lines
             if (Collision::IsCollision(currLineAABB, otherLineAABB)) {
-                const Vector2D& currOtherNormal = other.normals[j];
+                Vector2D currOtherNormal = currOtherLine.GetNormalToLine();
 
                 // Now do a more thorough test
                 float t = Vector2D::Dot(currOtherNormal, (currOtherLine.P1() - currThisLine.P1())) /

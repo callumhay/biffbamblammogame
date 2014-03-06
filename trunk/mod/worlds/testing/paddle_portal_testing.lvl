@@ -1,0 +1,70 @@
+Paddle Portal Testing
+21 24
+E S S S S S S S S S E S S S S S S S S S E 
+E S E E E E E E E S E S E E E R E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E S E E E E E E E S E S E E E E E E E S E 
+E X(a,b) E E E E E E E X(c,d) E X(d,c) E E E E E E E X(b,a) E 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 0
+PoisonPaddle 0
+Blackout 0
+BallSafetyNet 0
+UberBall 0
+BallGrow 0
+ShieldPaddle 0
+StickyPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FlameBlasterPaddle 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+RemoteControlRocket 0
+IceBall 0
+IceBlasterPaddle 0
+MineLauncherPaddle 0
+SlowBall 0
+FastBall 0
+Random 0
+CrazyBall 0
+GravityBall 0
+PaddleCam 0
+
+PADDLESTARTXPOS: 11.25

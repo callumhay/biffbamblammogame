@@ -33,6 +33,7 @@
 #include "Projectile.h"
 
 class CollateralBlock;
+class PortalBlock;
 
 /**
  * A projectile that holds a collateral block during its warning and
@@ -47,6 +48,8 @@ public:
     bool IsMine() const { return false; }
     bool IsRefractableOrReflectable() const { return false; }
 
+    void LevelPieceCollisionOccurred(LevelPiece* block);
+
 	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
     ProjectileType GetType() const {
@@ -57,7 +60,12 @@ public:
     void SetPosition(const Point2D& pos);
 
 private:
+    static const double PORTAL_COLLISION_RESET_TIME;
+
 	CollateralBlock* collateralBlock;
+
+    double resetPortalRecollisionCountdown;
+    PortalBlock* lastPortalCollidedWith;
 
 	DISALLOW_COPY_AND_ASSIGN(CollateralBlockProjectile);
 };

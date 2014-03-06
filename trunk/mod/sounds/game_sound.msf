@@ -194,8 +194,11 @@ WorldBackgroundLoop {
 	file  =
 }
 
-// TODO: Dada-Surrealism
-// TODO: Postmodernism
+// Dada-Surrealism ***********************************************************
+// TODO
+
+// Postmodernism *************************************************************
+// TODO
 
 
 // ---------------------------------------------------------------------------
@@ -214,6 +217,13 @@ PaddleFrozenEvent {
 
 PaddleOnFireEvent {
 	file = resources/PaddleOnFireEvent.ogg
+}
+
+
+// Paddle and Block Events ***************************************************
+
+PaddlePortalTeleportEvent {
+	file = resources/BallPortalTeleportEvent.ogg
 }
 
 // Ball Events ***************************************************************
@@ -286,6 +296,9 @@ BallBlockCollisionColourChange {
 	file = resources/BallBlockCollisionColourChange_01.ogg | resources/BallBlockCollisionColourChange_02.ogg | resources/BallBlockCollisionColourChange_03.ogg | resources/BallBlockCollisionColourChange_04.ogg | resources/BallBlockCollisionColourChange_05.ogg | resources/BallBlockCollisionColourChange_06.ogg | resources/BallBlockCollisionColourChange_07.ogg | resources/BallBlockCollisionColourChange_08.ogg
 }
 
+BallPortalTeleportEvent {
+	file = resources/BallPortalTeleportEvent.ogg
+}
 
 // Block Events **************************************************************
 
@@ -331,10 +344,6 @@ FragileCannonDestroyedEvent {
 	file = resources/FragileCannonDestroyedEvent.ogg
 }
 
-
-BallPortalTeleportEvent {
-	file = resources/BallPortalTeleportEvent.ogg
-}
 
 EnergyProjectilePortalTeleportEvent {
 	file = resources/EnergyProjectilePortalTeleportEvent.ogg

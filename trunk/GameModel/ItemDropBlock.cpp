@@ -99,8 +99,8 @@ LevelPiece* ItemDropBlock::Destroy(GameModel* gameModel, const LevelPiece::Destr
 		assert(success);
 	}
 
-    // Only collateral blocks and tesla lighting can destroy this block, otherwise the block is just triggered
-    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+    // Only Tesla lighting can destroy this block, otherwise the block is just triggered
+    if (method != LevelPiece::TeslaDestruction) {
         this->Triggered(gameModel);
         return this;
     }
@@ -251,6 +251,9 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
+            if (!this->HasStatus(LevelPiece::IceCubeStatus)) {
+                this->AttemptToDropAnItem(gameModel);
+            }
             this->LightPieceOnFire(gameModel, false);
             break;
 

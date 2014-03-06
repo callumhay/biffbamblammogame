@@ -1,36 +1,36 @@
 Frikin Laser Beams (Part 2)
-21 31
-E T(P,ul) E E E E E E X(n,m) E E E X(o,p) E E E E E E T(P,ur) E 
-E E E E E E E E X(d,c) E E E X(f,e) E E E E E E E E 
-E E E T(P,ul) E E E E X(j,i) E E E X(l,k) E E E E T(P,ur) E E E 
-E E E E E E E E E E E E E E E E E E E E E 
-E E E E S S S S S S S S S S S S S E E E E 
-E E E E S T(P,ul) G K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) G G G K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) G G G G S E E E E 
-E E E E S E E O E G E G E O E E S E E E E 
-E E E E S T(P,ll) G Q(f) Y Q(f) G Q(f) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Q(f) E X(p,o) S E E E E 
-E E E E S S G O R O R O R O G T(P,ur) S E E E E 
-E E E E S E E Y E G E G E Y E E S E E E E 
-E E E E S X(m,n) E Q(f) Y Q(f) R Q(f) Y Q(f) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) T(P,lr) S E E E E 
-E E E E S T(P,ul) G O E O D(IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle) O E Y E S S E E E E 
-E E X(b,a) E S E E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E Y E Y E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E E S E X(h,g) E E 
-E E E E S T(P,ll) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Q(f) R Q(f) R Q(f) R Q(f) E X(k,l) S E E E E 
-E E E E S S E O E O E O E O E E S E E E E 
-E E E E S E E Y E G E G E Y E E S E E E E 
-E E E E S X(i,j) E Q(f) G Q(f) O Q(f) G Q(f) G G S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E X(a,b) E X(c,d) E X(e,f) E X(g,h) E E S E E E E 
-E E E E S S S S S S D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) S S S S S S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E S E E E E E E E E E E E S E E E E 
-E E E E N E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E N E E E E 
-E E E E N E E E E E E E E E E E N E E E E 
+23 31
+E E T(P,ul) E E E E E E X(n,m) E E E X(o,p) E E E E E E T(P,ur) E E 
+E E E E E E E E E X(d,c) E E E X(f,e) E E E E E E E E E 
+E E E E T(P,ul) E E E E X(j,i) E E E X(l,k) E E E E T(P,ur) E E E E 
+E E E E E E E E E E E E E E E E E E E E E E E 
+E E E E E S S S S S S S S S S S S S E E E E E 
+E E E E E S T(P,ul) G K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) G G G K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) G G G G S E E E E E 
+E E E E E S E E O E G E G E O E E S E E E E E 
+E E E E E S T(P,ll) G Q(f) Y Q(f) G Q(f) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Q(f) E X(p,o) S E E E E E 
+E E E E E S S G O R O R O R O G T(P,ur) S E E E E E 
+E E E E E S E E Y E G E G E Y E E S E E E E E 
+E E E E E S X(m,n) E Q(f) Y Q(f) R Q(f) Y Q(f) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) T(P,lr) S E E E E E 
+E E E E E S T(P,ul) G O E O D(IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle) O E Y E S S E E E E E 
+E E E X(b,a) E S E E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E Y E Y E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E E S E X(h,g) E E E 
+E E E E E S T(P,ll) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Q(f) R Q(f) R Q(f) R Q(f) E X(k,l) S E E E E E 
+E E E E E S S E O E O E O E O E E S E E E E E 
+E E E E E S E E Y E G E G E Y E E S E E E E E 
+E E E E E S X(i,j) E Q(f) G Q(f) O Q(f) G Q(f) G G S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E X(a,b) E X(c,d) E X(e,f) E X(g,h) E E S E E E E E 
+E E E E E S S S S S S D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) S S S S S S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E S E E E E E E E E E E E S E E E E E 
+E E E E E N E E E E E E E E E E E N E E E E E 
+E E E E E N E E E E E E E E E E E N E E E E E 
+E X(x,y) E E E N E E E E E E E E E E E N E E E X(y,x) E 
 
 STARS:
 4000
@@ -45,8 +45,8 @@ Blackout 3
 BallSafetyNet 0
 UberBall 0
 BallGrow 0
-StickyPaddle 0
 ShieldPaddle 0
+StickyPaddle 0
 LaserBulletPaddle 0
 PaddleShrink 2
 InvisiPaddle 3
@@ -69,7 +69,7 @@ IceBlasterPaddle 0
 MineLauncherPaddle 0
 SlowBall 0
 FastBall 3
-GravityBall 3
-CrazyBall 1
 Random 0
+CrazyBall 1
+GravityBall 3
 PaddleCam 3

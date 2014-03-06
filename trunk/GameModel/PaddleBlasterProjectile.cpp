@@ -97,10 +97,15 @@ bool PaddleBlasterProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
 
 BoundingLines PaddleBlasterProjectile::BuildBoundingLines() const {
 
-    Point2D topRight    = this->GetPosition() + this->GetHalfHeight()*this->velocityDir + this->GetHalfWidth()*this->rightVec;
-    Point2D bottomRight = topRight - this->GetHeight()*this->velocityDir;
-    Point2D topLeft     = topRight - this->GetWidth()*this->rightVec;
-    Point2D bottomLeft  = topLeft - this->GetHeight()*this->velocityDir;
+    float boundsHalfWidth  = 0.9f*this->GetHalfWidth();
+    float boundsHalfHeight = 0.9f* this->GetHalfHeight();
+    float boundsWidth  = 2.0f*boundsHalfWidth;
+    float boundsHeight = 2.0f*boundsHalfHeight;
+
+    Point2D topRight    = this->GetPosition() + boundsHalfHeight*this->velocityDir + boundsHalfWidth*this->rightVec;
+    Point2D bottomRight = topRight - boundsHeight*this->velocityDir;
+    Point2D topLeft     = topRight - boundsWidth*this->rightVec;
+    Point2D bottomLeft  = topLeft  - boundsHeight*this->velocityDir;
 
     static const int NUM_BOUNDING_LINES = 4;
 

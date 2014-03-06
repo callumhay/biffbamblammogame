@@ -1,0 +1,74 @@
+new_level
+15 30
+S S S S S S S S S S S S S S S 
+S T(G,ur) T(G,ul) T(G,ur) T(G,ul) T(G,ur) T(G,ul) T(G,ur) T(G,ul) T(G,ur) T(G,ul) T(G,ur) T(G,ul) T(G,ur) S 
+S E E E E E E E E E E T(G,ur) E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S N N E E E E E E E E E N N S 
+S X(b,a) N E E E E E E E E E N X(d,c) S 
+S N N E E E E E E E E E N N S 
+S S S X(f,e) X(h,g) X(j,i) X(l,k) X(n,m) X(p,o) X(r,q) X(t,s) X(v,u) S S S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E X(e,f) X(g,h) X(i,j) X(k,l) X(m,n) X(o,p) X(q,r) X(s,t) X(u,v) E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S N N E E E E E E E E E N N S 
+E X(c,d) N E E E E E E E E E N X(a,b) E 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 0
+PoisonPaddle 0
+Blackout 0
+BallSafetyNet 0
+UberBall 0
+BallGrow 0
+ShieldPaddle 0
+StickyPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FlameBlasterPaddle 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+RemoteControlRocket 0
+IceBall 0
+IceBlasterPaddle 0
+MineLauncherPaddle 0
+SlowBall 0
+FastBall 0
+Random 0
+CrazyBall 0
+GravityBall 0
+PaddleCam 0

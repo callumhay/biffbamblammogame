@@ -733,6 +733,7 @@ void GameAssets::DrawPaddle(double dT, const GameModel& gameModel, const Camera&
 			this->paddleGunAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
 
+        // NOTE: This transform only works because the meshes for the attachements are already in paddle space
         glPushMatrix();
         glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
         glRotatef(p.GetZRotation(), 0, 0, 1);

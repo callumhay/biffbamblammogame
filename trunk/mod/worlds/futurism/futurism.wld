@@ -36,6 +36,9 @@ resources/worlds/levels/medium/not_burning_any_bridges.lvl
 # Camera Paddle Item intro
 resources/worlds/levels/hard/disorientation_precipitation_station.lvl
 
+# Paddle teleportation
+resources/worlds/levels/medium/where_no_paddle_has_gone_before.lvl
+
 # A level where you just rely on manipulating the ball via boosts
 resources/worlds/levels/medium/three_chances.lvl
 
@@ -43,20 +46,33 @@ resources/worlds/levels/medium/three_chances.lvl
 # repeating to get to an otherwise impossible to reach area
 resources/worlds/levels/hard/loop_booster.lvl
 
+# Paddle teleportation + acting as a decoy for rocket turrets
+resources/worlds/levels/medium/multitasking_now_with_more_rockets.lvl
 
-# 12
+# Ice a whole pillar of solid blocks and then use the laser beam
+# to get it through to a collateral block that will wipe out the pillar granting access
+# to otherwise inaccessible breakable blocks
 resources/worlds/levels/medium/a_pillar_too_far.lvl
 
 
-# 13
+resources/worlds/levels/hard/180_degrees_of_separation.lvl
 
-resources/worlds/testing/paddle_block_collisions_test.lvl
+
+# 4X paddle teleportation with one-way blocks
+resources/worlds/levels/hard/rewiring_your_brain.lvl
+
+
+# TODO: Collateral block with level flip and portals?
+
+
 
 
 
 # Really tough level where you are constantly balancing the ball while shooting
 # the laser beam through portals
 resources/worlds/levels/hard/frikin_laser_beams_part_2.lvl
+
+
 
 
 

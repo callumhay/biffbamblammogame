@@ -572,7 +572,8 @@ void LaserTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSe
         ignoreTypes.insert(LevelPiece::PrismTriangle);
 
         std::list<LevelPiece*> collisionPieces;
-        model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes, collisionPieces, LaserTurretProjectile::WIDTH_DEFAULT);
+        model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes, 
+            collisionPieces, paddleRayT, LaserTurretProjectile::WIDTH_DEFAULT);
 
         if (collisionPieces.empty()) {
             // The ray is unimpeded, fire ze lasers!

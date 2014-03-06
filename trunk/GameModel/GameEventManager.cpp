@@ -74,6 +74,13 @@ void GameEventManager::ActionPaddleHitWall(const PlayerPaddle& paddle, const Poi
 	}
 }
 
+void GameEventManager::ActionPaddlePortalBlockTeleport(const PlayerPaddle& paddle, const PortalBlock& enterPortal) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddlePortalBlockTeleportEvent(paddle, enterPortal);
+    }
+}
+
 // Action for when the player paddle is hit by a projectile
 void GameEventManager::ActionPaddleHitByProjectile(const PlayerPaddle& paddle, const Projectile& projectile) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();

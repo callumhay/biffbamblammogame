@@ -289,8 +289,8 @@ void GothicRomanticBossAI::GetItemDropPositions(int numItemsToDrop, const GameLe
     // In cases where the number of items isn't to large, we confine it to the smaller, enclosed level space.
     // This was tested empirically.
     if (numItemsToDrop <= 5) {
-        minX = level.GetMinPaddleBoundPiece()->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
-        maxX = level.GetMaxPaddleBoundPiece()->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+        minX = level.GetMinXPaddleBoundPiece(0)->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+        maxX = level.GetMaxXPaddleBoundPiece(0)->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
     }
 
     float axisLengthToDropIn = maxX - minX;
@@ -1374,7 +1374,7 @@ void IceBallAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
         // coupled with the ice ball
 
         const GameLevel* level = gameModel->GetCurrentLevel();
-        float midX = (level->GetMaxPaddleBoundPiece()->GetCenter()[0] - level->GetMinPaddleBoundPiece()->GetCenter()[0]) / 2.0f;
+        float midX = (level->GetMaxXPaddleBoundPiece(0)->GetCenter()[0] - level->GetMinXPaddleBoundPiece(0)->GetCenter()[0]) / 2.0f;
 
         // Generate a fairly item drop position that is random and reasonably close to or at the center of the level...
         static const float X_POS_VARIATION = 3*LevelPiece::PIECE_WIDTH;
@@ -1868,7 +1868,7 @@ void FreeMovingAttackAI::ExecuteGlitchState(double dT, GameModel* gameModel) {
         // coupled with the ice ball
 
         const GameLevel* level = gameModel->GetCurrentLevel();
-        float midX = (level->GetMaxPaddleBoundPiece()->GetCenter()[0] - level->GetMinPaddleBoundPiece()->GetCenter()[0]) / 2.0f;
+        float midX = (level->GetMaxXPaddleBoundPiece(0)->GetCenter()[0] - level->GetMinXPaddleBoundPiece(0)->GetCenter()[0]) / 2.0f;
 
         // Generate an item drop position that is random and reasonably close to or at the center of the level...
         static const float X_POS_VARIATION = 3*LevelPiece::PIECE_WIDTH;

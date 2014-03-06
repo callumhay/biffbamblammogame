@@ -175,7 +175,7 @@ inline void ItemDropBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Le
         this->hasSparkleEffect = bottomNeighbor->IsNoBoundsPieceType();
     }
 
-    LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
+    LevelPiece::UpdateSolidRectBlockBounds(this, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor,
         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 

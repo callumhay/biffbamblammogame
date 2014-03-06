@@ -99,16 +99,21 @@ public:
 	// Get the line at the given index within this set of bounding lines
 	// Precondition: The given index must be within bounds of the number of lines.
 	const Collision::LineSeg2D& GetLine(int index) const {
-		assert(index < static_cast<int>(lines.size()) && index >= 0);
+		assert(index < static_cast<int>(this->lines.size()) && index >= 0);
 		return this->lines[index];
 	}
 
 	// Get the normal at the given index within this set of bounding lines
 	// Precondition: The given index must be within bounds of the number of lines.
 	const Vector2D& GetNormal(int index) const {
-		assert(index < static_cast<int>(normals.size()) && index >= 0);
+		assert(index < static_cast<int>(this->normals.size()) && index >= 0);
 		return this->normals[index];
 	}
+
+    bool GetOnInside(int index) const {
+        assert(index < static_cast<int>(this->onInside.size()) && index >= 0);
+        return this->onInside[index];
+    }
 
     void SetAllBoundsInside(bool inside);
     void SetBoundInside(int index, bool inside);
