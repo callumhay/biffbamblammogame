@@ -39,7 +39,7 @@ public:
 	static const char* LASER_BEAM_PADDLE_ITEM_NAME;
 	static const double LASER_BEAM_PADDLE_TIMER_IN_SECS;
 
-	LaserBeamPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	LaserBeamPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~LaserBeamPaddleItem();
 
 	double Activate();

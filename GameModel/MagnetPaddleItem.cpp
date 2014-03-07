@@ -33,8 +33,8 @@
 const char* MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME       = "MagnetPaddle";
 const double MagnetPaddleItem::MAGNET_PADDLE_TIMER_IN_SECS  = 38.0;
 
-MagnetPaddleItem::MagnetPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+MagnetPaddleItem::MagnetPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 MagnetPaddleItem::~MagnetPaddleItem() {

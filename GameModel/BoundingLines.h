@@ -53,6 +53,9 @@ public:
 	size_t GetNumLines() const {
 		return this->lines.size();
 	}
+    bool IsEmpty() const {
+        return this->GetNumLines() == 0;
+    }
 
 	Collision::AABB2D GenerateAABBFromLines() const;
     Collision::Circle2D GenerateCircleFromLines() const;

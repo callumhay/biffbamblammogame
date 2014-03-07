@@ -43,7 +43,7 @@ public:
 	static const char* BALL_SAFETY_NET_ITEM_NAME;
 	static const double BALL_SAFETY_NET_TIMER_IN_SECS;
 
-	BallSafetyNetItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	BallSafetyNetItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~BallSafetyNetItem();
 
 	double Activate();

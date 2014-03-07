@@ -42,7 +42,7 @@ class RandomItem : public GameItem {
 public:
 	static const char* RANDOM_ITEM_NAME;
 
-	RandomItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	RandomItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~RandomItem();
 	
 	std::set<const GameBall*> GetBallsAffected() const ;

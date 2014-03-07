@@ -86,13 +86,6 @@ Point3D ESPVolumeEmitter::CalculateRandomInitParticlePos() const {
 }
 
 /**
- * Set the emit direction for this area emitter.
- */
-void ESPVolumeEmitter::SetEmitDirection(const Vector3D& dir) {
-	this->emitDir = dir;
-}
-
-/**
  * --------------
  * |     ^      |
  * |     |      |

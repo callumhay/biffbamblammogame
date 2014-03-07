@@ -32,8 +32,8 @@
 const char* BlackoutItem::BLACKOUT_ITEM_NAME	      = "Blackout";
 const double BlackoutItem::BLACKOUT_TIMER_IN_SECS		= 20.0;
 
-BlackoutItem::BlackoutItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(BlackoutItem::BLACKOUT_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
+BlackoutItem::BlackoutItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(BlackoutItem::BLACKOUT_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Bad) {
 }
 
 BlackoutItem::~BlackoutItem() {

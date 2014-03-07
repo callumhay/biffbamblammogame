@@ -34,8 +34,8 @@
 const char* FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_ITEM_NAME      = "FlameBlasterPaddle";
 const double FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_TIMER_IN_SECS = 17.0f;
 
-FlameBlasterPaddleItem::FlameBlasterPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+FlameBlasterPaddleItem::FlameBlasterPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(FlameBlasterPaddleItem::FLAME_BLASTER_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 FlameBlasterPaddleItem::~FlameBlasterPaddleItem() {

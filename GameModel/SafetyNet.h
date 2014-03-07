@@ -35,6 +35,7 @@
 #include "BoundingLines.h"
 
 class GameLevel;
+class LevelPiece;
 class MineProjectile;
 
 /**
@@ -48,8 +49,11 @@ public:
     static const float SAFETY_NET_HEIGHT;
     static const float SAFETY_NET_HALF_HEIGHT;
 
-    SafetyNet(const GameLevel& currLevel);
+    SafetyNet(const GameLevel& currLevel, bool isBottomSafetyNet);
     ~SafetyNet();
+
+    static bool CanTopSafetyNetBePlaced(const GameLevel& currLevel);
+    static std::pair<const LevelPiece*, const LevelPiece*> GetSafetyNetMinMaxPiece(const GameLevel& currLevel, bool isBottomSafetyNet);
 
     const BoundingLines& GetBounds() { return this->bounds; }
 

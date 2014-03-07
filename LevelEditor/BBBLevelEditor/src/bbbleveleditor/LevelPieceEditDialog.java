@@ -45,6 +45,8 @@ public class LevelPieceEditDialog extends JDialog {
     //private JComboBox triggerIDComboBox;
     // End of variables declaration//GEN-END:variables
 	
+    private JCheckBox portalFlipsPaddle;
+    
 	private Set<Character> allPieceIDs;
 	private LevelPieceImageLabel levelPieceLbl;
 	private JFrame parentWindow;
@@ -356,6 +358,19 @@ public class LevelPieceEditDialog extends JDialog {
         	
         	buttonPanel.add(tempPanel);
         }
+        else if (this.levelPieceLbl.getIsPortal()) {
+
+	        this.portalFlipsPaddle = new JCheckBox("Portal flips paddle");
+	        this.portalFlipsPaddle.setSelected(this.levelPieceLbl.getPortalFlipsPaddle());
+	        this.portalFlipsPaddle.setEnabled(true);
+	        this.portalFlipsPaddle.addActionListener(new java.awt.event.ActionListener() {
+	        	public void actionPerformed(java.awt.event.ActionEvent evt) {
+	            	portalFlipsPaddleCheckBoxClicked(evt);
+	            }
+	        });
+	        
+	        buttonPanel.add(this.portalFlipsPaddle);
+        }
         
         this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
         pack();
@@ -447,6 +462,10 @@ public class LevelPieceEditDialog extends JDialog {
     
     private void teslaChangableCheckBoxClicked(java.awt.event.ActionEvent evt) {
     	this.levelPieceLbl.setTeslaChangable(this.teslaChangable.isSelected());
+    }
+    
+    private void portalFlipsPaddleCheckBoxClicked(java.awt.event.ActionEvent evt) {
+    	this.levelPieceLbl.setPortalFlipsPaddle(this.portalFlipsPaddle.isSelected());
     }
     
     private void cannonAngleRadioClicked(boolean random) {

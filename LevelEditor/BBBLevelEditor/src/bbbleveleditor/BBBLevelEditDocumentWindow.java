@@ -576,7 +576,15 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						}
 						
 						levelFileWriter.write(currLvlPiece.getSymbol() + "(" + currPieceLbl.getBlockID() + 
-								"," + currPieceLbl.getPortalSiblingID() + ")");
+								"," + currPieceLbl.getPortalSiblingID());
+						
+						if (currPieceLbl.getPortalFlipsPaddle()) {
+							levelFileWriter.write(",f)");
+						}
+						else {
+							levelFileWriter.write(")");
+						}
+						
 					}
 					else if (currPieceLbl.getIsTesla()) {
 						if (!currPieceLbl.getHasIDsInGivenSet(this.teslaIDs)) {

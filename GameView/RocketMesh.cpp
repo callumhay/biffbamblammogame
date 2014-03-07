@@ -286,12 +286,11 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
         const Point2D& paddleCenter = paddle.GetCenterPosition();
         float rocketHeight = paddle.GetPaddleScaleFactor() * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
         float rocketZRotation = paddle.GetZRotation();
-        Vector2D rocketDisplacement = (paddle.GetHalfHeight() + 0.5f * rocketHeight) * paddle.GetUpVector();
 
         glPushMatrix();
         glTranslatef(paddleCenter[0], paddleCenter[1], 0.0f);
         glRotatef(rocketZRotation, 0.0f, 0.0f, 1.0f);        
-        glTranslatef(rocketDisplacement[0], rocketDisplacement[1], 0.0f);
+        glTranslatef(0.0f, paddle.GetHalfHeight() + 0.5f * rocketHeight, 0.0f);
         glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
 
         // The rocket will be invisible under special circumstances...

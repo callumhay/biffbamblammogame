@@ -126,9 +126,9 @@ public:
 
 	void DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight);
 
-    const Point2D& GetBallSafetyNetPosition() const;
-    void BallSafetyNetCreated();
-    void BallSafetyNetDestroyed(const GameLevel& currLevel, const Point2D& pos);
+    const Point2D& GetBallSafetyNetPosition(bool bottomSafetyNet) const;
+    void BallSafetyNetCreated(bool bottomSafetyNet);
+    void BallSafetyNetDestroyed(const GameLevel& currLevel, const Point2D& pos, bool bottomSafetyNet);
 
 #ifdef _DEBUG
 	void DebugDrawLights() const { this->lightAssets->DebugDrawLights(); };
@@ -275,7 +275,8 @@ private:
     PaddleStatusEffectRenderer* paddleStatusEffectRenderer;
 
 	// Misc. display lists and meshes for other geometry activated by items and such
-	BallSafetyNetMesh* ballSafetyNet;
+	BallSafetyNetMesh* bottomSafetyNetMesh;
+    BallSafetyNetMesh* topSafetyNetMesh;
 
 	RandomToItemAnimation randomToItemAnimation;
 
@@ -303,6 +304,8 @@ private:
     void DrawRandomToItemAnimation(const Camera& camera, double dT, const GameModel& gameModel);
     void DrawSkipDeathAnimation(const Camera& camera, double dT);
 
+    void DrawSafetyNet(BallSafetyNetMesh* safetyNetMesh, double dT, const Camera& camera, const GameModel& gameModel, float yTranslationOffset);
+        
     DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };
 

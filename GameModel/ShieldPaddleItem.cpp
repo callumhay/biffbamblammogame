@@ -30,11 +30,11 @@
 #include "ShieldPaddleItem.h"
 #include "GameModel.h"
 
-const char* ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME	      = "ShieldPaddle";
-const double ShieldPaddleItem::SHIELD_PADDLE_TIMER_IN_SECS    = 25.0;
+const char* ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME	   = "ShieldPaddle";
+const double ShieldPaddleItem::SHIELD_PADDLE_TIMER_IN_SECS = 25.0;
 
-ShieldPaddleItem::ShieldPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+ShieldPaddleItem::ShieldPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 ShieldPaddleItem::~ShieldPaddleItem() {

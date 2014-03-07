@@ -145,9 +145,15 @@ public:
 		this->centerPos = center;
 	}
 
+    float GetAnimatedZRotation() const {
+        return this->rotAngleZAnimation.GetInterpolantValue();
+    }
 	float GetZRotation() const {
-		return this->rotAngleZAnimation.GetInterpolantValue();
+        return this->rotAngleZAnimation.GetInterpolantValue() + 
+            Trig::radiansToDegrees(this->reorientZRotInRads);
 	}
+    void SetPaddleFlipped(bool flipPaddle);
+    bool GetIsPaddleFlipped() const { return this->reorientZRotInRads != 0.0f; }
 
 	float GetHalfHeight() const {
 		return this->currHalfHeight;
@@ -167,7 +173,7 @@ public:
 	}
 
 	Vector2D GetUpVector() const {
-		return Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR);
+        return Vector2D::Rotate(this->GetZRotation(), PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR);
 	}
 
 	void Tick(double seconds, bool pausePaddleMovement, GameModel& gameModel);
@@ -315,6 +321,8 @@ public:
         return this->bounds;
     }
 
+    bool IsBallUnderPaddle(const GameBall& ball) const;
+
     // Enable options for the paddle - used during the tutorial
     static void SetEnablePaddleReleaseTimer(bool enabled) {
         PlayerPaddle::paddleBallReleaseTimerEnabled = enabled;
@@ -390,7 +398,10 @@ private:
 	float currHalfDepthTotal;   // Half of the total depth of the paddle
 	float currScaleFactor;      // The scale difference between the paddle's current size and its default size
 
-    float minXBound, maxXBound, minYBound; // The current level's boundaries along its width for the paddle
+    float reorientZRotInRads; // When a portal flips the paddle upside-down causing it to be reoriented to face downwards
+                                    // this value is pi, otherwise zero
+
+    float minXBound, maxXBound, underPaddleYBound; // The current level's boundaries along its width for the paddle
 
     float defaultYPos;   // The current default y position of the paddle
     float startingXPos;  // Starting position of the paddle when the level begins or the ball dies and is revived

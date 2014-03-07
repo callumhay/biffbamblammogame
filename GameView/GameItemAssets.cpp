@@ -124,6 +124,7 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 	glPushMatrix();
 	const Point2D& center = gameItem.GetCenter();
 	glTranslatef(center[0], center[1], 0.0f);
+    glRotatef(gameItem.GetRotationInDegs(), 0, 0, 1);
 
 	// Draw the item's effect and the item itself
 	this->espAssets->DrawItemDropEffects(dT, camera, gameItem);

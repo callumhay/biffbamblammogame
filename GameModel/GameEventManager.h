@@ -94,6 +94,7 @@ public:
     void ActionPaddleStatusUpdate(const PlayerPaddle& paddle, PlayerPaddle::PaddleSpecialStatus status, bool isActive);
     void ActionFrozenPaddleCanceledByFire(const PlayerPaddle& paddle);
     void ActionOnFirePaddleCanceledByIce(const PlayerPaddle& paddle);
+    void ActionPaddleFlipped(const PlayerPaddle& paddle, bool isUpsideDown);
 
 	void ActionBallDied(const GameBall& deadBall);
 	void ActionLastBallAboutToDie(const GameBall& ballAboutToDie);
@@ -127,10 +128,10 @@ public:
 	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);
     void ActionBallBossCollision(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart);
 	void ActionBlockDestroyed(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
-	void ActionBallSafetyNetCreated();
-	void ActionBallSafetyNetDestroyed(const GameBall& ball);
-	void ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle);
-	void ActionBallSafetyNetDestroyed(const Projectile& projectile);
+	void ActionBallSafetyNetCreated(bool bottomSafetyNet);
+	void ActionBallSafetyNetDestroyed(const GameBall& ball, bool bottomSafetyNet);
+	void ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle, bool bottomSafetyNet);
+	void ActionBallSafetyNetDestroyed(const Projectile& projectile, bool bottomSafetyNet);
 	void ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void ActionLevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
 	void ActionLevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);

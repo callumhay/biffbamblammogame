@@ -36,9 +36,10 @@ const double BallSizeItem::BALL_SIZE_TIMER_IN_SECS	= 0.0;
 const char* BallSizeItem::BALL_GROW_ITEM_NAME		= "BallGrow";
 const char* BallSizeItem::BALL_SHRINK_ITEM_NAME = "BallShrink";
 
-BallSizeItem::BallSizeItem(const BallSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(((type == ShrinkBall) ? BallSizeItem::BALL_SHRINK_ITEM_NAME : BallSizeItem::BALL_GROW_ITEM_NAME), spawnOrigin, gameModel, 
-				 ((type == ShrinkBall) ? GameItem::Bad : GameItem::Good)), sizeChangeType(type) {
+BallSizeItem::BallSizeItem(const BallSizeChangeType type, const Point2D &spawnOrigin, 
+                           const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(((type == ShrinkBall) ? BallSizeItem::BALL_SHRINK_ITEM_NAME : BallSizeItem::BALL_GROW_ITEM_NAME), 
+         spawnOrigin, dropDir, gameModel,((type == ShrinkBall) ? GameItem::Bad : GameItem::Good)), sizeChangeType(type) {
 }
 
 BallSizeItem::~BallSizeItem() {

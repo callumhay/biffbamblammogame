@@ -401,7 +401,7 @@ void BallInPlayState::Tick(double seconds) {
 				    }
 
 				    // Do ball-paddle collision
-                    this->DoBallPaddleCollision(*currBall, n, seconds, timeUntilCollision, 
+                    this->DoBallPaddleCollision(*currBall, *paddle, n, seconds, timeUntilCollision, 
                         GameBall::MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS, paddle->GetVelocity());
                     BallCollisionChangeInfo& collisionInfo = ballChangedByCollision[ballIdx];                    
                     collisionInfo.posChanged = true;
@@ -446,26 +446,15 @@ void BallInPlayState::Tick(double seconds) {
 		    }
 
 		    // Ball Safety Net Collisions:
-            if (this->gameModel->IsSafetyNetActive()) {
-		        if (this->gameModel->safetyNet->BallCollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision, collisionPt)) {
-                    
-                    bool ballBlastsThroughSafetyNet = this->gameModel->safetyNet->BallBlastsThrough(*currBall);
-                    this->gameModel->DestroySafetyNet();
-
-                    // EVENT: The ball just destroyed the safety net
-                    GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currBall);
-
-                    if (!ballBlastsThroughSafetyNet) {
-                        this->DoBallCollision(*currBall, n, seconds, timeUntilCollision, GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
-                        ballChangedByCollision[ballIdx].posChanged = true;
-                    }
-		        }
-            }
+            this->DoBallSafetyNetCollision(this->gameModel->bottomSafetyNet, *currBall, seconds, n, collisionLine, 
+                timeUntilCollision, collisionPt, ballChangedByCollision[ballIdx]);
+            this->DoBallSafetyNetCollision(this->gameModel->topSafetyNet, *currBall, seconds, n, collisionLine, 
+                timeUntilCollision, collisionPt, ballChangedByCollision[ballIdx]);
 
 		    // Ball - Tesla lightning arc collisions:
 		    didCollideWithTeslaLightning = currLevel->TeslaLightningCollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision, collisionPt);
 		    if (didCollideWithTeslaLightning) {
-			    // Clear the last piece collided with since the ball is now colliding with a tesla lightning arc
+			    // Clear the last piece collided with since the ball is now colliding with a Tesla lightning arc
 			    currBall->SetLastPieceCollidedWith(NULL);
     			
 			    // Calculate the ball position/velocity after collision
@@ -608,12 +597,23 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Quick check to see if the paddle collided with the safety net - this will just register necessary
 	// events and destroy the net if it exists and there is a collision
-	if (!paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState()) && this->gameModel->IsSafetyNetActive()) {
-        if (this->gameModel->safetyNet->PaddleCollisionCheck(*paddle)) {
-            this->gameModel->DestroySafetyNet();
+	if (!paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState())) {
+        
+        if (this->gameModel->IsBottomSafetyNetActive() && 
+            this->gameModel->bottomSafetyNet->PaddleCollisionCheck(*paddle)) {
+
+            this->gameModel->DestroyBottomSafetyNet();
             
             // EVENT: The paddle just destroyed the safety net
-            GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*paddle);
+            GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*paddle, true);
+        }
+        else if (this->gameModel->IsTopSafetyNetActive() &&
+            this->gameModel->topSafetyNet->PaddleCollisionCheck(*paddle)) {
+            
+            this->gameModel->DestroyTopSafetyNet();
+
+            // EVENT: The paddle just destroyed the safety net
+            GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*paddle, false);
         }
     }
 
@@ -734,8 +734,8 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 	b.SetCenterPosition(b.GetCenterPosition2D() + timeToMoveInReflectionDir * moveVel);
 }
 
-void BallInPlayState::DoBallPaddleCollision(GameBall& b, const Vector2D& n, double dT, double timeUntilCollision, 
-                                            float minAngleInDegs, const Vector2D& lineVelocity) {
+void BallInPlayState::DoBallPaddleCollision(GameBall& b, PlayerPaddle& p, const Vector2D& n, double dT, 
+                                            double timeUntilCollision, float minAngleInDegs, const Vector2D& lineVelocity) {
 
     b.BallCollided();
 
@@ -789,15 +789,16 @@ void BallInPlayState::DoBallPaddleCollision(GameBall& b, const Vector2D& n, doub
    
     // Only have to check whether the ball is acceptably far enough away from the +/-x directions
     float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));
+    float paddleFlipMultiplier = p.GetIsPaddleFlipped() ? -1 : 1;
     if (angleAwayFromX < minAngleInDegs) {
         // Rotate so that its going to fire upwards a bit from the (1,0) direction
-        reflVecHat = Vector2D::Rotate(minAngleInDegs - angleAwayFromX, reflVecHat);
+        reflVecHat = Vector2D::Rotate(minAngleInDegs - paddleFlipMultiplier * angleAwayFromX, reflVecHat);
     }
     else {
         float oneEightyMinusMinAngle = 180.0f - minAngleInDegs;
         if (angleAwayFromX > oneEightyMinusMinAngle) {
             // Rotate so that its going to fire upwards a bit from the (-1,0) direction
-            reflVecHat = Vector2D::Rotate(oneEightyMinusMinAngle - angleAwayFromX, reflVecHat);
+            reflVecHat = Vector2D::Rotate(oneEightyMinusMinAngle - paddleFlipMultiplier * angleAwayFromX, reflVecHat);
         }
     }
 
@@ -883,27 +884,53 @@ void BallInPlayState::DoItemCollision() {
 	}
 }
 
+void BallInPlayState::DoBallSafetyNetCollision(SafetyNet* safetyNet, GameBall& ball, double seconds, Vector2D& n,
+                                               Collision::LineSeg2D& collisionLine, double& timeUntilCollision, 
+                                               Point2D& collisionPt, BallCollisionChangeInfo& collisionChangeInfo) {
+    if (safetyNet == NULL || !safetyNet->BallCollisionCheck(ball, seconds, n, collisionLine, timeUntilCollision, collisionPt)) {
+        return;
+    }
+
+    bool isBottomSafetyNet = (safetyNet == this->gameModel->bottomSafetyNet);
+    bool ballBlastsThroughSafetyNet = safetyNet->BallBlastsThrough(ball);
+    this->gameModel->DestroySafetyNet(safetyNet);
+    safetyNet = NULL;
+
+    // EVENT: The ball just destroyed the safety net
+    GameEventManager::Instance()->ActionBallSafetyNetDestroyed(ball, isBottomSafetyNet);
+
+    if (!ballBlastsThroughSafetyNet) {
+        this->DoBallCollision(ball, n, seconds, timeUntilCollision, GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+        collisionChangeInfo.posChanged = true;
+    }
+
+}
+
 // Makes sure that the ball's direction is upwards and changes it to be upwards - when it gets
 // hit by the paddle this is called.
 bool BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const PlayerPaddle& p, const Vector2D& collisionNormal) {
-    // We are unforgiving if the collision normal was pointing very downwards as well
-    if (collisionNormal[1] < -0.9f) {
+
+    // We are unforgiving if the collision normal was the paddle's bottom boundary normal OR
+    // if the ball is below the paddle
+    if (collisionNormal[1] == p.GetBottomCollisionNormal()[1] || p.IsBallUnderPaddle(b)) {
         return false;
     }
-    // We are also unforgiving if the ball is below the paddle...
-    if (b.GetCenterPosition2D()[1] < (p.GetCenterPosition()[1] - p.GetHalfHeight() - 0.9f*b.GetBounds().Radius())) {
-        return false;
-    }
-    // We also don't change the direction if the ball is past one of the paddle boundaries
 
-	Vector2D ballDirection = b.GetDirection();
+	Vector2D updatedBallDir = b.GetDirection();
+    bool paddleFlipped = p.GetIsPaddleFlipped();
 
-	if (ballDirection[1] < 0) {
-		ballDirection[1] = fabs(ballDirection[0] * tanf(GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS));
-		ballDirection.Normalize();
-		b.SetDirection(ballDirection);
+    if (paddleFlipped && updatedBallDir[1] > 0) {
+        updatedBallDir[1] = -fabs(updatedBallDir[0] * tanf(GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS));
+        updatedBallDir.Normalize();
+        b.SetDirection(updatedBallDir);
         return true;
-	}
+    }
+    else if (!paddleFlipped && updatedBallDir[1] < 0) {
+        updatedBallDir[1] = fabs(updatedBallDir[0] * tanf(GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_RADS));
+        updatedBallDir.Normalize();
+        b.SetDirection(updatedBallDir);
+        return true;
+    }
 
     return false;
 }

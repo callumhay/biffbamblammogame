@@ -126,7 +126,8 @@ paddleGunAttachment(NULL),
 paddleStickyAttachment(NULL),
 paddleShield(NULL),
 paddleStatusEffectRenderer(NULL),
-ballSafetyNet(NULL),
+bottomSafetyNetMesh(NULL),
+topSafetyNetMesh(NULL),
 
 invisibleEffect(NULL), 
 ghostBallEffect(NULL),
@@ -233,8 +234,10 @@ GameAssets::~GameAssets() {
     delete this->paddleMineAttachment;
     this->paddleMineAttachment = NULL;
 
-    delete this->ballSafetyNet;
-    this->ballSafetyNet = NULL;
+    delete this->bottomSafetyNetMesh;
+    this->bottomSafetyNetMesh = NULL;
+    delete this->topSafetyNetMesh;
+    this->topSafetyNetMesh = NULL;
 
     // Clean up tutorial assets
     delete this->tutorialAssets;
@@ -903,37 +906,53 @@ void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& c
 
 void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {
 
-    if (gameModel.IsSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
+    if (gameModel.IsBottomSafetyNetActive() || this->bottomSafetyNetMesh->IsPlayingAnimation()) {
+        this->DrawSafetyNet(this->bottomSafetyNetMesh, dT, camera, gameModel, 0.3f);
+    }
+    if (gameModel.IsTopSafetyNetActive() || this->topSafetyNetMesh->IsPlayingAnimation()) {
+        this->DrawSafetyNet(this->topSafetyNetMesh, dT, camera, gameModel, -0.3f);
+    }
+}
 
-        this->ballSafetyNet->Tick(dT);
+void GameAssets::DrawSafetyNet(BallSafetyNetMesh* safetyNetMesh, double dT, const Camera& camera, 
+                               const GameModel& gameModel, float yTranslationOffset) {
+    
+    safetyNetMesh->Tick(dT);
 
-        // Deal with the special case of paddle camera mode: we don't want the safety net to not appear in paddle camera mode
-        // and we want it to fade out/in when going into/out of paddle camera mode
-        const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-        if (paddle->GetIsPaddleCameraOn() || gameModel.GetTransformInfo()->GetIsPaddleCamAnimationActive()) {
-            float paddleAlpha = paddle->GetAlpha();
-            if (paddleAlpha <= 0.0f) {
-                // Don't draw the safety net if the paddle is invisible and we're in paddle camera mode
-                return;
-            }
-            else {
-                this->ballSafetyNet->SetAlpha(paddleAlpha);
-            }
+    // Deal with the special case of paddle camera mode: we don't want the safety net to not appear in paddle camera mode
+    // and we want it to fade out/in when going into/out of paddle camera mode
+    
+    // NOTE: We also have to deal with the case of the safety net being where the paddle is
+    // located (i.e., check to see if the paddle is flipped and whether we're dealing with the top or bottom
+    // safety net before changing whether it's visible or not.
+
+    const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+    if (paddle->GetIsPaddleCameraOn() || gameModel.GetTransformInfo()->GetIsPaddleCamAnimationActive() &&
+        (safetyNetMesh == this->bottomSafetyNetMesh && !paddle->GetIsPaddleFlipped() || 
+         safetyNetMesh == this->topSafetyNetMesh && paddle->GetIsPaddleFlipped()) ) {
+
+        float paddleAlpha = paddle->GetAlpha();
+        if (paddleAlpha <= 0.0f) {
+            // Don't draw the safety net if the paddle is invisible and we're in paddle camera mode
+            return;
         }
         else {
-            this->ballSafetyNet->SetAlpha(1.0f);
+            safetyNetMesh->SetAlpha(paddleAlpha);
         }
-
-        BasicPointLight fgKeyLight, fgFillLight, ballLight;
-        this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-
-        GameLevel* currLevel = gameModel.GetCurrentLevel();
-
-        glPushMatrix();
-        glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + SafetyNet::SAFETY_NET_HALF_HEIGHT + 0.1f), 0.0f);
-        this->ballSafetyNet->Draw(camera, fgKeyLight, fgFillLight, ballLight);
-        glPopMatrix();
     }
+    else {
+        safetyNetMesh->SetAlpha(1.0f);
+    }
+
+    BasicPointLight fgKeyLight, fgFillLight, ballLight;
+    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+
+    GameLevel* currLevel = gameModel.GetCurrentLevel();
+
+    glPushMatrix();
+    glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + yTranslationOffset) + safetyNetMesh->GetMidYCoord(*currLevel), 0.0f);
+    safetyNetMesh->Draw(camera, fgKeyLight, fgFillLight, ballLight);
+    glPopMatrix();
 }
 
 void GameAssets::DrawMiscEffects(const GameModel& gameModel) {
@@ -1229,24 +1248,39 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 	this->flashHUD->Draw(dT, displayWidth, displayHeight);
 }
 
-const Point2D& GameAssets::GetBallSafetyNetPosition() const {
-    return this->ballSafetyNet->GetSafetyNetCenterPosition();
+const Point2D& GameAssets::GetBallSafetyNetPosition(bool bottomSafetyNet) const {
+    if (bottomSafetyNet) {
+        return this->bottomSafetyNetMesh->GetSafetyNetCenterPosition();
+    }
+    else {
+        return this->topSafetyNetMesh->GetSafetyNetCenterPosition();
+    }
 }
 
 /**
  * Call when the ball safety net has been created. This will prompt any animations /
  * effects associated with the mesh representing the safety net.
  */
-void GameAssets::BallSafetyNetCreated() {
-	this->ballSafetyNet->CreateBallSafetyNet();
+void GameAssets::BallSafetyNetCreated(bool bottomSafetyNet) {
+    if (bottomSafetyNet) {
+	    this->bottomSafetyNetMesh->CreateBallSafetyNet();
+    }
+    else {
+        this->topSafetyNetMesh->CreateBallSafetyNet();
+    }
 }
 
 /**
  * Call when the ball safety net has been destroyed this will prompt any
  * animations / effects associated with the mesh representing the safety net.
  */
-void GameAssets::BallSafetyNetDestroyed(const GameLevel& currLevel, const Point2D& pos) {
-	this->ballSafetyNet->DestroyBallSafetyNet(currLevel, pos[0]);
+void GameAssets::BallSafetyNetDestroyed(const GameLevel& currLevel, const Point2D& pos, bool bottomSafetyNet) {
+    if (bottomSafetyNet) {
+	    this->bottomSafetyNetMesh->DestroyBallSafetyNet(currLevel, pos[0]);
+    }
+    else {
+        this->topSafetyNetMesh->DestroyBallSafetyNet(currLevel, pos[0]);
+    }
 }
 
 void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
@@ -1260,7 +1294,8 @@ void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
 	}
     
     // Setup the ball safety net for the new level...
-	this->ballSafetyNet->Regenerate(currLevel);
+	this->bottomSafetyNetMesh->Regenerate(currLevel);
+    this->topSafetyNetMesh->Regenerate(currLevel);
 
     // Load the lighting setup for the current level...
     this->worldAssets->LoadLightingForLevel(this, currLevel);
@@ -1291,8 +1326,11 @@ void GameAssets::LoadRegularMeshAssets() {
 	if (this->paddleStickyAttachment == NULL) {
 		this->paddleStickyAttachment = new StickyPaddleGoo();
 	}
-    if (this->ballSafetyNet == NULL) {
-        this->ballSafetyNet = new BallSafetyNetMesh();
+    if (this->bottomSafetyNetMesh == NULL) {
+        this->bottomSafetyNetMesh = new BallSafetyNetMesh(true);
+    }
+    if (this->topSafetyNetMesh == NULL) {
+        this->topSafetyNetMesh = new BallSafetyNetMesh(false);
     }
 }
 
@@ -1909,12 +1947,6 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			// NOTE that this is not permanent and just does so for any currently falling items
 			this->espAssets->TurnOffCurrentItemDropStars();
 			
-			// We make the safety net transparent so that it doesn't obstruct the paddle cam... too much
-
-            // Call to make the safety net visible or not when its activated. This is
-            // useful to avoid obstruction of the player's viewpoint e.g., when in paddle camera mode.
-            this->ballSafetyNet->SetAlpha(0.5f);
-
 			// Move the key light in the foreground so that it is behind the camera when it goes into paddle cam mode.
 			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
 			float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
@@ -2055,9 +2087,6 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		}
 
 		case GameItem::PaddleCamItem: {
-			// We make the safety net visible (if activated) again
-			this->ballSafetyNet->SetAlpha(1.0f);
-
 			// Move the foreground key and fill lights back to their default positions...
 			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGKeyLight, 1.5f);
 			this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::FGFillLight, 1.5f);

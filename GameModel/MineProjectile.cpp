@@ -273,10 +273,12 @@ bool MineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
 
             // If this mine was attached to a safety net then the safety net should be destroyed...
             if (this->GetIsAttachedToSafetyNet()) {
-                model.DestroySafetyNet();
+                bool isBottomSafetyNet = model.IsBottomSafetyNet(this->attachedToNet);
+                model.DestroySafetyNet(this->attachedToNet);
+                this->attachedToNet = NULL;
                 
                 // EVENT: The mine just destroyed the safety net
-                GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*this);
+                GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*this, isBottomSafetyNet);
             }
 
             return true;

@@ -100,7 +100,7 @@ maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_AC
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 timeSinceLastBlastShot(PADDLE_FLAME_BLAST_DELAY + PADDLE_ICE_BLAST_DELAY), timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), currSpecialStatus(PlayerPaddle::NoStatus),
-attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
+attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f), reorientZRotInRads(0.0f),
 impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), lastThingCollidedWith(NULL),
 levelBoundsCheckingOn(true), startingXPos(0.0), defaultYPos(0.0), frozenCountdown(0.0), onFireCountdown(0.0) {
 	this->ResetPaddle();
@@ -117,6 +117,7 @@ void PlayerPaddle::ResetPaddle() {
 	this->laserBeamTimer = 0.0;
     this->frozenCountdown = 0.0;
     this->onFireCountdown = 0.0;
+    this->reorientZRotInRads = 0.0f;
 	this->currSize = PlayerPaddle::NormalSize;
     this->SetDefaultYPosition(PlayerPaddle::PADDLE_HALF_HEIGHT);
 	this->centerPos   = this->GetDefaultCenterPosition();
@@ -146,7 +147,22 @@ void PlayerPaddle::ResetPaddle() {
 
 void PlayerPaddle::SetDefaultYPosition(float yPos) {
     this->defaultYPos = yPos;
-    this->minYBound   = yPos - GameLevel::MIN_Y_BOUND_BUFFER_SPACE_FOR_PADDLE;
+    this->underPaddleYBound = yPos - (cosf(this->reorientZRotInRads) * GameLevel::MIN_Y_BOUND_BUFFER_SPACE_FOR_PADDLE);
+}
+
+void PlayerPaddle::SetPaddleFlipped(bool flipPaddle) {
+    float yBoundDiff = fabs(this->underPaddleYBound - this->defaultYPos);
+    if (flipPaddle) {
+        this->underPaddleYBound = this->defaultYPos + yBoundDiff;
+        this->reorientZRotInRads = M_PI;
+    }
+    else {
+        this->underPaddleYBound = this->defaultYPos - yBoundDiff;
+        this->reorientZRotInRads = 0.0;
+    }
+
+    // EVENT: Paddle just flipped
+    GameEventManager::Instance()->ActionPaddleFlipped(*this, flipPaddle);
 }
 
 /**
@@ -218,8 +234,10 @@ void PlayerPaddle::RegenerateBounds() {
 	}
 
 	this->bounds = BoundingLines(MAX_NUM_LINES, boundingLines, boundingNorms);
+
 	// Rotate the bounds (in the case where the paddle rotation has changed)
-	this->bounds.RotateLinesAndNormals(this->rotAngleZAnimation.GetInterpolantValue(), Point2D(0,0));
+	this->bounds.RotateLinesAndNormals(this->GetZRotation(), Point2D(0,0));
+
 	// Translate the bounds into game space
 	this->bounds.TranslateBounds(Vector2D(this->GetCenterPosition()[0], this->GetCenterPosition()[1]));
 }
@@ -286,7 +304,7 @@ void PlayerPaddle::FireAttachedBall() {
         std::vector<int> indices = this->bounds.ClosestCollisionIndices(this->attachedBall->GetCenterPosition2D(), 0.01f);
 		assert(indices.size() > 0);
 		
-        ballReleaseDir = 2*Vector2D::Rotate(this->GetZRotation(), this->bounds.GetNormal(indices[0]));
+        ballReleaseDir = 2*this->bounds.GetNormal(indices[0]);
 	}
 
     // Check to see if the paddle has crashed into a wall or is touching it, in this case we reduce
@@ -310,7 +328,7 @@ void PlayerPaddle::FireAttachedBall() {
 	// Set the ball velocity (trajectory it will leave the paddle on)
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), newReleaseDir);
     
-    // Add a brief impulse to the ball's velocity to give the launch a more viseral feeling
+    // Add a brief impulse to the ball's velocity to give the launch a more visceral feeling
     float ballImpulse = 0.575f * absPaddleSpd;
     this->attachedBall->ApplyImpulseForce(ballImpulse, ballImpulse); 
 
@@ -385,7 +403,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 
 	Point2D startingCenterPos = this->centerPos;
 	Point2D defaultCenterPos  = this->GetDefaultCenterPosition();
-	this->centerPos[1] = defaultCenterPos[1] - this->moveDownAnimation.GetInterpolantValue();
+	this->centerPos[1] = defaultCenterPos[1] - (cosf(this->reorientZRotInRads) * this->moveDownAnimation.GetInterpolantValue());
 
 	// Increment seconds since the various types of previous weapon shots
 	// This makes sure the user can't consecutively fire various weapons like crazy
@@ -420,7 +438,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
     this->moveDownAnimation.Tick(seconds);
 
     // If the paddle is rotating (might have been hit or knocked around) we want to animate that rotation
-    float startingZRotation = this->rotAngleZAnimation.GetInterpolantValue();
+    float startingZAnimRotation = this->rotAngleZAnimation.GetInterpolantValue();
     this->rotAngleZAnimation.Tick(seconds);
 
 	// Figure out what the current acceleration is based on whether the player
@@ -516,17 +534,36 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
         }
     }
     if (this->levelBoundsCheckingOn) {
+        
         Collision::AABB2D paddleAABB = this->bounds.GenerateAABBFromLines();
-        if (paddleAABB.GetMin()[1] < this->minYBound) {
+        if (this->reorientZRotInRads != 0.0f) {
 
-            this->centerPos[1] = this->centerPos[1] + this->minYBound - paddleAABB.GetMin()[1];
-            float maxMoveDownAmt = fabs(this->defaultYPos - this->centerPos[1]);
+            if (paddleAABB.GetMax()[1] > this->underPaddleYBound) {
 
-            // We have to make sure that any movement animation also accommodates the lower Y boundary...
-            std::vector<float>& interpolationValues = this->moveDownAnimation.GetEditableInterpolationValues();
-            for (std::vector<float>::iterator iter = interpolationValues.begin(); iter != interpolationValues.end(); ++iter) {
-                if (*iter > maxMoveDownAmt) {
-                    *iter = maxMoveDownAmt;
+                this->centerPos[1] = this->centerPos[1] - paddleAABB.GetMax()[1] - this->underPaddleYBound;
+                float maxMoveDownAmt = fabs(this->defaultYPos - this->centerPos[1]);
+
+                // We have to make sure that any movement animation also accommodates the lower Y boundary...
+                std::vector<float>& interpolationValues = this->moveDownAnimation.GetEditableInterpolationValues();
+                for (std::vector<float>::iterator iter = interpolationValues.begin(); iter != interpolationValues.end(); ++iter) {
+                    if (*iter > maxMoveDownAmt) {
+                        *iter = maxMoveDownAmt;
+                    }
+                }
+            }
+        }
+        else {
+            if (paddleAABB.GetMin()[1] < this->underPaddleYBound) {
+
+                this->centerPos[1] = this->centerPos[1] + this->underPaddleYBound - paddleAABB.GetMin()[1];
+                float maxMoveDownAmt = fabs(this->defaultYPos - this->centerPos[1]);
+
+                // We have to make sure that any movement animation also accommodates the lower Y boundary...
+                std::vector<float>& interpolationValues = this->moveDownAnimation.GetEditableInterpolationValues();
+                for (std::vector<float>::iterator iter = interpolationValues.begin(); iter != interpolationValues.end(); ++iter) {
+                    if (*iter > maxMoveDownAmt) {
+                        *iter = maxMoveDownAmt;
+                    }
                 }
             }
         }
@@ -619,7 +656,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
     }
 
 	// Check to see if the center position changed or its rotation changed, if so then regenerate the bounds
-	if (startingCenterPos != this->centerPos || startingZRotation != this->rotAngleZAnimation.GetInterpolantValue()) {
+	if (startingCenterPos != this->centerPos || startingZAnimRotation != this->rotAngleZAnimation.GetInterpolantValue()) {
 		this->RegenerateBounds();
 	}
 }
@@ -821,13 +858,13 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 	    if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
             rocketType = PlayerPaddle::RocketPaddle;
 		    rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, 
-                Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
+                this->GetUpVector(), rocketWidth, rocketHeight);
 	    }
         else {
             assert(this->HasPaddleType(PlayerPaddle::RemoteControlRocketPaddle));
             rocketType = PlayerPaddle::RemoteControlRocketPaddle;
             rocketProjectile = new PaddleRemoteControlRocketProjectile(rocketSpawnPos, 
-                Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
+                this->GetUpVector(), rocketWidth, rocketHeight);
         }
 
         // Make sure the rocket doesn't explode if it's lying up against a block when launched...
@@ -890,9 +927,9 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 			    float projectileHeight = this->GetPaddleScaleFactor() * PaddleLaserProjectile::HEIGHT_DEFAULT;
 
 			    // Create the right type of projectile in the right place
+                Vector2D paddleUpDir = this->GetUpVector();
 			    Projectile* newProjectile = new PaddleLaserProjectile(
-				    this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight), 
-                    Vector2D::Normalize(this->GetUpVector()));
+				    this->GetCenterPosition() + (this->currHalfHeight + 0.5f * projectileHeight) * paddleUpDir, paddleUpDir);
 
                 newProjectile->SetLastThingCollidedWith(this);
 
@@ -945,9 +982,10 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 			    float projectileHeight = this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;
 
 			    // Create the right type of projectile in the right place
+                Vector2D paddleUpDir = this->GetUpVector();
 			    Projectile* mineProjectile = new PaddleMineProjectile(
-				    this->GetCenterPosition() + Vector2D(0, this->GetMineProjectileStartingHeightRelativeToPaddle()),
-                    Vector2D::Normalize(this->GetUpVector()), projectileWidth, projectileHeight);
+				    this->GetCenterPosition() + this->GetMineProjectileStartingHeightRelativeToPaddle() * paddleUpDir,
+                    paddleUpDir, projectileWidth, projectileHeight);
                
                 mineProjectile->SetLastThingCollidedWith(this);
 
@@ -993,10 +1031,17 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
     // If the ball is directly below the paddle then we don't attach it
     const Point2D& ballCenter = ball->GetBounds().Center();
     float ballRadius = ball->GetBounds().Radius();
+
+    // Check to make sure the ball is within the x coordinates of the paddle
     if (ballCenter[0] - ballRadius <= this->GetCenterPosition()[0] + this->GetHalfWidthTotal() &&
         ballCenter[0] + ballRadius >= this->GetCenterPosition()[0] - this->GetHalfWidthTotal()) {
 
-        if ((ballCenter[1] - 0.5f * ballRadius) <= (this->GetCenterPosition()[1] - this->GetHalfHeight())) {
+        // Check to see if the ball is below the paddle...
+        bool isPaddleFlipped = this->GetIsPaddleFlipped();
+        bool isUnderPaddle = (isPaddleFlipped && (ballCenter[1] + 0.5f * ballRadius) >= (this->GetCenterPosition()[1] + this->GetHalfHeight())) ||
+            (!isPaddleFlipped && (ballCenter[1] - 0.5f * ballRadius) <= (this->GetCenterPosition()[1] - this->GetHalfHeight()));
+
+        if (isUnderPaddle) {
             return false;
         }
     }
@@ -1094,6 +1139,12 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 		// The boss hit the 'right' side of the paddle (typically along the positive x-axis)
 		rotationAmount *= -1.0f;
     }
+    //else {
+    // The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
+    //}
+
+    // Re-adjust the rotation sign based on whether the paddle is flipped
+    rotationAmount *= cosf(this->reorientZRotInRads);
 
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
 	static const double HIT_EFFECT_TIME = 2.5;
@@ -1309,12 +1360,16 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
             p.GetBounds().GetCollisionPoints(this->CreatePaddleShieldBounds(), collisionPts)) {
 
             // Separate points into those to the left and right of the paddle center, closest to the paddle center...
-	        bool collisionOnMinX  = false;
+	        bool collisionOnMinX = false;
 	        bool collisionOnMaxX = false;
-            bool collisionUnder   = false;
+            bool collisionUnder  = false;
 
-            bool isOneWayDown = (p.GetType() == LevelPiece::OneWay) && (static_cast<const OneWayBlock&>(p).GetDirType() == OneWayBlock::OneWayDown);
-            float paddleYCollisionCoord = this->defaultYPos - (this->currHalfHeight - EPSILON);
+            float rotationSign = cosf(this->reorientZRotInRads);
+            assert(rotationSign != 0);
+            bool isOneWayInOKDir = (p.GetType() == LevelPiece::OneWay) && 
+                static_cast<const OneWayBlock&>(p).IsGoingTheOneWay(Vector2D(0, -rotationSign));
+
+            float paddleYCollisionCoord = this->defaultYPos - rotationSign*(this->currHalfHeight - EPSILON);
 
 	        for (std::list<Point2D>::iterator iter = collisionPts.begin(); iter != collisionPts.end(); ++iter) {
 		        const Point2D& currPt = *iter;
@@ -1328,13 +1383,21 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
 			        collisionOnMaxX = true;
 		        }
 
-
-                if (currPt[1] < paddleYCollisionCoord) {
+                if (rotationSign > 0 && currPt[1] < paddleYCollisionCoord) {
+                    // Not flipped upside down and there's a collision under the paddle
                     collisionUnder = true;
-                    if (!isOneWayDown) {
-                        this->minYBound = std::max<float>(this->minYBound, currPt[1]);
+                    if (!isOneWayInOKDir) {
+                        this->underPaddleYBound = std::max<float>(this->underPaddleYBound, currPt[1]);
                     }
                 }
+                else if (rotationSign < 0 && currPt[1] > paddleYCollisionCoord) {
+                    // Flipped upside down and there's a collision under the paddle
+                    collisionUnder = true;
+                    if (!isOneWayInOKDir) {
+                        this->underPaddleYBound = std::min<float>(this->underPaddleYBound, currPt[1]);
+                    }
+                }
+ 
 	        }
 
             if (collisionUnder || (collisionOnMaxX && collisionOnMinX)) {
@@ -1355,11 +1418,19 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
 
             if (this->bounds.CollisionCheck(pieceAABB)) {
 	            
-                bool isOneWayDown = (p.GetType() == LevelPiece::OneWay) && 
-                    (static_cast<const OneWayBlock&>(p).GetDirType() == OneWayBlock::OneWayDown);
-                if (!isOneWayDown && p.GetCenter()[1] < this->defaultYPos-this->currHalfHeight+EPSILON) {
-                    // Update the y bounds of the paddle...
-                    this->minYBound = pieceAABB.GetMax()[1];
+                float rotationSign = cosf(this->reorientZRotInRads);
+                assert(rotationSign != 0);
+                bool isOneWayInOKDir = (p.GetType() == LevelPiece::OneWay) && 
+                    static_cast<const OneWayBlock&>(p).IsGoingTheOneWay(Vector2D(0, -rotationSign));
+                float paddleYCollisionCoord = this->defaultYPos - rotationSign*(this->currHalfHeight - EPSILON);
+
+                if (rotationSign > 0 && p.GetCenter()[1] < paddleYCollisionCoord && !isOneWayInOKDir) {
+                    // Not flipped, update the y bounds of the paddle...
+                    this->underPaddleYBound = pieceAABB.GetMax()[1];
+                    return;
+                }
+                else if (rotationSign < 0 && p.GetCenter()[1] > paddleYCollisionCoord && !isOneWayInOKDir) {
+                    this->underPaddleYBound = pieceAABB.GetMin()[1];
                     return;
                 }
 
@@ -1402,7 +1473,11 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
     }
 
     // Don't let the piece interfere if it's below the paddle
-    if (p.GetCenter()[1] < this->defaultYPos-this->currHalfHeight+EPSILON) {
+    float rotationSign = cosf(this->reorientZRotInRads);
+    float paddleYCollisionCoord = this->defaultYPos - rotationSign*(this->currHalfHeight - EPSILON);
+    if ((rotationSign > 0 && p.GetCenter()[1] < paddleYCollisionCoord) ||
+        (rotationSign < 0 && p.GetCenter()[1] > paddleYCollisionCoord)) {
+
         return;
     }
 
@@ -1483,6 +1558,9 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 		// The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
 	//}
 
+    // Re-adjust the rotation sign based on whether the paddle is flipped
+    rotationAmount *= cosf(this->reorientZRotInRads);
+
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
 	static const double HIT_EFFECT_TIME = 2.5;
 	std::vector<double> times;
@@ -1553,6 +1631,12 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
 		rotationAmount *= -1.0f;
 	}
+    //else {
+    // The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
+    //}
+
+    // Re-adjust the rotation sign based on whether the paddle is flipped
+    rotationAmount *= cosf(this->reorientZRotInRads);
 
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
 	const double HIT_EFFECT_TIME = 5.0 * projectile.GetForcePercentageFactor();
@@ -1729,6 +1813,12 @@ void PlayerPaddle::GetPaddleHitByProjectileEffect(const Point2D& projectileCente
         // The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
         totalRotationInDegs *= -1.0f;
     }
+    //else {
+    // The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
+    //}
+
+    // Re-adjust the rotation sign based on whether the paddle is flipped
+    totalRotationInDegs *= cosf(this->reorientZRotInRads);
 
     totalMoveDownAmt = minMoveDown + percentNearCenter * closeToCenterCoeff;
 }
@@ -1754,9 +1844,6 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 	float rotationAmount;
     float totalMaxMoveDown;
     this->GetPaddleHitByProjectileEffect(projectileCenter, maxRotationInDegs, minMoveDown, closeToCenterCoeff, totalMaxMoveDown, rotationAmount);
-
-    // When the paddle moves down make sure it doesn't collide with blocks along the way...
-
 
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
 	std::vector<double> times;
@@ -1789,6 +1876,7 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
  */
 bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesChangePerSec,
                                                   const Point2D& currCenter, Vector2D& vectorToAugment) const {
+
     // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
     // modify the velocity to make it move towards the paddle...
     if (!this->HasPaddleType(PlayerPaddle::MagnetPaddle)) {
@@ -1796,7 +1884,10 @@ bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
     }
         
     // Also, don't keep augmenting the direction if the projectile has passed the paddle going out of bounds...
-    if (currCenter[1] < this->GetCenterPosition()[1]) {
+    float rotationSign = cosf(this->reorientZRotInRads);
+    if ((rotationSign > 0 && currCenter[1] < this->GetCenterPosition()[1]) ||
+        (rotationSign < 0 && currCenter[1] > this->GetCenterPosition()[1])) {
+
         return false;
     }
 
@@ -1809,25 +1900,25 @@ bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
         return false;
     }
     
+    bool isFlipped = this->GetIsPaddleFlipped();
+    const float MIN_RANGE = isFlipped ? Trig::degreesToRadians(30)  : Trig::degreesToRadians(-150);
+    const float MAX_RANGE = isFlipped ? Trig::degreesToRadians(150) : Trig::degreesToRadians(-30);
+
     float currRotAngle = atan2(vectorToAugment[1], vectorToAugment[0]);
     
     // Don't let the angle get too sharp or the projectile will collide with the paddle no matter what
     bool wasInRange = true;
-    if (currRotAngle > Trig::degreesToRadians(-30) || currRotAngle < Trig::degreesToRadians(-150)) {
+    if (currRotAngle > MAX_RANGE || currRotAngle < MIN_RANGE) {
         wasInRange = false;
     }
 
     float targetRotAngle = atan2(projectileToPaddleVec[1],  projectileToPaddleVec[0]);
-
-    if (currRotAngle > M_PI_DIV2) { currRotAngle -= M_PI_MULT2; }
-
-
-    if (fabs(targetRotAngle - currRotAngle) <= 0.01) {
-        // If the direction is already pointing at the paddle then exit immediately
+    if (fmod(fabs(targetRotAngle - currRotAngle), 360.0f) <= 0.01f) {
+        // If the direction is already pointing at the paddle then exit, no need to do anything else
         return false;
     }
 
-    // Figure out the shortest way to get there...
+    // Figure out the shortest way to go from the current rotation to the target...
     float rotSgn;
     if (targetRotAngle < currRotAngle) {
         rotSgn = -1;
@@ -1835,9 +1926,11 @@ bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
     else {
         rotSgn = 1;
     }
+    //if (isFlipped) {
+    //    rotSgn *= -1;
+    //}
 
     float rotationAmt = rotSgn * seconds * degreesChangePerSec;
-
     Vector2D newVector(vectorToAugment);
     newVector.Rotate(rotationAmt);
     newVector.Normalize();
@@ -1845,7 +1938,7 @@ bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
     if (wasInRange) {
         // Make sure the new vector is in range as well...
         float newRotAngle = atan2(newVector[1], newVector[0]);
-        if (newRotAngle > Trig::degreesToRadians(-30) || newRotAngle < Trig::degreesToRadians(-150)) {
+        if (newRotAngle > MAX_RANGE || newRotAngle < MIN_RANGE) {
             // We've gone out of range, don't change anything and exit
             return false;
         }
@@ -1927,6 +2020,13 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 	return didCollide;
 }
 
+bool PlayerPaddle::IsBallUnderPaddle(const GameBall& ball) const {
+    bool isFlipped = this->GetIsPaddleFlipped();
+    float ballYAdjustment = this->GetHalfHeight() + 0.9f*ball.GetBounds().Radius();
+    return (!isFlipped && (ball.GetCenterPosition2D()[1] < this->GetCenterPosition()[1] - ballYAdjustment)) ||
+        (isFlipped && (ball.GetCenterPosition2D()[1] > this->GetCenterPosition()[1] + ballYAdjustment));
+}
+
 // Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
 // as the time since the collision occurred
 bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
@@ -1947,15 +2047,14 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
     else {
         assert(this->bounds.GetNumLines() == 4);
 
-        if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight() - 0.9f*ball.GetBounds().Radius())) &&
-          Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
+        bool ballIsUnderPaddle = this->IsBallUnderPaddle(ball);
+        if (ballIsUnderPaddle && Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
 
               // Ball is traveling upwards at the paddle from below it...
               return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, 
                   timeUntilCollision, pointOfCollision, this->GetVelocity());
         }
         else {
-
           // Ball is traveling downwards/parallel at the paddle
           BoundingLines boundsNoBottom;
           this->GetBoundsWithoutBottomCollisionLine(boundsNoBottom);
@@ -2104,7 +2203,7 @@ void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, flo
         width  = this->currScaleFactor * PaddleRemoteControlRocketProjectile::PADDLE_REMOTE_CONTROL_ROCKET_WIDTH_DEFAULT;
     }
 
-    spawnPos = this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * height);
+    spawnPos = this->GetCenterPosition() + (this->currHalfHeight + 0.5f * height) * this->GetUpVector();
 }
 
 void PlayerPaddle::CancelFireStatusWithIce() {

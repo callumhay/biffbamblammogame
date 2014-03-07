@@ -55,16 +55,18 @@ resources/worlds/levels/medium/multitasking_now_with_more_rockets.lvl
 resources/worlds/levels/medium/a_pillar_too_far.lvl
 
 
-resources/worlds/levels/hard/180_degrees_of_separation.lvl
+
 
 
 # 4X paddle teleportation with one-way blocks
 resources/worlds/levels/hard/rewiring_your_brain.lvl
 
 
+
+
+
 # TODO: Collateral block with level flip and portals?
-
-
+resources/worlds/levels/hard/180_degrees_of_separation.lvl
 
 
 
@@ -73,7 +75,7 @@ resources/worlds/levels/hard/rewiring_your_brain.lvl
 resources/worlds/levels/hard/frikin_laser_beams_part_2.lvl
 
 
-
+resources/worlds/testing/test_paddle_flip.lvl
 
 
 # Boss

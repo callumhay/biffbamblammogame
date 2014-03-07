@@ -37,7 +37,7 @@ public:
     static const char* FLAME_BLASTER_PADDLE_ITEM_NAME;
     static const double FLAME_BLASTER_PADDLE_TIMER_IN_SECS;
 
-    FlameBlasterPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+    FlameBlasterPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
     ~FlameBlasterPaddleItem();
 
     double Activate();

@@ -64,6 +64,7 @@ public:
     void PaddleStatusUpdateEvent(const PlayerPaddle& paddle, PlayerPaddle::PaddleSpecialStatus status, bool isActive);
     void FrozenPaddleCanceledByFireEvent(const PlayerPaddle& paddle);
     void OnFirePaddleCanceledByIceEvent(const PlayerPaddle& paddle);
+    void PaddleFlippedEvent(const PlayerPaddle& paddle, bool isUpsideDown);
 
 	// Ball/Block related events
 	void BallDiedEvent(const GameBall& deadBall);
@@ -97,10 +98,10 @@ public:
 
 	// Misc game events
 	void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
-	void BallSafetyNetCreatedEvent();
-	void BallSafetyNetDestroyedEvent(const GameBall& ball);
-	void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle);
-	void BallSafetyNetDestroyedEvent(const Projectile& projectile);
+	void BallSafetyNetCreatedEvent(bool bottomSafetyNet);
+	void BallSafetyNetDestroyedEvent(const GameBall& ball, bool bottomSafetyNet);
+	void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle, bool bottomSafetyNet);
+	void BallSafetyNetDestroyedEvent(const Projectile& projectile, bool bottomSafetyNet);
 	void LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
 	void LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);
@@ -222,7 +223,7 @@ private:
     int numFallingItemsInPlay;
     SoundID fallingItemSoundID;
 
-	void DestroyBallSafetyNet(const Point2D& pt);
+	void DestroyBallSafetyNet(const Point2D& pt, bool bottomSafetyNet);
 
 	static void GetEffectsForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,
         float& shakeLength, BBBGameController::VibrateAmount& controllerVibeAmt);

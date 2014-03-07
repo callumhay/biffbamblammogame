@@ -33,8 +33,8 @@
 const double RocketPaddleItem::ROCKET_PADDLE_TIMER_IN_SECS	= 0.0;  // The rocket is not a timed power-up, it's activated when shot
 const char* RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME       = "RocketPaddle";
 
-RocketPaddleItem::RocketPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
+RocketPaddleItem::RocketPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Good) {
 }
 
 RocketPaddleItem::~RocketPaddleItem() {

@@ -37,8 +37,8 @@
 const char*  BallCamItem::BALL_CAM_ITEM_NAME	    = "BallCam";
 const double BallCamItem::BALL_CAM_TIMER_IN_SECS	= 15.0;
 
-BallCamItem::BallCamItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(BallCamItem::BALL_CAM_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
+BallCamItem::BallCamItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(BallCamItem::BALL_CAM_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Bad) {
 }
 
 BallCamItem::~BallCamItem() {

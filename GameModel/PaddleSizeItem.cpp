@@ -36,8 +36,9 @@ const double PaddleSizeItem::PADDLE_SIZE_TIMER_IN_SECS	= 0.0;
 const char* PaddleSizeItem::PADDLE_GROW_ITEM_NAME		= "PaddleGrow";
 const char* PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME = "PaddleShrink";
 
-PaddleSizeItem::PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(((type == ShrinkPaddle) ? PADDLE_SHRINK_ITEM_NAME : PADDLE_GROW_ITEM_NAME), spawnOrigin, gameModel, 
+PaddleSizeItem::PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin,
+                               const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(((type == ShrinkPaddle) ? PADDLE_SHRINK_ITEM_NAME : PADDLE_GROW_ITEM_NAME), spawnOrigin, dropDir, gameModel, 
 				 ((type == ShrinkPaddle) ? GameItem::Bad : GameItem::Good)), sizeChangeType(type) {
 }
 

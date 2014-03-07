@@ -46,7 +46,7 @@ public:
 	static const char*  UPSIDEDOWN_ITEM_NAME;
 	static const double UPSIDEDOWN_TIMER_IN_SECS;
 
-	UpsideDownItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	UpsideDownItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~UpsideDownItem();
 
 	double Activate();

@@ -44,7 +44,7 @@ public:
 	static const char* POISON_PADDLE_ITEM_NAME;
 	static const double POISON_PADDLE_TIMER_IN_SECS;
 
-	PoisonPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	PoisonPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~PoisonPaddleItem();
 
 	double Activate();

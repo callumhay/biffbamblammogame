@@ -34,27 +34,35 @@
 const float SafetyNet::SAFETY_NET_HEIGHT      = 1.0f;
 const float SafetyNet::SAFETY_NET_HALF_HEIGHT = SafetyNet::SAFETY_NET_HEIGHT / 2.0f;
 
-SafetyNet::SafetyNet(const GameLevel& currLevel) {
+SafetyNet::SafetyNet(const GameLevel& currLevel, bool isBottomSafetyNet) {
 
-    const LevelPiece* maxBoundPiece = currLevel.GetMaxXPaddleBoundPiece(0);
-    const LevelPiece* minBoundPiece = currLevel.GetMinXPaddleBoundPiece(0);
+    static const float BOUND_DIST_MULTIPLIER = 1.5f;
+
+    float safetyNetLine1Y = -LevelPiece::HALF_PIECE_HEIGHT;
+    float safetyNetLine2Y = -BOUND_DIST_MULTIPLIER*LevelPiece::HALF_PIECE_HEIGHT;
+    if (!isBottomSafetyNet) {
+        safetyNetLine2Y = currLevel.GetLevelUnitHeight() + LevelPiece::HALF_PIECE_HEIGHT;
+        safetyNetLine1Y = currLevel.GetLevelUnitHeight() + BOUND_DIST_MULTIPLIER*LevelPiece::HALF_PIECE_HEIGHT;
+    }
+
+    std::pair<const LevelPiece*, const LevelPiece*> minMaxPieces = SafetyNet::GetSafetyNetMinMaxPiece(currLevel, isBottomSafetyNet);
 
 	// Create the safety net bounding line for this level
 	std::vector<Collision::LineSeg2D> lines;
 	lines.reserve(2);
     Collision::LineSeg2D safetyNetLine1(
-        Point2D(minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-        Point2D(maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+        Point2D(minMaxPieces.first->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH, safetyNetLine1Y),
+        Point2D(minMaxPieces.second->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH, safetyNetLine1Y));
     Collision::LineSeg2D safetyNetLine2(
-        Point2D(minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH, -1.5f*LevelPiece::HALF_PIECE_HEIGHT),
-        Point2D(maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH, -1.5f*LevelPiece::HALF_PIECE_HEIGHT));
+        Point2D(minMaxPieces.first->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH, safetyNetLine2Y),
+        Point2D(minMaxPieces.second->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH, safetyNetLine2Y));
 	lines.push_back(safetyNetLine1);
     lines.push_back(safetyNetLine2);
 
 	std::vector<Vector2D> normals;
 	normals.reserve(2);
-	normals.push_back(Vector2D(0, 1));
-    normals.push_back(Vector2D(0, -1));
+	normals.push_back(Vector2D(0.0f, 1.0f));
+    normals.push_back(Vector2D(0.0f, -1.0f));
 	
 	this->bounds = BoundingLines(lines, normals);
 }
@@ -70,4 +78,17 @@ SafetyNet::~SafetyNet() {
         this->DetachProjectile(p); // This is redundant and will be ignored, just here for robustness
     }
     this->attachedProjectiles.clear();
+}
+
+bool SafetyNet::CanTopSafetyNetBePlaced(const GameLevel& currLevel) {
+    std::pair<const LevelPiece*, const LevelPiece*> minMaxPieces = SafetyNet::GetSafetyNetMinMaxPiece(currLevel, false);
+    return (minMaxPieces.first != minMaxPieces.second);
+}
+
+std::pair<const LevelPiece*, const LevelPiece*> 
+SafetyNet::GetSafetyNetMinMaxPiece(const GameLevel& currLevel, bool isBottomSafetyNet) {
+    float yPos = isBottomSafetyNet ? 0.0f : (currLevel.GetLevelUnitHeight() - LevelPiece::HALF_PIECE_HEIGHT);
+    const LevelPiece* maxBoundPiece = currLevel.GetMaxXPaddleBoundPiece(yPos);
+    const LevelPiece* minBoundPiece = currLevel.GetMinXPaddleBoundPiece(yPos);
+    return std::make_pair(minBoundPiece, maxBoundPiece);
 }

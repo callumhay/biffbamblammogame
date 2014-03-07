@@ -47,7 +47,7 @@ public:
 	static const char* ROCKET_PADDLE_ITEM_NAME;
 	static const double ROCKET_PADDLE_TIMER_IN_SECS;
 
-	RocketPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	RocketPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~RocketPaddleItem ();
 
 	double Activate();

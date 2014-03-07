@@ -42,7 +42,7 @@ public:
 	static const char* GHOST_BALL_ITEM_NAME;
 	static const double GHOST_BALL_TIMER_IN_SECS;
 
-	GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	GhostBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~GhostBallItem();
 
 	double Activate();

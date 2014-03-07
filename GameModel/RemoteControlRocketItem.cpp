@@ -34,8 +34,8 @@
 const char* RemoteControlRocketItem::REMOTE_CONTROL_ROCKET_ITEM_NAME      = "RemoteControlRocket";
 const double RemoteControlRocketItem::REMOTE_CONTROL_ROCKET_TIMER_IN_SECS = 0.0; // The rocket is not a timed power-up, it's activated when shot
 
-RemoteControlRocketItem::RemoteControlRocketItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(REMOTE_CONTROL_ROCKET_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
+RemoteControlRocketItem::RemoteControlRocketItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(REMOTE_CONTROL_ROCKET_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Good) {
 }
 
 RemoteControlRocketItem::~RemoteControlRocketItem () {

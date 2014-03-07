@@ -51,6 +51,9 @@ public:
 		assert(sibling != NULL);
 		this->sibling = sibling;
 	}
+    void SetFlipsPaddleOnEntry(bool flipsPaddle) {
+        this->flipsPaddleOnEntry = flipsPaddle;
+    }
 
 	LevelPieceType GetType() const { 
 		return LevelPiece::Portal;
@@ -61,8 +64,8 @@ public:
         return false;
     }
 
-	// Is this piece one without any boundries (i.e., no collision surface/line)?
-	// Return: true if non-collider, false otherwise.
+	// Is this piece one without any boundaries (i.e., no collision surface/line)?
+	// Return: true if this has no bounce-off-able collision bounds, false otherwise.
 	bool IsNoBoundsPieceType() const {
 		return true;
 	}
@@ -154,8 +157,10 @@ private:
 
     enum PaddleTeleportLineType { ComingFromLeftPaddleLine, ComingFromRightPaddleLine, NoPaddleLine };
     PaddleTeleportLineType paddleTeleportLine;
+    bool flipsPaddleOnEntry;
 
     Collision::LineSeg2D GetPaddleTeleportLine() const;
+    bool FlipsPaddleOnEntry() const;
 
     DISALLOW_COPY_AND_ASSIGN(PortalBlock);
 };
@@ -189,6 +194,10 @@ inline void PortalBlock::SetPaddleTeleportLine(bool fromRight) {
 inline Collision::LineSeg2D PortalBlock::GetPaddleTeleportLine() const {
     Vector2D halfHeightVec(0, LevelPiece::HALF_PIECE_HEIGHT);
     return Collision::LineSeg2D(this->center + halfHeightVec, this->center - halfHeightVec);
+}
+
+inline bool PortalBlock::FlipsPaddleOnEntry() const {
+    return this->flipsPaddleOnEntry;
 }
 
 #endif // __PORTALBLOCK_H__

@@ -715,7 +715,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 						// X(a,b) - Portal block:
 						// a: A single character name for this portal block
 						// b: The single character name of the sibling portal block that this portal block is
-						// the enterance and exit for.
+						// the entrance and exit for.
 						char tempChar;
 						*inFile >> tempChar;
 						if (tempChar != '(') {
@@ -742,6 +742,19 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 							debug_output("ERROR: Portal block name must be a character A-Z or a-z");
 							break;
 						}
+
+                        bool flipsPaddle = false;
+
+                        // Check for the option that flips the paddle when it enters this portal...
+                        if (inFile->peek() == ',') {
+                            *inFile >> tempChar;
+                            *inFile >> tempChar;
+                            if (tempChar != 'f') {
+                                debug_output("ERROR: Portal block only allows 'f' option, currently.");
+                                break;
+                            }
+                            flipsPaddle = true;
+                        }
 
 						*inFile >> tempChar;
 						if (tempChar != ')') {
@@ -790,6 +803,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 							siblingPortalBlock->SetColour(ColourRGBA(portalBlockColour, 1.0f));
 						}
 
+                        currentPortalBlock->SetFlipsPaddleOnEntry(flipsPaddle);
 						newPiece = currentPortalBlock;
 					}
 					break;
@@ -1996,7 +2010,7 @@ std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(double dT, 
 }
 
 std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius) const {
-	// Get the ball boundary and use it to figure out what levelpieces are relevant
+	// Get the ball boundary and use it to figure out what level pieces are relevant
 	// Find the non-rounded max and min indices to look at along the x and y axis
 	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
 	float xIndexMax = floorf(xNonAdjustedIndex + radius); 
@@ -2016,6 +2030,9 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNoSort(const Po
  */
 std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(double dT, const Point2D& center,
                                                                   const BoundingLines& bounds, float velocityMagnitude) const {
+    if (bounds.IsEmpty()) {
+        return std::set<LevelPiece*>();
+    }
 
     Collision::AABB2D boundsAABB = bounds.GenerateAABBFromLines();
     float radius = std::max<float>(boundsAABB.GetWidth(), boundsAABB.GetHeight()) / 2.0f + dT * velocityMagnitude;

@@ -42,7 +42,7 @@ public:
 	static const char* GRAVITY_BALL_ITEM_NAME;
 	static const double GRAVITY_BALL_TIMER_IN_SECS;
 
-	GravityBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	GravityBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~GravityBallItem();
 
 	double Activate();

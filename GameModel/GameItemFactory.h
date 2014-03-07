@@ -49,12 +49,14 @@ public:
 	static void DeleteInstance();
 
 	// Factory functions for the creation of game items
-	GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const;   // Could be either power-up or down
+	GameItem* CreateRandomItem(const Point2D &spawnOrigin, const Vector2D& dropDir, 
+        GameModel *gameModel, bool allowRandomItemType) const;   // Could be either power-up or down
 	GameItem::ItemType CreateRandomItemType(GameModel *gameModel, bool allowRandomItemType) const;
 	GameItem::ItemType GetItemTypeFromName(const std::string& itemName) const;
-	GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) const;
+	GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) const;
 
-	GameItem* CreateRandomItemForCurrentLevel(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const;
+	GameItem* CreateRandomItemForCurrentLevel(const Point2D &spawnOrigin, const Vector2D& dropDir, 
+        GameModel *gameModel, bool allowRandomItemType) const;
 	GameItem::ItemType CreateRandomItemTypeForCurrentLevel(GameModel *gameModel, bool allowRandomItemType) const;
 
 	GameItem::ItemDisposition GetItemTypeDisposition(const GameItem::ItemType& itemType) const;

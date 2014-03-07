@@ -43,7 +43,7 @@ public:
 	static const char* PADDLE_SHRINK_ITEM_NAME;
 	static const double PADDLE_SIZE_TIMER_IN_SECS;
 
-	PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel);
+	PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~PaddleSizeItem();
 
 	double Activate();

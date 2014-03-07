@@ -32,8 +32,8 @@
 const char* PoisonPaddleItem::POISON_PADDLE_ITEM_NAME       = "PoisonPaddle";
 const double PoisonPaddleItem::POISON_PADDLE_TIMER_IN_SECS	= 18.0f;
 
-PoisonPaddleItem::PoisonPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
+PoisonPaddleItem::PoisonPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Bad) {
 }
 
 PoisonPaddleItem::~PoisonPaddleItem() {

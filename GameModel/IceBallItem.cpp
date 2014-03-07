@@ -35,8 +35,8 @@
 const double IceBallItem::ICE_BALL_TIMER_IN_SECS	= 22.0;
 const char* IceBallItem::ICE_BALL_ITEM_NAME			  = "IceBall";
 
-IceBallItem::IceBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(ICE_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+IceBallItem::IceBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(ICE_BALL_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 IceBallItem::~IceBallItem() {

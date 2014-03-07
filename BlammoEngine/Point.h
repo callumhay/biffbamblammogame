@@ -193,6 +193,12 @@ public:
         v_[2] = z;		
     }
 
+    Point3D(const Vector2D& v, float z) {
+        v_[0] = v[0];
+        v_[1] = v[1];
+        v_[2] = z;	
+    }
+
     explicit Point3D(const Point2D& p) {
         v_[0] = p[0];
         v_[1] = p[1];

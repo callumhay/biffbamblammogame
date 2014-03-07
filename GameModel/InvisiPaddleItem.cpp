@@ -33,8 +33,8 @@
 const char* InvisiPaddleItem::INVISI_PADDLE_ITEM_NAME       = "InvisiPaddle";
 const double InvisiPaddleItem::INVISI_PADDLE_TIMER_IN_SECS  = 20.0;
 
-InvisiPaddleItem::InvisiPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(InvisiPaddleItem::INVISI_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
+InvisiPaddleItem::InvisiPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(InvisiPaddleItem::INVISI_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Bad) {
 }
 
 InvisiPaddleItem::~InvisiPaddleItem() {

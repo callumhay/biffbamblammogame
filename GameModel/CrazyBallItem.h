@@ -40,7 +40,7 @@ public:
 	static const char* CRAZY_BALL_ITEM_NAME;
 	static const double CRAZY_BALL_TIMER_IN_SECS;
 
-	CrazyBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	CrazyBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~CrazyBallItem();
 
 	double Activate();

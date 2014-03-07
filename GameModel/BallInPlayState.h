@@ -40,6 +40,8 @@ class Vector2D;
 class PlayerPaddle;
 class GameItem;
 class Point2D;
+class SafetyNet;
+struct BallCollisionChangeInfo;
 
 namespace Collision {
 class LineSeg2D;
@@ -72,13 +74,14 @@ private:
 
 	void DoBallCollision(GameBall& b, const Vector2D& n, double dT, double timeUntilCollision, 
         float minAngleInDegs, const Vector2D& lineVelocity = Vector2D(0,0));
-    void DoBallPaddleCollision(GameBall& b, const Vector2D& n, double dT, double timeUntilCollision, 
+    void DoBallPaddleCollision(GameBall& b, PlayerPaddle& p, const Vector2D& n, double dT, double timeUntilCollision, 
         float minAngleInDegs, const Vector2D& lineVelocity);
-
 	void DoBallCollision(GameBall& ball1, GameBall& ball2, const Point2D& ball1PtOfCollision, 
         const Point2D& ball2PtOfCollision, double dT, double timeUntilCollision);
-
 	void DoItemCollision();
+    void DoBallSafetyNetCollision(SafetyNet* safetyNet, GameBall& ball, double seconds, Vector2D& n,
+        Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& collisionPt,
+        BallCollisionChangeInfo& collisionChangeInfo);
 
 	bool AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const PlayerPaddle& p, const Vector2D& collisionNormal);
 

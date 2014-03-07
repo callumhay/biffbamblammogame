@@ -44,6 +44,7 @@ public:
 	//void SetEmitArea(const Point3D& center, const Vector3D& rectHalfVert, const Vector3D& rectHalfHoriz);
 	void SetEmitVolume(const Point3D& min, const Point3D& max);
 	void SetEmitDirection(const Vector3D& dir);
+    void SetEmitDirection(const Vector2D& dir);
 
 protected:
 	Vector3D CalculateRandomInitParticleDir() const;
@@ -72,4 +73,17 @@ private:
 	ESPVolumeEmitter& operator=(const ESPVolumeEmitter& e);
 
 };
+
+/**
+ * Set the emit direction for this area emitter.
+ */
+inline void ESPVolumeEmitter::SetEmitDirection(const Vector3D& dir) {
+	this->emitDir = dir;
+}
+
+inline void ESPVolumeEmitter::SetEmitDirection(const Vector2D& dir) {
+    this->emitDir[0] = dir[0];
+    this->emitDir[1] = dir[1];
+    this->emitDir[2] = 0.0f;
+}
 #endif

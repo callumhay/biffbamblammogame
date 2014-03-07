@@ -149,6 +149,13 @@ void GameEventManager::ActionOnFirePaddleCanceledByIce(const PlayerPaddle& paddl
     }	
 }
 
+void GameEventManager::ActionPaddleFlipped(const PlayerPaddle& paddle, bool isUpsideDown) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->PaddleFlippedEvent(paddle, isUpsideDown);
+    }
+}
+
 // Action for when a ball has died (gone out of bounds)
 void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
@@ -367,30 +374,30 @@ void GameEventManager::ActionBlockDestroyed(const LevelPiece& block, const Level
 	}	
 }
 
-void GameEventManager::ActionBallSafetyNetCreated() {
+void GameEventManager::ActionBallSafetyNetCreated(bool bottomSafetyNet) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->BallSafetyNetCreatedEvent();
+		(*listenerIter)->BallSafetyNetCreatedEvent(bottomSafetyNet);
 	}		
 }
 
 // Action for when the ball safety net is destroyed
-void GameEventManager::ActionBallSafetyNetDestroyed(const GameBall& ball) {
+void GameEventManager::ActionBallSafetyNetDestroyed(const GameBall& ball, bool bottomSafetyNet) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->BallSafetyNetDestroyedEvent(ball);
+		(*listenerIter)->BallSafetyNetDestroyedEvent(ball, bottomSafetyNet);
 	}	
 }
-void GameEventManager::ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle) {
+void GameEventManager::ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle, bool bottomSafetyNet) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->BallSafetyNetDestroyedEvent(paddle);
+		(*listenerIter)->BallSafetyNetDestroyedEvent(paddle, bottomSafetyNet);
 	}	
 }
-void GameEventManager::ActionBallSafetyNetDestroyed(const Projectile& projectile) {
+void GameEventManager::ActionBallSafetyNetDestroyed(const Projectile& projectile, bool bottomSafetyNet) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->BallSafetyNetDestroyedEvent(projectile);
+		(*listenerIter)->BallSafetyNetDestroyedEvent(projectile, bottomSafetyNet);
 	}	
 }
 

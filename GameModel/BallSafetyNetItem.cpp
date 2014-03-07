@@ -34,8 +34,8 @@
 const char* BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME	  = "BallSafetyNet";
 const double BallSafetyNetItem::BALL_SAFETY_NET_TIMER_IN_SECS = 0.0;
 
-BallSafetyNetItem::BallSafetyNetItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
+BallSafetyNetItem::BallSafetyNetItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Good) {
 }
 
 BallSafetyNetItem::~BallSafetyNetItem() {

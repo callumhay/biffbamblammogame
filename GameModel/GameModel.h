@@ -183,9 +183,14 @@ public:
 		}
 	}
 
-    bool IsSafetyNetActive() const { return this->safetyNet != NULL; }
+    bool IsBottomSafetyNetActive() const { return this->bottomSafetyNet != NULL; }
+    bool IsTopSafetyNetActive() const { return this->topSafetyNet != NULL; }
+    bool IsBottomSafetyNet(const SafetyNet* safetyNet) { return safetyNet != NULL && this->bottomSafetyNet == safetyNet; }
+
     bool ActivateSafetyNet();
-    void DestroySafetyNet();
+    void DestroySafetyNet(SafetyNet* netToDestroy);
+    void DestroyBottomSafetyNet();
+    void DestroyTopSafetyNet();
 
     void CleanUpAfterLevelEnd();
 
@@ -548,7 +553,8 @@ private:
     // Player-controllable game assets
     PlayerPaddle* playerPaddle;                         // The one and only player paddle
     std::list<GameBall*> balls;                         // Current set of balls active in the game
-    SafetyNet* safetyNet;                               // The ball safety net
+    SafetyNet* bottomSafetyNet;                         // The bottom (of the level) ball safety net
+    SafetyNet* topSafetyNet;                            // The top (of the level) ball safety net
     std::list<Beam*> beams;                             // Beams spawned as the game is played
     std::map<LevelPiece*, int32_t> statusUpdatePieces;  // Pieces that require updating every frame due to status effects
     BallBoostModel* boostModel;                         // This is only not NULL when the ball is in play - it contains the model/state for ball boosting

@@ -36,8 +36,9 @@ const double BallSpeedItem::BALL_SPEED_TIMER_IN_SECS	= 20.0;
 const char* BallSpeedItem::SLOW_BALL_ITEM_NAME        = "SlowBall";
 const char* BallSpeedItem::FAST_BALL_ITEM_NAME        = "FastBall";
 
-BallSpeedItem::BallSpeedItem(const BallSpeedType type, const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem((type==SlowBall)?SLOW_BALL_ITEM_NAME:FAST_BALL_ITEM_NAME, spawnOrigin, gameModel, (type==SlowBall)?GameItem::Good:GameItem::Bad), spdType(type) {
+BallSpeedItem::BallSpeedItem(const BallSpeedType type, const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem((type==SlowBall)?SLOW_BALL_ITEM_NAME:FAST_BALL_ITEM_NAME, 
+         spawnOrigin, dropDir, gameModel, (type==SlowBall) ? GameItem::Good : GameItem::Bad), spdType(type) {
 }
 
 BallSpeedItem::~BallSpeedItem() {

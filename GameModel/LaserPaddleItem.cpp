@@ -35,8 +35,8 @@
 const double LaserPaddleItem::LASER_PADDLE_TIMER_IN_SECS = 15.0;
 const char* LaserPaddleItem::LASER_PADDLE_ITEM_NAME      = "LaserBulletPaddle";
 
-LaserPaddleItem::LaserPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(LASER_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
+LaserPaddleItem::LaserPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(LASER_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Good) {
 }
 
 LaserPaddleItem::~LaserPaddleItem() {

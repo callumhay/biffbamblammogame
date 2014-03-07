@@ -32,8 +32,8 @@
 const char* LifeUpItem::LIFE_UP_ITEM_NAME	    = "LifeUp";
 const double LifeUpItem::LIFE_UP_TIMER_IN_SECS	= 0.0;
 
-LifeUpItem::LifeUpItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(LifeUpItem::LIFE_UP_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
+LifeUpItem::LifeUpItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(LifeUpItem::LIFE_UP_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Good) {
 }
 
 LifeUpItem::~LifeUpItem() {

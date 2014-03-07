@@ -46,7 +46,7 @@ public:
 	static const char* OMNI_LASER_BALL_ITEM_NAME;
 	static const double OMNI_LASER_BALL_TIMER_IN_SECS;
 
-	OmniLaserBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	OmniLaserBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~OmniLaserBallItem();
 
 	double Activate();

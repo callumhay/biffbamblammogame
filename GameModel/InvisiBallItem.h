@@ -42,7 +42,7 @@ public:
 	static const char* INVISI_BALL_ITEM_NAME;
 	static const double INVISI_BALL_TIMER_IN_SECS;
 
-	InvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	InvisiBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~InvisiBallItem();
 	
 	double Activate();

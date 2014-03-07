@@ -114,27 +114,6 @@ void ESPPointEmitter::OverwriteEmittedPosition(const Point3D& pt) {
 }
 
 /**
- * Set the center emit point for this point emitter.
- */
-void ESPPointEmitter::SetEmitPosition(const Point3D& pt) {
-	this->emitPt = pt;
-}
-
-/**
- * Set the emit direction for this point emitter.
- */
-void ESPPointEmitter::SetEmitDirection(const Vector3D& dir) {
-	this->emitDir = dir;
-	if (this->emitOnPlane) {
-		assert(Vector3D::cross(this->planeNormal, this->emitDir) != Vector3D(0,0,0));
-	}
-
-    if (this->emitDir.IsZero()) {
-        this->emitDir = Vector3D(0,1,0);
-    }
-}
-
-/**
  * Tell the emitter to only emit particles on the plane defined by the given plane normal,
  * or tell it to not do any such thing.
  */

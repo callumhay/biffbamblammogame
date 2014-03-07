@@ -99,10 +99,13 @@ void RandomToItemAnimation::Start(const GameItem& actualItem, const Texture* gam
     this->scaleAnim.SetLerp(0.0f, TOTAL_ANIMATION_TIME, 1.0f, 1.5f);
     this->scaleAnim.SetInterpolantValue(1.0f);
 
+    assert(actualItem.GetItemType() != GameItem::LifeUpItem);
     this->itemNameEffect = espAssets->CreateItemNameEffect(paddle, actualItem);
     assert(this->itemNameEffect != NULL);
+
+    Point2D emitPos = paddle.GetCenterPosition() + (2*paddle.GetHalfHeight() + 2.5*GameItem::ITEM_HEIGHT) * paddle.GetUpVector();
     this->itemNameEffect->SetInitialSpd(ESPInterval(speed));
-    this->itemNameEffect->SetEmitPosition(Point3D(paddle.GetCenterPosition()[0], 2*paddle.GetHalfHeight() + 2.5*GameItem::ITEM_HEIGHT, 0.0f));
+    this->itemNameEffect->SetEmitPosition(Point3D(emitPos, 0.0f));
     this->itemNameEffect->SetParticleLife(ESPInterval(TOTAL_ANIMATION_TIME));
 
 	this->isAnimating = true;
