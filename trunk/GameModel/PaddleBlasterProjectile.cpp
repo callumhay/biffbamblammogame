@@ -39,8 +39,7 @@ const float PaddleBlasterProjectile::DEFAULT_DIST_FROM_TOP_OF_PADDLE_TO_PROJECTI
 PaddleBlasterProjectile::PaddleBlasterProjectile(const PlayerPaddle& firingPaddle, 
                                                  float defaultSize, float defaultVelMag) :
 Projectile(firingPaddle.GetCenterPosition() + 
-           Vector2D(0, firingPaddle.GetHalfHeight() + 
-           PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(firingPaddle)), 1, 1),
+           (firingPaddle.GetHalfHeight() + PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(firingPaddle)) * firingPaddle.GetUpVector(), 1, 1),
 cannonBlock(NULL), defaultVelocityMagnitude(defaultVelMag) {
 
     float size = defaultSize * firingPaddle.GetPaddleScaleFactor();

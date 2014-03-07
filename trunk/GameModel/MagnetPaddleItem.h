@@ -40,7 +40,7 @@ public:
 	static const char* MAGNET_PADDLE_ITEM_NAME;
 	static const double MAGNET_PADDLE_TIMER_IN_SECS;
 
-	MagnetPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	MagnetPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~MagnetPaddleItem();
 
 	double Activate();

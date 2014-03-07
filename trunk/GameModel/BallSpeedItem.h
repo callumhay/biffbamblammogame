@@ -46,7 +46,8 @@ public:
 	static const char* SLOW_BALL_ITEM_NAME;
 	static const char* FAST_BALL_ITEM_NAME;
 
-	BallSpeedItem(const BallSpeedType type, const Point2D &spawnOrigin, GameModel *gameModel);
+	BallSpeedItem(const BallSpeedType type, const Point2D &spawnOrigin, 
+        const Vector2D& dropDir, GameModel *gameModel);
 	~BallSpeedItem();
 
 	double Activate();

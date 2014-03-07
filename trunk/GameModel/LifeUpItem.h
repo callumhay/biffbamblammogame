@@ -41,7 +41,7 @@ public:
 	static const char*  LIFE_UP_ITEM_NAME;
 	static const double LIFE_UP_TIMER_IN_SECS;
 
-	LifeUpItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	LifeUpItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~LifeUpItem();
 
 	double Activate();

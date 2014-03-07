@@ -103,10 +103,17 @@ void PaddleMineLauncher::DrawEffects(double dT, const PlayerPaddle& paddle) {
 
     float alpha = this->flickerAnim.GetInterpolantValue() * this->pulseAlphaAnim.GetInterpolantValue() * paddle.GetAlpha();
 
-    float negHalfPaddleDepth      = -paddle.GetHalfDepthTotal();
-    float halfBigHighlightWidth   = 0.3f * paddle.GetHalfFlatTopWidth();
-    float halfSmallHighlightWidth = 0.5f * halfBigHighlightWidth;
-    float highlightHeight         = 3.5f * LevelPiece::PIECE_HEIGHT * paddle.GetPaddleScaleFactor();
+    float negHalfPaddleDepth = -paddle.GetHalfDepthTotal();
+    float halfOuterRayWidth  = 0.3f * paddle.GetHalfFlatTopWidth();
+    float halfInnerRayWidth  = 0.5f * halfOuterRayWidth;
+    float highlightHeight    = 3.5f * LevelPiece::PIECE_HEIGHT * paddle.GetPaddleScaleFactor();
+
+    Vector2D rayUpDir(0,1);// = paddle.GetUpVector();
+    const Vector2D rayRightDir(rayUpDir[1], -rayUpDir[0]);
+
+    const Vector2D rayUpVec = highlightHeight*rayUpDir;
+    const Vector2D rayOuterRightVec = halfOuterRayWidth*rayRightDir;
+    const Vector2D rayInnerRightVec = halfInnerRayWidth*rayRightDir;
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -117,27 +124,38 @@ void PaddleMineLauncher::DrawEffects(double dT, const PlayerPaddle& paddle) {
 
     glPushMatrix();
     glTranslatef(0, 0, negHalfPaddleDepth);
-    glRotatef(paddle.GetZRotation(), 0.0f, 0.0f, 1.0f);
 
     glBegin(GL_QUADS);
 
     // Big highlight
     static const float BIG_HIGHLIGHT_VAL = 0.75f;
+    
+    Vector2D bottomLeft  = -rayOuterRightVec;
+    Vector2D bottomRight = rayOuterRightVec;
     glColor4f(BIG_HIGHLIGHT_VAL, BIG_HIGHLIGHT_VAL, BIG_HIGHLIGHT_VAL, 0.4f*alpha);
-    glVertex3f(-halfBigHighlightWidth, 0, 0);
-    glVertex3f(halfBigHighlightWidth, 0, 0);
-    glColor4f(1, 1, 1, 0.0f);
-    glVertex3f(halfBigHighlightWidth,  highlightHeight, 0);
-    glVertex3f(-halfBigHighlightWidth, highlightHeight, 0);
+    glVertex3f(bottomLeft[0], bottomLeft[1], 0);
+    glVertex3f(bottomRight[0], bottomRight[1], 0);
 
-    // Highlight behind the lasers
-    static const float SMALL_HIGHLIGHT_VAL = 1.0f;
-    glColor4f(SMALL_HIGHLIGHT_VAL, SMALL_HIGHLIGHT_VAL, SMALL_HIGHLIGHT_VAL, 0.4f*alpha);
-    glVertex3f(-halfSmallHighlightWidth, 0, 0);
-    glVertex3f(halfSmallHighlightWidth, 0, 0);
+    Vector2D topLeft  = rayUpVec - rayOuterRightVec;
+    Vector2D topRight = rayUpVec + rayOuterRightVec;
     glColor4f(1, 1, 1, 0.0f);
-    glVertex3f(halfSmallHighlightWidth,  highlightHeight, 0);
-    glVertex3f(-halfSmallHighlightWidth, highlightHeight, 0);
+    glVertex3f(topRight[0],  topRight[1], 0);
+    glVertex3f(topLeft[0], topLeft[1], 0);
+
+    // Highlight in the middle of the beam
+    static const float SMALL_HIGHLIGHT_VAL = 1.0f;
+    
+    bottomLeft  = -rayInnerRightVec;
+    bottomRight = rayInnerRightVec;
+    glColor4f(SMALL_HIGHLIGHT_VAL, SMALL_HIGHLIGHT_VAL, SMALL_HIGHLIGHT_VAL, 0.4f*alpha);
+    glVertex3f(bottomLeft[0], bottomLeft[1], 0);
+    glVertex3f(bottomRight[0], bottomRight[1], 0);
+    
+    topLeft  = rayUpVec - rayInnerRightVec;
+    topRight = rayUpVec + rayInnerRightVec;
+    glColor4f(1, 1, 1, 0.0f);
+    glVertex3f(topRight[0],  topRight[1], 0);
+    glVertex3f(topLeft[0], topLeft[1], 0);
 
     glEnd();
 

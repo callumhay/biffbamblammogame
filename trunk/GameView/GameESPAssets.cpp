@@ -528,7 +528,7 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
 }
 
 void GameESPAssets::KillAllActiveTeslaLightningArcs() {
-	// Clear all of the tesla lightning arcs
+	// Clear all of the Tesla lightning arcs
 	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter1 = this->teslaLightningArcs.begin();
 		iter1 != this->teslaLightningArcs.end(); ++iter1) {
 		
@@ -541,6 +541,14 @@ void GameESPAssets::KillAllActiveTeslaLightningArcs() {
 			lightningArcs.clear();
 	}
 	this->teslaLightningArcs.clear();
+}
+
+void GameESPAssets::PaddleFlipped() {
+    this->paddleFlameBlasterOrigin->Reset();
+    this->paddleIceBlasterOrigin->Reset();
+    this->paddleLaserGlowSparks->Reset();
+    this->paddleBeamOriginUp->Reset();
+    this->paddleBeamBlastBits->Reset();
 }
 
 /**
@@ -6694,6 +6702,10 @@ void GameESPAssets::AddBallHitTurretEffect(const GameBall& ball, const LevelPiec
 
 ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item) {
 
+    if (item.GetItemType() == GameItem::LifeUpItem) {
+        return NULL;
+    }
+
     ESPInterval redColour(0), greenColour(0), blueColour(0);
 	switch (item.GetItemDisposition()) {
 		case GameItem::Good:
@@ -6714,14 +6726,16 @@ ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle,
 			break;
 	}
 
+    Vector3D emitDir(0.0f, 1.0f, 0.0f);
+
     ESPPointEmitter* itemNameEffect = new ESPPointEmitter();
     itemNameEffect->SetSpawnDelta(ESPInterval(-1, -1));
     itemNameEffect->SetInitialSpd(ESPInterval(1.1f));
-    itemNameEffect->SetEmitDirection(Vector3D(0, 1, 0));
+    itemNameEffect->SetEmitDirection(emitDir);
     itemNameEffect->SetParticleLife(ESPInterval(2.4f));
     itemNameEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
     itemNameEffect->SetParticleAlignment(ESP::ScreenAligned);
-    itemNameEffect->SetEmitPosition(Point3D(0, 2.75f * paddle.GetHalfHeight(), 0));
+    itemNameEffect->SetEmitPosition(2.75f * paddle.GetHalfHeight() * emitDir);
     itemNameEffect->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(1));
     itemNameEffect->AddEffector(&this->particleFader);
     itemNameEffect->AddEffector(&this->particleSmallGrowth);
@@ -6854,7 +6868,6 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
         ESPPointEmitter* itemNameEffect = NULL;
         if (item.GetItemType() != GameItem::RandomItem) {
            itemNameEffect = this->CreateItemNameEffect(paddle, item);
-           assert(itemNameEffect != NULL);
         }
 
 		this->activePaddleEmitters.push_back(haloExpandingAura);
@@ -6870,7 +6883,9 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 /**
  * Add the effect for when the paddle grows.
  */
-void GameESPAssets::AddPaddleGrowEffect() {
+void GameESPAssets::AddPaddleGrowEffect(const PlayerPaddle* paddle) {
+    UNUSED_PARAMETER(paddle);
+
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -6885,7 +6900,7 @@ void GameESPAssets::AddPaddleGrowEffect() {
 		paddleGrowEffect->SetParticleLife(ESPInterval(0.8f, 2.00f));
 		paddleGrowEffect->SetParticleSize(ESPInterval(0.25f, 1.0f));
 		paddleGrowEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		paddleGrowEffect->SetParticleAlignment(ESP::AxisAligned);
+        paddleGrowEffect->SetParticleAlignment(ESP::AxisAligned);
 		paddleGrowEffect->SetEmitPosition(Point3D(0,0,0));
 		paddleGrowEffect->SetEmitDirection(directions[i]);
 		paddleGrowEffect->SetEmitAngleInDegrees(23);
@@ -6901,7 +6916,9 @@ void GameESPAssets::AddPaddleGrowEffect() {
 /**
  * Add the effect for when the paddle shrinks.
  */
-void GameESPAssets::AddPaddleShrinkEffect() {
+void GameESPAssets::AddPaddleShrinkEffect(const PlayerPaddle* paddle) {
+    UNUSED_PARAMETER(paddle);
+
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -7135,6 +7152,12 @@ void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
 	Point2D paddlePos2D = paddle->GetCenterPosition();
 	Point3D paddlePos3D = Point3D(paddlePos2D[0], paddlePos2D[1], 0.0f);
 
+    Vector3D emitDir(paddle->GetUpVector());
+    ESPInterval rotInterval(0);
+    if (paddle->GetIsPaddleFlipped()) {
+        rotInterval = ESPInterval(180);
+    }
+
 	// Create an emitter for the Life-UP! text raising from the paddle
 	ESPPointEmitter* textEffect = new ESPPointEmitter();
 	// Set up the emitter...
@@ -7145,8 +7168,9 @@ void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
 	textEffect->SetParticleRotation(ESPInterval(0.0f));
 	textEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	textEffect->SetParticleAlignment(ESP::ScreenAligned);
-	textEffect->SetEmitPosition(paddlePos3D + Vector3D(0, 0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL, 0));
-	textEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	textEffect->SetEmitPosition(paddlePos3D + 0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL * emitDir);
+	textEffect->SetEmitDirection(emitDir);
+    textEffect->SetParticleRotation(rotInterval);
 	textEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1.0f));
 	// Add effectors...
 	textEffect->AddEffector(&this->particleFader);
@@ -7171,7 +7195,8 @@ void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
 	heartEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	heartEffect->SetParticleAlignment(ESP::ScreenAligned);
 	heartEffect->SetEmitPosition(paddlePos3D);
-	heartEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	heartEffect->SetEmitDirection(emitDir);
+    heartEffect->SetParticleRotation(rotInterval);
 	heartEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1.0f));
 	// Add effectors...
 	heartEffect->AddEffector(&this->particleFader);
@@ -7285,12 +7310,12 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 			break;
 
 		case GameItem::PaddleGrowItem: {
-				this->AddPaddleGrowEffect();
+				this->AddPaddleGrowEffect(gameModel.GetPlayerPaddle());
 			}
 			break;
 
 		case GameItem::PaddleShrinkItem: {
-				this->AddPaddleShrinkEffect();
+				this->AddPaddleShrinkEffect(gameModel.GetPlayerPaddle());
 			}
 			break;
 
@@ -7422,7 +7447,8 @@ void GameESPAssets::DrawPaddleFlameBlasterEffects(double dT, const Camera& camer
     }
 
     float scaleFactor = paddle.GetPaddleScaleFactor();
-    Point3D emitPos(0, PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle), -paddle.GetHalfDepthTotal());
+    Point3D emitPos(PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle) * paddle.GetUpVector(), -paddle.GetHalfDepthTotal());
+
     this->paddleFlameBlasterOrigin->SetEmitPosition(emitPos);
     this->paddleFlameBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
     this->paddleFlameBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
@@ -7436,7 +7462,8 @@ void GameESPAssets::DrawPaddleIceBlasterEffects(double dT, const Camera& camera,
     }
 
     float scaleFactor = paddle.GetPaddleScaleFactor();
-    Point3D emitPos(0, PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle), -paddle.GetHalfDepthTotal());
+    Point3D emitPos(PaddleBlasterProjectile::GetOriginDistanceFromTopOfPaddle(paddle) * paddle.GetUpVector(), -paddle.GetHalfDepthTotal());
+
     this->paddleIceBlasterOrigin->SetEmitPosition(emitPos);
     this->paddleIceBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
     this->paddleIceBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
@@ -7627,6 +7654,12 @@ void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* ite
     const ESPInterval sizeInterval(0.25f, 1.25f);
     const ESPInterval spawnDeltaInterval(invFractionAmt*0.1f, invFractionAmt*0.2f);
 
+    ESPInterval rotInterval(0);
+    Vector3D emitDir(0.0f, 1.0f, 0.0f);
+    //if (item.GetIsFlipped()) {
+    //    rotInterval = ESPInterval(180);
+    //}
+
     // Middle emitter...
     ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
     itemDropEmitterTrail1->SetSpawnDelta(spawnDeltaInterval);
@@ -7636,7 +7669,8 @@ void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* ite
     itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
     itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
     itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
+    itemDropEmitterTrail1->SetEmitDirection(emitDir);
+    itemDropEmitterTrail1->SetParticleRotation(rotInterval);
     itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
     itemDropEmitterTrail1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     itemDropEmitterTrail1->AddEffector(&this->particleFader);
@@ -7651,7 +7685,8 @@ void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* ite
     itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
     itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
     itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
+    itemDropEmitterTrail2->SetEmitDirection(emitDir);
+    itemDropEmitterTrail2->SetParticleRotation(rotInterval);
     itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
     itemDropEmitterTrail2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     itemDropEmitterTrail2->AddEffector(&this->particleFader);
@@ -7667,7 +7702,8 @@ void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* ite
     itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
     itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
     itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
+    itemDropEmitterTrail3->SetEmitDirection(emitDir);
+    itemDropEmitterTrail3->SetParticleRotation(rotInterval);
     itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
     itemDropEmitterTrail3->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     itemDropEmitterTrail3->AddEffector(&this->particleFader);
@@ -8237,6 +8273,9 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
  */
 void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 
+    glPushMatrix();
+    glRotatef(paddle.GetZRotation(), 0, 0, 1);
+
     // Go through all the particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
 		iter != this->activePaddleEmitters.end();) {
@@ -8254,12 +8293,14 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
             if (paddle.GetAlpha() < 1.0f) {
                 curr->SetAliveParticleAlphaMax(paddle.GetAlpha());
             }
-            curr->SetParticleRotation(ESPInterval(-paddle.GetZRotation()));
+            
             curr->Tick(dT);
             curr->Draw(camera);
             ++iter;
 		}
 	}
+
+    glPopMatrix();
 }
 
 void GameESPAssets::TickButDontDrawBackgroundPaddleEffects(double dT) {
@@ -8289,17 +8330,19 @@ void GameESPAssets::TickButDontDrawBackgroundPaddleEffects(double dT) {
  */
 void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
     
+
     float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
-    float tempYBound = paddle.GetHalfHeight();
+    float tempYBound = (paddle.GetIsPaddleFlipped() ? -1.0f : 1.0f) * paddle.GetHalfHeight();
     assert(tempZBound > 0);
 
+    Vector2D paddleUpVec = paddle.GetUpVector();
     if (paddle.HasPaddleType(PlayerPaddle::StickyPaddle)) {
         
         float beamSpacing = PaddleLaserBeam::GetStickyPaddleOriginBeamSpacing(paddle);
         
         Vector2D centerVec, leftVec, rightVec;
         float centerSize, leftSize, rightSize;
-        StickyPaddleBeamDirGenerator::GetBeamValues(Vector2D(0,1), centerVec, leftVec, rightVec, centerSize, leftSize, rightSize);
+        StickyPaddleBeamDirGenerator::GetBeamValues(paddleUpVec, centerVec, leftVec, rightVec, centerSize, leftSize, rightSize);
         
         centerSize *= 0.5f;
         leftSize   *= 0.5f;
@@ -8335,6 +8378,7 @@ void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Came
         float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
         assert(tempXBound > 0);
         
+        this->paddleBeamGlowSparks->SetEmitDirection(paddleUpVec);
 	    this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, tempYBound, -tempZBound), Point3D(tempXBound, tempYBound, tempZBound));
 	    this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
         this->paddleBeamGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());

@@ -34,8 +34,8 @@
 const double LaserBeamPaddleItem::LASER_BEAM_PADDLE_TIMER_IN_SECS	= 0.0; // The laser beam is not a timed power-up, it's activated when shot
 const char* LaserBeamPaddleItem::LASER_BEAM_PADDLE_ITEM_NAME      = "LaserBeamPaddle";
 
-LaserBeamPaddleItem::LaserBeamPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(LASER_BEAM_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
+LaserBeamPaddleItem::LaserBeamPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(LASER_BEAM_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Good) {
 }
 
 LaserBeamPaddleItem::~LaserBeamPaddleItem() {

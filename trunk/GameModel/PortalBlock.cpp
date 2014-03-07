@@ -39,7 +39,8 @@ const float PortalBlock::FRACTION_HALF_PIECE_WIDTH  = 0.9f * LevelPiece::HALF_PI
 const float PortalBlock::FRACTION_HALF_PIECE_HEIGHT = 0.9f * LevelPiece::HALF_PIECE_HEIGHT;
 
 PortalBlock::PortalBlock(unsigned int wLoc, unsigned int hLoc, PortalBlock* sibling) :
-LevelPiece(wLoc, hLoc), sibling(sibling), timeOfLastBallCollision(0), paddleTeleportLine(NoPaddleLine) {
+LevelPiece(wLoc, hLoc), sibling(sibling), timeOfLastBallCollision(0),
+paddleTeleportLine(NoPaddleLine), flipsPaddleOnEntry(false) {
 }
 
 PortalBlock::~PortalBlock() {
@@ -184,6 +185,20 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& p
         // since that isn't the case, make it so!
         Point2D newPaddleCenter = sibling->GetCenter() + (paddle.GetCenterPosition() - this->GetCenter());
         paddle.SetCenterPosition(newPaddleCenter);
+        
+        if (this->FlipsPaddleOnEntry()) {
+            paddle.SetPaddleFlipped(!paddle.GetIsPaddleFlipped());
+
+            // Remove the paddle as the last thing the ball(s) collided with
+            const std::list<GameBall*>& balls = gameModel->GetGameBalls();
+            for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+                GameBall* ball = *iter;
+                if (ball->IsLastThingCollidedWith(&paddle)) {
+                    ball->SetLastThingCollidedWith(NULL);
+                }
+            }
+        }
+
         paddle.RegenerateBounds();
 
         paddle.SetDefaultYPosition(sibling->GetCenter()[1] - LevelPiece::HALF_PIECE_HEIGHT + paddle.GetHalfHeight());

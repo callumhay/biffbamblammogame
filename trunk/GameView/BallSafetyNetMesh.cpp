@@ -44,8 +44,8 @@
 const float BallSafetyNetMesh::SAFETY_NET_HEIGHT	= SafetyNet::SAFETY_NET_HEIGHT;
 const float BallSafetyNetMesh::SAFETY_NET_DEPTH		= 1.25f;
 
-BallSafetyNetMesh::BallSafetyNetMesh() : shadingMaterial(NULL), displayListID(0), leftPieceDispListID(0),
-rightPieceDispListID(0), currAnimation(BallSafetyNetMesh::Dead), idleAlpha(1.0f), centerPos(0,0),
+BallSafetyNetMesh::BallSafetyNetMesh(bool isBottomNet) : shadingMaterial(NULL), displayListID(0), leftPieceDispListID(0),
+rightPieceDispListID(0), currAnimation(BallSafetyNetMesh::Dead), idleAlpha(1.0f), centerPos(0,0), isBottomNet(isBottomNet),
 leftPieceAnim(&leftPieceOrient), rightPieceAnim(&rightPieceOrient), pieceFadeAnim(&pieceAlpha) {
 
 	this->displayListID = glGenLists(1);
@@ -80,6 +80,10 @@ BallSafetyNetMesh::~BallSafetyNetMesh() {
 	}
 }
 
+float BallSafetyNetMesh::GetMidYCoord(const GameLevel& level) const {
+    return this->isBottomNet ? -BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f : level.GetLevelUnitHeight() + BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f;
+}
+
 /**
  * Private helper function for initializing the material(s) of this mesh.
  */
@@ -108,73 +112,74 @@ void BallSafetyNetMesh::InitializeMaterials() {
 /**
  * Static function for drawing the safety net mesh with the given parameters.
  */
-void BallSafetyNetMesh::DrawSafetyNetMesh(float minXCoord, float maxXCoord, float minTexCoordU, float maxTexCoordU) {
+void BallSafetyNetMesh::DrawSafetyNetMesh(float minXCoord, float maxXCoord, float midYCoord, float minTexCoordU, float maxTexCoordU) {
 	const float HalfDepth  = BallSafetyNetMesh::SAFETY_NET_DEPTH  / 2.0f;
-	const float HalfHeight = BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f;	
-	
-	// The safety net is just a long rectangular prism that spans the bottom portion
-	// of the current level
-	glBegin(GL_QUADS);
+	const float HalfHeight = BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f;
+    float maxYCoord = midYCoord + HalfHeight;
+    float minYCoord = midYCoord - HalfHeight;
+
+    // The safety net is just a long rectangular prism that spans the current level
+    glBegin(GL_QUADS);
     glNormal3i(0, 1, 0);
     glTexCoord2f(maxTexCoordU, 1.0f);
-    glVertex3f(maxXCoord, HalfHeight,-HalfDepth);	// Top Right Of The Quad (Top)
+    glVertex3f(maxXCoord, maxYCoord,-HalfDepth);	// Top Right Of The Quad (Top)
     glTexCoord2f(minTexCoordU, 1.0f);
-    glVertex3f(minXCoord, HalfHeight,-HalfDepth);	// Top Left Of The Quad (Top)
+    glVertex3f(minXCoord, maxYCoord,-HalfDepth);	// Top Left Of The Quad (Top)
     glTexCoord2f(minTexCoordU, 0.0f);
-    glVertex3f(minXCoord, HalfHeight, HalfDepth);	// Bottom Left Of The Quad (Top)
+    glVertex3f(minXCoord, maxYCoord, HalfDepth);	// Bottom Left Of The Quad (Top)
     glTexCoord2f(maxTexCoordU, 0.0f);
-    glVertex3f(maxXCoord, HalfHeight, HalfDepth);	// Bottom Right Of The Quad (Top)
+    glVertex3f(maxXCoord, maxYCoord, HalfDepth);	// Bottom Right Of The Quad (Top)
 
     glNormal3i(0, -1, 0);
     glTexCoord2f(maxTexCoordU, 1.0f);
-    glVertex3f(maxXCoord,-HalfHeight, HalfDepth);	// Top Right Of The Quad (Bottom)
+    glVertex3f(maxXCoord, minYCoord, HalfDepth);	// Top Right Of The Quad (Bottom)
     glTexCoord2f(minTexCoordU, 1.0f);
-    glVertex3f(minXCoord,-HalfHeight, HalfDepth);	// Top Left Of The Quad (Bottom)
+    glVertex3f(minXCoord, minYCoord, HalfDepth);	// Top Left Of The Quad (Bottom)
     glTexCoord2f(minTexCoordU, 0.0f);
-    glVertex3f(minXCoord,-HalfHeight,-HalfDepth);	// Bottom Left Of The Quad (Bottom)
+    glVertex3f(minXCoord, minYCoord,-HalfDepth);	// Bottom Left Of The Quad (Bottom)
     glTexCoord2f(maxTexCoordU, 0.0f);
-    glVertex3f(maxXCoord,-HalfHeight,-HalfDepth);	// Bottom Right Of The Quad (Bottom)
+    glVertex3f(maxXCoord, minYCoord,-HalfDepth);	// Bottom Right Of The Quad (Bottom)
 
-		glNormal3i(0, 0, 1);
-		glTexCoord2f(maxTexCoordU, 1.0f);
-    glVertex3f(maxXCoord, HalfHeight, HalfDepth);	// Top Right Of The Quad (Front)
-		glTexCoord2f(minTexCoordU, 1.0f);
-    glVertex3f(minXCoord, HalfHeight, HalfDepth);	// Top Left Of The Quad (Front)
-		glTexCoord2f(minTexCoordU, 0.0f);
-    glVertex3f(minXCoord,-HalfHeight, HalfDepth);	// Bottom Left Of The Quad (Front)
-		glTexCoord2f(maxTexCoordU, 0.0f);
-    glVertex3f(maxXCoord,-HalfHeight, HalfDepth);	// Bottom Right Of The Quad (Front)
+    glNormal3i(0, 0, 1);
+    glTexCoord2f(maxTexCoordU, 1.0f);
+    glVertex3f(maxXCoord, maxYCoord, HalfDepth);	// Top Right Of The Quad (Front)
+    glTexCoord2f(minTexCoordU, 1.0f);
+    glVertex3f(minXCoord, maxYCoord, HalfDepth);	// Top Left Of The Quad (Front)
+    glTexCoord2f(minTexCoordU, 0.0f);
+    glVertex3f(minXCoord, minYCoord, HalfDepth);	// Bottom Left Of The Quad (Front)
+    glTexCoord2f(maxTexCoordU, 0.0f);
+    glVertex3f(maxXCoord, minYCoord, HalfDepth);	// Bottom Right Of The Quad (Front)
 
-		glNormal3i(0, 0, -1);
-		glTexCoord2f(maxTexCoordU, 1.0f);
-    glVertex3f(maxXCoord,-HalfHeight,-HalfDepth);	// Top Right Of The Quad (Back)
-		glTexCoord2f(minTexCoordU, 1.0f);
-    glVertex3f(minXCoord,-HalfHeight,-HalfDepth);	// Top Left Of The Quad (Back)
-		glTexCoord2f(minTexCoordU, 0.0f);
-    glVertex3f(minXCoord, HalfHeight,-HalfDepth);	// Bottom Left Of The Quad (Back)
-		glTexCoord2f(maxTexCoordU, 0.0f);
-    glVertex3f(maxXCoord, HalfHeight,-HalfDepth);	// Bottom Right Of The Quad (Back)
+    glNormal3i(0, 0, -1);
+    glTexCoord2f(maxTexCoordU, 1.0f);
+    glVertex3f(maxXCoord, minYCoord,-HalfDepth);	// Top Right Of The Quad (Back)
+    glTexCoord2f(minTexCoordU, 1.0f);
+    glVertex3f(minXCoord, minYCoord,-HalfDepth);	// Top Left Of The Quad (Back)
+    glTexCoord2f(minTexCoordU, 0.0f);
+    glVertex3f(minXCoord, maxYCoord,-HalfDepth);	// Bottom Left Of The Quad (Back)
+    glTexCoord2f(maxTexCoordU, 0.0f);
+    glVertex3f(maxXCoord, maxYCoord,-HalfDepth);	// Bottom Right Of The Quad (Back)
 
-		glNormal3i(-1, 0, 0);
-		glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(minXCoord, HalfHeight, HalfDepth);	// Top Right Of The Quad (Left)
-		glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(minXCoord, HalfHeight,-HalfDepth);	// Top Left Of The Quad (Left)
-		glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(minXCoord,-HalfHeight,-HalfDepth);	// Bottom Left Of The Quad (Left)
-		glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(minXCoord,-HalfHeight, HalfDepth);	// Bottom Right Of The Quad (Left)
+    glNormal3i(-1, 0, 0);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(minXCoord, maxYCoord, HalfDepth);	// Top Right Of The Quad (Left)
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(minXCoord, maxYCoord,-HalfDepth);	// Top Left Of The Quad (Left)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(minXCoord, minYCoord,-HalfDepth);	// Bottom Left Of The Quad (Left)
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(minXCoord, minYCoord, HalfDepth);	// Bottom Right Of The Quad (Left)
 
-		glNormal3i(1, 0, 0);
-		glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(maxXCoord, HalfHeight,-HalfDepth);	// Top Right Of The Quad (Right)
-		glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(maxXCoord, HalfHeight, HalfDepth);	// Top Left Of The Quad (Right)
-		glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(maxXCoord,-HalfHeight, HalfDepth);	// Bottom Left Of The Quad (Right)
-		glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(maxXCoord,-HalfHeight,-HalfDepth);	// Bottom Right Of The Quad (Right)
-	glEnd();
+    glNormal3i(1, 0, 0);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(maxXCoord, maxYCoord,-HalfDepth);	// Top Right Of The Quad (Right)
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(maxXCoord, maxYCoord, HalfDepth);	// Top Left Of The Quad (Right)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(maxXCoord, minYCoord, HalfDepth);	// Bottom Left Of The Quad (Right)
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(maxXCoord, minYCoord,-HalfDepth);	// Bottom Right Of The Quad (Right)
+    glEnd();
 }
 
 /**
@@ -185,22 +190,21 @@ void BallSafetyNetMesh::DrawSafetyNetMesh(float minXCoord, float maxXCoord, floa
 void BallSafetyNetMesh::Regenerate(const GameLevel& currLevel) {
 	assert(this->displayListID != 0);
 
-    const LevelPiece* maxBoundPiece = currLevel.GetMaxXPaddleBoundPiece(0);
-    const LevelPiece* minBoundPiece = currLevel.GetMinXPaddleBoundPiece(0);
-    
-    const float minX = minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
-    const float maxX = maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+    std::pair<const LevelPiece*, const LevelPiece*> minMaxPieces = SafetyNet::GetSafetyNetMinMaxPiece(currLevel, this->isBottomNet);
 
+    const float minX = minMaxPieces.first->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+    const float maxX = minMaxPieces.second->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+    const float midY = 0;//this->GetMidYCoord(currLevel);
 	const float maxTexCoordU = (maxX - minX) / 2.0f;
 
 	glNewList(this->displayListID, GL_COMPILE);
-    BallSafetyNetMesh::DrawSafetyNetMesh(minX, maxX, 0.0f, maxTexCoordU);
+    BallSafetyNetMesh::DrawSafetyNetMesh(minX, maxX, midY, 0.0f, maxTexCoordU);
 	glEndList();
 
 	debug_opengl_state();
 
     this->centerPos[0] = maxTexCoordU;
-    this->centerPos[1] = BallSafetyNetMesh::SAFETY_NET_HEIGHT / 2.0f;
+    this->centerPos[1] = midY;
 }
 
 /**
@@ -225,12 +229,13 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float d
 	// Make sure that both display lists for the broken pieces get initialized
 	assert(this->leftPieceDispListID != 0 && this->rightPieceDispListID != 0);
 
-    const LevelPiece* maxBoundPiece = currLevel.GetMaxXPaddleBoundPiece(0);
-    const LevelPiece* minBoundPiece = currLevel.GetMinXPaddleBoundPiece(0);
+    std::pair<const LevelPiece*, const LevelPiece*> minMaxPieces = 
+        SafetyNet::GetSafetyNetMinMaxPiece(currLevel, this->isBottomNet);
 
 	// (Re)compile the 2 new display lists of the broken pieces of the safety net
-	const float minX = minBoundPiece->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
-    const float maxX = maxBoundPiece->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+	const float minX = minMaxPieces.first->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+    const float maxX = minMaxPieces.second->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+    const float midY = 0;//this->GetMidYCoord(currLevel);
 
     if (minX > destructionXPos) {
         assert(false);
@@ -246,12 +251,12 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float d
 	
 	// Left broken piece
 	glNewList(this->leftPieceDispListID, GL_COMPILE);
-    BallSafetyNetMesh::DrawSafetyNetMesh(minX, destructionXPos, 0.0f, maxTexCoordLeft);
+    BallSafetyNetMesh::DrawSafetyNetMesh(minX, destructionXPos, midY, 0.0f, maxTexCoordLeft);
 	glEndList();
 
 	// Right broken piece
 	glNewList(this->rightPieceDispListID, GL_COMPILE);
-	BallSafetyNetMesh::DrawSafetyNetMesh(destructionXPos, maxX, maxTexCoordLeft, maxTexCoordRight);
+	BallSafetyNetMesh::DrawSafetyNetMesh(destructionXPos, maxX, midY, maxTexCoordLeft, maxTexCoordRight);
 	glEndList();
 
 	// Setup the linear interpolation values for the animations of the two pieces
@@ -259,8 +264,13 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const GameLevel& currLevel, float d
 	this->rightPieceOrient = Orientation3D(Vector3D(0,0,0), Vector3D(0,0,0));
 	this->pieceAlpha = 1.0f;
 
-	this->leftPieceAnim.SetLerp(2.0, Orientation3D(Vector3D(-3.0f, -5.0f, 0.0f), Vector3D(60.0f, 0.0f, 0.0f)));
-	this->rightPieceAnim.SetLerp(2.0, Orientation3D(Vector3D(3.0f, -5.0f, 0.0f), Vector3D(50.0f, 0.0f, 0.0f)));
+    float ySign = -1;
+    if (!this->isBottomNet) {
+        ySign = 1.0f;
+    }
+
+	this->leftPieceAnim.SetLerp(2.0, Orientation3D(Vector3D(-3.0f, ySign*5.0f, 0.0f), Vector3D(60.0f, 0.0f, 0.0f)));
+	this->rightPieceAnim.SetLerp(2.0, Orientation3D(Vector3D(3.0f, ySign*5.0f, 0.0f), Vector3D(50.0f, 0.0f, 0.0f)));
 	this->pieceFadeAnim.SetLerp(2.0, 0.0f);
 
 	//this->playDestructionAnimation = true;

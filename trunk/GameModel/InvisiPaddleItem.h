@@ -41,7 +41,7 @@ public:
 	static const char*  INVISI_PADDLE_ITEM_NAME;
 	static const double INVISI_PADDLE_TIMER_IN_SECS;
 
-	InvisiPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	InvisiPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~InvisiPaddleItem();
 
 	double Activate();

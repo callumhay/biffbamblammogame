@@ -42,7 +42,7 @@ public:
 	static const char* FIRE_BALL_ITEM_NAME;
 	static const double FIRE_BALL_TIMER_IN_SECS;
 
-	FireBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	FireBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~FireBallItem();
 
 	double Activate();

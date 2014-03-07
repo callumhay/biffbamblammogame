@@ -37,7 +37,7 @@ public:
     static const char* ICE_BLASTER_PADDLE_ITEM_NAME;
     static const double ICE_BLASTER_PADDLE_TIMER_IN_SECS;
 
-    IceBlasterPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+    IceBlasterPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
     ~IceBlasterPaddleItem();
 
     double Activate();

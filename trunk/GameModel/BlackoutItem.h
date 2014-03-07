@@ -42,7 +42,7 @@ public:
 	static const char* BLACKOUT_ITEM_NAME;
 	static const double BLACKOUT_TIMER_IN_SECS;
 
-	BlackoutItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	BlackoutItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~BlackoutItem();
 
 	double Activate();

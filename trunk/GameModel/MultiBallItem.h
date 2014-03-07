@@ -50,7 +50,7 @@ public:
 	static const unsigned int MIN_NUM_SPLITBALLS = 1;		// Minimum number of balls that can split off in a multiball
 	static const float MIN_SPLIT_DEGREES;								// Minimum number of degrees between balls when splitting
 
-	MultiBallItem(const Point2D &spawnOrigin, GameModel *gameModel, NumMultiBalls numBalls);
+	MultiBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel, NumMultiBalls numBalls);
 	~MultiBallItem();
 
 	double Activate();

@@ -33,8 +33,8 @@
 const char* StickyPaddleItem::STICKY_PADDLE_ITEM_NAME	    = "StickyPaddle";
 const double StickyPaddleItem::STICKY_PADDLE_TIMER_IN_SECS  = 20.0;
 
-StickyPaddleItem::StickyPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
+StickyPaddleItem::StickyPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Good) {
 }
 
 StickyPaddleItem::~StickyPaddleItem() {

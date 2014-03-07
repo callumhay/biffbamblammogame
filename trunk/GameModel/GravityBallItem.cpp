@@ -32,8 +32,8 @@
 const char* GravityBallItem::GRAVITY_BALL_ITEM_NAME			= "GravityBall";
 const double GravityBallItem::GRAVITY_BALL_TIMER_IN_SECS	= 17.0;
 
-GravityBallItem::GravityBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(GRAVITY_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+GravityBallItem::GravityBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(GRAVITY_BALL_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 GravityBallItem::~GravityBallItem() {

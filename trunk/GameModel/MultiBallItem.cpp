@@ -40,8 +40,8 @@ const double MultiBallItem::BALL_COLLISIONS_DISABLED_DURATION = 0.5;
 // from colliding when they are initially spawned and could result in collision issues
 const float MultiBallItem::MIN_SPLIT_DEGREES = 360.0f / static_cast<float>(MAX_NUM_SPLITBALLS + 1);
 
-MultiBallItem::MultiBallItem(const Point2D &spawnOrigin, GameModel *gameModel, NumMultiBalls numBalls) : 
-GameItem(MultiBallItem::NameFromNumBalls(numBalls), spawnOrigin, gameModel, GameItem::Good), 
+MultiBallItem::MultiBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel, NumMultiBalls numBalls) : 
+GameItem(MultiBallItem::NameFromNumBalls(numBalls), spawnOrigin, dropDir, gameModel, GameItem::Good), 
 numNewSpawnedBalls(static_cast<unsigned int>(numBalls)-1), numBalls(numBalls) {
 	assert(numNewSpawnedBalls >= MIN_NUM_SPLITBALLS && numNewSpawnedBalls <= MAX_NUM_SPLITBALLS);
 }

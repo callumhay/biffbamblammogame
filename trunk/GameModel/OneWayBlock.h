@@ -118,20 +118,14 @@ public:
 
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
+    bool IsGoingTheOneWay(const Vector2D& v) const;
+
 private:
     static const int POINTS_ON_BLOCK_DESTROYED = 700;
     static const float ACCEPTIBLE_MAX_ANGLE_TO_ONE_WAY_IN_RADS;
 
-    //static const int LEFT_BOUNDRY_IDX   = 0;
-    //static const int BOTTOM_BOUNDRY_IDX = 1;
-    //static const int RIGHT_BOUNDRY_IDX  = 2;
-    //static const int TOP_BOUNDRY_IDX    = 3;
-
     OneWayDir dirType;
     Vector2D oneWayDir;
-
-    bool IsGoingTheOneWay(const Vector2D& v) const;
-    //int GetBlockingBoundIndex() const;
 
     DISALLOW_COPY_AND_ASSIGN(OneWayBlock);
 };

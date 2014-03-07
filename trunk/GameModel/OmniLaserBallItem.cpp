@@ -35,8 +35,8 @@
 const char* OmniLaserBallItem::OMNI_LASER_BALL_ITEM_NAME      = "OmniLaserBall";
 const double OmniLaserBallItem::OMNI_LASER_BALL_TIMER_IN_SECS = 16.0;
 
-OmniLaserBallItem::OmniLaserBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(OMNI_LASER_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+OmniLaserBallItem::OmniLaserBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(OMNI_LASER_BALL_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 OmniLaserBallItem::~OmniLaserBallItem() {

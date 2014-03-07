@@ -111,7 +111,6 @@ private:
     ESPMultiColourEffector starColourFlasher;
     ESPMultiColourEffector fireOriginColourEffector;
     
-
 	ESPParticleScaleEffector particlePulseUberballAura;
 	ESPParticleScaleEffector particlePulseItemDropAura;
 	ESPParticleScaleEffector particlePulsePaddleLaser;
@@ -292,8 +291,8 @@ private:
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 
-	void AddPaddleGrowEffect();
-	void AddPaddleShrinkEffect();
+	void AddPaddleGrowEffect(const PlayerPaddle* paddle);
+	void AddPaddleShrinkEffect(const PlayerPaddle* paddle);
 	void AddBallGrowEffect(const GameBall* ball);
 	void AddBallShrinkEffect(const GameBall* ball);
 	void AddLifeUpEffect(const PlayerPaddle* paddle);
@@ -472,6 +471,8 @@ public:
 	void KillAllActiveBallEffects(const GameBall& ball);
 	void KillAllActiveTeslaLightningArcs();
 
+    void PaddleFlipped();
+
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawBeamEffects(double dT, const Camera& camera);
@@ -521,9 +522,11 @@ inline void GameESPAssets::ResetBulletTimeBallBoostEffects() {
  * NOTE: You must transform these effects to be where the paddle is first!
  */
 inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
-	float effectPos = paddle.GetHalfHeight() + this->paddleLaserGlowAura->GetParticleSizeY().maxValue * 0.5f;
 	
-    this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, effectPos, 0));
+    float effectPos = (paddle.GetIsPaddleFlipped() ? -1.0f : 1.0f) * 
+        (paddle.GetHalfHeight() + this->paddleLaserGlowAura->GetParticleSizeY().maxValue * 0.5f);
+	
+    this->paddleLaserGlowAura->SetAliveParticlePosition(0, effectPos, 0);
 	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, effectPos, 0));
 
     this->paddleLaserGlowAura->SetAliveParticleAlphaMax(paddle.GetAlpha());
@@ -538,6 +541,7 @@ inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera&
 inline void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	ESPInterval xSize(paddle.GetHalfFlatTopWidth() * 0.3f, paddle.GetHalfFlatTopWidth() * 0.6f);
 
+    this->paddleBeamBlastBits->SetEmitDirection(paddle.GetUpVector());
 	this->paddleBeamBlastBits->SetEmitPosition(Point3D(0, 0, -paddle.GetHalfHeight()));
 	this->paddleBeamBlastBits->SetParticleSize(xSize);
     this->paddleBeamBlastBits->SetAliveParticleAlphaMax(paddle.GetAlpha());

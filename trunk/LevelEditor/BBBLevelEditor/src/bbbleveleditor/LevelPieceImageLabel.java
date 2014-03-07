@@ -30,6 +30,8 @@ public class LevelPieceImageLabel extends JLabel {
 	private boolean teslaBlockStartsOn;
 	private boolean teslaIsChangable;
 	
+	private boolean portalFlipsPaddle;
+	
 	private int cannonDegAngle1;
 	private int cannonDegAngle2;
 	private int triggerID;
@@ -49,6 +51,7 @@ public class LevelPieceImageLabel extends JLabel {
 		this.blockID = INVALID_ID;
 		this.teslaBlockStartsOn = false;
 		this.teslaIsChangable   = true;
+		this.portalFlipsPaddle  = false;
 		this.setLevelPiece(piece);
 		this.cannonDegAngle1 = 0;
 		this.cannonDegAngle2 = 0;
@@ -62,10 +65,16 @@ public class LevelPieceImageLabel extends JLabel {
 		String justTheSymbol = pieceSymbol;
 		
 		// Clean up in the case of a portal block - since it has variables in it
-		if (pieceSymbol.length() == 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.PORTAL_PIECE_SYMBOL + "(")) {
+		if (pieceSymbol.length() >= 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.PORTAL_PIECE_SYMBOL + "(")) {
 			this.blockID  = pieceSymbol.charAt(2);
 			char siblingID = pieceSymbol.charAt(4);
 			this.siblingIDs.add(siblingID);
+			
+			this.portalFlipsPaddle = false;
+			if (pieceSymbol.length() >= 8) {
+				this.portalFlipsPaddle = (pieceSymbol.substring(5).contains("f"));
+			}
+			
 			justTheSymbol = LevelPiece.PORTAL_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.TESLA_PIECE_SYMBOL + "(")) {
@@ -208,6 +217,13 @@ public class LevelPieceImageLabel extends JLabel {
 	}
 	void setTeslaChangable(boolean changable) {
 		this.teslaIsChangable = changable;
+	}
+	
+	public boolean getPortalFlipsPaddle() {
+		return this.portalFlipsPaddle;
+	}
+	void setPortalFlipsPaddle(boolean flipsPaddle) {
+		this.portalFlipsPaddle = flipsPaddle;
 	}
 	
 	public boolean getIsValid() {

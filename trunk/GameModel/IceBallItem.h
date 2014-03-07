@@ -42,7 +42,7 @@ public:
 	static const char* ICE_BALL_ITEM_NAME;
 	static const double ICE_BALL_TIMER_IN_SECS;
 
-	IceBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	IceBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~IceBallItem();
 
 	double Activate();

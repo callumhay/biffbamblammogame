@@ -45,7 +45,7 @@ public:
 	static const char* BALL_SHRINK_ITEM_NAME;
 	static const double BALL_SIZE_TIMER_IN_SECS;
 
-	BallSizeItem(const BallSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel);
+	BallSizeItem(const BallSizeChangeType type, const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~BallSizeItem();
 
 	double Activate();

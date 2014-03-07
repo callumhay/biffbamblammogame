@@ -131,16 +131,25 @@ void PaddleLaserBeam::UpdateCollisions(const GameModel* gameModel) {
         float centerSize, leftSize, rightSize;
 	    StickyPaddleBeamDirGenerator::GetBeamValues(BEAM_UNIT_DIR, centerVec, leftVec, rightVec, centerSize, leftSize, rightSize);
 
+        const Vector2D adjustBeamOriginAmt(PaddleLaserBeam::GetStickyPaddleOriginBeamSpacing(*this->paddle), 0.0f);
+
+        Point2D leftOrigin  = BEAM_ORIGIN - adjustBeamOriginAmt;
+        Point2D rightOrigin = BEAM_ORIGIN + adjustBeamOriginAmt;
+
+        if (BEAM_UNIT_DIR[1] < 0) {
+            // Left and right need to be switched
+            leftOrigin  = BEAM_ORIGIN + adjustBeamOriginAmt;
+            rightOrigin = BEAM_ORIGIN - adjustBeamOriginAmt;
+        }
+
 	    firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, centerVec), 
 	        centerSize * INITIAL_BEAM_RADIUS, centerSize * this->baseDamagePerSecond, NULL);
 
-	    Vector2D adjustBeamOriginAmt(PaddleLaserBeam::GetStickyPaddleOriginBeamSpacing(*this->paddle), 0.0f);
-	    
-        BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN - adjustBeamOriginAmt, leftVec), 
+        BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(leftOrigin, leftVec), 
 	        leftSize * INITIAL_BEAM_RADIUS, leftSize * this->baseDamagePerSecond, NULL);
 	    initialBeamSegs.push_back(refractSeg1);
 	    
-        BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN + adjustBeamOriginAmt, rightVec), 
+        BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(rightOrigin, rightVec), 
 	        rightSize * INITIAL_BEAM_RADIUS, rightSize * this->baseDamagePerSecond, NULL);
 	    initialBeamSegs.push_back(refractSeg2);
     }

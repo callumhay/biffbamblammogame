@@ -46,7 +46,7 @@ public:
 	static const float SAFETY_NET_HEIGHT;
 	static const float SAFETY_NET_DEPTH;
 
-	BallSafetyNetMesh();
+	BallSafetyNetMesh(bool isBottomNet);
 	~BallSafetyNetMesh();
 
 	bool IsPlayingAnimation() const { 
@@ -65,6 +65,7 @@ public:
 	void Draw(const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
     const Point2D& GetSafetyNetCenterPosition() const;
+    float GetMidYCoord(const GameLevel& level) const;
 
 private:
 	enum BallSafetyNetAnimation{ Dead, Idle, CreationAnimation, DestructionAnimation };
@@ -74,6 +75,8 @@ private:
 	CgFxCelShading* shadingMaterial;
 	GLuint displayListID;
     Point2D centerPos;
+
+    bool isBottomNet;
 	
 	// Destruction animation values 
 	GLuint leftPieceDispListID, rightPieceDispListID;
@@ -86,7 +89,7 @@ private:
 	AnimationLerp<float> pieceFadeAnim;
 
 	void InitializeMaterials();
-	static void DrawSafetyNetMesh(float minXCoord, float maxXCoord, float minTexCoordU, float maxTexCoordU);
+	static void DrawSafetyNetMesh(float minXCoord, float maxXCoord, float midYCoord, float minTexCoordU, float maxTexCoordU);
 };
 
 inline const Point2D& BallSafetyNetMesh::GetSafetyNetCenterPosition() const {

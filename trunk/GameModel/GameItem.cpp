@@ -44,8 +44,10 @@ const float GameItem::SPEED_OF_DESCENT	= 4.4f;
 const float GameItem::ALPHA_ON_PADDLE_CAM = 0.9f;
 const float GameItem::ALPHA_ON_BALL_CAM		= 0.75f;
 
-GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp) : 
-	name(name), center(spawnOrigin), gameModel(gameModel), disposition(disp), isActive(false), colour(1, 1, 1, 1), currVelocityDir(0, -1) {
+GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, const Vector2D& dropDir,
+                   GameModel *gameModel, const GameItem::ItemDisposition disp) : 
+	name(name), center(spawnOrigin), gameModel(gameModel), disposition(disp), 
+        isActive(false), colour(1, 1, 1, 1), currVelocityDir(dropDir), rotationInDegs(0.0f) {
 	assert(gameModel != NULL);
 
 	// If the paddle camera is currently active then we must set the item
@@ -60,6 +62,9 @@ GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameMode
 
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
+
+    this->currVelocityDir.Normalize();
+    this->rotationInDegs = Trig::radiansToDegrees(acos(Vector2D::Dot(this->currVelocityDir, Vector2D(0,-1))));
 }
 
 GameItem::~GameItem() {

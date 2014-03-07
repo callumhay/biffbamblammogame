@@ -42,7 +42,9 @@ public:
 
     void OverwriteEmittedPosition(const Point3D& pt);
 	void SetEmitPosition(const Point3D& pt);
+    void SetEmitPosition(const Vector3D& pt);
 	void SetEmitDirection(const Vector3D& dir);
+    void SetEmitDirection(const Vector2D& dir);
 	void SetToggleEmitOnPlane(bool emitOnPlane, const Vector3D& planeNormal = Vector3D(0, 0, 1));
 	void SetEmitAngleInDegrees(int degs);
 	
@@ -68,4 +70,36 @@ private:
 	ESPPointEmitter& operator=(const ESPPointEmitter& e);
 
 };
+
+/**
+ * Set the center emit point for this point emitter.
+ */
+inline void ESPPointEmitter::SetEmitPosition(const Point3D& pt) {
+	this->emitPt = pt;
+}
+
+inline void ESPPointEmitter::SetEmitPosition(const Vector3D& pt) {
+    this->emitPt[0] = pt[0];
+    this->emitPt[1] = pt[1];
+    this->emitPt[2] = pt[2];
+}
+
+/**
+ * Set the emit direction for this point emitter.
+ */
+inline void ESPPointEmitter::SetEmitDirection(const Vector3D& dir) {
+	this->emitDir = dir;
+
+	assert(!this->emitOnPlane || Vector3D::cross(this->planeNormal, this->emitDir) != Vector3D(0,0,0));
+    assert(!this->emitDir.IsZero());
+}
+
+inline void ESPPointEmitter::SetEmitDirection(const Vector2D& dir) {
+    this->emitDir[0] = dir[0];
+    this->emitDir[1] = dir[1];
+    this->emitDir[2] = 0;
+
+    assert(!this->emitOnPlane || Vector3D::cross(this->planeNormal, this->emitDir) != Vector3D(0,0,0));
+    assert(!this->emitDir.IsZero());
+}
 #endif

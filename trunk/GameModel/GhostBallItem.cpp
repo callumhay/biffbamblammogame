@@ -35,8 +35,8 @@
 const double GhostBallItem::GHOST_BALL_TIMER_IN_SECS	= 25.0;
 const char* GhostBallItem::GHOST_BALL_ITEM_NAME			  = "GhostBall";
 
-GhostBallItem::GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(GHOST_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+GhostBallItem::GhostBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(GHOST_BALL_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 GhostBallItem::~GhostBallItem() {

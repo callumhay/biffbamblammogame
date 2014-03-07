@@ -35,8 +35,8 @@
 const double FireBallItem::FIRE_BALL_TIMER_IN_SECS	= 22.0;
 const char* FireBallItem::FIRE_BALL_ITEM_NAME			  = "FireBall";
 
-FireBallItem::FireBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(FIRE_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+FireBallItem::FireBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(FIRE_BALL_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 FireBallItem::~FireBallItem() {

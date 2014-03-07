@@ -33,8 +33,8 @@
 const char*  RandomItem::RANDOM_ITEM_NAME = "Random";
 const long RandomItem::TIME_BETWEEN_BLINKS_IN_MS = 100;
 
-RandomItem::RandomItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(RandomItem::RANDOM_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral), randomItem(NULL),
+RandomItem::RandomItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(RandomItem::RANDOM_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral), randomItem(NULL),
 currRandomIdx(-1), lastBlinkTime(0) {
 
 	// Build a list of all possible random items, but make sure the random item type isn't included in there...
@@ -64,7 +64,7 @@ double RandomItem::Activate() {
     // Choose the random item...
     assert(this->randomItem == NULL);
     GameItem::ItemType randomItemType = this->possibleItemDropTypes[currRandomIdx];
-    this->randomItem = GameItemFactory::GetInstance()->CreateItem(randomItemType, this->GetCenter(), gameModel);
+    this->randomItem = GameItemFactory::GetInstance()->CreateItem(randomItemType, this->GetCenter(), this->currVelocityDir, gameModel);
     assert(this->randomItem != NULL);
     assert(this->randomItem->GetItemType() != GameItem::RandomItem);
 

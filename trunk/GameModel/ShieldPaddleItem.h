@@ -37,7 +37,7 @@ public:
 	static const char* SHIELD_PADDLE_ITEM_NAME;
 	static const double SHIELD_PADDLE_TIMER_IN_SECS;
 
-	ShieldPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	ShieldPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~ShieldPaddleItem();
 
 	double Activate();

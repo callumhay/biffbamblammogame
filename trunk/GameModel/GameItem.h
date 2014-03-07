@@ -136,6 +136,10 @@ public:
 	void Tick(double seconds, const GameModel& model);
 	bool CollisionCheck(const PlayerPaddle &paddle);
 
+    Vector2D GetUpVector() const { return -this->currVelocityDir; }
+    bool GetIsFlipped() const { return (this->currVelocityDir[1] > 0); }
+    float GetRotationInDegs() const { return this->rotationInDegs; }
+
 	// Returns the timer length for this item
 	virtual double Activate(){
 		// Raise an event for this item being activated...
@@ -157,6 +161,7 @@ protected:
 	ItemDisposition disposition; // The disposition of the item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
 	bool isActive;               // Whether or not this item is currently active (i.e., has been acquired and is effecting the game play)
 	Vector2D currVelocityDir;    // The direction that this item is moving in
+    float rotationInDegs;
 
 	ColourRGBA colour;                          // Colour multiply of the item
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
@@ -166,7 +171,8 @@ protected:
 	// Speed of descent for items
 	static const float SPEED_OF_DESCENT;
 
-	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp);
+	GameItem(const std::string& name, const Point2D &spawnOrigin, const Vector2D& dropDir, 
+        GameModel *gameModel, const GameItem::ItemDisposition disp);
 
 	void SetItemDisposition(const ItemDisposition& d) {
 		this->disposition = d;

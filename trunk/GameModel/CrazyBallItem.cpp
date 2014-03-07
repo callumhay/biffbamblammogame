@@ -32,8 +32,8 @@
 const char* CrazyBallItem::CRAZY_BALL_ITEM_NAME       = "CrazyBall";
 const double CrazyBallItem::CRAZY_BALL_TIMER_IN_SECS  = 28.0;
 
-CrazyBallItem::CrazyBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(CRAZY_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+CrazyBallItem::CrazyBallItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(CRAZY_BALL_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 CrazyBallItem::~CrazyBallItem() {

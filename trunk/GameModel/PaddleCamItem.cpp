@@ -34,8 +34,8 @@
 const char* PaddleCamItem::PADDLE_CAM_ITEM_NAME			  = "PaddleCam";
 const double PaddleCamItem::PADDLE_CAM_TIMER_IN_SECS	= 17.0;
 
-PaddleCamItem::PaddleCamItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(PaddleCamItem::PADDLE_CAM_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
+PaddleCamItem::PaddleCamItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) : 
+GameItem(PaddleCamItem::PADDLE_CAM_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Bad) {
 }
 
 PaddleCamItem::~PaddleCamItem() {

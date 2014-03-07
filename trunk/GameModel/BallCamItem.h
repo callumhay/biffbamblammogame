@@ -41,7 +41,7 @@ public:
 	static const char* BALL_CAM_ITEM_NAME;
 	static const double BALL_CAM_TIMER_IN_SECS;
 
-	BallCamItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	BallCamItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~BallCamItem();
 
 	double Activate();

@@ -54,9 +54,11 @@ GameModel::GameModel(GameSound* sound, const GameModel::Difficulty& initDifficul
                      const BallBoostModel::BallBoostMode& ballBoostMode) : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0),
 livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
-pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
+pauseBitField(GameModel::NoPause), isBlackoutActive(false), 
+areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
-droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty),
+droppedLifeForMaxMultiplier(false), bottomSafetyNet(NULL), topSafetyNet(NULL),
+ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty),
 ballBoostMode(ballBoostMode), sound(sound) {
 	
     assert(sound != NULL);
@@ -216,7 +218,8 @@ void GameModel::ResetLevelValues(int numLives) {
     this->droppedLifeForMaxMultiplier = false;
     this->ResetNumAcquiredItems();
     this->ResetLevelTime();
-    this->DestroySafetyNet();
+    this->DestroyBottomSafetyNet();
+    this->DestroyTopSafetyNet();
     
 	// Clear up the model
     this->ClearStatusUpdatePieces();
@@ -330,13 +333,14 @@ void GameModel::ResetCurrentLevel() {
 
 // Called in order to make sure the game is no longer processing or generating anything
 void GameModel::ClearGameState() {
-	// Delete all world items, timers and thingys
+	// Delete all world items, timers and other stuff
 	this->ClearStatusUpdatePieces();
 	this->ClearLiveItems();
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
 	this->ClearBeams();
-    this->DestroySafetyNet();
+    this->DestroyBottomSafetyNet();
+    this->DestroyTopSafetyNet();
 
 	// Delete the state
 	delete this->currState;
@@ -497,20 +501,50 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
 }
 
 bool GameModel::ActivateSafetyNet() {
-    if (this->safetyNet != NULL) {
-        return false;
+    // Figure out which safety net is becoming active...
+    if (this->playerPaddle->GetIsPaddleFlipped() && SafetyNet::CanTopSafetyNetBePlaced(*this->GetCurrentLevel())) {
+        if (this->topSafetyNet != NULL) {
+            return false;
+        }
+        this->topSafetyNet = new SafetyNet(*this->GetCurrentLevel(), false);
+        
+        // EVENT: We just created a brand new ball safety net...
+        GameEventManager::Instance()->ActionBallSafetyNetCreated(false);
+    }
+    else {
+        if (this->bottomSafetyNet != NULL) {
+            return false;
+        }
+        this->bottomSafetyNet = new SafetyNet(*this->GetCurrentLevel(), true);
+
+        // EVENT: We just created a brand new ball safety net...
+        GameEventManager::Instance()->ActionBallSafetyNetCreated(true);
     }
 
-    this->safetyNet = new SafetyNet(*this->GetCurrentLevel());
-    // EVENT: We just created a brand new ball safety net...
-	GameEventManager::Instance()->ActionBallSafetyNetCreated();
+
     return true;
 }
 
-void GameModel::DestroySafetyNet() {
-    if (this->safetyNet != NULL) {
-        delete this->safetyNet;
-        this->safetyNet = NULL;
+void GameModel::DestroySafetyNet(SafetyNet* netToDestroy) {
+    if (this->bottomSafetyNet == netToDestroy) {
+        this->DestroyBottomSafetyNet();
+    }
+    else if (this->topSafetyNet == netToDestroy) {
+        this->DestroyTopSafetyNet();
+    }
+}
+
+void GameModel::DestroyBottomSafetyNet() {
+    if (this->bottomSafetyNet != NULL) {
+        delete this->bottomSafetyNet;
+        this->bottomSafetyNet = NULL;
+    }
+}
+
+void GameModel::DestroyTopSafetyNet() {
+    if (this->topSafetyNet != NULL) {
+        delete this->topSafetyNet;
+        this->topSafetyNet = NULL;
     }
 }
 
@@ -830,37 +864,68 @@ void GameModel::DoProjectileCollisions(double dT) {
 		    }
 
 		    // Check to see if the projectile collided with a safety net (if one is active)
-            if (this->IsSafetyNetActive()) {
-                if (this->safetyNet->ProjectileCollisionCheck(projectileBoundingLines, dT, currProjectileVel)) {
+            if (this->IsBottomSafetyNetActive() && 
+                this->bottomSafetyNet->ProjectileCollisionCheck(projectileBoundingLines, dT, currProjectileVel)) {
                     
-                    currProjectile->SafetyNetCollisionOccurred(this->safetyNet);
-                    if (currProjectile->IsMine()) {
-                        MineProjectile* mine = static_cast<MineProjectile*>(currProjectile);
-                        if (mine->GetIsAttachedToSafetyNet()) {
-                            ++iter;
-                            continue;
-                        }
+                currProjectile->SafetyNetCollisionOccurred(this->bottomSafetyNet);
+                if (currProjectile->IsMine()) {
+                    MineProjectile* mine = static_cast<MineProjectile*>(currProjectile);
+                    if (mine->GetIsAttachedToSafetyNet()) {
+                        ++iter;
+                        continue;
                     }
-                    
-                    // EVENT: The projectile was just destroyed by the safety net
-                    GameEventManager::Instance()->ActionProjectileSafetyNetCollision(*currProjectile, *this->safetyNet);
+                }
+                
+                // EVENT: The projectile was just destroyed by the safety net
+                GameEventManager::Instance()->ActionProjectileSafetyNetCollision(*currProjectile, *this->bottomSafetyNet);
 
-                    if (currProjectile->BlastsThroughSafetyNets()) {
-                        this->DestroySafetyNet();
-                        // EVENT: The projectile just destroyed the safety net
-                        GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currProjectile);
-                    }
+                if (currProjectile->BlastsThroughSafetyNets()) {
+                    this->DestroyBottomSafetyNet();
+                    // EVENT: The projectile just destroyed the safety net
+                    GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currProjectile, true);
+                }
 
-                    // Check to see if the projectile will be destroyed due to the collision...
-                    if (currProjectile->IsDestroyedBySafetyNets()) {
-                        iter = currProjectileList.erase(iter);
-				        PROJECTILE_CLEANUP(currProjectile);
-				        continue;
-                    }
-
-			        ++iter;
+                // Check to see if the projectile will be destroyed due to the collision...
+                if (currProjectile->IsDestroyedBySafetyNets()) {
+                    iter = currProjectileList.erase(iter);
+			        PROJECTILE_CLEANUP(currProjectile);
 			        continue;
-		        }
+                }
+
+		        ++iter;
+		        continue;
+
+            }
+            else if (this->IsTopSafetyNetActive() && 
+                this->topSafetyNet->ProjectileCollisionCheck(projectileBoundingLines, dT, currProjectileVel)) {
+
+                currProjectile->SafetyNetCollisionOccurred(this->topSafetyNet);
+                if (currProjectile->IsMine()) {
+                    MineProjectile* mine = static_cast<MineProjectile*>(currProjectile);
+                    if (mine->GetIsAttachedToSafetyNet()) {
+                        ++iter;
+                        continue;
+                    }
+                }
+
+                // EVENT: The projectile was just destroyed by the safety net
+                GameEventManager::Instance()->ActionProjectileSafetyNetCollision(*currProjectile, *this->topSafetyNet);
+
+                if (currProjectile->BlastsThroughSafetyNets()) {
+                    this->DestroyTopSafetyNet();
+                    // EVENT: The projectile just destroyed the safety net
+                    GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currProjectile, false);
+                }
+
+                // Check to see if the projectile will be destroyed due to the collision...
+                if (currProjectile->IsDestroyedBySafetyNets()) {
+                    iter = currProjectileList.erase(iter);
+                    PROJECTILE_CLEANUP(currProjectile);
+                    continue;
+                }
+
+                ++iter;
+                continue;
             }
 
             // Check if the projectile collided with any Tesla lightning arcs...
@@ -1324,8 +1389,9 @@ void GameModel::ClearLiveItems() {
 	}
 	this->currLiveItems.clear();
 
-    // Remove any safety net that might be active
-    this->DestroySafetyNet();
+    // Remove any safety nets that might be active
+    this->DestroyBottomSafetyNet();
+    this->DestroyTopSafetyNet();
 }
 /**
  * Clears all of the active timers in the game.
@@ -1554,8 +1620,14 @@ void GameModel::AddItemDrop(const Point2D& p, const GameItem::ItemType& itemType
         return;
     }
 
+    // Decide which way the item will drop...
+    Vector2D dropDir(0,-1);
+    if (this->playerPaddle->GetIsPaddleFlipped()) {
+        dropDir[1] = 1;
+    }
+
 	// We always drop items in this manor, even if we've exceeded the max!
-	GameItem* newGameItem = GameItemFactory::GetInstance()->CreateItem(itemType, p, this);
+	GameItem* newGameItem = GameItemFactory::GetInstance()->CreateItem(itemType, p, dropDir, this);
 	this->currLiveItems.push_back(newGameItem);
 	// EVENT: Item has been created and added to the game
 	GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
@@ -1817,7 +1889,12 @@ void GameModel::DropItem(GameItem::ItemType itemType) {
 	BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
 	if (state != NULL) {
 		Vector2D levelDim = this->GetLevelUnitDimensions();
-		state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType, Point2D(0,0) + 0.5f*levelDim, this));
+        Vector2D dropDir(0,-1);
+        if (playerPaddle->GetIsPaddleFlipped()) {
+            dropDir[1] = 1;
+        }
+		state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType, 
+            Point2D(playerPaddle->GetCenterPosition()[0], 0.5f*levelDim[1]), dropDir, this));
 	}
 }
 
@@ -1829,10 +1906,11 @@ void GameModel::DropThreeItems(GameItem::ItemType itemType1, GameItem::ItemType 
         Point2D midDropPt   = Point2D(0,0) + 0.5f*this->GetLevelUnitDimensions();
         Point2D leftDropPt  = midDropPt - distToOtherItem;
         Point2D rightDropPt = midDropPt + distToOtherItem;
+        Vector2D dropDir(0,-1);
 
-        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType1, leftDropPt,  this));
-        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType2, midDropPt,   this));
-        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType3, rightDropPt, this));
+        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType1, leftDropPt, dropDir,  this));
+        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType2, midDropPt, dropDir,   this));
+        state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType3, rightDropPt, dropDir, this));
     }
 }
 #endif

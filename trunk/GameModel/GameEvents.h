@@ -329,6 +329,15 @@ public:
      */
     virtual void OnFirePaddleCanceledByIceEvent(const PlayerPaddle& paddle) { UNUSED_PARAMETER(paddle); }
 
+    /**
+     * Event triggered when a paddle is flipped either upside down or right-side up.
+     * Arguments: paddle       - The paddle that had its fire canceled.
+     *            isUpsideDown - If the paddle is upside-down this is true, otherwise false.
+     */
+    virtual void PaddleFlippedEvent(const PlayerPaddle& paddle, bool isUpsideDown) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(isUpsideDown);
+    }
 
 	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
@@ -495,19 +504,30 @@ public:
 	/**
 	 * Event triggered when a ball safety net is created. Only occurs once as the safety net
 	 * becomes active.
+     * Arguments: bottomSafetyNet - If the safety net created was the bottom one, this is true, false if the top one was created.
 	 */
-    virtual void BallSafetyNetCreatedEvent() {}
+    virtual void BallSafetyNetCreatedEvent(bool bottomSafetyNet) { UNUSED_PARAMETER(bottomSafetyNet); }
 
 	/**
 	 * Event triggered when a ball collides with the safety net and the safety net is
 	 * destroyed by it.
 	 * Arguments: ball - The ball that collided and destroyed the safety net.
+     *            bottomSafetyNet - If the safety net destroyed was the bottom one, this is true, false if the top one was destroyed.
 	 */
-    virtual void BallSafetyNetDestroyedEvent(const GameBall& ball) { UNUSED_PARAMETER(ball); }
+    virtual void BallSafetyNetDestroyedEvent(const GameBall& ball, bool bottomSafetyNet) { 
+        UNUSED_PARAMETER(ball); 
+        UNUSED_PARAMETER(bottomSafetyNet);
+    }
 	// Same as above, only the paddle did it.
-    virtual void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle) { UNUSED_PARAMETER(paddle); }
+    virtual void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle, bool bottomSafetyNet) {
+        UNUSED_PARAMETER(paddle);
+        UNUSED_PARAMETER(bottomSafetyNet);
+    }
 	// Same as above, only a projectile did it.
-    virtual void BallSafetyNetDestroyedEvent(const Projectile& projectile) { UNUSED_PARAMETER(projectile); }
+    virtual void BallSafetyNetDestroyedEvent(const Projectile& projectile, bool bottomSafetyNet) {
+        UNUSED_PARAMETER(projectile);
+        UNUSED_PARAMETER(bottomSafetyNet);
+    }
 
     /**
      * Event triggered when the bullet time state has changed. Triggered right after the state changed.

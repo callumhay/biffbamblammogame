@@ -46,7 +46,7 @@ public:
 	static const char* REMOTE_CONTROL_ROCKET_ITEM_NAME;
 	static const double REMOTE_CONTROL_ROCKET_TIMER_IN_SECS;
 
-	RemoteControlRocketItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	RemoteControlRocketItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~RemoteControlRocketItem ();
 
 	double Activate();

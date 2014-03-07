@@ -470,6 +470,18 @@ void GameEventsListener::OnFirePaddleCanceledByIceEvent(const PlayerPaddle& padd
     debug_output("EVENT: Frozen paddle canceled by fire");
 }
 
+void GameEventsListener::PaddleFlippedEvent(const PlayerPaddle& paddle, bool isUpsideDown) {
+    UNUSED_PARAMETER(paddle);
+    UNUSED_PARAMETER(isUpsideDown);
+
+    GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+    assert(espAssets != NULL);
+
+    espAssets->PaddleFlipped();
+
+    debug_output("EVENT: Paddle flipped");
+}
+
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);
@@ -1319,39 +1331,39 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 	debug_output("EVENT: Block destroyed");
 }
 
-void GameEventsListener::BallSafetyNetCreatedEvent() {
+void GameEventsListener::BallSafetyNetCreatedEvent(bool bottomSafetyNet) {
 
     // Tell the level mesh about it so it can show any effects for the creation
 	// of the safety net mesh
-	this->display->GetAssets()->BallSafetyNetCreated();
+	this->display->GetAssets()->BallSafetyNetCreated(bottomSafetyNet);
 
     // Play the sound for the creation of the net
-    const Point2D& safetyNetCenterPos = this->display->GetAssets()->GetBallSafetyNetPosition();
+    const Point2D& safetyNetCenterPos = this->display->GetAssets()->GetBallSafetyNetPosition(bottomSafetyNet);
     this->display->GetSound()->PlaySoundAtPosition(GameSound::BallSafetyNetCreatedEvent, false, 
         Point3D(safetyNetCenterPos, 0.0f), true, true, true);
 
 	debug_output("EVENT: Ball safety net created");
 }
 
-void GameEventsListener::BallSafetyNetDestroyedEvent(const GameBall& ball) {
+void GameEventsListener::BallSafetyNetDestroyedEvent(const GameBall& ball, bool bottomSafetyNet) {
 	Point2D collisionCenter = ball.GetCenterPosition2D() - Vector2D(0, ball.GetBounds().Radius() + BallSafetyNetMesh::SAFETY_NET_HEIGHT/2.0f);
-	this->DestroyBallSafetyNet(collisionCenter);
+	this->DestroyBallSafetyNet(collisionCenter, bottomSafetyNet);
 	debug_output("EVENT: Ball safety net destroyed by ball");
 }
 
-void GameEventsListener::BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle) {
-	this->DestroyBallSafetyNet(paddle.GetCenterPosition());
+void GameEventsListener::BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle, bool bottomSafetyNet) {
+	this->DestroyBallSafetyNet(paddle.GetCenterPosition(), bottomSafetyNet);
 	debug_output("EVENT: Ball safety net destroyed by paddle");
 }
 
-void GameEventsListener::BallSafetyNetDestroyedEvent(const Projectile& projectile) {
-	this->DestroyBallSafetyNet(projectile.GetPosition());
+void GameEventsListener::BallSafetyNetDestroyedEvent(const Projectile& projectile, bool bottomSafetyNet) {
+	this->DestroyBallSafetyNet(projectile.GetPosition(), bottomSafetyNet);
 	debug_output("EVENT: Ball safety net destroyed by projectile");
 }
 
 
 // Private helper for when the safety net is destroyed
-void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
+void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt, bool bottomSafetyNet) {
 
 	this->display->GetSound()->PlaySoundAtPosition(GameSound::BallSafetyNetDestroyedEvent, false, 
         Point3D(pt, 0.0f), true, true, true);
@@ -1360,7 +1372,7 @@ void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 	// of the safety net mesh
     GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
     assert(currLevel != NULL);
-	this->display->GetAssets()->BallSafetyNetDestroyed(*currLevel, pt);
+	this->display->GetAssets()->BallSafetyNetDestroyed(*currLevel, pt, bottomSafetyNet);
 
 	// Particle effects for when the safety net is destroyed
 	this->display->GetAssets()->GetESPAssets()->AddBallSafetyNetDestroyedEffect(pt);

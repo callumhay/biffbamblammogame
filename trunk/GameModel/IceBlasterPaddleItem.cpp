@@ -34,8 +34,8 @@
 const char* IceBlasterPaddleItem::ICE_BLASTER_PADDLE_ITEM_NAME      = "IceBlasterPaddle";
 const double IceBlasterPaddleItem::ICE_BLASTER_PADDLE_TIMER_IN_SECS = 17.0f;
 
-IceBlasterPaddleItem::IceBlasterPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(IceBlasterPaddleItem::ICE_BLASTER_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+IceBlasterPaddleItem::IceBlasterPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel) :
+GameItem(IceBlasterPaddleItem::ICE_BLASTER_PADDLE_ITEM_NAME, spawnOrigin, dropDir, gameModel, GameItem::Neutral) {
 }
 
 IceBlasterPaddleItem::~IceBlasterPaddleItem() {

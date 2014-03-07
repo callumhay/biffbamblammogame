@@ -46,7 +46,7 @@ public:
 	static const char* MINE_LAUNCHER_PADDLE_ITEM_NAME;
 	static const double MINE_LAUNCHER_PADDLE_TIMER_IN_SECS;
 
-	PaddleMineLauncherItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	PaddleMineLauncherItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~PaddleMineLauncherItem ();
 
 	double Activate();

@@ -43,7 +43,7 @@ public:
 	static const char* PADDLE_CAM_ITEM_NAME;
 	static const double PADDLE_CAM_TIMER_IN_SECS;
 
-	PaddleCamItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	PaddleCamItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~PaddleCamItem();
 
 	double Activate();

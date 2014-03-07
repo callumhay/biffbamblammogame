@@ -71,7 +71,6 @@ void PaddleBeamAttachment::DrawEffects(const PlayerPaddle& paddle) {
 
     glPushMatrix();
     glTranslatef(0, 0, -paddle.GetHalfDepthTotal());
-    glRotatef(paddle.GetZRotation(), 0.0f, 0.0f, 1.0f);
 
     // Draw the highlight pre-beam(s) coming out of the paddle...
 
@@ -121,9 +120,11 @@ void PaddleBeamAttachment::DrawHighlightQuadVertices(float alpha, const Vector2D
     
     glBegin(GL_QUADS);
 
+    Vector2D bottomLeft  = -rayOuterRightVec;
+    Vector2D bottomRight = rayOuterRightVec;
     glColor4f(DARK_WASHED_OUT_BEAM_COLOUR.R(), DARK_WASHED_OUT_BEAM_COLOUR.G(), DARK_WASHED_OUT_BEAM_COLOUR.B(), 0.6f*alpha);
-    glVertex3f(-halfOuterRayWidth, 0, 0);
-    glVertex3f(halfOuterRayWidth, 0, 0);
+    glVertex3f(bottomLeft[0], bottomLeft[1], 0);
+    glVertex3f(bottomRight[0], bottomRight[1], 0);
     
     Vector2D topLeft  = rayUpVec - rayOuterRightVec;
     Vector2D topRight = rayUpVec + rayOuterRightVec;
@@ -131,9 +132,11 @@ void PaddleBeamAttachment::DrawHighlightQuadVertices(float alpha, const Vector2D
     glVertex3f(topRight[0], topRight[1], 0);
     glVertex3f(topLeft[0],  topLeft[1], 0);
 
+    bottomLeft  = -rayInnerRightVec;
+    bottomRight = rayInnerRightVec;
     glColor4f(BRIGHT_WASHED_OUT_BEAM_COLOUR.R(), BRIGHT_WASHED_OUT_BEAM_COLOUR.G(), BRIGHT_WASHED_OUT_BEAM_COLOUR.B(), 0.6f*alpha);
-    glVertex3f(-halfInnerRayWidth, 0, 0);
-    glVertex3f(halfInnerRayWidth, 0, 0);
+    glVertex3f(bottomLeft[0], bottomLeft[1], 0);
+    glVertex3f(bottomRight[0], bottomRight[1], 0);
     
     topLeft  = rayUpVec - rayInnerRightVec;
     topRight = rayUpVec + rayInnerRightVec;

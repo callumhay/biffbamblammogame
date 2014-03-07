@@ -189,10 +189,11 @@ GameItemFactory::~GameItemFactory() {
  * hands the new object to the caller.
  * NOTE: The caller will be responsible for its destruction!
  */
-GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const {
+GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, const Vector2D& dropDir, 
+                                            GameModel *gameModel, bool allowRandomItemType) const {
 	assert(gameModel != NULL);
 	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemType(gameModel, allowRandomItemType);
-	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, gameModel);
+	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, dropDir, gameModel);
 }
 
 /**
@@ -229,113 +230,114 @@ GameItem::ItemType GameItemFactory::GetItemTypeFromName(const std::string& itemN
  * Creates a item based on the given item type; hands the new object to the caller.
  * NOTE: The caller will be responsible for its destruction!
  */
-GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) const {
+GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, 
+                                      const Vector2D& dropDir, GameModel *gameModel) const {
 	switch (type) {
 		case GameItem::BallSpeedUpItem:
-			return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);
+			return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, dropDir, gameModel);
 		
 		case GameItem::BallSlowDownItem:
-			return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
+			return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, dropDir, gameModel);
 
 		case GameItem::UberBallItem:
-			return new UberBallItem(spawnOrigin, gameModel);
+			return new UberBallItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::InvisiBallItem:
-			return new InvisiBallItem(spawnOrigin, gameModel);
+			return new InvisiBallItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::GhostBallItem:
-			return new GhostBallItem(spawnOrigin, gameModel);
+			return new GhostBallItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::LaserBulletPaddleItem:
-			return new LaserPaddleItem(spawnOrigin, gameModel);
+			return new LaserPaddleItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::MultiBall3Item:
-			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::ThreeMultiBalls);
+			return new MultiBallItem(spawnOrigin, dropDir, gameModel, MultiBallItem::ThreeMultiBalls);
 	
 		case GameItem::MultiBall5Item:
-			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);
+			return new MultiBallItem(spawnOrigin, dropDir, gameModel, MultiBallItem::FiveMultiBalls);
 
 		case GameItem::PaddleGrowItem:
-			return new PaddleSizeItem(PaddleSizeItem::GrowPaddle, spawnOrigin, gameModel);
+			return new PaddleSizeItem(PaddleSizeItem::GrowPaddle, spawnOrigin, dropDir, gameModel);
 
 		case GameItem::PaddleShrinkItem:
-			return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, gameModel);
+			return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, dropDir, gameModel);
 
 		case GameItem::BallShrinkItem:
-			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);
+			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, dropDir, gameModel);
 
 		case GameItem::BallGrowItem:
-			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);
+			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, dropDir, gameModel);
 
 		case GameItem::BlackoutItem:
-			return new BlackoutItem(spawnOrigin, gameModel);
+			return new BlackoutItem(spawnOrigin, dropDir, gameModel);
 		
 		case GameItem::UpsideDownItem:
-			return new UpsideDownItem(spawnOrigin, gameModel);
+			return new UpsideDownItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::BallSafetyNetItem:
-			return new BallSafetyNetItem(spawnOrigin, gameModel);
+			return new BallSafetyNetItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::LifeUpItem:
-			return new LifeUpItem(spawnOrigin, gameModel);
+			return new LifeUpItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::PoisonPaddleItem:
-			return new PoisonPaddleItem(spawnOrigin, gameModel);
+			return new PoisonPaddleItem(spawnOrigin, dropDir, gameModel);
 		
 		case GameItem::StickyPaddleItem:
-			return new StickyPaddleItem(spawnOrigin, gameModel);
+			return new StickyPaddleItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::PaddleCamItem:
-			return new PaddleCamItem(spawnOrigin, gameModel);
+			return new PaddleCamItem(spawnOrigin, dropDir, gameModel);
 		
 		case GameItem::BallCamItem:
-			return new BallCamItem(spawnOrigin, gameModel);
+			return new BallCamItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::LaserBeamPaddleItem:
-			return new LaserBeamPaddleItem(spawnOrigin, gameModel);
+			return new LaserBeamPaddleItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::GravityBallItem:
-			return new GravityBallItem(spawnOrigin, gameModel);
+			return new GravityBallItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::RocketPaddleItem:
-			return new RocketPaddleItem(spawnOrigin, gameModel);
+			return new RocketPaddleItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::CrazyBallItem:
-			return new CrazyBallItem(spawnOrigin, gameModel);
+			return new CrazyBallItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::ShieldPaddleItem:
-			return new ShieldPaddleItem(spawnOrigin, gameModel);
+			return new ShieldPaddleItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::FireBallItem:
-			return new FireBallItem(spawnOrigin, gameModel);
+			return new FireBallItem(spawnOrigin, dropDir, gameModel);
 
 		case GameItem::IceBallItem:
-			return new IceBallItem(spawnOrigin, gameModel);
+			return new IceBallItem(spawnOrigin, dropDir, gameModel);
 
         case GameItem::OmniLaserBallItem:
-            return new OmniLaserBallItem(spawnOrigin, gameModel);
+            return new OmniLaserBallItem(spawnOrigin, dropDir, gameModel);
 
         case GameItem::InvisiPaddleItem:
-            return new InvisiPaddleItem(spawnOrigin, gameModel);
+            return new InvisiPaddleItem(spawnOrigin, dropDir, gameModel);
 
         case GameItem::MagnetPaddleItem:
-            return new MagnetPaddleItem(spawnOrigin, gameModel);
+            return new MagnetPaddleItem(spawnOrigin, dropDir, gameModel);
 
         case GameItem::MineLauncherPaddleItem:
-            return new PaddleMineLauncherItem(spawnOrigin, gameModel);
+            return new PaddleMineLauncherItem(spawnOrigin, dropDir, gameModel);
         
         case GameItem::RemoteCtrlRocketItem:
-            return new RemoteControlRocketItem(spawnOrigin, gameModel);
+            return new RemoteControlRocketItem(spawnOrigin, dropDir, gameModel);
 
         case GameItem::FlameBlasterPaddleItem:
-            return new FlameBlasterPaddleItem(spawnOrigin, gameModel);
+            return new FlameBlasterPaddleItem(spawnOrigin, dropDir, gameModel);
 
         case GameItem::IceBlasterPaddleItem:
-            return new IceBlasterPaddleItem(spawnOrigin, gameModel);
+            return new IceBlasterPaddleItem(spawnOrigin, dropDir, gameModel);
 
 		// Random item is a very special kind of item that can't be generated anywhere else but here
 		case GameItem::RandomItem:
-			return new RandomItem(spawnOrigin, gameModel);
+			return new RandomItem(spawnOrigin, dropDir, gameModel);
 
 		default:
 			assert(false);
@@ -345,7 +347,8 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 	return NULL;
 }
 
-GameItem* GameItemFactory::CreateRandomItemForCurrentLevel(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const {
+GameItem* GameItemFactory::CreateRandomItemForCurrentLevel(const Point2D &spawnOrigin, const Vector2D& dropDir, 
+                                                           GameModel *gameModel, bool allowRandomItemType) const {
 	assert(gameModel != NULL);
     
     // Check the special case where no item drops are allowed for the current level...
@@ -353,11 +356,11 @@ GameItem* GameItemFactory::CreateRandomItemForCurrentLevel(const Point2D &spawnO
 	assert(currGameLevel != NULL);
 	const std::vector<GameItem::ItemType>& allowableItemDrops = currGameLevel->GetAllowableItemDropTypes();
     if (allowableItemDrops.empty()) {
-        return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);;
+        return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, dropDir, gameModel);;
     }
 
 	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemTypeForCurrentLevel(gameModel, allowRandomItemType);
-	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, gameModel);
+	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, dropDir, gameModel);
 }
 
 /**

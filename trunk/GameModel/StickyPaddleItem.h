@@ -42,7 +42,7 @@ public:
 	static const char*  STICKY_PADDLE_ITEM_NAME;
 	static const double STICKY_PADDLE_TIMER_IN_SECS;
 
-	StickyPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	StickyPaddleItem(const Point2D &spawnOrigin, const Vector2D& dropDir, GameModel *gameModel);
 	~StickyPaddleItem();
 
 	double Activate();
