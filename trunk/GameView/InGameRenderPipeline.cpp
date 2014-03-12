@@ -236,7 +236,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 	glPopMatrix();
 
 	// Level pieces / blocks and their associated emitter effects
-	assets->DrawLevelPieces(dT, *gameModel, camera);
+	assets->DrawFirstPassLevelPieces(dT, *gameModel, camera);
 
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
@@ -306,7 +306,7 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
 
 	// Render full-screen effects
     // N.B., Bloom is applied here
-    FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);//fboAssets->GetFullSceneFBO();
+    FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(Camera::GetWindowWidth(), Camera::GetWindowHeight(), dT);
     FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
     FBObj* finalFBO = fboAssets->GetFinalFullScreenFBO();
     
@@ -319,9 +319,13 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
     initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuadNoDepth();
 
 	// Render all effects that do not go through all the post-processing filters...
-
     glPushMatrix();
     glMultMatrixf(gameTransform.begin());
+
+    // Second pass level pieces, these are the reflective/refractive pieces that use FBO(s)
+    // from earlier in the rendering pipeline
+    assets->DrawSecondPassLevelPieces(dT, *gameModel, camera);
+
     glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0);
 
     // Item drop blocks (draw them without bloom because otherwise it's hard to see
@@ -329,6 +333,8 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
     assets->DrawNoBloomLevelPieces(dT, camera);
 
     glClear(GL_DEPTH_BUFFER_BIT);
+    //glPushAttrib(GL_DEPTH_BUFFER_BIT);
+    //glDepthFunc(GL_ALWAYS);
 
     // Draw dropping items
     if (fboAssets->DrawItemsInLastPass()) {
@@ -345,8 +351,7 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
 
 	// Absolute post effects call for various object effects
 	assets->DrawGameBallsPostEffects(dT, *gameModel, camera);
-
-
+    //glPopAttrib();
 
     // Add outlines to the scene...
     {

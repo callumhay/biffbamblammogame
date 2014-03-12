@@ -255,7 +255,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	}
     else {
         // bottomNeighbor is NULL
-        if (this->dirType == OneWayDown) {
+        if (this->dirType != OneWayUp) {
             boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
                 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
             boundingNorms[lineCount] = Vector2D(0, -1);
@@ -341,7 +341,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	}
     else {
         // topNeighbor is NULL
-        if (this->dirType == OneWayUp) {
+        if (this->dirType != OneWayDown) {
             boundingLines[lineCount] = Collision::LineSeg2D(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
                 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
             boundingNorms[lineCount] = Vector2D(0, 1);

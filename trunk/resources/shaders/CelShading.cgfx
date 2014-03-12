@@ -278,7 +278,7 @@ technique BasicBG {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
-        DepthFunc = LEqual;
+        //DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
@@ -293,7 +293,7 @@ technique BasicFG {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
-        DepthFunc = LEqual;
+        //DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
@@ -308,7 +308,7 @@ technique TexturedBG {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
-        DepthFunc = LEqual;
+        //DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
@@ -323,7 +323,7 @@ technique TexturedFG {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
-        DepthFunc = LEqual;
+        //DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);

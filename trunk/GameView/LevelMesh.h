@@ -79,7 +79,9 @@ public:
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void RemovePiece(const LevelPiece& piece);
 	
-	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const GameModel* gameModel, 
+	void DrawFirstPassPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const GameModel* gameModel, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawSecondPassPieces(double dT, const Camera& camera, const GameModel* gameModel, 
         const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
     void DrawPiecesPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
@@ -131,9 +133,11 @@ private:
 	Mesh* bombBlock;
 	Mesh* triangleBlockUR;                  // Triangle block (default position in upper-right)
 	Mesh* inkBlock;
+
 	PortalBlockMesh* portalBlock;
 	PrismBlockMesh* prismBlockDiamond;		// Prism diamond block
 	PrismBlockMesh* prismBlockTriangleUR;	// Prism triangle block in upper-right corner position
+
 	CannonBlockMesh* cannonBlock;
     FragileCannonBlockMesh* fragileCannonBlock;
 	CollateralBlockMesh* collateralBlock;
@@ -162,9 +166,11 @@ private:
 	std::map<std::string, CgFxAbstractMaterialEffect*> levelMaterials;
 
 	// Which display lists correspond to a given material
-	std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> > displayListsPerMaterial;
+	std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> > firstPassDisplayListsPerMaterial;
+    std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> > secondPassDisplayListsPerMaterial;
 	// The display lists associated with each level piece
-	std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> > pieceDisplayLists;
+	std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> > firstPassPieceDisplayLists;
+    std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> > secondPassPieceDisplayLists;
 	// Special effects always present for specific level pieces
 	std::map<const LevelPiece*, std::list<ESPEmitter*> > pieceEmitterEffects;
     // Effects for the last couple of pieces left in the level, to highlight them for the player
