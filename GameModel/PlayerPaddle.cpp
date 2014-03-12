@@ -2039,30 +2039,38 @@ bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
 
     // If the paddle has a shield around it do the collision with the shield
     if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
-      Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
-      Point2D shieldPtOfCollision;
-      return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n,
-          collisionLine, timeUntilCollision, pointOfCollision, shieldPtOfCollision, this->GetVelocity());
+        Collision::Circle2D shieldBounds = this->CreatePaddleShieldBounds();
+        Point2D shieldPtOfCollision;
+        return shieldBounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n,
+            collisionLine, timeUntilCollision, pointOfCollision, shieldPtOfCollision, this->GetVelocity());
     }
     else {
         assert(this->bounds.GetNumLines() == 4);
 
         bool ballIsUnderPaddle = this->IsBallUnderPaddle(ball);
-        if (ballIsUnderPaddle && Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
+        bool ballIsGoingUp     = Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0;
+        if (ballIsUnderPaddle && ballIsGoingUp) {
 
-              // Ball is traveling upwards at the paddle from below it...
-              return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, 
-                  timeUntilCollision, pointOfCollision, this->GetVelocity());
+            // Ball is traveling upwards at the paddle from below it...
+            return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, 
+                timeUntilCollision, pointOfCollision, this->GetVelocity());
         }
         else {
-          // Ball is traveling downwards/parallel at the paddle
-          BoundingLines boundsNoBottom;
-          this->GetBoundsWithoutBottomCollisionLine(boundsNoBottom);
 
-          bool wasCollision = boundsNoBottom.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
+            // Check to see if the ball is actually traveling down and whether it has collided recently, if
+            // so then we don't allow another collision with the paddle
+            if (ballIsGoingUp && ball.GetTimeSinceLastCollision() <= 2.0*dT) {
+                return false;
+            }
+
+            // Ball is traveling downwards/parallel at the paddle
+            BoundingLines boundsNoBottom;
+            this->GetBoundsWithoutBottomCollisionLine(boundsNoBottom);
+
+            bool wasCollision = boundsNoBottom.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, 
               collisionLine, timeUntilCollision, pointOfCollision, this->GetVelocity());
 
-          return wasCollision;
+            return wasCollision;
         }
     }
 }
@@ -2247,13 +2255,4 @@ void PlayerPaddle::GetBoundsWithoutBottomCollisionLine(BoundingLines& boundsNoBo
     boundsNoBottom.AddBound(this->bounds.GetLine(0), this->bounds.GetNormal(0), this->bounds.GetOnInside(0));
     boundsNoBottom.AddBound(this->bounds.GetLine(1), this->bounds.GetNormal(1), this->bounds.GetOnInside(1));
     boundsNoBottom.AddBound(this->bounds.GetLine(2), this->bounds.GetNormal(2), this->bounds.GetOnInside(2));
-
-    /*
-    if (this->bounds.GetNumLines() > 4) {
-        assert(this->bounds.GetNumLines() == 8);
-        boundsNoBottom.AddBound(this->bounds.GetLine(4), this->bounds.GetNormal(4), this->bounds.GetOnInside(4));
-        boundsNoBottom.AddBound(this->bounds.GetLine(5), this->bounds.GetNormal(5), this->bounds.GetOnInside(5));
-        boundsNoBottom.AddBound(this->bounds.GetLine(6), this->bounds.GetNormal(6), this->bounds.GetOnInside(6));
-    }
-    */
 }

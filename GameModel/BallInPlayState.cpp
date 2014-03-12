@@ -401,13 +401,17 @@ void BallInPlayState::Tick(double seconds) {
 				    }
 
 				    // Do ball-paddle collision
+                    double timeSinceLastBallCollision = currBall->GetTimeSinceLastCollision();
                     this->DoBallPaddleCollision(*currBall, *paddle, n, seconds, timeUntilCollision, 
                         GameBall::MIN_BALL_ANGLE_ON_PADDLE_HIT_IN_DEGS, paddle->GetVelocity());
                     BallCollisionChangeInfo& collisionInfo = ballChangedByCollision[ballIdx];                    
                     collisionInfo.posChanged = true;
 
-                    // Only apply the impulse if the paddle is not close to a wall...
-                    if (!paddle->GetIsHittingAWall() && !paddle->GetIsCloseToAWall()) {
+                    // Only apply the impulse if the paddle is not close to a wall, the ball hasn't collided
+                    // recently (not including the current collision with the paddle), and both the paddle and ball are going in the same
+                    // general direction
+                    if (!paddle->GetIsHittingAWall() && !paddle->GetIsCloseToAWall() && timeSinceLastBallCollision > 2*seconds &&
+                        Vector2D::Dot(currBall->GetDirection(), paddle->GetVelocity()) > 0) {
                         collisionInfo.impulseApplied = true;
                         collisionInfo.impulseAmt     = (GameBall::GetNormalSpeed() / currBall->GetSpeed()) * fabs(paddle->GetSpeed()) / 5.0f;
                         collisionInfo.impulseDecel   = collisionInfo.impulseAmt;
@@ -496,8 +500,6 @@ void BallInPlayState::Tick(double seconds) {
                     currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(),
                     currBall->GetBounds().Radius(), currBall->GetSpeed());
 
-
-                
                 // Start by finding the best candidate out of the possible collisions...
                 LevelPiece* bestPiece = NULL;
                 bestTimeUntilCollision = std::numeric_limits<double>::max();
@@ -736,7 +738,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
 void BallInPlayState::DoBallPaddleCollision(GameBall& b, PlayerPaddle& p, const Vector2D& n, double dT, 
                                             double timeUntilCollision, float minAngleInDegs, const Vector2D& lineVelocity) {
-
+    UNUSED_PARAMETER(p);
     b.BallCollided();
 
     // Calculate the time of collision and then the difference up to this point
@@ -789,16 +791,15 @@ void BallInPlayState::DoBallPaddleCollision(GameBall& b, PlayerPaddle& p, const 
    
     // Only have to check whether the ball is acceptably far enough away from the +/-x directions
     float angleAwayFromX =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(Vector2D(1,0), reflVecHat)))));
-    float paddleFlipMultiplier = p.GetIsPaddleFlipped() ? -1 : 1;
     if (angleAwayFromX < minAngleInDegs) {
         // Rotate so that its going to fire upwards a bit from the (1,0) direction
-        reflVecHat = Vector2D::Rotate(minAngleInDegs - paddleFlipMultiplier * angleAwayFromX, reflVecHat);
+        reflVecHat = Vector2D::Rotate(minAngleInDegs - angleAwayFromX, reflVecHat);
     }
     else {
         float oneEightyMinusMinAngle = 180.0f - minAngleInDegs;
         if (angleAwayFromX > oneEightyMinusMinAngle) {
             // Rotate so that its going to fire upwards a bit from the (-1,0) direction
-            reflVecHat = Vector2D::Rotate(oneEightyMinusMinAngle - paddleFlipMultiplier * angleAwayFromX, reflVecHat);
+            reflVecHat = Vector2D::Rotate(oneEightyMinusMinAngle - angleAwayFromX, reflVecHat);
         }
     }
 

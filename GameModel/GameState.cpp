@@ -81,9 +81,10 @@ void GameState::MoveKeyPressedForPaddle(int dir, float magnitudePercent) {
 
     if ((this->gameModel->GetPauseState() & (GameModel::PausePaddle | GameModel::PausePaddleControls)) == 0x0) {
 
+        PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
+
         // Default action here is to just move the paddle around
-        this->gameModel->GetPlayerPaddle()->ControlPaddleMovement(
-            static_cast<PlayerPaddle::PaddleMovement>(dir), magnitudePercent);
+        paddle->ControlPaddleMovement(static_cast<PlayerPaddle::PaddleMovement>(dir), magnitudePercent);
     }
 }
 

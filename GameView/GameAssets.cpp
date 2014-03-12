@@ -662,7 +662,7 @@ void GameAssets::DrawPaddle(double dT, const GameModel& gameModel, const Camera&
 	
     const PlayerPaddle& p = *gameModel.GetPlayerPaddle();
     const Point2D& paddleCenter = p.GetCenterPosition();	
-	float paddleScaleFactor = p.GetPaddleScaleFactor();
+	float paddleScaleFactor     = p.GetPaddleScaleFactor();
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
 	
 	// Obtain the lights that affect the paddle
@@ -878,13 +878,20 @@ void GameAssets::DrawBackgroundEffects(const Camera& camera) {
 }
 
 // Draw the foreground level pieces...
-void GameAssets::DrawLevelPieces(double dT, const GameModel& gameModel, const Camera& camera) {
+void GameAssets::DrawFirstPassLevelPieces(double dT, const GameModel& gameModel, const Camera& camera) {
     
     Vector3D worldTransform = gameModel.GetCurrentLevelTranslation();
     BasicPointLight fgKeyLight, fgFillLight, ballLight;
 
     this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-    this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, &gameModel, fgKeyLight, fgFillLight,
+    this->GetCurrentLevelMesh()->DrawFirstPassPieces(worldTransform, dT, camera, &gameModel, fgKeyLight, fgFillLight, ballLight);
+}
+
+void GameAssets::DrawSecondPassLevelPieces(double dT, const GameModel& gameModel, const Camera& camera) {
+    BasicPointLight fgKeyLight, fgFillLight, ballLight;
+
+    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+    this->GetCurrentLevelMesh()->DrawSecondPassPieces(dT, camera, &gameModel, fgKeyLight, fgFillLight,
         ballLight, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 

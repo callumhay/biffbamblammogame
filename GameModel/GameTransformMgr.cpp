@@ -614,11 +614,9 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 		        this->GetPaddleCamPositionAndFOV(*this->paddleWithCamera, currLevel->GetLevelUnitWidth(), 
 			        currLevel->GetLevelUnitHeight(), worldSpaceTranslation, this->cameraFOVAngle);
 
-		        Vector3D worldRotation(90, this->paddleWithCamera->GetZRotation(), 0);
+                Vector3D worldRotation(90, this->paddleWithCamera->GetZRotation(), this->paddleWithCamera->GetIsPaddleFlipped() ? 180 : 0);
 		        worldRotation = this->GetGameXYZTransform() * worldRotation;	
-                
-                // TODO: Make this more versatile based on whether the paddle is being hit/hurt?...
-    																															    
+																								    
                 // Rotate the y-axis to move the view point when the paddle is discombobulated!
 		        // Update the camera position and rotation based on the movement of the paddle and the level transform
 		        this->currCamOrientation.SetTranslation(worldSpaceTranslation);

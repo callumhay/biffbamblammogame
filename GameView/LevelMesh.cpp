@@ -213,16 +213,27 @@ void LevelMesh::Flush() {
 	
 	// Delete each of the display lists loaded for the previous level and clear up the
 	// relevant mappings to those display lists.
-	for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
-		iter != this->displayListsPerMaterial.end(); ++iter) {
+	for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::iterator iter = this->firstPassDisplayListsPerMaterial.begin();
+		iter != this->firstPassDisplayListsPerMaterial.end(); ++iter) {
 		
 		for (std::vector<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); ++dispListIter) {
 			glDeleteLists((*dispListIter), 1);
 			(*dispListIter) = 0;
 		}
 	}
-	this->displayListsPerMaterial.clear();
-	this->pieceDisplayLists.clear();
+	this->firstPassDisplayListsPerMaterial.clear();
+    this->firstPassPieceDisplayLists.clear();
+
+    for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::iterator iter = this->secondPassDisplayListsPerMaterial.begin();
+        iter != this->secondPassDisplayListsPerMaterial.end(); ++iter) {
+
+            for (std::vector<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); ++dispListIter) {
+                glDeleteLists((*dispListIter), 1);
+                (*dispListIter) = 0;
+            }
+    }
+    this->secondPassDisplayListsPerMaterial.clear();
+    this->secondPassPieceDisplayLists.clear();
 
 	// Delete all of the emitter effects for any of the level pieces
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
@@ -446,9 +457,27 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 
 	// Find the changed piece and change its display list...
 	std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> >::iterator pieceInfoIter =
-        this->pieceDisplayLists.find(&pieceBefore);
+        this->firstPassPieceDisplayLists.find(&pieceBefore);
+    
+    bool foundPieceInfo = false;
+    std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> >* displayListMap = NULL;
+    std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >* displayListPerMaterialMap = NULL;
 
-	if (pieceInfoIter != this->pieceDisplayLists.end()) {
+    if (pieceInfoIter == this->firstPassPieceDisplayLists.end()) {
+        pieceInfoIter = this->secondPassPieceDisplayLists.find(&pieceBefore);
+        if (pieceInfoIter != this->secondPassPieceDisplayLists.end()) {
+            foundPieceInfo = true;
+            displayListMap = &this->secondPassPieceDisplayLists;
+            displayListPerMaterialMap = &this->secondPassDisplayListsPerMaterial;
+        }
+    }
+    else {
+        foundPieceInfo = true;
+        displayListMap = &this->firstPassPieceDisplayLists;
+        displayListPerMaterialMap = &this->firstPassDisplayListsPerMaterial;
+    }
+
+	if (foundPieceInfo) {
 		
         // Go through each of the materials and clear up previous display lists and materials...
 		for (std::map<CgFxAbstractMaterialEffect*, GLuint>::iterator iter = pieceInfoIter->second.begin();
@@ -458,7 +487,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 			glDeleteLists(iter->second, 1);
 
 			// ... and remove it from other relevant maps/arrays/etc.
-			std::vector<GLuint>& displayLists = this->displayListsPerMaterial[iter->first];
+			std::vector<GLuint>& displayLists = (*displayListPerMaterialMap)[iter->first];
 			for (std::vector<GLuint>::iterator iterDL = displayLists.begin(); iterDL != displayLists.end(); ++iterDL) {
 				if (*iterDL == iter->second)	{
 					displayLists.erase(iterDL);
@@ -466,16 +495,17 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 				}
 			}
 			if (displayLists.size() == 0) {
-				this->displayListsPerMaterial.erase(iter->first);
+				displayListPerMaterialMap->erase(iter->first);
 			}
 
 			// Clean up
 			iter->second = 0;
 		}
 		pieceInfoIter->second.clear();
-		this->pieceDisplayLists.erase(pieceInfoIter);
+		displayListMap->erase(pieceInfoIter);
 	}
 	else {
+        
 		// The piece is a special type that must be handled in a very specific way...
 		switch (pieceBefore.GetType()) {
 			case LevelPiece::Cannon:
@@ -593,16 +623,9 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 /**
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
-void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera,
-                           const GameModel* gameModel, const BasicPointLight& keyLight, 
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight,
-                           const Texture2D* sceneTexture) {
-
-	// Set any appropriate parameters on the various meshes materials, etc.
-	this->prismBlockDiamond->SetSceneTexture(sceneTexture);
-	this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
-	this->portalBlock->SetSceneTexture(sceneTexture);
-	this->portalBlock->Tick(dT);
+void LevelMesh::DrawFirstPassPieces(const Vector3D& worldTranslation, double dT, const Camera& camera,
+                                    const GameModel* gameModel, const BasicPointLight& keyLight, 
+                                    const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
     // Draw any 'remaining pieces' effects
     ESPEmitter* emitter = NULL;
@@ -620,8 +643,8 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 
 	// Go through each material and draw all the display lists corresponding to it
 	CgFxAbstractMaterialEffect* currEffect = NULL;
-	for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
-		iter != this->displayListsPerMaterial.end(); ++iter) {
+	for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->firstPassDisplayListsPerMaterial.begin();
+		iter != this->firstPassDisplayListsPerMaterial.end(); ++iter) {
 		
 		currEffect = iter->first;
 		currEffect->SetKeyLight(keyLight);
@@ -644,17 +667,41 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->alwaysDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
     this->oneWayBlock->DrawRegularPass(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
+}
 
-	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
-		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
+void LevelMesh::DrawSecondPassPieces(double dT, const Camera& camera, const GameModel* gameModel, 
+                                     const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+                                     const BasicPointLight& ballLight, const Texture2D* sceneTexture) {
 
-		std::list<ESPEmitter*>& emitterList = pieceIter->second;
-		for (std::list<ESPEmitter*>::iterator emitterIter = emitterList.begin(); emitterIter != emitterList.end(); ++emitterIter) {
-			emitter = *emitterIter;
-			emitter->Tick(dT);
-			emitter->Draw(camera);
-		}
-	}
+    this->prismBlockDiamond->SetSceneTexture(sceneTexture);
+    this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
+    this->portalBlock->SetSceneTexture(sceneTexture);
+    this->portalBlock->Tick(dT);
+
+    // Draw all of the second pass display lists
+    CgFxAbstractMaterialEffect* currEffect = NULL;
+    for (std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->secondPassDisplayListsPerMaterial.begin();
+         iter != this->secondPassDisplayListsPerMaterial.end(); ++iter) {
+
+        currEffect = iter->first;
+        currEffect->SetKeyLight(keyLight);
+        currEffect->SetFillLight(fillLight);
+        currEffect->SetBallLight(ballLight);
+        currEffect->Draw(camera, iter->second);
+    }
+
+    ESPEmitter* emitter = NULL;
+    for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
+         pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
+
+        std::list<ESPEmitter*>& emitterList = pieceIter->second;
+        for (std::list<ESPEmitter*>::iterator emitterIter = emitterList.begin(); emitterIter != emitterList.end(); ++emitterIter) {
+            emitter = *emitterIter;
+            emitter->Tick(dT);
+            emitter->Draw(camera);
+        }
+    }
+
 }
 
 void LevelMesh::DrawNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
@@ -727,10 +774,25 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		currPolyGrp->Transform(fullInvTransform);
 	
 		// Insert the new display list into the list of display lists...
-		std::map<CgFxAbstractMaterialEffect*, GLuint>& currPieceMatMap = this->pieceDisplayLists[piece];
+        
+        // Based on the type of block we decide whether this is a first or second pass piece
+        std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> >* pieceDisplayListMap = &this->firstPassPieceDisplayLists;
+        std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >* displayListsPerMaterialMap = &this->firstPassDisplayListsPerMaterial;
+        switch (piece->GetType()) {
+            case LevelPiece::Portal:
+            case LevelPiece::Prism:
+            case LevelPiece::PrismTriangle:
+                pieceDisplayListMap = &this->secondPassPieceDisplayLists;
+                displayListsPerMaterialMap = &this->secondPassDisplayListsPerMaterial;
+                break;
+            default:
+                break;
+        }
+
+		std::map<CgFxAbstractMaterialEffect*, GLuint>& currPieceMatMap = (*pieceDisplayListMap)[piece];
         currPieceMatMap.insert(std::make_pair<CgFxAbstractMaterialEffect*, GLuint>(currMaterial, newDisplayList));
 		
-        std::vector<GLuint>& currDisplayListVec = this->displayListsPerMaterial[currMaterial];
+        std::vector<GLuint>& currDisplayListVec = (*displayListsPerMaterialMap)[currMaterial];
         currDisplayListVec.push_back(newDisplayList);
 	}
 
@@ -946,11 +1008,16 @@ void LevelMesh::SetLevelAlpha(float alpha) {
     this->levelAlpha = alpha;
 
 	// First go through each stored material effect and change its alpha multiplier
-	std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
-	for (; iter != this->displayListsPerMaterial.end(); ++iter) {
+	std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >::iterator iter = this->firstPassDisplayListsPerMaterial.begin();
+	for (; iter != this->firstPassDisplayListsPerMaterial.end(); ++iter) {
 		CgFxAbstractMaterialEffect* currMatEffect = iter->first;
         currMatEffect->SetAlphaMultiplier(alpha);
 	}
+    iter = this->secondPassDisplayListsPerMaterial.begin();
+    for (; iter != this->secondPassDisplayListsPerMaterial.end(); ++iter) {
+        CgFxAbstractMaterialEffect* currMatEffect = iter->first;
+        currMatEffect->SetAlphaMultiplier(alpha);
+    }
 
     for (std::map<const LevelPiece*, ESPEmitter*>::iterator iter = this->lastPieceEffects.begin();
          iter != this->lastPieceEffects.end(); ++iter) {

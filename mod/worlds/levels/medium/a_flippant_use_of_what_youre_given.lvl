@@ -1,0 +1,78 @@
+A Flippant Use of What You're Given
+23 32
+E E Q(i) Q(i) Q(i) E E E E E E E E D(RocketPaddle,RocketPaddle,RocketPaddle) E E E E E E E E E 
+E C(180) Q(i) Q(f) Q(i) E E E E C(270) E E E E E E E C(90) E E E E C(180) 
+E E Q(i) Q(i) Q(i) E E E E E E E E E E E E E E E E E E 
+E E E E E E E E E E E E E E E E E E E E E E E 
+E E E E E E X(d,c,f) N E E E E E E E E E E E N X(b,a,f) E E 
+E E E E E E E N E E E E E E E E E E E N E E E 
+E E E E E E E N E E E E E E E E E E E N E E E 
+E E E E E E E S E E E E E E E E E E E S E E E 
+E E E E E E E S E E E E E E E E E E E S E E E 
+E E E E E E E S E E E E E E E E E E E S E E E 
+E E E E E E E S E E E E E K(GravityBall,GravityBall,GravityBall) E E E E E S E E E 
+E E E E E E S S E E E E G G G E E E E S E E E 
+E E E E E S T(S,ul) F(r) E E E E G G G E E E E F(l) E E E 
+E E E E S T(S,ul) E F(r) E E E K(UpsideDown,UpsideDown,UpsideDown) G G G K(UpsideDown,UpsideDown,UpsideDown) E E E F(l) E E E 
+E E E S T(S,ul) E E F(r) E E E G G G G G E E E F(l) E E E 
+E E E S E E E F(r) E E G G G G G G G E E F(l) E E E 
+E E E S E E E F(r) E E G G G G G G G E E F(l) E E E 
+E E E S E E E F(r) E E E E G G G E E E E F(l) E E E 
+E E E S E E E F(r) E E E E G G G E E E E F(l) E E E 
+E E E S E E E F(r) E E E E G G G E E E E F(l) E E E 
+E E E S F(u) F(u) F(u) S R R R R G Y G R R R R S E E E 
+E E E S E E E S O O O Y Y Y Y Y O O O S E E E 
+E E E S E E E S Y Y Y Y G G G Y Y Y Y S E E E 
+E E E S E E E S Y G G G G G G G G G Y S E E E 
+E E E S E E E S Y G G G G G G G G G Y S E E E 
+E E E S E E E S Y G G G G G G G G G Y S E E E 
+Q(i) Q(i) Q(i) S E E E S E E E E E E E E E E E S E E E 
+Q(i) Q(f) Q(i) S E E E S E E E E E E E E E E E S E E E 
+S S S S E E E S F(u) F(u) F(u) F(u) F(u) F(u) F(u) F(u) F(u) F(u) F(u) S E E E 
+E E E N E E E N E E E E E E E E E E E N E E E 
+E E E N E E E N E E E E E E E E E E E N E E E 
+E E X(a,b,f) N E E E N E E E E E E E E E E E N X(c,d,f) E E 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 3
+Blackout 2
+BallSafetyNet 2
+UberBall 1
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 3
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FlameBlasterPaddle 1
+FireBall 1
+RocketPaddle 0
+GhostBall 1
+BallShrink 1
+UpsideDown 3
+MultiBall5 2
+BallCam 3
+MagnetPaddle 2
+MultiBall3 2
+RemoteControlRocket 0
+IceBall 1
+IceBlasterPaddle 1
+MineLauncherPaddle 2
+SlowBall 2
+FastBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+PaddleCam 3
+
+PADDLESTARTXPOS: 13.75

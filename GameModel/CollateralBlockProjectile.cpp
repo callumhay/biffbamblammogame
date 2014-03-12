@@ -63,10 +63,6 @@ void CollateralBlockProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
         this->resetPortalRecollisionCountdown = PORTAL_COLLISION_RESET_TIME;
         this->lastPortalCollidedWith = static_cast<PortalBlock*>(block)->GetSiblingPortal();
     }
-    else {
-        this->resetPortalRecollisionCountdown = -1;
-        this->lastPortalCollidedWith = NULL;
-    }
 }
 
 void CollateralBlockProjectile::Tick(double seconds, const GameModel& model) {

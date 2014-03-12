@@ -117,7 +117,7 @@ public:
 	void BallCollided() {
 		this->timeSinceLastCollision = 0.0;
 	}
-	double GetTimeSinceLastCollision() {
+	double GetTimeSinceLastCollision() const {
 		return this->timeSinceLastCollision;
 	}
 

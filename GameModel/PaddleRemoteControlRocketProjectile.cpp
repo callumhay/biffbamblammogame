@@ -81,10 +81,6 @@ void PaddleRemoteControlRocketProjectile::LevelPieceCollisionOccurred(LevelPiece
         this->resetPortalRecollisionCountdown = PORTAL_COLLISION_RESET_TIME;
         this->lastPortalCollidedWith = static_cast<PortalBlock*>(block)->GetSiblingPortal();
     }
-    else {
-        this->resetPortalRecollisionCountdown = -1;
-        this->lastPortalCollidedWith = NULL;
-    }
 }
 
 /// <summary>
