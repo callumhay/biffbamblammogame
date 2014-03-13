@@ -213,7 +213,8 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             }
 
             if (this->display->GetModel()->GetPlayerPaddle()->HasPaddleType(
-                PlayerPaddle::LaserBeamPaddle | PlayerPaddle::LaserBulletPaddle | PlayerPaddle::RocketPaddle) &&
+                PlayerPaddle::LaserBeamPaddle | PlayerPaddle::LaserBulletPaddle | 
+                PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle) &&
                 !this->fireWeaponAlreadyShown) {
 
                 this->fireWeaponHint->Show(0.0, 1.0);

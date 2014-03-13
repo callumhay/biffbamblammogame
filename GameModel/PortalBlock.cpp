@@ -200,8 +200,12 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& p
         }
 
         paddle.RegenerateBounds();
-
-        paddle.SetDefaultYPosition(sibling->GetCenter()[1] - LevelPiece::HALF_PIECE_HEIGHT + paddle.GetHalfHeight());
+        
+        int sign = 1;
+        if (paddle.GetIsPaddleFlipped()) {
+            sign = -1;
+        }
+        paddle.SetDefaultYPosition(sibling->GetCenter()[1] - sign*LevelPiece::HALF_PIECE_HEIGHT + sign*PlayerPaddle::PADDLE_HALF_HEIGHT);
         
         // We'll need to update the min and max X boundaries of the paddle as well...
         const GameLevel* currLevel = gameModel->GetCurrentLevel();

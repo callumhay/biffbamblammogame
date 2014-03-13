@@ -1445,7 +1445,7 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
                 return;
             }
 	        // If there's a rocket attached we need to check its bounds too...
-	        else if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+            else if (this->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) {
 		        Point2D rocketSpawnPos;
 		        float rocketHeight, rocketWidth;
 		        this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
@@ -1973,7 +1973,7 @@ Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
 		paddleAABB.AddPoint(ballBounds.Center() - ballRadiusVec);
 	}
 
-	if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+    if (this->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) {
 		Point2D rocketSpawnPos;
 		float rocketHeight, rocketWidth;
 		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
@@ -2006,7 +2006,7 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttac
 	// If there's a rocket attached we need to check for collisions with it!
     if (!didCollide) {
 
-        if (this->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+        if (this->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) {
 		    Point2D rocketSpawnPos;
 		    float rocketHeight, rocketWidth;
 		    this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
