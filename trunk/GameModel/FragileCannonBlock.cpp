@@ -49,6 +49,12 @@ FragileCannonBlock::~FragileCannonBlock() {
 }
 
 LevelPiece* FragileCannonBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+
+    // Make sure that the block is destroying itself!
+    if (method != LevelPiece::SelfDestruction) {
+        return this;
+    }
+    
     // EVENT: Block is being destroyed
     GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 

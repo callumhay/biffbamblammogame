@@ -711,7 +711,7 @@ void GameAssets::DrawPaddle(double dT, const GameModel& gameModel, const Camera&
 		}
 		// Beam isn't firing yet, if the rocket is on the paddle then don't draw any of the beam effects
 		// coming out of the paddle
-		else if (!p.HasPaddleType(PlayerPaddle::RocketPaddle)){
+		else if (!p.HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)){
 			// Draw glow-y beam origin when beam is able to fire but not actually firing yet
 			this->espAssets->DrawPaddleLaserBeamBeforeFiringEffects(dT, camera, p);
 		}
@@ -820,7 +820,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 
 	// In order to draw the laser glow effect make sure there isn't a rocket sitting on the paddle
 	if (paddle->HasPaddleType(PlayerPaddle::LaserBulletPaddle) && 
-        !paddle->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+        !paddle->HasPaddleType(PlayerPaddle::RocketPaddle | PlayerPaddle::RemoteControlRocketPaddle)) {
 
 		// Draw glow-y effects where the laser originates...
 		this->espAssets->DrawPaddleLaserBulletEffects(dT, camera, *paddle);
