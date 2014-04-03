@@ -77,11 +77,10 @@ PortalBlockMesh::~PortalBlockMesh() {
 	assert(success);
 }
 
-/**
- * Creates emitter effects for a portal block.
- */
-std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation) {
-	std::list<ESPEmitter*> portalEmitters;
+void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation, 
+                                                ESPParticleScaleEffector& haloExpandPulse, ESPParticleColourEffector& haloFader, Texture2D* haloTexture,
+                                                ESPParticleColourEffector& particleFader, ESPParticleScaleEffector& particleMediumGrowth,
+                                                Texture2D* circleTex, Texture2D* hoopTex, std::list<ESPEmitter*>& emitters) {
 
 	// Halo effect that pulses outwards
 	const float HALO_LIFETIME = 2.3f;
@@ -96,13 +95,13 @@ std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& 
 	haloExpandingPulse->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	haloExpandingPulse->SetEmitPosition(worldTranslation);
 	haloExpandingPulse->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
-	haloExpandingPulse->AddEffector(&this->haloExpandPulse);
-	haloExpandingPulse->AddEffector(&this->haloFader);
-	haloExpandingPulse->SetParticles(NUM_HALOS, this->haloTexture);
+	haloExpandingPulse->AddEffector(&haloExpandPulse);
+	haloExpandingPulse->AddEffector(&haloFader);
+	haloExpandingPulse->SetParticles(NUM_HALOS, haloTexture);
 
     std::vector<Texture2D*> particleTextures(2, NULL);
-    particleTextures[0] = this->circleTex;
-    particleTextures[1] = this->hoopTex;
+    particleTextures[0] = circleTex;
+    particleTextures[1] = hoopTex;
 
     ESPInterval rColour(colour.R(), std::min<float>(1.0f, 1.75f*(0.25f+colour.R())));
     ESPInterval gColour(colour.G(), std::min<float>(1.0f, 1.75f*(0.25f+colour.G())));
@@ -121,8 +120,8 @@ std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& 
         ESPInterval(0.0f, 0.4f*LevelPiece::HALF_PIECE_DEPTH));
     particlesComing->SetIsReversed(true);
     particlesComing->SetEmitPosition(worldTranslation);
-    particlesComing->AddEffector(&this->particleFader);
-    particlesComing->AddEffector(&this->particleMediumGrowth);
+    particlesComing->AddEffector(&particleFader);
+    particlesComing->AddEffector(&particleMediumGrowth);
     particlesComing->SetRandomTextureParticles(12, particleTextures);
 
     ESPPointEmitter* particlesGoing  = new ESPPointEmitter();
@@ -137,21 +136,18 @@ std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& 
         ESPInterval(0.0f, 0.5f*LevelPiece::HALF_PIECE_HEIGHT), 
         ESPInterval(0.0f, 0.5f*LevelPiece::HALF_PIECE_DEPTH));
     particlesGoing->SetEmitPosition(worldTranslation);
-    particlesGoing->AddEffector(&this->particleFader);
-    particlesGoing->AddEffector(&this->particleMediumGrowth);
+    particlesGoing->AddEffector(&particleFader);
+    particlesGoing->AddEffector(&particleMediumGrowth);
     particlesGoing->SetRandomTextureParticles(12, particleTextures);
 
-	portalEmitters.push_back(haloExpandingPulse);
-    portalEmitters.push_back(particlesComing);
-    portalEmitters.push_back(particlesGoing);
-
-	return portalEmitters;
+	emitters.push_back(haloExpandingPulse);
+    emitters.push_back(particlesComing);
+    emitters.push_back(particlesGoing);
 }
 
 void PortalBlockMesh::SetAlphaMultiplier(float alpha) {
 	this->haloFader.SetStartAlpha(HALO_FADER_START * alpha);
 	this->haloFader.SetEndAlpha(HALO_FADER_END * alpha);
-
     this->particleFader.SetStartAlpha(PARTICLE_FADER_START * alpha);
     this->particleFader.SetEndAlpha(PARTICLE_FADER_END * alpha);
 }

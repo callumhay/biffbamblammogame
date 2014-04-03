@@ -27,8 +27,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LEVELSHAKEEVENTINFO_H__
-#define __LEVELSHAKEEVENTINFO_H__
+#ifndef __LEVELSHAKEEFFECTTINFO_H__
+#define __LEVELSHAKEEFFECTTINFO_H__
 
 #include "GeneralEffectEventInfo.h"
 
@@ -51,4 +51,4 @@ private:
     DISALLOW_COPY_AND_ASSIGN(LevelShakeEffectInfo);
 };
 
-#endif // __LEVELSHAKEEVENTINFO_H__
+#endif // __LEVELSHAKEEFFECTTINFO_H__

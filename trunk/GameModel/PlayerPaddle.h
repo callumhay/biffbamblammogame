@@ -296,9 +296,9 @@ public:
     void HitByBoss(const BossBodyPart& bossPart);
 	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
     void HitByBeam(const Beam& beam, const BeamSegment& beamSegment);
-	bool ProjectilePassesThrough(const Projectile& projectile);
-    bool ProjectileIsDestroyedOnCollision(const Projectile& projectile);
-	void ModifyProjectileTrajectory(Projectile& projectile);
+	bool ProjectilePassesThrough(const Projectile& projectile) const;
+    bool ProjectileIsDestroyedOnCollision(const Projectile& projectile) const;
+	void ModifyProjectileTrajectory(Projectile& projectile) const;
 
 	void UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision);
 

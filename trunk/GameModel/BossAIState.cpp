@@ -70,13 +70,13 @@ bool BossAIState::MoveToTargetPosition(float maxMoveSpd) {
             return true;
     }
 
-    // We're not at or near the target position yet, get the velocity to move there
+    // We're not at the target position yet, get the velocity to move there
     // (unless we're getting close then we want to slow down and stop)
 
     // With a bit of kinematics we figure out when to start stopping...
     float distToTargetToStartStopping = -this->currVel.SqrMagnitude() / (2 * -this->GetAccelerationMagnitude());
     assert(distToTargetToStartStopping >= 0.0);
-    if (currPosToTargetVec.SqrMagnitude() <= distToTargetToStartStopping * distToTargetToStartStopping) {
+    if (currPosToTargetVec.SqrMagnitude()-EPSILON <= distToTargetToStartStopping * distToTargetToStartStopping) {
         this->desiredVel = Vector2D(0,0);
     }
     else {
@@ -84,4 +84,41 @@ bool BossAIState::MoveToTargetPosition(float maxMoveSpd) {
     }
 
     return false;
+}
+
+bool LargestToSmallestDistPoint2DSorter(const std::pair<float, Point2D>& a, const std::pair<float, Point2D>& b) {
+    return (a.first > b.first);
+}
+
+/// <summary>
+/// Gets the furthest distance positions (the number of these chosen positions is the one given)
+/// from the current boss position.
+/// NOTE: 'positions' and 'result' may reference the same vector in memory.
+/// </summary>
+/// <param name="currBossPos"> The boss' current position. </param>
+/// <param name="positions"> The overall possible positions. </param>
+/// <param name="numPositionsToChoose"> Number of positions to choose from. </param>
+/// <param name="result"> [in,out] The resulting, chosen furthest positions (size == numPositionsToChoose). </param>
+void BossAIState::GetFurthestDistFromBossPositions(const Point2D& currBossPos, const std::vector<Point2D>& positions, 
+                                                   int numPositionsToChoose, std::vector<Point2D>& result) {
+
+    assert(static_cast<int>(positions.size()) >= numPositionsToChoose);
+
+    std::vector<std::pair<float, Point2D> > distPosPairs;
+    distPosPairs.reserve(positions.size());
+    for (int i = 0; i < static_cast<int>(positions.size()); i++) {
+        distPosPairs.push_back(std::make_pair(Point2D::SqDistance(currBossPos, positions[i]), positions[i]));
+    }
+
+    // Sort by the distances (largest to smallest)
+    std::sort(distPosPairs.begin(), distPosPairs.end(), LargestToSmallestDistPoint2DSorter);
+
+    // Pick the last three positions among the pairs...
+    assert(static_cast<int>(distPosPairs.size()) >= numPositionsToChoose);
+    result.resize(numPositionsToChoose);
+    for (int i = 0; i < numPositionsToChoose; i++) {
+        result[i] = distPosPairs[i].second;
+    }
+
+    assert(static_cast<int>(result.size()) == numPositionsToChoose);
 }

@@ -197,6 +197,10 @@ bool LevelPiece::ProjectileIsDestroyedOnCollision(const Projectile* projectile) 
             // Mines are typically not destroyed by collisions with blocks.
             return false;
 
+        case Projectile::PortalBlobProjectile:
+            // Portals are not destroyed by collisions with blocks
+            return false;
+
         default:
             break;
     }

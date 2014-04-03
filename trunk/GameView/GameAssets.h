@@ -114,6 +114,7 @@ public:
     void DrawLevelPiecesPostEffects(double dT, const Camera& camera);
     void DrawNoBloomLevelPieces(double dT, const Camera& camera);
     void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
+    void DrawBossPostEffects(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
 	void DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO);
     void DrawMiscEffects(const GameModel& gameModel);

@@ -29,6 +29,7 @@
 
 #include "PaddleRocketProjectile.h"
 
+const float PaddleRocketProjectile::DEFAULT_ROCKET_DMG = 400.0f;
 const float PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT = RocketProjectile::DEFAULT_VISUAL_HEIGHT;
 const float PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT  = RocketProjectile::DEFAULT_VISUAL_WIDTH;
 

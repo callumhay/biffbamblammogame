@@ -33,10 +33,11 @@
 #include "ESPUtil.h"
 
 // Effectors
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 #include "ESPParticleAccelEffector.h"
 #include "ESPParticleColourEffector.h"
 #include "ESPMultiColourEffector.h"
+#include "ESPMultiAlphaEffector.h"
 #include "ESPAnimatedAlphaEffector.h"
 #include "ESPParticleScaleEffector.h"
 #include "ESPParticleRotateEffector.h"

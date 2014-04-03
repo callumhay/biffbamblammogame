@@ -106,6 +106,10 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
         case Projectile::MineTurretBulletProjectile:
             break;
 
+        // Portals don't affect bosses
+        case Projectile::PortalBlobProjectile:
+            break;
+
         // Boss projectiles are ignored (they are for hitting the player only)
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BossRocketBulletProjectile:

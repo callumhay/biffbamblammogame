@@ -43,12 +43,22 @@ namespace Collision {
 	 */
 	class AABB2D {
 	private:
+        bool isInit;
 		Point2D minCoord, maxCoord;
 	public:
-        AABB2D() : minCoord(0,0), maxCoord(0, 0) {}
-        AABB2D(const Point2D &pt): minCoord(pt), maxCoord(pt) {}
-        AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
-		~AABB2D() {}
+        AABB2D() : minCoord(0,0), maxCoord(0, 0), isInit(false) {}
+        AABB2D(const Point2D &pt): minCoord(pt), maxCoord(pt), isInit(true) {}
+        AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max), isInit(true) {}
+        AABB2D(float minX, float minY, float maxX, float maxY): minCoord(minX, minY), maxCoord(maxX, maxY), isInit(true) {}
+        AABB2D(const AABB2D& copy) : minCoord(copy.minCoord), maxCoord(copy.maxCoord), isInit(copy.isInit) {}
+        ~AABB2D() {}
+
+        AABB2D& operator=(const AABB2D& copy) {
+            this->minCoord = copy.minCoord;
+            this->maxCoord = copy.maxCoord;
+            this->isInit   = copy.isInit;
+            return *this;
+        }
 
         bool IsEmpty() const {
             return this->minCoord[0] == this->maxCoord[0] &&
@@ -66,6 +76,11 @@ namespace Collision {
 		}
         void SetMax(const Point2D& max) {
             this->maxCoord = max;
+        }
+        Point2D GetRandomPointInside() const {
+            return Point2D(
+                this->minCoord[0] + Randomizer::GetInstance()->RandomNumZeroToOne()*(this->maxCoord[0]-this->minCoord[0]),
+                this->minCoord[1] + Randomizer::GetInstance()->RandomNumZeroToOne()*(this->maxCoord[1]-this->minCoord[1]));
         }
 
         void GetCorners(std::vector<Point2D>& corners) {
@@ -89,6 +104,14 @@ namespace Collision {
 
 		// Potentially Increase the bounds of this AABB by adding a point to include within it
 		void AddPoint(const Point2D& pt) {
+
+            if (!this->isInit) {
+                this->minCoord = pt;
+                this->maxCoord = pt;
+                this->isInit = true;
+                return;
+            }
+
 			if (pt[0] < minCoord[0]) {
 				minCoord[0] = pt[0];
 			}
@@ -708,6 +731,15 @@ namespace Collision {
 	}
 
     inline void AABB2D::AddCircle(const Circle2D& circle) {
+        
+        if (!this->isInit) {
+            Vector2D radiusVec(circle.Radius(),circle.Radius());
+            this->minCoord = circle.Center() - radiusVec;
+            this->maxCoord = circle.Center() + radiusVec;
+            this->isInit = true;
+            return;
+        }
+
         float temp = circle.Center()[0] - circle.Radius();
         if (temp < this->GetMin()[0]) {
             this->minCoord[0] = temp;

@@ -36,6 +36,9 @@
 #include "GothicRomanticBoss.h"
 #include "NouveauBoss.h"
 #include "DecoBoss.h"
+#include "FuturismBoss.h"
+//#include "DadaSurrealistBoss.h"
+//#include "PomoBoss.h"
 
 const double Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = 1.5;
 const double Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = TOTAL_DEATH_ANIM_TIME / 1.25;
@@ -96,7 +99,8 @@ Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& st
             break;
 
         case GameWorld::Futurism:
-            // TODO
+            boss = new FuturismBoss();
+            break;
 
         //case GameWorld::SurrealDada:
 
@@ -412,6 +416,43 @@ AnimationMultiLerp<Vector3D> Boss::BuildBossHurtMoveAnim(const Vector2D& hurtVec
     result.SetLerp(timeValues, moveValues);
     result.SetRepeat(false);
     return result;
+}
+
+AnimationMultiLerp<Vector3D> Boss::BuildShakeAnim(double startTime, double totalAnimTime, float shakeFreq, 
+                                                  float shakeMagX, float shakeMagY) {
+    AnimationMultiLerp<Vector3D> shakeAnim;
+
+    int numShakes = static_cast<int>(totalAnimTime * shakeFreq);
+    double lastShakeTime = totalAnimTime * shakeFreq - static_cast<double>(numShakes);
+    double timeOfEachShake = totalAnimTime / static_cast<double>(numShakes);
+    double halfTimeOfEachShake = timeOfEachShake / 2.0;
+
+    std::vector<double> timeValues;
+    timeValues.reserve(2*numShakes+2);
+    timeValues.push_back(startTime);
+    for (int i = 0; i < numShakes; i++) {
+        timeValues.push_back(timeValues.back() + halfTimeOfEachShake);
+        timeValues.push_back(timeValues.back() + halfTimeOfEachShake);
+    }
+    timeValues.push_back(timeValues.back() + lastShakeTime);
+
+    std::vector<Vector3D> movementValues;
+    movementValues.reserve(timeValues.size());
+    movementValues.push_back(Vector3D(0,0,0));
+    for (int i = 0; i < numShakes; i++) {
+        float randomNum1 = Randomizer::GetInstance()->RandomNegativeOrPositive() * 
+            (0.1f*shakeMagX + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.9f*shakeMagX);
+        float randomNum2 = Randomizer::GetInstance()->RandomNegativeOrPositive() * 
+            (0.1f*shakeMagY + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.9f*shakeMagY);
+        movementValues.push_back(Vector3D(randomNum1, randomNum2, 0));
+        movementValues.push_back(Vector3D(-randomNum1, -randomNum2, 0));
+    }
+    movementValues.push_back(Vector3D(0,0,0));
+    
+    shakeAnim.SetLerp(timeValues, movementValues);
+    shakeAnim.SetRepeat(false);
+
+    return shakeAnim;
 }
 
 AnimationMultiLerp<float> Boss::BuildLimbShakeAnim(float limbSize) {

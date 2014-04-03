@@ -80,8 +80,10 @@ leftArmIdx(0), leftArmSquareIdx(0), rightArmIdx(0), rightArmSquareIdx(0)
 ClassicalBoss::~ClassicalBoss() {
 }
 
-void ClassicalBoss::Init(float startingX, float startingY) {
-    
+void ClassicalBoss::Init(float startingX, float startingY, 
+                         const std::vector<std::vector<LevelPiece*> >& levelPieces) {
+
+    UNUSED_PARAMETER(levelPieces);
     
     // Body Layout for the Classical Boss:
     // -----------------------------------

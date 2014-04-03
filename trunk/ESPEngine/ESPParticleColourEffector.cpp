@@ -55,3 +55,8 @@ void ESPParticleColourEffector::AffectParticleOnTick(double dT, ESPParticle* par
 
 	particle->SetColour(currColour, currAlpha);
 }
+
+void ESPParticleColourEffector::AffectBeamOnTick(double, ESPBeam*) {
+    assert(false);
+    // NOT IMPLEMENTED YET
+}

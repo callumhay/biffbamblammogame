@@ -39,6 +39,7 @@
 #include "MineTurretBlockMesh.h"
 #include "RocketTurretBlockMesh.h"
 #include "OneWayBlockMesh.h"
+#include "BossMesh.h"
 
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/ObjReader.h"
@@ -93,6 +94,7 @@ public:
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
     void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
+    void DrawBossPostEffects(double dT, const Camera& camera);
 
 	void LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 
@@ -208,6 +210,19 @@ inline void LevelMesh::LevelPieceAllStatusRemoved(const LevelPiece& piece) {
 
 inline void LevelMesh::DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture) {
 	this->statusEffectRenderer->Draw(dT, camera, sceneTexture);
+}
+
+inline void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                                const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                                const GameAssets* assets) {
+
+    assert(this->bossMesh != NULL);
+    this->bossMesh->Draw(dT, camera, keyLight, fillLight, ballLight, assets);
+}
+
+inline void LevelMesh::DrawBossPostEffects(double dT, const Camera& camera) {
+    assert(this->bossMesh != NULL);
+    this->bossMesh->DrawLaterPassEffects(dT, camera);
 }
 
 /**

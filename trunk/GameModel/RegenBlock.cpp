@@ -285,6 +285,9 @@ LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
             this->FreezePieceInIce(gameModel);
             break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;

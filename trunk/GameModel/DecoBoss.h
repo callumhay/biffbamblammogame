@@ -188,7 +188,7 @@ private:
     DecoBoss();
 
     // Inherited from Boss
-    void Init(float startingX, float startingY);
+    void Init(float startingX, float startingY, const std::vector<std::vector<LevelPiece*> >& levelPieces);
 
     BossCompositeBodyPart* BuildArm(BossCompositeBodyPart* middleBody, size_t& armIdx, size_t& gearIdx, 
         size_t& scoping1Idx, size_t& scoping2Idx, size_t& scoping3Idx, size_t& scoping4Idx, size_t& handIdx);

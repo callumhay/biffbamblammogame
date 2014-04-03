@@ -163,7 +163,9 @@ inline Point2D operator -(const Point2D& a, const Vector2D& b) {
 inline Point2D operator *(float f, const Point2D& p) {
     return Point2D(f*p[0], f*p[1]);
 }
-
+inline bool operator==(const Point2D& a, const Point2D& b) {
+    return 	fabs(a[0] - b[0]) < EPSILON && fabs(a[1] - b[1]) < EPSILON;
+}
 inline bool operator!=(const Point2D& a, const Point2D& b) {
     return a[0] != b[0] && a[1] != b[1];
 }

@@ -54,7 +54,7 @@ public:
     virtual ~Boss();
     
     static Boss* BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style);
-    virtual void Init(float startingX, float startingY) = 0;
+    virtual void Init(float startingX, float startingY, const std::vector<std::vector<LevelPiece*> >& levelPieces) = 0;
 
     GameModel* GetGameModel();
 
@@ -106,6 +106,8 @@ public:
     static AnimationMultiLerp<Vector3D>   BuildBossAngryShakeAnim(float shakeMagnitude);
     static AnimationMultiLerp<Vector3D>   BuildBossFinalDeathShakeAnim(float shakeMagnitude);
     static AnimationMultiLerp<Vector3D>   BuildBossHurtMoveAnim(const Vector2D& hurtDir, float shakeMagnitude, double invulnerableTimeInSecs);
+    
+    static AnimationMultiLerp<Vector3D> BuildShakeAnim(double startTime, double totalAnimTime, float shakeFreq, float shakeMagX, float shakeMagY);
 
     static AnimationMultiLerp<float> BuildLimbShakeAnim(float limbSize);
 
@@ -118,7 +120,7 @@ public:
 
     // DEBUGGING...
 #ifdef _DEBUG
-    void DebugDraw() const;
+    virtual void DebugDraw() const;
 #endif
 
 protected:

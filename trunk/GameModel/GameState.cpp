@@ -110,7 +110,10 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 	// Check to see if the paddle collided with any blocks...
 	bool didCollideWithCurrentPiece = false;
     bool didCollideWithAnyPiece = false;
-	std::set<LevelPiece*> collisionCandidatePieces = currentLevel->GetLevelPieceCollisionCandidates(*paddle, doAttachedBallCollision);
+	
+    std::set<LevelPiece*> collisionCandidatePieces;
+    currentLevel->GetLevelPieceCollisionCandidates(*paddle, doAttachedBallCollision, collisionCandidatePieces);
+
 	for (std::set<LevelPiece*>::iterator iter = collisionCandidatePieces.begin(); iter != collisionCandidatePieces.end(); ++iter) {
 		LevelPiece* currPiece = *iter;
         if (currPiece->IsNoBoundsPieceType() && currPiece->GetType() != LevelPiece::Portal) {

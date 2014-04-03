@@ -105,7 +105,9 @@ Point3D GothicRomanticBoss::GetTopPointTipPos() const {
     return topPt->GetTranslationPt3D() + Vector3D(0.0f, TOP_POINT_TIP_Y, 0.0f);
 }
 
-void GothicRomanticBoss::Init(float startingX, float startingY) {
+void GothicRomanticBoss::Init(float startingX, float startingY, 
+                              const std::vector<std::vector<LevelPiece*> >& levelPieces) {
+    UNUSED_PARAMETER(levelPieces);
 
     // Body Layout for the Gothic-Romantic Boss:
     // -----------------------------------

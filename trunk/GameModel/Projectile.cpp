@@ -113,6 +113,8 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p, bool creat
             return new BossOrbProjectile(*static_cast<const BossOrbProjectile*>(p));
         case Projectile::BossLightningBoltBulletProjectile:
             return new BossLightningBoltProjectile(*static_cast<const BossLightningBoltProjectile*>(p));
+        
+
         default:
 			assert(false);
 			break;

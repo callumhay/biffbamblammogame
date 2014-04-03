@@ -208,7 +208,7 @@ double ClassicalBossMesh::ActivateIntroAnimation() {
 
     // Glowing in the eye
     this->eyePulseGlow.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	this->eyePulseGlow.SetParticleLife(ESPInterval(-1));
+	this->eyePulseGlow.SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	this->eyePulseGlow.SetParticleSize(ESPInterval(0.75f * ClassicalBoss::EYE_HEIGHT));
     this->eyePulseGlow.SetParticleAlignment(ESP::ScreenAligned);
     this->eyePulseGlow.SetEmitPosition(Point3D(0, 0, ClassicalBoss::EYE_DEPTH));

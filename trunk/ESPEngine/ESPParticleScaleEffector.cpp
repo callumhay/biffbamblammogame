@@ -67,12 +67,13 @@ void ESPParticleScaleEffector::AffectParticleOnTick(double dT, ESPParticle* part
 			// Growth cycle...
 			amtOfScaling = 2 * (effect.pulseGrowthScale - 1.0) * pulseAmt + 1.0;
 		}
-		else if (pulseAmt >= 0.5) {
+		else {
 			// Shrink cycle...
 			double twoTimesGS = 2 * this->effect.pulseGrowthScale;
 			amtOfScaling = (-twoTimesGS + 2)* pulseAmt + twoTimesGS - 1;
 		}
 		particle->MultiplyInitSizeScale(Vector2D(amtOfScaling, amtOfScaling));
+        return;
 	}
 
 	// Only do interpolations for particles with discrete lifetimes
@@ -85,4 +86,9 @@ void ESPParticleScaleEffector::AffectParticleOnTick(double dT, ESPParticle* part
 
 		particle->MultiplyInitSizeScale(newScale);
 	}
+}
+
+void ESPParticleScaleEffector::AffectBeamOnTick(double, ESPBeam*) {
+    assert(false);
+    // NOT IMPLEMENTED YET
 }

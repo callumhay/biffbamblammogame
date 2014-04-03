@@ -292,12 +292,14 @@ Mesh* ResourceManager::GetPortalBlockMeshResource() {
 	// Create the material group and its geometry (as defined above)
 	MaterialGroup* portalMatGrp = new MaterialGroup(portalBlockEffect);
 	portalMatGrp->SetPolygonGroup(portalBlockPolyGrp);
+    portalMatGrp->ResetDisplayList();
 
 	std::map<std::string, MaterialGroup*> portalBlockMatGrps;
 	portalBlockMatGrps.insert(std::make_pair("Portal Material", portalMatGrp));
 
 	// Insert the material and its geometry it into the mesh
 	this->portalBlockMesh = new Mesh("Portal Block", portalBlockMatGrps);
+
 	return this->portalBlockMesh;
 }
 
@@ -384,7 +386,7 @@ bool ResourceManager::ReleaseMeshResource(Mesh* mesh) {
 	}
 
 	if (meshResourceIter == this->loadedMeshes.end()) {
-		return false;
+		return (mesh != this->portalBlockMesh);
 	}
 
 	// Check the number of references if we have reached the last reference then

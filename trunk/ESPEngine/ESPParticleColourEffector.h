@@ -32,9 +32,9 @@
 
 #include "../BlammoEngine/Colour.h"
 
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 
-class ESPParticleColourEffector : public ESPParticleEffector {
+class ESPParticleColourEffector : public ESPEffector {
 public:
 	ESPParticleColourEffector();
 	ESPParticleColourEffector(float startAlpha, float endAlpha);
@@ -44,6 +44,7 @@ public:
 	~ESPParticleColourEffector();
 
 	void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectBeamOnTick(double dT, ESPBeam* beam);
 
 	float GetStartAlpha() const;
 	float GetEndAlpha() const;
@@ -53,6 +54,8 @@ public:
     void SetEndColour(const Colour& c) {
         this->endColour = c;
     }
+
+    ESPEffector* Clone() const;
 
 private:
 	bool useStartColour;
@@ -78,5 +81,14 @@ inline void ESPParticleColourEffector::SetEndAlpha(float alpha) {
 	this->endAlpha = alpha;
 }
 
+inline ESPEffector* ESPParticleColourEffector::Clone() const {
+    ESPParticleColourEffector* clone = new ESPParticleColourEffector();
+    clone->useStartColour = this->useStartColour;
+    clone->startAlpha = this->startAlpha;
+    clone->endAlpha = this->endAlpha;
+    clone->startColour = this->startColour;
+    clone->endColour = this->endColour;
+    return clone;
+}
 
 #endif

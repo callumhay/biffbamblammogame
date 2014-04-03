@@ -58,3 +58,8 @@ void ESPParticleMagneticEffector::AffectParticleOnTick(double dT, ESPParticle* p
 	// Affect the particle's velocity by accelerating by the calculated force
 	particle->SetVelocity(particle->GetVelocity() + ((dT * this->forceCoeff / squareDistanceToPole) * particleToPoleVec));
 }
+
+void ESPParticleMagneticEffector::AffectBeamOnTick(double, ESPBeam*) {
+    assert(false);
+    // NOT IMPLEMENTED YET
+}

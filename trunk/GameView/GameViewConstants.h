@@ -127,7 +127,6 @@ public:
     const char* TEXTURE_HOOP;
     const char* TEXTURE_SPHERE;
 	const char* TEXTURE_STAR;
-	const char* TEXTURE_STAR_OUTLINE;
 	const char* TEXTURE_EVIL_STAR;
 	const char* TEXTURE_EXPLOSION_CLOUD;
 	const char* TEXTURE_EXPLOSION_RAYS;
@@ -471,7 +470,12 @@ public:
     const char* FUTURISM_BACKGROUND_MESH;
     const char* FUTURISM_BLOCK_MESH;
     // FUTURISM BOSS
-    // TODO
+    const char* FUTURISM_BOSS_CORE_CENTER_MESH;
+    const char* FUTURISM_BOSS_CORE_ARMS_MESH;
+    const char* FUTURISM_BOSS_CORE_BULB_MESH;
+    const char* FUTURISM_BOSS_CORE_SHIELD_MESH;
+    const char* FUTURISM_BOSS_LEFT_AND_RIGHT_SHIELD_MESH;
+    const char* FUTURISM_BOSS_TOP_AND_BOTTOM_SHIELD_MESH;
 
 
     // Static Constants

@@ -1,5 +1,5 @@
 /**
- * ESPParticleEffector.h
+ * SummonPortalsEffectInfo.h
  * 
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
@@ -27,22 +27,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __ESPPARTICLEEFFECTOR_H__
-#define __ESPPARTICLEEFFECTOR_H__
+#ifndef __SUMMONPORTALSEFFECTINFO_H__
+#define __SUMMONPORTALSEFFECTINFO_H__
 
-class ESPParticle;
+#include "BossEffectEventInfo.h"
 
-/**
- * ESPParticleEffector.h
- * Abstract class used for making effectors for particles (e.g., force, noise).
- */
-class ESPParticleEffector {
-
+class SummonPortalsEffectInfo : public BossEffectEventInfo {
 public:
-	ESPParticleEffector(){};
-	virtual ~ESPParticleEffector(){};
+    SummonPortalsEffectInfo(const BossBodyPart* part, float size, double timeInSecs,
+        const Point2D& portal1Pos, const Point2D& portal2Pos, const Colour& portalColour,
+        const Vector3D& offset = Vector3D(0,0,0)) : 
+      BossEffectEventInfo(), bodyPart(part), size(size), timeInSecs(timeInSecs), 
+      portal1Pos(portal1Pos), portal2Pos(portal2Pos), portalColour(portalColour), offset(offset) {}
 
-	virtual void AffectParticleOnTick(double dT, ESPParticle* particle) = 0;
+    ~SummonPortalsEffectInfo() {}
 
+    BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::SummonPortalsInfo; }
+
+    const BossBodyPart* GetBodyPart() const { return this->bodyPart; }
+    double GetTimeInSecs() const { return this->timeInSecs; }
+    float GetSize() const { return this->size; }
+    const Point2D& GetPortal1Pos() const { return this->portal1Pos; }
+    const Point2D& GetPortal2Pos() const { return this->portal2Pos; }
+    const Colour& GetPortalColour() const { return this->portalColour; }
+    const Vector3D& GetOffset() const { return this->offset; }
+
+private:
+    const BossBodyPart* bodyPart;
+    const float size;
+    const double timeInSecs;
+    const Point2D portal1Pos;
+    const Point2D portal2Pos;
+    const Colour portalColour;
+    const Vector3D offset;
+
+    DISALLOW_COPY_AND_ASSIGN(SummonPortalsEffectInfo);
 };
-#endif
+
+#endif // __SUMMONPORTALSEFFECTINFO_H__

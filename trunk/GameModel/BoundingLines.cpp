@@ -105,7 +105,6 @@ void BoundingLines::AddBounds(const BoundingLines& bounds) {
 
 Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
     if (this->lines.empty()) {
-        assert(false);
         return Collision::AABB2D();
     }
 
@@ -116,7 +115,8 @@ Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
 	float maxX = firstLine.P1()[0];
 	float minY = firstLine.P1()[1];
 	float maxY = firstLine.P1()[1];
-
+    
+    ++thisIter;
 	while (thisIter != this->lines.end()) {
 		const Collision::LineSeg2D& currThisLine = *thisIter;
 
@@ -667,7 +667,7 @@ bool BoundingLines::CollisionCheck(const BoundingLines& other, double dT, const 
     else {
         // Calculate the number of samples required to make sure that the increment distance is reasonable
         numCollisionSamples = static_cast<int>(ceilf(velocity.Magnitude() * dT / SAMPLE_DISTANCE));
-        numCollisionSamples = std::min<int>(40, std::max<int>(1, numCollisionSamples+1));
+        numCollisionSamples = std::min<int>(20, std::max<int>(1, numCollisionSamples+1));
     }
 
     // Figure out the distance along the vector traveled since the last collision to take each sample at...

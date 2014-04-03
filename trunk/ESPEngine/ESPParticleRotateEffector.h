@@ -32,23 +32,41 @@
 
 #include "../BlammoEngine/Colour.h"
 
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 
-class ESPParticleRotateEffector : public ESPParticleEffector {
+class ESPParticleRotateEffector : public ESPEffector {
 public:
 	enum RotationDirection { CLOCKWISE = 1, COUNTER_CLOCKWISE = -1 };
 
+    ESPParticleRotateEffector(float rotationSpd, RotationDirection dir);
+    ESPParticleRotateEffector(float initialRotation, float numRotations, RotationDirection dir);
+    ~ESPParticleRotateEffector(){}
+
+    void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectBeamOnTick(double dT, ESPBeam* beam);
+
+    ESPEffector* Clone() const;
+
 private:
+    ESPParticleRotateEffector() {}
+
 	float rotationSpd;
 	float startRot, numRots;
 	RotationDirection rotDir;
     bool useRotationSpd;
 
-public:
-	ESPParticleRotateEffector(float rotationSpd, RotationDirection dir);
-	ESPParticleRotateEffector(float initialRotation, float numRotations, RotationDirection dir);
-	virtual ~ESPParticleRotateEffector(){}
-
-	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
+    DISALLOW_COPY_AND_ASSIGN(ESPParticleRotateEffector);
 };
+
+inline ESPEffector* ESPParticleRotateEffector::Clone() const {
+    ESPParticleRotateEffector* clone = new ESPParticleRotateEffector();
+    clone->rotationSpd = this->rotationSpd;
+    clone->startRot = this->startRot;
+    clone->numRots = this->numRots;
+    clone->rotDir = this->rotDir;
+    clone->useRotationSpd = this->useRotationSpd;
+
+    return clone;
+}
+
 #endif

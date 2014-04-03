@@ -46,6 +46,8 @@ class LevelPiece;
 class CannonBlock;
 class GameModel;
 class GameLevel;
+class Projectile;
+class BoundingLines;
 
 class GameBall : public IPositionObject {
 	// State Machine Design Pattern Friendships
@@ -134,6 +136,10 @@ public:
     bool CollisionCheck(double dT, const GameBall& otherBall, Vector2D& n, 
         Collision::LineSeg2D& collisionLine, double& timeUntilCollision, 
         Point2D& otherBallCenterAtCollision, Point2D& thisBallCenterAtCollision) const;
+
+    bool CollisionCheckWithProjectile(double dT, const Projectile& projectile, const BoundingLines& bounds) const;
+    bool ProjectileIsDestroyedOnCollision(const Projectile& projectile) const;
+    void ModifyProjectileTrajectory(Projectile& projectile) const;
 
     void ApplyImpulseForce(float impulseAmt, float deceleration);
     //void ApplyNewtonsThirdLawCollisionVelocity(const Vector2D& impulse);

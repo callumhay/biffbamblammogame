@@ -40,7 +40,6 @@
 #include "SwitchBlockMesh.h"
 #include "AlwaysDropBlockMesh.h"
 #include "OneWayBlockMesh.h"
-#include "BossMesh.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Vector.h"
@@ -673,6 +672,8 @@ void LevelMesh::DrawSecondPassPieces(double dT, const Camera& camera, const Game
                                      const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
                                      const BasicPointLight& ballLight, const Texture2D* sceneTexture) {
 
+    UNUSED_PARAMETER(gameModel);
+
     this->prismBlockDiamond->SetSceneTexture(sceneTexture);
     this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
     this->portalBlock->SetSceneTexture(sceneTexture);
@@ -714,14 +715,6 @@ void LevelMesh::DrawNoBloomPieces(double dT, const Camera& camera, const BasicPo
 void LevelMesh::DrawTransparentNoBloomPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     this->oneWayBlock->DrawTransparentNoBloomPass(dT, camera, keyLight, fillLight, ballLight);
-}
-
-void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                         const BasicPointLight& fillLight, const BasicPointLight& ballLight,
-                         const GameAssets* assets) {
-
-    assert(this->bossMesh != NULL);
-    this->bossMesh->Draw(dT, camera, keyLight, fillLight, ballLight, assets);
 }
 
 /**
@@ -814,7 +807,7 @@ void LevelMesh::CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vect
 	switch (piece->GetType()) {
 		case LevelPiece::Portal:
 			// Portal block has special emitters that suck/spit particles and stuff
-			pieceEmitters = this->portalBlock->CreatePortalBlockEmitters(piece->GetColour(), fullTransform.getTranslationPt3D());
+			this->portalBlock->CreatePortalBlockEmitters(piece->GetColour(), fullTransform.getTranslationPt3D(), pieceEmitters);
 			break;
 		default:
 			return;
@@ -943,9 +936,9 @@ void LevelMesh::LevelIsAlmostComplete() {
         const LevelPiece* piece = *iter;
 
         ESPPointEmitter* glowPulseEffect = new ESPPointEmitter();
-	    glowPulseEffect->SetSpawnDelta(ESPInterval(-1));
+	    glowPulseEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	    glowPulseEffect->SetInitialSpd(ESPInterval(0));
-	    glowPulseEffect->SetParticleLife(ESPInterval(-1));
+	    glowPulseEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
         glowPulseEffect->SetParticleSize(ESPInterval(1.2f*LevelPiece::PIECE_WIDTH), ESPInterval(1.2f*LevelPiece::PIECE_HEIGHT));
 	    glowPulseEffect->SetEmitAngleInDegrees(0);
 	    glowPulseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));

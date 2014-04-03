@@ -187,6 +187,7 @@ public:
         PaddleLaserBulletCollisionEvent,
         PaddleLaserBeamCollisionEvent,
         PaddleCollateralBlockCollisionEvent,
+        PortalProjectileOpenedEvent,
 
         // -> Item sounds
 		BallSafetyNetCreatedEvent,

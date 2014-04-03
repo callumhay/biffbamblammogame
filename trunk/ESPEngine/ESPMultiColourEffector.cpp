@@ -32,7 +32,7 @@
 
 #include "../BlammoEngine/Animation.h"
 
-ESPMultiColourEffector::ESPMultiColourEffector() : ESPParticleEffector() {
+ESPMultiColourEffector::ESPMultiColourEffector() : ESPEffector() {
 }
 
 void ESPMultiColourEffector::AffectParticleOnTick(double dT, ESPParticle* particle) {
@@ -59,30 +59,40 @@ void ESPMultiColourEffector::AffectParticleOnTick(double dT, ESPParticle* partic
 		lookupIndexNext = this->colours.size() - 1;
 	}
 
-	double startPercentage = static_cast<double>(lookupIndexBase) / static_cast<double>(colours.size()-1);
-	double endPercentage   = static_cast<double>(lookupIndexNext) / static_cast<double>(colours.size()-1);
+	double startPercentage = this->percentages[lookupIndexBase];//static_cast<double>(lookupIndexBase) / static_cast<double>(colours.size()-1);
+	double endPercentage   = this->percentages[lookupIndexNext];//static_cast<double>(lookupIndexNext) / static_cast<double>(colours.size()-1);
 	
     const ColourRGBA& startColour = this->colours[lookupIndexBase];
 	const ColourRGBA& endColour   = this->colours[lookupIndexNext];
-	ColourRGBA lerpColour = startColour + (percentLifeElapsed - startPercentage) * (endColour - startColour) / (endPercentage - startPercentage);
 
-	particle->SetColour(lerpColour);
+	particle->SetColour(startColour + (percentLifeElapsed - startPercentage) * (endColour - startColour) / (endPercentage - startPercentage));
+}
+
+void ESPMultiColourEffector::AffectBeamOnTick(double, ESPBeam*) {
+    assert(false);
+    // NOT IMPLEMENTED YET
 }
 
 void ESPMultiColourEffector::SetColours(const std::vector<ColourRGBA>& colours) {
 	this->colours = colours;
 	this->percentages.clear();
 
-	if (colours.size() <= 1) {
+	if (colours.empty()) {
 		return;
 	}
+    else if (colours.size() == 1) {
+        this->percentages.reserve(1);
+        this->percentages.push_back(1.0);
+        return;
+    }
 
 	this->percentages.reserve(colours.size());
 
 	double currPercentage = 0.0;
-	double percentageIncrement = 1.0 / static_cast<float>(colours.size()-1);
-	for (size_t i = 0; i < colours.size(); i++) {
+    double percentageIncrement = 1.0 / static_cast<double>(colours.size()-1);
+	for (int i = 0; i < static_cast<int>(colours.size()); i++) {
 		this->percentages.push_back(currPercentage);
 		currPercentage += percentageIncrement;
 	}
+    this->percentages.back() = 1.0;
 }

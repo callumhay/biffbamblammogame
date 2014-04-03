@@ -594,6 +594,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPAbstractEmitter.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPAnimatedCurveParticle.h"
 					>
 				</File>
@@ -741,6 +745,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\ESPEngine\ESPEffector.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPMultiAlphaEffector.h"
+						>
+					</File>
+					<File
 						RelativePath=".\ESPEngine\ESPMultiColourEffector.h"
 						>
 					</File>
@@ -750,10 +762,6 @@
 					</File>
 					<File
 						RelativePath=".\ESPEngine\ESPParticleColourEffector.h"
-						>
-					</File>
-					<File
-						RelativePath=".\ESPEngine\ESPParticleEffector.h"
 						>
 					</File>
 					<File
@@ -772,6 +780,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\ESPEngine\ESPMultiAlphaEffector.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\ESPEngine\ESPMultiColourEffector.cpp"
 						>
@@ -1320,6 +1332,10 @@
 							>
 						</File>
 						<File
+							RelativePath=".\GameView\FuturismBossMesh.h"
+							>
+						</File>
+						<File
 							RelativePath=".\GameView\GothicRomanticBossMesh.h"
 							>
 						</File>
@@ -1341,6 +1357,10 @@
 						</File>
 						<File
 							RelativePath=".\GameView\DecoBossMesh.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameView\FuturismBossMesh.cpp"
 							>
 						</File>
 						<File
@@ -1412,6 +1432,10 @@
 						RelativePath=".\GameView\NouveauWorldAssets.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameView\PersistentTextureManager.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -1466,6 +1490,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\NouveauWorldAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PersistentTextureManager.cpp"
 						>
 					</File>
 				</Filter>
@@ -1797,7 +1825,23 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameView\BasicEmitterUpdateStrategy.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\BlockStatusEffectRenderer.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BossBodyPartEmitterUpdateStrategy.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BossPt2PtBeamUpdateStrategy.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\EffectUpdateStrategy.h"
 						>
 					</File>
 					<File
@@ -2677,6 +2721,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PortalProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\Projectile.h"
 						>
 					</File>
@@ -2781,6 +2829,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PortalProjectile.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\Projectile.cpp"
 						>
 					</File>
@@ -2830,14 +2882,6 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\ClassicalBossAIStates.h"
-						>
-					</File>
-					<File
-						RelativePath=".\GameModel\DecoBoss.h"
-						>
-					</File>
-					<File
-						RelativePath=".\GameModel\DecoBossAIStates.h"
 						>
 					</File>
 					<File
@@ -2893,14 +2937,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameModel\DecoBoss.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\GameModel\DecoBossAIStates.cpp"
-						>
-					</File>
-					<File
 						RelativePath=".\GameModel\GothicRomanticBoss.cpp"
 						>
 					</File>
@@ -2916,6 +2952,70 @@
 						RelativePath=".\GameModel\NouveauBossAIStates.cpp"
 						>
 					</File>
+				</Filter>
+				<Filter
+					Name="Futurism Boss"
+					>
+					<Filter
+						Name="Header Files"
+						>
+						<File
+							RelativePath=".\GameModel\FuturismBoss.h"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossAIState.h"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossStage1AIState.h"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="Source Files"
+						>
+						<File
+							RelativePath=".\GameModel\FuturismBoss.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossAIState.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossStage1AIState.cpp"
+							>
+						</File>
+					</Filter>
+				</Filter>
+				<Filter
+					Name="Deco Boss"
+					>
+					<Filter
+						Name="Header Files"
+						>
+						<File
+							RelativePath=".\GameModel\DecoBoss.h"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\DecoBossAIStates.h"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="Source Files"
+						>
+						<File
+							RelativePath=".\GameModel\DecoBoss.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\DecoBossAIStates.cpp"
+							>
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 			<Filter
@@ -2941,6 +3041,10 @@
 						>
 						<File
 							RelativePath=".\GameModel\BossEffectEventInfo.h"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\BossTeleportEffectInfo.h"
 							>
 						</File>
 						<File
@@ -2983,6 +3087,10 @@
 							RelativePath=".\GameModel\SparkBurstEffectInfo.h"
 							>
 						</File>
+						<File
+							RelativePath=".\GameModel\SummonPortalsEffectInfo.h"
+							>
+						</File>
 					</Filter>
 				</Filter>
 				<Filter
@@ -2996,7 +3104,15 @@
 							>
 						</File>
 						<File
+							RelativePath=".\GameModel\GenericEmitterEffectInfo.h"
+							>
+						</File>
+						<File
 							RelativePath=".\GameModel\LevelShakeEffectInfo.h"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\PortalSpawnEffectInfo.h"
 							>
 						</File>
 						<File

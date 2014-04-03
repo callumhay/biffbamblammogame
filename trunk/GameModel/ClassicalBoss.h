@@ -129,7 +129,7 @@ private:
     void BuildColumnBounds(BoundingLines& columnBounds);
     
     // Inherited from Boss
-    void Init(float startingX, float startingY);
+    void Init(float startingX, float startingY, const std::vector<std::vector<LevelPiece*> >& levelPieces);
 
     DISALLOW_COPY_AND_ASSIGN(ClassicalBoss);
 };

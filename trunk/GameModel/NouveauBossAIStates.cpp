@@ -550,7 +550,7 @@ void NouveauBossAI::ExecutePrepLaserBeamAttackState(double dT, GameModel* gameMo
             Point2D nextFiringPt;
             Point2D nextTargetPt;
             bool isLeft = false;
-            Vector2D chargeOffset;
+            Vector3D chargeOffset;
             const BossBodyPart* firingBodyPart = NULL;
 
             switch (nextFiringLocation) {
@@ -558,31 +558,31 @@ void NouveauBossAI::ExecutePrepLaserBeamAttackState(double dT, GameModel* gameMo
                     isLeft = true;
                     firingBodyPart = this->boss->GetLeftSideCurls();
                     nextFiringPt = this->boss->GetLeftSideCurlShootTopPt().ToPoint2D();
-                    chargeOffset = this->boss->GetLeftSideCurlShootTopPtOffset().ToVector2D();
+                    chargeOffset = this->boss->GetLeftSideCurlShootTopPtOffset();
                     break;
                 case LeftSideBottom:
                     isLeft = true;
                     firingBodyPart = this->boss->GetLeftSideCurls();
                     nextFiringPt = this->boss->GetLeftSideCurlShootBottomPt().ToPoint2D();
-                    chargeOffset = this->boss->GetLeftSideCurlShootBottomPtOffset().ToVector2D();
+                    chargeOffset = this->boss->GetLeftSideCurlShootBottomPtOffset();
                     break;
                 case CenterBottom:
                     firingBodyPart = this->boss->GetBottomHexSphere();
                     nextFiringPt = this->boss->GetBottomSphereBeamShootPt().ToPoint2D();
-                    chargeOffset = this->boss->GetBottomSphereBeamShootPtOffset().ToVector2D();
+                    chargeOffset = this->boss->GetBottomSphereBeamShootPtOffset();
                     nextTargetPt = Point2D(nextFiringPt[0], 0.0f);
                     break;
                 case RightSideTop:
                     isLeft = false;
                     firingBodyPart = this->boss->GetRightSideCurls();
                     nextFiringPt = this->boss->GetRightSideCurlShootTopPt().ToPoint2D();
-                    chargeOffset = this->boss->GetRightSideCurlShootTopPtOffset().ToVector2D();
+                    chargeOffset = this->boss->GetRightSideCurlShootTopPtOffset();
                     break;
                 case RightSideBottom:
                     isLeft = false;
                     firingBodyPart = this->boss->GetRightSideCurls();
                     nextFiringPt = this->boss->GetRightSideCurlShootBottomPt().ToPoint2D();
-                    chargeOffset = this->boss->GetRightSideCurlShootBottomPtOffset().ToVector2D();
+                    chargeOffset = this->boss->GetRightSideCurlShootBottomPtOffset();
                     break;
                 default:
                     assert(false);

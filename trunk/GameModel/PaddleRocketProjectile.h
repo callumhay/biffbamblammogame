@@ -37,6 +37,7 @@
  */
 class PaddleRocketProjectile : public RocketProjectile {
 public:
+    static const float DEFAULT_ROCKET_DMG;
 	static const float PADDLEROCKET_HEIGHT_DEFAULT;
 	static const float PADDLEROCKET_WIDTH_DEFAULT;
 
@@ -50,7 +51,7 @@ public:
     float GetDamage() const {
         // Obtain the size relative to the the normal size of the rocket (1.0) this rocket
         // is currently - used to determine how much it will destroy.
-        return (this->GetWidth() / PADDLEROCKET_WIDTH_DEFAULT) * 400.0f;
+        return (this->GetWidth() / PADDLEROCKET_WIDTH_DEFAULT) * DEFAULT_ROCKET_DMG;
     }
 
     float GetVisualScaleFactor() const { return this->GetWidth() / this->GetDefaultWidth(); }

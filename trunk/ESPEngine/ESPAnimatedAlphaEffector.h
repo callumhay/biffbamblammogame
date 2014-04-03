@@ -32,12 +32,13 @@
 
 #include "../BlammoEngine/Animation.h"
 
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 #include "ESPParticle.h"
+#include "ESPBeam.h"
 
-class ESPAnimatedAlphaEffector : public ESPParticleEffector {
+class ESPAnimatedAlphaEffector : public ESPEffector {
 public:
-    ESPAnimatedAlphaEffector() : ESPParticleEffector() {
+    ESPAnimatedAlphaEffector() : ESPEffector() {
         this->alphaAnimation0.SetInterpolantValue(1.0f);
         this->alphaAnimation1.SetInterpolantValue(1.0f);
     }
@@ -51,6 +52,9 @@ public:
     }
 
     void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectBeamOnTick(double dT, ESPBeam* beam);
+
+    ESPEffector* Clone() const;
     
 private:
     AnimationMultiLerp<float> alphaAnimation0;
@@ -63,6 +67,18 @@ inline void ESPAnimatedAlphaEffector::AffectParticleOnTick(double dT, ESPParticl
     this->alphaAnimation0.Tick(dT);
     this->alphaAnimation1.Tick(dT);
     particle->SetAlpha(this->alphaAnimation0.GetInterpolantValue() * this->alphaAnimation1.GetInterpolantValue());
+}
+
+inline void ESPAnimatedAlphaEffector::AffectBeamOnTick(double, ESPBeam*) {
+    assert(false);
+    // NOT IMPLEMENTED YET
+}
+
+inline ESPEffector* ESPAnimatedAlphaEffector::Clone() const {
+    ESPAnimatedAlphaEffector* clone = new ESPAnimatedAlphaEffector();
+    clone->alphaAnimation0 = this->alphaAnimation0;
+    clone->alphaAnimation1 = this->alphaAnimation1;
+    return clone;
 }
 
 

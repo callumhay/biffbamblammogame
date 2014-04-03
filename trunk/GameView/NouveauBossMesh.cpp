@@ -120,21 +120,8 @@ bottomGlowSoundID(INVALID_SOUND_ID)
         this->glowCirclePulseAnim.SetLerp(timeVals, pulseVals);
         this->glowCirclePulseAnim.SetRepeat(true);
     }
-    {
-        std::vector<double> timeVals;
-        timeVals.reserve(3);
-        timeVals.push_back(0.0);
-        timeVals.push_back(0.9);
-        timeVals.push_back(1.8);
-        std::vector<Colour> colourVals;
-        colourVals.reserve(timeVals.size());
-        colourVals.push_back(Colour(1,1,1));
-        colourVals.push_back(Colour(0.33f, 0.33f, 0.33f));
-        colourVals.push_back(Colour(1,1,1));
 
-        this->frillColourAnim.SetLerp(timeVals, colourVals);
-        this->frillColourAnim.SetRepeat(true);
-    }
+    BossMesh::BuildShieldingColourAnimation(this->frillColourAnim);
 
     const Texture2D* bossTexture = static_cast<const Texture2D*>(
         this->bodyMesh->GetMaterialGroups().begin()->second->GetMaterial()->GetProperties()->diffuseTexture);

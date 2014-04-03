@@ -118,7 +118,7 @@ private:
     void BuildLeg(const Vector3D& legTranslation, float legYRotation, size_t& legIdx);
 
     // Inherited from Boss
-    void Init(float startingX, float startingY);
+    void Init(float startingX, float startingY, const std::vector<std::vector<LevelPiece*> >& levelPieces);
 
     DISALLOW_COPY_AND_ASSIGN(GothicRomanticBoss);
 };

@@ -312,6 +312,11 @@ public:
     GameModel::ProjectileMap& GetActiveProjectiles() {
 		return this->projectiles;
 	}
+    const GameModel::ProjectileList* GetActiveProjectilesWithType(Projectile::ProjectileType type) const {
+        GameModel::ProjectileMapConstIter findIter = this->projectiles.find(type);
+        if (findIter == this->projectiles.end()) { return NULL; }
+        return &findIter->second;
+    }
 
 	std::list<Beam*>& GetActiveBeams() {
 		return this->beams;
@@ -625,6 +630,7 @@ private:
     void CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* bossPart);
     void CollisionOccurred(Projectile* projectile, Boss* boss, BossBodyPart* bossPart);
     void CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle);
+    void CollisionOccurred(Projectile* projectile, GameBall* ball);
 
     void BallPaddleCollisionOccurred(GameBall& ball);
     void BallDied(GameBall* deadBall, bool& stateChanged);

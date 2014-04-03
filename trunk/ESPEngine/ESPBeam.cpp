@@ -31,9 +31,9 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/Collision.h"
 
-ESPBeam::ESPBeam(const Vector3D& beamLineVec, const Vector3D& rotationalVec, 
+ESPBeam::ESPBeam(const ColourRGBA& colour, const Vector3D& beamLineVec, const Vector3D& rotationalVec, 
                  const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt) : 
-startSegment(new ESPBeamSegment(NULL)), 
+startSegment(new ESPBeamSegment(NULL)), colour(colour),
 lifeTimeInSecs(0.0), currLifeTickCount(0.0),
 rotationalVec(rotationalVec), beamLineVec(beamLineVec), 
 amplitudeVariationAmt(amplitudeVariationAmt), lineDistVariationAmt(lineDistVariationAmt) {
@@ -65,6 +65,8 @@ void ESPBeam::Draw(const Point3D& startPt, const Point3D& endPt, const Camera& c
 	float minMaxLineWidth[2];
 	glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, minMaxLineWidth);
 	thicknessInPixels = std::min<float>(minMaxLineWidth[1], std::max<float>(minMaxLineWidth[0], thicknessInPixels)); 
+
+    glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
 
     glPointSize(thicknessInPixels);
     glBegin(GL_POINTS);

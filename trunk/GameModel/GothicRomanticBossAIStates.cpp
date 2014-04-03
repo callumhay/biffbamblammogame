@@ -747,7 +747,7 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             // NOTE: nextAtkAIState and nextMovePos must be set
             this->shootCountdown = this->GenerateShootCountdownAmtForMoving();
             this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
-                this->GetConfinedBossCenterMovePosition(this->nextMovePos), 0.01f);
+                this->GetConfinedBossCenterMovePosition(this->nextMovePos));
             break;
 
         case SpinLaserAttackAIState: {
@@ -1099,7 +1099,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             // NOTE: nextAtkAIState and nextMovePos must be set
             this->shootCountdown = this->GenerateShootCountdownAmtForMoving();
             this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
-                this->GetConfinedBossCenterMovePosition(this->nextMovePos), 0.01f);
+                this->GetConfinedBossCenterMovePosition(this->nextMovePos));
             break;
 
         case SpinLaserAttackAIState: {
@@ -1193,7 +1193,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
         case MoveToCenterAIState: {
             this->nextMovePos = GothicRomanticBossAI::Center;
             this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), 
-                this->GetConfinedBossCenterMovePosition(GothicRomanticBossAI::Center), 0.01f);
+                this->GetConfinedBossCenterMovePosition(GothicRomanticBossAI::Center));
 
             GameSound* sound = this->boss->GetGameModel()->GetSound();
             // Stop the current boss background music

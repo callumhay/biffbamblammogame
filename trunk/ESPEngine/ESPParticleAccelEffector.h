@@ -32,22 +32,31 @@
 
 #include "../BlammoEngine/Vector.h"
 
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 
-class ESPParticleAccelEffector : public ESPParticleEffector {
-
-private:
-	// The amount of acceleration in m/s^2 to apply to the particle it affects
-	Vector3D accelAmount;
-
+class ESPParticleAccelEffector : public ESPEffector {
 public:
 	ESPParticleAccelEffector(const Vector3D& accelAmount);
-	virtual ~ESPParticleAccelEffector();
+	~ESPParticleAccelEffector();
 
-	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
+	void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectBeamOnTick(double dT, ESPBeam* beam);
 
 	void SetAcceleration(const Vector3D& a) {
 		this->accelAmount = a;
 	}
+
+    ESPEffector* Clone() const;
+
+private:
+    // The amount of acceleration in m/s^2 to apply to the particle it affects
+    Vector3D accelAmount;
+
+    DISALLOW_COPY_AND_ASSIGN(ESPParticleAccelEffector);
 };
+
+inline ESPEffector* ESPParticleAccelEffector::Clone() const {
+    return new ESPParticleAccelEffector(this->accelAmount);
+}
+
 #endif

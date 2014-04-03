@@ -42,6 +42,7 @@ class LevelPiece;
 class GameModel;
 class SafetyNet;
 class PlayerPaddle;
+class GameBall;
 class Boss;
 class BossBodyPart;
 
@@ -53,7 +54,7 @@ public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, PaddleRemoteCtrlRocketBulletProjectile,
                           RocketTurretBulletProjectile, FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
-                          PaddleFlameBlastProjectile, PaddleIceBlastProjectile,
+                          PaddleFlameBlastProjectile, PaddleIceBlastProjectile, PortalBlobProjectile,
                           BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile, 
                           BossLightningBoltBulletProjectile
     };
@@ -65,26 +66,33 @@ public:
 
 	virtual void Tick(double seconds, const GameModel& model) = 0;
 	virtual BoundingLines BuildBoundingLines() const          = 0;
+    virtual Collision::AABB2D BuildAABB() const { return this->BuildBoundingLines().GenerateAABBFromLines(); }
 	virtual ProjectileType GetType() const                    = 0;
     virtual float GetDamage() const                           = 0;
     virtual bool IsRocket() const                             = 0;
     virtual bool IsMine() const                               = 0;
     virtual bool IsRefractableOrReflectable() const           = 0;
-    
+
     virtual float GetZOffset() const { return 0.0f; }
 
     virtual bool BlastsThroughSafetyNets() const { return true; }
     virtual bool IsDestroyedBySafetyNets() const { return false; }
 
-    virtual void SafetyNetCollisionOccurred(SafetyNet* safetyNet) { this->SetLastThingCollidedWith(safetyNet); };
-    virtual void LevelPieceCollisionOccurred(LevelPiece* block)   { UNUSED_PARAMETER(block); };
-    virtual void PaddleCollisionOccurred(PlayerPaddle* paddle)    { UNUSED_PARAMETER(paddle); };
-    virtual void BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart) { UNUSED_PARAMETER(boss); this->SetLastThingCollidedWith(bossPart); };
+    virtual bool CanCollideWithBall() const { return false; }
+    virtual bool CanCollideWithBlocks() const { return true; }
+    virtual bool CanCollideWithProjectiles() const { return false; }
 
-    virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; };
+    virtual void SafetyNetCollisionOccurred(SafetyNet* safetyNet)          { this->SetLastThingCollidedWith(safetyNet); }
+    virtual void LevelPieceCollisionOccurred(LevelPiece* block)            { UNUSED_PARAMETER(block); }
+    virtual void PaddleCollisionOccurred(PlayerPaddle* paddle)             { UNUSED_PARAMETER(paddle); }
+    virtual void BallCollisionOccurred(GameBall* ball)                     { UNUSED_PARAMETER(ball); }
+    virtual void ProjectileCollisionOccurred(Projectile* projectile)       { UNUSED_PARAMETER(projectile); }
+    virtual void BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart) { UNUSED_PARAMETER(boss); this->SetLastThingCollidedWith(bossPart); }
 
-    virtual void DetachFromPaddle() {};
-    virtual bool IsAttachedToSomething() const { return false; };
+    virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; }
+
+    virtual void DetachFromPaddle() {}
+    virtual bool IsAttachedToSomething() const { return false; }
 
     bool AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
@@ -137,7 +145,6 @@ public:
 	bool IsLastThingCollidedWith(const void* p) const { return this->lastThingCollidedWith == p; }
 
     static Projectile* CreateProjectileFromCopy(const Projectile* p, bool createdByReflectionOrRefraction);
-
     static float GetProjectileSplitScaleFactor(int numSplits);
 
 	virtual bool GetIsActive() const {

@@ -279,6 +279,7 @@ void BallInPlayState::Tick(double seconds) {
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
 	bool didCollideWithTeslaLightning = false;
+    std::vector<LevelPiece*> collisionPieces(12, NULL);
 	
     // The last ball to hit the paddle is the one with priority for item effects
 	GameBall* ballToMoveToFront = NULL;
@@ -496,9 +497,9 @@ void BallInPlayState::Tick(double seconds) {
 
 			    // Check for ball collision with level pieces
 			    // Get the small set of level pieces based on the position of the ball...
-			    std::vector<LevelPiece*> collisionPieces = 
-                    currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(),
-                    currBall->GetBounds().Radius(), currBall->GetSpeed());
+			    collisionPieces.clear();
+                currLevel->GetLevelPieceCollisionCandidates(seconds, currBall->GetBounds().Center(),
+                    currBall->GetBounds().Radius(), currBall->GetSpeed(), collisionPieces);
 
                 // Start by finding the best candidate out of the possible collisions...
                 LevelPiece* bestPiece = NULL;

@@ -871,8 +871,9 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
         bool foundPiece = false;
         const GameLevel* currLevel = gameModel->GetCurrentLevel();
 
-        std::set<LevelPiece*> levelPieces = currLevel->GetLevelPieceCollisionCandidates(0.0, 
-            rocketProjectile->GetPosition(), rocketProjectile->BuildBoundingLines(), 0.0);
+        std::set<LevelPiece*> levelPieces;
+        currLevel->GetLevelPieceCollisionCandidates(0.0, rocketProjectile->GetPosition(), 
+            rocketProjectile->BuildBoundingLines(), 0.0, levelPieces);
 
         for (std::set<LevelPiece*>::const_iterator iter = levelPieces.begin(); iter != levelPieces.end(); ++iter) {
             const LevelPiece* currPiece = *iter;
@@ -1263,9 +1264,14 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
             this->AddSpecialStatus(PlayerPaddle::FrozenInIceStatus);
             break;
 
+        case Projectile::PortalBlobProjectile:
+            // This shouldn't happen... not yet developed!
+            assert(false);
+            return;
+
 		default:
 			assert(false);
-			break;
+			return;
 	}
 
 	// EVENT: Paddle was just hit by a projectile
@@ -1298,7 +1304,7 @@ void PlayerPaddle::HitByBeam(const Beam& beam, const BeamSegment& beamSegment) {
 
 // Modify the projectile trajectory in certain special cases when the projectile is colliding with the paddle
 // (or the paddle shield or some component of the paddle)
-void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
+void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) const {
 
 	if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
         switch (projectile.GetType()) {
@@ -1682,7 +1688,8 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 	assert(currentLevel != NULL);
 
 	// Figure out the position in space where the rocket hit and find what block is at that position...
-	std::set<LevelPiece*> levelPieces = currentLevel->GetLevelPieceCollisionCandidatesNoSort(projectile.GetPosition(), EPSILON);
+	std::set<LevelPiece*> levelPieces;
+    currentLevel->GetLevelPieceCollisionCandidatesNoSort(projectile.GetPosition(), EPSILON, levelPieces);
 	if (!levelPieces.empty()) {
 		currentLevel->RocketExplosion(gameModel, &projectile, *levelPieces.begin());
 	}
@@ -2115,6 +2122,10 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, co
             // there's no way it could collide with the paddle.
             return false;
 
+        case Projectile::PortalBlobProjectile:
+            // Not implemented!
+            return false;
+
         default:
             return this->CollisionCheck(bounds, true);
     }
@@ -2123,7 +2134,7 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile, co
 }
 
 // The paddle destroys all projectiles that collide with it, currently
-bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
+bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) const {
 
     // Projectiles can pass through when reflected by the paddle shield
     if (this->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
@@ -2153,7 +2164,7 @@ bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
     return false;
 }
 
-bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile) {
+bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile) const {
     // Special case: sticky paddles always attach mines to themselves
     if (this->HasPaddleType(PlayerPaddle::StickyPaddle) &&
         (projectile.GetType() == Projectile::PaddleMineBulletProjectile ||

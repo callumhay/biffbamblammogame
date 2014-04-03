@@ -103,8 +103,6 @@ protected:
     AnimationMultiLerp<Vector3D> angryMoveAnim;
     AIState currState;
 
-    //static void DoFirstTimeInit();
-
     Point2D GeneratePaddleArmAttackPosition(GameModel* gameModel) const;
     Point2D GenerateShotOrigin() const;
     Vector2D GenerateRandomShotDirTowardsPaddle(const Point2D& shotOrigin, GameModel* gameModel) const;

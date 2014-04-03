@@ -205,8 +205,8 @@ bool GameBall::CanShootBallCamOutOfCannon(const CannonBlock& cannon, const GameL
         (CannonBlock::HALF_CANNON_BARREL_LENGTH + this->GetBounds().Radius()) * cannonDir,
         this->GetBounds().Radius());
 
-    std::vector<LevelPiece*> collisionPieces = 
-        currLevel.GetLevelPieceCollisionCandidates(0.0, testBallBounds.Center(), testBallBounds.Radius(), 0.0);
+    std::vector<LevelPiece*> collisionPieces;
+    currLevel.GetLevelPieceCollisionCandidates(0.0, testBallBounds.Center(), testBallBounds.Radius(), 0.0, collisionPieces);
 
     for (std::vector<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
          pieceIter != collisionPieces.end(); ++pieceIter) {
@@ -456,6 +456,35 @@ bool GameBall::CollisionCheck(double dT, const GameBall& otherBall, Vector2D& n,
     return this->bounds.Collide(dT, otherBall.GetBounds(), otherBall.GetVelocity(), 
         n, collisionLine, timeUntilCollision, otherBallCenterAtCollision, 
         thisBallCenterAtCollision, this->GetVelocity());
+}
+
+bool GameBall::CollisionCheckWithProjectile(double dT, const Projectile& projectile, const BoundingLines& bounds) const {
+    if (this->IsLastThingCollidedWith(&projectile)) {
+        return false;
+    }
+
+    // NOTE: If we want the ball to react/bounce off the projectile this will need to become much more complicated
+    // (i.e., similar to how it's done in BallInPlayState).
+
+    // Create a line for the ball over time
+    const Point2D& currCenter = this->bounds.Center();
+    Point2D previousCenter = currCenter - dT * this->GetVelocity();
+    Collision::LineSeg2D sweptCenter(previousCenter, currCenter);
+
+    // Check to see if the ball is/was inside the projectile bounding lines over the time interval dT
+    return (bounds.CollisionCheckIndices(sweptCenter).size() > 0);
+}
+
+bool GameBall::ProjectileIsDestroyedOnCollision(const Projectile& projectile) const {
+    UNUSED_PARAMETER(projectile);
+    // No cases where projectiles are destroyed by the ball yet.
+    return false;
+}
+
+void GameBall::ModifyProjectileTrajectory(Projectile& projectile) const {
+    UNUSED_PARAMETER(projectile);
+    // Nope, not yet...
+    return;
 }
 
 void GameBall::ApplyImpulseForce(float impulseAmt, float deceleration) {

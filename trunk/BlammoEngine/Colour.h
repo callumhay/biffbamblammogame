@@ -131,12 +131,12 @@ public:
 	}
   
 	ColourRGBA& operator =(const ColourRGBA& other) {
-	  this->colours[0] = other.colours[0];
-    this->colours[1] = other.colours[1];
-    this->colours[2] = other.colours[2];	
+        this->colours[0] = other.colours[0];
+        this->colours[1] = other.colours[1];
+        this->colours[2] = other.colours[2];	
 		this->alpha   = other.alpha;
-    return *this;
-  }
+        return *this;
+    }
 
 	float& operator[](size_t idx) {
 		assert(idx < 4);
@@ -144,10 +144,10 @@ public:
 			return this->alpha;
 		}
 
-    return this->colours[ idx ];
-  }
+        return this->colours[ idx ];
+    }
 
-  float operator[](size_t idx) const {
+    float operator[](size_t idx) const {
 		assert(idx < 4);
 		if (idx == 3) {
 			return this->alpha;
@@ -163,6 +163,9 @@ public:
 	const Colour& GetColour() const {
 		return (*this);
 	}
+    void SetColour(const Colour& colour) {
+        (*static_cast<Colour*>(this)) = colour;
+    }
 };
 
 // Multiplicative colour based off a scalar

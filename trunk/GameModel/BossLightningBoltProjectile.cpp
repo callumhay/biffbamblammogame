@@ -52,8 +52,8 @@ void BossLightningBoltProjectile::Tick(double seconds, const GameModel& model) {
 }
 
 BoundingLines BossLightningBoltProjectile::BuildBoundingLines() const {
-    const Vector2D UP_DIR       = this->GetVelocityDirection();
-    const Vector2D RIGHT_DIR	= this->GetRightVectorDirection();
+    const Vector2D& UP_DIR    = this->GetVelocityDirection();
+    const Vector2D& RIGHT_DIR = this->GetRightVectorDirection();
 
     Point2D topRight    = this->GetPosition() + this->GetHalfHeight()*UP_DIR + this->GetHalfWidth()*RIGHT_DIR;
     Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;
