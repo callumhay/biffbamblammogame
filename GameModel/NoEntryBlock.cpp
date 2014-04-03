@@ -333,6 +333,9 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
             this->FreezePieceInIce(gameModel, false);
             break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;

@@ -55,3 +55,8 @@ void ESPParticleRotateEffector::AffectParticleOnTick(double dT, ESPParticle* par
 		particle->SetRotation(currParticleRot + this->rotDir*this->rotationSpd*dT);
 	}
 }
+
+void ESPParticleRotateEffector::AffectBeamOnTick(double, ESPBeam*) {
+    assert(false);
+    // NOT IMPLEMENTED YET
+}

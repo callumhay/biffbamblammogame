@@ -30,6 +30,8 @@
 #ifndef __ESPBEAM_H__
 #define __ESPBEAM_H__
 
+#include "../BlammoEngine/Colour.h"
+
 #include "ESPUtil.h"
 #include "ESPBeamSegment.h"
 
@@ -37,7 +39,7 @@ class ESPBeam {
 public:
 	static const int INFINITE_BEAM_LIFETIME = -1;
 
-	ESPBeam(const Vector3D& beamLineVec, const Vector3D& rotationalVec,
+	ESPBeam(const ColourRGBA& colour, const Vector3D& beamLineVec, const Vector3D& rotationalVec,
             const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt);
 	~ESPBeam();
 
@@ -45,6 +47,10 @@ public:
 	void SetLifeTime(double lifeInSeconds);
 	void SetThickness(float thickness);
 
+    void SetColour(const ColourRGBA& colour) { this->colour = colour; }
+    void SetColour(const Colour& colour) { this->colour.SetColour(colour); }
+    void SetAlpha(float alpha) { this->colour[3] = alpha; }
+    
 	void Tick(double dT);
 	void Draw(const Point3D& startPt, const Point3D& endPt, const Camera& camera) const;
 	bool IsDead() const;
@@ -54,9 +60,14 @@ public:
 	const float GetRandomAmplitudeVariation() const;
 	const float GetRandomLineDistanceVariation() const;
 
+    double GetCurrentLifeElapsed() const { return this->currLifeTickCount; }
+    double GetLifespanLength() const { return this->lifeTimeInSecs; }
+
 private:
 	double currLifeTickCount;
 	double lifeTimeInSecs;
+
+    ColourRGBA colour;
 
 	// Allowed interval of variation of the point over time
 	Vector3D rotationalVec;             // Vector orthogonal to the beam line
@@ -64,8 +75,6 @@ private:
 	ESPInterval amplitudeVariationAmt;	// Interval of allowed variation from the beam line
 	ESPInterval lineDistVariationAmt;   // Interval of allowed variation along the beam line of any segment point
 	float thickness;
-
-	//double variationSpd
 
 	ESPBeamSegment* startSegment;	// The root/starting beam segment
 

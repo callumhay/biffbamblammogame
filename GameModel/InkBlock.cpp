@@ -249,6 +249,9 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
             this->FreezePieceInIce(gameModel);
             break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;

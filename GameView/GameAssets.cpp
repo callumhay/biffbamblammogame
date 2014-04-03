@@ -898,16 +898,21 @@ void GameAssets::DrawSecondPassLevelPieces(double dT, const GameModel& gameModel
 void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera) {
 
     if (currLevel->GetHasBoss()) {
-        Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
-        
+
         glPushMatrix();
-	    glTranslatef(worldTransform[0], worldTransform[1], worldTransform[2]);
+	    glTranslatef(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0);
 
 	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	    this->lightAssets->GetBossAffectingLights(fgKeyLight, fgFillLight, ballLight);
         this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight, this);
 
         glPopMatrix();
+    }
+}
+
+void GameAssets::DrawBossPostEffects(double dT, const GameLevel* currLevel, const Camera& camera) {
+    if (currLevel->GetHasBoss()) {
+        this->GetCurrentLevelMesh()->DrawBossPostEffects(dT, camera);
     }
 }
 
@@ -1521,6 +1526,12 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             break;
         }
 
+        case Projectile::PortalBlobProjectile: {
+            // Play a sound for the portal being summoned into existence
+            sound->PlaySoundAtPosition(GameSound::PortalProjectileOpenedEvent, false, projectile.GetPosition3D(), true, true, true);
+            break;
+        }
+
 		default:
 			break;
 	}
@@ -1570,6 +1581,11 @@ void GameAssets::RemoveProjectile(const GameModel& gameModel, const Projectile& 
 
                 soundFadeoutTime = 1.0;
             }
+            break;
+        }
+
+        case Projectile::PortalBlobProjectile: {
+            // TODO?
             break;
         }
 
@@ -1720,6 +1736,10 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
             break;
         }
+
+        case Projectile::PortalBlobProjectile:
+            // Not implemented
+            return;
 
 		default:
 			assert(false);

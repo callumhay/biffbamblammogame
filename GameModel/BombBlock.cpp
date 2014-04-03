@@ -274,6 +274,9 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
             this->FreezePieceInIce(gameModel);
             break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;

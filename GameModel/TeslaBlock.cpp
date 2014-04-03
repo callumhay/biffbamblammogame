@@ -229,6 +229,9 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
             // Extinguish, projectile has no effect on this block
 			break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;

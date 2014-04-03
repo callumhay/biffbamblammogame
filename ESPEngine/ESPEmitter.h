@@ -35,9 +35,10 @@
 
 #include "../GameModel/Onomatoplex.h"
 
+#include "ESPAbstractEmitter.h"
 #include "ESPParticle.h"
 #include "ESPUtil.h"
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 #include "ESPParticleBatchMesh.h"
 
 #include <vector>
@@ -54,7 +55,7 @@ class Bezier;
  * ESPEmitter.h
  * Abstract base class representing an Emitter of particles.
  */
-class ESPEmitter {
+class ESPEmitter : public ESPAbstractEmitter {
 public:
 	ESPEmitter();
 	virtual ~ESPEmitter();
@@ -119,8 +120,8 @@ public:
 	void SetRadiusDeviationFromCenter(const ESPInterval& xDistFromCenter, const ESPInterval& yDistFromCenter, const ESPInterval& zDistFromCenter);
 	void SetParticleDeathPlane(const Plane& plane);
 
-	void AddEffector(ESPParticleEffector* effector);
-	void RemoveEffector(ESPParticleEffector* const effector);
+	void AddEffector(ESPEffector* effector);
+    void AddCopiedEffector(const ESPEffector& effector);
     void ClearEffectors();
 	void AddEventHandler(ESPEmitterEventHandler* eventHandler);
 
@@ -152,7 +153,7 @@ protected:
 	
 	bool isReversed;		// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
 
-	std::list<ESPParticleEffector*> effectors;        // All the particle effectors of this emitter
+    std::list<std::pair<ESPEffector*, bool> > effectors; // All the particle effectors of this emitter, pairing boolean means that this object owns the emitter
 	std::list<ESPEmitterEventHandler*> eventHandlers; // The event handlers attached to this emitter
 	
 	Plane particleDeathPlane;
@@ -190,11 +191,7 @@ protected:
 
 private:
 	void TickParticles(double dT);
-
-	// Disallow copy and assign
-	ESPEmitter(const ESPEmitter& e);
-	ESPEmitter& operator=(const ESPEmitter& e);
-
+    DISALLOW_COPY_AND_ASSIGN(ESPEmitter);
 };
 
 inline bool ESPEmitter::GetHasParticles() const {

@@ -46,3 +46,8 @@ void ESPParticleAccelEffector::AffectParticleOnTick(double dT, ESPParticle* part
 	// Affect the particle by applying a constant velocity to it...
 	particle->SetVelocity(particle->GetVelocity() + (dT * this->accelAmount));
 }
+
+void ESPParticleAccelEffector::AffectBeamOnTick(double, ESPBeam*) {
+    assert(false);
+    // NOT IMPLEMENTED YET
+}

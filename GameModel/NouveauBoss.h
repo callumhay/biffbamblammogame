@@ -183,7 +183,7 @@ private:
     static const float Y_POS_FOR_LASER_BEAMS2;
 
     // Inherited from Boss
-    void Init(float startingX, float startingY);
+    void Init(float startingX, float startingY, const std::vector<std::vector<LevelPiece*> >& levelPieces);
    
     void BuildBottomCurl(const Vector3D& translation, float yRotation, size_t& idx);
 

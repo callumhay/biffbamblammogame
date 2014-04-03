@@ -35,20 +35,27 @@
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Colour.h"
 
+#include "ESPAbstractEmitter.h"
 #include "ESPUtil.h"
 #include "ESPBeam.h"
 
+class ESPEffector;
 class Texture2D;
 
-class ESPPointToPointBeam {
+class ESPPointToPointBeam : public ESPAbstractEmitter {
 public:
 	ESPPointToPointBeam();
 	~ESPPointToPointBeam();
 
 	void Tick(double dT);
 	void Draw(const Camera& camera);
+    bool IsDead() const { return (this->aliveBeams.empty() && !this->ThereAreStillMoreBeamsToFire()); }
+
+    void SetStartPoint(const Point3D& startPt) { this->startPt = startPt; }
 
 	void SetStartAndEndPoints(const Point3D& startPt, const Point3D& endPt);
+    void SetStartAndEndPoints(const Point2D& startPt, const Point2D& endPt);
+
 	void SetColour(const ColourRGBA& colour);
 	void SetAlpha(float alpha);
 	//void SetTexture(const Texture2D* texture);
@@ -56,19 +63,25 @@ public:
 	void SetMainBeamAmplitude(const ESPInterval& a);
 	void SetMainBeamThickness(const ESPInterval& thickness);
 
+    void SetEnableDepth(bool enable) { this->depthEnabled = enable; }
 	
 	static const int INFINITE_NUMBER_OF_BEAM_SHOTS = -1;
 	void SetNumBeamShots(int numBeamShots);
 	void SetTimeBetweenBeamShots(const ESPInterval& timeBetweenShotsInSeconds);
 	void SetBeamLifetime(const ESPInterval& beamLifetimeInSeconds);
 
+    void AddCopiedEffector(const ESPEffector& effector);
+    void ClearEffectors();
+
 protected:
 	std::list<ESPBeam*> aliveBeams;
+    std::list<ESPEffector*> effectors;
 
 	// Appearance
 	Point3D startPt;	// Start of the beam
 	Point3D endPt;		// End of the beam
 
+    bool depthEnabled;
 	ColourRGBA colour;							// General colour of the beam (multiplies the texture colour if there is a texture)
 	//const Texture2D* texture;			// The texture applied to the beam
 	size_t numMainESPBeamSegments;	// Number of segments that make up the main beam that goes from startPt to endPt
@@ -87,7 +100,6 @@ protected:
 	bool ThereAreStillMoreBeamsToFire() const;
 	void SpawnBeam();
 
-
 	// Disallow copy and assign
 	ESPPointToPointBeam(const ESPPointToPointBeam& b);
 	ESPPointToPointBeam& operator=(const ESPPointToPointBeam& b);
@@ -97,6 +109,11 @@ protected:
 inline void ESPPointToPointBeam::SetStartAndEndPoints(const Point3D& startPt, const Point3D& endPt) {
 	this->startPt = startPt;
 	this->endPt   = endPt;
+}
+
+inline void ESPPointToPointBeam::SetStartAndEndPoints(const Point2D& startPt, const Point2D& endPt) {
+    this->startPt[0] = startPt[0]; this->startPt[1] = startPt[1]; this->startPt[2] = 0;
+    this->endPt[0] = endPt[0]; this->endPt[1] = endPt[1]; this->endPt[2] = 0;
 }
 
 // Sets the general colour of the beam

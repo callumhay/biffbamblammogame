@@ -456,6 +456,7 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, PaddleLaserBulletCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleLaserBeamCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleCollateralBlockCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PortalProjectileOpenedEvent, false);
 
 
 	INSERT_MAPPING_PAIR(GameSound, BallSafetyNetCreatedEvent, false);

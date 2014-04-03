@@ -125,7 +125,10 @@ bool DecoBoss::ProjectilePassesThrough(const Projectile* projectile) const {
     return false;
 }
 
-void DecoBoss::Init(float startingX, float startingY) {
+void DecoBoss::Init(float startingX, float startingY, 
+                    const std::vector<std::vector<LevelPiece*> >& levelPieces) {
+
+    UNUSED_PARAMETER(levelPieces);
 
     // Body Layout for the Deco Boss:
     // -----------------------------------
@@ -297,6 +300,7 @@ void DecoBoss::Init(float startingX, float startingY) {
     }
 
     // Move the boss to its starting location
+    // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
     this->root->Translate(Vector3D(startingX, startingY, 0.0f));
     
     // Retract the bosses' arms so that they initially hidden by the two side parts of the bosses' body
@@ -327,7 +331,6 @@ void DecoBoss::Init(float startingX, float startingY) {
         ARM_SCOPING_SEG3_Y_RETRACT_TRANSLATION + ARM_SCOPING_SEG4_Y_RETRACT_TRANSLATION, 0));
 
     this->SetCurrentAIStateImmediately(new Stage1AI(this));
-    // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
 }
 
 BossCompositeBodyPart* DecoBoss::BuildArm(BossCompositeBodyPart* middleBody, size_t& armIdx, size_t& gearIdx, 

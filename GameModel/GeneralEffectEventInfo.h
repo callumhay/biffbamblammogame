@@ -35,7 +35,7 @@ public:
     GeneralEffectEventInfo() {};
     virtual ~GeneralEffectEventInfo() {};
 
-    enum Type { ShortCircuit, LevelShake, StarSmash };
+    enum Type { ShortCircuit, LevelShake, StarSmash, PortalSpawn, GenericEmitter };
 
     virtual GeneralEffectEventInfo::Type GetType() const = 0;
 

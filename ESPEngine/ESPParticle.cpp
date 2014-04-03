@@ -32,6 +32,8 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
+#include <Eigen/Geometry>
+
 const Vector3D ESPParticle::PARTICLE_UP_VEC			= Vector3D(0, 1, 0);
 const Vector3D ESPParticle::PARTICLE_NORMAL_VEC		= Vector3D(0, 0, 1);
 const Vector3D ESPParticle::PARTICLE_RIGHT_VEC		= Vector3D::cross(PARTICLE_UP_VEC, PARTICLE_NORMAL_VEC);
@@ -156,11 +158,32 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			alignRightVec  = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
 			break;
 
-		case ESP::ScreenAlignedFollowVelocity:
-			alignNormalVec = -cam.GetNormalizedViewVector();
-			alignUpVec     = Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));
-			alignRightVec  = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
-			break;
+        case ESP::ScreenAlignedFollowVelocity: {
+            alignNormalVec = -cam.GetNormalizedViewVector();
+            alignUpVec     = cam.GetNormalizedUpVector();
+            alignRightVec  = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+            
+            Eigen::Matrix3f alignMatrix;
+            alignMatrix << 
+                alignRightVec[0], alignRightVec[1], alignRightVec[2],
+                alignUpVec[0], alignUpVec[1], alignUpVec[2],
+                alignNormalVec[0], alignNormalVec[1], alignNormalVec[2];
+
+            Eigen::Quaternionf rot;
+            rot.setFromTwoVectors(Eigen::Vector3f(0,1,0), Eigen::Vector3f(-this->velocity[0], this->velocity[1], -this->velocity[2]));
+            rot.normalize();
+
+            alignMatrix = alignMatrix*rot;
+
+            return Matrix4x4(alignMatrix(0,0), alignMatrix(0,1), alignMatrix(0,2), 0,
+                             alignMatrix(1,0), alignMatrix(1,1), alignMatrix(1,2), 0,
+                             alignMatrix(2,0), alignMatrix(2,1), alignMatrix(2,2), 0,
+                             0, 0, 0, 1);
+        }
+			//alignNormalVec = -cam.GetNormalizedViewVector();
+			//alignUpVec     = Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], this->velocity[2]));
+			//alignRightVec  = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+			//break;
 
         case ESP::ScreenAlignedGlobalUpVec:
 

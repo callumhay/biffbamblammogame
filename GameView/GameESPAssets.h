@@ -57,11 +57,14 @@ class Beam;
 class PaddleBlasterProjectile;
 struct ESPInterval;
 class GameSound;
+class PortalProjectile;
 
 class PuffOfSmokeEffectInfo;
 class ShockwaveEffectInfo;
 class ShortCircuitEffectInfo;
 class DebrisEffectInfo;
+class PortalSpawnEffectInfo;
+class GenericEmitterEffectInfo;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -78,13 +81,14 @@ private:
     typedef ProjectileEmitterMap::iterator ProjectileEmitterMapIter;
 
 	// Currently active particle systems
-	std::list<ESPEmitter*> activeGeneralEmitters;
+	std::list<ESPAbstractEmitter*> activeGeneralEmitters;
 	std::list<ESPEmitter*> activePaddleEmitters;
 
 	std::map<const GameBall*, std::list<ESPEmitter*> > activeBallBGEmitters;
     BallEffectsMap boostBallEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*> > activeItemDropEmitters;
 	ProjectileEmitterMap activeProjectileEmitters;
+    ProjectileEmitterMap activePostProjectileEmitters;
 	std::map<const Beam*, std::list<ESPEmitter*> > activeBeamEmitters;
 	std::map<GameItem::ItemType, std::list<ESPEmitter*> > activeTimerHUDEmitters;
 	//std::map<const LevelPiece*, std::list<ESPEmitter*> > activeLevelPieceEmitters;
@@ -110,6 +114,7 @@ private:
     ESPParticleColourEffector iceOriginColourEffector;
     ESPMultiColourEffector starColourFlasher;
     ESPMultiColourEffector fireOriginColourEffector;
+    ESPMultiAlphaEffector particleFastFadeInFadeOut;
     
 	ESPParticleScaleEffector particlePulseUberballAura;
 	ESPParticleScaleEffector particlePulseItemDropAura;
@@ -121,6 +126,7 @@ private:
 	ESPParticleScaleEffector particleShrinkToNothing;
     ESPParticleScaleEffector particleLargeGrowthSuperFastPulser;
     ESPParticleScaleEffector flarePulse;
+    ESPParticleScaleEffector haloExpandPulse;
 
 	ESPParticleAccelEffector ghostBallAccel1;
 	ESPParticleAccelEffector gravity;
@@ -134,6 +140,7 @@ private:
 	ESPParticleScaleEffector particleMediumShrink;
 	ESPParticleScaleEffector particleLargeVStretch;
     ESPParticleScaleEffector particleMedVStretch;
+    ESPParticleScaleEffector particleLargeVShrink;
 
 	ESPParticleRotateEffector explosionRayRotatorCW;
 	ESPParticleRotateEffector explosionRayRotatorCCW;
@@ -158,42 +165,8 @@ private:
     std::vector<Texture2D*> cloudTextures;
     std::vector<Texture2D*> fireGlobTextures;
 	std::vector<CgFxFireBallEffect*> moltenRockEffects;
-	
-    Texture2D* cleanCircleGradientTex;
-	Texture2D* circleGradientTex;
-	Texture2D* starTex;
-	Texture2D* starOutlineTex;
-	Texture2D* evilStarTex;
-	Texture2D* explosionTex;
-	Texture2D* explosionRayTex;
-	Texture2D* laserBeamTex;
-	Texture2D* upArrowTex;
-	Texture2D* ballTex;
-	Texture2D* circleTargetTex;
-	Texture2D* haloTex;
-	Texture2D* lensFlareTex;
-	Texture2D* sparkleTex;
-	Texture2D* spiralTex;
-	Texture2D* sideBlastTex;
-	Texture2D* hugeExplosionTex;
-    Texture2D* bubblyExplosionTex;
-    Texture2D* cloudRayExplosionTex;
-	Texture2D* lightningBoltTex;
-	Texture2D* sphereNormalsTex;
-    Texture2D* cloudNormalTex;
-    Texture2D* vapourTrailTex;
-    Texture2D* heartTex;
-    Texture2D* chevronTex;
-    Texture2D* infinityTex;
-    Texture2D* dropletTex;
-    Texture2D* flareTex;
 
-    Texture2D* happyFaceTex;
-    Texture2D* neutralFaceTex;
-    Texture2D* sadFaceTex;
 
-    Texture2D* plusTex;
-    Texture2D* plusOutlineTex;
     Texture2D* circleTex;
     Texture2D* outlinedHoopTex;
     Texture2D* xTex;
@@ -207,6 +180,8 @@ private:
     Mesh* fragileCannonBarrelMesh;
     Mesh* fragileCannonBasePostMesh;
     Mesh* fragileCannonBaseBarMesh;
+    
+    Mesh* portalMesh;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // Stores each balls set of item-related (defined by unique ID) effects
@@ -302,8 +277,8 @@ private:
 
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 	
-    void AddSingleEnergyProjectilePortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, const PortalBlock& block, bool isSibling);
-    void AddSingleObjectPortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, const PortalBlock& block, bool isSibling);
+    void AddSingleEnergyProjectilePortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, bool isSibling);
+    void AddSingleObjectPortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, const Colour& portalColour, bool isSibling);
 	
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const GameModel& gameModel, const RocketProjectile& projectile);
@@ -312,6 +287,7 @@ private:
     void AddIceBlastProjectileEffects(const GameModel& gameModel, const PaddleIceBlasterProjectile& projectile);
     void AddPaddleMineFiredEffects(const GameModel& gameModel, const PaddleMineProjectile& projectile);
     void AddPaddleMineAttachedEffects(const Projectile& projectile);
+    void AddPortalProjectileEffects(const PortalProjectile& projectile);
 
 	void AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
 
@@ -348,7 +324,7 @@ private:
 	ESPPointEmitter* CreateBeamFlareEffect(const Beam& beam);
 
     ESPPointEmitter* CreateMultiplierComboEffect(int multiplier, const Point2D& position);
-    void CreateStarAcquiredEffect(const Point2D& position, std::list<ESPEmitter*>& emitterListToAddTo);
+    void CreateStarAcquiredEffect(const Point2D& position, std::list<ESPAbstractEmitter*>& emitterListToAddTo);
 
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Projectile& projectile, ESPPointEmitter* projectileEmitter);
 
@@ -372,9 +348,11 @@ public:
 
 	void UpdateBGTexture(const Texture2D& bgTexture);
 
-	ESPPointEmitter* CreateShockwaveEffect(const Point3D& center, float startSize, float lifeTime);
+	ESPPointEmitter* CreateShockwaveEffect(const Point3D& center, float startSize, float lifeTime, bool reverse = false);
 	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
 		bool gravity = true, size_t numParticles = 10);
+    ESPPointEmitter* CreateEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
+        int numLines, float lengthMin, float lengthMax);
 
     void AddBossHurtEffect(const Point2D& pos, float width, float height);
     void AddBossAngryEffect(const Point2D& pos, float width, float height);
@@ -407,8 +385,10 @@ public:
     void AddBossHitByProjectileEffect(const Projectile& projectile, const BossBodyPart& collisionPart, GameSound* sound); 
 	void AddBallHitLightningArcEffect(const GameBall& ball);
 
-    void AddEnergyProjectilePortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block);
-	void AddObjectPortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block);
+    void AddEnergyProjectilePortalTeleportEffect(const Point2D& enterPt, const Point2D& enterPortalCenter, 
+        const Point2D& exitPortalCenter, float sizeX, float sizeY);
+	void AddObjectPortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, 
+        const Point2D& enterCenter, const Point2D& exitCenter, const Colour& portalColour);
     void ItemEnteredPortalBlockEffects(const GameItem& item, const PortalBlock& block);
 	void AddCannonFireEffect(const Point3D& endOfCannonPt, const Vector2D& fireDir);
 	void AddBasicBlockBreakEffect(const LevelPiece& block);
@@ -464,6 +444,8 @@ public:
     void AddShortCircuitEffect(const ShortCircuitEffectInfo& effectInfo);
     void AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, const ESPInterval& size, 
         const ESPInterval& lifeInSecs, Onomatoplex::Extremeness extremeness);
+    void AddPortalSpawnEffect(const PortalSpawnEffectInfo& effectInfo);
+    void AddGenericEmitterEffect(const GenericEmitterEffectInfo& effectInfo);
 
 	void TurnOffCurrentItemDropStars();
 
@@ -477,6 +459,7 @@ public:
 	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawBeamEffects(double dT, const Camera& camera);
 	void DrawProjectileEffects(double dT, const Camera& camera);
+    void DrawPostProjectileEffects(double dT, const Camera& camera);
     
     void DrawPaddleFlameBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
     void DrawPaddleIceBlasterEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);

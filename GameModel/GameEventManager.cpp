@@ -235,6 +235,13 @@ void GameEventManager::ActionProjectileBossCollision(const Projectile& projectil
      }
 }
 
+void GameEventManager::ActionProjectileBallCollision(const Projectile& projectile, const GameBall& ball) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->ProjectileBallCollisionEvent(projectile, ball);
+    }
+}
+
 // Action for when the ball collides with a block in the level
 void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
@@ -249,6 +256,22 @@ void GameEventManager::ActionBallPortalBlockTeleport(const GameBall& ball, const
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
 		(*listenerIter)->BallPortalBlockTeleportEvent(ball, enterPortal);
 	}	
+}
+
+void GameEventManager::ActionBallPortalProjectileTeleport(const GameBall& ball, const PortalProjectile& enterPortalProjectile) {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->BallPortalProjectileTeleportEvent(ball, enterPortalProjectile);
+    }
+}
+
+void GameEventManager::ActionProjectilePortalProjectileTeleport(const Projectile& projectile, 
+                                                                const PortalProjectile& enterPortalProjectile) {
+
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->ProjectilePortalProjectileTeleportEvent(projectile, enterPortalProjectile);
+    }
 }
 
 void GameEventManager::ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal) {

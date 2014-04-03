@@ -65,6 +65,7 @@ class GeneralEffectEventInfo;
 class BossEffectEventInfo;
 class PaddleRemoteControlRocketProjectile;
 class CollateralBlockProjectile;
+class PortalProjectile;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -106,8 +107,11 @@ public:
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
     void ActionProjectileSafetyNetCollision(const Projectile& projectile, const SafetyNet& safetyNet);
     void ActionProjectileBossCollision(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);
+    void ActionProjectileBallCollision(const Projectile& projectile, const GameBall& ball);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
+    void ActionBallPortalProjectileTeleport(const GameBall& ball, const PortalProjectile& enterPortalProjectile);
+    void ActionProjectilePortalProjectileTeleport(const Projectile& projectile, const PortalProjectile& enterPortalProjectile);
 	void ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal);
     void ActionItemPortalBlockTeleport(const GameItem& item, const PortalBlock& enterPortal);
     void ActionBallEnteredCannon(const GameBall& ball, const CannonBlock& cannonBlock, bool canShootWithoutObstruction);

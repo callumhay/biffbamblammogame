@@ -33,15 +33,18 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Colour.h"
 
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 
-class ESPMultiColourEffector : public ESPParticleEffector {
+class ESPMultiColourEffector : public ESPEffector {
 public:
     ESPMultiColourEffector();
     ~ESPMultiColourEffector() {}
 
     void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectBeamOnTick(double dT, ESPBeam* beam);
     void SetColours(const std::vector<ColourRGBA>& colours);
+
+    ESPEffector* Clone() const;
 
 private:
 	std::vector<double> percentages;
@@ -49,4 +52,12 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(ESPMultiColourEffector);
 };
+
+inline ESPEffector* ESPMultiColourEffector::Clone() const {
+    ESPMultiColourEffector* clone = new ESPMultiColourEffector();
+    clone->percentages = this->percentages;
+    clone->colours = this->colours;
+    return clone;
+}
+
 #endif

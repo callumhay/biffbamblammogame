@@ -221,6 +221,9 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
             this->FreezePieceInIce(gameModel);
             break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -532,7 +535,7 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
         ignoreTypes.insert(LevelPiece::Switch);
         ignoreTypes.insert(LevelPiece::Ink);
 
-        std::list<LevelPiece*> collisionPieces;
+        std::set<LevelPiece*> collisionPieces;
         model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes,
             collisionPieces, paddleRayT, 0.525f * RocketTurretProjectile::TURRETROCKET_WIDTH_DEFAULT);
 

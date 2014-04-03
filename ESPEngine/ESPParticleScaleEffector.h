@@ -33,37 +33,38 @@
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Vector.h"
 
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 
 class ESPParticleScaleEffector;
 
 class ScaleEffect {
-private:
-	bool isInit;
-
+    friend class ESPParticleScaleEffector;
 public:
 	// Variables for pulse effects
 	float pulseRate;				// (Hz) Pulse rate in number of pulses per second
 	float pulseGrowthScale;	// Amount of growth of a single pulse from smallest scale to largest
 
+    ScaleEffect() : isInit(false), pulseRate(0), pulseGrowthScale(1) {}
     ScaleEffect(float pulseRate, float pulseGrowthScale) : isInit(false), pulseRate(pulseRate), pulseGrowthScale(pulseGrowthScale) {}
-	ScaleEffect() : isInit(false), pulseRate(0), pulseGrowthScale(1) {}
+    ScaleEffect(const ScaleEffect& copy) : isInit(copy.isInit), pulseRate(copy.pulseRate), pulseGrowthScale(copy.pulseGrowthScale) {}
 
-	friend class ESPParticleScaleEffector;
+    ScaleEffect& operator=(const ScaleEffect& copy) {
+        this->isInit = copy.isInit;
+        this->pulseRate = copy.pulseRate;
+        this->pulseGrowthScale = copy.pulseGrowthScale;
+        return *this;
+    }	
+private:
+    bool isInit;
 };
 
-class ESPParticleScaleEffector : public ESPParticleEffector {
-
-private:
-	ScaleEffect effect;
-	Vector2D startScale, endScale;
-
+class ESPParticleScaleEffector : public ESPEffector {
 public:
-
-	ESPParticleScaleEffector(const Vector2D& startScale, const Vector2D& endScale);
-	ESPParticleScaleEffector(float startScale, float endScale);
-	ESPParticleScaleEffector(const ScaleEffect& effect);
-	~ESPParticleScaleEffector();
+    ESPParticleScaleEffector(const Vector2D& startScale, const Vector2D& endScale);
+    ESPParticleScaleEffector(float startScale, float endScale);
+    ESPParticleScaleEffector(const ScaleEffect& effect);
+    ESPParticleScaleEffector(const ESPParticleScaleEffector& copy);
+    ~ESPParticleScaleEffector();
 
     const Vector2D& GetEndScale() const {
         return this->endScale;
@@ -75,6 +76,33 @@ public:
         this->effect.isInit = true;
     }
 
-	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectBeamOnTick(double dT, ESPBeam* beam);
+
+    ESPEffector* Clone() const;
+
+    ESPParticleScaleEffector& operator=(const ESPParticleScaleEffector& copy);
+
+private:
+    ESPParticleScaleEffector() {}
+
+	ScaleEffect effect;
+	Vector2D startScale, endScale;
 };
+
+inline ESPParticleScaleEffector::ESPParticleScaleEffector(const ESPParticleScaleEffector& copy) {
+    *this = copy;
+}
+
+inline ESPEffector* ESPParticleScaleEffector::Clone() const {
+    return new ESPParticleScaleEffector(*this);
+}
+
+inline ESPParticleScaleEffector& ESPParticleScaleEffector::operator=(const ESPParticleScaleEffector& copy) {
+    this->effect = copy.effect;
+    this->startScale = copy.startScale;
+    this->endScale = copy.endScale;
+    return *this;
+}
+
 #endif

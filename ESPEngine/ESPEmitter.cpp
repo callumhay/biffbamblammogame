@@ -39,7 +39,7 @@
 
 #include "../BlammoEngine/TextLabel.h"
 
-ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), particleTexture(NULL),
+ESPEmitter::ESPEmitter() : ESPAbstractEmitter(), timeSinceLastSpawn(0.0f), particleTexture(NULL),
 particleAlignment(ESP::ScreenAlignedGlobalUpVec), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
 isReversed(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),
@@ -52,8 +52,9 @@ radiusDeviationFromPtX(0.0), radiusDeviationFromPtY(0.0), radiusDeviationFromPtZ
 ESPEmitter::~ESPEmitter() {
 	this->Flush();
 	
-	// Clear the effectors
-	this->effectors.clear();
+	// Clear the effectors, delete the ones owned by this
+    this->ClearEffectors();
+
 	// Clear the event handlers
 	this->eventHandlers.clear();
 }
@@ -201,8 +202,10 @@ void ESPEmitter::TickParticles(double dT) {
 			currParticle->Tick(dT);
 
 			// Have each of the effectors in this emitter affect the particle...
-			for (std::list<ESPParticleEffector*>::iterator effIter = this->effectors.begin(); effIter != this->effectors.end(); ++effIter) {
-				(*effIter)->AffectParticleOnTick(dT, currParticle);
+            for (std::list<std::pair<ESPEffector*, bool> >::iterator effIter = this->effectors.begin(); 
+                 effIter != this->effectors.end(); ++effIter) {
+
+				effIter->first->AffectParticleOnTick(dT, currParticle);
 			}
 		}
 
@@ -766,9 +769,13 @@ void ESPEmitter::SetParticleDeathPlane(const Plane& plane) {
 /**
  * Adds a particle effector to this emitter.
  */
-void ESPEmitter::AddEffector(ESPParticleEffector* effector) {
+void ESPEmitter::AddEffector(ESPEffector* effector) {
 	assert(effector != NULL);
-	this->effectors.push_back(effector);
+    this->effectors.push_back(std::make_pair(effector, false));
+}
+
+void ESPEmitter::AddCopiedEffector(const ESPEffector& effector) {
+    this->effectors.push_back(std::make_pair(effector.Clone(), true));
 }
 
 // TODO: Get rid of this function, replace with set particle for onomatopiea effects!!!
@@ -780,15 +787,16 @@ void ESPEmitter::AddParticle(ESPParticle* particle) {
 	this->particleLivesLeft[particle] = this->numParticleLives;
 }
 
-/**
- * Removes a previously added particle effector from this emitter.
- */
-void ESPEmitter::RemoveEffector(ESPParticleEffector* const effector) {
-	assert(effector != NULL);
-	this->effectors.remove(effector);
-}
-
 void ESPEmitter::ClearEffectors() {
+    for (std::list<std::pair<ESPEffector*, bool> >::iterator iter = this->effectors.begin(); 
+         iter != this->effectors.end(); ++iter) {
+
+        if (iter->second) {
+            ESPEffector* effector = iter->first;
+            delete effector;
+            effector = NULL;
+        }
+    }
     this->effectors.clear();
 }
 

@@ -76,11 +76,14 @@ public:
 	void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block);
     void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet);
     void ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);
+    void ProjectileBallCollisionEvent(const Projectile& projectile, const GameBall& ball);
 	void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle, bool hitPaddleUnderside);
     void BallBossCollisionEvent(GameBall& ball, const Boss& boss, const BossBodyPart& bossPart);
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
+    void ProjectilePortalProjectileTeleportEvent(const Projectile& projectile, const PortalProjectile& enterPortalProjectile);
+    void BallPortalProjectileTeleportEvent(const GameBall& ball, const PortalProjectile& enterPortalProjectile);
 	void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal);
     void ItemPortalBlockTeleportEvent(const GameItem& item, const PortalBlock& enterPortal);
 	void BallEnteredCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock, bool canShootWithoutObstruction);
@@ -224,9 +227,14 @@ private:
     SoundID fallingItemSoundID;
 
 	void DestroyBallSafetyNet(const Point2D& pt, bool bottomSafetyNet);
+    void DoBallTeleportation(const GameBall& ball, const Point2D& enterPt, 
+        const Point2D& exitPt, const Colour& portalColour);
+    void DoProjectileTeleportation(const Projectile& projectile, const Point2D& enterPortalCenter, 
+        const Point2D& exitPortalCenter, const Colour& portalColour);
 
 	static void GetEffectsForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,
         float& shakeLength, BBBGameController::VibrateAmount& controllerVibeAmt);
+
 };
 
 #endif

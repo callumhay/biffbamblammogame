@@ -29,8 +29,10 @@
 
 #include "ESPPointToPointBeam.h"
 #include "ESPBeam.h"
+#include "ESPEffector.h"
 
-ESPPointToPointBeam::ESPPointToPointBeam() : startPt(0,0,0), endPt(0,0,0), colour(1,1,1,1), /*texture(NULL),*/
+ESPPointToPointBeam::ESPPointToPointBeam() : ESPAbstractEmitter(), 
+startPt(0,0,0), endPt(0,0,0), colour(1,1,1,1), depthEnabled(true),/*texture(NULL),*/
 numMainESPBeamSegments(10), numBeamsShot(0), timeSinceLastBeamSpawn(0.0), timeUntilNextBeamSpawn(0.0), 
 mainBeamAmplitude(ESPInterval(0.0f)), mainBeamThickness(ESPInterval(1.0f)) {
 	// By default there is a single beam shot that lasts forever
@@ -47,6 +49,8 @@ ESPPointToPointBeam::~ESPPointToPointBeam() {
 		beam = NULL;
 	}
 	this->aliveBeams.clear();
+
+    this->ClearEffectors();
 }
 
 void ESPPointToPointBeam::Tick(double dT) {
@@ -61,13 +65,23 @@ void ESPPointToPointBeam::Tick(double dT) {
 	// Go through each beam to check if it's life has expired yet
 	for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end();) {
 		ESPBeam* currBeam = *iter;
-		currBeam->Tick(dT);
+		
+
 		if (currBeam->IsDead()) {
 			delete currBeam;
 			currBeam = NULL;
 			iter = this->aliveBeams.erase(iter);
 		}
 		else {
+            currBeam->Tick(dT);
+
+            // Affect the beam with the various effectors...
+            for (std::list<ESPEffector*>::const_iterator effectorIter = this->effectors.begin(); 
+                 effectorIter != this->effectors.end(); ++effectorIter) {
+
+                (*effectorIter)->AffectBeamOnTick(dT, currBeam);
+            }
+
 			++iter;
 		}
 	}
@@ -78,9 +92,14 @@ void ESPPointToPointBeam::Tick(double dT) {
 void ESPPointToPointBeam::Draw(const Camera& camera) {
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
 	
-    glEnable(GL_DEPTH_TEST);
+    if (this->depthEnabled) {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else {
+        glDisable(GL_DEPTH_TEST);
+    }
     glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glPushMatrix();
 	glTranslatef(this->startPt[0], this->startPt[1], this->startPt[2]);
@@ -96,6 +115,19 @@ void ESPPointToPointBeam::Draw(const Camera& camera) {
 	glPopAttrib();
 
 	debug_opengl_state();
+}
+
+void ESPPointToPointBeam::AddCopiedEffector(const ESPEffector& effector) {
+    this->effectors.push_back(effector.Clone());
+}
+
+void ESPPointToPointBeam::ClearEffectors() {
+    for (std::list<ESPEffector*>::iterator iter = this->effectors.begin(); iter != this->effectors.end(); ++iter) {
+        ESPEffector* effector = *iter;
+        delete effector;
+        effector = NULL;
+    }
+    this->effectors.clear();
 }
 
 void ESPPointToPointBeam::SpawnBeam() {
@@ -121,7 +153,8 @@ void ESPPointToPointBeam::SpawnBeam() {
 	float avgSegLength = beamLength / this->numMainESPBeamSegments;
 	float fractionAvgSegLength = BEAM_LINE_DIST_VARIATION_FRACTION * avgSegLength;
 
-	ESPBeam* newBeam = new ESPBeam(beamVec, orthToBeamVec, this->mainBeamAmplitude, ESPInterval(-fractionAvgSegLength, fractionAvgSegLength));
+	ESPBeam* newBeam = new ESPBeam(this->colour, beamVec, orthToBeamVec, 
+        this->mainBeamAmplitude, ESPInterval(-fractionAvgSegLength, fractionAvgSegLength));
 	ESPBeamSegment* currESPBeamSegment = newBeam->GetStartSegment();
 	assert(currESPBeamSegment != NULL);
 	

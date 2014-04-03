@@ -101,6 +101,8 @@ private:
 		this->material = material;
 	}
 
+    void BuildDisplayList();
+
 public:
 	MaterialGroup(CgFxAbstractMaterialEffect* mat) : material(mat), displayListID(0), polyGrp(NULL) {}
 	
@@ -127,6 +129,7 @@ public:
 		}
 		this->polyGrp = polyGrp;
 	}
+    void ResetDisplayList();
 
 	void SetDisplayListID(GLuint dispListID) {
 		this->displayListID = dispListID;

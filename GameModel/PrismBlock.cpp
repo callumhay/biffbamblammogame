@@ -275,6 +275,9 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			// Extinguish the projectile, no effect on this block
 			break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;

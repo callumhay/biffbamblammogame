@@ -82,6 +82,10 @@ protected:
     void SetMoveToTargetPosition(const Point2D& startPos, const Point2D& targetPos, float targetError = DEFAULT_TARGET_ERROR);
     bool MoveToTargetPosition(float maxMoveSpd);
 
+    // Misc. Helper Functions    
+    static void GetFurthestDistFromBossPositions(const Point2D& currBossPos, const std::vector<Point2D>& positions, 
+        int numPositionsToChoose, std::vector<Point2D>& result);
+
 private:
     Point2D startPosition;   // The position the boss started in before its current movement
     Point2D targetPosition;  // The position the boss is moving towards

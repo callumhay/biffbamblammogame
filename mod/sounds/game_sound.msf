@@ -191,7 +191,7 @@ WorldBackgroundLoop {
 // Futurism ******************************************************************
 WorldBackgroundLoop {
 	world = Futurism
-	file  =
+	file  = resources/FuturismWorldBackgroundLoop.ogg
 }
 
 // Dada-Surrealism ***********************************************************
@@ -486,6 +486,9 @@ PaddleCollateralBlockCollisionEvent {
 	file = resources/PaddleCollateralBlockCollisionEvent.ogg
 }
 
+PortalProjectileOpenedEvent {
+	file = NOT_IMPLEMENTED
+}
 
 // Game Item Events **********************************************************
 
@@ -546,6 +549,7 @@ ItemMovingLoop {
 BossFadeInIntroEvent {
 	file = resources/BossFadeInIntroEvent.ogg
 }
+
 BossBackgroundLoop {
 	world = Classical
 	file = resources/BossClassicalWorldBackgroundLoop.ogg	
@@ -562,6 +566,11 @@ BossBackgroundLoop {
 	world = Deco
 	file = resources/BossDecoWorldBackgroundLoop.ogg	
 }
+BossBackgroundLoop {
+	world = Futurism
+	file = resources/BossFuturismWorldBackgroundLoop.ogg	
+}
+
 // TODO: Change back to resources/BossBackgroundLoopTransition.ogg
 BossBackgroundLoopTransition {
 	file = resources/BossBackgroundLoopTransitionSingleHitEvent.ogg
@@ -570,6 +579,7 @@ BossBackgroundLoopTransition {
 BossBackgroundLoopTransitionSingleHitEvent {
 	file = TODO
 }
+
 BossAngryBackgroundLoop {
 	world = Classical
 	file = resources/BossAngryClassicalWorldBackgroundLoop.ogg
@@ -586,6 +596,11 @@ BossAngryBackgroundLoop {
 	world = Deco
 	file = resources/BossAngryDecoWorldBackgroundLoop.ogg
 }
+BossAngryBackgroundLoop {
+	world = Futurism
+	file = resources/BossAngryFuturismWorldBackgroundLoop.ogg
+}
+
 BossGlowEvent {
 	file = resources/BossGlowEvent.ogg
 }

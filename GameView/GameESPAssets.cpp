@@ -29,11 +29,13 @@
 
 #include "GameESPAssets.h"
 #include "GameFontAssetsManager.h"
+#include "PersistentTextureManager.h"
 #include "GameViewConstants.h"
 #include "BallSafetyNetMesh.h"
 #include "RegenBlockMesh.h"
 #include "CgFXFireBallEffect.h"
 #include "PointsHUD.h"
+#include "PortalBlockMesh.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameLevel.h"
@@ -54,10 +56,13 @@
 #include "../GameModel/PaddleMineProjectile.h"
 #include "../GameModel/PaddleFlameBlasterProjectile.h"
 #include "../GameModel/PaddleIceBlasterProjectile.h"
+#include "../GameModel/PortalProjectile.h"
 #include "../GameModel/PuffOfSmokeEffectInfo.h"
 #include "../GameModel/ShockwaveEffectInfo.h"
 #include "../GameModel/DebrisEffectInfo.h"
 #include "../GameModel/ShortCircuitEffectInfo.h"
+#include "../GameModel/PortalSpawnEffectInfo.h"
+#include "../GameModel/GenericEmitterEffectInfo.h"
 
 #include "../GameSound/GameSound.h"
 
@@ -85,6 +90,7 @@ flashColourFader(ColourRGBA(1,1,1,1), ColourRGBA(GameViewConstants::GetInstance(
 iceOriginColourEffector(ColourRGBA(0.75f, 0.85f, 1.0f, 1.0f), ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 0.0f)),
 starColourFlasher(),
 fireOriginColourEffector(),
+particleFastFadeInFadeOut(),
 
 particleShrinkToNothing(1, 0),
 particlePulseUberballAura(0, 0),
@@ -103,6 +109,8 @@ particleSuperGrowth(1.0f, 5.0f),
 particleMediumShrink(1.0f, 0.25f),
 particleLargeVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 4.0f)),
 particleMedVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 3.0f)),
+particleLargeVShrink(Vector2D(1.0f, 5.0f), Vector2D(1.0f, 0.1f)),
+haloExpandPulse(1.0f, 1.5f),
 
 beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameModelConstants::GetInstance()->PADDLE_LASER_BEAM_COLOUR, 0.8f)),
 slowBallColourFader(ColourRGBA(0.12f, 0.72f, 0.94f, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.15f)),
@@ -141,50 +149,11 @@ loopRotateEffectorCCW(90.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 moderateSpdLoopRotateEffectorCW(180.0f, ESPParticleRotateEffector::CLOCKWISE),
 moderateSpdLoopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 
-cleanCircleGradientTex(NULL),
-circleGradientTex(NULL), 
-starTex(NULL), 
-starOutlineTex(NULL),
-evilStarTex(NULL),
-explosionTex(NULL),
-explosionRayTex(NULL),
-laserBeamTex(NULL),
-upArrowTex(NULL),
-ballTex(NULL),
-circleTargetTex(NULL),
-haloTex(NULL),
-lensFlareTex(NULL),
-sparkleTex(NULL),
-spiralTex(NULL),
-sideBlastTex(NULL),
-hugeExplosionTex(NULL),
-bubblyExplosionTex(NULL),
-cloudRayExplosionTex(NULL),
-lightningBoltTex(NULL),
-sphereNormalsTex(NULL),
-cloudNormalTex(NULL),
-vapourTrailTex(NULL),
-heartTex(NULL),
-chevronTex(NULL),
-infinityTex(NULL),
-circleTex(NULL),
-outlinedHoopTex(NULL),
-dropletTex(NULL),
-flareTex(NULL),
-happyFaceTex(NULL),
-neutralFaceTex(NULL),
-sadFaceTex(NULL),
-plusTex(NULL),
-plusOutlineTex(NULL),
-xTex(NULL),
-xOutlineTex(NULL),
-lightningAnimTex(NULL),
-leftHalfBrokenPadlockTex(NULL),
-rightHalfBrokenPadlockTex(NULL),
-
 fragileCannonBarrelMesh(NULL),
 fragileCannonBasePostMesh(NULL),
-fragileCannonBaseBarMesh(NULL)
+fragileCannonBaseBarMesh(NULL),
+
+portalMesh(NULL)
 {
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -198,66 +167,13 @@ GameESPAssets::~GameESPAssets() {
     bool removed = false;
     UNUSED_VARIABLE(removed);
 
-	// Delete any effect textures
-	for (std::vector<Texture2D*>::iterator iter = this->bangTextures.begin();
-		iter != this->bangTextures.end(); ++iter) {
-		
-		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);	
-	}
 	this->bangTextures.clear();
-
-	for (std::vector<Texture2D*>::iterator iter = this->splatTextures.begin();
-		iter != this->splatTextures.end(); ++iter) {
-		
-		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);	
-	}
 	this->splatTextures.clear();
-
-	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
-		iter != this->smokeTextures.end(); ++iter) {
-		
-		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);	
-	}
 	this->smokeTextures.clear();
-
-	for (std::vector<Texture2D*>::iterator iter = this->snowflakeTextures.begin();
-		iter != this->snowflakeTextures.end(); ++iter) {
-		
-		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);	
-	}
 	this->snowflakeTextures.clear();
-	
-	for (std::vector<Texture2D*>::iterator iter = this->boltTextures.begin();
-		iter != this->boltTextures.end(); ++iter) {
-
-		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);
-	}
 	this->boltTextures.clear();
-
-	for (std::vector<Texture2D*>::iterator iter = this->rockTextures.begin(); iter != this->rockTextures.end(); ++iter) {
-
-		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);
-	}
 	this->rockTextures.clear();
-
-    for (std::vector<Texture2D*>::iterator iter = this->cloudTextures.begin(); iter != this->cloudTextures.end(); ++iter) {
-
-        removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-        assert(removed);
-    }
     this->cloudTextures.clear();
-
-    for (std::vector<Texture2D*>::iterator iter = this->fireGlobTextures.begin(); iter != this->fireGlobTextures.end(); ++iter) {
-
-        removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-        assert(removed);
-    }
     this->fireGlobTextures.clear();
 
 	for (std::vector<CgFxFireBallEffect*>::iterator iter = this->moltenRockEffects.begin(); iter != this->moltenRockEffects.end(); ++iter) {
@@ -268,92 +184,6 @@ GameESPAssets::~GameESPAssets() {
 	this->moltenRockEffects.clear();
 
 
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cleanCircleGradientTex);
-    assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGradientTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starOutlineTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->evilStarTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->explosionTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->explosionRayTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->laserBeamTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->upArrowTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleTargetTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sideBlastTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->hugeExplosionTex);
-	assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->bubblyExplosionTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudRayExplosionTex);
-    assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningBoltTex);
-	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
-	assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudNormalTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->vapourTrailTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->heartTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->chevronTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->infinityTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->outlinedHoopTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->dropletTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
-    assert(removed);
-
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->happyFaceTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->neutralFaceTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sadFaceTex);
-    assert(removed);
-
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->plusTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->plusOutlineTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->xTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->xOutlineTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
-    assert(removed);
-
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->leftHalfBrokenPadlockTex);
-    assert(removed);
-    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->rightHalfBrokenPadlockTex);
-    assert(removed);
-
-   
-
     // Clean up any meshes
     removed = ResourceManager::GetInstance()->ReleaseMeshResource(this->fragileCannonBarrelMesh);
     assert(removed);
@@ -361,6 +191,10 @@ GameESPAssets::~GameESPAssets() {
     assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseMeshResource(this->fragileCannonBasePostMesh);
     assert(removed);
+
+    // NOTE: Not necessary to remove the portal mesh resource -- it's maintained
+    //removed = ResourceManager::GetInstance()->ReleaseMeshResource(this->portalMesh);
+    //assert(removed);
 
     UNUSED_VARIABLE(removed);
 
@@ -403,7 +237,7 @@ GameESPAssets::~GameESPAssets() {
 void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
 	
     // Delete any leftover emitters
-	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
+	for (std::list<ESPAbstractEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
 		iter != this->activeGeneralEmitters.end(); ++iter) {
 			delete *iter;
 			*iter = NULL;
@@ -446,6 +280,7 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
 	    // Clear projectile emitters
         this->RemoveAllProjectileEffectsFromMap(this->activeProjectileEmitters);
         this->RemoveAllProjectileEffectsFromMap(this->activeBlasterProjectileEffects);
+        this->RemoveAllProjectileEffectsFromMap(this->activePostProjectileEmitters);
     }
 
 	// Clear beam emitters
@@ -606,100 +441,69 @@ void GameESPAssets::InitESPTextures() {
 	// Initialize bang textures (big boom thingys when there are explosions)
 	if (this->bangTextures.empty()) {
 		this->bangTextures.reserve(3);
-		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->bangTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture::Trilinear));
-		assert(temp != NULL);
-		this->bangTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture::Trilinear));
-		assert(temp != NULL);
-		this->bangTextures.push_back(temp);
+		this->bangTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BANG1));
+        this->bangTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BANG2));
+        this->bangTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BANG3));
 	}
 	
 	// Initialize splat textures (splatty thingys when ink blocks and other messy, gooey things explode)
 	if (this->splatTextures.empty()) {
 		this->splatTextures.reserve(1);
-		Texture2D* temp =  static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPLAT1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->splatTextures.push_back(temp);
+		this->splatTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SPLAT1));
 	}
 
-	// Initialize smoke textures (cartoony puffs of smoke)
+	// Initialize smoke textures (cartoon-ey puffs of smoke)
 	if (this->smokeTextures.empty()) {
 		this->smokeTextures.reserve(NUM_SMOKE_TEXTURES);
-		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);	
+        this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE1));
+        this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE2));
+        this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE3));
+        this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE4));
+        this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE5));
+        this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE6));	
 	}
 
 	// Initialize all the snowflake textures
 	if (this->snowflakeTextures.empty()) {
 		this->snowflakeTextures.reserve(3);
-		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->snowflakeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE2, Texture::Trilinear));
-		assert(temp != NULL);
-		this->snowflakeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE3, Texture::Trilinear));
-		assert(temp != NULL);
-		this->snowflakeTextures.push_back(temp);
+        this->snowflakeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE1));
+        this->snowflakeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE2));
+        this->snowflakeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE3));
 	}
 
     if (this->boltTextures.empty()) {
         this->boltTextures.reserve(5);
-        Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT1, Texture::Trilinear));
-        assert(temp != NULL);
-        this->boltTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT2, Texture::Trilinear));
-        assert(temp != NULL);
-        this->boltTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT3, Texture::Trilinear));
-        assert(temp != NULL);
-        this->boltTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT4, Texture::Trilinear));
-        assert(temp != NULL);
-        this->boltTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOLT5, Texture::Trilinear));
-        assert(temp != NULL);
-        this->boltTextures.push_back(temp);
+        this->boltTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BOLT1));
+        this->boltTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BOLT2));
+        this->boltTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BOLT3));
+        this->boltTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BOLT4));
+        this->boltTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BOLT5));
     }
 
 	// Initialize all rock textures
 	if (this->rockTextures.empty()) {
 		this->rockTextures.reserve(5);
-		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->rockTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK2, Texture::Trilinear));
-		assert(temp != NULL);
-		this->rockTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK3, Texture::Trilinear));
-		assert(temp != NULL);
-		this->rockTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK4, Texture::Trilinear));
-		assert(temp != NULL);
-		this->rockTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK5, Texture::Trilinear));
-		assert(temp != NULL);
-		this->rockTextures.push_back(temp);
+        this->rockTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_ROCK1));
+        this->rockTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_ROCK2));
+        this->rockTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_ROCK3));
+        this->rockTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_ROCK4));
+        this->rockTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_ROCK5));
 	}
+
+    if (this->cloudTextures.empty()) {
+        this->cloudTextures.reserve(3);
+        this->cloudTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD1));
+        this->cloudTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD2));
+        this->cloudTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD3));
+    }
+
+    if (this->fireGlobTextures.empty()) {
+        this->fireGlobTextures.reserve(3);
+        this->fireGlobTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB1));
+        this->fireGlobTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB2));
+        this->fireGlobTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB3));
+    }
+
 	// Initialize all of the molten rock effects with the rock textures as masks
 	if (this->moltenRockEffects.empty()) {
 		assert(!this->rockTextures.empty());
@@ -715,250 +519,45 @@ void GameESPAssets::InitESPTextures() {
 		}
 	}
 
-    if (this->cleanCircleGradientTex == NULL) {
-        this->cleanCircleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
-		assert(this->cleanCircleGradientTex != NULL);
-    }
-	if (this->circleGradientTex == NULL) {
-		this->circleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
-		assert(this->circleGradientTex != NULL);
-	}
-	if (this->starTex == NULL) {
-		this->starTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear));
-		assert(this->starTex != NULL);	
-	}
-	if (this->starOutlineTex == NULL) {
-		this->starOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear));
-		assert(this->starOutlineTex != NULL);
-	}
-	if (this->evilStarTex == NULL) {
-		this->evilStarTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR, Texture::Trilinear));
-		assert(this->evilStarTex != NULL);	
-	}
-	if (this->explosionTex == NULL) {
-		this->explosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear));
-		assert(this->explosionTex != NULL);
-	}
-	if (this->explosionRayTex == NULL) {
-		this->explosionRayTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear));
-		assert(this->explosionRayTex != NULL);
-	}
-	if (this->laserBeamTex == NULL) {
-		this->laserBeamTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear));
-		assert(this->laserBeamTex != NULL);
-	}
-	if (this->upArrowTex == NULL) {
-		this->upArrowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear));
-		assert(this->upArrowTex != NULL);
-	}
-	if (this->ballTex == NULL) {
-		this->ballTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_SPHERE, Texture::Trilinear));
-		assert(this->ballTex != NULL);
-	}
-	if (this->circleTargetTex == NULL) {
-		this->circleTargetTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CIRCLE_TARGET, Texture::Trilinear));
-		assert(this->circleTargetTex != NULL);
-	}
-	if (this->haloTex == NULL) {
-		this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
-		assert(this->haloTex != NULL);
-	}
-	if (this->lensFlareTex == NULL) {
-		this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
-		assert(this->lensFlareTex != NULL);
-	}
-	if (this->sparkleTex == NULL) {
-		this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
-		assert(this->sparkleTex != NULL);
-	}
-	if (this->spiralTex == NULL) {
-		this->spiralTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL, Texture::Trilinear));
-		assert(this->spiralTex != NULL);
-	}
-	if (this->sideBlastTex == NULL) {
-		this->sideBlastTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST, Texture::Trilinear));
-		assert(this->sideBlastTex != NULL);
-	}
-	if (this->hugeExplosionTex == NULL) {
-		this->hugeExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
-		assert(this->hugeExplosionTex != NULL);
-	}
-    if (this->bubblyExplosionTex == NULL) {
-        this->bubblyExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_BUBBLY_EXPLOSION, Texture::Trilinear));
-		assert(this->bubblyExplosionTex != NULL);
-    }
-    if (this->cloudRayExplosionTex == NULL) {
-        this->cloudRayExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CLOUD_RAY_EXPLOSION, Texture::Trilinear));
-        assert(this->cloudRayExplosionTex != NULL);
-    }
-	if (this->lightningBoltTex == NULL) {
-		this->lightningBoltTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT, Texture::Trilinear));
-		assert(this->lightningBoltTex != NULL);
-	}
-	if (this->sphereNormalsTex == NULL) {
-		this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
-		assert(this->sphereNormalsTex != NULL);
-	}
-	//if (this->rectPrismTexture != NULL) {
-	//	this->rectPrismTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-    //GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
-	//	assert(this->rectPrismTexture != NULL);
-	//}	
-    if (this->cloudTextures.empty()) {
-        this->cloudTextures.reserve(3);
-        Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CLOUD1, Texture::Trilinear));
-        assert(temp != NULL);
-        this->cloudTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CLOUD2, Texture::Trilinear));
-        assert(temp != NULL);
-        this->cloudTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CLOUD3, Texture::Trilinear));
-        assert(temp != NULL);
-        this->cloudTextures.push_back(temp);
-    }
-    if (this->fireGlobTextures.empty()) {
-        this->fireGlobTextures.reserve(3);
-        Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB1, Texture::Trilinear));
-        assert(temp != NULL);
-        this->fireGlobTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB2, Texture::Trilinear));
-        assert(temp != NULL);
-        this->fireGlobTextures.push_back(temp);
-        temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB3, Texture::Trilinear));
-        assert(temp != NULL);
-        this->fireGlobTextures.push_back(temp);
-        //temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        //    GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB4, Texture::Trilinear));
-        //assert(temp != NULL);
-        //this->fireGlobTextures.push_back(temp);
-    }
-
-    if (this->cloudNormalTex == NULL) {
-        this->cloudNormalTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_NORMAL_CLOUD, Texture::Trilinear));
-        assert(this->cloudNormalTex != NULL);
-    }
-    if (this->vapourTrailTex == NULL) {
-        this->vapourTrailTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL, Texture::Trilinear));
-        assert(this->vapourTrailTex != NULL);
-    }
-    if (this->heartTex == NULL) {
-        this->heartTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_HEART, Texture::Trilinear));
-        assert(this->heartTex != NULL);
-    }
-    if (this->chevronTex == NULL) {
-        this->chevronTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CHEVRON, Texture::Trilinear));
-        assert(this->chevronTex != NULL);
-    }
-    if (this->infinityTex == NULL) {
-        this->infinityTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR, Texture::Trilinear));
-        assert(this->infinityTex != NULL);
-    }
-    if (this->circleTex == NULL) {
-        this->circleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_CIRCLE, Texture::Trilinear));
-        assert(this->circleTex != NULL);
-    }
-    if (this->outlinedHoopTex == NULL) {
-        this->outlinedHoopTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP, Texture::Trilinear));
-        assert(this->outlinedHoopTex != NULL);
-    }
-    if (this->dropletTex == NULL) {
-        this->dropletTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_DROPLET, Texture::Trilinear));
-        assert(this->dropletTex != NULL);
-    }
-    if (this->flareTex == NULL) {
-        this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE, Texture::Trilinear));
-        assert(this->flareTex != NULL);
-    }
-
-    if (this->happyFaceTex == NULL) {
-        this->happyFaceTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_HAPPY_FACE, Texture::Trilinear));
-        assert(this->happyFaceTex != NULL);
-    }
-    if (this->neutralFaceTex == NULL) {
-        this->neutralFaceTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_NEUTRAL_FACE, Texture::Trilinear));
-        assert(this->neutralFaceTex != NULL);
-    }
-    if (this->sadFaceTex == NULL) {
-        this->sadFaceTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_SAD_FACE, Texture::Trilinear));
-        assert(this->sadFaceTex != NULL);
-    }
-
-    if (this->plusTex == NULL) {
-        this->plusTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_PLUS, Texture::Trilinear));
-        assert(this->plusTex != NULL);
-    }
-    if (this->plusOutlineTex == NULL) {
-        this->plusOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_OUTLINED_PLUS, Texture::Trilinear));
-        assert(this->plusOutlineTex != NULL);
-    }
-    if (this->xTex == NULL) {
-        this->xTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_X, Texture::Trilinear));
-        assert(this->xTex != NULL);
-    }
-    if (this->xOutlineTex == NULL) {
-        this->xOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_OUTLINED_X, Texture::Trilinear));
-        assert(this->xOutlineTex != NULL);
-    }
-
-    if (this->lightningAnimTex == NULL) {
-        this->lightningAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION, Texture::Trilinear));
-        assert(this->lightningAnimTex != NULL);
-    }
-
-    if (this->leftHalfBrokenPadlockTex == NULL) {
-        this->leftHalfBrokenPadlockTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_PADLOCK_BROKEN_LEFT, Texture::Trilinear));
-        assert(this->leftHalfBrokenPadlockTex != NULL);
-    }
-    if (this->rightHalfBrokenPadlockTex == NULL) {
-        this->rightHalfBrokenPadlockTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-            GameViewConstants::GetInstance()->TEXTURE_PADLOCK_BROKEN_RIGHT, Texture::Trilinear));
-        assert(this->rightHalfBrokenPadlockTex != NULL);
-    }
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_STAR);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SPHERE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_TARGET);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_HALO);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SPARKLE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BUBBLY_EXPLOSION);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD_RAY_EXPLOSION);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_NORMAL_CLOUD);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_HEART);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CHEVRON);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CIRCLE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_DROPLET);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_HAPPY_FACE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_NEUTRAL_FACE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SAD_FACE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_PLUS);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_PLUS);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_X);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_X);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_PADLOCK_BROKEN_LEFT);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_PADLOCK_BROKEN_RIGHT);
 
 	debug_opengl_state();
 }
@@ -969,21 +568,21 @@ void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effects
 
 	// Set up the uberball emitters...
 	ESPPointEmitter* uberBallEmitterAura = new ESPPointEmitter();
-	uberBallEmitterAura->SetSpawnDelta(ESPInterval(-1));
+	uberBallEmitterAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	uberBallEmitterAura->SetInitialSpd(ESPInterval(0));
-	uberBallEmitterAura->SetParticleLife(ESPInterval(-1));
+	uberBallEmitterAura->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	uberBallEmitterAura->SetParticleSize(ESPInterval(1.5f));
 	uberBallEmitterAura->SetEmitAngleInDegrees(0);
 	uberBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	uberBallEmitterAura->SetParticleAlignment(ESP::ScreenAligned);
 	uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
-	uberBallEmitterAura->SetParticleColour(ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.R()), 
-																				 ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.G()), 
-																				 ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.B()), 
-																			   ESPInterval(0.75f));
+	uberBallEmitterAura->SetParticleColour(
+        ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.R()), 
+        ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.G()), 
+        ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.B()), ESPInterval(0.75f));
 	uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
-	bool result = uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
-	assert(result);
+	uberBallEmitterAura->SetParticles(1, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	ESPPointEmitter* uberBallEmitterTrail = new ESPPointEmitter();
 	uberBallEmitterTrail->SetSpawnDelta(ESPInterval(0.005f));
@@ -996,9 +595,9 @@ void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effects
 	uberBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
 	uberBallEmitterTrail->AddEffector(&this->particleFaderUberballTrail);
 	uberBallEmitterTrail->AddEffector(&this->particleShrinkToNothing);
-	result = uberBallEmitterTrail->SetParticles(GameESPAssets::NUM_UBER_BALL_TRAIL_PARTICLES, this->circleGradientTex);
-	assert(result);
-	
+	uberBallEmitterTrail->SetParticles(GameESPAssets::NUM_UBER_BALL_TRAIL_PARTICLES, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
+
 	effectsList.push_back(uberBallEmitterTrail);
 	effectsList.push_back(uberBallEmitterAura);
 }
@@ -1012,10 +611,10 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	ghostBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
 	ghostBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
 	ghostBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
-	ghostBallEmitterTrail->SetParticleColour(ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.R()), 
-																					 ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.G()), 
-																					 ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.B()), 
-																					 ESPInterval(1.0f));
+	ghostBallEmitterTrail->SetParticleColour(
+        ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.R()), 
+        ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.G()), 
+        ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.B()), ESPInterval(1.0f));
 
 	ghostBallEmitterTrail->SetEmitAngleInDegrees(20);
 	ghostBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -1023,9 +622,7 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	ghostBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
 	ghostBallEmitterTrail->AddEffector(&this->particleFader);
 	ghostBallEmitterTrail->AddEffector(&this->ghostBallAccel1);
-	bool result = ghostBallEmitterTrail->SetParticles(GameESPAssets::NUM_GHOST_SMOKE_PARTICLES, &this->ghostBallSmoke);
-    UNUSED_VARIABLE(result);
-	assert(result);
+	ghostBallEmitterTrail->SetParticles(GameESPAssets::NUM_GHOST_SMOKE_PARTICLES, &this->ghostBallSmoke);
 
 	effectsList.push_back(ghostBallEmitterTrail);
 }
@@ -1062,9 +659,9 @@ void GameESPAssets::AddIceBallESPEffects(const GameBall* ball, std::vector<ESPPo
 	bool result = false;
 	
 	ESPPointEmitter* iceBallEmitterAura = new ESPPointEmitter();
-	iceBallEmitterAura->SetSpawnDelta(ESPInterval(-1));
+	iceBallEmitterAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	iceBallEmitterAura->SetInitialSpd(ESPInterval(0));
-	iceBallEmitterAura->SetParticleLife(ESPInterval(-1));
+	iceBallEmitterAura->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	iceBallEmitterAura->SetParticleSize(ESPInterval(1.5f));
 	iceBallEmitterAura->SetEmitAngleInDegrees(0);
 	iceBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -1076,7 +673,7 @@ void GameESPAssets::AddIceBallESPEffects(const GameBall* ball, std::vector<ESPPo
                                           ESPInterval(1.0f));
 	iceBallEmitterAura->AddEffector(&this->particlePulseIceBallAura);
 	iceBallEmitterAura->AddEffector(&this->loopRotateEffectorCW);
-	result = iceBallEmitterAura->SetParticles(1, this->circleGradientTex);
+	result = iceBallEmitterAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);
 	effectsList.push_back(iceBallEmitterAura);
 
@@ -1091,7 +688,7 @@ void GameESPAssets::AddIceBallESPEffects(const GameBall* ball, std::vector<ESPPo
 	sparklesEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.75f * ball->GetBounds().Radius()));
 	sparklesEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
 	sparklesEmitterTrail->AddEffector(&this->gravity);
-	result = sparklesEmitterTrail->SetParticles(11, this->sparkleTex);
+	result = sparklesEmitterTrail->SetParticles(11, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 	assert(result);
 	effectsList.push_back(sparklesEmitterTrail);	
 	
@@ -1169,9 +766,9 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 
     assert(this->crazyBallAura == NULL);
 	this->crazyBallAura = new ESPPointEmitter();
-	this->crazyBallAura->SetSpawnDelta(ESPInterval(-1));
+	this->crazyBallAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	this->crazyBallAura->SetInitialSpd(ESPInterval(0));
-	this->crazyBallAura->SetParticleLife(ESPInterval(-1));
+	this->crazyBallAura->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	this->crazyBallAura->SetParticleSize(ESPInterval(1.5f));
 	this->crazyBallAura->SetEmitAngleInDegrees(0);
 	this->crazyBallAura->SetParticleAlignment(ESP::ScreenAligned);
@@ -1179,7 +776,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->crazyBallAura->SetEmitPosition(Point3D(0, 0, 0));
 	this->crazyBallAura->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
 	this->crazyBallAura->AddEffector(&this->particlePulsePaddleLaser);
-	result = this->crazyBallAura->SetParticles(1, this->circleGradientTex);
+	result = this->crazyBallAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
     assert(this->boostSparkleEmitterLight == NULL);
     this->boostSparkleEmitterLight = new ESPPointEmitter();
@@ -1195,7 +792,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->boostSparkleEmitterLight->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     this->boostSparkleEmitterLight->AddEffector(&this->particleMediumShrink);
     this->boostSparkleEmitterLight->AddEffector(&this->particleFader);
-    result = this->boostSparkleEmitterLight->SetParticles(40, this->sparkleTex);
+    result = this->boostSparkleEmitterLight->SetParticles(40, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
     assert(result);
 
     assert(this->boostSparkleEmitterDark == NULL);
@@ -1212,14 +809,14 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->boostSparkleEmitterDark->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     this->boostSparkleEmitterDark->AddEffector(&this->particleMediumShrink);
     this->boostSparkleEmitterDark->AddEffector(&this->particleFader);
-    result = this->boostSparkleEmitterDark->SetParticles(40, this->sparkleTex);
+    result = this->boostSparkleEmitterDark->SetParticles(40, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
     assert(result);
 
     assert(this->paddleLaserGlowAura == NULL);
 	this->paddleLaserGlowAura = new ESPPointEmitter();
-	this->paddleLaserGlowAura->SetSpawnDelta(ESPInterval(-1));
+	this->paddleLaserGlowAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	this->paddleLaserGlowAura->SetInitialSpd(ESPInterval(0));
-	this->paddleLaserGlowAura->SetParticleLife(ESPInterval(-1));
+	this->paddleLaserGlowAura->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	this->paddleLaserGlowAura->SetParticleSize(ESPInterval(1.5f));
 	this->paddleLaserGlowAura->SetEmitAngleInDegrees(0);
 	this->paddleLaserGlowAura->SetParticleAlignment(ESP::ScreenAligned);
@@ -1227,7 +824,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowAura->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleLaserGlowAura->AddEffector(&this->particlePulsePaddleLaser);
-	result = this->paddleLaserGlowAura->SetParticles(1, this->circleGradientTex);
+	result = this->paddleLaserGlowAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);
 
     assert(this->paddleLaserGlowSparks == NULL);
@@ -1242,7 +839,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
 	this->paddleLaserGlowSparks->AddEffector(&this->particleFader);
-	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, this->circleGradientTex);
+	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);		
 	
     assert(this->paddleBeamOriginUp == NULL);
@@ -1255,7 +852,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamOriginUp->SetEmitDirection(Vector3D(0, 1, 0));
     this->paddleBeamOriginUp->SetParticleAlignment(ESP::ScreenAligned);
 	this->paddleBeamOriginUp->AddEffector(&this->particleFader);
-	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, this->sparkleTex);
+	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 	assert(result);
 
     assert(this->paddleBeamBlastBits == NULL);
@@ -1270,7 +867,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamBlastBits->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	this->paddleBeamBlastBits->AddEffector(&this->particleLargeVStretch);
 	this->paddleBeamBlastBits->AddEffector(&this->beamBlastColourEffector);
-	result = this->paddleBeamBlastBits->SetParticles(35, this->circleGradientTex);
+	result = this->paddleBeamBlastBits->SetParticles(35, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);
 
     const ESPInterval GLOW_SPARK_SPAWN_DELTA(0.005f, 0.01f);
@@ -1286,7 +883,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->paddleBeamGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
     this->paddleBeamGlowSparks->SetParticleAlignment(ESP::ScreenAligned);
     this->paddleBeamGlowSparks->AddEffector(&this->particleFader);
-    result = this->paddleBeamGlowSparks->SetParticles(50, this->circleGradientTex);
+    result = this->paddleBeamGlowSparks->SetParticles(50, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
 
     assert(this->stickyPaddleBeamGlowSparks0 == NULL);
@@ -1298,7 +895,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->stickyPaddleBeamGlowSparks0->SetEmitDirection(Vector3D(0, 1, 0));
     this->stickyPaddleBeamGlowSparks0->SetParticleAlignment(ESP::ScreenAligned);
     this->stickyPaddleBeamGlowSparks0->AddEffector(&this->particleFader);
-    result = this->stickyPaddleBeamGlowSparks0->SetParticles(30, this->circleGradientTex);
+    result = this->stickyPaddleBeamGlowSparks0->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
 
     assert(this->stickyPaddleBeamGlowSparks1 == NULL);
@@ -1310,7 +907,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->stickyPaddleBeamGlowSparks1->SetEmitDirection(Vector3D(0, 1, 0));
     this->stickyPaddleBeamGlowSparks1->SetParticleAlignment(ESP::ScreenAligned);
     this->stickyPaddleBeamGlowSparks1->AddEffector(&this->particleFader);
-    result = this->stickyPaddleBeamGlowSparks1->SetParticles(30, this->circleGradientTex);
+    result = this->stickyPaddleBeamGlowSparks1->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
 
     assert(this->stickyPaddleBeamGlowSparks2 == NULL);
@@ -1322,7 +919,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->stickyPaddleBeamGlowSparks2->SetEmitDirection(Vector3D(0, 1, 0));
     this->stickyPaddleBeamGlowSparks2->SetParticleAlignment(ESP::ScreenAligned);
     this->stickyPaddleBeamGlowSparks2->AddEffector(&this->particleFader);
-    result = this->stickyPaddleBeamGlowSparks2->SetParticles(30, this->circleGradientTex);
+    result = this->stickyPaddleBeamGlowSparks2->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
 }
 
@@ -1374,9 +971,9 @@ void GameESPAssets::InitPaddleBlasterESPEffects() {
 ESPPointEmitter* GameESPAssets::CreateSpinningTargetESPEffect() {
 
 	ESPPointEmitter* spinningTarget = new ESPPointEmitter();
-	spinningTarget->SetSpawnDelta(ESPInterval(-1));
+	spinningTarget->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	spinningTarget->SetInitialSpd(ESPInterval(0));
-	spinningTarget->SetParticleLife(ESPInterval(-1));
+	spinningTarget->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	spinningTarget->SetParticleSize(ESPInterval(2));
 	spinningTarget->SetEmitAngleInDegrees(0);
 	spinningTarget->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -1385,7 +982,8 @@ ESPPointEmitter* GameESPAssets::CreateSpinningTargetESPEffect() {
 	spinningTarget->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.5f));
 	spinningTarget->AddEffector(&this->loopRotateEffectorCW);
 
-	bool result = spinningTarget->SetParticles(1, this->circleTargetTex);
+	bool result = spinningTarget->SetParticles(1, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_TARGET));
     UNUSED_VARIABLE(result);
 	assert(result);
 
@@ -1473,12 +1071,22 @@ void GameESPAssets::InitStandaloneESPEffects() {
 
     this->fireOriginColourEffector.SetColours(fireOriginColours);
 
+    {
+        std::vector<std::pair<float, double> > alphasAndPercents;
+        alphasAndPercents.reserve(3);
+        alphasAndPercents.push_back(std::make_pair(0.0f, 0.0));
+        alphasAndPercents.push_back(std::make_pair(1.0f, 0.1));
+        alphasAndPercents.push_back(std::make_pair(1.0f, 0.9));
+        alphasAndPercents.push_back(std::make_pair(0.0f, 1.0));
+        this->particleFastFadeInFadeOut.SetAlphasWithPercentage(alphasAndPercents);
+    }
+
 	// Ghost smoke effect used for ghost-ball
 	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
 	this->ghostBallSmoke.SetScale(0.5f);
 	this->ghostBallSmoke.SetFrequency(0.25f);
 	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
-	this->ghostBallSmoke.SetTexture(this->circleGradientTex);
+	this->ghostBallSmoke.SetTexture(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	// Fire effect used in various things - like explosions and such.
 	this->fireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
@@ -1486,7 +1094,7 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->fireEffect.SetScale(0.25f);
 	this->fireEffect.SetFrequency(1.0f);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
-	this->fireEffect.SetTexture(this->circleGradientTex);
+	this->fireEffect.SetTexture(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
     this->flameBlasterFireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
     this->flameBlasterFireEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
@@ -1503,7 +1111,7 @@ void GameESPAssets::InitStandaloneESPEffects() {
     this->flameBlasterOriginFireEffect.SetTexture(this->fireGlobTextures[0]);
 
     this->flameBlasterParticleEffect.SetTechnique(CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME);
-    this->flameBlasterParticleEffect.SetTexture(this->cleanCircleGradientTex);
+    this->flameBlasterParticleEffect.SetTexture(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
     this->flameBlasterParticleEffect.SetDarkFireColour(Colour(0.8f, 0.125f, 0.10f));
     this->flameBlasterParticleEffect.SetBrightFireColour(Colour(1.0f, 0.7f, 0.10f));
     this->flameBlasterParticleEffect.SetScale(0.6f);
@@ -1513,7 +1121,7 @@ void GameESPAssets::InitStandaloneESPEffects() {
     this->iceBlasterParticleEffect.SetScale(0.5f);
     this->iceBlasterParticleEffect.SetFrequency(0.8f);
     this->iceBlasterParticleEffect.SetFlowDirection(Vector3D(0, 0, 1));
-    this->iceBlasterParticleEffect.SetTexture(this->cleanCircleGradientTex);
+    this->iceBlasterParticleEffect.SetTexture(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
 
     this->iceBlasterCloudEffect.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
     this->iceBlasterCloudEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
@@ -1543,17 +1151,17 @@ void GameESPAssets::InitStandaloneESPEffects() {
     this->refractFireEffect.SetIndexOfRefraction(1.33f);
     this->refractFireEffect.SetScale(0.02f);
     this->refractFireEffect.SetFrequency(0.08f);
-    this->refractFireEffect.SetNormalTexture(this->cloudNormalTex);
+    this->refractFireEffect.SetNormalTexture(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_NORMAL_CLOUD));
 
 	this->normalTexRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
 	this->normalTexRefractEffect.SetWarpAmountParam(27.0f);
 	this->normalTexRefractEffect.SetIndexOfRefraction(1.2f);
-	this->normalTexRefractEffect.SetNormalTexture(this->sphereNormalsTex);
+	this->normalTexRefractEffect.SetNormalTexture(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS));
 
     this->vapourTrailRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
 	this->vapourTrailRefractEffect.SetWarpAmountParam(20.0f);
 	this->vapourTrailRefractEffect.SetIndexOfRefraction(1.33f);
-	this->vapourTrailRefractEffect.SetNormalTexture(this->vapourTrailTex);
+	this->vapourTrailRefractEffect.SetNormalTexture(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL));
 
 	//this->iceRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
 	//this->iceRefractEffect.SetWarpAmountParam(50.0f);
@@ -1576,6 +1184,10 @@ void GameESPAssets::InitMeshes() {
     assert(this->fragileCannonBaseBarMesh  != NULL);
     assert(this->fragileCannonBasePostMesh != NULL);
     assert(this->fragileCannonBarrelMesh   != NULL);
+
+    assert(this->portalMesh == NULL);
+    this->portalMesh = ResourceManager::GetInstance()->GetPortalBlockMeshResource();
+    assert(this->portalMesh != NULL);
 }
 
 /**
@@ -1586,7 +1198,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	// The effect is a basic onomatopeia word that occurs at the position of the ball
 	ESPPointEmitter* bounceEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	bounceEffect->SetSpawnDelta(ESPInterval(-1));
+	bounceEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	bounceEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
 	bounceEffect->SetParticleLife(ESPInterval(0.9f, 1.15f));
 	
@@ -1719,7 +1331,7 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
 	// Small 'bang' star that appears at the position of the ball-ball collision
 	// Create an emitter for the bang texture
 	ESPPointEmitter* bangEffect = new ESPPointEmitter();
-	bangEffect->SetSpawnDelta(ESPInterval(-1));
+	bangEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	bangEffect->SetInitialSpd(ESPInterval(0.0f));
 	bangEffect->SetParticleLife(ESPInterval(0.8f, 1.1f));
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -1730,11 +1342,11 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
 	bangEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.75f, 1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
 	bangEffect->AddEffector(&this->particleFader);
 	bangEffect->AddEffector(&this->particleMediumGrowth);
-	bangEffect->SetParticles(1, this->evilStarTex);
+	bangEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR));
 
 	// Basic onomatopeia word that occurs at the position of the ball-ball collision
 	ESPPointEmitter* bounceEffect = new ESPPointEmitter();
-	bounceEffect->SetSpawnDelta(ESPInterval(-1));
+	bounceEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	bounceEffect->SetInitialSpd(ESPInterval(0.0f));
 	bounceEffect->SetParticleLife(ESPInterval(1.2f, 1.5f));
 	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
@@ -1771,6 +1383,10 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
     0.25f*(block.GetCenter() - projectile.GetPosition())
 
 	switch (projectile.GetType()) {
+
+        case Projectile::PortalBlobProjectile:
+            // Not implemented
+            return;
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
@@ -1935,6 +1551,10 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 
 void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projectile, GameSound* sound) {
     switch (projectile.GetType()) {
+        
+        case Projectile::PortalBlobProjectile:
+            // Not implemented
+            return;
 
         case Projectile::BossOrbBulletProjectile:
             this->AddOrbHitWallEffect(projectile, projectile.GetPosition(),
@@ -2036,7 +1656,7 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 	lightningBoltEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.9f, 1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
 	lightningBoltEffect->AddEffector(&this->particleFader);
 	lightningBoltEffect->AddEffector(&this->particleMediumGrowth);
-	bool result = lightningBoltEffect->SetParticles(1, this->lightningBoltTex);
+	bool result = lightningBoltEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT));
     UNUSED_VARIABLE(result);
 	assert(result);
 
@@ -2075,15 +1695,10 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 	this->activeGeneralEmitters.push_back(boltOnoEffect);
 }
 
-void GameESPAssets::AddSingleEnergyProjectilePortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, 
-                                                                  const PortalBlock& block, bool isSibling) {
+void GameESPAssets::AddSingleEnergyProjectilePortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, bool isSibling) {
     
     float sparkleSize = std::min<float>(std::max<float>(sizeX, sizeY), LevelPiece::PIECE_HEIGHT);
     
-    UNUSED_PARAMETER(block);
-    //const Colour& portalColour = block.GetColour().GetColour();
-    //Colour sparkleColour = portalColour + Colour(0.75f, 0.75f, 0.75f);
-
     // Create an emitter for the spirally teleportation texture
     ESPPointEmitter* sparkleEffect = new ESPPointEmitter();
     sparkleEffect->SetSpawnDelta(ESPInterval(-1, -1));
@@ -2097,7 +1712,7 @@ void GameESPAssets::AddSingleEnergyProjectilePortalTeleportEffect(const Point2D&
     sparkleEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
     sparkleEffect->AddEffector(&this->particleFader);
     sparkleEffect->AddEffector(&this->particleSuperGrowth);
-    sparkleEffect->SetParticles(1, this->sparkleTex);
+    sparkleEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     // Do anything special for if it's a sibling or not...
     if (isSibling) {
@@ -2111,10 +1726,8 @@ void GameESPAssets::AddSingleEnergyProjectilePortalTeleportEffect(const Point2D&
 }
 
 void GameESPAssets::AddSingleObjectPortalTeleportEffect(const Point2D& center, float sizeX, float sizeY, 
-                                                        const PortalBlock& block, bool isSibling) {
+                                                        const Colour& portalColour, bool isSibling) {
 
-	const Colour& portalColour = block.GetColour().GetColour();
-	
     float spiralSize = std::min<float>(sizeY, LevelPiece::PIECE_HEIGHT);
 
     // Create an emitter for the spirally teleportation texture
@@ -2130,7 +1743,7 @@ void GameESPAssets::AddSingleObjectPortalTeleportEffect(const Point2D& center, f
 	spiralEffect->SetParticleColour(ESPInterval(1.2f*portalColour.R()), ESPInterval(1.2f*portalColour.G()), ESPInterval(1.2f*portalColour.B()), ESPInterval(1));
 	spiralEffect->AddEffector(&this->particleFader);
 	spiralEffect->AddEffector(&this->particleLargeGrowth);
-    spiralEffect->SetParticles(1, this->spiralTex);
+    spiralEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL));
 
     // Add a flare effect as well...
     ESPPointEmitter* flareEffect = new ESPPointEmitter();
@@ -2147,7 +1760,7 @@ void GameESPAssets::AddSingleObjectPortalTeleportEffect(const Point2D& center, f
         ESPInterval(flareColour.G()), ESPInterval(flareColour.B()), ESPInterval(1.0f));
     flareEffect->AddEffector(&this->particleFader);
     flareEffect->AddEffector(&this->particleLargeGrowth);
-    flareEffect->SetParticles(1, this->flareTex);
+    flareEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE));
 
     // Do anything special for if it's a sibling or not...
 	if (isSibling) {
@@ -2171,7 +1784,9 @@ void GameESPAssets::UpdateBGTexture(const Texture2D& bgTexture) {
  * Builds a shockwave that distorts the background.
  *
  */
-ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, float startSize, float lifeTime) {
+ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, float startSize, 
+                                                      float lifeTime, bool reverse) {
+
 	// Add the shockwave for the ball hitting the lightning...
 	assert(lifeTime > 0);
 
@@ -2185,7 +1800,7 @@ ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, flo
 	shockwaveEffect->SetParticleSize(ESPInterval(startSize));
 	shockwaveEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	shockwaveEffect->AddEffector(&this->particleFader);
-	shockwaveEffect->AddEffector(&this->particleSuperGrowth);
+    shockwaveEffect->AddEffector(reverse ? &this->particleShrinkToNothing : &this->particleSuperGrowth);
 	bool result = shockwaveEffect->SetParticles(1, &this->normalTexRefractEffect);
     UNUSED_VARIABLE(result);
 	assert(result);
@@ -2193,22 +1808,23 @@ ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, flo
 	return shockwaveEffect;
 }
 
-void GameESPAssets::AddEnergyProjectilePortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block) {
-    Vector2D toEnterPtFromBlock = enterPt - block.GetCenter();
-    this->AddSingleEnergyProjectilePortalTeleportEffect(enterPt, sizeX, sizeY, block, false);
-    this->AddSingleEnergyProjectilePortalTeleportEffect(block.GetSiblingPortal()->GetCenter() + toEnterPtFromBlock, 
-        sizeX, sizeY, *block.GetSiblingPortal(), true);
+void GameESPAssets::AddEnergyProjectilePortalTeleportEffect(const Point2D& enterPt, const Point2D& enterPortalCenter, 
+                                                            const Point2D& exitPortalCenter, float sizeX, float sizeY) {
+    Vector2D toEnterPtFromBlock = enterPt - enterPortalCenter;
+    this->AddSingleEnergyProjectilePortalTeleportEffect(enterPt, sizeX, sizeY, false);
+    this->AddSingleEnergyProjectilePortalTeleportEffect(exitPortalCenter + toEnterPtFromBlock, sizeX, sizeY, true);
 }
 
 /**
  * Add an effect to bring the user's attention to the fact that something just went though
  * a portal block and got teleported to its sibling.
  */
-void GameESPAssets::AddObjectPortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, const PortalBlock& block) {
+void GameESPAssets::AddObjectPortalTeleportEffect(const Point2D& enterPt, float sizeX, float sizeY, 
+                                                  const Point2D& enterCenter, const Point2D& exitCenter, 
+                                                  const Colour& portalColour) {
 
-    Vector2D toEnterPtFromBlock = enterPt - block.GetCenter();
-	this->AddSingleObjectPortalTeleportEffect(enterPt, sizeX, sizeY, block, false);
-	this->AddSingleObjectPortalTeleportEffect(block.GetSiblingPortal()->GetCenter() + toEnterPtFromBlock, sizeX, sizeY, *block.GetSiblingPortal(), true);
+	this->AddSingleObjectPortalTeleportEffect(enterPt, sizeX, sizeY, portalColour, false);
+	this->AddSingleObjectPortalTeleportEffect(exitCenter + (enterPt - enterCenter), sizeX, sizeY, portalColour, true);
 }
 
 void GameESPAssets::ItemEnteredPortalBlockEffects(const GameItem& item, const PortalBlock& block) {
@@ -2244,7 +1860,8 @@ void GameESPAssets::ItemEnteredPortalBlockEffects(const GameItem& item, const Po
     this->AddItemDropFaceEmitters(item);
 
     // Now let's add some actual effects...
-    this->AddObjectPortalTeleportEffect(item.GetCenter(), GameItem::ITEM_WIDTH, GameItem::ITEM_HEIGHT, block);
+    this->AddObjectPortalTeleportEffect(item.GetCenter(), GameItem::ITEM_WIDTH, GameItem::ITEM_HEIGHT, block.GetCenter(),
+        block.GetSiblingPortal()->GetCenter(), block.GetColour().GetColour());
 }
 
 /**
@@ -2268,7 +1885,7 @@ void GameESPAssets::AddCannonFireEffect(const Point3D& endOfCannonPt, const Vect
 	cannonBlast->SetEmitDirection(emitDir);
 	cannonBlast->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	cannonBlast->AddEffector(&this->particleFader);
-	result = cannonBlast->SetParticles(1, this->sideBlastTex);
+	result = cannonBlast->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST));
 	assert(result);
 
 	// Bits of stuff
@@ -2283,7 +1900,7 @@ void GameESPAssets::AddCannonFireEffect(const Point3D& endOfCannonPt, const Vect
 	debrisBits->SetEmitPosition(endOfCannonPt);
 	debrisBits->SetEmitDirection(emitDir);
 	debrisBits->AddEffector(&this->particleFireColourFader);
-	result = debrisBits->SetParticles(10, this->starTex);
+	result = debrisBits->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 	assert(result);	
 	
 	// Create an emitter for the sound of onomatopeia of the cannon firing
@@ -2454,9 +2071,34 @@ ESPPointEmitter* GameESPAssets::CreateBlockBreakSmashyBits(const Point3D& center
 		if (gravity) {
 			smashyBits->AddEffector(&this->gravity);
 		}
-		smashyBits->SetParticles(numParticles, this->starTex);
+		smashyBits->SetParticles(numParticles, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 
 		return smashyBits;
+}
+
+ESPPointEmitter* GameESPAssets::CreateEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
+                                                         int numLines, float lengthMin, float lengthMax) {
+
+    float lineSpawnDeltaMin = totalEffectTime / static_cast<float>(2.5f*numLines);
+    float lineSpawnDeltaMax = totalEffectTime / static_cast<float>(2.5f*numLines - 2);
+    float lineLifeMin = 0.25f * totalEffectTime;
+    float lineLifeMax = 0.5f * totalEffectTime;
+
+    ESPPointEmitter* emphasisLines = new ESPPointEmitter();
+    emphasisLines->SetSpawnDelta(ESPInterval(lineSpawnDeltaMin, lineSpawnDeltaMax));
+    emphasisLines->SetInitialSpd(ESPInterval(lengthMax / lineLifeMin, 1.25f*lengthMax / lineLifeMin));
+    emphasisLines->SetParticleLife(ESPInterval(lineLifeMin, lineLifeMax));
+    emphasisLines->SetNumParticleLives(1);
+    emphasisLines->SetEmitAngleInDegrees(180);
+    emphasisLines->SetParticleSize(ESPInterval(0.05f, 0.125f), ESPInterval(lengthMin, lengthMax));
+    emphasisLines->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+    emphasisLines->SetEmitPosition(center);
+    emphasisLines->SetIsReversed(true);
+    emphasisLines->AddEffector(&this->particleLargeVShrink);
+    emphasisLines->AddEffector(&this->particleFastFadeInFadeOut);
+    emphasisLines->SetParticles(numLines, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
+
+    return emphasisLines;
 }
 
 /**
@@ -2591,7 +2233,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 	Texture2D* randomBangTex = this->bangTextures[randomBangTexIndex];
 
 	ESPPointEmitter* bangEffect = new ESPPointEmitter();
-	bangEffect->SetSpawnDelta(ESPInterval(-1));
+	bangEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangEffect->SetParticleLife(ESPInterval(1.5f));
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0));
@@ -2614,7 +2256,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 	// Onomatopoeia for the explosion
 	ESPPointEmitter* explodeOnoEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	explodeOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	explodeOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	explodeOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	explodeOnoEffect->SetParticleLife(ESPInterval(2.5f));
     explodeOnoEffect->SetParticleSize(ESPInterval(sizeFract));
@@ -2657,7 +2299,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	bombExplodeRayEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	bombExplodeRayEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bombExplodeRayEffect->SetEmitPosition(emitCenter);
-	bombExplodeRayEffect->SetParticles(1, this->explosionRayTex);
+	bombExplodeRayEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS));
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		bombExplodeRayEffect->AddEffector(&this->explosionRayRotatorCW);
 	}
@@ -2678,7 +2320,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	bombExplodeFireEffect2->SetParticleAlignment(ESP::ScreenAligned);
 	bombExplodeFireEffect2->SetEmitPosition(emitCenter);
 	bombExplodeFireEffect2->SetEmitAngleInDegrees(180);
-	bombExplodeFireEffect2->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_CLOUD_PARTICLES, this->explosionTex);
+	bombExplodeFireEffect2->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_CLOUD_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD));
 	bombExplodeFireEffect2->AddEffector(&this->particleFireFastColourFader);
 	bombExplodeFireEffect2->AddEffector(&this->particleLargeGrowth);
 
@@ -2797,7 +2439,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 		inkySpray->SetEmitDirection(inkySprayDir);
 		inkySpray->SetEmitAngleInDegrees(5);
 		inkySpray->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
-		inkySpray->SetParticles(GameESPAssets::NUM_INK_SPRAY_PARTICLES, this->ballTex);
+		inkySpray->SetParticles(GameESPAssets::NUM_INK_SPRAY_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPHERE));
 		inkySpray->AddEffector(&this->particleFader);
 		inkySpray->AddEffector(&this->particleMediumGrowth);
 	}
@@ -2896,7 +2538,7 @@ void GameESPAssets::AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock
             ESPInterval(RegenBlockMesh::LIFE_DISPLAY_HEIGHT));
         
         // Infinity symbol goes flying
-	    lifeInfoEmitter->SetParticles(1, this->infinityTex);
+	    lifeInfoEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR));
     }
     else {
         int lifePercentage = regenBlock.GetCurrentLifePercentInt();
@@ -2968,7 +2610,7 @@ void GameESPAssets::AddFragileCannonBreakEffect(const LevelPiece& block) {
 
     // Build emitters for the explosion of the fragile cannon block
     ESPPointEmitter* explosionEffect = new ESPPointEmitter();
-    explosionEffect->SetSpawnDelta(ESPInterval(-1));
+    explosionEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
     explosionEffect->SetParticleLife(bangLifeInterval);
     explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
@@ -2978,12 +2620,12 @@ void GameESPAssets::AddFragileCannonBreakEffect(const LevelPiece& block) {
     explosionEffect->SetParticleSize(ESPInterval(1.4f*LevelPiece::PIECE_WIDTH));
     explosionEffect->AddEffector(&this->particleFader);
     explosionEffect->AddEffector(&this->particleMediumGrowth);
-    explosionEffect->SetParticles(1, this->cloudRayExplosionTex);
+    explosionEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLOUD_RAY_EXPLOSION));
 
     // Create an emitter for the sound of onomatopoeia of the breaking block
     ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
     // Set up the emitter...
-    bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    bangOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
     bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
     bangOnoEffect->SetParticleSize(ESPInterval(1.2f));
@@ -3207,7 +2849,7 @@ void GameESPAssets::AddIceMeltedByFireEffect(const Point3D& pos, float width, fl
         ESPInterval(0.9f, 1.0f), ESPInterval(1.0f)); // Varying light shades of blue
 	waterDropletRainEffect->AddEffector(&this->gravity);
 	waterDropletRainEffect->AddEffector(&this->particleShrinkToNothing);
-    waterDropletRainEffect->SetParticles(8, this->dropletTex);
+    waterDropletRainEffect->SetParticles(8, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_DROPLET));
 
 	this->activeGeneralEmitters.push_back(waterDropletRainEffect);
     this->activeGeneralEmitters.push_back(waterVapourEffect);
@@ -3319,7 +2961,7 @@ void GameESPAssets::AddFireballCanceledEffect(const GameBall& ball) {
 	haloExpandingAura->SetEmitPosition(ball.GetCenterPosition());
     haloExpandingAura->AddEffector(&this->particleSuperGrowth);
     haloExpandingAura->AddEffector(&this->particleFireColourFader);
-	haloExpandingAura->SetParticles(1, this->haloTex);
+	haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 
     this->activeGeneralEmitters.push_back(haloExpandingAura);
     this->activeGeneralEmitters.push_back(fireDisperseEffect1);
@@ -3381,7 +3023,7 @@ void GameESPAssets::AddIceballCanceledEffect(const GameBall& ball) {
 	haloExpandingAura->SetEmitPosition(ball.GetCenterPosition());
     haloExpandingAura->AddEffector(&this->particleSuperGrowth);
     haloExpandingAura->AddEffector(&this->particleWaterVapourColourFader);
-	haloExpandingAura->SetParticles(1, this->haloTex);
+	haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 
     this->activeGeneralEmitters.push_back(haloExpandingAura);
     this->activeGeneralEmitters.push_back(iceDisperseEffect1);
@@ -3447,7 +3089,7 @@ void GameESPAssets::AddFireBlasterCanceledEffect(const PlayerPaddle& paddle) {
     haloExpandingAura->SetEmitPosition(pos);
     haloExpandingAura->AddEffector(&this->particleSuperGrowth);
     haloExpandingAura->AddEffector(&this->particleFireColourFader);
-    haloExpandingAura->SetParticles(1, this->haloTex);
+    haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 
     this->activeGeneralEmitters.push_back(haloExpandingAura);
     this->activeGeneralEmitters.push_back(fireDisperseEffect1);
@@ -3513,7 +3155,7 @@ void GameESPAssets::AddIceBlasterCanceledEffect(const PlayerPaddle& paddle) {
     haloExpandingAura->SetEmitPosition(pos);
     haloExpandingAura->AddEffector(&this->particleSuperGrowth);
     haloExpandingAura->AddEffector(&this->particleWaterVapourColourFader);
-    haloExpandingAura->SetParticles(1, this->haloTex);
+    haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 
     this->activeGeneralEmitters.push_back(haloExpandingAura);
     this->activeGeneralEmitters.push_back(iceDisperseEffect1);
@@ -3596,6 +3238,10 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	Onomatoplex::Extremeness severity = Onomatoplex::NORMAL;
 	switch (projectile.GetType()) {
 
+        case Projectile::PortalBlobProjectile:
+            // Not implemented
+            return;
+
 		case Projectile::CollateralBlockProjectile:
 			severity = Onomatoplex::SUPER_AWESOME;
 			size.minValue = 0.5f;
@@ -3666,7 +3312,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 
 	// Onomatopeia for the hit...
 	ESPPointEmitter* paddleOnoEffect = new ESPPointEmitter();
-	paddleOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	paddleOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	paddleOnoEffect->SetInitialSpd(ESPInterval(1.0f, 1.75f));
 	paddleOnoEffect->SetParticleLife(ESPInterval(2.5f));
 	paddleOnoEffect->SetParticleRotation(ESPInterval(-45.0f, 45.0f));
@@ -3744,7 +3390,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	        impactEmitter->SetEmitDirection(emitDirection);
 	        impactEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	        impactEmitter->AddEffector(&this->particleFader);
-	        impactEmitter->SetParticles(1, this->sideBlastTex);
+	        impactEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST));
             this->activePaddleEmitters.push_back(impactEmitter);
             break;
         }
@@ -3753,7 +3399,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 
 	// Smashy star texture particle
 	ESPPointEmitter* starEmitter = new ESPPointEmitter();
-	starEmitter->SetSpawnDelta(ESPInterval(-1));
+	starEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	starEmitter->SetInitialSpd(ESPInterval(3.0f, 5.5f));
 	starEmitter->SetParticleLife(ESPInterval(1.2f, 2.0f));
 	starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.2f, paddle.GetHalfWidthTotal() * 0.5f));
@@ -3772,7 +3418,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	}
 
 	starEmitter->AddEffector(&this->particleFader);
-	starEmitter->SetParticles(3, this->starTex);
+	starEmitter->SetParticles(3, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 
 	this->activeGeneralEmitters.push_back(starEmitter);
 }
@@ -3788,6 +3434,10 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle,
 	}
 
 	switch (projectile.GetType()) {
+
+        case Projectile::PortalBlobProjectile:
+            // Not implemented
+            return;
 
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
@@ -3863,7 +3513,7 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
     bangEffect->SetParticles(1, randomBangTex);
 
     ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
-    bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    bangOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
     bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
     bangOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
@@ -3885,7 +3535,7 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
 
     // Smashy star texture particle
     ESPPointEmitter* starEmitter = new ESPPointEmitter();
-    starEmitter->SetSpawnDelta(ESPInterval(-1));
+    starEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     starEmitter->SetInitialSpd(ESPInterval(3.0f, 5.5f));
     starEmitter->SetParticleLife(ESPInterval(1.0f, 2.5f));
     starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.25f, paddle.GetHalfWidthTotal()));
@@ -3903,7 +3553,7 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
         starEmitter->AddEffector(&this->explosionRayRotatorCW);
     }
     starEmitter->AddEffector(&this->particleFader);
-    starEmitter->SetParticles(10, this->starTex);
+    starEmitter->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 
     this->activeGeneralEmitters.push_back(starEmitter);
     this->activeGeneralEmitters.push_back(bangEffect);
@@ -3945,7 +3595,7 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
     bangEffect->SetParticles(1, randomBangTex);
 
     ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
-    bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    bangOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
     bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
     bangOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
@@ -3967,7 +3617,7 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
 
     // Smashy star texture particle
     ESPPointEmitter* starEmitter = new ESPPointEmitter();
-    starEmitter->SetSpawnDelta(ESPInterval(-1));
+    starEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     starEmitter->SetInitialSpd(ESPInterval(3.0f, 5.5f));
     starEmitter->SetParticleLife(ESPInterval(1.0f, 2.5f));
     starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.5f, paddle.GetHalfWidthTotal() * 1.0f));
@@ -3985,7 +3635,7 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
         starEmitter->AddEffector(&this->explosionRayRotatorCW);
     }
     starEmitter->AddEffector(&this->particleFader);
-    starEmitter->SetParticles(12, this->starTex);
+    starEmitter->SetParticles(12, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 
     this->activeGeneralEmitters.push_back(starEmitter);
     this->activeGeneralEmitters.push_back(bangEffect);
@@ -4008,7 +3658,7 @@ void GameESPAssets::AddPaddleFrozeEffect(const PlayerPaddle& paddle) {
     flareEffect->SetParticleColour(Colour(1,1,1));
     flareEffect->AddEffector(&this->particleFader);
     flareEffect->AddEffector(&this->particleSuperGrowth);
-    flareEffect->SetParticles(1, this->flareTex);
+    flareEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE));
 
     // Cloudy stuffs
     ESPPointEmitter* particleClouds = new ESPPointEmitter();
@@ -4053,9 +3703,9 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 
 	// Aura around the ends of the dropping item
 	ESPPointEmitter* itemDropEmitterAura1 = new ESPPointEmitter();
-	itemDropEmitterAura1->SetSpawnDelta(ESPInterval(-1));
+	itemDropEmitterAura1->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	itemDropEmitterAura1->SetInitialSpd(ESPInterval(0));
-	itemDropEmitterAura1->SetParticleLife(ESPInterval(-1));
+	itemDropEmitterAura1->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	itemDropEmitterAura1->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
 	itemDropEmitterAura1->SetEmitAngleInDegrees(0);
 	itemDropEmitterAura1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -4063,12 +3713,12 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 	itemDropEmitterAura1->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
     itemDropEmitterAura1->SetParticleAlignment(ESP::ScreenAligned);
 	itemDropEmitterAura1->AddEffector(&this->particlePulseItemDropAura);
-	itemDropEmitterAura1->SetParticles(1, this->circleGradientTex);
+	itemDropEmitterAura1->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	
 	ESPPointEmitter* itemDropEmitterAura2 = new ESPPointEmitter();
-	itemDropEmitterAura2->SetSpawnDelta(ESPInterval(-1));
+	itemDropEmitterAura2->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	itemDropEmitterAura2->SetInitialSpd(ESPInterval(0));
-	itemDropEmitterAura2->SetParticleLife(ESPInterval(-1));
+	itemDropEmitterAura2->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	itemDropEmitterAura2->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
 	itemDropEmitterAura2->SetEmitAngleInDegrees(0);
 	itemDropEmitterAura2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -4076,7 +3726,7 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 	itemDropEmitterAura2->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
     itemDropEmitterAura2->SetParticleAlignment(ESP::ScreenAligned);
 	itemDropEmitterAura2->AddEffector(&this->particlePulseItemDropAura);
-	itemDropEmitterAura2->SetParticles(1, this->circleGradientTex);
+	itemDropEmitterAura2->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	
 	// Add the aura emitters
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura1);
@@ -4193,6 +3843,10 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
             this->AddIceBlastProjectileEffects(gameModel, *static_cast<const PaddleIceBlasterProjectile*>(&projectile));
             break;
 
+        case Projectile::PortalBlobProjectile:
+            this->AddPortalProjectileEffects(*static_cast<const PortalProjectile*>(&projectile));
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -4240,6 +3894,7 @@ void GameESPAssets::RemoveProjectileEffect(const Projectile& projectile) {
 
         default:
  	        this->RemoveProjectileEffectFromMap(projectile, this->activeProjectileEmitters);
+            this->RemoveProjectileEffectFromMap(projectile, this->activePostProjectileEmitters);
             break;
     }
 }
@@ -4281,6 +3936,7 @@ void GameESPAssets::RemoveProjectileEffectFromMap(const Projectile& projectile, 
 
 void GameESPAssets::RemoveAllProjectileEffects() {
     this->RemoveAllProjectileEffectsFromMap(this->activeProjectileEmitters);
+    this->RemoveAllProjectileEffectsFromMap(this->activePostProjectileEmitters);
     this->RemoveAllProjectileEffectsFromMap(this->activeBlasterProjectileEffects);
 }
 
@@ -4472,7 +4128,7 @@ std::list<ESPPointEmitter*> GameESPAssets::CreateBeamOriginEffects(const Beam& b
     beamOriginSparkles->SetParticleRotation(ESPInterval(0.0f, 359.99f));
     beamOriginSparkles->AddEffector(&this->particleFader);
     beamOriginSparkles->AddEffector(&this->particleMediumGrowth);
-    beamOriginSparkles->SetParticles(30, this->sparkleTex);
+    beamOriginSparkles->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     ESPPointEmitter* beamOriginFlare = new ESPPointEmitter();
     beamOriginFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
@@ -4486,7 +4142,7 @@ std::list<ESPPointEmitter*> GameESPAssets::CreateBeamOriginEffects(const Beam& b
     beamOriginFlare->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.98f), ESPInterval(1.0f), ESPInterval(1.0f));
     beamOriginFlare->SetParticleRotation(ESPInterval(0.0f, 359.99f));
     beamOriginFlare->AddEffector(&this->flarePulse);
-    beamOriginFlare->SetParticles(1, this->flareTex);
+    beamOriginFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE));
 
     ESPPointEmitter* beamOriginRays = new ESPPointEmitter();
     beamOriginRays->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
@@ -4499,7 +4155,7 @@ std::list<ESPPointEmitter*> GameESPAssets::CreateBeamOriginEffects(const Beam& b
     beamOriginRays->SetParticleSize(ESPInterval(8.5f * originRadius));
     beamOriginRays->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     beamOriginRays->SetParticleRotation(ESPInterval(0.0f, 359.99f));
-    beamOriginRays->SetParticles(1, this->explosionRayTex);
+    beamOriginRays->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS));
 
     result.push_back(beamOriginSparkles);
     result.push_back(beamOriginRays);
@@ -4524,7 +4180,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndEffect(const Beam& beam) {
 	beamEndEffect->SetEmitPosition(Point3D(0, 0, 0));
 	beamEndEffect->SetParticleColour(ESPInterval(beamEndColour.R()), ESPInterval(beamEndColour.G()), ESPInterval(beamEndColour.B()), ESPInterval(1.0f));
 	beamEndEffect->AddEffector(&this->beamEndPulse);
-	bool result = beamEndEffect->SetParticles(1, this->circleGradientTex);
+	bool result = beamEndEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     UNUSED_VARIABLE(result);
 	assert(result);
 
@@ -4559,7 +4215,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect(const Beam& beam) {
 
 	beamBlockEndEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	beamBlockEndEffect->AddEffector(&this->particleLargeVStretch);
-	beamBlockEndEffect->SetParticles(30, this->circleGradientTex);
+	beamBlockEndEffect->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	return beamBlockEndEffect;	
 }
@@ -4591,7 +4247,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect(const Beam& beam) {
 	beamFallingBitEffect->AddEffector(&this->particleMediumShrink);
 	beamFallingBitEffect->AddEffector(&this->gravity);
 	
-    beamFallingBitEffect->SetParticles(25, this->circleGradientTex);
+    beamFallingBitEffect->SetParticles(25, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	return beamFallingBitEffect;	
 }
@@ -4614,7 +4270,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamFlareEffect(const Beam& beam) {
         ESPInterval(flareColour.B()), ESPInterval(0.8f));
 	beamFlareEffect->AddEffector(&this->beamEndPulse);
 	
-    beamFlareEffect->SetParticles(1, this->lensFlareTex);
+    beamFlareEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
 
 	return beamFlareEffect;
 }
@@ -4851,7 +4507,7 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
 	haloExpandingAura->AddEffector(&this->particleLargeGrowth);
 	haloExpandingAura->AddEffector(&this->particleFader);
-	haloExpandingAura->SetParticles(1, this->haloTex);
+	haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 
 	std::list<ESPEmitter*> timerHUDEmitters;
 	timerHUDEmitters.push_back(shapeEmitter1);
@@ -4873,8 +4529,8 @@ void GameESPAssets::AddShortCircuitEffect(const ShortCircuitEffectInfo& effectIn
 
     std::vector<Texture2D*> sparkTextures;
     sparkTextures.reserve(2);
-    sparkTextures.push_back(this->sparkleTex);
-    sparkTextures.push_back(this->lensFlareTex);
+    sparkTextures.push_back(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
+    sparkTextures.push_back(PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
 
     // Basic sparks
     ESPPointEmitter* sparkParticles1 = new ESPPointEmitter();
@@ -4919,7 +4575,7 @@ void GameESPAssets::AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, 
                                        const ESPInterval& lifeInSecs, Onomatoplex::Extremeness extremeness) {
 
     ESPPointEmitter* wallOnoEffect = new ESPPointEmitter();
-    wallOnoEffect->SetSpawnDelta(ESPInterval(-1));
+    wallOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     wallOnoEffect->SetInitialSpd(ESPInterval(1.0f, 1.75f));
     wallOnoEffect->SetParticleLife(lifeInSecs);
 
@@ -4952,7 +4608,7 @@ void GameESPAssets::AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, 
 
     // Smashy star texture particle
     ESPPointEmitter* wallStarEmitter = new ESPPointEmitter();
-    wallStarEmitter->SetSpawnDelta(ESPInterval(-1));
+    wallStarEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     wallStarEmitter->SetInitialSpd(ESPInterval(1.5f, 3.0f));
     wallStarEmitter->SetParticleLife(lifeInSecs);
     wallStarEmitter->SetParticleSize(size);
@@ -4972,10 +4628,50 @@ void GameESPAssets::AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, 
     }
 
     wallStarEmitter->AddEffector(&this->particleFader);
-    wallStarEmitter->SetParticles(3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3), this->starTex);
+    wallStarEmitter->SetParticles(3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3), PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 
     this->activeGeneralEmitters.push_back(wallStarEmitter);
     this->activeGeneralEmitters.push_back(wallOnoEffect);
+}
+
+void GameESPAssets::AddPortalSpawnEffect(const PortalSpawnEffectInfo& effectInfo) {
+
+    Point3D spawnPos(effectInfo.GetSpawnPosition(), 0);
+
+    ESPPointEmitter* spawnFlare = new ESPPointEmitter();
+    spawnFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    spawnFlare->SetInitialSpd(ESPInterval(0));
+    spawnFlare->SetParticleLife(ESPInterval(2*effectInfo.GetEffectTimeInSeconds()));
+    spawnFlare->SetParticleSize(ESPInterval(1.25f * effectInfo.GetWidth()), ESPInterval(1.25f * effectInfo.GetHeight()));
+    spawnFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    spawnFlare->SetParticleAlignment(ESP::ScreenAligned);
+    spawnFlare->SetEmitPosition(spawnPos);
+    spawnFlare->SetParticleColour(
+        ESPInterval(1.5f*(effectInfo.GetColour().R() + 0.5f)), 
+        ESPInterval(1.5f*(effectInfo.GetColour().G() + 0.5f)), 
+        ESPInterval(1.5f*(effectInfo.GetColour().B() + 0.5f)),
+        ESPInterval(1.0f));
+    spawnFlare->AddEffector(&this->particleSuperGrowth);
+    spawnFlare->AddEffector(&this->particleFader);
+    spawnFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE));
+
+    ESPPointEmitter* reverseShockwave = this->CreateShockwaveEffect(spawnPos, 
+        3.0f*std::max<float>(effectInfo.GetWidth(), effectInfo.GetHeight()), 
+        effectInfo.GetEffectTimeInSeconds(), true);
+
+    static const int NUM_LINES = 20;
+    ESPPointEmitter* emphasisLines = this->CreateEmphasisLineEffect(
+        spawnPos, effectInfo.GetEffectTimeInSeconds(), NUM_LINES, 1.0f, 2.5f);
+
+    this->activeGeneralEmitters.push_back(reverseShockwave);
+    this->activeGeneralEmitters.push_back(emphasisLines);
+    this->activeGeneralEmitters.push_back(spawnFlare);
+}
+
+void GameESPAssets::AddGenericEmitterEffect(const GenericEmitterEffectInfo& effectInfo) {
+    std::vector<ESPAbstractEmitter*> emitters;
+    effectInfo.TakeEmitters(emitters);
+    this->activeGeneralEmitters.insert(this->activeGeneralEmitters.end(), emitters.begin(), emitters.end());
 }
 
 /**
@@ -5003,7 +4699,7 @@ void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile)
     fireCloudTrail->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	fireCloudTrail->AddEffector(&this->particleLargeGrowth);
 	fireCloudTrail->AddEffector(&this->particleSuperFireFastColourFader);
-	fireCloudTrail->SetParticles(10, this->explosionTex);
+	fireCloudTrail->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD));
 
 	this->activeProjectileEmitters[&projectile].push_back(fireCloudTrail);
 }
@@ -5103,9 +4799,9 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 
 	size_t randomRockIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->moltenRockEffects.size();
 	ESPPointEmitter* fireRock = new ESPPointEmitter();
-	fireRock->SetSpawnDelta(ESPInterval(-1));
+	fireRock->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	fireRock->SetInitialSpd(ESPInterval(0));
-	fireRock->SetParticleLife(ESPInterval(-1));
+	fireRock->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	fireRock->SetParticleSize(ESPInterval(projectile.GetWidth()), ESPInterval(projectile.GetHeight()));
 	fireRock->SetEmitAngleInDegrees(0);
 	fireRock->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -5124,9 +4820,9 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 
 	// Add a fire aura around the rock...
 	ESPPointEmitter* fireRockAura = new ESPPointEmitter();
-	fireRockAura->SetSpawnDelta(ESPInterval(-1));
+	fireRockAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	fireRockAura->SetInitialSpd(ESPInterval(0));
-	fireRockAura->SetParticleLife(ESPInterval(-1));
+	fireRockAura->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	fireRockAura->SetParticleSize(ESPInterval(1.3f * projectile.GetWidth()), ESPInterval(1.3f * projectile.GetHeight()));
 	fireRockAura->SetEmitAngleInDegrees(0);
 	fireRockAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -5134,7 +4830,7 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 	fireRockAura->SetEmitPosition(Point3D(0, 0, 0));
 	fireRockAura->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.8f), ESPInterval(0.0f), ESPInterval(1.0f));
 	fireRockAura->AddEffector(&this->particlePulseFireGlobAura);
-	result = fireRockAura->SetParticles(1, this->circleGradientTex);
+	result = fireRockAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);
 
 	ESPPointEmitter* fireBallEmitterTrail = new ESPPointEmitter();
@@ -5209,7 +4905,7 @@ void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel,
     fireBits->AddEffector(&this->particleShrinkToNothing);
     fireBits->AddEffector(&this->gravity);
     fireBits->AddEffector(&this->fireOriginColourEffector);
-    fireBits->SetParticles(12, this->circleGradientTex);
+    fireBits->SetParticles(12, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
     ESPPointEmitter* smokeTrail = new ESPPointEmitter();
     smokeTrail->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
@@ -5268,14 +4964,14 @@ void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel,
         shotEmitter->SetEmitPosition(projectilePos);
         shotEmitter->AddEffector(&this->particleFireFastColourFader);
         shotEmitter->AddEffector(&this->particleLargeGrowth);
-        shotEmitter->SetParticles(8, this->cleanCircleGradientTex);
+        shotEmitter->SetParticles(8, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
 
         this->activeGeneralEmitters.push_back(shotEmitter);
 
         // .. and the onomatopoeia for it
         ESPPointEmitter* shotOnoEffect = new ESPPointEmitter();
         // Set up the emitter...
-        shotOnoEffect->SetSpawnDelta(ESPInterval(-1));
+        shotOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
         shotOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
         shotOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
         shotOnoEffect->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 0.75f*projectile.GetWidth()));
@@ -5361,7 +5057,7 @@ void GameESPAssets::AddIceBlastProjectileEffects(const GameModel& gameModel, con
     iceBits->AddEffector(&this->particleShrinkToNothing);
     iceBits->AddEffector(&this->gravity);
     iceBits->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
-    iceBits->SetParticles(15, this->sparkleTex);
+    iceBits->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     ESPPointEmitter* snowflakeTrail = new ESPPointEmitter();
     snowflakeTrail->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
@@ -5407,14 +5103,14 @@ void GameESPAssets::AddIceBlastProjectileEffects(const GameModel& gameModel, con
         shotEmitter->SetEmitPosition(projectilePos);
         shotEmitter->AddEffector(&this->iceBallColourFader);
         shotEmitter->AddEffector(&this->particleLargeGrowth);
-        shotEmitter->SetParticles(8, this->cleanCircleGradientTex);
+        shotEmitter->SetParticles(8, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
 
         this->activeGeneralEmitters.push_back(shotEmitter);
 
         // .. and the onomatopoeia for it
         ESPPointEmitter* shotOnoEffect = new ESPPointEmitter();
         // Set up the emitter...
-        shotOnoEffect->SetSpawnDelta(ESPInterval(-1));
+        shotOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
         shotOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
         shotOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
         shotOnoEffect->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 0.75f*projectile.GetWidth()));
@@ -5461,7 +5157,7 @@ void GameESPAssets::AddPaddleMineFiredEffects(const GameModel& gameModel,
         // Create mine launch onomatopoeia
 		ESPPointEmitter* launchOnoEffect = new ESPPointEmitter();
 		// Set up the emitter...
-		launchOnoEffect->SetSpawnDelta(ESPInterval(-1));
+		launchOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 		launchOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
 		launchOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
 		launchOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
@@ -5503,7 +5199,7 @@ void GameESPAssets::AddPaddleMineFiredEffects(const GameModel& gameModel,
     particleSparks->SetEmitPosition(Point3D(0, 0, 0));
     particleSparks->SetEmitDirection(Vector3D(paddle->GetUpVector()));
 	particleSparks->AddEffector(&this->particleFader);
-	particleSparks->SetParticles(15, this->circleGradientTex);    
+	particleSparks->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));    
     
     this->activePaddleEmitters.push_back(particleSparks);
 }
@@ -5512,10 +5208,10 @@ void GameESPAssets::AddPaddleMineAttachedEffects(const Projectile& projectile) {
 
     const Point2D& projectilePos2D  = projectile.GetPosition();
 
-    // Create mine launch onomatopeia
+    // Create mine launch onomatopoeia
 	ESPPointEmitter* attachOnoEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	attachOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	attachOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	attachOnoEffect->SetInitialSpd(ESPInterval(0.0f));
 	attachOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.1f));
 	attachOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
@@ -5544,6 +5240,33 @@ void GameESPAssets::AddPaddleMineAttachedEffects(const Projectile& projectile) {
 	this->activeGeneralEmitters.push_back(attachOnoEffect);
 }
 
+void GameESPAssets::AddPortalProjectileEffects(const PortalProjectile& projectile) {
+
+    ESPPointEmitter* portalEffect = new ESPPointEmitter();
+    portalEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    portalEffect->SetInitialSpd(ESPInterval(0));
+    portalEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    portalEffect->SetEmitPosition(Point3D(0,0,0));
+    portalEffect->SetEmitDirection(Vector3D(0,1,0));
+    portalEffect->SetParticleColour(projectile.GetColour().GetColour());
+    portalEffect->AddParticle(new ESPMeshParticle(this->portalMesh));
+
+    std::list<ESPEmitter*> otherPortalEffects;
+    PortalBlockMesh::CreatePortalBlockEmitters(projectile.GetColour().GetColour(), Point3D(0,0,0), this->haloExpandPulse,
+        this->particleFader, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO), 
+        this->particleFader, this->particleMediumGrowth, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE), 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP),
+        otherPortalEffects);
+    
+    std::list<ESPPointEmitter*>& projectileEmitters = this->activePostProjectileEmitters[&projectile];
+    
+    projectileEmitters.push_back(portalEffect);
+    for (std::list<ESPEmitter*>::iterator iter = otherPortalEffects.begin(); iter != otherPortalEffects.end(); ++iter) {
+        assert(dynamic_cast<ESPPointEmitter*>(*iter) != NULL);
+        projectileEmitters.push_back(static_cast<ESPPointEmitter*>(*iter));
+    }
+}
+
 /**
  * Private helper function for making and adding a laser blast effect for the laser paddle item.
  */
@@ -5556,12 +5279,12 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	Vector3D projectileDir3D        = Vector3D(projectileDir[0], projectileDir[1], 0.0f);
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
-	// We only do the laser onomatopiea if we aren't in a special camera mode...
+	// We only do the laser onomatopoeia if we aren't in a special camera mode...
 	if (!paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
 		// Create laser onomatopeia
 		ESPPointEmitter* laserOnoEffect = new ESPPointEmitter();
 		// Set up the emitter...
-		laserOnoEffect->SetSpawnDelta(ESPInterval(-1));
+		laserOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 		laserOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
 		laserOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
 		laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
@@ -5633,7 +5356,7 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	    laserTrailSparks->SetEmitPosition(projectilePos3D);
 	    laserTrailSparks->AddEffector(&this->particleFader);
 	    laserTrailSparks->AddEffector(&this->particleMediumShrink);
-	    laserTrailSparks->SetParticles(10, this->circleGradientTex);
+	    laserTrailSparks->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	    this->activeProjectileEmitters[&projectile].push_back(laserTrailSparks);
     }
@@ -5642,7 +5365,7 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	ESPPointEmitter* laserBeamEmitter = new ESPPointEmitter();
 	laserBeamEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	laserBeamEmitter->SetInitialSpd(ESPInterval(0));
-	laserBeamEmitter->SetParticleLife(ESPInterval(-1));
+	laserBeamEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
 		laserBeamEmitter->SetParticleSize(ESPInterval(std::min<float>(projectile.GetWidth(), projectile.GetHeight())));
 	}
@@ -5655,13 +5378,13 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	laserBeamEmitter->SetEmitPosition(Point3D(0,0,0));
     laserBeamEmitter->SetParticleColour(ESPInterval(baseColour.R()),
         ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
-	laserBeamEmitter->SetParticles(1, this->laserBeamTex);
+	laserBeamEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM));
 
 	// Create the slightly-pulsing-glowing aura
 	ESPPointEmitter* laserAuraEmitter = new ESPPointEmitter();
 	laserAuraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	laserAuraEmitter->SetInitialSpd(ESPInterval(0));
-	laserAuraEmitter->SetParticleLife(ESPInterval(-1));
+	laserAuraEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
 		laserAuraEmitter->SetParticleSize(ESPInterval(std::min<float>(2*projectile.GetWidth(), 1.8f*projectile.GetHeight())));
 	}
@@ -5676,7 +5399,7 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	laserAuraEmitter->SetParticleColour(ESPInterval(1.3f * baseColour.R()), ESPInterval(1.3f * baseColour.G()),
         ESPInterval(1.3f * baseColour.B()), ESPInterval(1.0f));
 	laserAuraEmitter->AddEffector(&this->particlePulsePaddleLaser);
-	laserAuraEmitter->SetParticles(1, this->circleGradientTex);
+	laserAuraEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 
 	this->activeProjectileEmitters[&projectile].push_back(laserAuraEmitter);
@@ -5700,14 +5423,14 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	orbEmitter->SetEmitPosition(Point3D(0,0,0));
     orbEmitter->SetParticleColour(ESPInterval(baseColour.R()),
         ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
-    orbEmitter->SetParticles(1, this->circleTex);
+    orbEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE));
 
     // Orbs have a pulsing aura
 	// Create the slightly-pulsing-glowing aura
 	ESPPointEmitter* auraEmitter = new ESPPointEmitter();
 	auraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	auraEmitter->SetInitialSpd(ESPInterval(0));
-	auraEmitter->SetParticleLife(ESPInterval(-1));
+	auraEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	auraEmitter->SetParticleSize(ESPInterval(1.2f * projectile.GetWidth()));
 	auraEmitter->SetEmitAngleInDegrees(0);
 	auraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -5716,7 +5439,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	auraEmitter->SetParticleColour(ESPInterval(brightColour.R()), ESPInterval(brightColour.G()),
         ESPInterval(brightColour.B()), ESPInterval(1.0f));
 	auraEmitter->AddEffector(&this->particlePulseOrb);
-	auraEmitter->SetParticles(1, this->outlinedHoopTex);
+	auraEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP));
 
     // Lens flare
 	ESPPointEmitter* lensFlareEmitter = new ESPPointEmitter();
@@ -5730,7 +5453,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	lensFlareEmitter->SetEmitPosition(Point3D(0,0,0));
 	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.5f));
 	lensFlareEmitter->AddEffector(&this->loopRotateEffectorCW);
-	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
+	lensFlareEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
 
     // Orbs have a consistent trail of energy
     static const int NUM_TRAIL_PARTICLES = 20;
@@ -5753,7 +5476,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
     trailEmitter->SetEmitPosition(Point3D(0, 0, 0));
     trailEmitter->AddEffector(&this->particleMediumShrink);
     trailEmitter->AddEffector(&this->particleFader);
-    trailEmitter->SetParticles(NUM_TRAIL_PARTICLES, this->cleanCircleGradientTex);
+    trailEmitter->SetParticles(NUM_TRAIL_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
 
     this->activeProjectileEmitters[&projectile].push_back(trailEmitter);
     this->activeProjectileEmitters[&projectile].push_back(auraEmitter);
@@ -5769,7 +5492,7 @@ void GameESPAssets::AddLightningBoltESPEffects(const GameModel& gameModel, const
     ESPPointEmitter* boltEmitter = new ESPPointEmitter();
     boltEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     boltEmitter->SetInitialSpd(ESPInterval(0));
-    boltEmitter->SetParticleLife(ESPInterval(-1));
+    boltEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
     // We multiply the size by a small amount extra because the sprite doesn't fill the entire texture
     if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
         boltEmitter->SetParticleSize(ESPInterval(1.15f*std::min<float>(projectile.GetWidth(), projectile.GetHeight())));
@@ -5789,7 +5512,7 @@ void GameESPAssets::AddLightningBoltESPEffects(const GameModel& gameModel, const
     ESPPointEmitter* auraEmitter = new ESPPointEmitter();
     auraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     auraEmitter->SetInitialSpd(ESPInterval(0));
-    auraEmitter->SetParticleLife(ESPInterval(-1));
+    auraEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
     if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
         auraEmitter->SetParticleSize(ESPInterval(std::min<float>(2*projectile.GetWidth(), 1.8f*projectile.GetHeight())));
     }
@@ -5802,7 +5525,7 @@ void GameESPAssets::AddLightningBoltESPEffects(const GameModel& gameModel, const
     auraEmitter->SetEmitPosition(Point3D(0,0,0));
     auraEmitter->SetParticleColour(ESPInterval(0.5f), ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f));
     auraEmitter->AddEffector(&this->particlePulsePaddleLaser);
-    auraEmitter->SetParticles(1, this->sparkleTex);
+    auraEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     // Lens flares
     ESPPointEmitter* lensFlareEmitter = new ESPPointEmitter();
@@ -5819,7 +5542,7 @@ void GameESPAssets::AddLightningBoltESPEffects(const GameModel& gameModel, const
     lensFlareEmitter->AddEffector(&this->loopRotateEffectorCW);
     lensFlareEmitter->AddEffector(&this->particleSmallGrowth);
     lensFlareEmitter->AddEffector(&this->particleFader);
-    lensFlareEmitter->SetParticles(15, this->lensFlareTex);
+    lensFlareEmitter->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
 
     this->activeProjectileEmitters[&projectile].push_back(auraEmitter);
     this->activeProjectileEmitters[&projectile].push_back(boltEmitter);
@@ -5830,6 +5553,11 @@ void GameESPAssets::AddHitWallEffect(const Projectile& projectile, const Point2D
                                      GameSound* sound) {
 
     switch (projectile.GetType()) {
+
+        case Projectile::PortalBlobProjectile:
+            // Not implemented
+            return;
+
         case Projectile::BossOrbBulletProjectile:
             this->AddOrbHitWallEffect(projectile, hitPos, GameViewConstants::GetInstance()->BOSS_ORB_BASE_COLOUR,
                 GameViewConstants::GetInstance()->BOSS_ORB_BRIGHT_COLOUR);
@@ -5879,7 +5607,7 @@ void GameESPAssets::AddLaserHitPrismBlockEffect(const Point2D& loc) {
 	shinyGlowEmitter->SetParticleColour(ESPInterval(0.75f, 0.9f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	shinyGlowEmitter->AddEffector(&this->particleMediumShrink);
 	shinyGlowEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
-	shinyGlowEmitter->SetParticles(1, this->circleGradientTex);
+	shinyGlowEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	// Create a brief lens-flare effect
 	ESPPointEmitter* lensFlareEmitter = new ESPPointEmitter();
@@ -5895,7 +5623,7 @@ void GameESPAssets::AddLaserHitPrismBlockEffect(const Point2D& loc) {
 	lensFlareEmitter->AddEffector(&this->particleFader);
 	lensFlareEmitter->AddEffector(&this->particleLargeGrowth);
 	lensFlareEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
-	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
+	lensFlareEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
 
 	this->activeGeneralEmitters.push_back(lensFlareEmitter);
 	this->activeGeneralEmitters.push_back(shinyGlowEmitter);
@@ -5921,7 +5649,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	lensFlareEmitter->AddEffector(&this->particleFader);
 	lensFlareEmitter->AddEffector(&this->particleMediumGrowth);
 	lensFlareEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
-	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
+	lensFlareEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
 
 	// Create a dispersion of particle bits
 	ESPPointEmitter* particleSparks = new ESPPointEmitter();
@@ -5935,7 +5663,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	particleSparks->SetEmitPosition(EMITTER_LOCATION);
 	particleSparks->AddEffector(&this->particleFader);
 	particleSparks->AddEffector(&this->particleMediumGrowth);
-	particleSparks->SetParticles(6, this->circleGradientTex);
+	particleSparks->SetParticles(6, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	this->activeGeneralEmitters.push_back(lensFlareEmitter);
 	this->activeGeneralEmitters.push_back(particleSparks);
@@ -6052,7 +5780,7 @@ void GameESPAssets::AddOrbHitWallEffect(const Projectile& projectile, const Poin
 	particleSparks->SetEmitPosition(EMITTER_LOCATION);
 	particleSparks->AddEffector(&this->particleFader);
 	particleSparks->AddEffector(&this->particleMediumGrowth);
-	particleSparks->SetParticles(6, this->circleGradientTex);
+	particleSparks->SetParticles(6, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
     this->activeGeneralEmitters.push_back(shockwaveEffect);
     this->activeGeneralEmitters.push_back(particleSparks);
@@ -6082,7 +5810,7 @@ void GameESPAssets::AddLightningBoltHitWallEffect(float width, float height, con
     electricDisperseEffect1->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     electricDisperseEffect1->AddEffector(&this->particleFader);
     electricDisperseEffect1->AddEffector(&this->fastRotatorCW);
-    electricDisperseEffect1->SetAnimatedParticles(5, this->lightningAnimTex, 64, 64);
+    electricDisperseEffect1->SetAnimatedParticles(5, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION), 64, 64);
 
     ESPPointEmitter* electricDisperseEffect2 = new ESPPointEmitter();
     electricDisperseEffect2->SetSpawnDelta(ESPInterval(0.01f, 0.025f));
@@ -6099,7 +5827,7 @@ void GameESPAssets::AddLightningBoltHitWallEffect(float width, float height, con
     electricDisperseEffect2->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     electricDisperseEffect2->AddEffector(&this->particleFader);
     electricDisperseEffect2->AddEffector(&this->fastRotatorCCW);
-    electricDisperseEffect2->SetAnimatedParticles(5, this->lightningAnimTex, 64, 64);
+    electricDisperseEffect2->SetAnimatedParticles(5, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION), 64, 64);
 
     this->activeGeneralEmitters.push_back(shockwaveEffect);
     this->activeGeneralEmitters.push_back(electricDisperseEffect1);
@@ -6136,7 +5864,8 @@ ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, cons
     return comboEffect;
 }
 
-void GameESPAssets::CreateStarAcquiredEffect(const Point2D& position, std::list<ESPEmitter*>& emitterListToAddTo) {
+void GameESPAssets::CreateStarAcquiredEffect(const Point2D& position, 
+                                             std::list<ESPAbstractEmitter*>& emitterListToAddTo) {
 
     static const float LIFE_TIME = 1.75f;
 
@@ -6150,7 +5879,7 @@ void GameESPAssets::CreateStarAcquiredEffect(const Point2D& position, std::list<
     starEmitter->AddEffector(&this->smokeRotatorCCW);
     starEmitter->AddEffector(&this->particleLargeGrowth);
     starEmitter->AddEffector(&this->starColourFlasher);
-    starEmitter->SetParticles(1, this->starTex);
+    starEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 
     // Flare on top of the star
     ESPPointEmitter* flareEmitter = new ESPPointEmitter();
@@ -6163,7 +5892,7 @@ void GameESPAssets::CreateStarAcquiredEffect(const Point2D& position, std::list<
     flareEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
     flareEmitter->AddEffector(&this->fastRotatorCW);
     flareEmitter->AddEffector(&this->particleFader);
-    flareEmitter->SetParticles(1, this->lensFlareTex);
+    flareEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
 
     emitterListToAddTo.push_back(starEmitter);
     emitterListToAddTo.push_back(flareEmitter);
@@ -6185,7 +5914,7 @@ void GameESPAssets::AddBossHurtEffect(const Point2D& pos, float width, float hei
 	hurtStars->SetEmitPosition(Point3D(pos, 0));
 	hurtStars->SetEmitDirection(Vector3D(0,1,0));
 	hurtStars->AddEffector(&this->particleFireColourFader);
-    hurtStars->SetParticles(20, this->starTex);
+    hurtStars->SetParticles(20, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_STAR));
 
     this->activeGeneralEmitters.push_back(hurtStars);
 }
@@ -6207,7 +5936,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
     angryBolts->SetRadiusDeviationFromCenter(ESPInterval(0.0f, width/3.0f), ESPInterval(0.0f, std::min<float>(height/3.0f, 1.0f)), ESPInterval(0.0f));
     angryBolts->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     angryBolts->AddEffector(&this->particleFader);
-	angryBolts->SetParticles(10, this->lightningBoltTex);
+	angryBolts->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT));
 
     // Angry onomatopoeia
 	ESPPointEmitter* angryOno = new ESPPointEmitter();
@@ -6335,7 +6064,7 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         boostSparkles->SetEmitPosition(ballPosition);
 	    boostSparkles->AddEffector(&this->particleFader);
         boostSparkles->AddEffector(&this->particleMediumShrink);
-	    result = boostSparkles->SetParticles(15, this->sparkleTex);
+	    result = boostSparkles->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 	    assert(result);
 
 	    ESPPointEmitter* glowEmitterTrail = new ESPPointEmitter();
@@ -6351,7 +6080,7 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
         glowEmitterTrail->SetParticleColour(ESPInterval(0.85f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
         glowEmitterTrail->AddEffector(&this->particleBoostFader);
 	    glowEmitterTrail->AddEffector(&this->particleShrinkToNothing);
-	    result = glowEmitterTrail->SetParticles(30, this->circleGradientTex);
+	    result = glowEmitterTrail->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	    assert(result);
 
         ESPPointEmitter* vapourTrailEffect = new ESPPointEmitter();
@@ -6395,7 +6124,7 @@ void GameESPAssets::AddBallAcquiredBoostEffect(const GameBall& ball, const Colou
     boostGainedHaloEmitter->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
     boostGainedHaloEmitter->AddEffector(&this->particleSuperGrowth);
 	boostGainedHaloEmitter->AddEffector(&this->particleFader);
-    bool result = boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, this->haloTex);
+    bool result = boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
     UNUSED_VARIABLE(result);
 	assert(result);
 
@@ -6415,7 +6144,7 @@ void GameESPAssets::AddBallAcquiredBoostEffect(const GameBall& ball, const Colou
                                      ESPInterval(colour.B()), ESPInterval(1.0f));
 	sinkParticles->AddEffector(&this->particleFader);
 	sinkParticles->AddEffector(&this->particleMediumShrink);    
-    sinkParticles->SetParticles(15, this->sparkleTex);
+    sinkParticles->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     this->activeBallBGEmitters[&ball].push_back(boostGainedHaloEmitter);
     this->activeBallBGEmitters[&ball].push_back(sinkParticles);
@@ -6431,7 +6160,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	ESPPointEmitter* explosionEffect = new ESPPointEmitter();
 	
 	// Set up the emitter...
-	explosionEffect->SetSpawnDelta(ESPInterval(-1));
+	explosionEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	explosionEffect->SetParticleLife(bangLifeInterval);
 	explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
@@ -6450,7 +6179,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	explosionEffect->AddEffector(&this->particleMediumGrowth);
 	
 	// Add the explosion particle...
-	bool result = explosionEffect->SetParticles(1, this->hugeExplosionTex);
+	bool result = explosionEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION));
     UNUSED_VARIABLE(result);
 	assert(result);
 
@@ -6463,7 +6192,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	explodeRayEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	explodeRayEffect->SetParticleAlignment(ESP::ScreenAligned);
 	explodeRayEffect->SetEmitPosition(emitCenter);
-	explodeRayEffect->SetParticles(1, this->explosionRayTex);
+	explodeRayEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS));
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
 		explodeRayEffect->AddEffector(&this->explosionRayRotatorCW);
 	}
@@ -6475,7 +6204,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 
 	// Add debris bits
 	ESPPointEmitter* debrisBits = new ESPPointEmitter();
-	debrisBits->SetSpawnDelta(ESPInterval(-1));
+	debrisBits->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	debrisBits->SetInitialSpd(ESPInterval(4.5f, 6.0f));
 	debrisBits->SetParticleLife(ESPInterval(2.5f, 3.5f));
 	debrisBits->SetParticleSize(ESPInterval(rocketSizeFactor * LevelPiece::PIECE_WIDTH / 6.0f, rocketSizeFactor * LevelPiece::PIECE_WIDTH / 5.0f));
@@ -6485,12 +6214,12 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	debrisBits->AddEffector(&this->particleFader);
 	debrisBits->AddEffector(&this->particleMediumGrowth);
 	debrisBits->AddEffector(&this->gravity);
-	debrisBits->SetParticles(15, this->circleGradientTex);
+	debrisBits->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	// Create an emitter for the sound of onomatopeia of the breaking block
 	ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	bangOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
 	bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
 	bangOnoEffect->SetParticleSize(ESPInterval(rocketSizeFactor * 1.0f));
@@ -6546,7 +6275,7 @@ void GameESPAssets::AddMineBlastEffect(const MineProjectile& mine, const Point2D
 	ESPPointEmitter* explosionEffect = new ESPPointEmitter();
 	
 	// Set up the emitter...
-	explosionEffect->SetSpawnDelta(ESPInterval(-1));
+	explosionEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	explosionEffect->SetParticleLife(bangLifeInterval);
 	explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
@@ -6565,14 +6294,14 @@ void GameESPAssets::AddMineBlastEffect(const MineProjectile& mine, const Point2D
 	explosionEffect->AddEffector(&this->particleMediumGrowth);
 	
 	// Add the explosion particle...
-	bool result = explosionEffect->SetParticles(1, this->bubblyExplosionTex);
+	bool result = explosionEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BUBBLY_EXPLOSION));
     UNUSED_VARIABLE(result);
 	assert(result);
 
 	// Create an emitter for the sound of onomatopeia of the breaking block
 	ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	bangOnoEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
 	bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
 	bangOnoEffect->SetParticleSize(ESPInterval(mineSizeFactor));
@@ -6633,7 +6362,7 @@ void GameESPAssets::AddEnergyShieldHitEffect(const Point2D& shieldCenter, const 
 	sparkleEnergyBits->SetEmitPosition(emitPosition3D);
 	sparkleEnergyBits->AddEffector(&this->particleFader);
 	sparkleEnergyBits->AddEffector(&this->particleMediumShrink);
-	bool result = sparkleEnergyBits->SetParticles(7, this->sparkleTex);
+	bool result = sparkleEnergyBits->SetParticles(7, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 	assert(result);
 	
 	ESPPointEmitter* solidEnergyBits = new ESPPointEmitter();
@@ -6648,7 +6377,7 @@ void GameESPAssets::AddEnergyShieldHitEffect(const Point2D& shieldCenter, const 
 	solidEnergyBits->SetEmitPosition(emitPosition3D);
 	solidEnergyBits->AddEffector(&this->particleFader);
 	solidEnergyBits->AddEffector(&this->particleMediumShrink);
-	result = solidEnergyBits->SetParticles(10, this->circleGradientTex);
+	result = solidEnergyBits->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);
 
 	// Add a small shockwave
@@ -6679,7 +6408,7 @@ void GameESPAssets::AddBallHitTurretEffect(const GameBall& ball, const LevelPiec
     fallingSparkEffect->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
     fallingSparkEffect->AddEffector(&this->particleFader);
     fallingSparkEffect->AddEffector(&this->gravity);
-    fallingSparkEffect->SetParticles(8, this->sparkleTex);
+    fallingSparkEffect->SetParticles(8, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
     smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
@@ -6807,7 +6536,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		haloExpandingAura->AddEffector(&this->particleLargeGrowth);
 		haloExpandingAura->AddEffector(&this->particleFader);
 
-		bool result = haloExpandingAura->SetParticles(1, this->haloTex);
+		bool result = haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
         UNUSED_VARIABLE(result);
 		assert(result);
 
@@ -6829,7 +6558,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		paddlePulsingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.7f));
 		paddlePulsingAura->AddEffector(&this->particleLargeGrowth);
 		paddlePulsingAura->AddEffector(&this->particleFader);
-		bool result = paddlePulsingAura->SetParticles(1, this->circleGradientTex);
+		bool result = paddlePulsingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 		assert(result);
 
 		// Halo expanding aura
@@ -6845,7 +6574,8 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
 		haloExpandingAura->AddEffector(&this->particleLargeGrowth);
 		haloExpandingAura->AddEffector(&this->particleFader);
-		result = haloExpandingAura->SetParticles(1, this->haloTex);
+		result = haloExpandingAura->SetParticles(1, 
+            PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 		assert(result);	
 
 		// Absorb glow sparks
@@ -6862,7 +6592,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		absorbGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
 		absorbGlowSparks->AddEffector(&this->particleFader);
 		absorbGlowSparks->AddEffector(&this->particleMediumShrink);
-		result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, this->circleGradientTex);
+		result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 		assert(result);
 		
         ESPPointEmitter* itemNameEffect = NULL;
@@ -6905,7 +6635,7 @@ void GameESPAssets::AddPaddleGrowEffect(const PlayerPaddle* paddle) {
 		paddleGrowEffect->SetEmitDirection(directions[i]);
 		paddleGrowEffect->SetEmitAngleInDegrees(23);
 		paddleGrowEffect->SetParticleColour(ESPInterval(0.0f, 0.5f), ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
-		paddleGrowEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		paddleGrowEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW));
 		paddleGrowEffect->AddEffector(&this->particleFader);
 		paddleGrowEffect->AddEffector(&this->particleMediumGrowth);
 
@@ -6939,7 +6669,7 @@ void GameESPAssets::AddPaddleShrinkEffect(const PlayerPaddle* paddle) {
 		paddleShrinkEffect->SetEmitAngleInDegrees(23);
 		paddleShrinkEffect->SetIsReversed(true);
 		paddleShrinkEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f) , ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
-		paddleShrinkEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		paddleShrinkEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW));
 		paddleShrinkEffect->AddEffector(&this->particleFader);
 		paddleShrinkEffect->AddEffector(&this->particleMediumShrink);
 
@@ -6972,7 +6702,7 @@ void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
 		ballGrowEffect->SetEmitDirection(directions[i]);
 		ballGrowEffect->SetEmitAngleInDegrees(23);
 		ballGrowEffect->SetParticleColour(ESPInterval(0.0f, 0.5f), ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
-		ballGrowEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		ballGrowEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW));
 		ballGrowEffect->AddEffector(&this->particleFader);
 		ballGrowEffect->AddEffector(&this->particleMediumGrowth);
 
@@ -7006,7 +6736,7 @@ void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
 		ballShrinkEffect->SetEmitAngleInDegrees(23);
 		ballShrinkEffect->SetIsReversed(true);
 		ballShrinkEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f) , ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
-		ballShrinkEffect->SetParticles(GameESPAssets::NUM_BALL_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		ballShrinkEffect->SetParticles(GameESPAssets::NUM_BALL_SIZE_CHANGE_PARTICLES/4, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW));
 		ballShrinkEffect->AddEffector(&this->particleFader);
 		ballShrinkEffect->AddEffector(&this->particleMediumShrink);
 
@@ -7032,7 +6762,7 @@ void GameESPAssets::AddGravityBallESPEffects(const GameBall* ball, std::vector<E
 	ballGravityEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 
 	ballGravityEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f) , ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
-	ballGravityEffect->SetParticles(10, this->upArrowTex);
+	ballGravityEffect->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW));
 	ballGravityEffect->AddEffector(&this->particleGravityArrowColour);
 	ballGravityEffect->AddEffector(&this->particleSmallGrowth);
 
@@ -7073,7 +6803,7 @@ void GameESPAssets::AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESP
 	crazySparks->SetRadiusDeviationFromCenter(0.25f * ball->GetBounds().Radius());
 	crazySparks->SetEmitPosition(Point3D(0,0,0));
 	crazySparks->AddEffector(&this->particleFader);
-	crazySparks->SetParticles(15, this->circleGradientTex);
+	crazySparks->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	effectsList.push_back(crazyTextEffect);
 	effectsList.push_back(crazySparks);
@@ -7085,16 +6815,16 @@ void GameESPAssets::AddSlowBallESPEffects(const GameBall* ball, std::vector<ESPP
     static const float SPAWN_DELTA = LIFE_TIME / static_cast<float>(NUM_CHEVRONS);
 
     ESPPointEmitter* slowBallAura = new ESPPointEmitter();
-	slowBallAura->SetSpawnDelta(ESPInterval(-1));
+	slowBallAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	slowBallAura->SetInitialSpd(ESPInterval(0));
-	slowBallAura->SetParticleLife(ESPInterval(-1));
+	slowBallAura->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	slowBallAura->SetParticleSize(ESPInterval(1.5f));
 	slowBallAura->SetEmitAngleInDegrees(0);
 	slowBallAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	slowBallAura->SetParticleAlignment(ESP::ScreenAligned);
 	slowBallAura->SetEmitPosition(Point3D(0, 0, 0));
 	slowBallAura->SetParticleColour(ESPInterval(0.12f), ESPInterval(0.8f), ESPInterval(0.94f), ESPInterval(0.75f));
-	slowBallAura->SetParticles(1, this->circleGradientTex);
+	slowBallAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	ESPPointEmitter* slowChevrons = new ESPPointEmitter();
 	slowChevrons->SetSpawnDelta(ESPInterval(SPAWN_DELTA));
@@ -7105,7 +6835,7 @@ void GameESPAssets::AddSlowBallESPEffects(const GameBall* ball, std::vector<ESPP
 	slowChevrons->SetEmitPosition(Point3D(0,0,0));
     slowChevrons->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	slowChevrons->AddEffector(&this->slowBallColourFader);
-	slowChevrons->SetParticles(NUM_CHEVRONS, this->chevronTex);
+	slowChevrons->SetParticles(NUM_CHEVRONS, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CHEVRON));
 
     effectsList.push_back(slowBallAura);
 	effectsList.push_back(slowChevrons);
@@ -7117,16 +6847,16 @@ void GameESPAssets::AddFastBallESPEffects(const GameBall* ball, std::vector<ESPP
     static const float SPAWN_DELTA = LIFE_TIME / static_cast<float>(NUM_CHEVRONS);
 
     ESPPointEmitter* fastBallAura = new ESPPointEmitter();
-	fastBallAura->SetSpawnDelta(ESPInterval(-1));
+	fastBallAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	fastBallAura->SetInitialSpd(ESPInterval(0));
-	fastBallAura->SetParticleLife(ESPInterval(-1));
+	fastBallAura->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	fastBallAura->SetParticleSize(ESPInterval(1.5f));
 	fastBallAura->SetEmitAngleInDegrees(0);
 	fastBallAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	fastBallAura->SetParticleAlignment(ESP::ScreenAligned);
 	fastBallAura->SetEmitPosition(Point3D(0, 0, 0));
 	fastBallAura->SetParticleColour(ESPInterval(0.95f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(0.75f));
-	fastBallAura->SetParticles(1, this->circleGradientTex);
+	fastBallAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	ESPPointEmitter* fastChevrons = new ESPPointEmitter();
 	fastChevrons->SetSpawnDelta(ESPInterval(SPAWN_DELTA));
@@ -7138,7 +6868,7 @@ void GameESPAssets::AddFastBallESPEffects(const GameBall* ball, std::vector<ESPP
     //fastChevrons->SetIsReversed(true);
     fastChevrons->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	fastChevrons->AddEffector(&this->fastBallColourFader);
-	fastChevrons->SetParticles(NUM_CHEVRONS, this->chevronTex);
+	fastChevrons->SetParticles(NUM_CHEVRONS, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CHEVRON));
 
     effectsList.push_back(fastBallAura);
 	effectsList.push_back(fastChevrons);
@@ -7201,7 +6931,7 @@ void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
 	// Add effectors...
 	heartEffect->AddEffector(&this->particleFader);
 	heartEffect->AddEffector(&this->particleSmallGrowth);
-    heartEffect->SetParticles(1, this->heartTex);
+    heartEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HEART));
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
 	this->activeGeneralEmitters.push_back(heartEffect);
@@ -7355,8 +7085,8 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
  */
 void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 	// Go through all the other particles and do book keeping and drawing
-	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin(); iter != this->activeGeneralEmitters.end();) {
-		ESPEmitter* curr = *iter;
+	for (std::list<ESPAbstractEmitter*>::iterator iter = this->activeGeneralEmitters.begin(); iter != this->activeGeneralEmitters.end();) {
+		ESPAbstractEmitter* curr = *iter;
 		assert(curr != NULL);
 
 		// Check to see if dead, if so erase it...
@@ -7401,6 +7131,29 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
     this->DrawPaddleBlasterProjectiles(dT, camera);
 }
 
+void GameESPAssets::DrawPostProjectileEffects(double dT, const Camera& camera) {
+    for (ProjectileEmitterMapIter iter = this->activePostProjectileEmitters.begin();
+        iter != this->activePostProjectileEmitters.end(); ++iter) {
+
+            const Projectile* currProjectile = iter->first;
+            if (!currProjectile->GetIsActive()) {
+                continue;
+            }
+
+            ProjectileEmitterCollection& projEmitters = iter->second;
+
+            assert(currProjectile != NULL);
+
+            // Update and draw the emitters, background then foreground...
+            for (ProjectileEmitterCollectionIter emitIter = projEmitters.begin(); 
+                emitIter != projEmitters.end(); ++emitIter) {
+
+                this->DrawProjectileEmitter(dT, camera, *currProjectile, *emitIter);
+            }
+    }
+
+}
+
 /**
  * Private helper function for drawing a single projectile at a given position.
  */
@@ -7430,7 +7183,7 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera,
         
         glPopMatrix();
 	}
-	else {
+	else if (projectile.GetVelocityMagnitude() != 0) {
 		// We want all the emitting, moving particles attached to the projectile to move with the projectile and
 		// fire opposite its trajectory
         Point3D emitPos = Point3D(projectile.GetPosition() - projectile.GetHalfHeight() * projectile.GetVelocityDirection(), projectile.GetZOffset());
@@ -7438,6 +7191,12 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera,
 		projectileEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()[0], -projectile.GetVelocityDirection()[1], 0.0f));
         projectileEmitter->Tick(dT);
         projectileEmitter->Draw(camera);   
+    }
+    else {
+        Point3D emitPos = Point3D(projectile.GetPosition(), projectile.GetZOffset());
+        projectileEmitter->SetEmitPosition(emitPos);
+        projectileEmitter->Tick(dT);
+        projectileEmitter->Draw(camera);  
     }
 }
 
@@ -7552,23 +7311,23 @@ void GameESPAssets::ChooseDispositionTextures(const GameItem::ItemDisposition& i
 
     switch (itemDisposition) {
         case GameItem::Good:
-            itemSpecificFillShapeTex    = this->plusTex;
-            itemSpecificOutlineShapeTex = this->plusOutlineTex;
-            itemSepecificFaceTex        = this->happyFaceTex;
+            itemSpecificFillShapeTex    = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_PLUS);
+            itemSpecificOutlineShapeTex = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_PLUS);
+            itemSepecificFaceTex        = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HAPPY_FACE);
 
             break;
 
         case GameItem::Bad:
-            itemSpecificFillShapeTex    = this->xTex;
-            itemSpecificOutlineShapeTex = this->xOutlineTex;
-            itemSepecificFaceTex        = this->sadFaceTex;
+            itemSpecificFillShapeTex    = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_X);
+            itemSpecificOutlineShapeTex = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_X);
+            itemSepecificFaceTex        = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SAD_FACE);
 
             break;
 
         case GameItem::Neutral:
-            itemSpecificFillShapeTex    = this->circleTex;
-            itemSpecificOutlineShapeTex = this->outlinedHoopTex;
-            itemSepecificFaceTex        = this->neutralFaceTex;
+            itemSpecificFillShapeTex    = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE);
+            itemSpecificOutlineShapeTex = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_OUTLINED_HOOP);
+            itemSepecificFaceTex        = PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_NEUTRAL_FACE);
 
             break;
 
@@ -7962,6 +7721,7 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 }
 
 void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+
 	// Check to see if the ball has any associated slow ball effects, if not, then
 	// create the effect and add it to the ball first
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
@@ -7974,9 +7734,7 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
 
 	std::vector<ESPPointEmitter*>& slowBallEffectList = this->ballEffects[&ball][GameItem::BallSlowDownItem];
 
-	const Point2D& loc = ball.GetBounds().Center();
-    Vector3D negBallDir = -Vector3D(ball.GetDirection());
-
+    const Point2D& loc = ball.GetBounds().Center();
 	glPushMatrix();
 	glTranslatef(loc[0], loc[1], 0);
 
@@ -7985,6 +7743,14 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
 	slowBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     slowBallEffectList[0]->Tick(dT);
     slowBallEffectList[0]->Draw(camera);
+
+    // If the ball is not moving it doesn't have a tail
+    if (ball.GetDirection().IsZero()) {
+        glPopMatrix();
+        return;
+    }
+    
+    Vector3D negBallDir = -Vector3D(ball.GetDirection());
 
 	// Draw the tail...
     // Reset the tail emitter when the direction of the ball changes
@@ -8017,8 +7783,6 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
 	std::vector<ESPPointEmitter*>& fastBallEffectList = this->ballEffects[&ball][GameItem::BallSpeedUpItem];
 
 	const Point2D& loc = ball.GetBounds().Center();
-    Vector3D ballDir = Vector3D(ball.GetDirection());
-
 	glPushMatrix();
 	glTranslatef(loc[0], loc[1], 0);
 
@@ -8027,6 +7791,14 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
 	fastBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     fastBallEffectList[0]->Tick(dT);
     fastBallEffectList[0]->Draw(camera);
+
+    // If the ball is not moving it doesn't have a tail
+    if (ball.GetDirection().IsZero()) {
+        glPopMatrix();
+        return;
+    }
+
+    Vector3D ballDir = Vector3D(ball.GetDirection());
 
 	// Draw the tail...
     // Reset the tail emitter when the direction of the ball changes
@@ -8133,9 +7905,13 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
 }
 
 void GameESPAssets::ResetProjectileEffects(const Projectile& projectile) {
+    
     ProjectileEmitterMapIter findIter = this->activeProjectileEmitters.find(&projectile);
     if (findIter == this->activeProjectileEmitters.end()) {
-        return;
+        findIter = this->activePostProjectileEmitters.find(&projectile);
+        if (findIter == this->activePostProjectileEmitters.end()) {
+            return;
+        }
     }
 
     ProjectileEmitterCollection& emitters = findIter->second;

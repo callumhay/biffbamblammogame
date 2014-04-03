@@ -49,6 +49,7 @@
 #include "PaddleMineProjectile.h"
 #include "PaddleRemoteControlRocketProjectile.h"
 #include "CollateralBlockProjectile.h"
+#include "PortalProjectile.h"
 #include "GeneralEffectEventInfo.h"
 #include "BossEffectEventInfo.h"
 
@@ -260,6 +261,16 @@ public:
         UNUSED_PARAMETER(collisionPart);
     }
 
+    /**
+     * Event triggered when a projectile collides with a ball. Occurs just once just after the collision.
+     * Arguments: projectile - The projectile that collided with the ball.
+     *            ball       - The ball that collided with the projectile.
+     */
+    virtual void ProjectileBallCollisionEvent(const Projectile& projectile, const GameBall& ball) {
+        UNUSED_PARAMETER(projectile);
+        UNUSED_PARAMETER(ball);
+    }
+
 	/**
 	 * Event triggered when a projectile hits the paddle shield and is deflected by it. Occurs once right after
 	 * the deflection.
@@ -377,10 +388,36 @@ public:
 	/** 
 	 * Event triggered when a ball is teleported by a portal block. Only occurs once as the ball enters
 	 * the portal block, one frame before it is shown coming out of the sibling portal.
-	 * Arguments: ball				- The ball teleported.
-	 *            enterPortal	- The portal entered by the ball.
+	 * Arguments: ball		  - The ball teleported.
+	 *            enterPortal - The portal (block) entered by the ball.
 	 */
-    virtual void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) { UNUSED_PARAMETER(ball); UNUSED_PARAMETER(enterPortal); }
+    virtual void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) {
+        UNUSED_PARAMETER(ball);
+        UNUSED_PARAMETER(enterPortal);
+    }
+
+    /** 
+	 * Event triggered when a projectile is teleported by a portal projectile. Only occurs once as the projectile enters
+	 * the portal, one frame before it is shown coming out of the sibling portal.
+	 * Arguments: projectile            - The projectile teleported.
+	 *            enterPortalProjectile	- The portal (projectile) entered by the projectile.
+	 */
+    virtual void ProjectilePortalProjectileTeleportEvent(const Projectile& projectile, 
+                                                         const PortalProjectile& enterPortalProjectile) {
+        UNUSED_PARAMETER(projectile);
+        UNUSED_PARAMETER(enterPortalProjectile);
+    }
+
+	/** 
+	 * Event triggered when a ball is teleported by a portal projectile. Only occurs once as the ball enters
+	 * the portal, one frame before it is shown coming out of the sibling portal.
+	 * Arguments: ball			        - The ball teleported.
+	 *            enterPortalProjectile	- The portal (projectile) entered by the ball.
+	 */
+    virtual void BallPortalProjectileTeleportEvent(const GameBall& ball, const PortalProjectile& enterPortalProjectile) {
+        UNUSED_PARAMETER(ball);
+        UNUSED_PARAMETER(enterPortalProjectile);
+    }
 
 	/**
 	 * Event triggered when a projectile is teleported by a portal block. Only occurs once per projectile,

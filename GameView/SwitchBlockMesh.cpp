@@ -250,9 +250,9 @@ void SwitchBlockMesh::InitEmitters() {
     this->pulser = ESPParticleScaleEffector(pulseSettings);
 
     this->idlePulseEmitter = new ESPPointEmitter();
-    this->idlePulseEmitter->SetSpawnDelta(ESPInterval(-1));
+    this->idlePulseEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     this->idlePulseEmitter->SetInitialSpd(ESPInterval(0));
-    this->idlePulseEmitter->SetParticleLife(ESPInterval(-1));
+    this->idlePulseEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
     this->idlePulseEmitter->SetParticleSize(ESPInterval(1.2f*LevelPiece::PIECE_WIDTH), ESPInterval(1.2f*LevelPiece::PIECE_HEIGHT));
     this->idlePulseEmitter->SetEmitAngleInDegrees(0);
     this->idlePulseEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));

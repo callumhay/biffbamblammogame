@@ -30,21 +30,29 @@
 #ifndef __ESPPARTICLEMAGNETICEFFECTOR_H__
 #define __ESPPARTICLEMAGNETICEFFECTOR_H__
 
-#include "ESPParticleEffector.h"
+#include "ESPEffector.h"
 #include "../BlammoEngine/Point.h"
 
-class ESPParticleMagneticEffector : public ESPParticleEffector {
+class ESPParticleMagneticEffector : public ESPEffector {
 
 public:
 	ESPParticleMagneticEffector(const Point3D& attactingPolePos, float forceCoeff);
 	~ESPParticleMagneticEffector();
 
 	void AffectParticleOnTick(double dT, ESPParticle* particle);
+    void AffectBeamOnTick(double dT, ESPBeam* beam);
+
+    ESPEffector* Clone() const;
 
 private:
     Point3D attactingPolePos;
     float forceCoeff;
 
+    DISALLOW_COPY_AND_ASSIGN(ESPParticleMagneticEffector);
 };
+
+inline ESPEffector* ESPParticleMagneticEffector::Clone() const {
+    return new ESPParticleMagneticEffector(this->attactingPolePos, this->forceCoeff);
+}
 
 #endif // __ESPPARTICLEMAGNETICEFFECTOR_H__

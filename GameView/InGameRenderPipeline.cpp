@@ -278,7 +278,8 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     GameESPAssets* espAssets = assets->GetESPAssets();
 
 	// Render any post-processing effects for various items/objects in the game
-	espAssets->DrawProjectileEffects(dT, camera);
+    assets->DrawBossPostEffects(dT, currLevel, camera);
+    espAssets->DrawProjectileEffects(dT, camera);
     assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
     assets->DrawLevelPiecesPostEffects(dT, camera);
 	assets->DrawStatusEffects(dT, camera, colourAndDepthFBO);
@@ -333,8 +334,6 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
     assets->DrawNoBloomLevelPieces(dT, camera);
 
     glClear(GL_DEPTH_BUFFER_BIT);
-    //glPushAttrib(GL_DEPTH_BUFFER_BIT);
-    //glDepthFunc(GL_ALWAYS);
 
     // Draw dropping items
     if (fboAssets->DrawItemsInLastPass()) {
@@ -348,10 +347,10 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
 	GameESPAssets* espAssets = assets->GetESPAssets();
 	espAssets->DrawBeamEffects(dT, camera);
 	espAssets->DrawParticleEffects(dT, camera);
+    espAssets->DrawPostProjectileEffects(dT, camera);
 
 	// Absolute post effects call for various object effects
 	assets->DrawGameBallsPostEffects(dT, *gameModel, camera);
-    //glPopAttrib();
 
     // Add outlines to the scene...
     {

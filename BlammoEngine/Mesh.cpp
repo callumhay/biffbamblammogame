@@ -109,6 +109,17 @@ void PolygonGroup::Transform(const Matrix4x4& m) {
 	}
 }
 
+void MaterialGroup::BuildDisplayList() {
+    assert(this->polyGrp != NULL);
+    assert(this->displayListID == 0);
+
+    // Create a display list for the polygon group
+    this->displayListID = glGenLists(1);
+    glNewList(this->displayListID, GL_COMPILE);
+    this->polyGrp->Draw();
+    glEndList();
+}
+
 void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 
 														 const std::vector<Point3D>& vertexStream, 
 														 const std::vector<Vector3D>& normalStream,
@@ -121,12 +132,16 @@ void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer,
 	}
 
 	this->polyGrp = new PolygonGroup(indexer, vertexStream, normalStream, texCoordStream);
+	this->BuildDisplayList();
+}
 
-	// Create a display list for the polygon group
-	this->displayListID = glGenLists(1);
-	glNewList(this->displayListID, GL_COMPILE);
-	this->polyGrp->Draw();
-	glEndList();
+void MaterialGroup::ResetDisplayList() {
+    this->DeleteDisplayList();
+    if (this->polyGrp == NULL) {
+        return;
+    }
+    
+    this->BuildDisplayList();
 }
 
 Mesh::Mesh(const std::string name, const std::map<std::string, MaterialGroup*> &matGrps):

@@ -167,9 +167,9 @@ particleShrinkToNothing(1, 0), pulseGrower(1.0f, 4.0f), fastPulser(0,0) {
 	this->fastPulseSettings.pulseRate = 1.0f;
 	this->fastPulser = ESPParticleScaleEffector(this->fastPulseSettings);
 
-	this->triggeredPulseEmitter.SetSpawnDelta(ESPInterval(-1));
+	this->triggeredPulseEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	this->triggeredPulseEmitter.SetInitialSpd(ESPInterval(0));
-	this->triggeredPulseEmitter.SetParticleLife(ESPInterval(-1));
+	this->triggeredPulseEmitter.SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
     this->triggeredPulseEmitter.SetParticleSize(ESPInterval(1.5f * this->mine->GetWidth()));
 	this->triggeredPulseEmitter.SetEmitAngleInDegrees(0);
 	this->triggeredPulseEmitter.SetRadiusDeviationFromCenter(ESPInterval(0.0f));

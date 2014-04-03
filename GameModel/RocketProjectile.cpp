@@ -72,12 +72,14 @@ BoundingLines RocketProjectile::BuildBoundingLines() const {
 		return BoundingLines();
 	}
 
+    static const float HALF_WIDTH_COEFF = 0.75;
 	const Vector2D& UP_DIR      = this->GetVelocityDirection();
 	const Vector2D& RIGHT_DIR	= this->GetRightVectorDirection();
 
-	Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + 0.75f*this->GetHalfWidth()*RIGHT_DIR;
+	Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + HALF_WIDTH_COEFF*this->GetHalfWidth()*RIGHT_DIR;
 	Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;
-	Point2D topLeft = topRight - this->GetWidth()*RIGHT_DIR;
+
+	Point2D topLeft    = this->GetPosition() + this->GetHalfHeight()*UP_DIR - HALF_WIDTH_COEFF*this->GetHalfWidth()*RIGHT_DIR;
 	Point2D bottomLeft = topLeft - this->GetHeight()*UP_DIR;
 
 	std::vector<Collision::LineSeg2D> sideBounds;

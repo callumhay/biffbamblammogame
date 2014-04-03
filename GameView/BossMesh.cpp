@@ -32,8 +32,13 @@
 #include "GothicRomanticBossMesh.h"
 #include "NouveauBossMesh.h"
 #include "DecoBossMesh.h"
+#include "FuturismBossMesh.h"
 #include "GameViewConstants.h"
 #include "CgFxBossWeakpoint.h"
+#include "BasicEmitterUpdateStrategy.h"
+#include "BossBodyPartEmitterUpdateStrategy.h"
+#include "BossPt2PtBeamUpdateStrategy.h"
+#include "PersistentTextureManager.h"
 
 #include "../BlammoEngine/Texture2D.h"
 
@@ -45,18 +50,20 @@
 #include "../GameModel/GothicRomanticBoss.h"
 #include "../GameModel/NouveauBoss.h"
 #include "../GameModel/DecoBoss.h"
+#include "../GameModel/FuturismBoss.h"
 #include "../GameModel/LaserBeamSightsEffectInfo.h"
 #include "../GameModel/PowerChargeEffectInfo.h"
 #include "../GameModel/ExpandingHaloEffectInfo.h"
 #include "../GameModel/SparkBurstEffectInfo.h"
 #include "../GameModel/ElectricitySpasmEffectInfo.h"
 #include "../GameModel/ElectrifiedEffectInfo.h"
+#include "../GameModel/SummonPortalsEffectInfo.h"
+#include "../GameModel/BossTeleportEffectInfo.h"
 
 #include "../ResourceManager.h"
 
 BossMesh::BossMesh(GameSound* sound) : 
 sound(sound), 
-explosionAnimTex(NULL), 
 weakpointMaterial(NULL),
 finalExplosionIsActive(false),
 finalExplosionSoundID(INVALID_SOUND_ID),
@@ -78,47 +85,21 @@ particleShrinkToNothing(1, 0)
     assert(sound != NULL);
 
     // Initialize the smoke textures...
-    if (this->smokeTextures.empty()) {
-		this->smokeTextures.reserve(6);
-		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);	
-	}
+	this->smokeTextures.reserve(6);
+    this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE1));
+    this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE2));
+    this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE3));
+    this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE4));
+    this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE5));
+    this->smokeTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SMOKE6));
 
-    this->explosionAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_ANIMATION, Texture::Trilinear));
-    assert(this->explosionAnimTex != NULL);
-
-    this->squareTargetTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_SQUARE_TARGET, Texture::Trilinear));
-    assert(this->squareTargetTex != NULL);
-    
-    this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
-    assert(this->haloTex != NULL);
-
-    this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
-    assert(this->sparkleTex != NULL);
-
-    this->lightningAnimTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION, Texture::Trilinear));
-    assert(this->lightningAnimTex != NULL);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_ANIMATION);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SQUARE_TARGET);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_HALO);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SPARKLE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE);
 
     this->lineAnim.ClearLerp();
     this->flashAnim.ClearLerp();
@@ -127,29 +108,7 @@ particleShrinkToNothing(1, 0)
 }
 
 BossMesh::~BossMesh() {
-    // Release the smoke textures
-    bool success = false;
-
-    for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
-		iter != this->smokeTextures.end(); ++iter) {
-		
-		success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(success);	
-	}
 	this->smokeTextures.clear();
-
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->explosionAnimTex);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->squareTargetTex);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningAnimTex);
-    assert(success);
-
-    UNUSED_VARIABLE(success);
 
     // Clean up the effects emitters (if there are any)
     this->ClearActiveEffects();
@@ -199,8 +158,12 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss, GameSo
             break;
         }
 
-        case GameWorld::Futurism:
-            // TODO
+        case GameWorld::Futurism: {
+            assert(dynamic_cast<FuturismBoss*>(boss) != NULL);
+            FuturismBoss* futurismBoss = static_cast<FuturismBoss*>(boss);
+            result = new FuturismBossMesh(futurismBoss, sound);
+            break;
+        }
 
         //case GameWorld::SurrealismDada:
             // TODO
@@ -245,24 +208,12 @@ double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const Gam
 
 void BossMesh::ClearActiveEffects() {
     
-    for (std::list<ESPEmitter*>::iterator iter = this->fgEffectsEmitters.begin();
-        iter != this->fgEffectsEmitters.end(); ++iter) {
+    for (std::list<EffectUpdateStrategy*>::iterator iter = this->fgEffects.begin();
+        iter != this->fgEffects.end(); ++iter) {
             delete *iter;
             *iter = NULL;
     }
-    this->fgEffectsEmitters.clear();
-
-    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->fgAttachedEffectsEmitters.begin();
-        iter1 != this->fgAttachedEffectsEmitters.end(); ++iter1) {
-
-            std::list<ESPEmitter*>& currEmitters = iter1->second;
-            for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end(); ++iter2) {
-                ESPEmitter* currEmitter = *iter2;
-                delete currEmitter;
-                currEmitter = NULL;
-            }
-    }
-    this->fgAttachedEffectsEmitters.clear();
+    this->fgEffects.clear();
 
     for (std::list<ESPEmitter*>::iterator iter = this->bgEffectsEmitters.begin();
         iter != this->bgEffectsEmitters.end(); ++iter) {
@@ -270,12 +221,19 @@ void BossMesh::ClearActiveEffects() {
             *iter = NULL;
     }
     this->bgEffectsEmitters.clear();
+
+    for (std::list<EffectUpdateStrategy*>::iterator iter = this->laterPassEffects.begin();
+        iter != this->laterPassEffects.end(); ++iter) {
+            delete *iter;
+            *iter = NULL;
+    }
+    this->laterPassEffects.clear();
 }
 
 void BossMesh::AddLaserBeamSightsEffect(const LaserBeamSightsEffectInfo& info) {
 
     ESPPointEmitter* spinningTarget = new ESPPointEmitter();
-    spinningTarget->SetSpawnDelta(ESPInterval(-1));
+    spinningTarget->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     spinningTarget->SetInitialSpd(ESPInterval(0));
     spinningTarget->SetParticleLife(ESPInterval(info.GetDurationInSecs()));
     spinningTarget->SetParticleSize(ESPInterval(PlayerPaddle::PADDLE_WIDTH_TOTAL));
@@ -287,16 +245,16 @@ void BossMesh::AddLaserBeamSightsEffect(const LaserBeamSightsEffectInfo& info) {
     spinningTarget->AddEffector(&this->laserSightTargetRotateEffector);
     spinningTarget->AddEffector(&this->laserSightTargetColourChanger);
     spinningTarget->AddEffector(&this->laserSightBigToSmallSize);
-    spinningTarget->SetParticles(1, this->squareTargetTex);
+    spinningTarget->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SQUARE_TARGET));
 
-    this->fgEffectsEmitters.push_back(spinningTarget);
+    this->fgEffects.push_back(new BasicEmitterUpdateStrategy(spinningTarget));
 }
 
 void BossMesh::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
 
     const BossBodyPart* bodyPart = info.GetChargingPart();
     const Colour& baseColour = info.GetColour();
-    const Vector2D& posOffset = info.GetPositionOffset();
+    const Vector3D& posOffset = info.GetPositionOffset();
 
     std::vector<Colour> colours;
     colours.reserve(5);
@@ -314,14 +272,14 @@ void BossMesh::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
     chargeParticles1->SetParticleSize(ESPInterval(info.GetSizeMultiplier() * 1.5f, info.GetSizeMultiplier() * 3.5f));
     chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     chargeParticles1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
-    chargeParticles1->SetEmitPosition(Point3D(posOffset[0],posOffset[1],0));
     chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
     chargeParticles1->SetEmitAngleInDegrees(180);
     chargeParticles1->SetIsReversed(true);
     chargeParticles1->SetParticleColourPalette(colours);
     chargeParticles1->AddEffector(&this->particleFader);
     chargeParticles1->AddEffector(&this->particleMediumShrink);
-    chargeParticles1->SetParticles(20, this->sparkleTex);
+    chargeParticles1->SetParticles(20, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+        GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     static const unsigned int NUM_HALOS = 3;
     ESPPointEmitter* halo = new ESPPointEmitter();
@@ -331,15 +289,19 @@ void BossMesh::AddBossPowerChargeEffect(const PowerChargeEffectInfo& info) {
     halo->SetParticleSize(ESPInterval(5.0f));
     halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     halo->SetParticleAlignment(ESP::ScreenAligned);
-    halo->SetEmitPosition(Point3D(posOffset[0],posOffset[1],0));
     halo->SetIsReversed(true);
     halo->SetParticleColour(ESPInterval(baseColour.R()), ESPInterval(baseColour.G()), 
         ESPInterval(baseColour.B()), ESPInterval(1.0f));
     halo->AddEffector(&this->particleShrinkToNothing);
-    halo->SetParticles(NUM_HALOS, this->haloTex);
+    halo->SetParticles(NUM_HALOS, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+        GameViewConstants::GetInstance()->TEXTURE_HALO));
 
-    this->fgAttachedEffectsEmitters[bodyPart].push_back(halo);
-    this->fgAttachedEffectsEmitters[bodyPart].push_back(chargeParticles1);
+    BossBodyPartEmitterUpdateStrategy* strategy = new BossBodyPartEmitterUpdateStrategy(bodyPart);
+    strategy->AddEmitter(halo);
+    strategy->AddEmitter(chargeParticles1);
+    strategy->SetOffset(posOffset);
+
+    this->fgEffects.push_back(strategy);
 }
 
 void BossMesh::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
@@ -363,9 +325,12 @@ void BossMesh::AddBossExpandingHaloEffect(const ExpandingHaloEffectInfo& info) {
     halo->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(0.8f));
     halo->AddEffector(&this->particleFader);
     halo->AddEffector(&this->particleSuperGrowth);
-    halo->SetParticles(1, this->haloTex);
+    halo->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 
-    this->fgAttachedEffectsEmitters[bodyPart].push_back(halo);
+    BossBodyPartEmitterUpdateStrategy* strategy = new BossBodyPartEmitterUpdateStrategy(bodyPart);
+    strategy->AddEmitter(halo);
+
+    this->fgEffects.push_back(strategy);
 }
 
 void BossMesh::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
@@ -392,7 +357,7 @@ void BossMesh::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
         ESPInterval(colour.B() * 0.75f, colour.B()), ESPInterval(1.0f));
     sparkParticles1->AddEffector(&this->particleFader);
     sparkParticles1->AddEffector(&this->particleSmallGrowth);
-    sparkParticles1->SetParticles(8, this->sparkleTex);
+    sparkParticles1->SetParticles(8, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     ESPPointEmitter* sparkParticles2 = new ESPPointEmitter();
     sparkParticles2->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
@@ -408,15 +373,17 @@ void BossMesh::AddBossSparkBurstEffect(const SparkBurstEffectInfo& info) {
     sparkParticles2->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.8f));
     sparkParticles2->AddEffector(&this->particleFader);
     sparkParticles2->AddEffector(&this->particleSmallGrowth);
-    sparkParticles2->SetParticles(5, this->sparkleTex);
+    sparkParticles2->SetParticles(5, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     if (bodyPart != NULL) {
-        this->fgAttachedEffectsEmitters[bodyPart].push_back(sparkParticles1);
-        this->fgAttachedEffectsEmitters[bodyPart].push_back(sparkParticles2);
+        BossBodyPartEmitterUpdateStrategy* strategy = new BossBodyPartEmitterUpdateStrategy(bodyPart);
+        strategy->AddEmitter(sparkParticles1);
+        strategy->AddEmitter(sparkParticles2);
+        this->fgEffects.push_back(strategy);
     }
     else {
-        this->fgEffectsEmitters.push_back(sparkParticles1);
-        this->fgEffectsEmitters.push_back(sparkParticles2);
+        this->fgEffects.push_back(new BasicEmitterUpdateStrategy(sparkParticles1));
+        this->fgEffects.push_back(new BasicEmitterUpdateStrategy(sparkParticles2));
     }
 }
 
@@ -446,9 +413,13 @@ void BossMesh::AddElectricitySpasmEffect(const ElectricitySpasmEffectInfo& info)
     electricSpasm->SetEmitAngleInDegrees(180);
     electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
     electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
-    electricSpasm->SetAnimatedParticles(NUM_PARTICLES, this->lightningAnimTex, 64, 64);
+    electricSpasm->SetAnimatedParticles(NUM_PARTICLES, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION), 64, 64);
 
-    this->fgAttachedEffectsEmitters[bodyPart].push_back(electricSpasm);
+    BossBodyPartEmitterUpdateStrategy* strategy = new BossBodyPartEmitterUpdateStrategy(bodyPart);
+    strategy->AddEmitter(electricSpasm);
+
+    this->fgEffects.push_back(strategy);
 }
 
 void BossMesh::AddElectrifiedEffect(const ElectrifiedEffectInfo& info) {
@@ -469,9 +440,38 @@ void BossMesh::AddElectrifiedEffect(const ElectrifiedEffectInfo& info) {
     electricSpasm->SetEmitAngleInDegrees(180);
     electricSpasm->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
     electricSpasm->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()),ESPInterval(colour.B()), ESPInterval(1.0f));
-    electricSpasm->SetAnimatedParticles(20, this->lightningAnimTex, 64, 64);
+    electricSpasm->SetAnimatedParticles(20, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION), 64, 64);
 
     this->bgEffectsEmitters.push_back(electricSpasm);
+}
+
+void BossMesh::AddSummonPortalEffect(const SummonPortalsEffectInfo& info) {
+    Point3D bossPos = info.GetBodyPart()->GetTranslationPt3D() + info.GetOffset();
+    Point3D portal1Pos(info.GetPortal1Pos(), 0);
+    //Point3D portal2Pos(info.GetPortal2Pos(), 0);
+    
+    std::list<ESPAbstractEmitter*> emitters; 
+    std::list<ESPPointToPointBeam*> beams;
+    this->BuildSummonPortalEffects(bossPos, portal1Pos, info.GetTimeInSecs(), 
+        info.GetSize(), info.GetPortalColour(), emitters, beams);
+
+    BossPt2PtBeamUpdateStrategy* strategy1 = new BossPt2PtBeamUpdateStrategy(info.GetBodyPart(), beams);
+    strategy1->SetOffset(info.GetOffset());
+    BossBodyPartEmitterUpdateStrategy* strategy2 = new BossBodyPartEmitterUpdateStrategy(info.GetBodyPart(), emitters);
+    strategy2->SetOffset(info.GetOffset());
+
+    // NOTE: Beams should be drawn first!
+    this->laterPassEffects.push_back(strategy1);
+    this->fgEffects.push_back(strategy2);
+}
+
+void BossMesh::AddTeleportEffect(const BossTeleportEffectInfo& info) {
+    // A portal opens at both the original and final locations of the teleportation
+    // TODO
+
+    // Energy particles are being sucked into the original location and spit out of the teleport location
+    // TODO
 }
 
 void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
@@ -533,71 +533,6 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
             }
         }
     }
-}
-
-void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
-    UNUSED_PARAMETER(assets);
-
-    // Go through all the active effects for the boss, draw each one and clean up dead effects
-    for (std::list<ESPEmitter*>::iterator iter = this->fgEffectsEmitters.begin(); iter != this->fgEffectsEmitters.end();) {
-
-        ESPEmitter* curr = *iter;
-        assert(curr != NULL);
-
-        // Check to see if dead, if so erase it...
-        if (curr->IsDead()) {
-            iter = this->fgEffectsEmitters.erase(iter);
-            delete curr;
-            curr = NULL;
-        }
-        else {
-            // Not dead yet so we draw and tick
-            curr->Tick(dT);
-            curr->Draw(camera);
-            ++iter;
-        }
-    }
-
-    // Go through all the attached effects emitters and do book keeping and drawing
-    for (std::map<const BossBodyPart*, std::list<ESPEmitter*> >::iterator iter1 = this->fgAttachedEffectsEmitters.begin();
-         iter1 != this->fgAttachedEffectsEmitters.end();) {
-
-        const BossBodyPart* bodyPart = iter1->first;
-        Point3D bodyPartPos = bodyPart->GetTranslationPt3D();
-
-        std::list<ESPEmitter*>& currEmitters = iter1->second;
-
-        glPushMatrix();
-        glTranslatef(bodyPartPos[0], bodyPartPos[1], bodyPartPos[2]);
-
-        for (std::list<ESPEmitter*>::iterator iter2 = currEmitters.begin(); iter2 != currEmitters.end();) {
-            ESPEmitter* currEmitter = *iter2;
-
-            // Check to see if dead, if so erase it...
-            if (currEmitter->IsDead()) {
-                iter2 = currEmitters.erase(iter2);
-                delete currEmitter;
-                currEmitter = NULL;
-            }
-            else {
-
-                // Not dead yet so we draw and tick - transform to the body part to draw
-                currEmitter->Tick(dT);
-                currEmitter->Draw(camera);
-                ++iter2;
-            }
-        }
-
-        glPopMatrix();
-
-        if (currEmitters.empty()) {
-            iter1 = this->fgAttachedEffectsEmitters.erase(iter1);
-        }
-        else {
-            ++iter1;
-        }
-    }
-
 }
 
 ESPPointEmitter* BossMesh::BuildFireEmitter(float width, float height, float sizeScaler) {
@@ -683,11 +618,129 @@ ESPPointEmitter* BossMesh::BuildExplodingEmitter(float volumeAmt, const Abstract
 	
     int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
     assert(numParticles < 30);
-    bool success = explosionEmitter->SetAnimatedParticles(numParticles, this->explosionAnimTex, 256, 256);
+    bool success = explosionEmitter->SetAnimatedParticles(numParticles, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_ANIMATION), 256, 256);
 	assert(success);
     UNUSED_VARIABLE(success);
 
     return explosionEmitter;
+}
+
+void BossMesh::BuildSummonPortalEffects(const Point3D& bossPos, const Point3D& portalPos, double effectTime,
+                                        float size, const Colour& portalColour, std::list<ESPAbstractEmitter*>& emitters, 
+                                        std::list<ESPPointToPointBeam*>& beams) const {
+
+    ESPMultiAlphaEffector fadeEffector;
+    std::vector<std::pair<float, double> > alphaAndPercentages;
+    alphaAndPercentages.reserve(4);
+    alphaAndPercentages.push_back(std::make_pair(0.0f, 0.0));
+    alphaAndPercentages.push_back(std::make_pair(1.0f, 0.1));
+    alphaAndPercentages.push_back(std::make_pair(1.0f, 0.7));
+    alphaAndPercentages.push_back(std::make_pair(0.0f, 1.0));
+
+    fadeEffector.SetAlphasWithPercentage(alphaAndPercentages);
+
+    // Beams...
+    static const float NUM_SEGS_PER_UNIT = 0.5f;
+
+    Vector3D beamVec = (portalPos-bossPos);
+    assert(!beamVec.IsZero());
+    float beamLength = beamVec.length();
+    Colour brightPortalColour = Colour(0.66f,0.66f,0.66f) + 1.5f*portalColour;
+
+    ESPPointToPointBeam* mainBeam = new ESPPointToPointBeam();
+    mainBeam->SetStartAndEndPoints(bossPos, portalPos);
+    mainBeam->SetColour(ColourRGBA(Colour(0.33f,0.33f,0.33f) + 1.5f*portalColour, 1.0f));
+    mainBeam->SetBeamLifetime(ESPInterval(0.85*effectTime));
+    mainBeam->SetNumBeamShots(1);
+    mainBeam->SetMainBeamThickness(ESPInterval(size));
+    mainBeam->SetNumMainESPBeamSegments(1);
+    mainBeam->SetEnableDepth(false);
+    mainBeam->AddCopiedEffector(fadeEffector);
+
+    ESPPointToPointBeam* innerBeam = new ESPPointToPointBeam();
+    innerBeam->SetStartAndEndPoints(bossPos, portalPos);
+    innerBeam->SetColour(ColourRGBA(Colour(0.55f,0.55f,0.55f) + 1.5f*portalColour, 1.0f));
+    innerBeam->SetBeamLifetime(ESPInterval(0.85*effectTime));
+    innerBeam->SetNumBeamShots(1);
+    innerBeam->SetMainBeamThickness(ESPInterval(0.5f*size));
+    innerBeam->SetNumMainESPBeamSegments(1);
+    innerBeam->SetEnableDepth(false);
+    innerBeam->AddCopiedEffector(fadeEffector);
+
+    static const int NUM_SMALLER_BEAMS = 3;
+    ESPPointToPointBeam* smallerBeam = new ESPPointToPointBeam();
+    smallerBeam->SetStartAndEndPoints(bossPos, portalPos);
+    smallerBeam->SetColour(ColourRGBA(brightPortalColour, 1.0f));
+    smallerBeam->SetBeamLifetime(ESPInterval(0.85*effectTime));
+    //smallerBeam->SetTimeBetweenBeamShots(ESPInterval(TIME_BETWEEN_SHOTS));
+    smallerBeam->SetNumBeamShots(NUM_SMALLER_BEAMS);
+    smallerBeam->SetMainBeamAmplitude(ESPInterval(0.1f * size, 0.5f*size));
+    smallerBeam->SetMainBeamThickness(ESPInterval(0.1f * size));
+    smallerBeam->SetNumMainESPBeamSegments(static_cast<int>(beamLength * NUM_SEGS_PER_UNIT));
+    smallerBeam->SetEnableDepth(false);
+    smallerBeam->AddCopiedEffector(fadeEffector);
+
+    beams.push_back(mainBeam);
+    beams.push_back(innerBeam);
+    beams.push_back(smallerBeam);
+
+    // Emitters...
+    // Set up the pulse effector for the flare emitter
+    ScaleEffect flarePulseSettings;
+    flarePulseSettings.pulseGrowthScale = 1.25f;
+    flarePulseSettings.pulseRate        = 4.0f;
+    ESPParticleScaleEffector flarePulse(flarePulseSettings);
+
+    // NOTE: We don't position the emitters at the boss position since their draw strategy is different
+    // (they will be automatically translated to the position of the body part associated with the effects)
+    // Setup the flare emitter
+    ESPPointEmitter* emitFlare = new ESPPointEmitter();
+    emitFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    emitFlare->SetInitialSpd(ESPInterval(0));
+    emitFlare->SetParticleLife(ESPInterval(effectTime));
+    emitFlare->SetEmitAngleInDegrees(0);
+    emitFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    emitFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    emitFlare->SetParticleSize(ESPInterval(4*size));
+    emitFlare->SetParticleRotation(ESPInterval(0, 359.99f));
+    emitFlare->SetParticleColour(ESPInterval(brightPortalColour.R()), 
+        ESPInterval(brightPortalColour.G()), ESPInterval(brightPortalColour.B()), ESPInterval(1.0f));
+    emitFlare->AddCopiedEffector(flarePulse);
+    emitFlare->AddCopiedEffector(fadeEffector);
+    emitFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE));
+    
+    ESPPointEmitter* emitLensFlare = new ESPPointEmitter();
+    emitLensFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    emitLensFlare->SetInitialSpd(ESPInterval(0));
+    emitLensFlare->SetParticleLife(ESPInterval(effectTime));
+    emitLensFlare->SetEmitAngleInDegrees(0);
+    emitLensFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    emitLensFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    emitLensFlare->SetParticleSize(ESPInterval(5*size));
+    emitLensFlare->SetParticleColour(ESPInterval(brightPortalColour.R()), 
+        ESPInterval(brightPortalColour.G()), ESPInterval(brightPortalColour.B()), ESPInterval(1.0f));
+    emitLensFlare->AddCopiedEffector(fadeEffector);
+    emitLensFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
+
+    emitters.push_back(emitFlare);
+    emitters.push_back(emitLensFlare);
+}
+
+void BossMesh::BuildShieldingColourAnimation(AnimationMultiLerp<Colour>& anim) {
+    std::vector<double> timeVals;
+    timeVals.reserve(3);
+    timeVals.push_back(0.0);
+    timeVals.push_back(0.7);
+    timeVals.push_back(1.4);
+    std::vector<Colour> colourVals;
+    colourVals.reserve(timeVals.size());
+    colourVals.push_back(Colour(1,1,1));
+    colourVals.push_back(Colour(0.33f, 0.33f, 0.33f));
+    colourVals.push_back(Colour(1,1,1));
+
+    anim.SetLerp(timeVals, colourVals);
+    anim.SetRepeat(true);
 }
 
 BossMesh::ExplodingEmitterHandler::ExplodingEmitterHandler(GameSound* sound, const AbstractBossBodyPart* bossBodyPart, float volumeAmt) : 

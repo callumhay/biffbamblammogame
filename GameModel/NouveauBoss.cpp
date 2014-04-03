@@ -128,8 +128,10 @@ bool NouveauBoss::ProjectileIsDestroyedOnCollision(const Projectile* projectile,
     return Boss::ProjectileIsDestroyedOnCollision(projectile, collisionPart);
 }
 
-void NouveauBoss::Init(float startingX, float startingY) {
+void NouveauBoss::Init(float startingX, float startingY,
+                       const std::vector<std::vector<LevelPiece*> >& levelPieces) {
 
+    UNUSED_PARAMETER(levelPieces);
     // Body Layout for the Nouveau Boss:
     // -----------------------------------
     // root

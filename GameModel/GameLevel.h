@@ -127,11 +127,13 @@ public:
 		return this->randomItemProbabilityNum;
 	}
 
-    std::vector<LevelPiece*> GetLevelPieceCollisionCandidatesNotMoving(const Point2D& center, float radius) const;
-	std::vector<LevelPiece*> GetLevelPieceCollisionCandidates(double dT, const Point2D& center, float radius, float velocityMagnitude) const;
-    std::set<LevelPiece*> GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius) const;
-	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(double dT, const Point2D& center, const BoundingLines& bounds, float velocityMagnitude) const;
-	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const;
+    void GetLevelPieceCollisionCandidatesNotMoving(const Point2D& center, float radius, std::vector<LevelPiece*>& candidates) const;
+	void GetLevelPieceCollisionCandidates(double dT, const Point2D& center, float radius, float velocityMagnitude, std::vector<LevelPiece*>& candidates) const;
+    void GetLevelPieceCollisionCandidates(const Collision::AABB2D& aabb, std::set<LevelPiece*>& candidates) const;
+    void GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius, std::set<LevelPiece*>& candidates) const;
+	void GetLevelPieceCollisionCandidates(double dT, const Point2D& center, const BoundingLines& bounds, float velocityMagnitude, std::set<LevelPiece*>& candidates) const;
+	void GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall, std::set<LevelPiece*>& candidates) const;
+    void GetLevelPieceCollisionCandidatesNotMoving(const Point2D& center, float width, float height, std::set<LevelPiece*>& candidates) const;
 
     static void BuildCollisionBoundsCombinationAndMap(const std::vector<LevelPiece*>& pieces,
         std::map<size_t, LevelPiece*>& boundsIdxMap, BoundingLines& combinationBounds);
@@ -141,7 +143,7 @@ public:
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
         const std::set<const LevelPiece*>& ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
     void GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
-        const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::list<LevelPiece*>& result, 
+        const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::set<LevelPiece*>& result, 
         float cutoffRayT, float toleranceRadius = 0.0f) const;
     
 	// Ability to add/remove Tesla lightning barriers
@@ -331,7 +333,8 @@ private:
     void SetPaddleStartXPos(float xPos);
 
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
-	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;
+    void IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax, std::set<LevelPiece*>& candidates) const;
+
 	static void CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces);
 
     DISALLOW_COPY_AND_ASSIGN(GameLevel);

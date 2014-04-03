@@ -225,6 +225,9 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
             this->FreezePieceInIce(gameModel);
             break;
 
+        case Projectile::PortalBlobProjectile:
+            break;
+
 		default:
 			assert(false);
 			break;
@@ -571,7 +574,7 @@ void LaserTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSe
         ignoreTypes.insert(LevelPiece::Prism);
         ignoreTypes.insert(LevelPiece::PrismTriangle);
 
-        std::list<LevelPiece*> collisionPieces;
+        std::set<LevelPiece*> collisionPieces;
         model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes, 
             collisionPieces, paddleRayT, LaserTurretProjectile::WIDTH_DEFAULT);
 

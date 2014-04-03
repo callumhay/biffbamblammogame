@@ -66,7 +66,11 @@ public:
 		this->portalEffect->AddToTimer(dT);
 	}
 
-	std::list<ESPEmitter*> CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation);
+	void CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation, std::list<ESPEmitter*>& emitters);
+    static void CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation, 
+        ESPParticleScaleEffector& haloExpandPulse, ESPParticleColourEffector& haloFader, Texture2D* haloTexture,
+        ESPParticleColourEffector& particleFader, ESPParticleScaleEffector& particleMediumGrowth,
+        Texture2D* circleTex, Texture2D* hoopTex, std::list<ESPEmitter*>& emitters);
 
 	void SetAlphaMultiplier(float alpha);
 
@@ -93,4 +97,15 @@ private:
 	void LoadMesh();
 
 };
+
+/**
+ * Creates emitter effects for a portal block.
+ */
+inline void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation, 
+                                                       std::list<ESPEmitter*>& emitters) {
+
+    PortalBlockMesh::CreatePortalBlockEmitters(colour, worldTranslation, this->haloExpandPulse, this->haloFader,
+        this->haloTexture, this->particleFader, this->particleMediumGrowth, this->circleTex, this->hoopTex, emitters);
+}
+
 #endif // __PORTAL_BLOCK_MESH_H__

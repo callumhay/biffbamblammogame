@@ -40,6 +40,7 @@
 #include "GameView/GameViewConstants.h"
 #include "GameView/GameFontAssetsManager.h"
 #include "GameView/LoadingScreen.h"
+#include "GameView/PersistentTextureManager.h"
 
 #include "GameSound/GameSound.h"
 
@@ -131,6 +132,7 @@ static void KillGraphicsAndWindow(bool gameIsQuiting) {
 	GeometryMaker::DeleteInstance();
 	LoadingScreen::DeleteInstance();
 	GameFontAssetsManager::DeleteInstance();
+    PersistentTextureManager::DeleteInstance();
 
 	// Only delete the resource manager if we aren't quitting (we need the
 	// resource manager to write out the config file otherwise - it needs to be

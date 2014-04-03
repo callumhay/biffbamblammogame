@@ -75,9 +75,9 @@ loopRotateEffectorCCW(180.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
 	this->pulseEffector = ESPParticleScaleEffector(pulseSettings);
 
 	this->rocketGlowEmitter = new ESPPointEmitter();
-	this->rocketGlowEmitter->SetSpawnDelta(ESPInterval(-1));
+	this->rocketGlowEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	this->rocketGlowEmitter->SetInitialSpd(ESPInterval(0));
-	this->rocketGlowEmitter->SetParticleLife(ESPInterval(-1));
+	this->rocketGlowEmitter->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	this->rocketGlowEmitter->SetParticleSize(ESPInterval(1), ESPInterval(1));
 	this->rocketGlowEmitter->SetEmitAngleInDegrees(0);
 	this->rocketGlowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
