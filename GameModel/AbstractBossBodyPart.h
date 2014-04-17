@@ -89,6 +89,7 @@ public:
     virtual void SetDestroyed(bool isDestroyed) = 0;
 
     virtual Collision::AABB2D GenerateWorldAABB() const = 0;
+    virtual Collision::Circle2D GenerateWorldCircleBounds() const = 0;
 
     const Matrix4x4& GetWorldTransform() const { return this->worldTransform; }
 

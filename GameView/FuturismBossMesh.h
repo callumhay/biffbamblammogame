@@ -56,17 +56,36 @@ private:
     Mesh* leftRightShieldMesh;
     Mesh* topBottomShieldMesh;
 
+    Mesh* damagedLeftRightShieldMesh;
+    Mesh* damagedTopBottomShieldMesh;
+
+    Mesh* iceEncasingMesh;
+
     // Effect assets
     Texture2D* circleGlowTex;
     AnimationMultiLerp<float> glowCirclePulseAnim;
     AnimationMultiLerp<Colour> shieldColourAnim;
 
+    ESPPointEmitter* topShieldExplodingEmitter;
+    ESPPointEmitter* bottomShieldExplodingEmitter;
+    ESPPointEmitter* leftShieldExplodingEmitter;
+    ESPPointEmitter* rightShieldExplodingEmitter;
+
     // Inherited functions
-    //void DrawPreBodyEffects(double dT, const Camera& camera);
+    //void DrawPreBodyEffects(double dT, const Camera& camera, const GameModel& gameModel);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
+    void DrawPostBodyEffects(double dT, const Camera& camera, const GameModel& gameModel, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+        const BasicPointLight& ballLight,const GameAssets* assets);
     Point3D GetBossFinalExplodingEpicenter() const;
+
+    // Helper functions
+    void DrawDamagableBodyPart(const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+        const BossBodyPart* bodyPart, Mesh* nonDmgMesh, Mesh * dmgMesh) const;
+    void DrawShieldPostEffects(double dT, const Camera& camera, float xOffset, float yOffset,
+        const BossBodyPart* shield, ESPPointEmitter* explodingEmitter);
 
     DISALLOW_COPY_AND_ASSIGN(FuturismBossMesh);
 };

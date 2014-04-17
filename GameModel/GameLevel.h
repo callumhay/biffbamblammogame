@@ -127,6 +127,8 @@ public:
 		return this->randomItemProbabilityNum;
 	}
 
+    bool IsCollidingWithLevelPieces(const Point2D& center, float radius) const;
+
     void GetLevelPieceCollisionCandidatesNotMoving(const Point2D& center, float radius, std::vector<LevelPiece*>& candidates) const;
 	void GetLevelPieceCollisionCandidates(double dT, const Point2D& center, float radius, float velocityMagnitude, std::vector<LevelPiece*>& candidates) const;
     void GetLevelPieceCollisionCandidates(const Collision::AABB2D& aabb, std::set<LevelPiece*>& candidates) const;
@@ -141,8 +143,8 @@ public:
     LevelPiece* GetLevelPieceAt(const Point2D& p) const;
     LevelPiece* GetLevelPieceColliderFast(const Collision::Ray2D& ray, float toleranceRadius = 0.0f) const;
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
-        const std::set<const LevelPiece*>& ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
-    void GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
+        const std::set<const void*>& ignoreThings, float& rayT, float toleranceRadius = 0.0f) const;
+    void GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const void*>& ignoreThings,
         const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::set<LevelPiece*>& result, 
         float cutoffRayT, float toleranceRadius = 0.0f) const;
     

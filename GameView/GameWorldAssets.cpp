@@ -148,10 +148,11 @@ void GameWorldAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera, Cg
                                  const BasicPointLight& keyLight, const BasicPointLight& fillLight,
                                  const BasicPointLight& ballLight) const {
 
-    const ColourRGBA& paddleColour = p.GetColour();
-    if (paddleColour.A() <= 0.0f) {
+    if (p.GetAlpha() <= 0.0f) {
         return;
     }
+    
+    ColourRGBA paddleColour = p.GetColour();
 
     glPushMatrix();
 

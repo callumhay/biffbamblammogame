@@ -189,11 +189,9 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
                                                    FBObj* backgroundFBO, double dT) {
 	assert(backgroundFBO != NULL);
 
-	const Camera& camera = this->display->GetCamera();
-    GameModel* gameModel = this->display->GetModel();
-	const GameLevel* currLevel = gameModel->GetCurrentLevel();
-
-    GameAssets* assets = this->display->GetAssets();
+	const Camera& camera     = this->display->GetCamera();
+    GameModel* gameModel     = this->display->GetModel();
+    GameAssets* assets       = this->display->GetAssets();
     GameFBOAssets* fboAssets = assets->GetFBOAssets();
     
     FBObj* colourAndDepthFBO = fboAssets->GetColourAndDepthTexFBO();
@@ -216,7 +214,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     assets->GetESPAssets()->DrawTeslaLightningArcs(dT, camera);
 
     // Bosses
-    assets->DrawBoss(dT, currLevel, camera);
+    assets->DrawBoss(dT, camera, *gameModel);
 
     // Safety net (if active)
     assets->DrawSafetyNetIfActive(dT, camera, *gameModel);
@@ -278,7 +276,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     GameESPAssets* espAssets = assets->GetESPAssets();
 
 	// Render any post-processing effects for various items/objects in the game
-    assets->DrawBossPostEffects(dT, currLevel, camera);
+    assets->DrawBossPostEffects(dT, camera, *gameModel);
     espAssets->DrawProjectileEffects(dT, camera);
     assets->DrawPaddlePostEffects(dT, *gameModel, camera, colourAndDepthFBO);
     assets->DrawLevelPiecesPostEffects(dT, camera);
@@ -344,10 +342,12 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
     }
 
 	// Typical Particle effects...
+    // NOTE: Order matters here: e.g., portal projectiles need to be drawn under beam effects so that the beam ends
+    // get hidden by the effects when beams go through the portals
 	GameESPAssets* espAssets = assets->GetESPAssets();
-	espAssets->DrawBeamEffects(dT, camera);
+	espAssets->DrawPostProjectileEffects(dT, camera);
+    espAssets->DrawBeamEffects(dT, camera);
 	espAssets->DrawParticleEffects(dT, camera);
-    espAssets->DrawPostProjectileEffects(dT, camera);
 
 	// Absolute post effects call for various object effects
 	assets->DrawGameBallsPostEffects(dT, *gameModel, camera);

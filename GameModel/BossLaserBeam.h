@@ -37,7 +37,8 @@ class BossLaserBeam : public Beam {
 public:
     static const double BEAM_EXPIRE_TIME_IN_SECONDS;
 
-    BossLaserBeam(const Collision::Ray2D& initialBeamRay, float initialBeamRadius, const GameModel* gameModel);
+    BossLaserBeam(const GameModel* gameModel, const Collision::Ray2D& initialBeamRay, 
+        float initialBeamRadius, double expireTimeInSecs);
     ~BossLaserBeam();
 
     Beam::BeamType GetType() const { return Beam::BossBeam; }
@@ -46,6 +47,8 @@ public:
     void UpdateCollisions(const GameModel* gameModel);
     int GetNumBaseBeamSegments() const;
     const Colour& GetBeamColour() const;
+
+    void UpdateOriginBeamSegment(const GameModel* gameModel, const Collision::Ray2D& newOriginBeamRay);
 
 private:
     static const int BASE_DAMAGE_PER_SECOND;
@@ -62,6 +65,12 @@ inline int BossLaserBeam::GetNumBaseBeamSegments() const {
 
 inline const Colour& BossLaserBeam::GetBeamColour() const {
     return GameModelConstants::GetInstance()->BOSS_LASER_BEAM_COLOUR;
+}
+
+inline void BossLaserBeam::UpdateOriginBeamSegment(const GameModel* gameModel, 
+                                                   const Collision::Ray2D& newOriginBeamRay) {
+    this->initialBeamRay = newOriginBeamRay;
+    this->UpdateCollisions(gameModel);
 }
 
 #endif // __BOSSLASERBEAM_H__

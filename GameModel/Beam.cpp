@@ -34,13 +34,16 @@
 #include "GameModel.h"
 #include "GameLevel.h"
 #include "GameEventManager.h"
+#include "BeamColliderStrategy.h"
+
 
 const double Beam::MIN_ALLOWED_LIFETIME_IN_SECS = 0.75;
 const float Beam::MIN_BEAM_RADIUS = 0.05f;
 const int   Beam::MIN_DMG_PER_SEC = 25;
 
 Beam::Beam(int dmgPerSec, double lifeTimeInSec) : 
-baseDamagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(lifeTimeInSec), beamAlpha(1), beamAlphaDirty(true) {
+baseDamagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(lifeTimeInSec), 
+beamAlpha(1), zOffset(0), beamAlphaDirty(true) {
     assert(lifeTimeInSec >= MIN_ALLOWED_LIFETIME_IN_SECS);
 };
 
@@ -100,7 +103,7 @@ void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& i
     this->beamParts.clear();
 
     // Keep track of the pieces collided with to watch out for bad loops (e.g., infinite loops of beams through prisms)
-    std::set<const LevelPiece*> piecesCollidedWith;
+    std::set<const void*> thingsCollidedWith;
 
     // Loop as long as there are new beam segments to add to this beam
     while (newBeamSegs.size() > 0) {
@@ -109,88 +112,22 @@ void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& i
         BeamSegment* currBeamSegment = newBeamSegs.front();
         newBeamSegs.pop_front();
 
-        // Fire the current beam segment into the level in order to figure out what piece it hit
-        // If new beam segments are spawned add them to the list of new beam segments to deal with
-        // IMPORTANT NOTE / TODO: For now this MUST be done before checking for collisions with the paddle... combine all collisions
-        // in a single function in the future!
-        LevelPiece* pieceCollidedWith = currBeamSegment->FireBeamSegmentIntoLevel(level);
-
-        // Check for collisions with the paddle too
-        PlayerPaddle* playerPaddle = gameModel->GetPlayerPaddle();
-        assert(playerPaddle != NULL);
-        float minRayT = std::numeric_limits<float>::max();
-
         // Note: If the beam is a paddle laser beam and the beam segment is an origin
         // segment then we don't do collisions with the paddle! 
         // Also, if the beam has faded-out past a certain point then paddle collisions no longer happen
-        if (this->GetType() == Beam::PaddleBeam && this->beamParts.size() < initialBeamSegs.size() || this->beamAlpha < 0.33f) {
-            // No paddle collisions for the current beam segment!
-        }
-        else {
-            // Fire multiple rays of the current beam segment...
-            const Collision::Ray2D& beamSegRayMiddle = currBeamSegment->GetBeamSegmentRay();
+        bool cannotCollideWithPaddle = (this->GetType() == Beam::PaddleBeam && this->beamParts.size() < initialBeamSegs.size() || this->beamAlpha < 0.33f);
+
+        // Fire the current beam segment into the level in order to figure out what piece it hit
+        
+        BeamColliderStrategy* collisionStrategy = currBeamSegment->FireBeamSegmentIntoLevel(*gameModel, cannotCollideWithPaddle);
+        if (collisionStrategy != NULL) {
             
-            // Create other parallel rays to test for paddle collision...
-            Vector2D perpendicularDir(-beamSegRayMiddle.GetUnitDirection()[1], beamSegRayMiddle.GetUnitDirection()[0]);
-            Collision::Ray2D beamSegRayOuter1(beamSegRayMiddle.GetOrigin() + currBeamSegment->GetRadius() * perpendicularDir, beamSegRayMiddle.GetUnitDirection());
-            Collision::Ray2D beamSegRayOuter2(beamSegRayMiddle.GetOrigin() - currBeamSegment->GetRadius() * perpendicularDir, beamSegRayMiddle.GetUnitDirection());
-
-            float tempRayT;
-            playerPaddle->CollisionCheck(beamSegRayMiddle, minRayT);
-            playerPaddle->CollisionCheck(beamSegRayOuter1, tempRayT);
-            minRayT = std::min<float>(minRayT, tempRayT);
-            playerPaddle->CollisionCheck(beamSegRayOuter2, tempRayT);
-            minRayT = std::min<float>(minRayT, tempRayT);
-        }
-
-        minRayT = std::max<float>(0.0f, minRayT);
-        if (minRayT <= currBeamSegment->GetLength()) {
-            // Set the new beam ending point - This MUST be done before telling the paddle it was hit!!
-            currBeamSegment->SetLength(minRayT);
-            // There's a collision with the paddle, stop all collisions here
-            playerPaddle->HitByBeam(*this, *currBeamSegment);
-        }
-        else if (pieceCollidedWith != NULL) {
-            // There was a piece that the beam collided with...
-
-            // Check to see if the piece was already hit by this beam...
-            std::pair<std::set<const LevelPiece*>::iterator, bool> insertResult = piecesCollidedWith.insert(pieceCollidedWith);
-            if (insertResult.second) {
-
-                // First time the level piece was hit by this beam - we are allowed to spawn more beams...
-                // The piece may generate a set of spawned beams based on whether or not it reflects/refracts light
-                const Collision::Ray2D& currBeamRay = currBeamSegment->GetBeamSegmentRay();
-                std::list<Collision::Ray2D> spawnedRays;
-                pieceCollidedWith->GetReflectionRefractionRays(currBeamSegment->GetEndPoint(), currBeamRay.GetUnitDirection(), spawnedRays);
-
-                // In the case where a portal block is collided with then we need to account for its sibling
-                // as a collider for the new beam we spawn
-                if (pieceCollidedWith->GetType() == LevelPiece::Portal) {
-                    PortalBlock* portalBlock = static_cast<PortalBlock*>(pieceCollidedWith);
-                    assert(portalBlock != NULL);
-                    pieceCollidedWith = portalBlock->GetSiblingPortal();
-                    insertResult = piecesCollidedWith.insert(pieceCollidedWith);
-                }
-
-                if (spawnedRays.size() >= 1) {
-                    // The radius of the spawned beams will be a fraction of the current radius based
-                    // on the number of reflection/refraction rays
-                    const float NEW_BEAM_SEGMENT_RADIUS = this->beamAlpha * std::max<float>(currBeamSegment->GetRadius() / 
-                        static_cast<float>(spawnedRays.size()), Beam::MIN_BEAM_RADIUS);
-
-                    if (NEW_BEAM_SEGMENT_RADIUS > 0.0f) {
-                        const int NEW_BEAM_DMG_PER_SECOND = this->beamAlpha * std::max<int>(Beam::MIN_DMG_PER_SEC, 
-                            currBeamSegment->GetDamagePerSecond() / spawnedRays.size());
-
-                        // Now add the new beams to the list of beams we need to fire into the level and repeat this whole process with
-                        std::list<BeamSegment*> spawnedBeamSegs;
-                        for (std::list<Collision::Ray2D>::iterator iter = spawnedRays.begin(); iter != spawnedRays.end(); ++iter) {
-
-                            newBeamSegs.push_back(new BeamSegment(*iter, NEW_BEAM_SEGMENT_RADIUS, NEW_BEAM_DMG_PER_SECOND, pieceCollidedWith));
-                        }
-                    }
-                }
-            }
+            // The beam collided with something:
+            // If new beam segments are spawned or any other special stuff needs to happen, it will be dealt with by
+            // the particular collision strategy...
+            collisionStrategy->UpdateBeam(*this, currBeamSegment, thingsCollidedWith, newBeamSegs);
+            delete collisionStrategy;
+            collisionStrategy = NULL;
         }
         else {
             // In a case where there was no piece colliding it means that the beam shot out of the level
@@ -265,7 +202,7 @@ bool Beam::Tick(double dT, const GameModel* gameModel) {
 			(*iter)->Tick(dT);
 		}
 		this->currTimeElapsed += dT;
-        this->currTimeElapsed = std::min<float>(this->currTimeElapsed, this->totalLifeTime);
+        this->currTimeElapsed = std::min<double>(this->currTimeElapsed, this->totalLifeTime);
 	}
 
     this->TickAlpha();
@@ -278,6 +215,10 @@ void Beam::TickAlpha() {
     if (this->currTimeElapsed < this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS) {
         this->beamAlpha = 1.0f;
     }
+    else if (this->currTimeElapsed > this->totalLifeTime) {
+        this->currTimeElapsed = this->totalLifeTime;
+        this->beamAlpha = 0.0f;
+    }
     else {
         this->beamAlpha = NumberFuncs::LerpOverTime(this->totalLifeTime - MIN_ALLOWED_LIFETIME_IN_SECS, 
             this->totalLifeTime, 1.0f, 0.0f, this->currTimeElapsed);
@@ -289,9 +230,22 @@ void Beam::TickAlpha() {
     }
 }
 
-BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, LevelPiece* ignorePiece) :
-timeSinceFired(0.0), ray(beamRay), collidingPiece(NULL), endT(0.0f),
-ignorePiece(ignorePiece), damagePerSecond(beamDmgPerSec) {
+void Beam::UpdateOriginBeamSegment(const GameModel* gameModel, const Collision::Ray2D& newOriginBeamRay) {
+    if (this->beamParts.empty()) {
+        assert(false);
+        return;
+    }
+
+    BeamSegment* originSeg = this->beamParts.front();
+    assert(originSeg != NULL);
+    originSeg->SetBeamSegmentRay(newOriginBeamRay);
+
+    this->UpdateCollisions(gameModel);
+}
+
+BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, const void* ignoreThing) :
+timeSinceFired(0.0), ray(beamRay), collidingPiece(NULL), collidingProjectile(NULL), endT(0.0f),
+ignoreThing(ignoreThing), damagePerSecond(beamDmgPerSec) {
 
 	this->SetRadius(beamRadius);
 }
@@ -322,40 +276,95 @@ void BeamSegment::SetRadius(float radius) {
 }
 
 BeamSegment::~BeamSegment() {
-	if (this->collidingPiece != NULL) {
-		this->collidingPiece = NULL;
-	}
+    this->collidingPiece = NULL;
+    this->collidingProjectile = NULL;
 }
 
 void BeamSegment::Tick(double dT) {
 	this->radiusPulseAnim.Tick(dT);
 }
 
+bool SmallestToLargestRayTStratSorter(const std::pair<float, BeamColliderStrategy*>& a, const std::pair<float, BeamColliderStrategy*>& b) {
+    return (a.first < b.first);
+}
+
 /**
  * Fire this beam segment into the given level.
  * Returns: The level piece that this beam segment collided with when shot - NULL if no collisions.
  */
-LevelPiece* BeamSegment::FireBeamSegmentIntoLevel(const GameLevel* level) {
-	assert(level != NULL);
-	
-	std::set<const LevelPiece*> ignorePieces;
-	ignorePieces.insert(this->ignorePiece);
+BeamColliderStrategy* BeamSegment::FireBeamSegmentIntoLevel(const GameModel& gameModel, 
+                                                            bool cannotCollideWithPaddle) {
 
-	// Collide the ray of this beam with the level - find out where the collision occurs
-	// and what piece is being collided with - set those values for the members of this beam segment.
-    this->collidingPiece = level->GetLevelPieceFirstCollider(this->ray, ignorePieces, this->endT);
+	const GameLevel* level = gameModel.GetCurrentLevel();
+    assert(level != NULL);
 
-	// Make sure that the endT isn't set if there was no collision - it flies out of the level...
-	if (this->collidingPiece == NULL) {
-		this->endT = std::max<float>(level->GetLevelUnitHeight(), level->GetLevelUnitWidth());
-	}
-    else {
-        if (this->endT < 0.0) {
-            this->endT = 0;
-        }
+    const float maxRayT = std::max<float>(level->GetLevelUnitHeight(), level->GetLevelUnitWidth());
+
+	std::set<const void*> ignoreThings;
+	ignoreThings.insert(this->ignoreThing);
+
+    std::vector<std::pair<float, BeamColliderStrategy*> > strategies;
+    strategies.reserve(3);
+
+    // Check for colliding pieces...
+    float tempT = std::numeric_limits<float>::max();
+    this->collidingPiece = level->GetLevelPieceFirstCollider(this->ray, ignoreThings, tempT);
+    if (this->collidingPiece != NULL) {
+        strategies.push_back(std::make_pair(std::max<float>(0,tempT), new LevelPieceBeamColliderStrategy(tempT, this->collidingPiece)));
     }
 
-	return this->collidingPiece;
+    // Check for colliding paddle...
+    if (!cannotCollideWithPaddle) {
+        // Check for collision with the paddle as well...
+        PlayerPaddle* playerPaddle = gameModel.GetPlayerPaddle();
+        assert(playerPaddle != NULL);
+        
+        // Fire multiple rays of the current beam segment...
+        // Create other parallel rays to test for paddle collision...
+        Vector2D perpendicularDir(-this->ray.GetUnitDirection()[1], this->ray.GetUnitDirection()[0]);
+        Collision::Ray2D beamSegRayOuter1(this->ray.GetOrigin() + this->GetRadius() * perpendicularDir, this->ray.GetUnitDirection());
+        Collision::Ray2D beamSegRayOuter2(this->ray.GetOrigin() - this->GetRadius() * perpendicularDir, this->ray.GetUnitDirection());
+
+        float minRayT = std::numeric_limits<float>::max();
+        tempT = std::numeric_limits<float>::max();
+        bool isCollision = false;
+        isCollision |= playerPaddle->CollisionCheck(this->ray, minRayT);
+        isCollision |= playerPaddle->CollisionCheck(beamSegRayOuter1, tempT);
+        minRayT = std::min<float>(minRayT, tempT);
+        isCollision |= playerPaddle->CollisionCheck(beamSegRayOuter2, tempT);
+        minRayT = std::min<float>(minRayT, tempT);
+        
+        if (isCollision) {
+            strategies.push_back(std::make_pair(std::max<float>(0,minRayT), new PaddleBeamColliderStrategy(maxRayT, playerPaddle)));
+        }
+    }
+    
+    // Check for colliding projectiles...
+    tempT = std::numeric_limits<float>::max();
+    this->collidingProjectile = gameModel.GetFirstBeamProjectileCollider(this->ray, ignoreThings, tempT);
+    if (this->collidingProjectile != NULL) {
+        strategies.push_back(std::make_pair(std::max<float>(0,tempT), new ProjectileBeamColliderStrategy(tempT, this->collidingProjectile)));
+    }
+
+    if (strategies.empty()) {
+        this->endT = maxRayT;
+        return NULL;
+    }
+
+    std::sort(strategies.begin(), strategies.end(), SmallestToLargestRayTStratSorter);
+
+    // Delete all the failures...
+    for (int i = 1; i < static_cast<int>(strategies.size()); i++) {
+        delete strategies[i].second;
+    }
+
+    BeamColliderStrategy* strategy = strategies.front().second;
+    assert(strategy != NULL);
+    this->endT = strategies.front().first;
+    this->collidingPiece = strategy->GetCollidingPiece();
+    this->collidingProjectile = strategy->GetCollidingProjectile();
+
+    return strategy;
 }
 
 /**

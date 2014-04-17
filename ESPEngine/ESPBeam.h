@@ -55,6 +55,11 @@ public:
 	void Draw(const Point3D& startPt, const Point3D& endPt, const Camera& camera) const;
 	bool IsDead() const;
 
+    void SetBeamLineVec(const Vector3D& beamLineVec) { this->beamLineVec = beamLineVec; }
+    void SetOrthoBeamLineVec(const Vector3D& rotationalVec) { this->rotationalVec = rotationalVec; }
+    void SetAmplitudeVariation(const ESPInterval& ampVariation) { this->amplitudeVariationAmt = ampVariation; }
+    void SetLineDistanceVariation(const ESPInterval& lineDistVariation) { this->lineDistVariationAmt = lineDistVariation; }
+
 	const Vector3D& GetBeamLineVec() const;
 	const Vector3D& GetOrthoBeamLineVec() const;
 	const float GetRandomAmplitudeVariation() const;
@@ -62,6 +67,9 @@ public:
 
     double GetCurrentLifeElapsed() const { return this->currLifeTickCount; }
     double GetLifespanLength() const { return this->lifeTimeInSecs; }
+
+    double GetRemainingLifeTime() const { return this->currLifeTickCount; }
+    void SetRemainingLifeTime(double remainingLifeInSecs) { this->currLifeTickCount = remainingLifeInSecs; }
 
 private:
 	double currLifeTickCount;

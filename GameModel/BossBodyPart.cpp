@@ -128,6 +128,7 @@ void BossBodyPart::OnTransformUpdate() {
 
 #ifdef _DEBUG
 void BossBodyPart::DebugDraw() const {
+    this->GenerateWorldAABB().DebugDraw();
     this->GetWorldBounds().DebugDraw();
 }
 #endif

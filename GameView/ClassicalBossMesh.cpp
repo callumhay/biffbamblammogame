@@ -233,8 +233,6 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     UNUSED_PARAMETER(dT);
     UNUSED_PARAMETER(assets);
 
-    this->weakpointMaterial->SetLightAmt(keyLight, fillLight);
-
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // world space locations...
 
@@ -410,8 +408,11 @@ void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoi
     }
 }
 
-void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
-    BossMesh::DrawPostBodyEffects(dT, camera, assets);
+void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameModel& gameModel,
+                                            const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+                                            const BasicPointLight& ballLight, const GameAssets* assets) {
+
+    BossMesh::DrawPostBodyEffects(dT, camera, gameModel, keyLight, fillLight, ballLight, assets);
 
     const BossBodyPart* eye = this->boss->GetEye();
 

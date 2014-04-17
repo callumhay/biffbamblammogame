@@ -64,6 +64,7 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
 #include "../GameModel/Beam.h"
+#include "../GameModel/BossLaserBeam.h"
 #include "../GameModel/LaserBulletProjectile.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
@@ -895,24 +896,25 @@ void GameAssets::DrawSecondPassLevelPieces(double dT, const GameModel& gameModel
         ballLight, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 
-void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera) {
+void GameAssets::DrawBoss(double dT, const Camera& camera, const GameModel& gameModel) {
 
-    if (currLevel->GetHasBoss()) {
+    if (gameModel.GetCurrentLevel()->GetHasBoss()) {
+        Vector2D levelTranslation = gameModel.GetCurrentLevelTranslation2D();
 
         glPushMatrix();
-	    glTranslatef(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0);
+	    glTranslatef(levelTranslation[0], levelTranslation[1], 0);
 
 	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	    this->lightAssets->GetBossAffectingLights(fgKeyLight, fgFillLight, ballLight);
-        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight, this);
+        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, gameModel, fgKeyLight, fgFillLight, ballLight, this);
 
         glPopMatrix();
     }
 }
 
-void GameAssets::DrawBossPostEffects(double dT, const GameLevel* currLevel, const Camera& camera) {
-    if (currLevel->GetHasBoss()) {
-        this->GetCurrentLevelMesh()->DrawBossPostEffects(dT, camera);
+void GameAssets::DrawBossPostEffects(double dT, const Camera& camera, const GameModel& gameModel) {
+    if (gameModel.GetCurrentLevel()->GetHasBoss()) {
+        this->GetCurrentLevelMesh()->DrawBossPostEffects(dT, camera, gameModel);
     }
 }
 
@@ -1034,7 +1036,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
     static const float TYPICAL_INNER_BEAM_ALPHA = 0.8f;
 	static const float TYPICAL_OUTER_BEAM_ALPHA = 0.4f;
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-	float quarterPaddleDepth = paddle->GetHalfDepthTotal() / 2.0f;
+	float innerBeamDepth;
 
     
 	glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
@@ -1054,7 +1056,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	Vector3D beamRightVec;
 	Vector3D beamUpVec;
 	Vector3D beamDepthVec;
-	float currRadius, currAlpha;
+	float currRadius, currAlpha, currZOffset;
 	Vector2D tempRadiusOffset;
 	
     bool paddleLaserBeamActive = false;
@@ -1065,16 +1067,30 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 
         // Special cases for paddle laser beams -- if the paddle has been removed from the game then
         // we don't want to draw its beams either
-        if (currentBeam->GetType() == Beam::PaddleBeam) {
-            if (paddle->HasBeenPausedAndRemovedFromGame(gameModel.GetPauseState())) {
-                continue;
-            }
-            else {
-                paddleLaserBeamActive = true;
-                if (paddle->GetIsPaddleCameraOn()) {
-                    currAlpha *= 0.25f;
+        switch (currentBeam->GetType()) {
+            case Beam::PaddleBeam: {
+
+                if (paddle->HasBeenPausedAndRemovedFromGame(gameModel.GetPauseState())) {
+                    continue;
                 }
+                else {
+                    currZOffset = 0.0f;
+                    innerBeamDepth = paddle->GetHalfDepthTotal() / 2.0f;
+                    paddleLaserBeamActive = true;
+                    if (paddle->GetIsPaddleCameraOn()) {
+                        currAlpha *= 0.25f;
+                    }
+                }
+                break;
             }
+            case Beam::BossBeam:
+                innerBeamDepth = 0.01f;
+                currZOffset = static_cast<const BossLaserBeam*>(currentBeam)->GetZOffset();
+                break;
+
+            default:
+                assert(false);
+                continue;
         }
         
         const Colour& beamColour = currentBeam->GetBeamColour();
@@ -1098,14 +1114,14 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 
 			const BeamSegment* currentSeg = *segmentIter;
 
-			beamSegStart = Point3D(currentSeg->GetStartPoint());
-			beamSegEnd   = Point3D(currentSeg->GetEndPoint());
+			beamSegStart = Point3D(currentSeg->GetStartPoint(), currZOffset);
+			beamSegEnd   = Point3D(currentSeg->GetEndPoint(), currZOffset);
 			beamUpVec    = Vector3D(currentSeg->GetBeamSegmentRay().GetUnitDirection());
 
 			// Center of the beam (brighter in the center) 
 			currRadius   = 0.5f * currentSeg->GetRadius();
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
-			beamDepthVec = Vector3D(0, 0, 0.5f * quarterPaddleDepth);
+			beamDepthVec = Vector3D(0, 0, 0.5f * innerBeamDepth);
 
 			glColor4f(beamCenterColour.R(), beamCenterColour.G(), beamCenterColour.B(), TYPICAL_INNER_BEAM_ALPHA*currAlpha);
 			
@@ -1152,7 +1168,7 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 			// We want the first beams to fill up the entire screen in paddle cam mode
 			currRadius   = currentSeg->GetRadius();
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
-			beamDepthVec = Vector3D(0, 0, quarterPaddleDepth);
+			beamDepthVec = Vector3D(0, 0, innerBeamDepth);
 
 			glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_OUTER_BEAM_ALPHA*currAlpha);
 
@@ -1195,7 +1211,9 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 			glVertex3fv(temp.begin());
 			temp = beamSegEnd - beamRightVec + beamDepthVec;
 			glVertex3fv(temp.begin());
-		}
+		
+            currZOffset = 0;
+        }
 	}
 	glEnd();
 	glPopMatrix();
@@ -1250,7 +1268,7 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 	// perspective, we need to make these a bit more presentable...
 	if (paddle->GetIsPaddleCameraOn()) {
 		this->crosshairHUD->Tick(dT);
-		this->crosshairHUD->Draw(paddle, displayWidth, displayHeight, (1.0 - paddle->GetColour().A()));
+		this->crosshairHUD->Draw(paddle, displayWidth, displayHeight, (1.0 - paddle->GetAlpha()));
 	}
 
 
@@ -1760,7 +1778,7 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
     this->painHUD->Activate(PlayerHurtHUD::MajorPain);
 
     // Play sound
-    this->sound->PlaySoundAtPosition(GameSound::PaddleLaserBeamCollisionEvent, false, paddle.GetPosition3D(), true, true, true);
+    this->sound->PlaySound(GameSound::PaddleLaserBeamCollisionEvent, false, true);
 
     // Vibrate the controller
     float intensityMultiplier = (beamSegment.GetRadius() / paddle.GetHalfWidthTotal());

@@ -43,15 +43,18 @@ public:
 
     bool IsRocket() const { return false; }
     bool IsMine() const { return false; }
-    bool IsRefractableOrReflectable() const { return false; }
+    bool IsRefractableOrReflectable() const { return true; }
     float GetDamage() const { return 0.0f; }
 
     bool CanCollideWithBlocks() const { return false; }
     bool CanCollideWithBall() const { return true; }
     bool CanCollideWithProjectiles() const { return true; }
+    bool CanCollideWithBeams() const { return true; }
 
     void BallCollisionOccurred(GameBall* ball);
     void ProjectileCollisionOccurred(Projectile* projectile);
+
+    void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 
     void Tick(double, const GameModel&) {}
     bool ModifyLevelUpdate(double dT, GameModel& model);
@@ -62,10 +65,13 @@ public:
     const PortalProjectile* GetSiblingPortal() const { return this->sibling; }
 
     bool IsTerminating() const;
+    bool IsCloseToTerminating() const;
+
 
 private:
     static const int NO_TERMINATION_TIME = INT_MIN;
     static const float BOUNDS_COEFF;
+    static const double CLOSE_TO_TERMINATING_FRACTION;
 
     PortalProjectile* sibling; // NOT owned by this, only referenced
 
@@ -90,6 +96,14 @@ inline bool PortalProjectile::IsTerminating() const {
     return this->sibling == NULL || 
         (this->ballHasGoneThroughBefore && this->sibling->ballHasGoneThroughBefore) || 
         (this->terminationCountdown != NO_TERMINATION_TIME && this->terminationCountdown <= 0);
+}
+
+inline bool PortalProjectile::IsCloseToTerminating() const {
+    return this->IsTerminating() ||
+        (this->terminationCountdown == NO_TERMINATION_TIME && 
+        this->sibling->terminationCountdown < CLOSE_TO_TERMINATING_FRACTION*this->baseTeriminationTime) ||
+        (this->terminationCountdown != NO_TERMINATION_TIME && 
+        this->terminationCountdown < CLOSE_TO_TERMINATING_FRACTION*this->baseTeriminationTime);
 }
 
 inline void PortalProjectile::SetSibling(PortalProjectile* sibling) {

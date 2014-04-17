@@ -625,6 +625,12 @@ BossCrosshairTargetingEvent {
 BossLaserBeamLoop {
 	file = resources/BossLaserBeamLoop.ogg
 }
+BossFrozenEvent {
+	file = resources/BlockFrozenEvent.ogg
+}
+BossIceShatterEvent {
+	file = resources/BossIceShatterEvent.ogg
+}
 
 ClassicalBossSparkleEvent {
 	file = resources/ClassicalBossSparkleEvent.ogg
@@ -687,6 +693,22 @@ DecoBossLightningBoltAttackEvent {
 DecoBossElectricShockLoop {
 	file = resources/DecoBossElectricShockLoop.ogg
 }
+
+
+FuturismBossTeleportationChargingEvent {
+	file = resources/NOT_IMPLEMENTED
+}
+FuturismBossTeleportationEvent {
+	file = resources/NOT_IMPLEMENTED
+}
+FuturismBossTwitchBeamWarningEvent {
+	file = resources/FuturismBossTwitchBeamWarningEvent.ogg
+}
+FuturismBossArcBeamWarningEvent {
+	file = resources/FuturismBossArcBeamWarningEvent.ogg
+}
+
+
 
 // Bullet-time / Ball Boost Events *******************************************
 

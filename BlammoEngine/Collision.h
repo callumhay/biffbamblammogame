@@ -127,11 +127,16 @@ namespace Collision {
 		}
 
         void AddAABB(const AABB2D& aabb) {
+            if (!aabb.isInit) { return; }
             this->AddPoint(aabb.GetMax());
             this->AddPoint(aabb.GetMin());
         }
 
         void AddCircle(const Circle2D& circle);
+
+#ifdef _DEBUG
+        void DebugDraw();
+#endif
 	};
 
 	class LineSeg2D {
@@ -158,6 +163,10 @@ namespace Collision {
 		const Point2D& P2() const {
 			return this->p2;
 		}
+
+        bool Equals(const LineSeg2D& other) const {
+            return (this->p1 == other.p1 && this->p2 == other.p2) || (this->p1 == other.p2 && this->p2 == other.p1);
+        }
 
         void BuildAABB(AABB2D& aabb) const {
             aabb.SetMin(Point2D(this->p1[0] < this->p2[0] ? this->p1[0] : this->p2[0], 
@@ -274,10 +283,15 @@ namespace Collision {
 
 	class Circle2D {
     public:
+        Circle2D(): radius(0.0f) {}
         Circle2D(const Point2D& c, float r): center(c), radius(r) {}
         Circle2D(const Circle2D& copy) : center(copy.center), radius(copy.radius) {}
         ~Circle2D(){}
 
+        bool IsEmpty() const {
+            return this->radius <= 0;
+        }
+            
         void SetCenter(const Point2D& c) {
             this->center = c;
         }
@@ -290,6 +304,39 @@ namespace Collision {
         float Radius() const {
             return this->radius;
         }
+
+        void AddCircle(const Collision::Circle2D& c) {
+            if (c.IsEmpty()) {
+                return;
+            }
+            if (this->IsEmpty()) {
+                this->center = c.center;
+                this->radius = c.radius;
+                return;
+            }
+
+            Vector2D d = c.Center() - this->Center();
+            float distSqr = Vector2D::Dot(d,d);
+            if (pow(c.Radius() - this->Radius(), 2) >= distSqr) {
+                // The sphere with the larger radius encloses the other; just set the bounding sphere
+                // to be the larger of the two
+                if (c.Radius() >= this->Radius()) {
+                    *this = c;
+                }
+            }
+            else {
+                // Spheres partially overlap or are disjoint
+                float dist = sqrt(distSqr);
+                float finalRadius   = (dist + this->Radius() + c.Radius()) * 0.5f;
+                Point2D finalCenter = this->Center();
+                if (dist > EPSILON) {
+                    finalCenter += ((finalRadius - this->Radius()) / dist) * d;
+                }
+
+                this->radius = finalRadius;
+                this->center = finalCenter;
+            }
+        } 
 
         bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
             Collision::LineSeg2D& collisionLine, double& timeUntilCollision, Point2D& cCenterAtCollision) const;
@@ -394,6 +441,39 @@ namespace Collision {
 		if (a.GetMax()[1] < b.GetMin()[1] || a.GetMin()[1] > b.GetMax()[1]) return false;
 		return true;
 	}
+
+    // Moving AABB collision test
+    inline bool IsCollision(const AABB2D &a, const AABB2D &b, const Vector2D& va, const Vector2D& vb) {
+        // Early exit if a and b are already overlapping
+        if (IsCollision(a, b)) {
+            return true;
+        }
+
+        // Initialize times of first and last contact
+        float tFirst = 0.0f;
+        float tLast  = std::numeric_limits<float>::max();
+        
+        // Use relative velocity, treating a as stationary
+        Vector2D v = vb - va;
+        // For each axis, determine first/last contact if any
+        for (int i = 0; i < 2; i++) {
+            if (v[i] < 0.0f) {
+                if (b.GetMax()[i] < a.GetMin()[i]) { return false; } // Not intersecting and moving apart
+                if (a.GetMax()[i] < b.GetMin()[i]) { tFirst = std::max<float>((a.GetMax()[i] - b.GetMin()[i]) / v[i], tFirst); }
+                if (b.GetMax()[i] > a.GetMin()[i]) { tLast  = std::min<float>((a.GetMin()[i] - b.GetMax()[i]) / v[i], tLast);  }
+            }
+            if (v[i] > 0.0f) {
+                if (b.GetMin()[i] > a.GetMax()[i]) { return false; } // Not intersecting and moving apart
+                if (b.GetMax()[i] < a.GetMin()[i]) { tFirst = std::max<float>((a.GetMin()[i] - b.GetMax()[i]) / v[i], tFirst); }
+                if (a.GetMax()[i] > b.GetMin()[i]) { tLast  = std::min<float>((a.GetMax()[i] - b.GetMin()[i]) / v[i], tLast); }
+            }
+
+            // No overlap possible if the time of first contact occurs after the time of last contact
+            if (tFirst > tLast) { return false; }
+        }
+
+        return true;
+    }
 
     inline bool IsCollision(const Circle2D& c1, const Circle2D& c2) {
         Vector2D d = c1.Center() - c2.Center();

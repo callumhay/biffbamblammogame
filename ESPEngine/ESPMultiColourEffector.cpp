@@ -52,20 +52,26 @@ void ESPMultiColourEffector::AffectParticleOnTick(double dT, ESPParticle* partic
 	double totalParticleLife   = particle->GetLifespanLength();
     double percentLifeElapsed  = std::min<float>(1.0f, particleLifeElapsed / totalParticleLife);
 
-	int lookupIndexBase = static_cast<int>(percentLifeElapsed * static_cast<double>(this->colours.size()-1));
+	int lookupIndexBase = static_cast<int>(percentLifeElapsed * (static_cast<double>(this->colours.size())-1));
 	int lookupIndexNext = (lookupIndexBase + 1);
 	
 	if (lookupIndexNext >= static_cast<int>(this->colours.size())) {
-		lookupIndexNext = this->colours.size() - 1;
+		lookupIndexNext = static_cast<int>(this->colours.size()) - 1;
+        
+        if (lookupIndexNext == lookupIndexBase) {
+            particle->SetColour(this->colours.back());
+            return;
+        }
 	}
 
-	double startPercentage = this->percentages[lookupIndexBase];//static_cast<double>(lookupIndexBase) / static_cast<double>(colours.size()-1);
-	double endPercentage   = this->percentages[lookupIndexNext];//static_cast<double>(lookupIndexNext) / static_cast<double>(colours.size()-1);
+	double startPercentage = this->percentages[lookupIndexBase];
+	double endPercentage   = this->percentages[lookupIndexNext];
 	
-    const ColourRGBA& startColour = this->colours[lookupIndexBase];
-	const ColourRGBA& endColour   = this->colours[lookupIndexNext];
+    Vector4D startColour = this->colours[lookupIndexBase].GetAsVector4D();
+	Vector4D endColour   = this->colours[lookupIndexNext].GetAsVector4D();
+    Vector4D finalColour = startColour + (percentLifeElapsed - startPercentage) * (endColour - startColour) / (endPercentage - startPercentage);
 
-	particle->SetColour(startColour + (percentLifeElapsed - startPercentage) * (endColour - startColour) / (endPercentage - startPercentage));
+	particle->SetColour(ColourRGBA(finalColour));
 }
 
 void ESPMultiColourEffector::AffectBeamOnTick(double, ESPBeam*) {
@@ -95,4 +101,35 @@ void ESPMultiColourEffector::SetColours(const std::vector<ColourRGBA>& colours) 
 		currPercentage += percentageIncrement;
 	}
     this->percentages.back() = 1.0;
+}
+
+void ESPMultiColourEffector::SetColoursWithPercentage(const std::vector<std::pair<ColourRGBA, double> >& colours) {
+    this->colours.clear();
+    this->percentages.clear();
+
+    int addAmt = 0;
+    if (colours.front().second != 0.0) {
+        addAmt++;
+    }
+    if (colours.back().second != 1.0) {
+        addAmt++;
+    }
+
+    this->colours.reserve(colours.size() + addAmt);
+    this->percentages.reserve(colours.size() + addAmt);
+
+    if (colours.front().second != 0.0) {
+        this->percentages.push_back(0.0);
+        this->colours.push_back(colours.front().first);
+    }
+
+    for (size_t i = 0; i < colours.size(); i++) {
+        this->colours.push_back(colours[i].first);
+        this->percentages.push_back(colours[i].second);
+    }
+
+    if (this->percentages.back() != 1.0) {
+        this->colours.push_back(this->colours.back());
+        this->percentages.push_back(1.0);
+    }
 }

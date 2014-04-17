@@ -70,6 +70,8 @@ public:
 	void SetTimeBetweenBeamShots(const ESPInterval& timeBetweenShotsInSeconds);
 	void SetBeamLifetime(const ESPInterval& beamLifetimeInSeconds);
 
+    void SetRemainingBeamLifetimeMax(double lifeTimeInSecs);
+
     void AddCopiedEffector(const ESPEffector& effector);
     void ClearEffectors();
 
@@ -99,6 +101,9 @@ protected:
 
 	bool ThereAreStillMoreBeamsToFire() const;
 	void SpawnBeam();
+    void UpdateBeams();
+
+    void GetBeamInfo(Vector3D& beamVec, Vector3D& orthToBeamVec, float& avgSegLength, float& fractionAvgSegLength) const;
 
 	// Disallow copy and assign
 	ESPPointToPointBeam(const ESPPointToPointBeam& b);
@@ -109,11 +114,13 @@ protected:
 inline void ESPPointToPointBeam::SetStartAndEndPoints(const Point3D& startPt, const Point3D& endPt) {
 	this->startPt = startPt;
 	this->endPt   = endPt;
+    this->UpdateBeams();
 }
 
 inline void ESPPointToPointBeam::SetStartAndEndPoints(const Point2D& startPt, const Point2D& endPt) {
     this->startPt[0] = startPt[0]; this->startPt[1] = startPt[1]; this->startPt[2] = 0;
     this->endPt[0] = endPt[0]; this->endPt[1] = endPt[1]; this->endPt[2] = 0;
+    this->UpdateBeams();
 }
 
 // Sets the general colour of the beam

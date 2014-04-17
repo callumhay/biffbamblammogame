@@ -60,7 +60,7 @@ public:
         this->offset = offset;
     }
 
-    void TickAndDraw(double dT, const Camera& camera);
+    void TickAndDraw(double dT, const Camera& camera, const GameModel& gameModel);
     bool IsDead() const { return this->beams.empty(); }
 
 private:
@@ -69,7 +69,8 @@ private:
     std::list<ESPPointToPointBeam*> beams;
 };
 
-inline void BossPt2PtBeamUpdateStrategy::TickAndDraw(double dT, const Camera& camera) {
+inline void BossPt2PtBeamUpdateStrategy::TickAndDraw(double dT, const Camera& camera,
+                                                     const GameModel&) {
     
     Point3D bodyPartPos = this->bodyPart->GetTranslationPt3D() + this->offset;
 

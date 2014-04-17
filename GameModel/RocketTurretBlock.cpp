@@ -522,8 +522,8 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
     // Check to see if the ray collides with the paddle before doing any further calculations...
     if (collidesWithPaddle) {
 
-        std::set<const LevelPiece*> ignorePieces;
-        ignorePieces.insert(this);
+        std::set<const void*> ignoreThings;
+        ignoreThings.insert(this);
         
         static std::set<LevelPiece::LevelPieceType> ignoreTypes;
         ignoreTypes.insert(LevelPiece::NoEntry);
@@ -536,7 +536,7 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
         ignoreTypes.insert(LevelPiece::Ink);
 
         std::set<LevelPiece*> collisionPieces;
-        model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes,
+        model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignoreThings, ignoreTypes,
             collisionPieces, paddleRayT, 0.525f * RocketTurretProjectile::TURRETROCKET_WIDTH_DEFAULT);
 
         if (collisionPieces.empty()) {
@@ -552,7 +552,7 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
             // Looks like the ray was impeded - try to find out whether or not the turret can
             // even remotely view the paddle at all, this is difficult since it might be able to see the paddle
             // through an open space between blocks via some ray in its fov... approximate this
-            LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire, ignorePieces, levelPieceRayT, 0);
+            LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire, ignoreThings, levelPieceRayT, 0);
             if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
                 canSeePaddle = true;
                 return;

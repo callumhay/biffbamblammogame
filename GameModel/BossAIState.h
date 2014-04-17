@@ -41,6 +41,7 @@ class GameBall;
 class Projectile;
 class PlayerPaddle;
 class Boss;
+class RocketProjectile;
 class MineProjectile;
 class TeslaBlock;
 
@@ -57,6 +58,7 @@ public:
 	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) = 0;
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart)   = 0;
     
+    virtual void RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket);
     virtual void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
     virtual void TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
     // TODO: Beams!!!
@@ -99,6 +101,9 @@ inline void BossAIState::Tick(double dT, GameModel* gameModel) {
     this->UpdateState(dT, gameModel);
     // Update the bosses' movement
     this->UpdateMovement(dT);
+}
+
+inline void BossAIState::RocketExplosionOccurred(GameModel*, const RocketProjectile*) {
 }
 
 inline void BossAIState::MineExplosionOccurred(GameModel*, const MineProjectile*) {

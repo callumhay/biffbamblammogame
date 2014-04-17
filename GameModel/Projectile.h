@@ -81,6 +81,7 @@ public:
     virtual bool CanCollideWithBall() const { return false; }
     virtual bool CanCollideWithBlocks() const { return true; }
     virtual bool CanCollideWithProjectiles() const { return false; }
+    virtual bool CanCollideWithBeams() const { return false; }
 
     virtual void SafetyNetCollisionOccurred(SafetyNet* safetyNet)          { this->SetLastThingCollidedWith(safetyNet); }
     virtual void LevelPieceCollisionOccurred(LevelPiece* block)            { UNUSED_PARAMETER(block); }
@@ -90,6 +91,12 @@ public:
     virtual void BossCollisionOccurred(Boss* boss, BossBodyPart* bossPart) { UNUSED_PARAMETER(boss); this->SetLastThingCollidedWith(bossPart); }
 
     virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; }
+
+    virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
+        UNUSED_PARAMETER(hitPoint);
+        UNUSED_PARAMETER(impactDir);
+        UNUSED_PARAMETER(rays);
+    }
 
     virtual void DetachFromPaddle() {}
     virtual bool IsAttachedToSomething() const { return false; }

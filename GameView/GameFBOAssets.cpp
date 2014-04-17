@@ -272,7 +272,7 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 		if (paddle->HasPaddleType(PlayerPaddle::StickyPaddle)) {
 
 			// We take inverse of the alpha of the paddle to fade the sticky goo effect properly while in paddle cam mode
-			float stickyGooAlpha = 1.0f - paddle->GetColour().A();
+			float stickyGooAlpha = 1.0f - paddle->GetAlpha();
 			this->stickyPaddleCamEffect->SetFadeAlpha(stickyGooAlpha);
 			this->stickyPaddleCamEffect->SetInputFBO(inputFBO);
 			this->stickyPaddleCamEffect->SetOutputFBO(outputFBO);
@@ -285,7 +285,7 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 		
 		if (paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
 
-			float shieldAlpha = 1.0f - paddle->GetColour().A();
+			float shieldAlpha = 1.0f - paddle->GetAlpha();
 			this->shieldPaddleCamEffect->SetFadeAlpha(shieldAlpha);
 			this->shieldPaddleCamEffect->SetInputFBO(inputFBO);
 			this->shieldPaddleCamEffect->SetOutputFBO(outputFBO);
@@ -309,7 +309,7 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
         if (paddle->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
             // The paddle camera is on and the paddle is frozen in ice, make everything frozen/frosty for the player...
             // We take inverse of the alpha of the paddle to fade the effect properly while in paddle cam mode
-            float icyAlpha = 1.0f - paddle->GetColour().A();
+            float icyAlpha = 1.0f - paddle->GetAlpha();
             this->icyCamEffect->SetFadeAlpha(icyAlpha);
             this->icyCamEffect->SetInputFBO(inputFBO);
             this->icyCamEffect->SetOutputFBO(outputFBO);

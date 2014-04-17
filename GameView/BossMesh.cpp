@@ -34,11 +34,13 @@
 #include "DecoBossMesh.h"
 #include "FuturismBossMesh.h"
 #include "GameViewConstants.h"
-#include "CgFxBossWeakpoint.h"
 #include "BasicEmitterUpdateStrategy.h"
 #include "BossBodyPartEmitterUpdateStrategy.h"
 #include "BossPt2PtBeamUpdateStrategy.h"
+#include "BossBallBeamUpdateStrategy.h"
 #include "PersistentTextureManager.h"
+#include "GameESPAssets.h"
+#include "GameFontAssetsManager.h"
 
 #include "../BlammoEngine/Texture2D.h"
 
@@ -59,6 +61,7 @@
 #include "../GameModel/ElectrifiedEffectInfo.h"
 #include "../GameModel/SummonPortalsEffectInfo.h"
 #include "../GameModel/BossTeleportEffectInfo.h"
+#include "../GameModel/EnumBossEffectInfo.h"
 
 #include "../ResourceManager.h"
 
@@ -100,6 +103,9 @@ particleShrinkToNothing(1, 0)
     PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION);
     PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE);
     PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CIRCLE);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_HOOP);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT);
 
     this->lineAnim.ClearLerp();
     this->flashAnim.ClearLerp();
@@ -215,12 +221,12 @@ void BossMesh::ClearActiveEffects() {
     }
     this->fgEffects.clear();
 
-    for (std::list<ESPEmitter*>::iterator iter = this->bgEffectsEmitters.begin();
-        iter != this->bgEffectsEmitters.end(); ++iter) {
+    for (std::list<EffectUpdateStrategy*>::iterator iter = this->bgEffects.begin();
+        iter != this->bgEffects.end(); ++iter) {
             delete *iter;
             *iter = NULL;
     }
-    this->bgEffectsEmitters.clear();
+    this->bgEffects.clear();
 
     for (std::list<EffectUpdateStrategy*>::iterator iter = this->laterPassEffects.begin();
         iter != this->laterPassEffects.end(); ++iter) {
@@ -443,7 +449,7 @@ void BossMesh::AddElectrifiedEffect(const ElectrifiedEffectInfo& info) {
     electricSpasm->SetAnimatedParticles(20, 
         PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_ANIMATION), 64, 64);
 
-    this->bgEffectsEmitters.push_back(electricSpasm);
+    this->bgEffects.push_back(new BasicEmitterUpdateStrategy(electricSpasm));
 }
 
 void BossMesh::AddSummonPortalEffect(const SummonPortalsEffectInfo& info) {
@@ -467,14 +473,414 @@ void BossMesh::AddSummonPortalEffect(const SummonPortalsEffectInfo& info) {
 }
 
 void BossMesh::AddTeleportEffect(const BossTeleportEffectInfo& info) {
-    // A portal opens at both the original and final locations of the teleportation
-    // TODO
+    switch (info.GetTeleportType()) {
 
-    // Energy particles are being sucked into the original location and spit out of the teleport location
-    // TODO
+        case BossTeleportEffectInfo::TeleportingOut: {
+
+            float halfSize = info.GetSize() / 2.0f;
+            Point3D emitPos(info.GetPosition(),0);
+            
+            ESPMultiAlphaEffector circleAlpha;
+            std::vector<std::pair<float, double> > alphaAndPercentages;
+            alphaAndPercentages.reserve(4);
+            alphaAndPercentages.push_back(std::make_pair(0.0f, 0.0));
+            alphaAndPercentages.push_back(std::make_pair(1.0f, 0.5));
+            alphaAndPercentages.push_back(std::make_pair(1.0f, 0.9));
+            alphaAndPercentages.push_back(std::make_pair(0.0f, 1.0));
+            circleAlpha.SetAlphasWithPercentage(alphaAndPercentages);
+            
+            ESPPointEmitter* teleportCircle = new ESPPointEmitter();
+            teleportCircle->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+            teleportCircle->SetNumParticleLives(1);
+            teleportCircle->SetParticleLife(ESPInterval(info.GetTimeInSeconds()));
+            teleportCircle->SetParticleSize(ESPInterval(1));
+            teleportCircle->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            teleportCircle->SetParticleAlignment(ESP::ScreenAligned);
+            teleportCircle->SetEmitPosition(emitPos);
+            teleportCircle->SetParticleColour(Colour(1,1,1));
+            teleportCircle->AddCopiedEffector(ESPParticleScaleEffector(0.01, 2*info.GetSize()));
+            teleportCircle->AddCopiedEffector(circleAlpha);
+            teleportCircle->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
+
+            static const int NUM_MEZZ_PARTICLES = 4;
+
+            float deltaAndLife = info.GetTimeInSeconds() / (NUM_MEZZ_PARTICLES+1);
+            ESPPointEmitter* teleportMezz = new ESPPointEmitter();
+            teleportMezz->SetSpawnDelta(ESPInterval(deltaAndLife));
+            teleportMezz->SetNumParticleLives(1);
+            teleportMezz->SetParticleLife(ESPInterval(2*deltaAndLife));
+            teleportMezz->SetParticleSize(ESPInterval(1));
+            teleportMezz->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            teleportMezz->SetParticleAlignment(ESP::ScreenAligned);
+            teleportMezz->SetEmitPosition(emitPos);
+            teleportMezz->SetParticleColour(Colour(0,0,0));
+            teleportMezz->AddCopiedEffector(ESPParticleScaleEffector(0.01, info.GetSize()));
+            teleportMezz->AddCopiedEffector(circleAlpha);
+            teleportMezz->SetParticles(NUM_MEZZ_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_HOOP));
+
+            const ESPInterval lifeInterval(info.GetTimeInSeconds() * 0.1f, info.GetTimeInSeconds() * 0.25f);
+            
+            static const int NUM_PARTICLES = 70;
+            ESPInterval deltaSpawnInterval(
+                info.GetTimeInSeconds() / static_cast<float>(2.5f*NUM_PARTICLES),
+                info.GetTimeInSeconds() / static_cast<float>(2.25f*NUM_PARTICLES));
+
+            std::vector<Texture2D*> suckedParticleTextures(2, NULL);
+            suckedParticleTextures[0] = PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_CIRCLE);
+            suckedParticleTextures[1] = PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_HOOP);
+
+            ESPPointEmitter* suckedParticles1 = new ESPPointEmitter();
+            suckedParticles1->SetSpawnDelta(deltaSpawnInterval);
+            suckedParticles1->SetNumParticleLives(1);
+            suckedParticles1->SetInitialSpd(ESPInterval(halfSize / lifeInterval.maxValue, halfSize / lifeInterval.minValue));
+            suckedParticles1->SetParticleLife(lifeInterval);
+            suckedParticles1->SetParticleSize(ESPInterval(info.GetSize() / 13.0f, info.GetSize() / 4.0f));
+            suckedParticles1->SetParticleAlignment(ESP::ScreenAligned);
+            suckedParticles1->SetEmitDirection(Vector3D(0, 1, 0));
+            suckedParticles1->SetEmitPosition(emitPos);
+            suckedParticles1->SetEmitAngleInDegrees(180);
+            suckedParticles1->SetIsReversed(true);
+            suckedParticles1->SetToggleEmitOnPlane(true);
+            suckedParticles1->SetParticleColour(Colour(0,0,0));
+            suckedParticles1->SetCutoffLifetime(info.GetTimeInSeconds());
+            suckedParticles1->AddCopiedEffector(circleAlpha);
+            suckedParticles1->AddCopiedEffector(ESPParticleScaleEffector(1.0f, 0.01f));
+            suckedParticles1->SetRandomTextureParticles(NUM_PARTICLES, suckedParticleTextures);
+
+            BasicEmitterUpdateStrategy* strategy = new BasicEmitterUpdateStrategy();
+            strategy->AddEmitter(teleportCircle);
+            strategy->AddEmitter(teleportMezz);
+            strategy->AddEmitter(suckedParticles1);
+
+            this->bgEffects.push_back(strategy);
+
+            break;
+        }
+
+        case BossTeleportEffectInfo::TeleportingIn: {
+            /*
+            static const int NUM_PARTICLES = 20;
+            Point3D emitPos(info.GetPosition(),0);
+
+            std::vector<Texture2D*> suckedParticleTextures(2, NULL);
+            suckedParticleTextures[0] = PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_CIRCLE);
+            suckedParticleTextures[1] = PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_HOOP);
+
+            ESPPointEmitter* spatParticles = new ESPPointEmitter();
+            spatParticles->SetSpawnDelta(ESPInterval(0.005f, 0.015f));
+            spatParticles->SetNumParticleLives(1);
+            spatParticles->SetInitialSpd(ESPInterval(8.0f, 16.0f));
+            spatParticles->SetParticleLife(ESPInterval(0.25f*info.GetTimeInSeconds(), 0.75f*info.GetTimeInSeconds()));
+            spatParticles->SetParticleSize(ESPInterval(info.GetSize() / 20.0f, info.GetSize() / 16.0f));
+            spatParticles->SetParticleAlignment(ESP::ScreenAligned);
+            spatParticles->SetEmitDirection(Vector3D(0, 1, 0));
+            spatParticles->SetEmitPosition(emitPos);
+            spatParticles->SetEmitAngleInDegrees(180);
+            spatParticles->SetToggleEmitOnPlane(true);
+            spatParticles->SetParticleColour(Colour(0,0,0));
+            spatParticles->SetCutoffLifetime(info.GetTimeInSeconds());
+            spatParticles->AddEffector(&this->particleFader);
+            spatParticles->AddCopiedEffector(ESPParticleScaleEffector(1.0f, 1.5f));
+            spatParticles->SetRandomTextureParticles(NUM_PARTICLES, suckedParticleTextures);
+            
+            BasicEmitterUpdateStrategy* strategy = new BasicEmitterUpdateStrategy();
+            strategy->AddEmitter(spatParticles);
+            this->bgEffects.push_back(strategy);
+            */
+            break;
+        }
+
+        case BossTeleportEffectInfo::TeleportFailed:
+            break;
+
+        default:
+            assert(false);
+            return;
+    }
 }
 
-void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
+void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
+    
+    switch (info.GetSpecificType()) {
+        case EnumBossEffectInfo::FrozenIceClouds: {
+            // TODO
+            break;
+        }
+
+        case EnumBossEffectInfo::IceBreak: {
+            std::vector<Texture2D*> rockTextures;
+            GameESPAssets::GetRockTextures(rockTextures);
+            std::vector<Texture2D*> snowflakeTextures;
+            GameESPAssets::GetSnowflakeTextures(snowflakeTextures);
+
+            const Colour iceColour = 2.1f*GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+            Point3D emitCenter(info.GetBodyPart()->GetTranslationPt2D(), 0.0f);
+
+            // Create the smashy block bits
+            ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
+            smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+            smashBitsEffect->SetInitialSpd(ESPInterval(8.0f, 15.0f));
+            smashBitsEffect->SetParticleLife(ESPInterval(0.75f*info.GetTimeInSecs(), info.GetTimeInSecs()));
+            smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
+            smashBitsEffect->SetEmitAngleInDegrees(100);
+            smashBitsEffect->SetParticleSize(ESPInterval(info.GetSize1D() / 12.0f, info.GetSize1D() / 4.0f));
+            smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+            smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, info.GetSize1D() / 4.0f));
+            smashBitsEffect->SetEmitPosition(emitCenter);
+            smashBitsEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            smashBitsEffect->SetParticleColour(
+                ESPInterval(0.8f * iceColour.R(), iceColour.R()), 
+                ESPInterval(0.8f * iceColour.G(), iceColour.G()),
+                ESPInterval(0.8f * iceColour.B(), iceColour.B()), ESPInterval(0.8f, 1.0f));
+            smashBitsEffect->AddCopiedEffector(ESPParticleAccelEffector(Vector3D(0,-9.8f,0)));
+            smashBitsEffect->AddEffector(&this->particleFader);
+            smashBitsEffect->SetRandomTextureParticles(10, rockTextures);
+
+            // Snowflakey bits...
+            ESPPointEmitter* snowflakeBitsEffect = new ESPPointEmitter();
+            snowflakeBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+            snowflakeBitsEffect->SetInitialSpd(ESPInterval(3.0f, 7.0f));
+            snowflakeBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
+            snowflakeBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
+            snowflakeBitsEffect->SetEmitAngleInDegrees(180);
+            snowflakeBitsEffect->SetParticleSize(ESPInterval(info.GetSize1D() / 8.0f, info.GetSize1D() / 3.0f));
+            snowflakeBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+            snowflakeBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, info.GetSize1D() / 4.0f));
+            snowflakeBitsEffect->SetEmitPosition(emitCenter);
+            snowflakeBitsEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            snowflakeBitsEffect->SetParticleColour(
+                ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f),
+                ESPInterval(iceColour.B(), 1.0f), ESPInterval(1.0f));
+            snowflakeBitsEffect->AddEffector(&this->particleFader);
+            snowflakeBitsEffect->AddCopiedEffector(ESPParticleRotateEffector(100.0f, ESPParticleRotateEffector::RandomDirection()));
+            snowflakeBitsEffect->SetRandomTextureParticles(10, snowflakeTextures);
+
+            // Giant snow flake with onomatopoeia
+            ESPPointEmitter* snowflakeBackingEffect = new ESPPointEmitter();
+            snowflakeBackingEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+            snowflakeBackingEffect->SetInitialSpd(ESPInterval(0.0f));
+            snowflakeBackingEffect->SetParticleLife(ESPInterval(1.75f));
+            snowflakeBackingEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            snowflakeBackingEffect->SetEmitPosition(emitCenter);
+            snowflakeBackingEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+            snowflakeBackingEffect->SetParticleRotation(ESPInterval(-180, 180));
+            snowflakeBackingEffect->SetParticleSize(ESPInterval(info.GetSize1D()));
+            snowflakeBackingEffect->AddEffector(&this->particleFader);
+            snowflakeBackingEffect->AddEffector(&this->particleMediumGrowth);
+            snowflakeBackingEffect->SetRandomTextureParticles(1, snowflakeTextures);
+
+            // Create an emitter for the sound of onomatopoeia of shattering block
+            ESPPointEmitter* iceSmashOnoEffect = new ESPPointEmitter();
+            // Set up the emitter...
+            iceSmashOnoEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+            iceSmashOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+            iceSmashOnoEffect->SetParticleLife(ESPInterval(2.25f));
+            iceSmashOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+            iceSmashOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+            iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            iceSmashOnoEffect->SetEmitPosition(emitCenter);
+            iceSmashOnoEffect->SetParticleColour(GameModelConstants::GetInstance()->ICE_BALL_COLOUR);
+            iceSmashOnoEffect->AddEffector(&this->particleFader);
+            iceSmashOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+            // Set the onomatopoeia particle
+            TextLabel2D smashTextLabel(GameFontAssetsManager::GetInstance()->GetFont(
+                GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "");
+            smashTextLabel.SetColour(iceColour);
+            smashTextLabel.SetDropShadow(Colour(0, 0, 0), 0.15f);
+            iceSmashOnoEffect->SetParticles(1, smashTextLabel, Onomatoplex::SHATTER, 
+                Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::AWESOME, Onomatoplex::UBER));
+
+            BasicEmitterUpdateStrategy* strategy = new BasicEmitterUpdateStrategy();
+            strategy->AddEmitter(smashBitsEffect);
+            strategy->AddEmitter(snowflakeBitsEffect);
+            strategy->AddEmitter(snowflakeBackingEffect);
+            strategy->AddEmitter(iceSmashOnoEffect);
+
+            this->fgEffects.push_back(strategy);
+
+            break;
+        }
+
+        case EnumBossEffectInfo::FuturismBossWarningFlare: {
+
+            std::vector<ESPAbstractEmitter*> flareEmitters;
+            flareEmitters.reserve(1);
+            ESPPointEmitter* briefLensFlare = new ESPPointEmitter();
+            briefLensFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+            briefLensFlare->SetNumParticleLives(1);
+            briefLensFlare->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+            briefLensFlare->SetParticleSize(ESPInterval(info.GetSize1D()));
+            briefLensFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            briefLensFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            briefLensFlare->SetEmitPosition(Point3D(0,0,0));
+            briefLensFlare->SetParticleColour(Colour(1,1,1));
+            briefLensFlare->AddCopiedEffector(ESPParticleScaleEffector(1.0f, 5.0f));
+            briefLensFlare->AddCopiedEffector(ESPMultiAlphaEffector(0.0f, 0.0, 1.0f, 0.05, 1.0f, 0.9, 0.0f, 1.0));
+            briefLensFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
+
+            ESPPointEmitter* briefSparkle = new ESPPointEmitter();
+            briefSparkle->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+            briefSparkle->SetNumParticleLives(1);
+            briefSparkle->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+            briefSparkle->SetParticleSize(ESPInterval(info.GetSize1D()));
+            briefSparkle->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            briefSparkle->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            briefSparkle->SetEmitPosition(Point3D(0,0,0));
+            briefSparkle->SetParticleColour(Colour(1,1,1));
+            briefSparkle->AddCopiedEffector(ESPParticleScaleEffector(1.0f, 5.0f));
+            briefSparkle->AddCopiedEffector(ESPParticleRotateEffector(
+                Randomizer::GetInstance()->RandomUnsignedInt() % 360, 1, ESPParticleRotateEffector::CLOCKWISE));
+            briefSparkle->AddCopiedEffector(ESPMultiAlphaEffector(1.0f, 0.0, 1.0f, 0.8, 0.0f, 1.0));
+            briefSparkle->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
+
+            std::list<ESPAbstractEmitter*> emitters; 
+            emitters.push_back(briefSparkle);
+            emitters.push_back(briefLensFlare);
+
+            BossBodyPartEmitterUpdateStrategy* strategy = 
+                new BossBodyPartEmitterUpdateStrategy(info.GetBodyPart(), emitters);
+            strategy->SetOffset(info.GetOffset());
+
+            this->fgEffects.push_back(strategy);
+
+            break;
+        }
+
+        case EnumBossEffectInfo::FuturismBossBeamEnergy: {
+            ESPPointEmitter* lineEffect = GameESPAssets::CreateContinuousEmphasisLineEffect(
+                Point3D(0,0,0), info.GetTimeInSecs(), 0.5f*info.GetSize1D(), 10.0f*info.GetSize1D(), true);
+            assert(lineEffect != NULL);
+
+            BossBodyPartEmitterUpdateStrategy* strategy = 
+                new BossBodyPartEmitterUpdateStrategy(info.GetBodyPart(), lineEffect);
+            strategy->SetOffset(info.GetOffset());
+
+            this->fgEffects.push_back(strategy);
+
+            break;
+        }
+
+        case EnumBossEffectInfo::FuturismBossAttractorBeam: {
+            
+            ESPMultiAlphaEffector fadeEffector;
+            std::vector<std::pair<float, double> > alphaAndPercentages;
+            alphaAndPercentages.reserve(4);
+            alphaAndPercentages.push_back(std::make_pair(0.0f, 0.0));
+            alphaAndPercentages.push_back(std::make_pair(1.0f, 0.4));
+            alphaAndPercentages.push_back(std::make_pair(1.0f, 0.9));
+            alphaAndPercentages.push_back(std::make_pair(0.0f, 1.0));
+
+            fadeEffector.SetAlphasWithPercentage(alphaAndPercentages);
+
+            ESPPointToPointBeam* bossToBallBigBeam = new ESPPointToPointBeam();
+            bossToBallBigBeam->SetColour(ColourRGBA(1.0f, 1.0f, 1.0f, 0.5f));
+            bossToBallBigBeam->SetBeamLifetime(ESPInterval(info.GetTimeInSecs()));
+            bossToBallBigBeam->SetNumBeamShots(1);
+            bossToBallBigBeam->SetMainBeamThickness(ESPInterval(1.25f*info.GetSize1D()));
+            bossToBallBigBeam->SetNumMainESPBeamSegments(1);
+            bossToBallBigBeam->SetEnableDepth(false);
+            bossToBallBigBeam->AddCopiedEffector(fadeEffector);
+
+            ESPPointEmitter* lineEffect = GameESPAssets::CreateContinuousEmphasisLineEffect(
+                Point3D(0,0,0), info.GetTimeInSecs(), 0.5f*info.GetSize1D(), 5.0f*info.GetSize1D(), true);
+            assert(lineEffect != NULL);
+            lineEffect->SetParticleColour(ESPInterval(0,0.1), ESPInterval(0), ESPInterval(0), ESPInterval(1.0f));
+
+            static const float NUM_LIVES = 5;
+
+            ESPPointEmitter* sparkleCone = new ESPPointEmitter();
+            sparkleCone->SetSpawnDelta(ESPInterval(0.005f, 0.015f), true);
+            sparkleCone->SetNumParticleLives(NUM_LIVES);
+            sparkleCone->SetInitialSpd(ESPInterval(5.0f, 10.0f));
+            sparkleCone->SetParticleLife(ESPInterval(0.8f, 1.2f));
+            sparkleCone->SetParticleSize(ESPInterval(info.GetSize1D() * 0.05f, info.GetSize1D() * 0.45f));
+            sparkleCone->SetEmitAngleInDegrees(25);
+            sparkleCone->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            sparkleCone->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.8f, 1.0f));
+            sparkleCone->SetEmitDirection(Vector3D(info.GetDirection(), 0));
+            sparkleCone->SetParticleRotation(ESPInterval(0.0f, 359.99f));
+            sparkleCone->SetIsReversed(true);
+            sparkleCone->AddCopiedEffector(fadeEffector);
+            sparkleCone->AddCopiedEffector(ESPParticleRotateEffector(90.0f, ESPParticleRotateEffector::CLOCKWISE));
+            sparkleCone->SetParticles(40, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
+
+            ESPPointEmitter* chargeParticles1 = new ESPPointEmitter();
+            chargeParticles1->SetSpawnDelta(ESPInterval(0.025f, 0.05f), true);
+            chargeParticles1->SetNumParticleLives(NUM_LIVES);
+            chargeParticles1->SetInitialSpd(ESPInterval(6.0f, 10.0f));
+            chargeParticles1->SetParticleLife(ESPInterval(0.75f * info.GetTimeInSecs()/NUM_LIVES, info.GetTimeInSecs()/NUM_LIVES));
+            chargeParticles1->SetParticleSize(ESPInterval(info.GetSize1D() * 0.1f, info.GetSize1D() * 0.5f));
+            chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            chargeParticles1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
+            chargeParticles1->SetEmitAngleInDegrees(180);
+            chargeParticles1->SetIsReversed(true);
+            chargeParticles1->SetParticleColour(ESPInterval(0,0.1), ESPInterval(0), ESPInterval(0), ESPInterval(1.0f));
+            chargeParticles1->AddCopiedEffector(fadeEffector);
+            chargeParticles1->AddEffector(&this->particleMediumShrink);
+            chargeParticles1->SetParticles(20, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_CIRCLE));
+
+            static const int NUM_CIRCLES = 10;
+            static const float CIRCLE_ALPHA  = 0.1;
+            const float CIRCLE_RADIUS = 5*info.GetSize1D();
+
+            ESPMultiAlphaEffector circleFadeEffector;
+            alphaAndPercentages[0] = std::make_pair(0.0f, 0.0);
+            alphaAndPercentages[1] = std::make_pair(CIRCLE_ALPHA, 0.05);
+            alphaAndPercentages[2] = std::make_pair(CIRCLE_ALPHA, 0.8);
+            alphaAndPercentages[3] = std::make_pair(0.0f, 1.0);
+            circleFadeEffector.SetAlphasWithPercentage(alphaAndPercentages);
+
+            float deltaAndLife = info.GetTimeInSecs() / (NUM_CIRCLES+1);
+            ESPPointEmitter* concentricCircleEffect = new ESPPointEmitter();
+            concentricCircleEffect->SetSpawnDelta(ESPInterval(deltaAndLife), true);
+            concentricCircleEffect->SetNumParticleLives(1);
+            concentricCircleEffect->SetParticleLife(ESPInterval((NUM_CIRCLES-1)*deltaAndLife));
+            concentricCircleEffect->SetParticleSize(ESPInterval(1));
+            concentricCircleEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            concentricCircleEffect->SetParticleAlignment(ESP::ScreenAligned);
+            concentricCircleEffect->SetIsReversed(true);
+            concentricCircleEffect->SetCutoffLifetime(info.GetTimeInSecs());
+            concentricCircleEffect->SetParticleColour(ESPInterval(0.1), ESPInterval(0.1), ESPInterval(0.1), ESPInterval(0));
+            concentricCircleEffect->AddCopiedEffector(ESPParticleScaleEffector(2*CIRCLE_RADIUS, 0.01));
+            concentricCircleEffect->AddCopiedEffector(circleFadeEffector);
+            concentricCircleEffect->SetParticles(NUM_CIRCLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_HOOP));
+
+            BossBallBeamUpdateStrategy* strategyFG = new BossBallBeamUpdateStrategy(info.GetBodyPart());
+            strategyFG->AddPointEmitter(chargeParticles1);
+            strategyFG->AddPointEmitter(sparkleCone);
+            strategyFG->AddPointEmitter(lineEffect);
+            this->fgEffects.push_back(strategyFG);
+
+            BossBallBeamUpdateStrategy* strategyBG = new BossBallBeamUpdateStrategy(info.GetBodyPart());
+            strategyBG->AddPointEmitter(concentricCircleEffect);
+            this->bgEffects.push_back(strategyBG);
+
+            BossBallBeamUpdateStrategy* strategyLaterPass = new BossBallBeamUpdateStrategy(info.GetBodyPart());
+            strategyLaterPass->AddBeamEmitter(bossToBallBigBeam);
+            this->laterPassEffects.push_back(strategyLaterPass);
+
+            break;
+        }
+
+        default:
+            assert(false);
+            return;
+    }
+}
+
+void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera, const GameModel& gameModel) {
     UNUSED_PARAMETER(camera);
 
     if (this->finalExplosionIsActive) {
@@ -515,23 +921,7 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
     }
     else {
         // Draw currently active background effects
-        for (std::list<ESPEmitter*>::iterator iter = this->bgEffectsEmitters.begin(); iter != this->bgEffectsEmitters.end();) {
-            ESPEmitter* curr = *iter;
-            assert(curr != NULL);
-
-            // Check to see if dead, if so erase it...
-            if (curr->IsDead()) {
-                iter = this->bgEffectsEmitters.erase(iter);
-                delete curr;
-                curr = NULL;
-            }
-            else {
-                // Not dead yet so we draw and tick
-                curr->Tick(dT);
-                curr->Draw(camera);
-                ++iter;
-            }
-        }
+        EffectUpdateStrategy::UpdateStrategyCollection(dT, camera, gameModel, this->bgEffects);
     }
 }
 
@@ -596,13 +986,13 @@ ESPPointEmitter* BossMesh::BuildSmokeEmitter(float width, float height, float si
 ESPPointEmitter* BossMesh::BuildExplodingEmitter(float volumeAmt, const AbstractBossBodyPart* bossBodyPart, float width, float height, float sizeScaler) {
     float largestDimension = std::max<float>(width, height);
 
-    static const float MAX_SPAWN_DELTA = 0.2f;
+    ESPInterval spawnDeltaInterval(0.2f);
     
     static const double FPS = 60.0;
     static const float MAX_LIFE = 4*16.0 / FPS;
 
 	ESPPointEmitter* explosionEmitter = new ESPPointEmitter();
-	explosionEmitter->SetSpawnDelta(ESPInterval(0.2f, MAX_SPAWN_DELTA));
+	explosionEmitter->SetSpawnDelta(spawnDeltaInterval);
 	explosionEmitter->SetInitialSpd(ESPInterval(1.0f));
 	explosionEmitter->SetParticleLife(ESPInterval(MAX_LIFE));
     explosionEmitter->SetParticleSize(ESPInterval(0.25f * sizeScaler * largestDimension, 0.5f * sizeScaler * largestDimension));
@@ -616,7 +1006,7 @@ ESPPointEmitter* BossMesh::BuildExplodingEmitter(float volumeAmt, const Abstract
     this->explodingEmitterHandlers.push_back(new ExplodingEmitterHandler(this->sound, bossBodyPart, volumeAmt));
     explosionEmitter->AddEventHandler(this->explodingEmitterHandlers.back());
 	
-    int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
+    int numParticles = static_cast<int>(MAX_LIFE / spawnDeltaInterval.maxValue);
     assert(numParticles < 30);
     bool success = explosionEmitter->SetAnimatedParticles(numParticles, 
         PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_ANIMATION), 256, 256);

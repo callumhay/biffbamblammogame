@@ -92,6 +92,7 @@ public:
     void ResetColourRGBAAnimation();
 
     Collision::AABB2D GenerateWorldAABB() const;
+    Collision::Circle2D GenerateWorldCircleBounds() const;
 
     virtual void ColourAnimationFinished() {};
 
@@ -354,6 +355,10 @@ inline void BossBodyPart::SetDestroyed(bool isDestroyed) {
 
 inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {
     return this->GetWorldBounds().GenerateAABBFromLines();
+}
+
+inline Collision::Circle2D BossBodyPart::GenerateWorldCircleBounds() const {
+    return this->GetWorldBounds().GenerateCircleFromLines();
 }
 
 // Sets the velocity to use when doing collisions with this object - allows the

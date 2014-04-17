@@ -185,6 +185,11 @@ void PlayerPaddle::SetupAnimations() {
 	this->rotAngleZAnimation.ClearLerp();
 	this->rotAngleZAnimation.SetInterpolantValue(0.0f);
 	this->rotAngleZAnimation.SetRepeat(false);
+
+    // Set the hurt alpha animation to just be 1.0 for now
+    this->hurtAlphaAnim.ClearLerp();
+    this->hurtAlphaAnim.SetInterpolantValue(1.0f);
+    this->hurtAlphaAnim.SetRepeat(false);
 }
 
 // Regenerate the bounding lines of the player paddle so that they adhere to the size, position and rotation
@@ -440,6 +445,9 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
     // If the paddle is rotating (might have been hit or knocked around) we want to animate that rotation
     float startingZAnimRotation = this->rotAngleZAnimation.GetInterpolantValue();
     this->rotAngleZAnimation.Tick(seconds);
+
+    // Tick the hurt animation
+    this->hurtAlphaAnim.Tick(seconds);
 
 	// Figure out what the current acceleration is based on whether the player
 	// is currently telling the paddle to move or not
@@ -719,12 +727,19 @@ void PlayerPaddle::AddSpecialStatus(int32_t status) {
 
     // Check whether the paddle was just frozen
     if ((status & PlayerPaddle::FrozenInIceStatus) != 0x0) {
+        this->hurtAlphaAnim.ClearLerp();
+        this->hurtAlphaAnim.SetInterpolantValue(1.0f);
+
         this->frozenCountdown = PADDLE_FROZEN_TIME_IN_SECS;
         // EVENT: Paddle was just frozen
         GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::FrozenInIceStatus, true);
+        
     }
     // Check whether the paddle was just set on fire
     if ((status & PlayerPaddle::OnFireStatus) != 0x0) {
+        this->hurtAlphaAnim.ClearLerp();
+        this->hurtAlphaAnim.SetInterpolantValue(1.0f);
+
         this->onFireCountdown = PADDLE_ON_FIRE_TIME_IN_SECS;
         // EVENT: Paddle was just set on fire
         GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::OnFireStatus, true);
@@ -1185,6 +1200,7 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
     this->rotAngleZAnimation.Tick(0.001);
+    this->SetupAlphaFlashAnim(0.25*HIT_EFFECT_TIME);
 
     this->lastEntityThatHurtHitPaddle = &bossPart;
 
@@ -1523,6 +1539,34 @@ void PlayerPaddle::AnimateFade(bool fadeOut, double duration) {
 	this->colourAnimation.SetLerp(duration, finalColour);
 }
 
+void PlayerPaddle::SetupAlphaFlashAnim(double totalFlashTime) {
+    static const double FLASH_FREQ = 50;
+    int numFlashes = static_cast<int>(totalFlashTime*FLASH_FREQ);
+    if (numFlashes % 2 == 0) {
+        numFlashes++;
+    }
+    double timePerFlash = totalFlashTime/numFlashes;
+
+    std::vector<double> timeVals(numFlashes, 0.0);
+    timeVals[0] = 0.0;
+    for (int i = 1; i < numFlashes; i++) {
+        timeVals[i] = timeVals[i-1] + timePerFlash;
+    }
+    
+    // WARNING: NEVER SET THE ALPHA TO EXACTLY ZERO FOR THIS ANIMATION!! 
+    // THERE ARE SPECIAL CONDITIONS WHEN THE PADDLE ALPHA IS ZERO.
+    std::vector<float> alphaVals;
+    alphaVals.reserve(numFlashes);
+    alphaVals.push_back(1.0f);
+    for (int i = 1; i < numFlashes; i += 2) {
+        alphaVals.push_back(0.01f); 
+        alphaVals.push_back(1.0f);
+    }
+
+    this->hurtAlphaAnim.SetLerp(timeVals, alphaVals);
+    this->hurtAlphaAnim.SetRepeat(false);
+}
+
 bool PlayerPaddle::GetIsStableForGoingThroughPortals() const {
     return fabs(this->centerPos[1] - this->defaultYPos) < 0.01f;
 }
@@ -1603,6 +1647,7 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 	rotationValues.push_back(0.0f);
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+    this->SetupAlphaFlashAnim(0.3*HIT_EFFECT_TIME);
 
     this->lastEntityThatHurtHitPaddle = &projectile;
 }
@@ -1610,17 +1655,23 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 void PlayerPaddle::OrbProjectileCollision(const Projectile& projectile) {
 	float currHeight = 2.0f * this->GetHalfHeight();
 	this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 1.6f, currHeight, currHeight, 17.0f);
+    this->hurtAlphaAnim.ClearLerp();
+    this->hurtAlphaAnim.SetInterpolantValue(1.0f);
 }
 
 void PlayerPaddle::LightningBoltProjectileCollision(const Projectile& projectile) {
     float currHeight = 2.0f * this->GetHalfHeight();
     this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 1.7f, currHeight, currHeight, 19.0f);
+    this->hurtAlphaAnim.ClearLerp();
+    this->hurtAlphaAnim.SetInterpolantValue(1.0f);
 }
 
 // A laser bullet just collided with the paddle...
 void PlayerPaddle::LaserBulletProjectileCollision(const Projectile& projectile) {
 	float currHeight = 2.0f * this->GetHalfHeight();
 	this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 1.5f, currHeight, currHeight, 15.0f);
+    this->hurtAlphaAnim.ClearLerp();
+    this->hurtAlphaAnim.SetInterpolantValue(1.0f);
 }
 
 // Rocket projectile just collided with the paddle - causes the paddle to fly wildly off course
@@ -1680,6 +1731,7 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 	rotationValues.push_back(0.0f);
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+    this->SetupAlphaFlashAnim(0.2*HIT_EFFECT_TIME);
 
     this->lastEntityThatHurtHitPaddle = &projectile;
 
@@ -1705,9 +1757,11 @@ void PlayerPaddle::MineProjectileCollision(GameModel* gameModel, const MineProje
         return;
     }
 
+    static const double HIT_EFFECT_TIME = 3.5;
     float currHeight = 2.0f * this->GetHalfHeight();
-    this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 3.5f, 3.0f * currHeight, 2.0f * currHeight, 70.0f);
+    this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), HIT_EFFECT_TIME, 3.0f * currHeight, 2.0f * currHeight, 70.0f);
     this->lastEntityThatHurtHitPaddle = &projectile;
+    this->SetupAlphaFlashAnim(0.2*HIT_EFFECT_TIME);
 
     // Mine explosion!
     GameLevel* currentLevel = gameModel->GetCurrentLevel();
@@ -1779,14 +1833,17 @@ void PlayerPaddle::IceBlastProjectileCollision(const PaddleIceBlasterProjectile&
 void PlayerPaddle::BeamCollision(const Beam& beam, const BeamSegment& beamSegment) {
     UNUSED_PARAMETER(beam);
 
-    float intensityMultiplier = (beamSegment.GetRadius() / this->GetHalfWidthTotal());
+    float intensityMultiplier = NumberFuncs::Clamp(2.0f*(beamSegment.GetRadius() / this->GetHalfWidthTotal()), 0.1f, 2.0f);
     assert(intensityMultiplier > 0.0f && intensityMultiplier < 2.0f);
 
     float currHeight = 2.0f * this->GetHalfHeight();
 
+    double hitEffectTime = intensityMultiplier * 6.5;
     this->SetPaddleHitByProjectileAnimation(beamSegment.GetEndPoint(), 
-        intensityMultiplier * 8.0f, intensityMultiplier * 3.5f * currHeight, 
-        intensityMultiplier * 5.0f * currHeight, 80.0f);
+        hitEffectTime, intensityMultiplier * 3.5f * currHeight, 
+        intensityMultiplier * 6.0f * currHeight, 80.0f);
+
+    this->SetupAlphaFlashAnim(0.25*hitEffectTime);
 
     this->lastEntityThatHurtHitPaddle = &beamSegment;
 }

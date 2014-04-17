@@ -97,7 +97,9 @@ private:
 
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
+    void DrawPostBodyEffects(double dT, const Camera& camera, const GameModel& gameModel, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+        const BasicPointLight& ballLight,const GameAssets* assets);
 
     Point3D GetBossFinalExplodingEpicenter() const;
 

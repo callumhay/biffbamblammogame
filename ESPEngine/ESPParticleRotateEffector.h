@@ -31,12 +31,16 @@
 #define __ESPPARTICLEROTATEEFFECTOR_H__
 
 #include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Algebra.h"
 
 #include "ESPEffector.h"
 
 class ESPParticleRotateEffector : public ESPEffector {
 public:
 	enum RotationDirection { CLOCKWISE = 1, COUNTER_CLOCKWISE = -1 };
+    static RotationDirection RandomDirection() {
+        return Randomizer::GetInstance()->RandomTrueOrFalse() ? CLOCKWISE : COUNTER_CLOCKWISE;
+    }
 
     ESPParticleRotateEffector(float rotationSpd, RotationDirection dir);
     ESPParticleRotateEffector(float initialRotation, float numRotations, RotationDirection dir);

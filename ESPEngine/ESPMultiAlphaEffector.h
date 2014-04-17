@@ -38,6 +38,8 @@
 class ESPMultiAlphaEffector : public ESPEffector {
 public:
     ESPMultiAlphaEffector();
+    ESPMultiAlphaEffector(float a0, double p0, float a1, double p1, float a2, double p2 = 1.0);
+    ESPMultiAlphaEffector(float a0, double p0, float a1, double p1, float a2, double p2, float a3, double p3 = 1.0);
     ~ESPMultiAlphaEffector() {}
 
     void AffectParticleOnTick(double dT, ESPParticle* particle);

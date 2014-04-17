@@ -43,7 +43,7 @@ public:
     void AffectParticleOnTick(double dT, ESPParticle* particle);
     void AffectBeamOnTick(double dT, ESPBeam* beam);
     void SetColours(const std::vector<ColourRGBA>& colours);
-
+    void SetColoursWithPercentage(const std::vector<std::pair<ColourRGBA, double> >& colours);
     ESPEffector* Clone() const;
 
 private:

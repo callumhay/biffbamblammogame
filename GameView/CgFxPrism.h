@@ -40,6 +40,9 @@ class Texture2D;
  */
 class CgFxPrism : public CgFxMaterialEffect {
 public:
+    static const char* DEFAULT_PRISM_TECHNIQUE_NAME;
+    static const char* ICE_TECHNIQUE_NAME;
+
 	CgFxPrism(MaterialProperties* properties);
 	~CgFxPrism();
 
@@ -55,8 +58,6 @@ protected:
 	void SetupBeforePasses(const Camera& camera);
 
 private:
-	static const char* DEFAULT_PRISM_TECHNIQUE_NAME;
-
 	CGparameter indexOfRefractionParam;
 	CGparameter warpAmountParam;
 	CGparameter sceneWidthParam;

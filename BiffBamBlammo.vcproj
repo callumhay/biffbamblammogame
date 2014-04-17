@@ -1159,7 +1159,7 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="Block/World Meshes"
+				Name="Block, Boss World Meshes"
 				>
 				<Filter
 					Name="Header Files"
@@ -1830,6 +1830,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\BlockStatusEffectRenderer.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BossBallBeamUpdateStrategy.h"
 						>
 					</File>
 					<File
@@ -2641,6 +2645,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\BeamColliderStrategy.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\BossLaserBeam.h"
 						>
 					</File>
@@ -2746,6 +2754,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\Beam.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BeamColliderStrategy.cpp"
 						>
 					</File>
 					<File
@@ -2971,6 +2983,10 @@
 							RelativePath=".\GameModel\FuturismBossStage1AIState.h"
 							>
 						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossStage2AIState.h"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="Source Files"
@@ -2985,6 +3001,10 @@
 						</File>
 						<File
 							RelativePath=".\GameModel\FuturismBossStage1AIState.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossStage2AIState.cpp"
 							>
 						</File>
 					</Filter>
@@ -3057,6 +3077,10 @@
 						</File>
 						<File
 							RelativePath=".\GameModel\ElectrifiedEffectInfo.h"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\EnumBossEffectInfo.h"
 							>
 						</File>
 						<File

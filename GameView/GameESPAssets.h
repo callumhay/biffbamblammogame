@@ -54,6 +54,7 @@ class PlayerPaddle;
 class GameModel;
 class GameLevel;
 class Beam;
+class BossLaserBeam;
 class PaddleBlasterProjectile;
 struct ESPInterval;
 class GameSound;
@@ -114,8 +115,7 @@ private:
     ESPParticleColourEffector iceOriginColourEffector;
     ESPMultiColourEffector starColourFlasher;
     ESPMultiColourEffector fireOriginColourEffector;
-    ESPMultiAlphaEffector particleFastFadeInFadeOut;
-    
+
 	ESPParticleScaleEffector particlePulseUberballAura;
 	ESPParticleScaleEffector particlePulseItemDropAura;
 	ESPParticleScaleEffector particlePulsePaddleLaser;
@@ -140,7 +140,6 @@ private:
 	ESPParticleScaleEffector particleMediumShrink;
 	ESPParticleScaleEffector particleLargeVStretch;
     ESPParticleScaleEffector particleMedVStretch;
-    ESPParticleScaleEffector particleLargeVShrink;
 
 	ESPParticleRotateEffector explosionRayRotatorCW;
 	ESPParticleRotateEffector explosionRayRotatorCCW;
@@ -165,17 +164,6 @@ private:
     std::vector<Texture2D*> cloudTextures;
     std::vector<Texture2D*> fireGlobTextures;
 	std::vector<CgFxFireBallEffect*> moltenRockEffects;
-
-
-    Texture2D* circleTex;
-    Texture2D* outlinedHoopTex;
-    Texture2D* xTex;
-    Texture2D* xOutlineTex;
-
-    Texture2D* lightningAnimTex;
-
-    Texture2D* leftHalfBrokenPadlockTex;
-    Texture2D* rightHalfBrokenPadlockTex;
 
     Mesh* fragileCannonBarrelMesh;
     Mesh* fragileCannonBasePostMesh;
@@ -315,7 +303,7 @@ private:
     void AddBallHitTurretEffect(const GameBall& ball, const LevelPiece& block);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
-    void AddBossLaserBeamEffect(const Beam& beam);
+    void AddBossLaserBeamEffect(const BossLaserBeam& beam);
     void AddTypicalBeamSegmentEffects(const Beam& beam, std::list<ESPEmitter*>& beamEmitters);
     std::list<ESPPointEmitter*> CreateBeamOriginEffects(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect(const Beam& beam);
@@ -346,13 +334,27 @@ public:
 	GameESPAssets();
 	~GameESPAssets();
 
-	void UpdateBGTexture(const Texture2D& bgTexture);
+    ESPPointEmitter* CreateShockwaveEffect(const Point3D& center, float startSize, 
+        float lifeTime, bool reverse = false);
 
-	ESPPointEmitter* CreateShockwaveEffect(const Point3D& center, float startSize, float lifeTime, bool reverse = false);
-	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
-		bool gravity = true, size_t numParticles = 10);
-    ESPPointEmitter* CreateEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
-        int numLines, float lengthMin, float lengthMax);
+    // Effector Factory Methods -------------------------------------------------------------
+    static void CreateFastFadeInFadeOutEffector(ESPMultiAlphaEffector& effector);
+
+    // Effect Factory Methods ---------------------------------------------------------------
+    static ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, 
+        const ESPInterval& g, const ESPInterval& b, bool gravity = true, size_t numParticles = 10);
+    static ESPPointEmitter* CreateSingleEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
+        int numLines, float lengthMin, float lengthMax, bool reverse = true);
+    static ESPPointEmitter* CreateContinuousEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
+        float lengthMin, float lengthMax, bool reverse = true);
+    // --------------------------------------------------------------------------------------
+
+    // Texture Collection Methods -----------------------------------------------------------
+    static void GetRockTextures(std::vector<Texture2D*>& rockTextures);
+    static void GetSnowflakeTextures(std::vector<Texture2D*>& snowflakeTextures);
+    // --------------------------------------------------------------------------------------
+
+	void UpdateBGTexture(const Texture2D& bgTexture);
 
     void AddBossHurtEffect(const Point2D& pos, float width, float height);
     void AddBossAngryEffect(const Point2D& pos, float width, float height);

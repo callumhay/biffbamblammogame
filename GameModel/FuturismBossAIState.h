@@ -32,11 +32,13 @@
 
 #include "BossAIState.h"
 #include "GameItem.h"
+#include "FuturismBoss.h"
 
 class FuturismBoss;
 class BossBodyPart;
 class BossWeakpoint;
 class BossCompositeBodyPart;
+class BossLaserBeam;
 
 class ESPAbstractEmitter;
 
@@ -51,26 +53,28 @@ public:
     enum AIState {
         // Movement, Status and Teleportation-related States ----------------
         MoveToPositionAIState,     // Boss moves to a particular location, boss may spin and/or attack while doing this
-        BallAttractAIState,        // Boss sucks the ball into orbit (happens right before teleporting with the ball)
-        //TeleportWithBallAIState,   // Boss teleports with the ball in orbit
-        //BallDiscardAIState,        // Boss lets go of the orbiting ball (typically happens right after the teleport)
+        MoveToCenterAIState,       // Boss moves to the center of the current sub-arena
         TeleportAIState,           // Boss teleports itself only
-        //FrozenAIState,             // Boss is frozen in ice
+        BallAttractAIState,        // Boss sucks the ball into orbit (happens right before teleporting with the ball)
+        BallDiscardAIState,        // Boss lets go of the orbiting ball (typically happens right after the teleport)
+        FrozenAIState,             // Boss is frozen in ice
 
         // Attack-specific States ------------------------------------
         // Basic Weapon Attacks:
         BasicBurstLineFireAIState, // Boss fires a single/double/triple burst of its basic weapon at the paddle
         BasicBurstWaveFireAIState, // Boss fires a set of waves of its basic weapon, blanketing the playing area around the paddle
-        // Teleport-Attack Combos:
+        
+        // Teleport-Attack Combo with various weapons:
         TeleportAttackComboAIState,
 
         // Laser Beam Attacks:
         LaserBeamTwitchAIState,    // Boss twitches briefly and then immediately fires a laser beam at the paddle
         LaserBeamArcAIState,       // Boss fires its laser beam at a wall and arcs it through the paddle movement area
         //LaserBeamStarAIState,      // Boss rotates, firing laser beams outwards from all its 'bulbs'
+        
         // Portal Attacks:
         StationaryFireStrategyPortalAIState, // Boss opens a portal that leads to an item that can be used to defeat the boss
-        //FireWeaponPortalAIState,   // Boss opens a portal used to make it harder for the player
+        StationaryFireWeaponPortalAIState,   // Boss opens a portal used to make it harder for the player
 
         // Angry/Hurt/Destruction-related States ----------------------
         AngryAIState,
@@ -82,8 +86,8 @@ public:
     };
 
     AIState GetCurrentAIState() const { return this->currState; }
-
-
+    
+    bool IsFrozen() const { return this->currState == FrozenAIState; }
     virtual bool IsCoreShieldVulnerable() const = 0;
 
     // Inherited functions
@@ -101,58 +105,177 @@ protected:
     static const float SPAWNED_PORTAL_HALF_WIDTH;
     static const float SPAWNED_PORTAL_HALF_HEIGHT;
 
+    static const float EYE_BEAM_HALF_RADIUS;
+
     static const double STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS;
     static const double PORTAL_SPAWN_EFFECT_TIME_IN_SECS;
 
+    static const double TWITCH_BEAM_EXPIRE_TIME_IN_SECS;
+    static const double DEFAULT_FROZEN_TIME_IN_SECS;
+
+    static const float SHIELD_LIFE_POINTS;
+    static const float SHIELD_BALL_DAMAGE;
+
+    
     FuturismBoss* boss;
     AIState currState;
 
     enum ArenaState { InLeftArena, InRightArena, InFullyOpenedArena };
     ArenaState arenaState;
+    
+    // Track the number of consecutive time certain types of states have been visited,
+    // this helps us update to the next state in an intelligent and not-quite-so redundant random way
+    int numConsecutiveMoves;
+    int numConsecutiveBeams;
+    int numConsecutiveShots;
+    int numConsecutiveAttacks;
 
     // State-specific variables
-    AnimationMultiLerp<float> bossEffortShakeAnim;
+    AnimationMultiLerp<Vector3D> angryMoveAnim;
+    AnimationMultiLerp<Vector3D> bossHurtAnim;
+    AnimationMultiLerp<Vector3D> shieldCrackedMoveAnim;
+    //AnimationMultiLerp<Vector3D> frozenShakeAnim;
     AnimationMultiLerp<float> coreRotVelAnim; // Animation value is degrees per second
+    
+    double frozenTimeCountdown;
     double countdownToPortalShot;             // Countdown time until a portal is shot
-    bool portalWasShot;                       // Has the portal been shot yet?
+    bool weaponWasShot;                       // Weather the weapon (e.g., portal, laser beam, etc.) has been shot yet (used by various states)
     Colour nextPortalColour;                  // The colour of the next portal
-    double countdownToTeleport;               // Countdown time until the boss teleports
+    double totalBallAttractTime;              // Total time that the boss is attracting the ball for
+    double ballAttractTimeCount;              // Count of the time that the boss is attracting the ball for
+    double countdownToTeleportOut;            // Countdown time until the boss teleports out from its current position
+    double countdownToTeleportIn;             // Countdown time until the boss teleports in to its new position
+    double countdownToShot;                   // Countdown time until the boss fires a shot of its weapon (basic/beam/etc.) -- used by various states
+    Collision::Ray2D beamRay;                 // The ray that the beam will follow (if determined before firing)
+    float beamSweepSpd;
+    float beamSweepAngularDist;
+    BossLaserBeam* currBeam;    // BE VERY CAREFUL WITH THIS, NOT OWNED OR CONTROLLED BY THIS, SHOULD ONLY BE USED TO QUERY NOT DIRECT ACCESS!!!
+    GameBall* attachedBall;     // DITTO
+    Vector2D ballDirBeforeAttachment;
+    Point2D ballPosBeforeAttachment;
+    int numBasicShotsToFire;
+    double waitTimeCountdown;
+
+    double timeSinceLastStratPortal;    // Time since the boss last spawned/shot a strategy portal
+    double timeSinceLastAttackPortal;   // Time since the boss last spawned/shot an attack portal
 
     // Pure virtual functions
-    virtual void SetState(FuturismBossAIState::AIState newState) = 0;
+    virtual void GoToNextState(const GameModel& gameModel) = 0;
+    virtual FuturismBossAIState* BuildNextAIState() const = 0;
     virtual float GetMaxSpeed() const = 0;
-    virtual void GetRandomMoveToPositions(std::vector<Point2D>& positions) const = 0;
-    virtual double GetPauseTimeBeforeSingleTeleport() const = 0;
-    virtual double GetTotalStrategyPortalShootTime() const = 0;
-    virtual void GetStrategyPortalCandidatePieces(const GameLevel& level, Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates) const = 0;
+    virtual void GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const = 0;
     
-
+    virtual double GetAfterAttackWaitTime(FuturismBossAIState::AIState attackState) const = 0;
+    virtual double GetSingleTeleportInAndOutTime() const = 0;
+    virtual double GetBallAttractTime() const = 0;
+    virtual double GetBallDiscardTime() const = 0;
+    virtual double GetFrozenTime() const = 0;
+    virtual double GetTotalStrategyPortalShootTime() const = 0;
+    virtual double GetTotalWeaponPortalShootTime() const = 0;
+    virtual double GetTwitchBeamShootTime() const = 0;
+    virtual double GetBeamArcShootTime() const = 0;
+    virtual double GetBeamArcHoldTime() const = 0;
+    virtual double GetBeamArcingTime() const = 0;  // Total time the beam will be arcing for
+    virtual double GetTimeBetweenBurstLineShots() const = 0;
+    virtual double GetTimeBetweenBurstWaveShots() const = 0;
+    virtual int GetNumBurstLineShots() const = 0;
+    virtual int GetNumWaveBurstShots() const = 0;
+    virtual int GetNumShotsPerWaveBurst() const = 0;
+    
+    virtual bool AllShieldsDestroyedToEndThisState() const = 0;
+    virtual bool ArenaBarrierExists() const = 0;
+    virtual void GetStrategyPortalCandidatePieces(const GameLevel& level, Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates) = 0;
+    
     // State functions
     void InitMoveToPositionAIState();
+    void InitMoveToCenterAIState();
     void ExecuteMoveToPositionAIState(double dT, GameModel* gameModel);
     void InitTeleportAIState();
     void ExecuteTeleportAIState(double dT, GameModel* gameModel);
+    void InitBallAttractAIState();
+    void ExecuteBallAttractAIState(double dT, GameModel* gameModel);
+    void InitBallDiscardAIState();
+    void ExecuteBallDiscardAIState(double dT, GameModel* gameModel);
+    void InitFrozenAIState();
+    void ExecuteFrozenAIState(double dT, GameModel* gameModel);
+    void InitBasicBurstLineFireAIState();
+    void ExecuteBasicBurstLineFireAIState(double dT, GameModel* gameModel);
+    void InitBasicBurstWaveFireAIState();
+    void ExecuteBasicBurstWaveFireAIState(double dT, GameModel* gameModel);
+    void InitLaserBeamTwitchAIState();
+    void ExecuteLaserBeamTwitchAIState(double dT, GameModel* gameModel);
+    void InitLaserBeamArcAIState();
+    void ExecuteLaserBeamArcAIState(double dT, GameModel* gameModel);
+    void InitStationaryFireWeaponPortalAIState();
+    void ExecuteStationaryFireWeaponPortalAIState(double dT, GameModel* gameModel);
     void InitStationaryFireStrategyPortalAIState();
     void ExecuteStationaryFireStrategyPortalAIState(double dT, GameModel* gameModel);
+    void ExecuteFirePortalState(double dT, GameModel* gameModel, bool isStrategyPortal);
+    void InitShieldPartCrackedAIState();
+    void ExecuteShieldPartCrackedAIState(double dT, GameModel* gameModel);
+    void InitShieldPartDestroyedAIState();
+    void ExecuteShieldPartDestroyedAIState(double dT, GameModel* gameModel);
+    void InitAngryAIState();
+    void ExecuteAngryAIState(double dT, GameModel* gameModel);
 
     // Inherited functions
     void CollisionOccurred(GameModel*, PlayerPaddle&, BossBodyPart*) {}; // Shouldn't happen
+    void SetState(FuturismBossAIState::AIState newState);
     void UpdateState(double dT, GameModel* gameModel);
 
     // Misc. Helper functions
-    void GetArenaBounds(float& minX, float& maxX, float& minY, float& maxY) const;
-    const std::vector<Point2D>& GetArenaMoveToPositions() const;
+    static void GetArenaBounds(ArenaState arena, float& minX, float& maxX, float& minY, float& maxY);
+    const std::vector<Point2D>& GetArenaMoveToPositions(ArenaState arenaState) const;
     void GetPortalCandidatePieces(const GameModel& gameModel, std::set<LevelPiece*>& candidates) const;
     void GetBossCandidatePieces(const GameLevel& level, float paddingX, float paddingY, std::set<LevelPiece*>& candidates) const;
-    bool GetArenaPortalLocation(const GameModel& gameModel, Point2D& portalPos) const;
-    bool GetStrategyPortalLocation(const GameModel& gameModel, Point2D& portalPos) const;
-    bool GetTeleportationLocation(const GameModel& gameModel, bool withBall, Point2D& teleportPos) const;
+    bool GetArenaPortalLocation(const GameModel& gameModel, Point2D& portalPos, ArenaState chosenArena) const;
+    bool GetStrategyPortalLocation(const GameModel& gameModel, Point2D& portalPos);
+    bool GetTeleportationLocation(const GameModel& gameModel, Point2D& teleportPos) const;
+    void GetValidMoveToPositions(const GameModel& gameModel, const std::vector<Point2D>& allPositions, std::vector<Point2D>& positions) const;
     void SpawnPortals(GameModel& gameModel, const Point2D& portal1Pos, const Point2D& portal2Pos);
+    Point2D GetCenterMovePosition() const;
 
+    void ShootStrategyPortal(GameModel& gameModel);
+    void ShootWeaponPortal(GameModel& gameModel);
+
+    bool IsPaddleVisibleToShootAt(const GameModel& gameModel) const;
+    bool BossHasLineOfSightToBall(const GameBall& ball, const GameLevel& level) const;
+
+    void DoBasicWeaponSingleShot(GameModel& gameModel, const Point2D& firePos, const Vector2D& fireDir) const;
+    void DoBasicWeaponWaveShot(GameModel& gameModel, const Point2D& firePos, const Vector2D& middleFireDir) const;
+
+    void DoLaserBeamWarningEffect(double timeInSecs, bool isTwitch) const;
+    void DoLaserBeamEnergyEffect(double timeInSecs) const;
+    void DoIceShatterIfFrozen();
+
+    bool DoWaitTimeCountdown(double dT);
+
+    void GoToRandomBasicMoveState();
+    void GoToRandomBasicAttackState();
+
+    void WeakenShield(const Vector2D& hitDir, float hitMagnitude, FuturismBoss::ShieldLimbType shieldType);
+    void DestroyShield(const Vector2D& hitDir, FuturismBoss::ShieldLimbType shieldType);
+    AnimationMultiLerp<Vector3D> GenerateShieldDeathTranslationAnimation(FuturismBoss::ShieldLimbType shieldType, 
+        float shieldSize, float xDir, float currYPos, double timeInSecs) const;
+    AnimationMultiLerp<float> GenerateShieldDeathRotationAnimation(FuturismBoss::ShieldLimbType shieldType, 
+        double timeInSecs) const;
     
+    void SetupCoreRotationVelAnim(double totalTime);
+    //void SetupFrozenShakeAnim(double totalTime);
+
+    void AttachBall(GameBall* ball);
+    void DetachAndShootBall(const Vector2D& shootDir);
+    void ShakeBall(GameBall* ball);
+    bool IsBallAvailableForAttractingAndTeleporting(const GameModel& gameModel) const;
+    void GetCenterRotationBodyPartAndFullDegAmt(AbstractBossBodyPart*& bodyPart, float& fullDegAmt) const;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(FuturismBossAIState);
 };
+
+inline bool FuturismBossAIState::DoWaitTimeCountdown(double dT) {
+    this->waitTimeCountdown -= dT;
+    return (this->waitTimeCountdown <= 0);
+}
 
 #endif

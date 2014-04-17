@@ -184,8 +184,6 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
     UNUSED_PARAMETER(dT);
     UNUSED_PARAMETER(assets);
 
-    this->weakpointMaterial->SetLightAmt(keyLight, fillLight);
-
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // world space locations...
 
@@ -262,8 +260,12 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
 
 }
 
-void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
-    BossMesh::DrawPostBodyEffects(dT, camera, assets);
+void GothicRomanticBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, 
+                                                 const GameModel& gameModel, const BasicPointLight& keyLight, 
+                                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
+                                                 const GameAssets* assets) {
+
+    BossMesh::DrawPostBodyEffects(dT, camera, gameModel, keyLight, fillLight, ballLight, assets);
 
     this->glowCirclePulseAnim.Tick(dT);
     float pulseScaler = this->glowCirclePulseAnim.GetInterpolantValue();

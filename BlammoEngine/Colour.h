@@ -43,9 +43,9 @@ public:
         colours[0] = colours[1] = colours[2] = 1;
     }
     Colour(float r, float g, float b) {
-        colours[0] = r;
-        colours[1] = g;
-        colours[2] = b;
+        colours[0] = NumberFuncs::Clamp(r,0,1);
+        colours[1] = NumberFuncs::Clamp(g,0,1);
+        colours[2] = NumberFuncs::Clamp(b,0,1);
     }
     explicit Colour(int hexColour) {
         colours[0] = static_cast<float>((hexColour & 0xFF0000) >> 16) / 255.0f;
@@ -53,9 +53,9 @@ public:
         colours[2] = static_cast<float>((hexColour & 0x0000FF)) / 255.0f;
     }
     explicit Colour(const Vector3D& vec) {
-        colours[0] = std::min<float>(1.0f, std::max<float>(0.0f, vec[0]));
-        colours[1] = std::min<float>(1.0f, std::max<float>(0.0f, vec[1]));
-        colours[2] = std::min<float>(1.0f, std::max<float>(0.0f, vec[2]));
+        colours[0] = NumberFuncs::Clamp(vec[0], 0, 1);
+        colours[1] = NumberFuncs::Clamp(vec[1], 0, 1);
+        colours[2] = NumberFuncs::Clamp(vec[2], 0, 1);
     }
 
     Colour(const Colour& other) {
@@ -122,12 +122,18 @@ private:
 
 public:
 	ColourRGBA() : Colour(), alpha(1.0f) {}
-	ColourRGBA(float r, float g, float b, float a): Colour(r,g,b), alpha(a) {}
-	ColourRGBA(const Colour &c, float a) : Colour(c), alpha(a) {}
+    ColourRGBA(float r, float g, float b, float a): Colour(r,g,b), alpha(NumberFuncs::Clamp(a,0,1)) {}
+	ColourRGBA(const Colour &c, float a) : Colour(c), alpha(NumberFuncs::Clamp(a,0,1)) {}
+    ColourRGBA(const Vector4D& v) {
+        this->colours[0] = NumberFuncs::Clamp(v[0], 0.0f, 1.0f);
+        this->colours[1] = NumberFuncs::Clamp(v[1], 0.0f, 1.0f);
+        this->colours[2] = NumberFuncs::Clamp(v[2], 0.0f, 1.0f);
+        this->alpha = NumberFuncs::Clamp(v[3], 0.0f, 1.0f);
+    }
 	ColourRGBA(const ColourRGBA& other) : alpha(other.alpha) {
-	  this->colours[0] = other.colours[0];
-    this->colours[1] = other.colours[1];
-    this->colours[2] = other.colours[2];	
+	    this->colours[0] = other.colours[0];
+        this->colours[1] = other.colours[1];
+        this->colours[2] = other.colours[2];	
 	}
   
 	ColourRGBA& operator =(const ColourRGBA& other) {
@@ -165,6 +171,10 @@ public:
 	}
     void SetColour(const Colour& colour) {
         (*static_cast<Colour*>(this)) = colour;
+    }
+
+    Vector4D GetAsVector4D() const {
+        return Vector4D(this->R(), this->G(), this->B(), this->A());
     }
 };
 
@@ -218,6 +228,9 @@ inline ColourRGBA operator *(const ColourRGBA& a, const ColourRGBA& b) {
 }
 inline ColourRGBA operator *(const Colour& a, const ColourRGBA& b) {
 	return ColourRGBA(a.R()*b.R(), a.G()*b.G(), a.B()*b.B(), b.A());
+}
+inline ColourRGBA operator *(const ColourRGBA& a, const Colour& b) {
+    return ColourRGBA(a.R()*b.R(), a.G()*b.G(), a.B()*b.B(), a.A());
 }
 
 // Additive colouring

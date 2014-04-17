@@ -35,25 +35,51 @@
 
 class BasicEmitterUpdateStrategy : public EffectUpdateStrategy {
 public:
-    BasicEmitterUpdateStrategy(ESPAbstractEmitter* emitter) : emitter(emitter) {
+
+    BasicEmitterUpdateStrategy() {}
+    explicit BasicEmitterUpdateStrategy(ESPAbstractEmitter* emitter) {
         assert(emitter != NULL);
+        this->AddEmitter(emitter);
     }
     ~BasicEmitterUpdateStrategy() {
-        delete this->emitter;
-        this->emitter = NULL;
+        for (std::list<ESPAbstractEmitter*>::iterator iter = this->emitters.begin(); iter != this->emitters.end(); ++iter) {
+            delete (*iter);
+        }
+        this->emitters.clear();
     }
 
-    void TickAndDraw(double dT, const Camera& camera);
-    bool IsDead() const { return this->emitter->IsDead(); }
+    void AddEmitter(ESPAbstractEmitter* emitter) { 
+        assert(emitter != NULL);
+        this->emitters.push_back(emitter);
+    }
+
+    void TickAndDraw(double dT, const Camera& camera, const GameModel& gameModel);
+    bool IsDead() const { return this->emitters.empty(); }
 
 private:
-    ESPAbstractEmitter* emitter;
+    std::list<ESPAbstractEmitter*> emitters;
 };
 
-inline void BasicEmitterUpdateStrategy::TickAndDraw(double dT, const Camera& camera) {
-    if (!this->emitter->IsDead()) {
-        this->emitter->Tick(dT);
-        this->emitter->Draw(camera);
+inline void BasicEmitterUpdateStrategy::TickAndDraw(double dT, const Camera& camera,
+                                                    const GameModel&) {
+
+    for (std::list<ESPAbstractEmitter*>::iterator iter = this->emitters.begin(); 
+         iter != this->emitters.end();) {
+
+        ESPAbstractEmitter* currEmitter = *iter;
+
+        // Check to see if dead, if so erase it...
+        if (currEmitter->IsDead()) {
+            iter = this->emitters.erase(iter);
+            delete currEmitter;
+            currEmitter = NULL;
+        }
+        else {
+            // Not dead yet so we draw and tick - transform to the body part to draw
+            currEmitter->Tick(dT);
+            currEmitter->Draw(camera);
+            ++iter;
+        }
     }
 }
 

@@ -487,6 +487,8 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, BossDeathFlashToFullscreenWhiteoutEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BossCrosshairTargetingEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BossLaserBeamLoop, false);
+    INSERT_MAPPING_PAIR(GameSound, BossFrozenEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossIceShatterEvent, false);
     INSERT_MAPPING_PAIR(GameSound, ClassicalBossSparkleEvent, false);
     INSERT_MAPPING_PAIR(GameSound, ClassicalBossArmShakeLoop, false);
     INSERT_MAPPING_PAIR(GameSound, ClassicalBossArmAttackEvent, false);
@@ -505,6 +507,11 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, DecoBossLevelRotatingLoop, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossLightningBoltAttackEvent, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossElectricShockLoop, false);
+
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossTeleportationChargingEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossTeleportationEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossTwitchBeamWarningEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossArcBeamWarningEvent, false);
 
     INSERT_MAPPING_PAIR(GameSound, EnterBulletTimeEvent, false);
     INSERT_MAPPING_PAIR(GameSound, InBulletTimeLoop, false);

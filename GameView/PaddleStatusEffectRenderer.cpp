@@ -234,7 +234,9 @@ void PaddleStatusEffectRenderer::Reinitialize() {
     this->currStatusMaterial = NULL;
 }
 
-void PaddleStatusEffectRenderer::Draw(double dT, const Camera& camera, const PlayerPaddle& paddle, const Texture2D* sceneTexture) {
+void PaddleStatusEffectRenderer::Draw(double dT, const Camera& camera, 
+                                      const PlayerPaddle& paddle, 
+                                      const Texture2D* sceneTexture) {
 
     if (paddle.HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
 
@@ -283,7 +285,6 @@ void PaddleStatusEffectRenderer::Draw(double dT, const Camera& camera, const Pla
         // Flash the fire colours in the fire status material
         this->fireFlashAnim.Tick(dT);
         this->onFireEffect.SetBrightFireColour(this->fireFlashAnim.GetInterpolantValue());
-        //this->onFireEffect.SetAlphaMultiplier(paddle.GetTimeUntilNotOnFire());
 
         static const double TIME_TO_START_FADE_OUT = 0.75;
         if (paddle.GetTimeUntilNotOnFire() < TIME_TO_START_FADE_OUT) {

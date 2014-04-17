@@ -33,13 +33,15 @@
 #include "../BlammoEngine/Texture2D.h"
 
 const char* CgFxPrism::DEFAULT_PRISM_TECHNIQUE_NAME = "Prism";
+const char* CgFxPrism::ICE_TECHNIQUE_NAME = "Ice";
 
 CgFxPrism::CgFxPrism(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PRISM_SHADER, properties),
 indexOfRefractionParam(NULL), warpAmountParam(NULL), sceneWidthParam(NULL), sceneHeightParam(NULL), 
 sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(200) {
 
-	assert(properties->materialType == MaterialProperties::MATERIAL_PRISM_TYPE);
+	assert(properties->materialType == MaterialProperties::MATERIAL_PRISM_TYPE ||
+        properties->materialType == MaterialProperties::MATERIAL_ICE_TYPE);
 
 	this->currTechnique = this->techniques[DEFAULT_PRISM_TECHNIQUE_NAME];
 

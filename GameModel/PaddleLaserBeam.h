@@ -50,6 +50,8 @@ public:
 	int GetNumBaseBeamSegments() const;
     const Colour& GetBeamColour() const;
 
+    void UpdateOriginBeamSegment(const GameModel*, const Collision::Ray2D&) { /* DOES NOTHING YET */ }
+
     static float GetStickyPaddleOriginBeamSpacing(const PlayerPaddle& paddle);
     static float GetInitialBeamRadius(const PlayerPaddle& paddle);
     

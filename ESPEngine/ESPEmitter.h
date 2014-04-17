@@ -61,6 +61,7 @@ public:
 	virtual ~ESPEmitter();
 
 	static const int ONLY_SPAWN_ONCE = -1;
+    static const int NO_CUTOFF_LIFETIME = -1;
 
 	bool ParticlesHaveNoLivesLeft() const {
 		if (this->numParticleLives != ESPParticle::INFINITE_PARTICLE_LIVES) {
@@ -76,7 +77,7 @@ public:
 
 	bool IsDead() const {
 		return (this->aliveParticles.size() == 0) && 
-			     (this->timeSinceLastSpawn > this->particleLifetime.maxValue || this->ParticlesHaveNoLivesLeft());
+            (this->timeSinceLastSpawn > this->particleLifetime.maxValue || this->ParticlesHaveNoLivesLeft());
 	}
 
 	bool OnlySpawnsOnce() const {
@@ -96,7 +97,7 @@ public:
         const std::vector<Bezier*>& curves, const ESPInterval& animateTimeInSecs);
 
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
-	void SetSpawnDelta(const ESPInterval& spawnDelta);
+	void SetSpawnDelta(const ESPInterval& spawnDelta, bool firstSpawnNoDelta = false);
 	void SetInitialSpd(const ESPInterval& initialSpd);
 	void SetParticleLife(const ESPInterval& particleLife, bool affectLiveParticles = false);
 
@@ -119,6 +120,8 @@ public:
 	void SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter);
 	void SetRadiusDeviationFromCenter(const ESPInterval& xDistFromCenter, const ESPInterval& yDistFromCenter, const ESPInterval& zDistFromCenter);
 	void SetParticleDeathPlane(const Plane& plane);
+
+    void SetCutoffLifetime(double timeInSecs);
 
 	void AddEffector(ESPEffector* effector);
     void AddCopiedEffector(const ESPEffector& effector);
@@ -148,6 +151,10 @@ protected:
 	std::list<ESPParticle*> aliveParticles;               // All the alive particles in this emitter
 	std::list<ESPParticle*> deadParticles;                // All the dead particles in this emitter
 	
+    // If not NO_CUTOFF_LIFETIME, then this will kill the particle once it expires
+    double cutoffLifetimeInSecs;
+    double currCutoffLifetimeCountdown;
+
 	float timeSinceLastSpawn;  // Time since the last particle was spawned	
 	int numParticleLives;
 	
@@ -182,6 +189,7 @@ protected:
 	ESPInterval radiusDeviationFromPtZ;
 
 	void Flush();
+    void Kill();
 
 	virtual Vector3D CalculateRandomInitParticleDir() const = 0;
 	virtual Point3D  CalculateRandomInitParticlePos() const = 0;

@@ -35,25 +35,26 @@
 #include "../BlammoEngine/IPositionObject.h"
 #include "../BlammoEngine/Colour.h"
 
-#include <list>
-
 class LevelPiece;
+class Projectile;
 class PlayerPaddle;
 class GameModel;
 class GameLevel;
+class BeamColliderStrategy;
 
 // Structure for defining a part of the overall beam - a complete
 // linear segment of the beam
 class BeamSegment {
 public:
-	BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, LevelPiece* ignorePiece);
+	BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, const void* ignoreThing);
 	~BeamSegment();
 
-	LevelPiece* FireBeamSegmentIntoLevel(const GameLevel* level);
+	BeamColliderStrategy* FireBeamSegmentIntoLevel(const GameModel& gameModel, bool cannotCollideWithPaddle);
 	const Collision::Ray2D& GetBeamSegmentRay() const { return this->ray; }
+    void SetBeamSegmentRay(const Collision::Ray2D& r) { this->ray = r; }
 	
 	LevelPiece* GetCollidingPiece() const { return this->collidingPiece; }
-	void SetCollidingPiece(LevelPiece* piece) { this->collidingPiece = piece; }
+    Projectile* GetCollidingProjectile() const { return this->collidingProjectile; }
 
 	const Point2D& GetStartPoint() const { return this->ray.GetOrigin(); }
 	Point2D GetEndPoint() const { return this->ray.GetPointAlongRayFromOrigin(this->endT); }
@@ -77,12 +78,14 @@ public:
 	static bool Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg2);
 
 private:
-	LevelPiece* ignorePiece;    // If a beam is originating inside a level piece then we want it to ignore all collisions with that piece...
-	LevelPiece* collidingPiece;	// The level piece that the beam is colliding with, which marks the end of the beam
-                                // In cases where this is NULL the beam technically is going out of bounds, in which case
-                                // it is limited by a maximum length
+	const void* ignoreThing;    // If a beam is originating inside a particular object then we want it to ignore all collisions with that object...
 
-	int damagePerSecond; // Amount of damage this beamsegment does per second to damagable blocks it hits
+    Projectile* collidingProjectile;
+	LevelPiece* collidingPiece;	// The level piece that the beam is colliding with, which marks the end of the beam
+                                // In cases where this is NULL the beam technically is going out of bounds or is colliding with
+                                // a non-block object
+
+	int damagePerSecond; // Amount of damage this beam segment does per second to damageable blocks it hits
                          // NOTE: typical life of a block is 100
 
 	double timeSinceFired;	// Time in seconds since this part of the beam was fired/shot
@@ -99,6 +102,9 @@ class Beam : public IPositionObject {
 public:
 	enum BeamType { PaddleBeam, BossBeam };
 
+    static const float MIN_BEAM_RADIUS;
+    static const int MIN_DMG_PER_SEC;
+
 	virtual ~Beam();
     virtual Beam::BeamType GetType() const = 0;
     virtual bool CanDestroyLevelPieces() const = 0;
@@ -106,6 +112,9 @@ public:
 	virtual void UpdateCollisions(const GameModel* gameModel) = 0;
 	virtual bool Tick(double dT, const GameModel* gameModel);
     virtual void TickAlpha();
+
+    void SetZOffset(float zOffset) { this->zOffset = zOffset; }
+    float GetZOffset() const { return this->zOffset; }
 
     float GetBeamAlpha() const { return this->beamAlpha; }
 
@@ -117,6 +126,9 @@ public:
 	virtual int GetNumBaseBeamSegments() const = 0;
     virtual const Colour& GetBeamColour() const = 0;
 
+    virtual void UpdateOriginBeamSegment(const GameModel* gameModel, const Collision::Ray2D& newOriginBeamRay) = 0;
+    //void UpdateOriginBeamSegments(const std::vector<Collision::Ray2D>& newOriginBeams);
+
 	void DebugDraw() const;
 
     // Inherited from IPositionObject
@@ -127,8 +139,6 @@ public:
 
 protected:
     static const double MIN_ALLOWED_LIFETIME_IN_SECS;
-	static const float MIN_BEAM_RADIUS;
-	static const int MIN_DMG_PER_SEC;
 
 	std::list<BeamSegment*> beamParts;  // The beam's parts that make up this entire beam
 	int baseDamagePerSecond;            // Amount of damage the beam does per second to damagable blocks it hits
@@ -139,6 +149,7 @@ protected:
 
     bool beamAlphaDirty;
     float beamAlpha; // As the beam nears the end of its life it's alpha diminishes and so does its power/damage
+    float zOffset;
 
 	void CleanUpBeam(std::list<BeamSegment*>& beamSegs);
 	bool BeamHasChanged(const std::list<BeamSegment*>& oldBeamSegs, const std::list<BeamSegment*>& newBeamSegs);

@@ -113,8 +113,8 @@ public:
     void DrawSecondPassLevelPieces(double dT, const GameModel& gameModel, const Camera& camera);
     void DrawLevelPiecesPostEffects(double dT, const Camera& camera);
     void DrawNoBloomLevelPieces(double dT, const Camera& camera);
-    void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
-    void DrawBossPostEffects(double dT, const GameLevel* currLevel, const Camera& camera);
+    void DrawBoss(double dT, const Camera& camera, const GameModel& gameModel);
+    void DrawBossPostEffects(double dT, const Camera& camera, const GameModel& gameModel);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
 	void DrawStatusEffects(double dT, const Camera& camera, FBObj* sceneFBO);
     void DrawMiscEffects(const GameModel& gameModel);
