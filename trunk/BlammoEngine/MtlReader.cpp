@@ -220,8 +220,12 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFileFromStream
 		else if (matPropIter->second->materialType == MaterialProperties::MATERIAL_PRISM_TYPE) {
 			currMaterial = new CgFxPrism(matPropIter->second);
 		}
+        else if (matPropIter->second->materialType == MaterialProperties::MATERIAL_ICE_TYPE) {
+            currMaterial = new CgFxPrism(matPropIter->second);
+            currMaterial->SetTechnique(CgFxPrism::ICE_TECHNIQUE_NAME);
+        }
 		else {
-			// Default to using the cel shader for now
+			// Default to using the cel-shader for now
 			matPropIter->second->materialType = MaterialProperties::MATERIAL_CELBASIC_TYPE;
 			currMaterial = new CgFxCelShading(matPropIter->second);
 		}

@@ -143,3 +143,20 @@ bool Circle2D::Collide(double dT, const Collision::Circle2D& c, const Vector2D& 
 
     return true;
 }
+
+#ifdef _DEBUG
+void AABB2D::DebugDraw() {
+    glPushAttrib(GL_CURRENT_BIT);
+
+    glColor4f(0, 1, 1, 1);
+
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(this->minCoord[0], this->minCoord[1]);
+    glVertex2f(this->maxCoord[0], this->minCoord[1]);
+    glVertex2f(this->maxCoord[0], this->maxCoord[1]);
+    glVertex2f(this->minCoord[0], this->maxCoord[1]);
+    glEnd();
+
+    glPopAttrib();
+}
+#endif

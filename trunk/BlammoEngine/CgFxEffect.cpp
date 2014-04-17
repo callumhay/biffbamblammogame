@@ -47,12 +47,13 @@ CgFxEffectBase::~CgFxEffectBase() {
     UNUSED_VARIABLE(success);
 }
 
-const char* MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
-const char* MaterialProperties::MATERIAL_PHONG_TYPE			= "phong";
+const char* MaterialProperties::MATERIAL_CELBASIC_TYPE  = "outlinedcel";
+const char* MaterialProperties::MATERIAL_PHONG_TYPE     = "phong";
 const char* MaterialProperties::MATERIAL_INKBLOCK_TYPE	= "inkblock";
 const char* MaterialProperties::MATERIAL_STICKYGOO_TYPE	= "stickygoo";
-const char* MaterialProperties::MATERIAL_PRISM_TYPE			= "prism";
-const char* MaterialProperties::MATERIAL_PORTAL_TYPE		= "portal";
+const char* MaterialProperties::MATERIAL_PRISM_TYPE	    = "prism";
+const char* MaterialProperties::MATERIAL_ICE_TYPE       = "ice";
+const char* MaterialProperties::MATERIAL_PORTAL_TYPE    = "portal";
 
 const char* MaterialProperties::MATERIAL_GEOM_FG_TYPE = "fg";
 const char* MaterialProperties::MATERIAL_GEOM_BG_TYPE = "bg";

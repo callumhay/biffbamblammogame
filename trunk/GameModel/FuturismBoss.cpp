@@ -39,11 +39,23 @@ const float FuturismBoss::FULLY_SHIELDED_BOSS_HALF_WIDTH   = FuturismBoss::FULLY
 const float FuturismBoss::CORE_BOSS_SIZE      = 5.037f;
 const float FuturismBoss::CORE_BOSS_HALF_SIZE = FuturismBoss::CORE_BOSS_SIZE / 2.0f;
 
-const float FuturismBoss::CORE_EYE_SIZE = 1.40f;
+const float FuturismBoss::CORE_EYE_SIZE      = 1.40f;
+const float FuturismBoss::CORE_EYE_HALF_SIZE = CORE_EYE_SIZE / 2.0f;
 
-const float FuturismBoss::CORE_Z_DIST_FROM_ORIGIN   = 1.732f;
-const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN = CORE_Z_DIST_FROM_ORIGIN - 0.35f;
+const float FuturismBoss::CORE_Z_DIST_FROM_ORIGIN = 0.0f;//1.732f;
+const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD = 0.0f;//CORE_Z_DIST_FROM_ORIGIN;
+const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD = 0.0f;//2.094f;
 const float FuturismBoss::CORE_SHIELD_CORNER_HEIGHT = 1.167f;
+
+const float FuturismBoss::TOP_BOTTOM_SHIELD_EXPLODE_WIDTH  = 1.636f;
+const float FuturismBoss::TOP_BOTTOM_SHIELD_EXPLODE_HEIGHT = 3.457f;
+const float FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_WIDTH  = 3.233f;
+const float FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_HEIGHT = 2.333f;
+
+const float FuturismBoss::TOP_BOTTOM_SHIELD_X_OFFSET = 0.0f;
+const float FuturismBoss::TOP_BOTTOM_SHIELD_Y_OFFSET = 3.272f;
+const float FuturismBoss::LEFT_RIGHT_SHIELD_X_OFFSET = 1.6165f + 1.167f;
+const float FuturismBoss::LEFT_RIGHT_SHIELD_Y_OFFSET = 0.0f;
 
 const float FuturismBoss::BLOCK_TO_BOSS_X_PADDING = LevelPiece::PIECE_HEIGHT;
 const float FuturismBoss::BLOCK_TO_BOSS_Y_PADDING = LevelPiece::PIECE_HEIGHT;
@@ -53,45 +65,56 @@ const float FuturismBoss::PORTAL_PROJECTILE_HEIGHT      = 1.1f*LevelPiece::PIECE
 const float FuturismBoss::PORTAL_PROJECTILE_HALF_WIDTH  = FuturismBoss::PORTAL_PROJECTILE_WIDTH / 2.0f;
 const float FuturismBoss::PORTAL_PROJECTILE_HALF_HEIGHT = FuturismBoss::PORTAL_PROJECTILE_HEIGHT / 2.0f;
 
-FuturismBoss::FuturismBoss() : Boss(), currCoreRotInDegs(0.0f) {
+FuturismBoss::FuturismBoss() : Boss(), currCoreRotInDegs(0.0f), currIceRotInDegs(0.0f) {
 
     // The middle y coordinate is the same for the left and right sub-arenas
     float midY = FuturismBoss::GetLeftSubArenaMinYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT) + 
         (FuturismBoss::GetLeftSubArenaMaxYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT) - FuturismBoss::GetLeftSubArenaMinYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT)) / 2.0f;
     
-    float leftSideMidX    = FuturismBoss::GetLeftSubArenaMinXConfines()  + FuturismBoss::GetSubArenaWidth()/2.0f;
-    float leftSideLeftX   = FuturismBoss::GetLeftSubArenaMinXBossPos(FULLY_SHIELDED_BOSS_HALF_WIDTH);
-    float leftSideRightX  = FuturismBoss::GetLeftSubArenaMaxXBossPos(FULLY_SHIELDED_BOSS_HALF_WIDTH);
-    float leftSideTopY    = FuturismBoss::GetLeftSubArenaMaxYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT);
-    float leftSideBottomY = FuturismBoss::GetLeftSubArenaMinYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT);
-    //float rightSideMidX = FuturismBoss::GetRightSubArenaMinXConfines() + FuturismBoss::GetSubArenaWidth()/2.0f;
+    {
+        float leftSideMidX    = FuturismBoss::GetLeftSubArenaMinXConfines()  + FuturismBoss::GetSubArenaWidth()/2.0f;
+        float leftSideLeftX   = FuturismBoss::GetLeftSubArenaMinXBossPos(FULLY_SHIELDED_BOSS_HALF_WIDTH);
+        float leftSideRightX  = FuturismBoss::GetLeftSubArenaMaxXBossPos(FULLY_SHIELDED_BOSS_HALF_WIDTH);
+        float leftSideTopY    = FuturismBoss::GetLeftSubArenaMaxYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT);
+        float leftSideBottomY = FuturismBoss::GetLeftSubArenaMinYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT);
 
-    this->leftSideMovePositions.reserve(9);
-    this->leftSideMovePositions.push_back(Point2D(leftSideLeftX, leftSideTopY));     // Top-Left
-    this->leftSideMovePositions.push_back(Point2D(leftSideMidX, leftSideTopY));      // Top
-    this->leftSideMovePositions.push_back(Point2D(leftSideRightX, leftSideTopY));    // Top-Right
-    this->leftSideMovePositions.push_back(Point2D(leftSideLeftX, midY));             // Left
-    this->leftSideMovePositions.push_back(Point2D(leftSideMidX, midY));              // Middle
-    this->leftSideMovePositions.push_back(Point2D(leftSideRightX, midY));            // Right
-    this->leftSideMovePositions.push_back(Point2D(leftSideLeftX, leftSideBottomY));  // Bottom-Left
-    this->leftSideMovePositions.push_back(Point2D(leftSideMidX, leftSideBottomY));   // Bottom
-    this->leftSideMovePositions.push_back(Point2D(leftSideRightX, leftSideBottomY)); // Bottom-Right
+        this->leftSideMovePositions.reserve(9);
+        this->leftSideMovePositions.push_back(Point2D(leftSideLeftX, leftSideTopY));     // Top-Left
+        this->leftSideMovePositions.push_back(Point2D(leftSideMidX, leftSideTopY));      // Top
+        this->leftSideMovePositions.push_back(Point2D(leftSideRightX, leftSideTopY));    // Top-Right
+        this->leftSideMovePositions.push_back(Point2D(leftSideLeftX, midY));             // Left
+        this->leftSideMovePositions.push_back(Point2D(leftSideMidX, midY));              // Middle
+        this->leftSideMovePositions.push_back(Point2D(leftSideRightX, midY));            // Right
+        this->leftSideMovePositions.push_back(Point2D(leftSideLeftX, leftSideBottomY));  // Bottom-Left
+        this->leftSideMovePositions.push_back(Point2D(leftSideMidX, leftSideBottomY));   // Bottom
+        this->leftSideMovePositions.push_back(Point2D(leftSideRightX, leftSideBottomY)); // Bottom-Right
+    }
+    {
+        float rightSideMidX    = FuturismBoss::GetRightSubArenaMinXConfines()  + FuturismBoss::GetSubArenaWidth()/2.0f;
+        float rightSideLeftX   = FuturismBoss::GetRightSubArenaMinXBossPos(FULLY_SHIELDED_BOSS_HALF_WIDTH);
+        float rightSideRightX  = FuturismBoss::GetRightSubArenaMaxXBossPos(FULLY_SHIELDED_BOSS_HALF_WIDTH);
+        float rightSideTopY    = FuturismBoss::GetRightSubArenaMaxYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT);
+        float rightSideBottomY = FuturismBoss::GetRightSubArenaMinYBossPos(FULLY_SHIELDED_BOSS_HALF_HEIGHT);
 
-    //this->rightSideMovePositions.reserve(5);
-    //this->rightSideMovePositions.push_back(Point2D(rightSideMidX, FuturismBoss::GetRightSubArenaMaxYBossPos())); // Top
-    //this->rightSideMovePositions.push_back(Point2D(FuturismBoss::GetRightSubArenaMinXBossPos(), midY));          // Left
-    //this->rightSideMovePositions.push_back(Point2D(rightSideMidX, midY));                                        // Middle
-    //this->rightSideMovePositions.push_back(Point2D(FuturismBoss::GetRightSubArenaMaxXBossPos(), midY));          // Right
-    //this->rightSideMovePositions.push_back(Point2D(rightSideMidX, FuturismBoss::GetRightSubArenaMinYBossPos())); // Bottom
-
-    //this->fullLevelMovePositions.reserve(7);
-    //this->fullLevelMovePositions.push_back(Point2D(leftSideMidX, FuturismBoss::GetLeftSubArenaMaxYBossPos()));   // Top-Left
-    //this->fullLevelMovePositions.push_back(Point2D(FuturismBoss::GetLeftSubArenaMinXBossPos(), midY));           // Left-Left
-    //this->fullLevelMovePositions.push_back(Point2D(leftSideMidX, FuturismBoss::GetLeftSubArenaMinYBossPos()));   // Bottom-Left
-    //this->fullLevelMovePositions.push_back(Point2D(leftSideMidX + (rightSideMidX-leftSideMidX)/2.0f, midY));     // Middle-Middle
-    //this->fullLevelMovePositions.push_back(Point2D(rightSideMidX, FuturismBoss::GetRightSubArenaMaxYBossPos())); // Top-Right
-    //this->fullLevelMovePositions.push_back(Point2D(FuturismBoss::GetRightSubArenaMaxXBossPos(), midY));          // Right-Right
-    //this->fullLevelMovePositions.push_back(Point2D(rightSideMidX, FuturismBoss::GetRightSubArenaMinYBossPos())); // Bottom-Right
+        this->rightSideMovePositions.reserve(9);
+        this->rightSideMovePositions.push_back(Point2D(rightSideLeftX, rightSideTopY));     // Top-Left
+        this->rightSideMovePositions.push_back(Point2D(rightSideMidX, rightSideTopY));      // Top
+        this->rightSideMovePositions.push_back(Point2D(rightSideRightX, rightSideTopY));    // Top-Right
+        this->rightSideMovePositions.push_back(Point2D(rightSideLeftX, midY));              // Left
+        this->rightSideMovePositions.push_back(Point2D(rightSideMidX, midY));               // Middle
+        this->rightSideMovePositions.push_back(Point2D(rightSideRightX, midY));             // Right
+        this->rightSideMovePositions.push_back(Point2D(rightSideLeftX, rightSideBottomY));  // Bottom-Left
+        this->rightSideMovePositions.push_back(Point2D(rightSideMidX, rightSideBottomY));   // Bottom
+        this->rightSideMovePositions.push_back(Point2D(rightSideRightX, rightSideBottomY)); // Bottom-Right
+    }
+    {
+        float midX = FuturismBoss::GetFullArenaCenterPos()[0];
+        
+        this->fullLevelMovePositions.reserve(19);
+        this->fullLevelMovePositions.insert(this->fullLevelMovePositions.end(), this->leftSideMovePositions.begin(), this->leftSideMovePositions.end());
+        this->fullLevelMovePositions.insert(this->fullLevelMovePositions.end(), this->rightSideMovePositions.begin(), this->rightSideMovePositions.end());
+        this->fullLevelMovePositions.push_back(Point2D(midX, midY));
+    }
 }
 
 FuturismBoss::~FuturismBoss() {
@@ -99,6 +122,10 @@ FuturismBoss::~FuturismBoss() {
 
 bool FuturismBoss::IsCoreShieldVulnerable() const {
     return static_cast<const FuturismBossAIState*>(this->GetCurrentAIState())->IsCoreShieldVulnerable();
+}
+
+bool FuturismBoss::IsFrozen() const {
+    return static_cast<const FuturismBossAIState*>(this->GetCurrentAIState())->IsFrozen();
 }
 
 bool FuturismBoss::ProjectilePassesThrough(const Projectile* projectile) const {
@@ -311,6 +338,18 @@ void FuturismBoss::Init(float startingX, float startingY,
             this->rightSubArenaPieces.insert(levelPieces[row][col]);
         }
     }
+    
+    // For the full arena, insert pieces for both the left and right sub-arenas
+    this->fullArenaPieces.insert(this->leftSubArenaPieces.begin(), this->leftSubArenaPieces.end());
+    this->fullArenaPieces.insert(this->rightSubArenaPieces.begin(), this->rightSubArenaPieces.end());
+    
+    // NOTE: WHEN THE BOSS BLOWS UP THE MID PIECES WE'LL NEED TO INSERT THE RESULTING PIECES, UNTIL THEN DONT.
+    // ... also insert the middle pieces...
+    //int midCol = static_cast<int>(levelPieces.front().size()) / 2;
+    //for (int row = LEVEL_Y_OUTER_PADDING_NUM_PIECES+1; row < LEVEL_SUBARENA_HEIGHT_NUM_PIECES-1; row++) {
+    //    this->fullArenaPieces.insert(levelPieces[row][midCol]);
+    //}
+
 
     // Setup the portal projectile colours...
     static const int NUM_PORTAL_COLOURS = 5;
@@ -332,7 +371,7 @@ void FuturismBoss::Init(float startingX, float startingY,
 }
 
 
-void FuturismBoss::AddCoreShieldBounds(ShieldLimbType sectorToAdd) {
+void FuturismBoss::AddSpecialCoreBounds(ShieldLimbType sectorToAdd) {
 
     // These points represent the bounds for the top part of the shield
     const Point2D PT0(-CORE_SHIELD_CORNER_HEIGHT, CORE_SHIELD_CORNER_HEIGHT);
@@ -347,8 +386,8 @@ void FuturismBoss::AddCoreShieldBounds(ShieldLimbType sectorToAdd) {
     Collision::LineSeg2D rightLine(PT2, PT3);
     Vector2D rightLineNormal(PT2[1] - PT3[1], PT3[0] - PT2[0]);
 
-    BossBodyPart* coreShield = static_cast<BossBodyPart*>(this->bodyParts[this->coreShieldIdx]);
-    BoundingLines shieldBounds = coreShield->GetLocalBounds();
+    BossBodyPart* core = static_cast<BossBodyPart*>(this->bodyParts[this->coreBodyIdx]);
+    BoundingLines shieldBounds = core->GetLocalBounds();
 
 #define ROTATE_LINES_AND_NORMALS(degs) \
     leftLine.Rotate(degs, Point2D(0,0)); leftLineNormal.Rotate(degs); \
@@ -376,9 +415,10 @@ void FuturismBoss::AddCoreShieldBounds(ShieldLimbType sectorToAdd) {
             ROTATE_LINES_AND_NORMALS(-90);
             break;
 
+        case CoreShield:
         default:
-            assert(false);
             return;
+
     }
     ADD_BOUNDS();
 
@@ -386,50 +426,29 @@ void FuturismBoss::AddCoreShieldBounds(ShieldLimbType sectorToAdd) {
 #undef ROTATE_LINES_AND_NORMALS
 
     assert(shieldBounds.GetNumLines() <= 12);
-    coreShield->SetLocalBounds(shieldBounds);
+    core->SetLocalBounds(shieldBounds);
 }
 
 // When a particular shielded limb of the boss is destroyed, this function should be called to
 // update the bounds of all other existing body parts
 void FuturismBoss::UpdateBoundsForDestroyedShieldLimb(ShieldLimbType type) {
     
-    // TODO
-    assert(false);
-
     switch (type) {
         case TopShield:
-            if (!this->GetLeftShield()->GetIsDestroyed()) {
-                // Add top bound line to left shield
-            }
-            if (!this->GetRightShield()->GetIsDestroyed()) {
-                // Add top bound line to right shield
-            }
-            this->AddCoreShieldBounds(TopShield);
+            this->TopShieldUpdate();
             break;
-
         case BottomShield:
-            if (!this->GetLeftShield()->GetIsDestroyed()) {
-                // Add bottom bound line to left shield
-            }
-            if (!this->GetRightShield()->GetIsDestroyed()) {
-                // Add bottom bound line to right shield
-            }
-            this->AddCoreShieldBounds(BottomShield);
+            this->BottomShieldUpdate();
             break;
-
         case LeftShield:
-            // If both top and bottom shield still exist
-                // Add special core shield lines
-            // Else
-                // Add core shield lines
-
+            this->LeftShieldUpdate();
             break;
-
         case RightShield:
-            // If both top and bottom shield still exist
-                // Add special core shield lines
-            // Else
-                // Add core shield lines
+            this->RightShieldUpdate();
+            break;
+        
+        case CoreShield:
+            this->RegenerateBoundsForFinalCore();
             break;
 
         default:
@@ -441,8 +460,202 @@ void FuturismBoss::UpdateBoundsForDestroyedShieldLimb(ShieldLimbType type) {
     // bounds should already be properly generated
 }
 
-void FuturismBoss::RegenerateBoundsForFinalCore() {
+static const float SIDE_SHIELD_EXTRA_LINE_Y = 1.167f;
+static const float SIDE_SHIELD_EXTRA_LINE_X0 = 1.167f;
+static const float SIDE_SHIELD_EXTRA_LINE_X1 = 2.159f;
 
+void FuturismBoss::TopShieldUpdate() {
+    if (this->GetLeftShield()->GetIsDestroyed()) {
+        // Update the relevant part of the left shield
+        this->LeftShieldUpdate();
+    }
+    else {
+        const Point2D PT0(SIDE_SHIELD_EXTRA_LINE_X0, -SIDE_SHIELD_EXTRA_LINE_Y);
+        const Point2D PT1(SIDE_SHIELD_EXTRA_LINE_X1, -SIDE_SHIELD_EXTRA_LINE_Y);
+
+        // Add top bound line to left shield (since the left shield is rotated by 180, we actually add the bottom)
+        BossBodyPart* leftShield = static_cast<BossBodyPart*>(this->bodyParts[this->leftShieldIdx]);
+        BoundingLines bounds = leftShield->GetLocalBounds();
+        bounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(0,-1), false);
+        leftShield->SetLocalBounds(bounds);
+    }
+    if (this->GetRightShield()->GetIsDestroyed()) {
+        this->RightShieldUpdate();
+    }
+    else {
+        // Add top bound line to right shield
+        const Point2D PT0(SIDE_SHIELD_EXTRA_LINE_X0, SIDE_SHIELD_EXTRA_LINE_Y);
+        const Point2D PT1(SIDE_SHIELD_EXTRA_LINE_X1, SIDE_SHIELD_EXTRA_LINE_Y);
+
+        BossBodyPart* rightShield = static_cast<BossBodyPart*>(this->bodyParts[this->rightShieldIdx]);
+        BoundingLines bounds = rightShield->GetLocalBounds();
+        bounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(0,1), false);
+        rightShield->SetLocalBounds(bounds);
+    }
+    this->AddSpecialCoreBounds(TopShield);
+}
+
+void FuturismBoss::BottomShieldUpdate() {
+    if (this->GetLeftShield()->GetIsDestroyed()) {
+        this->LeftShieldUpdate();
+    }
+    else {
+        // Add bottom bound line to left shield
+        const Point2D PT0(SIDE_SHIELD_EXTRA_LINE_X0, SIDE_SHIELD_EXTRA_LINE_Y);
+        const Point2D PT1(SIDE_SHIELD_EXTRA_LINE_X1, SIDE_SHIELD_EXTRA_LINE_Y);
+
+        // Add top bound line to left shield (since the left shield is rotated by 180, we actually add the top)
+        BossBodyPart* leftShield = static_cast<BossBodyPart*>(this->bodyParts[this->leftShieldIdx]);
+        BoundingLines bounds = leftShield->GetLocalBounds();
+        bounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(0,1), false);
+        leftShield->SetLocalBounds(bounds);
+    }
+    if (this->GetRightShield()->GetIsDestroyed()) {
+        this->RightShieldUpdate();
+    }
+    else {
+        // Add bottom bound line to right shield
+        const Point2D PT0(SIDE_SHIELD_EXTRA_LINE_X0, -SIDE_SHIELD_EXTRA_LINE_Y);
+        const Point2D PT1(SIDE_SHIELD_EXTRA_LINE_X1, -SIDE_SHIELD_EXTRA_LINE_Y);
+
+        BossBodyPart* rightShield = static_cast<BossBodyPart*>(this->bodyParts[this->rightShieldIdx]);
+        BoundingLines bounds = rightShield->GetLocalBounds();
+        bounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(0,-1), false);
+        rightShield->SetLocalBounds(bounds);
+    }
+
+    this->AddSpecialCoreBounds(BottomShield);
+}
+
+void FuturismBoss::LeftShieldUpdate() {
+
+    const Point2D PT0(-2.159f, 1.167f);
+    const Point2D PT1(-2.519f, 0.384f);
+    const Point2D PT2(-2.519f, -0.384f);
+    const Point2D PT3(-2.159f, -1.167f);
+
+    const Point2D TOP_CORNER_PT(-CORE_SHIELD_CORNER_HEIGHT, CORE_SHIELD_CORNER_HEIGHT);
+    const Point2D BOTTOM_CORNER_PT(-CORE_SHIELD_CORNER_HEIGHT, -CORE_SHIELD_CORNER_HEIGHT);
+
+    const Collision::LineSeg2D line0(PT0, PT1);
+    const Collision::LineSeg2D line1(PT1, PT2);
+    const Collision::LineSeg2D line2(PT2, PT3);
+
+    const Collision::LineSeg2D topCornerLine(PT1, TOP_CORNER_PT);
+    const Collision::LineSeg2D bottomCornerLine(PT2, BOTTOM_CORNER_PT);
+
+    const Vector2D line0Norm(PT1[1]-PT0[1], PT0[0]-PT1[0]);
+    const Vector2D line1Norm(-1,0);
+    const Vector2D line2Norm(PT3[1]-PT2[1], PT2[0]-PT3[0]);
+
+    // Make sure special bounds are removed...
+    BossBodyPart* core = static_cast<BossBodyPart*>(this->bodyParts[this->coreBodyIdx]);
+    BoundingLines bounds = core->GetLocalBounds();
+    bounds.RemoveBound(line0);
+    bounds.RemoveBound(line1);
+    bounds.RemoveBound(line2);
+    bounds.RemoveBound(topCornerLine);
+    bounds.RemoveBound(bottomCornerLine);
+
+    if (this->GetTopShield()->GetIsDestroyed()) {
+        if (this->GetBottomShield()->GetIsDestroyed()) {
+            core->SetLocalBounds(bounds);
+            this->AddSpecialCoreBounds(LeftShield);
+        }
+        else {
+            // Top shield destroyed, bottom shield not destroyed
+            bounds.AddBound(line1, line1Norm, false);
+            bounds.AddBound(line2, line2Norm, false);
+            bounds.AddBound(topCornerLine, Vector2D(PT1[1]-TOP_CORNER_PT[1], TOP_CORNER_PT[0]-PT1[0]), false);
+            
+            core->SetLocalBounds(bounds);
+        }
+    }
+    else {
+        if (this->GetBottomShield()->GetIsDestroyed()) {
+            // Top shield not destroyed, bottom shield destroyed
+            bounds.AddBound(line0, line0Norm, false);
+            bounds.AddBound(line1, line1Norm, false);
+            bounds.AddBound(bottomCornerLine, Vector2D(BOTTOM_CORNER_PT[1]-PT2[1], PT2[0]-BOTTOM_CORNER_PT[0]), false);
+
+            core->SetLocalBounds(bounds);
+        }
+        else {
+            // Top and bottom shields are not destroyed
+            bounds.AddBound(line0, line0Norm, false);
+            bounds.AddBound(line1, line1Norm, false);
+            bounds.AddBound(line2, line2Norm, false);
+            
+            core->SetLocalBounds(bounds);
+        }
+    }
+}
+
+void FuturismBoss::RightShieldUpdate() {
+
+    const Point2D PT0(2.159f, 1.167f);
+    const Point2D PT1(2.519f, 0.384f);
+    const Point2D PT2(2.519f, -0.384f);
+    const Point2D PT3(2.159f, -1.167f);
+
+    const Point2D TOP_CORNER_PT(CORE_SHIELD_CORNER_HEIGHT, CORE_SHIELD_CORNER_HEIGHT);
+    const Point2D BOTTOM_CORNER_PT(CORE_SHIELD_CORNER_HEIGHT, -CORE_SHIELD_CORNER_HEIGHT);
+
+    const Collision::LineSeg2D line0(PT0, PT1);
+    const Collision::LineSeg2D line1(PT1, PT2);
+    const Collision::LineSeg2D line2(PT2, PT3);
+
+    const Collision::LineSeg2D topCornerLine(PT1, TOP_CORNER_PT);
+    const Collision::LineSeg2D bottomCornerLine(PT2, BOTTOM_CORNER_PT);
+
+    const Vector2D line0Norm(PT0[1]-PT1[1], PT1[0]-PT0[0]);
+    const Vector2D line1Norm(1,0);
+    const Vector2D line2Norm(PT2[1]-PT3[1], PT3[0]-PT2[0]);
+
+    // Make sure special bounds are removed...
+    BossBodyPart* core = static_cast<BossBodyPart*>(this->bodyParts[this->coreBodyIdx]);
+    BoundingLines bounds = core->GetLocalBounds();
+    bounds.RemoveBound(line0);
+    bounds.RemoveBound(line1);
+    bounds.RemoveBound(line2);
+    bounds.RemoveBound(topCornerLine);
+    bounds.RemoveBound(bottomCornerLine);
+
+    if (this->GetTopShield()->GetIsDestroyed()) {
+        if (this->GetBottomShield()->GetIsDestroyed()) {
+            core->SetLocalBounds(bounds);
+            this->AddSpecialCoreBounds(RightShield);
+        }
+        else {
+            // Top shield destroyed, bottom shield not destroyed
+            bounds.AddBound(line1, line1Norm, false);
+            bounds.AddBound(line2, line2Norm, false);
+            bounds.AddBound(topCornerLine, Vector2D(TOP_CORNER_PT[1]-PT1[1],PT1[0]- TOP_CORNER_PT[0]), false);
+            
+            core->SetLocalBounds(bounds);
+        }
+    }
+    else {
+        if (this->GetBottomShield()->GetIsDestroyed()) {
+            // Top shield not destroyed, bottom shield destroyed
+            bounds.AddBound(line0, line0Norm, false);
+            bounds.AddBound(line1, line1Norm, false);
+            bounds.AddBound(bottomCornerLine, Vector2D(PT2[1]-BOTTOM_CORNER_PT[1], BOTTOM_CORNER_PT[0]-PT2[0]), false);
+            
+            core->SetLocalBounds(bounds);
+        }
+        else {
+            // Top and bottom shields are not destroyed
+            bounds.AddBound(line0, line0Norm, false);
+            bounds.AddBound(line1, line1Norm, false);
+            bounds.AddBound(line2, line2Norm, false);
+
+            core->SetLocalBounds(bounds);
+        }
+    }
+}
+
+void FuturismBoss::RegenerateBoundsForFinalCore() {
     {
         const Point2D PT0(-2.137f, 0.340f);
         const Point2D PT1(-0.386f, 2.090f);
@@ -500,18 +713,36 @@ void FuturismBoss::RegenerateBoundsForFinalCore() {
     }
 }
 
+size_t FuturismBoss::GetShieldIndex(ShieldLimbType type) const {
+    switch (type) {
+        case TopShield:
+            return this->topShieldIdx;
+        case BottomShield:
+            return this->bottomShieldIdx;
+        case LeftShield:
+            return this->leftShieldIdx;
+        case RightShield:
+            return this->rightShieldIdx;
+        case CoreShield:
+            return this->coreShieldIdx;
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
 void FuturismBoss::GetRocketStrategyPortalSearchPieces(const GameLevel& level, std::set<LevelPiece*>& pieces) {
     const std::vector<std::vector<LevelPiece*> >& levelPieces = level.GetCurrentLevelLayout();
-    for (int row = 11; row <= 17; row++) {
+    for (int row = 15; row <= 21; row++) {
         for (int col = static_cast<int>(levelPieces[row].size()-3); col < static_cast<int>(levelPieces[row].size()-1); col++) {
             pieces.insert(levelPieces[row][col]);
         }
     }
 }
 
-void FuturismBoss::GetIceStrategyPortalSearchAABB(const GameLevel& level, std::set<LevelPiece*>& pieces) {
+void FuturismBoss::GetIceStrategyPortalSearchPieces(const GameLevel& level, std::set<LevelPiece*>& pieces) {
     const std::vector<std::vector<LevelPiece*> >& levelPieces = level.GetCurrentLevelLayout();
-    for (int row = 15; row <= 21; row++) {
+    for (int row = 11; row <= 17; row++) {
         for (int col = 0; col <= 2; col++) {
             pieces.insert(levelPieces[row][col]);
         }
@@ -546,7 +777,7 @@ void FuturismBoss::DebugDraw() const {
     }
 
     glEnd();
-
+/*
 #define DRAW_LEVEL_PIECE_LINES(piece) \
     Point2D center = piece->GetCenter(); \
     glVertex2f(center[0] - LevelPiece::HALF_PIECE_WIDTH, center[1] + LevelPiece::HALF_PIECE_HEIGHT); \
@@ -570,7 +801,7 @@ void FuturismBoss::DebugDraw() const {
         DRAW_LEVEL_PIECE_LINES(currPiece);
     }
     glEnd();
-
+*/
     glPopAttrib();
 }
 #endif

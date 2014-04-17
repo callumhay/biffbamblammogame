@@ -42,6 +42,7 @@
 ESPEmitter::ESPEmitter() : ESPAbstractEmitter(), timeSinceLastSpawn(0.0f), particleTexture(NULL),
 particleAlignment(ESP::ScreenAlignedGlobalUpVec), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
+cutoffLifetimeInSecs(NO_CUTOFF_LIFETIME), currCutoffLifetimeCountdown(NO_CUTOFF_LIFETIME),
 isReversed(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),
 radiusDeviationFromPtX(0.0), radiusDeviationFromPtY(0.0), radiusDeviationFromPtZ(0.0) {
 	// NOTE: The death plane has been setup so that it's impossible to be in the 'death-zone' of it
@@ -86,6 +87,28 @@ void ESPEmitter::Flush() {
 	// Reset appropriate variables
 	this->timeSinceLastSpawn = 0.0f;
 	this->particleTexture = NULL;
+}
+
+void ESPEmitter::Kill() {
+    // Convert all alive particles to dead particles, make the number of lives of all particles zero
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+        ESPParticle* currParticle = *iter;
+        currParticle->Kill();
+        this->deadParticles.push_back(currParticle);
+    }
+    this->aliveParticles.clear();
+
+    for (std::map<const ESPParticle*, int>::iterator iter = this->particleLivesLeft.begin(); 
+         iter != this->particleLivesLeft.end(); ++iter) {
+
+        iter->second = 0;
+    }
+    
+    if (this->cutoffLifetimeInSecs != NO_CUTOFF_LIFETIME) {
+        this->currCutoffLifetimeCountdown = 0;
+    }
+
+    this->timeSinceLastSpawn = this->particleLifetime.maxValue + EPSILON;
 }
 
 /**
@@ -272,6 +295,14 @@ void ESPEmitter::SimulateTicking(double time) {
  */
 void ESPEmitter::Tick(const double dT) {
 
+    // Check for cutoff lifetime
+    if (this->cutoffLifetimeInSecs != NO_CUTOFF_LIFETIME) {
+        this->currCutoffLifetimeCountdown -= dT;
+        if (this->currCutoffLifetimeCountdown < 0) {
+            this->Kill();
+        }
+    }
+ 
 	// Check for the special case of a single lifetime
 	if (this->OnlySpawnsOnce()) {
 		// Inline: Particles only have a single life time and are spawned immediately
@@ -549,8 +580,11 @@ void  ESPEmitter::SetParticleAlignment(const ESP::ESPAlignment alignment) {
  * Sets the inclusive interval of random possible values that represent the 
  * delay (in seconds) between the spawning of new particles for this emitter.
  */
-void ESPEmitter::SetSpawnDelta(const ESPInterval& spawnDelta) {
+void ESPEmitter::SetSpawnDelta(const ESPInterval& spawnDelta, bool firstSpawnNoDelta) {
 	this->particleSpawnDelta.CopyFromInterval(spawnDelta);
+    if (firstSpawnNoDelta && spawnDelta.maxValue != ESPEmitter::ONLY_SPAWN_ONCE) {
+        this->timeSinceLastSpawn = spawnDelta.maxValue;
+    }
 }
 
 /**
@@ -766,6 +800,11 @@ void ESPEmitter::SetParticleDeathPlane(const Plane& plane) {
 	this->particleDeathPlane = plane;
 }
 
+void ESPEmitter::SetCutoffLifetime(double timeInSecs) {
+    this->cutoffLifetimeInSecs = timeInSecs;
+    this->currCutoffLifetimeCountdown = timeInSecs;
+}
+
 /**
  * Adds a particle effector to this emitter.
  */
@@ -827,4 +866,7 @@ void ESPEmitter::Reset() {
 
 	// Reset time...
 	this->timeSinceLastSpawn = 0.0f;
+    if (this->cutoffLifetimeInSecs != NO_CUTOFF_LIFETIME) {
+        this->currCutoffLifetimeCountdown = this->cutoffLifetimeInSecs;
+    }
 }

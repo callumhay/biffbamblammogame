@@ -219,6 +219,8 @@ public:
         BossDeathFlashToFullscreenWhiteoutEvent,
         BossCrosshairTargetingEvent,
         BossLaserBeamLoop,
+        BossFrozenEvent,
+        BossIceShatterEvent,
         ClassicalBossSparkleEvent,
         ClassicalBossArmShakeLoop,
         ClassicalBossArmAttackEvent,
@@ -237,7 +239,10 @@ public:
         DecoBossLevelRotatingLoop,
         DecoBossLightningBoltAttackEvent,
         DecoBossElectricShockLoop,
-        DecoBossBackgroundLoopTransitionEvent,
+        FuturismBossTeleportationChargingEvent,
+        FuturismBossTeleportationEvent,
+        FuturismBossTwitchBeamWarningEvent,
+        FuturismBossArcBeamWarningEvent,
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,

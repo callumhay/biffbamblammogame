@@ -66,9 +66,7 @@ private:
 	Vector3D planeNormal;		// The normal vector defining the plane to emit on in the case of emitOnPlane == true
 
 	// Disallow copy and assign
-	ESPPointEmitter(const ESPPointEmitter& e);
-	ESPPointEmitter& operator=(const ESPPointEmitter& e);
-
+	DISALLOW_COPY_AND_ASSIGN(ESPPointEmitter);
 };
 
 /**

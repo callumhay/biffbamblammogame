@@ -44,24 +44,47 @@ public:
     ~FuturismBossStage1AIState();
 
 private:
-    static const float BOSS_SPEED;
+    static const double MIN_TIME_UNTIL_FIRST_PORTAL;
 
-    bool bottomShieldWeakened, topShieldWeakened, leftShieldWeakened, rightShieldWeakened;
-    
-    // Inherited from FuturismBossAIState
-    void SetState(FuturismBossAIState::AIState newState);
+    // Inherited from FuturismBossAIState -----------------------------------------------------
+    void GoToNextState(const GameModel& gameModel);
+    FuturismBossAIState* BuildNextAIState() const;
     bool IsCoreShieldVulnerable() const { return false; }
-    float GetMaxSpeed() const { return BOSS_SPEED; }
-    void GetRandomMoveToPositions(std::vector<Point2D>& positions) const;
-    double GetPauseTimeBeforeSingleTeleport() const { return 1.0; }
+    float GetMaxSpeed() const { return FuturismBossAIState::DEFAULT_SPEED; }
+    void GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const;
+    double GetAfterAttackWaitTime(FuturismBossAIState::AIState attackState) const;
+    double GetBallAttractTime() const { /*assert(false);*/ return 5.0; }
+    double GetBallDiscardTime() const { /*assert(false);*/ return 0.5; }
+    double GetFrozenTime() const { return 0.5*FuturismBossAIState::DEFAULT_FROZEN_TIME_IN_SECS; }
+    double GetSingleTeleportInAndOutTime() const { return 1.0; }
     double GetTotalStrategyPortalShootTime() const { return 4.0; }
-    void GetStrategyPortalCandidatePieces(const GameLevel& level, Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates) const;
+    double GetTotalWeaponPortalShootTime() const { /*assert(false);*/ return 4.0; }
+    double GetTwitchBeamShootTime() const { return 0.65; }
+    double GetBeamArcShootTime() const { return this->GetTwitchBeamShootTime(); }
+    double GetBeamArcHoldTime() const  { return 1.33; }
+    double GetBeamArcingTime() const { return 3.5; }
+    double GetTimeBetweenBurstLineShots() const { return 0.2 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.08; }
+    double GetTimeBetweenBurstWaveShots() const { return 0.45 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.250; }
+    int GetNumBurstLineShots() const { return 3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 2); }
+    int GetNumWaveBurstShots() const { return 2 + (Randomizer::GetInstance()->RandomUnsignedInt() % 2); }
+    int GetNumShotsPerWaveBurst() const { return 3; }
+    
+    bool AllShieldsDestroyedToEndThisState() const;
+    bool ArenaBarrierExists() const { return true; }
+
+    void GetStrategyPortalCandidatePieces(const GameLevel& level, 
+        Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates);
+    // -----------------------------------------------------------------------------------------
 
     // Inherited from BossAIState
     void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
     void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
     float GetTotalLifePercent() const;
     float GetAccelerationMagnitude() const { return FuturismBossAIState::DEFAULT_ACCELERATION; }
+
+    // Helper Methods
+    bool LevelHasRocketInIt(const GameModel& gameModel) const;
+    void RocketAwareGoToRandomMoveState(const GameModel& gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(FuturismBossStage1AIState);
 };

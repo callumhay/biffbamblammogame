@@ -1579,6 +1579,12 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProject
     // EVENT: Rocket exploded!!
     GameEventManager::Instance()->ActionRocketExploded(*rocket);
 
+    // If there's a boss then it needs to be informed of the explosion as well, make sure we do this before
+    // any "return" calls since it doesn't depend on whether any blocks were hit
+    if (this->GetHasBoss()) {
+        this->boss->RocketExplosionOccurred(gameModel, rocket);
+    }
+
 	// Destroy the hit piece if we can...
 	LevelPiece* centerPieceAfterDestruction = hitPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
 
@@ -1937,6 +1943,22 @@ bool ComparePieceAndSqrDist(const PieceAndSqrDist& e1, const PieceAndSqrDist& e2
   return e1.sqrDist < e2.sqrDist;
 }
 
+bool GameLevel::IsCollidingWithLevelPieces(const Point2D& center, float radius) const {
+
+    std::set<LevelPiece*> candidates;
+    this->GetLevelPieceCollisionCandidatesNoSort(center, radius, candidates);
+    
+    Collision::Circle2D circle(center, radius);
+    for (std::set<LevelPiece*>::const_iterator iter = candidates.begin(); iter != candidates.end(); ++iter) {
+        LevelPiece* currPiece = *iter;
+        assert(currPiece != NULL);
+        if (!currPiece->IsNoBoundsPieceType() && Collision::IsCollision(currPiece->GetAABB(), circle)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void GameLevel::GetLevelPieceCollisionCandidatesNotMoving(const Point2D& center, float radius,
                                                           std::vector<LevelPiece*>& candidates) const {
 
@@ -2179,7 +2201,7 @@ LevelPiece* GameLevel::GetLevelPieceColliderFast(const Collision::Ray2D& ray,
  * if no collision found.
  */
 LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
-                                                  const std::set<const LevelPiece*>& ignorePieces,
+                                                  const std::set<const void*>& ignoreThings,
                                                   float& rayT, float toleranceRadius) const {
 
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
@@ -2207,7 +2229,7 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 
 			// Check to see if the piece can be collided with, if so try to collide the ray with
 			// the actual block bounds, if there's a collision we get out of here and just return the piece
-			if (ignorePieces.find(currSamplePiece) == ignorePieces.end()) {
+			if (ignoreThings.find(currSamplePiece) == ignoreThings.end()) {
 				if (currSamplePiece->CollisionCheck(ray, rayT)) {
 					// Make sure the piece is along the direction of the ray and not behind it
 					if (rayT < minRayT) {
@@ -2236,7 +2258,7 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 	return NULL;
 }
 
-void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
+void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const void*>& ignoreThings,
                                        const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes,
                                        std::set<LevelPiece*>& result, float cutoffRayT, float toleranceRadius) const {
     result.clear();
@@ -2279,7 +2301,7 @@ void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::s
 
 			// Check to see if the piece can be collided with, if so try to collide the ray with
 			// the actual block bounds, if there's a collision we get out of here and just return the piece
-			if (ignorePieces.find(currSamplePiece) == ignorePieces.end() &&
+			if (ignoreThings.find(currSamplePiece) == ignoreThings.end() &&
                 ignorePieceTypes.find(currSamplePiece->GetType()) == ignorePieceTypes.end()) {
 
 				if (currSamplePiece->CollisionCheck(ray, rayT)) {
@@ -2298,7 +2320,7 @@ void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::s
 	}
 }
 
-// Add a newly activated lightning barrier for the tesla block
+// Add a newly activated lightning barrier for the Tesla block
 void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
 
 	// Check to see if the barrier already exists, if it does then just exit with no change
@@ -2332,12 +2354,12 @@ void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock*
 		Collision::Ray2D rayFromBlock(block1->GetCenter(), arcVector / arcLength);
 		float rayT;
 		LevelPiece* pieceInArc;
-		std::set<const LevelPiece*> ignorePieces;
-		ignorePieces.insert(block1);
+		std::set<const void*> ignoreThings;
+		ignoreThings.insert(block1);
 
 		for (;;) {
-			pieceInArc = this->GetLevelPieceFirstCollider(rayFromBlock, ignorePieces, rayT, TeslaBlock::LIGHTNING_ARC_RADIUS);
-			// We get out once we've reached the 2nd tesla block (which MUST happen!)
+			pieceInArc = this->GetLevelPieceFirstCollider(rayFromBlock, ignoreThings, rayT, TeslaBlock::LIGHTNING_ARC_RADIUS);
+			// We get out once we've reached the 2nd Tesla block (which MUST happen!)
 			if (pieceInArc == block2) {
 				break;
 			}
@@ -2346,7 +2368,7 @@ void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock*
 			assert(rayT >= 0.0f);
 
 			// Destroy the piece in the lightning arc...
-            ignorePieces.insert(pieceInArc->Destroy(gameModel, LevelPiece::TeslaDestruction));
+            ignoreThings.insert(pieceInArc->Destroy(gameModel, LevelPiece::TeslaDestruction));
 			// Reevaluate the next collider using a new ray from the new ignore piece
 			rayFromBlock.SetOrigin(rayFromBlock.GetPointAlongRayFromOrigin(rayT));
 		}

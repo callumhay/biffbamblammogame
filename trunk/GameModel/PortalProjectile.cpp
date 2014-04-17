@@ -31,7 +31,10 @@
 #include "GameBall.h"
 #include "GameEventManager.h"
 
-const float PortalProjectile::BOUNDS_COEFF = 0.9f;
+const float PortalProjectile::BOUNDS_COEFF = 0.7f;
+
+// Fraction of the base termination time where this portal is considered to be "close to" terminating
+const double PortalProjectile::CLOSE_TO_TERMINATING_FRACTION = 0.2;
 
 std::pair<PortalProjectile*, PortalProjectile*> 
 PortalProjectile::BuildSiblingPortalProjectiles(const Point2D& portal1Pos, const Point2D& portal2Pos, 
@@ -123,6 +126,17 @@ void PortalProjectile::ProjectileCollisionOccurred(Projectile* projectile) {
     projectile->SetPosition(this->sibling->GetPosition() + centerToProjectile);
 }
 
+void PortalProjectile::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, 
+                                                   std::list<Collision::Ray2D>& rays) const {
+
+    // Find position difference between the point and center...
+    Vector2D toHitVec = hitPoint - this->GetPosition();
+
+    // The new ray is simply the old one coming out of the sibling portal
+    Point2D newPosition = this->sibling->GetPosition() + toHitVec;
+    rays.push_back(Collision::Ray2D(newPosition, impactDir));
+}
+
 BoundingLines PortalProjectile::BuildBoundingLines() const {
  
     static const Vector2D UP_DIR(0,1);
@@ -131,10 +145,10 @@ BoundingLines PortalProjectile::BuildBoundingLines() const {
     const Vector2D HALF_UP_VEC    = BOUNDS_COEFF*this->GetHalfHeight()*UP_DIR;
     const Vector2D HALF_RIGHT_VEC = BOUNDS_COEFF*this->GetHalfWidth()*RIGHT_DIR;
 
-    Point2D topRight = this->GetPosition() + HALF_UP_VEC + HALF_RIGHT_VEC;
-    Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;
-    Point2D topLeft = this->GetPosition() + HALF_UP_VEC - HALF_RIGHT_VEC;
-    Point2D bottomLeft = topLeft - this->GetHeight()*UP_DIR;
+    Point2D topRight    = this->GetPosition() + HALF_UP_VEC + HALF_RIGHT_VEC;
+    Point2D bottomRight = this->GetPosition() - HALF_UP_VEC + HALF_RIGHT_VEC;
+    Point2D topLeft     = this->GetPosition() + HALF_UP_VEC - HALF_RIGHT_VEC;
+    Point2D bottomLeft  = this->GetPosition() - HALF_UP_VEC - HALF_RIGHT_VEC;
 
     static const int NUM_BOUNDS = 4;
     Collision::LineSeg2D bounds[NUM_BOUNDS];

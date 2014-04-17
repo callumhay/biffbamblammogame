@@ -57,6 +57,7 @@ struct MaterialProperties {
 	static const char* MATERIAL_INKBLOCK_TYPE;
 	static const char* MATERIAL_STICKYGOO_TYPE;
 	static const char* MATERIAL_PRISM_TYPE;
+    static const char* MATERIAL_ICE_TYPE;
 	static const char* MATERIAL_PORTAL_TYPE;
 
 	// Geometry types

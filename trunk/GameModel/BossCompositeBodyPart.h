@@ -79,6 +79,7 @@ public:
     void SetDestroyed(bool isDestroyed);
 
     Collision::AABB2D GenerateWorldAABB() const;
+    Collision::Circle2D GenerateWorldCircleBounds() const;
 
     void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);
     void ResetColourRGBAAnimation();

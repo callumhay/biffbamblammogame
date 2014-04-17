@@ -52,6 +52,9 @@
 
 using namespace nouveaubossai;
 
+const double NouveauBossAI::BEAM_EXPIRE_TIME_IN_SECONDS = 3.25; // Length of time for the beam to be firing
+
+
 NouveauBossAI::NouveauBossAI(NouveauBoss* boss) : BossAIState(), boss(boss) {
     assert(boss != NULL);
     this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(1.0f);
@@ -431,7 +434,7 @@ void NouveauBossAI::OnSetStateLaserBeamAttack() {
     this->desiredVel = Vector2D(0,0);
 
     this->countdownToNextLaserBeamFiring   = 0.0;
-    this->countdownWaitForLastBeamToFinish = BossLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS + 1.5; 
+    this->countdownWaitForLastBeamToFinish = BEAM_EXPIRE_TIME_IN_SECONDS + 1.5; 
 }
 
 void NouveauBossAI::ExecuteMoveToTargetStopAndShootState(double dT, GameModel* gameModel) {
@@ -714,7 +717,7 @@ void NouveauBossAI::ExecuteLaserBeamAttackState(double dT, GameModel* gameModel)
                 return;
         }
 
-        BossLaserBeam* bossBeam = new BossLaserBeam(beamRay, beamRadius, gameModel);
+        BossLaserBeam* bossBeam = new BossLaserBeam(gameModel, beamRay, beamRadius, BEAM_EXPIRE_TIME_IN_SECONDS);
         gameModel->AddBeam(bossBeam);
         
         // EVENT: Flash for the laser beam

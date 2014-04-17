@@ -36,8 +36,13 @@
 
 class BossBodyPartEmitterUpdateStrategy : public EffectUpdateStrategy {
 public:
-    BossBodyPartEmitterUpdateStrategy(const BossBodyPart* bodyPart) : bodyPart(bodyPart), offset(0,0,0) {
+    explicit BossBodyPartEmitterUpdateStrategy(const BossBodyPart* bodyPart) : bodyPart(bodyPart), offset(0,0,0) {
         assert(bodyPart != NULL);
+    }
+    BossBodyPartEmitterUpdateStrategy(const BossBodyPart* bodyPart, ESPAbstractEmitter* emitter) : 
+    bodyPart(bodyPart), offset(0,0,0) {
+        assert(bodyPart != NULL);
+        this->AddEmitter(emitter);
     }
     BossBodyPartEmitterUpdateStrategy(const BossBodyPart* bodyPart, std::list<ESPAbstractEmitter*>& emitters) : 
       bodyPart(bodyPart), emitters(emitters), offset(0,0,0) {
@@ -61,7 +66,7 @@ public:
         this->offset = offset;
     }
 
-    void TickAndDraw(double dT, const Camera& camera);
+    void TickAndDraw(double dT, const Camera& camera, const GameModel& gameModel);
     bool IsDead() const { return this->emitters.empty(); }
 
 private:
@@ -70,7 +75,8 @@ private:
     std::list<ESPAbstractEmitter*> emitters;
 };
 
-inline void BossBodyPartEmitterUpdateStrategy::TickAndDraw(double dT, const Camera& camera) {
+inline void BossBodyPartEmitterUpdateStrategy::TickAndDraw(double dT, const Camera& camera,
+                                                           const GameModel&) {
     
     Point3D bodyPartPos = this->bodyPart->GetTranslationPt3D() + this->offset;
 

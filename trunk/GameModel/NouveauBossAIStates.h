@@ -66,6 +66,8 @@ public:
     void CollisionOccurred(GameModel*, PlayerPaddle&, BossBodyPart*) {}; // There aren't any boss-paddle collisions in this battle
 
 protected:
+    static const double BEAM_EXPIRE_TIME_IN_SECONDS;
+
     NouveauBoss* boss;
     AnimationMultiLerp<Vector3D> angryMoveAnim;
 

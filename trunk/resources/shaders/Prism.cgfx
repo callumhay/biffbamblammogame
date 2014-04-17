@@ -160,6 +160,7 @@ struct appdata {
     float3 Position : POSITION;
     float4 Normal   : NORMAL;
     float4 Colour   : COLOR0;
+    float2 UV       : TEXCOORD0;
 };
 
 struct vertexOutput {
@@ -169,6 +170,7 @@ struct vertexOutput {
     float3 WorldView    : TEXCOORD3;
     float4 Colour       : TEXCOORD4;
     float3 ProjPos      : TEXCOORD5;
+    float2 UV           : TEXCOORD6;
 };
 
 vertexOutput prism_VS(appdata IN) {
@@ -186,6 +188,7 @@ vertexOutput prism_VS(appdata IN) {
     OUT.ProjPos   = outPos.xyz / outPos.w; 
     OUT.Colour    = IN.Colour;
     OUT.Colour.a *= AlphaMultiplier;
+    OUT.UV = IN.UV.xy;
     return OUT;
 }
 
@@ -261,6 +264,26 @@ float4 prism_PS(vertexOutput IN) : COLOR {
     return float4(result, IN.Colour.a);
 }
 
+float4 ice_PS(vertexOutput IN) : COLOR {
+    float3 diffContrib;
+    float3 specContrib;
+    float3 nWorldView   = normalize(IN.WorldView);
+    float3 nWorldNormal = normalize(IN.WorldNormal);
+    float3 nProjPos     = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
+      
+    PrismShading(nWorldNormal, IN.WorldPos, nWorldView, diffContrib, specContrib);
+    float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
+    float3 refractColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
+    float4 textureColour = tex2D(ColourSampler, IN.UV).rgba;
+    
+
+    float3 result = SpecularColour * specContrib + DiffuseColour * diffContrib + 
+    	(1-textureColour.a)*refractColour + textureColour.a*textureColour.rgb;
+
+    return float4(result, IN.Colour.a);
+}
+
+
 technique Prism {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
@@ -275,5 +298,21 @@ technique Prism {
         FragmentProgram = compile arbfp1 prism_PS();
     }
 }
+
+technique Ice {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+
+        VertexProgram = compile arbvp1 prism_VS();        
+        FragmentProgram = compile arbfp1 ice_PS();
+    }
+}
+
 
 

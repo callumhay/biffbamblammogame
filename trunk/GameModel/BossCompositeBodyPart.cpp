@@ -379,21 +379,23 @@ void BossCompositeBodyPart::SetDestroyed(bool isDestroyed) {
 }
 
 Collision::AABB2D BossCompositeBodyPart::GenerateWorldAABB() const {
-    int i = 0;
+    
     Collision::AABB2D result;
-    while (result.IsEmpty() && i < static_cast<int>(this->childParts.size())) {
+
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         const AbstractBossBodyPart* part = this->childParts[i];
-        result = part->GenerateWorldAABB();
-        i++;
+        result.AddAABB(part->GenerateWorldAABB());
     }
 
-    Collision::AABB2D temp;
-    for (; i < static_cast<int>(this->childParts.size()); i++) {
+    return result;
+}
+
+Collision::Circle2D BossCompositeBodyPart::GenerateWorldCircleBounds() const {
+    Collision::Circle2D result;
+
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         const AbstractBossBodyPart* part = this->childParts[i];
-        temp = part->GenerateWorldAABB();
-        if (!temp.IsEmpty()) {
-            result.AddAABB(temp);
-        }
+        result.AddCircle(part->GenerateWorldCircleBounds());
     }
 
     return result;
@@ -401,6 +403,10 @@ Collision::AABB2D BossCompositeBodyPart::GenerateWorldAABB() const {
 
 #ifdef _DEBUG
 void BossCompositeBodyPart::DebugDraw() const {
+    // Show the AABB for this part
+    Collision::AABB2D aabb = this->GenerateWorldAABB();
+    aabb.DebugDraw();
+
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         const AbstractBossBodyPart* part = this->childParts[i];
         part->DebugDraw();

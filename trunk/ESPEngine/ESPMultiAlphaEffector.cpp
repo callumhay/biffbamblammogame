@@ -36,6 +36,23 @@
 ESPMultiAlphaEffector::ESPMultiAlphaEffector() : ESPEffector() {
 }
 
+ESPMultiAlphaEffector::ESPMultiAlphaEffector(float a0, double p0, float a1, double p1, float a2, double p2) : ESPEffector() {
+    std::vector<std::pair<float, double> > pairs(3);
+    pairs[0].first = a0; pairs[0].second = p0;
+    pairs[1].first = a1; pairs[1].second = p1;
+    pairs[2].first = a2; pairs[2].second = p2;
+    this->SetAlphasWithPercentage(pairs);
+}
+ESPMultiAlphaEffector::ESPMultiAlphaEffector(float a0, double p0, float a1, double p1, 
+                                             float a2, double p2, float a3, double p3) : ESPEffector() {
+    std::vector<std::pair<float, double> > pairs(4);
+    pairs[0].first = a0; pairs[0].second = p0;
+    pairs[1].first = a1; pairs[1].second = p1;
+    pairs[2].first = a2; pairs[2].second = p2;
+    pairs[2].first = a3; pairs[2].second = p3;
+    this->SetAlphasWithPercentage(pairs);
+}
+
 void ESPMultiAlphaEffector::AffectParticleOnTick(double dT, ESPParticle* particle) {
 	UNUSED_PARAMETER(dT);
 
@@ -126,11 +143,15 @@ float ESPMultiAlphaEffector::CalculateAlpha(double lifeElapsed, double totalLife
 
     double percentLifeElapsed = std::min<float>(1.0f, lifeElapsed / totalLifespan);
 
-    int lookupIndexBase = static_cast<int>(percentLifeElapsed * static_cast<double>(this->alphas.size()-1));
+    int lookupIndexBase = static_cast<int>(percentLifeElapsed * (static_cast<double>(this->alphas.size())-1));
     int lookupIndexNext = (lookupIndexBase + 1);
 
     if (lookupIndexNext >= static_cast<int>(this->alphas.size())) {
-        lookupIndexNext = this->alphas.size() - 1;
+        lookupIndexNext = static_cast<int>(this->alphas.size()) - 1;
+
+        if (lookupIndexNext == lookupIndexBase) {
+            return this->alphas.back();
+        }
     }
 
     double startPercentage = this->percentages[lookupIndexBase];
@@ -138,5 +159,6 @@ float ESPMultiAlphaEffector::CalculateAlpha(double lifeElapsed, double totalLife
     float startAlpha = this->alphas[lookupIndexBase];
     float endAlpha   = this->alphas[lookupIndexNext];
 
-    return static_cast<float>(startAlpha + (percentLifeElapsed - startPercentage) * (endAlpha - startAlpha) / (endPercentage - startPercentage));
+    return NumberFuncs::Clamp(static_cast<float>(startAlpha + (percentLifeElapsed - startPercentage) * 
+        (endAlpha - startAlpha) / (endPercentage - startPercentage)), 0.0f, 1.0f);
 }

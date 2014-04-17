@@ -35,14 +35,16 @@
 class DebrisEffectInfo : public BossEffectEventInfo {
 public:
     DebrisEffectInfo(const BossBodyPart* part, const Point2D& explosionCenter, const Colour& colour, 
-        double minLifeOfDebrisInSecs, double maxLifeOfDebrisInSecs, int numDebrisBits) : 
-      BossEffectEventInfo(), part(part), explosionCenter(explosionCenter), colour(colour), 
+        double minLifeOfDebrisInSecs, double maxLifeOfDebrisInSecs, int numDebrisBits, float sizeMultiplier = 1.0f,
+        float forceMultiplier = 1.0f) :  BossEffectEventInfo(), part(part), explosionCenter(explosionCenter), colour(colour), 
           minLifeOfDebrisInSecs(minLifeOfDebrisInSecs), maxLifeOfDebrisInSecs(maxLifeOfDebrisInSecs), 
-          numDebrisBits(numDebrisBits) {
+          numDebrisBits(numDebrisBits), sizeMultiplier(sizeMultiplier), forceMultiplier(forceMultiplier) {
+
         assert(part != NULL);
         assert(minLifeOfDebrisInSecs > 0.0 && maxLifeOfDebrisInSecs >= minLifeOfDebrisInSecs);
         assert(numDebrisBits > 0);
-      }
+    }
+
     ~DebrisEffectInfo() {}
 
     BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::DebrisInfo; }
@@ -53,6 +55,8 @@ public:
     double GetMinLifeOfDebrisInSecs() const { return this->minLifeOfDebrisInSecs; }
     double GetMaxLifeOfDebrisInSecs() const { return this->maxLifeOfDebrisInSecs; }
     int GetNumDebrisBits() const { return this->numDebrisBits; }
+    float GetSizeMultiplier() const { return this->sizeMultiplier; }
+    float GetForceMultiplier() const { return this->forceMultiplier; }
     
 private:
     const BossBodyPart* part;
@@ -61,6 +65,8 @@ private:
     double minLifeOfDebrisInSecs;
     double maxLifeOfDebrisInSecs;
     const int numDebrisBits;
+    float sizeMultiplier;
+    float forceMultiplier;
 
     DISALLOW_COPY_AND_ASSIGN(DebrisEffectInfo);
 };

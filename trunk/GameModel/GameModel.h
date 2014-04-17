@@ -239,6 +239,11 @@ public:
         assert(currLevel != NULL);
         return currLevel->GetTranslationToMiddle();
     }
+    Vector2D GetCurrentLevelTranslation2D() const {
+        GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
+        assert(currLevel != NULL);
+        return currLevel->GetTranslationToMiddle2D();
+    }
 
 	bool IsLastWorld() const {
 		return this->currWorldNum == this->worlds.size()-1;
@@ -317,6 +322,8 @@ public:
         if (findIter == this->projectiles.end()) { return NULL; }
         return &findIter->second;
     }
+
+    Projectile* GetFirstBeamProjectileCollider(const Collision::Ray2D& ray, const std::set<const void*>& ignoreThings, float& rayT) const;
 
 	std::list<Beam*>& GetActiveBeams() {
 		return this->beams;

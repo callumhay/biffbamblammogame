@@ -226,8 +226,8 @@ public:
 	void ApplyImpulseForce(float xDirectionalForce, float deaccel);
 
 	// Paddle colour set/get functions
-	const ColourRGBA& GetColour() const {
-		return this->colour;
+	ColourRGBA GetColour() const {
+		return ColourRGBA(this->colour.GetColour(), this->hurtAlphaAnim.GetInterpolantValue()*this->colour.A());
 	}
 	void SetColour(const Colour& c) {
 		this->colour = ColourRGBA(c, this->colour.A());
@@ -236,7 +236,7 @@ public:
 		this->colour[3] = alpha;
 	}
     float GetAlpha() const {
-        return this->colour[3];
+        return this->colour[3] * this->hurtAlphaAnim.GetInterpolantValue();
     }
 	void AnimateFade(bool fadeOut, double duration);
 
@@ -355,6 +355,9 @@ public:
 
     double GetTimeUntilUnfrozen() const { return this->frozenCountdown; }
     double GetTimeUntilNotOnFire() const { return this->onFireCountdown; }
+    double GetHurtTime() const { return std::max<double>(this->moveDownAnimation.GetFinalTimeValue(), this->rotAngleZAnimation.GetFinalTimeValue()); }
+
+    void SetupAlphaFlashAnim(double totalFlashTime);
 
     void SetLastPieceCollidedWith(const LevelPiece* p) { 
         this->lastThingCollidedWith = p; 
@@ -421,7 +424,8 @@ private:
 	// Colour and animation
 	ColourRGBA colour;									// The colour multiply of the paddle, including its visibility/alpha
 	AnimationLerp<ColourRGBA> colourAnimation;			// Animation associated with the colour
-	AnimationMultiLerp<float> moveDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)
+	AnimationMultiLerp<float> hurtAlphaAnim;
+    AnimationMultiLerp<float> moveDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)
 	AnimationMultiLerp<float> rotAngleZAnimation;		// Animation for rotating the paddle on the plane that the game is played, default angle is zero (pointing up)
     
     const void* lastEntityThatHurtHitPaddle;            // Pointer to the last entity that hit the paddle

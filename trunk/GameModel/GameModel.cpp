@@ -735,6 +735,36 @@ void GameModel::SetInvertBallBoostDir(bool isInverted) {
     }
 }
 
+Projectile* GameModel::GetFirstBeamProjectileCollider(const Collision::Ray2D& ray, 
+                                                      const std::set<const void*>& ignoreThings, 
+                                                      float& rayT) const {
+    
+    Projectile* closestCollider = NULL;
+    rayT = std::numeric_limits<float>::max();
+
+    for (ProjectileMapConstIter mapIter = this->projectiles.begin(); mapIter != this->projectiles.end(); ++mapIter) {
+        const ProjectileList& currProjectileList = mapIter->second;
+
+        for (ProjectileListConstIter iter = currProjectileList.begin(); iter != currProjectileList.end(); ++iter) {
+
+            Projectile* currProjectile = *iter;
+            float tempRayT = std::numeric_limits<float>::max();
+
+            if (currProjectile->CanCollideWithBeams() && ignoreThings.find(currProjectile) == ignoreThings.end() && 
+                Collision::IsCollision(ray, currProjectile->BuildAABB(), tempRayT)) {
+
+                if (tempRayT < rayT) {
+
+                    rayT = tempRayT;
+                    closestCollider = currProjectile;
+                }
+            }
+        }
+    }
+
+    return closestCollider;
+}
+
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	ball.BallCollided();
 

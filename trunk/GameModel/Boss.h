@@ -86,6 +86,7 @@ public:
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
     void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
+    void RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket);
     void MineExplosionOccurred(GameModel* gameModel, const MineProjectile* mine);
     void TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 

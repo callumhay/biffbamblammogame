@@ -79,6 +79,7 @@
 #include "../GameModel/PortalSpawnEffectInfo.h"
 #include "../GameModel/GenericEmitterEffectInfo.h"
 #include "../GameModel/BossTeleportEffectInfo.h"
+#include "../GameModel/EnumBossEffectInfo.h"
 
 // GameControl Includes
 #include "../GameControl/GameControllerManager.h"
@@ -1454,9 +1455,6 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
     }
     this->numFallingItemsInPlay++;
 
-    //sound->AttachAndPlaySound(&item, GameSound::ItemMovingLoop, true,
-    //    this->display->GetModel()->GetCurrentLevelTranslation(), 0.33f);
-
 	debug_output("EVENT: Item Spawned: " << item);
 }
 
@@ -2355,6 +2353,12 @@ void GameEventsListener::BossEffectEvent(const BossEffectEventInfo& effectEvent)
             const BossTeleportEffectInfo& teleportInfo = static_cast<const BossTeleportEffectInfo&>(effectEvent);
             bossMesh->AddTeleportEffect(teleportInfo);
             break;  
+        }
+
+        case BossEffectEventInfo::EnumInfo: {
+            const EnumBossEffectInfo& enumInfo = static_cast<const EnumBossEffectInfo&>(effectEvent);
+            bossMesh->AddEnumEffect(enumInfo);
+            break;
         }
 
         default:

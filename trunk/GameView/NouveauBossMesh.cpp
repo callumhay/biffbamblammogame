@@ -210,8 +210,6 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
 
     UNUSED_PARAMETER(dT);
 
-    this->weakpointMaterial->SetLightAmt(keyLight, fillLight);
-
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // world space locations...
 
@@ -320,8 +318,12 @@ void NouveauBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoint
 #undef DRAW_POSSIBLE_WEAKPOINT_BODY_PART
 }
 
-void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
-    BossMesh::DrawPostBodyEffects(dT, camera, assets);
+void NouveauBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, 
+                                          const GameModel& gameModel, const BasicPointLight& keyLight, 
+                                          const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
+                                          const GameAssets* assets) {
+
+    BossMesh::DrawPostBodyEffects(dT, camera, gameModel, keyLight, fillLight, ballLight, assets);
 
     this->glowCirclePulseAnim.Tick(dT);
     float pulseScaler = this->glowCirclePulseAnim.GetInterpolantValue();

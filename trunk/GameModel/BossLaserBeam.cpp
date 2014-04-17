@@ -30,11 +30,10 @@
 #include "BossLaserBeam.h"
 #include "GameEventManager.h"
 
-const double BossLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS = 3.25; // Length of time for the beam to be firing
-const int BossLaserBeam::BASE_DAMAGE_PER_SECOND         = 0;    // Damage per second that the beam does to blocks and stuff																															// NOTE: a typical block has about 100 life
+const int BossLaserBeam::BASE_DAMAGE_PER_SECOND = 0;    // Damage per second that the beam does to blocks and stuff																															// NOTE: a typical block has about 100 life
 
-BossLaserBeam::BossLaserBeam(const Collision::Ray2D& initialBeamRay, float initialBeamRadius, const GameModel* gameModel) : 
-Beam(BossLaserBeam::BASE_DAMAGE_PER_SECOND, BossLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), 
+BossLaserBeam::BossLaserBeam(const GameModel* gameModel, const Collision::Ray2D& initialBeamRay, float initialBeamRadius, double expireTimeInSecs) : 
+Beam(BossLaserBeam::BASE_DAMAGE_PER_SECOND, expireTimeInSecs), 
 initialBeamRay(initialBeamRay), initialBeamRadius(initialBeamRadius) {
 	this->UpdateCollisions(gameModel);
 }
@@ -46,7 +45,8 @@ void BossLaserBeam::UpdateCollisions(const GameModel* gameModel) {
     assert(gameModel != NULL);
 
     std::list<BeamSegment*> initialBeamSegs;
-    initialBeamSegs.push_back(new BeamSegment(this->initialBeamRay, this->beamAlpha * this->initialBeamRadius, this->beamAlpha * BASE_DAMAGE_PER_SECOND, NULL));
+    initialBeamSegs.push_back(new BeamSegment(this->initialBeamRay, this->beamAlpha * this->initialBeamRadius, 
+        this->beamAlpha * BASE_DAMAGE_PER_SECOND, NULL));
 
     this->BuildAndUpdateCollisionsForBeamParts(initialBeamSegs, gameModel);
 }

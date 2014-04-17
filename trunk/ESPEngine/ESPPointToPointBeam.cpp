@@ -31,6 +31,8 @@
 #include "ESPBeam.h"
 #include "ESPEffector.h"
 
+#define ORIGIN_PT Point3D(0,0,0)
+
 ESPPointToPointBeam::ESPPointToPointBeam() : ESPAbstractEmitter(), 
 startPt(0,0,0), endPt(0,0,0), colour(1,1,1,1), depthEnabled(true),/*texture(NULL),*/
 numMainESPBeamSegments(10), numBeamsShot(0), timeSinceLastBeamSpawn(0.0), timeUntilNextBeamSpawn(0.0), 
@@ -117,6 +119,14 @@ void ESPPointToPointBeam::Draw(const Camera& camera) {
 	debug_opengl_state();
 }
 
+void ESPPointToPointBeam::SetRemainingBeamLifetimeMax(double lifeTimeInSecs) {
+    this->SetBeamLifetime(ESPInterval(lifeTimeInSecs));
+    for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end(); ++iter) {
+        ESPBeam* currBeam = *iter;
+        currBeam->SetRemainingLifeTime(std::min<double>(currBeam->GetRemainingLifeTime(), lifeTimeInSecs));
+    }
+}
+
 void ESPPointToPointBeam::AddCopiedEffector(const ESPEffector& effector) {
     this->effectors.push_back(effector.Clone());
 }
@@ -131,30 +141,14 @@ void ESPPointToPointBeam::ClearEffectors() {
 }
 
 void ESPPointToPointBeam::SpawnBeam() {
-	Vector3D beamVec = endPt - startPt;
-	float beamLength = beamVec.length();
-	beamVec.Normalize();
 
-	// Calculate an orthogonal vector for the beam line/vector
-	Vector3D orthToBeamVec = Vector3D::cross(beamVec, Vector3D(1, 0, 0));
-	if (orthToBeamVec == Vector3D(0, 0, 0)) {
-		orthToBeamVec = Vector3D::cross(beamVec, Vector3D(0, 1, 0));
-		if (orthToBeamVec == Vector3D(0, 0, 0)) {
-			orthToBeamVec = Vector3D::cross(beamVec, Vector3D(0, 0, 1));
-		}
-	}
-	assert(orthToBeamVec != Vector3D(0, 0, 0));
-	orthToBeamVec = Vector3D::cross(beamVec, orthToBeamVec);
-	orthToBeamVec.Normalize();
-
-	const Point3D ORIGIN_PT(0,0,0);
-
-	const float BEAM_LINE_DIST_VARIATION_FRACTION = 0.6f;
-	float avgSegLength = beamLength / this->numMainESPBeamSegments;
-	float fractionAvgSegLength = BEAM_LINE_DIST_VARIATION_FRACTION * avgSegLength;
+	Vector3D beamVec, orthToBeamVec;
+    float avgSegLength, fractionAvgSegLength;
+    this->GetBeamInfo(beamVec, orthToBeamVec, avgSegLength, fractionAvgSegLength);
 
 	ESPBeam* newBeam = new ESPBeam(this->colour, beamVec, orthToBeamVec, 
         this->mainBeamAmplitude, ESPInterval(-fractionAvgSegLength, fractionAvgSegLength));
+
 	ESPBeamSegment* currESPBeamSegment = newBeam->GetStartSegment();
 	assert(currESPBeamSegment != NULL);
 	
@@ -171,4 +165,58 @@ void ESPPointToPointBeam::SpawnBeam() {
 	
 	// Add the new beam as an alive beam in this beam emitter
 	this->aliveBeams.push_back(newBeam);
+}
+
+void ESPPointToPointBeam::UpdateBeams() {
+
+    Vector3D beamVec, orthToBeamVec;
+    float avgSegLength, fractionAvgSegLength;
+    this->GetBeamInfo(beamVec, orthToBeamVec, avgSegLength, fractionAvgSegLength);
+
+    // Go through all the alive beams and update the end point of this overall emitter
+    for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end(); ++iter) {
+        ESPBeam* beam = *iter;
+        beam->SetBeamLineVec(beamVec);
+        beam->SetOrthoBeamLineVec(orthToBeamVec);
+        beam->SetAmplitudeVariation(this->mainBeamAmplitude);
+        beam->SetLineDistanceVariation(ESPInterval(-fractionAvgSegLength, fractionAvgSegLength));
+
+        ESPBeamSegment* currESPBeamSegment = beam->GetStartSegment();
+        assert(currESPBeamSegment != NULL);
+
+        for (int i = 0; i < static_cast<int>(this->numMainESPBeamSegments); i++) {
+            currESPBeamSegment->SetDefaultPointOnLine(ORIGIN_PT + (i * avgSegLength) * beamVec);
+            assert(!currESPBeamSegment->GetChildSegments().empty());
+            currESPBeamSegment = currESPBeamSegment->GetChildSegments().front();
+            assert(currESPBeamSegment != NULL);
+        }
+        currESPBeamSegment->SetDefaultPointOnLine(ORIGIN_PT + (this->numMainESPBeamSegments * avgSegLength) * beamVec);
+    }
+}
+
+void ESPPointToPointBeam::GetBeamInfo(Vector3D& beamVec, Vector3D& orthToBeamVec, float& avgSegLength, float& fractionAvgSegLength) const {
+    beamVec = endPt - startPt;
+    float beamLength = beamVec.length();
+    if (beamLength < EPSILON) {
+        assert(false);
+        beamLength = 0.1f;
+    }
+    beamVec /= beamLength;
+
+    // Calculate an orthogonal vector for the beam line/vector
+    orthToBeamVec = Vector3D::cross(beamVec, Vector3D(1, 0, 0));
+    if (orthToBeamVec == Vector3D(0, 0, 0)) {
+        orthToBeamVec = Vector3D::cross(beamVec, Vector3D(0, 1, 0));
+        if (orthToBeamVec == Vector3D(0, 0, 0)) {
+            orthToBeamVec = Vector3D::cross(beamVec, Vector3D(0, 0, 1));
+        }
+    }
+    assert(orthToBeamVec != Vector3D(0, 0, 0));
+    orthToBeamVec = Vector3D::cross(beamVec, orthToBeamVec);
+    orthToBeamVec.Normalize();
+
+    const float BEAM_LINE_DIST_VARIATION_FRACTION = 0.6f;
+
+    avgSegLength = beamLength / this->numMainESPBeamSegments;
+    fractionAvgSegLength = BEAM_LINE_DIST_VARIATION_FRACTION * avgSegLength;
 }

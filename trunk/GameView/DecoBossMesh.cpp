@@ -332,8 +332,11 @@ void DecoBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLig
 #undef DRAW_BODY_PART
 }
 
-void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
-    BossMesh::DrawPostBodyEffects(dT, camera, assets);
+void DecoBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameModel& gameModel,
+                                       const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+                                       const BasicPointLight& ballLight, const GameAssets* assets) {
+
+    BossMesh::DrawPostBodyEffects(dT, camera, gameModel, keyLight, fillLight, ballLight, assets);
 
     // Check to see if we're drawing intro effects
     if (this->introTimeCountdown > 0.0) {

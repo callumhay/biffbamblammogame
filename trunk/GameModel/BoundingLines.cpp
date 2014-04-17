@@ -103,55 +103,26 @@ void BoundingLines::AddBounds(const BoundingLines& bounds) {
     this->onInside.insert(this->onInside.end(), bounds.onInside.begin(), bounds.onInside.end());
 }
 
+void BoundingLines::RemoveBound(const Collision::LineSeg2D& line) {
+    for (int i = 0; i < static_cast<int>(this->lines.size()); i++) {
+        if (this->lines[i].Equals(line)) {
+            this->lines.erase(this->lines.begin()+i);
+            this->normals.erase(this->normals.begin()+i);
+            this->onInside.erase(this->onInside.begin()+i);
+            return;
+        }
+    }
+}
+
 Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
-    if (this->lines.empty()) {
-        return Collision::AABB2D();
+
+    Collision::AABB2D result;
+    for (int i = 0; i < static_cast<int>(this->lines.size()); i++) {
+        result.AddPoint(this->lines[i].P1());
+        result.AddPoint(this->lines[i].P2());
     }
 
-	std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin();
-	const Collision::LineSeg2D& firstLine = *thisIter;
-
-	float minX = firstLine.P1()[0];
-	float maxX = firstLine.P1()[0];
-	float minY = firstLine.P1()[1];
-	float maxY = firstLine.P1()[1];
-    
-    ++thisIter;
-	while (thisIter != this->lines.end()) {
-		const Collision::LineSeg2D& currThisLine = *thisIter;
-
-		// First point on the line...
-		if (currThisLine.P1()[0] < minX) {
-			minX = currThisLine.P1()[0];
-		}
-		if (currThisLine.P1()[0] > maxX) {
-			maxX = currThisLine.P1()[0];
-		}
-		if (currThisLine.P1()[1] < minY) {
-			minY = currThisLine.P1()[1];
-		}
-		if (currThisLine.P1()[1] > maxY) {
-			maxY = currThisLine.P1()[1];
-		}
-
-		// Second point on the line...
-		if (currThisLine.P2()[0] < minX) {
-			minX = currThisLine.P2()[0];
-		}
-		if (currThisLine.P2()[0] > maxX) {
-			maxX = currThisLine.P2()[0];
-		}
-		if (currThisLine.P2()[1] < minY) {
-			minY = currThisLine.P2()[1];
-		}
-		if (currThisLine.P2()[1] > maxY) {
-			maxY = currThisLine.P2()[1];
-		}
-
-		++thisIter;
-	}
-
-	return Collision::AABB2D(Point2D(minX, minY), Point2D(maxX, maxY));
+	return result;
 }
 
 Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {

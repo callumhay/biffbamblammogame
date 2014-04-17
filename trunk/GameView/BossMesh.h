@@ -33,7 +33,9 @@
 #include "../GameModel/GameWorld.h"
 #include "../ESPEngine/ESP.h"
 #include "../GameSound/SoundCommon.h"
+
 #include "EffectUpdateStrategy.h"
+#include "CgFxBossWeakpoint.h"
 
 class GameSound;
 class Camera;
@@ -49,7 +51,7 @@ class ElectricitySpasmEffectInfo;
 class ElectrifiedEffectInfo;
 class SummonPortalsEffectInfo;
 class BossTeleportEffectInfo;
-class CgFxBossWeakpoint;
+class EnumBossEffectInfo;
 class EffectUpdateStrategy;
 
 /**
@@ -62,9 +64,10 @@ public:
 
     static BossMesh* Build(const GameWorld::WorldStyle& style, Boss* boss, GameSound* sound);
     
-    void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+    void Draw(double dT, const Camera& camera, const GameModel& gameModel, 
+        const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
         const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawLaterPassEffects(double dT, const Camera& camera);
+    void DrawLaterPassEffects(double dT, const Camera& camera, const GameModel& gameModel);
 
     virtual double ActivateIntroAnimation() = 0;
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
@@ -78,6 +81,7 @@ public:
     void AddElectrifiedEffect(const ElectrifiedEffectInfo& info);
     void AddSummonPortalEffect(const SummonPortalsEffectInfo& info);
     void AddTeleportEffect(const BossTeleportEffectInfo& info);
+    void AddEnumEffect(const EnumBossEffectInfo& info);
 
 protected:
     GameSound* sound;
@@ -112,13 +116,15 @@ protected:
 
     // Boss-specific effects
     std::list<EffectUpdateStrategy*> fgEffects;
-    std::list<ESPEmitter*> bgEffectsEmitters;
+    std::list<EffectUpdateStrategy*> bgEffects;
     std::list<EffectUpdateStrategy*> laterPassEffects;
 
-    virtual void DrawPreBodyEffects(double dT, const Camera& camera);
+    virtual void DrawPreBodyEffects(double dT, const Camera& camera, const GameModel& gameModel);
     virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight, 
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets) = 0;
-    virtual void DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets);
+    virtual void DrawPostBodyEffects(double dT, const Camera& camera, 
+        const GameModel& gameModel, const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+        const BasicPointLight& ballLight, const GameAssets* assets);
 
     virtual Point3D GetBossFinalExplodingEpicenter() const = 0;
 
@@ -151,26 +157,28 @@ private:
     DISALLOW_COPY_AND_ASSIGN(BossMesh);
 };
 
-inline void BossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
-                           const GameAssets* assets) {
+inline void BossMesh::Draw(double dT, const Camera& camera, const GameModel& gameModel, 
+                           const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+                           const BasicPointLight& ballLight, const GameAssets* assets) {
 
-    this->DrawPreBodyEffects(dT, camera);
+    this->weakpointMaterial->SetLightAmt(keyLight, fillLight);
+    this->DrawPreBodyEffects(dT, camera, gameModel);
     this->DrawBody(dT, camera, keyLight, fillLight, ballLight, assets);
-    this->DrawPostBodyEffects(dT, camera, assets);
+    this->DrawPostBodyEffects(dT, camera, gameModel, keyLight, fillLight, ballLight, assets);
 }
 
-inline void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameAssets* assets) {
-    UNUSED_PARAMETER(assets);
+inline void BossMesh::DrawPostBodyEffects(double dT, const Camera& camera, const GameModel& gameModel, 
+                                          const BasicPointLight&, const BasicPointLight&, 
+                                          const BasicPointLight&, const GameAssets*) {
 
     // Go through all the active post-body-effects for the boss, draw each one and clean up dead effects
-    EffectUpdateStrategy::UpdateStrategyCollection(dT, camera, this->fgEffects);
+    EffectUpdateStrategy::UpdateStrategyCollection(dT, camera, gameModel, this->fgEffects);
 }
 
-inline void BossMesh::DrawLaterPassEffects(double dT, const Camera& camera) {
+inline void BossMesh::DrawLaterPassEffects(double dT, const Camera& camera, const GameModel& gameModel) {
 
     // Go through all the active later-pass-effects for the boss, draw each one and clean up dead effects
-    EffectUpdateStrategy::UpdateStrategyCollection(dT, camera, this->laterPassEffects);
+    EffectUpdateStrategy::UpdateStrategyCollection(dT, camera, gameModel, this->laterPassEffects);
 }
 
 #endif // __BOSSMESH_H__

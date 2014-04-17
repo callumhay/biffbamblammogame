@@ -50,6 +50,8 @@ public:
     void AddBound(const Collision::LineSeg2D& line, const Vector2D& norm, bool onInside = false);
     void AddBounds(const BoundingLines& bounds);
 
+    void RemoveBound(const Collision::LineSeg2D& line);
+
 	size_t GetNumLines() const {
 		return this->lines.size();
 	}

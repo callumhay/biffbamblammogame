@@ -37,6 +37,7 @@ class BossCompositeBodyPart;
 
 class FuturismBossAIState;
 class FuturismBossStage1AIState;
+class FuturismBossStage2AIState;
 
 #include "Boss.h"
 #include "GameLevel.h"
@@ -46,6 +47,7 @@ class FuturismBoss : public Boss {
     friend Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& style);
     friend class FuturismBossAIState;
     friend class FuturismBossStage1AIState;
+    friend class FuturismBossStage2AIState;
 
 public:
     static const float FULLY_SHIELDED_BOSS_HEIGHT;
@@ -57,11 +59,25 @@ public:
     static const float CORE_BOSS_HALF_SIZE;
 
     static const float CORE_EYE_SIZE;
+    static const float CORE_EYE_HALF_SIZE;
 
     static const float CORE_Z_DIST_FROM_ORIGIN;
-    static const float CORE_Z_SHOOT_DIST_FROM_ORIGIN;
+    static const float CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD;
+    static const float CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD;
+
+    static const float TOP_BOTTOM_SHIELD_EXPLODE_WIDTH;
+    static const float TOP_BOTTOM_SHIELD_EXPLODE_HEIGHT;
+    static const float LEFT_RIGHT_SHIELD_EXPLODE_WIDTH;
+    static const float LEFT_RIGHT_SHIELD_EXPLODE_HEIGHT;
+
+    static const float TOP_BOTTOM_SHIELD_X_OFFSET;
+    static const float TOP_BOTTOM_SHIELD_Y_OFFSET;
+    static const float LEFT_RIGHT_SHIELD_X_OFFSET;
+    static const float LEFT_RIGHT_SHIELD_Y_OFFSET;
 
     ~FuturismBoss();
+
+    float GetCurrentZShootDistFromOrigin() const;
 
     // Get the various shields of the Boss
     const BossBodyPart* GetCoreShield() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->coreShieldIdx]); }
@@ -78,6 +94,15 @@ public:
     const BossBodyPart* GetCoreRightBulb() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->rightBulbIdx]); }
 
     bool IsCoreShieldVulnerable() const;
+    bool IsFrozen() const;
+    
+    bool IsCoreShieldWeakened() const   { return this->GetCoreShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart;   }
+    bool IsTopShieldWeakened() const    { return this->GetTopShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart;    }
+    bool IsBottomShieldWeakened() const { return this->GetBottomShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart; }
+    bool IsLeftShieldWeakened() const   { return this->GetLeftShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart;   }
+    bool IsRightShieldWeakened() const  { return this->GetRightShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart;  }
+    
+    float GetIceRotationInDegs() const { return this->currIceRotInDegs; }
 
     // Inherited from Boss
     bool ProjectilePassesThrough(const Projectile* projectile) const;
@@ -107,7 +132,7 @@ private:
     static const float PORTAL_PROJECTILE_HALF_WIDTH;
     static const float PORTAL_PROJECTILE_HALF_HEIGHT;
 
-    enum ShieldLimbType { TopShield, BottomShield, LeftShield, RightShield };
+    enum ShieldLimbType { TopShield, BottomShield, LeftShield, RightShield, CoreShield };
 
     // Core Assembly Indices
     size_t coreAssemblyIdx, coreBodyIdx, topBulbIdx, bottomBulbIdx, leftBulbIdx, rightBulbIdx;
@@ -115,6 +140,7 @@ private:
     size_t coreShieldIdx, topShieldIdx, bottomShieldIdx, leftShieldIdx, rightShieldIdx;
 
     float currCoreRotInDegs;
+    float currIceRotInDegs;
 
     // Valid movement positions for the boss in each half of the level and for when the level is eventually opened up
     // NOTE: Treat these as constant!!
@@ -124,6 +150,7 @@ private:
 
     std::set<LevelPiece*> leftSubArenaPieces;
     std::set<LevelPiece*> rightSubArenaPieces;
+    std::set<LevelPiece*> fullArenaPieces;
 
     std::vector<Colour> portalProjectileColours;
     int currPortalProjectileColourIdx;
@@ -134,9 +161,21 @@ private:
     void Init(float startingX, float startingY, const std::vector<std::vector<LevelPiece*> >& levelPieces);
 
     // FuturismBoss Helper Methods
-    void AddCoreShieldBounds(ShieldLimbType sectorToAdd);
+    void AddSpecialCoreBounds(ShieldLimbType sectorToAdd);
     void UpdateBoundsForDestroyedShieldLimb(ShieldLimbType type);
     void RegenerateBoundsForFinalCore();
+    size_t GetShieldIndex(ShieldLimbType type) const;
+    BossBodyPart* GetShieldBodyPart(ShieldLimbType type) { return static_cast<BossBodyPart*>(this->bodyParts[this->GetShieldIndex(type)]); }
+    
+    void TopShieldUpdate();
+    void BottomShieldUpdate();
+    void LeftShieldUpdate();
+    void RightShieldUpdate();
+    
+    bool AllLimbShieldsDestroyed() const {
+        return this->GetTopShield()->GetIsDestroyed() && this->GetBottomShield()->GetIsDestroyed() && 
+            this->GetLeftShield()->GetIsDestroyed() && this->GetRightShield()->GetIsDestroyed();
+    }
 
     const Colour& GetAndIncrementPortalColour() {
         this->currPortalProjectileColourIdx = (this->currPortalProjectileColourIdx + 1) % 
@@ -183,18 +222,46 @@ private:
     static float GetRightSubArenaMinYBossPos(float halfHeight) { return FuturismBoss::GetRightSubArenaMinYPaddedConfines() + halfHeight; }
     static float GetRightSubArenaMaxYBossPos(float halfHeight) { return FuturismBoss::GetRightSubArenaMaxYPaddedConfines() - halfHeight; }
 
+    static Point2D GetLeftSubArenaCenterPos() {
+        float minX = GetLeftSubArenaMinXConfines();
+        float minY = GetLeftSubArenaMinYConfines();
+        return Point2D(minX + (GetLeftSubArenaMaxXConfines() - minX) / 2.0f, 
+            minY + (GetLeftSubArenaMaxYConfines() - minY) / 2.0f);
+    }
+    static Point2D GetRightSubArenaCenterPos() {
+        float minX = GetRightSubArenaMinXConfines();
+        float minY = GetRightSubArenaMinYConfines();
+        return Point2D(minX + (GetRightSubArenaMaxXConfines() - minX) / 2.0f, 
+            minY + (GetRightSubArenaMaxYConfines() - minY) / 2.0f);
+    }
+    static Point2D GetFullArenaCenterPos() {
+        float minX = GetLeftSubArenaMinXConfines();
+        float minY = GetRightSubArenaMinYConfines();
+        return Point2D(minX + (GetRightSubArenaMaxXConfines() - minX) / 2.0f, 
+            minY + (GetRightSubArenaMaxYConfines() - minY) / 2.0f);
+    }
+
+    static bool IsInLeftSubArena(const Point2D& pt) {
+        return pt[0] <= GetLeftSubArenaMaxXConfines() && pt[0] >= GetLeftSubArenaMinXConfines() &&
+            pt[1] <= GetLeftSubArenaMaxYConfines() && pt[1] >= GetLeftSubArenaMinYConfines();
+    }
+    static bool IsInRightSubArena(const Point2D& pt) {
+        return pt[0] <= GetRightSubArenaMaxXConfines() && pt[0] >= GetRightSubArenaMinXConfines() &&
+            pt[1] <= GetRightSubArenaMaxYConfines() && pt[1] >= GetRightSubArenaMinYConfines();
+    }
+
     static void GetRocketStrategyPortalSearchPieces(const GameLevel& level, std::set<LevelPiece*>& pieces);
     static Collision::AABB2D GetRocketStrategyPortalSearchAABB(const GameLevel& level, float halfPortalWidth, float halfPortalHeight) {
         return Collision::AABB2D(
-            Point2D(level.GetLevelUnitWidth() - halfPortalWidth - (3*LevelPiece::PIECE_WIDTH - 2*halfPortalWidth), halfPortalHeight + 11*LevelPiece::PIECE_HEIGHT), 
-            Point2D(level.GetLevelUnitWidth() - halfPortalWidth, halfPortalHeight + 11*LevelPiece::PIECE_HEIGHT + 6*LevelPiece::PIECE_HEIGHT));
+            Point2D(level.GetLevelUnitWidth() - halfPortalWidth - (3*LevelPiece::PIECE_WIDTH - 2*halfPortalWidth), -halfPortalHeight + 15*LevelPiece::PIECE_HEIGHT), 
+            Point2D(level.GetLevelUnitWidth() - halfPortalWidth, -halfPortalHeight + 15*LevelPiece::PIECE_HEIGHT + 6*LevelPiece::PIECE_HEIGHT));
     }
 
-    static void GetIceStrategyPortalSearchAABB(const GameLevel& level, std::set<LevelPiece*>& pieces);
+    static void GetIceStrategyPortalSearchPieces(const GameLevel& level, std::set<LevelPiece*>& pieces);
     static Collision::AABB2D GetIceStrategyPortalSearchAABB(float halfPortalWidth, float halfPortalHeight) {
         return Collision::AABB2D(
-            Point2D(halfPortalWidth, -halfPortalHeight + 15*LevelPiece::PIECE_HEIGHT),
-            Point2D(halfPortalWidth + (3*LevelPiece::PIECE_WIDTH - 2*halfPortalWidth), -halfPortalHeight + 15*LevelPiece::PIECE_HEIGHT + 6*LevelPiece::PIECE_HEIGHT));
+            Point2D(halfPortalWidth, halfPortalHeight + 11*LevelPiece::PIECE_HEIGHT),
+            Point2D(halfPortalWidth + (3*LevelPiece::PIECE_WIDTH - 2*halfPortalWidth), halfPortalHeight + 11*LevelPiece::PIECE_HEIGHT + 6*LevelPiece::PIECE_HEIGHT));
     }
 
     // DEBUGGING...
@@ -204,4 +271,9 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(FuturismBoss);
 };
+
+inline float FuturismBoss::GetCurrentZShootDistFromOrigin() const {
+    return this->GetCoreShield()->GetIsDestroyed() ? CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD : CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD;
+}
+
 #endif // __FUTURISMBOSS_H__

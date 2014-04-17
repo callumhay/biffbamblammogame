@@ -35,10 +35,13 @@ class Camera;
 class EffectUpdateStrategy {
 public:
     virtual ~EffectUpdateStrategy() {}
-    virtual void TickAndDraw(double dT, const Camera& camera) = 0;
+    virtual void TickAndDraw(double dT, const Camera& camera, const GameModel& gameModel) = 0;
     virtual bool IsDead() const = 0;
 
-    template<typename STL_COLLECTION> static void UpdateStrategyCollection(double dT, const Camera& camera, STL_COLLECTION& collection) {
+    template<typename STL_COLLECTION> 
+    static void UpdateStrategyCollection(double dT, const Camera& camera, const GameModel& gameModel,
+                                         STL_COLLECTION& collection) {
+
         for (STL_COLLECTION::iterator iter = collection.begin(); iter != collection.end();) {
 
             EffectUpdateStrategy* curr = *iter;
@@ -52,7 +55,7 @@ public:
             }
             else {
                 // Not dead yet so we draw and tick
-                curr->TickAndDraw(dT, camera);
+                curr->TickAndDraw(dT, camera, gameModel);
                 ++iter;
             }
         }

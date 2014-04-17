@@ -92,9 +92,9 @@ public:
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
-    void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
+    void DrawBoss(double dT, const Camera& camera, const GameModel& gameModel, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight, const GameAssets* assets);
-    void DrawBossPostEffects(double dT, const Camera& camera);
+    void DrawBossPostEffects(double dT, const Camera& camera, const GameModel& gameModel);
 
 	void LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 
@@ -212,17 +212,17 @@ inline void LevelMesh::DrawStatusEffects(double dT, const Camera& camera, const 
 	this->statusEffectRenderer->Draw(dT, camera, sceneTexture);
 }
 
-inline void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
+inline void LevelMesh::DrawBoss(double dT, const Camera& camera, const GameModel& gameModel, const BasicPointLight& keyLight,
                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight,
                                 const GameAssets* assets) {
 
     assert(this->bossMesh != NULL);
-    this->bossMesh->Draw(dT, camera, keyLight, fillLight, ballLight, assets);
+    this->bossMesh->Draw(dT, camera, gameModel, keyLight, fillLight, ballLight, assets);
 }
 
-inline void LevelMesh::DrawBossPostEffects(double dT, const Camera& camera) {
+inline void LevelMesh::DrawBossPostEffects(double dT, const Camera& camera, const GameModel& gameModel) {
     assert(this->bossMesh != NULL);
-    this->bossMesh->DrawLaterPassEffects(dT, camera);
+    this->bossMesh->DrawLaterPassEffects(dT, camera, gameModel);
 }
 
 /**

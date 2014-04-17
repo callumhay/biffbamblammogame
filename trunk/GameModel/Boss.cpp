@@ -170,6 +170,10 @@ void Boss::MineExplosionOccurred(GameModel* gameModel, const MineProjectile* min
     this->currAIState->MineExplosionOccurred(gameModel, mine);
 }
 
+void Boss::RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket) {
+    this->currAIState->RocketExplosionOccurred(gameModel, rocket);
+}
+
 void Boss::TeslaLightningArcHitOccurred(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
     this->currAIState->TeslaLightningArcHitOccurred(gameModel, block1, block2);
 }

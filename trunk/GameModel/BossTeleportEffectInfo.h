@@ -34,19 +34,24 @@
 
 class BossTeleportEffectInfo : public BossEffectEventInfo {
 public:
-    BossTeleportEffectInfo(const Point2D& originalPos, const Point2D& teleportPos) : BossEffectEventInfo(),
-        originalPos(originalPos), teleportPos(teleportPos) {}
+    enum TeleportType { TeleportingOut, TeleportingIn, TeleportFailed };
+    BossTeleportEffectInfo(TeleportType teleportType, const Point2D& position, double timeInSecs, float size) : BossEffectEventInfo(),
+        teleportType(teleportType), position(position), timeInSecs(timeInSecs), size(size) {}
 
     ~BossTeleportEffectInfo() {}
 
     BossEffectEventInfo::Type GetType() const { return BossEffectEventInfo::TeleportInfo; }
     
-    const Point2D& GetOriginalPosition() const { return this->originalPos; }
-    const Point2D& GetTeleportPosition() const { return this->teleportPos; } 
+    TeleportType GetTeleportType() const { return this->teleportType; }
+    const Point2D& GetPosition() const { return this->position; }
+    double GetTimeInSeconds() const { return this->timeInSecs; } // NOTE: This value will be zero on TeleportFailed
+    float GetSize() const { return this->size; }
 
 private:
-    const Point2D originalPos;
-    const Point2D teleportPos;
+    TeleportType teleportType;
+    const Point2D position;
+    double timeInSecs;
+    float size;
 
     DISALLOW_COPY_AND_ASSIGN(BossTeleportEffectInfo);
 };

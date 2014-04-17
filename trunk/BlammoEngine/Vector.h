@@ -120,7 +120,7 @@ public:
 
     void Normalize() {
         float magnitude = Vector2D::Magnitude(*this);
-        assert(magnitude != 0);
+        if (magnitude == 0) { assert(false); return; }
         this->values[0] /= magnitude;
         this->values[1] /= magnitude;
     }
@@ -498,6 +498,23 @@ public:
 
 inline std::ostream& operator <<(std::ostream& os, const Vector4D& v) {
     return os << "v<" << v[0] << "," << v[1] << "," << v[2] << "," << v[3] << ">";
+}
+
+inline Vector4D operator *(float s, const Vector4D& v) {
+    return Vector4D(s*v[0], s*v[1], s*v[2], s*v[3]);
+}
+
+inline Vector4D operator /(const Vector4D& v, float d) {
+    assert(d != 0);
+    return Vector4D(v[0]/d, v[1]/d, v[2]/d, v[3]/d);
+}
+
+inline Vector4D operator +(const Vector4D& a, const Vector4D& b) {
+    return Vector4D(a[0]+b[0], a[1]+b[1], a[2]+b[2], a[3]+b[3]);
+}
+
+inline Vector4D operator -(const Vector4D& a, const Vector4D& b) {
+    return Vector4D(a[0]-b[0], a[1]-b[1], a[2]-b[2], a[3]-b[3]);
 }
 
 #endif
