@@ -352,6 +352,7 @@ public:
     // Texture Collection Methods -----------------------------------------------------------
     static void GetRockTextures(std::vector<Texture2D*>& rockTextures);
     static void GetSnowflakeTextures(std::vector<Texture2D*>& snowflakeTextures);
+    static void GetCloudTextures(std::vector<Texture2D*>& cloudTextures);
     // --------------------------------------------------------------------------------------
 
 	void UpdateBGTexture(const Texture2D& bgTexture);

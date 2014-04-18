@@ -31,6 +31,7 @@
 #define __FUTURISMBOSSMESH_H__
 
 #include "BossMesh.h"
+#include "CgFxVolumetricEffect.h"
 
 class FuturismBoss;
 class Mesh;
@@ -48,6 +49,8 @@ private:
 
     FuturismBoss* boss;  // N.B., The pointed-to object doesn't belong to this
 
+    double introTimeCountdown;
+
     // Meshes for all of the parts of the boss' structure/body
     Mesh* coreCenterMesh;
     Mesh* coreArmsMesh;
@@ -58,18 +61,22 @@ private:
 
     Mesh* damagedLeftRightShieldMesh;
     Mesh* damagedTopBottomShieldMesh;
+    Mesh* damagedCoreShieldMesh;
 
     Mesh* iceEncasingMesh;
 
     // Effect assets
-    Texture2D* circleGlowTex;
-    AnimationMultiLerp<float> glowCirclePulseAnim;
     AnimationMultiLerp<Colour> shieldColourAnim;
 
     ESPPointEmitter* topShieldExplodingEmitter;
     ESPPointEmitter* bottomShieldExplodingEmitter;
     ESPPointEmitter* leftShieldExplodingEmitter;
     ESPPointEmitter* rightShieldExplodingEmitter;
+    ESPPointEmitter* coreShieldExplodingEmitter;
+
+    ESPPointEmitter eyePulseGlow;
+    ESPPointEmitter frostMist;
+    CgFxVolumetricEffect frostMistShader;
 
     // Inherited functions
     //void DrawPreBodyEffects(double dT, const Camera& camera, const GameModel& gameModel);

@@ -482,10 +482,7 @@ void GameESPAssets::InitESPTextures() {
 	}
 
     if (this->cloudTextures.empty()) {
-        this->cloudTextures.reserve(3);
-        this->cloudTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD1));
-        this->cloudTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD2));
-        this->cloudTextures.push_back(PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD3));
+        GameESPAssets::GetCloudTextures(this->cloudTextures);
     }
 
     if (this->fireGlobTextures.empty()) {
@@ -2142,6 +2139,13 @@ void GameESPAssets::GetSnowflakeTextures(std::vector<Texture2D*>& snowflakeTextu
     snowflakeTextures[0] = PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE1);
     snowflakeTextures[1] = PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE2);
     snowflakeTextures[2] = PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE3);
+}
+
+void GameESPAssets::GetCloudTextures(std::vector<Texture2D*>& cloudTextures) {
+    cloudTextures.resize(3);
+    cloudTextures[0] = PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD1);
+    cloudTextures[1] = PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD2);
+    cloudTextures[2] = PersistentTextureManager::GetInstance()->PreloadTexture2D(GameViewConstants::GetInstance()->TEXTURE_CLOUD3);
 }
 
 /**
@@ -6048,20 +6052,25 @@ void GameESPAssets::AddDebrisEffect(const DebrisEffectInfo& info) {
     float maxSize = info.GetSizeMultiplier() * std::max<float>(partAABB.GetWidth(), partAABB.GetHeight());
     float minSize = info.GetSizeMultiplier() * std::min<float>(partAABB.GetWidth(), partAABB.GetHeight());
 
-    Vector2D explosionDir = info.GetPart()->GetTranslationPt2D() - info.GetExplosionCenter();
-    explosionDir.Normalize();
-
     ESPPointEmitter* debrisBits = new ESPPointEmitter();
     debrisBits->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
     debrisBits->SetInitialSpd(info.GetForceMultiplier() * ESPInterval(3.0f, 7.0f));
     debrisBits->SetParticleLife(ESPInterval(static_cast<float>(info.GetMinLifeOfDebrisInSecs()), static_cast<float>(info.GetMaxLifeOfDebrisInSecs())));
-    debrisBits->SetEmitDirection(Vector3D(explosionDir, 0));
     debrisBits->SetEmitAngleInDegrees(55.0f);
-    debrisBits->SetParticleSize(ESPInterval(0.05f * maxSize, 0.2f * maxSize));
+    debrisBits->SetParticleSize(ESPInterval(0.075f * maxSize, 0.2f * maxSize));
     debrisBits->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
     debrisBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * minSize), ESPInterval(0.0f, 0.1f * minSize), ESPInterval(0));
     debrisBits->SetEmitPosition(Point3D(info.GetExplosionCenter(), 0.0f));
     debrisBits->SetParticleAlignment(ESP::ScreenAligned);
+
+    if (info.IsDirectionOverriden()) {
+        debrisBits->SetEmitDirection(info.GetOverridenDirection());
+    }
+    else {
+        Vector2D explosionDir = info.GetPart()->GetTranslationPt2D() - info.GetExplosionCenter();
+        explosionDir.Normalize();
+        debrisBits->SetEmitDirection(Vector3D(explosionDir, 0));
+    }
 
     std::vector<Colour> colourPalette;
     colourPalette.reserve(5);

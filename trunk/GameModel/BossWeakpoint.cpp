@@ -96,8 +96,6 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::FireGlobProjectile:
-        case Projectile::PaddleFlameBlastProjectile: // TODO?
-        case Projectile::PaddleIceBlastProjectile:   // TODO?
             this->Diminish(projectile->GetDamage());
             break;
 
@@ -108,6 +106,12 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
 
         // Portals don't affect bosses
         case Projectile::PortalBlobProjectile:
+            break;
+
+        // Don't allow these to diminish/hurt the boss, they would cause a status effect
+        // handled specifically by a bosses' AI routines
+        case Projectile::PaddleFlameBlastProjectile:
+        case Projectile::PaddleIceBlastProjectile:
             break;
 
         // Boss projectiles are ignored (they are for hitting the player only)

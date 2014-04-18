@@ -59,9 +59,9 @@ private:
     double GetSingleTeleportInAndOutTime() const { return 1.0; }
     double GetTotalStrategyPortalShootTime() const { return 4.0; }
     double GetTotalWeaponPortalShootTime() const { /*assert(false);*/ return 4.0; }
-    double GetTwitchBeamShootTime() const { return 0.65; }
+    double GetTwitchBeamShootTime() const { return 0.7; }
     double GetBeamArcShootTime() const { return this->GetTwitchBeamShootTime(); }
-    double GetBeamArcHoldTime() const  { return 1.33; }
+    double GetBeamArcHoldTime() const  { return 1.4; }
     double GetBeamArcingTime() const { return 3.5; }
     double GetTimeBetweenBurstLineShots() const { return 0.2 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.08; }
     double GetTimeBetweenBurstWaveShots() const { return 0.45 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.250; }

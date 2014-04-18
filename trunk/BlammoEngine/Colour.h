@@ -43,9 +43,9 @@ public:
         colours[0] = colours[1] = colours[2] = 1;
     }
     Colour(float r, float g, float b) {
-        colours[0] = NumberFuncs::Clamp(r,0,1);
-        colours[1] = NumberFuncs::Clamp(g,0,1);
-        colours[2] = NumberFuncs::Clamp(b,0,1);
+        colours[0] = r;
+        colours[1] = g;
+        colours[2] = b;
     }
     explicit Colour(int hexColour) {
         colours[0] = static_cast<float>((hexColour & 0xFF0000) >> 16) / 255.0f;
@@ -122,13 +122,13 @@ private:
 
 public:
 	ColourRGBA() : Colour(), alpha(1.0f) {}
-    ColourRGBA(float r, float g, float b, float a): Colour(r,g,b), alpha(NumberFuncs::Clamp(a,0,1)) {}
-	ColourRGBA(const Colour &c, float a) : Colour(c), alpha(NumberFuncs::Clamp(a,0,1)) {}
+    ColourRGBA(float r, float g, float b, float a): Colour(r,g,b), alpha(a) {}
+	ColourRGBA(const Colour &c, float a) : Colour(c), alpha(a) {}
     ColourRGBA(const Vector4D& v) {
         this->colours[0] = NumberFuncs::Clamp(v[0], 0.0f, 1.0f);
         this->colours[1] = NumberFuncs::Clamp(v[1], 0.0f, 1.0f);
         this->colours[2] = NumberFuncs::Clamp(v[2], 0.0f, 1.0f);
-        this->alpha = NumberFuncs::Clamp(v[3], 0.0f, 1.0f);
+        this->alpha      = NumberFuncs::Clamp(v[3], 0.0f, 1.0f);
     }
 	ColourRGBA(const ColourRGBA& other) : alpha(other.alpha) {
 	    this->colours[0] = other.colours[0];

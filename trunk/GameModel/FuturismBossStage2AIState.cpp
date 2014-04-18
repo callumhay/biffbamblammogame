@@ -28,6 +28,7 @@
  */
 
 #include "FuturismBossStage2AIState.h"
+#include "FuturismBossStage3AIState.h"
 #include "GameModel.h"
 
 const double FuturismBossStage2AIState::MIN_TIME_UNTIL_FIRST_PORTAL = 10.0;
@@ -35,6 +36,9 @@ const double FuturismBossStage2AIState::MIN_TIME_UNTIL_FIRST_PORTAL = 10.0;
 FuturismBossStage2AIState::FuturismBossStage2AIState(FuturismBoss* boss) : 
 FuturismBossAIState(boss), numConsecutiveRocketStratPortals(0),
 hasDoneInitialBallTeleport(false) {
+
+    // Regenerate the boss bounds
+    this->boss->RegenerateBoundsForCoreWithShield();
 
     // We don't want the boss to shoot portals right away...
     this->timeSinceLastStratPortal = FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS - MIN_TIME_UNTIL_FIRST_PORTAL;
@@ -54,7 +58,9 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
     }
     else if (!this->hasDoneInitialBallTeleport) {
         // Try to teleport the ball if it's available...
-        if (this->IsBallAvailableForAttractingAndTeleporting(gameModel)) {
+        if (this->IsBallAvailableForAttractingAndTeleporting(gameModel) &&
+            this->IsBallFarEnoughAwayToInitiateAttracting(gameModel)) {
+
             this->SetState(BallAttractAIState);
             return;
         }
@@ -79,7 +85,8 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
     // If it's been too long since the last strategy portal was shot then we should shoot one
     // or else the battle could take forever (the player NEEDS the portal to get the item required
     // to move on to the next high-level AI state!)
-    if (this->timeSinceLastStratPortal > 3.0*FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS) {
+    if (this->timeSinceLastStratPortal > 2.3*FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS &&
+        FuturismBoss::IsInRightSubArena(bossPos)) {
         this->SetState(StationaryFireStrategyPortalAIState);
         return;
     }
@@ -104,9 +111,10 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
     // the right sub-arena (since the entire first stage is played in the left sub-arena, and the ice blast
     // is easier to acquire from the right sub-arena)...
     if (this->numConsecutiveMoves == 0 && this->currState != FuturismBossAIState::BallDiscardAIState &&
-        (Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) &&
+        (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) &&
         FuturismBoss::IsInLeftSubArena(ball->GetCenterPosition2D()) && FuturismBoss::IsInLeftSubArena(bossPos) &&
-        this->IsBallAvailableForAttractingAndTeleporting(gameModel)) {
+        this->IsBallAvailableForAttractingAndTeleporting(gameModel) && 
+        this->IsBallFarEnoughAwayToInitiateAttracting(gameModel)) {
         
         this->SetState(BallAttractAIState);
         return;
@@ -236,9 +244,7 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
 }
 
 FuturismBossAIState* FuturismBossStage2AIState::BuildNextAIState() const {
-    // TODO 
-    assert(false);
-    return NULL;
+    return new FuturismBossStage3AIState(this->boss);
 }
 
 void FuturismBossStage2AIState::GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const {
@@ -287,13 +293,8 @@ void FuturismBossStage2AIState::GetStrategyPortalCandidatePieces(const GameLevel
 
     // Choose between the ice blast and rocket, favouring the rocket...
     bool iceBlastPortal = false;
-    if (this->numConsecutiveRocketStratPortals > 2) {
+    if (this->numConsecutiveRocketStratPortals > 1) {
         iceBlastPortal = true;
-    }
-    else {
-        if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
-            iceBlastPortal = true;
-        }
     }
 
     if (iceBlastPortal) {
@@ -347,13 +348,13 @@ void FuturismBossStage2AIState::CollisionOccurred(GameModel* gameModel, Projecti
 
     // Check the type of projectile, only ice blasts should be available for affecting the boss in this way.
     // Rockets are dealt with in the "RocketExplosionOccurred" method.
-    bool isIceBlast = projectile->GetType() != Projectile::PaddleIceBlastProjectile;
+    bool isIceBlast = projectile->GetType() == Projectile::PaddleIceBlastProjectile;
     if (!isIceBlast || this->currState == FrozenAIState || this->currState == ShieldPartCrackedAIState ||
         this->currState == ShieldPartDestroyedAIState || this->currState == AngryAIState) {
         return;
     }
 
-    if (collisionPart == this->boss->GetCoreShield()) {
+    if (collisionPart == this->boss->GetCoreShield() || collisionPart == this->boss->GetCoreBody()) {
         // If we're dealing with an ice blast then it's going to freeze the boss, but don't hurt it
         this->SetState(FrozenAIState);
     }

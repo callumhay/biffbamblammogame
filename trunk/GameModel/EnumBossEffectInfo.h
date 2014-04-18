@@ -36,6 +36,7 @@ class EnumBossEffectInfo : public BossEffectEventInfo {
 public:
     enum SpecificEffectType { 
         FrozenIceClouds,           // Icy clouds and vapour to indicate something was frozen
+        FrozenShakeDebris,         // Icy debris as the boss shakes itself while frozen
         IceBreak,                  // After being frozen, and a boss breaks free of it
 
         FuturismBossWarningFlare,  // A bright flash right before doing something mean to the player

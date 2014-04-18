@@ -96,6 +96,10 @@ bool PaddleBlasterProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
 
 BoundingLines PaddleBlasterProjectile::BuildBoundingLines() const {
 
+    if (this->IsLoadedInCannonBlock()) {
+        return BoundingLines();
+    }
+
     float boundsHalfWidth  = 0.9f*this->GetHalfWidth();
     float boundsHalfHeight = 0.9f* this->GetHalfHeight();
     float boundsWidth  = 2.0f*boundsHalfWidth;

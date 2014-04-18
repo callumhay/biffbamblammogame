@@ -41,7 +41,7 @@ PaddleStatusEffectRenderer::PaddleStatusEffectRenderer(GameESPAssets* espAssets,
 espAssets(espAssets), sound(sound), currStatusMaterial(NULL), frozenShakeTimeCounter(0.0),
 rectPrismTexture(NULL), frostTexture(NULL), paddleOnFireEmitter(NULL),
 fireColourFader(ColourRGBA(1.0f, 1.0f, 0.0f, 1.0f), ColourRGBA(0.4f, 0.15f, 0.0f, 0.2f)),
-particleMediumGrowth(1.0f, 1.6f), fireAccel(Vector3D(1,1,1)) {
+particleMediumGrowth(1.0f, 1.6f), fireAccel(Vector3D(1,1,1)), paddleIceShakeSoundID(INVALID_SOUND_ID) {
     
     assert(espAssets != NULL);
     assert(sound != NULL);
@@ -266,6 +266,15 @@ void PaddleStatusEffectRenderer::Draw(double dT, const Camera& camera,
 
                 this->frozenShakeTimeCounter = 0.0;
                 alternator = !alternator;
+            }
+            
+            // Play the shaking sound
+            if (this->paddleIceShakeSoundID == INVALID_SOUND_ID) {
+                this->paddleIceShakeSoundID = this->sound->PlaySoundAtPosition(GameSound::PaddleIceShakeEvent,
+                    false, paddle.GetPosition3D(), true, true, true);
+            }
+            else if (!this->sound->IsSoundPlaying(this->paddleIceShakeSoundID)) {
+                this->paddleIceShakeSoundID = INVALID_SOUND_ID;
             }
         }
 

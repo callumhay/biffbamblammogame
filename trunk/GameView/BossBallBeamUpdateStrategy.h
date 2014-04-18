@@ -105,7 +105,7 @@ inline void BossBallBeamUpdateStrategy::TickAndDraw(double dT, const Camera& cam
 
         // Fade the beam
         for (std::list<ESPPointToPointBeam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
-            (*iter)->SetRemainingBeamLifetimeMax(1.0);
+            (*iter)->SetRemainingBeamLifetimeMax(1.3);
         }
     }
 

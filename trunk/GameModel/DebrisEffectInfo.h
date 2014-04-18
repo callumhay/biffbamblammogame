@@ -38,7 +38,8 @@ public:
         double minLifeOfDebrisInSecs, double maxLifeOfDebrisInSecs, int numDebrisBits, float sizeMultiplier = 1.0f,
         float forceMultiplier = 1.0f) :  BossEffectEventInfo(), part(part), explosionCenter(explosionCenter), colour(colour), 
           minLifeOfDebrisInSecs(minLifeOfDebrisInSecs), maxLifeOfDebrisInSecs(maxLifeOfDebrisInSecs), 
-          numDebrisBits(numDebrisBits), sizeMultiplier(sizeMultiplier), forceMultiplier(forceMultiplier) {
+          numDebrisBits(numDebrisBits), sizeMultiplier(sizeMultiplier), forceMultiplier(forceMultiplier),
+            overrideDirection(false) {
 
         assert(part != NULL);
         assert(minLifeOfDebrisInSecs > 0.0 && maxLifeOfDebrisInSecs >= minLifeOfDebrisInSecs);
@@ -58,6 +59,17 @@ public:
     float GetSizeMultiplier() const { return this->sizeMultiplier; }
     float GetForceMultiplier() const { return this->forceMultiplier; }
     
+    void OverrideDirection(const Vector3D& dir) {
+        this->overrideDirection = true;
+        this->overridenDir = dir;
+        this->overridenDir.Normalize();
+    }
+    void OverrideDirection(const Vector2D& dir) {
+        this->OverrideDirection(Vector3D(dir, 0));
+    }
+    bool IsDirectionOverriden() const { return this->overrideDirection; }
+    const Vector3D& GetOverridenDirection() const { return this->overridenDir; }
+
 private:
     const BossBodyPart* part;
     const Point2D explosionCenter;
@@ -67,6 +79,9 @@ private:
     const int numDebrisBits;
     float sizeMultiplier;
     float forceMultiplier;
+
+    bool overrideDirection;
+    Vector3D overridenDir;
 
     DISALLOW_COPY_AND_ASSIGN(DebrisEffectInfo);
 };

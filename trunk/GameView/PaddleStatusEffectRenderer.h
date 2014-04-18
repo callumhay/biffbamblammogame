@@ -32,6 +32,8 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../ESPEngine/ESP.h"
+#include "../GameSound/SoundCommon.h"
+
 #include "CgFxPostRefract.h"
 #include "CgFxFireBallEffect.h"
 #include "CgFxVolumetricEffect.h"
@@ -86,6 +88,8 @@ private:
     ESPParticleColourEffector fireColourFader;
     ESPParticleScaleEffector particleMediumGrowth;
     ESPParticleAccelEffector fireAccel;
+
+    SoundID paddleIceShakeSoundID;
 
     DISALLOW_COPY_AND_ASSIGN(PaddleStatusEffectRenderer);
 };

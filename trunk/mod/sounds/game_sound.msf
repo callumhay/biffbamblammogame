@@ -219,6 +219,10 @@ PaddleOnFireEvent {
 	file = resources/PaddleOnFireEvent.ogg
 }
 
+PaddleIceShakeEvent {
+	file = resources/IceShakeEvent.ogg
+}
+
 
 // Paddle and Block Events ***************************************************
 
@@ -630,6 +634,9 @@ BossFrozenEvent {
 }
 BossIceShatterEvent {
 	file = resources/BossIceShatterEvent.ogg
+}
+BossIceShakeEvent {
+	file = resources/IceShakeEvent.ogg
 }
 
 ClassicalBossSparkleEvent {

@@ -38,13 +38,13 @@ const float FuturismBoss::FULLY_SHIELDED_BOSS_HALF_WIDTH   = FuturismBoss::FULLY
 
 const float FuturismBoss::CORE_BOSS_SIZE      = 5.037f;
 const float FuturismBoss::CORE_BOSS_HALF_SIZE = FuturismBoss::CORE_BOSS_SIZE / 2.0f;
-
 const float FuturismBoss::CORE_EYE_SIZE      = 1.40f;
 const float FuturismBoss::CORE_EYE_HALF_SIZE = CORE_EYE_SIZE / 2.0f;
+const float FuturismBoss::CORE_SHIELD_SIZE = 3.30f;
 
 const float FuturismBoss::CORE_Z_DIST_FROM_ORIGIN = 0.0f;//1.732f;
 const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD = 0.0f;//CORE_Z_DIST_FROM_ORIGIN;
-const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD = 0.0f;//2.094f;
+const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD = 0.363f;//2.094f;
 const float FuturismBoss::CORE_SHIELD_CORNER_HEIGHT = 1.167f;
 
 const float FuturismBoss::TOP_BOTTOM_SHIELD_EXPLODE_WIDTH  = 1.636f;
@@ -256,6 +256,8 @@ void FuturismBoss::Init(float startingX, float startingY,
                 this->bodyParts.push_back(coreShield);
             }
 
+            static const Vector2D BOUNDS_OFFSET(0.5f, 0.0f);
+
             {
                 const Point2D PT0(-2.159f, CORE_SHIELD_CORNER_HEIGHT);
                 const Point2D PT1(-0.818f, 4.517f);
@@ -271,9 +273,12 @@ void FuturismBoss::Init(float startingX, float startingY,
                 shieldBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(0,1), false);
                 shieldBounds.AddBound(Collision::LineSeg2D(PT3, PT4), Vector2D(PT3[1]-PT4[1], PT4[0]-PT3[0]), false);
                 shieldBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(PT4[1]-PT5[1], PT5[0]-PT4[0]), false);
-
+                
+                
+                
                 // top_shield
                 {
+                    shieldBounds.TranslateBounds(BOUNDS_OFFSET);
                     BossBodyPart* topShield = new BossBodyPart(shieldBounds);
                     this->alivePartsRoot->AddBodyPart(topShield);
                     this->topShieldIdx = this->bodyParts.size();
@@ -282,6 +287,7 @@ void FuturismBoss::Init(float startingX, float startingY,
 
                 // bottom_shield
                 {
+                    shieldBounds.TranslateBounds(-2*BOUNDS_OFFSET);
                     BossBodyPart* bottomShield = new BossBodyPart(shieldBounds);
                     this->alivePartsRoot->AddBodyPart(bottomShield);
                     this->bottomShieldIdx = this->bodyParts.size();
@@ -308,6 +314,7 @@ void FuturismBoss::Init(float startingX, float startingY,
             
                 // right_shield
                 {
+                    shieldBounds.TranslateBounds(BOUNDS_OFFSET);
                     BossBodyPart* rightShield = new BossBodyPart(shieldBounds);
                     this->alivePartsRoot->AddBodyPart(rightShield);
                     this->rightShieldIdx = this->bodyParts.size();
@@ -316,6 +323,7 @@ void FuturismBoss::Init(float startingX, float startingY,
 
                 // left_shield
                 {
+                    shieldBounds.TranslateBounds(-2*BOUNDS_OFFSET);
                     BossBodyPart* leftShield = new BossBodyPart(shieldBounds);
                     this->alivePartsRoot->AddBodyPart(leftShield);
                     this->leftShieldIdx = this->bodyParts.size();
@@ -365,7 +373,8 @@ void FuturismBoss::Init(float startingX, float startingY,
     // NOTE: We override the starting position because we want the boss to start on one side of the level...
     UNUSED_PARAMETER(startingX);
     UNUSED_PARAMETER(startingY);
-    this->root->Translate(Vector3D(this->leftSideMovePositions.front()[0], this->leftSideMovePositions.front()[1], 0.0f));
+    Point2D rightArenaCenter = FuturismBoss::GetRightSubArenaCenterPos();
+    this->root->Translate(Vector3D(rightArenaCenter[0], rightArenaCenter[1], 0.0f));
 
     this->SetCurrentAIStateImmediately(new FuturismBossStage1AIState(this));
 }
@@ -652,6 +661,99 @@ void FuturismBoss::RightShieldUpdate() {
 
             core->SetLocalBounds(bounds);
         }
+    }
+}
+
+void FuturismBoss::RegenerateBoundsForCoreWithShield() {
+
+
+    {
+        static const Point2D PT0(-0.722f, 1.351f);
+        static const Point2D PT1(-0.435f, 2.562f);
+        static const Point2D PT2(0.435f,  2.562f);
+        static const Point2D PT3(0.722f,  1.351f);
+
+        Collision::LineSeg2D lineSeg0(PT0, PT1);
+        Collision::LineSeg2D lineSeg1(PT1, PT2);
+        Collision::LineSeg2D lineSeg2(PT2, PT3);
+        Vector2D norm0(PT0[1]-PT1[1], PT1[0]-PT0[0]); norm0.Normalize();
+        Vector2D norm1(0, 1);
+        Vector2D norm2(PT2[1]-PT3[1], PT3[0]-PT2[0]); norm2.Normalize();
+
+#define ROTATE_BY_90() lineSeg0.Rotate(90, Point2D(0,0)); lineSeg1.Rotate(90, Point2D(0,0)); lineSeg2.Rotate(90, Point2D(0,0)); \
+    norm0.Rotate(90); norm1.Rotate(90); norm2.Rotate(90)
+
+        BoundingLines bounds;
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, false);
+        ROTATE_BY_90();
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, false);
+        ROTATE_BY_90();
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, false);
+        ROTATE_BY_90();
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, false);
+
+#undef ROTATE_BY_90
+        BossBodyPart* coreBody   = static_cast<BossBodyPart*>(this->bodyParts[this->coreBodyIdx]);
+        coreBody->SetLocalBounds(bounds);
+    }
+
+    {
+        static const float PT0_X = 0.722f;
+        static const float PT0_Y = 1.351f;
+        static const float PT1_X = 1.167f;
+        static const float PT1_Y = 1.167f;
+        static const float PT2_X = 1.351f;
+        static const float PT2_Y = 0.722f;
+        
+        const Point2D PT3(0, 1.650f);
+        const Point2D PT4(1.650f, 0);
+
+
+        Collision::LineSeg2D lineSeg0(Point2D(PT0_X, PT0_Y), Point2D(PT1_X, PT1_Y));
+        Collision::LineSeg2D lineSeg1(Point2D(PT1_X, PT1_Y), Point2D(PT2_X, PT2_Y));
+        Collision::LineSeg2D lineSeg2(Point2D(PT0_X, PT0_Y), PT3);
+        Collision::LineSeg2D lineSeg3(Point2D(PT2_X, PT2_Y), PT4);
+        Vector2D norm0(PT0_Y - PT1_Y, PT1_X - PT0_X); norm0.Normalize();
+        Vector2D norm1(PT1_Y - PT2_Y, PT2_X - PT1_X); norm1.Normalize();
+        Vector2D norm2(PT3[1]-PT0_Y, PT0_X-PT3[0]); norm2.Normalize();
+        Vector2D norm3(PT2_Y-PT4[1], PT4[0]-PT2_X); norm3.Normalize();
+#define ROTATE_BY_90() lineSeg0.Rotate(90, Point2D(0,0)); lineSeg1.Rotate(90, Point2D(0,0)); \
+    lineSeg2.Rotate(90, Point2D(0,0)); lineSeg3.Rotate(90, Point2D(0,0)); \
+    norm0.Rotate(90); norm1.Rotate(90); norm2.Rotate(90); norm3.Rotate(90)
+
+        BoundingLines bounds;
+
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, true);
+        bounds.AddBound(lineSeg3, norm3, true);
+        ROTATE_BY_90();
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, true);
+        bounds.AddBound(lineSeg3, norm3, true);
+        ROTATE_BY_90();
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, true);
+        bounds.AddBound(lineSeg3, norm3, true);
+        ROTATE_BY_90();
+        bounds.AddBound(lineSeg0, norm0, false);
+        bounds.AddBound(lineSeg1, norm1, false);
+        bounds.AddBound(lineSeg2, norm2, true);
+        bounds.AddBound(lineSeg3, norm3, true);
+
+#undef ROTATE_BY_90
+        BossBodyPart* coreShield = static_cast<BossBodyPart*>(this->bodyParts[this->coreShieldIdx]);
+        coreShield->SetLocalBounds(bounds);
     }
 }
 

@@ -1,5 +1,5 @@
 /**
- * FuturismStage2AIState.h
+ * FuturismBossStage3AIState.h
  * 
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
@@ -27,54 +27,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __FUTURISMBOSSSTAGE2AISTATE_H__
-#define __FUTURISMBOSSSTAGE2AISTATE_H__
+#ifndef __FUTURISMBOSSSTAGE3AISTATE_H__
+#define __FUTURISMBOSSSTAGE3AISTATE_H__
 
 #include "FuturismBossAIState.h"
 
-// In the second stage the futurism boss has shielding on just its core.
-// The core shield is vulnerable to rockets and being shattered. The boss is now
-// capable of being frozen by ice blasts (when frozen and then hit by the ball it will
-// cause its shielding to be destroyed and the end of this state).
-// During this state the boss will become more aggressive with its attacks and movement,
-// it will start to use portals as weapons (sending the ball back and forth across the
-// playing field). Strategy portals will be opened to both the ice blast and the rockets.
-class FuturismBossStage2AIState : public FuturismBossAIState {
+class FuturismBossStage3AIState : public FuturismBossAIState {
 public:
-    FuturismBossStage2AIState(FuturismBoss* boss);
-    ~FuturismBossStage2AIState();
+    FuturismBossStage3AIState(FuturismBoss* boss);
+    ~FuturismBossStage3AIState();
+
 
 private:
-    static const double MIN_TIME_UNTIL_FIRST_PORTAL;
-
-    int numConsecutiveRocketStratPortals;
-    bool hasDoneInitialBallTeleport;
+    bool hasDestroyedBarrier;
+    SoundID transitionSoundID;
 
     // Inherited from FuturismBossAIState -----------------------------------------------------
     void GoToNextState(const GameModel& gameModel);
-    FuturismBossAIState* BuildNextAIState() const;
-    bool IsCoreShieldVulnerable() const { return true; }
-    float GetMaxSpeed() const { return 1.15*FuturismBossAIState::DEFAULT_SPEED; }
+    FuturismBossAIState* BuildNextAIState() const { assert(false); return NULL; } // This is the last state!
+    bool IsCoreShieldVulnerable() const { return false; }
+    float GetMaxSpeed() const { return 1.25*FuturismBossAIState::DEFAULT_SPEED; }
     void GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const;
     double GetAfterAttackWaitTime(FuturismBossAIState::AIState attackState) const;
-    double GetBallAttractTime() const { return 5.0; }
-    double GetBallDiscardTime() const { return 0.5; }
+    double GetBallAttractTime() const { return 4.0; }
+    double GetBallDiscardTime() const { return 0.4; }
     double GetFrozenTime() const { return FuturismBossAIState::DEFAULT_FROZEN_TIME_IN_SECS; }
-    double GetSingleTeleportInAndOutTime() const { return 0.9; }
-    double GetTotalStrategyPortalShootTime() const { return 3.5; }
-    double GetTotalWeaponPortalShootTime() const { return 3.25; }
-    double GetTwitchBeamShootTime() const { return 0.55; }
+    double GetSingleTeleportInAndOutTime() const { return 0.8; }
+    double GetTotalStrategyPortalShootTime() const { return 3.3; }
+    double GetTotalWeaponPortalShootTime() const { return 3.1; }
+    double GetTwitchBeamShootTime() const { return 0.5; }
     double GetBeamArcShootTime() const { return this->GetTwitchBeamShootTime(); }
-    double GetBeamArcHoldTime() const  { return 1.2; }
-    double GetBeamArcingTime() const { return 3.1; }
-    double GetTimeBetweenBurstLineShots() const { return 0.18 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.05; }
-    double GetTimeBetweenBurstWaveShots() const { return 0.40 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.20; }
-    int GetNumBurstLineShots() const { return 4 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3); }
+    double GetBeamArcHoldTime() const  { return 1.1; }
+    double GetBeamArcingTime() const { return 3.0; }
+    double GetTimeBetweenBurstLineShots() const { return 0.16 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.04; }
+    double GetTimeBetweenBurstWaveShots() const { return 0.33 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.15; }
+    int GetNumBurstLineShots() const { return 4 + (Randomizer::GetInstance()->RandomUnsignedInt() % 4); }
     int GetNumWaveBurstShots() const { return 3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 2); }
-    int GetNumShotsPerWaveBurst() const { return 3; }
+    int GetNumShotsPerWaveBurst() const { return 5; }
 
-    bool AllShieldsDestroyedToEndThisState() const;
-    bool ArenaBarrierExists() const { return true; }
+    bool AllShieldsDestroyedToEndThisState() const { assert(false); return false; } // There are no shields left at any point during this state
+    bool ArenaBarrierExists() const { return this->hasDestroyedBarrier; }
 
     void GetStrategyPortalCandidatePieces(const GameLevel& level, 
         Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates);
@@ -84,8 +76,10 @@ private:
     void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
     void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
     void RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket);
-    float GetTotalLifePercent() const { return this->boss->IsCoreShieldWeakened() ? 0.5f : 1.0f; }
-    float GetAccelerationMagnitude() const { return 1.1*FuturismBossAIState::DEFAULT_ACCELERATION; }
+    float GetTotalLifePercent() const;
+    float GetAccelerationMagnitude() const { return 1.2*FuturismBossAIState::DEFAULT_ACCELERATION; }
+
+    DISALLOW_COPY_AND_ASSIGN(FuturismBossStage3AIState);
 };
 
-#endif // __FUTURISMBOSSSTAGE2AISTATE_H__
+#endif // __FUTURISMBOSSSTAGE3AISTATE_H__
