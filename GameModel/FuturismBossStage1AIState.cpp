@@ -49,8 +49,7 @@ FuturismBossStage1AIState::FuturismBossStage1AIState(FuturismBoss* boss) : Futur
 
     // NOTE: Shields aren't weak-points, but they can be destroyed by rockets
 
-    // Boss starts off by moving to some location
-    //this->SetState(FuturismBossAIState::StationaryFireStrategyPortalAIState);
+    // Boss starts off by teleporting into the left arena...
     this->SetState(FuturismBossAIState::TeleportAIState);
 }
 
@@ -79,19 +78,19 @@ double FuturismBossStage1AIState::GetAfterAttackWaitTime(FuturismBossAIState::AI
 
         case FuturismBossAIState::BasicBurstLineFireAIState:
         case FuturismBossAIState::BasicBurstWaveFireAIState:
-            return 1.0;
+            return 1.2;
 
         case FuturismBossAIState::LaserBeamArcAIState:
-            return 1.7;
+            return 1.8;
 
         case FuturismBossAIState::LaserBeamTwitchAIState:
-            return 1.2;
+            return 1.5;
 
         default:
             break;
     }
 
-    return 1.0;
+    return 1.2;
 }
 
 bool FuturismBossStage1AIState::AllShieldsDestroyedToEndThisState() const { 
@@ -271,7 +270,7 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
         case TWITCH_BEAM_IDX:  this->SetState(LaserBeamTwitchAIState); break; 
         
         case TELEPORT_IDX:
-            if (this->LevelHasRocketInIt(gameModel) && Randomizer::GetInstance()->RandomTrueOrFalse()) { 
+            if (this->LevelHasRocketInIt(gameModel)) { 
                 this->GoToRandomBasicAttackState(); 
             }
             else {
@@ -280,16 +279,13 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
             break;
 
         case MOVE_TO_POS_IDX:  
-            if (this->LevelHasRocketInIt(gameModel) && Randomizer::GetInstance()->RandomTrueOrFalse()) { 
+        default: 
+            if (this->LevelHasRocketInIt(gameModel)) { 
                 this->GoToRandomBasicAttackState(); 
             }
             else {
                 this->SetState(MoveToPositionAIState); 
             }
-            break;
-        
-        default: 
-            this->SetState(MoveToPositionAIState);
             break;
     }
 }
@@ -336,7 +332,8 @@ float FuturismBossStage1AIState::GetTotalLifePercent() const {
     return lifePercent;
 }
 
-void FuturismBossStage1AIState::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
+void FuturismBossStage1AIState::CollisionOccurred(GameModel* gameModel, GameBall& ball, 
+                                                  BossBodyPart* collisionPart) {
     UNUSED_PARAMETER(gameModel);
     
     assert(gameModel != NULL);

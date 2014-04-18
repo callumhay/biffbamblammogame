@@ -129,9 +129,13 @@ void PortalProjectile::ProjectileCollisionOccurred(Projectile* projectile) {
 void PortalProjectile::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, 
                                                    std::list<Collision::Ray2D>& rays) const {
 
+    if (this->IsTerminating()) {
+        return;
+    }
+
     // Find position difference between the point and center...
     Vector2D toHitVec = hitPoint - this->GetPosition();
-
+   
     // The new ray is simply the old one coming out of the sibling portal
     Point2D newPosition = this->sibling->GetPosition() + toHitVec;
     rays.push_back(Collision::Ray2D(newPosition, impactDir));

@@ -613,64 +613,119 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             break;
         }
 
-        case EnumBossEffectInfo::IceBreak: {
+        case EnumBossEffectInfo::FrozenShakeDebris: {
             std::vector<Texture2D*> rockTextures;
             GameESPAssets::GetRockTextures(rockTextures);
-            std::vector<Texture2D*> snowflakeTextures;
-            GameESPAssets::GetSnowflakeTextures(snowflakeTextures);
 
-            const Colour iceColour = 2.1f*GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+            const Colour iceColour(0.75, 0.88f, 0.95f);
             Point3D emitCenter(info.GetBodyPart()->GetTranslationPt2D(), 0.0f);
 
             // Create the smashy block bits
             ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
             smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-            smashBitsEffect->SetInitialSpd(ESPInterval(8.0f, 15.0f));
+            smashBitsEffect->SetInitialSpd(ESPInterval(5.0f, 8.0f));
             smashBitsEffect->SetParticleLife(ESPInterval(0.75f*info.GetTimeInSecs(), info.GetTimeInSecs()));
             smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
-            smashBitsEffect->SetEmitAngleInDegrees(100);
+            smashBitsEffect->SetEmitAngleInDegrees(180);
+            smashBitsEffect->SetToggleEmitOnPlane(true);
+            smashBitsEffect->SetParticleSize(ESPInterval(info.GetSize1D() / 18.0f, info.GetSize1D() / 8.5f));
+            smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+            smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, info.GetSize1D() / 4.0f));
+            smashBitsEffect->SetEmitPosition(emitCenter);
+            smashBitsEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            smashBitsEffect->SetParticleColour(
+                ESPInterval(iceColour.R(), 1.0f), 
+                ESPInterval(iceColour.G(), 1.0f),
+                ESPInterval(iceColour.B(), 1.0f), ESPInterval(1.0f));
+            smashBitsEffect->AddCopiedEffector(ESPParticleAccelEffector(Vector3D(0,-9.8f,0)));
+            smashBitsEffect->AddEffector(&this->particleFader);
+            smashBitsEffect->SetRandomTextureParticles(8, rockTextures);
+
+            this->fgEffects.push_back(new BasicEmitterUpdateStrategy(smashBitsEffect));
+
+            break;
+        }
+
+        case EnumBossEffectInfo::IceBreak: {
+
+            std::vector<Texture2D*> rockTextures;
+            GameESPAssets::GetRockTextures(rockTextures);
+            std::vector<Texture2D*> snowflakeTextures;
+            GameESPAssets::GetSnowflakeTextures(snowflakeTextures);
+
+            const Colour iceColour(0.75, 0.88f, 0.95f);
+            Point3D emitCenter(info.GetBodyPart()->GetTranslationPt2D(), 0.0f);
+
+            // Create the smashy block bits
+            ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
+            smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+            smashBitsEffect->SetInitialSpd(ESPInterval(9.0f, 14.0f));
+            smashBitsEffect->SetParticleLife(ESPInterval(0.75f*info.GetTimeInSecs(), info.GetTimeInSecs()));
+            smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
+            smashBitsEffect->SetEmitAngleInDegrees(180);
+            smashBitsEffect->SetToggleEmitOnPlane(true);
             smashBitsEffect->SetParticleSize(ESPInterval(info.GetSize1D() / 12.0f, info.GetSize1D() / 4.0f));
             smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
             smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, info.GetSize1D() / 4.0f));
             smashBitsEffect->SetEmitPosition(emitCenter);
             smashBitsEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
             smashBitsEffect->SetParticleColour(
-                ESPInterval(0.8f * iceColour.R(), iceColour.R()), 
-                ESPInterval(0.8f * iceColour.G(), iceColour.G()),
-                ESPInterval(0.8f * iceColour.B(), iceColour.B()), ESPInterval(0.8f, 1.0f));
-            smashBitsEffect->AddCopiedEffector(ESPParticleAccelEffector(Vector3D(0,-9.8f,0)));
+                ESPInterval(iceColour.R(), 1.0f), 
+                ESPInterval(iceColour.G(), 1.0f),
+                ESPInterval(iceColour.B(), 1.0f), ESPInterval(1.0f));
+            smashBitsEffect->AddCopiedEffector(ESPParticleAccelEffector(Vector3D(0,-7.0f,0)));
             smashBitsEffect->AddEffector(&this->particleFader);
-            smashBitsEffect->SetRandomTextureParticles(10, rockTextures);
+            smashBitsEffect->SetRandomTextureParticles(15, rockTextures);
 
             // Snowflakey bits...
             ESPPointEmitter* snowflakeBitsEffect = new ESPPointEmitter();
             snowflakeBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-            snowflakeBitsEffect->SetInitialSpd(ESPInterval(3.0f, 7.0f));
-            snowflakeBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
+            snowflakeBitsEffect->SetInitialSpd(ESPInterval(5.0f, 9.0f));
+            snowflakeBitsEffect->SetParticleLife(ESPInterval(1.75f, 2.75f));
             snowflakeBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
             snowflakeBitsEffect->SetEmitAngleInDegrees(180);
-            snowflakeBitsEffect->SetParticleSize(ESPInterval(info.GetSize1D() / 8.0f, info.GetSize1D() / 3.0f));
+            snowflakeBitsEffect->SetToggleEmitOnPlane(true);
+            snowflakeBitsEffect->SetParticleSize(ESPInterval(info.GetSize1D() / 6.0f, info.GetSize1D() / 2.0f));
             snowflakeBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
             snowflakeBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, info.GetSize1D() / 4.0f));
             snowflakeBitsEffect->SetEmitPosition(emitCenter);
             snowflakeBitsEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
             snowflakeBitsEffect->SetParticleColour(
                 ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f),
-                ESPInterval(iceColour.B(), 1.0f), ESPInterval(1.0f));
+                ESPInterval(1.0f), ESPInterval(1.0f));
             snowflakeBitsEffect->AddEffector(&this->particleFader);
-            snowflakeBitsEffect->AddCopiedEffector(ESPParticleRotateEffector(100.0f, ESPParticleRotateEffector::RandomDirection()));
-            snowflakeBitsEffect->SetRandomTextureParticles(10, snowflakeTextures);
+            snowflakeBitsEffect->AddCopiedEffector(ESPParticleRotateEffector(160.0f, ESPParticleRotateEffector::RandomDirection()));
+            snowflakeBitsEffect->SetRandomTextureParticles(12, snowflakeTextures);
+
+            ESPPointEmitter* otherBits = new ESPPointEmitter();
+            otherBits->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+            otherBits->SetInitialSpd(ESPInterval(10.0f, 15.0f));
+            otherBits->SetParticleLife(ESPInterval(2.0f, 2.5f));
+            otherBits->SetEmitDirection(Vector3D(0, 1, 0));
+            otherBits->SetEmitAngleInDegrees(180);
+            otherBits->SetToggleEmitOnPlane(true);
+            otherBits->SetParticleSize(ESPInterval(info.GetSize1D() / 10.0f, info.GetSize1D() / 5.0f));
+            otherBits->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+            otherBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f, info.GetSize1D() / 4.0f));
+            otherBits->SetEmitPosition(emitCenter);
+            otherBits->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            otherBits->SetParticleColour(
+                ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+            otherBits->AddEffector(&this->particleFader);
+            otherBits->SetParticles(15, 
+                PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
             // Giant snow flake with onomatopoeia
             ESPPointEmitter* snowflakeBackingEffect = new ESPPointEmitter();
             snowflakeBackingEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
             snowflakeBackingEffect->SetInitialSpd(ESPInterval(0.0f));
-            snowflakeBackingEffect->SetParticleLife(ESPInterval(1.75f));
+            snowflakeBackingEffect->SetParticleLife(ESPInterval(0.8f*info.GetTimeInSecs()));
             snowflakeBackingEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
             snowflakeBackingEffect->SetEmitPosition(emitCenter);
-            snowflakeBackingEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+            snowflakeBackingEffect->SetParticleColour(ESPInterval(0.95f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
             snowflakeBackingEffect->SetParticleRotation(ESPInterval(-180, 180));
-            snowflakeBackingEffect->SetParticleSize(ESPInterval(info.GetSize1D()));
+            snowflakeBackingEffect->SetParticleSize(ESPInterval(1.5*info.GetSize1D()));
             snowflakeBackingEffect->AddEffector(&this->particleFader);
             snowflakeBackingEffect->AddEffector(&this->particleMediumGrowth);
             snowflakeBackingEffect->SetRandomTextureParticles(1, snowflakeTextures);
@@ -680,7 +735,7 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             // Set up the emitter...
             iceSmashOnoEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
             iceSmashOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
-            iceSmashOnoEffect->SetParticleLife(ESPInterval(2.25f));
+            iceSmashOnoEffect->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
             iceSmashOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
             iceSmashOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
             iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
@@ -691,7 +746,7 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
 
             // Set the onomatopoeia particle
             TextLabel2D smashTextLabel(GameFontAssetsManager::GetInstance()->GetFont(
-                GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "");
+                GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "");
             smashTextLabel.SetColour(iceColour);
             smashTextLabel.SetDropShadow(Colour(0, 0, 0), 0.15f);
             iceSmashOnoEffect->SetParticles(1, smashTextLabel, Onomatoplex::SHATTER, 
@@ -699,6 +754,7 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
 
             BasicEmitterUpdateStrategy* strategy = new BasicEmitterUpdateStrategy();
             strategy->AddEmitter(smashBitsEffect);
+            strategy->AddEmitter(otherBits);
             strategy->AddEmitter(snowflakeBitsEffect);
             strategy->AddEmitter(snowflakeBackingEffect);
             strategy->AddEmitter(iceSmashOnoEffect);
@@ -783,7 +839,7 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
 
             ESPPointToPointBeam* bossToBallBigBeam = new ESPPointToPointBeam();
             bossToBallBigBeam->SetColour(ColourRGBA(1.0f, 1.0f, 1.0f, 0.5f));
-            bossToBallBigBeam->SetBeamLifetime(ESPInterval(info.GetTimeInSecs()));
+            bossToBallBigBeam->SetBeamLifetime(ESPInterval(info.GetTimeInSecs() + 3.0));
             bossToBallBigBeam->SetNumBeamShots(1);
             bossToBallBigBeam->SetMainBeamThickness(ESPInterval(1.25f*info.GetSize1D()));
             bossToBallBigBeam->SetNumMainESPBeamSegments(1);

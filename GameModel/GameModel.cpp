@@ -939,6 +939,7 @@ void GameModel::DoProjectileCollisions(double dT) {
                     }
                 }
                 if (destroyProjectile) {
+                    ++iter;
                     continue;
                 }
             }
@@ -1109,7 +1110,7 @@ void GameModel::DoProjectileCollisions(double dT) {
                             currPiece->GetType() != LevelPiece::FragileCannon) {
                             
                             this->CollisionOccurred(currProjectile, currPiece);
-                            // currPiece may now be destroyed...
+                            // currPiece will still exist since cannons cannot be destroyed
 
                             if (static_cast<const CannonBlock*>(currPiece)->IsProjectileLoaded(currProjectile)) {
                                 alreadyCollidedWithPieces.insert(currPiece);
@@ -1130,6 +1131,8 @@ void GameModel::DoProjectileCollisions(double dT) {
                             break;
 				        }
                         else {
+
+
                             // NOTE: We need to be careful since some blocks may no longer exist after a collision at this
                             // point so we re-populate the set of pieces to check and keep track of the ones we've already collided with
                             collisionPieces.clear();

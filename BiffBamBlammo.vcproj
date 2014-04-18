@@ -2987,6 +2987,10 @@
 							RelativePath=".\GameModel\FuturismBossStage2AIState.h"
 							>
 						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossStage3AIState.h"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="Source Files"
@@ -3005,6 +3009,10 @@
 						</File>
 						<File
 							RelativePath=".\GameModel\FuturismBossStage2AIState.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameModel\FuturismBossStage3AIState.cpp"
 							>
 						</File>
 					</Filter>

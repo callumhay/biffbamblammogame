@@ -110,6 +110,7 @@ public:
 		PaddleHitWallEvent,
         PaddleFrozenEvent,
         PaddleOnFireEvent,
+        PaddleIceShakeEvent,
 
         // -> Paddle/block sounds
         PaddlePortalTeleportEvent,
@@ -221,6 +222,7 @@ public:
         BossLaserBeamLoop,
         BossFrozenEvent,
         BossIceShatterEvent,
+        BossIceShakeEvent,
         ClassicalBossSparkleEvent,
         ClassicalBossArmShakeLoop,
         ClassicalBossArmAttackEvent,

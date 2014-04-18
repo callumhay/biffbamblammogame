@@ -34,6 +34,8 @@
 #include "GameItem.h"
 #include "FuturismBoss.h"
 
+#include "../GameSound/SoundCommon.h"
+
 class FuturismBoss;
 class BossBodyPart;
 class BossWeakpoint;
@@ -75,6 +77,9 @@ public:
         // Portal Attacks:
         StationaryFireStrategyPortalAIState, // Boss opens a portal that leads to an item that can be used to defeat the boss
         StationaryFireWeaponPortalAIState,   // Boss opens a portal used to make it harder for the player
+
+        // Special States:
+        //DestroyLevelBarrierAIState,
 
         // Angry/Hurt/Destruction-related States ----------------------
         AngryAIState,
@@ -138,6 +143,7 @@ protected:
     AnimationMultiLerp<float> coreRotVelAnim; // Animation value is degrees per second
     
     double frozenTimeCountdown;
+    double frozenShakeEffectCountdown;
     double countdownToPortalShot;             // Countdown time until a portal is shot
     bool weaponWasShot;                       // Weather the weapon (e.g., portal, laser beam, etc.) has been shot yet (used by various states)
     Colour nextPortalColour;                  // The colour of the next portal
@@ -159,6 +165,8 @@ protected:
     double timeSinceLastStratPortal;    // Time since the boss last spawned/shot a strategy portal
     double timeSinceLastAttackPortal;   // Time since the boss last spawned/shot an attack portal
 
+    SoundID iceShakeSoundID;
+    
     // Pure virtual functions
     virtual void GoToNextState(const GameModel& gameModel) = 0;
     virtual FuturismBossAIState* BuildNextAIState() const = 0;
@@ -238,6 +246,8 @@ protected:
     void ShootStrategyPortal(GameModel& gameModel);
     void ShootWeaponPortal(GameModel& gameModel);
 
+    void CancelActiveBeam(GameModel& gameModel);
+
     bool IsPaddleVisibleToShootAt(const GameModel& gameModel) const;
     bool BossHasLineOfSightToBall(const GameBall& ball, const GameLevel& level) const;
 
@@ -256,7 +266,7 @@ protected:
     void WeakenShield(const Vector2D& hitDir, float hitMagnitude, FuturismBoss::ShieldLimbType shieldType);
     void DestroyShield(const Vector2D& hitDir, FuturismBoss::ShieldLimbType shieldType);
     AnimationMultiLerp<Vector3D> GenerateShieldDeathTranslationAnimation(FuturismBoss::ShieldLimbType shieldType, 
-        float shieldSize, float xDir, float currYPos, double timeInSecs) const;
+        float shieldSize, float xDir, double timeInSecs) const;
     AnimationMultiLerp<float> GenerateShieldDeathRotationAnimation(FuturismBoss::ShieldLimbType shieldType, 
         double timeInSecs) const;
     
@@ -267,6 +277,7 @@ protected:
     void DetachAndShootBall(const Vector2D& shootDir);
     void ShakeBall(GameBall* ball);
     bool IsBallAvailableForAttractingAndTeleporting(const GameModel& gameModel) const;
+    bool IsBallFarEnoughAwayToInitiateAttracting(const GameModel& gameModel) const;
     void GetCenterRotationBodyPartAndFullDegAmt(AbstractBossBodyPart*& bodyPart, float& fullDegAmt) const;
 
 private:

@@ -384,6 +384,7 @@ void MSFReader::InitSoundTypeMapping() {
 	INSERT_MAPPING_PAIR(GameSound, PaddleHitWallEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleFrozenEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleOnFireEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleIceShakeEvent, false);
 
     INSERT_MAPPING_PAIR(GameSound, PaddlePortalTeleportEvent, false);
 
@@ -489,6 +490,7 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, BossLaserBeamLoop, false);
     INSERT_MAPPING_PAIR(GameSound, BossFrozenEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BossIceShatterEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, BossIceShakeEvent, false);
     INSERT_MAPPING_PAIR(GameSound, ClassicalBossSparkleEvent, false);
     INSERT_MAPPING_PAIR(GameSound, ClassicalBossArmShakeLoop, false);
     INSERT_MAPPING_PAIR(GameSound, ClassicalBossArmAttackEvent, false);

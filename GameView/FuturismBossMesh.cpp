@@ -30,21 +30,24 @@
 #include "FuturismBossMesh.h"
 #include "GameViewConstants.h"
 #include "GameAssets.h"
+#include "GameESPAssets.h"
 #include "GameFBOAssets.h"
 #include "InGameBossLevelDisplayState.h"
 #include "CgFxBossWeakpoint.h"
 #include "CgFxPrism.h"
+#include "PersistentTextureManager.h"
 
 #include "../BlammoEngine/Mesh.h"
 #include "../GameModel/FuturismBoss.h"
 
-const double FuturismBossMesh::INTRO_TIME_IN_SECS = 2.0;
+const double FuturismBossMesh::INTRO_TIME_IN_SECS = 1.0; // TODO: 4.0;
 
 FuturismBossMesh::FuturismBossMesh(FuturismBoss* boss, GameSound* sound) : 
 BossMesh(sound), boss(boss), coreCenterMesh(NULL), coreArmsMesh(NULL), 
 coreBulbMesh(NULL), coreShieldMesh(NULL), 
-leftRightShieldMesh(NULL), topBottomShieldMesh(NULL), circleGlowTex(NULL), 
-damagedLeftRightShieldMesh(NULL), damagedTopBottomShieldMesh(NULL), iceEncasingMesh(NULL),
+leftRightShieldMesh(NULL), topBottomShieldMesh(NULL), 
+damagedLeftRightShieldMesh(NULL), damagedTopBottomShieldMesh(NULL), 
+damagedCoreShieldMesh(NULL), iceEncasingMesh(NULL),
 topShieldExplodingEmitter(NULL), bottomShieldExplodingEmitter(NULL),
 leftShieldExplodingEmitter(NULL), rightShieldExplodingEmitter(NULL)
 {
@@ -76,14 +79,16 @@ leftShieldExplodingEmitter(NULL), rightShieldExplodingEmitter(NULL)
     this->damagedTopBottomShieldMesh = ResourceManager::GetInstance()->GetObjMeshResource(
         GameViewConstants::GetInstance()->FUTURISM_BOSS_DAMAGED_TOP_AND_BOTTOM_SHIELD_MESH);
     assert(this->damagedTopBottomShieldMesh != NULL);
+    this->damagedCoreShieldMesh = ResourceManager::GetInstance()->GetObjMeshResource(
+        GameViewConstants::GetInstance()->FUTURISM_BOSS_DAMAGED_CORE_SHIELD_MESH);
+    assert(this->damagedCoreShieldMesh != NULL);
 
     this->iceEncasingMesh = ResourceManager::GetInstance()->GetObjMeshResource(
         GameViewConstants::GetInstance()->FUTURISM_BOSS_ICE_ENCASING);
     assert(this->iceEncasingMesh != NULL);
 
-    this->circleGlowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
-    assert(this->circleGlowTex != NULL);
+    PersistentTextureManager::GetInstance()->PreloadTexture2D(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT);
 
     this->topShieldExplodingEmitter    = this->BuildExplodingEmitter(0.9f, this->boss->GetTopShield(), 
         FuturismBoss::TOP_BOTTOM_SHIELD_EXPLODE_WIDTH, FuturismBoss::TOP_BOTTOM_SHIELD_EXPLODE_HEIGHT, 2.0f);
@@ -93,24 +98,46 @@ leftShieldExplodingEmitter(NULL), rightShieldExplodingEmitter(NULL)
         FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_WIDTH, FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_HEIGHT, 2.0f);
     this->rightShieldExplodingEmitter  = this->BuildExplodingEmitter(0.9f, this->boss->GetRightShield(),
         FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_WIDTH, FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_HEIGHT, 2.0f);
+    this->coreShieldExplodingEmitter   = this->BuildExplodingEmitter(0.9f, this->boss->GetCoreShield(),
+        FuturismBoss::CORE_SHIELD_SIZE, FuturismBoss::CORE_SHIELD_SIZE, 2.0f);
 
     BossMesh::BuildShieldingColourAnimation(this->shieldColourAnim);
 
+
     {
-        std::vector<double> timeVals;
-        timeVals.reserve(3);
-        timeVals.push_back(0.0);
-        timeVals.push_back(1.0);
-        timeVals.push_back(2.0);
+        std::vector<Texture2D*> cloudTextures;
+        GameESPAssets::GetCloudTextures(cloudTextures);
 
-        std::vector<float> pulseVals;
-        pulseVals.reserve(timeVals.size());
-        pulseVals.push_back(1.0f);
-        pulseVals.push_back(1.33f);
-        pulseVals.push_back(1.0f);
+        ESPMultiAlphaEffector mistAlpha;
+        std::vector<std::pair<float, double> > alphaAndPercentages;
+        alphaAndPercentages.reserve(4);
+        alphaAndPercentages.push_back(std::make_pair(0.0f, 0.0));
+        alphaAndPercentages.push_back(std::make_pair(0.25f, 0.25));
+        alphaAndPercentages.push_back(std::make_pair(0.25f, 0.75));
+        alphaAndPercentages.push_back(std::make_pair(0.0f, 1.0));
+        mistAlpha.SetAlphasWithPercentage(alphaAndPercentages);
 
-        this->glowCirclePulseAnim.SetLerp(timeVals, pulseVals);
-        this->glowCirclePulseAnim.SetRepeat(true);
+        this->frostMistShader.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
+        this->frostMistShader.SetColour(Colour(1.0f, 1.0f, 1.0f));
+        this->frostMistShader.SetScale(0.5f);
+        this->frostMistShader.SetFrequency(0.8f);
+        this->frostMistShader.SetFlowDirection(Vector3D(0, 0, 1));
+        this->frostMistShader.SetTexture(cloudTextures[0]);
+
+        frostMist.SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+        frostMist.SetSpawnDelta(ESPInterval(0.15f, 0.25f));
+        frostMist.SetInitialSpd(ESPInterval(0.25f, 1.0f));
+        frostMist.SetParticleLife(ESPInterval(1.5f, 2.5f));
+        frostMist.SetParticleSize(ESPInterval(FuturismBoss::CORE_BOSS_SIZE / 4.0f, FuturismBoss::CORE_BOSS_SIZE / 1.15f));
+        frostMist.SetEmitAngleInDegrees(180);
+        frostMist.SetRadiusDeviationFromCenter(ESPInterval(0, 0.6f*FuturismBoss::CORE_BOSS_HALF_SIZE), 
+            ESPInterval(0, 0.6f*FuturismBoss::CORE_BOSS_HALF_SIZE), ESPInterval(0, FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD));
+        frostMist.SetParticleRotation(ESPInterval(0, 359.99f));
+        frostMist.SetParticleColour(ESPInterval(0.85f, 1.0f),ESPInterval(1.0f),ESPInterval(1.0f),ESPInterval(0.8f,1));
+        frostMist.AddCopiedEffector(ESPParticleScaleEffector(1.0f, 1.5f));
+        frostMist.AddCopiedEffector(mistAlpha);
+        frostMist.AddCopiedEffector(ESPParticleRotateEffector(80.0f, ESPParticleRotateEffector::CLOCKWISE));
+        frostMist.SetRandomTextureEffectParticles(20, &this->frostMistShader, cloudTextures);
     }
 
     // Set the weak-point material's texture
@@ -143,10 +170,9 @@ FuturismBossMesh::~FuturismBossMesh() {
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->damagedTopBottomShieldMesh);
     assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->iceEncasingMesh);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->damagedCoreShieldMesh);
     assert(success);
-
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGlowTex);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->iceEncasingMesh);
     assert(success);
 
     UNUSED_VARIABLE(success);
@@ -159,12 +185,26 @@ FuturismBossMesh::~FuturismBossMesh() {
     this->leftShieldExplodingEmitter = NULL;
     delete this->rightShieldExplodingEmitter;
     this->rightShieldExplodingEmitter = NULL;
+    delete this->coreShieldExplodingEmitter;
+    this->coreShieldExplodingEmitter = NULL;
 }
 
 double FuturismBossMesh::ActivateIntroAnimation() {
-    // TODO
 
-    return FuturismBossMesh::INTRO_TIME_IN_SECS;
+    // Glowing in the eye
+    this->eyePulseGlow.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->eyePulseGlow.SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    this->eyePulseGlow.SetParticleSize(ESPInterval(0.75f*FuturismBoss::CORE_EYE_SIZE));
+    this->eyePulseGlow.SetParticleAlignment(ESP::ScreenAligned);
+    this->eyePulseGlow.SetEmitPosition(Point3D(0, 0, FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD));
+    this->eyePulseGlow.SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.0f));
+    this->eyePulseGlow.AddCopiedEffector(ESPParticleScaleEffector(ScaleEffect(1.0f, 1.5f)));
+    this->eyePulseGlow.SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
+
+    
+    this->introTimeCountdown = FuturismBossMesh::INTRO_TIME_IN_SECS;
+    return this->introTimeCountdown;
 }
 
 
@@ -232,7 +272,13 @@ void FuturismBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoin
         else {
             glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
         }
-        this->coreShieldMesh->Draw(camera, keyLight, fillLight, ballLight);
+        
+        if (coreShield->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            this->damagedCoreShieldMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
+        else {
+            this->coreShieldMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
         glPopMatrix();
     }
 
@@ -257,10 +303,44 @@ void FuturismBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, cons
 
     BossMesh::DrawPostBodyEffects(dT, camera, gameModel, keyLight, fillLight, ballLight, assets);
 
+    static const float MAX_EYE_GLOW_ALPHA = 0.7f;
+
+    // Check to see if we're drawing intro effects
+    if (this->introTimeCountdown > 0.0) {
+        static const double START_GLOW_TIME = INTRO_TIME_IN_SECS / 1.5;
+        if (this->introTimeCountdown <= START_GLOW_TIME) {
+            glPushMatrix();
+            glMultMatrixf(this->boss->GetCoreBody()->GetWorldTransform().begin());
+            
+            this->eyePulseGlow.SetParticleAlpha(ESPInterval(MAX_EYE_GLOW_ALPHA*NumberFuncs::LerpOverTime(
+                INTRO_TIME_IN_SECS, START_GLOW_TIME, 0.0f, 1.0f, this->introTimeCountdown)));
+            this->eyePulseGlow.Tick(dT);
+            this->eyePulseGlow.Draw(camera);
+
+            glPopMatrix();
+        }
+        
+        this->introTimeCountdown -= dT;
+        return;
+    }
+
+    // Draw the glowing eye...
+    const BossBodyPart* core = this->boss->GetCoreBody();
+    if (core->GetAlpha() > 0) {
+        // Draw the core's eye glowing effect
+        glPushMatrix();
+        glMultMatrixf(core->GetWorldTransform().begin());
+        this->eyePulseGlow.SetParticleAlpha(MAX_EYE_GLOW_ALPHA*core->GetAlpha());
+        this->eyePulseGlow.Tick(dT);
+        this->eyePulseGlow.Draw(camera);
+        glPopMatrix();
+    }
+
     const BossBodyPart* topShield    = this->boss->GetTopShield();
     const BossBodyPart* bottomShield = this->boss->GetBottomShield();
     const BossBodyPart* leftShield   = this->boss->GetLeftShield();
     const BossBodyPart* rightShield  = this->boss->GetRightShield();
+    const BossBodyPart* coreShield   = this->boss->GetCoreShield();
     this->DrawShieldPostEffects(dT, camera, FuturismBoss::TOP_BOTTOM_SHIELD_X_OFFSET, 
         FuturismBoss::TOP_BOTTOM_SHIELD_Y_OFFSET, topShield, this->topShieldExplodingEmitter);
     this->DrawShieldPostEffects(dT, camera, FuturismBoss::TOP_BOTTOM_SHIELD_X_OFFSET, 
@@ -269,6 +349,7 @@ void FuturismBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, cons
         FuturismBoss::LEFT_RIGHT_SHIELD_Y_OFFSET, leftShield, this->leftShieldExplodingEmitter);
     this->DrawShieldPostEffects(dT, camera, FuturismBoss::LEFT_RIGHT_SHIELD_X_OFFSET, 
         FuturismBoss::LEFT_RIGHT_SHIELD_Y_OFFSET, rightShield, this->rightShieldExplodingEmitter);
+    this->DrawShieldPostEffects(dT, camera, 0.0f, 0.0f, coreShield, this->coreShieldExplodingEmitter);
 
     // Check to see if the boss is frozen, if so then draw the ice...
     // NOTE: This should be the very last thing we draw for the boss
@@ -286,6 +367,10 @@ void FuturismBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, cons
         glColor4f(1, 1, 1, 0.7f);
         
         this->iceEncasingMesh->Draw(camera, keyLight, fillLight, ballLight);
+
+        this->frostMist.Tick(dT);
+        this->frostMist.Draw(camera);
+
         glPopMatrix();
     }
 }
@@ -304,22 +389,18 @@ void FuturismBossMesh::DrawDamagableBodyPart(const Camera& camera, const BasicPo
     if (currColour.A() > 0.0f) {
         glPushMatrix();
         glMultMatrixf(bodyPart->GetWorldTransform().begin());
+        
+        const Colour& shieldColour = this->shieldColourAnim.GetInterpolantValue();
+        glColor4f(currColour.R()*shieldColour.R(), currColour.G()*shieldColour.G(),
+            currColour.B()*shieldColour.B(), currColour.A());
+
         if (bodyPart->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
-            glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-            if (bodyPart->GetIsDestroyed()) {
-                dmgMesh->Draw(camera, keyLight, fillLight, ballLight);
-            }
-            else {
-                dmgMesh->Draw(camera, this->weakpointMaterial); 
-            }
+            dmgMesh->Draw(camera, keyLight, fillLight, ballLight);
         } 
         else {
-            const Colour& shieldColour = this->shieldColourAnim.GetInterpolantValue();
-
-            glColor4f(currColour.R()*shieldColour.R(), currColour.G()*shieldColour.G(),
-                currColour.B()*shieldColour.B(), currColour.A());
             nonDmgMesh->Draw(camera, keyLight, fillLight, ballLight);
         }
+
         glPopMatrix();
     }
 }

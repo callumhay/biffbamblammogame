@@ -38,6 +38,7 @@ class BossCompositeBodyPart;
 class FuturismBossAIState;
 class FuturismBossStage1AIState;
 class FuturismBossStage2AIState;
+class FuturismBossStage3AIState;
 
 #include "Boss.h"
 #include "GameLevel.h"
@@ -48,6 +49,7 @@ class FuturismBoss : public Boss {
     friend class FuturismBossAIState;
     friend class FuturismBossStage1AIState;
     friend class FuturismBossStage2AIState;
+    friend class FuturismBossStage3AIState;
 
 public:
     static const float FULLY_SHIELDED_BOSS_HEIGHT;
@@ -57,9 +59,9 @@ public:
 
     static const float CORE_BOSS_SIZE;
     static const float CORE_BOSS_HALF_SIZE;
-
     static const float CORE_EYE_SIZE;
     static const float CORE_EYE_HALF_SIZE;
+    static const float CORE_SHIELD_SIZE;
 
     static const float CORE_Z_DIST_FROM_ORIGIN;
     static const float CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD;
@@ -163,7 +165,10 @@ private:
     // FuturismBoss Helper Methods
     void AddSpecialCoreBounds(ShieldLimbType sectorToAdd);
     void UpdateBoundsForDestroyedShieldLimb(ShieldLimbType type);
+    
+    void RegenerateBoundsForCoreWithShield();
     void RegenerateBoundsForFinalCore();
+
     size_t GetShieldIndex(ShieldLimbType type) const;
     BossBodyPart* GetShieldBodyPart(ShieldLimbType type) { return static_cast<BossBodyPart*>(this->bodyParts[this->GetShieldIndex(type)]); }
     
