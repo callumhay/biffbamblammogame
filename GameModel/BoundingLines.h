@@ -79,6 +79,7 @@ public:
 
 	bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	bool CollisionCheck(const Collision::Circle2D& c) const;
+    bool CollisionCheck(const Collision::Circle2D& c, float& sqrDist) const;
 	bool CollisionCheck(const BoundingLines& other) const;
     bool CollisionCheck(const BoundingLines& other, double dT, const Vector2D& velocity) const;
     bool CollisionCheck(const Collision::LineSeg2D& lineSeg) const;
@@ -170,6 +171,14 @@ inline bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, cons
  */
 inline bool BoundingLines::CollisionCheck(const BoundingLines& other) const {
 	return this->CollisionCheckIndex(other) != -1;
+}
+
+/**
+ * Check to see if the given circle collides with any of the bounding lines of this.
+ */
+inline bool BoundingLines::CollisionCheck(const Collision::Circle2D& c) const {
+    float temp;
+	return this->CollisionCheck(c, temp);
 }
 
 #endif

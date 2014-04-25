@@ -180,6 +180,7 @@ public:
     void BossAngryEvent(const Boss* boss, const BossBodyPart* angryPart);
     void BossAngryEvent(const Boss* boss, const Point2D& angryPartLoc, float angryPartWidth, float angryPartHeight);
 
+    void ClearActiveBossEffectsEvent();
     void BossEffectEvent(const BossEffectEventInfo& effectEvent);
     void GeneralEffectEvent(const GeneralEffectEventInfo& effectEvent);
 
@@ -226,6 +227,7 @@ private:
     int numFallingItemsInPlay;
     SoundID fallingItemSoundID;
 
+    void ClearActiveBossEffects();
 	void DestroyBallSafetyNet(const Point2D& pt, bool bottomSafetyNet);
     void DoBallTeleportation(const GameBall& ball, const Point2D& enterPt, 
         const Point2D& exitPt, const Colour& portalColour);

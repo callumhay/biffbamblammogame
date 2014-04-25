@@ -1053,7 +1053,7 @@ double LevelMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const Ga
     return this->bossMesh->ActivateBossExplodingFlashEffects(delayInSecs, model, camera);
 }
 
-void LevelMesh::BossHurt() {
+void LevelMesh::ClearActiveBossEffects() {
     assert(this->bossMesh != NULL);
     this->bossMesh->ClearActiveEffects();
 }

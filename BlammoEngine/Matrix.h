@@ -365,6 +365,17 @@ inline Matrix4x4 operator *(const Matrix4x4& a, const Matrix4x4& b)
   return ret;
 }
 
+inline Vector2D operator*(const Matrix4x4& m, const Vector2D& v) {
+    Vector2D ret;
+    Vector4D temp = Vector4D(v[0], v[1], 0, 0);
+
+    for (int i = 0; i < 2; i++) {
+        ret[i] = Vector4D::Dot(temp, m.getRow(i)); 
+    }
+
+    return ret;
+}
+
 inline Vector3D operator*(const Matrix4x4& m, const Vector3D& v) {
 	Vector3D ret;
 

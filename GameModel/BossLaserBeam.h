@@ -32,6 +32,7 @@
 
 #include "Beam.h"
 #include "GameModelConstants.h"
+#include "GameEventManager.h"
 
 class BossLaserBeam : public Beam {
 public:
@@ -46,15 +47,19 @@ public:
 
     void UpdateCollisions(const GameModel* gameModel);
     int GetNumBaseBeamSegments() const;
+    
+    void SetBeamColour(const Colour& c);
     const Colour& GetBeamColour() const;
 
     void UpdateOriginBeamSegment(const GameModel* gameModel, const Collision::Ray2D& newOriginBeamRay);
+    const Collision::Ray2D& GetInitialBeamRay() const;
 
 private:
     static const int BASE_DAMAGE_PER_SECOND;
 
     Collision::Ray2D initialBeamRay;
     float initialBeamRadius;
+    Colour colour;
 
     DISALLOW_COPY_AND_ASSIGN(BossLaserBeam);
 };
@@ -63,14 +68,22 @@ inline int BossLaserBeam::GetNumBaseBeamSegments() const {
     return 1; // Only one base ray for any boss laser beam
 }
 
+inline void BossLaserBeam::SetBeamColour(const Colour& c) {
+    this->colour = c;
+}
+
 inline const Colour& BossLaserBeam::GetBeamColour() const {
-    return GameModelConstants::GetInstance()->BOSS_LASER_BEAM_COLOUR;
+    return this->colour;
 }
 
 inline void BossLaserBeam::UpdateOriginBeamSegment(const GameModel* gameModel, 
                                                    const Collision::Ray2D& newOriginBeamRay) {
     this->initialBeamRay = newOriginBeamRay;
     this->UpdateCollisions(gameModel);
+}
+
+inline const Collision::Ray2D& BossLaserBeam::GetInitialBeamRay() const {
+    return this->initialBeamRay;
 }
 
 #endif // __BOSSLASERBEAM_H__

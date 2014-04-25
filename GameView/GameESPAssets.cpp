@@ -4030,6 +4030,13 @@ void GameESPAssets::AddBossLaserBeamEffect(const BossLaserBeam& beam) {
         std::list<ESPPointEmitter*> originEffects = this->CreateBeamOriginEffects(beam);
         beamOriginEmittersVec.insert(beamOriginEmittersVec.end(), originEffects.begin(), originEffects.end());
     }
+    const Point2D& beamOrigin = beam.GetInitialBeamRay().GetOrigin();
+    for (std::vector<ESPPointEmitter*>::iterator iter = beamOriginEmittersVec.begin(); iter != beamOriginEmittersVec.end(); ++iter) {
+        ESPPointEmitter* originEmitter = *iter;
+        
+        originEmitter->SetAliveParticlePosition(beamOrigin[0], beamOrigin[1], beam.GetZOffset());
+    }
+
     beamEmitters.insert(beamEmitters.end(), beamOriginEmittersVec.begin(), beamOriginEmittersVec.end());
 
     // Add all the beams to the active beams, associated with the given beam
@@ -4191,26 +4198,26 @@ std::list<ESPPointEmitter*> GameESPAssets::CreateBeamOriginEffects(const Beam& b
     beamOriginFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     beamOriginFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
     beamOriginFlare->SetEmitPosition(emitPos);
-    beamOriginFlare->SetParticleSize(ESPInterval(5.2f * originRadius));
+    beamOriginFlare->SetParticleSize(ESPInterval(6.0f * originRadius));
     beamOriginFlare->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.98f), ESPInterval(1.0f), ESPInterval(1.0f));
     beamOriginFlare->SetParticleRotation(ESPInterval(0.0f, 359.99f));
     beamOriginFlare->AddEffector(&this->flarePulse);
     beamOriginFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE));
 
-    ESPPointEmitter* beamOriginRays = new ESPPointEmitter();
-    beamOriginRays->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-    beamOriginRays->SetInitialSpd(ESPInterval(0));
-    beamOriginRays->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
-    beamOriginRays->SetEmitAngleInDegrees(0);
-    beamOriginRays->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
-    beamOriginRays->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    beamOriginRays->SetEmitPosition(emitPos);
-    beamOriginRays->SetParticleSize(ESPInterval(8.5f * originRadius));
-    beamOriginRays->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.75f));
-    beamOriginRays->SetParticleRotation(ESPInterval(0.0f, 359.99f));
-    beamOriginRays->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS));
+    //ESPPointEmitter* beamOriginRays = new ESPPointEmitter();
+    //beamOriginRays->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    //beamOriginRays->SetInitialSpd(ESPInterval(0));
+    //beamOriginRays->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    //beamOriginRays->SetEmitAngleInDegrees(0);
+    //beamOriginRays->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    //beamOriginRays->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    //beamOriginRays->SetEmitPosition(emitPos);
+    //beamOriginRays->SetParticleSize(ESPInterval(10.0f * originRadius));
+    //beamOriginRays->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    //beamOriginRays->SetParticleRotation(ESPInterval(0.0f, 359.99f));
+    //beamOriginRays->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS));
 
-    result.push_back(beamOriginRays);
+    //result.push_back(beamOriginRays);
     result.push_back(beamOriginSparkles);
     result.push_back(beamOriginFlare);
 

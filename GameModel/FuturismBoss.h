@@ -62,6 +62,11 @@ public:
     static const float CORE_EYE_SIZE;
     static const float CORE_EYE_HALF_SIZE;
     static const float CORE_SHIELD_SIZE;
+    static const float CORE_BULB_SIZE;
+    static const float CORE_BULB_HALF_SIZE;
+    static const float CORE_BULB_Z_DIST;
+    static const float CORE_BULB_OFFSET_FROM_ORIGIN;
+    static const float CORE_ARMS_MOVE_FORWARD_AMT;
 
     static const float CORE_Z_DIST_FROM_ORIGIN;
     static const float CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD;
@@ -89,15 +94,53 @@ public:
     const BossBodyPart* GetRightShield() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->rightShieldIdx]); }
 
     // Get the core parts of the boss
+    const BossCompositeBodyPart* GetCoreAssembly() const { return static_cast<const BossCompositeBodyPart*>(this->bodyParts[this->coreAssemblyIdx]); }
     const BossBodyPart* GetCoreBody() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->coreBodyIdx]); }
     const BossBodyPart* GetCoreTopBulb() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->topBulbIdx]); }
     const BossBodyPart* GetCoreBottomBulb() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->bottomBulbIdx]); }
     const BossBodyPart* GetCoreLeftBulb() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->leftBulbIdx]); }
     const BossBodyPart* GetCoreRightBulb() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->rightBulbIdx]); }
 
+
+    Point2D GetCoreTopBulbWorldPos() const { 
+        Vector2D vec = GetCoreTopBulbLocalVec();
+        return this->GetCoreAssembly()->GetWorldTransform() * Point2D(vec[0], vec[1]); 
+    }
+    Point2D GetCoreBottomBulbWorldPos() const { 
+        Vector2D vec = GetCoreBottomBulbLocalVec();
+        return this->GetCoreAssembly()->GetWorldTransform() * Point2D(vec[0], vec[1]); 
+    }
+    Point2D GetCoreLeftBulbWorldPos() const { 
+        Vector2D vec = GetCoreLeftBulbLocalVec();
+        return this->GetCoreAssembly()->GetWorldTransform() * Point2D(vec[0], vec[1]); 
+    }
+    Point2D GetCoreRightBulbWorldPos() const { 
+        Vector2D vec = GetCoreRightBulbLocalVec();
+        return this->GetCoreAssembly()->GetWorldTransform() * Point2D(vec[0], vec[1]); 
+    }
+
+    Vector2D GetCoreTopBulbWorldVec() const { 
+        return this->GetCoreAssembly()->GetWorldTransform() * GetCoreTopBulbLocalVec(); 
+    }
+    Vector2D GetCoreBottomBulbWorldVec() const { 
+        return this->GetCoreAssembly()->GetWorldTransform() * GetCoreBottomBulbLocalVec(); 
+    }
+    Vector2D GetCoreLeftBulbWorldVec() const { 
+        return this->GetCoreAssembly()->GetWorldTransform() * GetCoreLeftBulbLocalVec(); 
+    }
+    Vector2D GetCoreRightBulbWorldVec() const { 
+        return this->GetCoreAssembly()->GetWorldTransform() * GetCoreRightBulbLocalVec(); 
+    }
+
     bool IsCoreShieldVulnerable() const;
+    bool AreBulbsVulnerable() const;
     bool IsFrozen() const;
     
+    bool AreAllBulbsDestroyed() const {
+        return this->GetCoreTopBulb()->GetIsDestroyed() && this->GetCoreBottomBulb()->GetIsDestroyed() &&
+            this->GetCoreLeftBulb()->GetIsDestroyed() && this->GetCoreRightBulb()->GetIsDestroyed();
+    }
+
     bool IsCoreShieldWeakened() const   { return this->GetCoreShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart;   }
     bool IsTopShieldWeakened() const    { return this->GetTopShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart;    }
     bool IsBottomShieldWeakened() const { return this->GetBottomShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart; }
@@ -105,6 +148,8 @@ public:
     bool IsRightShieldWeakened() const  { return this->GetRightShield()->GetType() == AbstractBossBodyPart::WeakpointBodyPart;  }
     
     float GetIceRotationInDegs() const { return this->currIceRotInDegs; }
+    float GetCurrArmMoveForwardOffset() const { return this->currArmMoveForwardOffset; }
+    float GetCurrArmZOffset() const { return CORE_BULB_Z_DIST + this->currArmMoveForwardOffset; }
 
     // Inherited from Boss
     bool ProjectilePassesThrough(const Projectile* projectile) const;
@@ -141,8 +186,9 @@ private:
     // Shield Indices
     size_t coreShieldIdx, topShieldIdx, bottomShieldIdx, leftShieldIdx, rightShieldIdx;
 
-    float currCoreRotInDegs;
     float currIceRotInDegs;
+    float currArmMoveForwardOffset;
+    
 
     // Valid movement positions for the boss in each half of the level and for when the level is eventually opened up
     // NOTE: Treat these as constant!!
@@ -268,6 +314,18 @@ private:
             Point2D(halfPortalWidth, halfPortalHeight + 11*LevelPiece::PIECE_HEIGHT),
             Point2D(halfPortalWidth + (3*LevelPiece::PIECE_WIDTH - 2*halfPortalWidth), halfPortalHeight + 11*LevelPiece::PIECE_HEIGHT + 6*LevelPiece::PIECE_HEIGHT));
     }
+
+    static Vector2D GetCoreTopBulbLocalDir()    { return Vector2D(0,  1); }
+    static Vector2D GetCoreBottomBulbLocalDir() { return Vector2D(0, -1); }
+    static Vector2D GetCoreLeftBulbLocalDir()   { return Vector2D(-1, 0); }
+    static Vector2D GetCoreRightBulbLocalDir()  { return Vector2D(1,  0); }
+
+    static Vector2D GetCoreTopBulbLocalVec()    { return FuturismBoss::CORE_BULB_OFFSET_FROM_ORIGIN * GetCoreTopBulbLocalDir(); }
+    static Vector2D GetCoreBottomBulbLocalVec() { return FuturismBoss::CORE_BULB_OFFSET_FROM_ORIGIN * GetCoreBottomBulbLocalDir(); }
+    static Vector2D GetCoreLeftBulbLocalVec()   { return FuturismBoss::CORE_BULB_OFFSET_FROM_ORIGIN * GetCoreLeftBulbLocalDir(); }
+    static Vector2D GetCoreRightBulbLocalVec()  { return FuturismBoss::CORE_BULB_OFFSET_FROM_ORIGIN * GetCoreRightBulbLocalDir(); }
+
+    static void GetBarrierPiecesTopToBottom(const GameLevel& level, std::vector<LevelPiece*>& pieces);
 
     // DEBUGGING...
 #ifdef _DEBUG

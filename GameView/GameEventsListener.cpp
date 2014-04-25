@@ -1324,6 +1324,10 @@ void GameEventsListener::BallSafetyNetDestroyedEvent(const Projectile& projectil
 	debug_output("EVENT: Ball safety net destroyed by projectile");
 }
 
+void GameEventsListener::ClearActiveBossEffects() {
+    this->display->GetAssets()->GetCurrentLevelMesh()->ClearActiveBossEffects();
+    this->display->GetModel()->ClearSpecificBeams(Beam::BossBeam);
+}
 
 // Private helper for when the safety net is destroyed
 void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt, bool bottomSafetyNet) {
@@ -2239,9 +2243,8 @@ void GameEventsListener::BossHurtEvent(const BossWeakpoint* hurtPart) {
 
     this->display->GetAssets()->GetESPAssets()->AddBossHurtEffect(hurtPart->GetTranslationPt2D(), 
         partAABB.GetWidth(), partAABB.GetHeight());
-    this->display->GetAssets()->GetCurrentLevelMesh()->BossHurt();
 
-    this->display->GetModel()->ClearSpecificBeams(Beam::BossBeam);
+    this->ClearActiveBossEffects();
 
     // Play sound...
     GameSound* sound = this->display->GetSound();
@@ -2265,6 +2268,11 @@ void GameEventsListener::BossAngryEvent(const Boss* boss, const Point2D& angryPa
     sound->PlaySound(GameSound::BossAngryEvent, false, false);
 
     debug_output("EVENT: Boss is angry.");
+}
+
+void GameEventsListener::ClearActiveBossEffectsEvent() {
+    this->ClearActiveBossEffects();
+    debug_output("EVENT: Clearing active boss effects.");
 }
 
 void GameEventsListener::BossEffectEvent(const BossEffectEventInfo& effectEvent) {

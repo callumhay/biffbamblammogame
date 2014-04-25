@@ -1081,7 +1081,8 @@ public:
     }
 
     // Effect Events *********************************************************************
-    
+    virtual void ClearActiveBossEffectsEvent() {}
+
     virtual void GeneralEffectEvent(const GeneralEffectEventInfo& effectEvent) {
         UNUSED_PARAMETER(effectEvent);
     }

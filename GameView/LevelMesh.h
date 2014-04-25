@@ -125,7 +125,7 @@ public:
     BossMesh* GetBossMesh() const { return this->bossMesh; }
     double ActivateBossIntro();
     double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model, const Camera& camera);
-    void BossHurt();
+    void ClearActiveBossEffects();
 
 private:
 	const GameLevel* currLevel;

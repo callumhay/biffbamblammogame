@@ -34,18 +34,42 @@
 
 class FuturismBossStage3AIState : public FuturismBossAIState {
 public:
-    FuturismBossStage3AIState(FuturismBoss* boss);
+    FuturismBossStage3AIState(FuturismBoss* boss, FuturismBossAIState::ArenaState arena);
     ~FuturismBossStage3AIState();
 
-
 private:
+    static const int TIMES_PER_ONE_NON_AVOIDANCE = 3;
+
+    static const double FULL_STAR_BEAM_ROTATION_TIME_IN_SECS;
+    static const double MIN_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS;
+    static const double MAX_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS;
+
+    static const double HALTING_AVOIDANCE_TELEPORT_WAIT_TIME_IN_SECS;
+
+    static const float DEFAULT_MOVE_ROTATION_SPD;
+
+    float currRotationSpd;
+    float currRotationAccel;
+
     bool hasDestroyedBarrier;
     SoundID transitionSoundID;
+    int idxOfNonAvoidance, currNonAvoidanceIdx;
 
+    double timeSinceLastAttractAttack;
+    double avoidanceHaltingTime;
+
+    // BE VERY CAREFUL WITH THIS, NOT OWNED OR CONTROLLED BY THIS, SHOULD ONLY BE USED TO QUERY NOT DIRECT ACCESS!!!
+    // Maps boss laser beams to their original beam rays
+    std::map<BossLaserBeam*, Collision::Ray2D> currMultiBeam; 
+   
     // Inherited from FuturismBossAIState -----------------------------------------------------
     void GoToNextState(const GameModel& gameModel);
+    void GoToRandomBasicMoveState();
+    void GoToRandomBasicAttackState();
+
     FuturismBossAIState* BuildNextAIState() const { assert(false); return NULL; } // This is the last state!
     bool IsCoreShieldVulnerable() const { return false; }
+    bool AreBulbsVulnerable() const { return true; }
     float GetMaxSpeed() const { return 1.25*FuturismBossAIState::DEFAULT_SPEED; }
     void GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const;
     double GetAfterAttackWaitTime(FuturismBossAIState::AIState attackState) const;
@@ -59,17 +83,26 @@ private:
     double GetBeamArcShootTime() const { return this->GetTwitchBeamShootTime(); }
     double GetBeamArcHoldTime() const  { return 1.1; }
     double GetBeamArcingTime() const { return 3.0; }
-    double GetTimeBetweenBurstLineShots() const { return 0.16 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.04; }
-    double GetTimeBetweenBurstWaveShots() const { return 0.33 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.15; }
-    int GetNumBurstLineShots() const { return 4 + (Randomizer::GetInstance()->RandomUnsignedInt() % 4); }
-    int GetNumWaveBurstShots() const { return 3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 2); }
+    double GetTimeBetweenBurstLineShots() const { return 0.2 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.08; }
+    double GetTimeBetweenBurstWaveShots() const { return 0.7 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.40; }
+    int GetNumBurstLineShots() const { return 0; } // Doesn't matter, depends on movement time in this state
+    int GetNumWaveBurstShots() const { return 0; } // Doesn't matter, depends on movement time in this state
     int GetNumShotsPerWaveBurst() const { return 5; }
 
     bool AllShieldsDestroyedToEndThisState() const { assert(false); return false; } // There are no shields left at any point during this state
-    bool ArenaBarrierExists() const { return this->hasDestroyedBarrier; }
+    bool ArenaBarrierExists() const { return !this->hasDestroyedBarrier; }
 
     void GetStrategyPortalCandidatePieces(const GameLevel& level, 
         Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates);
+
+    void UpdateState(double dT, GameModel* gameModel);
+    void InitBasicBurstLineFireAIState();
+    void ExecuteBasicBurstLineFireAIState(double dT, GameModel* gameModel);
+    void InitBasicBurstWaveFireAIState();
+    void ExecuteBasicBurstWaveFireAIState(double dT, GameModel* gameModel);
+    void InitLaserBeamStarAIState();
+    void ExecuteLaserBeamStarAIState(double dT, GameModel* gameModel);
+
     // -----------------------------------------------------------------------------------------
 
     // Inherited from BossAIState
@@ -78,6 +111,16 @@ private:
     void RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket);
     float GetTotalLifePercent() const;
     float GetAccelerationMagnitude() const { return 1.2*FuturismBossAIState::DEFAULT_ACCELERATION; }
+
+    // Helper Methods
+    bool BallAboutToHitBulbWeakpoints(const GameModel& gameModel) const;
+    //bool BallAboutToHitBulbWeakpoint(const BossBodyPart& bulb, const GameBall& ball, const Vector2D& relativeBallDir, 
+    //    const Point2D& ballSideAPt, const Point2D& ballSideBPt, float ballMoveMag) const;
+    void BuildAndAddBossBulbBeam(GameModel& gameModel, const BossBodyPart& bulb, const Collision::Ray2D& initBeamRay,
+        const Collision::Ray2D& noRotBeamRay, double beamLifeTime);
+    void DestroyBulb(size_t bulbIdx, const Vector2D& hitDir);
+
+    void DoBasicRotation(double dT);
 
     DISALLOW_COPY_AND_ASSIGN(FuturismBossStage3AIState);
 };

@@ -33,18 +33,22 @@
 
 const double FuturismBossStage2AIState::MIN_TIME_UNTIL_FIRST_PORTAL = 10.0;
 
-FuturismBossStage2AIState::FuturismBossStage2AIState(FuturismBoss* boss) : 
-FuturismBossAIState(boss), numConsecutiveRocketStratPortals(0),
-hasDoneInitialBallTeleport(false) {
+FuturismBossStage2AIState::FuturismBossStage2AIState(FuturismBoss* boss, 
+                                                     FuturismBossAIState::ArenaState arena, 
+                                                     float currCoreRotInDegs) : 
+FuturismBossAIState(boss), hasDoneInitialBallTeleport(false) {
+
+    this->arenaState = arena;
+    this->currCoreRotInDegs = currCoreRotInDegs;
 
     // Regenerate the boss bounds
     this->boss->RegenerateBoundsForCoreWithShield();
 
     // We don't want the boss to shoot portals right away...
-    this->timeSinceLastStratPortal = FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS - MIN_TIME_UNTIL_FIRST_PORTAL;
+    this->timeSinceLastStratPortal = FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS - MIN_TIME_UNTIL_FIRST_PORTAL;
 
     // The boss starts this state by attempting to 'grab' the ball and go to the other side of the level
-    this->SetState(BallAttractAIState);
+    this->SetState(MoveToCenterAIState);
 }
 
 FuturismBossStage2AIState::~FuturismBossStage2AIState() {
@@ -85,27 +89,11 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
     // If it's been too long since the last strategy portal was shot then we should shoot one
     // or else the battle could take forever (the player NEEDS the portal to get the item required
     // to move on to the next high-level AI state!)
-    if (this->timeSinceLastStratPortal > 2.3*FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS &&
+    if (this->timeSinceLastStratPortal > 2.3*FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
         FuturismBoss::IsInRightSubArena(bossPos)) {
         this->SetState(StationaryFireStrategyPortalAIState);
         return;
     }
-
-/*
-    // FOR TESTING STATES
-    static int TEMP = 0;
-    switch (TEMP % 6) {
-        case 0: this->SetState(BasicBurstWaveFireAIState); break;
-        case 1: this->SetState(BasicBurstLineFireAIState); break;
-        case 2: this->SetState(LaserBeamArcAIState); break;
-        case 3: this->SetState(StationaryFireStrategyPortalAIState); break;
-        case 4: this->SetState(LaserBeamTwitchAIState); break; 
-        case 5: this->SetState(TeleportAIState); break;
-        default: break;
-    }
-    TEMP++;
-    return;
-*/
 
     // If the boss and ball are in the left sub-arena then the boss will tend to want to move play to
     // the right sub-arena (since the entire first stage is played in the left sub-arena, and the ice blast
@@ -122,8 +110,8 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
 
     // Last special case: If the boss hasn't shot a portal in a while then there's a chance of shooting
     // an attack portal
-    if (this->timeSinceLastAttackPortal > 1.25*FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS &&
-        this->timeSinceLastStratPortal > FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS &&
+    if (this->timeSinceLastAttackPortal > 1.25*FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
+        this->timeSinceLastStratPortal > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
         Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
 
         this->SetState(StationaryFireWeaponPortalAIState);
@@ -244,7 +232,7 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
 }
 
 FuturismBossAIState* FuturismBossStage2AIState::BuildNextAIState() const {
-    return new FuturismBossStage3AIState(this->boss);
+    return new FuturismBossStage3AIState(this->boss, this->arenaState);
 }
 
 void FuturismBossStage2AIState::GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const {
@@ -291,26 +279,9 @@ bool FuturismBossStage2AIState::AllShieldsDestroyedToEndThisState() const {
 void FuturismBossStage2AIState::GetStrategyPortalCandidatePieces(const GameLevel& level, Collision::AABB2D& pieceBounds, 
                                                                  std::set<LevelPiece*>& candidates) {
 
-    // Choose between the ice blast and rocket, favouring the rocket...
-    bool iceBlastPortal = false;
-    if (this->numConsecutiveRocketStratPortals > 1) {
-        iceBlastPortal = true;
-    }
-
-    if (iceBlastPortal) {
-        pieceBounds = FuturismBoss::GetIceStrategyPortalSearchAABB(
-            FuturismBoss::PORTAL_PROJECTILE_HALF_WIDTH, FuturismBoss::PORTAL_PROJECTILE_HALF_HEIGHT);
-        FuturismBoss::GetIceStrategyPortalSearchPieces(level, candidates);
-
-        this->numConsecutiveRocketStratPortals = 0;
-    }
-    else {
-        pieceBounds = FuturismBoss::GetRocketStrategyPortalSearchAABB(
-            level, FuturismBoss::PORTAL_PROJECTILE_HALF_WIDTH, FuturismBoss::PORTAL_PROJECTILE_HALF_HEIGHT);
-        FuturismBoss::GetRocketStrategyPortalSearchPieces(level, candidates);
-
-        this->numConsecutiveRocketStratPortals++;
-    }
+    pieceBounds = FuturismBoss::GetIceStrategyPortalSearchAABB(
+        FuturismBoss::PORTAL_PROJECTILE_HALF_WIDTH, FuturismBoss::PORTAL_PROJECTILE_HALF_HEIGHT);
+    FuturismBoss::GetIceStrategyPortalSearchPieces(level, candidates);
 }
 
 void FuturismBossStage2AIState::CollisionOccurred(GameModel* gameModel, GameBall& ball,
@@ -324,7 +295,8 @@ void FuturismBossStage2AIState::CollisionOccurred(GameModel* gameModel, GameBall
         return;
     }
 
-    if (collisionPart == this->boss->GetCoreShield()) {
+    if (collisionPart == this->boss->GetCoreShield() || 
+        (this->currState == FrozenAIState && collisionPart == this->boss->GetCoreBody())) {
 
         // We can only do damage to the boss with the ball if the shield is already weakened or if the
         // boss is frozen in ice when the ball hits it...

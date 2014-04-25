@@ -561,6 +561,41 @@ void BossMesh::AddTeleportEffect(const BossTeleportEffectInfo& info) {
             break;
         }
 
+        case BossTeleportEffectInfo::FastTeleportOut: {
+
+            ESPMultiAlphaEffector circleAlpha;
+            std::vector<std::pair<float, double> > alphaAndPercentages;
+            alphaAndPercentages.reserve(4);
+            alphaAndPercentages.push_back(std::make_pair(0.0f, 0.0));
+            alphaAndPercentages.push_back(std::make_pair(0.75f, 0.5));
+            alphaAndPercentages.push_back(std::make_pair(0.75f, 0.9));
+            alphaAndPercentages.push_back(std::make_pair(0.0f, 1.0));
+            circleAlpha.SetAlphasWithPercentage(alphaAndPercentages);
+
+            Point3D emitPos(info.GetPosition(),0);
+
+            ESPPointEmitter* teleportCircle = new ESPPointEmitter();
+            teleportCircle->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+            teleportCircle->SetNumParticleLives(1);
+            teleportCircle->SetParticleLife(ESPInterval(info.GetTimeInSeconds()));
+            teleportCircle->SetParticleSize(ESPInterval(1));
+            teleportCircle->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            teleportCircle->SetParticleAlignment(ESP::ScreenAligned);
+            teleportCircle->SetEmitPosition(emitPos);
+            teleportCircle->SetParticleColour(Colour(1,1,1));
+            teleportCircle->AddCopiedEffector(ESPParticleScaleEffector(0.01, 2*info.GetSize()));
+            teleportCircle->AddCopiedEffector(circleAlpha);
+            teleportCircle->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
+
+            BasicEmitterUpdateStrategy* strategy = new BasicEmitterUpdateStrategy();
+            strategy->AddEmitter(teleportCircle);
+            
+            this->bgEffects.push_back(strategy);
+
+            break;
+        }
+
         case BossTeleportEffectInfo::TeleportingIn: {
             /*
             static const int NUM_PARTICLES = 20;
@@ -757,9 +792,8 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             strategy->AddEmitter(otherBits);
             strategy->AddEmitter(snowflakeBitsEffect);
             strategy->AddEmitter(snowflakeBackingEffect);
-            strategy->AddEmitter(iceSmashOnoEffect);
-
             this->fgEffects.push_back(strategy);
+            this->laterPassEffects.push_back(new BasicEmitterUpdateStrategy(iceSmashOnoEffect));
 
             break;
         }
@@ -913,6 +947,54 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             concentricCircleEffect->SetParticles(NUM_CIRCLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(
                 GameViewConstants::GetInstance()->TEXTURE_HOOP));
 
+            // The flare emitter is at the center of the attractor beam...
+            // Set up the pulse effector for the flare emitter
+            ScaleEffect flarePulseSettings;
+            flarePulseSettings.pulseGrowthScale = 1.25f;
+            flarePulseSettings.pulseRate        = 2.5f;
+            ESPParticleScaleEffector flarePulse(flarePulseSettings);
+
+            ESPPointEmitter* emitFlare = new ESPPointEmitter();
+            emitFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+            emitFlare->SetInitialSpd(ESPInterval(0));
+            emitFlare->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+            emitFlare->SetEmitAngleInDegrees(0);
+            emitFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            emitFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            emitFlare->SetParticleSize(ESPInterval(2.5*info.GetSize1D()));
+            emitFlare->SetParticleRotation(ESPInterval(0, 359.99f));
+            emitFlare->SetParticleColour(Colour(1,1,1));
+            emitFlare->AddCopiedEffector(flarePulse);
+            emitFlare->AddCopiedEffector(fadeEffector);
+            emitFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE));
+
+            ESPPointEmitter* emitLensFlare = new ESPPointEmitter();
+            emitLensFlare->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+            emitLensFlare->SetInitialSpd(ESPInterval(0));
+            emitLensFlare->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+            emitLensFlare->SetEmitAngleInDegrees(0);
+            emitLensFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            emitLensFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            emitLensFlare->SetParticleSize(ESPInterval(3.5*info.GetSize1D()));
+            emitLensFlare->SetParticleColour(Colour(1,1,1));
+            emitLensFlare->AddCopiedEffector(fadeEffector);
+            emitLensFlare->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
+
+            // Ball aura
+            ESPPointEmitter* auraEmitter = new ESPPointEmitter();
+            auraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+            auraEmitter->SetInitialSpd(ESPInterval(0));
+            auraEmitter->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+            auraEmitter->SetParticleSize(ESPInterval(3.0f*GameBall::DEFAULT_BALL_RADIUS));
+            auraEmitter->SetEmitAngleInDegrees(0);
+            auraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            auraEmitter->SetParticleAlignment(ESP::ScreenAligned);
+            auraEmitter->SetEmitPosition(Point3D(0,0,0));
+            auraEmitter->SetParticleColour(Colour(1,1,1));
+            auraEmitter->AddCopiedEffector(ESPParticleScaleEffector(ScaleEffect(flarePulseSettings.pulseRate, 2.0)));
+            auraEmitter->AddCopiedEffector(fadeEffector);
+            auraEmitter->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
+
             BossBallBeamUpdateStrategy* strategyFG = new BossBallBeamUpdateStrategy(info.GetBodyPart());
             strategyFG->AddPointEmitter(chargeParticles1);
             strategyFG->AddPointEmitter(sparkleCone);
@@ -921,10 +1003,13 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
 
             BossBallBeamUpdateStrategy* strategyBG = new BossBallBeamUpdateStrategy(info.GetBodyPart());
             strategyBG->AddPointEmitter(concentricCircleEffect);
+            strategyBG->AddBallEmitter(auraEmitter);
             this->bgEffects.push_back(strategyBG);
 
             BossBallBeamUpdateStrategy* strategyLaterPass = new BossBallBeamUpdateStrategy(info.GetBodyPart());
             strategyLaterPass->AddBeamEmitter(bossToBallBigBeam);
+            strategyLaterPass->AddPointEmitter(emitFlare);
+            strategyLaterPass->AddPointEmitter(emitLensFlare);
             this->laterPassEffects.push_back(strategyLaterPass);
 
             break;

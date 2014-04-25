@@ -714,6 +714,12 @@ FuturismBossTwitchBeamWarningEvent {
 FuturismBossArcBeamWarningEvent {
 	file = resources/FuturismBossArcBeamWarningEvent.ogg
 }
+FuturismBossAttractorBeamOpenAndLoopEvent {
+	file = resources/FuturismBossAttractorBeamOpenAndLoopEvent.ogg
+}
+FuturismBossChargingEvent {
+	file = resources/FuturismBossChargingEvent.ogg
+}
 
 
 

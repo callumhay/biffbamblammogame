@@ -42,7 +42,7 @@ FuturismBossStage1AIState::FuturismBossStage1AIState(FuturismBoss* boss) : Futur
     // time since last portal...
     // To calculate this we need to offset by the termination time of the portal since
     // the boss won't shoot if a portal still exists
-    this->timeSinceLastStratPortal = FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS - MIN_TIME_UNTIL_FIRST_PORTAL;
+    this->timeSinceLastStratPortal = FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS - MIN_TIME_UNTIL_FIRST_PORTAL;
 
     // The boss spends this entire state in the initial, left sub arena of the level
     this->arenaState = FuturismBossAIState::InLeftArena;
@@ -107,8 +107,22 @@ void FuturismBossStage1AIState::GetStrategyPortalCandidatePieces(const GameLevel
 
 void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
 
-    /*
     // FOR TESTING STATES
+    /*
+    {
+        static int TEMP = 0;
+        if (TEMP % 2 == 0) {
+            this->arenaState = InRightArena;
+            this->SetState(MoveToCenterAIState);
+        }
+        else {
+            
+            this->SetState(DestroyLevelBarrierAIState);
+        }
+        TEMP++;
+        return;
+    }
+        
     {
         // Check to see if the boss is on the same side of the arena as the ball, 
         // if not, teleport to that side immediately
@@ -144,7 +158,7 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
     // If it's been too long since the last strategy portal was shot then we should shoot one
     // or else the battle could take forever (the player NEEDS the portal to get the item required
     // to move on to the next high-level AI state!)
-    if (this->timeSinceLastStratPortal > 2.4*FuturismBossAIState::STRATEGY_PORTAL_TERMINATION_TIME_IN_SECS) {
+    if (this->timeSinceLastStratPortal > 2.4*FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS) {
         this->SetState(StationaryFireStrategyPortalAIState);
         return;
     }
@@ -291,7 +305,7 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
 }
 
 FuturismBossAIState* FuturismBossStage1AIState::BuildNextAIState() const {
-    return new FuturismBossStage2AIState(this->boss);
+    return new FuturismBossStage2AIState(this->boss, this->arenaState, this->currCoreRotInDegs);
 }
 
 float FuturismBossStage1AIState::GetTotalLifePercent() const {

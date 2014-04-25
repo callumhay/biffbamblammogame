@@ -90,8 +90,9 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
         assert(success);
 	}
 
-    // Only collateral blocks and tesla lightning can destroy a solid block
-    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+    // Only collateral blocks, Tesla lightning and disintegration can destroy a solid block
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction && 
+        method != LevelPiece::DisintegrationDestruction) {
         return this;
     }
 
