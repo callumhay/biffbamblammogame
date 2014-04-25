@@ -32,8 +32,10 @@
 
 const int BossLaserBeam::BASE_DAMAGE_PER_SECOND = 0;    // Damage per second that the beam does to blocks and stuff																															// NOTE: a typical block has about 100 life
 
-BossLaserBeam::BossLaserBeam(const GameModel* gameModel, const Collision::Ray2D& initialBeamRay, float initialBeamRadius, double expireTimeInSecs) : 
+BossLaserBeam::BossLaserBeam(const GameModel* gameModel, const Collision::Ray2D& initialBeamRay, 
+                             float initialBeamRadius, double expireTimeInSecs) : 
 Beam(BossLaserBeam::BASE_DAMAGE_PER_SECOND, expireTimeInSecs), 
+colour(GameModelConstants::GetInstance()->BOSS_LASER_BEAM_COLOUR),
 initialBeamRay(initialBeamRay), initialBeamRadius(initialBeamRadius) {
 	this->UpdateCollisions(gameModel);
 }

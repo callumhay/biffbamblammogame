@@ -1887,6 +1887,27 @@ void GameModel::ClearSpecificBeams(const Beam::BeamType& beamType) {
     }
 }
 
+void GameModel::ClearSpecificProjectiles(const Projectile::ProjectileType& projectileType) {
+    ProjectileMapIter findIter = this->projectiles.find(projectileType);
+    if (findIter == this->projectiles.end()) {
+        return;
+    }
+
+    ProjectileList& projectileList = findIter->second;
+    for (ProjectileListIter iter = projectileList.begin(); iter != projectileList.end(); ++iter) {
+        
+        Projectile* projectile = *iter;
+        projectile->Teardown(*this);
+
+        // EVENT: Projectile removed from the game
+        GameEventManager::Instance()->ActionProjectileRemoved(*projectile);
+
+        delete projectile;
+        projectile = NULL;
+    }
+    projectileList.clear();
+}
+
 bool GameModel::IsTimerTypeActive(const GameItem::ItemType& type) const {
     for (std::list<GameItemTimer*>::const_iterator iter = this->activeTimers.begin();
         iter != this->activeTimers.end(); ++iter) {

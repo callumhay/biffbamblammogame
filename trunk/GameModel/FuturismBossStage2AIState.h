@@ -38,22 +38,22 @@
 // cause its shielding to be destroyed and the end of this state).
 // During this state the boss will become more aggressive with its attacks and movement,
 // it will start to use portals as weapons (sending the ball back and forth across the
-// playing field). Strategy portals will be opened to both the ice blast and the rockets.
+// playing field). Strategy portals will be opened to the ice blast.
 class FuturismBossStage2AIState : public FuturismBossAIState {
 public:
-    FuturismBossStage2AIState(FuturismBoss* boss);
+    FuturismBossStage2AIState(FuturismBoss* boss, FuturismBossAIState::ArenaState arena, float currCoreRotInDegs);
     ~FuturismBossStage2AIState();
 
 private:
     static const double MIN_TIME_UNTIL_FIRST_PORTAL;
 
-    int numConsecutiveRocketStratPortals;
     bool hasDoneInitialBallTeleport;
 
     // Inherited from FuturismBossAIState -----------------------------------------------------
     void GoToNextState(const GameModel& gameModel);
     FuturismBossAIState* BuildNextAIState() const;
     bool IsCoreShieldVulnerable() const { return true; }
+    bool AreBulbsVulnerable() const { return false; }
     float GetMaxSpeed() const { return 1.15*FuturismBossAIState::DEFAULT_SPEED; }
     void GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const;
     double GetAfterAttackWaitTime(FuturismBossAIState::AIState attackState) const;

@@ -599,19 +599,18 @@ bool BoundingLines::IsInside(const Point2D& pt) const {
 	return true;
 }
 
-/**
- * Check to see if the given circle collides with any of the bounding lines of this.
- */
-bool BoundingLines::CollisionCheck(const Collision::Circle2D& c) const {
-	const float sqrRadius = c.Radius() * c.Radius();
-	for (size_t i = 0; i < this->lines.size(); i++) {
-		Point2D closestPt = Collision::ClosestPoint(c.Center(), this->lines[i]);
-		if (Point2D::SqDistance(closestPt, c.Center()) <= sqrRadius) {
-			return true;
-		}
-	}
 
-	return false;
+bool BoundingLines::CollisionCheck(const Collision::Circle2D& c, float& sqrDist) const {
+    const float sqrRadius = c.Radius() * c.Radius();
+    for (size_t i = 0; i < this->lines.size(); i++) {
+        Point2D closestPt = Collision::ClosestPoint(c.Center(), this->lines[i]);
+        sqrDist = Point2D::SqDistance(closestPt, c.Center());
+        if (sqrDist <= sqrRadius) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool BoundingLines::CollisionCheck(const Collision::AABB2D& aabb) const {
@@ -623,8 +622,6 @@ bool BoundingLines::CollisionCheck(const Collision::AABB2D& aabb) const {
 
 	return false;
 }
-
-
 
 bool BoundingLines::CollisionCheck(const BoundingLines& other, double dT, const Vector2D& velocity) const {
     static const float SAMPLE_DISTANCE = LevelPiece::PIECE_HEIGHT / 2.0f;

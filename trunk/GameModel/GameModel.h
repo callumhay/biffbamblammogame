@@ -304,6 +304,7 @@ public:
 	void WipePieceFromAuxLists(LevelPiece* piece);
 
     void ClearSpecificBeams(const Beam::BeamType& beamType);
+    void ClearSpecificProjectiles(const Projectile::ProjectileType& projectileType);
 
 	std::list<GameItem*>& GetLiveItems() {
 		return this->currLiveItems;

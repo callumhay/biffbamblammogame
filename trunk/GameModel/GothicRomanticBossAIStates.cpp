@@ -1506,7 +1506,7 @@ void IceBallAI::ExecuteDestroyConfinesState(double dT, GameModel* gameModel) {
         GameLevel* level = gameModel->GetCurrentLevel();
         
         // EVENT: Big flash for the destruction...
-        GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.75, 1.0f));
+        GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.66, 1.0f));
 
         // Top row of confine blocks
         for (int i = 0; i < 13; i++) {

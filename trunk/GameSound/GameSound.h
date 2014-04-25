@@ -245,6 +245,8 @@ public:
         FuturismBossTeleportationEvent,
         FuturismBossTwitchBeamWarningEvent,
         FuturismBossArcBeamWarningEvent,
+        FuturismBossAttractorBeamOpenAndLoopEvent,
+        FuturismBossChargingEvent,
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,

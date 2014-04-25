@@ -49,7 +49,8 @@ leftRightShieldMesh(NULL), topBottomShieldMesh(NULL),
 damagedLeftRightShieldMesh(NULL), damagedTopBottomShieldMesh(NULL), 
 damagedCoreShieldMesh(NULL), iceEncasingMesh(NULL),
 topShieldExplodingEmitter(NULL), bottomShieldExplodingEmitter(NULL),
-leftShieldExplodingEmitter(NULL), rightShieldExplodingEmitter(NULL)
+leftShieldExplodingEmitter(NULL), rightShieldExplodingEmitter(NULL),
+coreExplodingEmitter(NULL)
 {
     assert(boss != NULL);
 
@@ -100,10 +101,28 @@ leftShieldExplodingEmitter(NULL), rightShieldExplodingEmitter(NULL)
         FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_WIDTH, FuturismBoss::LEFT_RIGHT_SHIELD_EXPLODE_HEIGHT, 2.0f);
     this->coreShieldExplodingEmitter   = this->BuildExplodingEmitter(0.9f, this->boss->GetCoreShield(),
         FuturismBoss::CORE_SHIELD_SIZE, FuturismBoss::CORE_SHIELD_SIZE, 2.0f);
+    this->coreExplodingEmitter = this->BuildExplodingEmitter(0.9f, this->boss->GetCoreBody(),
+        FuturismBoss::CORE_BOSS_SIZE, FuturismBoss::CORE_BOSS_SIZE, 1.45f);
 
     BossMesh::BuildShieldingColourAnimation(this->shieldColourAnim);
+    {
+        std::vector<double> timeValues;
+        timeValues.reserve(4);
+        timeValues.push_back(0.0);
+        timeValues.push_back(0.65);
+        timeValues.push_back(0.67);
+        timeValues.push_back(1.32);
 
+        std::vector<Colour> colourValues;
+        colourValues.reserve(4);
+        colourValues.push_back(Colour(1.0f, 0.0f, 0.0f));
+        colourValues.push_back(Colour(1.0f, 1.0f, 1.0f));
+        colourValues.push_back(Colour(1.0f, 1.0f, 1.0f));
+        colourValues.push_back(Colour(1.0f, 0.0f, 0.0f));
 
+        this->bulbFlashingAnim.SetLerp(timeValues, colourValues);
+        this->bulbFlashingAnim.SetRepeat(true);
+    }
     {
         std::vector<Texture2D*> cloudTextures;
         GameESPAssets::GetCloudTextures(cloudTextures);
@@ -187,6 +206,8 @@ FuturismBossMesh::~FuturismBossMesh() {
     this->rightShieldExplodingEmitter = NULL;
     delete this->coreShieldExplodingEmitter;
     this->coreShieldExplodingEmitter = NULL;
+    delete this->coreExplodingEmitter;
+    this->coreExplodingEmitter = NULL;
 }
 
 double FuturismBossMesh::ActivateIntroAnimation() {
@@ -223,37 +244,25 @@ void FuturismBossMesh::DrawBody(double dT, const Camera& camera, const BasicPoin
         glPushMatrix();
         glMultMatrixf(core->GetWorldTransform().begin());
         glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
+
         this->coreCenterMesh->Draw(camera, keyLight, fillLight, ballLight);
+        
+        glTranslatef(0,0,this->boss->GetCurrArmMoveForwardOffset());
         this->coreArmsMesh->Draw(camera, keyLight, fillLight, ballLight);
+        
         glPopMatrix();
     }
 
-#define DRAW_POSSIBLE_WEAKPOINT_BODY_PART(bodyPart, bodyPartMesh) \
-    assert(bodyPart != NULL); \
-    currColour = &bodyPart->GetColour(); \
-    if (currColour->A() > 0.0f) { \
-        glPushMatrix(); \
-        glMultMatrixf(bodyPart->GetWorldTransform().begin()); \
-        glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A()); \
-        if (bodyPart->GetType() == AbstractBossBodyPart::WeakpointBodyPart) { \
-            bodyPartMesh->Draw(camera, this->weakpointMaterial); \
-        } \
-        else { \
-            bodyPartMesh->Draw(camera, keyLight, fillLight, ballLight); \
-        } \
-        glPopMatrix(); \
-    }
-
+    // Draw the bulbs (weak points in the final stage of the boss)
+    this->bulbFlashingAnim.Tick(dT);
     const BossBodyPart* coreTopBulb = this->boss->GetCoreTopBulb();
     const BossBodyPart* coreBottomBulb = this->boss->GetCoreBottomBulb();
     const BossBodyPart* coreLeftBulb = this->boss->GetCoreLeftBulb();
     const BossBodyPart* coreRightBulb = this->boss->GetCoreRightBulb();
-    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(coreTopBulb, this->coreBulbMesh);
-    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(coreBottomBulb, this->coreBulbMesh);
-    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(coreLeftBulb, this->coreBulbMesh);
-    DRAW_POSSIBLE_WEAKPOINT_BODY_PART(coreRightBulb, this->coreBulbMesh);
-
-#undef DRAW_POSSIBLE_WEAKPOINT_BODY_PART
+    this->DrawBulbBodyPart(camera, keyLight, fillLight, ballLight, coreTopBulb, this->coreBulbMesh);
+    this->DrawBulbBodyPart(camera, keyLight, fillLight, ballLight, coreBottomBulb, this->coreBulbMesh);
+    this->DrawBulbBodyPart(camera, keyLight, fillLight, ballLight, coreLeftBulb, this->coreBulbMesh);
+    this->DrawBulbBodyPart(camera, keyLight, fillLight, ballLight, coreRightBulb, this->coreBulbMesh);
 
     // Draw the shield parts of the body
     this->shieldColourAnim.Tick(dT);
@@ -327,6 +336,7 @@ void FuturismBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, cons
     // Draw the glowing eye...
     const BossBodyPart* core = this->boss->GetCoreBody();
     if (core->GetAlpha() > 0) {
+        
         // Draw the core's eye glowing effect
         glPushMatrix();
         glMultMatrixf(core->GetWorldTransform().begin());
@@ -334,7 +344,22 @@ void FuturismBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, cons
         this->eyePulseGlow.Tick(dT);
         this->eyePulseGlow.Draw(camera);
         glPopMatrix();
+
+        // Draw spark/smoke/etc. effects for any of the dead bulbs
+        // TODO
+
+        // If the core is destroyed, draw the exploding emitter...
+        if (this->boss->AreAllBulbsDestroyed()) {
+            Point2D corePos = core->GetTranslationPt2D();
+            glPushMatrix();
+            glTranslatef(corePos[0], corePos[1], 0.0f);
+            //this->coreExplodingEmitter->SetParticleAlpha(core->GetAlpha());
+            this->coreExplodingEmitter->Tick(dT);
+            this->coreExplodingEmitter->Draw(camera);
+            glPopMatrix();
+        }
     }
+
 
     const BossBodyPart* topShield    = this->boss->GetTopShield();
     const BossBodyPart* bottomShield = this->boss->GetBottomShield();
@@ -405,6 +430,38 @@ void FuturismBossMesh::DrawDamagableBodyPart(const Camera& camera, const BasicPo
     }
 }
 
+void FuturismBossMesh::DrawBulbBodyPart(const Camera& camera, const BasicPointLight& keyLight,
+                                        const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                                        const BossBodyPart* bodyPart, Mesh* mesh) const {
+
+    const ColourRGBA& currColour = bodyPart->GetColour();
+    Colour finalColour = currColour.GetColour();
+    if (currColour.A() > 0.0f) {
+        if (this->boss->AreBulbsVulnerable()) {
+            if (bodyPart->GetIsDestroyed()) {
+                finalColour = 0.25f*currColour.GetColour();
+            }
+            else {
+                finalColour = this->bulbFlashingAnim.GetInterpolantValue();
+            }
+        }
+
+        glPushMatrix();
+        glMultMatrixf(bodyPart->GetWorldTransform().begin());
+        glTranslatef(0, 0, this->boss->GetCurrArmMoveForwardOffset());
+
+        glColor4f(finalColour.R(), finalColour.G(), finalColour.B(), currColour.A());
+        if (this->boss->AreBulbsVulnerable() && !bodyPart->GetIsDestroyed()) {
+            mesh->Draw(camera, this->weakpointMaterial);
+        }
+        else {
+            mesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
+
+        glPopMatrix();
+    }
+}
+
 void FuturismBossMesh::DrawShieldPostEffects(double dT, const Camera& camera, float xOffset, float yOffset,
                                              const BossBodyPart* shield, ESPPointEmitter* explodingEmitter) {
 
@@ -412,6 +469,7 @@ void FuturismBossMesh::DrawShieldPostEffects(double dT, const Camera& camera, fl
         glPushMatrix();
         glMultMatrixf(shield->GetWorldTransform().begin());
         glTranslatef(xOffset, yOffset, 0.0f);
+        //explodingEmitter->SetParticleAlpha(shield->GetAlpha());
         explodingEmitter->Tick(dT);
         explodingEmitter->Draw(camera);
         glPopMatrix();

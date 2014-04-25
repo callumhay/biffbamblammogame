@@ -34,7 +34,7 @@
 
 class BossTeleportEffectInfo : public BossEffectEventInfo {
 public:
-    enum TeleportType { TeleportingOut, TeleportingIn, TeleportFailed };
+    enum TeleportType { TeleportingOut, FastTeleportOut, TeleportingIn, TeleportFailed };
     BossTeleportEffectInfo(TeleportType teleportType, const Point2D& position, double timeInSecs, float size) : BossEffectEventInfo(),
         teleportType(teleportType), position(position), timeInSecs(timeInSecs), size(size) {}
 

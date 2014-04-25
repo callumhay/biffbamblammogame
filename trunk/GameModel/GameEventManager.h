@@ -224,6 +224,7 @@ public:
     void ActionBossAngry(const Boss* boss, const Point2D& angryPartLoc, float angryPartWidth, float angryPartHeight);
 
     // Effect Events
+    void ActionClearActiveBossEffects();
     void ActionGeneralEffect(const GeneralEffectEventInfo& effectEvent);
     void ActionBossEffect(const BossEffectEventInfo& effectEvent);
 

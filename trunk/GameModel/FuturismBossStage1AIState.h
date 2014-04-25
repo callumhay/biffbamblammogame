@@ -50,6 +50,7 @@ private:
     void GoToNextState(const GameModel& gameModel);
     FuturismBossAIState* BuildNextAIState() const;
     bool IsCoreShieldVulnerable() const { return false; }
+    bool AreBulbsVulnerable() const { return false; }
     float GetMaxSpeed() const { return FuturismBossAIState::DEFAULT_SPEED; }
     void GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const;
     double GetAfterAttackWaitTime(FuturismBossAIState::AIState attackState) const;

@@ -948,6 +948,13 @@ void GameEventManager::ActionBossAngry(const Boss* boss, const Point2D& angryPar
     }
 }
 
+void GameEventManager::ActionClearActiveBossEffects() {
+    std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
+        (*listenerIter)->ClearActiveBossEffectsEvent();
+    }
+}
+
 void GameEventManager::ActionGeneralEffect(const GeneralEffectEventInfo& effectEvent) {
     std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
     for (; listenerIter != this->eventListeners.end(); ++listenerIter) {

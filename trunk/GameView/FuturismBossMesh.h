@@ -67,12 +67,14 @@ private:
 
     // Effect assets
     AnimationMultiLerp<Colour> shieldColourAnim;
+    AnimationMultiLerp<Colour> bulbFlashingAnim;
 
     ESPPointEmitter* topShieldExplodingEmitter;
     ESPPointEmitter* bottomShieldExplodingEmitter;
     ESPPointEmitter* leftShieldExplodingEmitter;
     ESPPointEmitter* rightShieldExplodingEmitter;
     ESPPointEmitter* coreShieldExplodingEmitter;
+    ESPPointEmitter* coreExplodingEmitter;
 
     ESPPointEmitter eyePulseGlow;
     ESPPointEmitter frostMist;
@@ -91,6 +93,9 @@ private:
     void DrawDamagableBodyPart(const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight,
         const BossBodyPart* bodyPart, Mesh* nonDmgMesh, Mesh * dmgMesh) const;
+    void DrawBulbBodyPart(const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+        const BossBodyPart* bodyPart, Mesh* mesh) const;
     void DrawShieldPostEffects(double dT, const Camera& camera, float xOffset, float yOffset,
         const BossBodyPart* shield, ESPPointEmitter* explodingEmitter);
 

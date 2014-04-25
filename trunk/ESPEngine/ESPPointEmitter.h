@@ -42,6 +42,7 @@ public:
 
     void OverwriteEmittedPosition(const Point3D& pt);
 	void SetEmitPosition(const Point3D& pt);
+    void SetEmitPosition(const Point2D& pt);
     void SetEmitPosition(const Vector3D& pt);
 	void SetEmitDirection(const Vector3D& dir);
     void SetEmitDirection(const Vector2D& dir);
@@ -74,6 +75,12 @@ private:
  */
 inline void ESPPointEmitter::SetEmitPosition(const Point3D& pt) {
 	this->emitPt = pt;
+}
+
+inline void ESPPointEmitter::SetEmitPosition(const Point2D& pt) {
+    this->emitPt[0] = pt[0];
+    this->emitPt[1] = pt[1];
+    this->emitPt[2] = 0;
 }
 
 inline void ESPPointEmitter::SetEmitPosition(const Vector3D& pt) {
