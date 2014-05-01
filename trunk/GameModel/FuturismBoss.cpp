@@ -49,8 +49,8 @@ const float FuturismBoss::CORE_BULB_OFFSET_FROM_ORIGIN = 2.326f;
 const float FuturismBoss::CORE_ARMS_MOVE_FORWARD_AMT = 0.723f;
 
 const float FuturismBoss::CORE_Z_DIST_FROM_ORIGIN = 0.0f;//1.732f;
-const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD = 0.0f;//CORE_Z_DIST_FROM_ORIGIN;
-const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD = 0.363f;//2.094f;
+const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD = EPSILON;
+const float FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD    = 0.363f;
 const float FuturismBoss::CORE_SHIELD_CORNER_HEIGHT = 1.167f;
 
 const float FuturismBoss::TOP_BOTTOM_SHIELD_EXPLODE_WIDTH  = 1.636f;
@@ -796,10 +796,10 @@ void FuturismBoss::RegenerateBoundsForFinalCore() {
 
         BoundingLines coreBodyBounds;
 
-        coreBodyBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(PT0[1]-PT1[1], PT1[0]-PT0[0]), false); // Top-left
-        coreBodyBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(PT2[1]-PT3[1], PT3[0]-PT2[0]), false); // Top-right
-        coreBodyBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(PT4[1]-PT5[1], PT5[0]-PT4[0]), false); // Bottom-right
-        coreBodyBounds.AddBound(Collision::LineSeg2D(PT6, PT7), Vector2D(PT6[1]-PT7[1], PT7[0]-PT6[0]), false); // Bottom-left
+        coreBodyBounds.AddBound(Collision::LineSeg2D(PT0, PT1), Vector2D(PT0[1]-PT1[1], PT1[0]-PT0[0]), true); // Top-left
+        coreBodyBounds.AddBound(Collision::LineSeg2D(PT2, PT3), Vector2D(PT2[1]-PT3[1], PT3[0]-PT2[0]), true); // Top-right
+        coreBodyBounds.AddBound(Collision::LineSeg2D(PT4, PT5), Vector2D(PT4[1]-PT5[1], PT5[0]-PT4[0]), true); // Bottom-right
+        coreBodyBounds.AddBound(Collision::LineSeg2D(PT6, PT7), Vector2D(PT6[1]-PT7[1], PT7[0]-PT6[0]), true); // Bottom-left
 
         BossBodyPart* coreBody = static_cast<BossBodyPart*>(this->bodyParts[this->coreBodyIdx]);
         coreBody->SetLocalBounds(coreBodyBounds);

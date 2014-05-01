@@ -78,7 +78,9 @@ public:
         StationaryFireStrategyPortalAIState, // Boss opens a portal that leads to an item that can be used to defeat the boss
         StationaryFireWeaponPortalAIState,   // Boss opens a portal used to make it harder for the player
 
-        // Special States:
+        // Special/Scripted States:
+        IntroStartingAIState,
+        IntroTeleportAIState,
         DestroyLevelBarrierAIState,
 
         // Angry/Hurt/Destruction-related States ----------------------
@@ -99,7 +101,7 @@ public:
     // Inherited functions
     Boss* GetBoss() const;
     bool CanHurtPaddleWithBody() const { return false; }
-    bool IsStateMachineFinished() const { return (this->currState == FinalDeathThroesAIState); }
+    bool IsStateMachineFinished() const;
     Collision::AABB2D GenerateDyingAABB() const;
 
 protected:
@@ -204,12 +206,15 @@ protected:
     virtual void GetStrategyPortalCandidatePieces(const GameLevel& level, Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates) = 0;
     
     // State functions
+    void InitPauseAIState(double pauseTime);
+    void ExecutePauseAIState(double dT, GameModel* gameModel);
     void InitMoveToPositionAIState();
     void InitMoveToCenterAIState();
+    void InitMoveAIState(const Point2D& position);
     void ExecuteMoveToPositionAIState(double dT, GameModel* gameModel);
     void InitTeleportAIState();
     void InitAvoidanceTeleportAIState();
-    void ExecuteTeleportAIState(double dT, GameModel* gameModel);
+    virtual void ExecuteTeleportAIState(double dT, GameModel* gameModel);
     void InitBallAttractAIState();
     void ExecuteBallAttractAIState(double dT, GameModel* gameModel);
     void InitBallDiscardAIState();
@@ -276,14 +281,16 @@ protected:
     void DoLaserBeamWarningEffect(double timeInSecs, bool isTwitch) const;
     void DoLaserBeamEnergyEffect(double timeInSecs) const;
     void DoIceShatterIfFrozen();
+    void Refreeze(GameModel& gameModel);
 
     bool DoWaitTimeCountdown(double dT);
 
     virtual void GoToRandomBasicMoveState();
     virtual void GoToRandomBasicAttackState();
 
-    void WeakenShield(const Vector2D& hitDir, float hitMagnitude, FuturismBoss::ShieldLimbType shieldType);
-    void DestroyShield(const Vector2D& hitDir, FuturismBoss::ShieldLimbType shieldType);
+    void WeakenShieldDebrisEffect(const BossWeakpoint* crackedShield);
+    void WeakenShield(const Vector2D& hitDir, float hitMagnitude, FuturismBoss::ShieldLimbType shieldType, bool doStateChange = true);
+    void DestroyShield(const Vector2D& hitDir, FuturismBoss::ShieldLimbType shieldType, bool doStateChange = true);
     AnimationMultiLerp<Vector3D> GenerateShieldDeathTranslationAnimation(FuturismBoss::ShieldLimbType shieldType, 
         float shieldSize, float xDir, double timeInSecs) const;
     AnimationMultiLerp<float> GenerateShieldDeathRotationAnimation(FuturismBoss::ShieldLimbType shieldType, 

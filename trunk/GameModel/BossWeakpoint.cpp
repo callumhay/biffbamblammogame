@@ -57,7 +57,10 @@ BossWeakpoint* BossWeakpoint::BuildWeakpoint(BossBodyPart* part, float lifePoint
     result->ToggleSimpleBoundingCalc(part->GetIsSimpleBoundingCalcOn());
     result->worldTransform  = part->GetWorldTransform();
     result->attachedProjectiles = part->GetAttachedProjectilesMap();
-    
+    result->localYRotation   = part->GetLocalYRotation();
+    result->localZRotation   = part->GetLocalZRotation();
+    result->localTranslation = part->GetLocalTranslation();
+
     return result;
 }
 

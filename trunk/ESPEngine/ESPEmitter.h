@@ -131,10 +131,11 @@ public:
 	void AddParticle(ESPParticle* particle);
 
 	bool GetHasParticles() const;
+
     const ESPInterval& GetParticleAlpha() const { return this->particleAlpha; }
-		
 	const ESPInterval& GetParticleSizeX() const { return this->particleSize[0]; }
 	const ESPInterval& GetParticleSizeY() const { return this->particleSize[1]; }
+    const ESPInterval& GetParticleInitialSpd() const { return this->particleInitialSpd; }
 
 	void SimulateTicking(double time);
 

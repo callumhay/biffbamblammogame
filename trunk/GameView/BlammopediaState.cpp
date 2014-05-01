@@ -602,13 +602,6 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
     for (Blammopedia::ItemEntryMapConstIter iter = itemEntries.begin(); iter != itemEntries.end(); ++iter) {
         
         Blammopedia::ItemEntry* itemEntry = iter->second;
-
-        // SKIP BALL AND PADDLE CAM FOR NOW
-        // TODO: REMOVE THIS!!!
-        if (itemEntry->GetName() == "Ball Camera" || itemEntry->GetName() == "Paddle Camera") {
-            continue;
-        }
-
         ItemListView::ListItem* listItem = NULL;
         if (!itemEntry->GetIsLocked()) {
 
@@ -654,13 +647,6 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
     for (Blammopedia::BlockEntryMapConstIter iter = blockEntries.begin(); iter != blockEntries.end(); ++iter) {
         
         Blammopedia::AbstractBlockEntry* blockEntry = iter->second;
-
-        // SKIP THE PORTAL BLOCK FOR NOW
-        // TODO: REMOVE THIS!!!
-        if (blockEntry->GetName() == "Portal Block") {
-            continue;
-        }
-
         ItemListView::ListItem* listItem = NULL;
         if (!blockEntry->GetIsLocked()) {
             const Texture2D* texture   = blockEntry->GetBlockTexture(furthestWorldIdx);

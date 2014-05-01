@@ -611,7 +611,10 @@ void Boss::SetCurrentAIStateImmediately(BossAIState* newState) {
 #ifdef _DEBUG
 void Boss::DebugDraw() const {
     if (this->root != NULL) {
+        glPushAttrib(GL_LINE_BIT);
+        glLineWidth(1.0f);
         this->alivePartsRoot->DebugDraw();
+        glPopAttrib();
     }
 }
 #endif

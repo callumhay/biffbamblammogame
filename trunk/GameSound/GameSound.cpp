@@ -410,7 +410,6 @@ SoundID GameSound::PlaySound(const GameSound::SoundType& soundType, bool isLoope
 SoundID GameSound::PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, const Point3D& position, 
                                        bool applyActiveEffects, bool applyLevelTranslation, bool applyGameFGTransform,
                                        float minDistance, float volume) {
-
     if (this->ignorePlaySounds) {
         return INVALID_SOUND_ID;
     }

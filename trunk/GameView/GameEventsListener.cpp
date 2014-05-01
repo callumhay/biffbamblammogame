@@ -80,6 +80,7 @@
 #include "../GameModel/GenericEmitterEffectInfo.h"
 #include "../GameModel/BossTeleportEffectInfo.h"
 #include "../GameModel/EnumBossEffectInfo.h"
+#include "../GameModel/EnumGeneralEffectInfo.h"
 
 // GameControl Includes
 #include "../GameControl/GameControllerManager.h"
@@ -2412,6 +2413,12 @@ void GameEventsListener::GeneralEffectEvent(const GeneralEffectEventInfo& effect
         case GenericEmitterEffectInfo::GenericEmitter: {
             const GenericEmitterEffectInfo& genericEmitter = static_cast<const GenericEmitterEffectInfo&>(effectEvent);
             espAssets->AddGenericEmitterEffect(genericEmitter);
+            break;
+        }
+
+        case GenericEmitterEffectInfo::EnumEffect: {
+            const EnumGeneralEffectInfo& enumEffect = static_cast<const EnumGeneralEffectInfo&>(effectEvent);
+            espAssets->AddGeneralEnumEffect(enumEffect);
             break;
         }
 

@@ -512,6 +512,8 @@ void MSFReader::InitSoundTypeMapping() {
 
     INSERT_MAPPING_PAIR(GameSound, FuturismBossTeleportationChargingEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FuturismBossTeleportationEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossPortalSummonChargeEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossPortalFireEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FuturismBossTwitchBeamWarningEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FuturismBossArcBeamWarningEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FuturismBossAttractorBeamOpenAndLoopEvent, false);

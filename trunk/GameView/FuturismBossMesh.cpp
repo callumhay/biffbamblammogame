@@ -40,7 +40,7 @@
 #include "../BlammoEngine/Mesh.h"
 #include "../GameModel/FuturismBoss.h"
 
-const double FuturismBossMesh::INTRO_TIME_IN_SECS = 1.0; // TODO: 4.0;
+const double FuturismBossMesh::INTRO_TIME_IN_SECS = 4.0;
 
 FuturismBossMesh::FuturismBossMesh(FuturismBoss* boss, GameSound* sound) : 
 BossMesh(sound), boss(boss), coreCenterMesh(NULL), coreArmsMesh(NULL), 
@@ -50,7 +50,7 @@ damagedLeftRightShieldMesh(NULL), damagedTopBottomShieldMesh(NULL),
 damagedCoreShieldMesh(NULL), iceEncasingMesh(NULL),
 topShieldExplodingEmitter(NULL), bottomShieldExplodingEmitter(NULL),
 leftShieldExplodingEmitter(NULL), rightShieldExplodingEmitter(NULL),
-coreExplodingEmitter(NULL)
+coreExplodingEmitter(NULL), glowSoundID(INVALID_SOUND_ID)
 {
     assert(boss != NULL);
 
@@ -318,6 +318,10 @@ void FuturismBossMesh::DrawPostBodyEffects(double dT, const Camera& camera, cons
     if (this->introTimeCountdown > 0.0) {
         static const double START_GLOW_TIME = INTRO_TIME_IN_SECS / 1.5;
         if (this->introTimeCountdown <= START_GLOW_TIME) {
+            if (this->glowSoundID == INVALID_SOUND_ID) {
+                this->glowSoundID = assets->GetSound()->PlaySound(GameSound::BossGlowEvent, false, false);
+            }
+
             glPushMatrix();
             glMultMatrixf(this->boss->GetCoreBody()->GetWorldTransform().begin());
             

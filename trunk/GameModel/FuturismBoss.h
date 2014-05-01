@@ -85,6 +85,7 @@ public:
     ~FuturismBoss();
 
     float GetCurrentZShootDistFromOrigin() const;
+    float GetCurrentBeamZShootDistFromOrigin() const;
 
     // Get the various shields of the Boss
     const BossBodyPart* GetCoreShield() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->coreShieldIdx]); }
@@ -336,7 +337,9 @@ private:
 };
 
 inline float FuturismBoss::GetCurrentZShootDistFromOrigin() const {
+    return this->GetCoreShield()->GetIsDestroyed() ? (CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD + 0.1f) : CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD;
+}
+inline float FuturismBoss::GetCurrentBeamZShootDistFromOrigin() const {
     return this->GetCoreShield()->GetIsDestroyed() ? CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITHOUT_SHIELD : CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD;
 }
-
 #endif // __FUTURISMBOSS_H__

@@ -65,6 +65,7 @@ public:
     void RotateZ(float rotZDegs);
     void Transform(const Matrix4x4& m);
 
+    void SetWorldTransform(const Matrix4x4& m);
     void SetLocalTranslation(const Vector3D& t);
     void SetLocalZRotation(float zRotInDegs);
     void SetLocalYRotation(float yRotInDegs);
@@ -263,6 +264,10 @@ inline void BossBodyPart::RotateZ(float rotZDegs) {
 inline void BossBodyPart::Transform(const Matrix4x4& m) {
     this->worldTransform = m * this->worldTransform;
     this->OnTransformUpdate();
+}
+
+inline void BossBodyPart::SetWorldTransform(const Matrix4x4& m) {
+    this->worldTransform = m;
 }
 
 inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {

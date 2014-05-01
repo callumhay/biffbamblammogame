@@ -66,6 +66,7 @@ class ShortCircuitEffectInfo;
 class DebrisEffectInfo;
 class PortalSpawnEffectInfo;
 class GenericEmitterEffectInfo;
+class EnumGeneralEffectInfo;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -363,6 +364,8 @@ public:
     void AddPuffOfSmokeEffect(const PuffOfSmokeEffectInfo& info);
     void AddShockwaveEffect(const ShockwaveEffectInfo& info);
     void AddDebrisEffect(const DebrisEffectInfo& info);
+    void AddDebrisEffect(float minSize, float maxSize, float minLife, float maxLife, 
+        const Point3D& pos, const Colour& colour, float force, const Vector3D& dir, int numParticles);
 
     void AddMultiplierComboEffect(int multiplier, const Point2D& position, const PlayerPaddle& paddle);
     //void AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle);
@@ -449,6 +452,7 @@ public:
         const ESPInterval& lifeInSecs, Onomatoplex::Extremeness extremeness);
     void AddPortalSpawnEffect(const PortalSpawnEffectInfo& effectInfo);
     void AddGenericEmitterEffect(const GenericEmitterEffectInfo& effectInfo);
+    void AddGeneralEnumEffect(const EnumGeneralEffectInfo& enumEffect);
 
 	void TurnOffCurrentItemDropStars();
 

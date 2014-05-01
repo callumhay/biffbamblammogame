@@ -31,6 +31,7 @@
 #define __PORTALPROJECTILE_H__
 
 #include "Projectile.h"
+#include "../BlammoEngine/Animation.h"
 
 class PortalProjectile : public Projectile {
 public:
@@ -61,12 +62,12 @@ public:
 
     BoundingLines BuildBoundingLines() const;
 
+    float GetAlpha() const { return this->colour.A(); }
+
     const ColourRGBA& GetColour() const { return this->colour; }
     const PortalProjectile* GetSiblingPortal() const { return this->sibling; }
 
     bool IsTerminating() const;
-    bool IsCloseToTerminating() const;
-
 
 private:
     static const int NO_TERMINATION_TIME = INT_MIN;
@@ -76,6 +77,8 @@ private:
     PortalProjectile* sibling; // NOT owned by this, only referenced
 
     ColourRGBA colour;
+    AnimationMultiLerp<float> alphaFlickerAnim;
+
     bool ballHasGoneThroughBefore;
 
     double baseTeriminationTime; // The base time it will take (without resets) for the portal to terminate itself
@@ -86,6 +89,7 @@ private:
 
     void SetSibling(PortalProjectile* sibling);
     void ResetTeriminationCountdown();
+    void SetupAlphaFlickerAnim(double totalFlickerTime);
 
     DISALLOW_COPY_AND_ASSIGN(PortalProjectile);
 };
@@ -96,14 +100,6 @@ inline bool PortalProjectile::IsTerminating() const {
     return this->sibling == NULL || 
         (this->ballHasGoneThroughBefore && this->sibling->ballHasGoneThroughBefore) || 
         (this->terminationCountdown != NO_TERMINATION_TIME && this->terminationCountdown <= 0);
-}
-
-inline bool PortalProjectile::IsCloseToTerminating() const {
-    return this->IsTerminating() ||
-        (this->terminationCountdown == NO_TERMINATION_TIME && 
-        this->sibling->terminationCountdown < CLOSE_TO_TERMINATING_FRACTION*this->baseTeriminationTime) ||
-        (this->terminationCountdown != NO_TERMINATION_TIME && 
-        this->terminationCountdown < CLOSE_TO_TERMINATING_FRACTION*this->baseTeriminationTime);
 }
 
 inline void PortalProjectile::SetSibling(PortalProjectile* sibling) {

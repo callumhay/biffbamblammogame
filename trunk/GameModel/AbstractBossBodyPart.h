@@ -74,6 +74,8 @@ public:
     virtual void SetLocalTransform(const Vector3D& translation, float zRotInDegs) = 0;
 
     float GetLocalZRotation() const { return this->localZRotation; }
+    float GetLocalYRotation() const { return this->localYRotation; }
+    const Vector3D& GetLocalTranslation() const { return this->localTranslation; }
 
     void AnimateLocalTranslation(const AnimationMultiLerp<Vector3D>& animation);
     void ClearLocalTranslationAnimation();

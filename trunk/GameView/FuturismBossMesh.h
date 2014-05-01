@@ -80,6 +80,8 @@ private:
     ESPPointEmitter frostMist;
     CgFxVolumetricEffect frostMistShader;
 
+    SoundID glowSoundID;
+
     // Inherited functions
     //void DrawPreBodyEffects(double dT, const Camera& camera, const GameModel& gameModel);
     void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,

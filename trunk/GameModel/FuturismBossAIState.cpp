@@ -40,6 +40,7 @@
 #include "EnumBossEffectInfo.h"
 #include "ExpandingHaloEffectInfo.h"
 #include "DebrisEffectInfo.h"
+#include "EnumGeneralEffectInfo.h"
 #include "BossLaserProjectile.h"
 #include "BossWeakpoint.h"
 
@@ -95,13 +96,26 @@ Boss* FuturismBossAIState::GetBoss() const {
     return this->boss;
 }
 
+bool FuturismBossAIState::IsStateMachineFinished() const { 
+    return (this->currState == FinalDeathThroesAIState || 
+        (this->currState == BulbHitAndDestroyedAIState && this->boss->AreAllBulbsDestroyed()));
+}
+
 Collision::AABB2D FuturismBossAIState::GenerateDyingAABB() const {
     return this->boss->GetCoreBody()->GenerateWorldAABB();
 }
 
-void FuturismBossAIState::InitMoveToPositionAIState() {
-    this->DetachAndShootBall(this->ballDirBeforeAttachment);
+void FuturismBossAIState::InitPauseAIState(double pauseTime) {
+    this->waitTimeCountdown = pauseTime;
+}
+void FuturismBossAIState::ExecutePauseAIState(double dT, GameModel* gameModel) {
+    this->waitTimeCountdown -= dT;
+    if (this->waitTimeCountdown <= 0) {
+        this->GoToNextState(*gameModel);
+    }
+}
 
+void FuturismBossAIState::InitMoveToPositionAIState() {
     const GameModel* gameModel = this->boss->GetGameModel();
     assert(gameModel != NULL);
 
@@ -109,26 +123,28 @@ void FuturismBossAIState::InitMoveToPositionAIState() {
     std::vector<Point2D> moveToPositions;
     this->GetRandomMoveToPositions(*gameModel, moveToPositions);
 
-    Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
     if (moveToPositions.empty()) {
-        this->SetMoveToTargetPosition(bossPos, bossPos, EPSILON);
-        return;
+        this->InitMoveAIState(this->boss->alivePartsRoot->GetTranslationPt2D());
     }
-
-    // Choose a position at random...
-    int randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % static_cast<int>(moveToPositions.size());
-    this->SetMoveToTargetPosition(bossPos, moveToPositions[randomIdx]);
-
-    this->numConsecutiveMoves++;
-    this->numConsecutiveAttacks = 0;
-    this->numConsecutiveBeams = 0;
-    this->numConsecutiveShots = 0;
+    else {
+        // Choose a position at random...
+        int randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % static_cast<int>(moveToPositions.size());
+        this->InitMoveAIState(moveToPositions[randomIdx]);
+    }
 }
 
 void FuturismBossAIState::InitMoveToCenterAIState() {
-    this->DetachAndShootBall(this->ballDirBeforeAttachment);
+    this->InitMoveAIState(this->GetCenterMovePosition());
+}
 
-    this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), this->GetCenterMovePosition());
+void FuturismBossAIState::InitMoveAIState(const Point2D& position) {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
+    this->DetachAndShootBall(this->ballDirBeforeAttachment);
+    this->SetMoveToTargetPosition(this->boss->alivePartsRoot->GetTranslationPt2D(), position);
 
     this->numConsecutiveMoves++;
     this->numConsecutiveAttacks = 0;
@@ -148,6 +164,10 @@ void FuturismBossAIState::ExecuteMoveToPositionAIState(double dT, GameModel* gam
 }
 
 void FuturismBossAIState::InitTeleportAIState() {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
 
     this->countdownToTeleportOut = this->GetSingleTeleportInAndOutTime();
     this->countdownToTeleportIn = this->countdownToTeleportOut;
@@ -184,8 +204,8 @@ void FuturismBossAIState::InitTeleportAIState() {
     this->boss->alivePartsRoot->AnimateColourRGBA(fadeToBlackAnim);
 
     // Play teleportation "charging" sound...
-    this->chargingSoundID = this->boss->GetGameModel()->GetSound()->PlaySoundAtPosition(
-        GameSound::FuturismBossTeleportationChargingEvent, false, bossPos, true, true, true);
+    this->chargingSoundID = this->boss->GetGameModel()->GetSound()->PlaySound(
+        GameSound::FuturismBossTeleportationChargingEvent, false, true);
 
     this->numConsecutiveMoves++;
     this->numConsecutiveAttacks = 0;
@@ -194,6 +214,11 @@ void FuturismBossAIState::InitTeleportAIState() {
 }
 
 void FuturismBossAIState::InitAvoidanceTeleportAIState() {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
     GameModel* gameModel = this->boss->GetGameModel();
     assert(gameModel != NULL);
 
@@ -332,6 +357,11 @@ void FuturismBossAIState::ExecuteTeleportAIState(double dT, GameModel* gameModel
 }
 
 void FuturismBossAIState::InitBallAttractAIState() {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
     GameModel* gameModel = this->boss->GetGameModel();
     assert(gameModel != NULL);
 
@@ -448,11 +478,16 @@ void FuturismBossAIState::ExecuteBallAttractAIState(double dT, GameModel* gameMo
         partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
     }
 
-    // Make the ball look like it's struggling...
+    // Make the ball looks like it's struggling...
     this->ShakeBall(ball);
 }
 
 void FuturismBossAIState::InitBallDiscardAIState() {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
     this->waitTimeCountdown = this->GetBallDiscardTime();
 
     GameModel* gameModel = this->boss->GetGameModel();
@@ -514,6 +549,11 @@ void FuturismBossAIState::ExecuteBallDiscardAIState(double dT, GameModel* gameMo
 }
 
 void FuturismBossAIState::InitFrozenAIState() {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
     this->currVel    = Vector2D(0,0);
     this->desiredVel = Vector2D(0,0);
 
@@ -545,7 +585,6 @@ void FuturismBossAIState::InitFrozenAIState() {
     // Clear local transforms and animations that might be relevant to other states
     this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
     this->boss->alivePartsRoot->ClearLocalTranslationAnimation();
-    this->boss->alivePartsRoot->ClearLocalZRotationAnimation();
     this->boss->alivePartsRoot->ResetColourRGBAAnimation();
 
     this->boss->currIceRotInDegs += (1 + Randomizer::GetInstance()->RandomUnsignedInt() % 3) * 90;
@@ -555,6 +594,9 @@ void FuturismBossAIState::InitFrozenAIState() {
     frozenEffect.SetBodyPart(this->boss->GetCoreBody());
     frozenEffect.SetTimeInSecs(2.0);
     GameEventManager::Instance()->ActionBossEffect(frozenEffect);
+
+    // EFFECT: Very brief full screen flash for the freeze
+    GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.125, 0.0f));
 
     // Play sound for the boss being frozen
     GameSound* sound = gameModel->GetSound();
@@ -756,7 +798,7 @@ void FuturismBossAIState::ExecuteLaserBeamTwitchAIState(double dT, GameModel* ga
             // Fire the beam
             this->currBeam = new BossLaserBeam(gameModel, this->beamRay, 
                 EYE_BEAM_HALF_RADIUS, TWITCH_BEAM_EXPIRE_TIME_IN_SECS);
-            this->currBeam->SetZOffset(this->boss->GetCurrentZShootDistFromOrigin());
+            this->currBeam->SetZOffset(FuturismBoss::CORE_Z_SHOOT_DIST_FROM_ORIGIN_WITH_SHIELD);
             gameModel->AddBeam(this->currBeam);  // WARNING: After this call currBeam no longer belongs to this!!!
 
             // EVENT: Flash for the laser beam
@@ -859,7 +901,7 @@ void FuturismBossAIState::ExecuteLaserBeamArcAIState(double dT, GameModel* gameM
             // Fire the beam
             this->currBeam = new BossLaserBeam(gameModel, this->beamRay, 
                 EYE_BEAM_HALF_RADIUS, totalBeamTime);
-            this->currBeam->SetZOffset(this->boss->GetCurrentZShootDistFromOrigin());
+            this->currBeam->SetZOffset(this->boss->GetCurrentBeamZShootDistFromOrigin());
             gameModel->AddBeam(this->currBeam); // WARNING: The currBeam no longer belongs to this after this call!!!!
 
             // EVENT: Flash for the laser beam
@@ -897,6 +939,13 @@ void FuturismBossAIState::InitStationaryFireWeaponPortalAIState() {
         Colour(0.5f,0.5f,0.5f)+1.25f*this->nextPortalColour, 0.5f, 
         Vector3D(0,0,FuturismBoss::CORE_Z_DIST_FROM_ORIGIN)));
 
+    GameSound* sound = this->boss->GetGameModel()->GetSound();
+    if (this->chargingSoundID != INVALID_SOUND_ID) {
+        sound->StopSound(this->chargingSoundID);
+        this->chargingSoundID = INVALID_SOUND_ID;
+    }
+    this->chargingSoundID = sound->PlaySound(GameSound::FuturismBossPortalSummonChargeEvent, false, true);
+
     this->numConsecutiveMoves   = 0;
     this->numConsecutiveShots   = 0;
     this->numConsecutiveBeams   = 0;
@@ -926,6 +975,13 @@ void FuturismBossAIState::InitStationaryFireStrategyPortalAIState() {
         this->boss->GetCoreBody(), this->countdownToPortalShot, 
         Colour(0.5f,0.5f,0.5f)+1.25f*this->nextPortalColour, 0.5f, 
         Vector3D(0,0,FuturismBoss::CORE_Z_DIST_FROM_ORIGIN)));
+
+    GameSound* sound = this->boss->GetGameModel()->GetSound();
+    if (this->chargingSoundID != INVALID_SOUND_ID) {
+        sound->StopSound(this->chargingSoundID);
+        this->chargingSoundID = INVALID_SOUND_ID;
+    }
+    this->chargingSoundID = sound->PlaySound(GameSound::FuturismBossPortalSummonChargeEvent, false, true);
 
     this->numConsecutiveMoves   = 0;
     this->numConsecutiveShots   = 0;
@@ -1134,6 +1190,15 @@ void FuturismBossAIState::ExecuteDestroyLevelBarrierAIState(double dT, GameModel
                                 gameModel->GetSound()->PlaySoundAtPosition(GameSound::BasicBlockDestroyedEvent, false, 
                                     currPiece->GetPosition3D(), true, true, true);
                                 
+                                // Add some extra effects for the piece's destruction...
+                                EnumGeneralEffectInfo disintegrateEffect(EnumGeneralEffectInfo::FuturismBarrierBlockDisintegrationEffect);
+                                disintegrateEffect.SetPosition(currPiece->GetCenter());
+                                disintegrateEffect.SetDirection(this->beamRay.GetUnitDirection());
+                                disintegrateEffect.SetSize2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
+                                disintegrateEffect.SetTimeInSecs(2.0);
+                                disintegrateEffect.SetColour(Colour(0.5f, 0.5f, 0.5f));
+                                GameEventManager::Instance()->ActionGeneralEffect(disintegrateEffect);
+
                                 // Destroy the piece...
                                 this->barrierPieces[pieceIdx] = currPiece->Destroy(gameModel, LevelPiece::DisintegrationDestruction);
                             }
@@ -1157,7 +1222,7 @@ void FuturismBossAIState::ExecuteDestroyLevelBarrierAIState(double dT, GameModel
             // Shoot the laser beam at the barrier!!!
             this->currBeam = new BossLaserBeam(gameModel, this->beamRay, 
                 EYE_BEAM_HALF_RADIUS, BARRIER_DESTRUCTION_ARC_TIME_IN_SECS + 0.5);
-            this->currBeam->SetZOffset(this->boss->GetCurrentZShootDistFromOrigin());
+            this->currBeam->SetZOffset(this->boss->GetCurrentBeamZShootDistFromOrigin());
 
             // Start animating the colour of the beam...
             this->currBeam->SetBeamColour(this->beamColourAnim.GetInterpolantValue());
@@ -1223,7 +1288,6 @@ void FuturismBossAIState::InitShieldPartCrackedAIState() {
     this->currVel    = Vector2D(0,0);
 
     this->boss->alivePartsRoot->ResetColourRGBAAnimation();
-    this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
 
     // Cause the boss to animate briefly...
     this->bossHurtAnim.ResetToStart();
@@ -1315,8 +1379,9 @@ void FuturismBossAIState::InitBulbHitAndDestroyedAIState() {
     this->desiredVel = Vector2D(0,0);
     this->currVel    = Vector2D(0,0);
 
-    this->boss->alivePartsRoot->ResetColourRGBAAnimation();
-    this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
+    // Boss should flash due to being hit...
+    this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim(
+        BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS));
 
     // Cause the boss to animate briefly...
     this->bossHurtAnim.ResetToStart();
@@ -1418,8 +1483,15 @@ void FuturismBossAIState::InitFinalDeathThroesAIState() {
     this->desiredVel = Vector2D(0,0);
     this->currVel    = Vector2D(0,0);
 
+    // Final fade-out for the whole boss
     this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
-    this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossFinalDeathFlashAnim());
+    AnimationMultiLerp<ColourRGBA> deathColourAnim = Boss::BuildBossFinalDeathFlashAnim();
+    
+    this->boss->alivePartsRoot->AnimateColourRGBA(deathColourAnim);
+    this->boss->bodyParts[this->boss->topBulbIdx]->AnimateColourRGBA(deathColourAnim);
+    this->boss->bodyParts[this->boss->bottomBulbIdx]->AnimateColourRGBA(deathColourAnim);
+    this->boss->bodyParts[this->boss->leftBulbIdx]->AnimateColourRGBA(deathColourAnim);
+    this->boss->bodyParts[this->boss->rightBulbIdx]->AnimateColourRGBA(deathColourAnim);
 }
 void FuturismBossAIState::ExecuteFinalDeathThroesAIState(double, GameModel*) {
     // The boss is dead dead dead.
@@ -1474,6 +1546,12 @@ void FuturismBossAIState::SetState(FuturismBossAIState::AIState newState) {
             this->InitStationaryFireWeaponPortalAIState();
             break;
 
+        case IntroStartingAIState:
+            this->InitPauseAIState(1.0);
+            break;
+        case IntroTeleportAIState:
+            this->InitTeleportAIState();
+            break;
         case DestroyLevelBarrierAIState:
             this->InitDestroyLevelBarrierAIState();
             break;
@@ -1550,6 +1628,12 @@ void FuturismBossAIState::UpdateState(double dT, GameModel* gameModel) {
             this->ExecuteStationaryFireWeaponPortalAIState(dT, gameModel);
             break;
 
+        case IntroStartingAIState:
+            this->ExecutePauseAIState(dT, gameModel);
+            break;
+        case IntroTeleportAIState:
+            this->ExecuteTeleportAIState(dT, gameModel);
+            break;
         case DestroyLevelBarrierAIState:
             this->ExecuteDestroyLevelBarrierAIState(dT, gameModel);
             break;
@@ -1799,63 +1883,78 @@ bool FuturismBossAIState::GetStrategyPortalLocation(const GameModel& gameModel, 
 
 bool FuturismBossAIState::GetTeleportationLocation(const GameModel& gameModel, Point2D& teleportPos) const {
     
+
     std::vector<Point2D> allLocations;
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
 
-    // If the ball isn't attached and the boss is on the opposite side of the arena as the ball AND
-    // the mid-arena barrier still exists then the boss MUST teleport to the same side of the arena as the ball...
-    const GameBall* ball = gameModel.GetGameBalls().front();    
-    if (this->attachedBall != ball && this->ArenaBarrierExists() && this->arenaState != InFullyOpenedArena) {
-
-        // When checking whether the ball is on the same side of the arena as the boss, first make sure the
-        // ball is ACTUALLY IN any of the arenas!!
-        bool ballNotOnSameSideAsBoss = (FuturismBoss::IsInLeftSubArena(ball->GetCenterPosition2D()) || 
-            FuturismBoss::IsInRightSubArena(ball->GetCenterPosition2D())) &&
-            FuturismBoss::IsInLeftSubArena(ball->GetCenterPosition2D()) != FuturismBoss::IsInLeftSubArena(bossPos);
-
-        if (ballNotOnSameSideAsBoss) {
-            ArenaState otherArenaState = (this->arenaState == InLeftArena) ? InRightArena : InLeftArena;
-            allLocations = this->GetArenaMoveToPositions(otherArenaState);
-        }
-        else {
-            allLocations = this->GetArenaMoveToPositions(this->arenaState);
+    if (this->currState == IntroTeleportAIState) {
+        // Teleport to positions in the top half of the arena...
+        float midY = FuturismBoss::GetLeftSubArenaCenterPos()[1];
+        std::vector<Point2D> tempLocations = this->GetArenaMoveToPositions(InLeftArena);
+        allLocations.reserve(tempLocations.size());
+        for (int i = 0; i < static_cast<int>(tempLocations.size()); i++) {
+            if (tempLocations[i][1] >= midY) {
+                allLocations.push_back(tempLocations[i]);
+            }
         }
     }
     else {
-        // If the ball is attached and there's still a barrier, then the boss will be
-        // teleporting to the other sub-arena...
-        if (this->attachedBall == ball && this->ArenaBarrierExists() && this->arenaState != InFullyOpenedArena) {
 
-            ArenaState otherArenaState = (this->arenaState == InLeftArena) ? InRightArena : InLeftArena;
-            allLocations = this->GetArenaMoveToPositions(otherArenaState);
+        // If the ball isn't attached and the boss is on the opposite side of the arena as the ball AND
+        // the mid-arena barrier still exists then the boss MUST teleport to the same side of the arena as the ball...
+        const GameBall* ball = gameModel.GetGameBalls().front();    
+        if (this->attachedBall != ball && this->ArenaBarrierExists() && this->arenaState != InFullyOpenedArena) {
 
-            // Make sure the boss teleports near the top of the respective arena...
-            if (otherArenaState == InLeftArena) {
-                float midY = this->boss->GetLeftSubArenaCenterPos()[1];
-                for (std::vector<Point2D>::iterator iter = allLocations.begin(); iter != allLocations.end();) {
-                    if ((*iter)[1] < midY) {
-                        iter = allLocations.erase(iter);
+            // When checking whether the ball is on the same side of the arena as the boss, first make sure the
+            // ball is ACTUALLY IN any of the arenas!!
+            bool ballNotOnSameSideAsBoss = (FuturismBoss::IsInLeftSubArena(ball->GetCenterPosition2D()) || 
+                FuturismBoss::IsInRightSubArena(ball->GetCenterPosition2D())) &&
+                FuturismBoss::IsInLeftSubArena(ball->GetCenterPosition2D()) != FuturismBoss::IsInLeftSubArena(bossPos);
+
+            if (ballNotOnSameSideAsBoss) {
+                ArenaState otherArenaState = (this->arenaState == InLeftArena) ? InRightArena : InLeftArena;
+                allLocations = this->GetArenaMoveToPositions(otherArenaState);
+            }
+            else {
+                allLocations = this->GetArenaMoveToPositions(this->arenaState);
+            }
+        }
+        else {
+            // If the ball is attached and there's still a barrier, then the boss will be
+            // teleporting to the other sub-arena...
+            if (this->attachedBall == ball && this->ArenaBarrierExists() && this->arenaState != InFullyOpenedArena) {
+
+                ArenaState otherArenaState = (this->arenaState == InLeftArena) ? InRightArena : InLeftArena;
+                allLocations = this->GetArenaMoveToPositions(otherArenaState);
+
+                // Make sure the boss teleports near the top of the respective arena...
+                if (otherArenaState == InLeftArena) {
+                    float midY = this->boss->GetLeftSubArenaCenterPos()[1];
+                    for (std::vector<Point2D>::iterator iter = allLocations.begin(); iter != allLocations.end();) {
+                        if ((*iter)[1] < midY) {
+                            iter = allLocations.erase(iter);
+                        }
+                        else {
+                            ++iter;
+                        }
                     }
-                    else {
-                        ++iter;
+                }
+                else {
+                    float midY = this->boss->GetRightSubArenaCenterPos()[1];
+                    for (std::vector<Point2D>::iterator iter = allLocations.begin(); iter != allLocations.end();) {
+                        if ((*iter)[1] > midY) {
+                            iter = allLocations.erase(iter);
+                        }
+                        else {
+                            ++iter;
+                        }
                     }
                 }
             }
             else {
-                float midY = this->boss->GetRightSubArenaCenterPos()[1];
-                for (std::vector<Point2D>::iterator iter = allLocations.begin(); iter != allLocations.end();) {
-                    if ((*iter)[1] > midY) {
-                        iter = allLocations.erase(iter);
-                    }
-                    else {
-                        ++iter;
-                    }
-                }
+                // Grab the locations where the boss typically moves...
+                allLocations = this->GetArenaMoveToPositions(this->arenaState);
             }
-        }
-        else {
-            // Grab the locations where the boss typically moves...
-            allLocations = this->GetArenaMoveToPositions(this->arenaState);
         }
     }
 
@@ -2027,6 +2126,9 @@ void FuturismBossAIState::SpawnPortals(GameModel& gameModel, const Point2D& port
         PORTAL_SPAWN_EFFECT_TIME_IN_SECS, portal2Pos, this->nextPortalColour, 
         FuturismBoss::PORTAL_PROJECTILE_WIDTH, FuturismBoss::PORTAL_PROJECTILE_HEIGHT));
 
+    // Sound for the portal shooting effect
+    gameModel.GetSound()->PlaySound(GameSound::FuturismBossPortalFireEvent, false, true);
+
     this->weaponWasShot = true;
 }
 
@@ -2179,9 +2281,14 @@ void FuturismBossAIState::DoBasicWeaponSingleShot(GameModel& gameModel, const Po
 
     gameModel.AddProjectile(new BossLaserProjectile(firePos, fireDir));
 
+    float sizeMultiplier = 0.3f;
+    if (this->boss->GetCoreBody()->GetLocalBounds().IsEmpty()) {
+        sizeMultiplier *= FuturismBoss::CORE_BOSS_SIZE / LevelPiece::PIECE_HEIGHT;
+    }
+
     GameEventManager::Instance()->ActionBossEffect(
         ExpandingHaloEffectInfo(this->boss->GetCoreBody(), BASIC_WEAPON_EFFECT_DISCHARGE_TIME, 
-        BASIC_WEAPON_EFFECT_DISCHARGE_COLOUR, 0.5f, 
+        BASIC_WEAPON_EFFECT_DISCHARGE_COLOUR, sizeMultiplier, 
         Vector3D(0,0,this->boss->GetCurrentZShootDistFromOrigin())));
 }
 
@@ -2207,9 +2314,14 @@ void FuturismBossAIState::DoBasicWeaponWaveShot(GameModel& gameModel, const Poin
         gameModel.AddProjectile(new BossLaserProjectile(firePos, nextShotDir2));
     }
 
+    float sizeMultiplier = 0.3f;
+    if (this->boss->GetCoreBody()->GetLocalBounds().IsEmpty()) {
+        sizeMultiplier *= FuturismBoss::CORE_BOSS_SIZE / LevelPiece::PIECE_HEIGHT;
+    }
+
     GameEventManager::Instance()->ActionBossEffect(
         ExpandingHaloEffectInfo(this->boss->GetCoreBody(), BASIC_WEAPON_EFFECT_DISCHARGE_TIME, 
-        BASIC_WEAPON_EFFECT_DISCHARGE_COLOUR, 0.5f, 
+        BASIC_WEAPON_EFFECT_DISCHARGE_COLOUR, sizeMultiplier, 
         Vector3D(0,0,this->boss->GetCurrentZShootDistFromOrigin())));
 }
 
@@ -2254,6 +2366,32 @@ void FuturismBossAIState::DoIceShatterIfFrozen() {
 
     // Play a sound for the ice shattering
     gameModel->GetSound()->PlaySound(GameSound::BossIceShatterEvent, false, true);
+}
+
+void FuturismBossAIState::Refreeze(GameModel& gameModel) {
+    if (this->currState != FrozenAIState) {
+        return;
+    }
+
+    this->waitTimeCountdown = 0.0;
+    this->frozenTimeCountdown = this->GetFrozenTime();
+    this->frozenShakeEffectCountdown = 0.0;
+
+    GameSound* sound = gameModel.GetSound();
+    sound->StopSound(this->iceShakeSoundID);
+    this->iceShakeSoundID = INVALID_SOUND_ID;
+
+    // Play sound for the boss being frozen
+    sound->PlaySound(GameSound::BossFrozenEvent, false, true);
+
+    // EVENT: Effect of ice clouds and vapour around the boss to complement the freezing effect
+    EnumBossEffectInfo frozenEffect(EnumBossEffectInfo::FrozenIceClouds);
+    frozenEffect.SetBodyPart(this->boss->GetCoreBody());
+    frozenEffect.SetTimeInSecs(1.5);
+    GameEventManager::Instance()->ActionBossEffect(frozenEffect);
+
+    // EVENT: Full-screen flash for the re-freeze
+    GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.11, 0.0f));
 }
 
 void FuturismBossAIState::GoToRandomBasicMoveState() {
@@ -2309,27 +2447,14 @@ void FuturismBossAIState::GoToRandomBasicAttackState() {
     }  
 }
 
-void FuturismBossAIState::WeakenShield(const Vector2D& hitDir, float hitMagnitude, FuturismBoss::ShieldLimbType shieldType) {
-
-    if (this->boss->GetShieldBodyPart(shieldType)->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
-        assert(false);
-        return;
-    }
-
-    size_t shieldIdx = this->boss->GetShieldIndex(shieldType);
-    this->boss->ConvertAliveBodyPartToWeakpoint(shieldIdx, SHIELD_LIFE_POINTS, SHIELD_BALL_DAMAGE);
-
+void FuturismBossAIState::WeakenShieldDebrisEffect(const BossWeakpoint* crackedShield) {
     static const int NUM_DEBRIS_COLOURS = 5;
     static const Colour DEBRIS_COLOURS[NUM_DEBRIS_COLOURS] = {
         Colour(0.57f, 0.6f, 0.63f), Colour(0.467f, 0.463f, 0.455f), Colour(0.5f, 0.52f, 0.545f),
         Colour(0.58f, 0.58f, 0.58f), Colour(0.36f, 0.384f, 0.396f)
     };
-
-    assert(dynamic_cast<const BossWeakpoint*>(this->boss->bodyParts[shieldIdx]) != NULL);
-    const BossWeakpoint* crackedShield = static_cast<const BossWeakpoint*>(this->boss->bodyParts[shieldIdx]);
+    
     Collision::AABB2D shieldAABB = crackedShield->GenerateWorldAABB();
-
-    GameEventManager::Instance()->ActionBossHurt(crackedShield);
 
     const float aabbHalfWidth  = shieldAABB.GetWidth() / 2.0f;
     const float aabbHalfHeight = shieldAABB.GetHeight() / 2.0f;
@@ -2364,14 +2489,34 @@ void FuturismBossAIState::WeakenShield(const Vector2D& hitDir, float hitMagnitud
         2.0f + Randomizer::GetInstance()->RandomNumZeroToOne()*1.0);
     info3.OverrideDirection(bottomRight - centerPos);
     GameEventManager::Instance()->ActionBossEffect(info3);
-
-    this->bossHurtAnim = Boss::BuildBossHurtMoveAnim(hitDir, hitMagnitude, 1.0);
-    
-    this->DoIceShatterIfFrozen();
-    this->SetState(ShieldPartCrackedAIState);
 }
 
-void FuturismBossAIState::DestroyShield(const Vector2D& hitDir, FuturismBoss::ShieldLimbType shieldType) {
+void FuturismBossAIState::WeakenShield(const Vector2D& hitDir, float hitMagnitude, 
+                                       FuturismBoss::ShieldLimbType shieldType, bool doStateChange) {
+
+    if (this->boss->GetShieldBodyPart(shieldType)->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+        assert(false);
+        return;
+    }
+
+    size_t shieldIdx = this->boss->GetShieldIndex(shieldType);
+    this->boss->ConvertAliveBodyPartToWeakpoint(shieldIdx, SHIELD_LIFE_POINTS, SHIELD_BALL_DAMAGE);
+
+    assert(dynamic_cast<const BossWeakpoint*>(this->boss->bodyParts[shieldIdx]) != NULL);
+    const BossWeakpoint* crackedShield = static_cast<const BossWeakpoint*>(this->boss->bodyParts[shieldIdx]);
+    
+    this->WeakenShieldDebrisEffect(crackedShield);
+
+    if (doStateChange) {
+        GameEventManager::Instance()->ActionBossHurt(crackedShield);
+        this->bossHurtAnim = Boss::BuildBossHurtMoveAnim(hitDir, hitMagnitude, 1.0);
+        this->DoIceShatterIfFrozen();
+        this->SetState(ShieldPartCrackedAIState);
+    }
+}
+
+void FuturismBossAIState::DestroyShield(const Vector2D& hitDir, FuturismBoss::ShieldLimbType shieldType, 
+                                        bool doStateChange) {
 
     BossBodyPart* shieldToDestroy = this->boss->GetShieldBodyPart(shieldType);
     if (shieldToDestroy == NULL || shieldToDestroy->GetType() != AbstractBossBodyPart::WeakpointBodyPart) {
@@ -2385,6 +2530,7 @@ void FuturismBossAIState::DestroyShield(const Vector2D& hitDir, FuturismBoss::Sh
     float shieldSize = std::max<float>(shieldAABB.GetWidth(), shieldAABB.GetHeight());
 
     // Destroy the shield...
+    shieldToDestroy->SetLocalTransform(Vector3D(0,0,0), 0.0f);
     this->boss->ConvertAliveBodyPartToDeadBodyPart(shieldToDestroy);
     this->boss->UpdateBoundsForDestroyedShieldLimb(shieldType);
 
@@ -2392,14 +2538,16 @@ void FuturismBossAIState::DestroyShield(const Vector2D& hitDir, FuturismBoss::Sh
     shieldToDestroy->AnimateLocalTranslation(this->GenerateShieldDeathTranslationAnimation(shieldType, shieldSize, 
         (hitDir[0] == 0 ? Randomizer::GetInstance()->RandomNegativeOrPositive() : NumberFuncs::SignOf(hitDir[0])), TOTAL_BLOWUP_TIME));
     shieldToDestroy->AnimateLocalZRotation(this->GenerateShieldDeathRotationAnimation(shieldType, TOTAL_BLOWUP_TIME));
+   
+    if (doStateChange) {
+        // ... and make the boss look noticeably hurt
+        this->bossHurtAnim = Boss::BuildBossHurtMoveAnim(hitDir, FuturismBoss::CORE_BOSS_HALF_SIZE/2.0f, 
+            BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
+        GameEventManager::Instance()->ActionBossHurt(static_cast<BossWeakpoint*>(shieldToDestroy));
 
-    // ... and make the boss look noticeably hurt
-    this->bossHurtAnim = Boss::BuildBossHurtMoveAnim(hitDir, FuturismBoss::CORE_BOSS_HALF_SIZE/2.0f, 
-        BossWeakpoint::DEFAULT_INVULNERABLE_TIME_IN_SECS);
-    GameEventManager::Instance()->ActionBossHurt(static_cast<BossWeakpoint*>(shieldToDestroy));
-
-    this->DoIceShatterIfFrozen();
-    this->SetState(ShieldPartDestroyedAIState);
+        this->DoIceShatterIfFrozen();
+        this->SetState(ShieldPartDestroyedAIState);
+    }
 }
 
 AnimationMultiLerp<Vector3D> 
@@ -2411,7 +2559,7 @@ FuturismBossAIState::GenerateShieldDeathTranslationAnimation(FuturismBoss::Shiel
     const float bossHalfHeight = this->boss->alivePartsRoot->GenerateWorldAABB().GetHeight() / 2.0f;
     const float maxHeight = 1.2f*FuturismBoss::GetRightSubArenaMaxYBossPos(bossHalfHeight);
 
-    float xDist = 2.5f*xDir*shieldSize;
+    float xDist = 1.75f*xDir*shieldSize;
     float yDist = -(maxHeight + addedHeight);
     switch (shieldType) {
 

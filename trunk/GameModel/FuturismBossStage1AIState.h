@@ -80,6 +80,7 @@ private:
     // Inherited from BossAIState
     void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
     void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
+    void RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket);
     float GetTotalLifePercent() const;
     float GetAccelerationMagnitude() const { return FuturismBossAIState::DEFAULT_ACCELERATION; }
 
