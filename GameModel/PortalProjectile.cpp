@@ -34,7 +34,7 @@
 const float PortalProjectile::BOUNDS_COEFF = 0.7f;
 
 // Fraction of the base termination time where this portal is considered to be "close to" terminating
-const double PortalProjectile::CLOSE_TO_TERMINATING_FRACTION = 0.2;
+const double PortalProjectile::CLOSE_TO_TERMINATING_FRACTION = 0.33;
 
 std::pair<PortalProjectile*, PortalProjectile*> 
 PortalProjectile::BuildSiblingPortalProjectiles(const Point2D& portal1Pos, const Point2D& portal2Pos, 
@@ -61,6 +61,10 @@ Projectile(spawnLoc, width, height), sibling(NULL), colour(colour, 1.0f),
 ballHasGoneThroughBefore(false), baseTeriminationTime(baseTerminationTimeInSecs), 
 terminationCountdown(baseTerminationTimeInSecs) {
 
+    if (baseTerminationTimeInSecs != NO_TERMINATION_TIME) {
+        this->SetupAlphaFlickerAnim(CLOSE_TO_TERMINATING_FRACTION*baseTerminationTimeInSecs);
+    }
+
     // This is VERY necessary. Also make sure to call the two argument setter or else
     // there will be assertion errors.
     this->SetVelocity(Vector2D(0,0), 0);
@@ -68,8 +72,20 @@ terminationCountdown(baseTerminationTimeInSecs) {
 
 bool PortalProjectile::ModifyLevelUpdate(double dT, GameModel&) {
 
-    if (this->terminationCountdown != NO_TERMINATION_TIME) {
+    if (this->baseTeriminationTime != NO_TERMINATION_TIME) {
         this->terminationCountdown -= dT;
+
+        // Animate the close-to-termination alpha for both this portal and its sibling
+        if (!this->IsTerminating()) {
+            if (this->terminationCountdown <= CLOSE_TO_TERMINATING_FRACTION*this->baseTeriminationTime) {
+
+                this->alphaFlickerAnim.Tick(dT);
+                this->colour[3] = this->sibling->colour[3] = this->alphaFlickerAnim.GetInterpolantValue();
+            }
+            else {
+                this->colour[3] = this->sibling->colour[3] = 1.0f;
+            }
+        }
     }
 
     if (this->IsTerminating()) {
@@ -170,10 +186,38 @@ void PortalProjectile::ResetTeriminationCountdown() {
     if (this->terminationCountdown != NO_TERMINATION_TIME) {
         // Reset the termination countdown on this portal to the beginning
         this->terminationCountdown = this->baseTeriminationTime;
+        this->alphaFlickerAnim.ResetToStart();
     }
     else {
         // The countdown is in the sibling, reset it there instead
         assert(this->sibling->terminationCountdown != NO_TERMINATION_TIME);
         this->sibling->terminationCountdown = this->sibling->baseTeriminationTime;
+        this->sibling->alphaFlickerAnim.ResetToStart();
     }
+}
+
+void PortalProjectile::SetupAlphaFlickerAnim(double totalFlickerTime) {
+    static const double FLASH_FREQ = 50;
+    int numFlashes = static_cast<int>(totalFlickerTime*FLASH_FREQ);
+    if (numFlashes % 2 == 0) {
+        numFlashes++;
+    }
+    double timePerFlash = totalFlickerTime/numFlashes;
+
+    std::vector<double> timeVals(numFlashes, 0.0);
+    timeVals[0] = 0.0;
+    for (int i = 1; i < numFlashes; i++) {
+        timeVals[i] = timeVals[i-1] + timePerFlash;
+    }
+
+    std::vector<float> alphaVals;
+    alphaVals.reserve(numFlashes);
+    alphaVals.push_back(1.0f);
+    for (int i = 1; i < numFlashes; i += 2) {
+        alphaVals.push_back(0.01f); 
+        alphaVals.push_back(1.0f);
+    }
+
+    this->alphaFlickerAnim.SetLerp(timeVals, alphaVals);
+    this->alphaFlickerAnim.SetRepeat(false);
 }

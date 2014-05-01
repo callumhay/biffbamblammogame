@@ -78,15 +78,17 @@ BallDeathState::~BallDeathState() {
 	this->gameModel->GetTransformInfo()->SetBallDeathCamera(false);	
 	
 	// If we are exiting being in play then clear all items and timers
-	this->gameModel->ClearBeams();
+    this->gameModel->ClearSpecificBeams(Beam::PaddleBeam);
 	this->gameModel->ClearActiveTimers();
 	
     // Remove any rockets attached to the paddle
     this->gameModel->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RocketPaddle);
     this->gameModel->GetPlayerPaddle()->RemovePaddleType(PlayerPaddle::RemoteControlRocketPaddle);
 
-    // Only clear projectiles if it's game over
+    // Only clear projectiles and every other beam if it's game over
     if (this->gameModel->IsGameOver()) {
+
+        this->gameModel->ClearBeams();
         this->gameModel->ClearProjectiles();
     }
 

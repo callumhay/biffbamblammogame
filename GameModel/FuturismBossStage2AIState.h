@@ -63,7 +63,7 @@ private:
     double GetSingleTeleportInAndOutTime() const { return 0.9; }
     double GetTotalStrategyPortalShootTime() const { return 3.5; }
     double GetTotalWeaponPortalShootTime() const { return 3.25; }
-    double GetTwitchBeamShootTime() const { return 0.55; }
+    double GetTwitchBeamShootTime() const { return 0.6; }
     double GetBeamArcShootTime() const { return this->GetTwitchBeamShootTime(); }
     double GetBeamArcHoldTime() const  { return 1.2; }
     double GetBeamArcingTime() const { return 3.1; }

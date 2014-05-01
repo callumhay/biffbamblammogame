@@ -491,7 +491,7 @@ PaddleCollateralBlockCollisionEvent {
 }
 
 PortalProjectileOpenedEvent {
-	file = NOT_IMPLEMENTED
+	file = resources/PortalProjectileOpenedEvent.ogg
 }
 
 // Game Item Events **********************************************************
@@ -706,6 +706,12 @@ FuturismBossTeleportationChargingEvent {
 	file = resources/NOT_IMPLEMENTED
 }
 FuturismBossTeleportationEvent {
+	file = resources/NOT_IMPLEMENTED
+}
+FuturismBossPortalSummonChargeEvent {
+	file = resources/NOT_IMPLEMENTED
+}
+FuturismBossPortalFireEvent {
 	file = resources/NOT_IMPLEMENTED
 }
 FuturismBossTwitchBeamWarningEvent {

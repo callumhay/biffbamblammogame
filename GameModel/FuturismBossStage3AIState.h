@@ -55,6 +55,9 @@ private:
     SoundID transitionSoundID;
     int idxOfNonAvoidance, currNonAvoidanceIdx;
 
+    bool doneExtraWarning;
+    bool doneExtraWarningWait;
+    double extraWarningCountdown;
     double timeSinceLastAttractAttack;
     double avoidanceHaltingTime;
 
@@ -74,17 +77,17 @@ private:
     void GetRandomMoveToPositions(const GameModel& gameModel, std::vector<Point2D>& positions) const;
     double GetAfterAttackWaitTime(FuturismBossAIState::AIState attackState) const;
     double GetBallAttractTime() const { return 4.0; }
-    double GetBallDiscardTime() const { return 0.4; }
-    double GetFrozenTime() const { return FuturismBossAIState::DEFAULT_FROZEN_TIME_IN_SECS; }
-    double GetSingleTeleportInAndOutTime() const { return 0.8; }
-    double GetTotalStrategyPortalShootTime() const { return 3.3; }
-    double GetTotalWeaponPortalShootTime() const { return 3.1; }
-    double GetTwitchBeamShootTime() const { return 0.5; }
+    double GetBallDiscardTime() const { return 1.0; }
+    double GetFrozenTime() const { return 1.0 + FuturismBossAIState::DEFAULT_FROZEN_TIME_IN_SECS; }
+    double GetSingleTeleportInAndOutTime() const { return 0.9; }
+    double GetTotalStrategyPortalShootTime() const { return 3.5; }
+    double GetTotalWeaponPortalShootTime() const { return 3.3; }
+    double GetTwitchBeamShootTime() const { return 0.6; }
     double GetBeamArcShootTime() const { return this->GetTwitchBeamShootTime(); }
     double GetBeamArcHoldTime() const  { return 1.1; }
     double GetBeamArcingTime() const { return 3.0; }
-    double GetTimeBetweenBurstLineShots() const { return 0.2 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.08; }
-    double GetTimeBetweenBurstWaveShots() const { return 0.7 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.40; }
+    double GetTimeBetweenBurstLineShots() const { return 0.3 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.12; }
+    double GetTimeBetweenBurstWaveShots() const { return 0.8 + Randomizer::GetInstance()->RandomNumZeroToOne()*0.45; }
     int GetNumBurstLineShots() const { return 0; } // Doesn't matter, depends on movement time in this state
     int GetNumWaveBurstShots() const { return 0; } // Doesn't matter, depends on movement time in this state
     int GetNumShotsPerWaveBurst() const { return 5; }
@@ -96,6 +99,7 @@ private:
         Collision::AABB2D& pieceBounds, std::set<LevelPiece*>& candidates);
 
     void UpdateState(double dT, GameModel* gameModel);
+    void ExecuteTeleportAIState(double dT, GameModel* gameModel);
     void InitBasicBurstLineFireAIState();
     void ExecuteBasicBurstLineFireAIState(double dT, GameModel* gameModel);
     void InitBasicBurstWaveFireAIState();
@@ -113,6 +117,8 @@ private:
     float GetAccelerationMagnitude() const { return 1.2*FuturismBossAIState::DEFAULT_ACCELERATION; }
 
     // Helper Methods
+    void DoBulbsLaserStarWarningEffect(double timeInSecs) const;
+    void DoBulbLaserStarWarningEffect(const BossBodyPart* part, const Point2D& offset, double timeInSecs) const;
     bool BallAboutToHitBulbWeakpoints(const GameModel& gameModel) const;
     //bool BallAboutToHitBulbWeakpoint(const BossBodyPart& bulb, const GameBall& ball, const Vector2D& relativeBallDir, 
     //    const Point2D& ballSideAPt, const Point2D& ballSideBPt, float ballMoveMag) const;

@@ -74,6 +74,7 @@ public:
     virtual bool IsRefractableOrReflectable() const           = 0;
 
     virtual float GetZOffset() const { return 0.0f; }
+    virtual float GetAlpha() const { return 1.0f; }
 
     virtual bool BlastsThroughSafetyNets() const { return true; }
     virtual bool IsDestroyedBySafetyNets() const { return false; }

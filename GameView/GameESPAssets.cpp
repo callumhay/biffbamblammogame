@@ -64,6 +64,7 @@
 #include "../GameModel/ShortCircuitEffectInfo.h"
 #include "../GameModel/PortalSpawnEffectInfo.h"
 #include "../GameModel/GenericEmitterEffectInfo.h"
+#include "../GameModel/EnumGeneralEffectInfo.h"
 
 #include "../GameSound/GameSound.h"
 
@@ -4030,11 +4031,15 @@ void GameESPAssets::AddBossLaserBeamEffect(const BossLaserBeam& beam) {
         std::list<ESPPointEmitter*> originEffects = this->CreateBeamOriginEffects(beam);
         beamOriginEmittersVec.insert(beamOriginEmittersVec.end(), originEffects.begin(), originEffects.end());
     }
-    const Point2D& beamOrigin = beam.GetInitialBeamRay().GetOrigin();
+    Point3D emitPos(beam.GetInitialBeamRay().GetOrigin(), beam.GetZOffset());
     for (std::vector<ESPPointEmitter*>::iterator iter = beamOriginEmittersVec.begin(); iter != beamOriginEmittersVec.end(); ++iter) {
         ESPPointEmitter* originEmitter = *iter;
-        
-        originEmitter->SetAliveParticlePosition(beamOrigin[0], beamOrigin[1], beam.GetZOffset());
+        if (originEmitter->GetParticleInitialSpd().minValue > 0) {
+            originEmitter->SetEmitPosition(emitPos);
+        }
+        else {
+            originEmitter->SetAliveParticlePosition(emitPos[0], emitPos[1], emitPos[2]);
+        }
     }
 
     beamEmitters.insert(beamEmitters.end(), beamOriginEmittersVec.begin(), beamOriginEmittersVec.end());
@@ -4734,6 +4739,21 @@ void GameESPAssets::AddGenericEmitterEffect(const GenericEmitterEffectInfo& effe
     std::vector<ESPAbstractEmitter*> emitters;
     effectInfo.TakeEmitters(emitters);
     this->activeGeneralEmitters.insert(this->activeGeneralEmitters.end(), emitters.begin(), emitters.end());
+}
+
+void GameESPAssets::AddGeneralEnumEffect(const EnumGeneralEffectInfo& enumEffect) {
+    switch (enumEffect.GetSpecificType()) {
+        case EnumGeneralEffectInfo::FuturismBarrierBlockDisintegrationEffect: {
+            this->AddDebrisEffect(0.25f*LevelPiece::PIECE_WIDTH, 0.85f*LevelPiece::PIECE_WIDTH, 0.66f*enumEffect.GetTimeInSecs(), 
+                enumEffect.GetTimeInSecs(), enumEffect.GetPosition(), enumEffect.GetColour(), 1.0f, 
+                Vector3D(enumEffect.GetDirection()), 5 + (Randomizer::GetInstance()->RandomUnsignedInt() % 5));
+            break;
+        }
+
+        default:
+            assert(false);
+            break;
+    }
 }
 
 /**
@@ -6054,44 +6074,53 @@ void GameESPAssets::AddShockwaveEffect(const ShockwaveEffectInfo& info) {
 }
 
 void GameESPAssets::AddDebrisEffect(const DebrisEffectInfo& info) {
-
     Collision::AABB2D partAABB = info.GetPart()->GenerateWorldAABB();
     float maxSize = info.GetSizeMultiplier() * std::max<float>(partAABB.GetWidth(), partAABB.GetHeight());
     float minSize = info.GetSizeMultiplier() * std::min<float>(partAABB.GetWidth(), partAABB.GetHeight());
 
+    Vector3D dir;
+    if (info.IsDirectionOverriden()) {
+        dir = info.GetOverridenDirection();
+    }
+    else {
+        dir = Vector3D(info.GetPart()->GetTranslationPt2D() - info.GetExplosionCenter());
+        dir.Normalize();
+    }
+
+    this->AddDebrisEffect(minSize, maxSize, static_cast<float>(info.GetMinLifeOfDebrisInSecs()), 
+        static_cast<float>(info.GetMaxLifeOfDebrisInSecs()), Point3D(info.GetExplosionCenter(), 0.0f), 
+        info.GetColour(), info.GetForceMultiplier(), dir, info.GetNumDebrisBits());
+}
+
+void GameESPAssets::AddDebrisEffect(float minSize, float maxSize, float minLife, float maxLife, 
+                                    const Point3D& pos, const Colour& colour, float force, 
+                                    const Vector3D& dir, int numParticles) {
+
     ESPPointEmitter* debrisBits = new ESPPointEmitter();
     debrisBits->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-    debrisBits->SetInitialSpd(info.GetForceMultiplier() * ESPInterval(3.0f, 7.0f));
-    debrisBits->SetParticleLife(ESPInterval(static_cast<float>(info.GetMinLifeOfDebrisInSecs()), static_cast<float>(info.GetMaxLifeOfDebrisInSecs())));
+    debrisBits->SetInitialSpd(force * ESPInterval(3.0f, 7.0f));
+    debrisBits->SetParticleLife(ESPInterval(minLife, maxLife));
     debrisBits->SetEmitAngleInDegrees(55.0f);
     debrisBits->SetParticleSize(ESPInterval(0.075f * maxSize, 0.2f * maxSize));
     debrisBits->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
     debrisBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * minSize), ESPInterval(0.0f, 0.1f * minSize), ESPInterval(0));
-    debrisBits->SetEmitPosition(Point3D(info.GetExplosionCenter(), 0.0f));
+    debrisBits->SetEmitPosition(pos);
     debrisBits->SetParticleAlignment(ESP::ScreenAligned);
-
-    if (info.IsDirectionOverriden()) {
-        debrisBits->SetEmitDirection(info.GetOverridenDirection());
-    }
-    else {
-        Vector2D explosionDir = info.GetPart()->GetTranslationPt2D() - info.GetExplosionCenter();
-        explosionDir.Normalize();
-        debrisBits->SetEmitDirection(Vector3D(explosionDir, 0));
-    }
+    debrisBits->SetEmitDirection(dir);
 
     std::vector<Colour> colourPalette;
     colourPalette.reserve(5);
-    colourPalette.push_back(1.0f  * info.GetColour());
-    colourPalette.push_back(1.25f * info.GetColour());
-    colourPalette.push_back(1.5f  * info.GetColour());
-    colourPalette.push_back(1.75f * info.GetColour());
-    colourPalette.push_back(2.0f  * info.GetColour());
+    colourPalette.push_back(1.0f  * colour);
+    colourPalette.push_back(1.25f * colour);
+    colourPalette.push_back(1.5f  * colour);
+    colourPalette.push_back(1.75f * colour);
+    colourPalette.push_back(2.0f  * colour);
 
     debrisBits->SetParticleColourPalette(colourPalette);
 
     debrisBits->AddEffector(&this->gravity);
     debrisBits->AddEffector(&this->particleFader);
-    debrisBits->SetRandomTextureParticles(info.GetNumDebrisBits(), this->rockTextures);
+    debrisBits->SetRandomTextureParticles(numParticles, this->rockTextures);
 
     this->activeGeneralEmitters.push_back(debrisBits);
 }
@@ -7215,7 +7244,10 @@ void GameESPAssets::DrawPostProjectileEffects(double dT, const Camera& camera) {
         for (ProjectileEmitterCollectionIter emitIter = projEmitters.begin(); 
             emitIter != projEmitters.end(); ++emitIter) {
 
-            this->DrawProjectileEmitter(dT, camera, *currProjectile, *emitIter);
+            ESPPointEmitter* emitter = *emitIter;
+            emitter->SetAliveParticleAlphaMax(currProjectile->GetAlpha());
+
+            this->DrawProjectileEmitter(dT, camera, *currProjectile, emitter);
         }
     }
 }

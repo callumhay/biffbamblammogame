@@ -37,7 +37,7 @@
 
 const char* GameCompleteDisplayState::DEMO_COMPLETE_TITLE_TEXT = "Demo Complete!"; 
 const char* GameCompleteDisplayState::CONGRATS_TEXT = "Thanks for playing! Hope you enjoyed Biff! Bam!! Blammo!?!";
-const char* GameCompleteDisplayState::NOTE_TEXT     = "You just completed four out of seven worlds in what will be the final game. Three more worlds are still on the way along with more items, blocks, levels, and bosses.";
+const char* GameCompleteDisplayState::NOTE_TEXT     = "You just completed five of the seven movements in what will be the final game. Three more movements are still on the way along with more items, blocks, levels, and bosses.";
 
 const float GameCompleteDisplayState::TITLE_Y_GAP          = 30;
 const float GameCompleteDisplayState::TITLE_CONGRATS_Y_GAP = 60;

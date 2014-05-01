@@ -32,6 +32,7 @@
 #include "BossWeakpoint.h"
 #include "BossLaserBeam.h"
 #include "FullscreenFlashEffectInfo.h"
+#include "EnumBossEffectInfo.h"
 
 #include "../GameSound/GameSound.h"
 
@@ -40,7 +41,7 @@ const double FuturismBossStage3AIState::FULL_STAR_BEAM_ROTATION_TIME_IN_SECS = 1
 const double FuturismBossStage3AIState::MIN_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS = 40.0;
 const double FuturismBossStage3AIState::MAX_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS = 80.0;
 
-const double FuturismBossStage3AIState::HALTING_AVOIDANCE_TELEPORT_WAIT_TIME_IN_SECS = 3.5;
+const double FuturismBossStage3AIState::HALTING_AVOIDANCE_TELEPORT_WAIT_TIME_IN_SECS = 2.5;
 
 const float FuturismBossStage3AIState::DEFAULT_MOVE_ROTATION_SPD = 270.0f;
 
@@ -50,7 +51,7 @@ FuturismBossAIState(boss), hasDestroyedBarrier(false), transitionSoundID(INVALID
 currRotationSpd(0.0f), currRotationAccel(0.0f), timeSinceLastAttractAttack(0.0), avoidanceHaltingTime(FLT_MAX) {
 
     this->arenaState = arena;
-    this->currCoreRotInDegs = 0;
+    this->currCoreRotInDegs   = 0;
     this->idxOfNonAvoidance   = Randomizer::GetInstance()->RandomUnsignedInt() % TIMES_PER_ONE_NON_AVOIDANCE;
     this->currNonAvoidanceIdx = 0;
 
@@ -120,8 +121,10 @@ void FuturismBossStage3AIState::GoToNextState(const GameModel& gameModel) {
     }
 
     if (this->currState != FuturismBossAIState::BallDiscardAIState &&
+        this->timeSinceLastStratPortal > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
+        this->timeSinceLastAttractAttack > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
         (this->timeSinceLastAttractAttack > MAX_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS || 
-        this->timeSinceLastAttractAttack > MIN_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS && Randomizer::GetInstance()->RandomUnsignedInt() % 5 == 0) &&
+        this->timeSinceLastAttractAttack > MIN_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS && Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) &&
         this->IsBallAvailableForAttractingAndTeleporting(gameModel) && this->IsBallFarEnoughAwayToInitiateAttracting(gameModel)) {
 
         this->timeSinceLastAttractAttack = 0.0;
@@ -325,13 +328,13 @@ double FuturismBossStage3AIState::GetAfterAttackWaitTime(FuturismBossAIState::AI
             return 1.25;
 
         case FuturismBossAIState::LaserBeamTwitchAIState:
-            return 0.9;
+            return 1.0;
 
         default:
             break;
     }
 
-    return 0.6;
+    return 0.8;
 }
 
 void FuturismBossStage3AIState::GetStrategyPortalCandidatePieces(const GameLevel& level, Collision::AABB2D& pieceBounds, 
@@ -377,7 +380,17 @@ void FuturismBossStage3AIState::UpdateState(double dT, GameModel* gameModel) {
     }
 }
 
+void FuturismBossStage3AIState::ExecuteTeleportAIState(double dT, GameModel* gameModel) {
+    this->DoBasicRotation(dT);
+    FuturismBossAIState::ExecuteTeleportAIState(dT, gameModel);
+}
+
 void FuturismBossStage3AIState::InitBasicBurstLineFireAIState() {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
     GameModel* gameModel = this->boss->GetGameModel();
     assert(gameModel != NULL);
 
@@ -434,6 +447,11 @@ void FuturismBossStage3AIState::ExecuteBasicBurstLineFireAIState(double dT, Game
 }
 
 void FuturismBossStage3AIState::InitBasicBurstWaveFireAIState() {
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
     GameModel* gameModel = this->boss->GetGameModel();
     assert(gameModel != NULL);
 
@@ -456,7 +474,7 @@ void FuturismBossStage3AIState::InitBasicBurstWaveFireAIState() {
     this->SetMoveToTargetPosition(bossPos, moveToPositions[randomIdx]);
 
     // Rotation...
-    this->currRotationSpd = Randomizer::GetInstance()->RandomNegativeOrPositive() * 180.0;
+    this->currRotationSpd = Randomizer::GetInstance()->RandomNegativeOrPositive() * DEFAULT_MOVE_ROTATION_SPD;
 
     this->numConsecutiveMoves = prevNumMoves+1;
 }
@@ -493,7 +511,15 @@ void FuturismBossStage3AIState::ExecuteBasicBurstWaveFireAIState(double dT, Game
 void FuturismBossStage3AIState::InitLaserBeamStarAIState() {
     this->DetachAndShootBall(this->ballDirBeforeAttachment);
 
+    AbstractBossBodyPart* partToAnimate = NULL;
+    float fullRotationDegAmt;
+    this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
     this->waitTimeCountdown = this->GetAfterAttackWaitTime(LaserBeamStarAIState);
+    this->extraWarningCountdown = 0.5;
+    this->doneExtraWarning = false;
+    this->doneExtraWarningWait = false;
     this->countdownToShot = this->GetBeamArcShootTime();
     this->weaponWasShot = false;
     this->currMultiBeam.clear();
@@ -502,10 +528,12 @@ void FuturismBossStage3AIState::InitLaserBeamStarAIState() {
     this->beamSweepSpd = Randomizer::GetInstance()->RandomNegativeOrPositive() * (360.0f / FULL_STAR_BEAM_ROTATION_TIME_IN_SECS);
     
     assert(this->countdownToShot > EPSILON);
-    this->currRotationAccel = -this->currRotationSpd / this->countdownToShot;
+
+    this->currRotationAccel = 0.0;
+    this->currRotationSpd   = 0.0;
 
     // The boss emits a brief flare before firing its laser beam...
-    this->DoLaserBeamWarningEffect(1.75*this->countdownToShot, false);
+    this->DoLaserBeamWarningEffect(0.5, false);
 
     this->numConsecutiveMoves = 0;
     this->numConsecutiveShots = 0;
@@ -513,10 +541,31 @@ void FuturismBossStage3AIState::InitLaserBeamStarAIState() {
     this->numConsecutiveAttacks++;
 }
 void FuturismBossStage3AIState::ExecuteLaserBeamStarAIState(double dT, GameModel* gameModel) {
-    
+
     AbstractBossBodyPart* partToAnimate = NULL;
     float fullRotationDegAmt;
     this->GetCenterRotationBodyPartAndFullDegAmt(partToAnimate, fullRotationDegAmt);
+    partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
+
+    if (!this->doneExtraWarning) {
+        if (this->extraWarningCountdown <= 0) {
+            this->DoBulbsLaserStarWarningEffect(0.5);
+            this->doneExtraWarning = true;
+            this->extraWarningCountdown = 0.1;
+        }
+        else {
+            this->extraWarningCountdown -= dT;
+        }
+        return;
+    }
+
+    if (!this->doneExtraWarningWait) {
+        this->extraWarningCountdown -= dT;
+        if (this->extraWarningCountdown <= 0) {
+            this->doneExtraWarningWait = true;
+        }
+        return;
+    }
 
     if (this->countdownToShot <= 0) {
 
@@ -641,17 +690,6 @@ void FuturismBossStage3AIState::ExecuteLaserBeamStarAIState(double dT, GameModel
     }
     else {
         this->countdownToShot -= dT;
-
-        if (!this->weaponWasShot) {
-            this->currRotationSpd += this->currRotationAccel*dT;
-            // Slow down the rotation speed of the boss to zero...
-            if ((this->currRotationAccel > 0 && this->currRotationSpd > 0) || (this->currRotationAccel < 0 && this->currRotationSpd < 0)) {
-                this->currRotationSpd = 0;
-            }
-            this->currCoreRotInDegs += this->currRotationSpd*dT;
-            this->currCoreRotInDegs = fmod(this->currCoreRotInDegs, 360.0f);
-            partToAnimate->SetLocalZRotation(this->currCoreRotInDegs);
-        }
     }
 }
 
@@ -688,7 +726,7 @@ void FuturismBossStage3AIState::CollisionOccurred(GameModel* gameModel, GameBall
     // if the ball is close enough then we consider that bulb destroyed.
     if (this->currState == FrozenAIState) {
         
-        static const float RADIUS_COEFF = 1.1f;
+        static const float RADIUS_COEFF = 1.33f;
 
         // Is the ball close enough to any of the non-destroyed bulbs?
         int bulbIdx = -1;
@@ -742,19 +780,26 @@ void FuturismBossStage3AIState::CollisionOccurred(GameModel* gameModel, Projecti
     // Check the type of projectile, only ice blasts should be available for affecting the boss in this way.
     // Rockets are dealt with in the "RocketExplosionOccurred" method.
     bool isIceBlast = projectile->GetType() == Projectile::PaddleIceBlastProjectile;
-    if (!isIceBlast || !this->hasDestroyedBarrier || this->currState == FrozenAIState || 
-        this->currState == BulbHitAndDestroyedAIState || this->currState == AngryAIState || 
-        this->currState == FinalDeathThroesAIState || this->currState == DestroyLevelBarrierAIState) {
+    if (!isIceBlast || !this->hasDestroyedBarrier || this->currState == BulbHitAndDestroyedAIState || 
+        this->currState == AngryAIState || this->currState == FinalDeathThroesAIState || 
+        this->currState == DestroyLevelBarrierAIState) {
 
         return;
     }
+
+
 
     if (collisionPart == this->boss->GetCoreBody() || collisionPart == this->boss->GetCoreTopBulb() || 
         collisionPart == this->boss->GetCoreBottomBulb() || collisionPart == this->boss->GetCoreLeftBulb() ||
         collisionPart == this->boss->GetCoreRightBulb()) {
 
-        // If we're dealing with an ice blast then it's going to freeze the boss, but don't hurt it
-        this->SetState(FrozenAIState);
+        if (this->currState == FrozenAIState) {
+            this->Refreeze(*gameModel);
+        }
+        else {
+            // If we're dealing with an ice blast then it's going to freeze the boss, but don't hurt it
+            this->SetState(FrozenAIState);
+        }
     }
 }
 
@@ -840,6 +885,41 @@ float FuturismBossStage3AIState::GetTotalLifePercent() const {
     }
 
     return totalLife;
+}
+
+void FuturismBossStage3AIState::DoBulbsLaserStarWarningEffect(double timeInSecs) const {
+    Point2D pos;
+    Vector2D tVec = this->boss->GetCoreBody()->GetTranslationVec2D();
+
+    if (!this->boss->GetCoreTopBulb()->GetIsDestroyed()) {
+        pos = this->boss->GetCoreTopBulbWorldPos() - tVec;
+        this->DoBulbLaserStarWarningEffect(this->boss->GetCoreBody(), pos, timeInSecs);
+    }
+    if (!this->boss->GetCoreBottomBulb()->GetIsDestroyed()) {
+        pos = this->boss->GetCoreBottomBulbWorldPos() - tVec;
+        this->DoBulbLaserStarWarningEffect(this->boss->GetCoreBody(), pos, timeInSecs);
+    }
+    if (!this->boss->GetCoreLeftBulb()->GetIsDestroyed()) {
+        pos = this->boss->GetCoreLeftBulbWorldPos() - tVec;
+        this->DoBulbLaserStarWarningEffect(this->boss->GetCoreBody(), pos, timeInSecs);
+    }
+    if (!this->boss->GetCoreRightBulb()->GetIsDestroyed()) {
+        pos = this->boss->GetCoreRightBulbWorldPos() - tVec;
+        this->DoBulbLaserStarWarningEffect(this->boss->GetCoreBody(), pos, timeInSecs);
+    }
+}
+
+void FuturismBossStage3AIState::DoBulbLaserStarWarningEffect(const BossBodyPart* part, const Point2D& offset, double timeInSecs) const {
+    // Effects for the warning...
+    EnumBossEffectInfo warningEffectInfo(EnumBossEffectInfo::FuturismBossWarningFlare);
+    warningEffectInfo.SetBodyPart(part);
+    warningEffectInfo.SetOffset(Vector3D(offset[0], offset[1], this->boss->GetCurrArmZOffset()));
+    warningEffectInfo.SetSize1D(FuturismBoss::CORE_BULB_SIZE);
+    warningEffectInfo.SetTimeInSecs(timeInSecs);
+    GameEventManager::Instance()->ActionBossEffect(warningEffectInfo);
+
+    // Sound for the warning...
+    this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::FuturismBossTwitchBeamWarningEvent, false, true, 0.8f);
 }
 
 bool FuturismBossStage3AIState::BallAboutToHitBulbWeakpoints(const GameModel& gameModel) const {

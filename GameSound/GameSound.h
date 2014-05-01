@@ -243,6 +243,8 @@ public:
         DecoBossElectricShockLoop,
         FuturismBossTeleportationChargingEvent,
         FuturismBossTeleportationEvent,
+        FuturismBossPortalSummonChargeEvent,
+        FuturismBossPortalFireEvent,
         FuturismBossTwitchBeamWarningEvent,
         FuturismBossArcBeamWarningEvent,
         FuturismBossAttractorBeamOpenAndLoopEvent,
@@ -335,7 +337,7 @@ public:
     SoundID PlaySound(const GameSound::SoundType& soundType, bool isLooped, bool applyActiveEffects = true, float volume = 1.0f);
     SoundID PlaySoundAtPosition(const GameSound::SoundType& soundType, bool isLooped, 
         const Point3D& position, bool applyActiveEffects, bool applyLevelTranslation, bool applyGameFGTransform, 
-        float minDistance = DEFAULT_MIN_3D_SOUND_DIST, float volume = 1.0f);
+        float minDistance = 500.0f, float volume = 1.0f);
 
     void StopSound(SoundID soundID, double fadeOutTimeInSecs = 0.0);
     void StopAllSoundsWithType(const GameSound::SoundType& soundType, double fadeOutTimeInSecs = 0.0);

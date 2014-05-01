@@ -469,7 +469,7 @@ void BossMesh::AddSummonPortalEffect(const SummonPortalsEffectInfo& info) {
 
     // NOTE: Beams should be drawn first!
     this->laterPassEffects.push_back(strategy1);
-    this->fgEffects.push_back(strategy2);
+    this->laterPassEffects.push_back(strategy2);
 }
 
 void BossMesh::AddTeleportEffect(const BossTeleportEffectInfo& info) {
@@ -840,7 +840,7 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
                 new BossBodyPartEmitterUpdateStrategy(info.GetBodyPart(), emitters);
             strategy->SetOffset(info.GetOffset());
 
-            this->fgEffects.push_back(strategy);
+            this->laterPassEffects.push_back(strategy);
 
             break;
         }
@@ -1231,9 +1231,9 @@ void BossMesh::BuildSummonPortalEffects(const Point3D& bossPos, const Point3D& p
     emitFlare->SetInitialSpd(ESPInterval(0));
     emitFlare->SetParticleLife(ESPInterval(effectTime));
     emitFlare->SetEmitAngleInDegrees(0);
-    emitFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    emitFlare->SetParticleAlignment(ESP::ScreenAligned);
     emitFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    emitFlare->SetParticleSize(ESPInterval(4*size));
+    emitFlare->SetParticleSize(ESPInterval(3.25*size));
     emitFlare->SetParticleRotation(ESPInterval(0, 359.99f));
     emitFlare->SetParticleColour(ESPInterval(brightPortalColour.R()), 
         ESPInterval(brightPortalColour.G()), ESPInterval(brightPortalColour.B()), ESPInterval(1.0f));
@@ -1248,7 +1248,7 @@ void BossMesh::BuildSummonPortalEffects(const Point3D& bossPos, const Point3D& p
     emitLensFlare->SetEmitAngleInDegrees(0);
     emitLensFlare->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     emitLensFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    emitLensFlare->SetParticleSize(ESPInterval(5*size));
+    emitLensFlare->SetParticleSize(ESPInterval(4.5*size));
     emitLensFlare->SetParticleColour(ESPInterval(brightPortalColour.R()), 
         ESPInterval(brightPortalColour.G()), ESPInterval(brightPortalColour.B()), ESPInterval(1.0f));
     emitLensFlare->AddCopiedEffector(fadeEffector);

@@ -3132,6 +3132,10 @@
 						Name="Header Files"
 						>
 						<File
+							RelativePath=".\GameModel\EnumGeneralEffectInfo.h"
+							>
+						</File>
+						<File
 							RelativePath=".\GameModel\GeneralEffectEventInfo.h"
 							>
 						</File>

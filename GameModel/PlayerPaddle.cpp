@@ -1568,7 +1568,7 @@ void PlayerPaddle::SetupAlphaFlashAnim(double totalFlashTime) {
 }
 
 bool PlayerPaddle::GetIsStableForGoingThroughPortals() const {
-    return fabs(this->centerPos[1] - this->defaultYPos) < 0.01f;
+    return fabs(this->centerPos[1] - this->defaultYPos) < 0.1f;
 }
 
 #ifdef _DEBUG
@@ -1838,9 +1838,9 @@ void PlayerPaddle::BeamCollision(const Beam& beam, const BeamSegment& beamSegmen
 
     float currHeight = 2.0f * this->GetHalfHeight();
 
-    double hitEffectTime = intensityMultiplier * 6.5;
+    double hitEffectTime = intensityMultiplier * 5.0;
     this->SetPaddleHitByProjectileAnimation(beamSegment.GetEndPoint(), 
-        hitEffectTime, intensityMultiplier * 3.5f * currHeight, 
+        hitEffectTime, intensityMultiplier * 2.5f * currHeight, 
         intensityMultiplier * 6.0f * currHeight, 80.0f);
 
     this->SetupAlphaFlashAnim(0.25*hitEffectTime);

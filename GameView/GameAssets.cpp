@@ -1546,7 +1546,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 
         case Projectile::PortalBlobProjectile: {
             // Play a sound for the portal being summoned into existence
-            sound->PlaySoundAtPosition(GameSound::PortalProjectileOpenedEvent, false, projectile.GetPosition3D(), true, true, true);
+            sound->PlaySoundAtPosition(GameSound::PortalProjectileOpenedEvent, false, projectile.GetPosition3D(), true, true, true, 50.0f);
             break;
         }
 
@@ -1782,7 +1782,7 @@ void GameAssets::PaddleHurtByBeam(const PlayerPaddle& paddle, const Beam& beam, 
 
     // Vibrate the controller
     float intensityMultiplier = (beamSegment.GetRadius() / paddle.GetHalfWidthTotal());
-    GameControllerManager::GetInstance()->VibrateControllers(intensityMultiplier * 1.33f,
+    GameControllerManager::GetInstance()->VibrateControllers(intensityMultiplier * 1.25f,
         BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
 }
 
@@ -1830,7 +1830,7 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera,
 
 	// Add a camera/controller shake and flash for when the rocket explodes...
     
-    // Make boss rockets a bit weaker (interferes a bit less with the gameplay during the boss fight)
+    // Make boss rockets a bit weaker (interferes a bit less with the game play during the boss fight)
     if (rocket.GetType() == Projectile::BossRocketBulletProjectile) {
         camera.ApplyCameraShake(forcePercentage * 0.75f, forcePercentage * Vector3D(0.7f, 0.6f, 0.1f), 100);
         GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
@@ -1839,8 +1839,8 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera,
     }
     else {
         camera.ApplyCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 122);
-        GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.5f,
-            BBBGameController::MediumVibration, BBBGameController::HeavyVibration);
+        GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.33f,
+            BBBGameController::MediumVibration, BBBGameController::MediumVibration);
         this->flashHUD->Activate(0.5, 1.0f * flashMultiplier);
     }
 

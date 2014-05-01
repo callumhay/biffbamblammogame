@@ -321,14 +321,19 @@ void FuturismBossStage2AIState::CollisionOccurred(GameModel* gameModel, Projecti
     // Check the type of projectile, only ice blasts should be available for affecting the boss in this way.
     // Rockets are dealt with in the "RocketExplosionOccurred" method.
     bool isIceBlast = projectile->GetType() == Projectile::PaddleIceBlastProjectile;
-    if (!isIceBlast || this->currState == FrozenAIState || this->currState == ShieldPartCrackedAIState ||
+    if (!isIceBlast || this->currState == ShieldPartCrackedAIState ||
         this->currState == ShieldPartDestroyedAIState || this->currState == AngryAIState) {
         return;
     }
 
     if (collisionPart == this->boss->GetCoreShield() || collisionPart == this->boss->GetCoreBody()) {
-        // If we're dealing with an ice blast then it's going to freeze the boss, but don't hurt it
-        this->SetState(FrozenAIState);
+        if (this->currState == FrozenAIState) {
+            this->Refreeze(*gameModel);
+        }
+        else {
+            // If we're dealing with an ice blast then it's going to freeze the boss, but don't hurt it
+            this->SetState(FrozenAIState);
+        }
     }
 }
 

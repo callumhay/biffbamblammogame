@@ -50,7 +50,7 @@ FuturismBossStage1AIState::FuturismBossStage1AIState(FuturismBoss* boss) : Futur
     // NOTE: Shields aren't weak-points, but they can be destroyed by rockets
 
     // Boss starts off by teleporting into the left arena...
-    this->SetState(FuturismBossAIState::TeleportAIState);
+    this->SetState(FuturismBossAIState::IntroStartingAIState);
 }
 
 FuturismBossStage1AIState::~FuturismBossStage1AIState() {
@@ -154,6 +154,12 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
         return;
     }
     */
+
+    // Intro animation
+    if (this->currState == IntroStartingAIState) {
+        this->SetState(IntroTeleportAIState);
+        return;
+    }
 
     // If it's been too long since the last strategy portal was shot then we should shoot one
     // or else the battle could take forever (the player NEEDS the portal to get the item required
@@ -380,54 +386,100 @@ void FuturismBossStage1AIState::CollisionOccurred(GameModel* gameModel, Projecti
     assert(projectile != NULL);
     assert(collisionPart != NULL);
 
-    // Only rocket projectiles can hurt the boss in this state, also make sure the boss is in a good state to be hurt
-    if ((!projectile->IsRocket() && projectile->GetType() != Projectile::PaddleIceBlastProjectile) || 
-        this->currState == ShieldPartCrackedAIState || this->currState == ShieldPartDestroyedAIState || 
-        this->currState == AngryAIState) {
+    // NOTE: We deal with rockets in the RocketExplosionOccurred function!
+    if (projectile->GetType() != Projectile::PaddleIceBlastProjectile || 
+        this->currState == ShieldPartCrackedAIState ||  this->currState == AngryAIState) {
 
         return;
     }
 
-    if (projectile->IsRocket()) {
-        if (collisionPart == this->boss->GetTopShield()) {
-            if (this->boss->IsTopShieldWeakened()) {
-                this->DestroyShield(projectile->GetVelocityDirection(), FuturismBoss::TopShield);
-            }
-            else {
-                this->WeakenShield(projectile->GetVelocityDirection(), projectile->GetHeight(), FuturismBoss::TopShield);
-            }
-        }
-        else if (collisionPart == this->boss->GetBottomShield()) {
-            if (this->boss->IsBottomShieldWeakened()) {
-                this->DestroyShield(projectile->GetVelocityDirection(), FuturismBoss::BottomShield);
-            }
-            else {
-                this->WeakenShield(projectile->GetVelocityDirection(), projectile->GetHeight(), FuturismBoss::BottomShield);
-            }
-        }
-        else if (collisionPart == this->boss->GetLeftShield()) {
-            if (this->boss->IsLeftShieldWeakened()) {
-                this->DestroyShield(projectile->GetVelocityDirection(), FuturismBoss::LeftShield);
-            }
-            else {
-                this->WeakenShield(projectile->GetVelocityDirection(), projectile->GetHeight(), FuturismBoss::LeftShield);
-            }
-        }
-        else if (collisionPart == this->boss->GetRightShield()) {
-            if (this->boss->IsRightShieldWeakened()) {
-                this->DestroyShield(projectile->GetVelocityDirection(), FuturismBoss::RightShield);
-            }
-            else {
-                this->WeakenShield(projectile->GetVelocityDirection(), projectile->GetHeight(), FuturismBoss::RightShield);
-            }
-        }
-    }
-    else if (collisionPart == this->boss->GetCoreBody() || collisionPart == this->boss->GetCoreShield() &&
+    if (collisionPart == this->boss->GetCoreBody() || collisionPart == this->boss->GetCoreShield() &&
              projectile->GetType() == Projectile::PaddleIceBlastProjectile) {
 
         // Freeze the boss if an ice blast hits the core... this has no real effect in this state damage-wise, but
         // since it's still possible to get the ice blaster item, do we should do it
         this->SetState(FrozenAIState);
+    }
+}
+
+void FuturismBossStage1AIState::RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket) {
+    UNUSED_PARAMETER(gameModel);
+
+    if (this->currState == ShieldPartCrackedAIState ||  this->currState == AngryAIState) {
+        return;
+    }
+    
+    static const float DEFAULT_EXPLOSION_RADIUS = FuturismBoss::CORE_BOSS_HALF_SIZE;
+    float rocketSizeFactor = rocket->GetHeight() / rocket->GetDefaultHeight();
+    Collision::Circle2D explosionCircle(rocket->GetPosition(), rocketSizeFactor*DEFAULT_EXPLOSION_RADIUS);
+
+    // Find all the shields that were in the explosion radius and either destroy or damage them...
+    const Vector2D& rocketVelDir = rocket->GetVelocityDirection();
+
+    std::vector<FuturismBoss::ShieldLimbType> limbsToDestroy;
+    limbsToDestroy.reserve(4);
+    std::vector<FuturismBoss::ShieldLimbType> limbsToCrack;
+    limbsToCrack.reserve(4);
+    
+    if (this->boss->GetTopShield()->GetWorldBounds().CollisionCheck(explosionCircle)) {
+        if (this->boss->IsTopShieldWeakened()) {
+            limbsToDestroy.push_back(FuturismBoss::TopShield);
+        }
+        else {
+            limbsToCrack.push_back(FuturismBoss::TopShield);
+        }
+    }
+    if (this->boss->GetBottomShield()->GetWorldBounds().CollisionCheck(explosionCircle)) {
+        if (this->boss->IsBottomShieldWeakened()) {
+            limbsToDestroy.push_back(FuturismBoss::BottomShield);
+        }
+        else {
+            limbsToCrack.push_back(FuturismBoss::BottomShield);
+        }
+    }
+    if (this->boss->GetLeftShield()->GetWorldBounds().CollisionCheck(explosionCircle)) {
+        if (this->boss->IsLeftShieldWeakened()) {
+            limbsToDestroy.push_back(FuturismBoss::LeftShield);
+        }
+        else {
+            limbsToCrack.push_back(FuturismBoss::LeftShield);
+        }
+    }
+    if (this->boss->GetRightShield()->GetWorldBounds().CollisionCheck(explosionCircle)) {
+        if (this->boss->IsRightShieldWeakened()) {
+            limbsToDestroy.push_back(FuturismBoss::RightShield);
+        }
+        else {
+            limbsToCrack.push_back(FuturismBoss::RightShield);
+        }
+    }
+
+    // Crack them and destroy them but make sure only one state change is made...
+    if (limbsToCrack.empty() && limbsToDestroy.empty()) {
+        return;
+    }
+    else if (limbsToCrack.size() + limbsToDestroy.size() == 1) {
+        if (limbsToCrack.empty()) {
+            this->DestroyShield(rocketVelDir, limbsToDestroy.front());
+        }
+        else {
+            this->WeakenShield(rocketVelDir, rocket->GetHeight(), limbsToCrack.front());
+        }
+    }
+    else if (limbsToDestroy.empty()) {
+        for (int i = 0; i < static_cast<int>(limbsToCrack.size())-1; i++) {
+            this->WeakenShield(rocketVelDir, rocket->GetHeight(), limbsToCrack[i], false);
+        }
+        this->WeakenShield(rocketVelDir, rocket->GetHeight(), limbsToCrack.back(), true);
+    }
+    else {
+        for (int i = 0; i < static_cast<int>(limbsToCrack.size()); i++) {
+            this->WeakenShield(rocketVelDir, rocket->GetHeight(), limbsToCrack[i], false);
+        }
+        for (int i = 0; i < static_cast<int>(limbsToDestroy.size())-1; i++) {
+            this->DestroyShield(rocketVelDir, limbsToDestroy[i], false);
+        }
+        this->DestroyShield(rocketVelDir, limbsToDestroy.back(), true);
     }
 }
 
