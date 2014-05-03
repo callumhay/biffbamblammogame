@@ -55,7 +55,8 @@ public:
 	ESPParticle();
 	virtual ~ESPParticle();
 
-	Matrix4x4 GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment);
+	void GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+        const Camera& cam, const ESP::ESPAlignment alignment, const Point3D& localPos, Matrix4x4& result);
 
 	/**
 	 * Is this particle dead or not.
@@ -67,7 +68,7 @@ public:
 
 	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	virtual void Tick(const double dT);
-	virtual void Draw(const Camera& camera, const ESP::ESPAlignment& alignment);
+	virtual void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, const Camera& camera, const ESP::ESPAlignment& alignment);
 	virtual void Kill() {
 		this->currLifeElapsed = this->totalLifespan;
 	}
@@ -108,11 +109,19 @@ public:
 		this->initSize = size;
 	}
 
-	const Vector3D& GetVelocity() const {
-		return this->velocity;
+	Vector3D GetVelocity() const {
+		return this->speed * this->velocityDir;
 	}
 	void SetVelocity(const Vector3D& v) {
-		this->velocity = v;
+        if (v.IsZero()) { 
+            velocityDir = Vector3D(0,0,0); 
+            this->speed = 0.0f; 
+        }
+        else {
+            this->speed = v.length();
+            assert(this->speed > 0);
+		    this->velocityDir = v/this->speed;
+        }
 	}
 
 	void GetColour(Colour& rgb, float& alpha) {
@@ -185,7 +194,9 @@ protected:
 
 	// Kinematics variables for this particle
 	Point3D  position;	// Position of the particle in world space
-	Vector3D velocity;
+	
+    Vector3D velocityDir;   // Direction (normalized) of the velocity
+    float speed;            // Always positive
 
 	static float minMaxPtSize[2];
 	

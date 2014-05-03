@@ -136,7 +136,8 @@ void TutorialEventsListener::ItemActivatedEvent(const GameItem& item) {
     }
 }
 
-void TutorialEventsListener::PaddleWeaponFiredEvent() {
+void TutorialEventsListener::PaddleWeaponFiredEvent(PlayerPaddle::PaddleType weaponType) {
+    UNUSED_PARAMETER(weaponType);
     if (!this->fireWeaponAlreadyShown) {
         this->fireWeaponHint->Unshow(0.0, 0.5);
         this->fireWeaponAlreadyShown = true;

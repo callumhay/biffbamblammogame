@@ -203,6 +203,8 @@ private:
 	ESPPointEmitter*  paddleLaserGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;
 	ESPPointEmitter*  paddleBeamBlastBits;
+    ESPPointEmitter*  paddleCamBeamGlowInside;
+    ESPPointEmitter*  paddleCamBeamGlowOutside;
 
     ESPVolumeEmitter* paddleBeamGlowSparks;
     ESPVolumeEmitter* stickyPaddleBeamGlowSparks0;
@@ -464,7 +466,7 @@ public:
 
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera);
-	void DrawBeamEffects(double dT, const Camera& camera);
+	void DrawBeamEffects(double dT, const GameModel& gameModel, const Camera& camera);
 	void DrawProjectileEffects(double dT, const Camera& camera);
     void DrawPostProjectileEffects(double dT, const Camera& camera);
     

@@ -55,7 +55,8 @@ ESPOrthoOnomataParticle::~ESPOrthoOnomataParticle() {
 /**
  * Draw this particle as it is currently.
  */
-void ESPOrthoOnomataParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment) {
+void ESPOrthoOnomataParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+                                   const Camera& camera, const ESP::ESPAlignment& alignment) {
 
 	// Don't draw if dead...
 	if (this->IsDead()) {
@@ -63,15 +64,21 @@ void ESPOrthoOnomataParticle::Draw(const Camera& camera, const ESP::ESPAlignment
 	}
 
 	// Transform and draw the particle...
-	Matrix4x4 personalAlignXF = this->GetPersonalAlignmentTransform(camera, alignment);
+    Matrix4x4 alignmentMat;
+	this->GetPersonalAlignmentTransform(modelMat, modelInvTMat, camera, alignment, this->position, alignmentMat);
 
 	// If set, draw the shadow
 	if (this->dropShadow.isSet) {
 		float dropAmt = 2.0f * this->currHalfStrHeight * this->dropShadow.amountPercentage;
 		Vector2D dsScale = this->dropShadow.scale * this->size;
 		glPushMatrix();
-		glTranslatef(this->position[0] + dropAmt, this->position[1] - dropAmt, this->position[2]); 
-		glMultMatrixf(personalAlignXF.begin());
+
+        alignmentMat[12]  += dropAmt; 
+        alignmentMat[13]  -= dropAmt; 
+        glMultMatrixf(alignmentMat.begin());
+        alignmentMat[12]  -= dropAmt; 
+        alignmentMat[13]  += dropAmt; 
+
 		glScalef(dsScale[0], dsScale[1], 1.0f);
 		glRotatef(this->rotation, 0, 0, -1);
 		glTranslatef(-this->currHalfStrWidth, -this->currHalfStrHeight, 0.00f);
@@ -82,8 +89,7 @@ void ESPOrthoOnomataParticle::Draw(const Camera& camera, const ESP::ESPAlignment
 
 	// Draw the font itself
 	glPushMatrix();
-	glTranslatef(this->position[0], this->position[1], this->position[2]);
-	glMultMatrixf(personalAlignXF.begin());
+	glMultMatrixf(alignmentMat.begin());
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
 	glTranslatef(-this->currHalfStrWidth, -this->currHalfStrHeight, 0.0f);

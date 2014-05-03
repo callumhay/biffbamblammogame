@@ -75,6 +75,8 @@ public:
 	const int& GetDamagePerSecond() const { return this->damagePerSecond; }
 	void SetDamagePerSecond(int dmgPerSec) { this->damagePerSecond = dmgPerSec; }
 
+    float GetCurrentRadiusFraction() const { return this->initialRadius == 0 ? 0.0f : (this->radius / this->initialRadius); }
+
 	static bool Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg2);
 
 private:
@@ -90,7 +92,8 @@ private:
 
 	double timeSinceFired;	// Time in seconds since this part of the beam was fired/shot
 	Collision::Ray2D ray;   // The ray defining this part of the beam
-	float radius;           // Half-width of the beam segment
+	const float initialRadius;    // Initial half-width of the beam segment
+    float radius;           // Half-width of the beam segment
 	float endT;             // The value that when fed into the ray equation will give where this beam segment ends
 
 	AnimationMultiLerp<float> radiusPulseAnim;

@@ -36,6 +36,7 @@
 #include "MainMenuDisplayState.h"
 #include "GameCompleteDisplayState.h"
 #include "BossLevelCompleteSummaryDisplayState.h"
+#include "LevelCompleteSummaryDisplayState.h"
 #include "CreditsDisplayState.h"
 #include "LoadingScreen.h"
 #include "MouseRenderer.h"
@@ -67,6 +68,7 @@ assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCam
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
+    //this->SetCurrentState(new LevelCompleteSummaryDisplayState(this)); // Testing level complete screen
     //this->SetCurrentState(new BossLevelCompleteSummaryDisplayState(this)); // Testing world complete screen
     //this->SetCurrentState(new GameCompleteDisplayState(this)); // Testing game complete screen
 	this->SetInitialRenderOptions();

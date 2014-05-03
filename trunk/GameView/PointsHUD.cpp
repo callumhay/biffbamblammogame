@@ -346,7 +346,7 @@ void PointsHUD::SetAlpha(float alpha) {
 
 // MULTIPLIER HUD FUNCTIONS ***********************************************
 
-const float PointsHUD::MultiplierHUD::BANG_TEXT_BORDER = 5.0f;
+const float PointsHUD::MultiplierHUD::BANG_TEXT_BORDER = 7.0f;
 
 PointsHUD::MultiplierHUD::MultiplierHUD() : 
 ptMultiplierLabel(NULL), currPtMultiplier(1), multiplierBangTex(NULL), 

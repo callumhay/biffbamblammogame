@@ -73,6 +73,7 @@ public:
 	void AllBallsDeadEvent(int livesLeft);
 	void BallSpawnEvent(const GameBall& spawnedBall);
 	void BallShotEvent(const GameBall& shotBall);
+    void PaddleWeaponFiredEvent(PlayerPaddle::PaddleType weaponType);
 	void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block);
     void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet);
     void ProjectileBossCollisionEvent(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);

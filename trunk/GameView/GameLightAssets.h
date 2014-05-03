@@ -42,8 +42,8 @@ class GameLightAssets {
 public:
     static const float DEFAULT_LIGHT_TOGGLE_TIME;
 
-	enum GameLightType { 
-        FGKeyLight,         // Foreground key light  (key light affecting all foreground objects except the paddle and ball)
+	enum GameLightType {
+        FGKeyLight = 0,     // Foreground key light  (key light affecting all foreground objects except the paddle and ball)
         FGFillLight,        // Foreground fill light (fill light affecting all foreground objects except the paddle and ball)
         FGBallLight,        // Foreground ball light (light coming from the ball that affects all foreground objects except the ball)
         BGKeyLight,         // Background key light  (key light affecting all background objects)
@@ -51,7 +51,10 @@ public:
         BallKeyLight,       // Key light affecting only the ball
         BallFillLight,      // Fill light affecting only the ball
         PaddleKeyLight,     // Key light affecting only the paddle
-        PaddleFillLight     // Fill light affecting only the paddle
+        PaddleFillLight,    // Fill light affecting only the paddle
+
+        BeamLight1 = FGKeyLight,
+        BeamLight2 = PaddleKeyLight
     };
 
 	GameLightAssets();
@@ -66,6 +69,7 @@ public:
 	
 	void ChangeLightPositionAndAttenuation(GameLightType lightType, const Point3D& newPosition, float newAtten, float changeTime);
 	void RestoreLightPositionAndAttenuation(GameLightType lightType, float restoreTime);
+    void RestoreLightColour(GameLightType lightType, float restoreTime);
 
 	void Tick(double dT);
 
@@ -77,6 +81,9 @@ public:
 	
     PointLight& GetBallLight() { return this->ballLight; }
     PointLight& GetFGKeyLight() { return this->fgKeyLight; }
+
+    PointLight& GetBeamLight1() { return *this->GetLightFromType(BeamLight1); }
+    PointLight& GetBeamLight2() { return *this->GetLightFromType(BeamLight2); }
 
     void SetBackgroundLightDefaults(const BasicPointLight& bgKeyAttributes, const BasicPointLight& bgFillAttributes);
     void SetForegroundLightDefaults(const BasicPointLight& fgKeyAttributes, const BasicPointLight& fgFillAttributes);

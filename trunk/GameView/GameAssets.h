@@ -121,7 +121,7 @@ public:
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(double dT, const Camera& camera, const GameModel& gameModel);
 
-	void DrawBeams(const GameModel& gameModel, const Camera& camera);
+	void DrawBeams(double dT, const GameModel& gameModel, const Camera& camera, const Vector2D& worldT);
     void DrawMeshProjectiles(double dT, const GameModel& gameModel, const Camera& camera);
 
 	void DrawInformativeGameElements(const Camera& camera, double dT, const GameModel& gameModel);
@@ -145,6 +145,7 @@ public:
 	void ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem);
 	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item);
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item, bool gameIsInPlay);
+    void RemoveBeamEffects(const GameModel& gameModel, const Beam& beam);
     
     void ActivatePaddleStatusEffect(const GameModel& gameModel, Camera& camera, PlayerPaddle::PaddleSpecialStatus status);
     void DeactivatePaddleStatusEffect(const GameModel& gameModel, Camera& camera, PlayerPaddle::PaddleSpecialStatus status);
@@ -307,7 +308,9 @@ private:
     void DrawSkipDeathAnimation(const Camera& camera, double dT);
 
     void DrawSafetyNet(BallSafetyNetMesh* safetyNetMesh, double dT, const Camera& camera, const GameModel& gameModel, float yTranslationOffset);
-        
+    
+    void SetActiveEffectLights(const GameModel& gameModel, GameItem::ItemType itemEffectType);
+
     DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };
 

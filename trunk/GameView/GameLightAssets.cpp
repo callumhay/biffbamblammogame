@@ -218,6 +218,42 @@ void GameLightAssets::RestoreLightPositionAndAttenuation(GameLightType lightType
 	}
 }
 
+void GameLightAssets::RestoreLightColour(GameLightType lightType, float restoreTime) {
+    assert(restoreTime >= 0.0f);
+
+    switch (lightType) {
+        case FGKeyLight:
+            this->fgKeyLight.SetLightColourChange(this->defaultFGKeyLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case FGFillLight:
+            this->fgFillLight.SetLightColourChange(this->defaultFGFillLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case BallKeyLight:
+            this->ballKeyLight.SetLightColourChange(this->defaultFGKeyLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case BallFillLight:
+            this->ballFillLight.SetLightColourChange(this->defaultFGFillLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case PaddleKeyLight:
+            this->paddleKeyLight.SetLightColourChange(this->defaultFGKeyLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case PaddleFillLight:
+            this->paddleFillLight.SetLightColourChange(this->defaultFGFillLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+
+        case BGKeyLight:
+            this->bgKeyLight.SetLightColourChange(this->defaultBGKeyLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case BGFillLight:
+            this->bgFillLight.SetLightColourChange(this->defaultBGFillLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+}
+
 /**
  * Called every frame with the delta time in seconds between frames - this will tick
  * all animations of the lights and anything else that needs to be informed of the
@@ -326,31 +362,22 @@ PointLight* GameLightAssets::GetLightFromType(GameLightType lightType) {
 	switch (lightType) {
 		case FGKeyLight:
 			return &this->fgKeyLight;
-			break;
 		case FGFillLight:
 			return &this->fgFillLight;
-			break;
 		case FGBallLight:
 			return &this->ballLight;
-			break;
 		case BGKeyLight:
 			return &this->bgKeyLight;
-			break;
 		case BGFillLight:
 			return &this->bgFillLight;
-			break;
 		case BallKeyLight:
 			return &this->ballKeyLight;
-			break;
 		case BallFillLight:
 			return &this->ballFillLight;
-			break;
 		case PaddleKeyLight:
 			return &this->paddleKeyLight;
-			break;
 		case PaddleFillLight:
 			return &this->paddleFillLight;
-			break;
 		default:
 			assert(false);
 			return NULL;

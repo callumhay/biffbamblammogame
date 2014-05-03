@@ -313,6 +313,9 @@ public:
 	std::list<GameItemTimer*>& GetActiveTimers() {
 		return this->activeTimers;
 	}
+    const std::list<GameItemTimer*>& GetActiveTimers() const {
+        return this->activeTimers;
+    }
     bool IsTimerTypeActive(const GameItem::ItemType& type) const;
 
     GameModel::ProjectileMap& GetActiveProjectiles() {

@@ -161,7 +161,20 @@ public:
 		this->invViewMatrix = Matrix4x4();
 	}
 
-	void SetTransform(const Matrix4x4& m);
+	/**
+     * Sets the camera transform based on the given m, m will become the
+     * transformation to get from camera to world coordinates and the inverse
+     * will become the view inverse matrix.
+     */
+    void SetTransform(const Matrix4x4& m) {
+	    this->viewMatrix = m;
+	    this->invViewMatrix = m.inverse();
+    }
+    void SetInvTransform(const Matrix4x4& m) {
+        this->invViewMatrix = m;
+        this->viewMatrix = m.inverse();
+    }
+
 	void Move(const Vector3D &v);
 	void Rotate(char axis, float degs);
 
@@ -191,7 +204,7 @@ public:
 		this->shakeSpeed = 0;
 	}
 
-	void ApplyCameraTransform() {
+	void ApplyCameraTransform() const {
 		glMultMatrixf(this->viewMatrix.begin());
 	}
 

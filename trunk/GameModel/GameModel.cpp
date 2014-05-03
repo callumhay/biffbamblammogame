@@ -1470,14 +1470,17 @@ void GameModel::ClearProjectiles() {
  * Clears the list of all beams that are currently in existance in the game.
  */
 void GameModel::ClearBeams() {
-	for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
+	for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end();) {
 		Beam* currBeam = *iter;
+
+        // NOTE: We must remove the beam BEFORE we raise the event!
+        iter = this->beams.erase(iter);
+
 		// EVENT: Beam is removed from the game
 		GameEventManager::Instance()->ActionBeamRemoved(*currBeam);
 		delete currBeam;
 		currBeam = NULL;
 	}
-	this->beams.clear();
 }
 
 /**
@@ -1875,11 +1878,14 @@ void GameModel::ClearSpecificBeams(const Beam::BeamType& beamType) {
     for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end();) {
         Beam* currBeam = *iter;
         if (currBeam->GetType() == beamType) {
+
+            // NOTE: We must remove the beam BEFORE we raise the event!
+            iter = this->beams.erase(iter);
+
             // EVENT: Beam is removed from the game
             GameEventManager::Instance()->ActionBeamRemoved(*currBeam);
             delete currBeam;
             currBeam = NULL;
-            iter = this->beams.erase(iter);
         }
         else {
              ++iter;

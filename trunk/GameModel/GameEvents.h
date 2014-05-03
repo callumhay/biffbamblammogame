@@ -33,6 +33,7 @@
 #include "LevelPiece.h"
 #include "GameWorld.h"
 #include "GameLevel.h"
+#include "PlayerPaddle.h"
 #include "PortalBlock.h"
 #include "CannonBlock.h"
 #include "TeslaBlock.h"
@@ -220,8 +221,9 @@ public:
 
     /** 
      * Event triggered whenever a weapon is fired from the paddle during the game.
+     * Arguments: weaponType - The type of paddle weapon that fired.
      */
-    virtual void PaddleWeaponFiredEvent() {}
+    virtual void PaddleWeaponFiredEvent(PlayerPaddle::PaddleType weaponType) { UNUSED_PARAMETER(weaponType); }
 
 	/**
 	 * Event triggered when the ball collides with a level block. Only occurs once as the ball

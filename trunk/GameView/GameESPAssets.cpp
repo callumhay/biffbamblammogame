@@ -129,6 +129,8 @@ paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
 paddleBeamOriginUp(NULL),
 paddleBeamBlastBits(NULL),
+paddleCamBeamGlowOutside(NULL),
+paddleCamBeamGlowInside(NULL),
 
 paddleBeamGlowSparks(NULL),
 stickyPaddleBeamGlowSparks0(NULL),
@@ -215,6 +217,10 @@ GameESPAssets::~GameESPAssets() {
 	this->paddleBeamOriginUp = NULL;
 	delete this->paddleBeamBlastBits;
 	this->paddleBeamBlastBits = NULL;
+    delete this->paddleCamBeamGlowInside;
+    this->paddleCamBeamGlowInside = NULL;
+    delete this->paddleCamBeamGlowOutside;
+    this->paddleCamBeamGlowOutside = NULL;
 
     delete this->paddleBeamGlowSparks;
     this->paddleBeamGlowSparks = NULL;
@@ -828,7 +834,8 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
 	this->paddleLaserGlowSparks->AddEffector(&this->particleFader);
-	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
+	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);		
 	
     assert(this->paddleBeamOriginUp == NULL);
@@ -839,9 +846,10 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamOriginUp->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleBeamOriginUp->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->paddleBeamOriginUp->SetEmitDirection(Vector3D(0, 1, 0));
-    this->paddleBeamOriginUp->SetParticleAlignment(ESP::ScreenAligned);
+    this->paddleBeamOriginUp->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	this->paddleBeamOriginUp->AddEffector(&this->particleFader);
-	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
+	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 	assert(result);
 
     assert(this->paddleBeamBlastBits == NULL);
@@ -856,8 +864,39 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamBlastBits->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	this->paddleBeamBlastBits->AddEffector(&this->particleLargeVStretch);
 	this->paddleBeamBlastBits->AddEffector(&this->beamBlastColourEffector);
-	result = this->paddleBeamBlastBits->SetParticles(35, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
+	result = this->paddleBeamBlastBits->SetParticles(35, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	assert(result);
+
+    assert(this->paddleCamBeamGlowInside == NULL);
+    this->paddleCamBeamGlowInside = new ESPPointEmitter();
+    this->paddleCamBeamGlowInside->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->paddleCamBeamGlowInside->SetInitialSpd(ESPInterval(0));
+    this->paddleCamBeamGlowInside->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    this->paddleCamBeamGlowInside->SetParticleSize(ESPInterval(0.66f));
+    this->paddleCamBeamGlowInside->SetEmitAngleInDegrees(0);
+    this->paddleCamBeamGlowInside->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->paddleCamBeamGlowInside->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->paddleCamBeamGlowInside->SetEmitPosition(Point3D(0, 0, 0));
+    this->paddleCamBeamGlowInside->SetParticleColour(ESPInterval(0.9f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.33f));
+    this->paddleCamBeamGlowInside->AddEffector(&this->particlePulsePaddleLaser);
+    this->paddleCamBeamGlowInside->SetParticles(1, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
+
+    assert(this->paddleCamBeamGlowOutside == NULL);
+    this->paddleCamBeamGlowOutside = new ESPPointEmitter();
+    this->paddleCamBeamGlowOutside->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->paddleCamBeamGlowOutside->SetInitialSpd(ESPInterval(0));
+    this->paddleCamBeamGlowOutside->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+    this->paddleCamBeamGlowOutside->SetParticleSize(ESPInterval(1.5f));
+    this->paddleCamBeamGlowOutside->SetEmitAngleInDegrees(0);
+    this->paddleCamBeamGlowOutside->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->paddleCamBeamGlowOutside->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->paddleCamBeamGlowOutside->SetEmitPosition(Point3D(0, 0, 0));
+    this->paddleCamBeamGlowOutside->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.5f));
+    this->paddleCamBeamGlowOutside->AddEffector(&this->particlePulsePaddleLaser);
+    this->paddleCamBeamGlowOutside->SetParticles(1, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
 
     const ESPInterval GLOW_SPARK_SPAWN_DELTA(0.005f, 0.01f);
     const ESPInterval GLOW_SPARK_SPD(2.0f, 5.0f);
@@ -870,7 +909,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->paddleBeamGlowSparks->SetParticleLife(GLOW_SPARK_LIFE);
     this->paddleBeamGlowSparks->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->paddleBeamGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
-    this->paddleBeamGlowSparks->SetParticleAlignment(ESP::ScreenAligned);
+    this->paddleBeamGlowSparks->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->paddleBeamGlowSparks->AddEffector(&this->particleFader);
     result = this->paddleBeamGlowSparks->SetParticles(50, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
@@ -882,7 +921,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->stickyPaddleBeamGlowSparks0->SetParticleLife(GLOW_SPARK_LIFE);
     this->stickyPaddleBeamGlowSparks0->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->stickyPaddleBeamGlowSparks0->SetEmitDirection(Vector3D(0, 1, 0));
-    this->stickyPaddleBeamGlowSparks0->SetParticleAlignment(ESP::ScreenAligned);
+    this->stickyPaddleBeamGlowSparks0->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->stickyPaddleBeamGlowSparks0->AddEffector(&this->particleFader);
     result = this->stickyPaddleBeamGlowSparks0->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
@@ -894,7 +933,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->stickyPaddleBeamGlowSparks1->SetParticleLife(GLOW_SPARK_LIFE);
     this->stickyPaddleBeamGlowSparks1->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->stickyPaddleBeamGlowSparks1->SetEmitDirection(Vector3D(0, 1, 0));
-    this->stickyPaddleBeamGlowSparks1->SetParticleAlignment(ESP::ScreenAligned);
+    this->stickyPaddleBeamGlowSparks1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->stickyPaddleBeamGlowSparks1->AddEffector(&this->particleFader);
     result = this->stickyPaddleBeamGlowSparks1->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
@@ -906,7 +945,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
     this->stickyPaddleBeamGlowSparks2->SetParticleLife(GLOW_SPARK_LIFE);
     this->stickyPaddleBeamGlowSparks2->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
     this->stickyPaddleBeamGlowSparks2->SetEmitDirection(Vector3D(0, 1, 0));
-    this->stickyPaddleBeamGlowSparks2->SetParticleAlignment(ESP::ScreenAligned);
+    this->stickyPaddleBeamGlowSparks2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     this->stickyPaddleBeamGlowSparks2->AddEffector(&this->particleFader);
     result = this->stickyPaddleBeamGlowSparks2->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
     assert(result);
@@ -966,7 +1005,7 @@ ESPPointEmitter* GameESPAssets::CreateSpinningTargetESPEffect() {
 	spinningTarget->SetParticleSize(ESPInterval(2));
 	spinningTarget->SetEmitAngleInDegrees(0);
 	spinningTarget->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	spinningTarget->SetParticleAlignment(ESP::ScreenAligned);
+	spinningTarget->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	spinningTarget->SetEmitPosition(Point3D(0, 0, 0));
 	spinningTarget->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.5f));
 	spinningTarget->AddEffector(&this->loopRotateEffectorCW);
@@ -1184,7 +1223,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetEmitAngleInDegrees(10);
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	bounceEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bounceEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
 	
 	Vector2D ballVelocity = ball.GetVelocity();
@@ -1314,7 +1353,7 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
 	bangEffect->SetInitialSpd(ESPInterval(0.0f));
 	bangEffect->SetParticleLife(ESPInterval(0.8f, 1.1f));
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangEffect->SetEmitPosition(emitPoint3D);
 	bangEffect->SetParticleRotation(ESPInterval(0.0f, 360.0f));
 	bangEffect->SetParticleSize(ESPInterval(0.75f, 1.25f));
@@ -1331,7 +1370,7 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
 	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	bounceEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bounceEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
 	bounceEffect->SetEmitPosition(emitPoint3D);
 	
@@ -1648,7 +1687,7 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 	boltOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
 	boltOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	boltOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	boltOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	boltOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	boltOnoEffect->SetEmitPosition(emitPosition);
 	boltOnoEffect->AddEffector(&this->particleFader);
 	boltOnoEffect->AddEffector(&this->particleSmallGrowth);
@@ -1889,7 +1928,7 @@ void GameESPAssets::AddCannonFireEffect(const Point3D& endOfCannonPt, const Vect
 	shotOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
 	shotOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	shotOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	shotOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	shotOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	shotOnoEffect->SetEmitPosition(endOfCannonPt + Vector3D(0, -LevelPiece::PIECE_HEIGHT, 0));
 	shotOnoEffect->SetEmitDirection(emitDir);
 	
@@ -1933,7 +1972,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangEffect->SetParticleLife(bangLifeInterval);
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangEffect->SetEmitPosition(emitCenter);
 
 	// Figure out some random proper orientation...
@@ -1969,7 +2008,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
 	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
@@ -2209,7 +2248,7 @@ void GameESPAssets::AddBallSafetyNetDestroyedEffect(const Point2D& pos) {
 	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
@@ -2260,7 +2299,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 		smokeClouds->SetParticleLife(ESPInterval(0.5f, 2.0f));
 		smokeClouds->SetParticleSize(ESPInterval(smallSize, bigSize));
 		smokeClouds->SetRadiusDeviationFromCenter(ESPInterval(ballRadius));
-		smokeClouds->SetParticleAlignment(ESP::ScreenAligned);
+		smokeClouds->SetParticleAlignment(ESP::ScreenPlaneAligned);
 		smokeClouds->SetEmitPosition(emitCenter);
 		smokeClouds->SetEmitAngleInDegrees(180);
 		smokeClouds->SetParticles(GameESPAssets::NUM_EXPLOSION_SMOKE_PART_PARTICLES, this->smokeTextures[randomTexIndex]);
@@ -2285,7 +2324,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangEffect->SetParticleLife(ESPInterval(1.5f));
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0));
-	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangEffect->SetEmitPosition(emitCenter);
 	// Figure out some random proper orientation...
 	// Two base rotations (for variety) : 180 or 0...
@@ -2310,7 +2349,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
     explodeOnoEffect->SetParticleSize(ESPInterval(sizeFract));
 	explodeOnoEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	explodeOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	explodeOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	explodeOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	explodeOnoEffect->SetEmitPosition(emitCenter);
 	explodeOnoEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
 	
@@ -2381,7 +2420,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	bombOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bombOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bombOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bombOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bombOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bombOnoEffect->SetEmitPosition(emitCenter);
 	bombOnoEffect->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
 	
@@ -2501,7 +2540,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	inkOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	inkOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	inkOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	inkOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	inkOnoEffect->SetEmitPosition(emitCenter);
 	inkOnoEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
 	
@@ -2510,7 +2549,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkOnoEffect->AddEffector(&this->particleSmallGrowth);
 
 	// Set the onomata particle
-	TextLabel2D splatTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+    TextLabel2D splatTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::SadBadGoo, GameFontAssetsManager::Medium), "");
 	splatTextLabel.SetColour(Colour(1, 1, 1));
 	splatTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
 	Onomatoplex::Extremeness severity = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::GOOD, Onomatoplex::UBER);
@@ -2569,7 +2608,7 @@ void GameESPAssets::AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock
     lifeInfoEmitter->SetToggleEmitOnPlane(true);
     lifeInfoEmitter->SetEmitAngleInDegrees(80);
     lifeInfoEmitter->SetEmitPosition(blockCenter);
-    lifeInfoEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    lifeInfoEmitter->SetParticleAlignment(ESP::ScreenPlaneAligned);
 
     lifeInfoEmitter->AddEffector(&this->particleFader);
     lifeInfoEmitter->AddEffector(&this->gravity);
@@ -2662,7 +2701,7 @@ void GameESPAssets::AddFragileCannonBreakEffect(const LevelPiece& block) {
     explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
     explosionEffect->SetParticleLife(bangLifeInterval);
     explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-    explosionEffect->SetParticleAlignment(ESP::ScreenAligned);
+    explosionEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     explosionEffect->SetEmitPosition(emitCenter);
     explosionEffect->SetParticleRotation(ESPInterval(-30.0, 30.0f));
     explosionEffect->SetParticleSize(ESPInterval(1.4f*LevelPiece::PIECE_WIDTH));
@@ -2679,7 +2718,7 @@ void GameESPAssets::AddFragileCannonBreakEffect(const LevelPiece& block) {
     bangOnoEffect->SetParticleSize(ESPInterval(1.2f));
     bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
     bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-    bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     bangOnoEffect->SetEmitPosition(emitCenter);
     bangOnoEffect->AddEffector(&this->particleFader);
     bangOnoEffect->AddEffector(&this->particleSmallGrowth);
@@ -2812,7 +2851,7 @@ void GameESPAssets::AddIceCubeBreakEffect(const Point2D& pos, float baseSize, co
 	snowflakeBackingEffect->SetInitialSpd(ESPInterval(0.0f));
 	snowflakeBackingEffect->SetParticleLife(ESPInterval(1.75f));
 	snowflakeBackingEffect->SetRadiusDeviationFromCenter(ESPInterval(0));
-	snowflakeBackingEffect->SetParticleAlignment(ESP::ScreenAligned);
+	snowflakeBackingEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	snowflakeBackingEffect->SetEmitPosition(emitCenter);
 	snowflakeBackingEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	snowflakeBackingEffect->SetParticleRotation(ESPInterval(-180, 180));
@@ -2831,7 +2870,7 @@ void GameESPAssets::AddIceCubeBreakEffect(const Point2D& pos, float baseSize, co
 	iceSmashOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	iceSmashOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	iceSmashOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	iceSmashOnoEffect->SetEmitPosition(emitCenter);
 	iceSmashOnoEffect->SetParticleColour(ESPInterval(iceColour.R()), ESPInterval(iceColour.G()), 
 	    ESPInterval(iceColour.B()), ESPInterval(1));
@@ -3364,7 +3403,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	paddleOnoEffect->SetParticleLife(ESPInterval(2.5f));
 	paddleOnoEffect->SetParticleRotation(ESPInterval(-45.0f, 45.0f));
 	paddleOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	paddleOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	paddleOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	paddleOnoEffect->SetEmitPosition(hitPosition);
 	paddleOnoEffect->SetEmitDirection(emitDirection);
 	paddleOnoEffect->SetEmitAngleInDegrees(10);
@@ -3544,7 +3583,7 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
     bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
     bangEffect->SetParticleLife(bangLifeInterval);
     bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-    bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     bangEffect->SetEmitPosition(emitCenter);
 
     // Figure out some random proper orientation...
@@ -3566,7 +3605,7 @@ void GameESPAssets::AddPaddleHitByBeamEffect(const PlayerPaddle& paddle, const B
     bangOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
     bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
     bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-    bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     bangOnoEffect->SetEmitPosition(emitCenter);
     bangOnoEffect->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
     bangOnoEffect->AddEffector(&this->particleFader);
@@ -3626,7 +3665,7 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
     bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
     bangEffect->SetParticleLife(bangLifeInterval);
     bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-    bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     bangEffect->SetEmitPosition(emitCenter);
 
     // Figure out some random proper orientation...
@@ -3648,7 +3687,7 @@ void GameESPAssets::AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, con
     bangOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
     bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
     bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-    bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     bangOnoEffect->SetEmitPosition(emitCenter);
     bangOnoEffect->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
     bangOnoEffect->AddEffector(&this->particleFader);
@@ -3758,7 +3797,7 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 	itemDropEmitterAura1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	itemDropEmitterAura1->SetEmitPosition(Point3D(GameItem::HALF_ITEM_WIDTH, 0, 0));
 	itemDropEmitterAura1->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
-    itemDropEmitterAura1->SetParticleAlignment(ESP::ScreenAligned);
+    itemDropEmitterAura1->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	itemDropEmitterAura1->AddEffector(&this->particlePulseItemDropAura);
 	itemDropEmitterAura1->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	
@@ -3771,7 +3810,7 @@ void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showParticles) 
 	itemDropEmitterAura2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	itemDropEmitterAura2->SetEmitPosition(Point3D(-GameItem::HALF_ITEM_WIDTH, 0, 0));
 	itemDropEmitterAura2->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
-    itemDropEmitterAura2->SetParticleAlignment(ESP::ScreenAligned);
+    itemDropEmitterAura2->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	itemDropEmitterAura2->AddEffector(&this->particlePulseItemDropAura);
 	itemDropEmitterAura2->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 	
@@ -4240,7 +4279,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndEffect(const Beam& beam) {
 	beamEndEffect->SetInitialSpd(ESPInterval(0));
 	beamEndEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	beamEndEffect->SetEmitAngleInDegrees(0);
-	beamEndEffect->SetParticleAlignment(ESP::ScreenAligned);
+	beamEndEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
 	beamEndEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	beamEndEffect->SetEmitPosition(Point3D(0, 0, 0));
 	beamEndEffect->SetParticleColour(ESPInterval(beamEndColour.R()), ESPInterval(beamEndColour.G()), ESPInterval(beamEndColour.B()), ESPInterval(1.0f));
@@ -4259,28 +4298,28 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndEffect(const Beam& beam) {
 ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect(const Beam& beam) {
 
     const Colour& beamColourBase = beam.GetBeamColour();
+    Colour finishColour = 1.25f*(beamColourBase + Colour(0.25f, 0.25f, 0.25f));
 
     std::vector<std::pair<ColourRGBA, double> > coloursAndPercentage;
     coloursAndPercentage.reserve(3);
     coloursAndPercentage.push_back(std::make_pair(ColourRGBA(beamColourBase, 1.0f), 0.0));
-    coloursAndPercentage.push_back(std::make_pair(ColourRGBA(1,1,1,1), 0.9));
-    coloursAndPercentage.push_back(std::make_pair(ColourRGBA(1,1,1,0), 1.0));
+    coloursAndPercentage.push_back(std::make_pair(ColourRGBA(finishColour,   1.0f), 0.9));
+    coloursAndPercentage.push_back(std::make_pair(ColourRGBA(finishColour,   0.0f), 1.0));
 
     ESPMultiColourEffector colourEffector;
     colourEffector.SetColoursWithPercentage(coloursAndPercentage);
 
 	ESPPointEmitter* beamBlockEndEffect = new ESPPointEmitter();
-	beamBlockEndEffect->SetSpawnDelta(ESPInterval(0.005f, 0.015f));
+	beamBlockEndEffect->SetSpawnDelta(ESPInterval(0.005f, 0.010f));
 	beamBlockEndEffect->SetInitialSpd(ESPInterval(2.5f, 4.0f));
-	beamBlockEndEffect->SetParticleLife(ESPInterval(0.4f, 0.65f));
+	beamBlockEndEffect->SetParticleLife(ESPInterval(0.5f, 0.75f));
 	beamBlockEndEffect->SetEmitAngleInDegrees(87);
 	beamBlockEndEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	beamBlockEndEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	beamBlockEndEffect->SetEmitPosition(Point3D(0, 0, 0));
-	beamBlockEndEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	beamBlockEndEffect->AddEffector(&this->particleLargeVStretch);
     beamBlockEndEffect->AddCopiedEffector(colourEffector);
-	beamBlockEndEffect->SetParticles(30, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+	beamBlockEndEffect->SetParticles(35, PersistentTextureManager::GetInstance()->GetLoadedTexture(
         GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 	return beamBlockEndEffect;	
@@ -4654,7 +4693,7 @@ void GameESPAssets::AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, 
     }
 
     wallOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    wallOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+    wallOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     wallOnoEffect->SetEmitPosition(pos);
     wallOnoEffect->SetEmitDirection(dir);
     wallOnoEffect->SetEmitAngleInDegrees(40);
@@ -4682,7 +4721,7 @@ void GameESPAssets::AddStarSmashEffect(const Point3D& pos, const Vector3D& dir, 
     wallStarEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
     wallStarEmitter->SetEmitAngleInDegrees(35);
     wallStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.25f));
-    wallStarEmitter->SetParticleAlignment(ESP::ViewPlaneAligned);
+    wallStarEmitter->SetParticleAlignment(ESP::ScreenAligned);
     wallStarEmitter->SetEmitDirection(dir);
     wallStarEmitter->SetEmitPosition(pos);
 
@@ -5059,7 +5098,7 @@ void GameESPAssets::AddFlameBlastProjectileEffects(const GameModel& gameModel,
         shotOnoEffect->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 0.75f*projectile.GetWidth()));
         shotOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
         shotOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-        shotOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+        shotOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
         shotOnoEffect->SetEmitPosition(projectilePos);
         shotOnoEffect->SetEmitDirection(Vector3D(projectile.GetVelocityDirection(), 0.0f));
         shotOnoEffect->SetEmitAngleInDegrees(45);
@@ -5198,7 +5237,7 @@ void GameESPAssets::AddIceBlastProjectileEffects(const GameModel& gameModel, con
         shotOnoEffect->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 0.75f*projectile.GetWidth()));
         shotOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
         shotOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-        shotOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+        shotOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
         shotOnoEffect->SetEmitPosition(projectilePos);
         shotOnoEffect->SetEmitDirection(Vector3D(projectile.GetVelocityDirection(), 0.0f));
         shotOnoEffect->SetEmitAngleInDegrees(45);
@@ -5245,7 +5284,7 @@ void GameESPAssets::AddPaddleMineFiredEffects(const GameModel& gameModel,
 		launchOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
 		launchOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 		launchOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		launchOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+		launchOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 		launchOnoEffect->SetEmitPosition(Point3D(projectilePos2D));
 		launchOnoEffect->SetEmitDirection(Vector3D(projectileDir2D));
 		launchOnoEffect->SetEmitAngleInDegrees(45);
@@ -5299,7 +5338,7 @@ void GameESPAssets::AddPaddleMineAttachedEffects(const Projectile& projectile) {
 	attachOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
 	attachOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	attachOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	attachOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	attachOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	attachOnoEffect->SetEmitPosition(Point3D(projectilePos2D));
 	attachOnoEffect->SetEmitAngleInDegrees(45);
 	attachOnoEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
@@ -5372,7 +5411,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 		laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
 		laserOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 		laserOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		laserOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+		laserOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 		laserOnoEffect->SetEmitPosition(projectilePos3D);
 		laserOnoEffect->SetEmitDirection(projectileDir3D);
 		laserOnoEffect->SetEmitAngleInDegrees(45);
@@ -5925,7 +5964,7 @@ ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, cons
 	comboEffect->SetParticleLife(ESPInterval(2.25f));
 	comboEffect->SetParticleSize(ESPInterval(0.75f));
 	comboEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	comboEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	comboEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	comboEffect->SetEmitPosition(Point3D(position));
 
     comboEffect->AddEffector(&this->particleLargeGrowth);
@@ -6010,7 +6049,7 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
 	angryBolts->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryBolts->SetInitialSpd(ESPInterval(4.33f));
 	angryBolts->SetParticleLife(ESPInterval(2.0f));
-	angryBolts->SetParticleSize(ESPInterval(0.425f*avgSize, 0.55f*avgSize), ESPInterval(0.85f*avgSize, 1.1f*avgSize));
+	angryBolts->SetParticleSize(ESPInterval(0.39f*avgSize, 0.5f*avgSize), ESPInterval(0.78f*avgSize, 1.0f*avgSize));
 	angryBolts->SetEmitAngleInDegrees(45);
 	angryBolts->SetEmitPosition(Point3D(pos, 0));
 	angryBolts->SetEmitDirection(Vector3D(0,1,0));
@@ -6018,14 +6057,15 @@ void GameESPAssets::AddBossAngryEffect(const Point2D& pos, float width, float he
     angryBolts->SetRadiusDeviationFromCenter(ESPInterval(0.0f, width/3.0f), ESPInterval(0.0f, std::min<float>(height/3.0f, 1.0f)), ESPInterval(0.0f));
     angryBolts->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     angryBolts->AddEffector(&this->particleFader);
-	angryBolts->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT));
+	angryBolts->SetParticles(8, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT));
 
     // Angry onomatopoeia
 	ESPPointEmitter* angryOno = new ESPPointEmitter();
 	angryOno->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	angryOno->SetParticleLife(ESPInterval(2.0f));
 	angryOno->SetRadiusDeviationFromCenter(ESPInterval(0.4f * width), ESPInterval(0.4f * height), ESPInterval(0.0f));
-	angryOno->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	angryOno->SetParticleAlignment(ESP::ScreenPlaneAligned);
+    angryOno->SetParticleSize(ESPInterval(0.85f));
 	angryOno->SetEmitPosition(Point3D(pos));
     angryOno->SetParticleColour(ESPInterval(0.75f, 0.9f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(1.0f));
     angryOno->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
@@ -6260,7 +6300,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	explosionEffect->SetParticleLife(bangLifeInterval);
 	explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	explosionEffect->SetParticleAlignment(ESP::ScreenAligned);
+	explosionEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	explosionEffect->SetEmitPosition(emitCenter);
 
 	// Figure out some random proper orientation...
@@ -6286,7 +6326,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	explodeRayEffect->SetParticleLife(ESPInterval(1.0f));
 	explodeRayEffect->SetParticleSize(sizeIntervalX);
 	explodeRayEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	explodeRayEffect->SetParticleAlignment(ESP::ScreenAligned);
+	explodeRayEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	explodeRayEffect->SetEmitPosition(emitCenter);
 	explodeRayEffect->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS));
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -6321,7 +6361,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	bangOnoEffect->SetParticleSize(ESPInterval(rocketSizeFactor * 1.0f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
@@ -6375,7 +6415,7 @@ void GameESPAssets::AddMineBlastEffect(const MineProjectile& mine, const Point2D
 	explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	explosionEffect->SetParticleLife(bangLifeInterval);
 	explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	explosionEffect->SetParticleAlignment(ESP::ScreenAligned);
+	explosionEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	explosionEffect->SetEmitPosition(emitCenter);
 
 	// Figure out some random proper orientation...
@@ -6403,7 +6443,7 @@ void GameESPAssets::AddMineBlastEffect(const MineProjectile& mine, const Point2D
 	bangOnoEffect->SetParticleSize(ESPInterval(mineSizeFactor));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
@@ -6559,7 +6599,7 @@ ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle,
     itemNameEffect->SetEmitDirection(emitDir);
     itemNameEffect->SetParticleLife(ESPInterval(2.4f));
     itemNameEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
-    itemNameEffect->SetParticleAlignment(ESP::ScreenAligned);
+    itemNameEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     itemNameEffect->SetEmitPosition(2.75f * paddle.GetHalfHeight() * emitDir);
     itemNameEffect->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(1));
     itemNameEffect->AddEffector(&this->particleFader);
@@ -6851,7 +6891,8 @@ void GameESPAssets::AddGravityBallESPEffects(const GameBall* ball, std::vector<E
 	ballGravityEffect->SetParticleLife(ESPInterval(1.8f, 2.2f));
 	ballGravityEffect->SetParticleSize(ESPInterval(1.5f*BALL_RADIUS, 2.0f*BALL_RADIUS));
 	ballGravityEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.8f*BALL_RADIUS), ESPInterval(0), ESPInterval(0.0f, 0.8f*BALL_RADIUS));
-	ballGravityEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+    ballGravityEffect->SetParticleAlignment(ESP::AxisAligned);
+    ballGravityEffect->SetParticleRotation(ESPInterval(-180));
 	ballGravityEffect->SetEmitPosition(Point3D(0,0,0));
 	ballGravityEffect->SetEmitDirection(Vector3D(0, -1, 0));	// Downwards gravity vector is always in -y direction
 	ballGravityEffect->SetEmitAngleInDegrees(0.0f);
@@ -6875,7 +6916,7 @@ void GameESPAssets::AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESP
 	crazyTextEffect->SetParticleSize(ESPInterval(0.7f, 1.0f));
 	crazyTextEffect->SetParticleRotation(ESPInterval(-45.0f, 45.0f));
 	crazyTextEffect->SetRadiusDeviationFromCenter(ESPInterval(0.8f * ball->GetBounds().Radius(), ball->GetBounds().Radius()));
-	crazyTextEffect->SetParticleAlignment(ESP::ScreenAligned);
+	crazyTextEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	crazyTextEffect->SetEmitPosition(Point3D(0,0,0));
 	crazyTextEffect->SetEmitAngleInDegrees(180.0f);
 	crazyTextEffect->SetParticleColour(ESPInterval(0.15f, 1.0f), ESPInterval(0.15f, 1.0f), ESPInterval(0.15f, 1.0f), ESPInterval(1.0f));
@@ -6975,7 +7016,7 @@ void GameESPAssets::AddFastBallESPEffects(const GameBall* ball, std::vector<ESPP
  */
 void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
 	
-	Point2D paddlePos2D = paddle->GetCenterPosition();
+	const Point2D& paddlePos2D = paddle->GetCenterPosition();
 	Point3D paddlePos3D = Point3D(paddlePos2D[0], paddlePos2D[1], 0.0f);
 
     Vector3D emitDir(paddle->GetUpVector());
@@ -6993,7 +7034,7 @@ void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
 	textEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	textEffect->SetParticleRotation(ESPInterval(0.0f));
 	textEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	textEffect->SetParticleAlignment(ESP::ScreenAligned);
+	textEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	textEffect->SetEmitPosition(paddlePos3D + 0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL * emitDir);
 	textEffect->SetEmitDirection(emitDir);
     textEffect->SetParticleRotation(rotInterval);
@@ -7019,7 +7060,7 @@ void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
     heartEffect->SetParticleSize(ESPInterval(0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL), ESPInterval(0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL));
 	heartEffect->SetParticleRotation(ESPInterval(0.0f));
 	heartEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	heartEffect->SetParticleAlignment(ESP::ScreenAligned);
+	heartEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	heartEffect->SetEmitPosition(paddlePos3D);
 	heartEffect->SetEmitDirection(emitDir);
     heartEffect->SetParticleRotation(rotInterval);
@@ -7529,7 +7570,7 @@ void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* ite
     itemDropEmitterTrail1->SetEmitDirection(emitDir);
     itemDropEmitterTrail1->SetParticleRotation(rotInterval);
     itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
-    itemDropEmitterTrail1->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    itemDropEmitterTrail1->SetParticleAlignment(ESP::ScreenPlaneAligned);
     itemDropEmitterTrail1->AddEffector(&this->particleFader);
     itemDropEmitterTrail1->SetRandomTextureParticles(numParticlesPerEmitter, randomItemTextures);
 
@@ -7545,7 +7586,7 @@ void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* ite
     itemDropEmitterTrail2->SetEmitDirection(emitDir);
     itemDropEmitterTrail2->SetParticleRotation(rotInterval);
     itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
-    itemDropEmitterTrail2->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    itemDropEmitterTrail2->SetParticleAlignment(ESP::ScreenPlaneAligned);
     itemDropEmitterTrail2->AddEffector(&this->particleFader);
     itemDropEmitterTrail2->SetRandomTextureParticles(numParticlesPerEmitter, randomItemTextures);
 
@@ -7562,7 +7603,7 @@ void GameESPAssets::AddItemDropFaceEmitters(const GameItem& item, Texture2D* ite
     itemDropEmitterTrail3->SetEmitDirection(emitDir);
     itemDropEmitterTrail3->SetParticleRotation(rotInterval);
     itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
-    itemDropEmitterTrail3->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    itemDropEmitterTrail3->SetParticleAlignment(ESP::ScreenPlaneAligned);
     itemDropEmitterTrail3->AddEffector(&this->particleFader);
     itemDropEmitterTrail3->SetRandomTextureParticles(numParticlesPerEmitter, randomItemTextures);
 
@@ -7760,7 +7801,7 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 		ESPPointEmitter* emitter = *iter;
 
 		// If the gravity direction is changing then reset it - we reset the emitter so the
-		// user doesn't see random particles flying around inbetween the transitions
+		// user doesn't see random particles flying around in between the transitions
 		if (emitter->GetEmitDirection() != gravityDir) {
 			emitter->SetEmitDirection(gravityDir);
 			emitter->Reset();
@@ -8280,23 +8321,42 @@ void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
 /**
  * Draw all the beams that are currently active in the game.
  */
-void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera) {
+void GameESPAssets::DrawBeamEffects(double dT, const GameModel& gameModel, const Camera& camera) {
 	
     for (std::map<const Beam*, std::list<ESPEmitter*> >::iterator iter = this->activeBeamEmitters.begin();
 		 iter != this->activeBeamEmitters.end(); ++iter) {
 
 		const Beam* beam = iter->first;
 		std::list<ESPEmitter*>& beamEmitters = iter->second;
+        
+        if (beam->GetType() == Beam::PaddleBeam && gameModel.GetPlayerPaddle()->GetIsPaddleCameraOn()) {
+            // Draw the effect for the beam in paddle camera mode...
+            const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+            const Point2D& paddlePos = paddle->GetCenterPosition();
+            Point2D effectPos = paddlePos + paddle->GetHalfHeight() *paddle->GetUpVector();
+            this->paddleCamBeamGlowOutside->SetAliveParticlePosition(effectPos[0], effectPos[1], 0.0f);
+            this->paddleCamBeamGlowOutside->SetParticleAlpha(ESPInterval(0.7f*beam->GetBeamAlpha()));
+            this->paddleCamBeamGlowOutside->Tick(dT);
+            this->paddleCamBeamGlowOutside->Draw(camera);
 
-		// Update and draw the emitters...
-		for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {
-			ESPEmitter* currentEmitter = *emitIter;
-			assert(currentEmitter != NULL);
+            this->paddleCamBeamGlowInside->SetAliveParticlePosition(effectPos[0], effectPos[1], 0.0f);
+            this->paddleCamBeamGlowInside->SetParticleAlpha(ESPInterval(0.4f*beam->GetBeamAlpha()));
+            this->paddleCamBeamGlowInside->Tick(dT);
+            this->paddleCamBeamGlowInside->Draw(camera);
+        }
+
+        // Update and draw the emitters...
+        for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {
+	        ESPEmitter* currentEmitter = *emitIter;
+	        assert(currentEmitter != NULL);
             currentEmitter->SetParticleAlpha(ESPInterval(beam->GetBeamAlpha()));
-			currentEmitter->Tick(dT);
+	        currentEmitter->Tick(dT);
             currentEmitter->Draw(camera);
-		}
+        }
+
 	}
+
+
 }
 
 void GameESPAssets::DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type) {

@@ -245,7 +245,7 @@ void BossMesh::AddLaserBeamSightsEffect(const LaserBeamSightsEffectInfo& info) {
     spinningTarget->SetParticleSize(ESPInterval(PlayerPaddle::PADDLE_WIDTH_TOTAL));
     spinningTarget->SetEmitAngleInDegrees(0);
     spinningTarget->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    spinningTarget->SetParticleAlignment(ESP::ScreenAligned);
+    spinningTarget->SetParticleAlignment(ESP::ScreenPlaneAligned);
     spinningTarget->SetEmitPosition(Point3D(info.GetTargetPoint(), 0));
     spinningTarget->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.5f));
     spinningTarget->AddEffector(&this->laserSightTargetRotateEffector);
@@ -756,7 +756,7 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             snowflakeBackingEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
             snowflakeBackingEffect->SetInitialSpd(ESPInterval(0.0f));
             snowflakeBackingEffect->SetParticleLife(ESPInterval(0.8f*info.GetTimeInSecs()));
-            snowflakeBackingEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            snowflakeBackingEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
             snowflakeBackingEffect->SetEmitPosition(emitCenter);
             snowflakeBackingEffect->SetParticleColour(ESPInterval(0.95f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
             snowflakeBackingEffect->SetParticleRotation(ESPInterval(-180, 180));
@@ -773,7 +773,7 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             iceSmashOnoEffect->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
             iceSmashOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
             iceSmashOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
-            iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+            iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
             iceSmashOnoEffect->SetEmitPosition(emitCenter);
             iceSmashOnoEffect->SetParticleColour(GameModelConstants::GetInstance()->ICE_BALL_COLOUR);
             iceSmashOnoEffect->AddEffector(&this->particleFader);
