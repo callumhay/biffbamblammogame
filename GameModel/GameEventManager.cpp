@@ -205,10 +205,10 @@ void GameEventManager::ActionBallShot(const GameBall& shotBall) {
 }
 
 // Action for when a weapon is fired from the paddle
-void GameEventManager::ActionPaddleWeaponFired() {
+void GameEventManager::ActionPaddleWeaponFired(PlayerPaddle::PaddleType weaponType) {
 	std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
 	for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
-		(*listenerIter)->PaddleWeaponFiredEvent();
+		(*listenerIter)->PaddleWeaponFiredEvent(weaponType);
 	}		
 }
 

@@ -847,6 +847,10 @@ LevelSummaryNewHighScoreEvent {
 	file = resources/LevelSummaryNewHighScoreEvent.ogg
 }
 
+LevelSummaryAllStarsEvent {
+	file = resources/FiveStarsAcquiredEvent.ogg
+}
+
 LevelSummaryPointTallyLoop {
 	file = resources/LevelSummaryPointTallyLoop.ogg
 }

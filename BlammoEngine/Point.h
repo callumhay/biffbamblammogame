@@ -60,8 +60,6 @@ public:
         v_[1] = other.v_[1];
     }
 
-
-
     float MagnitudeAsVector() const {
         return sqrtf(v_[0]*v_[0] + v_[1]*v_[1]);
     }
@@ -122,6 +120,11 @@ public:
 
     bool operator!=(const Point2D& other) {
         return !(*this == other);
+    }
+
+    void AddPoint(const Point2D& other) {
+        this->v_[0] += other[0];
+        this->v_[1] += other[1];
     }
 
     static Point2D GetMidPoint(const Point2D& p1, const Point2D& p2) {

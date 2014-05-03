@@ -42,7 +42,8 @@ public:
     ~ESPTextureShaderParticle() {}
 
     void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
-	void Draw(const Camera& camera, const ESP::ESPAlignment& alignment);
+	void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+        const Camera& camera, const ESP::ESPAlignment& alignment);
 
 private:
     int currSelectedTexIdx;
@@ -59,10 +60,12 @@ inline void ESPTextureShaderParticle::Revive(const Point3D& pos, const Vector3D&
     this->SelectRandomTexture();
 }
 
-inline void ESPTextureShaderParticle::Draw(const Camera& camera, const ESP::ESPAlignment& alignment) {
+inline void ESPTextureShaderParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+                                           const Camera& camera, const ESP::ESPAlignment& alignment) {
+
     const Texture2D* currTexture = this->textures[this->currSelectedTexIdx];
     static_cast<CgFxTextureEffectBase*>(this->shaderEffect)->SetTexture(currTexture);
-    ESPShaderParticle::Draw(camera, alignment);
+    ESPShaderParticle::Draw(modelMat, modelInvTMat, camera, alignment);
 }
 
 inline void ESPTextureShaderParticle::SelectRandomTexture() {

@@ -101,6 +101,8 @@ private:
     AnimationMultiLerp<Colour> starTotalColourAnim;
     AnimationMultiLerp<float> starTotalScaleAnim;
 
+    AnimationMultiLerp<Colour> allStarColourFlashAnim;
+
     ESPPointEmitter flareEmitter;
 
     ESPParticleRotateEffector flareRotator;
@@ -135,7 +137,7 @@ private:
     Texture2D* lensFlareTex;
     Texture2D* haloTex;
 
-    std::vector<ESPPointEmitter*> starBgEmitters;
+    std::vector<std::vector<ESPPointEmitter*> > starBgEmitters;
     std::vector<ESPPointEmitter*> starFgEmitters;
 
     ESPParticleRotateEffector starBgRotator;
@@ -144,6 +146,7 @@ private:
 
     SoundID bgLoopSoundID;
     SoundID highScoreSoundID;
+    SoundID allStarSoundID;
     SoundID pointTallySoundID;
 
     class DifficultyPaneEventHandler : public OverlayPaneEventHandler {

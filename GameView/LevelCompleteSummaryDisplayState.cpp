@@ -80,7 +80,8 @@ starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), 
 starFgPulser(ScaleEffect(1.0f, 1.5f)), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
 flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
-highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallySoundID(INVALID_SOUND_ID) {
+highScoreSoundID(INVALID_SOUND_ID), allStarSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), 
+pointTallySoundID(INVALID_SOUND_ID) {
     
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
@@ -207,7 +208,7 @@ highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallyS
     this->currStarTotal = this->display->GetModel()->GetTotalStarsCollectedInGame();
     int numPrevLevelStars = completedLevel->GetNumStarsForScore(completedLevel->GetPrevHighScore());
     int numCurrLevelStars = completedLevel->GetNumStarsForScore(completedLevel->GetHighScore());
-    
+
     this->starAddAnimationCount = numCurrLevelStars - numPrevLevelStars;
     assert(this->starAddAnimationCount >= 0);
 
@@ -293,6 +294,17 @@ highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallyS
         this->starTotalColourAnim.SetInterpolantValue(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
         this->starTotalColourAnim.SetLerp(timeVals, colourVals);
         this->starTotalColourAnim.SetRepeat(false);
+
+        
+        colourVals[1] = GameViewConstants::GetInstance()->BRIGHT_POINT_STAR_COLOUR;
+        timeVals[0] = 0.0;
+        timeVals[1] = 1.0;
+        timeVals[2] = 2.0;
+
+        this->allStarColourFlashAnim.SetInterpolantValue(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+        this->allStarColourFlashAnim.SetLerp(timeVals, colourVals);
+        this->allStarColourFlashAnim.SetRepeat(true);
+
 
         std::vector<float> scaleVals;
         scaleVals.reserve(3);
@@ -398,7 +410,14 @@ highScoreSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), pointTallyS
         starBgEmitter->AddEffector(&this->starBgRotator);
         starBgEmitter->SetParticles(1, static_cast<Texture2D*>(this->glowTexture));
 
-        this->starBgEmitters.push_back(starBgEmitter);
+        std::vector<ESPPointEmitter*> bgEmittersForStar;
+        bgEmittersForStar.push_back(starBgEmitter);
+
+        // TODO: If there were five stars then we add extra effects...
+        //if (gameModel->GetNumStarsAwarded() == GameLevel::MAX_STARS_PER_LEVEL) {
+        //}
+
+        this->starBgEmitters.push_back(bgEmittersForStar);
     }
 
     // Depending on whether the level was the tutorial level or not and whether the player has 
@@ -496,15 +515,18 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
     assert(success);
     UNUSED_VARIABLE(success);
 
-    for (size_t i = 0; i < this->starAnimations.size(); i++) {
+    for (int i = 0; i < static_cast<int>(this->starAnimations.size()); i++) {
         delete this->starAnimations[i];
     }
     this->starAnimations.clear();
-    for (size_t i = 0; i < this->starBgEmitters.size(); i++) {
-        delete this->starBgEmitters[i];
+    for (int i = 0; i < static_cast<int>(this->starBgEmitters.size()); i++) {
+        std::vector<ESPPointEmitter*>& currVec = this->starBgEmitters[i];
+        for (int j = 0; j < static_cast<int>(currVec.size()); j++) {
+            delete currVec[j];
+        }
     }
     this->starBgEmitters.clear();
-    for (size_t i = 0; i < this->starFgEmitters.size(); i++) {
+    for (int i = 0; i < static_cast<int>(this->starFgEmitters.size()); i++) {
         delete this->starFgEmitters[i];
     }
     this->starFgEmitters.clear();
@@ -713,17 +735,38 @@ void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, floa
     currYPos -= STAR_SIZE/2;
 
     Colour starColour;
+    bool finishedAnimatingStars = true;
+    this->allStarColourFlashAnim.Tick(dT);
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
         
         AnimationLerp<float>* starAnimation = this->starAnimations[i];
+        finishedAnimatingStars &= (starAnimation->GetTimeValue() == starAnimation->GetFinalTime());
         if (i < gameModel->GetNumStarsAwarded()) {
-            starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
 
-            ESPPointEmitter* starBGEmitter = this->starBgEmitters[i];
+            if (gameModel->GetNumStarsAwarded() == GameLevel::MAX_STARS_PER_LEVEL) {
+                starColour = this->allStarColourFlashAnim.GetInterpolantValue();
+            }
+            else {
+                starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+            }
+
+            std::vector<ESPPointEmitter*>& currStarBGEmitterVec = this->starBgEmitters[i];
+            assert(!currStarBGEmitterVec.empty());
+
+            ESPPointEmitter* starBGEmitter = currStarBGEmitterVec[0];
             starBGEmitter->SetParticleAlpha(ESPInterval(0.75f*starAnimation->GetInterpolantValue()));
             starBGEmitter->OverwriteEmittedPosition(Point3D(currX, currYPos, 0));
             starBGEmitter->Tick(dT);
             starBGEmitter->Draw(this->display->GetCamera());
+
+            for (int j = 1; j < static_cast<int>(currStarBGEmitterVec.size()); j++) {
+                starBGEmitter = currStarBGEmitterVec[j];
+                starBGEmitter->SetAliveParticleAlphaMax(starAnimation->GetInterpolantValue());
+                starBGEmitter->SetEmitPosition(Point2D(currX, currYPos));
+                starBGEmitter->Tick(dT);
+                starBGEmitter->Draw(this->display->GetCamera());
+            }
+
         }
         else {
             starColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
@@ -749,8 +792,14 @@ void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, floa
     }
 
     glPopAttrib();
-
     debug_opengl_state();
+
+    // Play the 5-star event sound (if they player got 5 stars)
+    if (gameModel->GetNumStarsAwarded() == GameLevel::MAX_STARS_PER_LEVEL && finishedAnimatingStars && 
+        this->allStarSoundID == INVALID_SOUND_ID) {
+
+        this->allStarSoundID = this->display->GetSound()->PlaySound(GameSound::LevelSummaryAllStarsEvent, false);
+    }
 }
 
 /*
@@ -820,6 +869,7 @@ void LevelCompleteSummaryDisplayState::DrawTotalScoreLabel(float currYPos, float
 
     GameModel* gameModel = this->display->GetModel();
     GameLevel* gameLevel = gameModel->GetCurrentLevel();
+    GameSound* sound = this->display->GetSound();
 
     // Check to see if the player has a new high score
     if (gameLevel->GetHasNewHighScore()) {
@@ -827,7 +877,7 @@ void LevelCompleteSummaryDisplayState::DrawTotalScoreLabel(float currYPos, float
         float highScoreAlpha = this->newHighScoreFade.GetInterpolantValue();
         if (highScoreAlpha > 0.0f) {
             if (this->highScoreSoundID == INVALID_SOUND_ID) {
-                this->highScoreSoundID = this->display->GetSound()->PlaySound(GameSound::LevelSummaryNewHighScoreEvent, false);
+                this->highScoreSoundID = sound->PlaySound(GameSound::LevelSummaryNewHighScoreEvent, false);
             }
         }
 
@@ -874,7 +924,6 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
         this->flareEmitter.Tick(dT);
 
         if (!this->starAddAlphaAnims.empty()) {
-            this->starTotalColourAnim.Tick(dT);
             this->starTotalScaleAnim.Tick(dT);
         }
 

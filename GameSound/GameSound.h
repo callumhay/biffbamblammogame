@@ -283,6 +283,7 @@ public:
         LevelEndFadeoutEvent,
         LevelSummaryBackgroundLoop,
         LevelSummaryNewHighScoreEvent,
+        LevelSummaryAllStarsEvent,
         LevelSummaryPointTallyLoop,
         LevelSummaryPointTallySkipEvent,
         LevelSummaryStarTallyEvent,

@@ -549,6 +549,7 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, LevelEndFadeoutEvent, false);
     INSERT_MAPPING_PAIR(GameSound, LevelSummaryBackgroundLoop, true);
     INSERT_MAPPING_PAIR(GameSound, LevelSummaryNewHighScoreEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, LevelSummaryAllStarsEvent, false);
     INSERT_MAPPING_PAIR(GameSound, LevelSummaryPointTallyLoop, false);
     INSERT_MAPPING_PAIR(GameSound, LevelSummaryPointTallySkipEvent, false);
     INSERT_MAPPING_PAIR(GameSound, LevelSummaryStarTallyEvent, false);

@@ -465,8 +465,10 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				    // Draw when gravity ball and not invisiball...
 				    // We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
 				    if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
-					    Vector3D gravityDir = gameModel.GetTransformInfo()->GetGameXYZTransform() * Vector3D(0, -1, 0);
-					    this->espAssets->DrawGravityBallEffects(dT, camera, *currBall, gravityDir);
+                       // if (!gameModel.GetPlayerPaddle()->GetIsPaddleCameraOn()) {
+					        Vector3D gravityDir = gameModel.GetTransformInfo()->GetGameXYZTransform() * Vector3D(0, -1, 0);
+					        this->espAssets->DrawGravityBallEffects(dT, camera, *currBall, gravityDir);
+                       // }
 				    }
     				
 				    currBallColourVec += GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR.GetAsVector3D();
@@ -969,6 +971,73 @@ void GameAssets::DrawSafetyNet(BallSafetyNetMesh* safetyNetMesh, double dT, cons
     glPopMatrix();
 }
 
+void GameAssets::SetActiveEffectLights(const GameModel& gameModel, GameItem::ItemType itemEffectType) {
+    switch (itemEffectType) {
+        case GameItem::BlackoutItem:
+            this->lightAssets->ToggleLights(false, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
+            break;
+
+        case GameItem::PoisonPaddleItem: {
+            this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+            this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);
+            this->lightAssets->StartStrobeLight(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+            break;
+        }
+
+        case GameItem::PaddleCamItem: {
+            // Move the key light in the foreground so that it is behind the camera when it goes into paddle cam mode.
+            float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+            float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
+
+            const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+            const Point2D& paddlePos = paddle->GetCenterPosition();
+
+            Point3D newFGKeyLightPos(paddlePos[0], paddlePos[1] + PaddleCamHUD::PADDLE_CAM_FG_KEY_LIGHT_Y_OFFSET, 0.0f);
+            Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 10.0f), -5.0f);
+
+            Matrix4x4 gameXYZTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
+            Vector3D gameTranslation   = gameModel.GetCurrentLevelTranslation();
+
+            newFGKeyLightPos  += gameTranslation;
+            newFGKeyLightPos   = gameXYZTransform * newFGKeyLightPos;
+            newFGFillLightPos += gameTranslation;
+            newFGFillLightPos  = gameXYZTransform * newFGFillLightPos;
+
+            this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight, newFGKeyLightPos, 0.08f, 1.5f);
+            this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
+
+            break;
+        }
+
+        case GameItem::BallCamItem: {
+            GameBall* cameraBall = gameModel.GetBallChosenForBallCamera();
+
+            // Change the position of the key light so that it is facing down with the ball
+            float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+
+            const Point2D& cameraBallPos = cameraBall->GetCenterPosition2D();
+            Point3D newFGKeyLightPos(cameraBallPos[0], cameraBallPos[1], BallCamHUD::BALL_CAM_FG_KEY_LIGHT_Z_POS);
+            Point3D newFGFillLightPos(0.0f, -halfLevelHeight, BallCamHUD::BALL_CAM_FG_FILL_LIGHT_Z_POS);
+
+            Matrix4x4 gameXYZTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
+            Vector3D gameTranslation   = gameModel.GetCurrentLevelTranslation();
+
+            newFGKeyLightPos  += gameTranslation;
+            newFGKeyLightPos   = gameXYZTransform * newFGKeyLightPos;
+            newFGFillLightPos += gameTranslation;
+            newFGFillLightPos  = gameXYZTransform * newFGFillLightPos;
+
+            this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight,  newFGKeyLightPos,  0.08f, 1.5f);
+            this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
+
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
 void GameAssets::DrawMiscEffects(const GameModel& gameModel) {
     // If the player is in RC rocket mode, then we draw the level boundaries for where the rocket can't be...
     if (gameModel.GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
@@ -1024,7 +1093,9 @@ void GameAssets::DrawMiscEffects(const GameModel& gameModel) {
     }
 }
 
-void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
+void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& camera, 
+                           const Vector2D& worldT) {
+    UNUSED_PARAMETER(dT);
     UNUSED_PARAMETER(camera);
 
 	const std::list<Beam*>& beams = gameModel.GetActiveBeams();
@@ -1038,7 +1109,6 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	float innerBeamDepth;
 
-    
 	glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
@@ -1058,8 +1128,13 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	Vector3D beamDepthVec;
 	float currRadius, currAlpha, currZOffset;
 	Vector2D tempRadiusOffset;
-	
     bool paddleLaserBeamActive = false;
+
+    int numBeamPositions = 0;
+    Point2D avgBeamPos(0,0);
+    Colour avgBeamColour(0,0,0);
+    float avgBeamZOffset = PlayerPaddle::PADDLE_HALF_DEPTH;
+    float avgRadiusFraction = 0.0f;
 
 	for (std::list<Beam*>::const_iterator beamIter = beams.begin(); beamIter != beams.end(); ++beamIter) {
 		const Beam* currentBeam = *beamIter;
@@ -1092,6 +1167,13 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
                 assert(false);
                 continue;
         }
+
+        if (currAlpha <= 0) {
+            continue;
+        }
+
+        avgBeamColour += currAlpha*currentBeam->GetBeamColour();
+        avgBeamZOffset += currZOffset;
         
         const Colour& beamColour = currentBeam->GetBeamColour();
         Colour beamCenterColour  = BRIGHT_BEAM_CENTER_MULTIPLER * beamColour;
@@ -1103,6 +1185,12 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 		const int NUM_BASE_SEGMENTS = currentBeam->GetNumBaseBeamSegments();
 
 		for (; segmentIter != beamSegments.end(); ++segmentIter, ++segCounter) {
+            const BeamSegment* currentSeg = *segmentIter;
+
+            avgRadiusFraction += currentSeg->GetCurrentRadiusFraction();
+            avgBeamPos.AddPoint(currentSeg->GetBeamSegmentRay().GetOrigin() + 
+                LevelPiece::PIECE_HEIGHT*currentSeg->GetBeamSegmentRay().GetUnitDirection());
+            numBeamPositions++;
 
             // Don't show the first few segments of the beam if it's a paddle beam and the
             // paddle camera item is active, otherwise it will fill the screen with beaminess
@@ -1111,9 +1199,6 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
                 paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
 				continue;
 			}
-
-			const BeamSegment* currentSeg = *segmentIter;
-
 			beamSegStart = Point3D(currentSeg->GetStartPoint(), currZOffset);
 			beamSegEnd   = Point3D(currentSeg->GetEndPoint(), currZOffset);
 			beamUpVec    = Vector3D(currentSeg->GetBeamSegmentRay().GetUnitDirection());
@@ -1218,6 +1303,38 @@ void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	glEnd();
 	glPopMatrix();
 	glPopAttrib();
+
+    if (numBeamPositions > 0) {
+        avgBeamPos        /= static_cast<float>(numBeamPositions);
+        avgRadiusFraction /= static_cast<float>(numBeamPositions);
+        avgBeamColour     /= static_cast<float>(beams.size());
+        avgBeamZOffset    /= static_cast<float>(beams.size());
+
+        // Grab a transform matrix from the game model to say where the light is
+        // if the level is flipped or some such thing
+        avgBeamPos += worldT;
+        avgBeamPos = gameModel.GetTransformInfo()->GetGameXYZTransform() * avgBeamPos;
+
+        static const float ATTENUATION_MULTIPLIER = 1.2f;
+        assert(avgRadiusFraction > 0);
+        float invAvgRadiusFract = (1.0f/avgRadiusFraction);
+
+        PointLight& beamLight1 = this->lightAssets->GetBeamLight1();
+        beamLight1.SetLightOn(true, 0.0);
+        beamLight1.SetDiffuseColour(avgRadiusFraction*avgBeamColour);
+        beamLight1.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
+        beamLight1.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
+
+        PointLight& beamLight2 = this->lightAssets->GetBeamLight2();
+        beamLight2.SetLightOn(true, 0.0);
+        beamLight2.SetDiffuseColour(avgRadiusFraction*avgBeamColour);
+        beamLight2.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
+        beamLight2.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
+    }
+    else {
+        // Lights are moved back into their readjusted positions when a beam is removed from the game,
+        // See function: RemoveBeamEffects
+    }
 
     // If in paddle cam mode draw a full screen quad with the laser colour
     if (paddle->GetIsPaddleCameraOn() && paddleLaserBeamActive) {
@@ -1970,17 +2087,17 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		case GameItem::BlackoutItem: {
 			// Turn the lights off and make only the paddle and ball visible.
 			assert(gameModel.IsBlackoutEffectActive());
-			this->lightAssets->ToggleLights(false, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
+            // Change the lighting in the level...
+            this->SetActiveEffectLights(gameModel, GameItem::BlackoutItem);
 			break;
         }
 			
 		case GameItem::PoisonPaddleItem: {
 			// The poison item will make the lights turn a sickly green colour
 			assert(gameModel.GetPlayerPaddle()->HasPaddleType(PlayerPaddle::PoisonPaddle));
-
-			this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
-			this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);
-			this->lightAssets->StartStrobeLight(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+            
+            // Change the lighting in the level...
+            this->SetActiveEffectLights(gameModel, GameItem::PoisonPaddleItem);
 
             // Apply the sound effect for poison...
             this->sound->ToggleSoundEffect(GameSound::PoisonEffect, true);
@@ -1992,26 +2109,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			// NOTE that this is not permanent and just does so for any currently falling items
 			this->espAssets->TurnOffCurrentItemDropStars();
 			
-			// Move the key light in the foreground so that it is behind the camera when it goes into paddle cam mode.
-			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
-			float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
-
-            const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-            const Point2D& paddlePos = paddle->GetCenterPosition();
-
-			Point3D newFGKeyLightPos(paddlePos[0], paddlePos[1] + PaddleCamHUD::PADDLE_CAM_FG_KEY_LIGHT_Y_OFFSET, 0.0f);
-			Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 10.0f), -5.0f);
-
-            Matrix4x4 gameXYZTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
-            Vector3D gameTranslation   = gameModel.GetCurrentLevelTranslation();
-
-            newFGKeyLightPos  += gameTranslation;
-            newFGKeyLightPos   = gameXYZTransform * newFGKeyLightPos;
-            newFGFillLightPos += gameTranslation;
-            newFGFillLightPos  = gameXYZTransform * newFGFillLightPos;
-
-			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight, newFGKeyLightPos, 0.08f, 1.5f);
-			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
+            // Change the lighting in the level...
+            this->SetActiveEffectLights(gameModel, GameItem::PaddleCamItem);
 
 			// Fade out the background...
 			this->worldAssets->FadeBackground(true, 2.0f);
@@ -2033,23 +2132,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			// NOTE that this is not permanent and just does so for any currently falling items
 			this->espAssets->TurnOffCurrentItemDropStars();
 
-			// Change the position of the key light so that it is facing down with the ball
-			float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
-
-            const Point2D& cameraBallPos = cameraBall->GetCenterPosition2D();
-			Point3D newFGKeyLightPos(cameraBallPos[0], cameraBallPos[1], BallCamHUD::BALL_CAM_FG_KEY_LIGHT_Z_POS);
-			Point3D newFGFillLightPos(0.0f, -halfLevelHeight, BallCamHUD::BALL_CAM_FG_FILL_LIGHT_Z_POS);
-			
-            Matrix4x4 gameXYZTransform = gameModel.GetTransformInfo()->GetGameXYZTransform();
-            Vector3D gameTranslation   = gameModel.GetCurrentLevelTranslation();
-
-            newFGKeyLightPos  += gameTranslation;
-            newFGKeyLightPos   = gameXYZTransform * newFGKeyLightPos;
-            newFGFillLightPos += gameTranslation;
-            newFGFillLightPos  = gameXYZTransform * newFGFillLightPos;
-
-			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGKeyLight,  newFGKeyLightPos,  0.08f, 1.5f);
-			this->lightAssets->ChangeLightPositionAndAttenuation(GameLightAssets::FGFillLight, newFGFillLightPos, 0.12f, 1.5f);
+            // Change the lighting in the level...
+            this->SetActiveEffectLights(gameModel, GameItem::BallCamItem);
 
 			// Fade out the background...
 			this->worldAssets->FadeBackground(true, 2.0f);
@@ -2176,6 +2260,26 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		default:
 			break;
 	}
+}
+
+void GameAssets::RemoveBeamEffects(const GameModel& gameModel, const Beam& beam) {
+    UNUSED_PARAMETER(beam);
+
+    // Check to see if there are still beams active, if not we need to restore the beam light...
+    if (gameModel.GetActiveBeams().empty()) {
+
+        // Restore the beam light to its normal position and colour...
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLight1, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLight1, 0.5f);
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLight2, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLight2, 0.5f);
+
+        // Figure out what effects are currently active and make sure we maintain the lighting for those effects...
+        const std::list<GameItemTimer*>& activeTimers = gameModel.GetActiveTimers();
+        for (std::list<GameItemTimer*>::const_iterator iter = activeTimers.begin(); iter != activeTimers.end(); ++iter) {
+            this->SetActiveEffectLights(gameModel, (*iter)->GetTimerItemType());
+        }
+    }
 }
 
 void GameAssets::ActivatePaddleStatusEffect(const GameModel& gameModel, Camera& camera, 

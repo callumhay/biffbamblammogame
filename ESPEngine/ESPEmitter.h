@@ -130,6 +130,7 @@ public:
 
 	void AddParticle(ESPParticle* particle);
 
+    ESP::ESPAlignment GetParticleAlignment() const { return this->particleAlignment; }
 	bool GetHasParticles() const;
 
     const ESPInterval& GetParticleAlpha() const { return this->particleAlpha; }

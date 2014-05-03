@@ -915,7 +915,7 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
         this->RemovePaddleType(rocketType);
 
         // EVENT: Paddle just fired a rocket
-        GameEventManager::Instance()->ActionPaddleWeaponFired();
+        GameEventManager::Instance()->ActionPaddleWeaponFired(rocketType);
         
         updateBoundsAfterShooting = true;
     }
@@ -927,7 +927,7 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 		gameModel->AddBeam(paddleLaserBeam);
 
         // EVENT: Paddle just fired a beam
-        GameEventManager::Instance()->ActionPaddleWeaponFired();
+        GameEventManager::Instance()->ActionPaddleWeaponFired(PlayerPaddle::LaserBeamPaddle);
 	}
 	
     else {
@@ -960,7 +960,7 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
 			    this->timeSinceLastLaserBlast = 0.0;
 
                 // EVENT: Paddle just fired a laser bullet
-                GameEventManager::Instance()->ActionPaddleWeaponFired();
+                GameEventManager::Instance()->ActionPaddleWeaponFired(PlayerPaddle::LaserBulletPaddle);
 		    }
         }
 
@@ -974,7 +974,7 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
                 this->timeSinceLastBlastShot = 0.0;
 
                 // EVENT: Paddle just fired a blast of flame...
-                GameEventManager::Instance()->ActionPaddleWeaponFired();
+                GameEventManager::Instance()->ActionPaddleWeaponFired(PlayerPaddle::FlameBlasterPaddle);
             }
         }
         else if (this->HasPaddleType(PlayerPaddle::IceBlasterPaddle)) {
@@ -985,7 +985,7 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
                 this->timeSinceLastBlastShot = 0.0;
 
                 // EVENT: Paddle just fired a blast of ice...
-                GameEventManager::Instance()->ActionPaddleWeaponFired();
+                GameEventManager::Instance()->ActionPaddleWeaponFired(PlayerPaddle::IceBlasterPaddle);
             }
         }
 
@@ -1017,12 +1017,11 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
                 this->timeSinceLastMineLaunch = 0.0;
 
                 // EVENT: Paddle just launched a mine
-                GameEventManager::Instance()->ActionPaddleWeaponFired();
+                GameEventManager::Instance()->ActionPaddleWeaponFired(PlayerPaddle::MineLauncherPaddle);
             }
         }
 
 	} // other paddle shooting abilities go here...
-
 
     if (updateBoundsAfterShooting) {
         this->UpdatePaddleBounds(

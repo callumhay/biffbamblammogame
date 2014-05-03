@@ -114,6 +114,20 @@ public:
     const float* GetColourValues() const {
         return colours;
     }
+
+    Colour& operator/=(float f) {
+        assert(f > 0);
+        this->colours[0] /= f;
+        this->colours[1] /= f;
+        this->colours[2] /= f;
+        return *this;
+    }
+    Colour& operator+=(const Colour& c) {
+        this->colours[0] = std::min<float>(1, c[0] + this->colours[0]);
+        this->colours[1] = std::min<float>(1, c[1] + this->colours[1]);
+        this->colours[2] = std::min<float>(1, c[2] + this->colours[2]);
+        return *this;
+    }
 };
 
 class ColourRGBA : public Colour {

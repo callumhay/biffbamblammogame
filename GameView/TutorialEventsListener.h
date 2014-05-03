@@ -57,7 +57,7 @@ public:
     void BallShotEvent(const GameBall& shotBall);
     void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
     void ItemActivatedEvent(const GameItem& item);
-    void PaddleWeaponFiredEvent();
+    void PaddleWeaponFiredEvent(PlayerPaddle::PaddleType weaponType);
     void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
     void AllBallsDeadEvent(int livesLeft);
     void LastBallAboutToDieEvent(const GameBall& lastBallToDie);

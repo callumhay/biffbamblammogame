@@ -615,6 +615,11 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 	debug_output("EVENT: Ball shot");
 }
 
+void GameEventsListener::PaddleWeaponFiredEvent(PlayerPaddle::PaddleType weaponType) {
+    UNUSED_PARAMETER(weaponType);
+	debug_output("EVENT: Paddle weapon fired");
+}
+
 void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) {
 
     long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
@@ -1892,7 +1897,9 @@ void GameEventsListener::BeamChangedEvent(const Beam& beam) {
 
 void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
 	// Remove the effect for the beam...
-	this->display->GetAssets()->GetESPAssets()->RemoveBeamEffect(beam, true);
+    GameAssets* assets = this->display->GetAssets();
+    assets->RemoveBeamEffects(*this->display->GetModel(), beam);
+	assets->GetESPAssets()->RemoveBeamEffect(beam, true);
 
 	// Removed the appropriate sounds for the beam
 	switch (beam.GetType()) {

@@ -778,7 +778,8 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	ESPInterval xCoordInterval(minX, maxX);
 	ESPInterval yCoordInterval(minY, maxY);
 	ESPInterval zCoordInterval(minZ, maxZ);
-	Point3D emitCenter  = Point3D(xCoordInterval.RandomValueInInterval(), yCoordInterval.RandomValueInInterval(), zCoordInterval.RandomValueInInterval());
+	Point3D emitCenter(xCoordInterval.RandomValueInInterval(), 
+        yCoordInterval.RandomValueInInterval(), zCoordInterval.RandomValueInInterval());
 	
 	float randomSpawn = randomSpawnInterval.RandomValueInInterval();
 	float randomLife  = bangLifeInterval.RandomValueInInterval();
@@ -786,8 +787,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	// Create an emitter for the bang texture
 	ESPPointEmitter* bangEffect = this->deadBangEffects.front();
 	this->deadBangEffects.pop_front();
-	//new ESPPointEmitter();
-	
+
 	// Set up the emitter...
 
 	bangEffect->SetSpawnDelta(ESPInterval(randomSpawn));
@@ -795,7 +795,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangEffect->SetParticleLife(ESPInterval(randomLife));
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangEffect->SetEmitPosition(emitCenter);
 
 	// Figure out some random proper orientation...
@@ -821,7 +821,6 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	// Create an emitter for the sound of onomatopeia of the breaking block
 	ESPPointEmitter* bangOnoEffect = this->deadOnoEffects.front();
 	this->deadOnoEffects.pop_front();
-	//new ESPPointEmitter();
 
 	// Set up the emitter...
 	bangOnoEffect->SetSpawnDelta(ESPInterval(randomSpawn));
@@ -831,7 +830,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	bangOnoEffect->SetParticleSize(ESPInterval(0.8f), ESPInterval(0.8f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
@@ -1247,7 +1246,8 @@ void MainMenuDisplayState::EraseProgressVerifyEventHandler::MenuItemConfirmed() 
 /**
  * Triggered event when a sound onomatopoeia particle spawns for the background 'bang' particle effects.
  */
-void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const ESPParticle* particle) {
+void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const ESPParticle*) {
+    /*
 	const ESPOnomataParticle* soundParticle = static_cast<const ESPOnomataParticle*>(particle);
 	assert(soundParticle != NULL);
 
@@ -1278,4 +1278,5 @@ void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const 
 			assert(false);
 			break;
 	}
+    */
 }

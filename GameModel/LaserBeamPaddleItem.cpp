@@ -61,7 +61,6 @@ double LaserBeamPaddleItem::Activate() {
 		}
 	}
 
-	// Make the paddle have laser beam blasting abilities
 	if (paddle->GetIsLaserBeamFiring()) {
 		// Just add another beam if the beam is already firing - this will simply
 		// extend the lifetime of the already firing beam

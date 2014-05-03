@@ -243,13 +243,14 @@ void Beam::UpdateOriginBeamSegment(const GameModel* gameModel, const Collision::
     this->UpdateCollisions(gameModel);
 }
 
-BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, const void* ignoreThing) :
+BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, 
+                         int beamDmgPerSec, const void* ignoreThing) :
 timeSinceFired(0.0), ray(beamRay), collidingPiece(NULL), collidingProjectile(NULL), endT(0.0f),
-ignoreThing(ignoreThing), damagePerSecond(beamDmgPerSec) {
+ignoreThing(ignoreThing), damagePerSecond(beamDmgPerSec), initialRadius(beamRadius) {
 
 	this->SetRadius(beamRadius);
 }
-void BeamSegment::SetRadius(float radius) { 
+void BeamSegment::SetRadius(float radius) {
 	this->radius = radius;  
 
     static const int NUM_ANIMATION_CHANGES = 5;

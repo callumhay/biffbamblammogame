@@ -98,10 +98,10 @@ void InGameRenderPipeline::ApplyInGameCamera(double dT) {
 	// TODO: since we now reset the camera and reapply its transform each frame, we need to tell the MODEL about debug transforms!!
 #ifdef _DEBUG
 	if (!GameDisplay::IsCameraDetached()) {
-		camera.SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
+		camera.SetInvTransform(this->display->GetModel()->GetTransformInfo()->GetCameraInvTransform());
 	}
 #else
-	camera.SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
+	camera.SetInvTransform(this->display->GetModel()->GetTransformInfo()->GetCameraInvTransform());
 #endif	
 	camera.ApplyCameraTransform();
 
@@ -229,7 +229,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 	assets->DrawPaddle(dT, *gameModel, camera);
 
     // Render the beam effects
-    assets->DrawBeams(*gameModel, camera);
+    assets->DrawBeams(dT, *gameModel, camera, negHalfLevelDim);
 
 	glPopMatrix();
 
@@ -346,7 +346,7 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
     // get hidden by the effects when beams go through the portals
 	GameESPAssets* espAssets = assets->GetESPAssets();
 	espAssets->DrawPostProjectileEffects(dT, camera);
-    espAssets->DrawBeamEffects(dT, camera);
+    espAssets->DrawBeamEffects(dT, *gameModel, camera);
 	espAssets->DrawParticleEffects(dT, camera);
 
 	// Absolute post effects call for various object effects

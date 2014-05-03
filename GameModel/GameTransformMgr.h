@@ -81,7 +81,7 @@ public:
 
 	Matrix4x4 GetGameXYZTransform() const;
     Matrix4x4 GetGameXYTransform() const;
-	Matrix4x4 GetCameraTransform() const;
+	Matrix4x4 GetCameraInvTransform() const;
 	float GetCameraFOVAngle() const;
 
     float GetGameZRotationInDegs() const;
@@ -218,9 +218,9 @@ inline Matrix4x4 GameTransformMgr::GetGameXYTransform() const {
 /**
  * Grab the current transform for the camera.
  */
-inline Matrix4x4 GameTransformMgr::GetCameraTransform() const {
+inline Matrix4x4 GameTransformMgr::GetCameraInvTransform() const {
 	// The inverse is returned because the camera transform is applied to the world matrix
-	return this->currCamOrientation.GetTransform().inverse();
+	return this->currCamOrientation.GetTransform();
 }
 
 /**

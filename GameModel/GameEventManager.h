@@ -36,11 +36,11 @@
 #include "RocketTurretBlock.h"
 #include "MineTurretBlock.h"
 #include "CollateralBlock.h"
+#include "PlayerPaddle.h"
 
 class GameEvents;
 class GameBall;
 class Point2D;
-class PlayerPaddle;
 class PortalBlock;
 class CannonBlock;
 class TeslaBlock;
@@ -103,7 +103,7 @@ public:
 	void ActionAllBallsDead(int livesLeft);
 	void ActionBallSpawn(const GameBall& spawnBall);
 	void ActionBallShot(const GameBall& shotBall);
-    void ActionPaddleWeaponFired();
+    void ActionPaddleWeaponFired(PlayerPaddle::PaddleType weaponType);
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
     void ActionProjectileSafetyNetCollision(const Projectile& projectile, const SafetyNet& safetyNet);
     void ActionProjectileBossCollision(const Projectile& projectile, const Boss& boss, const BossBodyPart& collisionPart);
