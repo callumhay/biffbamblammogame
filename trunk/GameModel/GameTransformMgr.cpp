@@ -727,7 +727,7 @@ void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, fl
     // N.B., We take a fraction of the half width so that the FOV covers a little bit less than the
     // total width of the paddle, this gives the player a bit of leeway if the ball is just on or slightly off the edge
     // of the screen when it's coming down to the paddle in paddle camera mode
-	fov = 2.0f * Trig::radiansToDegrees(atan(0.85f * paddle.GetHalfWidthTotal() / DIST_FROM_PADDLE));
+	fov = 2.0f * Trig::radiansToDegrees(0.85f * atan(paddle.GetHalfWidthTotal() / DIST_FROM_PADDLE));
 }
 
 /**

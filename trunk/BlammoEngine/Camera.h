@@ -135,12 +135,23 @@ public:
 		return Matrix4x4(alignRightVec, alignUpVec, alignNormalVec);
 	}
 
+    Vector3D GetUpVector() const {
+        return this->viewMatrix * DEFAULT_UP_VEC; 
+    }
 	Vector3D GetNormalizedUpVector() const {
 		return Vector3D::Normalize(this->viewMatrix * DEFAULT_UP_VEC); 
 	}
+
+    Vector3D GetViewVector() const {
+        return this->viewMatrix * DEFAULT_FORWARD_VEC;
+    }
 	Vector3D GetNormalizedViewVector() const {
 		return Vector3D::Normalize(this->viewMatrix * DEFAULT_FORWARD_VEC);
 	}
+
+    Vector3D GetLeftVector() const {
+        return this->viewMatrix * DEFAULT_LEFT_VEC;
+    }
 	Vector3D GetNormalizedLeftVector() const {
 		return Vector3D::Normalize(this->viewMatrix * DEFAULT_LEFT_VEC);
 	}
