@@ -88,7 +88,6 @@ iceBallColourFader(ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
 particleGravityArrowColour(ColourRGBA(GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
-flashColourFader(ColourRGBA(1,1,1,1), ColourRGBA(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR, 0.0f)),
 iceOriginColourEffector(ColourRGBA(0.75f, 0.85f, 1.0f, 1.0f), ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 0.0f)),
 starColourFlasher(),
 fireOriginColourEffector(),
@@ -5968,8 +5967,8 @@ ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, cons
 	comboEffect->SetEmitPosition(Point3D(position));
 
     comboEffect->AddEffector(&this->particleLargeGrowth);
-    this->flashColourFader.SetEndColour(GameViewConstants::GetInstance()->GetMultiplierColour(multiplier));
-    comboEffect->AddEffector(&this->flashColourFader);
+    comboEffect->AddCopiedEffector(ESPParticleColourEffector(ColourRGBA(1,1,1,1), 
+        ColourRGBA(GameViewConstants::GetInstance()->GetMultiplierColour(multiplier), 0)));
 
 	// Add the single particle to the emitter
 	DropShadow dpTemp;

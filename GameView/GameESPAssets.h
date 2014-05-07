@@ -110,7 +110,6 @@ private:
 	ESPParticleColourEffector particleCloudColourFader;
 	ESPParticleColourEffector particleFaderUberballTrail;
 	ESPParticleColourEffector particleGravityArrowColour;
-    ESPParticleColourEffector flashColourFader;
     ESPParticleColourEffector slowBallColourFader;
     ESPParticleColourEffector fastBallColourFader;
     ESPParticleColourEffector iceOriginColourEffector;
