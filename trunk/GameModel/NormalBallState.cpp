@@ -78,7 +78,7 @@ void NormalBallState::Tick(bool simulateMovement, double seconds, const Vector2D
     // The impulse applies a sudden acceleration that diminishes
     else if (this->gameBall->impulseSpdDecreaseCounter < this->gameBall->impulseAmount) {
 
-        float currImpulseDeceleration   = this->gameBall->impulseDeceleration * seconds;
+        float currImpulseDeceleration = this->gameBall->impulseDeceleration * seconds;
         this->gameBall->impulseSpdDecreaseCounter += currImpulseDeceleration;
 
         if (this->gameBall->impulseSpdDecreaseCounter > this->gameBall->impulseAmount) {

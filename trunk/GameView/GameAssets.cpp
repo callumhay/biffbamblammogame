@@ -354,8 +354,6 @@ void GameAssets::DrawGameBallsPreEffects(double dT, GameModel& gameModel, const 
 }
 
 void GameAssets::DrawGameBallsBoostPostEffects(double dT, GameModel& gameModel, const Camera& camera) {
-    // This will draw any affects that occur right after a boost takes place
-    this->espAssets->DrawBallBoostingEffects(dT, camera);
 
     // Exit immediately if there's no bullet time effects currently active
     if (gameModel.GetBallBoostModel() == NULL || !gameModel.GetBallBoostModel()->IsInBulletTime()) {
@@ -377,6 +375,13 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 	int visibleBallCount        = 0;
     bool ballWithOmniLaserDrawn = false;
+
+    // Deal with the special case of the ball camera...
+    const GameBall* camBall = GameBall::GetBallCameraBall();
+    if (camBall == NULL) {
+        // This will draw any affects that occur right after a boost takes place
+        this->espAssets->DrawBallBoostingEffects(dT, camera);
+    }
 
 	// Go through each ball in the game, draw it accordingly
 	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
@@ -554,7 +559,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 		// Always make the colour of the invisiball to be plain white - we don't want to affect
 		// the cloaking effect
-        glPushAttrib(GL_DEPTH_BUFFER_BIT);
+        glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_CURRENT_BIT);
 		if (ballIsInvisible || ballColour.A() < 1.0f) {
 			glColor4f(1.0f, 1.0f, 1.0f, ballColour.A());
 
@@ -576,10 +581,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		glPopMatrix();
 	}
 
-    // Deal with the special case of the ball camera...
-    const GameBall* camBall = GameBall::GetBallCameraBall();
     if (camBall == NULL) {
-
         // If the ball boost direction is being decided then we need to draw the boost effect
         this->DrawGameBallsBoostPostEffects(dT, gameModel, camera);
 
@@ -653,6 +655,9 @@ void GameAssets::Tick(double dT, const GameModel& gameModel) {
 
 	// Tick the light assets (light animations for strobing, changing colours, etc.)
 	this->lightAssets->Tick(dT);
+
+    // Update the ESP assets
+    this->espAssets->Update(gameModel);
 
 	// Update the esp assets with any changes over the last tick
 	this->espAssets->UpdateBGTexture(*this->fboAssets->GetFinalFullScreenFBO()->GetFBOTexture());
@@ -1144,17 +1149,11 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
         // we don't want to draw its beams either
         switch (currentBeam->GetType()) {
             case Beam::PaddleBeam: {
-
-                if (paddle->HasBeenPausedAndRemovedFromGame(gameModel.GetPauseState())) {
-                    continue;
-                }
-                else {
-                    currZOffset = 0.0f;
-                    innerBeamDepth = paddle->GetHalfDepthTotal() / 2.0f;
-                    paddleLaserBeamActive = true;
-                    if (paddle->GetIsPaddleCameraOn()) {
-                        currAlpha *= 0.25f;
-                    }
+                paddleLaserBeamActive = currAlpha > 0;
+                currZOffset = 0.0f;
+                innerBeamDepth = paddle->GetHalfDepthTotal() / 2.0f;
+                if (paddle->GetIsPaddleCameraOn()) {
+                    currAlpha *= 0.25f;
                 }
                 break;
             }
@@ -1318,16 +1317,20 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
         static const float ATTENUATION_MULTIPLIER = 1.2f;
         assert(avgRadiusFraction > 0);
         float invAvgRadiusFract = (1.0f/avgRadiusFraction);
+        
+        static double timeCounter = 0;
+        timeCounter += 7*dT + 5 * Randomizer::GetInstance()->RandomNumZeroToOne() * dT;
+        Colour diffuseColour = NumberFuncs::LerpOverFloat(-1.0, 1.0, avgBeamColour, 1.33f*(avgBeamColour + Colour(0.33,0.33,0.33)), sinf(timeCounter));
 
         PointLight& beamLight1 = this->lightAssets->GetBeamLight1();
         beamLight1.SetLightOn(true, 0.0);
-        beamLight1.SetDiffuseColour(avgRadiusFraction*avgBeamColour);
+        beamLight1.SetDiffuseColour(avgRadiusFraction*diffuseColour);
         beamLight1.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
         beamLight1.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
 
         PointLight& beamLight2 = this->lightAssets->GetBeamLight2();
         beamLight2.SetLightOn(true, 0.0);
-        beamLight2.SetDiffuseColour(avgRadiusFraction*avgBeamColour);
+        beamLight2.SetDiffuseColour(avgRadiusFraction*diffuseColour);
         beamLight2.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
         beamLight2.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
     }
@@ -1796,7 +1799,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
             this->sound->PlaySoundAtPosition(GameSound::PaddleLaserBulletCollisionEvent, false, 
-                projectile.GetPosition3D(), true, true, true, 5*PlayerPaddle::PADDLE_WIDTH_TOTAL);
+                projectile.GetPosition3D(), true, true, true, 20.0f);
 			intensity = PlayerHurtHUD::MinorPain;
 			break;
 
@@ -1823,6 +1826,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
 				const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
 			    float multiplier = 1.0f / paddle.GetPaddleScaleFactor();
+                //float globSizeMultiplier = static_cast<float>(fireGlobProjectile->GetRelativeSize()) / static_cast<float>(FireGlobProjectile::Large);
                 
                 switch (fireGlobProjectile->GetRelativeSize()) {
 					case FireGlobProjectile::Small:
@@ -1847,6 +1851,9 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 						assert(false);
 						break;
 				}
+
+                this->sound->PlaySoundAtPosition(GameSound::PaddleFireGlobCollisionEvent, false, 
+                    projectile.GetPosition3D(), true, true, true, 20.0f);
 			}
 			break;
 

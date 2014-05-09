@@ -98,7 +98,7 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 
     // If the paddle is not in the game then we shouldn't be updating anything
-    if (paddle->HasBeenPausedAndRemovedFromGame(this->gameModel->GetPauseState()) ||
+    if (((this->gameModel->GetPauseState() & GameModel::PausePaddle) != 0x0) ||
         !paddle->GetIsLevelBoundsCheckingOn()) {
         return false;
     }

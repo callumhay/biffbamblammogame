@@ -87,6 +87,7 @@ public:
 	// Setter functions for typical attributes of emitters
 	bool SetParticles(unsigned int numParticles, Texture2D* texture);
 	bool SetParticles(unsigned int numParticles, CgFxEffectBase* effect);
+    bool AddParticles(unsigned int numParticles, CgFxEffectBase* effect);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e, bool isOrtho = false);
     
@@ -97,12 +98,14 @@ public:
         const std::vector<Bezier*>& curves, const ESPInterval& animateTimeInSecs);
 
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
+    void SetAliveParticleAlignmentAsVelocityBased(const Vector3D& velocityDir);
+    void SetAliveParticleAlignmentAsVelocityBased(const Vector2D& velocityDir);
 	void SetSpawnDelta(const ESPInterval& spawnDelta, bool firstSpawnNoDelta = false);
 	void SetInitialSpd(const ESPInterval& initialSpd);
 	void SetParticleLife(const ESPInterval& particleLife, bool affectLiveParticles = false);
 
-	void SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY);
-	void SetParticleSize(const ESPInterval& particleSize);
+	void SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY, bool setInitSize = false);
+	void SetParticleSize(const ESPInterval& particleSize, bool setInitSize = false);
     void SetParticleSpawnSize(const ESPInterval& particleSize);
 
 	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);

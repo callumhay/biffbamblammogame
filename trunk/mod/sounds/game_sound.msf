@@ -357,6 +357,9 @@ NonBallObjectPortalTeleportEvent {
 	file = resources/NonBallObjectPortalTeleportEvent.ogg
 }
 
+CollateralBlockHitEvent {
+	file = resources/BallBossBasicBounceEvent_01.ogg | resources/BallBossBasicBounceEvent_02.ogg | resources/BallBossBasicBounceEvent_03.ogg | resources/BallBossBasicBounceEvent_04.ogg | resources/BallBossBasicBounceEvent_05.ogg | resources/BallBossBasicBounceEvent_06.ogg | resources/BallBossBasicBounceEvent_07.ogg | resources/BallBossBasicBounceEvent_08.ogg | resources/BallBossBasicBounceEvent_09.ogg | resources/BallBossBasicBounceEvent_10.ogg
+}
 CollateralBlockFlashingLoop {
 	file = resources/CollateralBlockFlashingLoop.ogg
 }
@@ -476,6 +479,14 @@ BlastDeflectedByShieldEvent {
 
 FireGlobShieldCollisionEvent {
 	file = resources/FlameBlasterHitEvent.ogg
+}
+
+FireGlobBlockCollisionEvent {
+	file = resources/FireGlobBlockCollisionEvent.ogg
+}
+
+PaddleFireGlobCollisionEvent {
+	file = resources/FireGlobBlockCollisionEvent.ogg
 }
 
 PaddleLaserBulletCollisionEvent {
@@ -703,16 +714,16 @@ DecoBossElectricShockLoop {
 
 
 FuturismBossTeleportationChargingEvent {
-	file = resources/NOT_IMPLEMENTED
+	file = resources/FuturismBossTeleportationChargingEvent.ogg
 }
 FuturismBossTeleportationEvent {
-	file = resources/NOT_IMPLEMENTED
+	file = resources/FuturismBossTeleportationEvent.ogg
 }
 FuturismBossPortalSummonChargeEvent {
-	file = resources/NOT_IMPLEMENTED
+	file = resources/FuturismBossPortalSummonChargeEvent.ogg
 }
 FuturismBossPortalFireEvent {
-	file = resources/NOT_IMPLEMENTED
+	file = resources/FuturismBossPortalFireEvent.ogg
 }
 FuturismBossTwitchBeamWarningEvent {
 	file = resources/FuturismBossTwitchBeamWarningEvent.ogg
@@ -720,11 +731,14 @@ FuturismBossTwitchBeamWarningEvent {
 FuturismBossArcBeamWarningEvent {
 	file = resources/FuturismBossArcBeamWarningEvent.ogg
 }
-FuturismBossAttractorBeamOpenAndLoopEvent {
-	file = resources/FuturismBossAttractorBeamOpenAndLoopEvent.ogg
+FuturismBossAttractorBeamEvent {
+	file = resources/FuturismBossAttractorBeamEvent.ogg
 }
 FuturismBossChargingEvent {
 	file = resources/FuturismBossChargingEvent.ogg
+}
+FuturismBossSpinCoolDownEvent {
+	file = resources/FuturismBossSpinCoolDownEvent.ogg
 }
 
 

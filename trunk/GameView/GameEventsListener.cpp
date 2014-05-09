@@ -1108,7 +1108,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
 
             case LevelPiece::Regen: {
                 const RegenBlock& regenBlock = static_cast<const RegenBlock&>(block);
-                this->display->GetAssets()->GetESPAssets()->AddRegenBlockSpecialBreakEffect(regenBlock); // Make the counter on the block go exploding out
+                // Make the counter on the block go exploding out
+                this->display->GetAssets()->GetESPAssets()->AddRegenBlockSpecialBreakEffect(*this->display->GetModel(), regenBlock);
 			    if (wasFrozen) {
 				    // Add ice break effect
 				    this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block.GetCenter(), LevelPiece::PIECE_WIDTH, block.GetColour());
@@ -1421,6 +1422,8 @@ void GameEventsListener::CollateralBlockChangedStateEvent(const CollateralBlock&
 
         case CollateralBlock::WarningState:
             if (oldState == CollateralBlock::InitialState) {
+                sound->PlaySoundAtPosition(GameSound::CollateralBlockHitEvent, false, 
+                    collateralBlock.GetPosition3D(), true, true, true);
                 sound->AttachAndPlaySound(&projectile, GameSound::CollateralBlockFlashingLoop, 
                     true, gameModel->GetCurrentLevelTranslation());
             }

@@ -336,6 +336,8 @@ public:
 	GameESPAssets();
 	~GameESPAssets();
 
+    void Update(const GameModel& gameModel);
+
     ESPPointEmitter* CreateShockwaveEffect(const Point3D& center, float startSize, 
         float lifeTime, bool reverse = false);
 
@@ -401,7 +403,7 @@ public:
 	void AddBasicBlockBreakEffect(const LevelPiece& block);
 	void AddBombBlockBreakEffect(const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
-	void AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock);
+	void AddRegenBlockSpecialBreakEffect(const GameModel& gameModel, const RegenBlock& regenBlock);
     void AddFragileCannonBreakEffect(const LevelPiece& block);
 
     void AddBlockDisintegrationEffect(const LevelPiece& block);

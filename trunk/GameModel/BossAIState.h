@@ -77,7 +77,7 @@ protected:
     Vector2D currVel;
     Vector2D desiredVel;
 
-    Vector2D GetAcceleration() const;
+    Vector2D GetAcceleration(float& magnitude) const;
     virtual float GetAccelerationMagnitude() const = 0;
 
     // Special movement functionality to get the boss to move to an exact location
@@ -112,13 +112,14 @@ inline void BossAIState::MineExplosionOccurred(GameModel*, const MineProjectile*
 inline void BossAIState::TeslaLightningArcHitOccurred(GameModel*, const TeslaBlock*, const TeslaBlock*) {
 }
 
-inline Vector2D BossAIState::GetAcceleration() const {
+inline Vector2D BossAIState::GetAcceleration(float& magnitude) const {
     Vector2D accel = this->desiredVel - this->currVel;
     if (accel.IsZero()) {
         return Vector2D(0,0);
     }
     accel.Normalize();
-    return this->GetAccelerationMagnitude() * accel;
+    magnitude = this->GetAccelerationMagnitude();
+    return magnitude * accel;
 }
 
 inline void BossAIState::SetMoveToTargetPosition(const Point2D& startPos, const Point2D& targetPos, float targetError) {

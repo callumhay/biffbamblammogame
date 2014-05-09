@@ -37,6 +37,7 @@ public:
 	static const float HEIGHT_DEFAULT;
 	static const float WIDTH_DEFAULT;
     static const float DAMAGE_DEFAULT;
+    static const float MAX_DAMAGE;
 
     PaddleLaserProjectile(const Point2D& spawnLoc, const Vector2D& laserVelDir);
     PaddleLaserProjectile(const PaddleLaserProjectile& copy);
@@ -45,10 +46,12 @@ public:
     ProjectileType GetType() const {
         return Projectile::PaddleLaserBulletProjectile;
     }
-    float GetDamage() const { return DAMAGE_DEFAULT; }
+    float GetDamage() const { return std::min<float>(MAX_DAMAGE, this->GetSizeMultiplier() * DAMAGE_DEFAULT); }
 
     bool BlastsThroughSafetyNets() const { return false; }
     bool IsDestroyedBySafetyNets() const { return true;  }
+
+    float GetSizeMultiplier() const { return this->GetHeight() / HEIGHT_DEFAULT; }
 
 private:
     // Disallow assignment

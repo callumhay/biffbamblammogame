@@ -499,6 +499,14 @@ void GameBall::ApplyImpulseForce(float impulseAmt, float deceleration) {
     this->impulseSpdDecreaseCounter = 0.0f;
 }
 
+void GameBall::RemoveImpulseForce() {
+    if (this->impulseSpdDecreaseCounter < this->impulseAmount) {
+        float subtractAmt = this->impulseAmount - this->impulseSpdDecreaseCounter;
+        this->impulseSpdDecreaseCounter = this->impulseAmount;
+        this->SetSpeed(this->GetSpeed() - subtractAmt);
+    }
+}
+
 void GameBall::SetSpeed(float speed) {
 	this->currSpeed = speed;
 	this->gravitySpeed = speed;

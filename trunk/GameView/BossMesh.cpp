@@ -798,6 +798,59 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             break;
         }
 
+        case EnumBossEffectInfo::GothicRomanticBossSummon: {
+
+            Collision::AABB2D bossAABB = info.GetBodyPart()->GenerateWorldAABB();
+
+            ESPPointEmitter* lineEffect = GameESPAssets::CreateContinuousEmphasisLineEffect(
+                Point3D(0,0,0), info.GetTimeInSecs(), 0.4f*info.GetSize1D(), 5.0f*info.GetSize1D(), true);
+            assert(lineEffect != NULL);
+            lineEffect->SetParticleColour(ESPInterval(0.8f,1.0f), ESPInterval(0), ESPInterval(0), ESPInterval(1.0f));
+            
+            ESPPointEmitter* halo = new ESPPointEmitter();
+            halo->SetSpawnDelta(ESPInterval(0.25f));
+            halo->SetNumParticleLives(1);
+            halo->SetParticleLife(ESPInterval(info.GetTimeInSecs()));
+            halo->SetParticleSize(ESPInterval(1.5f*bossAABB.GetHeight()));
+            halo->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            halo->SetParticleAlignment(ESP::ScreenPlaneAligned);
+            halo->SetIsReversed(true);
+            halo->SetParticleColour(ESPInterval(0.5f), ESPInterval(0.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+            halo->AddEffector(&this->particleShrinkToNothing);
+            halo->AddEffector(&this->particleFader);
+            halo->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_HALO));
+
+            ESPPointEmitter* chargeParticles1 = new ESPPointEmitter();
+            chargeParticles1->SetSpawnDelta(ESPInterval(0.025f, 0.05f));
+            chargeParticles1->SetNumParticleLives(1);
+            chargeParticles1->SetInitialSpd(ESPInterval(2.25f, 6.0f));
+            chargeParticles1->SetParticleLife(ESPInterval(info.GetTimeInSecs() * 0.4f, info.GetTimeInSecs()*0.8f));
+            chargeParticles1->SetCutoffLifetime(info.GetTimeInSecs());
+            chargeParticles1->SetParticleSize(ESPInterval(2.0f, 3.5f));
+            chargeParticles1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+            chargeParticles1->SetParticleAlignment(ESP::ScreenPlaneAligned);
+            chargeParticles1->SetEmitDirection(Vector3D(0, 1, 0));
+            chargeParticles1->SetEmitAngleInDegrees(180);
+            chargeParticles1->SetIsReversed(true);
+            chargeParticles1->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+            chargeParticles1->AddEffector(&this->particleFader);
+            chargeParticles1->AddEffector(&this->particleMediumShrink);
+            chargeParticles1->AddCopiedEffector(ESPParticleRotateEffector(180.0f, ESPParticleRotateEffector::CLOCKWISE));
+            chargeParticles1->SetParticles(20, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+                GameViewConstants::GetInstance()->TEXTURE_LENSFLARE));
+
+            BossBodyPartEmitterUpdateStrategy* strategy = new BossBodyPartEmitterUpdateStrategy(info.GetBodyPart());
+            strategy->AddEmitter(halo);
+            strategy->AddEmitter(lineEffect);
+            strategy->AddEmitter(chargeParticles1);
+            strategy->SetOffset(info.GetOffset());
+
+            fgEffects.push_back(strategy);
+
+            break;
+        }
+
         case EnumBossEffectInfo::FuturismBossWarningFlare: {
 
             std::vector<ESPAbstractEmitter*> flareEmitters;

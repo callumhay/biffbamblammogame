@@ -1,7 +1,7 @@
 More than one way to break a block
 19 26
 S S S S D(StickyPaddle) S S S S D(LaserBeamPaddle) S S S S S S S S S 
-S E E E E E E E E E E E E F(l) E E E E F(l) 
+S E E E O E E E E O E E E F(l) E E E E F(l) 
 S E E E E E E E E E E E E F(l) E E E E F(l) 
 S I E R R R E E R R R E I F(l) E G G E F(l) 
 S E E R B R E E R B R E E N E G G E F(l) 
@@ -31,23 +31,24 @@ STARS:
 7000
 13000
 16500
-20200
-23700
+21000
+24000
 
 PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 1
-StickyPaddle 3
+BallGrow 2
 ShieldPaddle 0
+StickyPaddle 3
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 3
 OmniLaserBall 0
+FlameBlasterPaddle 0
 FireBall 0
 RocketPaddle 0
 GhostBall 2
@@ -59,12 +60,13 @@ MagnetPaddle 0
 MultiBall3 1
 RemoteControlRocket 0
 IceBall 0
+IceBlasterPaddle 0
 MineLauncherPaddle 0
 SlowBall 2
-GravityBall 1
-CrazyBall 1
-Random 2
 FastBall 2
+Random 2
+CrazyBall 1
+GravityBall 1
 PaddleCam 0
 
 PADDLESTARTXPOS: 17.5

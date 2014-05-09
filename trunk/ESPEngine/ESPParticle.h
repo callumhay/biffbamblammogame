@@ -108,13 +108,16 @@ public:
 	void SetNewInitSizeScale(const Vector2D& size) {
 		this->initSize = size;
 	}
+    void SetNewInitSizeScale(float x, float y) {
+        this->initSize[0] = x;
+        this->initSize[1] = y;
+    }
 
 	Vector3D GetVelocity() const {
 		return this->speed * this->velocityDir;
 	}
 	void SetVelocity(const Vector3D& v) {
         if (v.IsZero()) { 
-            velocityDir = Vector3D(0,0,0); 
             this->speed = 0.0f; 
         }
         else {
@@ -123,7 +126,14 @@ public:
 		    this->velocityDir = v/this->speed;
         }
 	}
-
+    void SetVelocityDir(const Vector3D& dir) {
+        this->velocityDir = dir;
+    }
+    void SetVelocityDir(const Vector2D& dir) {
+        this->velocityDir[0] = dir[0];
+        this->velocityDir[1] = dir[1];
+        this->velocityDir[2] = 0;
+    }
 	void GetColour(Colour& rgb, float& alpha) {
 		rgb = this->colour;
 		alpha = this->alpha;

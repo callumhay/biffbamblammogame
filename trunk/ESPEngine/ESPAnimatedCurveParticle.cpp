@@ -58,7 +58,9 @@ void ESPAnimatedCurveParticle::Tick(const double dT) {
     ESPParticle::Tick(dT);
 }
 
-void ESPAnimatedCurveParticle::Draw(const Camera&, const ESP::ESPAlignment&) {
+void ESPAnimatedCurveParticle::Draw(const Matrix4x4&, const Matrix4x4&, 
+                                    const Camera&, const ESP::ESPAlignment&) {
+
 
     // Don't draw if dead...
 	if (this->IsDead()) {

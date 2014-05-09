@@ -43,6 +43,7 @@
 #include "ExpandingHaloEffectInfo.h"
 #include "FullscreenFlashEffectInfo.h"
 #include "SparkBurstEffectInfo.h"
+#include "EnumBossEffectInfo.h"
 
 #include "../GameSound/GameSound.h"
 
@@ -208,10 +209,6 @@ float GothicRomanticBossAI::GenerateSummonProbability() const {
     }
 
     return 1.0f;
-}
-
-float GothicRomanticBossAI::GetAccelerationMagnitude() const {
-    return GothicRomanticBoss::DEFAULT_ACCELERATION;
 }
 
 void GothicRomanticBossAI::ShootOrbFromLegPoint(int legIdx, GameModel* gameModel) const {
@@ -413,6 +410,15 @@ void GothicRomanticBossAI::GenerateTargetRegenBlockPositions(std::vector<Point2D
     positions.push_back(Point2D(13*LevelPiece::PIECE_WIDTH + LevelPiece::HALF_PIECE_WIDTH, Y_POS));
 }
 
+void GothicRomanticBossAI::DoSummonEffect(double timeInSecs) {
+    EnumBossEffectInfo summonEffect(EnumBossEffectInfo::GothicRomanticBossSummon);
+    summonEffect.SetTimeInSecs(timeInSecs);
+    summonEffect.SetBodyPart(this->boss->GetBody());
+    summonEffect.SetSize1D(GothicRomanticBoss::BODY_WIDTH);
+
+    GameEventManager::Instance()->ActionBossEffect(summonEffect);
+}
+
 // End GothicRomanticBossAI *****************************************************
 
 // Begin ConfinedAI **************************************************************
@@ -424,6 +430,10 @@ summonsSinceLastSpecialItemDrop(0), numItemsPerSummoning(numItemsPerSummoning) {
     // Setup any animations specific to this state...
     this->laserSpinRotAnim.SetInterpolantValue(0.0f);
     this->laserSpinRotAnim.SetRepeat(false);
+}
+
+float ConfinedAI::GetAccelerationMagnitude() const {
+    return 3*LevelPiece::PIECE_WIDTH;
 }
 
 /**
@@ -776,9 +786,9 @@ void FireBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->attacksSinceLastSummon = 0;
 
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
+            
             // EVENT: Summon items power charge
-            GameEventManager::Instance()->ActionBossEffect(
-                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown - 0.15, Colour(1.0f, 0.1f, 0.1f)));
+            this->DoSummonEffect(this->summonItemsDelayCountdown);
 
             this->itemSummoningSoundID = this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossSummonItemChargeEvent, false);
 
@@ -1149,9 +1159,9 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->attacksSinceLastSummon = 0;
 
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS;
+            
             // EVENT: Summon items power charge
-            GameEventManager::Instance()->ActionBossEffect(
-                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown - 0.15, Colour(1.0f, 0.1f, 0.1f)));
+            this->DoSummonEffect(this->summonItemsDelayCountdown);
 
             this->itemSummoningSoundID = this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossSummonItemChargeEvent, false);
 
@@ -1601,6 +1611,10 @@ bool FreeMovingAttackAI::IsStateMachineFinished() const {
            (this->currState == GothicRomanticBossAI::HurtBodyAIState && this->bodyWeakpt->GetIsDestroyed());
 }
 
+float FreeMovingAttackAI::GetAccelerationMagnitude() const {
+    return GothicRomanticBoss::DEFAULT_ACCELERATION;
+}
+
 void FreeMovingAttackAI::SetNextAttackState() {
     if (this->attacksSinceLastSummon == 0 && this->currState == GothicRomanticBossAI::SummonItemsAIState) {
         if (this->glitchCounter % 2 == 1) {
@@ -1658,18 +1672,18 @@ void FreeMovingAttackAI::SetState(GothicRomanticBossAI::AIState newState) {
             this->attacksSinceLastSummon++;
             break;
 
-        case SummonItemsAIState:
+        case SummonItemsAIState: {
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->attacksSinceLastSummon = 0;
             this->summonItemsDelayCountdown = GothicRomanticBoss::DELAY_BEFORE_SUMMONING_ITEMS_IN_SECS / 1.5;
 
             // EVENT: Summon items power charge
-            GameEventManager::Instance()->ActionBossEffect(
-                PowerChargeEffectInfo(this->boss->GetBody(), this->summonItemsDelayCountdown, Colour(1.0f, 0.1f, 0.1f)));
+            this->DoSummonEffect(this->summonItemsDelayCountdown);
 
             this->itemSummoningSoundID = this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossSummonItemChargeEvent, false);
             break;
+        }
 
         case RocketToCannonAndPaddleAttackAIState:
             this->UpdateBasicMovement();
@@ -1820,7 +1834,7 @@ void FreeMovingAttackAI::ExecuteSummonItemsState(double dT, GameModel* gameModel
         }
 
         // EVENT: Effects for the boss itself
-        GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBody(), 1.0, Colour(1.0f, 1.0f, 1.0f)));
+        GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetBody(), 1.0, Colour(0.0f, 0.0f, 0.0f)));
 
         // Go to the next state...
         this->SetNextAttackState();

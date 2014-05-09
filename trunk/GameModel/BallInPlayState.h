@@ -73,7 +73,7 @@ private:
 	double timeSinceGhost;		// The time since the ball stopped colliding with blocks
 
 	void DoBallCollision(GameBall& b, const Vector2D& n, double dT, double timeUntilCollision, 
-        float minAngleInDegs, const Vector2D& lineVelocity = Vector2D(0,0));
+        float minAngleInDegs, float& ballNewtonsThirdLawImpulse, const Vector2D& lineVelocity = Vector2D(0,0));
     void DoBallPaddleCollision(GameBall& b, PlayerPaddle& p, const Vector2D& n, double dT, double timeUntilCollision, 
         float minAngleInDegs, const Vector2D& lineVelocity);
 	void DoBallCollision(GameBall& ball1, GameBall& ball2, const Point2D& ball1PtOfCollision, 

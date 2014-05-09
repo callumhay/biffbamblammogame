@@ -49,7 +49,42 @@ void BossAIState::UpdateMovement(double dT) {
     }
 
     // Update the speed based on the acceleration
-    this->currVel = this->currVel + dT * this->GetAcceleration();
+    if (this->currVel != this->desiredVel) {
+        
+        Vector2D prevVel = this->currVel;
+        
+        float accelMagnitude;
+        Vector2D accelVec = this->GetAcceleration(accelMagnitude);
+        Vector2D dA = dT * accelVec;
+        Vector2D velDiff = this->desiredVel - this->currVel;
+        if (velDiff.SqrMagnitude() < dT*dT*accelMagnitude*accelMagnitude) {
+            dA = velDiff;
+        }
+
+        this->currVel = this->currVel + dA;
+
+        /*
+        // Make sure we haven't exceeded the desired velocity
+        if (this->desiredVel.IsZero()) {
+            // If the velocity just changed directions then we set it to zero
+            if (Vector2D::Dot(prevVel, this->currVel) < 0) {
+                this->currVel = this->desiredVel;
+            }
+        }
+        else {
+            float currSqrSpd    = this->currVel.SqrMagnitude();
+            float desiredSqrSpd = this->desiredVel.SqrMagnitude();
+            float dotProd = Vector2D::Dot(this->currVel, this->desiredVel);
+            if (dotProd > 0 && fabs(dotProd*dotProd - currSqrSpd*desiredSqrSpd) < EPSILON) {
+                if (currSqrSpd > desiredSqrSpd) {
+                    this->currVel.Normalize();
+                    this->currVel *= sqrt(desiredSqrSpd);
+                }
+            }
+        }
+        */
+    }
+
     boss->alivePartsRoot->SetCollisionVelocity(this->currVel);
 }
 
@@ -73,8 +108,10 @@ bool BossAIState::MoveToTargetPosition(float maxMoveSpd) {
     // We're not at the target position yet, get the velocity to move there
     // (unless we're getting close then we want to slow down and stop)
 
+    float currSqrSpd = this->currVel.SqrMagnitude();
+
     // With a bit of kinematics we figure out when to start stopping...
-    float distToTargetToStartStopping = -this->currVel.SqrMagnitude() / (2 * -this->GetAccelerationMagnitude());
+    float distToTargetToStartStopping = -currSqrSpd / (2 * -this->GetAccelerationMagnitude());
     assert(distToTargetToStartStopping >= 0.0);
     if (currPosToTargetVec.SqrMagnitude()-EPSILON <= distToTargetToStartStopping * distToTargetToStartStopping) {
         this->desiredVel = Vector2D(0,0);

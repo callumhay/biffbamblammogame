@@ -418,6 +418,7 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, EnergyProjectilePortalTeleportEvent, false);
     INSERT_MAPPING_PAIR(GameSound, NonBallObjectPortalTeleportEvent, false);
 
+    INSERT_MAPPING_PAIR(GameSound, CollateralBlockHitEvent, false);
 	INSERT_MAPPING_PAIR(GameSound, CollateralBlockFlashingLoop, false);
 	INSERT_MAPPING_PAIR(GameSound, CollateralBlockFallingLoop, false);
 	INSERT_MAPPING_PAIR(GameSound, CannonBlockRotatingLoop, false);
@@ -454,6 +455,9 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, RocketOrMineDeflectedByShieldEvent, false);
     INSERT_MAPPING_PAIR(GameSound, BlastDeflectedByShieldEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FireGlobShieldCollisionEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FireGlobBlockCollisionEvent, false);
+
+    INSERT_MAPPING_PAIR(GameSound, PaddleFireGlobCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleLaserBulletCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleLaserBeamCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleCollateralBlockCollisionEvent, false);
@@ -516,8 +520,9 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, FuturismBossPortalFireEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FuturismBossTwitchBeamWarningEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FuturismBossArcBeamWarningEvent, false);
-    INSERT_MAPPING_PAIR(GameSound, FuturismBossAttractorBeamOpenAndLoopEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossAttractorBeamEvent, false);
     INSERT_MAPPING_PAIR(GameSound, FuturismBossChargingEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, FuturismBossSpinCoolDownEvent, false);
 
     INSERT_MAPPING_PAIR(GameSound, EnterBulletTimeEvent, false);
     INSERT_MAPPING_PAIR(GameSound, InBulletTimeLoop, false);

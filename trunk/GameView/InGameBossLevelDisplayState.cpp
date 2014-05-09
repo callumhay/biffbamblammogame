@@ -69,10 +69,13 @@ bossIntroFadeInSoundID(INVALID_SOUND_ID) {
 InGameBossLevelDisplayState::~InGameBossLevelDisplayState() {
     this->display->GetAssets()->ToggleLightsForBossDeath(true, 0.001);
     this->display->GetAssets()->ToggleLights(true, 0.001);
-    this->display->GetModel()->GetPlayerPaddle()->SetLevelBoundsChecking(true);
     this->display->GetModel()->ToggleAllowPaddleBallLaunching(true);
     this->display->GetCamera().ClearCameraShake();
     this->display->GetModel()->GetTransformInfo()->Reset();
+
+    // NOTE: This is done in the destructor of the boss summary state!
+    // If we do it here we run the risk of messing up the game model
+    //this->display->GetModel()->GetPlayerPaddle()->SetLevelBoundsChecking(true);
 }
 
 void InGameBossLevelDisplayState::RenderFrame(double dT) {

@@ -40,9 +40,15 @@ public:
 
     enum MouseButton { LeftMouseButton, RightMouseButton };
 
+    static bool IsDirectionActionButton(const ActionButton& button);
+
 private:
 	GameControl(){};
 	~GameControl(){};
 };
+
+inline bool GameControl::IsDirectionActionButton(const ActionButton& button) {
+    return (button == UpButtonAction || button == DownButtonAction || button == LeftButtonAction || button == RightButtonAction);
+}
 
 #endif // __GAMECONTROLACTIONBUTTONS_H__

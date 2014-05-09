@@ -151,6 +151,7 @@ public:
         EnergyProjectilePortalTeleportEvent,
         NonBallObjectPortalTeleportEvent,
 
+        CollateralBlockHitEvent,
 		CollateralBlockFlashingLoop,
 		CollateralBlockFallingLoop,
         TeslaLightningArcLoop,
@@ -185,6 +186,9 @@ public:
         RocketOrMineDeflectedByShieldEvent,
         BlastDeflectedByShieldEvent,
         FireGlobShieldCollisionEvent,
+        FireGlobBlockCollisionEvent,
+
+        PaddleFireGlobCollisionEvent,
         PaddleLaserBulletCollisionEvent,
         PaddleLaserBeamCollisionEvent,
         PaddleCollateralBlockCollisionEvent,
@@ -247,8 +251,9 @@ public:
         FuturismBossPortalFireEvent,
         FuturismBossTwitchBeamWarningEvent,
         FuturismBossArcBeamWarningEvent,
-        FuturismBossAttractorBeamOpenAndLoopEvent,
+        FuturismBossAttractorBeamEvent,
         FuturismBossChargingEvent,
+        FuturismBossSpinCoolDownEvent,
 
         // -> Bullet-time / boost sounds
         EnterBulletTimeEvent,

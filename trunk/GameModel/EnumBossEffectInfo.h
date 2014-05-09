@@ -39,6 +39,8 @@ public:
         FrozenShakeDebris,         // Icy debris as the boss shakes itself while frozen
         IceBreak,                  // After being frozen, and a boss breaks free of it
 
+        GothicRomanticBossSummon,  // Energy gather right before summoning items
+
         FuturismBossWarningFlare,  // A bright flash right before doing something mean to the player
         FuturismBossBeamEnergy,    // Energy streaks sucking into the boss as it fires a laser beam
         FuturismBossAttractorBeam, // Beam from the boss to the ball, that attracts the ball to the boss
