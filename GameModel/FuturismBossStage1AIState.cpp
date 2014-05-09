@@ -290,7 +290,7 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
         case TWITCH_BEAM_IDX:  this->SetState(LaserBeamTwitchAIState); break; 
         
         case TELEPORT_IDX:
-            if (this->LevelHasRocketInIt(gameModel)) { 
+            if (this->LevelHasRocketInIt(gameModel) || gameModel.GetPlayerPaddle()->HasPaddleType(PlayerPaddle::RocketPaddle)) { 
                 this->GoToRandomBasicAttackState(); 
             }
             else {
@@ -304,7 +304,17 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
                 this->GoToRandomBasicAttackState(); 
             }
             else {
-                this->SetState(MoveToPositionAIState); 
+                if (gameModel.GetPlayerPaddle()->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+                    if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) { 
+                        this->SetState(MoveToPositionAIState);
+                    }
+                    else {
+                        this->GoToRandomBasicAttackState(); 
+                    }
+                }
+                else {
+                    this->SetState(MoveToPositionAIState);
+                }
             }
             break;
     }
@@ -480,6 +490,24 @@ void FuturismBossStage1AIState::RocketExplosionOccurred(GameModel* gameModel, co
             this->DestroyShield(rocketVelDir, limbsToDestroy[i], false);
         }
         this->DestroyShield(rocketVelDir, limbsToDestroy.back(), true);
+    }
+}
+
+void FuturismBossStage1AIState::GoToRandomBasicMoveState() {
+    if (this->boss->GetGameModel()->GetPlayerPaddle()->HasPaddleType(PlayerPaddle::RocketPaddle)) {
+        this->SetState(MoveToPositionAIState);
+        return;
+    }
+
+    int randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % 5;
+    switch (randomNum) {
+        case 0: case 1: case 2: 
+            this->SetState(MoveToPositionAIState); 
+            return;
+
+        case 3: case 4: default: 
+            this->SetState(TeleportAIState); 
+            return;
     }
 }
 

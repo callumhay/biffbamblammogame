@@ -52,7 +52,8 @@ public:
 
 	void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	void Tick(const double dT);
-	void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, const Camera& camera, const ESP::ESPAlignment& alignment);
+	void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+        const Camera& camera, const ESP::ESPAlignment& alignment);
 
 	void SetDropShadow(const DropShadow& ds) {
 		this->dropShadow = ds;

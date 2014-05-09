@@ -92,7 +92,7 @@ void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Poin
 	haloExpandingPulse->SetParticleSize(ESPInterval(0.9f*LevelPiece::PIECE_WIDTH), ESPInterval(0.9f*LevelPiece::PIECE_HEIGHT));
 	haloExpandingPulse->SetEmitAngleInDegrees(0);
 	haloExpandingPulse->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	haloExpandingPulse->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+	haloExpandingPulse->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	haloExpandingPulse->SetEmitPosition(worldTranslation);
 	haloExpandingPulse->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
 	haloExpandingPulse->AddEffector(&haloExpandPulse);
@@ -114,6 +114,7 @@ void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Poin
     particlesComing->SetParticleSize(ESPInterval(0.1f*LevelPiece::PIECE_HEIGHT, 0.33f*LevelPiece::PIECE_HEIGHT));
     particlesComing->SetParticleColour(rColour, gColour, bColour, ESPInterval(1.0f));
     particlesComing->SetEmitAngleInDegrees(180);
+    particlesComing->SetParticleAlignment(ESP::ScreenPlaneAligned);
     particlesComing->SetRadiusDeviationFromCenter(
         ESPInterval(0.0f, 0.4f*LevelPiece::HALF_PIECE_WIDTH), 
         ESPInterval(0.0f, 0.4f*LevelPiece::HALF_PIECE_HEIGHT), 
@@ -131,6 +132,7 @@ void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Poin
     particlesGoing->SetParticleSize(ESPInterval(0.1f*LevelPiece::PIECE_HEIGHT, 0.33f*LevelPiece::PIECE_HEIGHT));
     particlesGoing->SetParticleColour(rColour, gColour, bColour, ESPInterval(1.0f));
     particlesGoing->SetEmitAngleInDegrees(180);
+    particlesGoing->SetParticleAlignment(ESP::ScreenPlaneAligned);
     particlesGoing->SetRadiusDeviationFromCenter(
         ESPInterval(0.0f, 0.5f*LevelPiece::HALF_PIECE_WIDTH), 
         ESPInterval(0.0f, 0.5f*LevelPiece::HALF_PIECE_HEIGHT), 

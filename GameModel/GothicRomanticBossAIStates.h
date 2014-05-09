@@ -113,7 +113,7 @@ protected:
         return NumberFuncs::LerpOverFloat<float>(0.0f, 1.0f, multiplier*0.15f, multiplier*0.3f, this->GetTotalLifePercent());
     }
 
-    float GetAccelerationMagnitude() const;
+    virtual float GetAccelerationMagnitude() const = 0;
     virtual void SetState(GothicRomanticBossAI::AIState newState) = 0;
 
     void ShootOrbFromLegPoint(int legIdx, GameModel* gameModel) const;
@@ -127,6 +127,8 @@ protected:
     static AnimationMultiLerp<Vector2D> GenerateGlitchShakeAnimation();
     static void GenerateRocketTargetCannonPositions(int numRockets, std::vector<Point2D>& positions);
     static void GenerateTargetRegenBlockPositions(std::vector<Point2D>& positions);
+
+    void DoSummonEffect(double timeInSecs);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(GothicRomanticBossAI);
@@ -153,6 +155,8 @@ protected:
     
     int numItemsPerSummoning;
     int summonsSinceLastSpecialItemDrop;
+
+    float GetAccelerationMagnitude() const;
 
     virtual float GenerateSpecialItemSummonProbability() const;
     virtual bool AllowLevelFlipItem() const { return true; }
@@ -323,6 +327,8 @@ private:
     AnimationMultiLerp<Vector3D> hurtMoveAnim;
     AnimationLerp<float> twirlAnim;
 
+    float GetAccelerationMagnitude() const;
+        
     double GenerateBasicMoveAndShootTime() const { return 8.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
     double GenerateTimeBetweenLaserShots() const { return 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.5; }
     double GenerateTimeBetweenRockets() const { return 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 1.0; }

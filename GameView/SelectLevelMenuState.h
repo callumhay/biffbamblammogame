@@ -81,6 +81,7 @@ private:
     AnimationMultiLerp<float> pressEscAlphaAnim;
     AnimationMultiLerp<float> totalGameStarGlowPulseAnim;
     AnimationMultiLerp<float> fadeAnimation;
+    AnimationMultiLerp<Colour> starGlowColourAnim;
 
     // Animation of the selection indicator
     AnimationMultiLerp<float> selectionAlphaOrangeAnim;   
@@ -106,6 +107,9 @@ private:
     ESPMultiColourEffector nextArrowFader;
     ESPVolumeEmitter* prevPgArrowEmitter;
     ESPMultiColourEffector prevArrowFader;
+
+    ESPPointEmitter* fiveStarFGSparkleEmitter;
+    ESPPointEmitter* fiveStarBGGlowEmitter;
 
     Texture2D* explosionTex;
     Texture2D* sphereNormalsTex;
@@ -242,9 +246,13 @@ private:
     private:
         static const float NUM_TO_HIGH_SCORE_Y_GAP;
         static const float HIGH_SCORE_TO_STAR_Y_GAP;
+        static const float STAR_GAP;
 
-        GLuint starDisplayList;
+        GLuint activeStarDisplayList;
+        GLuint inactiveStarDisplayList;
         float starSize;
+        Point2D starDrawPos;
+        int numStars;
 
         TextLabel2D* numLabel;
         TextLabel2D* highScoreLabel;

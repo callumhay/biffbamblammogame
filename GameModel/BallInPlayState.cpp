@@ -276,6 +276,7 @@ void BallInPlayState::Tick(double seconds) {
     Point2D collisionPt, otherCollisionPt;
 	Collision::LineSeg2D collisionLine;
 	double timeUntilCollision, bestTimeUntilCollision;
+    float ballMoveImpulse;
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
 	bool didCollideWithTeslaLightning = false;
@@ -464,7 +465,7 @@ void BallInPlayState::Tick(double seconds) {
     			
 			    // Calculate the ball position/velocity after collision
 			    this->DoBallCollision(*currBall, n, seconds, timeUntilCollision, 
-                    GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+                    GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, ballMoveImpulse);
                 ballChangedByCollision[ballIdx].posChanged = true;
 		    }
 
@@ -483,12 +484,20 @@ void BallInPlayState::Tick(double seconds) {
                     // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
                     collisionBossPart = boss->CollisionCheck(*currBall, seconds, n, collisionLine, timeUntilCollision, collisionPt);
                     if (collisionBossPart != NULL) {
+                        Vector2D bossVel = collisionBossPart->GetCollisionVelocity();
+                        
                         // Make the ball react to the collision...
                         this->DoBallCollision(*currBall, n, seconds, timeUntilCollision, 
-                            GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, collisionBossPart->GetCollisionVelocity());
+                            GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, ballMoveImpulse, bossVel);
+                        currBall->RemoveImpulseForce();
                         
                         BallCollisionChangeInfo& collisionInfo = ballChangedByCollision[ballIdx];   
                         collisionInfo.posChanged = true;
+                        if (!bossVel.IsZero()) {
+                            collisionInfo.impulseApplied = true;
+                            collisionInfo.impulseAmt = ballMoveImpulse;
+                            collisionInfo.impulseDecel = collisionInfo.impulseAmt;
+                        }
 
                         // Now make the boss react to the collision...
                         this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
@@ -556,7 +565,7 @@ void BallInPlayState::Tick(double seconds) {
 			        else {
 				        // Make the ball react to the collision
 				        this->DoBallCollision(*currBall, bestNormal, seconds, bestTimeUntilCollision,
-                            GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+                            GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, ballMoveImpulse);
                         ballChangedByCollision[ballIdx].posChanged = true;
 			        }
 					
@@ -640,7 +649,8 @@ void BallInPlayState::Tick(double seconds) {
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, 
                                       double dT, double timeUntilCollision, 
-                                      float minAngleInDegs, const Vector2D& lineVelocity) {
+                                      float minAngleInDegs, float& ballNewtonsThirdLawImpulse, 
+                                      const Vector2D& lineVelocity) {
 	b.BallCollided();
 
 	// Calculate the time of collision and then the difference up to this point
@@ -714,20 +724,19 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
         }
     }
 
-
     // Reflect the ball off the normal... this will have some dependence on whether there is a velocity for the line...
     Vector2D moveVel(0,0);
-
+    ballNewtonsThirdLawImpulse = 0;
     if (!lineVelocity.IsZero()) {
 
         Vector2D reflectionVel = reflSpd * reflVecHat;
         Vector2D augmentedReflectionVecHat = Vector2D::Normalize(reflectionVel + lineVelocity);
         reflVecHat = augmentedReflectionVecHat;
-        
+
         if (Vector2D::Dot(reflVecHat, lineVelocity) > 0.0f) {
             moveVel += lineVelocity;
+            ballNewtonsThirdLawImpulse = std::max<float>(0, lineVelocity.Magnitude() - 0.66f*b.GetSpeed());
         }
-
     }
    
     b.SetVelocity(reflSpd, reflVecHat);
@@ -902,7 +911,8 @@ void BallInPlayState::DoBallSafetyNetCollision(SafetyNet* safetyNet, GameBall& b
     GameEventManager::Instance()->ActionBallSafetyNetDestroyed(ball, isBottomSafetyNet);
 
     if (!ballBlastsThroughSafetyNet) {
-        this->DoBallCollision(ball, n, seconds, timeUntilCollision, GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS);
+        float ballMoveImpulse;
+        this->DoBallCollision(ball, n, seconds, timeUntilCollision, GameBall::MIN_BALL_ANGLE_ON_BLOCK_HIT_IN_DEGS, ballMoveImpulse);
         collisionChangeInfo.posChanged = true;
     }
 

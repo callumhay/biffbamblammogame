@@ -134,7 +134,7 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
     switch(alignment) {
 
         case ESP::AxisAligned: {
-            if (this->speed > 0) {
+            if (!this->velocityDir.IsZero()) {
                 alignUpVec = modelMat * this->velocityDir;
             }
             else {
@@ -160,7 +160,7 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
             break;
 
         case ESP::ScreenAlignedFollowVelocity: {
-            if (this->speed > 0) {
+            if (!this->velocityDir.IsZero()) {
                 alignUpVec = modelMat * this->velocityDir;
             }
             else {

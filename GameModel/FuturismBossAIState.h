@@ -130,6 +130,8 @@ protected:
     static const float SHIELD_LIFE_POINTS;
     static const float SHIELD_BALL_DAMAGE;
 
+    static const double COOL_DOWN_SFX_TIME_IN_SECS;
+
     FuturismBoss* boss;
     AIState currState;
     ArenaState arenaState;
@@ -177,6 +179,7 @@ protected:
     SoundID iceShakeSoundID;
     SoundID chargingSoundID;
     SoundID attractorBeamLoopSoundID;
+    SoundID spinCoolDownSoundID;
     
     // Pure virtual functions
     virtual void GoToNextState(const GameModel& gameModel) = 0;

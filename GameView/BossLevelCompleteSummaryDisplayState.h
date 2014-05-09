@@ -117,7 +117,9 @@ inline void BossLevelCompleteSummaryDisplayState::ButtonPressed(const GameContro
                                                                 const GameControl::ActionMagnitude& magnitude) {
     UNUSED_PARAMETER(pressedButton);
     UNUSED_PARAMETER(magnitude);
-    this->AnyKeyWasPressed();
+    if (!GameControl::IsDirectionActionButton(pressedButton)) {
+        this->AnyKeyWasPressed();
+    }
 }
 
 inline void BossLevelCompleteSummaryDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {

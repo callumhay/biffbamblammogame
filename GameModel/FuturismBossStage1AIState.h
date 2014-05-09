@@ -83,6 +83,8 @@ private:
     void RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket);
     float GetTotalLifePercent() const;
     float GetAccelerationMagnitude() const { return FuturismBossAIState::DEFAULT_ACCELERATION; }
+    
+    void GoToRandomBasicMoveState();
 
     // Helper Methods
     bool LevelHasRocketInIt(const GameModel& gameModel) const;

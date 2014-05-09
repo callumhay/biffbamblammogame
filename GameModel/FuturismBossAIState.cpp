@@ -74,6 +74,8 @@ const double FuturismBossAIState::TIME_UNTIL_BARRIER_DESTRUCTION_SHOT_IN_SECS = 
 const double FuturismBossAIState::BARRIER_DESTRUCTION_ARC_TIME_IN_SECS = 3.4;
 const double FuturismBossAIState::AVOIDANCE_PREDICTION_LOOKAHEAD_TIME_IN_SECS = 0.2;
 
+const double FuturismBossAIState::COOL_DOWN_SFX_TIME_IN_SECS = 1.3;
+
 const float FuturismBossAIState::SHIELD_LIFE_POINTS = FLT_MAX;
 const float FuturismBossAIState::SHIELD_BALL_DAMAGE = 0.0f;
 
@@ -86,7 +88,8 @@ timeSinceLastStratPortal(0), timeSinceLastAttackPortal(0), currBeam(NULL),
 numBasicShotsToFire(0), numConsecutiveMoves(0), numConsecutiveBeams(0), 
 numConsecutiveShots(0), numConsecutiveAttacks(0), attachedBall(NULL),
 iceShakeSoundID(INVALID_SOUND_ID), chargingSoundID(INVALID_SOUND_ID), 
-attractorBeamLoopSoundID(INVALID_SOUND_ID), currCoreRotInDegs(0.0f)  {
+attractorBeamLoopSoundID(INVALID_SOUND_ID), spinCoolDownSoundID(INVALID_SOUND_ID), 
+currCoreRotInDegs(0.0f)  {
 }
 
 FuturismBossAIState::~FuturismBossAIState() {
@@ -377,7 +380,7 @@ void FuturismBossAIState::InitBallAttractAIState() {
 
     // Play sounds
     GameSound* sound = gameModel->GetSound();
-    this->attractorBeamLoopSoundID = sound->PlaySound(GameSound::FuturismBossAttractorBeamOpenAndLoopEvent, false, true);
+    this->attractorBeamLoopSoundID = sound->PlaySound(GameSound::FuturismBossAttractorBeamEvent, false, true);
 
     this->numConsecutiveMoves   = 0;
     this->numConsecutiveBeams   = 0;
@@ -502,8 +505,11 @@ void FuturismBossAIState::InitBallDiscardAIState() {
     }
 
     // Fade out the attraction loop
-    gameModel->GetSound()->StopSound(this->attractorBeamLoopSoundID, this->waitTimeCountdown);
+    GameSound* sound = gameModel->GetSound();
+    sound->StopSound(this->attractorBeamLoopSoundID, this->waitTimeCountdown);
     this->attractorBeamLoopSoundID = INVALID_SOUND_ID;
+    // Spin cool-down sound
+    sound->PlaySound(GameSound::FuturismBossSpinCoolDownEvent, false, true);
 
     this->coreRotVelAnim.SetLerp(this->waitTimeCountdown, 0.0f);
 }
@@ -982,6 +988,7 @@ void FuturismBossAIState::InitStationaryFireStrategyPortalAIState() {
         this->chargingSoundID = INVALID_SOUND_ID;
     }
     this->chargingSoundID = sound->PlaySound(GameSound::FuturismBossPortalSummonChargeEvent, false, true);
+    this->spinCoolDownSoundID = INVALID_SOUND_ID;
 
     this->numConsecutiveMoves   = 0;
     this->numConsecutiveShots   = 0;
@@ -1011,6 +1018,11 @@ void FuturismBossAIState::ExecuteFirePortalState(double dT, GameModel* gameModel
 
     // Tick the rotation animation
     bool isFinished = this->coreRotVelAnim.Tick(dT);
+    if (this->spinCoolDownSoundID == INVALID_SOUND_ID && 
+        (this->coreRotVelAnim.GetFinalTimeValue() - this->coreRotVelAnim.GetCurrentTimeValue()) <= COOL_DOWN_SFX_TIME_IN_SECS) {
+        
+        this->spinCoolDownSoundID = gameModel->GetSound()->PlaySound(GameSound::FuturismBossSpinCoolDownEvent, false, true);
+    }
 
     // If the core shield is destroyed we rotate the core assembly/body instead
     AbstractBossBodyPart* partToAnimate = NULL;
@@ -2731,7 +2743,9 @@ void FuturismBossAIState::InterruptSounds(GameModel& gameModel) {
     GameSound* sound = gameModel.GetSound();
     sound->StopSound(this->attractorBeamLoopSoundID);
     sound->StopSound(this->chargingSoundID);
+    sound->StopSound(this->spinCoolDownSoundID);
 
     this->attractorBeamLoopSoundID = INVALID_SOUND_ID;
     this->chargingSoundID = INVALID_SOUND_ID;
+    this->spinCoolDownSoundID = INVALID_SOUND_ID;
 }

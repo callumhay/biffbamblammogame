@@ -34,6 +34,7 @@
 #include "GameViewConstants.h"
 #include "GameDisplay.h"
 #include "MenuBackgroundRenderer.h"
+#include "PersistentTextureManager.h"
 
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/FBObj.h"
@@ -57,7 +58,8 @@ particleFader(1, 0), particleMediumGrowth(1.0f, 2.0f), particleSuperGrowth(1.0f,
 lockBreakGravityEffector(Vector3D(0, -125, 0)),
 particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)), levelWasUnlockedViaStarCost(false),
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE), 
-smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
+smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+fiveStarFGSparkleEmitter(NULL), fiveStarBGGlowEmitter(NULL) {
 
     if (this->bgSoundLoopID == INVALID_SOUND_ID) {
         this->bgSoundLoopID = this->display->GetSound()->PlaySound(GameSound::WorldMenuBackgroundLoop, true);
@@ -134,6 +136,35 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
         assert(temp != NULL);
         this->smokeTextures.push_back(temp);	
     }
+
+    this->fiveStarFGSparkleEmitter = new ESPPointEmitter();
+    this->fiveStarFGSparkleEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->fiveStarFGSparkleEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    this->fiveStarFGSparkleEmitter->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+    this->fiveStarFGSparkleEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    this->fiveStarFGSparkleEmitter->SetParticleAlignment(ESP::NoAlignment);
+    this->fiveStarFGSparkleEmitter->SetParticleRotation(ESPInterval(0));
+    this->fiveStarFGSparkleEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), 
+        ESPInterval(0.8f), ESPInterval(0.85f));
+    this->fiveStarFGSparkleEmitter->SetParticleSize(ESPInterval(1));
+    this->fiveStarFGSparkleEmitter->AddCopiedEffector(ESPParticleRotateEffector(45.0f, ESPParticleRotateEffector::CLOCKWISE));
+    this->fiveStarFGSparkleEmitter->AddCopiedEffector(ESPParticleScaleEffector(ScaleEffect(1.0f, 1.5f)));
+    this->fiveStarFGSparkleEmitter->SetParticles(1, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
+
+    const Colour STAR_COLOUR_BG = 1.2f * GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    this->fiveStarBGGlowEmitter = new ESPPointEmitter();
+    this->fiveStarBGGlowEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    this->fiveStarBGGlowEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+    this->fiveStarBGGlowEmitter->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+    this->fiveStarBGGlowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+    this->fiveStarBGGlowEmitter->SetParticleAlignment(ESP::NoAlignment);
+    this->fiveStarBGGlowEmitter->SetParticleRotation(ESPInterval(0));
+    this->fiveStarBGGlowEmitter->SetParticleColour(ESPInterval(STAR_COLOUR_BG.R()), ESPInterval(STAR_COLOUR_BG.G()), ESPInterval(STAR_COLOUR_BG.B()), ESPInterval(1));
+    this->fiveStarBGGlowEmitter->SetParticleSize(ESPInterval(1));
+    this->fiveStarBGGlowEmitter->AddCopiedEffector(ESPParticleRotateEffector(45.0f, ESPParticleRotateEffector::CLOCKWISE));
+    this->fiveStarBGGlowEmitter->AddCopiedEffector(ESPParticleScaleEffector(ScaleEffect(1.0f, 1.2f)));
+    this->fiveStarBGGlowEmitter->SetParticles(1, static_cast<Texture2D*>(this->starGlowTexture));
 
     std::vector<ColourRGBA> arrowColours;
     arrowColours.reserve(3);
@@ -268,6 +299,25 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
         this->particleFlickerFader.SetAnimation1(fadeAnim);
     }
 
+    {
+        std::vector<double> timeVals;
+        timeVals.clear();
+        timeVals.reserve(3);
+        timeVals.push_back(0.0);
+        timeVals.push_back(1.0);
+        timeVals.push_back(2.0);
+
+        std::vector<Colour> colourVals;
+        colourVals.reserve(3);
+        colourVals.push_back(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+        colourVals.push_back(GameViewConstants::GetInstance()->BRIGHT_POINT_STAR_COLOUR);
+        colourVals.push_back(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+
+        this->starGlowColourAnim.SetInterpolantValue(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+        this->starGlowColourAnim.SetLerp(timeVals, colourVals);
+        this->starGlowColourAnim.SetRepeat(true);
+    }
+
     this->SetupLevelPages(info);
 }
 
@@ -329,11 +379,20 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     this->nextPgArrowEmitter = NULL;
     delete this->prevPgArrowEmitter;
     this->prevPgArrowEmitter = NULL;
+
+    delete this->fiveStarFGSparkleEmitter;
+    this->fiveStarFGSparkleEmitter = NULL;
+    delete this->fiveStarBGGlowEmitter;
+    this->fiveStarBGGlowEmitter = NULL;
 }
 
 
 void SelectLevelMenuState::RenderFrame(double dT) {
     this->pressEscAlphaAnim.Tick(dT);
+    this->starGlowColourAnim.Tick(dT);
+    this->fiveStarFGSparkleEmitter->Tick(dT);
+    this->fiveStarBGGlowEmitter->Tick(dT);
+    this->fiveStarBGGlowEmitter->SetParticleColour(this->starGlowColourAnim.GetInterpolantValue());
 
     const Camera& camera = this->display->GetCamera();
     MenuBackgroundRenderer* bgRenderer = this->display->GetMenuBGRenderer();
@@ -600,7 +659,7 @@ void SelectLevelMenuState::DrawStarTotalLabels(const Camera& camera, double dT) 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    const Colour& starColour = this->starGlowColourAnim.GetInterpolantValue();
     
     // Star in the world star total
     this->starTexture->BindTexture();
@@ -1932,12 +1991,14 @@ void SelectLevelMenuState::AbstractLevelMenuItem::ExecuteBasicUnlockAnimation() 
 
 const float SelectLevelMenuState::LevelMenuItem::NUM_TO_HIGH_SCORE_Y_GAP = 5;
 const float SelectLevelMenuState::LevelMenuItem::HIGH_SCORE_TO_STAR_Y_GAP = 4;
+const float SelectLevelMenuState::LevelMenuItem::STAR_GAP = 5;
 
 SelectLevelMenuState::LevelMenuItem::LevelMenuItem(SelectLevelMenuState* state,
                                                    int levelNum, GameLevel* level, 
                                                    float width, const Point2D& topLeftCorner, 
                                                    bool isEnabled) : 
-AbstractLevelMenuItem(state, level, width, topLeftCorner, isEnabled), numLabel(NULL), starDisplayList(0) {
+AbstractLevelMenuItem(state, level, width, topLeftCorner, isEnabled), numLabel(NULL), 
+activeStarDisplayList(0), inactiveStarDisplayList(0), numStars(-1), starDrawPos(-99999,-99999) {
 
     float scaleFactor = state->display->GetTextScalingFactor();
 
@@ -1964,8 +2025,10 @@ SelectLevelMenuState::LevelMenuItem::~LevelMenuItem() {
     delete this->highScoreLabel;
     this->highScoreLabel = NULL;
 
-    glDeleteLists(this->starDisplayList, 1);
-    this->starDisplayList = 0;
+    glDeleteLists(this->activeStarDisplayList, 1);
+    this->activeStarDisplayList = 0;
+    glDeleteLists(this->inactiveStarDisplayList, 1);
+    this->inactiveStarDisplayList = 0;
 }
 
 void SelectLevelMenuState::LevelMenuItem::RebuildItem(bool enabled, const Point2D& topLeftCorner) {
@@ -2060,40 +2123,62 @@ void SelectLevelMenuState::LevelMenuItem::RebuildItem(bool enabled, const Point2
 }
 
 void SelectLevelMenuState::LevelMenuItem::BuildStarDisplayList() {
-
-    if (this->starDisplayList != 0) {
-        glDeleteLists(this->starDisplayList, 1);
+   
+    if (this->activeStarDisplayList != 0) {
+        glDeleteLists(this->activeStarDisplayList, 1);
+        this->activeStarDisplayList = 0;
     }
-
-    this->starDisplayList = glGenLists(1);
-    glNewList(this->starDisplayList, GL_COMPILE);
-
-    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
-    glPushMatrix();
-
-    static const float STAR_GAP = 5;
+    if (this->inactiveStarDisplayList != 0) {
+        glDeleteLists(this->inactiveStarDisplayList, 1);
+        this->inactiveStarDisplayList = 0;
+    }
 
     float nameLabelWidth = this->width - NUM_TO_NAME_GAP - this->numLabel->GetLastRasterWidth();
     this->starSize = (nameLabelWidth - STAR_GAP * (GameLevel::MAX_STARS_PER_LEVEL-1)) / static_cast<float>(GameLevel::MAX_STARS_PER_LEVEL);
+    this->numStars = level->GetHighScoreNumStars();
     float halfStarSize = starSize / 2.0f;
 
-    glTranslatef(this->highScoreLabel->GetTopLeftCorner()[0], 
-        this->highScoreLabel->GetTopLeftCorner()[1] - this->highScoreLabel->GetHeight() - HIGH_SCORE_TO_STAR_Y_GAP, 0.0f);
-    glTranslatef(-STAR_GAP - halfStarSize, -halfStarSize, 0);
-    this->state->starTexture->BindTexture();
-
     if (isEnabled) {
-        int numStars = level->GetHighScoreNumStars();
-        const Colour& ACTIVE_STAR_COLOUR   = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
-        const Colour& INACTIVE_STAR_COLOUR = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
-        for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
-            if (i < numStars) {
-                glColor4f(ACTIVE_STAR_COLOUR.R(), ACTIVE_STAR_COLOUR.G(), ACTIVE_STAR_COLOUR.B(), 1.0f);
-            }
-            else {
-                glColor4f(INACTIVE_STAR_COLOUR.R(), INACTIVE_STAR_COLOUR.G(), INACTIVE_STAR_COLOUR.B(), 1.0f);
-            }
+        this->activeStarDisplayList = glGenLists(1);
+        glNewList(this->activeStarDisplayList, GL_COMPILE);
 
+        glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
+        glPushMatrix();
+
+        this->starDrawPos[0] = this->highScoreLabel->GetTopLeftCorner()[0] - halfStarSize - STAR_GAP;
+        this->starDrawPos[1] = this->highScoreLabel->GetTopLeftCorner()[1] - this->highScoreLabel->GetHeight() - HIGH_SCORE_TO_STAR_Y_GAP - halfStarSize;
+
+        glTranslatef(this->starDrawPos[0], this->starDrawPos[1], 0.0f);
+        glTranslatef(0, 0, 0);
+        this->state->starTexture->BindTexture();
+
+        for (int i = 0; i < this->numStars; i++) {
+            glTranslatef(STAR_GAP + this->starSize, 0, 0);
+            glBegin(GL_QUADS);
+            glTexCoord2i(0, 0); glVertex2f(-halfStarSize, -halfStarSize);
+            glTexCoord2i(1, 0); glVertex2f( halfStarSize, -halfStarSize);
+            glTexCoord2i(1, 1); glVertex2f( halfStarSize,  halfStarSize);
+            glTexCoord2i(0, 1); glVertex2f(-halfStarSize,  halfStarSize);
+            glEnd();
+        }
+
+        this->state->starTexture->UnbindTexture();
+
+        glPopMatrix();
+        glPopAttrib();
+        glEndList();
+
+        this->inactiveStarDisplayList = glGenLists(1);
+        glNewList(this->inactiveStarDisplayList, GL_COMPILE);
+
+        glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
+        glPushMatrix();
+
+        glTranslatef(this->starDrawPos[0], this->starDrawPos[1], 0.0f);
+        glTranslatef(this->numStars * (STAR_GAP + starSize), 0, 0);
+        this->state->starTexture->BindTexture();
+
+        for (int i = this->numStars; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
             glTranslatef(STAR_GAP + starSize, 0, 0);
             glBegin(GL_QUADS);
             glTexCoord2i(0, 0); glVertex2f(-halfStarSize, -halfStarSize);
@@ -2102,8 +2187,26 @@ void SelectLevelMenuState::LevelMenuItem::BuildStarDisplayList() {
             glTexCoord2i(0, 1); glVertex2f(-halfStarSize,  halfStarSize);
             glEnd();
         }
+
+        this->state->starTexture->UnbindTexture();
+
+        glPopMatrix();
+        glPopAttrib();
+        glEndList();
     }
     else {
+
+        this->inactiveStarDisplayList = glGenLists(1);
+        glNewList(this->inactiveStarDisplayList, GL_COMPILE);
+
+        glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
+        glPushMatrix();
+
+        glTranslatef(this->highScoreLabel->GetTopLeftCorner()[0], 
+            this->highScoreLabel->GetTopLeftCorner()[1] - this->highScoreLabel->GetHeight() - HIGH_SCORE_TO_STAR_Y_GAP, 0.0f);
+        glTranslatef(-STAR_GAP - halfStarSize, -halfStarSize, 0);
+        this->state->starTexture->BindTexture();
+
         GLfloat envColour[4] = { 1.0, 1.0, 1.0, 1.0 };
         glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColour);
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
@@ -2117,13 +2220,14 @@ void SelectLevelMenuState::LevelMenuItem::BuildStarDisplayList() {
             glTexCoord2i(0, 1); glVertex2f(-halfStarSize,  halfStarSize);
             glEnd();
         }
+
+        this->state->starTexture->UnbindTexture();
+
+        glPopMatrix();
+        glPopAttrib();
+
+        glEndList();
     }
-    this->state->starTexture->UnbindTexture();
-
-    glPopMatrix();
-    glPopAttrib();
-
-    glEndList();
 }
 
 float SelectLevelMenuState::LevelMenuItem::GetHeight() const {
@@ -2145,7 +2249,45 @@ void SelectLevelMenuState::LevelMenuItem::Draw(const Camera& camera, double dT, 
     this->highScoreLabel->Draw();
     
     // Draw the number of stars earned for the level
-    glCallList(this->starDisplayList);
+    glPushAttrib(GL_CURRENT_BIT);
+
+    if (this->activeStarDisplayList != 0) {
+        // If the number of active stars is equal to the max number of stars you can get in a level then
+        // we add some extraneous special effects as well...
+        if (this->numStars == GameLevel::MAX_STARS_PER_LEVEL) {
+            this->state->fiveStarBGGlowEmitter->SetParticleSize(ESPInterval(1.25f*this->starSize));
+            glPushMatrix();
+            glTranslatef(this->starDrawPos[0], this->starDrawPos[1], 0);
+            for (int i = 0; i < this->numStars; i++) {
+                glTranslatef(this->starSize + STAR_GAP, 0, 0);
+                this->state->fiveStarBGGlowEmitter->Draw(camera);
+            }
+            glPopMatrix();
+        }
+
+        const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+        glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+        glCallList(this->activeStarDisplayList);
+
+        if (this->numStars == GameLevel::MAX_STARS_PER_LEVEL) {
+            this->state->fiveStarFGSparkleEmitter->SetParticleSize(ESPInterval(this->starSize), true);
+            glPushMatrix();
+            glTranslatef(this->starDrawPos[0] + this->starSize/8.0f, this->starDrawPos[1] + this->starSize/8.0f, 0);
+            for (int i = 0; i < this->numStars; i++) {
+                glTranslatef(this->starSize + STAR_GAP, 0, 0);
+                this->state->fiveStarFGSparkleEmitter->Draw(camera);
+            }
+            glPopMatrix();
+        }
+
+    }
+    if (this->inactiveStarDisplayList != 0) {
+        const Colour& starColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
+        glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+        glCallList(this->inactiveStarDisplayList);
+    }
+
+    glPopAttrib();
 }
 
 void SelectLevelMenuState::LevelMenuItem::DrawAfter(const Camera& camera, double dT) {

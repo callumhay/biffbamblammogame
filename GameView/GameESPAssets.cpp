@@ -236,6 +236,10 @@ GameESPAssets::~GameESPAssets() {
     this->paddleIceBlasterOrigin = NULL;
 }
 
+void GameESPAssets::Update(const GameModel& gameModel) {
+    this->gravity.SetAcceleration(9.8f*gameModel.GetGravityDir());
+}
+
 /**
  * Kills all active effects currently being displayed in-game.
  */
@@ -1555,6 +1559,8 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 
 		case Projectile::FireGlobProjectile:
+            sound->PlaySoundAtPosition(GameSound::FireGlobBlockCollisionEvent, false, 
+                projectile.GetPosition3D(), true, true, true);
 			break;
 
 		default:
@@ -2596,14 +2602,14 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	this->activeGeneralEmitters.push_back(inkOnoEffect);
 }
 
-void GameESPAssets::AddRegenBlockSpecialBreakEffect(const RegenBlock& regenBlock) {
+void GameESPAssets::AddRegenBlockSpecialBreakEffect(const GameModel& gameModel, const RegenBlock& regenBlock) {
     Point3D blockCenter(regenBlock.GetCenter());
 
     ESPPointEmitter* lifeInfoEmitter = new ESPPointEmitter();
     lifeInfoEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
     lifeInfoEmitter->SetInitialSpd(ESPInterval(4.0f, 6.0f));
     lifeInfoEmitter->SetParticleLife(ESPInterval(2.5f));
-    lifeInfoEmitter->SetEmitDirection(Vector3D(0, 1, 0));
+    lifeInfoEmitter->SetEmitDirection(gameModel.GetGravityDir());
     lifeInfoEmitter->SetToggleEmitOnPlane(true);
     lifeInfoEmitter->SetEmitAngleInDegrees(80);
     lifeInfoEmitter->SetEmitPosition(blockCenter);
@@ -3250,6 +3256,8 @@ void GameESPAssets::AddIceBlasterCanceledEffect(const PlayerPaddle& paddle) {
 // When a fire glob extinguishes this effect is invoked
 void GameESPAssets::AddFireGlobDestroyedEffect(const Projectile& projectile) {
 
+    Point3D pos(projectile.GetPosition(), 0);
+
 	ESPPointEmitter* fireDisperseEffect = new ESPPointEmitter();
     fireDisperseEffect->SetNumParticleLives(1);
 	fireDisperseEffect->SetSpawnDelta(ESPInterval(0.01f, 0.015f));
@@ -3258,11 +3266,30 @@ void GameESPAssets::AddFireGlobDestroyedEffect(const Projectile& projectile) {
 	fireDisperseEffect->SetParticleSize(ESPInterval(0.2f*projectile.GetWidth(), 0.5f*projectile.GetWidth()));
 	fireDisperseEffect->SetEmitAngleInDegrees(180);
 	fireDisperseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    fireDisperseEffect->SetEmitPosition(Point3D(projectile.GetPosition(), 0));
+    fireDisperseEffect->SetEmitPosition(pos);
 	fireDisperseEffect->AddEffector(&this->particleFireColourFader);
     fireDisperseEffect->AddEffector(&this->particleMediumGrowth);
     fireDisperseEffect->SetRandomTextureParticles(8, this->smokeTextures);
 
+    size_t randomRockIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->moltenRockEffects.size();
+    ESPPointEmitter* debrisEmitter = new ESPPointEmitter();
+    debrisEmitter->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+    debrisEmitter->SetInitialSpd(ESPInterval(3.0f, 5.0f));
+    debrisEmitter->SetParticleLife(ESPInterval(2.0f, 2.5f));
+    debrisEmitter->SetEmitAngleInDegrees(55.0f);
+    debrisEmitter->SetParticleSize(ESPInterval(0.1f*projectile.GetWidth(), 0.4f*projectile.GetWidth()));
+    debrisEmitter->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+    debrisEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.1f * projectile.GetWidth()), ESPInterval(0.0f, 0.1f * projectile.GetHeight()), ESPInterval(0));
+    debrisEmitter->SetEmitPosition(pos);
+    debrisEmitter->SetEmitDirection(-projectile.GetVelocityDirection());
+    debrisEmitter->AddEffector(&this->gravity);
+    debrisEmitter->AddEffector(&this->particleFader);
+    debrisEmitter->AddEffector(Randomizer::GetInstance()->RandomTrueOrFalse() ? &this->moderateSpdLoopRotateEffectorCW : &this->moderateSpdLoopRotateEffectorCCW);
+    debrisEmitter->SetParticles(3, this->moltenRockEffects[randomRockIdx]);
+    debrisEmitter->AddParticles(3, this->moltenRockEffects[(randomRockIdx+1) % this->moltenRockEffects.size()]);
+    debrisEmitter->AddParticles(3, this->moltenRockEffects[(randomRockIdx+2) % this->moltenRockEffects.size()]);
+
+    this->activeGeneralEmitters.push_back(debrisEmitter);
     this->activeGeneralEmitters.push_back(fireDisperseEffect);
 }
 
@@ -5539,7 +5566,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	orbEmitter->SetParticleSize(ESPInterval(projectile.GetWidth()));
 	orbEmitter->SetEmitAngleInDegrees(0);
 	orbEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	orbEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	orbEmitter->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	orbEmitter->SetEmitPosition(Point3D(0,0,0));
     orbEmitter->SetParticleColour(ESPInterval(baseColour.R()),
         ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
@@ -5554,7 +5581,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	auraEmitter->SetParticleSize(ESPInterval(1.2f * projectile.GetWidth()));
 	auraEmitter->SetEmitAngleInDegrees(0);
 	auraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	auraEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	auraEmitter->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	auraEmitter->SetEmitPosition(Point3D(0,0,0));
 	auraEmitter->SetParticleColour(ESPInterval(brightColour.R()), ESPInterval(brightColour.G()),
         ESPInterval(brightColour.B()), ESPInterval(1.0f));
@@ -5569,7 +5596,7 @@ void GameESPAssets::AddOrbESPEffects(const Projectile& projectile,
 	lensFlareEmitter->SetParticleSize(ESPInterval(3.0f*projectile.GetWidth()));
 	lensFlareEmitter->SetEmitAngleInDegrees(0);
 	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	lensFlareEmitter->SetEmitPosition(Point3D(0,0,0));
 	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.5f));
 	lensFlareEmitter->AddEffector(&this->loopRotateEffectorCW);
@@ -6254,12 +6281,13 @@ void GameESPAssets::AddBallAcquiredBoostEffect(const GameBall& ball, const Colou
     boostGainedHaloEmitter->SetParticleSize(ESPInterval(2.5f * ball.GetBounds().Radius()));
 	boostGainedHaloEmitter->SetEmitAngleInDegrees(0);
 	boostGainedHaloEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    boostGainedHaloEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    boostGainedHaloEmitter->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	boostGainedHaloEmitter->SetEmitPosition(Point3D(0,0,0));
     boostGainedHaloEmitter->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
     boostGainedHaloEmitter->AddEffector(&this->particleSuperGrowth);
 	boostGainedHaloEmitter->AddEffector(&this->particleFader);
-    bool result = boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
+    bool result = boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
     UNUSED_VARIABLE(result);
 	assert(result);
 
@@ -6279,7 +6307,8 @@ void GameESPAssets::AddBallAcquiredBoostEffect(const GameBall& ball, const Colou
                                      ESPInterval(colour.B()), ESPInterval(1.0f));
 	sinkParticles->AddEffector(&this->particleFader);
 	sinkParticles->AddEffector(&this->particleMediumShrink);    
-    sinkParticles->SetParticles(15, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
+    sinkParticles->SetParticles(15, 
+        PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_SPARKLE));
 
     this->activeBallBGEmitters[&ball].push_back(boostGainedHaloEmitter);
     this->activeBallBGEmitters[&ball].push_back(sinkParticles);
@@ -6891,7 +6920,6 @@ void GameESPAssets::AddGravityBallESPEffects(const GameBall* ball, std::vector<E
 	ballGravityEffect->SetParticleSize(ESPInterval(1.5f*BALL_RADIUS, 2.0f*BALL_RADIUS));
 	ballGravityEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.8f*BALL_RADIUS), ESPInterval(0), ESPInterval(0.0f, 0.8f*BALL_RADIUS));
     ballGravityEffect->SetParticleAlignment(ESP::AxisAligned);
-    ballGravityEffect->SetParticleRotation(ESPInterval(-180));
 	ballGravityEffect->SetEmitPosition(Point3D(0,0,0));
 	ballGravityEffect->SetEmitDirection(Vector3D(0, -1, 0));	// Downwards gravity vector is always in -y direction
 	ballGravityEffect->SetEmitAngleInDegrees(0.0f);
@@ -7307,13 +7335,16 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera,
 
 		// If the projectile is not square then we rotate it so that it doesn't look strange in paddle camera mode
 		if (projectileEmitter->GetParticleSizeX() != projectileEmitter->GetParticleSizeY()) {
+
+            projectileEmitter->SetAliveParticleAlignmentAsVelocityBased(projectile.GetVelocityDirection());
+
 			// Calculate the angle to rotate it about the z-axis
-			float angleToRotate = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
-                std::max<float>(-1.0f, Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))))));
-			if (projectile.GetVelocityDirection()[0] > 0) {
-				angleToRotate *= -1.0;
-			}
-			glRotatef(angleToRotate, 0.0f, 0.0f, 1.0f);
+			//float angleToRotate = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
+   //             std::max<float>(-1.0f, Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))))));
+			//if (projectile.GetVelocityDirection()[0] > 0) {
+			//	angleToRotate *= -1.0;
+			//}
+			//glRotatef(angleToRotate, 0.0f, 0.0f, 1.0f);
 		}
 
         projectileEmitter->Tick(dT);

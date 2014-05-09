@@ -1,7 +1,8 @@
 Participatory Impaction
-21 30
+21 31
 E E E E S S S S S S S S S F(d) F(d) F(d) S E E E E 
 E E E E S L L L Y Y E E E E E E F(l) E E E E 
+E E E E S E E E E E E E E E E E F(l) E E E E 
 E E E E S E E E E E E E E E E E F(l) E E E E 
 E E E E S E E E E E E E E E L L S E E E E 
 E E E E S E E E E E E E L L R R S E E E E 
@@ -44,8 +45,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 2
 BallGrow 0
-StickyPaddle 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
@@ -68,7 +69,7 @@ IceBlasterPaddle 0
 MineLauncherPaddle 0
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 0

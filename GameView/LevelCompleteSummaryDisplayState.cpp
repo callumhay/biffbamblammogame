@@ -380,7 +380,6 @@ pointTallySoundID(INVALID_SOUND_ID) {
     //const Colour STAR_COLOUR_FG = 1.5f * GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
     for (int i = 0; i < gameModel->GetNumStarsAwarded(); i++) {
 
-        
         ESPPointEmitter* starFgEmitter = new ESPPointEmitter();
         starFgEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	    starFgEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -1138,7 +1137,7 @@ void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionBu
             this->difficultyChoicePane->Hide(0.0, HIDE_DIFFICULTY_CHOICE_PANE_TIME);
         }
     }
-    else {
+    else if (!GameControl::IsDirectionActionButton(pressedButton)) {
         this->AnyKeyWasPressed();
     }
 }

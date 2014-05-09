@@ -280,7 +280,7 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
     if (rocketIsOnPaddle) {
 
         glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, paddle.GetAlpha());
 
         // Draw the rocket, mounted on the paddle
         const Point2D& paddleCenter = paddle.GetCenterPosition();

@@ -180,6 +180,8 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
 }
 
 BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
+    this->display->GetModel()->GetPlayerPaddle()->SetLevelBoundsChecking(true);
+
     if (this->unlockedLabel != NULL) {
         delete this->unlockedLabel;
         this->unlockedLabel = NULL;

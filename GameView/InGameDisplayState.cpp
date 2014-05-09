@@ -48,6 +48,7 @@ DisplayState(display), renderPipeline(display) {
 	// be set unchanged from a previously loaded game
     this->display->GetModel()->SetPauseState(GameModel::NoPause);
 	this->display->GetCamera().ClearCameraShake();
+    this->display->GetModel()->GetPlayerPaddle()->SetLevelBoundsChecking(true);
 
 	debug_opengl_state();
 }

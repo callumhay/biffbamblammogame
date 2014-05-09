@@ -142,6 +142,7 @@ public:
     void ModifyProjectileTrajectory(Projectile& projectile) const;
 
     void ApplyImpulseForce(float impulseAmt, float deceleration);
+    void RemoveImpulseForce();
     //void ApplyNewtonsThirdLawCollisionVelocity(const Vector2D& impulse);
 
 	/** 

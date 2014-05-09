@@ -130,6 +130,9 @@ void GothicRomanticWorldAssets::DrawBackgroundPostOutlinePreEffects(const Camera
 
     glEnable(GL_DEPTH_TEST);
 
+    this->lowerCloudEmitter.Draw(camera);
+    this->moonCloudEmitter.Draw(camera);
+
     glPushMatrix();
     glTranslatef(this->moonPos[0], this->moonPos[1], this->moonPos[2]);
     glScalef(15.0f, 15.0f, 1.0f);
@@ -138,9 +141,6 @@ void GothicRomanticWorldAssets::DrawBackgroundPostOutlinePreEffects(const Camera
     GeometryMaker::GetInstance()->DrawQuad();
     this->moonTex->UnbindTexture();
     glPopMatrix();
-
-    this->lowerCloudEmitter.Draw(camera);
-    this->moonCloudEmitter.Draw(camera);
 
     glPopAttrib();
 }

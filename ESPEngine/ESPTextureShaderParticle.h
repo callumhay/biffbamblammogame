@@ -35,7 +35,8 @@
 
 class ESPTextureShaderParticle : public ESPShaderParticle {
 public: 
-    ESPTextureShaderParticle(CgFxTextureEffectBase* effect, const std::vector<Texture2D*>& textures) : ESPShaderParticle(effect), textures(textures) {
+    ESPTextureShaderParticle(CgFxTextureEffectBase* effect, const std::vector<Texture2D*>& textures) : 
+      ESPShaderParticle(effect), textures(textures) {
         assert(!textures.empty());
         this->SelectRandomTexture();
     }
@@ -55,7 +56,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(ESPTextureShaderParticle);
 };
 
-inline void ESPTextureShaderParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan) {
+inline void ESPTextureShaderParticle::Revive(const Point3D& pos, const Vector3D& vel, 
+                                             const Vector2D& size, float rot, float totalLifespan) {
+
     ESPShaderParticle::Revive(pos, vel, size, rot, totalLifespan);
     this->SelectRandomTexture();
 }

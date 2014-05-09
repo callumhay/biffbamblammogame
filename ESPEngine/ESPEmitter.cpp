@@ -440,19 +440,27 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
  */
 bool ESPEmitter::SetParticles(unsigned int numParticles, CgFxEffectBase* effect) {
 	assert(numParticles > 0);
-	// Clean up previous emitter data
-	this->Flush();
 	
-	// Create each of the new particles
-	for (unsigned int i = 0; i < numParticles; i++) {
-		ESPShaderParticle* newParticle = new ESPShaderParticle(effect);
-		this->deadParticles.push_back(newParticle);
-
-		// Assign the number of lives...
-		this->particleLivesLeft[newParticle] = this->numParticleLives;
-	}
+    // Clean up previous emitter data
+	this->Flush();
+    // ... and add the new particles
+	this->AddParticles(numParticles, effect);
 
 	return true;
+}
+
+bool ESPEmitter::AddParticles(unsigned int numParticles, CgFxEffectBase* effect) {
+
+    // Create each of the new particles
+    for (unsigned int i = 0; i < numParticles; i++) {
+        ESPShaderParticle* newParticle = new ESPShaderParticle(effect);
+        this->deadParticles.push_back(newParticle);
+
+        // Assign the number of lives...
+        this->particleLivesLeft[newParticle] = this->numParticleLives;
+    }
+
+    return true;
 }
 
 /**
@@ -596,8 +604,30 @@ bool ESPEmitter::SetRandomCurveParticles(unsigned int numParticles, const ESPInt
 /**
  * Sets the particle alignments for this emitter.
  */
-void  ESPEmitter::SetParticleAlignment(const ESP::ESPAlignment alignment) {
+void ESPEmitter::SetParticleAlignment(const ESP::ESPAlignment alignment) {
 	this->particleAlignment = alignment;
+}
+
+void ESPEmitter::SetAliveParticleAlignmentAsVelocityBased(const Vector3D& velocityDir) {
+    this->particleAlignment = ESP::ScreenAlignedFollowVelocity;
+
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+        iter != this->aliveParticles.end(); ++iter) {
+
+        ESPParticle* currParticle = *iter;
+        currParticle->SetVelocityDir(velocityDir);
+    }
+}
+
+void ESPEmitter::SetAliveParticleAlignmentAsVelocityBased(const Vector2D& velocityDir) {
+    this->particleAlignment = ESP::ScreenAlignedFollowVelocity;
+
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin();
+        iter != this->aliveParticles.end(); ++iter) {
+
+            ESPParticle* currParticle = *iter;
+            currParticle->SetVelocityDir(velocityDir);
+    }
 }
 
 /**
@@ -639,26 +669,38 @@ void ESPEmitter::SetParticleLife(const ESPInterval& particleLife, bool affectLiv
  * Sets the inclusive interval of random possible values that represent the
  * size (in units) of particles in this emitter.
  */
-void ESPEmitter::SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY) {
+void ESPEmitter::SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY, bool setInitSize) {
 	this->particleSize[0] = particleSizeX;
 	this->particleSize[1] = particleSizeY;
 	this->makeSizeConstraintsEqual = false;
 
-    float valueX = particleSizeX.MeanValueInInterval();
-    float valueY = particleSizeY.MeanValueInInterval();
+    float sX = particleSizeX.MeanValueInInterval();
+    float sY = particleSizeY.MeanValueInInterval();
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
-        currParticle->SetScale(valueX, valueY);
+        currParticle->SetScale(sX, sY);
 	}
+    if (setInitSize) {
+        for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+            ESPParticle* currParticle = *iter;
+            currParticle->SetNewInitSizeScale(sX, sY);
+        }
+    }
 }
-void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
+void ESPEmitter::SetParticleSize(const ESPInterval& particleSize, bool setInitSize) {
 	this->SetParticleSpawnSize(particleSize);
 
-    float value = particleSize.MeanValueInInterval();
+    float s = particleSize.MeanValueInInterval();
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
-        currParticle->SetScale(value, value);
+        currParticle->SetScale(s, s);
 	}
+    if (setInitSize) {
+        for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+            ESPParticle* currParticle = *iter;
+            currParticle->SetNewInitSizeScale(s, s);
+        }
+    }
 }
 
 void ESPEmitter::SetParticleSpawnSize(const ESPInterval& particleSize) {

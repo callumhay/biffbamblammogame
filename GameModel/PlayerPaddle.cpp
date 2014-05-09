@@ -701,10 +701,42 @@ bool PlayerPaddle::DecreasePaddleSize() {
 
 void PlayerPaddle::AddPaddleType(const PaddleType& type) {
     this->currType = this->currType | type;
+
+    switch (type) {
+        case PlayerPaddle::InvisiPaddle: {
+            if (this->HasPaddleType(RocketPaddle | RemoteControlRocketPaddle)) {
+                this->AddSpecialStatus(InvisibleRocketStatus);
+            }
+            else if (this->HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
+                this->AddSpecialStatus(InvisibleMineStatus);
+            }
+            break;
+        }
+
+        default:
+            break;
+    }
+
 }
 
 void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
 	this->currType = this->currType & ~type;
+
+    switch (type) {
+        case PlayerPaddle::InvisiPaddle: {
+            if (this->HasPaddleType(RocketPaddle | RemoteControlRocketPaddle)) {
+                this->RemoveSpecialStatus(InvisibleRocketStatus);
+            }
+            else if (this->HasPaddleType(PlayerPaddle::MineLauncherPaddle)) {
+                this->RemoveSpecialStatus(InvisibleMineStatus);
+            }
+            break;
+        }
+
+
+        default:
+            break;
+    }
 }
 
 void PlayerPaddle::AddSpecialStatus(int32_t status) { 
