@@ -4,8 +4,8 @@
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Redistribution and use of the Biff! Bam!! Blammo!?! code or any derivative
+ * works are permitted provided that the following conditions are met:
  * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
@@ -14,6 +14,8 @@
  * documentation and/or other materials provided with the distribution.
  * 3. The names of its contributors may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
+ * 4. Redistributions may not be sold, nor may they be used in a commercial
+ * product or activity without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -128,8 +130,8 @@ protected:
 
     virtual Point3D GetBossFinalExplodingEpicenter() const = 0;
 
-    ESPPointEmitter* BuildFireEmitter(float width, float height, float sizeScaler = 1.0f);
-    ESPPointEmitter* BuildSmokeEmitter(float width, float height, float sizeScaler = 1.0f);
+    ESPPointEmitter* BuildFireEmitter(float width, float height, float sizeScaler = 1.0f, double minSpawnDelta = 0.16);
+    ESPPointEmitter* BuildSmokeEmitter(float width, float height, float sizeScaler = 1.0f, double minSpawnDelta = 0.18);
     ESPPointEmitter* BuildExplodingEmitter(float volumeAmt, const AbstractBossBodyPart* bossBodyPart, float width, float height, float sizeScaler = 1.0f);
 
     void BuildSummonPortalEffects(const Point3D& bossPos, const Point3D& portalPos, double effectTime,

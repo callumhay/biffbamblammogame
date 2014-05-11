@@ -4,8 +4,8 @@
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Redistribution and use of the Biff! Bam!! Blammo!?! code or any derivative
+ * works are permitted provided that the following conditions are met:
  * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
@@ -14,6 +14,8 @@
  * documentation and/or other materials provided with the distribution.
  * 3. The names of its contributors may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
+ * 4. Redistributions may not be sold, nor may they be used in a commercial
+ * product or activity without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -1320,19 +1322,45 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
         
         static double timeCounter = 0;
         timeCounter += 7*dT + 5 * Randomizer::GetInstance()->RandomNumZeroToOne() * dT;
-        Colour diffuseColour = NumberFuncs::LerpOverFloat(-1.0, 1.0, avgBeamColour, 1.33f*(avgBeamColour + Colour(0.33,0.33,0.33)), sinf(timeCounter));
+        Colour keyDiffuseColour = avgRadiusFraction*NumberFuncs::LerpOverFloat(-1.0, 1.0, avgBeamColour, 1.33f*(avgBeamColour + Colour(0.33,0.33,0.33)), sinf(timeCounter));
+        Colour fillDiffuseColour = 0.5f*avgRadiusFraction*avgBeamColour;
 
-        PointLight& beamLight1 = this->lightAssets->GetBeamLight1();
-        beamLight1.SetLightOn(true, 0.0);
-        beamLight1.SetDiffuseColour(avgRadiusFraction*diffuseColour);
-        beamLight1.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
-        beamLight1.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
+        PointLight& beamLightFGKey = this->lightAssets->GetBeamLightFGKey();
+        beamLightFGKey.SetLightOn(true, 0.0);
+        beamLightFGKey.SetDiffuseColour(keyDiffuseColour);
+        beamLightFGKey.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
+        beamLightFGKey.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
 
-        PointLight& beamLight2 = this->lightAssets->GetBeamLight2();
-        beamLight2.SetLightOn(true, 0.0);
-        beamLight2.SetDiffuseColour(avgRadiusFraction*diffuseColour);
-        beamLight2.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
-        beamLight2.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
+        PointLight& beamLightFGFill = this->lightAssets->GetBeamLightFGFill();
+        beamLightFGFill.SetLightOn(true, 0.0);
+        beamLightFGFill.SetDiffuseColour(fillDiffuseColour);
+        beamLightFGFill.SetPosition(Point3D(avgBeamPos, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION[2]));
+        beamLightFGFill.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN*invAvgRadiusFract);
+
+        PointLight& beamLightPaddleKey = this->lightAssets->GetBeamLightPaddleKey();
+        beamLightPaddleKey.SetLightOn(true, 0.0);
+        beamLightPaddleKey.SetDiffuseColour(keyDiffuseColour);
+        beamLightPaddleKey.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
+        beamLightPaddleKey.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
+
+        PointLight& beamLightPaddleFill = this->lightAssets->GetBeamLightPaddleFill();
+        beamLightPaddleFill.SetLightOn(true, 0.0);
+        beamLightPaddleFill.SetDiffuseColour(fillDiffuseColour);
+        beamLightPaddleFill.SetPosition(Point3D(avgBeamPos, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION[2]));
+        beamLightPaddleFill.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN*invAvgRadiusFract);
+
+        PointLight& beamLightBossKey = this->lightAssets->GetBeamLightBossKey();
+        beamLightBossKey.SetLightOn(true, 0.0);
+        beamLightBossKey.SetDiffuseColour(keyDiffuseColour);
+        beamLightBossKey.SetPosition(Point3D(avgBeamPos, avgBeamZOffset));
+        beamLightBossKey.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_ATTEN*invAvgRadiusFract);
+
+        PointLight& beamLightBossFill = this->lightAssets->GetBeamLightBossFill();
+        beamLightBossFill.SetLightOn(true, 0.0);
+        beamLightBossFill.SetDiffuseColour(fillDiffuseColour);
+        beamLightBossFill.SetPosition(Point3D(avgBeamPos, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION[2]));
+        beamLightBossFill.SetLinearAttenuation(ATTENUATION_MULTIPLIER*GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_ATTEN*invAvgRadiusFract);
+
     }
     else {
         // Lights are moved back into their readjusted positions when a beam is removed from the game,
@@ -1702,7 +1730,7 @@ void GameAssets::RemoveProjectile(const GameModel& gameModel, const Projectile& 
             break;
 
         case Projectile::FireGlobProjectile:
-            this->espAssets->AddFireGlobDestroyedEffect(projectile);
+            this->espAssets->AddFireGlobDestroyedEffect(gameModel, projectile);
             break;
 
         case Projectile::PaddleMineBulletProjectile:
@@ -2276,10 +2304,18 @@ void GameAssets::RemoveBeamEffects(const GameModel& gameModel, const Beam& beam)
     if (gameModel.GetActiveBeams().empty()) {
 
         // Restore the beam light to its normal position and colour...
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLight1, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLight1, 0.5f);
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLight2, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLight2, 0.5f);
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightFGKey, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightFGKey, 0.5f);
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightFGFill, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightFGFill, 0.5f);
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightPaddleKey, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightPaddleKey, 0.5f);
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightPaddleFill, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightPaddleFill, 0.5f);
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightBossKey, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightBossKey, 0.5f);
+        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightBossFill, 0.5f);
+        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightBossFill, 0.5f);
 
         // Figure out what effects are currently active and make sure we maintain the lighting for those effects...
         const std::list<GameItemTimer*>& activeTimers = gameModel.GetActiveTimers();

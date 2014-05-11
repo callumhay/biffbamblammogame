@@ -489,6 +489,7 @@ PaddleFireGlobCollisionEvent {
 	file = resources/FireGlobBlockCollisionEvent.ogg
 }
 
+
 PaddleLaserBulletCollisionEvent {
 	file = resources/PaddleLaserBulletCollisionEvent.ogg
 }
