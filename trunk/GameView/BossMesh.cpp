@@ -4,8 +4,8 @@
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Redistribution and use of the Biff! Bam!! Blammo!?! code or any derivative
+ * works are permitted provided that the following conditions are met:
  * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
@@ -14,6 +14,8 @@
  * documentation and/or other materials provided with the distribution.
  * 3. The names of its contributors may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
+ * 4. Redistributions may not be sold, nor may they be used in a commercial
+ * product or activity without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -851,6 +853,13 @@ void BossMesh::AddEnumEffect(const EnumBossEffectInfo& info) {
             break;
         }
 
+        case EnumBossEffectInfo::GothicRomanticBossDestroyCharge: {
+            
+
+
+            break;
+        }
+
         case EnumBossEffectInfo::FuturismBossWarningFlare: {
 
             std::vector<ESPAbstractEmitter*> flareEmitters;
@@ -1119,14 +1128,13 @@ void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera, const GameMod
     }
 }
 
-ESPPointEmitter* BossMesh::BuildFireEmitter(float width, float height, float sizeScaler) {
+ESPPointEmitter* BossMesh::BuildFireEmitter(float width, float height, float sizeScaler, double minSpawnDelta) {
     float smallestDimension = std::min<float>(width, height);
 
-    static const float MAX_SPAWN_DELTA = 0.16f;
     static const float MAX_LIFE = 1.5f;
 
 	ESPPointEmitter* smokeEmitter = new ESPPointEmitter();
-	smokeEmitter->SetSpawnDelta(ESPInterval(MAX_SPAWN_DELTA, MAX_SPAWN_DELTA));
+	smokeEmitter->SetSpawnDelta(ESPInterval(minSpawnDelta, minSpawnDelta + 0.05));
 	smokeEmitter->SetInitialSpd(ESPInterval(1.0f, 4.0f));
 	smokeEmitter->SetParticleLife(ESPInterval(MAX_LIFE - 1.0f, MAX_LIFE));
     smokeEmitter->SetParticleSize(ESPInterval(0.25f * sizeScaler* smallestDimension, 0.75f * sizeScaler* smallestDimension));
@@ -1139,7 +1147,7 @@ ESPPointEmitter* BossMesh::BuildFireEmitter(float width, float height, float siz
 	smokeEmitter->AddEffector(&this->particleMediumGrowth);
 	smokeEmitter->AddEffector(&this->rotateEffectorCW);
 	
-    int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
+    int numParticles = static_cast<int>(MAX_LIFE / minSpawnDelta);
     assert(numParticles < 30);
     bool success = smokeEmitter->SetRandomTextureParticles(numParticles, this->smokeTextures);
 	assert(success);
@@ -1147,14 +1155,13 @@ ESPPointEmitter* BossMesh::BuildFireEmitter(float width, float height, float siz
 
     return smokeEmitter;
 }
-ESPPointEmitter* BossMesh::BuildSmokeEmitter(float width, float height, float sizeScaler) {
+ESPPointEmitter* BossMesh::BuildSmokeEmitter(float width, float height, float sizeScaler, double minSpawnDelta) {
     float smallestDimension = std::min<float>(width, height);
 
-    static const float MAX_SPAWN_DELTA = 0.16f;
     static const float MAX_LIFE = 1.75f;
 
 	ESPPointEmitter* smokeEmitter = new ESPPointEmitter();
-	smokeEmitter->SetSpawnDelta(ESPInterval(MAX_SPAWN_DELTA, MAX_SPAWN_DELTA));
+	smokeEmitter->SetSpawnDelta(ESPInterval(minSpawnDelta, minSpawnDelta + 0.05));
 	smokeEmitter->SetInitialSpd(ESPInterval(1.0f, 4.0f));
 	smokeEmitter->SetParticleLife(ESPInterval(MAX_LIFE - 1.0f, MAX_LIFE));
     smokeEmitter->SetParticleSize(ESPInterval(0.3f * sizeScaler* smallestDimension, 0.8f * sizeScaler* smallestDimension));
@@ -1167,7 +1174,7 @@ ESPPointEmitter* BossMesh::BuildSmokeEmitter(float width, float height, float si
 	smokeEmitter->AddEffector(&this->particleLargeGrowth);
 	smokeEmitter->AddEffector(&this->rotateEffectorCCW);
 	
-    int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
+    int numParticles = static_cast<int>(MAX_LIFE / minSpawnDelta);
     assert(numParticles < 30);
     bool success = smokeEmitter->SetRandomTextureParticles(numParticles, this->smokeTextures);
 	assert(success);

@@ -4,8 +4,8 @@
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Redistribution and use of the Biff! Bam!! Blammo!?! code or any derivative
+ * works are permitted provided that the following conditions are met:
  * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
@@ -14,6 +14,8 @@
  * documentation and/or other materials provided with the distribution.
  * 3. The names of its contributors may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
+ * 4. Redistributions may not be sold, nor may they be used in a commercial
+ * product or activity without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -202,6 +204,14 @@ void GameLightAssets::RestoreLightPositionAndAttenuation(GameLightType lightType
 			this->paddleFillLight.SetLightPositionChange(this->defaultFGFillLightProperties.GetPosition(), restoreTime);
             this->paddleFillLight.SetLinearAttenuationChange(this->defaultFGFillLightProperties.GetLinearAttenuation(), restoreTime);
 			break;
+        case BossKeyLight:
+            this->bossKeyLight.SetLightPositionChange(this->defaultFGKeyLightProperties.GetPosition(), restoreTime);
+            this->bossKeyLight.SetLinearAttenuationChange(this->defaultFGKeyLightProperties.GetLinearAttenuation(), restoreTime);
+            break;
+        case BossFillLight:
+            this->bossFillLight.SetLightPositionChange(this->defaultFGFillLightProperties.GetPosition(), restoreTime);
+            this->bossFillLight.SetLinearAttenuationChange(this->defaultFGFillLightProperties.GetLinearAttenuation(), restoreTime);
+            break;
 
         case BGKeyLight:
             this->bgKeyLight.SetLightPositionChange(this->defaultBGKeyLightProperties.GetPosition(), restoreTime);
@@ -239,6 +249,12 @@ void GameLightAssets::RestoreLightColour(GameLightType lightType, float restoreT
             break;
         case PaddleFillLight:
             this->paddleFillLight.SetLightColourChange(this->defaultFGFillLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case BossKeyLight:
+            this->bossKeyLight.SetLightColourChange(this->defaultFGKeyLightProperties.GetDiffuseColour(), restoreTime);
+            break;
+        case BossFillLight:
+            this->bossFillLight.SetLightColourChange(this->defaultFGFillLightProperties.GetDiffuseColour(), restoreTime);
             break;
 
         case BGKeyLight:
@@ -378,6 +394,10 @@ PointLight* GameLightAssets::GetLightFromType(GameLightType lightType) {
 			return &this->paddleKeyLight;
 		case PaddleFillLight:
 			return &this->paddleFillLight;
+        case BossKeyLight:
+            return &this->bossKeyLight;
+        case BossFillLight:
+            return &this->bossFillLight;
 		default:
 			assert(false);
 			return NULL;
