@@ -658,7 +658,7 @@ topPointWeakpt(NULL) {
     this->SetState(GothicRomanticBossAI::BasicMoveAndShootState);
 
     // Set the shoot countdown a large number so the boss doesn't attack the first time it moves
-    // (to accomodate the light fade-in, without cheap shots)
+    // (to accommodate the light fade-in, without cheap shots)
     this->shootCountdown = DBL_MAX;
 }
 
@@ -1217,7 +1217,7 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             break;
         }
 
-        case DestroyConfinesAIState:
+        case DestroyConfinesAIState: {
             this->spinningDestroyConfinesAnim.ResetToStart();
 
             this->chargeDestroyerBlastCountdown = TIME_TO_CHARGE_CONFINE_DESTROYER_BLAST;
@@ -1229,15 +1229,15 @@ void IceBallAI::SetState(GothicRomanticBossAI::AIState newState) {
             EnumBossEffectInfo chargeEffect(EnumBossEffectInfo::GothicRomanticBossDestroyCharge);
             chargeEffect.SetTimeInSecs(TIME_TO_CHARGE_CONFINE_DESTROYER_BLAST);
             chargeEffect.SetBodyPart(this->boss->GetBody());
-            //chargeEffect.SetSize1D()
+            chargeEffect.SetSize1D(GothicRomanticBoss::BODY_HEIGHT);
 
             GameEventManager::Instance()->ActionBossEffect(chargeEffect);
-                //PowerChargeEffectInfo(this->boss->GetBody(), TIME_TO_CHARGE_CONFINE_DESTROYER_BLAST, Colour(1.0f, 1.0f, 1.0f), 4.0f));
-            
+
             // Play sound for charging up to destroy the confines...
             this->boss->GetGameModel()->GetSound()->PlaySound(GameSound::GothicBossChargeShockwaveEvent, false);
 
             break;
+        }
 
         default:
             assert(false);

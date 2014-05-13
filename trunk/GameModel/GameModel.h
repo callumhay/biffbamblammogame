@@ -489,6 +489,8 @@ public:
 
     void AddPercentageToBoostMeter(double percent);
 
+    bool IsRemoteControlRocketActive() const { return this->GetActiveRemoteControlRocket() != NULL; }
+
 	// Pauses the game
 	void SetPause(PauseType pause) {
         int32_t prevPauseState = this->pauseBitField;

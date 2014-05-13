@@ -151,17 +151,18 @@ FBObj* InGameRenderPipeline::RenderBackgroundToFBO(const Vector2D& negHalfLevelD
         static const float OUTLINE_AMBIENT_BRIGHTNESS = 1.0f;
 
         CgFxCelOutlines& celOutlineEffect = fboAssets->GetCelOutlineEffect();
+        //celOutlineEffect.SetTechnique(CgFxCelOutlines::DEFAULT_TECHNIQUE_NAME);
         celOutlineEffect.SetMinDistance(currWorldAssets->GetOutlineMinDistance());
         celOutlineEffect.SetMaxDistance(currWorldAssets->GetOutlineMaxDistance());
         celOutlineEffect.SetContrastExponent(currWorldAssets->GetOutlineContrast());
         celOutlineEffect.SetOffsetMultiplier(currWorldAssets->GetOutlineOffset());
         celOutlineEffect.SetAlphaMultiplier(assets->GetCurrentWorldAssets()->GetAlpha());
         celOutlineEffect.SetAmbientBrightness(OUTLINE_AMBIENT_BRIGHTNESS);
-        celOutlineEffect.Draw(colourAndDepthFBO, tempFBO);
+        celOutlineEffect.Draw(colourAndDepthFBO, NULL, tempFBO);
     }
 
-    // Blur the background a bit so that it is less in focus than the foreground
-    fboAssets->RenderBlur(Camera::GetWindowWidth(), Camera::GetWindowHeight(), tempFBO);
+    // Blur the outlines
+    fboAssets->RenderBlur(Camera::GetWindowWidth(), Camera::GetWindowHeight(), tempFBO, 1.125f);
 
 	// Draw background effects into the background FBO -- we do this as a separate pass because
     // if we include it in the previous pass, the outlines will show through all the effects (which is not so pretty)
@@ -269,7 +270,16 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
         celOutlineEffect.SetOffsetMultiplier(OUTLINE_OFFSET);
         celOutlineEffect.SetAlphaMultiplier(assets->GetCurrentLevelMesh()->GetLevelAlpha());
         celOutlineEffect.SetAmbientBrightness(1.0f);
-        celOutlineEffect.Draw(colourAndDepthFBO, fullSceneFBO);
+
+        celOutlineEffect.Draw(colourAndDepthFBO, NULL, fullSceneFBO);
+
+        // To just blur the outlines:
+        //FBObj* tempFBO = fboAssets->GetTempFBO();
+        //celOutlineEffect.SetTechnique(CgFxCelOutlines::OUTLINES_ONLY_TECHNIQUE_NAME);
+        //celOutlineEffect.Draw(colourAndDepthFBO, NULL, tempFBO);
+        //fboAssets->RenderBlur(camera.GetWindowWidth(), camera.GetWindowHeight(), tempFBO, 0.8f);
+        //celOutlineEffect.SetTechnique(CgFxCelOutlines::COMPOSE_SCENE_AND_OUTLINES_TECHNIQUE_NAME);
+        //celOutlineEffect.Draw(colourAndDepthFBO, tempFBO, fullSceneFBO);
     }
 
 	// Draw Post-full-scene effects (N.B., when you bind a new FBO, the old one is automatically unbound)
@@ -291,7 +301,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
 	FBObj::UnbindFBObj();
 
 	// Do a Gaussian blur for a softer feeling
-	assets->GetFBOAssets()->RenderFullSceneBlur(camera.GetWindowWidth(), camera.GetWindowHeight());
+	assets->GetFBOAssets()->RenderBlur(camera.GetWindowWidth(), camera.GetWindowHeight(), fullSceneFBO, 0.7f); // sigma used to be 0.8f
 
 	debug_opengl_state();
 
@@ -362,13 +372,14 @@ void InGameRenderPipeline::RenderFinalGather(const Vector2D& negHalfLevelDim, co
         static const float OUTLINE_OFFSET = 0.75f;
 
         CgFxCelOutlines& celOutlineEffect = fboAssets->GetCelOutlineEffect();
+        //celOutlineEffect.SetTechnique(CgFxCelOutlines::DEFAULT_TECHNIQUE_NAME);
         celOutlineEffect.SetMinDistance(OUTLINE_MIN_DIST);
         celOutlineEffect.SetMaxDistance(OUTLINE_MAX_DIST);
         celOutlineEffect.SetContrastExponent(OUTLINE_CONTRAST);
         celOutlineEffect.SetOffsetMultiplier(OUTLINE_OFFSET);
         celOutlineEffect.SetAlphaMultiplier(assets->GetCurrentLevelMesh()->GetLevelAlpha());
         celOutlineEffect.SetAmbientBrightness(1.0f);
-        celOutlineEffect.Draw(colourAndDepthFBO, finalFBO);
+        celOutlineEffect.Draw(colourAndDepthFBO, NULL, finalFBO);
     }
 
 	// Render the final full screen effects

@@ -95,13 +95,22 @@ inline void ESPPointEmitter::SetEmitPosition(const Vector3D& pt) {
  * Set the emit direction for this point emitter.
  */
 inline void ESPPointEmitter::SetEmitDirection(const Vector3D& dir) {
+    if (dir.IsZero()) {
+        this->emitDir = Vector3D(0,1,0);
+        return;
+    }
+
 	this->emitDir = dir;
 
 	assert(!this->emitOnPlane || Vector3D::cross(this->planeNormal, this->emitDir) != Vector3D(0,0,0));
-    assert(!this->emitDir.IsZero());
 }
 
 inline void ESPPointEmitter::SetEmitDirection(const Vector2D& dir) {
+    if (dir.IsZero()) {
+        this->emitDir = Vector3D(0,1,0);
+        return;
+    }
+
     this->emitDir[0] = dir[0];
     this->emitDir[1] = dir[1];
     this->emitDir[2] = 0;

@@ -377,7 +377,7 @@ void NouveauWorldAssets::LoadFGLighting(GameAssets* assets, const Vector3D& fgKe
     assets->GetLightAssets()->SetForegroundLightDefaults(
         BasicPointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION + fgKeyPosOffset, 
         GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0175f), 
-        BasicPointLight(Point3D(10, 10, 50) + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.02f));
+        BasicPointLight(Point3D(11, 10, 52) + fgFillPosOffset, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR, 0.028f));
 }
 
 void NouveauWorldAssets::LoadBGLighting(GameAssets* assets) const {

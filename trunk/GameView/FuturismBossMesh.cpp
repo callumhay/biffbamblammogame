@@ -224,7 +224,6 @@ double FuturismBossMesh::ActivateIntroAnimation() {
     this->eyePulseGlow.AddCopiedEffector(ESPParticleScaleEffector(ScaleEffect(1.0f, 1.5f)));
     this->eyePulseGlow.SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
         GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT));
-
     
     this->introTimeCountdown = FuturismBossMesh::INTRO_TIME_IN_SECS;
     return this->introTimeCountdown;

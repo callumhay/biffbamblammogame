@@ -762,12 +762,11 @@ void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, floa
 
             for (int j = 1; j < static_cast<int>(currStarBGEmitterVec.size()); j++) {
                 starBGEmitter = currStarBGEmitterVec[j];
-                starBGEmitter->SetAliveParticleAlphaMax(starAnimation->GetInterpolantValue());
                 starBGEmitter->SetEmitPosition(Point2D(currX, currYPos));
                 starBGEmitter->Tick(dT);
+                starBGEmitter->SetAliveParticleAlphaMax(starAnimation->GetInterpolantValue());
                 starBGEmitter->Draw(this->display->GetCamera());
             }
-
         }
         else {
             starColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;

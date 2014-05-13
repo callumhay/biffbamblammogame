@@ -38,10 +38,14 @@
 
 class CgFxCelOutlines : public CgFxPostProcessingEffect {
 public:
+    static const char* DEFAULT_TECHNIQUE_NAME;
+    static const char* OUTLINES_ONLY_TECHNIQUE_NAME;
+    static const char* COMPOSE_SCENE_AND_OUTLINES_TECHNIQUE_NAME;
+
 	CgFxCelOutlines();
 	~CgFxCelOutlines();
 
-    void Draw(FBObj* colourAndDepthSceneFBO, FBObj* outputFBO);   
+    void Draw(FBObj* colourAndDepthSceneFBO, FBObj* outlinesOnlyFBO, FBObj* outputFBO);   
 
     void SetMinDistance(float minDist) { this->minDistance = minDist; }
     void SetMaxDistance(float maxDist) { this->maxDistance = maxDist; }
@@ -52,8 +56,6 @@ public:
     void SetAmbientBrightness(float amt) { this->ambientBrightness = amt; }
 
 private:
-    static const char* TECHNIQUE_NAME;
-
     CGparameter nearZParam;
     CGparameter farZParam;
     CGparameter texOffsetsParam;
@@ -67,6 +69,7 @@ private:
     // Texture sampler parameters
     CGparameter colourSamplerParam;
     CGparameter depthSamplerParam;
+    CGparameter outlineSamplerParam;
 
     float minDistance;
     float maxDistance;

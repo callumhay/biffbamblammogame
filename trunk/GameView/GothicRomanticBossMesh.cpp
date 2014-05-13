@@ -200,12 +200,7 @@ void GothicRomanticBossMesh::DrawBody(double dT, const Camera& camera, const Bas
         glPushMatrix();
         glMultMatrixf(body->GetWorldTransform().begin());
         glColor4f(currColour->R(), currColour->G(), currColour->B(), currColour->A());
-        if (body->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
-            this->bodyMesh->Draw(camera, this->weakpointMaterial);
-        }
-        else {
-            this->bodyMesh->Draw(camera, keyLight, fillLight, ballLight);
-        }
+        this->bodyMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 

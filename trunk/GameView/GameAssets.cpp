@@ -1045,6 +1045,21 @@ void GameAssets::SetActiveEffectLights(const GameModel& gameModel, GameItem::Ite
     }
 }
 
+void GameAssets::RemoveAndRestoreFromBeamLights(float timeToRestore) {
+    this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightFGKey, timeToRestore);
+    this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightFGKey, timeToRestore);
+    this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightFGFill, timeToRestore);
+    this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightFGFill, timeToRestore);
+    this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightPaddleKey, timeToRestore);
+    this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightPaddleKey, timeToRestore);
+    this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightPaddleFill, timeToRestore);
+    this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightPaddleFill, timeToRestore);
+    this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightBossKey, timeToRestore);
+    this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightBossKey, timeToRestore);
+    this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightBossFill, timeToRestore);
+    this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightBossFill, timeToRestore);
+}
+
 void GameAssets::DrawMiscEffects(const GameModel& gameModel) {
     // If the player is in RC rocket mode, then we draw the level boundaries for where the rocket can't be...
     if (gameModel.GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
@@ -1305,7 +1320,8 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 	glPopMatrix();
 	glPopAttrib();
 
-    if (numBeamPositions > 0) {
+    if (numBeamPositions > 0 && avgRadiusFraction > 0 && !gameModel.IsRemoteControlRocketActive()) {
+
         avgBeamPos        /= static_cast<float>(numBeamPositions);
         avgRadiusFraction /= static_cast<float>(numBeamPositions);
         avgBeamColour     /= static_cast<float>(beams.size());
@@ -1317,8 +1333,7 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
         avgBeamPos = gameModel.GetTransformInfo()->GetGameXYZTransform() * avgBeamPos;
 
         static const float ATTENUATION_MULTIPLIER = 1.2f;
-        assert(avgRadiusFraction > 0);
-        float invAvgRadiusFract = (1.0f/avgRadiusFraction);
+        float invAvgRadiusFract = (1.0f / avgRadiusFraction);
         
         static double timeCounter = 0;
         timeCounter += 7*dT + 5 * Randomizer::GetInstance()->RandomNumZeroToOne() * dT;
@@ -1668,6 +1683,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
             // Notify assets of the rocket...
             this->FireRocket(gameModel, *remoteCtrlRocket);
             this->currentLevelMesh->UpdateNoEntryBlock(true);
+            this->RemoveAndRestoreFromBeamLights(0.5);
             break;
         }
 
@@ -2304,18 +2320,7 @@ void GameAssets::RemoveBeamEffects(const GameModel& gameModel, const Beam& beam)
     if (gameModel.GetActiveBeams().empty()) {
 
         // Restore the beam light to its normal position and colour...
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightFGKey, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightFGKey, 0.5f);
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightFGFill, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightFGFill, 0.5f);
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightPaddleKey, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightPaddleKey, 0.5f);
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightPaddleFill, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightPaddleFill, 0.5f);
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightBossKey, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightBossKey, 0.5f);
-        this->lightAssets->RestoreLightPositionAndAttenuation(GameLightAssets::BeamLightBossFill, 0.5f);
-        this->lightAssets->RestoreLightColour(GameLightAssets::BeamLightBossFill, 0.5f);
+        this->RemoveAndRestoreFromBeamLights(0.5);
 
         // Figure out what effects are currently active and make sure we maintain the lighting for those effects...
         const std::list<GameItemTimer*>& activeTimers = gameModel.GetActiveTimers();

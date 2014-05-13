@@ -352,7 +352,7 @@ public:
     static ESPPointEmitter* CreateSingleEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
         int numLines, float lengthMin, float lengthMax, bool reverse = true);
     static ESPPointEmitter* CreateContinuousEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
-        float lengthMin, float lengthMax, bool reverse = true);
+        float lengthMin, float lengthMax, bool reverse = true, float widthMultiplier = 1.0f);
     // --------------------------------------------------------------------------------------
 
     // Texture Collection Methods -----------------------------------------------------------
@@ -524,12 +524,12 @@ inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera&
     this->paddleLaserGlowAura->SetAliveParticlePosition(0, effectPos, 0);
 	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, effectPos, 0));
 
-    this->paddleLaserGlowAura->SetAliveParticleAlphaMax(paddle.GetAlpha());
-    this->paddleLaserGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
-
     this->paddleLaserGlowAura->Tick(dT);
+    this->paddleLaserGlowAura->SetAliveParticleAlphaMax(paddle.GetAlpha());
 	this->paddleLaserGlowAura->Draw(camera);
+
 	this->paddleLaserGlowSparks->Tick(dT);
+    this->paddleLaserGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
     this->paddleLaserGlowSparks->Draw(camera);
 }
 
@@ -539,9 +539,9 @@ inline void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Cam
     this->paddleBeamBlastBits->SetEmitDirection(paddle.GetUpVector());
 	this->paddleBeamBlastBits->SetEmitPosition(Point3D(0, 0, -paddle.GetHalfHeight()));
 	this->paddleBeamBlastBits->SetParticleSize(xSize);
-    this->paddleBeamBlastBits->SetAliveParticleAlphaMax(paddle.GetAlpha());
-
+    
     this->paddleBeamBlastBits->Tick(dT);
+    this->paddleBeamBlastBits->SetAliveParticleAlphaMax(paddle.GetAlpha());
 	this->paddleBeamBlastBits->Draw(camera);
 }
 

@@ -54,6 +54,16 @@ sampler2D ColourSampler = sampler_state {
     Texture = <ColourTexture>;
 }; 
 
+texture OutlineTexture  <
+    string UIName =  "Colour Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D OutlineSampler = sampler_state {
+    Texture = <OutlineTexture>;
+}; 
+
+
 texture DepthTexture  <
     string UIName =  "Depth Texture";
     string ResourceType = "2D";
@@ -74,6 +84,38 @@ struct PSOutData {
 	float4 colour : COLOR;
 	float  depth  : DEPTH;
 };
+
+
+float3 celOutlinesOnlyPS(float2 UV : TEXCOORD0) : COLOR {
+	// Gets all neighboring fragments depths stored into the depth texture
+	// The result fragment sample matrix is as below, where x is the current fragment (index = 4)
+	// 0 1 2
+	// 3 x 5
+	// 6 7 8
+	float samples[9];
+	for (int i = 0; i < 4; i++) {
+  		samples[i] = LinearizeDepth(float(tex2D(DepthSampler, UV.st + TextureOffsets[i])));
+	}
+	for (int i = 5; i < 9; i++) {
+  		samples[i] = LinearizeDepth(float(tex2D(DepthSampler, UV.st + TextureOffsets[i])));
+	}
+	
+	// Sobel filtering...
+	float xValue  = -samples[6] - (2.0 * samples[7]) - samples[8] + samples[0] + (2.0 * samples[1]) + samples[2];
+	float yValue  = -samples[6] + samples[8] - (2.0 * samples[3]) + (2.0 * samples[5]) - samples[0] + samples[2];
+	float sqrDist = (xValue * xValue) + (yValue * yValue);
+	
+	// Calculate a basic edge multiplier
+	float edgeMultiplier = clamp(lerp(AmbientBrightness, AmbientDarkness, (sqrDist - MinDistance) / MaxDistance), 0, 1);
+
+	// Perform contrast pass
+	edgeMultiplier = pow(edgeMultiplier, Contrast);
+
+	// Fade pass
+	edgeMultiplier = max(clamp(1.0 - AlphaMultiplier, 0, 1), edgeMultiplier);
+	
+	return edgeMultiplier.xxx;
+}
 
 PSOutData celOutlinesPS(float2 UV : TEXCOORD0) {
 
@@ -115,6 +157,20 @@ PSOutData celOutlinesPS(float2 UV : TEXCOORD0) {
 	return outData;
 }
 
+PSOutData composeOutlinesWithScenePS(float2 UV : TEXCOORD0) {
+	float outlineMultiplier = tex2D(OutlineSampler, UV.st).r;
+
+	float4 sceneColour = tex2D(ColourSampler, UV.st);
+	sceneColour = float4(outlineMultiplier * sceneColour.rgb, sceneColour.a);
+	
+	PSOutData outData = (PSOutData)0;
+	outData.colour = sceneColour;
+	outData.depth  = float(tex2D(DepthSampler, UV.st));
+		
+	return outData;
+}
+
+
 ///// TECHNIQUES /////////////////////////////
 
 technique CelOutlines < string Script = "Pass=p0;"; > {
@@ -130,3 +186,32 @@ technique CelOutlines < string Script = "Pass=p0;"; > {
         FragmentProgram = compile arbfp1 celOutlinesPS();
     }
 }
+
+technique CelOutlinesOnly < string Script = "Pass=p0;"; > {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+		
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+		
+        FragmentProgram = compile arbfp1 celOutlinesOnlyPS();
+    }
+}
+
+technique ComposeOutlinesWithScene < string Script = "Pass=p0;"; > {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+		
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+		
+        FragmentProgram = compile arbfp1 composeOutlinesWithScenePS();
+    }
+}
+

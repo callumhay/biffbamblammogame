@@ -217,15 +217,18 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
         paddleStartingIdx = paddleStartXPos / LevelPiece::PIECE_WIDTH;
     }
 
+    static const float LOW_NO_ENTRY_ALPHA = 0.4f;
+
     for (int i = paddleStartingIdx+1; i < static_cast<int>(this->width); i++) {
         
         LevelPiece* currPiece = this->currentLevelPieces[0][i];
-        if (!currPiece->CanBeDestroyedByBall() && currPiece->GetType() != LevelPiece::NoEntry) {
+        if (!currPiece->CanBeDestroyedByBall() && currPiece->GetType() != LevelPiece::Empty &&
+            currPiece->GetType() != LevelPiece::NoEntry) {
             break;
         }
         else if (currPiece->GetType() == LevelPiece::NoEntry) {
             ColourRGBA currColour = currPiece->GetColour();
-            currColour[3] = 0.5f;
+            currColour[3] = LOW_NO_ENTRY_ALPHA;
             currPiece->SetColour(currColour);
         }
 
@@ -233,21 +236,21 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
             LevelPiece* pieceAbove = this->currentLevelPieces[1][i];
             if (pieceAbove->GetType() == LevelPiece::NoEntry) {
                 ColourRGBA currColour = pieceAbove->GetColour();
-                currColour[3] = 0.5f;
+                currColour[3] = LOW_NO_ENTRY_ALPHA;
                 pieceAbove->SetColour(currColour);
             }
         }
-
     }
 
     for (int i = paddleStartingIdx-1; i >= 0; i--) {
         LevelPiece* currPiece = this->currentLevelPieces[0][i];
-        if (!currPiece->CanBeDestroyedByBall() && currPiece->GetType() != LevelPiece::NoEntry) {
+        if (!currPiece->CanBeDestroyedByBall() && currPiece->GetType() != LevelPiece::Empty &&
+            currPiece->GetType() != LevelPiece::NoEntry) {
             break;
         }
         else if (currPiece->GetType() == LevelPiece::NoEntry) {
             ColourRGBA currColour = currPiece->GetColour();
-            currColour[3] = 0.5f;
+            currColour[3] = LOW_NO_ENTRY_ALPHA;
             currPiece->SetColour(currColour);
         }
 
@@ -255,7 +258,7 @@ void GameLevel::InitPieces(float paddleStartXPos, const std::vector<std::vector<
             LevelPiece* pieceAbove = this->currentLevelPieces[1][i];
             if (pieceAbove->GetType() == LevelPiece::NoEntry) {
                 ColourRGBA currColour = pieceAbove->GetColour();
-                currColour[3] = 0.5f;
+                currColour[3] = LOW_NO_ENTRY_ALPHA;
                 pieceAbove->SetColour(currColour);
             }
         }

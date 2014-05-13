@@ -74,16 +74,10 @@ public:
 
     FBObj* RenderInitialFullscreenEffects(int width, int height, double dT);
 
-	inline void RenderFullSceneBlur(int width, int height) {
-        this->blurEffect->SetInputFBO(this->fgAndBgFBO);
-        this->blurEffect->SetBlurType(CgFxGaussianBlur::Kernel3x3);
-        this->blurEffect->SetSigma(0.8f);
-		this->blurEffect->Draw(width, height);
-	}
-    inline void RenderBlur(int width, int height, FBObj* blurBuffer) {
+    inline void RenderBlur(int width, int height, FBObj* blurBuffer, float sigma) {
         this->blurEffect->SetInputFBO(blurBuffer);
         this->blurEffect->SetBlurType(CgFxGaussianBlur::Kernel3x3);
-        this->blurEffect->SetSigma(1.125f);
+        this->blurEffect->SetSigma(sigma);
         this->blurEffect->Draw(width, height);
     }
 
