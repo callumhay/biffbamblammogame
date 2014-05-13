@@ -157,7 +157,6 @@ public:
 
     void DeactivateMiscEffects();
 
-
     double ActivateBossIntro();
     double ActivateBossExplodingFlashEffects(double delayInSecs,
         const GameModel* model, const Camera& camera);
@@ -312,6 +311,7 @@ private:
     void DrawSafetyNet(BallSafetyNetMesh* safetyNetMesh, double dT, const Camera& camera, const GameModel& gameModel, float yTranslationOffset);
     
     void SetActiveEffectLights(const GameModel& gameModel, GameItem::ItemType itemEffectType);
+    void RemoveAndRestoreFromBeamLights(float timeToRestore);
 
     DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };

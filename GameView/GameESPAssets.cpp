@@ -54,6 +54,7 @@
 #include "../GameModel/FragileCannonBlock.h"
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/RegenBlock.h"
+#include "../GameModel/OneWayBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/FireGlobProjectile.h"
 #include "../GameModel/PaddleMineProjectile.h"
@@ -1561,8 +1562,41 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 
 		case Projectile::FireGlobProjectile:
-            sound->PlaySoundAtPosition(GameSound::FireGlobBlockCollisionEvent, false, 
-                projectile.GetPosition3D(), true, true, true);
+            if (!block.HasStatus(LevelPiece::IceCubeStatus) && !block.IsNoBoundsPieceType()) {
+                bool playBlockCollisionSound = false;
+                switch (block.GetType()) {
+                    case LevelPiece::Breakable:
+                    case LevelPiece::Solid:
+                    case LevelPiece::Bomb:
+                    case LevelPiece::SolidTriangle:
+                    case LevelPiece::BreakableTriangle:
+                    case LevelPiece::Prism:
+                    case LevelPiece::PrismTriangle:
+                    case LevelPiece::Cannon:
+                    case LevelPiece::FragileCannon:
+                    case LevelPiece::Collateral:
+                    case LevelPiece::Tesla:
+                    case LevelPiece::ItemDrop:
+                    case LevelPiece::Switch:
+                    case LevelPiece::LaserTurret:
+                    case LevelPiece::RocketTurret:
+                    case LevelPiece::MineTurret:
+                    case LevelPiece::AlwaysDrop:
+                    case LevelPiece::Regen:
+                        playBlockCollisionSound = true;
+                        break;
+                    case LevelPiece::OneWay:
+                        playBlockCollisionSound = !static_cast<const OneWayBlock&>(block).IsGoingTheOneWay(projectile.GetVelocityDirection());
+                        break;
+                    default:
+                        break;
+                }
+                if (playBlockCollisionSound) {
+                    sound->PlaySoundAtPosition(GameSound::FireGlobBlockCollisionEvent, false, 
+                        projectile.GetPosition3D(), true, true, true);
+                }
+            }
+
 			break;
 
 		default:
@@ -2142,7 +2176,8 @@ ESPPointEmitter* GameESPAssets::CreateSingleEmphasisLineEffect(const Point3D& ce
 }
 
 ESPPointEmitter* GameESPAssets::CreateContinuousEmphasisLineEffect(const Point3D& center, double totalEffectTime, 
-                                                                   float lengthMin, float lengthMax, bool reverse) {
+                                                                   float lengthMin, float lengthMax, bool reverse, 
+                                                                   float widthMultiplier) {
 
     const ESPInterval spawnDeltaInterval(0.01, 0.05);
     const ESPInterval lifeTimeInterval(0.75f, 1.25f);
@@ -2158,7 +2193,7 @@ ESPPointEmitter* GameESPAssets::CreateContinuousEmphasisLineEffect(const Point3D
     emphasisLines->SetParticleLife(lifeTimeInterval);
     emphasisLines->SetNumParticleLives(numLives);
     emphasisLines->SetEmitAngleInDegrees(180);
-    emphasisLines->SetParticleSize(ESPInterval(0.05f, 0.125f), ESPInterval(lengthMin, lengthMax));
+    emphasisLines->SetParticleSize(ESPInterval(widthMultiplier*0.05f, widthMultiplier*0.125f), ESPInterval(lengthMin, lengthMax));
     emphasisLines->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
     emphasisLines->SetEmitPosition(center);
     emphasisLines->SetIsReversed(reverse);
@@ -6688,8 +6723,8 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 
 	if (paddle.GetIsPaddleCameraOn()) {
 		const float HEIGHT_TO_WIDTH_RATIO = static_cast<float>(Camera::GetWindowHeight()) / static_cast<float>(Camera::GetWindowWidth());
-		const float HALO_WIDTH						= 2.5f * paddle.GetHalfWidthTotal();
-		const float HALO_HEIGHT						= HEIGHT_TO_WIDTH_RATIO * HALO_WIDTH;
+		const float HALO_WIDTH  = 2.5f * paddle.GetHalfWidthTotal();
+		const float HALO_HEIGHT = HEIGHT_TO_WIDTH_RATIO * HALO_WIDTH;
 
 		// When the paddle camera is on we just display a halo on screen...
 		ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
@@ -6699,15 +6734,12 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		haloExpandingAura->SetParticleSize(ESPInterval(HALO_WIDTH), ESPInterval(HALO_HEIGHT));
 		haloExpandingAura->SetEmitAngleInDegrees(0);
 		haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+		haloExpandingAura->SetParticleAlignment(ESP::ScreenPlaneAligned);
 		haloExpandingAura->SetEmitPosition(Point3D(0, 0, 0));
 		haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
 		haloExpandingAura->AddEffector(&this->particleLargeGrowth);
 		haloExpandingAura->AddEffector(&this->particleFader);
-
-		bool result = haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
-        UNUSED_VARIABLE(result);
-		assert(result);
+		haloExpandingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
 
 		this->activePaddleEmitters.push_back(haloExpandingAura);
 	}
@@ -6722,13 +6754,13 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		paddlePulsingAura->SetParticleSize(ESPInterval(2.0f * paddle.GetHalfWidthTotal()), ESPInterval(4.0f * paddle.GetHalfHeight()));
 		paddlePulsingAura->SetEmitAngleInDegrees(0);
 		paddlePulsingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		paddlePulsingAura->SetParticleAlignment(ESP::ScreenAligned);
+		paddlePulsingAura->SetParticleAlignment(ESP::ScreenPlaneAligned);
 		paddlePulsingAura->SetEmitPosition(Point3D(0, 0, 0));
 		paddlePulsingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.7f));
 		paddlePulsingAura->AddEffector(&this->particleLargeGrowth);
 		paddlePulsingAura->AddEffector(&this->particleFader);
-		bool result = paddlePulsingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
-		assert(result);
+		paddlePulsingAura->SetParticles(1, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+            GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 
 		// Halo expanding aura
 		ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
@@ -6738,14 +6770,13 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		haloExpandingAura->SetParticleSize(ESPInterval(3.0f * paddle.GetHalfWidthTotal()), ESPInterval(5.0f * paddle.GetHalfHeight()));
 		haloExpandingAura->SetEmitAngleInDegrees(0);
 		haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-		haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+		haloExpandingAura->SetParticleAlignment(ESP::ScreenPlaneAligned);
 		haloExpandingAura->SetEmitPosition(Point3D(0, 0, 0));
 		haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
 		haloExpandingAura->AddEffector(&this->particleLargeGrowth);
 		haloExpandingAura->AddEffector(&this->particleFader);
-		result = haloExpandingAura->SetParticles(1, 
+		haloExpandingAura->SetParticles(1, 
             PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_HALO));
-		assert(result);	
 
 		// Absorb glow sparks
 		ESPPointEmitter* absorbGlowSparks = new ESPPointEmitter();
@@ -6761,8 +6792,8 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		absorbGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
 		absorbGlowSparks->AddEffector(&this->particleFader);
 		absorbGlowSparks->AddEffector(&this->particleMediumShrink);
-		result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
-		assert(result);
+		absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, 
+            PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 		
         ESPPointEmitter* itemNameEffect = NULL;
         if (item.GetItemType() != GameItem::RandomItem) {
@@ -7317,10 +7348,7 @@ void GameESPAssets::DrawPostProjectileEffects(double dT, const Camera& camera) {
         for (ProjectileEmitterCollectionIter emitIter = projEmitters.begin(); 
             emitIter != projEmitters.end(); ++emitIter) {
 
-            ESPPointEmitter* emitter = *emitIter;
-            emitter->SetAliveParticleAlphaMax(currProjectile->GetAlpha());
-
-            this->DrawProjectileEmitter(dT, camera, *currProjectile, emitter);
+            this->DrawProjectileEmitter(dT, camera, *currProjectile, *emitIter);
         }
     }
 }
@@ -7340,19 +7368,11 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera,
 
 		// If the projectile is not square then we rotate it so that it doesn't look strange in paddle camera mode
 		if (projectileEmitter->GetParticleSizeX() != projectileEmitter->GetParticleSizeY()) {
-
             projectileEmitter->SetAliveParticleAlignmentAsVelocityBased(projectile.GetVelocityDirection());
-
-			// Calculate the angle to rotate it about the z-axis
-			//float angleToRotate = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
-   //             std::max<float>(-1.0f, Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))))));
-			//if (projectile.GetVelocityDirection()[0] > 0) {
-			//	angleToRotate *= -1.0;
-			//}
-			//glRotatef(angleToRotate, 0.0f, 0.0f, 1.0f);
 		}
 
         projectileEmitter->Tick(dT);
+        projectileEmitter->SetAliveParticleAlphaMax(projectile.GetAlpha());
         projectileEmitter->Draw(camera);
         
         glPopMatrix();
@@ -7364,12 +7384,14 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera,
 		projectileEmitter->SetEmitPosition(emitPos);
 		projectileEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()[0], -projectile.GetVelocityDirection()[1], 0.0f));
         projectileEmitter->Tick(dT);
+        projectileEmitter->SetAliveParticleAlphaMax(projectile.GetAlpha());
         projectileEmitter->Draw(camera);   
     }
     else {
         Point3D emitPos = Point3D(projectile.GetPosition(), projectile.GetZOffset());
         projectileEmitter->SetEmitPosition(emitPos);
         projectileEmitter->Tick(dT);
+        projectileEmitter->SetAliveParticleAlphaMax(projectile.GetAlpha());
         projectileEmitter->Draw(camera);  
     }
 }
@@ -7384,8 +7406,9 @@ void GameESPAssets::DrawPaddleFlameBlasterEffects(double dT, const Camera& camer
 
     this->paddleFlameBlasterOrigin->SetEmitPosition(emitPos);
     this->paddleFlameBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
-    this->paddleFlameBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
+    
     this->paddleFlameBlasterOrigin->Tick(dT);
+    this->paddleFlameBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
     this->paddleFlameBlasterOrigin->Draw(camera);
 }
 
@@ -7399,8 +7422,9 @@ void GameESPAssets::DrawPaddleIceBlasterEffects(double dT, const Camera& camera,
 
     this->paddleIceBlasterOrigin->SetEmitPosition(emitPos);
     this->paddleIceBlasterOrigin->SetParticleSize(ESPInterval(scaleFactor, scaleFactor * 1.25f));
-    this->paddleIceBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
+    
     this->paddleIceBlasterOrigin->Tick(dT);
+    this->paddleIceBlasterOrigin->SetAliveParticleAlphaMax(paddle.GetAlpha());
     this->paddleIceBlasterOrigin->Draw(camera);
 }
 
@@ -7672,8 +7696,8 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	glTranslatef(loc[0], loc[1], 0);
 
 	uberBallEffectList[1]->SetParticleSize(ESPInterval(3.0f*ball.GetBounds().Radius()));
-    uberBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
     uberBallEffectList[1]->Tick(dT);
+    uberBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
     uberBallEffectList[1]->Draw(camera);
 
 	glPopMatrix();
@@ -7681,8 +7705,8 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	// Draw the trail...
 	uberBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
 	uberBallEffectList[0]->SetEmitPosition(Point3D(ballPos[0], ballPos[1], 0.0f));
-	uberBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     uberBallEffectList[0]->Tick(dT);
+    uberBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     uberBallEffectList[0]->Draw(camera);
 }
 
@@ -7716,8 +7740,8 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 
 	// Draw the ghostly trail for the ball...
     ghostBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
-	ghostBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     ghostBallEffectList[0]->Tick(dT);
+    ghostBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     ghostBallEffectList[0]->Draw(camera);
 	
 	glPopMatrix();
@@ -7753,8 +7777,8 @@ void GameESPAssets::DrawFireBallEffects(double dT, const Camera& camera, const G
 		ESPPointEmitter* emitter = *iter;
 
 		emitter->SetParticleSize(ESPInterval(2.33f*ball.GetBounds().Radius(), 3.33f*ball.GetBounds().Radius()));
-		emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
         emitter->Tick(dT);
+        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
         emitter->Draw(camera);
 	}
 
@@ -7795,22 +7819,26 @@ void GameESPAssets::DrawIceBallEffects(double dT, const Camera& camera, const Ga
 	// The aura always needs to be drawn centered on the ball
 	glPushMatrix();
 	glTranslatef(loc[0], loc[1], 0);
-    iceBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    
 	iceBallEffectList[0]->Tick(dT);
+    iceBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     iceBallEffectList[0]->Draw(camera);
-    iceBallEffectList[lastIdx]->SetAliveParticleAlphaMax(ball.GetAlpha());
+    
 	iceBallEffectList[lastIdx]->Tick(dT);
+    iceBallEffectList[lastIdx]->SetAliveParticleAlphaMax(ball.GetAlpha());
     iceBallEffectList[lastIdx]->Draw(camera);
+
 	glPopMatrix();
 
-	for (size_t i = 1; i < lastIdx; i++) {
-		ESPPointEmitter* emitter = iceBallEffectList[i];
-		emitter->SetEmitDirection(-Vector3D(dir));
-		emitter->SetEmitPosition(Point3D(loc));
-        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
+    for (size_t i = 1; i < lastIdx; i++) {
+	    ESPPointEmitter* emitter = iceBallEffectList[i];
+	    emitter->SetEmitDirection(-Vector3D(dir));
+	    emitter->SetEmitPosition(Point3D(loc));
+
         emitter->Tick(dT);
+        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
         emitter->Draw(camera);
-	}
+    }
 }
 
 void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir) {
@@ -7842,8 +7870,8 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 			emitter->Reset();
 		}
 
-        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
 		emitter->Tick(dT);
+        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
         emitter->Draw(camera);
 	}
 
@@ -7877,8 +7905,8 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 	glTranslatef(loc[0], loc[1], 0);
 
 	this->crazyBallAura->SetParticleSize(ESPInterval(2.75f*ball.GetBounds().Radius()));
-    this->crazyBallAura->SetAliveParticleAlphaMax(ball.GetAlpha());
 	this->crazyBallAura->Tick(dT);
+    this->crazyBallAura->SetAliveParticleAlphaMax(ball.GetAlpha());
     this->crazyBallAura->Draw(camera);
 	glPopMatrix();
 
@@ -7888,8 +7916,8 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 		ESPPointEmitter* emitter = *iter;
 		emitter->SetEmitPosition(ball.GetCenterPosition());
 		emitter->SetEmitDirection(-Vector3D(ball.GetDirection()));
-        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
 		emitter->Tick(dT);
+        emitter->SetAliveParticleAlphaMax(ball.GetAlpha());
         emitter->Draw(camera);
 	}
 }
@@ -7914,8 +7942,8 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
 
     // Draw the aura
 	slowBallEffectList[0]->SetParticleSize(ESPInterval(3.75f * ball.GetBounds().Radius()));
-	slowBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     slowBallEffectList[0]->Tick(dT);
+    slowBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     slowBallEffectList[0]->Draw(camera);
 
     // If the ball is not moving it doesn't have a tail
@@ -7936,8 +7964,8 @@ void GameESPAssets::DrawSlowBallEffects(double dT, const Camera& camera, const G
     slowBallEffectList[1]->SetInitialSpd(ESPInterval(2.0f * ball.GetBounds().Radius() * 3.0f));
     slowBallEffectList[1]->SetEmitDirection(negBallDir);
 	slowBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
-    slowBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
 	slowBallEffectList[1]->Tick(dT);
+    slowBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
     slowBallEffectList[1]->Draw(camera);
 
     glPopMatrix();
@@ -7962,8 +7990,8 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
 
     // Draw the aura
 	fastBallEffectList[0]->SetParticleSize(ESPInterval(3.5f * ball.GetBounds().Radius()));
-	fastBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     fastBallEffectList[0]->Tick(dT);
+    fastBallEffectList[0]->SetAliveParticleAlphaMax(ball.GetAlpha());
     fastBallEffectList[0]->Draw(camera);
 
     // If the ball is not moving it doesn't have a tail
@@ -7984,8 +8012,8 @@ void GameESPAssets::DrawFastBallEffects(double dT, const Camera& camera, const G
     fastBallEffectList[1]->SetInitialSpd(ESPInterval(2.0f * ball.GetBounds().Radius() * 6.0f));
     fastBallEffectList[1]->SetEmitDirection(ballDir);
 	fastBallEffectList[1]->SetParticleSize(ESPInterval(2.4f * ball.GetBounds().Radius()), ESPInterval(1.2f * ball.GetBounds().Radius()));
-    fastBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
     fastBallEffectList[1]->Tick(dT);
+    fastBallEffectList[1]->SetAliveParticleAlphaMax(ball.GetAlpha());
     fastBallEffectList[1]->Draw(camera);
 	
     glPopMatrix();
@@ -8239,12 +8267,11 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
             curr = NULL;
 		}
 		else {
-			// Not dead yet so we draw and tick
+            // Not dead yet so we draw and tick
+            curr->Tick(dT);
             if (paddle.GetAlpha() < 1.0f) {
                 curr->SetAliveParticleAlphaMax(paddle.GetAlpha());
             }
-            
-            curr->Tick(dT);
             curr->Draw(camera);
             ++iter;
 		}
@@ -8298,10 +8325,6 @@ void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Came
         leftSize   *= 0.5f;
         rightSize  *= 0.5f;
 
-        this->stickyPaddleBeamGlowSparks0->SetAliveParticleAlphaMax(paddle.GetAlpha());
-        this->stickyPaddleBeamGlowSparks1->SetAliveParticleAlphaMax(paddle.GetAlpha());
-        this->stickyPaddleBeamGlowSparks2->SetAliveParticleAlphaMax(paddle.GetAlpha());
-
         const ESPInterval particleSize(0.075f * paddle.GetHalfFlatTopWidth(), 0.15f * paddle.GetHalfFlatTopWidth());
         this->stickyPaddleBeamGlowSparks0->SetParticleSize(particleSize);
         this->stickyPaddleBeamGlowSparks1->SetParticleSize(particleSize);
@@ -8318,10 +8341,15 @@ void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Came
         this->stickyPaddleBeamGlowSparks2->SetEmitVolume(Point3D(beamSpacing-rightSize, tempYBound, -tempZBound), Point3D(beamSpacing+rightSize, tempYBound, tempZBound));
 
         this->stickyPaddleBeamGlowSparks0->Tick(dT);
+        this->stickyPaddleBeamGlowSparks0->SetAliveParticleAlphaMax(paddle.GetAlpha());
         this->stickyPaddleBeamGlowSparks0->Draw(camera);
+
         this->stickyPaddleBeamGlowSparks1->Tick(dT);
+        this->stickyPaddleBeamGlowSparks1->SetAliveParticleAlphaMax(paddle.GetAlpha());
         this->stickyPaddleBeamGlowSparks1->Draw(camera);
+
         this->stickyPaddleBeamGlowSparks2->Tick(dT);
+        this->stickyPaddleBeamGlowSparks2->SetAliveParticleAlphaMax(paddle.GetAlpha());
         this->stickyPaddleBeamGlowSparks2->Draw(camera);
     }
     else {
@@ -8331,9 +8359,9 @@ void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Came
         this->paddleBeamGlowSparks->SetEmitDirection(paddleUpVec);
 	    this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, tempYBound, -tempZBound), Point3D(tempXBound, tempYBound, tempZBound));
 	    this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
-        this->paddleBeamGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
-
+        
         this->paddleBeamGlowSparks->Tick(dT);
+        this->paddleBeamGlowSparks->SetAliveParticleAlphaMax(paddle.GetAlpha());
 	    this->paddleBeamGlowSparks->Draw(camera);
     }
 }
