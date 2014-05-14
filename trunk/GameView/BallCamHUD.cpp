@@ -435,6 +435,13 @@ void BallCamHUD::DrawLevelDisplayHUD(double dT, const GameModel& gameModel) {
     float levelHeight = currLevel->GetLevelUnitHeight();
 
     float scale = 1.0f;
+    float windowWidthWithPadding = WINDOW_WIDTH - 2.0f * WINDOW_WIDTH * PADDING_PERCENT;
+    float windowHeightWithPadding = WINDOW_HEIGHT - 2.0f * WINDOW_HEIGHT * PADDING_PERCENT;
+    scale = std::min<float>(windowWidthWithPadding / levelWidth, windowHeightWithPadding / levelHeight);
+
+    
+
+/*
     if (levelWidth > levelHeight) {
         float windowHeightWithPadding = WINDOW_HEIGHT - 2.0f * WINDOW_HEIGHT * PADDING_PERCENT;
         scale = windowHeightWithPadding / levelHeight;
@@ -443,7 +450,7 @@ void BallCamHUD::DrawLevelDisplayHUD(double dT, const GameModel& gameModel) {
         float windowWidthWithPadding = WINDOW_WIDTH - 2.0f * WINDOW_WIDTH * PADDING_PERCENT;
         scale = windowWidthWithPadding / levelWidth;
     }
-
+*/
     glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_COLOR_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);

@@ -169,7 +169,7 @@ void ESPPointToPointBeam::SpawnBeam() {
 	this->aliveBeams.push_back(newBeam);
 }
 
-void ESPPointToPointBeam::UpdateBeams() {
+void ESPPointToPointBeam::UpdateBeamGeometry() {
 
     Vector3D beamVec, orthToBeamVec;
     float avgSegLength, fractionAvgSegLength;
@@ -193,6 +193,13 @@ void ESPPointToPointBeam::UpdateBeams() {
             assert(currESPBeamSegment != NULL);
         }
         currESPBeamSegment->SetDefaultPointOnLine(ORIGIN_PT + (this->numMainESPBeamSegments * avgSegLength) * beamVec);
+    }
+}
+
+void ESPPointToPointBeam::UpdateBeamColours() {
+    for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end(); ++iter) {
+        ESPBeam* beam = *iter;
+        beam->SetColour(this->colour);
     }
 }
 

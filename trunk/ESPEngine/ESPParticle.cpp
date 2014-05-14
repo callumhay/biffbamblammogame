@@ -85,8 +85,9 @@ void ESPParticle::Tick(const double dT) {
 /**
  * Draw this particle as it is currently.
  */
-void ESPParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
-                       const Camera& camera, const ESP::ESPAlignment& alignment) {
+void ESPParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, 
+                       const Matrix4x4& modelInvTMat, const Camera& camera, 
+                       const ESP::ESPAlignment& alignment) {
 
 	// Don't draw if dead...
 	if (this->IsDead()) {
@@ -96,10 +97,9 @@ void ESPParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat,
 	// Transform and draw the particle
 	glPushMatrix();
 
-
 	// Do any personal alignment transforms...
     Matrix4x4 alignmentMat;
-    this->GetPersonalAlignmentTransform(modelMat, modelInvTMat, camera, alignment, this->position, alignmentMat);
+    this->GetPersonalAlignmentTransform(modelMat, modelMatInv, modelInvTMat, camera, alignment, this->position, alignmentMat);
 	glMultMatrixf(alignmentMat.begin());
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
@@ -110,7 +110,8 @@ void ESPParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat,
 	glPopMatrix();
 }
 
-void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv,
+                                                const Matrix4x4& modelInvTMat, 
                                                 const Camera& cam, const ESP::ESPAlignment alignment, 
                                                 const Point3D& localPos, Matrix4x4& result) {
 
@@ -140,7 +141,7 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
                 alignUpVec = modelMat * this->velocityDir;
             }
             else {
-                alignUpVec = Vector3D(0, 1, 0);
+                alignUpVec = modelMat * Vector3D(0, 1, 0);
             }
 
             alignRightVec = Vector3D::cross(alignUpVec, alignNormalVec);
@@ -151,6 +152,13 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
                 }
             }
 
+            alignNormalVec	= Vector3D::cross(alignRightVec, alignUpVec);
+            break;
+        }
+
+        case ESP::GlobalAxisAlignedX: {
+            alignRightVec   = modelMatInv * Vector3D(1, 0, 0);
+            alignUpVec      = Vector3D::cross(alignNormalVec, alignRightVec);
             alignNormalVec	= Vector3D::cross(alignRightVec, alignUpVec);
             break;
         }
@@ -166,7 +174,7 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
                 alignUpVec = modelMat * this->velocityDir;
             }
             else {
-                alignUpVec = Vector3D(0, 1, 0);
+                alignUpVec = modelMat * Vector3D(0, 1, 0);
             }
 
             alignRightVec  = Vector3D::cross(alignUpVec, alignNormalVec);
@@ -191,33 +199,13 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
             }
             break;
 
-        case ESP::ScreenPlaneAligned: {
-            int largestIdx = 0;
-            float largestAbsValue = 0;
-            float largestValue = 0;
-            float tempAbsValue;
-
-            for (int i = 0; i < 3; i++) {
-                tempAbsValue = fabs(alignNormalVec[i]);
-                if (tempAbsValue > largestAbsValue) {
-                    largestAbsValue = tempAbsValue;
-                    largestValue = alignNormalVec[i];
-                    largestIdx = i;
-                }
-            }
-            for (int i = 0; i < 3; i++) {
-                if (i == largestIdx) {
-                    alignNormalVec[i] = NumberFuncs::SignOf(largestValue);
-                }
-                else {
-                    alignNormalVec[i] = 0;
-                }
-            }
-
-            alignUpVec     = cam.GetInvViewTransform() * Camera::DEFAULT_UP_VEC;
+        case ESP::ScreenPlaneAligned:
+        case ESP::ScreenPlaneAlignedGameWorldUpVec: {
+            alignNormalVec.CondenseAndNormalizeToLargestComponent();
+            alignUpVec     = modelMat * cam.GetInvViewTransform() * Camera::DEFAULT_UP_VEC;
             alignRightVec  = Vector3D::cross(alignUpVec, alignNormalVec);
             if (alignRightVec == ZERO_VEC3D) {
-                alignUpVec = cam.GetInvViewTransform() * -Camera::DEFAULT_LEFT_VEC;
+                alignUpVec = modelMat * cam.GetInvViewTransform() * -Camera::DEFAULT_LEFT_VEC;
                 alignRightVec  = Vector3D::cross(alignUpVec, alignNormalVec);
             }
             alignUpVec = Vector3D::cross(alignNormalVec, alignRightVec);
@@ -226,10 +214,12 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
         }
 
         case ESP::NoAlignment:
-            break;
-
         default:
-            break;
+            result.SetRow(0, alignRightVec[0], alignUpVec[0], alignNormalVec[0], localPos[0]);
+            result.SetRow(1, alignRightVec[1], alignUpVec[1], alignNormalVec[1], localPos[1]);
+            result.SetRow(2, alignRightVec[2], alignUpVec[2], alignNormalVec[2], localPos[2]);
+            result.SetRow(3, 0, 0, 0, 1);
+            return;
     }
 
     // Multiply the particle's alignment basis by the world/model inverse transpose matrix

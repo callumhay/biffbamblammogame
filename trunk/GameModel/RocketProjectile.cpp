@@ -74,22 +74,31 @@ BoundingLines RocketProjectile::BuildBoundingLines() const {
 		return BoundingLines();
 	}
 
-    static const float HALF_WIDTH_COEFF = 0.75;
-	const Vector2D& UP_DIR      = this->GetVelocityDirection();
-	const Vector2D& RIGHT_DIR	= this->GetRightVectorDirection();
+    static const float HALF_WIDTH_COEFF = 0.75f;
+    static const float HALF_HEIGHT_FRACT_TO_HAT = 0.5f;
+    static const float HEIGHT_COEFF = 0.9f;
 
-	Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + HALF_WIDTH_COEFF*this->GetHalfWidth()*RIGHT_DIR;
-	Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;
+	const Vector2D& UP_DIR    = this->GetVelocityDirection();
+	const Vector2D& RIGHT_DIR = this->GetRightVectorDirection();
 
-	Point2D topLeft    = this->GetPosition() + this->GetHalfHeight()*UP_DIR - HALF_WIDTH_COEFF*this->GetHalfWidth()*RIGHT_DIR;
-	Point2D bottomLeft = topLeft - this->GetHeight()*UP_DIR;
+    Point2D topCenter    = this->GetPosition() + this->GetHalfHeight()*UP_DIR;
+    Point2D bottomCenter = topCenter - HEIGHT_COEFF*this->GetHeight()*UP_DIR;
+
+	Point2D topRight = this->GetPosition() + HALF_HEIGHT_FRACT_TO_HAT*this->GetHalfHeight()*UP_DIR + 
+        HALF_WIDTH_COEFF*this->GetHalfWidth()*RIGHT_DIR;
+	Point2D bottomRight = topRight - 0.75f*HEIGHT_COEFF*this->GetHeight()*UP_DIR;
+
+	Point2D topLeft = this->GetPosition() + HALF_HEIGHT_FRACT_TO_HAT*this->GetHalfHeight()*UP_DIR - 
+        HALF_WIDTH_COEFF*this->GetHalfWidth()*RIGHT_DIR;
+	Point2D bottomLeft = topLeft - 0.75f*HEIGHT_COEFF*this->GetHeight()*UP_DIR;
 
 	std::vector<Collision::LineSeg2D> sideBounds;
-	sideBounds.reserve(2);
+	sideBounds.reserve(3);
 	sideBounds.push_back(Collision::LineSeg2D(topLeft, bottomLeft));
+    sideBounds.push_back(Collision::LineSeg2D(topCenter, bottomCenter));
 	sideBounds.push_back(Collision::LineSeg2D(topRight, bottomRight));
 	std::vector<Vector2D> normBounds;
-	normBounds.resize(2);
+	normBounds.resize(3);
 
 	return BoundingLines(sideBounds, normBounds);
 }

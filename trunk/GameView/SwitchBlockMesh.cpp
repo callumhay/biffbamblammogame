@@ -239,7 +239,7 @@ void SwitchBlockMesh::InitEmitters() {
 	this->onEmitter->SetParticleSize(ESPInterval(1.5 * LevelPiece::HALF_PIECE_WIDTH), ESPInterval(1.5 * LevelPiece::HALF_PIECE_HEIGHT));
 	this->onEmitter->SetEmitAngleInDegrees(0);
 	this->onEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->onEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->onEmitter->SetParticleAlignment(ESP::GlobalAxisAlignedX);
 	this->onEmitter->SetEmitPosition(Point3D(0,0,0));
 	this->onEmitter->SetParticleColour(ESPInterval(0), ESPInterval(1), ESPInterval(0), ESPInterval(1.0f));
 	this->onEmitter->AddEffector(&this->haloExpandPulse);
@@ -258,7 +258,7 @@ void SwitchBlockMesh::InitEmitters() {
     this->idlePulseEmitter->SetParticleSize(ESPInterval(1.2f*LevelPiece::PIECE_WIDTH), ESPInterval(1.2f*LevelPiece::PIECE_HEIGHT));
     this->idlePulseEmitter->SetEmitAngleInDegrees(0);
     this->idlePulseEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    this->idlePulseEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->idlePulseEmitter->SetParticleAlignment(ESP::GlobalAxisAlignedX);
     this->idlePulseEmitter->SetEmitPosition(Point3D(0, 0, 0));
     this->idlePulseEmitter->SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.75f));
     this->idlePulseEmitter->AddEffector(&this->pulser);

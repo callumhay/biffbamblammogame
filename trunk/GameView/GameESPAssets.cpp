@@ -1229,7 +1229,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetEmitAngleInDegrees(10);
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	bounceEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
+	bounceEffect->SetParticleAlignment(ESP::ScreenPlaneAlignedGameWorldUpVec);
 	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
 	
 	Vector2D ballVelocity = ball.GetVelocity();
@@ -6667,9 +6667,10 @@ ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle,
     itemNameEffect->SetEmitDirection(emitDir);
     itemNameEffect->SetParticleLife(ESPInterval(2.4f));
     itemNameEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
-    itemNameEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
+    itemNameEffect->SetParticleAlignment(ESP::GlobalAxisAlignedX);
     itemNameEffect->SetEmitPosition(2.75f * paddle.GetHalfHeight() * emitDir);
     itemNameEffect->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(1));
+    itemNameEffect->SetParticleRotation(paddle.GetIsPaddleFlipped() ? 180 : 0);
     itemNameEffect->AddEffector(&this->particleFader);
     itemNameEffect->AddEffector(&this->particleSmallGrowth);
 
@@ -6793,7 +6794,8 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		absorbGlowSparks->AddEffector(&this->particleFader);
 		absorbGlowSparks->AddEffector(&this->particleMediumShrink);
 		absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, 
-            PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
+            PersistentTextureManager::GetInstance()->GetLoadedTexture(
+            GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 		
         ESPPointEmitter* itemNameEffect = NULL;
         if (item.GetItemType() != GameItem::RandomItem) {
@@ -8251,8 +8253,8 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
  */
 void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 
-    glPushMatrix();
-    glRotatef(paddle.GetZRotation(), 0, 0, 1);
+    static Matrix4x4 paddleRotMat;
+    Matrix4x4::rotationZMatrix(paddle.GetZRotation(), paddleRotMat);
 
     // Go through all the particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
@@ -8272,12 +8274,10 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
             if (paddle.GetAlpha() < 1.0f) {
                 curr->SetAliveParticleAlphaMax(paddle.GetAlpha());
             }
-            curr->Draw(camera);
+            curr->DrawWithAddedTransform(camera, paddleRotMat);
             ++iter;
 		}
 	}
-
-    glPopMatrix();
 }
 
 void GameESPAssets::TickButDontDrawBackgroundPaddleEffects(double dT) {

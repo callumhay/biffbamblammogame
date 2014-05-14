@@ -33,8 +33,8 @@ S E E E E E E E E E S
 STARS:
 8000
 16000
-21000
-26000
+22000
+28000
 30000
 
 PaddleGrow 2
@@ -43,8 +43,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 0
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
@@ -67,7 +67,7 @@ IceBlasterPaddle 2
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 0

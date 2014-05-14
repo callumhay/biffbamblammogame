@@ -177,7 +177,7 @@ void GameBall::SetBallCamera(GameBall* ballCamBall, const GameLevel* currLevel) 
         }
 
         // EVENT: Ball camera is now set
-        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*ballCamBall, true, canShootOutOfCannon);
+        GameEventManager::Instance()->ActionBallCameraSetOrUnset(ballCamBall, true, canShootOutOfCannon);
     }
     else if (GameBall::currBallCamBall != NULL && ballCamBall == NULL) {
         const GameBall* prevBallCam = GameBall::currBallCamBall;
@@ -190,11 +190,16 @@ void GameBall::SetBallCamera(GameBall* ballCamBall, const GameLevel* currLevel) 
         }
 
         // EVENT: Ball camera is now unset
-        GameEventManager::Instance()->ActionBallCameraSetOrUnset(*prevBallCam, false, true);
+        GameEventManager::Instance()->ActionBallCameraSetOrUnset(prevBallCam, false, true);
     }
     else {
         // No events, just set the camera ball and leave
         GameBall::currBallCamBall = ballCamBall; 
+        if (ballCamBall == NULL) {
+            // Special case: unset ball camera with NULL since the previous ball camera either didn't exist or
+            // the ball that had the camera in it is now dead.
+            GameEventManager::Instance()->ActionBallCameraSetOrUnset(NULL, false, false);
+        }
     }
 }
 

@@ -112,7 +112,9 @@ public:
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawFirstPassLevelPieces(double dT, const GameModel& gameModel, const Camera& camera);
+    void DrawFirstPassNoOutlinesLevelPieces(double dT, const Camera& camera);
     void DrawSecondPassLevelPieces(double dT, const GameModel& gameModel, const Camera& camera);
+
     void DrawLevelPiecesPostEffects(double dT, const Camera& camera);
     void DrawNoBloomLevelPieces(double dT, const Camera& camera);
     void DrawBoss(double dT, const Camera& camera, const GameModel& gameModel);

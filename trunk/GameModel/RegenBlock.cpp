@@ -329,7 +329,8 @@ bool RegenBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedSta
 
 		// Fire will continue to diminish the piece... 
 		// NOTE: This can destroy this piece resulting in a new level piece to replace it (i.e., an empty piece)
-        resultingPiece = this->HurtPiece(dT * GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel,
+        // NOTE: We do 25% of the normal fire damage because we want the block to stay on fire for as long as a red block would
+        resultingPiece = this->HurtPiece(dT * (REGEN_LIFE_POINTS_PER_SECOND + 0.25 * GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND), gameModel,
             LevelPiece::FireDestruction);
 
 		// Technically if the above destroys the block then the block automatically loses all of its status

@@ -608,8 +608,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
         // No averaging of position or colour and we ignore anything concerning "visible ball counts", 
         // we want the ball camera to have good illumination at all times or it will drive players
         // even more insane than it already does
-        assert(avgBallPosition == camBall->GetCenterPosition());
-
+        avgBallPosition  = camBall->GetCenterPosition();
         avgBallPosition += Vector3D(worldT[0], worldT[1], 0.0f);
         avgBallPosition  = gameModel.GetTransformInfo()->GetGameXYZTransform() * avgBallPosition;
         
@@ -895,6 +894,10 @@ void GameAssets::DrawFirstPassLevelPieces(double dT, const GameModel& gameModel,
 
     this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
     this->GetCurrentLevelMesh()->DrawFirstPassPieces(worldTransform, dT, camera, &gameModel, fgKeyLight, fgFillLight, ballLight);
+}
+
+void GameAssets::DrawFirstPassNoOutlinesLevelPieces(double dT, const Camera& camera) {
+    this->GetCurrentLevelMesh()->DrawFirstPassNoOutlinesLevelPieces(dT, camera);
 }
 
 void GameAssets::DrawSecondPassLevelPieces(double dT, const GameModel& gameModel, const Camera& camera) {

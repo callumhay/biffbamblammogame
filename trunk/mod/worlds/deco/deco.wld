@@ -48,7 +48,7 @@ resources/worlds/levels/medium/deflection_redirection.lvl
 resources/worlds/levels/hard/safety_third.lvl
 
 # Tesla + Prisms/Ice/Lasers
-resources/worlds/levels/hard/lighting_the_lightning.lvl : 280
+resources/worlds/levels/hard/lighting_the_lightning.lvl : 275
 
 # Shield + rocket to redirect to other cannons and destroy turrets
 resources/worlds/levels/hard/upward_not_forward_and_always_twirling.lvl
@@ -70,4 +70,4 @@ resources/worlds/levels/medium/a_tale_of_two_projectiles.lvl
 resources/worlds/levels/hard/shooting_gallery.lvl
 
 # BOSS: Electrocutioner
-resources/worlds/levels/bosses/electrocutioner.lvl : 310
+resources/worlds/levels/bosses/electrocutioner.lvl : 305

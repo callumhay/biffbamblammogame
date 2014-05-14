@@ -45,7 +45,7 @@ public:
     RocketProjectile(const RocketProjectile& copy);
 	virtual ~RocketProjectile();
 
-    BoundingLines BuildBoundingLines() const;
+    virtual BoundingLines BuildBoundingLines() const;
 
     bool IsRocket() const { return true; }
     bool IsMine() const { return false; }

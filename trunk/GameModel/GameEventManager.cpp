@@ -602,7 +602,7 @@ void GameEventManager::ActionBoostFailedDueToNoBallsAvailable() {
     }
 }
 
-void GameEventManager::ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet, bool canShootWithoutObstruction) {
+void GameEventManager::ActionBallCameraSetOrUnset(const GameBall* ball, bool isSet, bool canShootWithoutObstruction) {
     std::list<GameEvents*>::iterator listenerIter = this->eventListeners.begin();
     for (; listenerIter != this->eventListeners.end(); ++listenerIter) {
         (*listenerIter)->BallCameraSetOrUnsetEvent(ball, isSet, canShootWithoutObstruction);

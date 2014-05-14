@@ -57,8 +57,9 @@ public:
 	ESPParticle();
 	virtual ~ESPParticle();
 
-	void GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
-        const Camera& cam, const ESP::ESPAlignment alignment, const Point3D& localPos, Matrix4x4& result);
+	void GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, 
+        const Matrix4x4& modelInvTMat, const Camera& cam, const ESP::ESPAlignment alignment, 
+        const Point3D& localPos, Matrix4x4& result);
 
 	/**
 	 * Is this particle dead or not.
@@ -70,7 +71,8 @@ public:
 
 	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	virtual void Tick(const double dT);
-	virtual void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, const Camera& camera, const ESP::ESPAlignment& alignment);
+	virtual void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, const Matrix4x4& modelInvTMat, 
+        const Camera& camera, const ESP::ESPAlignment& alignment);
 	virtual void Kill() {
 		this->currLifeElapsed = this->totalLifespan;
 	}

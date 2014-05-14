@@ -29,6 +29,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <Eigen/Core>
+#include <Eigen/LU>
+
 #include "ESPEmitter.h"
 #include "ESPShaderParticle.h"
 #include "ESPOnomataParticle.h"
@@ -334,8 +337,47 @@ void ESPEmitter::Tick(const double dT) {
 	}
 }
 
-#include <Eigen/Core>
-#include <Eigen/LU>
+void ESPEmitter::DrawWithAddedTransform(const Camera& camera, const Matrix4x4& t) {
+    // Setup OpenGL for drawing the particles in this emitter...
+    glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 	
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
+    glPolygonMode(GL_FRONT, GL_FILL);
+
+    // Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
+    if (this->particleTexture != NULL) {
+        this->particleTexture->BindTexture();
+    }
+
+    float tempMVXfVals[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
+
+    Matrix4x4 modelMat = camera.GetInvViewTransform() * Matrix4x4(tempMVXfVals);
+
+    Eigen::Matrix4f modelInvT(modelMat.begin());
+    modelInvT = modelInvT.inverse().eval();
+    Matrix4x4 modelInvMat(modelInvT.data());
+
+    modelInvT.transposeInPlace();
+    Matrix4x4 modelInvTMat(modelInvT.data());
+
+    glPushMatrix();
+    glMultMatrixf(t.begin());
+
+    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+        ESPParticle* currParticle = *iter;
+        currParticle->Draw(modelMat, modelInvMat, modelInvTMat, camera, this->particleAlignment);
+    }
+
+    glPopMatrix();
+
+    glPopAttrib();
+}
 
 /**
  * Draw this emitter.
@@ -363,14 +405,15 @@ void ESPEmitter::Draw(const Camera& camera) {
     Matrix4x4 modelMat = camera.GetInvViewTransform() * Matrix4x4(tempMVXfVals);
     
     Eigen::Matrix4f modelInvT(modelMat.begin());
-    modelInvT.inverse();
-    modelInvT.transpose();
+    modelInvT = modelInvT.inverse().eval();
+    Matrix4x4 modelInvMat(modelInvT.data());
 
+    modelInvT.transposeInPlace();
     Matrix4x4 modelInvTMat(modelInvT.data());
 
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
-		currParticle->Draw(modelMat, modelInvTMat, camera, this->particleAlignment);
+		currParticle->Draw(modelMat, modelInvMat, modelInvTMat, camera, this->particleAlignment);
 	}
 
 	glPopAttrib();
@@ -398,14 +441,15 @@ void ESPEmitter::DrawWithDepth(const Camera& camera) {
     Matrix4x4 modelMat = camera.GetInvViewTransform() * Matrix4x4(tempMVXfVals);
 
     Eigen::Matrix4f modelInvT(modelMat.begin());
-    modelInvT.inverse();
-    modelInvT.transpose();
+    modelInvT = modelInvT.inverse().eval();
+    Matrix4x4 modelInvMat(modelInvT.data());
 
+    modelInvT.transposeInPlace();
     Matrix4x4 modelInvTMat(modelInvT.data());
 
     for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
         ESPParticle* currParticle = *iter;
-        currParticle->Draw(modelMat, modelInvTMat, camera, this->particleAlignment);
+        currParticle->Draw(modelMat, modelInvMat, modelInvTMat, camera, this->particleAlignment);
     }
 
     glPopAttrib();

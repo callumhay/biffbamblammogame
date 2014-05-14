@@ -1,7 +1,7 @@
 Prismatic Pragmatism
 15 25
 S S S S S S S S S S S S T(P,ul) E T(P,ur) 
-S T(P,ul) O E E O R P O E T(P,ur) S E D(LaserBulletPaddle,LaserBeamPaddle){0} E 
+S T(P,ul) O E E O R P O E T(P,ur) S E D(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle){0} E 
 S R O G G O O O O G G S E E E 
 S T(P,ul) O G G G G G G G G S E E E 
 S O O G G G G G G G G S E E E 
@@ -39,8 +39,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 0
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
@@ -63,9 +63,9 @@ IceBlasterPaddle 2
 MineLauncherPaddle 0
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 0
 
 PADDLESTARTXPOS: 13.75

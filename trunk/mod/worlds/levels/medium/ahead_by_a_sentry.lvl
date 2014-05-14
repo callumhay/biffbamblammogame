@@ -1,37 +1,42 @@
 Ahead by a Sentry
-11 25
-S S S S S S S S S S S 
-S E E E E E Y G E E S 
-S K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E H E E Y G E E S 
-S E E E E E Y G E E S 
-S Y Y Y Y Y Y G E E S 
-S R R R R O O O G G S 
-S E E G Y E E E E E S 
-S E E G Y E E H E K(ShieldPaddle,ShieldPaddle,ShieldPaddle) S 
-S E E G Y E E E E E S 
-S E E G Y Y Y Y Y Y S 
-S G G O O O R R R R S 
-S E E E E E Y G E E S 
-S K(MultiBall3,MultiBall3,MultiBall3) E H E E Y G E E S 
-S E E E E E Y G E E S 
-S Y Y Y Y Y Y G E E S 
-S R R R R R R R E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
+13 30
+S S S S S S S S S S S S S 
+S E E G G E E E E E E E S 
+S E E G G E E E E H E K(UberBall,UberBall,UberBall) S 
+S E E G G E E E E E E E S 
+S E E G G G G G G G G G S 
+S G G O O Y Y Y Y Y Y Y S 
+S E E E E E E E G G E E S 
+S K(MineLauncherPaddle,MineLauncherPaddle,MineLauncherPaddle) E H E E E E G G E E S 
+S E E E E E E E G G E E S 
+S G G G G G G G G G E E S 
+S Y Y Y Y Y Y Y O O G G S 
+S E E G G E E E E E E E S 
+S E E G G E E E E H E K(ShieldPaddle,ShieldPaddle,ShieldPaddle) S 
+S E E G G E E E E E E E S 
+S E E G G Y Y Y Y Y Y Y S 
+S G G R R O O O O O O O S 
+S E E E E E E E G G E E S 
+S K(MultiBall3,MultiBall3,MultiBall3) E H E E E E G G E E S 
+S E E E E E E E G G E E S 
+S Y Y Y Y Y Y Y G G E E S 
+S O O O O O O O R R E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
 
 STARS:
-5000
-8000
-11000
-17500
-25500
+6600
+10500
+15000
+24000
+34000
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -39,8 +44,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 2
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
@@ -63,7 +68,7 @@ IceBlasterPaddle 0
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 0

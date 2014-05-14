@@ -286,12 +286,14 @@ bool MineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
             return true;
         }
     }
-    else {
+    else if (!this->GetIsAttachedToPaddle()) {
+
         // The mine is armed and explodes based on other active entity's proximity to it...
         // Check to see if any moving object is within the proximity of the mine...
         Collision::Circle2D proximityBound(this->GetPosition(), this->GetProximityRadius());
 
         // Check the ball(s)
+
         const std::list<GameBall*>& balls = model.GetGameBalls();
         for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
             const GameBall* currBall = *iter;
@@ -395,7 +397,17 @@ void MineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
 
     // If the paddle has its shield activated then we don't land the mine
     if (!paddle->HasPaddleType(PlayerPaddle::ShieldPaddle)) {
-        this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
+
+        // Land the mine so that it's sitting right on the paddle...
+        Point2D collisionPt;
+        Vector2D collisionNormal;
+        bool success = paddle->GetBounds().ClosestPointAndNormal(this->GetPosition(), this->GetHalfWidth(), collisionPt, collisionNormal);
+        if (!success) {
+            collisionPt = this->GetPosition();
+            collisionNormal = Vector2D(0,0);
+        }
+        
+        this->Land(collisionPt + this->GetHalfWidth() * collisionNormal);
         paddle->AttachProjectile(this);
         this->attachedToPaddle = paddle;
     }

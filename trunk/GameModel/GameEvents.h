@@ -601,7 +601,7 @@ public:
      *            isSet - true if ball camera mode was just fully activated, false if not.
      *            canShootWithoutObstruction - Whether or not the player can shoot the ball from the cannon without there being an obstruction.
      */
-    virtual void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet, 
+    virtual void BallCameraSetOrUnsetEvent(const GameBall* ball, bool isSet, 
                                            bool canShootWithoutObstruction) {
         UNUSED_PARAMETER(ball);
         UNUSED_PARAMETER(isSet);

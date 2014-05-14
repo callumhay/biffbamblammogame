@@ -650,8 +650,9 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 
                     // Check whether the one ball is close to the edge of the screen/level...
                     if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType &&
-                        gameModel.IsOutOfPaddedLevelBounds(ball->GetCenterPosition2D(), LevelPiece::PIECE_WIDTH/2.0f, 3.0f*PlayerPaddle::PADDLE_HEIGHT_TOTAL, 
-                        LevelPiece::PIECE_WIDTH/2.0f, LevelPiece::PIECE_HEIGHT)) {
+                        gameModel.IsOutOfPaddedLevelBounds(ball->GetCenterPosition2D(), 
+                        LevelPiece::PIECE_WIDTH, 3.0f*PlayerPaddle::PADDLE_HEIGHT_TOTAL, 
+                        LevelPiece::PIECE_WIDTH, 1.5f*LevelPiece::PIECE_HEIGHT)) {
                         
                         const GameLevel* currLevel = gameModel.GetCurrentLevel();
                         assert(currLevel != NULL);
@@ -701,6 +702,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
                         }
                         else {
                             this->currCamOrientation = this->defaultCamOrientation;
+                            this->storedOriBeforeBulletTimeCam = this->defaultCamOrientation;
                         }
 
                         this->followBallTimeCounter = 0.0;
@@ -1514,6 +1516,8 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
     else {
         this->bulletTimeCamAnimation.SetLerp(BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS, this->storedOriBeforeBulletTimeCam);
         this->bulletTimeCamAnimation.SetRepeat(false);
+        this->followBallTimeCounter = 0.0;
+        this->unfollowBallTimeCounter = 0.0;
     }
     bulletTimeAnim.hasStarted = true;
 }

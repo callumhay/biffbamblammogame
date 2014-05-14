@@ -275,6 +275,14 @@ public:
             0.0f, 0.0f, 0.0f, 1.0f);
     }
 
+    static void rotationZMatrix(float angleInDegs, Matrix4x4& r) {
+        float radAngle = Trig::degreesToRadians(angleInDegs);
+        r.SetRow(0, cos(radAngle), -sin(radAngle), 0, 0);
+        r.SetRow(1, sin(radAngle), cos(radAngle), 0, 0);
+        r.SetRow(2, 0, 0, 1, 0);
+        r.SetRow(3, 0, 0, 0, 1);
+    }
+
     static Matrix4x4 rotationZMatrix(float angleInDegs) {
         float radAngle = Trig::degreesToRadians(angleInDegs);
         Vector4D row1 = Vector4D(cos(radAngle), -sin(radAngle), 0, 0);

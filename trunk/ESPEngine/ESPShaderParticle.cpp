@@ -45,8 +45,9 @@ ESPShaderParticle::~ESPShaderParticle() {
 /**
  * Draw this particle as it is currently.
  */
-void ESPShaderParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
-                             const Camera& camera, const ESP::ESPAlignment& alignment) {
+void ESPShaderParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, 
+                             const Matrix4x4& modelInvTMat, const Camera& camera, 
+                             const ESP::ESPAlignment& alignment) {
 
 	// Don't draw if dead...
 	if (this->IsDead()) {
@@ -57,7 +58,7 @@ void ESPShaderParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelIn
 	glPushMatrix();
 
     Matrix4x4 alignmentMat;
-    this->GetPersonalAlignmentTransform(modelMat, modelInvTMat, camera, alignment, this->position, alignmentMat);
+    this->GetPersonalAlignmentTransform(modelMat, modelMatInv, modelInvTMat, camera, alignment, this->position, alignmentMat);
 	glMultMatrixf(alignmentMat.begin());
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);

@@ -296,6 +296,9 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(const Vector2D& negHalfLevelD
     assets->DrawMiscEffects(*gameModel);
 
     glPopMatrix();
+
+    assets->DrawFirstPassNoOutlinesLevelPieces(dT, camera);
+
     glPopMatrix();
 
 	FBObj::UnbindFBObj();

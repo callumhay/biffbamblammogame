@@ -86,9 +86,13 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
                 // Look up the level we're dealing with based on the read name
                 GameLevel* currLevel = currWorld->GetLevelByName(nameStr);
                 if (currLevel == NULL) {
-                    
-                    levelIdx = std::max<int>(0, levelIdx-1);
-                    continue;
+                    if (nameStr.empty()) {
+                        levelIdx = std::max<int>(0, levelIdx-1);
+                        continue;
+                    }
+                    else if (numLevels == static_cast<int>(currWorld->GetNumLevels())) {
+                        currLevel = currWorld->GetLevelByIndex(levelIdx);
+                    }
                 }
 
                 // Read the high-score for the level and set it

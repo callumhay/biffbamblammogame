@@ -69,8 +69,9 @@ void ESPAnimatedSpriteParticle::Tick(const double dT) {
     }
 }
 
-void ESPAnimatedSpriteParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
-                                     const Camera& camera, const ESP::ESPAlignment& alignment) {
+void ESPAnimatedSpriteParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, 
+                                     const Matrix4x4& modelInvTMat, const Camera& camera, 
+                                     const ESP::ESPAlignment& alignment) {
 
 	// Don't draw if dead...
 	if (this->IsDead() || this->currSpriteIdx >= this->numSprites) {
@@ -81,7 +82,7 @@ void ESPAnimatedSpriteParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4&
 	glPushMatrix();
 
     Matrix4x4 alignmentMat;
-    this->GetPersonalAlignmentTransform(modelMat, modelInvTMat, camera, alignment, this->position, alignmentMat);
+    this->GetPersonalAlignmentTransform(modelMat, modelMatInv, modelInvTMat, camera, alignment, this->position, alignmentMat);
 
 	glMultMatrixf(alignmentMat.begin());
 	glRotatef(this->rotation, 0, 0, -1);

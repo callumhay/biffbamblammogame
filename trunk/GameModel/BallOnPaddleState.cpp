@@ -87,8 +87,7 @@ void BallOnPaddleState::UpdateBallPosition() {
 	GameBall* ball       = this->GetGameBall();
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 
-	Vector2D disp = Vector2D(0.0f, ball->GetBounds().Radius() + paddle->GetHalfHeight() + 0.1f);
-	Point2D ballLoc = paddle->GetCenterPosition() + disp;
+	Point2D ballLoc = paddle->GetCenterPosition() + (ball->GetBounds().Radius() + paddle->GetHalfHeight() + 0.05f) * paddle->GetUpVector();
 	ball->SetCenterPosition(ballLoc);
 }
 
