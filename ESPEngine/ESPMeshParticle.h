@@ -41,7 +41,7 @@ public:
     ESPMeshParticle(Mesh* mesh);
     ~ESPMeshParticle();
 
-    void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+    void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, const Matrix4x4& modelInvTMat, 
         const Camera& camera, const ESP::ESPAlignment& alignment);
 
 private:

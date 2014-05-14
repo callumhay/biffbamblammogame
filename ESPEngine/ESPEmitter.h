@@ -146,6 +146,7 @@ public:
 	void SimulateTicking(double time);
 
 	void Tick(double dT);
+    void DrawWithAddedTransform(const Camera& camera, const Matrix4x4& t);
 	void Draw(const Camera& camera);
     void DrawWithDepth(const Camera& camera);
 

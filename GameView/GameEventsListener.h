@@ -131,7 +131,7 @@ public:
     void BallBoostLostEvent(bool allBoostsLost);
     void BoostFailedDueToNoBallsAvailableEvent();
 
-    void BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet, bool canShootWithoutObstruction);
+    void BallCameraSetOrUnsetEvent(const GameBall* ball, bool isSet, bool canShootWithoutObstruction);
     void BallCameraCannonRotationEvent(const GameBall& ball, const CannonBlock& cannon, bool canShootWithoutObstruction);
     void CantFireBallCamFromCannonEvent();
 

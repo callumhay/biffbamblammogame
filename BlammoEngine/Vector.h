@@ -282,6 +282,30 @@ public:
         return static_cast<float>(sqrt(length2()));
     }
 
+    void CondenseAndNormalizeToLargestComponent() {
+        int largestIdx = 0;
+        float largestAbsValue = 0;
+        float largestValue = 0;
+        float tempAbsValue;
+
+        for (int i = 0; i < 3; i++) {
+            tempAbsValue = fabs(this->values[i]);
+            if (tempAbsValue > largestAbsValue) {
+                largestAbsValue = tempAbsValue;
+                largestValue = this->values[i];
+                largestIdx = i;
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            if (i == largestIdx) {
+                this->values[i] = NumberFuncs::SignOf(largestValue);
+            }
+            else {
+                this->values[i] = 0;
+            }
+        }
+    }
+
     void Abs() {
         this->values[0] = fabs(this->values[0]);
         this->values[1] = fabs(this->values[1]);

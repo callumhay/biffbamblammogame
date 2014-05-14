@@ -396,6 +396,9 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
             hasInside |= this->onInside[collisionLineIdxs[i]];
         }
 
+        bool useCombinedNormal = false;
+        Vector2D combinedNormal(0,0);
+
         assert(collisionLineIdxs.size() == closestPts.size());
 
         if (hasInside) {
@@ -428,21 +431,51 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
 
                 int lineIdx = collisionLineIdxs[i];
                 const Point2D& closestPt = closestPts[i];
-                float sqrDist = Point2D::SqDistance(cPointOfCollision, closestPt);
+                float sqrDist = Point2D::SqDistance(cPointOfCollision, closestPt);                
 
                 assert(!this->onInside[lineIdx]);
                 if (sqrDist < smallestOutsideDist) {
 
                     if (outsideIdx >= 0 && fabs(sqrDist - smallestOutsideDist) <= EPSILON) {
-                        // Really close call... choose the normal that is closest to the opposite of the ball's velocity
+
+                        // Really close call... choose the normal in the appropriate half-space where the ball resides
+                        
+                        // Do a half-space test for each:
                         const Vector2D& currNormal  = this->normals[lineIdx];
+                        const Collision::LineSeg2D& currLine = this->lines[lineIdx];
                         const Vector2D& otherNormal = this->normals[outsideIdx];
+                        const Collision::LineSeg2D& otherLine = this->lines[outsideIdx];
+                        
+                        Vector2D currLineToBall  = circle.Center() - currLine.P1();
+                        if (currLineToBall.IsZero()) {
+                            currLineToBall = circle.Center() - currLine.P2();
+                        }
+                        Vector2D otherLineToBall = circle.Center() - otherLine.P1();
+                        if (otherLineToBall.IsZero()) {
+                            otherLineToBall = circle.Center() - otherLine.P2();
+                        }
 
-                        if (acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(nVelocity, currNormal)))) >
-                            acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(nVelocity, otherNormal))))) {
+                        float currLineHalfSpaceDot  = Vector2D::Dot(currNormal, currLineToBall);
+                        float otherLineHalfSpaceDot = Vector2D::Dot(otherNormal, otherLineToBall);
+                        
+                        if (currLineHalfSpaceDot > EPSILON) {
+                            if (otherLineHalfSpaceDot > EPSILON) {
+                                // We're in both half spaces... we should combine the normals...
+                                useCombinedNormal = true;
+                                combinedNormal = currNormal + otherNormal;
 
-                            smallestOutsideDist = sqrDist;
-                            outsideIdx = lineIdx;
+                                // To pick the proper line, choose the one that is closest to the opposite of the ball's velocity
+                                if (acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(nVelocity, currNormal)))) >
+                                    acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(nVelocity, otherNormal))))) {
+
+                                    smallestOutsideDist = sqrDist;
+                                    outsideIdx = lineIdx;
+                                }
+                            }
+                            else {
+                                smallestOutsideDist = sqrDist;
+                                outsideIdx = lineIdx;
+                            }
                         }
                     }
                     else {
@@ -463,6 +496,10 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& circle, const 
         else if (insideIdx == -1) {
             assert(outsideIdx != -1);
             DO_ASSIGNMENT(outsideIdx);
+            if (useCombinedNormal) {
+                combinedNormal.Normalize();
+                n = combinedNormal;
+            }
         }
         else {
             // There is an outside and an inside found in the tie... 
@@ -575,6 +612,36 @@ Point2D BoundingLines::ClosestPoint(const Point2D& pt) const {
 	}
 
 	return closestPt;
+}
+
+bool BoundingLines::ClosestPointAndNormal(const Point2D& pt, float toleranceRadius,
+                                          Point2D& closestPt, Vector2D& closestNormal) const {
+
+    std::vector<int> collisionIndices = this->ClosestCollisionIndices(pt, toleranceRadius);
+    if (collisionIndices.empty()) {
+        return false;
+    }
+
+    closestNormal = this->normals[collisionIndices[0]];
+    closestPt = Collision::ClosestPoint(pt, this->lines[collisionIndices[0]]);
+    float closestSqDist = Point2D::SqDistance(closestPt, pt);
+
+    for (int i = 1; i < static_cast<int>(collisionIndices.size()); i++) {
+        int currIdx = collisionIndices[i];
+        Point2D tempClosestPt = Collision::ClosestPoint(pt, this->lines[currIdx]);
+        float tempClosestSqDist	= Point2D::SqDistance(tempClosestPt, pt);
+
+        if (tempClosestSqDist <= closestSqDist) {
+            closestSqDist = tempClosestSqDist;
+            closestPt = tempClosestPt;
+            closestNormal += this->normals[currIdx];
+        }
+        
+    }
+
+    assert(!closestNormal.IsZero());
+    closestNormal.Normalize();
+    return true;
 }
 
 /**

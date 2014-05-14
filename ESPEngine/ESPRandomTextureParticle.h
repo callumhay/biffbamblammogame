@@ -40,7 +40,7 @@ public:
 	~ESPRandomTextureParticle();
 
 	void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
-	void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+	void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, const Matrix4x4& modelInvTMat, 
         const Camera& camera, const ESP::ESPAlignment& alignment);
 
 private:

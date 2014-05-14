@@ -63,7 +63,7 @@ teslaCenterFlare(NULL), flareTex(NULL), haloTexture(NULL), haloExpandPulse(1.0f,
     this->shieldEmitter->SetParticleSize(ESPInterval(1.5 * LevelPiece::HALF_PIECE_WIDTH), ESPInterval(1.5 * LevelPiece::HALF_PIECE_HEIGHT));
     this->shieldEmitter->SetEmitAngleInDegrees(0);
     this->shieldEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    this->shieldEmitter->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    this->shieldEmitter->SetParticleAlignment(ESP::GlobalAxisAlignedX);
     this->shieldEmitter->SetEmitPosition(Point3D(0,0,0));
     this->shieldEmitter->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.7f), ESPInterval(1.0f), ESPInterval(0.85f));
     this->shieldEmitter->AddEffector(&this->haloExpandPulse);
@@ -82,7 +82,7 @@ teslaCenterFlare(NULL), flareTex(NULL), haloTexture(NULL), haloExpandPulse(1.0f,
 	this->teslaCenterFlare->SetInitialSpd(ESPInterval(0));
 	this->teslaCenterFlare->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
 	this->teslaCenterFlare->SetEmitAngleInDegrees(0);
-	this->teslaCenterFlare->SetParticleAlignment(ESP::ScreenAligned);
+	this->teslaCenterFlare->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	this->teslaCenterFlare->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->teslaCenterFlare->SetEmitPosition(Point3D(0, 0, 0));
 	this->teslaCenterFlare->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));

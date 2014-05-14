@@ -54,7 +54,7 @@ public:
 
 	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	void Tick(const double dT);
-	virtual void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
+	virtual void Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, const Matrix4x4& modelInvTMat, 
         const Camera& camera, const ESP::ESPAlignment& alignment);
 
 protected:

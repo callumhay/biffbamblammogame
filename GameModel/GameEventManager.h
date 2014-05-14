@@ -162,7 +162,7 @@ public:
     void ActionBallBoostUsed();
     void ActionBoostFailedDueToNoBallsAvailable();
 
-    void ActionBallCameraSetOrUnset(const GameBall& ball, bool isSet, bool canShootWithoutObstruction);
+    void ActionBallCameraSetOrUnset(const GameBall* ball, bool isSet, bool canShootWithoutObstruction);
     void ActionBallCameraCannonRotation(const GameBall& ball, const CannonBlock& cannon, bool canShootWithoutObstruction);
     void ActionCantFireBallCamFromCannon();
 

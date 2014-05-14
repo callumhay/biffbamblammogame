@@ -2010,23 +2010,13 @@ bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
     }
 
     float targetRotAngle = atan2(projectileToPaddleVec[1],  projectileToPaddleVec[0]);
-    if (fmod(fabs(targetRotAngle - currRotAngle), 360.0f) <= 0.01f) {
+    if (fmod(fabs(targetRotAngle - currRotAngle), static_cast<float>(M_PI_MULT2)) <= 0.01f) {
         // If the direction is already pointing at the paddle then exit, no need to do anything else
         return false;
     }
 
-    // Figure out the shortest way to go from the current rotation to the target...
-    float rotSgn;
-    if (targetRotAngle < currRotAngle) {
-        rotSgn = -1;
-    }
-    else {
-        rotSgn = 1;
-    }
-    //if (isFlipped) {
-    //    rotSgn *= -1;
-    //}
-
+    Vector3D crossProd = Vector3D::cross(vectorToAugment, projectileToPaddleVec);
+    float rotSgn = NumberFuncs::SignOf(crossProd[2]);
     float rotationAmt = rotSgn * seconds * degreesChangePerSec;
     Vector2D newVector(vectorToAugment);
     newVector.Rotate(rotationAmt);

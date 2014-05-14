@@ -629,14 +629,6 @@ void LevelMesh::DrawFirstPassPieces(const Vector3D& worldTranslation, double dT,
                                     const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
     // Draw any 'remaining pieces' effects
-    ESPEmitter* emitter = NULL;
-    for (std::map<const LevelPiece*, ESPEmitter*>::iterator iter = this->lastPieceEffects.begin();
-         iter != this->lastPieceEffects.end(); ++iter) {
-
-        emitter = iter->second;
-		emitter->Tick(dT);
-		emitter->Draw(camera);
-    }
 
     // Special case: item drop block has some sparkles that drop from it, draw these before any of the blocks
     // so that they get hidden by any blocks in front of them
@@ -668,6 +660,17 @@ void LevelMesh::DrawFirstPassPieces(const Vector3D& worldTranslation, double dT,
     this->alwaysDropBlock->DrawBloomPass(dT, camera, keyLight, fillLight, ballLight);
     this->oneWayBlock->DrawRegularPass(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
+}
+
+void LevelMesh::DrawFirstPassNoOutlinesLevelPieces(double dT, const Camera& camera) {
+    ESPEmitter* emitter = NULL;
+    for (std::map<const LevelPiece*, ESPEmitter*>::iterator iter = this->lastPieceEffects.begin();
+        iter != this->lastPieceEffects.end(); ++iter) {
+
+        emitter = iter->second;
+        emitter->Tick(dT);
+        emitter->DrawWithDepth(camera);
+    }
 }
 
 void LevelMesh::DrawSecondPassPieces(double dT, const Camera& camera, const GameModel* gameModel, 
@@ -944,7 +947,7 @@ void LevelMesh::LevelIsAlmostComplete() {
         glowPulseEffect->SetParticleSize(ESPInterval(1.2f*LevelPiece::PIECE_WIDTH), ESPInterval(1.2f*LevelPiece::PIECE_HEIGHT));
 	    glowPulseEffect->SetEmitAngleInDegrees(0);
 	    glowPulseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	    glowPulseEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+        glowPulseEffect->SetParticleAlignment(ESP::GlobalAxisAlignedX);
         glowPulseEffect->SetEmitPosition(Point3D(piece->GetCenter() + levelTransform));
 	    glowPulseEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.75f));
 	    glowPulseEffect->AddEffector(&this->remainingPiecePulser);

@@ -1,11 +1,11 @@
 Upward and Always Twirling
 21 28
 S S S S S E E E E E E E E E E E S S S S S 
-S E E E S E E H E E E E E H E E S E E E S 
+S E E E S E E E H E E E H E E E S E E E S 
 S E Q(f) E S E E E E E E E E E E E S E Q(f) E S 
-S E E E S S N N N S S S N N N S S E E E S 
-S N N N S C(150-170) E E E E E E E E E C(190-210) S N N N S 
-E E E E N E E E E E E E E E E E N E E E E 
+S E E E S S S N N N S N N N S S S E E E S 
+S N N N S E E E E E E E E E E E S N N N S 
+E E E E S E C(150-170) E E E E E E E C(190-210) E S E E E E 
 E E E E N E E E E E E E E E E E N E E E E 
 E E C(0) E N G G G G G Y G G G G G N E C(0) E E 
 E E E E N G G G G Y Y Y G G G G N E E E E 
@@ -42,8 +42,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 2
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 0
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
@@ -66,7 +66,7 @@ IceBlasterPaddle 2
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 0

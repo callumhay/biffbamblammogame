@@ -1724,22 +1724,24 @@ void GameEventsListener::BoostFailedDueToNoBallsAvailableEvent() {
     }
 }
 
-void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall& ball, bool isSet,
+void GameEventsListener::BallCameraSetOrUnsetEvent(const GameBall* ball, bool isSet,
                                                    bool canShootWithoutObstruction) {
     GameAssets* assets = this->display->GetAssets();
 
     if (isSet) {
+        assert(ball != NULL);
 
         assets->GetBallCamHUD()->Activate();
         // If the ball camera is set and the ball is inside a cannon then we need to activate that HUD immediately
-        if (ball.IsLoadedInCannonBlock()) {
-            assets->GetBallCamHUD()->ToggleCannonHUD(true, ball.GetCannonBlock());
+        if (ball->IsLoadedInCannonBlock()) {
+            assets->GetBallCamHUD()->ToggleCannonHUD(true, ball->GetCannonBlock());
             assets->GetBallCamHUD()->SetCanShootCannon(canShootWithoutObstruction);
         }
 
         debug_output("EVENT: Ball camera set");
     }
     else {
+        // WARNING: ball may be NULL!!
         assets->GetBallCamHUD()->Deactivate();
         debug_output("EVENT: Ball camera unset");
     }

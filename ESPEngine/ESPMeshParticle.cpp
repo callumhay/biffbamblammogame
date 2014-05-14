@@ -41,10 +41,11 @@ ESPMeshParticle::~ESPMeshParticle() {
     this->mesh = NULL;
 }
 
-void ESPMeshParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
-                           const Camera& camera, const ESP::ESPAlignment& alignment) {
+void ESPMeshParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, 
+                           const Matrix4x4& modelInvTMat, const Camera& camera, const ESP::ESPAlignment& alignment) {
 
     UNUSED_PARAMETER(modelMat);
+    UNUSED_PARAMETER(modelMatInv);
     UNUSED_PARAMETER(modelInvTMat);
     UNUSED_PARAMETER(alignment);
 

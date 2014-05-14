@@ -103,7 +103,8 @@ protected:
 
 	bool ThereAreStillMoreBeamsToFire() const;
 	void SpawnBeam();
-    void UpdateBeams();
+    void UpdateBeamGeometry();
+    void UpdateBeamColours();
 
     void GetBeamInfo(Vector3D& beamVec, Vector3D& orthToBeamVec, float& avgSegLength, float& fractionAvgSegLength) const;
 
@@ -116,22 +117,26 @@ protected:
 inline void ESPPointToPointBeam::SetStartAndEndPoints(const Point3D& startPt, const Point3D& endPt) {
 	this->startPt = startPt;
 	this->endPt   = endPt;
-    this->UpdateBeams();
+    this->UpdateBeamGeometry();
 }
 
 inline void ESPPointToPointBeam::SetStartAndEndPoints(const Point2D& startPt, const Point2D& endPt) {
     this->startPt[0] = startPt[0]; this->startPt[1] = startPt[1]; this->startPt[2] = 0;
     this->endPt[0] = endPt[0]; this->endPt[1] = endPt[1]; this->endPt[2] = 0;
-    this->UpdateBeams();
+    this->UpdateBeamGeometry();
 }
 
 // Sets the general colour of the beam
 inline void ESPPointToPointBeam::SetColour(const ColourRGBA& colour) {
 	this->colour = colour;
+    // Update all the beam colours as well...
+    this->UpdateBeamColours();
 }
 
 inline void ESPPointToPointBeam::SetAlpha(float alpha) {
 	this->colour[3] = alpha;
+    // Update all the beam colours as well...
+    this->UpdateBeamColours();
 }
 
 // Sets the texture (if any) applied to the beam

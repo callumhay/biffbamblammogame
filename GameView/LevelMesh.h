@@ -84,6 +84,7 @@ public:
 	
 	void DrawFirstPassPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, const GameModel* gameModel, 
         const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawFirstPassNoOutlinesLevelPieces(double dT, const Camera& camera);
     void DrawSecondPassPieces(double dT, const Camera& camera, const GameModel* gameModel, 
         const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
     void DrawPiecesPostEffects(double dT, const Camera& camera, const BasicPointLight& keyLight, 

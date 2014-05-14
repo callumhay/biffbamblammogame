@@ -77,6 +77,9 @@ public:
         const Vector2D& lineVelocity) const;
 
 	Point2D ClosestPoint(const Point2D& pt) const;
+    bool ClosestPointAndNormal(const Point2D& pt, float toleranceRadius, 
+        Point2D& closestPt, Vector2D& closestNormal) const;
+
 	bool IsInside(const Point2D& pt) const;
 
 	bool CollisionCheck(const Collision::AABB2D& aabb) const;

@@ -57,8 +57,9 @@ ESPOnomataParticle::~ESPOnomataParticle() {
 /**
  * Draw this particle as it is currently.
  */
-void ESPOnomataParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelInvTMat, 
-                              const Camera& camera, const ESP::ESPAlignment& alignment) {
+void ESPOnomataParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelMatInv, 
+                              const Matrix4x4& modelInvTMat, const Camera& camera, 
+                              const ESP::ESPAlignment& alignment) {
 
 	// Don't draw if dead...
 	if (this->IsDead()) {
@@ -67,7 +68,7 @@ void ESPOnomataParticle::Draw(const Matrix4x4& modelMat, const Matrix4x4& modelI
 
 	// Transform and draw the particle...
     Matrix4x4 alignmentMat;
-	this->GetPersonalAlignmentTransform(modelMat, modelInvTMat, camera, alignment, this->position, alignmentMat);
+	this->GetPersonalAlignmentTransform(modelMat, modelMatInv, modelInvTMat, camera, alignment, this->position, alignmentMat);
 
 	// If set, draw the shadow
 	if (this->dropShadow.isSet) {
