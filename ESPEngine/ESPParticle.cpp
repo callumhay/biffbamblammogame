@@ -189,18 +189,19 @@ void ESPParticle::GetPersonalAlignmentTransform(const Matrix4x4& modelMat, const
             break;
         }
 
-        case ESP::ScreenAlignedGlobalUpVec:
-            alignUpVec     = Vector3D(0, 1, 0);
-            alignRightVec  = Vector3D::cross(alignUpVec, alignNormalVec);
-            if (alignRightVec == ZERO_VEC3D) {
-                alignUpVec    = Vector3D(0, 0, -1);
-                alignRightVec = Vector3D::cross(alignUpVec, alignNormalVec);
-                assert(!alignRightVec.IsZero());
+        case ESP::ScreenAlignedGlobalUpVec: {
+            alignNormalVec.CondenseAndNormalizeToLargestComponent();
+            alignRightVec = modelMatInv * Vector3D(1, 0, 0);
+            alignUpVec    = Vector3D::cross(alignNormalVec, alignRightVec);
+            if (alignUpVec == ZERO_VEC3D) {
+                alignUpVec      = modelMatInv * Vector3D(0, 1, 0);
+                alignRightVec   = Vector3D::cross(alignUpVec, alignNormalVec);
             }
+            alignNormalVec	= Vector3D::cross(alignRightVec, alignUpVec);
             break;
+        }
 
-        case ESP::ScreenPlaneAligned:
-        case ESP::ScreenPlaneAlignedGameWorldUpVec: {
+        case ESP::ScreenPlaneAligned: {
             alignNormalVec.CondenseAndNormalizeToLargestComponent();
             alignUpVec     = modelMat * cam.GetInvViewTransform() * Camera::DEFAULT_UP_VEC;
             alignRightVec  = Vector3D::cross(alignUpVec, alignNormalVec);

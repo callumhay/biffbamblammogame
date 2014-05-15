@@ -170,7 +170,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 
 					// Obtain all the normals of the lines that the projectile is colliding with...
 					std::vector<int> collidingIndices = 
-                        this->reflectRefractBounds.CollisionCheckIndices(Collision::Ray2D(projectile->GetPosition(), projectile->GetVelocityDirection()));
+                        this->reflectRefractBounds.CollisionCheckIndices(projectile->BuildBoundingLines());
 					Vector2D collisionNormal;
                     bool doReflectionRefractionCollisions = true;
 
@@ -179,8 +179,8 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 						// colliding with the projectile, we need to reconcile this...
 
 						// Just figure out which normal is closest to the negative velocity of the projectile and use it
-						Vector2D normal0 = this->reflectRefractBounds.GetNormal(collidingIndices[0]);
-						Vector2D normal1 = this->reflectRefractBounds.GetNormal(collidingIndices[1]);
+						const Vector2D& normal0 = this->reflectRefractBounds.GetNormal(collidingIndices[0]);
+						const Vector2D& normal1 = this->reflectRefractBounds.GetNormal(collidingIndices[1]);
 
 						float angleBetween0 = Trig::radiansToDegrees(
                             acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal0)))));

@@ -38,6 +38,11 @@
 
 #include "../GameSound/GameSound.h"
 
+const double FuturismBossStage3AIState::MIN_TIME_UNTIL_FIRST_STRATEGY_PORTAL = 8.0;
+const double FuturismBossStage3AIState::MIN_TIME_UNTIL_FIRST_WEAPON_PORTAL   = 5.0;
+const double FuturismBossStage3AIState::MIN_WAIT_BETWEEN_STRATEGY_PORTALS    = 2.2*FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+const double FuturismBossStage3AIState::MIN_WAIT_BETWEEN_WEAPON_PORTALS      = 1.2*FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+
 const double FuturismBossStage3AIState::FULL_STAR_BEAM_ROTATION_TIME_IN_SECS = 12.0;
 
 const double FuturismBossStage3AIState::MIN_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS = 40.0;
@@ -56,6 +61,9 @@ currRotationSpd(0.0f), currRotationAccel(0.0f), timeSinceLastAttractAttack(0.0),
     this->currCoreRotInDegs   = 0;
     this->idxOfNonAvoidance   = Randomizer::GetInstance()->RandomUnsignedInt() % TIMES_PER_ONE_NON_AVOIDANCE;
     this->currNonAvoidanceIdx = 0;
+
+    this->timeSinceLastStratPortal  = MIN_WAIT_BETWEEN_STRATEGY_PORTALS - MIN_TIME_UNTIL_FIRST_STRATEGY_PORTAL;
+    this->timeSinceLastAttackPortal = MIN_WAIT_BETWEEN_WEAPON_PORTALS - MIN_TIME_UNTIL_FIRST_WEAPON_PORTAL;
 
     GameSound* sound = this->boss->GetGameModel()->GetSound();
 
@@ -105,26 +113,26 @@ void FuturismBossStage3AIState::GoToNextState(const GameModel& gameModel) {
     // or else the battle could take forever (the player NEEDS the portal to get the item required
     // to move on to the next high-level AI state!)
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
-    if (this->timeSinceLastStratPortal > 2.5*FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
-        FuturismBoss::IsInRightSubArena(bossPos)) {
+    if (this->timeSinceLastStratPortal > MIN_WAIT_BETWEEN_STRATEGY_PORTALS &&
+        FuturismBoss::IsInRightSubArena(bossPos) && this->PlayerHasBoostAlmostAvailable(gameModel, this->GetTotalStrategyPortalShootTime())) {
 
         this->SetState(StationaryFireStrategyPortalAIState);
         return;
     }
 
     // Last special case: If the boss hasn't shot a portal in a while then there's a chance of shooting an attack portal
-    if (this->timeSinceLastAttackPortal > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
-        this->timeSinceLastStratPortal > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
-        Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
+    if (this->timeSinceLastAttackPortal > MIN_WAIT_BETWEEN_WEAPON_PORTALS &&
+        this->timeSinceLastStratPortal > FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
+        Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0 &&
+        this->PlayerHasBoostAlmostAvailable(gameModel, this->GetTotalWeaponPortalShootTime())) {
 
-        // TODO: Make this MovingFireWeaponPortalAIState?
         this->SetState(StationaryFireWeaponPortalAIState);
         return;
     }
 
     if (this->currState != FuturismBossAIState::BallDiscardAIState &&
-        this->timeSinceLastStratPortal > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
-        this->timeSinceLastAttractAttack > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
+        this->timeSinceLastStratPortal > FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
+        this->timeSinceLastAttractAttack > FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
         (this->timeSinceLastAttractAttack > MAX_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS || 
         this->timeSinceLastAttractAttack > MIN_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS && Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) &&
         this->IsBallAvailableForAttractingAndTeleporting(gameModel) && this->IsBallFarEnoughAwayToInitiateAttracting(gameModel)) {

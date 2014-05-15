@@ -94,7 +94,7 @@ void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Poin
 	haloExpandingPulse->SetParticleSize(ESPInterval(0.9f*LevelPiece::PIECE_WIDTH), ESPInterval(0.9f*LevelPiece::PIECE_HEIGHT));
 	haloExpandingPulse->SetEmitAngleInDegrees(0);
 	haloExpandingPulse->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	haloExpandingPulse->SetParticleAlignment(ESP::ScreenPlaneAligned);
+	haloExpandingPulse->SetParticleAlignment(ESP::GlobalAxisAlignedX);
 	haloExpandingPulse->SetEmitPosition(worldTranslation);
 	haloExpandingPulse->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
 	haloExpandingPulse->AddEffector(&haloExpandPulse);
@@ -110,7 +110,7 @@ void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Poin
     ESPInterval bColour(colour.B(), std::min<float>(1.0f, 1.75f*(0.25f+colour.B())));
 
     ESPPointEmitter* particlesComing = new ESPPointEmitter();
-    particlesComing->SetSpawnDelta(ESPInterval(0.02f, 0.05f));
+    particlesComing->SetSpawnDelta(ESPInterval(0.03f, 0.06f));
     particlesComing->SetInitialSpd(ESPInterval(1.0f, 2.4f));
     particlesComing->SetParticleLife(ESPInterval(0.7f, 1.2f));
     particlesComing->SetParticleSize(ESPInterval(0.1f*LevelPiece::PIECE_HEIGHT, 0.33f*LevelPiece::PIECE_HEIGHT));
@@ -125,12 +125,12 @@ void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Poin
     particlesComing->SetEmitPosition(worldTranslation);
     particlesComing->AddEffector(&particleFader);
     particlesComing->AddEffector(&particleMediumGrowth);
-    particlesComing->SetRandomTextureParticles(12, particleTextures);
+    particlesComing->SetRandomTextureParticles(9, particleTextures);
 
     ESPPointEmitter* particlesGoing  = new ESPPointEmitter();
-    particlesGoing->SetSpawnDelta(ESPInterval(0.02f, 0.05f));
+    particlesGoing->SetSpawnDelta(ESPInterval(0.03f, 0.06f));
     particlesGoing->SetInitialSpd(ESPInterval(1.0f, 2.4f));
-    particlesGoing->SetParticleLife(ESPInterval(0.8f, 1.3f));
+    particlesGoing->SetParticleLife(ESPInterval(0.8f, 1.2f));
     particlesGoing->SetParticleSize(ESPInterval(0.1f*LevelPiece::PIECE_HEIGHT, 0.33f*LevelPiece::PIECE_HEIGHT));
     particlesGoing->SetParticleColour(rColour, gColour, bColour, ESPInterval(1.0f));
     particlesGoing->SetEmitAngleInDegrees(180);
@@ -142,7 +142,7 @@ void PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Poin
     particlesGoing->SetEmitPosition(worldTranslation);
     particlesGoing->AddEffector(&particleFader);
     particlesGoing->AddEffector(&particleMediumGrowth);
-    particlesGoing->SetRandomTextureParticles(12, particleTextures);
+    particlesGoing->SetRandomTextureParticles(9, particleTextures);
 
 	emitters.push_back(haloExpandingPulse);
     emitters.push_back(particlesComing);

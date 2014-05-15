@@ -1,5 +1,5 @@
 Where no Paddle Has Gone Before
-23 30
+23 31
 E E S S S S S S S S E E E S S S S S S S S E E 
 E E S E E E E E E S E E E S E E E E E E S E E 
 E E S G G G G G G S E E E S G G G G G G S E E 
@@ -27,16 +27,17 @@ E E S E E E E E E E E E E E E E E E E E S E E
 E E S E E E E E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E E E E E S E E 
 E E S E E E E E E E E E E E E E E E E E S E E 
-E E N E E E E E E E E E E E E E E E E E N E E 
-E E N E E E E E E E E E E E E E E E E E N E E 
+E E S E E E E E E E E E E E E E E E E E S E E 
+S S S E E E E E E E E E E E E E E E E E S S S 
+E E E E E E E E E E E E E E E E E E E E E E E 
 E X(a,b) E E E E E E E E E E E E E E E E E E E X(f,e) E 
 
 STARS:
 10000
-18000
+20000
 30000
-50000
-60000
+48000
+59000
 
 PaddleGrow 0
 PoisonPaddle 3
@@ -44,8 +45,8 @@ Blackout 3
 BallSafetyNet 1
 UberBall 1
 BallGrow 0
-StickyPaddle 0
 ShieldPaddle 2
+StickyPaddle 0
 LaserBulletPaddle 0
 PaddleShrink 3
 InvisiPaddle 3
@@ -68,7 +69,7 @@ IceBlasterPaddle 2
 MineLauncherPaddle 1
 SlowBall 1
 FastBall 3
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 3

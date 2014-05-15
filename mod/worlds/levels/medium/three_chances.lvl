@@ -6,19 +6,19 @@ E E E E E E E E E E S S S F(d) F(d) F(d) S S S E E
 E E E E E E E E E E S E E E E E E E S E E 
 E E E E E E E E E E S E E E E E E E S E E 
 E E E E E E E E E E F(r) E O Y R Y O E F(l) E E 
-E E C1(90) E E C1(0) E E E E F(r) E O O G O O E F(l) C1(270) C1(270) 
+E E C1(90) E E C1(0) E E E E F(r) E Y O G O Y E F(l) C1(270) C1(270) 
 E E E E E E E E E E F(r) E R Y I Y R E F(l) E E 
 E E E E E E E E E E S E O Y G Y O E S E E 
 E E E E E E E E E E S E Y G E G Y E S E E 
 E E E E E X(e,f) E E E E S E G E Y E G E S E E 
 E E E E E E E E E E S E Y G E G Y E S E E 
-E E E E E X(d,c) E E E E S I O G Q(f) G O I S E E 
+E E E E E X(d,c) E E E E S I G G Q(f) G G I S E E 
 E E E E E E E E E E S E Y G E G Y E S E E 
 E E E E E E E E E E S E G E Y E G E S E E 
 E E E E E E E E E E F(r) E Y G E G Y E S E E 
 E E C1(90) E E C1(0) E E E E F(r) E O Y G Y O E S E E 
 E E E E E E E E E E F(r) E R Y I Y R E S E E 
-E E E E E E E E E E S E O O G O O E S E E 
+E E E E E E E E E E S E Y O G O Y E S E E 
 E E E E E E E E E E S E O Y R Y O E S E E 
 E E E E E E E E E E S E E E E E E E S E E 
 E E E E E X(c,d) E E E E S E E E E E E E S E E 
@@ -33,7 +33,7 @@ STARS:
 20000
 25000
 31000
-33000
+32500
 
 PaddleGrow 0
 PoisonPaddle 0
@@ -41,8 +41,8 @@ Blackout 0
 BallSafetyNet 0
 UberBall 0
 BallGrow 0
-StickyPaddle 0
 ShieldPaddle 0
+StickyPaddle 0
 LaserBulletPaddle 0
 PaddleShrink 0
 InvisiPaddle 0
@@ -65,9 +65,9 @@ IceBlasterPaddle 0
 MineLauncherPaddle 0
 SlowBall 0
 FastBall 0
-GravityBall 0
-CrazyBall 0
 Random 0
+CrazyBall 0
+GravityBall 0
 PaddleCam 0
 
 PADDLESTARTXPOS: 12.5

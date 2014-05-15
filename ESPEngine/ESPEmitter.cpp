@@ -45,7 +45,7 @@
 #include "../BlammoEngine/TextLabel.h"
 
 ESPEmitter::ESPEmitter() : ESPAbstractEmitter(), timeSinceLastSpawn(0.0f), particleTexture(NULL),
-particleAlignment(ESP::ScreenAlignedGlobalUpVec), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
+particleAlignment(ESP::ScreenPlaneAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
 cutoffLifetimeInSecs(NO_CUTOFF_LIFETIME), currCutoffLifetimeCountdown(NO_CUTOFF_LIFETIME),
 isReversed(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),

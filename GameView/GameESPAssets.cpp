@@ -1229,7 +1229,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetEmitAngleInDegrees(10);
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	bounceEffect->SetParticleAlignment(ESP::ScreenPlaneAlignedGameWorldUpVec);
+	bounceEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
 	
 	Vector2D ballVelocity = ball.GetVelocity();
@@ -1795,7 +1795,7 @@ void GameESPAssets::AddSingleObjectPortalTeleportEffect(const Point2D& center, f
 	spiralEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	spiralEffect->SetParticleLife(1.0f);
 	spiralEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	spiralEffect->SetParticleAlignment(ESP::ScreenAligned);
+    spiralEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	spiralEffect->SetEmitPosition(Point3D(center));
 	spiralEffect->SetParticleRotation(ESPInterval(0.0f, 359.999999f));
     spiralEffect->SetParticleSize(ESPInterval(spiralSize));
@@ -1810,7 +1810,7 @@ void GameESPAssets::AddSingleObjectPortalTeleportEffect(const Point2D& center, f
     flareEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
     flareEffect->SetParticleLife(1.0f);
     flareEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-    flareEffect->SetParticleAlignment(ESP::ScreenAligned);
+    flareEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     flareEffect->SetEmitPosition(Point3D(center));
     flareEffect->SetParticleRotation(ESPInterval(0.0f, 359.999999f));
     flareEffect->SetParticleSize(ESPInterval(1.2f*sizeX), ESPInterval(1.2f*sizeY));
@@ -1854,7 +1854,7 @@ ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, flo
     shockwaveEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
     shockwaveEffect->SetParticleLife(ESPInterval(lifeTime));
     shockwaveEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-    shockwaveEffect->SetParticleAlignment(ESP::ScreenAligned);
+    shockwaveEffect->SetParticleAlignment(ESP::ScreenPlaneAligned);
     shockwaveEffect->SetEmitPosition(center);
     shockwaveEffect->SetParticleSize(ESPInterval(startSize));
     shockwaveEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
@@ -4883,10 +4883,11 @@ void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile)
 	fireCloudTrail->SetEmitDirection(-projectileDir3D);
 	fireCloudTrail->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfHeight()));
 	fireCloudTrail->SetEmitPosition(projectilePos3D - 1.5f * projectile.GetHeight() * projectileDir3D);
-    fireCloudTrail->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
+    fireCloudTrail->SetParticleAlignment(ESP::ScreenPlaneAligned);
 	fireCloudTrail->AddEffector(&this->particleLargeGrowth);
 	fireCloudTrail->AddEffector(&this->particleSuperFireFastColourFader);
-	fireCloudTrail->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD));
+	fireCloudTrail->SetParticles(10, PersistentTextureManager::GetInstance()->GetLoadedTexture(
+        GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD));
 
 	this->activeProjectileEmitters[&projectile].push_back(fireCloudTrail);
 }
@@ -6667,10 +6668,9 @@ ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle,
     itemNameEffect->SetEmitDirection(emitDir);
     itemNameEffect->SetParticleLife(ESPInterval(2.4f));
     itemNameEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
-    itemNameEffect->SetParticleAlignment(ESP::GlobalAxisAlignedX);
+    itemNameEffect->SetParticleAlignment(ESP::ScreenAlignedGlobalUpVec);
     itemNameEffect->SetEmitPosition(2.75f * paddle.GetHalfHeight() * emitDir);
     itemNameEffect->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(1));
-    itemNameEffect->SetParticleRotation(paddle.GetIsPaddleFlipped() ? 180 : 0);
     itemNameEffect->AddEffector(&this->particleFader);
     itemNameEffect->AddEffector(&this->particleSmallGrowth);
 
@@ -6798,7 +6798,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
             GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT));
 		
         ESPPointEmitter* itemNameEffect = NULL;
-        if (item.GetItemType() != GameItem::RandomItem) {
+        if (item.GetItemType() != GameItem::RandomItem && !GameBall::GetIsBallCameraOn()) {
            itemNameEffect = this->CreateItemNameEffect(paddle, item);
         }
 

@@ -2428,7 +2428,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	// Tend towards changing the normal to make a bigger reflection not a smaller one...
     static const float MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS = Trig::degreesToRadians(60);	// Angle from the normal that's allowable
 	static const float MAX_ANGLE_LESS_REFLECTION_DEGS = 5.0f;
-	static const float MAX_ANGLE_MORE_REFLECTION_DEGS = 15.0f;
+	static const float MAX_ANGLE_MORE_REFLECTION_DEGS = 5.0f;
 	const Vector2D& ballVelocityDir = b.GetDirection();
 	// First make sure the ball velocity direction is reasonably off from the line / reasonably close to the normal
 	// or modification could cause the ball to collide multiple times or worse

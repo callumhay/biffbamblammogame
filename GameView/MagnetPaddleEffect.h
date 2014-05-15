@@ -66,7 +66,7 @@ private:
     std::vector<double> magnetLineTimeTrackers;
     Texture2D* magnetCircleTex;
 
-    void DrawLines(float scaleFactor, float alphaMultiplier);
+    void DrawLines(float zRotInDegs, float scaleFactor, float alphaMultiplier);
 
     float GetCircleWidthFromTime(double t, float scaleFactor);
     float GetCircleHeightFromTime(double t, float scaleFactor);

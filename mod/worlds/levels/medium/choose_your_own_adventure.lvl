@@ -1,38 +1,38 @@
 Choose Your Own Adventure
 23 33
 E E E E E E E E E S S E S S E E E E E E E E E 
-E E E E S S S S S E E S E E S S S S S E E E X(r,q) 
+E E E E E S S S S E E S E E S S S S E E E E X(r,q) 
 E E S S S E E E S E E E E E S E E E S S S E E 
 E S E E E E X(j,i) E S E E E E E S E X(k,l) E E E E S E 
 E S E R E E E E S E E Q(i) E E S E E E E R E S E 
 E S E E E E E E S E Q(i) E Q(i) E S E E E E E E S E 
 E S E E E E C1(300) E S E Q(i) E Q(i) E S E C1(60) E E E E S E 
-S S S S S E E E S X(f,e) S X(i,j) S X(g,h) S E E E S S S S S 
-S E E E S S S S S S S D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S S E E E S 
+E S S S S E E E S X(f,e) S X(i,j) S X(g,h) S E E E S S S S E 
+S E E E E S S S S S S D(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S E E E E S 
 S E X(m,n) E E S E E E E E E E E E E E F(l) E E X(h,g) E S 
 S E E E E S E E E E E E E E E E E F(l) E E E E S 
-S S S T(S,ll) E S E E E E E E E E E E E F(l) E E C(290) E S 
+E S S T(S,ll) E S E E E E E E E E E E E F(l) E E C(290) E S 
 E E E S E S R R R R R R R R R R R S E E E E S 
-E E E S E S R R R R R R R R R R R S S S S S S 
-S S S T(S,ul) E S K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) R R R R R R R R R R S E E E E S 
+E E E S E S R R R R R R R R R R R S S S S S E 
+E S S T(S,ul) E S K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) R R R R R R R R R R S E E E E S 
 S E E E E S E R E E E K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) E E E R E F(l) E E X(p,o) E S 
 S E E T(S,lr) E S E E E E E E E E E E E F(l) E E E E S 
 S E E S E S E E E R E E E R E E E F(l) E E C(290) E S 
 S E E S E S R R R R R R R R R R R S E E E E S 
-S E E S E S R R R R R R R R R R K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S S 
+S E E S E S R R R R R R R R R R K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) S S S S S E 
 S E X(d,c) S E S E E E R E E E R E E E F(l) E E E S E 
 S E E S X(l,k) S E E E E E E E E E E E F(l) E E E S E 
-S S S S S S E R E E E K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) E E E R E F(l) E E X(b,a) S E 
+E S S S S S E R E E E K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) E E E R E F(l) E E X(b,a) S E 
 E S X(c,d) E X(e,f) S R R R R R R R R R R R S E E E S E 
-S S E E E S K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) R R R R R R R R R R S S S S S S 
+E S E E E S K(RemoteControlRocket,RemoteControlRocket,RemoteControlRocket) R R R R R R R R R R S S S S S E 
 S E E E E S E E E E E E E E E E E S E E E E S 
 S X(a,b) E E E S E E E E E E E E E E E S E E X(n,m) E S 
 S E E E E S E E E E E E E E E E E S E E E E S 
-S S T(S,ll) E E S E E E E E E E E E E E S E T(S,ur) S S S 
+E S E E E S E E E E E E E E E E E S E T(S,ur) S S S 
 E E S N N S E E E E E E E E E E E S E E E E S 
 E E E E E S E E E E E E E E E E E S E E X(q,r) E S 
 E E E E E S E E E E E E E E E E E S X(o,p) E E E S 
-E E E E E S E E E E E E E E E E E S S S S S S 
+E E E E E S E E E E E E E E E E E S S S S S E 
 
 STARS:
 8000

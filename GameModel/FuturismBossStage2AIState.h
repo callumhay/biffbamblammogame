@@ -47,7 +47,10 @@ public:
     ~FuturismBossStage2AIState();
 
 private:
-    static const double MIN_TIME_UNTIL_FIRST_PORTAL;
+    static const double MIN_TIME_UNTIL_FIRST_STRATEGY_PORTAL;
+    static const double MIN_TIME_UNTIL_FIRST_WEAPON_PORTAL;
+    static const double MIN_WAIT_BETWEEN_STRATEGY_PORTALS;
+    static const double MIN_WAIT_BETWEEN_WEAPON_PORTALS;
 
     bool hasDoneInitialBallTeleport;
 

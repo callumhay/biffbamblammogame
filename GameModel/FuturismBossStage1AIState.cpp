@@ -36,15 +36,12 @@
 #include "BossWeakpoint.h"
 
 const double FuturismBossStage1AIState::MIN_TIME_UNTIL_FIRST_PORTAL = 10.0;
+const double FuturismBossStage1AIState::MIN_WAIT_BETWEEN_STRATEGY_PORTALS = 2.0*FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
 
 FuturismBossStage1AIState::FuturismBossStage1AIState(FuturismBoss* boss) : FuturismBossAIState(boss) {
-    
-    // We don't want the boss to shoot portals right away, let the player get
-    // acquainted with the boss first -- we do this by setting a negative time on the 
-    // time since last portal...
-    // To calculate this we need to offset by the termination time of the portal since
-    // the boss won't shoot if a portal still exists
-    this->timeSinceLastStratPortal = FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS - MIN_TIME_UNTIL_FIRST_PORTAL;
+
+    // Offset the time since the last portal was fired so that the condition isn't met immediately
+    this->timeSinceLastStratPortal = MIN_WAIT_BETWEEN_STRATEGY_PORTALS - MIN_TIME_UNTIL_FIRST_PORTAL;
 
     // The boss spends this entire state in the initial, left sub arena of the level
     this->arenaState = FuturismBossAIState::InLeftArena;
@@ -166,7 +163,9 @@ void FuturismBossStage1AIState::GoToNextState(const GameModel& gameModel) {
     // If it's been too long since the last strategy portal was shot then we should shoot one
     // or else the battle could take forever (the player NEEDS the portal to get the item required
     // to move on to the next high-level AI state!)
-    if (this->timeSinceLastStratPortal > 2.4*FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS) {
+    if (this->timeSinceLastStratPortal > MIN_WAIT_BETWEEN_STRATEGY_PORTALS &&
+        this->PlayerHasBoostAlmostAvailable(gameModel, this->GetTotalStrategyPortalShootTime())) {
+
         this->SetState(StationaryFireStrategyPortalAIState);
         return;
     }

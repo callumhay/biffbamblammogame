@@ -52,7 +52,6 @@ timeToWaitBeforeReleaseIsAllowed(pauseTime), ballWasReleased(false) {
 	GameBall* ball = this->GetGameBall();
 	assert(ball != NULL);
 
-
 	GameLevel* currLevel = this->gameModel->GetCurrentLevel();
 	assert(currLevel != NULL);
 

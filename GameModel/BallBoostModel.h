@@ -91,6 +91,7 @@ public:
     double GetTotalBulletTimeElapsed() const;
 
     float GetBoostChargePercentage() const;
+    double GetChargeTimeUntilNextBoost() const;
     int GetNumAvailableBoosts() const;
 
     void SetBoostChargeTime(double timeInSeconds);
@@ -204,6 +205,13 @@ inline float BallBoostModel::GetBoostChargePercentage() const {
         return 1.0f;
     }
     return static_cast<float>(this->elapsedBoostChargeTime / this->boostChargeTime);
+}
+
+inline double BallBoostModel::GetChargeTimeUntilNextBoost() const {
+    if (this->numAvailableBoosts == TOTAL_NUM_BOOSTS) {
+        return 0.0f;
+    }
+    return std::max<double>(0.0, this->boostChargeTime - this->elapsedBoostChargeTime);
 }
 
 inline void BallBoostModel::IncrementBoostChargeByPercent(const GameModel& gameModel, double percent) {

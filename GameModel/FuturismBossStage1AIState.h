@@ -46,6 +46,7 @@ public:
     ~FuturismBossStage1AIState();
 
 private:
+    static const double MIN_WAIT_BETWEEN_STRATEGY_PORTALS;
     static const double MIN_TIME_UNTIL_FIRST_PORTAL;
 
     // Inherited from FuturismBossAIState -----------------------------------------------------

@@ -36,10 +36,10 @@ E X(a,b,f) N E E E E E E E E E E E N X(c,d,f) E
 
 STARS:
 8000
-15000
-23000
-28000
-32000
+16000
+25000
+30000
+33500
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -47,8 +47,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 0
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 0
+StickyPaddle 2
 LaserBulletPaddle 0
 PaddleShrink 2
 InvisiPaddle 2
@@ -71,7 +71,7 @@ IceBlasterPaddle 2
 MineLauncherPaddle 1
 SlowBall 2
 FastBall 2
-GravityBall 3
-CrazyBall 0
 Random 2
+CrazyBall 0
+GravityBall 3
 PaddleCam 3
