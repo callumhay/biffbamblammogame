@@ -45,6 +45,7 @@
 
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
+#include "../GameModel/GameTransformMgr.h"
 #include "../WindowManager.h"
 
 const double LevelStartDisplayState::FADE_IN_TIME               = 1.25;
@@ -64,6 +65,9 @@ paddleMoveUpSoundID(INVALID_SOUND_ID), ballSpawnSoundID(INVALID_SOUND_ID) {
 
     GameModel* gameModel = this->display->GetModel();
     
+    // Reset the GameModel's transform manager...
+    gameModel->GetTransformInfo()->Reset();
+
     // Make sure the ball is in the center of the level, on top of the paddle
 	GameBall* ball = this->display->GetModel()->GetGameBalls().front();
 	assert(ball != NULL);
@@ -268,6 +272,10 @@ void LevelStartDisplayState::RenderFrame(double dT) {
             }
 
             if (ballFadeInDone && this->shockwaveEmitter->IsDead() && this->starEmitter->IsDead()) {
+                
+                // Make sure the ball is visible!!
+                ball->SetAlpha(1.0f);
+
                 this->display->SetCurrentStateAsNextQueuedState();
                 return;
             }

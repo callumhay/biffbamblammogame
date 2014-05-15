@@ -323,13 +323,19 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 
 		case Projectile::FireGlobProjectile:
 			if (!projectile->IsLastThingCollidedWith(this)) {
-				// This piece may catch on fire...
-				this->LightPieceOnFire(gameModel);
+                this->LightPieceOnFire(gameModel);
 			}
 			break;
 
         case Projectile::PaddleFlameBlastProjectile:
-            this->LightPieceOnFire(gameModel);
+            // Do a touch of damage if the piece is on fire...
+            if (this->HasStatus(LevelPiece::OnFireStatus)) {
+                newPiece = this->DiminishPiece(gameModel, LevelPiece::BasicProjectileDestruction);
+            }
+            else {
+                // This piece may catch on fire...
+                this->LightPieceOnFire(gameModel);
+            }
             break;
 
         case Projectile::PaddleIceBlastProjectile:

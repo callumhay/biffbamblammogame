@@ -71,6 +71,8 @@ GameTransformMgr::~GameTransformMgr() {
 }
 
 void GameTransformMgr::ClearSpecialCamEffects() {
+    // WARNING: DO NOT PUT ANYTHING TO DO WITH BALL DEATH CAMERA EFFECTS IN THIS METHOD!!!!
+
 	if (this->ballWithCamera != NULL) {
 		this->ballWithCamera = NULL;
 		GameBall::SetBallCamera(NULL, NULL);
@@ -246,6 +248,8 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 	}
 	else {
 		animType = GameTransformMgr::FromBallDeathAnimation;
+        // Get rid of ALL other effects on the animation queue except for ball death related effects
+        this->ClearSpecialCamEffects();
 	}
 
 	TransformAnimation transformAnim(animType);
@@ -1315,7 +1319,7 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 	// Based on the animation, set the animations for the camera's orientation
 	if (ballDeathAnim.type == GameTransformMgr::ToBallDeathAnimation) {
 		const GameBall* ball = *(gameModel.GetGameBalls().begin());
-		const GameLevel* currLevel = gameModel.GetCurrentLevel();
+        const GameLevel* currLevel = gameModel.GetCurrentLevel();
 
 		// Make sure the game state is paused while we move the camera
 		// into position to properly capture the ball death animation

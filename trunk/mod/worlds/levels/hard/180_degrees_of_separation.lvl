@@ -1,35 +1,35 @@
 180 Degrees of Separation
 23 34
-E E S S S S S S S S S S S S S S E E E E E E E 
-E S X(a,b) E X(k,l) E X(i,j) E X(g,h) E X(e,f) E X(m,n) E E E S E E E E E E 
-E S E E E E E E E E E E E E E E S E E E E E E 
-E S E E L E L E L E L E E E T(P,ur) E S S S S E E E 
-E S E E E E E E E E E E E E E E S E E E S E E 
-E S X(l,k) E X(j,i) E X(h,g) E X(f,e) E X(n,m) E X(c,d) E E E S E X(d,c) E S E E 
-E S E E D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle){4} E E E E E E E E E E E S E E E S E E 
-E S S S W(2) S A(1,0,y,x) S S S S D(UpsideDown,UpsideDown,UpsideDown){1} S N N N A(1,0,w,v) F(d) F(d) F(d) S S E 
-E S E E O E E E E E E E E E E E E E O E E S E 
-E S E G O E E E E E E E E E E E E E O G E S E 
-E S G E O E E G G G G K(GravityBall,GravityBall,GravityBall) G G G G E E O E G S E 
-E S E G O E E R Q(f) G G R G G Q(f) R E E O G E S E 
+E E E S S S S S S S S S S S S S E E E E E E E 
+E E S E X(a,b) E X(i,j) E X(g,h) E X(e,f) E X(m,n) E E E S E E E E E E 
+E E S E E E E E E E E E E E E E S E E E E E E 
+E E S E L E Q(f) E L E Q(f) E L E T(P,ur) E S S S S E E E 
+E E S E E E E E E E E E E E E E S E E E S E E 
+E E S E X(j,i) E X(h,g) E X(f,e) E X(n,m) E X(c,d) E E E S E X(d,c) E S E E 
+E E S E D(LaserBulletPaddle,LaserBulletPaddle,LaserBulletPaddle){4} E E E E E E E E E E E S E E E S E E 
+E S S S W(2) S S S S S S D(UpsideDown,UpsideDown,UpsideDown){1} S N N N S F(d) F(d) F(d) S S E 
+E S E E O E S E E E E E E E E E S E O E E S E 
+E S E G O E S E E E E E E E E E S E O G E S E 
+E S G E O E S G G G G K(GravityBall,GravityBall,GravityBall) G G G G S E O E G S E 
+E S E G O E S R O G G R G G O R S E O G E S E 
+E S E E O E S G G G G R G G G G S E O E E S E 
+E S E E O E A(1,0,x,y){2} E E E E E E E E E A(1,0,w,v) E O E E S E 
 E S E E O E E G G G G R G G G G E E O E E S E 
-E S E E O E E E E E E E E E E E E E O E E S E 
-E S E E O E E G G G G R G G G G E E O E E S E 
-E S E E O E E R Q(f) G G R G G Q(f) R E E O E E S E 
+E S E E O E E R O G G R G G O R E E O E E S E 
 E F(r) E E O E E G G G G R G G G G E E O E E F(l) E 
 E F(r) E E O E E E E E E E E E E E E E O E E F(l) E 
 E F(r) E E O E E G G G G R G G G G E E O E E F(l) E 
-E F(r) E E O E E R Q(f) G G R G G Q(f) R E E O E E F(l) E 
+E F(r) E E O E E R O G G R G G O R E E O E E F(l) E 
 E S E E O E E G G G G R G G G G E E O E E S E 
-E S E E O E E E E E E E E E E E E E O E E S E 
-E S E E O E E G G G G R G G G G E E O E E S E 
-E S E E O E E R Q(f) G G L G G Q(f) R E E O E E S E 
-E S E G O E E G G G G R G G G G E E O G E S E 
-E S G E O E E E E E E E E E E E E E O E G S E 
-E S E G O E E E E E E E E E E E E E O G E S E 
-E S E E O E E E E E E E E E E E E E O E E S E 
-E S E E O E E E E E E E E E E E E E O E E S E 
-E S S F(u) F(u) F(u) A(1,0,x,y){2} E E E E E E E E E A(1,0,v,w){3} S W(3) S S S E 
+E S E E O E A(1,0,y,x) E E E E E E E E E A(1,0,v,w){3} E O E E S E 
+E S E E O E S G G G G R G G G G S E O E E S E 
+E S E E O E S R O G G L G G O R S E O E E S E 
+E S E G O E S G G G G R G G G G S E O G E S E 
+E S G E O E S E E E E E E E E E S E O E G S E 
+E S E G O E S E E E E E E E E E S E O G E S E 
+E S E E O E S E E E E E E E E E S E O E E S E 
+E S E E O E S E E E E E E E E E S E O E E S E 
+E S S F(u) F(u) F(u) S E E E E E E E E E S S W(3) S S S E 
 E E S E E E S E E E E E E E E E S S S S E S E 
 E E S E X(b,a) E S E E E E E E E E E N E E E E S E 
 E E S E E E S E E E E E E E E E N E E E E S E 
@@ -48,8 +48,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 0
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 0
 PaddleShrink 2
 InvisiPaddle 2
@@ -72,9 +72,9 @@ IceBlasterPaddle 2
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 2
 
 PADDLESTARTXPOS: 28.75

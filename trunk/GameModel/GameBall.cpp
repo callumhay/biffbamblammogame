@@ -307,8 +307,11 @@ void GameBall::SetBallState(BallState* state, bool deletePrevState) {
 void GameBall::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec) {
     const PlayerPaddle* paddle = model.GetPlayerPaddle();
 
-    // If the ball is moving upwards in the level AT ALL then we don't effect it
-    if (Vector2D::Dot(this->currDir, Vector2D(0,1)) >= -EPSILON) {
+    // If the ball is moving away from the paddle AT ALL then we don't effect it
+    Vector2D paddleToBallVec = this->GetCenterPosition2D() - paddle->GetCenterPosition();
+    paddleToBallVec[0] = 0;
+    paddleToBallVec[1] = NumberFuncs::SignOf(paddleToBallVec[1]);
+    if (Vector2D::Dot(this->currDir, paddleToBallVec) >= -EPSILON) {
         return;
     }
 
@@ -517,6 +520,14 @@ void GameBall::RemoveImpulseForce() {
 void GameBall::SetSpeed(float speed) {
 	this->currSpeed = speed;
 	this->gravitySpeed = speed;
+}
+
+void GameBall::RemoveAllBallTypes() {
+    this->currType = GameBall::NormalBall;
+    this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
+    this->contributingCrazyColour   = Colour(1.0f, 1.0f, 1.0f);
+    this->contributingIceColour     = Colour(1.0f, 1.0f, 1.0f);
+    this->SetColour(ColourRGBA(1,1,1,1));
 }
 
 #ifdef _DEBUG

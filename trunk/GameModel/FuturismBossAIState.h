@@ -119,7 +119,7 @@ protected:
 
     static const float EYE_BEAM_HALF_RADIUS;
 
-    static const double BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+    static const double DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
     static const double PORTAL_SPAWN_EFFECT_TIME_IN_SECS;
 
     static const double TWITCH_BEAM_EXPIRE_TIME_IN_SECS;
@@ -279,6 +279,7 @@ protected:
 
     bool IsPaddleVisibleToShootAt(const GameModel& gameModel) const;
     bool BossHasLineOfSightToBall(const GameBall& ball, const GameLevel& level) const;
+    bool PlayerHasBoostAlmostAvailable(const GameModel& gameModel, double timeAllowanceToNextBoostInSecs) const;
 
     void DoBasicWeaponSingleShot(GameModel& gameModel, const Point2D& firePos, const Vector2D& fireDir) const;
     void DoBasicWeaponWaveShot(GameModel& gameModel, const Point2D& firePos, const Vector2D& middleFireDir) const;

@@ -1990,6 +1990,10 @@ bool PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
 
     // Figure out the vector from the projectile to the paddle...
     Vector2D projectileToPaddleVec = this->GetCenterPosition() - currCenter;
+    if (projectileToPaddleVec.IsZero()) {
+        return false;
+    }
+
     projectileToPaddleVec.Normalize();
 
     if (Vector2D::Dot(vectorToAugment, projectileToPaddleVec) <= 0.01) {

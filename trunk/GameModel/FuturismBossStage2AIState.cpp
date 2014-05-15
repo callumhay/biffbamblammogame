@@ -33,7 +33,10 @@
 #include "FuturismBossStage3AIState.h"
 #include "GameModel.h"
 
-const double FuturismBossStage2AIState::MIN_TIME_UNTIL_FIRST_PORTAL = 10.0;
+const double FuturismBossStage2AIState::MIN_TIME_UNTIL_FIRST_STRATEGY_PORTAL = 10.0;
+const double FuturismBossStage2AIState::MIN_TIME_UNTIL_FIRST_WEAPON_PORTAL   = 8.0;
+const double FuturismBossStage2AIState::MIN_WAIT_BETWEEN_STRATEGY_PORTALS = 2.2*FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+const double FuturismBossStage2AIState::MIN_WAIT_BETWEEN_WEAPON_PORTALS   = 1.25*FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
 
 FuturismBossStage2AIState::FuturismBossStage2AIState(FuturismBoss* boss, 
                                                      FuturismBossAIState::ArenaState arena, 
@@ -46,8 +49,9 @@ FuturismBossAIState(boss), hasDoneInitialBallTeleport(false) {
     // Regenerate the boss bounds
     this->boss->RegenerateBoundsForCoreWithShield();
 
-    // We don't want the boss to shoot portals right away...
-    this->timeSinceLastStratPortal = FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS - MIN_TIME_UNTIL_FIRST_PORTAL;
+    // We don't want the boss to shoot a strategy portal right away...
+    this->timeSinceLastStratPortal  = MIN_WAIT_BETWEEN_STRATEGY_PORTALS - MIN_TIME_UNTIL_FIRST_STRATEGY_PORTAL;
+    this->timeSinceLastAttackPortal = MIN_WAIT_BETWEEN_WEAPON_PORTALS - MIN_TIME_UNTIL_FIRST_WEAPON_PORTAL;
 
     // The boss starts this state by attempting to 'grab' the ball and go to the other side of the level
     this->SetState(MoveToCenterAIState);
@@ -91,8 +95,9 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
     // If it's been too long since the last strategy portal was shot then we should shoot one
     // or else the battle could take forever (the player NEEDS the portal to get the item required
     // to move on to the next high-level AI state!)
-    if (this->timeSinceLastStratPortal > 2.3*FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
-        FuturismBoss::IsInRightSubArena(bossPos)) {
+    if (this->timeSinceLastStratPortal > MIN_WAIT_BETWEEN_STRATEGY_PORTALS && FuturismBoss::IsInRightSubArena(bossPos) && 
+        this->PlayerHasBoostAlmostAvailable(gameModel, this->GetTotalStrategyPortalShootTime())) {
+
         this->SetState(StationaryFireStrategyPortalAIState);
         return;
     }
@@ -112,9 +117,10 @@ void FuturismBossStage2AIState::GoToNextState(const GameModel& gameModel) {
 
     // Last special case: If the boss hasn't shot a portal in a while then there's a chance of shooting
     // an attack portal
-    if (this->timeSinceLastAttackPortal > 1.25*FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
-        this->timeSinceLastStratPortal > FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
-        Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
+    if (this->timeSinceLastAttackPortal > MIN_WAIT_BETWEEN_WEAPON_PORTALS &&
+        this->timeSinceLastStratPortal > FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS &&
+        Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0 &&
+        this->PlayerHasBoostAlmostAvailable(gameModel, this->GetTotalWeaponPortalShootTime())) {
 
         this->SetState(StationaryFireWeaponPortalAIState);
         return;
@@ -340,6 +346,8 @@ void FuturismBossStage2AIState::CollisionOccurred(GameModel* gameModel, Projecti
 }
 
 void FuturismBossStage2AIState::RocketExplosionOccurred(GameModel* gameModel, const RocketProjectile* rocket) {
+    UNUSED_PARAMETER(gameModel);
+
     assert(gameModel != NULL);
     assert(rocket != NULL);
 

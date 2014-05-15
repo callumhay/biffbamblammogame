@@ -42,6 +42,11 @@ public:
 private:
     static const int TIMES_PER_ONE_NON_AVOIDANCE = 3;
 
+    static const double MIN_TIME_UNTIL_FIRST_STRATEGY_PORTAL;
+    static const double MIN_TIME_UNTIL_FIRST_WEAPON_PORTAL;
+    static const double MIN_WAIT_BETWEEN_STRATEGY_PORTALS;
+    static const double MIN_WAIT_BETWEEN_WEAPON_PORTALS;
+
     static const double FULL_STAR_BEAM_ROTATION_TIME_IN_SECS;
     static const double MIN_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS;
     static const double MAX_TIME_BETWEEN_ATTRACT_ATTACKS_IN_SECS;

@@ -238,12 +238,9 @@ public:
 	int32_t GetBallType() const {
 		return this->currType;
 	}
-	void RemoveAllBallTypes() {
-		this->currType = GameBall::NormalBall;
-		this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
-		this->contributingCrazyColour		= Colour(1.0f, 1.0f, 1.0f);
-		this->contributingIceColour			= Colour(1.0f, 1.0f, 1.0f);
-	}
+
+	void RemoveAllBallTypes();
+
 	void AddBallType(const BallType& type) {
 		this->currType = this->currType | type;
 		switch (type) {

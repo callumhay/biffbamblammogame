@@ -74,9 +74,11 @@ void MagnetPaddleEffect::Reset() {
 }
 
 void MagnetPaddleEffect::Draw(double dT, const PlayerPaddle& p) {
+    
+    float zRotInDegs  = p.GetZRotation();
     float scaleFactor = p.GetPaddleScaleFactor();
     float alphaMultiplier = p.GetAlpha();
-
+    
     if (p.HasPaddleType(PlayerPaddle::InvisiPaddle)) {
         alphaMultiplier *= 0.2f;
     }
@@ -113,11 +115,11 @@ void MagnetPaddleEffect::Draw(double dT, const PlayerPaddle& p) {
             break;
     }
     
-    this->DrawLines(scaleFactor, alphaMultiplier);
+    this->DrawLines(zRotInDegs, scaleFactor, alphaMultiplier);
 }
 
 
-void MagnetPaddleEffect::DrawLines(float scaleFactor, float alphaMultiplier) {
+void MagnetPaddleEffect::DrawLines(float zRotInDegs, float scaleFactor, float alphaMultiplier) {
 
     glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
 
@@ -125,6 +127,9 @@ void MagnetPaddleEffect::DrawLines(float scaleFactor, float alphaMultiplier) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     this->magnetCircleTex->BindTexture();
+
+    glPushMatrix();
+    glRotatef(zRotInDegs, 0, 0, 1);
 
     for (int i = static_cast<int>(this->magnetLineTimeTrackers.size())-1; i >= 0 ; i--) {
 
@@ -153,6 +158,8 @@ void MagnetPaddleEffect::DrawLines(float scaleFactor, float alphaMultiplier) {
         glPopMatrix();
     }
     
+    glPopMatrix();
+
     this->magnetCircleTex->UnbindTexture();
 
     glPopAttrib();

@@ -66,7 +66,7 @@ const float FuturismBossAIState::SPAWNED_PORTAL_HALF_HEIGHT = FuturismBossAIStat
 
 const float FuturismBossAIState::EYE_BEAM_HALF_RADIUS = 0.75f*FuturismBoss::CORE_EYE_HALF_SIZE;
 
-const double FuturismBossAIState::BOSS_PORTAL_TERMINATION_TIME_IN_SECS = 10.0;
+const double FuturismBossAIState::DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS = 10.0;
 const double FuturismBossAIState::PORTAL_SPAWN_EFFECT_TIME_IN_SECS = 1.0;
 
 const double FuturismBossAIState::TWITCH_BEAM_EXPIRE_TIME_IN_SECS = 0.9;
@@ -1972,9 +1972,6 @@ bool FuturismBossAIState::GetTeleportationLocation(const GameModel& gameModel, P
         }
     }
 
-    const GameLevel* level = gameModel.GetCurrentLevel();
-    assert(level != NULL);
-
     Collision::AABB2D bossAABB = this->boss->alivePartsRoot->GenerateWorldAABB();
     std::vector<Point2D> possibleLocations;
     possibleLocations.reserve(allLocations.size());
@@ -2115,11 +2112,36 @@ void FuturismBossAIState::GetValidMoveToPositions(const GameModel& gameModel, co
 }
 
 void FuturismBossAIState::SpawnPortals(GameModel& gameModel, const Point2D& portal1Pos, const Point2D& portal2Pos) {
+    
+    // Calculate a reasonable termination time based on the number of boosts that the player has...
+    int numBoosts = 0;
+    const BallBoostModel* boostModel = gameModel.GetBallBoostModel();
+    if (boostModel != NULL) {
+        numBoosts = boostModel->GetNumAvailableBoosts();
+    }
+
+    double portalLifeTimeInSecs = DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+    assert(numBoosts >= 0);
+    switch (numBoosts) {
+        case 0:
+            portalLifeTimeInSecs = 0.8*DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+            break;
+        case 1:
+            portalLifeTimeInSecs = 1.0*DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+            break;
+        case 2:
+            portalLifeTimeInSecs = 1.3*DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+            break;
+        default:
+            portalLifeTimeInSecs = 1.6*DEFAULT_BOSS_PORTAL_TERMINATION_TIME_IN_SECS;
+            break;
+    }
+
     // Create twin portals...
     std::pair<PortalProjectile*, PortalProjectile*> portalPair =
         PortalProjectile::BuildSiblingPortalProjectiles(portal1Pos, portal2Pos, 
         FuturismBoss::PORTAL_PROJECTILE_WIDTH, FuturismBoss::PORTAL_PROJECTILE_HEIGHT,
-        this->nextPortalColour, BOSS_PORTAL_TERMINATION_TIME_IN_SECS);
+        this->nextPortalColour, portalLifeTimeInSecs);
 
     gameModel.AddProjectile(portalPair.first);
     gameModel.AddProjectile(portalPair.second);
@@ -2288,6 +2310,16 @@ bool FuturismBossAIState::BossHasLineOfSightToBall(const GameBall& ball, const G
     }
 
     return false;
+}
+
+bool FuturismBossAIState::PlayerHasBoostAlmostAvailable(const GameModel& gameModel, double timeAllowanceToNextBoostInSecs) const {
+    const BallBoostModel* boostModel = gameModel.GetBallBoostModel();
+    if (boostModel == NULL) {
+        return false;
+    }
+
+    return (boostModel->GetNumAvailableBoosts() > 0) || 
+        (boostModel->GetChargeTimeUntilNextBoost() <= timeAllowanceToNextBoostInSecs);
 }
 
 void FuturismBossAIState::DoBasicWeaponSingleShot(GameModel& gameModel, const Point2D& firePos, 

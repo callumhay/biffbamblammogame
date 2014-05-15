@@ -189,7 +189,7 @@ fiveStarFGSparkleEmitter(NULL), fiveStarBGGlowEmitter(NULL) {
 	this->nextPgArrowEmitter->SetParticleLife(ESPInterval(ARROW_LIFE_TIME_MIN, ARROW_LIFE_TIME_MAX));
     this->nextPgArrowEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
 	this->nextPgArrowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->nextPgArrowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    this->nextPgArrowEmitter->SetParticleAlignment(ESP::NoAlignment);
 	this->nextPgArrowEmitter->SetParticleRotation(ESPInterval(90));
     this->nextPgArrowEmitter->SetEmitDirection(Vector3D(1,0,0));
 	this->nextPgArrowEmitter->SetParticleSize(ESPInterval(ARROW_WIDTH), ESPInterval(ARROW_HEIGHT));
@@ -203,7 +203,7 @@ fiveStarFGSparkleEmitter(NULL), fiveStarBGGlowEmitter(NULL) {
 	this->prevPgArrowEmitter->SetParticleLife(ESPInterval(ARROW_LIFE_TIME_MIN, ARROW_LIFE_TIME_MAX));
     this->prevPgArrowEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
 	this->prevPgArrowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->prevPgArrowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	this->prevPgArrowEmitter->SetParticleAlignment(ESP::NoAlignment);
 	this->prevPgArrowEmitter->SetParticleRotation(ESPInterval(-90));
     this->prevPgArrowEmitter->SetEmitDirection(Vector3D(-1,0,0));
 	this->prevPgArrowEmitter->SetParticleSize(ESPInterval(ARROW_WIDTH), ESPInterval(ARROW_HEIGHT));

@@ -27,7 +27,7 @@ resources/worlds/levels/medium/like_plinko_but_with_teleportation.lvl
 resources/worlds/levels/medium/obscured_enlightenment.lvl
 
 # Portals + Remote Control Rocket
-resources/worlds/levels/medium/choose_your_own_adventure.lvl : 333
+resources/worlds/levels/medium/choose_your_own_adventure.lvl : 325
 
 # Portals + One-way + Ice
 resources/worlds/levels/medium/not_burning_any_bridges.lvl
@@ -51,7 +51,7 @@ resources/worlds/levels/medium/three_chances.lvl
 resources/worlds/levels/hard/loop_booster.lvl
 
 # Paddle teleportation + acting as a decoy for rocket turrets
-resources/worlds/levels/medium/multitasking_now_with_more_rockets.lvl : 360
+resources/worlds/levels/medium/multitasking_now_with_more_rockets.lvl : 355
 
 # Ice a whole pillar of solid blocks and then use the laser beam
 # to get it through to a collateral block that will wipe out the pillar granting access
@@ -78,6 +78,5 @@ resources/worlds/levels/hard/frikin_laser_beams_part_2.lvl
 resources/worlds/levels/hard/much_portals_such_switches_very_distance.lvl
 
 # BOSS: Teleportron
-resources/worlds/levels/bosses/teleportron.lvl 
-#TODO ADD STARS 385
+resources/worlds/levels/bosses/teleportron.lvl : 385
 

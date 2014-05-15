@@ -760,7 +760,7 @@ int BoundingLines::CollisionCheckIndex(const BoundingLines& other) const {
                 // Now do a more thorough test
                 float t = Vector2D::Dot(currOtherNormal, (currOtherLine.P1() - currThisLine.P1())) /
                     Vector2D::Dot(currOtherNormal, (currThisLine.P2() - currThisLine.P1()));
-                if (t >= 0.0f && t <= 1.0f) {
+                if (t >= -EPSILON && t <= (1.0f + EPSILON)) {
                     return count;
                 }
             }
