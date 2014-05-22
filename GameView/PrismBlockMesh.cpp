@@ -31,8 +31,13 @@
 
 #include "PrismBlockMesh.h"
 #include "GameViewConstants.h"
+#include "PersistentTextureManager.h"
 
-PrismBlockMesh::PrismBlockMesh(PrismBlockType type) : prismBlockGeometry(NULL), prismEffect(NULL) {
+const double PrismBlockMesh::TIME_BETWEEN_SHINES_IN_SECS = 4.0;
+const double PrismBlockMesh::SHINE_LENGTH_IN_SECS = 0.4;
+
+PrismBlockMesh::PrismBlockMesh(PrismBlockType type) : 
+prismBlockGeometry(NULL), prismEffect(NULL), currShineState(NotShining), shineTimer(0.0) {
 	this->LoadMesh(type);
 	assert(this->prismBlockGeometry != NULL);
 	assert(this->prismEffect != NULL);
@@ -43,6 +48,52 @@ PrismBlockMesh::~PrismBlockMesh() {
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->prismBlockGeometry);
     assert(success);
     UNUSED_VARIABLE(success);
+}
+
+void PrismBlockMesh::Tick(double dT) {
+    this->shineTimer += dT;
+
+    switch (this->currShineState) {
+        case NotShining:
+            if (this->shineTimer >= TIME_BETWEEN_SHINES_IN_SECS) {
+                this->currShineState = Shining;
+                this->shineTimer = 0.0;
+                // Set the technique to shining...
+                this->prismEffect->SetTechnique(CgFxPrism::SHINE_PRISM_TECHNIQUE_NAME);
+                this->prismEffect->ResetTimer();
+            }
+            break;
+
+        case Shining: {
+            static const float STARTING_AND_ENDING_SHINE_ALPHA = 0.05f;
+            static const float MID_SHINE_ALPHA = 0.6f;
+
+            if (this->shineTimer >= SHINE_LENGTH_IN_SECS) {
+                this->prismEffect->SetTimer(1.0);
+                this->prismEffect->SetShineAlpha(STARTING_AND_ENDING_SHINE_ALPHA);
+                this->currShineState = NotShining;
+                this->shineTimer = 0.0;
+                // Set the technique to not shine
+                this->prismEffect->SetTechnique(CgFxPrism::DEFAULT_PRISM_TECHNIQUE_NAME);
+            }
+            else {
+                double percentDone = this->shineTimer/SHINE_LENGTH_IN_SECS;
+                this->prismEffect->SetTimer(percentDone);
+
+                if (percentDone <= 0.5) {
+                    this->prismEffect->SetShineAlpha(NumberFuncs::LerpOverTime(0, 0.5, STARTING_AND_ENDING_SHINE_ALPHA, MID_SHINE_ALPHA, percentDone));
+                }
+                else {
+                    this->prismEffect->SetShineAlpha(NumberFuncs::LerpOverTime(0.5, 1.0, MID_SHINE_ALPHA, STARTING_AND_ENDING_SHINE_ALPHA, percentDone));
+                }
+            }
+            break;
+        }
+
+        default:
+            assert(false);
+            break;
+    }
 }
 
 /**
@@ -71,4 +122,9 @@ void PrismBlockMesh::LoadMesh(PrismBlockType type) {
 	MaterialGroup* prismMatGrp = prismMaterialGrps.begin()->second;
 	this->prismEffect = static_cast<CgFxPrism*>(prismMatGrp->GetMaterial());
     assert(this->prismEffect != NULL);
+
+    Texture2D* shineTex = PersistentTextureManager::GetInstance()->PreloadTexture2D(
+        GameViewConstants::GetInstance()->TEXTURE_SHINY_FLASH);
+    assert(shineTex != NULL);
+    this->prismEffect->SetShineTexture(shineTex);
 }

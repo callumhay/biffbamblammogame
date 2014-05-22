@@ -30,16 +30,26 @@
  */
 
 #include "GameControllerManager.h"
+#include "BBBGameController.h"
 #include "KeyboardSDLController.h"
+
+#ifdef USE_XBOX360_CONTROLLER
 #include "XBox360Controller.h"
+#endif
+
+#ifdef USE_KINECT_CONTROLLER
+#include "KinectController.h"
+#endif
 
 GameControllerManager* GameControllerManager::instance = NULL;
 
-const size_t GameControllerManager::KEYBOARD_SDL_INDEX = 0;
-const size_t GameControllerManager::XBOX_360_INDEX		 = 1;
+const size_t GameControllerManager::KEYBOARD_SDL_INDEX     = 0;
+const size_t GameControllerManager::XBOX_360_INDEX         = 1;
+const size_t GameControllerManager::KINECT_INDEX           = 2;
+const size_t GameControllerManager::NUM_CONTROLLER_INDICES = 3;
 
 GameControllerManager::GameControllerManager() : model(NULL), display(NULL) {
-	this->gameControllers.resize(2, NULL);
+	this->gameControllers.resize(NUM_CONTROLLER_INDICES, NULL);
 }
 
 GameControllerManager::~GameControllerManager() {
@@ -62,6 +72,7 @@ void GameControllerManager::InitAllControllers(GameModel* model, GameDisplay* di
 	this->display = display;
 	this->GetSDLKeyboardGameController();
 	this->GetXBox360Controller(0);
+    this->GetKinectController();
 }
 
 /**
@@ -86,35 +97,58 @@ BBBGameController* GameControllerManager::GetXBox360Controller(int controllerNum
 	assert(this->model != NULL);
 	assert(this->display != NULL);
 
-#ifdef _WIN32
+#if defined(USE_XBOX360_CONTROLLER)
 	if (this->gameControllers[XBOX_360_INDEX] == NULL) {
 		// Check for a connected XBox 360 controller of the given controller number
 		if (XBox360Controller::IsConnected(controllerNum)) {
 			BBBGameController* xBox360Controller = new XBox360Controller(this->model, this->display, controllerNum);
-		this->gameControllers[XBOX_360_INDEX] = xBox360Controller;
-		this->loadedGameControllers.push_back(xBox360Controller);
+		    this->gameControllers[XBOX_360_INDEX] = xBox360Controller;
+		    this->loadedGameControllers.push_back(xBox360Controller);
 		}
 	}
-#endif
 
 	return this->gameControllers[XBOX_360_INDEX];
+#else
+    return NULL;
+#endif
+}
+
+BBBGameController* GameControllerManager::GetKinectController() {
+    assert(this->model != NULL);
+    assert(this->display != NULL);
+
+#if defined(USE_KINECT_CONTROLLER)
+    if (this->gameControllers[KINECT_INDEX] == NULL) {
+        // Check for a connected Kinect controller
+        if (KinectController::CheckForConnection()) {
+            BBBGameController* kinectController = new KinectController(this->model, this->display);
+            this->gameControllers[KINECT_INDEX] = kinectController;
+            this->loadedGameControllers.push_back(kinectController);
+        }
+    }
+
+    return this->gameControllers[KINECT_INDEX];
+#else
+    return NULL;
+#endif
 }
 
 /**
- * Trys to load any newly introduced plug-and-play controllers.
+ * Tries to load any newly introduced plug-and-play controllers.
  */
 void GameControllerManager::TryToLoadPlugAndPlayControllers() {
 	assert(this->model != NULL);
 	assert(this->display != NULL);
 
 	if (this->ControllersCanStillPlugAndPlay()) {
-		// Currently the only plug-and-play controller we care about is the XBox360 controller
+		// Load any plug and play controllers if possible...
 		GameControllerManager::GetXBox360Controller(0);
+        GameControllerManager::GetKinectController();
 	}
 }
 
 void GameControllerManager::SetControllerSensitivity(int sensitivity) {
-    bool success = XBox360Controller::SetSensitivity(sensitivity);
-    UNUSED_VARIABLE(success);
-    assert(success);
+#if defined(USE_XBOX360_CONTROLLER)
+    XBox360Controller::SetSensitivity(sensitivity);
+#endif
 }

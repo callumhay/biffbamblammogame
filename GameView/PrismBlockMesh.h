@@ -47,6 +47,8 @@ public:
 	PrismBlockMesh(PrismBlockType type);
 	~PrismBlockMesh();
 
+    void Tick(double dT);
+
 	/**
 	 * Set the scene texture for the material used to draw the sticky goo -
 	 * this texture is used to draw the refractive portion of the material.
@@ -61,7 +63,13 @@ public:
 	}
 
 private:
-	Mesh* prismBlockGeometry;
+    static const double TIME_BETWEEN_SHINES_IN_SECS;
+    static const double SHINE_LENGTH_IN_SECS;
+    
+    enum ShineState { NotShining, Shining } currShineState;
+    double shineTimer;
+	
+    Mesh* prismBlockGeometry;
 	CgFxPrism* prismEffect;
 
 	void LoadMesh(PrismBlockType type);

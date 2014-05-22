@@ -681,6 +681,9 @@ void LevelMesh::DrawSecondPassPieces(double dT, const Camera& camera, const Game
 
     this->prismBlockDiamond->SetSceneTexture(sceneTexture);
     this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
+    this->prismBlockDiamond->Tick(dT);
+    this->prismBlockTriangleUR->Tick(dT);
+
     this->portalBlock->SetSceneTexture(sceneTexture);
     this->portalBlock->Tick(dT);
 

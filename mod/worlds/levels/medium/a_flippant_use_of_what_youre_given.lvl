@@ -34,11 +34,11 @@ E E E N E E E N E E E E E E E E E E E N E E E
 E E X(a,b,f) N E E E N E E E E E E E E E E E N X(c,d,f) E E 
 
 STARS:
-100
-500
-1000
-2000
-5000
+7000
+12000
+22000
+27000
+30000
 
 PaddleGrow 2
 PoisonPaddle 3
@@ -46,8 +46,8 @@ Blackout 2
 BallSafetyNet 2
 UberBall 1
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 3
@@ -70,9 +70,9 @@ IceBlasterPaddle 1
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 2
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 3
 
 PADDLESTARTXPOS: 13.75

@@ -420,7 +420,7 @@ void FuturismBossStage1AIState::RocketExplosionOccurred(GameModel* gameModel, co
         return;
     }
     
-    static const float DEFAULT_EXPLOSION_RADIUS = FuturismBoss::CORE_BOSS_HALF_SIZE;
+    static const float DEFAULT_EXPLOSION_RADIUS = 1.25f * FuturismBoss::CORE_BOSS_HALF_SIZE;
     float rocketSizeFactor = rocket->GetHeight() / rocket->GetDefaultHeight();
     Collision::Circle2D explosionCircle(rocket->GetPosition(), rocketSizeFactor*DEFAULT_EXPLOSION_RADIUS);
 

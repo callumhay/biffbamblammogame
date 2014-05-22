@@ -211,34 +211,10 @@ void NouveauBossAI::ShootRandomBottomSphereLaserBullet(GameModel* gameModel) {
     Point3D shotOrigin3D = this->boss->GetBottomSphereShootPt(); 
     Point2D shotOrigin(shotOrigin3D[0], shotOrigin3D[1]);
     const Point2D& paddlePos = paddle->GetCenterPosition();
+    
     Vector2D laserDir = paddlePos - shotOrigin;
+    laserDir.Rotate(Randomizer::GetInstance()->RandomNumNegOneToOne() * 15.0f);
     laserDir.Normalize();
-
-    // If the laser is anywhere near to colliding with either of the splitter prisms then just shoot
-    // at the apex of that splitter prism...
-    PrismBlock* splitterPrism = NouveauBoss::GetLeftSplitterPrism(*currLevel);
-    Vector2D splitterTargetDir = (splitterPrism->GetCenter() + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT)) - shotOrigin;
-    splitterTargetDir.Normalize();
-    if (Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
-        Vector2D::Dot(splitterTargetDir, laserDir))))) <= 30.0f && IsWorthwhileShotAtSplitterPrism(splitterTargetDir)) {
-
-            laserDir = splitterTargetDir;
-    }
-    else {
-        splitterPrism = NouveauBoss::GetRightSplitterPrism(*currLevel);
-        splitterTargetDir = (splitterPrism->GetCenter() + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT)) - shotOrigin;
-        splitterTargetDir.Normalize();
-
-        if (Trig::radiansToDegrees(acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
-            Vector2D::Dot(splitterTargetDir, laserDir))))) <= 30.0f  && IsWorthwhileShotAtSplitterPrism(splitterTargetDir)) {
-
-                laserDir = splitterTargetDir;
-        }
-        else {
-            // Rotate a small, random amount if we're shooting directly at the paddle
-            laserDir.Rotate(Randomizer::GetInstance()->RandomNumNegOneToOne() * 15.0f);
-        }
-    }   
 
     gameModel->AddProjectile(new BossLaserProjectile(shotOrigin, laserDir));
 
@@ -602,36 +578,7 @@ void NouveauBossAI::ExecutePrepLaserBeamAttackState(double dT, GameModel* gameMo
                     NouveauBoss::GetBestSidePrismCandidates(*currLevel, *gameModel->GetPlayerPaddle(), 
                     nextFiringPt, isLeft, !isLeft);
                 
-                if (prisms.empty()) {
-
-                    // Try shooting at the splitter prisms...
-                    const PrismBlock* leftSplitterPrism  = NouveauBoss::GetLeftSplitterPrism(*currLevel);
-                    const PrismBlock* rightSplitterPrism = NouveauBoss::GetRightSplitterPrism(*currLevel);
-
-                    Point2D leftPrismTop  = leftSplitterPrism->GetCenter() + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT);
-                    Point2D rightPrismTop = rightSplitterPrism->GetCenter() + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT);
-
-                    Vector2D leftPrismTopDir  = Vector2D::Normalize(leftPrismTop - nextFiringPt);
-                    Vector2D rightPrismTopDir = Vector2D::Normalize(rightPrismTop - nextFiringPt);
-
-                    bool isLeftPrismWorthShooting  = IsWorthwhileShotAtSplitterPrism(leftPrismTopDir);
-                    bool isRightPrismWorthShooting = IsWorthwhileShotAtSplitterPrism(rightPrismTopDir);
-
-                    if (isLeftPrismWorthShooting && isRightPrismWorthShooting) {
-                        nextTargetPt = Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0 ? leftPrismTop : rightPrismTop;
-                    }
-                    else if (isLeftPrismWorthShooting) {
-                        nextTargetPt = leftPrismTop;
-                    }
-                    else if (isRightPrismWorthShooting) {
-                        nextTargetPt = rightPrismTop;
-                    }
-                    else {
-                        // If all else fails then just fire the laser straight downwards
-                        nextTargetPt = Point2D(nextFiringPt[0], 0.0f);
-                    }
-                }
-                else {
+                if (!prisms.empty()) {
                     // Choose a random prism on the side to shoot at...
                     const PrismTriangleBlock* chosenPrism = prisms[Randomizer::GetInstance()->RandomUnsignedInt() % prisms.size()];
                     assert(chosenPrism != NULL);

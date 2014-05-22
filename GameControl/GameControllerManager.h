@@ -82,11 +82,14 @@ private:
 	~GameControllerManager();
 
 	BBBGameController* GetSDLKeyboardGameController();
-	//BBBGameController* GetSDLJoystickGameController();
 	BBBGameController* GetXBox360Controller(int controllerNum);
+    BBBGameController* GetKinectController();
 
 	static const size_t KEYBOARD_SDL_INDEX;
 	static const size_t XBOX_360_INDEX;
+    static const size_t KINECT_INDEX;
+    static const size_t NUM_CONTROLLER_INDICES;
+
 	std::vector<BBBGameController*> gameControllers;
 	std::list<BBBGameController*> loadedGameControllers;
 
@@ -94,7 +97,7 @@ private:
 };
 
 inline bool GameControllerManager::ControllersCanStillPlugAndPlay() const {
-	return (this->gameControllers[XBOX_360_INDEX] == NULL);
+	return (this->gameControllers[XBOX_360_INDEX] == NULL || this->gameControllers[KINECT_INDEX] == NULL);
 }
 
 /**
