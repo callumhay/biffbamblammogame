@@ -159,7 +159,7 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	// Set the world transform parameters
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
 	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glPopMatrix();    
+	glPopMatrix();
     
 	// Textures
 	if (this->properties->diffuseTexture != NULL) {

@@ -84,7 +84,11 @@ public:
 	}
 
 	void Translate(const Vector3D& t);
-	void Transform(const Matrix4x4& m);
+	void TransformVerticesAndNormals(const Matrix4x4& m);
+    void TransformTexCoords(const Matrix4x4& m);
+    void TransformVerticesNormalsAndTexCoords(const Matrix4x4& m);
+    void RotateTexCoords(float degs);
+    //void ReflectTexCoordsInY();
 };
 
 class Mesh;

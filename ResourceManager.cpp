@@ -241,7 +241,7 @@ Mesh* ResourceManager::GetInkBlockMeshResource() {
     assert(success);
     UNUSED_VARIABLE(success);
 
-	inkBlockPolyGrp->Transform(Matrix4x4::scaleMatrix(Vector3D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT, 1.0f)));
+	inkBlockPolyGrp->TransformVerticesAndNormals(Matrix4x4::scaleMatrix(Vector3D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT, 1.0f)));
 	assert(inkBlockPolyGrp != NULL);
 
 	// Create the material properties and effect (ink block cgfx shader - makes the ink block all wiggly and stuff)
@@ -286,7 +286,7 @@ Mesh* ResourceManager::GetPortalBlockMeshResource() {
     UNUSED_VARIABLE(success);
 
     // Scale the ball mesh so that it's the size of a level piece...
-    portalBlockPolyGrp->Transform(Matrix4x4::scaleMatrix(Vector3D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT, 1.0f)));
+    portalBlockPolyGrp->TransformVerticesAndNormals(Matrix4x4::scaleMatrix(Vector3D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT, 1.0f)));
     assert(portalBlockPolyGrp != NULL);
 
 	CgFxPortalBlock* portalBlockEffect = new CgFxPortalBlock();

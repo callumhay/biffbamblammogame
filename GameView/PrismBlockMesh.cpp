@@ -108,8 +108,11 @@ void PrismBlockMesh::LoadMesh(PrismBlockType type) {
 		case PrismBlockMesh::DiamondPrism:
 			this->prismBlockGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PRISM_DIAMOND_BLOCK_MESH);
 			break;
-		case PrismBlockMesh::TrianglePrism:
-			this->prismBlockGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PRISM_TRIANGLE_BLOCK_MESH);
+        case PrismBlockMesh::TrianglePrismRight:
+            this->prismBlockGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PRISM_TRIANGLE_BLOCK_RIGHT_MESH);
+            break;
+		case PrismBlockMesh::TrianglePrismLeft:
+			this->prismBlockGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PRISM_TRIANGLE_BLOCK_LEFT_MESH);
 			break;
 		default:
 			assert(false);

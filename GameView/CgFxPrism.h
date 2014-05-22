@@ -72,6 +72,9 @@ public:
     void SetShineAlpha(float a) {
         this->shineAlpha = a;
     }
+    //void SetShineDir(const Vector2D& dir) {
+    //    this->shineDir = dir;
+    //}
 
 protected:
 	void SetupBeforePasses(const Camera& camera);
@@ -87,12 +90,14 @@ private:
     CGparameter timerParam;
     CGparameter shineSamplerParam;
     CGparameter shineAlphaParam;
+    //CGparameter shineDirParam;
 
 	float indexOfRefraction, warpAmount;
 	const Texture2D* sceneTex;
     const Texture2D* shineTex;
     float shineAlpha;
     double timer;
+    //Vector2D shineDir;
 
     DISALLOW_COPY_AND_ASSIGN(CgFxPrism);
 };

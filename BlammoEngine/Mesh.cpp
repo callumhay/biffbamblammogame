@@ -100,7 +100,7 @@ void PolygonGroup::Translate(const Vector3D& t) {
 	}
 }
 
-void PolygonGroup::Transform(const Matrix4x4& m) {
+void PolygonGroup::TransformVerticesAndNormals(const Matrix4x4& m) {
 	for (size_t i = 0; i < this->vertexStream.size(); ++i) {
 		Point3D& currPt = this->vertexStream[i];
 		currPt = m * currPt;
@@ -110,6 +110,32 @@ void PolygonGroup::Transform(const Matrix4x4& m) {
 		currNormal = m * currNormal;
 	}
 }
+
+void PolygonGroup::TransformTexCoords(const Matrix4x4& m) {
+    for (size_t i = 0; i < this->texCoordStream.size(); i++) {
+        Point2D& currTexCoord = this->texCoordStream[i];
+        currTexCoord = m * currTexCoord;
+    }
+}
+
+void PolygonGroup::TransformVerticesNormalsAndTexCoords(const Matrix4x4& m) {
+    this->TransformVerticesAndNormals(m);
+    this->TransformTexCoords(m);
+}
+
+void PolygonGroup::RotateTexCoords(float degs) {
+    for (size_t i = 0; i < this->texCoordStream.size(); i++) {
+        Point2D& currTexCoord = this->texCoordStream[i];
+        currTexCoord.Rotate(degs);
+    }
+}
+
+//void PolygonGroup::ReflectTexCoordsInY() {
+//    for (size_t i = 0; i < this->texCoordStream.size(); i++) {
+//        Point2D& currTexCoord = this->texCoordStream[i];
+//        TODO
+//    }
+//}
 
 void MaterialGroup::BuildDisplayList() {
     assert(this->polyGrp != NULL);

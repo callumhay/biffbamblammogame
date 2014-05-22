@@ -129,6 +129,18 @@ public:
         this->v_[1] += other[1];
     }
 
+    void Rotate(float angInDegs) {
+        float angInRads = Trig::degreesToRadians(angInDegs);
+
+        float c = cosf(angInRads);
+        float s = sinf(angInRads);
+        float x = c * this->v_[0] - s * this->v_[1];
+        float y = s * this->v_[0] + c * this->v_[1];
+
+        this->v_[0] = x;
+        this->v_[1] = y;
+    }
+
     static Point2D GetMidPoint(const Point2D& p1, const Point2D& p2) {
         return Point2D((p1[0] + p2[0]) / 2.0f, (p1[1] + p2[1]) / 2.0f);
     }

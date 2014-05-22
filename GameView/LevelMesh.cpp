@@ -63,10 +63,12 @@
 #include "../GameModel/AlwaysDropBlock.h"
 #include "../GameModel/RegenBlock.h"
 #include "../GameModel/OneWayBlock.h"
+#include "../GameModel/TriangleBlocks.h"
 
 LevelMesh::LevelMesh(GameSound* sound, const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) :
 currLevel(NULL), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
-prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), fragileCannonBlock(NULL), collateralBlock(NULL),
+prismBlockDiamond(NULL), prismBlockTriangleRight(NULL), prismBlockTriangleLeft(NULL),
+cannonBlock(NULL), fragileCannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayBlock(NULL), 
 laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), alwaysDropBlock(NULL), regenBlock(NULL),
 statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
@@ -83,7 +85,8 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
 	this->bombBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
 	this->triangleBlockUR				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
 	this->prismBlockDiamond			    = new PrismBlockMesh(PrismBlockMesh::DiamondPrism);
-	this->prismBlockTriangleUR	        = new PrismBlockMesh(PrismBlockMesh::TrianglePrism);
+	this->prismBlockTriangleRight	    = new PrismBlockMesh(PrismBlockMesh::TrianglePrismRight);
+    this->prismBlockTriangleLeft        = new PrismBlockMesh(PrismBlockMesh::TrianglePrismLeft);
 	this->inkBlock						= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 	this->portalBlock					= new PortalBlockMesh();
 	this->cannonBlock					= new CannonBlockMesh();
@@ -114,7 +117,8 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
     INSERT_MATERIAL_GRPS(this->bombBlock, false);
     INSERT_MATERIAL_GRPS(this->inkBlock, false);
     INSERT_MATERIAL_GRPS(this->prismBlockDiamond, false);
-    INSERT_MATERIAL_GRPS(this->prismBlockTriangleUR, false);
+    INSERT_MATERIAL_GRPS(this->prismBlockTriangleRight, false);
+    INSERT_MATERIAL_GRPS(this->prismBlockTriangleLeft, true);
     INSERT_MATERIAL_GRPS(this->portalBlock, false);
     INSERT_MATERIAL_GRPS(this->teslaBlock, false);
     INSERT_MATERIAL_GRPS(this->itemDropBlock, false);
@@ -143,8 +147,10 @@ LevelMesh::~LevelMesh() {
 	// Delete all meshes
 	delete this->prismBlockDiamond;
 	this->prismBlockDiamond = NULL;
-	delete this->prismBlockTriangleUR;
-	this->prismBlockTriangleUR = NULL;
+    delete this->prismBlockTriangleRight;
+    this->prismBlockTriangleRight = NULL;
+	delete this->prismBlockTriangleLeft;
+	this->prismBlockTriangleLeft = NULL;
 	delete this->portalBlock;
 	this->portalBlock = NULL;
 	delete this->cannonBlock;
@@ -680,9 +686,11 @@ void LevelMesh::DrawSecondPassPieces(double dT, const Camera& camera, const Game
     UNUSED_PARAMETER(gameModel);
 
     this->prismBlockDiamond->SetSceneTexture(sceneTexture);
-    this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
+    this->prismBlockTriangleRight->SetSceneTexture(sceneTexture);
+    this->prismBlockTriangleLeft->SetSceneTexture(sceneTexture);
     this->prismBlockDiamond->Tick(dT);
-    this->prismBlockTriangleUR->Tick(dT);
+    this->prismBlockTriangleRight->Tick(dT);
+    this->prismBlockTriangleLeft->Tick(dT);
 
     this->portalBlock->SetSceneTexture(sceneTexture);
     this->portalBlock->Tick(dT);
@@ -760,9 +768,8 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		GLuint newDisplayList = glGenLists(1);
 		assert(newDisplayList != 0);
 
-		currPolyGrp->Transform(fullTransform);
-		
-		// TODO: other local transform operations to the mesh e.g., reflect, rotate, etc.
+		currPolyGrp->TransformVerticesAndNormals(fullTransform);
+
 		glNewList(newDisplayList, GL_COMPILE);
 		glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
 		currPolyGrp->Draw();
@@ -772,7 +779,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		Matrix4x4 worldInvTransform = Matrix4x4::translationMatrix(-worldTranslation);
 		Matrix4x4 fullInvTransform = localInvTransform * worldInvTransform;
 		
-		currPolyGrp->Transform(fullInvTransform);
+		currPolyGrp->TransformVerticesAndNormals(fullInvTransform);
 	
 		// Insert the new display list into the list of display lists...
         
@@ -780,12 +787,19 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
         std::map<const LevelPiece*, std::map<CgFxAbstractMaterialEffect*, GLuint> >* pieceDisplayListMap = &this->firstPassPieceDisplayLists;
         std::map<CgFxAbstractMaterialEffect*, std::vector<GLuint> >* displayListsPerMaterialMap = &this->firstPassDisplayListsPerMaterial;
         switch (piece->GetType()) {
+            
             case LevelPiece::Portal:
             case LevelPiece::Prism:
-            case LevelPiece::PrismTriangle:
                 pieceDisplayListMap = &this->secondPassPieceDisplayLists;
                 displayListsPerMaterialMap = &this->secondPassDisplayListsPerMaterial;
                 break;
+
+            case LevelPiece::PrismTriangle: {
+                pieceDisplayListMap = &this->secondPassPieceDisplayLists;
+                displayListsPerMaterialMap = &this->secondPassDisplayListsPerMaterial;
+                break;
+            }
+
             default:
                 break;
         }
@@ -856,8 +870,20 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 		case LevelPiece::Prism:
 			return &this->prismBlockDiamond->GetMaterialGroups();
 
-		case LevelPiece::PrismTriangle:
-			return &this->prismBlockTriangleUR->GetMaterialGroups();
+        case LevelPiece::PrismTriangle: {
+            switch (static_cast<const PrismTriangleBlock*>(piece)->GetOrientation()) {
+                case TriangleBlock::LowerRight:
+                case TriangleBlock::UpperRight:
+                    return &this->prismBlockTriangleRight->GetMaterialGroups();
+                case TriangleBlock::LowerLeft:
+                case TriangleBlock::UpperLeft:
+                    return &this->prismBlockTriangleLeft->GetMaterialGroups();
+                default:
+                    assert(false);
+                    break;
+            }
+            return &this->prismBlockTriangleRight->GetMaterialGroups();
+        }
 
 		case LevelPiece::Portal:
 			return &this->portalBlock->GetMaterialGroups();

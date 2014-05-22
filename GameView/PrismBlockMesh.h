@@ -37,12 +37,12 @@
 
 /**
  * Wraps up the mesh for the prism block and ensures it has the appropriately
- * casted shader so that the scene texture can be set onthefly for it.
+ * casted shader so that the scene texture can be set on the fly for it.
  */
 class PrismBlockMesh {
 
 public:
-	enum PrismBlockType { DiamondPrism, TrianglePrism };
+	enum PrismBlockType { DiamondPrism, TrianglePrismLeft, TrianglePrismRight };
 
 	PrismBlockMesh(PrismBlockType type);
 	~PrismBlockMesh();

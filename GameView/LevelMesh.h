@@ -140,8 +140,10 @@ private:
 	Mesh* inkBlock;
 
 	PortalBlockMesh* portalBlock;
-	PrismBlockMesh* prismBlockDiamond;		// Prism diamond block
-	PrismBlockMesh* prismBlockTriangleUR;	// Prism triangle block in upper-right corner position
+	PrismBlockMesh* prismBlockDiamond;       // Prism diamond block
+	PrismBlockMesh* prismBlockTriangleRight; // Prism triangle block in upper-right corner position
+    PrismBlockMesh* prismBlockTriangleLeft;	 // Prism triangle block in lower-left corner position
+
 
 	CannonBlockMesh* cannonBlock;
     FragileCannonBlockMesh* fragileCannonBlock;

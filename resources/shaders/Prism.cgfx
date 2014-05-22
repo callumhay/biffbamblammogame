@@ -138,6 +138,8 @@ float ShineAlpha  <
     string UIName =  "Shine Alpha";
 > = 0.5f;
 
+float2 ShineDir;
+
 float Timer : TIME < string UIWidget = "None"; >;
 
 texture ColourTexture  <
@@ -304,7 +306,7 @@ float4 prism_shine_PS(vertexOutput IN) : COLOR {
 	PrismShading(nWorldNormal, IN.WorldPos, nWorldView, diffContrib, specContrib);
     float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
     float3 refractColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
-	float3 shineTexColour  = tex2D(ShineSampler, IN.UV + Timer * float2(1, 0)).rgb;
+	float3 shineTexColour  = tex2D(ShineSampler, IN.UV + Timer * ShineDir).rgb;
 	
     float3 result = ShineAlpha.r * shineTexColour + SpecularColour * specContrib + 
 		DiffuseColour * diffContrib + refractColour;
