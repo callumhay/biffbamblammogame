@@ -65,13 +65,13 @@ void BreakableTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const 
 
 Matrix4x4 BreakableTriangleBlock::GetPieceToLevelTransform() const {
 	Matrix4x4 translation =  Matrix4x4::translationMatrix(Vector3D(this->center[0], this->center[1], 0.0f));
-	Matrix4x4 orient = TriangleBlock::GetOrientationMatrix(this->orient);
+	Matrix4x4 orient = TriangleBlock::GetBasicOrientationMatrix(this->orient);
 	return translation * orient;
 }
 
 Matrix4x4 BreakableTriangleBlock::GetPieceToLevelInvTransform() const {
 	Matrix4x4 invTranslation =  Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
-	Matrix4x4 invOrient = TriangleBlock::GetInvOrientationMatrix(this->orient);
+	Matrix4x4 invOrient = TriangleBlock::GetBasicInvOrientationMatrix(this->orient);
 	return invOrient * invTranslation;
 }
 
@@ -108,13 +108,13 @@ void SolidTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Leve
 
 Matrix4x4 SolidTriangleBlock::GetPieceToLevelTransform() const {
 	Matrix4x4 translation =  Matrix4x4::translationMatrix(Vector3D(this->center[0], this->center[1], 0.0f));
-	Matrix4x4 orient = TriangleBlock::GetOrientationMatrix(this->orient);
+	Matrix4x4 orient = TriangleBlock::GetBasicOrientationMatrix(this->orient);
 	return translation * orient;
 }
 
 Matrix4x4 SolidTriangleBlock::GetPieceToLevelInvTransform() const {
 	Matrix4x4 invTranslation =  Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
-	Matrix4x4 invOrient = TriangleBlock::GetInvOrientationMatrix(this->orient);
+	Matrix4x4 invOrient = TriangleBlock::GetBasicInvOrientationMatrix(this->orient);
 	return invOrient * invTranslation;
 }
 
@@ -127,13 +127,13 @@ PrismTriangleBlock::~PrismTriangleBlock() {
 
 Matrix4x4 PrismTriangleBlock::GetPieceToLevelTransform() const {
 	Matrix4x4 translation =  Matrix4x4::translationMatrix(Vector3D(this->center[0], this->center[1], 0.0f));
-	Matrix4x4 orient = TriangleBlock::GetOrientationMatrix(this->orient);
+	Matrix4x4 orient = TriangleBlock::GetPrismOrientationMatrix(this->orient);
 	return translation * orient;
 }
 
 Matrix4x4 PrismTriangleBlock::GetPieceToLevelInvTransform() const {
 	Matrix4x4 invTranslation =  Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
-	Matrix4x4 invOrient = TriangleBlock::GetInvOrientationMatrix(this->orient);
+	Matrix4x4 invOrient = TriangleBlock::GetPrismInvOrientationMatrix(this->orient);
 	return invOrient * invTranslation;
 }
 
@@ -555,12 +555,12 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
 	return BoundingLines(boundingLines, boundingNorms, onInside);
 }
 
-Matrix4x4 TriangleBlock::GetOrientationMatrix(TriangleBlock::Orientation orient) {
+Matrix4x4 TriangleBlock::GetBasicOrientationMatrix(TriangleBlock::Orientation orient) {
 	Matrix4x4 orientMat;
 	switch (orient) {
 		case TriangleBlock::UpperLeft:
 			// Reflection in y-axis
-			orientMat = Matrix4x4::reflectionMatrix('y');
+            orientMat = Matrix4x4::rotationMatrix('x', 180, true) * Matrix4x4::rotationMatrix('z', 180, true);
 			break;
 		case TriangleBlock::UpperRight:
 			// Identity matrix.
@@ -570,7 +570,7 @@ Matrix4x4 TriangleBlock::GetOrientationMatrix(TriangleBlock::Orientation orient)
 			orientMat = Matrix4x4::rotationMatrix('z', 180, true);
 			break;
 		case TriangleBlock::LowerRight:
-			orientMat = Matrix4x4::reflectionMatrix('x');
+            orientMat = Matrix4x4::rotationMatrix('x', 180, true);
 			break;
 		default:
 			assert(false);
@@ -580,12 +580,12 @@ Matrix4x4 TriangleBlock::GetOrientationMatrix(TriangleBlock::Orientation orient)
 	return orientMat;
 }
 
-Matrix4x4 TriangleBlock::GetInvOrientationMatrix(TriangleBlock::Orientation orient) {
+Matrix4x4 TriangleBlock::GetBasicInvOrientationMatrix(TriangleBlock::Orientation orient) {
 	Matrix4x4 invOrientMat;
 	switch (orient) {
 		case TriangleBlock::UpperLeft:
 			// reflection in y-axis
-			invOrientMat = Matrix4x4::reflectionMatrix('y');
+			invOrientMat = Matrix4x4::rotationMatrix('z', -180, true) * Matrix4x4::rotationMatrix('x', -180, true);
 			break;
 		case TriangleBlock::UpperRight:
 			// Identity matrix.
@@ -596,7 +596,7 @@ Matrix4x4 TriangleBlock::GetInvOrientationMatrix(TriangleBlock::Orientation orie
 			break;
 		case TriangleBlock::LowerRight:
 			// reflection in x-axis
-			invOrientMat = Matrix4x4::reflectionMatrix('x');
+			invOrientMat = Matrix4x4::rotationMatrix('x', -180, true);
 			break;
 		default:
 			assert(false);
@@ -604,6 +604,52 @@ Matrix4x4 TriangleBlock::GetInvOrientationMatrix(TriangleBlock::Orientation orie
 	}
 
 	return invOrientMat;
+}
+
+Matrix4x4 TriangleBlock::GetPrismOrientationMatrix(Orientation orient) {
+    Matrix4x4 orientMat;
+    switch (orient) {
+        case TriangleBlock::UpperRight:
+        case TriangleBlock::LowerLeft:
+            // Identity matrix.
+            break;
+
+        case TriangleBlock::UpperLeft:
+            // Reflection in y-axis
+            orientMat = Matrix4x4::rotationMatrix('x', 180, true);
+            break;
+        case TriangleBlock::LowerRight:
+            orientMat = Matrix4x4::rotationMatrix('x', 180, true);
+            break;
+        default:
+            assert(false);
+            break;
+    }
+
+    return orientMat;
+}
+
+Matrix4x4 TriangleBlock::GetPrismInvOrientationMatrix(Orientation orient) {
+    Matrix4x4 orientMat;
+    switch (orient) {
+        case TriangleBlock::UpperRight:
+        case TriangleBlock::LowerLeft:
+            // Identity matrix.
+            break;
+
+        case TriangleBlock::UpperLeft:
+            // Reflection in y-axis
+            orientMat = Matrix4x4::rotationMatrix('x', -180, true);
+            break;
+        case TriangleBlock::LowerRight:
+            orientMat = Matrix4x4::rotationMatrix('x', -180, true);
+            break;
+        default:
+            assert(false);
+            break;
+    }
+
+    return orientMat;
 }
 
 /**

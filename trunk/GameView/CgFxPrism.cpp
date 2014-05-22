@@ -58,6 +58,7 @@ shineSamplerParam(NULL), shineTex(NULL), shineAlphaParam(NULL), shineAlpha(0.0f)
     this->timerParam        = cgGetNamedEffectParameter(this->cgEffect, "Timer");
     this->shineSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "ShineSampler");
     this->shineAlphaParam   = cgGetNamedEffectParameter(this->cgEffect, "ShineAlpha");
+    //this->shineDirParam     = cgGetNamedEffectParameter(this->cgEffect, "ShineDir");
 
 	// Set the appropriate diffuse colour
 	this->properties->diffuse   = GameViewConstants::GetInstance()->PRISM_BLOCK_COLOUR;
@@ -84,6 +85,7 @@ void CgFxPrism::SetupBeforePasses(const Camera& camera) {
     if (this->currTechnique == this->techniques[SHINE_PRISM_TECHNIQUE_NAME]) {
         cgGLSetParameter1f(this->timerParam, this->timer);
         cgGLSetParameter1f(this->shineAlphaParam, this->shineAlpha);
+        //cgGLSetParameter2f(this->shineDirParam, this->shineDir[0], this->shineDir[1]);
         assert(this->shineTex != NULL);
         cgGLSetTextureParameter(this->shineSamplerParam, this->shineTex->GetTextureID());
     }

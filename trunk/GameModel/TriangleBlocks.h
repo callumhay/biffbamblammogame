@@ -50,8 +50,10 @@ namespace TriangleBlock {
 		const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 		const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
 
-	Matrix4x4 GetOrientationMatrix(Orientation orient);
-	Matrix4x4 GetInvOrientationMatrix(Orientation orient);
+	Matrix4x4 GetBasicOrientationMatrix(Orientation orient);
+	Matrix4x4 GetBasicInvOrientationMatrix(Orientation orient);
+    Matrix4x4 GetPrismOrientationMatrix(Orientation orient);
+    Matrix4x4 GetPrismInvOrientationMatrix(Orientation orient);
 
 	Vector2D GetSideNormal(bool generateReflectRefractNormals, SideType side, Orientation orient);
     bool GetOrientation(const LevelPiece* piece, Orientation& orient);
@@ -72,9 +74,6 @@ public:
  * and orientation.
  */
 class BreakableTriangleBlock : public BreakableBlock, public TriangleBlockInterface {
-protected:
-	TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
-
 public:
 	BreakableTriangleBlock(char type, TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
 	~BreakableTriangleBlock();
@@ -91,10 +90,12 @@ public:
 	Matrix4x4 GetPieceToLevelInvTransform() const;
 
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-									  const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+	                  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+	                  const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
+protected:
+    TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
 };
 
 /**
@@ -102,9 +103,6 @@ public:
  * and orientation.
  */
 class SolidTriangleBlock : public SolidBlock, public TriangleBlockInterface {
-protected:
-	TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
-
 public:
 	SolidTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
 	~SolidTriangleBlock();
@@ -126,6 +124,8 @@ public:
 										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+protected:
+    TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
 
 };
 
