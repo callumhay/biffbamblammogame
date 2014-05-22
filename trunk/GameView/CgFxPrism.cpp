@@ -35,12 +35,14 @@
 #include "../BlammoEngine/Texture2D.h"
 
 const char* CgFxPrism::DEFAULT_PRISM_TECHNIQUE_NAME = "Prism";
-const char* CgFxPrism::ICE_TECHNIQUE_NAME = "Ice";
+const char* CgFxPrism::SHINE_PRISM_TECHNIQUE_NAME   = "PrismShine";
+const char* CgFxPrism::ICE_TECHNIQUE_NAME           = "Ice";
 
 CgFxPrism::CgFxPrism(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PRISM_SHADER, properties),
 indexOfRefractionParam(NULL), warpAmountParam(NULL), sceneWidthParam(NULL), sceneHeightParam(NULL), 
-sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(200) {
+sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(200), timer(0), timerParam(NULL),
+shineSamplerParam(NULL), shineTex(NULL), shineAlphaParam(NULL), shineAlpha(0.0f) {
 
 	assert(properties->materialType == MaterialProperties::MATERIAL_PRISM_TYPE ||
         properties->materialType == MaterialProperties::MATERIAL_ICE_TYPE);
@@ -52,6 +54,10 @@ sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(200) {
 	this->sceneWidthParam        = cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
 	this->sceneHeightParam       = cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
 	this->sceneSamplerParam      = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+
+    this->timerParam        = cgGetNamedEffectParameter(this->cgEffect, "Timer");
+    this->shineSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "ShineSampler");
+    this->shineAlphaParam   = cgGetNamedEffectParameter(this->cgEffect, "ShineAlpha");
 
 	// Set the appropriate diffuse colour
 	this->properties->diffuse   = GameViewConstants::GetInstance()->PRISM_BLOCK_COLOUR;
@@ -66,6 +72,7 @@ CgFxPrism::~CgFxPrism() {
 }
 
 void CgFxPrism::SetupBeforePasses(const Camera& camera) {
+
 	cgGLSetParameter1f(this->sceneWidthParam, camera.GetWindowWidth());
 	cgGLSetParameter1f(this->sceneHeightParam, camera.GetWindowHeight());
 	cgGLSetParameter1f(this->warpAmountParam, this->warpAmount);
@@ -73,6 +80,13 @@ void CgFxPrism::SetupBeforePasses(const Camera& camera) {
 	
 	assert(this->sceneTex != NULL);
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneTex->GetTextureID());
+
+    if (this->currTechnique == this->techniques[SHINE_PRISM_TECHNIQUE_NAME]) {
+        cgGLSetParameter1f(this->timerParam, this->timer);
+        cgGLSetParameter1f(this->shineAlphaParam, this->shineAlpha);
+        assert(this->shineTex != NULL);
+        cgGLSetTextureParameter(this->shineSamplerParam, this->shineTex->GetTextureID());
+    }
 
 	CgFxMaterialEffect::SetupBeforePasses(camera);
 }

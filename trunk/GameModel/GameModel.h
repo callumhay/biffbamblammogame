@@ -394,7 +394,7 @@ public:
 
 	// Paddle and ball related manipulators *********************************
 
-	// Move the paddle or some other interactive element that is active in the game...
+	// Move the paddle or some other interactive element in the game...
 	void MovePaddle(size_t frameID, int dir, float magnitudePercent = 1.0f) {
         assert(dir <= 1 && dir >= -1);
 		

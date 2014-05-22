@@ -178,9 +178,6 @@ private:
     static std::vector<PrismTriangleBlock*> GetBestSidePrismCandidates(const GameLevel& level, 
         const PlayerPaddle& paddle, const Point2D& shotOrigin, bool leftSide, bool rightSide);
 
-    static PrismBlock* GetLeftSplitterPrism(const GameLevel& level);
-    static PrismBlock* GetRightSplitterPrism(const GameLevel& level);
-    
     static const float Y_POS_FOR_LASER_BEAMS1;
     static const float Y_POS_FOR_LASER_BEAMS2;
 

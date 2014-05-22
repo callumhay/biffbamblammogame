@@ -32,6 +32,9 @@
 #ifndef __BBBGAMECONTROLLER_H__
 #define __BBBGAMECONTROLLER_H__
 
+#define USE_XBOX360_CONTROLLER
+//#define USE_KINECT_CONTROLLER
+
 #include "../BlammoEngine/BasicIncludes.h"
 
 class GameModel;

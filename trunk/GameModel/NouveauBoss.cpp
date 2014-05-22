@@ -681,20 +681,3 @@ std::vector<PrismTriangleBlock*> NouveauBoss::GetBestSidePrismCandidates(const G
     
     return result;
 }
-
-PrismBlock* NouveauBoss::GetLeftSplitterPrism(const GameLevel& level) {
-    LevelPiece* piece = level.GetCurrentLevelLayout()[9][9];
-
-    assert(piece != NULL);
-    assert(piece->GetType() == LevelPiece::Prism);
-
-    return static_cast<PrismBlock*>(piece);
-}
-PrismBlock* NouveauBoss::GetRightSplitterPrism(const GameLevel& level) {
-    LevelPiece* piece = level.GetCurrentLevelLayout()[9][15];
-
-    assert(piece != NULL);
-    assert(piece->GetType() == LevelPiece::Prism);
-
-    return static_cast<PrismBlock*>(piece);
-}

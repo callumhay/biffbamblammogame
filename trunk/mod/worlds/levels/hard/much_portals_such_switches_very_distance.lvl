@@ -15,7 +15,7 @@ E E S E S E S E S E S G Y G Y G G G Y G Y G S E E
 E E S E S E S E S E S Y E E E Y G Y E E E Y S E E 
 E E S E S E S E S E S G E J E G Y G E J E G S E E 
 E E S E S E S E S E S Y E E E Y G Y E E E Y S E E 
-E E S E S E S E S E S E E E E E E E E E E E S E E 
+E E S E S E S E S E S E G G G E E E G G G E S E E 
 E E S E S E S E S E A(1,0,x,y){3} E E E E E E E E E E E A(1,0,y,x) E E 
 E E S E S E S E S E S E E E E E E E E E E E S E E 
 E E S E S E S E S E S G G G G G G G G G G G S E E 
@@ -47,8 +47,8 @@ Blackout 3
 BallSafetyNet 0
 UberBall 1
 BallGrow 2
-StickyPaddle 2
 ShieldPaddle 0
+StickyPaddle 2
 LaserBulletPaddle 0
 PaddleShrink 0
 InvisiPaddle 3
@@ -71,9 +71,9 @@ IceBlasterPaddle 0
 MineLauncherPaddle 2
 SlowBall 2
 FastBall 3
-GravityBall 2
-CrazyBall 2
 Random 2
+CrazyBall 2
+GravityBall 2
 PaddleCam 3
 
 PADDLESTARTXPOS: 41.25

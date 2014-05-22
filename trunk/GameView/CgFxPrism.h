@@ -43,6 +43,7 @@ class Texture2D;
 class CgFxPrism : public CgFxMaterialEffect {
 public:
     static const char* DEFAULT_PRISM_TECHNIQUE_NAME;
+    static const char* SHINE_PRISM_TECHNIQUE_NAME;
     static const char* ICE_TECHNIQUE_NAME;
 
 	CgFxPrism(MaterialProperties* properties);
@@ -55,6 +56,22 @@ public:
 	void SetSceneTexture(const Texture2D* tex) {
 		this->sceneTex = tex;
 	}
+    void SetShineTexture(const Texture2D* tex) {
+        this->shineTex = tex;
+    }
+
+    void ResetTimer() {
+        this->timer = 0;
+    }
+    void AddToTimer(double dT) {
+        this->timer += dT;
+    }
+    void SetTimer(double t) {
+        this->timer = t;
+    }
+    void SetShineAlpha(float a) {
+        this->shineAlpha = a;
+    }
 
 protected:
 	void SetupBeforePasses(const Camera& camera);
@@ -66,8 +83,17 @@ private:
 	CGparameter sceneHeightParam;
 	CGparameter sceneSamplerParam;
 
+    // Parameters for shine only
+    CGparameter timerParam;
+    CGparameter shineSamplerParam;
+    CGparameter shineAlphaParam;
+
 	float indexOfRefraction, warpAmount;
 	const Texture2D* sceneTex;
+    const Texture2D* shineTex;
+    float shineAlpha;
+    double timer;
 
+    DISALLOW_COPY_AND_ASSIGN(CgFxPrism);
 };
 #endif // __CGFXPRISM_H__

@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;;&quot;$(ProjectDir)include/Kinect&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;IRRKLANG_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -127,7 +127,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;;&quot;$(ProjectDir)include/Kinect&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;IRRKLANG_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -209,7 +209,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;;&quot;$(ProjectDir)include/Kinect&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_DEMO;IRRKLANG_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -294,7 +294,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/irrKlang-1.4.0/include&quot;;&quot;$(ProjectDir)include/Kinect&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_DEMO;IRRKLANG_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -3526,6 +3526,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameControl\KinectController.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameControl\XBox360Controller.h"
 					>
 				</File>
@@ -3539,6 +3543,10 @@
 				</File>
 				<File
 					RelativePath=".\GameControl\KeyboardSDLController.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\KinectController.cpp"
 					>
 				</File>
 				<File

@@ -92,9 +92,6 @@ bool Beam::BeamHasChanged(const std::list<BeamSegment*>& oldBeamSegs, const std:
 void Beam::BuildAndUpdateCollisionsForBeamParts(const std::list<BeamSegment*>& initialBeamSegs, const GameModel* gameModel) {
     assert(gameModel != NULL);
    
-    const GameLevel* level = gameModel->GetCurrentLevel();
-    assert(level != NULL);
-
     // Keep a temporary list of all the beam segments that we are dealing with in the current
     // iteration of building all of the beam parts, we start with the provided initial beams segments
     std::list<BeamSegment*> newBeamSegs;

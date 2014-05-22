@@ -10,10 +10,10 @@ E E E E E S E E O E G E G E O E E S E E E E E
 E E E E E S T(P,ll) G Q(f) Y Q(f) G Q(f) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Q(f) E X(p,o) S E E E E E 
 E E E E E S S G O R O R O R O G T(P,ur) S E E E E E 
 E E E E E S E E Y E G E G E Y E E S E E E E E 
-E E E E E S X(m,n) E Q(f) Y Q(f) R Q(f) Y Q(f) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) T(P,lr) S E E E E E 
+E E E E E S X(m,n) E Q(f) Y Q(f) O Q(f) Y Q(f) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) T(P,lr) S E E E E E 
 E E E E E S T(P,ul) G O E O D(IceBlasterPaddle,IceBlasterPaddle,IceBlasterPaddle) O E Y E S S E E E E E 
 E E E X(b,a) E S E E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E Y E Y E K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) E E S E X(h,g) E E E 
-E E E E E S T(P,ll) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Q(f) R Q(f) R Q(f) R Q(f) E X(k,l) S E E E E E 
+E E E E E S T(P,ll) K(LaserBeamPaddle,LaserBeamPaddle,LaserBeamPaddle) Q(f) R Q(f) O Q(f) R Q(f) E X(k,l) S E E E E E 
 E E E E E S S E O E O E O E O E E S E E E E E 
 E E E E E S E E Y E G E G E Y E E S E E E E E 
 E E E E E S X(i,j) E Q(f) G Q(f) O Q(f) G Q(f) G G S E E E E E 

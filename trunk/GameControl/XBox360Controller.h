@@ -32,16 +32,11 @@
 #ifndef __XBOX360GAMECONTROLLER_H__
 #define __XBOX360GAMECONTROLLER_H__
 
-#include "BBBGameController.h"
-#include "GameControl.h"
-
-#ifdef _WIN32
 #include <windows.h>
 #include <XInput.h>
-#else
-class XINPUT_STATE;
-#endif
 
+#include "BBBGameController.h"
+#include "GameControl.h"
 
 class XBox360Controller : public BBBGameController {
 public:

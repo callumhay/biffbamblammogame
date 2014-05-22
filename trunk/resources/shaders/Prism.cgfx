@@ -130,7 +130,16 @@ float WarpAmount <
     string UIName =  "Warp Amount";
 > = 200.0f;
 
-// UNUSED, BUT NEEDED DUE TO INHERITANCE ******
+float ShineAlpha  <
+    string UIWidget = "slider";
+    float UIMin = 0;
+    float UIMax = 1;
+    float UIStep = 0.01;
+    string UIName =  "Shine Alpha";
+> = 0.5f;
+
+float Timer : TIME < string UIWidget = "None"; >;
+
 texture ColourTexture  <
     string ResourceName = "default_color.dds";
     string ResourceType = "2D";
@@ -139,7 +148,6 @@ texture ColourTexture  <
 sampler2D ColourSampler = sampler_state {
     Texture = <ColourTexture>;
 };
-// ********************************************
 
 texture SceneTexture <
     string ResourceName = "";
@@ -149,6 +157,21 @@ texture SceneTexture <
 
 sampler2D SceneSampler = sampler_state {
     Texture = <SceneTexture>;
+    WrapS = Repeat;
+    WrapT = Repeat;
+    WrapR = Repeat;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+};
+
+texture ShineTexture <
+    string ResourceName = "";
+    string UIName =  "Shine Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D ShineSampler = sampler_state {
+    Texture = <ShineTexture>;
     WrapS = Repeat;
     WrapT = Repeat;
     WrapR = Repeat;
@@ -249,18 +272,42 @@ float2 GetRefractBGOffset(float3 nWorldView, float3 nWorldNormal) {
     return lookupVec.xy * float2(1.0/SceneWidth, 1.0/SceneHeight);           
 }
 
-float4 prism_PS(vertexOutput IN) : COLOR {
-    float3 diffContrib;
+float4 PrismMaterialColour(float3 worldPos, float3 nWorldView, 
+                           float3 nWorldNormal, float3 nProjPos, float alpha) {
+	float3 diffContrib;
     float3 specContrib;
-    float3 nWorldView   = normalize(IN.WorldView);
-    float3 nWorldNormal = normalize(IN.WorldNormal);
-    float3 nProjPos     = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
-      
-    PrismShading(nWorldNormal, IN.WorldPos, nWorldView, diffContrib, specContrib);
+	
+	PrismShading(nWorldNormal, worldPos, nWorldView, diffContrib, specContrib);
     float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
     float3 refractColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
 	
     float3 result = SpecularColour * specContrib + DiffuseColour * diffContrib + refractColour;
+    return float4(result, alpha);
+}
+
+float4 prism_PS(vertexOutput IN) : COLOR {
+    float3 nWorldView   = normalize(IN.WorldView);
+    float3 nWorldNormal = normalize(IN.WorldNormal);
+    float3 nProjPos     = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
+	
+	return PrismMaterialColour(IN.WorldPos, nWorldView, nWorldNormal, nProjPos, IN.Colour.a);
+}
+
+float4 prism_shine_PS(vertexOutput IN) : COLOR {
+    float3 nWorldView   = normalize(IN.WorldView);
+    float3 nWorldNormal = normalize(IN.WorldNormal);
+    float3 nProjPos     = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
+	
+	float3 diffContrib;
+    float3 specContrib;
+	
+	PrismShading(nWorldNormal, IN.WorldPos, nWorldView, diffContrib, specContrib);
+    float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
+    float3 refractColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
+	float3 shineTexColour  = tex2D(ShineSampler, IN.UV + Timer * float2(1, 0)).rgb;
+	
+    float3 result = ShineAlpha.r * shineTexColour + SpecularColour * specContrib + 
+		DiffuseColour * diffContrib + refractColour;
     return float4(result, IN.Colour.a);
 }
 
@@ -276,7 +323,6 @@ float4 ice_PS(vertexOutput IN) : COLOR {
     float3 refractColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
     float4 textureColour = tex2D(ColourSampler, IN.UV).rgba;
     
-
     float3 result = SpecularColour * specContrib + DiffuseColour * diffContrib + 
     	(1-textureColour.a)*refractColour + textureColour.a*textureColour.rgb;
 
@@ -296,6 +342,21 @@ technique Prism {
 
         VertexProgram = compile arbvp1 prism_VS();        
         FragmentProgram = compile arbfp1 prism_PS();
+    }
+}
+
+technique PrismShine {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+
+        VertexProgram = compile arbvp1 prism_VS();        
+        FragmentProgram = compile arbfp1 prism_shine_PS();
     }
 }
 

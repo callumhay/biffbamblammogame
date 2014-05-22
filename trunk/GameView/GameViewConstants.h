@@ -166,10 +166,13 @@ public:
     const char* TEXTURE_PADLOCK_BROKEN_RIGHT;
     const char* TEXTURE_CHEVRON;
     const char* TEXTURE_MOON;
+    const char* TEXTURE_SHINY_FLASH;
+    
     const char* TEXTURE_FIRE_GLOB1;
     const char* TEXTURE_FIRE_GLOB2;
     const char* TEXTURE_FIRE_GLOB3;
     //const char* TEXTURE_FIRE_GLOB4;
+    
     
     const char* TEXTURE_DROPLET;
 
