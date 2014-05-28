@@ -386,6 +386,7 @@ void MSFReader::InitSoundTypeMapping() {
 	INSERT_MAPPING_PAIR(GameSound, PaddleHitWallEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleFrozenEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleOnFireEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, PaddleElectrocutedEvent, false);
     INSERT_MAPPING_PAIR(GameSound, PaddleIceShakeEvent, false);
 
     INSERT_MAPPING_PAIR(GameSound, PaddlePortalTeleportEvent, false);
@@ -506,6 +507,7 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, GothicBossSummonItemChargeEvent, false);
     INSERT_MAPPING_PAIR(GameSound, GothicBossChargeShockwaveEvent, false);
     INSERT_MAPPING_PAIR(GameSound, GothicBossMassiveShockwaveEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, NouveauBossFrillBreakEvent, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossLightningRelayTurnOnEvent, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossArmRotateLoop, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossArmExtendEvent, false);
@@ -514,6 +516,7 @@ void MSFReader::InitSoundTypeMapping() {
     INSERT_MAPPING_PAIR(GameSound, DecoBossArmPaddleCollisionEvent, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossLevelRotatingLoop, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossLightningBoltAttackEvent, false);
+    INSERT_MAPPING_PAIR(GameSound, DecoBossShockOrbAttackEvent, false);
     INSERT_MAPPING_PAIR(GameSound, DecoBossElectricShockLoop, false);
 
     INSERT_MAPPING_PAIR(GameSound, FuturismBossTeleportationChargingEvent, false);

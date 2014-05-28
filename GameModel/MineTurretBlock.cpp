@@ -149,6 +149,7 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
 
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             newPiece = this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::BasicProjectileDestruction);
             break;
 

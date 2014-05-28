@@ -1,5 +1,5 @@
 /**
- * BossOrbProjectile.h
+ * CgFxSimpleColour.cpp
  * 
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
@@ -29,37 +29,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __BOSSORBPROJECTILE_H__
-#define __BOSSORBPROJECTILE_H__
+#include "CgFxSimpleColour.h"
+#include "GameViewConstants.h"
 
-#include "OrbProjectile.h"
+const char* CgFxSimpleColour::BASIC_TECHNIQUE_NAME = "Basic";
 
-/**
- * Represents orb projectile shot by the gothic & romantic boss.
- */
-class BossOrbProjectile : public OrbProjectile {
-public:
-	static const float RADIUS_DEFAULT;
-    static const float SPD_DEFAULT;
+CgFxSimpleColour::CgFxSimpleColour() :
+CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_SIMPLECOLOUR_SHADER), 
+wvpMatrixParam(NULL), baseColourParam(NULL), baseColour(0,0,0) {
 
-    explicit BossOrbProjectile(const Point2D& spawnLoc);
-    BossOrbProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);
-    BossOrbProjectile(const BossOrbProjectile& copy);
-    ~BossOrbProjectile();
+    this->currTechnique = this->techniques[CgFxSimpleColour::BASIC_TECHNIQUE_NAME];
+    this->wvpMatrixParam   = cgGetNamedEffectParameter(this->cgEffect, "WvpXf");
+    this->baseColourParam  = cgGetNamedEffectParameter(this->cgEffect, "BaseColour");
+}
 
-    ProjectileType GetType() const {
-        return Projectile::BossOrbBulletProjectile;
-    }
+CgFxSimpleColour::~CgFxSimpleColour() {
+}
 
-    float GetDamage() const { return 0.0f; }
+void CgFxSimpleColour::SetupBeforePasses(const Camera& camera) {
+    UNUSED_PARAMETER(camera);
 
-    bool IsRefractableOrReflectable() const { return true; }
-    bool BlastsThroughSafetyNets() const { return false; }
-    bool IsDestroyedBySafetyNets() const { return true;  }
-
-private:
-    // Disallow assignment
-    void operator=(const BossOrbProjectile& copy);
-};
-
-#endif // __BOSSORBPROJECTILE_H__
+    cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+    cgGLSetParameter3f(this->baseColourParam, this->baseColour.R(), this->baseColour.G(), this->baseColour.B());
+}

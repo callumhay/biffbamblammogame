@@ -430,6 +430,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			break;
 		
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             break;
 
 		case Projectile::CollateralBlockProjectile:

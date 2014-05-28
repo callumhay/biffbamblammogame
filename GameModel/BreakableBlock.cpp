@@ -300,6 +300,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			break;
 
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             newPiece = this->DiminishPiece(gameModel, LevelPiece::BasicProjectileDestruction);
             break;
 

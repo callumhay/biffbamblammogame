@@ -149,7 +149,7 @@ bool FuturismBoss::ProjectilePassesThrough(const Projectile* projectile) const {
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLightningBoltBulletProjectile:
         case Projectile::PortalBlobProjectile:
-        //case Projectile::BossShockOrbBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             return true;
         default:
             break;

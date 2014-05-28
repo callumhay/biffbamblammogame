@@ -832,10 +832,12 @@ void SideSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProject
     float explosionRadius       = mine->GetExplosionRadius();
     Collision::Circle2D explosionCircle(minePosition, explosionRadius);
 
-    static const double DEBRIS_MIN_LIFE = 1.0;
-    static const double DEBRIS_MAX_LIFE = 1.75;
-    static const Colour DEBRIS_COLOUR   = Colour(0.5f, 0.5f, 0.5f);
-    static const int NUM_DEBRIS_BITS    = 10;
+    static const double DEBRIS_MIN_LIFE       = 1.75;
+    static const double DEBRIS_MAX_LIFE       = 2.5;
+    static const Colour DEBRIS_COLOUR         = Colour(0.33f, 0.33f, 0.33f);
+    static const int NUM_DEBRIS_BITS          = 10;
+    static const float DEBRIS_SIZE_MULTIPLIER = 1.2f;
+    static const float DEBRIS_FORCE_MULTIPLIER = 1.25f;
 
     // Check to see if the explosion hit the left/right frills (if they haven't been blown up already)
     if (!this->leftSideSphereFrill->GetIsDestroyed()) {
@@ -861,8 +863,11 @@ void SideSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProject
             
             // EVENT: Debris flies off the boss...
             GameEventManager::Instance()->ActionBossEffect(DebrisEffectInfo(this->leftSideSphereFrill, mine->GetPosition(), 
-                DEBRIS_COLOUR, DEBRIS_MIN_LIFE, DEBRIS_MAX_LIFE, NUM_DEBRIS_BITS));
+                DEBRIS_COLOUR, DEBRIS_MIN_LIFE, DEBRIS_MAX_LIFE, NUM_DEBRIS_BITS, DEBRIS_SIZE_MULTIPLIER, DEBRIS_FORCE_MULTIPLIER));
             GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
+
+            // Sound
+            gameModel->GetSound()->PlaySound(GameSound::NouveauBossFrillBreakEvent, false, true);
 
             return;
         }
@@ -890,8 +895,11 @@ void SideSphereAI::MineExplosionOccurred(GameModel* gameModel, const MineProject
 
             // EVENT: Debris flies off the boss...
             GameEventManager::Instance()->ActionBossEffect(DebrisEffectInfo(this->rightSideSphereFrill, mine->GetPosition(), 
-                DEBRIS_COLOUR, DEBRIS_MIN_LIFE, DEBRIS_MAX_LIFE, NUM_DEBRIS_BITS));
+                DEBRIS_COLOUR, DEBRIS_MIN_LIFE, DEBRIS_MAX_LIFE, NUM_DEBRIS_BITS, DEBRIS_SIZE_MULTIPLIER, DEBRIS_FORCE_MULTIPLIER));
             GameEventManager::Instance()->ActionBossEffect(FullscreenFlashEffectInfo(0.2, 0.0f));
+
+            // Sound
+            gameModel->GetSound()->PlaySound(GameSound::NouveauBossFrillBreakEvent, false, true);
 
             return;
         }

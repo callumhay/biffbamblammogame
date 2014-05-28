@@ -290,6 +290,7 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
 			break;
 		
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             break;
 
 		case Projectile::CollateralBlockProjectile:

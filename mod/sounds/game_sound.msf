@@ -219,6 +219,10 @@ PaddleOnFireEvent {
 	file = resources/PaddleOnFireEvent.ogg
 }
 
+PaddleElectrocutedEvent {
+	file = resources/PaddleElectrocutedEvent.ogg
+}
+
 PaddleIceShakeEvent {
 	file = resources/IceShakeEvent.ogg
 }
@@ -685,6 +689,10 @@ GothicBossOrbAttackEvent {
 	file = resources/GothicBossOrbAttackEvent_01.ogg
 }
 
+NouveauBossFrillBreakEvent {
+	file = resources/NouveauBossFrillBreakEvent.ogg
+}
+
 DecoBossLightningRelayTurnOnEvent {
 	file = resources/DecoBossLightningRelayTurnOnEvent.ogg
 }
@@ -708,6 +716,9 @@ DecoBossLevelRotatingLoop {
 }
 DecoBossLightningBoltAttackEvent {
 	file = resources/DecoBossLightningBoltAttackEvent.ogg
+}
+DecoBossShockOrbAttackEvent {
+	file = resources/DecoBossShockOrbAttackEvent.ogg
 }
 DecoBossElectricShockLoop {
 	file = resources/DecoBossElectricShockLoop.ogg

@@ -58,7 +58,7 @@ public:
                           RocketTurretBulletProjectile, FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
                           PaddleFlameBlastProjectile, PaddleIceBlastProjectile, PortalBlobProjectile,
                           BossLaserBulletProjectile, BossRocketBulletProjectile, BossOrbBulletProjectile, 
-                          BossLightningBoltBulletProjectile
+                          BossShockOrbBulletProjectile, BossLightningBoltBulletProjectile
     };
 
 	virtual ~Projectile();

@@ -420,7 +420,7 @@ void FuturismBossStage1AIState::RocketExplosionOccurred(GameModel* gameModel, co
         return;
     }
     
-    static const float DEFAULT_EXPLOSION_RADIUS = 1.25f * FuturismBoss::CORE_BOSS_HALF_SIZE;
+    static const float DEFAULT_EXPLOSION_RADIUS = 1.15f * FuturismBoss::CORE_BOSS_HALF_SIZE;
     float rocketSizeFactor = rocket->GetHeight() / rocket->GetDefaultHeight();
     Collision::Circle2D explosionCircle(rocket->GetPosition(), rocketSizeFactor*DEFAULT_EXPLOSION_RADIUS);
 
@@ -432,7 +432,8 @@ void FuturismBossStage1AIState::RocketExplosionOccurred(GameModel* gameModel, co
     std::vector<FuturismBoss::ShieldLimbType> limbsToCrack;
     limbsToCrack.reserve(4);
     
-    if (this->boss->GetTopShield()->GetWorldBounds().CollisionCheck(explosionCircle)) {
+    // For the top shield to be hurt/destroyed the rocket must have a direct hit
+    if (this->boss->GetTopShield()->GetWorldBounds().CollisionCheck(rocket->BuildAABB())) {
         if (this->boss->IsTopShieldWeakened()) {
             limbsToDestroy.push_back(FuturismBoss::TopShield);
         }
@@ -440,6 +441,7 @@ void FuturismBossStage1AIState::RocketExplosionOccurred(GameModel* gameModel, co
             limbsToCrack.push_back(FuturismBoss::TopShield);
         }
     }
+
     if (this->boss->GetBottomShield()->GetWorldBounds().CollisionCheck(explosionCircle)) {
         if (this->boss->IsBottomShieldWeakened()) {
             limbsToDestroy.push_back(FuturismBoss::BottomShield);
@@ -464,6 +466,7 @@ void FuturismBossStage1AIState::RocketExplosionOccurred(GameModel* gameModel, co
             limbsToCrack.push_back(FuturismBoss::RightShield);
         }
     }
+
 
     // Crack them and destroy them but make sure only one state change is made...
     if (limbsToCrack.empty() && limbsToDestroy.empty()) {

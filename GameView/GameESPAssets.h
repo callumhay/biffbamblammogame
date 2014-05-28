@@ -294,6 +294,7 @@ private:
         const Colour& brightColour);
     
     void AddLightningBoltESPEffects(const GameModel& gameModel, const Projectile& projectile);
+    void AddShockOrbESPEffects(const GameModel& gameModel, const Projectile& projectile);
 
     void AddHitWallEffect(const Projectile& projectile, const Point2D& hitPos, GameSound* sound);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
@@ -302,6 +303,7 @@ private:
     void AddIceBlastHitWallEffect(float size, const Point2D& loc, GameSound* sound);
 	void AddOrbHitWallEffect(const Projectile& projectile, const Point2D& loc, const Colour& baseColour, const Colour& brightColour);
     void AddLightningBoltHitWallEffect(float width, float height, const Point2D& loc);
+    void AddShockOrbHitWallEffect(const Projectile& projectile, float width, float height, const Point2D& loc);
     void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
     void AddBallHitTurretEffect(const GameBall& ball, const LevelPiece& block);
@@ -430,6 +432,7 @@ public:
     void AddPaddleHitByBossPartEffect(const PlayerPaddle& paddle, const BossBodyPart& bossPart);
     void AddPaddleFrozeEffect(const PlayerPaddle& paddle);
     void AddPaddleUnfrozeEffect(const PlayerPaddle& paddle);
+    void AddPaddleElectrocutedEffect(const PlayerPaddle& paddle);
     //void AddPaddleOnFireEffect(const PlayerPaddle& paddle);
 
 	ESPPointEmitter* CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item);

@@ -1,0 +1,57 @@
+/**
+ * SimpleColour.cgfx
+ * Author: Callum Hay
+ * 
+ * A super-simple shader for very basic colouring.
+ */
+ 
+ float Script : STANDARDSGLOBAL <
+    string UIWidget = "none";
+    string ScriptClass = "object";
+    string ScriptOrder = "standard";
+    string ScriptOutput = "color";
+    string Script = "Technique=Basic;";
+> = 0.8;
+
+float4x4 WvpXf : WorldViewProjection < string UIWidget="None"; >;
+float3 BaseColour;
+
+struct appdata {
+    float3 Position : POSITION;
+    float4 Colour   : COLOR0;
+};
+
+struct vertexOutput {
+    float4 HPosition   : POSITION;
+    float Alpha        : TEXCOORD0;
+};
+
+vertexOutput simplecolour_VS(appdata IN) {
+    vertexOutput OUT = (vertexOutput)0;
+
+    float4 Po = float4(IN.Position.xyz,1);
+    OUT.HPosition = mul(WvpXf,Po);
+    OUT.Alpha = IN.Colour.a;
+	
+    return OUT;
+}
+
+float4 simplecolour_PS(vertexOutput IN) : COLOR {
+    return float4(BaseColour.rgb, IN.Alpha);
+}
+
+technique Basic {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        
+        VertexProgram   = compile arbvp1 simplecolour_VS();        
+        FragmentProgram = compile arbfp1 simplecolour_PS();
+    }  
+}
+

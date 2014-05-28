@@ -109,7 +109,7 @@ protected:
     Point2D GenerateShotOrigin() const;
     Vector2D GenerateRandomShotDirTowardsPaddle(const Point2D& shotOrigin, GameModel* gameModel) const;
     void ShootLightningBoltAtPaddle(GameModel* gameModel);
-    //void ShootStaticOrbAtPaddle(GameModel* gameModel);
+    void ShootStaticOrbAtPaddle(GameModel* gameModel);
 
     virtual float GetMaxXSpeed() const { return DEFAULT_MAX_X_SPEED; }
     virtual float GetMaxYSpeed() const { return DEFAULT_MAX_Y_SPEED; }
@@ -127,13 +127,14 @@ protected:
             Randomizer::GetInstance()->RandomUnsignedInt() % static_cast<int>(3.0f / this->GetTotalLifePercent());
     }
     double GenerateShootCountdownWhileMoving() const {
-        return 0.12 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.13 + 
-            0.22 * Randomizer::GetInstance()->RandomNumZeroToOne() * this->GetTotalLifePercent(); 
+        return 0.13 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.15 + 
+            0.25 * Randomizer::GetInstance()->RandomNumZeroToOne() * this->GetTotalLifePercent(); 
     }
     int GenerateNumShotsWhileMoving() const {
         return 20 + Randomizer::GetInstance()->RandomUnsignedInt() % 8 + 
             Randomizer::GetInstance()->RandomUnsignedInt() % static_cast<int>(3.25f / this->GetTotalLifePercent());
     }
+    virtual int GenerateNumShotsBetweenStaticOrbs() const = 0;
     double GenerateItemDropCountdown() const {
         return 3.0 + 3.0 * Randomizer::GetInstance()->RandomNumZeroToOne() + 1.0 * this->GetTotalLifePercent();
     }
@@ -168,6 +169,7 @@ protected:
 
     // State Variables and functions
     double shootCountdown;
+    int numShotsUntilStaticOrb;
     int numShotsUntilNextState;
     double dropItemCountdown;
     GameItem::ItemType nextDropItemType;
@@ -248,6 +250,7 @@ private:
     AnimationMultiLerp<float> GenerateSideBodyPartDeathRotationAnimation(bool isLeft, double timeInSecs) const;
 
     // Inherited Functions
+    int GenerateNumShotsBetweenStaticOrbs() const { return 15 + (Randomizer::GetInstance()->RandomUnsignedInt() % 5); }
     bool ShutsOffLeftTeslaBlockOnRetaliation() const { return true; }
     bool ShutsOffRightTeslaBlockOnRetaliation() const { return false; }
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
@@ -274,6 +277,7 @@ private:
     float GetMaxYSpeed() const { return SPEED_COEFF * DecoBossAIState::DEFAULT_MAX_Y_SPEED; }
 
     // Inherited Functions
+    int GenerateNumShotsBetweenStaticOrbs() const { return 12 + (Randomizer::GetInstance()->RandomUnsignedInt() % 5); }
     bool ShutsOffLeftTeslaBlockOnRetaliation() const { return true; }
     bool ShutsOffRightTeslaBlockOnRetaliation() const { return true; }
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
@@ -301,6 +305,7 @@ private:
     float GetLevelRotationSpeed() const { return 1.3f * DecoBossAIState::DEFAULT_LEVEL_ROTATION_SPEED_DEGS_PER_SEC; }
 
     // Inherited Functions
+    int GenerateNumShotsBetweenStaticOrbs() const { return 10 + (Randomizer::GetInstance()->RandomUnsignedInt() % 5); }
     GameItem::ItemType GenerateRandomItemDropType(GameModel* gameModel) const;
     int GenerateNumItemsToDropInSideToSideState() const { return 8; } // Must not be random!
     DecoBossAIState* BuildNextAIState() const { assert(false); return NULL; }

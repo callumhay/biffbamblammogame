@@ -1,5 +1,5 @@
 /**
- * BossOrbProjectile.h
+ * BossShockOrbProjectile.cpp
  * 
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
@@ -29,37 +29,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __BOSSORBPROJECTILE_H__
-#define __BOSSORBPROJECTILE_H__
+#include "BossShockOrbProjectile.h"
 
-#include "OrbProjectile.h"
+const float BossShockOrbProjectile::RADIUS_DEFAULT = 1.0f;
+const float BossShockOrbProjectile::SPD_DEFAULT    = 10.0f;
 
-/**
- * Represents orb projectile shot by the gothic & romantic boss.
- */
-class BossOrbProjectile : public OrbProjectile {
-public:
-	static const float RADIUS_DEFAULT;
-    static const float SPD_DEFAULT;
+BossShockOrbProjectile::BossShockOrbProjectile(const Point2D& spawnLoc) :
+OrbProjectile(spawnLoc, RADIUS_DEFAULT, SPD_DEFAULT, Vector2D(0, -1)) {
+}
 
-    explicit BossOrbProjectile(const Point2D& spawnLoc);
-    BossOrbProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);
-    BossOrbProjectile(const BossOrbProjectile& copy);
-    ~BossOrbProjectile();
+BossShockOrbProjectile::BossShockOrbProjectile(const Point2D& spawnLoc, const Vector2D& dirVec) :
+OrbProjectile(spawnLoc, RADIUS_DEFAULT, SPD_DEFAULT, dirVec) {
+}
 
-    ProjectileType GetType() const {
-        return Projectile::BossOrbBulletProjectile;
-    }
+BossShockOrbProjectile::BossShockOrbProjectile(const BossShockOrbProjectile& copy) : OrbProjectile(copy) {
+}
 
-    float GetDamage() const { return 0.0f; }
-
-    bool IsRefractableOrReflectable() const { return true; }
-    bool BlastsThroughSafetyNets() const { return false; }
-    bool IsDestroyedBySafetyNets() const { return true;  }
-
-private:
-    // Disallow assignment
-    void operator=(const BossOrbProjectile& copy);
-};
-
-#endif // __BOSSORBPROJECTILE_H__
+BossShockOrbProjectile::~BossShockOrbProjectile() {
+}

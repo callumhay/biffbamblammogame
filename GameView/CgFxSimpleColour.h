@@ -1,5 +1,5 @@
 /**
- * BossOrbProjectile.h
+ * CgFxSimpleColour.h
  * 
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
@@ -29,37 +29,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __BOSSORBPROJECTILE_H__
-#define __BOSSORBPROJECTILE_H__
+#ifndef __CGFXSIMPLECOLOUR_H__
+#define __CGFXSIMPLECOLOUR_H__
 
-#include "OrbProjectile.h"
+#include "../BlammoEngine/CgFxEffect.h"
+#include "../BlammoEngine/Light.h"
 
-/**
- * Represents orb projectile shot by the gothic & romantic boss.
- */
-class BossOrbProjectile : public OrbProjectile {
+class CgFxSimpleColour : public CgFxEffectBase {
 public:
-	static const float RADIUS_DEFAULT;
-    static const float SPD_DEFAULT;
+    static const char* BASIC_TECHNIQUE_NAME;
 
-    explicit BossOrbProjectile(const Point2D& spawnLoc);
-    BossOrbProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);
-    BossOrbProjectile(const BossOrbProjectile& copy);
-    ~BossOrbProjectile();
+    CgFxSimpleColour();
+    ~CgFxSimpleColour();
 
-    ProjectileType GetType() const {
-        return Projectile::BossOrbBulletProjectile;
-    }
-
-    float GetDamage() const { return 0.0f; }
-
-    bool IsRefractableOrReflectable() const { return true; }
-    bool BlastsThroughSafetyNets() const { return false; }
-    bool IsDestroyedBySafetyNets() const { return true;  }
+    void SetColour(const Colour& c);
 
 private:
-    // Disallow assignment
-    void operator=(const BossOrbProjectile& copy);
+    CGparameter wvpMatrixParam;
+    CGparameter baseColourParam;
+    
+    Colour baseColour;
+
+    void SetupBeforePasses(const Camera& camera);
+
+    DISALLOW_COPY_AND_ASSIGN(CgFxSimpleColour);
 };
 
-#endif // __BOSSORBPROJECTILE_H__
+inline void CgFxSimpleColour::SetColour(const Colour& c) {
+    this->baseColour = c;
+}
+
+#endif // __CGFXSIMPLECOLOUR_H__

@@ -44,6 +44,7 @@
 #include "BossRocketProjectile.h"
 #include "BossOrbProjectile.h"
 #include "BossLightningBoltProjectile.h"
+#include "BossShockOrbProjectile.h"
 #include "GameModel.h"
 
 // Projectile ====================================================================================================================
@@ -115,7 +116,8 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p, bool creat
             return new BossOrbProjectile(*static_cast<const BossOrbProjectile*>(p));
         case Projectile::BossLightningBoltBulletProjectile:
             return new BossLightningBoltProjectile(*static_cast<const BossLightningBoltProjectile*>(p));
-        
+        case Projectile::BossShockOrbBulletProjectile:
+            return new BossShockOrbProjectile(*static_cast<const BossShockOrbProjectile*>(p));
 
         default:
 			assert(false);

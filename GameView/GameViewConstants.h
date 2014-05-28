@@ -99,6 +99,7 @@ public:
     const char* CGFX_POSTTUTORIALATTENTION_SHADER;
     const char* CGFX_CLOUD_SHADER;
     const char* CGFX_BOSSWEAKPOINT_SHADER;
+    const char* CGFX_SIMPLECOLOUR_SHADER;
 
 	// Texture path constants *******************************
 	const char* TEXTURE_BANG1;
@@ -167,6 +168,7 @@ public:
     const char* TEXTURE_CHEVRON;
     const char* TEXTURE_MOON;
     const char* TEXTURE_SHINY_FLASH;
+    const char* TEXTURE_WHITE_BANG;
     
     const char* TEXTURE_FIRE_GLOB1;
     const char* TEXTURE_FIRE_GLOB2;

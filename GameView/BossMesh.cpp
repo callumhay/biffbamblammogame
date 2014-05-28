@@ -1382,14 +1382,21 @@ void BossMesh::BuildSummonPortalEffects(const Point3D& bossPos, const Point3D& p
 }
 
 void BossMesh::BuildShieldingColourAnimation(AnimationMultiLerp<Colour>& anim) {
+    static const double TIME_TO_BLACK = 0.7;
+    static const double TIME_TO_FLASH_RED = 0.3;
+    
     std::vector<double> timeVals;
-    timeVals.reserve(3);
+    timeVals.reserve(5);
     timeVals.push_back(0.0);
-    timeVals.push_back(0.7);
-    timeVals.push_back(1.4);
+    timeVals.push_back(TIME_TO_BLACK);
+    timeVals.push_back(timeVals.back() + TIME_TO_FLASH_RED);
+    timeVals.push_back(timeVals.back() + TIME_TO_FLASH_RED);
+    timeVals.push_back(timeVals.back() + TIME_TO_BLACK);
     std::vector<Colour> colourVals;
     colourVals.reserve(timeVals.size());
     colourVals.push_back(Colour(1,1,1));
+    colourVals.push_back(Colour(0.33f, 0.33f, 0.33f));
+    colourVals.push_back(Colour(1.0f, 0.0f, 0.0));
     colourVals.push_back(Colour(0.33f, 0.33f, 0.33f));
     colourVals.push_back(Colour(1,1,1));
 

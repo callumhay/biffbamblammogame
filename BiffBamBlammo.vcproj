@@ -905,6 +905,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxSimpleColour.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxSkybox.h"
 						>
 					</File>
@@ -1002,6 +1006,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPrism.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxSimpleColour.cpp"
 						>
 					</File>
 					<File
@@ -2669,6 +2677,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\BossShockOrbProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\CollateralBlockProjectile.h"
 						>
 					</File>
@@ -2778,6 +2790,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\BossRocketProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossShockOrbProjectile.cpp"
 						>
 					</File>
 					<File
