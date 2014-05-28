@@ -34,6 +34,7 @@
 #include "GameModel.h"
 #include "PlayerPaddle.h"
 #include "BossLightningBoltProjectile.h"
+#include "BossShockOrbProjectile.h"
 #include "ElectrifiedEffectInfo.h"
 #include "ShockwaveEffectInfo.h"
 #include "SparkBurstEffectInfo.h"
@@ -314,6 +315,29 @@ void DecoBossAIState::ShootLightningBoltAtPaddle(GameModel* gameModel) {
         Colour(0.9f, 0.78f, 1.0f), offset));
 }
 
+void DecoBossAIState::ShootStaticOrbAtPaddle(GameModel* gameModel) {
+    assert(gameModel != NULL);
+
+    // Don't shoot if the player is in remote-control rocket mode
+    if (gameModel->GetTransformInfo()->GetIsRemoteControlRocketCameraOn()) {
+        return;
+    }
+
+    Point2D shotOrigin = this->GenerateShotOrigin();
+    Vector2D attackDir = this->GenerateRandomShotDirTowardsPaddle(shotOrigin, gameModel);
+
+    // Shoot!
+    gameModel->AddProjectile(new BossShockOrbProjectile(shotOrigin, attackDir));
+
+    // Add an effect for it
+    // EVENT: Boss shot a lightning bolt, add an effect for it
+    Vector3D offset = this->boss->GetLightningFireVec3D();
+    GameEventManager::Instance()->ActionBossEffect(ExpandingHaloEffectInfo(this->boss->GetLightningRelay(), 0.4, 
+        Colour(0.9f, 0.78f, 1.0f), 1.5f, offset));
+    GameEventManager::Instance()->ActionBossEffect(SparkBurstEffectInfo(this->boss->GetLightningRelay(), 0.55, 
+        Colour(0.9f, 0.78f, 1.0f), offset));
+}
+
 AnimationMultiLerp<Vector3D> DecoBossAIState::GenerateArmDeathTranslationAnimation(bool isLeft, double timeInSecs) const {
     float xDist = (isLeft ? -1 : 1) * 3 * DecoBoss::ARM_WIDTH;
 
@@ -416,8 +440,17 @@ void DecoBossAIState::UpdateBossUpDownSideToSideMotion() {
 /// <returns> true if there has been a state change, false if not. </returns>
 bool DecoBossAIState::UpdateShootAtPaddleWhileMoving(double dT, GameModel* gameModel) {
     if (this->shootCountdown <= 0.0) {
-        // Shoot a bolt at the paddle...
-        this->ShootLightningBoltAtPaddle(gameModel);
+
+        if (this->numShotsUntilStaticOrb <= 0) {
+            // Shoot an orb at the paddle...
+            this->ShootStaticOrbAtPaddle(gameModel);
+            this->numShotsUntilStaticOrb = this->GenerateNumShotsBetweenStaticOrbs();
+        }
+        else {
+            // Shoot a bolt at the paddle...
+            this->ShootLightningBoltAtPaddle(gameModel);
+            this->numShotsUntilStaticOrb--;
+        }
 
         // Reset the countdown and decrement the shot count
         this->shootCountdown = this->GenerateShootCountdownWhileMoving();
@@ -580,6 +613,7 @@ void DecoBossAIState::InitStationaryAttackState() {
 void DecoBossAIState::InitMovingAttackState() {
     this->shootCountdown         = this->GenerateShootCountdownWhileMoving();
     this->numShotsUntilNextState = this->GenerateNumShotsWhileMoving();
+    this->numShotsUntilStaticOrb = this->GenerateNumShotsBetweenStaticOrbs();
 
     assert(this->shootCountdown > 0.0);
     assert(this->numShotsUntilNextState > 0);
@@ -588,6 +622,7 @@ void DecoBossAIState::InitMovingAttackAndItemDropState() {
     this->dropItemCountdown      = this->GenerateItemDropCountdown();
     this->shootCountdown         = this->GenerateShootCountdownWhileMoving();
     this->numShotsUntilNextState = this->GenerateNumShotsWhileMoving();
+    this->numShotsUntilStaticOrb = this->GenerateNumShotsBetweenStaticOrbs();
 
     assert(this->dropItemCountdown > 0.0);
     assert(this->shootCountdown > 0.0);

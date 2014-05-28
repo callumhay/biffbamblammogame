@@ -86,8 +86,9 @@ const double PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY  = 0.75;
 // The default amount of damage the the paddle shield does to a block, when colliding with the block, per second
 const int PlayerPaddle::DEFAULT_SHIELD_DMG_PER_SECOND = 90;
 
-const double PlayerPaddle::PADDLE_FROZEN_TIME_IN_SECS  = 1.7;
-const double PlayerPaddle::PADDLE_ON_FIRE_TIME_IN_SECS = 2.0;
+const double PlayerPaddle::PADDLE_FROZEN_TIME_IN_SECS       = 1.7;
+const double PlayerPaddle::PADDLE_ON_FIRE_TIME_IN_SECS      = 2.0;
+const double PlayerPaddle::PADDLE_ELECTROCUTED_TIME_IN_SECS = 1.5;
 
 bool PlayerPaddle::paddleBallReleaseTimerEnabled = true;
 bool PlayerPaddle::paddleBallReleaseEnabled      = true;
@@ -104,7 +105,7 @@ timeSinceLastBlastShot(PADDLE_FLAME_BLAST_DELAY + PADDLE_ICE_BLAST_DELAY), timeS
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), currSpecialStatus(PlayerPaddle::NoStatus),
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f), reorientZRotInRads(0.0f),
 impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL), lastThingCollidedWith(NULL),
-levelBoundsCheckingOn(true), startingXPos(0.0), defaultYPos(0.0), frozenCountdown(0.0), onFireCountdown(0.0) {
+levelBoundsCheckingOn(true), startingXPos(0.0), defaultYPos(0.0), frozenCountdown(0.0), onFireCountdown(0.0), electrocutedCountdown(0.0) {
 	this->ResetPaddle();
 }
 
@@ -119,6 +120,7 @@ void PlayerPaddle::ResetPaddle() {
 	this->laserBeamTimer = 0.0;
     this->frozenCountdown = 0.0;
     this->onFireCountdown = 0.0;
+    this->electrocutedCountdown = 0.0;
     this->reorientZRotInRads = 0.0f;
 	this->currSize = PlayerPaddle::NormalSize;
     this->SetDefaultYPosition(PlayerPaddle::PADDLE_HALF_HEIGHT);
@@ -433,10 +435,23 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
         
         if (this->frozenCountdown <= 0.0) {
             this->RemoveSpecialStatus(PlayerPaddle::FrozenInIceStatus);
-            this->RecoverFromFrozenPaddle();
+            this->RecoverFromPausedPaddle();
         }
         else {
             this->frozenCountdown -= seconds;
+            this->RegenerateBounds();
+            return;
+        }
+    }
+
+    // If the paddle is electrocuted, then it can't be moved by the player until it's done sizzlin'
+    if (this->HasSpecialStatus(PlayerPaddle::ElectrocutedStatus)) {
+        if (this->electrocutedCountdown <= 0.0) {
+            this->RemoveSpecialStatus(PlayerPaddle::ElectrocutedStatus);
+            this->RecoverFromPausedPaddle();
+        }
+        else {
+            this->electrocutedCountdown -= seconds;
             this->RegenerateBounds();
             return;
         }
@@ -778,6 +793,15 @@ void PlayerPaddle::AddSpecialStatus(int32_t status) {
         // EVENT: Paddle was just set on fire
         GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::OnFireStatus, true);
     }
+    // Check whether the paddle was just electrocuted
+    if ((status & PlayerPaddle::ElectrocutedStatus) != 0x0) {
+        this->hurtAlphaAnim.ClearLerp();
+        this->hurtAlphaAnim.SetInterpolantValue(1.0f);
+
+        this->electrocutedCountdown = PADDLE_ELECTROCUTED_TIME_IN_SECS;
+        // EVENT: Paddle was just electrocuted
+        GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::ElectrocutedStatus, true);
+    }
 }
 
 void PlayerPaddle::RemoveSpecialStatus(int32_t status) {
@@ -798,6 +822,13 @@ void PlayerPaddle::RemoveSpecialStatus(int32_t status) {
         this->onFireCountdown = 0.0;
         // EVENT: Paddle stopped being on fire
         GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::OnFireStatus, false);
+    }
+
+    if ((statusBefore & PlayerPaddle::ElectrocutedStatus) != 0x0 && !this->HasSpecialStatus(PlayerPaddle::ElectrocutedStatus)) {
+        
+        this->electrocutedCountdown = 0.0;
+        // EVENT: Paddle stopped being electrocuted
+        GameEventManager::Instance()->ActionPaddleStatusUpdate(*this, PlayerPaddle::ElectrocutedStatus, false);
     }
 }
 
@@ -853,8 +884,8 @@ void PlayerPaddle::ContinuousShoot(double dT, GameModel* gameModel, float magnit
     assert(magnitudePercent >= 0.0f && magnitudePercent <= 1.0f);
 
     // TODO: If I ever implement this function...
-    // If the paddle is frozen or on fire it can't shoot
-    //if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus | PlayerPaddle::OnFireStatus)) {
+    // If the paddle has a nasty status, it can't shoot
+    //if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus | PlayerPaddle::OnFireStatus | PlayerPaddle::ElectrocutedStatus)) {
     //    return;
     //}
 
@@ -867,8 +898,8 @@ void PlayerPaddle::ContinuousShoot(double dT, GameModel* gameModel, float magnit
 void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
     assert(gameModel != NULL);
 
-    // If the paddle is frozen or on fire it can't shoot
-    if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus | PlayerPaddle::OnFireStatus)) {
+    // If the paddle has a nasty status, it can't shoot
+    if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus | PlayerPaddle::OnFireStatus | PlayerPaddle::ElectrocutedStatus)) {
         return;
     }
 
@@ -1270,6 +1301,11 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 
         case Projectile::BossLightningBoltBulletProjectile:
             this->LightningBoltProjectileCollision(projectile);
+            break;
+
+        case Projectile::BossShockOrbBulletProjectile:
+            this->ShockOrbProjectileCollision(projectile);
+            this->AddSpecialStatus(PlayerPaddle::ElectrocutedStatus);
             break;
 
         case Projectile::BossLaserBulletProjectile:
@@ -1699,6 +1735,13 @@ void PlayerPaddle::LightningBoltProjectileCollision(const Projectile& projectile
     this->hurtAlphaAnim.SetInterpolantValue(1.0f);
 }
 
+void PlayerPaddle::ShockOrbProjectileCollision(const Projectile& projectile) {
+    float currHeight = 2.0f * this->GetHalfHeight();
+    this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 2.0f, currHeight, currHeight, 25.0f);
+    this->hurtAlphaAnim.ClearLerp();
+    this->hurtAlphaAnim.SetInterpolantValue(1.0f);
+}
+
 // A laser bullet just collided with the paddle...
 void PlayerPaddle::LaserBulletProjectileCollision(const Projectile& projectile) {
 	float currHeight = 2.0f * this->GetHalfHeight();
@@ -1932,7 +1975,7 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
                                                      float closeToCenterCoeff, float maxRotationInDegs) {
 	
     // If the paddle is currently frozen then there is no effect...
-    if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
+    if (this->HasSpecialStatus(PlayerPaddle::FrozenInIceStatus | PlayerPaddle::ElectrocutedStatus)) {
         return;
     }
 
@@ -2240,6 +2283,7 @@ bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) const {
             case Projectile::PaddleFlameBlastProjectile:
             case Projectile::PaddleIceBlastProjectile:
                 return true;
+
             default:
                 break;
         }
@@ -2322,13 +2366,13 @@ void PlayerPaddle::CancelFrozenStatusWithFire() {
     // Cancel the ice
     this->currSpecialStatus &= ~PlayerPaddle::FrozenInIceStatus;
     this->frozenCountdown = 0.0;
-    this->RecoverFromFrozenPaddle();
+    this->RecoverFromPausedPaddle();
 
     // EVENT: The frozen paddle is no longer...
     GameEventManager::Instance()->ActionFrozenPaddleCanceledByFire(*this);
 }
 
-void PlayerPaddle::RecoverFromFrozenPaddle() {
+void PlayerPaddle::RecoverFromPausedPaddle() {
     static const double PADDLE_RECOVER_TIME_IN_SECS = 0.2;
     if (!this->rotAngleZAnimation.GetHasInterpolationSet() || 
         this->rotAngleZAnimation.GetFinalInterpolationValue() != 0.0f) {

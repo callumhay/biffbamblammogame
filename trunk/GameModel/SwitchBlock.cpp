@@ -233,6 +233,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			break;
 
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             if (!this->HasStatus(LevelPiece::IceCubeStatus)) {
                 this->SwitchPressed(gameModel);
             }

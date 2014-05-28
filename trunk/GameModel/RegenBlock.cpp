@@ -251,6 +251,7 @@ LevelPiece* RegenBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			break;
 
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             newPiece = this->HurtPiece(projectile->GetDamage(), gameModel, LevelPiece::BasicProjectileDestruction);
             break;
 

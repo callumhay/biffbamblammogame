@@ -208,6 +208,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 			break;
 
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             if (!this->HasStatus(LevelPiece::IceCubeStatus)) {
                 this->AttemptToDropAnItem(gameModel);
             }

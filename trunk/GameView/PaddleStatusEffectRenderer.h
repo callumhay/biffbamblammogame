@@ -39,6 +39,7 @@
 #include "CgFxPostRefract.h"
 #include "CgFxFireBallEffect.h"
 #include "CgFxVolumetricEffect.h"
+#include "CgFxSimpleColour.h"
 
 class GameESPAssets;
 class GameSound;
@@ -54,6 +55,7 @@ public:
 
     void ToggleFrozen(const PlayerPaddle& paddle, bool isFrozen);
     void ToggleOnFire(const PlayerPaddle& paddle, bool isOnFire);
+    void ToggleElectrocuted(const PlayerPaddle& paddle, bool isElectrocuted);
     
     void CancelOnFireWithFrozen();
     void CancelFrozenWithOnFire();
@@ -91,7 +93,15 @@ private:
     ESPParticleScaleEffector particleMediumGrowth;
     ESPParticleAccelEffector fireAccel;
 
+    // Electrocution-status-related variables -----------
+    static const double TIME_BETWEEN_ELECTROCUTED_NORMAL_FLASHES_IN_SECS;
+    AnimationMultiLerp<Colour> electrocutionFlashAnim;
+    CgFxSimpleColour electrocutionEffect;
+    double electrocutionNormalFlashTimeCounter;
+
+
     SoundID paddleIceShakeSoundID;
+    SoundID electrocutionSoundID;
 
     DISALLOW_COPY_AND_ASSIGN(PaddleStatusEffectRenderer);
 };

@@ -1667,6 +1667,11 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
                 projectile.GetPosition3D(), true, true, true);
             break;
 
+        case Projectile::BossShockOrbBulletProjectile:
+            this->sound->PlaySoundAtPosition(GameSound::DecoBossShockOrbAttackEvent, false,
+                projectile.GetPosition3D(), true, true, true);
+            break;
+
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
@@ -1854,6 +1859,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             intensity = PlayerHurtHUD::ModeratePain;
             break;
 
@@ -2352,6 +2358,13 @@ void GameAssets::ActivatePaddleStatusEffect(const GameModel& gameModel, Camera& 
             break;
         }
 
+        case PlayerPaddle::ElectrocutedStatus: {
+            this->paddleStatusEffectRenderer->ToggleElectrocuted(*paddle, true);
+            this->espAssets->AddPaddleElectrocutedEffect(*paddle);
+            this->flashHUD->Activate(0.33, 1.0f);
+            break;
+        }
+
         default:
             break;
     }
@@ -2381,6 +2394,11 @@ void GameAssets::DeactivatePaddleStatusEffect(const GameModel& gameModel, Camera
 
         case PlayerPaddle::OnFireStatus: {
             this->paddleStatusEffectRenderer->ToggleOnFire(*paddle, false);
+            break;
+        }
+
+        case PlayerPaddle::ElectrocutedStatus: {
+            this->paddleStatusEffectRenderer->ToggleElectrocuted(*paddle, false);
             break;
         }
 

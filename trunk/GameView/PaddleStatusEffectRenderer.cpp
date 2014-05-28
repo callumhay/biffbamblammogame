@@ -36,14 +36,16 @@
 
 #include "../GameControl/GameControllerManager.h"
 
-const double PaddleStatusEffectRenderer::TIME_BETWEEN_FROZEN_SHAKES_IN_SECS          = 0.125;
-const double PaddleStatusEffectRenderer::TIME_BETWEEN_ON_FIRE_NORMAL_FLASHES_IN_SECS = 0.03;
+const double PaddleStatusEffectRenderer::TIME_BETWEEN_FROZEN_SHAKES_IN_SECS               = 0.125;
+const double PaddleStatusEffectRenderer::TIME_BETWEEN_ON_FIRE_NORMAL_FLASHES_IN_SECS      = 0.03;
+const double PaddleStatusEffectRenderer::TIME_BETWEEN_ELECTROCUTED_NORMAL_FLASHES_IN_SECS = 0.03;
 
 PaddleStatusEffectRenderer::PaddleStatusEffectRenderer(GameESPAssets* espAssets, GameSound* sound) :
 espAssets(espAssets), sound(sound), currStatusMaterial(NULL), frozenShakeTimeCounter(0.0),
 rectPrismTexture(NULL), frostTexture(NULL), paddleOnFireEmitter(NULL),
 fireColourFader(ColourRGBA(1.0f, 1.0f, 0.0f, 1.0f), ColourRGBA(0.4f, 0.15f, 0.0f, 0.2f)),
-particleMediumGrowth(1.0f, 1.6f), fireAccel(Vector3D(1,1,1)), paddleIceShakeSoundID(INVALID_SOUND_ID) {
+particleMediumGrowth(1.0f, 1.6f), fireAccel(Vector3D(1,1,1)), 
+paddleIceShakeSoundID(INVALID_SOUND_ID), electrocutionSoundID(INVALID_SOUND_ID) {
     
     assert(espAssets != NULL);
     assert(sound != NULL);
@@ -98,6 +100,42 @@ particleMediumGrowth(1.0f, 1.6f), fireAccel(Vector3D(1,1,1)), paddleIceShakeSoun
 
         this->fireFlashAnim.SetLerp(timeVals, colourVals);
         this->fireFlashAnim.SetRepeat(true);
+    }
+
+    {
+        const double FLASH_TIME = 0.05;
+        const double QUICK_INTERVAL_TIME = 0.001;
+
+        std::vector<double> timeVals;
+        timeVals.reserve(9);
+        timeVals.push_back(0.0);
+        timeVals.push_back(FLASH_TIME);
+        timeVals.push_back(timeVals.back() + QUICK_INTERVAL_TIME);
+        timeVals.push_back(timeVals.back() + FLASH_TIME);
+        timeVals.push_back(timeVals.back() + QUICK_INTERVAL_TIME);
+        timeVals.push_back(timeVals.back() + FLASH_TIME);
+        timeVals.push_back(timeVals.back() + QUICK_INTERVAL_TIME);
+        timeVals.push_back(timeVals.back() + FLASH_TIME);
+        timeVals.push_back(timeVals.back() + QUICK_INTERVAL_TIME);
+
+        const Colour BRIGHT_COLOUR1(1.0f, 1.0f, 0.0f);
+        const Colour BRIGHT_COLOUR2(1.0f, 1.0f, 1.0f);
+        const Colour DARK_COLOUR(0.0f, 0.0f, 0.0f);
+
+        std::vector<Colour> colourVals;
+        colourVals.reserve(timeVals.size());
+        colourVals.push_back(BRIGHT_COLOUR1);
+        colourVals.push_back(BRIGHT_COLOUR1);
+        colourVals.push_back(DARK_COLOUR);
+        colourVals.push_back(DARK_COLOUR);
+        colourVals.push_back(BRIGHT_COLOUR2);
+        colourVals.push_back(BRIGHT_COLOUR2);
+        colourVals.push_back(DARK_COLOUR);
+        colourVals.push_back(DARK_COLOUR);
+        colourVals.push_back(BRIGHT_COLOUR1);
+
+        this->electrocutionFlashAnim.SetLerp(timeVals, colourVals);
+        this->electrocutionFlashAnim.SetRepeat(true);
     }
 
     // Initialize textures...
@@ -195,6 +233,9 @@ void PaddleStatusEffectRenderer::ToggleFrozen(const PlayerPaddle& paddle, bool i
     else {
         // The paddle has escaped its icy prison!
         this->sound->PlaySoundAtPosition(GameSound::IceShatterEvent, false, paddle.GetPosition3D(), true, true, true);
+
+        this->sound->StopSound(this->paddleIceShakeSoundID);
+        this->paddleIceShakeSoundID = INVALID_SOUND_ID;
     }
 }
 
@@ -216,6 +257,25 @@ void PaddleStatusEffectRenderer::ToggleOnFire(const PlayerPaddle& paddle, bool i
     }
 }
 
+void PaddleStatusEffectRenderer::ToggleElectrocuted(const PlayerPaddle& paddle, bool isElectrocuted) {
+    this->electrocutionNormalFlashTimeCounter = 0.0;
+
+    if (isElectrocuted) {
+        this->currStatusMaterial = &this->electrocutionEffect;
+
+        // Sound for being electrocuted...
+        this->sound->StopSound(this->electrocutionSoundID);
+        this->electrocutionSoundID = this->sound->PlaySoundAtPosition(
+            GameSound::PaddleElectrocutedEvent, true, paddle.GetPosition3D(), true, true, true);
+    }
+    else {
+        this->sound->StopSound(this->electrocutionSoundID);
+        this->electrocutionSoundID = INVALID_SOUND_ID;
+        
+        this->currStatusMaterial = NULL;
+    }
+}
+
 void PaddleStatusEffectRenderer::CancelOnFireWithFrozen() {
     this->onFireEffect.SetAlphaMultiplier(0.0f);
     this->currStatusMaterial = NULL;
@@ -229,16 +289,24 @@ void PaddleStatusEffectRenderer::CancelFrozenWithOnFire() {
 void PaddleStatusEffectRenderer::Reinitialize() {
     this->frozenShakeTimeCounter = 0.0;
     this->onFireNormalFlashTimeCounter = 0.0;
+    this->electrocutionNormalFlashTimeCounter = 0.0;
     
     this->paddleIceShakeAnim.ClearLerp();
     this->paddleIceShakeAnim.SetInterpolantValue(0.0f);
 
     this->currStatusMaterial = NULL;
+
+    this->sound->StopSound(this->paddleIceShakeSoundID);
+    this->paddleIceShakeSoundID = INVALID_SOUND_ID;
+    this->sound->StopSound(this->electrocutionSoundID);
+    this->electrocutionSoundID = INVALID_SOUND_ID;
 }
 
 void PaddleStatusEffectRenderer::Draw(double dT, const Camera& camera, 
                                       const PlayerPaddle& paddle, 
                                       const Texture2D* sceneTexture) {
+
+    static const double TIME_TO_START_FADE_OUT = 0.75;
 
     if (paddle.HasSpecialStatus(PlayerPaddle::FrozenInIceStatus)) {
 
@@ -297,7 +365,6 @@ void PaddleStatusEffectRenderer::Draw(double dT, const Camera& camera,
         this->fireFlashAnim.Tick(dT);
         this->onFireEffect.SetBrightFireColour(this->fireFlashAnim.GetInterpolantValue());
 
-        static const double TIME_TO_START_FADE_OUT = 0.75;
         if (paddle.GetTimeUntilNotOnFire() < TIME_TO_START_FADE_OUT) {
 
             float maxAlpha = static_cast<float>(NumberFuncs::LerpOverTime(TIME_TO_START_FADE_OUT, 0.0f, 1.0f, 0.0f, paddle.GetTimeUntilNotOnFire()));
@@ -323,5 +390,27 @@ void PaddleStatusEffectRenderer::Draw(double dT, const Camera& camera,
             Point3D(paddle.GetHalfWidthTotal(),0,0)));
         this->paddleOnFireEmitter->Tick(dT);
         this->paddleOnFireEmitter->Draw(camera);
+    }
+
+    if (paddle.HasSpecialStatus(PlayerPaddle::ElectrocutedStatus)) {
+        this->electrocutionFlashAnim.Tick(dT);
+        this->electrocutionEffect.SetColour(this->electrocutionFlashAnim.GetInterpolantValue());
+
+        if (paddle.GetTimeUntilNotElectrocuted() < TIME_TO_START_FADE_OUT) {
+
+            // Make the paddle flash between being on fire and its normal form when the fire is almost done
+            this->electrocutionNormalFlashTimeCounter += dT;
+            if (this->electrocutionNormalFlashTimeCounter >= TIME_BETWEEN_ELECTROCUTED_NORMAL_FLASHES_IN_SECS) {
+
+                // Alternate materials for the paddle to simulate the flashing
+                if (this->currStatusMaterial != &this->electrocutionEffect) {
+                    this->currStatusMaterial = &this->electrocutionEffect;
+                } 
+                else {
+                    this->currStatusMaterial = NULL;
+                }
+                this->electrocutionNormalFlashTimeCounter = 0.0;
+            }
+        }
     }
 }

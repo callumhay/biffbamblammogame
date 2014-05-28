@@ -78,6 +78,7 @@ bool GothicRomanticBoss::ProjectilePassesThrough(const Projectile* projectile) c
         case Projectile::BossRocketBulletProjectile:
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             return true;
         default:
             break;

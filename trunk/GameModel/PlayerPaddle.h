@@ -87,6 +87,7 @@ public:
 
     static const double PADDLE_FROZEN_TIME_IN_SECS;
     static const double PADDLE_ON_FIRE_TIME_IN_SECS;
+    static const double PADDLE_ELECTROCUTED_TIME_IN_SECS;
 
     // WARNING: The PaddleType is a bit-wise mask, make sure all enumerations are bit-wise mutually exclusive!
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000002, 
@@ -100,7 +101,7 @@ public:
     enum PaddleSpecialStatus { 
         NoStatus = 0x00000000, InvisibleRocketStatus = 0x00000001, InvisibleMineStatus = 0x00000002,
         AllInvisibleStatus = InvisibleRocketStatus | InvisibleMineStatus,
-        FrozenInIceStatus = 0x00000004, OnFireStatus = 0x00000008,
+        FrozenInIceStatus = 0x00000004, OnFireStatus = 0x00000008, ElectrocutedStatus = 0x00000010,
         AllStatus = 0xFFFFFFFF
     };
 
@@ -357,6 +358,7 @@ public:
 
     double GetTimeUntilUnfrozen() const { return this->frozenCountdown; }
     double GetTimeUntilNotOnFire() const { return this->onFireCountdown; }
+    double GetTimeUntilNotElectrocuted() const { return this->electrocutedCountdown; }
     double GetHurtTime() const { return std::max<double>(this->moveDownAnimation.GetFinalTimeValue(), this->rotAngleZAnimation.GetFinalTimeValue()); }
 
     void SetupAlphaFlashAnim(double totalFlashTime);
@@ -440,8 +442,9 @@ private:
     double timeSinceLastBlastShot; // Time since the last fire blast projectile was fired
 	double laserBeamTimer;          // Time left on the laser beam power-up
 
-    double frozenCountdown; // Keeps track of time that the paddle is frozen
-    double onFireCountdown; // Keeps track of time that the paddle is on fire
+    double frozenCountdown;         // Keeps track of time that the paddle is frozen
+    double onFireCountdown;         // Keeps track of time that the paddle is on fire
+    double electrocutedCountdown;   // Keeps track of time that the paddle is electrocuted
 
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
@@ -464,6 +467,7 @@ private:
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
     void OrbProjectileCollision(const Projectile& projectile);
     void LightningBoltProjectileCollision(const Projectile& projectile);
+    void ShockOrbProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
     void MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile);
@@ -488,7 +492,7 @@ private:
 
     void CancelFireStatusWithIce();
     void CancelFrozenStatusWithFire();
-    void RecoverFromFrozenPaddle();
+    void RecoverFromPausedPaddle();
 
     const Collision::LineSeg2D& GetBottomCollisionLine() const { return this->bounds.GetLine(3); }
     void GetBoundsWithoutBottomCollisionLine(BoundingLines& boundsNoBottom) const;

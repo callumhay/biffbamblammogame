@@ -248,10 +248,11 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
-			// Do nothing, typical laser bullets just extinguish on contact
+			// Do nothing, typical laser/energy bullets just extinguish on contact
 			break;
 
 		case Projectile::CollateralBlockProjectile:

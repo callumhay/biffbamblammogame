@@ -172,6 +172,7 @@ LevelPiece* AlwaysDropBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
         
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             newPiece = this->Destroy(gameModel, LevelPiece::BasicProjectileDestruction);
             break;
 

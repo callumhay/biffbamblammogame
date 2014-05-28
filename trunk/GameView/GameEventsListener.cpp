@@ -2476,6 +2476,7 @@ void GameEventsListener::DoProjectileTeleportation(const Projectile& projectile,
         case Projectile::BossOrbBulletProjectile:
         case Projectile::BossLaserBulletProjectile:
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

@@ -112,6 +112,7 @@ public:
 		PaddleHitWallEvent,
         PaddleFrozenEvent,
         PaddleOnFireEvent,
+        PaddleElectrocutedEvent,
         PaddleIceShakeEvent,
 
         // -> Paddle/block sounds
@@ -238,6 +239,7 @@ public:
         GothicBossSummonItemChargeEvent,
         GothicBossChargeShockwaveEvent,
         GothicBossMassiveShockwaveEvent,
+        NouveauBossFrillBreakEvent,
         DecoBossLightningRelayTurnOnEvent,
         DecoBossArmRotateLoop,
         DecoBossArmExtendEvent,
@@ -246,6 +248,7 @@ public:
         DecoBossArmPaddleCollisionEvent,
         DecoBossLevelRotatingLoop,
         DecoBossLightningBoltAttackEvent,
+        DecoBossShockOrbAttackEvent,
         DecoBossElectricShockLoop,
         FuturismBossTeleportationChargingEvent,
         FuturismBossTeleportationEvent,

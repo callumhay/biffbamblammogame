@@ -1,5 +1,5 @@
 /**
- * BossOrbProjectile.h
+ * BossShockOrbProjectile.h
  * 
  * Copyright (c) 2014, Callum Hay
  * All rights reserved.
@@ -29,37 +29,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __BOSSORBPROJECTILE_H__
-#define __BOSSORBPROJECTILE_H__
+#ifndef __BOSSSHOCKORBPROJECTILE_H__
+#define __BOSSSHOCKORBPROJECTILE_H__
 
 #include "OrbProjectile.h"
 
 /**
- * Represents orb projectile shot by the gothic & romantic boss.
+ * Represents lightning orb projectiles that are shot by the deco boss.
  */
-class BossOrbProjectile : public OrbProjectile {
+class BossShockOrbProjectile : public OrbProjectile {
 public:
 	static const float RADIUS_DEFAULT;
     static const float SPD_DEFAULT;
 
-    explicit BossOrbProjectile(const Point2D& spawnLoc);
-    BossOrbProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);
-    BossOrbProjectile(const BossOrbProjectile& copy);
-    ~BossOrbProjectile();
+    explicit BossShockOrbProjectile(const Point2D& spawnLoc);
+    BossShockOrbProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);
+    BossShockOrbProjectile(const BossShockOrbProjectile& copy);
+    ~BossShockOrbProjectile();
 
     ProjectileType GetType() const {
-        return Projectile::BossOrbBulletProjectile;
+        return Projectile::BossShockOrbBulletProjectile;
     }
 
     float GetDamage() const { return 0.0f; }
 
-    bool IsRefractableOrReflectable() const { return true; }
+    bool IsRefractableOrReflectable() const { return false; }
     bool BlastsThroughSafetyNets() const { return false; }
     bool IsDestroyedBySafetyNets() const { return true;  }
 
 private:
     // Disallow assignment
-    void operator=(const BossOrbProjectile& copy);
+    void operator=(const BossShockOrbProjectile& copy);
 };
 
-#endif // __BOSSORBPROJECTILE_H__
+#endif // __BOSSSHOCKORBPROJECTILE_H__

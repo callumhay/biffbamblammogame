@@ -251,6 +251,7 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 		break;
 
         case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
             break;
 
 		case Projectile::CollateralBlockProjectile:
