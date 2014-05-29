@@ -141,11 +141,7 @@ inline double GameModelConstants::GenerateFireGlobDropTime() const {
 }
 
 inline std::string GameModelConstants::GetWorldDefinitonFilePath() const {
-#ifdef _DEMO
-    return this->RESOURCE_DIR + std::string("/") + this->WORLD_DIR + std::string("/worlds_demo");
-#else
     return this->RESOURCE_DIR + std::string("/") + this->WORLD_DIR + std::string("/worlds");
-#endif
 }
 
 #endif

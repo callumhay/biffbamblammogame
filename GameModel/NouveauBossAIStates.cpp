@@ -204,8 +204,6 @@ void NouveauBossAI::ShootRandomLaserBullet(GameModel* gameModel) {
 void NouveauBossAI::ShootRandomBottomSphereLaserBullet(GameModel* gameModel) {
     PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
     assert(paddle != NULL);
-    const GameLevel* currLevel = gameModel->GetCurrentLevel();
-    assert(currLevel != NULL);
 
     // Shoot at the paddle
     Point3D shotOrigin3D = this->boss->GetBottomSphereShootPt(); 
