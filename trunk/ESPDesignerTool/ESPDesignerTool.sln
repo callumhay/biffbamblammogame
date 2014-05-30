@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ESPDesignerTool", "ESPDesignerTool.vcproj", "{B24B8AB4-CC3C-4E50-8A1D-76B0324CFEA0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7CCD6C55-B859-4732-BBFF-4CC2272D7D6B} = {7CCD6C55-B859-4732-BBFF-4CC2272D7D6B}
+		{F88BF4AD-F36B-4E49-A961-A0C239660D08} = {F88BF4AD-F36B-4E49-A961-A0C239660D08}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlammoEngine", "..\BlammoEngine.vcproj", "{7CCD6C55-B859-4732-BBFF-4CC2272D7D6B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ESPEngine", "..\ESPEngine.vcproj", "{F88BF4AD-F36B-4E49-A961-A0C239660D08}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7CCD6C55-B859-4732-BBFF-4CC2272D7D6B} = {7CCD6C55-B859-4732-BBFF-4CC2272D7D6B}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B24B8AB4-CC3C-4E50-8A1D-76B0324CFEA0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B24B8AB4-CC3C-4E50-8A1D-76B0324CFEA0}.Debug|Win32.Build.0 = Debug|Win32
+		{B24B8AB4-CC3C-4E50-8A1D-76B0324CFEA0}.Release|Win32.ActiveCfg = Release|Win32
+		{B24B8AB4-CC3C-4E50-8A1D-76B0324CFEA0}.Release|Win32.Build.0 = Release|Win32
+		{7CCD6C55-B859-4732-BBFF-4CC2272D7D6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7CCD6C55-B859-4732-BBFF-4CC2272D7D6B}.Debug|Win32.Build.0 = Debug|Win32
+		{7CCD6C55-B859-4732-BBFF-4CC2272D7D6B}.Release|Win32.ActiveCfg = Release|Win32
+		{7CCD6C55-B859-4732-BBFF-4CC2272D7D6B}.Release|Win32.Build.0 = Release|Win32
+		{F88BF4AD-F36B-4E49-A961-A0C239660D08}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F88BF4AD-F36B-4E49-A961-A0C239660D08}.Debug|Win32.Build.0 = Debug|Win32
+		{F88BF4AD-F36B-4E49-A961-A0C239660D08}.Release|Win32.ActiveCfg = Release|Win32
+		{F88BF4AD-F36B-4E49-A961-A0C239660D08}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
