@@ -256,7 +256,7 @@ public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 		currLevelEditFrame.saveAs();		
 	}
 
-	public void setItemDropsForLevelEditDocument(HashMap<String, Integer> settings) {
+	public void setItemDropsForLevelEditDocument(HashMap<String, ItemDropSettings> settings) {
 		JInternalFrame currInternalFrame = this.levelEditDesktop.getSelectedFrame();
 		if (currInternalFrame == null) {
 			assert false;

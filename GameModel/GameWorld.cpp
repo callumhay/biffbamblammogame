@@ -44,6 +44,7 @@ const char* GameWorld::GOTHIC_ROMANTIC_WORLD_NAME   = "Gothic and Romantic";
 const char* GameWorld::NOUVEAU_WORLD_NAME           = "Nouveau";
 const char* GameWorld::DECO_WORLD_NAME              = "Deco";
 const char* GameWorld::FUTURISM_WORLD_NAME          = "Futurism";
+const char* GameWorld::SURREALISM_DADA_WORLD_NAME   = "Surrealism and Dada";
 
 /* 
  * Constructor for GameWorld class, requires a list of level text/filenames
@@ -311,6 +312,9 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 	else if (s == FUTURISM_WORLD_NAME) {
 		ret = Futurism;
 	}
+    else if (s == SURREALISM_DADA_WORLD_NAME) {
+        ret = SurrealismDada;
+    }
 	return ret;
 }
 

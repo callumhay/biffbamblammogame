@@ -173,11 +173,14 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss, GameSo
             break;
         }
 
-        //case GameWorld::SurrealismDada:
-            // TODO
-
         //case GameWorld::Postmodernism:
             // TODO
+
+
+        case GameWorld::SurrealismDada: {
+            assert(false);
+            break;
+        }
 
         default:
             assert(false);

@@ -34,6 +34,7 @@
 
 #include <string>
 #include <iostream>
+#include <cctype>
 
 #define WHITESPACE_CHARACTERS " \t\r\n"
 
@@ -115,6 +116,14 @@ inline std::string AddNumberCommas(long number) {
         }
     }
     return scoreStr;
+}
+
+inline bool IsPositiveNumber(const std::string& s) {
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) {
+        ++it;
+    }
+    return (!s.empty() && it == s.end());
 }
 
 };

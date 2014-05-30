@@ -86,16 +86,17 @@ public:
     static const char FINITE_LIFE_CHAR;
     static const char INFINITE_LIFE_CHAR;
 
+    static const char ITEM_AVAILABLE_ONLY_IF_UNLOCKED_CHAR;
+
     static const char* BOSS_LEVEL_KEYWORD;
 
 	static const char* ALL_ITEM_TYPES_KEYWORD;
 	static const char* POWERUP_ITEM_TYPES_KEYWORD;
 	static const char* POWERNEUTRAL_ITEM_TYPES_KEYWORD;
 	static const char* POWERDOWN_ITEM_TYPES_KEYWORD;
-
     static const char* STAR_POINT_MILESTONE_KEYWORD;
+    static const char* PADDLE_STARTING_X_POS_KEYWORD;
 
-    static const char* PADDLE_STARTING_X_POS;
     static const int MIN_Y_BOUND_BUFFER_SPACE_FOR_PADDLE = 8;
     static const int DEFAULT_PADDLE_START_IDX = -1;
 

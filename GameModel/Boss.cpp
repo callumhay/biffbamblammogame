@@ -104,7 +104,9 @@ Boss* Boss::BuildStyleBoss(GameModel* gameModel, const GameWorld::WorldStyle& st
             boss = new FuturismBoss();
             break;
 
-        //case GameWorld::SurrealDada:
+        case GameWorld::SurrealismDada:
+            assert(false);
+            break;
 
         //case GameWorld::Postmodernism:
 

@@ -1,7 +1,7 @@
 A Pointed Challenge
 11 27
 E E E T(S,lr) S S S S T(S,ll) E E 
-E E T(S,lr) T(S,ul) E K(UberBall,UberBall,UberBall) E E T(S,ur) T(S,ll) E 
+E E T(S,lr) T(S,ul) E K(UberBall 3) E E T(S,ur) T(S,ll) E 
 E T(S,lr) T(S,ul) E E E E E E T(S,ur) T(S,ll) 
 T(S,lr) T(S,ul) E E E E E T(G,ur) T(Y,ll) E S 
 S B T(Y,lr) T(G,ul) E E I E T(G,ur) T(Y,ll) S 
@@ -19,7 +19,7 @@ S T(Y,lr) T(R,ul) E T(G,lr) G E E E E S
 S T(R,ul) E T(G,lr) O E E G Y E S 
 S E T(G,lr) G E E E Y G E S 
 S T(G,lr) O E E E E E E E S 
-S G E E E Y K(GhostBall,GhostBall,GhostBall) E E E S 
+S G E E E Y K(GhostBall 3) E E E S 
 S E E E E G Y E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -39,31 +39,24 @@ PaddleGrow 2
 PoisonPaddle 2
 Blackout 2
 BallSafetyNet 2
-BallGrow 2
 UberBall 2
-StickyPaddle 2
+BallGrow 2
 ShieldPaddle 2
+StickyPaddle 2
 LaserBulletPaddle 2
 PaddleShrink 2
 InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
-FireBall 0
 RocketPaddle 2
 GhostBall 2
 BallShrink 2
 UpsideDown 2
 MultiBall5 1
-BallCam 0
-MagnetPaddle 0
 MultiBall3 2
-RemoteControlRocket 0
-IceBall 0
-MineLauncherPaddle 0
 SlowBall 2
-GravityBall 2
-CrazyBall 2
-Random 2
 FastBall 2
-PaddleCam 0
+Random 2
+CrazyBall 2
+GravityBall 2

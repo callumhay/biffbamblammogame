@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
@@ -61,7 +62,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private Set<Character> teslaIDs  = new TreeSet<Character>();
 	
 	// Settings for all the drop items in the level
-	private HashMap<String, Integer> itemDropSettings;
+	private HashMap<String, ItemDropSettings> itemDropSettings;
 	
 	public BBBLevelEditDocumentWindow(BBBLevelEditMainWindow window) {
 		super("", true, true, true, true);
@@ -274,12 +275,12 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.currPaddleStartingXPos = xPos;
 	}
 	
-	public void setItemDropSettings(HashMap<String, Integer> settings) {
+	public void setItemDropSettings(HashMap<String, ItemDropSettings> settings) {
 		assert(settings.size() == this.itemDropSettings.size());
 		this.itemDropSettings = settings;
 		this.hasBeenModified = true;
 	}
-	public HashMap<String, Integer> getItemDropSettings() {
+	public HashMap<String, ItemDropSettings> getItemDropSettings() {
 		return this.itemDropSettings;
 	}
 	
@@ -384,6 +385,26 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					for (int col = 0; col < this.currWidth; col++) {
 						
 						currLevelPieceSymbol = levelFileScanner.next();
+						
+						// Deal with two special cases: 
+						// Item drop and always drop blocks...
+						if (!currLevelPieceSymbol.isEmpty() && !currLevelPieceSymbol.contains(")") &&
+								(currLevelPieceSymbol.substring(0, LevelPiece.ALWAYS_DROP_PIECE_SYMBOL.length()).equals(LevelPiece.ALWAYS_DROP_PIECE_SYMBOL) ||
+								 currLevelPieceSymbol.substring(0, LevelPiece.ITEM_DROP_PIECE_SYMBOL.length()).equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL))) {
+														
+							while(true) {
+								String temp = levelFileScanner.next();
+								if (temp.contains(")")) {
+									currLevelPieceSymbol += " " + temp;
+									break;
+								}
+								else {
+									currLevelPieceSymbol += " " + temp;
+								}
+							}							
+						}
+						
+						
 						LevelPieceImageLabel tempLabel = new LevelPieceImageLabel(currLevelPieceSymbol);
 
 						if (tempLabel.getIsPortal()) {
@@ -472,10 +493,16 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			}
 			
 			String possibleItemDropName = levelFileScanner.next();
+			boolean onlyAvailableIfUnlocked = false;
+			if (possibleItemDropName.equalsIgnoreCase("*")) {
+				onlyAvailableIfUnlocked = true;
+				possibleItemDropName = levelFileScanner.next();
+			}
+			
 			boolean itemExists = this.itemDropSettings.containsKey(possibleItemDropName);
 			if (itemExists) {
 				int likelihood = levelFileScanner.nextInt();
-				this.itemDropSettings.put(possibleItemDropName, likelihood);
+				this.itemDropSettings.put(possibleItemDropName, new ItemDropSettings(likelihood, onlyAvailableIfUnlocked));
 			}
 		}
 		
@@ -605,12 +632,29 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					}
 					else if (currPieceLbl.getIsItemDrop() || currPieceLbl.getIsAlwaysDrop()) {
 						String outputStr = currLvlPiece.getSymbol() + "(";
-						Iterator<String> iter = currPieceLbl.getItemDropTypes().iterator();
+						Iterator<Entry<String, ItemDropSettings>> iter = currPieceLbl.getItemDropTypes().entrySet().iterator();
+						
+						boolean isFirst = true;
+						boolean hasPrinted = false;
 						while (iter.hasNext()) {
-							outputStr = outputStr + iter.next();
-							if (iter.hasNext()) {
-								outputStr = outputStr + ",";
+							
+							Entry<String, ItemDropSettings> currEntry = iter.next();
+							if (currEntry.getValue().GetProbabilityValue() > 0) {
+								
+								if (!isFirst && hasPrinted) {
+									outputStr = outputStr + ",";
+								}
+								
+								String starStr = "";
+								if (currEntry.getValue().GetOnlyDropIfUnlocked()) {
+									starStr = "* ";
+								}
+		
+								outputStr = outputStr + starStr + currEntry.getKey() + " " + String.valueOf(currEntry.getValue().GetProbabilityValue());
+								hasPrinted = true;
 							}
+							
+							isFirst = false;
 						}
 						outputStr = outputStr + ")";
 						levelFileWriter.write(outputStr);
@@ -658,8 +702,16 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			Iterator<String> itemDropIter = this.itemDropSettings.keySet().iterator();
 			while (itemDropIter.hasNext()) {
 				String itemDropName = itemDropIter.next();
-				Integer itemDropLikelihood = this.itemDropSettings.get(itemDropName);
-				levelFileWriter.write(itemDropName + " " + itemDropLikelihood + "\r\n");
+				ItemDropSettings settings = this.itemDropSettings.get(itemDropName);
+				Integer itemDropLikelihood = settings.GetProbabilityValue();
+				if (itemDropLikelihood > 0) {
+					String onlyIfAvailableStar = "";
+					if (settings.GetOnlyDropIfUnlocked()) {
+						onlyIfAvailableStar = "* ";
+					}
+					
+					levelFileWriter.write(onlyIfAvailableStar + itemDropName + " " + itemDropLikelihood + "\r\n");
+				}
 			}
 			
 			// Add the paddle starting x position if there is one...
