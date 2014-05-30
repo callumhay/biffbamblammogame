@@ -57,8 +57,8 @@ GameViewConstants* GameViewConstants::Instance = NULL;
 #define FUTURISM_MESH_DIRECTORY MESH_DIRECTORY "/futurism"
 #define FUTURISM_BOSS_MESH_DIRECTORY FUTURISM_MESH_DIRECTORY BOSS_DIRECTORY
 
-#define DADA_SURREALISM_MESH_DIRECTORY MESH_DIRECTORY "/dada_surrealism"
-#define DADA_SURREALISM_BOSS_MESH_DIRECTORY DADA_SURREALISM_MESH_DIRECTORY BOSS_DIRECTORY
+#define SURREALISM_DADA_MESH_DIRECTORY MESH_DIRECTORY "/surrealism_dada"
+#define SURREALISM_DADA_BOSS_MESH_DIRECTORY SURREALISM_DADA_MESH_DIRECTORY BOSS_DIRECTORY
 
 // Static constants
 const char* GameViewConstants::BOOST_MALFUNCTION_TEXT              = ">>WARNING:\n>>BOOST MALFUNCTION?!";
@@ -197,6 +197,7 @@ TEXTURE_GOTHIC_ROMANTIC_BLOCK_IMG(TEXTURE_DIRECTORY "/gothic_romantic_block256x1
 TEXTURE_NOUVEAU_BLOCK_IMG(TEXTURE_DIRECTORY         "/nouveau_block256x128.png"),
 TEXTURE_DECO_BLOCK_IMG(TEXTURE_DIRECTORY            "/deco_block256x128.png"),
 TEXTURE_FUTURISM_BLOCK_IMG(TEXTURE_DIRECTORY        "/futurism_block256x128.png"),
+TEXTURE_SURREALISM_DADA_BLOCK_IMG(TEXTURE_DIRECTORY "/surrealism_dada_block256x128.png"),
 
 TEXTURE_MULTIPLIER_BANG(TEXTURE_DIRECTORY          "/multiplier_bang_128x128.png"),
 TEXTURE_MULTIPLIER_GAUGE_OUTLINE(TEXTURE_DIRECTORY "/multiplier_gage_128x128.png"),
@@ -397,8 +398,6 @@ ONE_WAY_BLOCK_RIGHT_MESH(MESH_DIRECTORY "/one_way_block_right.obj"),
 
 SKYBEAM_MESH(MESH_DIRECTORY "/skybeam.obj"),
 
-// PRE-MODERNISM ==================================================================
-
 // Classical Asset Paths
 CLASSICAL_PADDLE_MESH(CLASSICAL_MESH_DIRECTORY "/classical_paddle.obj"),
 CLASSICAL_BACKGROUND_MESH(CLASSICAL_MESH_DIRECTORY "/classical_background.obj"),
@@ -412,7 +411,6 @@ CLASSICAL_BOSS_EYE_MESH(CLASSICAL_BOSS_MESH_DIRECTORY "/classical_boss_eye.obj")
 CLASSICAL_BOSS_PEDIMENT_MESH(CLASSICAL_BOSS_MESH_DIRECTORY "/classical_boss_pediment.obj"),
 CLASSICAL_BOSS_TABLATURE_MESH(CLASSICAL_BOSS_MESH_DIRECTORY "/classical_boss_tablature.obj"),
 
-
 // Gothic-Romanticism Asset Paths
 GOTHIC_ROMANTIC_PADDLE_MESH(GOTHIC_ROMANTIC_MESH_DIRECTORY "/gothic_romantic_paddle.obj"),
 GOTHIC_ROMANTIC_BACKGROUND_MESH(GOTHIC_ROMANTIC_MESH_DIRECTORY "/gothic_romantic_background.obj"),
@@ -422,9 +420,6 @@ GOTHIC_ROMANTIC_BOSS_TOP_POINT_MESH(GOTHIC_ROMANTIC_BOSS_MESH_DIRECTORY "/gothic
 GOTHIC_ROMANTIC_BOSS_BOTTOM_POINT_MESH(GOTHIC_ROMANTIC_BOSS_MESH_DIRECTORY "/gothic_romantic_boss_bottom_point.obj"),
 GOTHIC_ROMANTIC_BOSS_BODY_MESH(GOTHIC_ROMANTIC_BOSS_MESH_DIRECTORY "/gothic_romantic_boss_body.obj"),
 GOTHIC_ROMANTIC_BOSS_LEG_MESH(GOTHIC_ROMANTIC_BOSS_MESH_DIRECTORY "/gothic_romantic_boss_leg.obj"),
-
-
-// MODERNISM =======================================================================
 
 // Nouveau Asset Paths
 NOUVEAU_PADDLE_MESH(NOUVEAU_MESH_DIRECTORY "/nouveau_paddle.obj"),
@@ -441,7 +436,6 @@ NOUVEAU_BOSS_SIDE_SPHERE_HOLDER_CURL_MESH(NOUVEAU_BOSS_MESH_DIRECTORY "/nouveau_
 NOUVEAU_BOSS_TOP_ENCLOSURE_DOME_MESH(NOUVEAU_BOSS_MESH_DIRECTORY "/nouveau_boss_top_enclosure_dome.obj"),
 NOUVEAU_BOSS_TOP_ENCLOSURE_GAZEBO_MESH(NOUVEAU_BOSS_MESH_DIRECTORY "/nouveau_boss_top_enclosure_gazebo.obj"),
 NOUVEAU_BOSS_TOP_SPHERE_MESH(NOUVEAU_BOSS_MESH_DIRECTORY "/nouveau_boss_top_sphere.obj"),
-
 
 // Deco Asset Paths
 DECO_PADDLE_MESH(DECO_MESH_DIRECTORY "/deco_paddle.obj"),
@@ -473,16 +467,20 @@ FUTURISM_BOSS_TOP_AND_BOTTOM_SHIELD_MESH(FUTURISM_BOSS_MESH_DIRECTORY "/futurism
 FUTURISM_BOSS_DAMAGED_LEFT_AND_RIGHT_SHIELD_MESH(FUTURISM_BOSS_MESH_DIRECTORY "/futurism_boss_left_and_right_shield_damaged.obj"),
 FUTURISM_BOSS_DAMAGED_TOP_AND_BOTTOM_SHIELD_MESH(FUTURISM_BOSS_MESH_DIRECTORY "/futurism_boss_top_and_bottom_shield_damaged.obj"),
 FUTURISM_BOSS_DAMAGED_CORE_SHIELD_MESH(FUTURISM_BOSS_MESH_DIRECTORY "/futurism_boss_core_shield_damaged.obj"),
-FUTURISM_BOSS_ICE_ENCASING(FUTURISM_BOSS_MESH_DIRECTORY "/futurism_boss_ice_encasing.obj")
-
-// Surrealism-Dada Asset Paths
-// TODO
-
-
-// POST-MODERNISM ==================================================================
+FUTURISM_BOSS_ICE_ENCASING(FUTURISM_BOSS_MESH_DIRECTORY "/futurism_boss_ice_encasing.obj"),
 
 // Pomo Asset Paths
 // TODO
+
+
+
+// SPECIAL WORLD ===================================================================
+// Surrealism-Dada Asset Paths
+SURREALISM_DADA_PADDLE_MESH(SURREALISM_DADA_MESH_DIRECTORY "/surrealism_dada_paddle.obj"),
+SURREALISM_DADA_BACKGROUND_MESH(SURREALISM_DADA_MESH_DIRECTORY "/surrealism_dada_background.obj"),
+SURREALISM_DADA_BLOCK_MESH(SURREALISM_DADA_MESH_DIRECTORY "/surrealism_dada_block.obj")
+
+
 
 {
 }
@@ -602,6 +600,7 @@ void GameViewConstants::GetWorldTypeBlockTextureNameMap(std::map<GameWorld::Worl
     styleToTexName.insert(std::make_pair(GameWorld::Nouveau, TEXTURE_NOUVEAU_BLOCK_IMG));
     styleToTexName.insert(std::make_pair(GameWorld::Deco, TEXTURE_DECO_BLOCK_IMG));
     styleToTexName.insert(std::make_pair(GameWorld::Futurism, TEXTURE_FUTURISM_BLOCK_IMG));
+    styleToTexName.insert(std::make_pair(GameWorld::SurrealismDada, TEXTURE_SURREALISM_DADA_BLOCK_IMG));
 }
 
 /**

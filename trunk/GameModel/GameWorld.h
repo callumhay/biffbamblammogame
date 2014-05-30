@@ -54,7 +54,10 @@ public:
     static const char* DECO_WORLD_NAME;
     static const char* FUTURISM_WORLD_NAME;
 
-	enum WorldStyle { None = -1, Classical = 0, GothicRomantic = 1, Nouveau = 2, Deco = 3, Futurism = 4 };
+    static const char* SURREALISM_DADA_WORLD_NAME;
+
+	enum WorldStyle { None = -1, Classical = 0, GothicRomantic = 1, Nouveau = 2, Deco = 3, Futurism = 4,
+        SurrealismDada = 69};
 
 	static bool IsValidWorldStyle(const std::string &s);
 	static WorldStyle GetWorldStyleFromString(const std::string &s);

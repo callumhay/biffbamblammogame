@@ -5,7 +5,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.ImageObserver;
-import java.util.ArrayList;
+
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,7 +37,7 @@ public class LevelPieceImageLabel extends JLabel {
 	private int cannonDegAngle2;
 	private int triggerID;
 	
-	private ArrayList<String> itemDropTypes = new ArrayList<String>();
+	private HashMap<String, ItemDropSettings> itemDropTypes = new HashMap<String, ItemDropSettings>();
 	
 	private int switchTriggerID;	// When this level piece is a switch, this ID is the ID of what gets triggered by the switch
 	
@@ -55,7 +56,6 @@ public class LevelPieceImageLabel extends JLabel {
 		this.setLevelPiece(piece);
 		this.cannonDegAngle1 = 0;
 		this.cannonDegAngle2 = 0;
-		this.itemDropTypes.add("all");
 		this.triggerID = LevelPiece.NO_TRIGGER_ID;
 		this.switchTriggerID = 0;
 	}
@@ -107,10 +107,48 @@ public class LevelPieceImageLabel extends JLabel {
 				(pieceSymbol.substring(0, 2).equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL + "(") ||
 				 pieceSymbol.substring(0, 2).equals(LevelPiece.ALWAYS_DROP_PIECE_SYMBOL + "("))) {
 			
-			String[] itemDropTypeNames = pieceSymbol.substring(2, pieceSymbol.length()).split("[\\(,\\)]");
+			String[] itemDropTypeNames = pieceSymbol.substring(2, pieceSymbol.length()).split("[\\(,\\) ]");
+			this.itemDropTypes.clear();
 			for (int i = 0; i < itemDropTypeNames.length; i++) {
-				if (itemDropTypeNames[i].length() > 1 && !itemDropTypeNames[i].contains("{") && !itemDropTypeNames[i].contains("}")) {
-					this.itemDropTypes.add(itemDropTypeNames[i]);
+				
+				String currStr = itemDropTypeNames[i];
+				
+				if (currStr.length() > 0 && !currStr.contains("{") && !currStr.contains("}") && !currStr.contains("(") && !currStr.contains(")")) {
+					
+					// Check to see if the value is a '*' meaning that the item will only drop if it's unlocked
+					boolean onlyDropIfUnlocked = false;
+					if (currStr.equals("*")) {
+						onlyDropIfUnlocked = true;
+						if (i == itemDropTypeNames.length-1) {
+							assert(false);
+							break;
+						}
+						else {
+							i++;
+							currStr = itemDropTypeNames[i];
+						}
+					}
+					
+					String currItemDropName = currStr;
+					
+					// Check to see if there's a probability in the next string token
+					int likelihoodValue = 1;
+					if (i < itemDropTypeNames.length-1) {
+						try {
+							likelihoodValue = Math.min(3, Math.max(0, Integer.parseInt(itemDropTypeNames[i+1])));
+							i++;
+						}
+						catch (NumberFormatException e) {
+						}
+					}
+					
+					ItemDropSettings currSettings = this.itemDropTypes.get(currItemDropName);
+					if (currSettings == null) {
+						this.itemDropTypes.put(currItemDropName, new ItemDropSettings(likelihoodValue, onlyDropIfUnlocked));
+					}
+					else {
+						currSettings.IncrementProbability();
+					}
 				}
 			}
 			
@@ -305,16 +343,12 @@ public class LevelPieceImageLabel extends JLabel {
 		return this.siblingIDs;
 	}
 	
-	public ArrayList<String> getItemDropTypes() {
+	public HashMap<String, ItemDropSettings> getItemDropTypes() {
 		return this.itemDropTypes;
 	}
-	public void setItemDropTypes(ArrayList<String> dropTypes) {
+	public void setItemDropTypes(HashMap<String, ItemDropSettings> dropTypes) {
 		this.itemDropTypes = dropTypes;
 	}
-	public void addItemDropType(String itemName) {
-		this.itemDropTypes.add(itemName);
-	}
-	
 	
 	public int getCannonBlockDegAngle1() {
 		return this.cannonDegAngle1;

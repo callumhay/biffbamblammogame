@@ -39,6 +39,7 @@
 #include "NouveauWorldAssets.h"
 #include "DecoWorldAssets.h"
 #include "FuturismWorldAssets.h"
+#include "SurrealismDadaWorldAssets.h"
 
 const float GameWorldAssets::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
 
@@ -197,6 +198,11 @@ GameWorldAssets* GameWorldAssets::CreateWorldAssets(GameWorld::WorldStyle world,
 			return new DecoWorldAssets(assets);
         case GameWorld::Futurism:
             return new FuturismWorldAssets(assets);
+        
+        
+        case GameWorld::SurrealismDada:
+            return new SurrealismDadaWorldAssets(assets);
+
 		default:
 			break;
 	}

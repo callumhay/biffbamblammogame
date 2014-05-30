@@ -821,6 +821,10 @@
 						RelativePath=".\GameView\PersistentTextureManager.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameView\SurrealismDadaWorldAssets.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -879,6 +883,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\PersistentTextureManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\SurrealismDadaWorldAssets.cpp"
 						>
 					</File>
 				</Filter>
@@ -1319,138 +1327,6 @@
 		<Filter
 			Name="GameModel"
 			>
-			<Filter
-				Name="Header Files"
-				>
-				<File
-					RelativePath=".\GameModel\BallBoostModel.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BallState.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BoundingLines.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameBall.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameLevel.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameModel.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameModelConstants.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameProgressIO.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameTransformMgr.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameWorld.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\InCannonBallState.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\NormalBallState.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\Onomatoplex.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PlayerPaddle.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PointAward.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\SafetyNet.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\ScoreTypes.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				>
-				<File
-					RelativePath=".\GameModel\BallBoostModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BoundingLines.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameBall.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameLevel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameModelConstants.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameProgressIO.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameTransformMgr.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameWorld.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\InCannonBallState.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\NormalBallState.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\Onomatoplex.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PlayerPaddle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\SafetyNet.cpp"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="Level Pieces"
 				>
@@ -2559,6 +2435,142 @@
 					>
 					<File
 						RelativePath=".\GameModel\GameEventManager.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="General"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameModel\BallBoostModel.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BallState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BoundingLines.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameBall.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameLevel.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameModel.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameModelConstants.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameProgressIO.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameTransformMgr.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameWorld.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\InCannonBallState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\NormalBallState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\Onomatoplex.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PlayerPaddle.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PointAward.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\SafetyNet.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ScoreTypes.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameModel\BallBoostModel.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BoundingLines.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameBall.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameLevel.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameModel.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameModelConstants.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameProgressIO.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameTransformMgr.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameWorld.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\InCannonBallState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\NormalBallState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\Onomatoplex.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PlayerPaddle.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\SafetyNet.cpp"
 						>
 					</File>
 				</Filter>

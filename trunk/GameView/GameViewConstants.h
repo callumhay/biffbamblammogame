@@ -197,6 +197,7 @@ public:
     const char* TEXTURE_NOUVEAU_BLOCK_IMG;
     const char* TEXTURE_DECO_BLOCK_IMG;
     const char* TEXTURE_FUTURISM_BLOCK_IMG;
+    const char* TEXTURE_SURREALISM_DADA_BLOCK_IMG;
 
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAUGE_OUTLINE;
@@ -488,6 +489,14 @@ public:
     const char* FUTURISM_BOSS_DAMAGED_TOP_AND_BOTTOM_SHIELD_MESH;
     const char* FUTURISM_BOSS_DAMAGED_CORE_SHIELD_MESH;
     const char* FUTURISM_BOSS_ICE_ENCASING;
+
+    // SURREALISM-DADA WORLD
+    const char* SURREALISM_DADA_PADDLE_MESH;
+    const char* SURREALISM_DADA_BACKGROUND_MESH;
+    const char* SURREALISM_DADA_BLOCK_MESH;
+    // SURREALISM-DADA BOSS
+    // TODO
+
 
     // Static Constants
     static const char* BOOST_MALFUNCTION_TEXT;

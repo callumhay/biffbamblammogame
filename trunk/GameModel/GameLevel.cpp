@@ -66,6 +66,7 @@
 #include "../BlammoEngine/StringHelper.h"
 
 #include "../ResourceManager.h"
+#include "../Blammopedia.h"
 
 const int GameLevel::MAX_STARS_PER_LEVEL = 5;
 
@@ -102,16 +103,16 @@ const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 const char GameLevel::FINITE_LIFE_CHAR   = 'f';
 const char GameLevel::INFINITE_LIFE_CHAR = 'i';
 
+const char GameLevel::ITEM_AVAILABLE_ONLY_IF_UNLOCKED_CHAR = '*';
+
 const char* GameLevel::BOSS_LEVEL_KEYWORD = "boss";
 
-const char* GameLevel::ALL_ITEM_TYPES_KEYWORD               = "all";
-const char* GameLevel::POWERUP_ITEM_TYPES_KEYWORD           = "powerups";
-const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD      = "powerneutrals";
-const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD         = "powerdowns";
-
-const char* GameLevel::STAR_POINT_MILESTONE_KEYWORD = "STARS:";
-
-const char* GameLevel::PADDLE_STARTING_X_POS = "PADDLESTARTXPOS:";
+const char* GameLevel::ALL_ITEM_TYPES_KEYWORD          = "all";
+const char* GameLevel::POWERUP_ITEM_TYPES_KEYWORD      = "powerups";
+const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD = "powerneutrals";
+const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD    = "powerdowns";
+const char* GameLevel::STAR_POINT_MILESTONE_KEYWORD    = "STARS:";
+const char* GameLevel::PADDLE_STARTING_X_POS_KEYWORD   = "PADDLESTARTXPOS:";
 
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
@@ -1134,7 +1135,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 	size_t randomItemProbabilityNum = 0;
 	std::vector<GameItem::ItemType> allowedDropTypes;
 	while (*inFile >> itemTypeName) {
-        if (itemTypeName.compare(GameLevel::PADDLE_STARTING_X_POS) == 0) {
+        if (itemTypeName.compare(GameLevel::PADDLE_STARTING_X_POS_KEYWORD) == 0) {
             for (int i = 0; i < static_cast<int>(itemTypeName.size()); i++) {
                 inFile->unget();
             }
@@ -1142,31 +1143,32 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
         }
 
 		// There are some special keywords that we need to check for first...
-		if (itemTypeName.compare(ALL_ITEM_TYPES_KEYWORD) == 0) {
-			// Add all item types...
-			std::set<GameItem::ItemType> allItemTypes = GameItemFactory::GetInstance()->GetAllItemTypes();
-			allItemTypes.erase(GameItem::RandomItem);
-			randomItemProbabilityNum++;
-			allowedDropTypes.insert(allowedDropTypes.end(), allItemTypes.begin(), allItemTypes.end());
-		}
-		else if (itemTypeName.compare(POWERUP_ITEM_TYPES_KEYWORD) == 0) {
-			// Add all power-up item types
-			const std::set<GameItem::ItemType>& powerUpItemTypes = GameItemFactory::GetInstance()->GetPowerUpItemTypes();
-			allowedDropTypes.insert(allowedDropTypes.end(), powerUpItemTypes.begin(), powerUpItemTypes.end());
-		}
-		else if (itemTypeName.compare(POWERNEUTRAL_ITEM_TYPES_KEYWORD) == 0) {
-			// Add all power-neutral item types
-			std::set<GameItem::ItemType> powerNeutralItemTypes = GameItemFactory::GetInstance()->GetPowerNeutralItemTypes();
-			powerNeutralItemTypes.erase(GameItem::RandomItem);
-			randomItemProbabilityNum++;
-			allowedDropTypes.insert(allowedDropTypes.end(), powerNeutralItemTypes.begin(), powerNeutralItemTypes.end());
-		}
-		else if (itemTypeName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
-			// Add all power-down item types
-			const std::set<GameItem::ItemType>& powerDownItemTypes = GameItemFactory::GetInstance()->GetPowerDownItemTypes();
-			allowedDropTypes.insert(allowedDropTypes.end(), powerDownItemTypes.begin(), powerDownItemTypes.end());
+		if (itemTypeName.compare(ALL_ITEM_TYPES_KEYWORD) == 0 ||
+            itemTypeName.compare(POWERUP_ITEM_TYPES_KEYWORD) == 0 ||
+            itemTypeName.compare(POWERNEUTRAL_ITEM_TYPES_KEYWORD) == 0 ||
+            itemTypeName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
+
+			assert(false);
+            debug_output("ERROR: Item collection keywords no longer supported");
+            GameLevel::CleanUpFileReadData(levelPieces);
+            delete inFile;
+            inFile = NULL;
+            return NULL;
 		}
 		else {
+            // There's a special case to look for: if the string read in was the ITEM_AVAILABLE_ONLY_IF_UNLOCKED_CHAR
+            // then we will only include the item in the level if it's unlocked!
+            bool onlyIncludeIfAvailable = false;
+            if (itemTypeName.size() == 1 && itemTypeName[0] == ITEM_AVAILABLE_ONLY_IF_UNLOCKED_CHAR) {
+                onlyIncludeIfAvailable = true;
+                if (!(*inFile >> itemTypeName)) {
+                    GameLevel::CleanUpFileReadData(levelPieces);
+                    delete inFile;
+                    inFile = NULL;
+                    return NULL;
+                }
+            }
+
 			if (!GameItemFactory::GetInstance()->IsValidItemTypeName(itemTypeName)) {
 				debug_output("ERROR: Invalid item type name found in allowable item drop probability list: '" << itemTypeName << "'");
 				GameLevel::CleanUpFileReadData(levelPieces);
@@ -1184,15 +1186,21 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 					return NULL;
 				}
 				else {
+                    
 					GameItem::ItemType currItemType = GameItemFactory::GetInstance()->GetItemTypeFromName(itemTypeName);
-					// Ignore random item types...
-					if (currItemType == GameItem::RandomItem) {
-						randomItemProbabilityNum = probabilityNum;
-						continue;
-					}
-					for (int i = 0; i < probabilityNum; i++) {
-						allowedDropTypes.push_back(currItemType);
-					}
+
+                    if (!onlyIncludeIfAvailable ||
+                        !ResourceManager::GetInstance()->GetBlammopedia()->GetItemEntry(currItemType)->GetIsLocked()) {
+
+					    // Ignore random item types...
+					    if (currItemType == GameItem::RandomItem) {
+						    randomItemProbabilityNum = probabilityNum;
+						    continue;
+					    }
+					    for (int i = 0; i < probabilityNum; i++) {
+						    allowedDropTypes.push_back(currItemType);
+					    }
+                    }
 				}
 			}
 			else {
@@ -1213,7 +1221,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
     // Get the x-coordinate where the paddle starts the level (and goes to when the ball dies), 
     // if this is missing then the default (center of the entire level) will be used
     float paddleStartXPos = GameLevel::DEFAULT_PADDLE_START_IDX;
-    if ((*inFile >> tempReadStr) && tempReadStr.compare(GameLevel::PADDLE_STARTING_X_POS) == 0) {
+    if ((*inFile >> tempReadStr) && tempReadStr.compare(GameLevel::PADDLE_STARTING_X_POS_KEYWORD) == 0) {
         if (!(*inFile >> paddleStartXPos)) {
             debug_output("ERROR: No paddle starting block index value was provided with keyword!");
             GameLevel::CleanUpFileReadData(levelPieces);
@@ -1281,6 +1289,12 @@ bool GameLevel::ReadItemList(std::stringstream& inFile, std::vector<GameItem::It
     std::string tempStr;
     inFile >> tempStr;
 
+    // If the temporary string doesn't contain a closing bracket, we need to keep reading...
+    std::string anotherTempStr = tempStr;
+    while (anotherTempStr.find(")") == std::string::npos && inFile >> anotherTempStr) {
+        tempStr = tempStr + " " + anotherTempStr;
+    }
+
     std::vector<std::string> itemNames;
 
     // Careful of the case where there's a curly bracket - we want to get rid of the curly bracket in that case
@@ -1303,40 +1317,61 @@ bool GameLevel::ReadItemList(std::stringstream& inFile, std::vector<GameItem::It
     items.clear();
 
     // Figure out the item types from the names...
-    for (std::vector<std::string>::const_iterator iter = itemNames.begin(); iter != itemNames.end(); ++iter) {
-	    std::string currItemName = stringhelper::trim(*iter);
+    bool onlyAvailableIfUnlocked = false;
+    for (int i = 0; i < static_cast<int>(itemNames.size()); i++) {
+	    std::string currItemName = stringhelper::trim(itemNames[i]);
 
 	    // There are some special keywords that we need to check for first...
-	    if (currItemName.compare(ALL_ITEM_TYPES_KEYWORD) == 0) {
-		    // Add all item types...
-		    const std::set<GameItem::ItemType>& allItemTypes = GameItemFactory::GetInstance()->GetAllItemTypes();
-		    items.insert(items.end(), allItemTypes.begin(), allItemTypes.end());
-	    }
-	    else if (currItemName.compare(POWERUP_ITEM_TYPES_KEYWORD) == 0) {
-		    // Add all power-up item types
-		    const std::set<GameItem::ItemType>& powerUpItemTypes = GameItemFactory::GetInstance()->GetPowerUpItemTypes();
-		    items.insert(items.end(), powerUpItemTypes.begin(), powerUpItemTypes.end());
-	    }
-	    else if (currItemName.compare(POWERNEUTRAL_ITEM_TYPES_KEYWORD) == 0) {
-		    // Add all power-neutral item types
-		    const std::set<GameItem::ItemType>& powerNeutralItemTypes = GameItemFactory::GetInstance()->GetPowerNeutralItemTypes();
-		    items.insert(items.end(), powerNeutralItemTypes.begin(), powerNeutralItemTypes.end());
-	    }
-	    else if (currItemName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
-		    // Add all power-up item types
-		    const std::set<GameItem::ItemType>& powerDownItemTypes = GameItemFactory::GetInstance()->GetPowerDownItemTypes();
-		    items.insert(items.end(), powerDownItemTypes.begin(), powerDownItemTypes.end());
+	    if (currItemName.compare(ALL_ITEM_TYPES_KEYWORD) == 0 || 
+            currItemName.compare(POWERUP_ITEM_TYPES_KEYWORD) == 0 || 
+            currItemName.compare(POWERNEUTRAL_ITEM_TYPES_KEYWORD) == 0 ||
+            currItemName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
+
+		    assert(false);
+            debug_output("ERROR: Item collection keywords no longer supported!");
+            return false;
 	    }
 	    else {
+
+            // Check to see if the name is actually a star, if it is then that signals that the
+            // item should only drop if it has been unlocked...
+            if (currItemName.size() == 1 && currItemName[0] == ITEM_AVAILABLE_ONLY_IF_UNLOCKED_CHAR) {
+                onlyAvailableIfUnlocked = true;
+                continue;
+            }
+
 		    // Check for manual entry of a specific item type name...
 		    bool isValid = GameItemFactory::GetInstance()->IsValidItemTypeName(currItemName);
 		    if (!isValid) {
 			    debug_output("ERROR: poorly formed item list syntax, no item drop type found for item \"" + currItemName + "\"");
 			    return false;
 		    }
-    		
-		    items.push_back(GameItemFactory::GetInstance()->GetItemTypeFromName(currItemName));
+            GameItem::ItemType itemType = GameItemFactory::GetInstance()->GetItemTypeFromName(currItemName);
+
+            // Check to see if the next string is actually a likelihood number
+            int likelihoodNumber = 1;
+            if (i < static_cast<int>(itemNames.size())-1) {
+                std::string likelihoodStr = itemNames[i+1];
+
+                if (stringhelper::IsPositiveNumber(likelihoodStr)) {
+                    std::stringstream tempStrStream(likelihoodStr);
+                    tempStrStream >> likelihoodNumber;
+                    if (likelihoodNumber > 3 || likelihoodNumber < 0) {
+                        debug_output("ERROR: Invalid likelihood number found");
+                        return false;
+                    }
+                    i++;
+                }
+            }
+
+            if (!onlyAvailableIfUnlocked || !ResourceManager::GetInstance()->GetBlammopedia()->GetItemEntry(itemType)->GetIsLocked()) {
+                for (int i = 0; i < likelihoodNumber; i++) {
+		            items.push_back(itemType);
+                }
+            }
 	    }
+
+        onlyAvailableIfUnlocked = false;
     }
 
     if (items.empty()) {
