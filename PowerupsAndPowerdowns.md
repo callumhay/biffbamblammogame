@@ -1,0 +1,32 @@
+# Power-ups #
+
+  * Grow
+  * Uber-Ball
+  * Multi-Ball
+  * Blaster
+  * Missile
+  * 1-Up
+  * Point Gain
+  * Explody-Ball
+  * Safety Net
+  * Slow-Ball
+  * Sticky Paddle
+  * Elastic-Paddle-Ball?
+  * Shield?
+
+# Power-neutrals #
+
+  * Ghost-Ball
+
+# Power-downs #
+
+  * Shrink
+  * Weak-Ball
+  * Ball Cam
+  * Paddle Cam
+  * Zoom Cam
+  * Flip Level
+  * Rotate Level
+  * Fast-ball
+  * Point Loss
+  * Invisi-Ball
