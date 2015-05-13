@@ -35,12 +35,16 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Texture.h"
 
+class Projectile;
+
 class PlayerHurtHUD {
 public:
 	PlayerHurtHUD();
 	~PlayerHurtHUD();
 
-	enum PainIntensity { MinorPain, ModeratePain, MoreThanModeratePain, MajorPain };
+	enum PainIntensity { NoPain, MinorPain, ModeratePain, MoreThanModeratePain, MajorPain };
+
+    static PlayerHurtHUD::PainIntensity GetIntensityForProjectile(const Projectile& projectile);
 
 	void Activate(PlayerHurtHUD::PainIntensity intensity);
     void Activate(double totalFadeOutTime, float initialIntensity);

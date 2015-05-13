@@ -43,6 +43,7 @@
 #include "LoadingScreen.h"
 #include "MouseRenderer.h"
 #include "MenuBackgroundRenderer.h"
+#include "GameViewEventManager.h"
 
 // Model includes
 #include "../GameModel/GameWorld.h"
@@ -120,6 +121,18 @@ void GameDisplay::SetInitialRenderOptions() {
 	glDisable(GL_LIGHTING);
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+}
+
+void GameDisplay::SetCurrentState(DisplayState* state) {
+    assert(state != NULL);
+    DisplayState::DisplayStateType prevType = DisplayState::NoState;
+    if (this->currState != NULL) {
+        prevType = this->currState->GetType();
+        delete this->currState;
+    }
+    this->currState = state;
+    // EVENT: The game display state just changed
+    GameViewEventManager::Instance()->ActionDisplayStateChanged(prevType, this->currState->GetType());
 }
 
 // Sets the current state to be the next state lined up on the

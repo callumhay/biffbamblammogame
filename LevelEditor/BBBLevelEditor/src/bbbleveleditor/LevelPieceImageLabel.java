@@ -37,6 +37,11 @@ public class LevelPieceImageLabel extends JLabel {
 	private int cannonDegAngle2;
 	private int triggerID;
 	
+	private double warpPortalStartTime;
+	private double warpPortalEndTime;
+	private String warpPortalWorldName;
+	private int warpPortalLevelNum;
+	
 	private HashMap<String, ItemDropSettings> itemDropTypes = new HashMap<String, ItemDropSettings>();
 	
 	private int switchTriggerID;	// When this level piece is a switch, this ID is the ID of what gets triggered by the switch
@@ -58,11 +63,26 @@ public class LevelPieceImageLabel extends JLabel {
 		this.cannonDegAngle2 = 0;
 		this.triggerID = LevelPiece.NO_TRIGGER_ID;
 		this.switchTriggerID = 0;
+		
+		this.warpPortalStartTime = 0.0;
+		this.warpPortalEndTime   = -1.0;
+		this.warpPortalWorldName = "surrealism_dada";
+		this.warpPortalLevelNum = 1;
 	}
 	
 	// constructor with icon
 	public LevelPieceImageLabel(String pieceSymbol) throws Exception {
 		String justTheSymbol = pieceSymbol;
+		
+		this.triggerID = LevelPiece.NO_TRIGGER_ID;
+		this.switchTriggerID = 0;
+		this.cannonDegAngle1 = 0;
+		this.cannonDegAngle2 = 0;
+		
+		this.warpPortalStartTime = 0.0;
+		this.warpPortalEndTime   = -1.0;
+		this.warpPortalLevelNum  = 1;
+		this.warpPortalWorldName = "surrealism_dada";
 		
 		// Clean up in the case of a portal block - since it has variables in it
 		if (pieceSymbol.length() >= 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.PORTAL_PIECE_SYMBOL + "(")) {
@@ -174,6 +194,22 @@ public class LevelPieceImageLabel extends JLabel {
 			String switchTriggerIDStr = pieceSymbol.substring(2, endSubstringIdx);
 			this.switchTriggerID = Integer.parseInt(switchTriggerIDStr);
 			justTheSymbol = LevelPiece.SWITCH_PIECE_SYMBOL;
+		}
+		else if (pieceSymbol.length() >= 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.WARP_PORTAL_PIECE_SYMBOL + "(")) {
+			
+			String[] parameterStrs = pieceSymbol.substring(2, pieceSymbol.length()).split("[\\(,\\)]");
+			
+			if (parameterStrs.length == 4) {
+				this.setWarpPortalStartTime(Double.parseDouble(parameterStrs[0]));
+				this.setWarpPortalEndTime(Double.parseDouble(parameterStrs[1]));
+				this.setWarpPortalWorldName(parameterStrs[2]);
+				this.setWarpPortalLevelNum(Integer.parseInt(parameterStrs[3]));
+			}
+			else {
+				assert(false);
+			}
+			
+			justTheSymbol = LevelPiece.WARP_PORTAL_PIECE_SYMBOL;
 		}
 
 		LevelPiece piece = LevelPiece.LevelPieceCache.get(justTheSymbol);
@@ -316,6 +352,9 @@ public class LevelPieceImageLabel extends JLabel {
 	public boolean getIsSwitchBlock() {
 		return piece.getSymbol().equals(LevelPiece.SWITCH_PIECE_SYMBOL);
 	}
+	public boolean getIsWarpPortal() {
+		return piece.getSymbol().equals(LevelPiece.WARP_PORTAL_PIECE_SYMBOL);
+	}
 	
 	public void setBlockID(char blockID) {
 		this.blockID = blockID;
@@ -373,6 +412,31 @@ public class LevelPieceImageLabel extends JLabel {
 		else {
 			this.cannonDegAngle2 = angle;
 		}
+	}
+	
+	public double getWarpPortalStartTime() {
+		return this.warpPortalStartTime;
+	}
+	public double getWarpPortalEndTime() {
+		return this.warpPortalEndTime;
+	}
+	public String getWarpPortalWorldName() {
+		return this.warpPortalWorldName;
+	}
+	public int getWarpPortalLevelNum() {
+		return this.warpPortalLevelNum;
+	}
+	void setWarpPortalStartTime(double startTime) {
+		this.warpPortalStartTime = startTime;
+	}
+	void setWarpPortalEndTime(double endTime) {
+		this.warpPortalEndTime = endTime;
+	}
+	void setWarpPortalWorldName(String name) {
+		this.warpPortalWorldName = name;
+	}
+	void setWarpPortalLevelNum(int num) {
+		this.warpPortalLevelNum = num;
 	}
 	
 	public char getPortalSiblingID() {

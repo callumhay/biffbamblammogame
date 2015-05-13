@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib BlammoEngine.lib ESPEngine.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib BlammoEngine.lib ESPEngine.lib Setupapi.lib seriald.lib"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;;&quot;$(OutDir)&quot;"
@@ -148,7 +148,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib BlammoEngine.lib ESPEngine.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib irrKlang.lib BlammoEngine.lib ESPEngine.lib Setupapi.lib serial.lib"
 				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;;&quot;$(OutDir)&quot;"
@@ -1142,10 +1142,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameView\GameEventsListener.cpp"
-						>
-					</File>
-					<File
 						RelativePath=".\GameView\GameViewConstants.cpp"
 						>
 					</File>
@@ -1206,10 +1202,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameView\TutorialEventsListener.cpp"
-						>
-					</File>
-					<File
 						RelativePath=".\GameView\TutorialInGameRenderPipeline.cpp"
 						>
 					</File>
@@ -1243,10 +1235,6 @@
 					</File>
 					<File
 						RelativePath=".\GameView\GameDisplay.h"
-						>
-					</File>
-					<File
-						RelativePath=".\GameView\GameEventsListener.h"
 						>
 					</File>
 					<File
@@ -1310,6 +1298,30 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\TutorialInGameRenderPipeline.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Events"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameView\GameEventsListener.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameViewEventListener.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameViewEventManager.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\TutorialEventsListener.h"
 						>
 					</File>
@@ -1317,8 +1329,20 @@
 						RelativePath=".\GameView\TutorialHintListeners.h"
 						>
 					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
 					<File
-						RelativePath=".\GameView\TutorialInGameRenderPipeline.h"
+						RelativePath=".\GameView\GameEventsListener.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameViewEventManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\TutorialEventsListener.cpp"
 						>
 					</File>
 				</Filter>
@@ -2513,6 +2537,10 @@
 						RelativePath=".\GameModel\ScoreTypes.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameModel\WarpPortal.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -2573,159 +2601,11 @@
 						RelativePath=".\GameModel\SafetyNet.cpp"
 						>
 					</File>
+					<File
+						RelativePath=".\GameModel\WarpPortal.cpp"
+						>
+					</File>
 				</Filter>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="physfs"
-			>
-			<Filter
-				Name="Header Files"
-				>
-				<File
-					RelativePath=".\include\physfs\physfs.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\physfs_casefolding.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\physfs_internal.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\physfs_platforms.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				>
-				<File
-					RelativePath=".\include\physfs\dir.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\physfs.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\physfs_byteorder.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\physfs_unicode.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\windows.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\physfs\zip.c"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="zlib"
-			>
-			<Filter
-				Name="Source Files"
-				>
-				<File
-					RelativePath=".\include\zlib\adler32.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\compress.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\crc32.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\deflate.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\gzio.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\infback.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\inffast.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\inflate.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\inftrees.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\trees.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\uncompr.c"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\zutil.c"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Header Files"
-				>
-				<File
-					RelativePath=".\include\zlib\crc32.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\deflate.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\inffast.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\inffixed.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\inflate.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\inftrees.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\trees.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\zconf.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\zlib.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\zlib\zutil.h"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -2915,6 +2795,18 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameControl\ArcadeController.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\ArcadeControllerEventsListener.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\ArcadeSerialComm.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameControl\BBBGameController.h"
 					>
 				</File>
@@ -2943,6 +2835,18 @@
 				Name="Source Files"
 				>
 				<File
+					RelativePath=".\GameControl\ArcadeController.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\ArcadeControllerEventsListener.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\ArcadeSerialComm.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameControl\GameControllerManager.cpp"
 					>
 				</File>
@@ -2958,6 +2862,10 @@
 					RelativePath=".\GameControl\XBox360Controller.cpp"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="Serial"
+				>
 			</Filter>
 		</Filter>
 		<File

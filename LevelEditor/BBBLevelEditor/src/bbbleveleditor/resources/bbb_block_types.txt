@@ -201,3 +201,7 @@ J
 Mine Turret
 mine_turret.png
 M
+
+Warp Portal
+warp_portal.png
+V

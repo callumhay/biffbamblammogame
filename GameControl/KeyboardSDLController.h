@@ -41,16 +41,16 @@
 class KeyboardSDLController : public BBBGameController {
 public:
 	KeyboardSDLController(GameModel* model, GameDisplay* display);
-	~KeyboardSDLController();
+	virtual ~KeyboardSDLController();
 
 	void Vibrate(double lengthInSeconds, const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
     void ClearVibration();
-	bool IsConnected() const;
+	virtual bool IsConnected() const;
 
-	bool ProcessState(double dT);
-	void Sync(size_t frameID, double dT);
+	virtual bool ProcessState(double dT);
+	virtual void Sync(size_t frameID, double dT);
 
-private:
+protected:
     static const double TIME_TO_MAX_SPEED;
 
     double dirHeldDownTimeCounter;
@@ -64,8 +64,8 @@ private:
 	bool keyPressed[SDLK_LAST];
 	void SetKeyPress(int key, bool isPressed);
 
-	void KeyDown(SDLKey key);
-	void KeyUp(SDLKey key);
+	virtual void KeyDown(SDLKey key);
+	virtual void KeyUp(SDLKey key);
 
     void MouseButtonDown(unsigned int button, unsigned int x, unsigned int y);
     void MouseButtonUp(unsigned int button);

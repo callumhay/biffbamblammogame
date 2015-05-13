@@ -90,7 +90,7 @@ private:
 class DisplayState {
 
 public:
-	enum DisplayStateType { MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart,  
+	enum DisplayStateType { NoState, MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart,  
                             InTutorialGame, InGame, InGameBossLevel, InGameMenu, LevelEnd, LevelCompleteSummary,
                             BossLevelCompleteSummary, GameComplete, GameOver, Credits };
 

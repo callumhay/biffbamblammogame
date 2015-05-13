@@ -135,7 +135,6 @@ void XBox360Controller::NotInGameOnProcessStateSpecificActions(const XINPUT_STAT
 		}
 	}
 
-
     this->UpdateDirections(controllerState, 2*XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 }
 
@@ -170,9 +169,6 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(double dT, const XIN
 			this->escapeActionOn = false;
 		}
 	}
-
-    //float addedSensitivityDeadZoneLThumb = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
-    //float addedSensitivityDeadZoneRThumb = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
 
     this->UpdateDirections(controllerState, static_cast<int>(XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE));
 
@@ -484,9 +480,6 @@ void XBox360Controller::Sync(size_t frameID, double dT) {
 			this->vibrateTimeTracker += dT;
 		}
 	}
-
-	// Execute any debug functionality for when a button is held down...
-	//this->DebugRepeatActions();
 }
 
 bool XBox360Controller::IsConnected() const {

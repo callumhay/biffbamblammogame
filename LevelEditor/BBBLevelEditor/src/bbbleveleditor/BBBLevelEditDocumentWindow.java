@@ -580,6 +580,8 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			levelFileWriter.write(this.levelName + "\r\n");
 			levelFileWriter.write(this.currWidth + " " + this.currHeight + "\r\n");
 			
+			int numWarpPortals = 0;
+			
 			// Followed by the level pieces...
 			for (int row = 0; row < this.currHeight; row++) {
 				for (int col = 0; col < this.currWidth; col++) {
@@ -673,6 +675,20 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					}
 					else if (currPieceLbl.getIsSwitchBlock()) {
 						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getSwitchTriggerID() + ")";
+						levelFileWriter.write(outputStr);
+					}
+					else if (currPieceLbl.getIsWarpPortal()) {
+						
+						numWarpPortals++;
+						if (numWarpPortals > 1) {
+							JOptionPane.showMessageDialog(this, "Failed to write level file due multiple warp portals.", 
+									"Level Format Error", JOptionPane.ERROR_MESSAGE);
+							throw new Exception();
+						}
+						
+						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getWarpPortalStartTime() + "," + 
+								currPieceLbl.getWarpPortalEndTime() + "," + currPieceLbl.getWarpPortalWorldName() + "," + 
+								currPieceLbl.getWarpPortalLevelNum() + ")";
 						levelFileWriter.write(outputStr);
 					}
 					else {

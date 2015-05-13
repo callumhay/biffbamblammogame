@@ -63,13 +63,7 @@ public:
 	void ReinitializeGame() { this->gameReinitialized = true; }
 
 	// Change the current state of the display
-	void SetCurrentState(DisplayState* state) {
-		assert(state != NULL);
-		if (this->currState != NULL) {
-			delete this->currState;
-		}
-		this->currState = state;
-	}
+	void SetCurrentState(DisplayState* state);
     void SetCurrentStateNoDeletePreviousState(DisplayState* state) {
         assert(state != NULL);
         this->currState = state;

@@ -43,6 +43,7 @@
 #include "GameView/GameFontAssetsManager.h"
 #include "GameView/LoadingScreen.h"
 #include "GameView/PersistentTextureManager.h"
+#include "GameView/GameViewEventManager.h"
 
 #include "GameSound/GameSound.h"
 
@@ -163,6 +164,17 @@ int main(int argc, char *argv[]) {
     assert(argc > 0 && argv != NULL);
     ResourceManager::SetLoadDir(argv[0]);
 
+    bool arcadeMode = false;
+    std::string serialPort = "";
+    if (argc > 1) {
+        if (std::string(argv[1]) == std::string("-a")) {
+            arcadeMode = true;
+            if (argc > 2) {
+                serialPort = std::string(argv[2]);
+            }
+        }
+    }
+
 	// Set the default config options - these will be read from and written to
 	// the .ini file as we need them
 	ConfigOptions initCfgOptions;
@@ -243,7 +255,8 @@ int main(int argc, char *argv[]) {
 		display = new GameDisplay(model, sound, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
 
 		// Initialize all controllers that we can...
-		GameControllerManager::GetInstance()->InitAllControllers(model, display);
+		GameControllerManager::GetInstance()->InitAllControllers(model, display, arcadeMode);
+        GameControllerManager::GetInstance()->SetArcadeSerialPort(serialPort);
 
 		LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 		debug_opengl_state();
@@ -262,6 +275,7 @@ int main(int argc, char *argv[]) {
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
 	GameEventManager::DeleteInstance();
+    GameViewEventManager::DeleteInstance();
 	Onomatoplex::Generator::DeleteInstance();
 	Randomizer::DeleteInstance();
 

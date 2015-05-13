@@ -83,7 +83,6 @@ bool KeyboardSDLController::ProcessState(double dT) {
                     keyEvent.motion.xrel, keyEvent.motion.yrel);
                 break;
 
-
 			case SDL_QUIT:
 				return true;
 
@@ -250,26 +249,24 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
     // Convert to OpenGL screen-space coordinates system (origin in lower-left corner)...
     unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
 
-    if (this->windowHasFocus) {
+    if (this->windowHasFocus && this->model->GetCurrentStateType() == GameState::BallInPlayStateType) {
 
-        if (this->model->GetCurrentStateType() == GameState::BallInPlayStateType) {
-            const BallBoostModel* boostModel = this->model->GetBallBoostModel();
-            if (boostModel == NULL) {
-                return;
+        const BallBoostModel* boostModel = this->model->GetBallBoostModel();
+        if (boostModel == NULL) {
+            return;
+        }
+
+        if (boostModel->IsInBulletTime()) {
+            Vector2D windowCenterPos(Camera::GetWindowWidth()/2, Camera::GetWindowHeight()/2);
+
+            // Calculate the angular difference from the previous mouse position to the current,
+            // this, added to the previous boost direction, determines the special direction used for ball boosting
+            Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
+            if (boostDir.IsZero()) {
+                boostDir[0] = 1;
             }
 
-            if (boostModel->IsInBulletTime()) {
-                Vector2D windowCenterPos(Camera::GetWindowWidth()/2, Camera::GetWindowHeight()/2);
-
-                // Calculate the angular difference from the previous mouse position to the current,
-                // this, added to the previous boost direction, determines the special direction used for ball boosting
-                Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
-                if (boostDir.IsZero()) {
-                    boostDir[0] = 1;
-                }
-
-                this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
-            }
+            this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
         }
     }
 

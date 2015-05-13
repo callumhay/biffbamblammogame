@@ -31,11 +31,87 @@
 
 #include "PlayerHurtHUD.h"
 #include "../BlammoEngine/GeometryMaker.h"
+#include "../GameModel/Projectile.h"
+#include "../GameModel/FireGlobProjectile.h"
 
 PlayerHurtHUD::PlayerHurtHUD() : isActive(false) {
 }
 
 PlayerHurtHUD::~PlayerHurtHUD() {
+}
+
+PlayerHurtHUD::PainIntensity PlayerHurtHUD::GetIntensityForProjectile(const Projectile& projectile) {
+
+    PlayerHurtHUD::PainIntensity intensity = PlayerHurtHUD::MinorPain;
+    switch (projectile.GetType()) {
+
+        case Projectile::BossOrbBulletProjectile:
+        case Projectile::BossLaserBulletProjectile:
+        case Projectile::BossLightningBoltBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
+        case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
+            intensity = PlayerHurtHUD::MinorPain;
+            break;
+
+        case Projectile::RocketTurretBulletProjectile:
+        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
+        case Projectile::BossRocketBulletProjectile:
+        case Projectile::BossShockOrbBulletProjectile:
+            intensity = PlayerHurtHUD::ModeratePain;
+            break;
+
+        case Projectile::CollateralBlockProjectile:
+            intensity = PlayerHurtHUD::MoreThanModeratePain;
+            break;
+
+        case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
+            intensity = PlayerHurtHUD::MajorPain;
+            break;
+
+        case Projectile::FireGlobProjectile: {
+
+            const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
+
+            switch (fireGlobProjectile->GetRelativeSize()) {
+                case FireGlobProjectile::Small:
+                    intensity = PlayerHurtHUD::MinorPain;
+                    break;
+                case FireGlobProjectile::Medium:
+                    intensity = PlayerHurtHUD::ModeratePain;
+                    break;
+                case FireGlobProjectile::Large:
+                    intensity = PlayerHurtHUD::MajorPain;
+                    break;
+                default:
+                    assert(false);
+                    break;
+            }
+            break;
+        }
+
+        case Projectile::PaddleFlameBlastProjectile: {
+            intensity = PlayerHurtHUD::MajorPain;
+            break;
+                                                     }
+
+        case Projectile::PaddleIceBlastProjectile:
+            intensity = PlayerHurtHUD::MinorPain;
+            break;
+
+        case Projectile::PortalBlobProjectile:
+            intensity = PlayerHurtHUD::NoPain;
+            break;
+
+        default:
+            assert(false);
+            intensity = PlayerHurtHUD::NoPain;
+            break;
+    }
+
+    return intensity;
 }
 
 void PlayerHurtHUD::Activate(PlayerHurtHUD::PainIntensity intensity) {
@@ -45,6 +121,8 @@ void PlayerHurtHUD::Activate(PlayerHurtHUD::PainIntensity intensity) {
 	// Set up the animation for the fade to immediately show the pain overlay
 	// and then fade it out fairly fast - this is all based on the given intensity
 	switch (intensity) {
+        case PlayerHurtHUD::NoPain:
+            return;
 		case PlayerHurtHUD::MinorPain:
 			totalFadeOutTime = 0.8;
 			initialOverlayIntensity = 0.25f;

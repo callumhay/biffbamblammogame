@@ -32,6 +32,7 @@
 #include "GameControllerManager.h"
 #include "BBBGameController.h"
 #include "KeyboardSDLController.h"
+#include "ArcadeController.h"
 
 #ifdef USE_XBOX360_CONTROLLER
 #include "XBox360Controller.h"
@@ -44,6 +45,7 @@
 GameControllerManager* GameControllerManager::instance = NULL;
 
 const size_t GameControllerManager::KEYBOARD_SDL_INDEX     = 0;
+const size_t GameControllerManager::ARCADE_INDEX           = KEYBOARD_SDL_INDEX;
 const size_t GameControllerManager::XBOX_360_INDEX         = 1;
 const size_t GameControllerManager::KINECT_INDEX           = 2;
 const size_t GameControllerManager::NUM_CONTROLLER_INDICES = 3;
@@ -65,14 +67,28 @@ GameControllerManager::~GameControllerManager() {
 	this->loadedGameControllers.clear();
 }
 
-void GameControllerManager::InitAllControllers(GameModel* model, GameDisplay* display) {
+void GameControllerManager::InitAllControllers(GameModel* model, GameDisplay* display, bool arcadeMode) {
 	assert(model != NULL);
 	assert(display != NULL);
 	this->model   = model;
 	this->display = display;
-	this->GetSDLKeyboardGameController();
+
+    // NOTE: Both the keyboard AND arcade controllers CANNOT exist at the same time!!
+    if (arcadeMode) {
+        this->GetArcadeController();
+    }
+    else {
+	    this->GetSDLKeyboardGameController();
+    }
+
 	this->GetXBox360Controller(0);
     this->GetKinectController();
+}
+
+void GameControllerManager::SetArcadeSerialPort(const std::string& serialPort) {
+    if (this->gameControllers[ARCADE_INDEX] != NULL) {
+        static_cast<ArcadeController*>(this->gameControllers[ARCADE_INDEX])->SetSerialPort(serialPort);
+    }
 }
 
 /**
@@ -88,6 +104,18 @@ BBBGameController* GameControllerManager::GetSDLKeyboardGameController() {
 		this->loadedGameControllers.push_back(sdlKeyboard);
 	}
 	return this->gameControllers[KEYBOARD_SDL_INDEX];
+}
+
+BBBGameController* GameControllerManager::GetArcadeController() {
+    assert(this->model != NULL);
+    assert(this->display != NULL);
+
+    if (this->gameControllers[ARCADE_INDEX] == NULL) {
+        BBBGameController* arcadeController = new ArcadeController(this->model, this->display);
+        this->gameControllers[ARCADE_INDEX] = arcadeController;
+        this->loadedGameControllers.push_back(arcadeController);
+    }
+    return this->gameControllers[ARCADE_INDEX];
 }
 
 /**

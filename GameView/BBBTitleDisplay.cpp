@@ -29,9 +29,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <functional>
+
 #include "BBBTitleDisplay.h"
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
+#include "GameViewEventManager.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/Texture2D.h"
@@ -188,6 +191,7 @@ void BBBTitleDisplay::Draw(double dT, Camera& camera, const Texture2D* fboTex) {
             this->sound->PlaySound(GameSound::MainMenuTitleBiffSlamEvent, false, false);
             camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
             this->biffSlamEffectDone = true;
+            GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BiffSlam);
         }
 
         if (bamDoneAnimating) {
@@ -198,6 +202,7 @@ void BBBTitleDisplay::Draw(double dT, Camera& camera, const Texture2D* fboTex) {
                 this->sound->PlaySound(GameSound::MainMenuTitleBamSlamEvent, false, false);
                 camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
                 this->bamSlamEffectDone = true;
+                GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BamSlam);
             }
 
             if (blammoDoneAnimating) {
@@ -208,6 +213,7 @@ void BBBTitleDisplay::Draw(double dT, Camera& camera, const Texture2D* fboTex) {
                     this->sound->PlaySound(GameSound::MainMenuTitleBlammoSlamEvent, false, false);
                     camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
                     this->blammoSlamEffectDone = true;
+                    GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BlammoSlam);
                 }
             }
         }

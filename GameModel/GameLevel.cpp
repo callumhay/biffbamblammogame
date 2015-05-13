@@ -62,6 +62,7 @@
 #include "PaddleRocketProjectile.h"
 #include "PaddleMineProjectile.h"
 #include "Boss.h"
+#include "WarpPortal.h"
 
 #include "../BlammoEngine/StringHelper.h"
 
@@ -94,6 +95,8 @@ const char GameLevel::MINE_TURRET_BLOCK_CHAR    = 'M';
 const char GameLevel::ALWAYS_DROP_BLOCK_CHAR    = 'K';
 const char GameLevel::REGEN_BLOCK_CHAR          = 'Q';
 
+const char GameLevel::WARP_PORTAL_CHAR = 'V';
+
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
 const char GameLevel::TRI_LOWER_CORNER		= 'l';
@@ -118,13 +121,14 @@ const char* GameLevel::PADDLE_STARTING_X_POS_KEYWORD   = "PADDLESTARTXPOS:";
 GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
                      unsigned int numBlocks, const std::vector<std::vector<LevelPiece*> >& pieces, 
                      int numStarsToUnlock, const std::vector<GameItem::ItemType>& allowedDropTypes, 
-                     size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos) :
+                     size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos,
+                     WarpPortal* warpPortal) :
 
 levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum), piecesLeft(numBlocks),
 filepath(filepath), levelName(levelName), prevHighScore(0), highScore(0),
 levelAlmostCompleteSignaled(false), boss(NULL), numStarsRequiredToUnlock(numStarsToUnlock), 
-areUnlockStarsPaidFor(false), paddleStartXPos(-1) {
+areUnlockStarsPaidFor(false), paddleStartXPos(-1), warpPortal(warpPortal) {
 
 	assert(!filepath.empty());
 	
@@ -147,7 +151,7 @@ levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropType
 randomItemProbabilityNum(randomItemProbabilityNum),
 piecesLeft(0), filepath(filepath), levelName(levelName), highScore(0),
 levelAlmostCompleteSignaled(false), boss(boss), numStarsRequiredToUnlock(numStarsToUnlock), 
-areUnlockStarsPaidFor(false), paddleStartXPos(-1) {
+areUnlockStarsPaidFor(false), paddleStartXPos(-1), warpPortal(NULL) {
 
     assert(!filepath.empty());
 	assert(boss != NULL);
@@ -180,6 +184,10 @@ GameLevel::~GameLevel() {
     if (this->boss != NULL) {
         delete this->boss;
         this->boss = NULL;
+    }
+    if (this->warpPortal != NULL) {
+        delete this->warpPortal;
+        this->warpPortal = NULL;
     }
 }
 
@@ -412,6 +420,9 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 
 	// Keep track of named Tesla blocks...
 	std::map<char, TeslaBlock*> teslaBlocks;
+
+    // If there's a warp portal we need to track its information
+    WarpPortal::WarpPortalInfo warpPortalInfo;
 
 	// Read in the values that make up the level
 	for (int h = 0; h < height; h++) {
@@ -992,9 +1003,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
                 case GameLevel::ALWAYS_DROP_BLOCK_CHAR: {
                     // K(i0, i1, i2, ...) - Always drop block (similar to Item drop block, but is destroyed after 1 hit):
                     // i0, i1, i2, ... : The names of all the item types that the block is allowed to drop, names can be 
-                    //                   repeated in order to make higher probabilities of drops. Also, there are several special key
-                    //                   words that can be used: (all, powerups, powerdowns, powerneutrals), which cause the block to drop 
-                    //                   all items of those respective designations.
+                    //                   repeated in order to make higher probabilities of drops.
 
 					std::vector<GameItem::ItemType> itemTypes;
 					if (!ReadItemList(*inFile, itemTypes)) {
@@ -1041,6 +1050,77 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
 				    }
 
                     newPiece = new RegenBlock(hasInfiniteLife, pieceWLoc, pieceHLoc);
+                    break;
+                }
+
+                case GameLevel::WARP_PORTAL_CHAR: {
+                    // Special -- this is NOT a block, it's an indicator that adds a warp portal to the level,
+                    // the piece will be treated as an empty space block, but a warp portal object will be added...
+                    
+                    char tempChar;
+
+                    *inFile >> tempChar;
+                    if (tempChar != '(') {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing '('");
+                        break;
+                    }
+                    // Read in the start and end times for the portal
+                    double startTimeInSecs = 0;
+                    double endTimeInSecs = -1;
+                    
+                    if (!(*inFile >> startTimeInSecs)) {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing/invalid start time.");
+                        break;
+                    }
+
+                    *inFile >> tempChar;
+                    if (tempChar != ',') {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing ','");
+                        break;
+                    }
+
+                    if (!(*inFile >> endTimeInSecs)) {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing/invalid end time.");
+                        break;
+                    }
+
+                    // Now read in the world name and level number that the portal warps to...
+                    std::string warpWorldName;
+                    int warpLevelNum;
+                    if (!(*inFile >> warpWorldName)) {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing warp world.");
+                        break;
+                    }
+                    // Make sure the world name is valid
+                    GameWorld::WorldStyle warpWorldStyle = GameWorld::GetWorldStyleFromString(warpWorldName);
+                    if (warpWorldStyle == GameWorld::None) {
+                        debug_output("ERROR: poorly formed warp portal syntax, invalid warp world type.");
+                        break;
+                    }
+
+                    *inFile >> tempChar;
+                    if (tempChar != ',') {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing ','");
+                        break;
+                    }
+
+                    if (!(*inFile >> warpLevelNum)) {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing warp level number.");
+                        break;
+                    }
+                    if (warpLevelNum <= 0 || warpLevelNum > 20) {
+                        debug_output("ERROR: poorly formed warp portal syntax, invalid warp level number, must be in [1,20].");
+                        break;
+                    }
+
+                    *inFile >> tempChar;
+                    if (tempChar != ')') {
+                        debug_output("ERROR: poorly formed warp portal syntax, missing ')'");
+                        break;
+                    }
+                    
+                    warpPortalInfo.Init(pieceWLoc, pieceHLoc, startTimeInSecs, endTimeInSecs, warpWorldStyle, warpLevelNum);
+                    newPiece = new EmptySpaceBlock(pieceWLoc, pieceHLoc);
                     break;
                 }
 
@@ -1266,7 +1346,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(GameModel* gameModel, const GameWo
     }
     else {
 	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, milestoneStarAmt, 
-            allowedDropTypes, randomItemProbabilityNum, starAwardScores, paddleStartXPos);
+            allowedDropTypes, randomItemProbabilityNum, starAwardScores, paddleStartXPos, 
+            warpPortalInfo.BuildWarpPortal());
     }
 }
 

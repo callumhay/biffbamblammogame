@@ -47,6 +47,7 @@ class GameBall;
 class QuadTree;
 class TeslaBlock;
 class PlayerPaddle;
+class WarpPortal;
 
 // Represents a game level, also deals with game level 'lvl' file reading.
 class GameLevel {
@@ -76,6 +77,8 @@ public:
     static const char MINE_TURRET_BLOCK_CHAR;
     static const char ALWAYS_DROP_BLOCK_CHAR;
     static const char REGEN_BLOCK_CHAR;
+
+    static const char WARP_PORTAL_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -310,7 +313,8 @@ private:
 
     std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 
-    Boss* boss; // If the current level has a boss, this is a pointer to it, otherwise it will be NULL
+    Boss* boss;             // If the current level has a boss, this is a pointer to it, otherwise it will be NULL
+    WarpPortal* warpPortal; // If the current level has a warp portal, this is a pointer to it, otherwise it will be NULL
 
     // Persistent scoring variables - used to mark previously saved scores and calculate high scores
     long starAwardScores[5];  // Scores where stars are awarded
@@ -327,7 +331,9 @@ private:
 	GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, int numStarsToUnlock,
         const std::vector<GameItem::ItemType>& allowedDropTypes,
-        size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos);
+        size_t randomItemProbabilityNum, long* starAwardScores, float paddleStartXPos, 
+        WarpPortal* warpPortal);
+
 	// Constructor for boss levels
     GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, int numStarsToUnlock,

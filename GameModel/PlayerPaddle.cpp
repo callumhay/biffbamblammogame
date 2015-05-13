@@ -1095,6 +1095,12 @@ void PlayerPaddle::DiscreteShoot(GameModel* gameModel) {
     }
 }
 
+bool PlayerPaddle::HasSomethingToShoot() const {
+    return this->HasBallAttached() || this->HasProjectileAttached() ||
+        this->HasPaddleType(LaserBulletPaddle | RocketPaddle | MineLauncherPaddle | RemoteControlRocketPaddle | 
+        FlameBlasterPaddle | IceBlasterPaddle) || (this->HasPaddleType(LaserBeamPaddle) && !this->isFiringBeam);
+}
+
 /**
  * Attaches the given ball to the paddle if there is no ball already attached
  * to the paddle.

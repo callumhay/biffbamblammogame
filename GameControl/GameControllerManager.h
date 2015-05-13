@@ -58,7 +58,9 @@ public:
 		}
 	}
 
-	void InitAllControllers(GameModel* model, GameDisplay* display);
+	void InitAllControllers(GameModel* model, GameDisplay* display, bool arcadeMode = false);
+    void SetArcadeSerialPort(const std::string& serialPort);
+
 	bool ControllersCanStillPlugAndPlay() const;
 	void TryToLoadPlugAndPlayControllers();
 
@@ -82,10 +84,12 @@ private:
 	~GameControllerManager();
 
 	BBBGameController* GetSDLKeyboardGameController();
+    BBBGameController* GetArcadeController();
 	BBBGameController* GetXBox360Controller(int controllerNum);
     BBBGameController* GetKinectController();
 
 	static const size_t KEYBOARD_SDL_INDEX;
+    static const size_t ARCADE_INDEX;
 	static const size_t XBOX_360_INDEX;
     static const size_t KINECT_INDEX;
     static const size_t NUM_CONTROLLER_INDICES;

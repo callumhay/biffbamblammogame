@@ -1841,7 +1841,6 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 	// Add the sprite/particle effect
 	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile, this->sound);
 
-	PlayerHurtHUD::PainIntensity intensity = PlayerHurtHUD::MinorPain;
 	switch (projectile.GetType()) {
 
         case Projectile::BossOrbBulletProjectile:
@@ -1852,7 +1851,6 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
         case Projectile::LaserTurretBulletProjectile:
             this->sound->PlaySoundAtPosition(GameSound::PaddleLaserBulletCollisionEvent, false, 
                 projectile.GetPosition3D(), true, true, true, 20.0f);
-			intensity = PlayerHurtHUD::MinorPain;
 			break;
 
         case Projectile::RocketTurretBulletProjectile:
@@ -1860,19 +1858,16 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
         case Projectile::MineTurretBulletProjectile:
         case Projectile::BossRocketBulletProjectile:
         case Projectile::BossShockOrbBulletProjectile:
-            intensity = PlayerHurtHUD::ModeratePain;
             break;
 
         case Projectile::CollateralBlockProjectile:
             // Not necessary since it's already played when the collateral block is destroyed
             //this->sound->PlaySoundAtPosition(GameSound::PaddleCollateralBlockCollisionEvent, false, 
             //    projectile.GetPosition3D(), true, true, true, 10*PlayerPaddle::PADDLE_WIDTH_TOTAL);
-            intensity = PlayerHurtHUD::MoreThanModeratePain;
             break;
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::PaddleRemoteCtrlRocketBulletProjectile:
-			intensity = PlayerHurtHUD::MajorPain;
 			break;
 
 		case Projectile::FireGlobProjectile: {
@@ -1883,19 +1878,16 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
                 
                 switch (fireGlobProjectile->GetRelativeSize()) {
 					case FireGlobProjectile::Small:
-						intensity = PlayerHurtHUD::MinorPain;
                         camera.ApplyCameraShake(multiplier*0.33, Vector3D(multiplier*1.5f*projectile.GetVelocityDirection(), multiplier*0.25f), 90);
                         GameControllerManager::GetInstance()->VibrateControllers(multiplier*0.33,
                             BBBGameController::SoftVibration, BBBGameController::VerySoftVibration);
 						break;
 					case FireGlobProjectile::Medium:
-						intensity = PlayerHurtHUD::ModeratePain;
                         camera.ApplyCameraShake(multiplier*0.5, Vector3D(multiplier*1.75f*projectile.GetVelocityDirection(), multiplier*0.33f), 100);
                         GameControllerManager::GetInstance()->VibrateControllers(multiplier*0.5,
                             BBBGameController::MediumVibration, BBBGameController::SoftVibration);
 						break;
 					case FireGlobProjectile::Large:
-						intensity = PlayerHurtHUD::MajorPain;
                         camera.ApplyCameraShake(multiplier*0.8, Vector3D(multiplier*2.0f*projectile.GetVelocityDirection(), multiplier*0.5f), 110);
                         GameControllerManager::GetInstance()->VibrateControllers(multiplier*0.8,
                             BBBGameController::HeavyVibration, BBBGameController::MediumVibration);
@@ -1911,8 +1903,6 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 			break;
 
         case Projectile::PaddleFlameBlastProjectile: {
-            intensity = PlayerHurtHUD::MajorPain;
-
             float multiplier = static_cast<const PaddleFlameBlasterProjectile*>(&projectile)->GetSizeMultiplier();
             camera.ApplyCameraShake(multiplier * 1.0, Vector3D(1.5f*projectile.GetVelocityDirection(), 0.25f), 90);
             GameControllerManager::GetInstance()->VibrateControllers(multiplier * 0.33f,
@@ -1922,8 +1912,6 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
         }
 
         case Projectile::PaddleIceBlastProjectile: {
-            intensity = PlayerHurtHUD::MinorPain;
-
             float multiplier = static_cast<const PaddleFlameBlasterProjectile*>(&projectile)->GetSizeMultiplier();
             camera.ApplyCameraShake(multiplier * 0.25, Vector3D(projectile.GetVelocityDirection(), 0.1f), 30);
             GameControllerManager::GetInstance()->VibrateControllers(multiplier * 0.25f,
@@ -1942,6 +1930,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 	}
 
 	// Add a full screen overlay effect to show pain/badness
+    PlayerHurtHUD::PainIntensity intensity = PlayerHurtHUD::GetIntensityForProjectile(projectile);
 	this->painHUD->Activate(intensity);
 }
 

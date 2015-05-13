@@ -82,7 +82,7 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 
 	// Load SDL, make sure the window is centered
 	putenv("SDL_VIDEO_CENTERED=1");
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) != 0) {
         debug_output("Unable to initialize SDL: " << SDL_GetError());
 		    std::cerr << "Unable to initialize SDL: " << SDL_GetError();
         return false;

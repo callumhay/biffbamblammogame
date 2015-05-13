@@ -107,7 +107,7 @@ remainingPiecePulser(0,0), bossMesh(NULL), levelAlpha(1.0f) {
 #define INSERT_MATERIAL_GRPS(block, allowDuplicateMaterials) { const std::map<std::string, MaterialGroup*>& matGrps = block->GetMaterialGroups(); \
     for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) { \
     if (this->levelMaterials.find(iter->first) != this->levelMaterials.end()) { if (allowDuplicateMaterials) { continue; } else { assert(false); } } \
-    this->levelMaterials.insert(std::make_pair<std::string, CgFxAbstractMaterialEffect*>(iter->first, iter->second->GetMaterial())); } }
+    this->levelMaterials.insert(std::make_pair(iter->first, iter->second->GetMaterial())); } }
 
 #pragma warning(push)
 #pragma warning(disable: 4127)
@@ -307,7 +307,7 @@ void LevelMesh::LoadNewLevel(GameSound* sound, const GameWorldAssets& gameWorldA
 	// Load the materials for the style block...
 	std::map<std::string, MaterialGroup*> styleBlockMatGrps  = this->styleBlock->GetMaterialGroups();
 	for (std::map<std::string, MaterialGroup*>::iterator iter = styleBlockMatGrps.begin(); iter != styleBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxAbstractMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+		this->levelMaterials.insert(std::make_pair(iter->first, iter->second->GetMaterial()));
 	}
 
 	// Load the actual level meshes as precomputed batches for speed...
@@ -805,7 +805,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
         }
 
 		std::map<CgFxAbstractMaterialEffect*, GLuint>& currPieceMatMap = (*pieceDisplayListMap)[piece];
-        currPieceMatMap.insert(std::make_pair<CgFxAbstractMaterialEffect*, GLuint>(currMaterial, newDisplayList));
+        currPieceMatMap.insert(std::make_pair(currMaterial, newDisplayList));
 		
         std::vector<GLuint>& currDisplayListVec = (*displayListsPerMaterialMap)[currMaterial];
         currDisplayListVec.push_back(newDisplayList);

@@ -56,6 +56,13 @@ public class LevelPieceEditDialog extends JDialog {
 	private JSpinner cannonAngleValue1;
 	private JSpinner cannonAngleValue2;
 	
+	private JRadioButton infinitePortalLifeRadio;
+	private JRadioButton finitePortalLifeRadio;
+	private JSpinner startTimeWarpPortalLife;
+	private JSpinner endTimeWarpPortalLife;
+	private JComboBox warpPortalWorldComboBox;
+	private JSpinner warpPortalLevelSpinner;
+	
 	private JSpinner switchTriggerIDSpinner;
 	
     /** Creates new form LevelPieceEditDialog */
@@ -371,6 +378,93 @@ public class LevelPieceEditDialog extends JDialog {
 	        
 	        buttonPanel.add(this.portalFlipsPaddle);
         }
+        else if (this.levelPieceLbl.getIsWarpPortal()) {
+        	this.infinitePortalLifeRadio = new JRadioButton("Infinite Lifetime");
+        	this.infinitePortalLifeRadio.setEnabled(true);
+        	this.infinitePortalLifeRadio.addActionListener( new ActionListener() {
+        		public void actionPerformed(ActionEvent evt) {
+        			warpPortalLifeRadioClicked(true);
+        		}
+        	});
+        	
+        	this.finitePortalLifeRadio   = new JRadioButton("Finite Lifetime");
+        	this.finitePortalLifeRadio.setEnabled(true);
+        	this.finitePortalLifeRadio.addActionListener( new ActionListener() {
+        		public void actionPerformed(ActionEvent evt) {
+        			warpPortalLifeRadioClicked(false);
+        		}
+        	});
+        	
+        	ButtonGroup group = new ButtonGroup();
+        	group.add(this.infinitePortalLifeRadio);
+        	group.add(this.finitePortalLifeRadio);
+        	
+        	this.startTimeWarpPortalLife = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 99999, 1.0));
+        	this.startTimeWarpPortalLife.setEnabled(true);
+        	this.startTimeWarpPortalLife.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(ChangeEvent arg0) {
+					warpPortalLifeValueChanged(true, (Double)startTimeWarpPortalLife.getValue());
+				}
+        	});
+        	
+        	this.endTimeWarpPortalLife   = new JSpinner(new SpinnerNumberModel(60.0, 0.0, 99999, 1.0));
+        	this.endTimeWarpPortalLife.setEnabled(true);
+        	this.endTimeWarpPortalLife.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(ChangeEvent arg0) {
+					warpPortalLifeValueChanged(false, (Double)endTimeWarpPortalLife.getValue());
+				}
+        	});
+        	
+        	if (this.levelPieceLbl.getWarpPortalEndTime() < 0) {
+        		this.infinitePortalLifeRadio.setSelected(true);
+        		this.finitePortalLifeRadio.setSelected(false);
+        		this.endTimeWarpPortalLife.setEnabled(false);
+        	}
+        	else {
+        		this.infinitePortalLifeRadio.setSelected(false);
+        		this.finitePortalLifeRadio.setSelected(true);
+        		this.startTimeWarpPortalLife.setValue(new Double(this.levelPieceLbl.getWarpPortalStartTime()));
+        		this.endTimeWarpPortalLife.setValue(new Double(this.levelPieceLbl.getWarpPortalEndTime()));
+        	}
+        	
+        	String[] worlds = {"classical", "gothic_romantic", "nouveau", "deco", "futurism", "pomo", "surrealism_dada"};
+        	this.warpPortalWorldComboBox = new JComboBox(worlds);
+        	this.warpPortalWorldComboBox.setSelectedItem(this.levelPieceLbl.getWarpPortalWorldName());
+        	this.warpPortalWorldComboBox.setEnabled(true);
+        	this.warpPortalWorldComboBox.addActionListener(new ActionListener() {
+        		public void actionPerformed(ActionEvent evt) {
+        			warpPortalWorldComboBoxChanged();
+        		}
+        	});
+        	
+        	this.warpPortalLevelSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
+        	this.warpPortalLevelSpinner.setValue(new Integer(this.levelPieceLbl.getWarpPortalLevelNum()));
+        	this.warpPortalLevelSpinner.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(ChangeEvent arg0) {
+					warpPortalLevelChanged((Integer)warpPortalLevelSpinner.getValue());
+				}
+        	});
+        	
+        	JPanel tempLifePanel = new JPanel(new FlowLayout());
+        	tempLifePanel.add(this.infinitePortalLifeRadio);
+        	tempLifePanel.add(this.finitePortalLifeRadio);
+        	tempLifePanel.add(new JLabel("start:"));
+        	tempLifePanel.add(this.startTimeWarpPortalLife);
+        	tempLifePanel.add(new JLabel("end:"));
+        	tempLifePanel.add(this.endTimeWarpPortalLife);
+
+        	JPanel tempDestPanel = new JPanel(new FlowLayout());
+        	tempDestPanel.add(new JLabel("Warp to world:"));
+        	tempDestPanel.add(this.warpPortalWorldComboBox);
+        	tempDestPanel.add(new JLabel("level:"));
+        	tempDestPanel.add(this.warpPortalLevelSpinner);
+        	
+	        buttonPanel.add(tempLifePanel);
+	        buttonPanel.add(tempDestPanel);
+        }
         
         this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
         pack();
@@ -448,6 +542,21 @@ public class LevelPieceEditDialog extends JDialog {
 	    	this.levelPieceLbl.setCannonBlockDegAngle2(cannonValue2);
     	}
     	
+    	if (this.startTimeWarpPortalLife != null && this.endTimeWarpPortalLife != null) {
+    		double startTime = (Double)this.startTimeWarpPortalLife.getValue();
+    		double endTime   = (Double)this.endTimeWarpPortalLife.getValue();
+    		
+    		if (this.infinitePortalLifeRadio.isSelected()) {
+    			endTime = -1;
+    		}
+    		else if (startTime > endTime) {
+    			startTime = endTime;
+    		}
+    		
+    		this.levelPieceLbl.setWarpPortalStartTime(startTime);
+    		this.levelPieceLbl.setWarpPortalEndTime(endTime);
+    	}
+    	
     	this.setVisible(false);
     }//GEN-LAST:event_okBtnActionPerformed
 
@@ -489,8 +598,46 @@ public class LevelPieceEditDialog extends JDialog {
 		}
 		else {
 			this.levelPieceLbl.setCannonBlockDegAngle2(value);
-		}
+		}		
 	}
+	
+    
+    private void warpPortalLifeRadioClicked(boolean infiniteLife) {
+    	if (infiniteLife) {
+    		this.levelPieceLbl.setWarpPortalEndTime(-1);
+    		this.endTimeWarpPortalLife.setEnabled(false);
+    	}
+    	else {
+    		this.endTimeWarpPortalLife.setEnabled(true);
+    		this.warpPortalLifeValueChanged(true,  (Double)this.startTimeWarpPortalLife.getValue());
+    		this.warpPortalLifeValueChanged(false, (Double)this.endTimeWarpPortalLife.getValue());
+    	}
+    }
+    
+    private void warpPortalLifeValueChanged(boolean startLife, double value) {
+    	if (startLife) {
+    		this.levelPieceLbl.setWarpPortalStartTime(value);
+    	}
+    	else {
+    		this.levelPieceLbl.setWarpPortalEndTime(value);
+    	}
+    	
+		// Make sure the end value is greater than or equal to the start value unless infinite life is selected...
+    	if (!this.infinitePortalLifeRadio.isSelected()) {
+    		double startTime = (Double)this.startTimeWarpPortalLife.getValue();
+    		double endTime   = (Double)this.endTimeWarpPortalLife.getValue();
+    		if (startTime > endTime) {
+    			startTime = endTime;
+    		}
+    	}
+    }
+    
+    private void warpPortalWorldComboBoxChanged() {
+    	this.levelPieceLbl.setWarpPortalWorldName((String)this.warpPortalWorldComboBox.getSelectedItem());
+    }
+    private void warpPortalLevelChanged(int levelNum) {
+    	this.levelPieceLbl.setWarpPortalLevelNum(levelNum);
+    }
     
 	private void switchTriggerableIDChanged(int value) {
 		this.levelPieceLbl.setSwitchTriggerID(value);
@@ -503,8 +650,5 @@ public class LevelPieceEditDialog extends JDialog {
     	}
     	this.levelPieceLbl.setSiblingIDs(siblings);
     }
-    
-    
-    
-    
+ 
 }

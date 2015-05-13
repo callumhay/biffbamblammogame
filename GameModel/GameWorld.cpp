@@ -44,7 +44,16 @@ const char* GameWorld::GOTHIC_ROMANTIC_WORLD_NAME   = "Gothic and Romantic";
 const char* GameWorld::NOUVEAU_WORLD_NAME           = "Nouveau";
 const char* GameWorld::DECO_WORLD_NAME              = "Deco";
 const char* GameWorld::FUTURISM_WORLD_NAME          = "Futurism";
+const char* GameWorld::POMO_WORLD_NAME              = "Postmodern";
 const char* GameWorld::SURREALISM_DADA_WORLD_NAME   = "Surrealism and Dada";
+
+const char* GameWorld::CLASSICAL_WORLD_NAME_SHORT       = "classical";
+const char* GameWorld::GOTHIC_ROMANTIC_WORLD_NAME_SHORT = "gothic_romantic";
+const char* GameWorld::NOUVEAU_WORLD_NAME_SHORT         = "nouveau";
+const char* GameWorld::DECO_WORLD_NAME_SHORT            = "deco";
+const char* GameWorld::FUTURISM_WORLD_NAME_SHORT        = "futurism";
+const char* GameWorld::POMO_WORLD_NAME_SHORT            = "pomo";
+const char* GameWorld::SURREALISM_DADA_WORLD_NAME_SHORT = "surrealism_dada";
 
 /* 
  * Constructor for GameWorld class, requires a list of level text/filenames
@@ -270,19 +279,14 @@ GameLevel* GameWorld::GetLevelByIndex(int idx) const {
  * Returns: true if s is a world style string, false otherwise.
  */
 bool GameWorld::IsValidWorldStyle(const std::string &s) {
-    if (s == CLASSICAL_WORLD_NAME) {
-        return true;
-    }
-    else if (s == GOTHIC_ROMANTIC_WORLD_NAME) {
-        return true;
-    }
-    else if (s == NOUVEAU_WORLD_NAME) {
-        return true;
-    }
-    else if (s == DECO_WORLD_NAME) {
-		return true;
-	}
-	else if (s == FUTURISM_WORLD_NAME) {
+    if (s == CLASSICAL_WORLD_NAME || s == CLASSICAL_WORLD_NAME_SHORT || 
+        s == GOTHIC_ROMANTIC_WORLD_NAME || s == GOTHIC_ROMANTIC_WORLD_NAME_SHORT ||
+        s == NOUVEAU_WORLD_NAME || s == NOUVEAU_WORLD_NAME_SHORT ||
+        s == DECO_WORLD_NAME || s == DECO_WORLD_NAME_SHORT ||
+        s == FUTURISM_WORLD_NAME || s == FUTURISM_WORLD_NAME_SHORT ||
+        s == POMO_WORLD_NAME || s == POMO_WORLD_NAME_SHORT ||
+        s == SURREALISM_DADA_WORLD_NAME || s == SURREALISM_DADA_WORLD_NAME_SHORT) {
+
 		return true;
 	}
 	else {
@@ -297,22 +301,26 @@ bool GameWorld::IsValidWorldStyle(const std::string &s) {
  */
 GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 	GameWorld::WorldStyle ret = None;
-    if (s == CLASSICAL_WORLD_NAME) {
+    if (s == CLASSICAL_WORLD_NAME || s == CLASSICAL_WORLD_NAME_SHORT) {
         ret = Classical;
     }
-    else if (s == GOTHIC_ROMANTIC_WORLD_NAME) {
+    else if (s == GOTHIC_ROMANTIC_WORLD_NAME || s == GOTHIC_ROMANTIC_WORLD_NAME_SHORT) {
         ret = GothicRomantic;
     }
-    else if (s == NOUVEAU_WORLD_NAME) {
+    else if (s == NOUVEAU_WORLD_NAME || s == NOUVEAU_WORLD_NAME_SHORT) {
         ret = Nouveau;
     }
-    else if (s == DECO_WORLD_NAME) {
+    else if (s == DECO_WORLD_NAME || s == DECO_WORLD_NAME_SHORT) {
 		ret = Deco;
 	}
-	else if (s == FUTURISM_WORLD_NAME) {
+	else if (s == FUTURISM_WORLD_NAME || s == FUTURISM_WORLD_NAME_SHORT) {
 		ret = Futurism;
 	}
-    else if (s == SURREALISM_DADA_WORLD_NAME) {
+    else if (s == POMO_WORLD_NAME || s == POMO_WORLD_NAME_SHORT) {
+        assert(false);
+        // TODO
+    }
+    else if (s == SURREALISM_DADA_WORLD_NAME || s == SURREALISM_DADA_WORLD_NAME_SHORT) {
         ret = SurrealismDada;
     }
 	return ret;

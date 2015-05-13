@@ -53,8 +53,16 @@ public:
     static const char* NOUVEAU_WORLD_NAME;
     static const char* DECO_WORLD_NAME;
     static const char* FUTURISM_WORLD_NAME;
-
+    static const char* POMO_WORLD_NAME;
     static const char* SURREALISM_DADA_WORLD_NAME;
+
+    static const char* CLASSICAL_WORLD_NAME_SHORT;
+    static const char* GOTHIC_ROMANTIC_WORLD_NAME_SHORT;
+    static const char* NOUVEAU_WORLD_NAME_SHORT;
+    static const char* DECO_WORLD_NAME_SHORT;
+    static const char* FUTURISM_WORLD_NAME_SHORT;
+    static const char* POMO_WORLD_NAME_SHORT;
+    static const char* SURREALISM_DADA_WORLD_NAME_SHORT;
 
 	enum WorldStyle { None = -1, Classical = 0, GothicRomantic = 1, Nouveau = 2, Deco = 3, Futurism = 4,
         SurrealismDada = 69};

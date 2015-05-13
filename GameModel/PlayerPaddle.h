@@ -276,6 +276,8 @@ public:
     void ShootBall();
     void ReleaseEverythingAttached();
 	
+    bool HasSomethingToShoot() const;
+
     bool AttachBall(GameBall* ball);
     void AttachProjectile(Projectile* projectile);
     void DetachProjectile(Projectile* projectile);
