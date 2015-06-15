@@ -63,6 +63,20 @@ const Texture2D* GameTutorialAssets::GetXBox360Texture(GameViewConstants::XBoxBu
     return NULL;
 }
 
+const Texture2D* GameTutorialAssets::GetArcadeTexture(GameViewConstants::ArcadeButtonType buttonType) const {
+    switch (buttonType) {
+        case GameViewConstants::ArcadeJoystick:
+            return this->GetAracdeJoystickTexture();
+        case GameViewConstants::ArcadeBoostButton:
+        case GameViewConstants::ArcadeFireButton:
+            return this->GetXBox360ButtonTexture();
+        default:
+            assert(false);
+            break;
+    }
+    return NULL;
+}
+
 const Texture2D* GameTutorialAssets::GetKeyboardTexture(GameViewConstants::KeyboardButtonType buttonType) const {
     switch (buttonType) {
         case GameViewConstants::KeyboardChar:
@@ -104,6 +118,11 @@ void GameTutorialAssets::Init() {
         dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_XBOX_CONTROLLER_TRIGGER, Texture::Trilinear));
     assert(this->xbox360TriggerTex != NULL);
+
+    this->arcadeJoystickTex =
+        dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_ARCADE_JOYSTICK, Texture::Trilinear));
+    assert(this->arcadeJoystickTex != NULL);
 
     this->keyboardShortButtonTex =
         dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -147,7 +166,6 @@ void GameTutorialAssets::Init() {
         GameViewConstants::GetInstance()->TEXTURE_LIFE_ITEM_DROP_TUTORIAL, Texture::Trilinear));
     assert(this->boostTutorialDirTex != NULL);
 
-
     this->boostTutorialItemTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BOOST_TUTORIAL_ITEM, Texture::Trilinear));
     assert(this->boostTutorialHUDTex != NULL);
@@ -169,6 +187,8 @@ void GameTutorialAssets::Release() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->xbox360AnalogStickTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->xbox360TriggerTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->arcadeJoystickTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->keyboardShortButtonTex);
     assert(success);

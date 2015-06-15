@@ -44,14 +44,19 @@ public:
     ~GameTutorialAssets();
 
     const Texture2D* GetXBox360Texture(GameViewConstants::XBoxButtonType buttonType) const;
+    const Texture2D* GetArcadeTexture(GameViewConstants::ArcadeButtonType buttonType) const;
     const Texture2D* GetKeyboardTexture(GameViewConstants::KeyboardButtonType buttonType) const;
     const Texture2D* GetMouseTexture(GameViewConstants::MouseButtonType buttonType) const;
 
     const Texture2D* GetXBox360ButtonTexture() const;
     const Texture2D* GetXBox360AnalogStickTexture() const;
     const Texture2D* GetXBox360TriggerTexture() const;
+
+    const Texture2D* GetAracdeJoystickTexture() const;
+
     const Texture2D* GetKeyboardShortButtonTexture() const;
     const Texture2D* GetKeyboardLongButtonTexture() const;
+
     const Texture2D* GetLeftMouseButtonTexture() const;
     const Texture2D* GetRightMouseButtonTexture() const;
     
@@ -70,6 +75,9 @@ private:
     Texture2D* xbox360ButtonTex;
     Texture2D* xbox360AnalogStickTex;
     Texture2D* xbox360TriggerTex;
+
+    Texture2D* arcadeJoystickTex;
+
     Texture2D* keyboardShortButtonTex;
     Texture2D* keyboardLongButtonTex;
     Texture2D* leftMouseButtonTex;
@@ -102,6 +110,10 @@ inline const Texture2D* GameTutorialAssets::GetXBox360AnalogStickTexture() const
 
 inline const Texture2D* GameTutorialAssets::GetXBox360TriggerTexture() const {
     return this->xbox360TriggerTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetAracdeJoystickTexture() const {
+    return this->arcadeJoystickTex;
 }
 
 inline const Texture2D* GameTutorialAssets::GetKeyboardShortButtonTexture() const {

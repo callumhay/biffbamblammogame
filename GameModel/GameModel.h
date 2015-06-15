@@ -474,7 +474,7 @@ public:
     const BallBoostModel::BallBoostMode& GetBallBoostMode() const { return this->ballBoostMode; }
     void SetBallBoostMode(const BallBoostModel::BallBoostMode& mode) { this->ballBoostMode = mode; }
 
-    void BallBoostDirectionPressed(float x, float y);
+    void BallBoostDirectionPressed(float x, float y, bool allowLargeChangeInDirection);
     void BallBoostDirectionReleased();
     void BallBoostReleasedForBall(const GameBall& ball);
     void ReleaseBulletTime();

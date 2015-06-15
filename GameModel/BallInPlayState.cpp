@@ -216,7 +216,7 @@ void BallInPlayState::MoveKeyPressedForOther(int dir, float magnitudePercent) {
     }
 }
 
-void BallInPlayState::BallBoostDirectionPressed(float x, float y) {
+void BallInPlayState::BallBoostDirectionPressed(float x, float y, bool allowLargeChangeInDirection) {
     assert(this->gameModel->boostModel != NULL);
 
     // Ignore applying the boost direction when the ball is paused
@@ -231,7 +231,7 @@ void BallInPlayState::BallBoostDirectionPressed(float x, float y) {
     }
     dir.Rotate(this->gameModel->GetTransformInfo()->GetGameZRotationInDegs());
 
-    this->gameModel->boostModel->BallBoostDirectionPressed(dir[0], dir[1]);
+    this->gameModel->boostModel->BallBoostDirectionPressed(dir[0], dir[1], allowLargeChangeInDirection);
 }
 
 void BallInPlayState::BallBoostDirectionReleased() {

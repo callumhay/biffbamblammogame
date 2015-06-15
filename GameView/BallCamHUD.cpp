@@ -72,8 +72,13 @@ cannonHUDActive(false), canShootCannon(false) {
     buttonTexts.push_back("A");
     buttonTexts.push_back("D");
 
-    this->cannonRotateHint.SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Left Analog", Colour(1,1,1));
-    this->cannonRotateHint.SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        this->cannonRotateHint.SetArcadeButton(GameViewConstants::ArcadeJoystick, "", Colour(1,1,1));
+    }
+    else {
+        this->cannonRotateHint.SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Left Analog", Colour(1,1,1));
+        this->cannonRotateHint.SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
+    }
 
     // Cannon fire hint
     xboxButtonTypes.clear();
@@ -86,8 +91,14 @@ cannonHUDActive(false), canShootCannon(false) {
     buttonColours.push_back(Colour(1,1,1));
     buttonColours.push_back(Colour(1,1,1));
 
-    this->cannonFireHint.SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
-    this->cannonFireHint.SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        this->cannonFireHint.SetArcadeButton(GameViewConstants::ArcadeFireButton, "Fire", 
+            GameViewConstants::GetInstance()->ARCADE_FIRE_BUTTON_COLOUR);
+    }
+    else {
+        this->cannonFireHint.SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+        this->cannonFireHint.SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    }
 
     this->barrelOverlayTex = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BARREL_OVERLAY, Texture::Trilinear);

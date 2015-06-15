@@ -36,6 +36,7 @@
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
 #include "MenuBackgroundRenderer.h"
+#include "GameViewEventManager.h"
 
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/FBObj.h"
@@ -167,74 +168,164 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 	this->menuFBO->UnbindFBObj();
 
     if (this->itemActivated) {
-        bool animDone = this->goToLevelSelectAlphaAnim.Tick(dT);
-        animDone &= this->goToLevelSelectMoveAnim.Tick(dT);
+        if (this->display->IsArcadeModeEnabled()) {
+            // Different type of animation for going straight into a level: Flash the screen and fade out...
+            bool animDone = this->arcadeFlashAnim.Tick(dT);
+            animDone &= this->goToLevelSelectAlphaAnim.Tick(dT);
+            
+            float flashAmt = this->arcadeFlashAnim.GetInterpolantValue();
+            float alphaAmt = this->goToLevelSelectAlphaAnim.GetInterpolantValue();
 
-        float moveAmt  = this->goToLevelSelectMoveAnim.GetInterpolantValue();  
-        float alphaAmt = this->goToLevelSelectAlphaAnim.GetInterpolantValue();
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            Camera::PushWindowCoords();
+            glMatrixMode(GL_MODELVIEW);
+            glPushMatrix();
+            glLoadIdentity();
 
-        Camera::PushWindowCoords();
-	    glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-	    glLoadIdentity();
+            glPushAttrib(GL_CURRENT_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glPolygonMode(GL_FRONT, GL_FILL);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDisable(GL_DEPTH_TEST);
 
-        glPushAttrib(GL_CURRENT_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glPolygonMode(GL_FRONT, GL_FILL);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            const Texture* bgTexture = bgRenderer->GetMenuBGTexture();
 
-        const Texture* bgTexture = bgRenderer->GetMenuBGTexture();
+            float screenWidth = Camera::GetWindowWidth();
+            float screenHeight = Camera::GetWindowHeight();
+            float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
+            float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
 
-        float screenWidth = Camera::GetWindowWidth();
-        float screenHeight = Camera::GetWindowHeight();
-        float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
-        float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
-
-        bgTexture->BindTexture();
-        glColor4f(1,1,1,1);
-        glBegin(GL_QUADS);
+            bgTexture->BindTexture();
+            glColor4f(1,1,1,1);
+            glBegin(GL_QUADS);
             glTexCoord2f(0, 0);
-	        glVertex2f(-moveAmt, 0);
+            glVertex2f(0, 0);
             glTexCoord2f(2*totalTexU, 0);
-	        glVertex2f(2*Camera::GetWindowWidth() - moveAmt, 0);
+            glVertex2f(2*Camera::GetWindowWidth(), 0);
             glTexCoord2f(2*totalTexU, totalTexV);
-            glVertex2f(2*Camera::GetWindowWidth() - moveAmt, Camera::GetWindowHeight());
-	        glTexCoord2f(0, totalTexV);
-            glVertex2f(-moveAmt, Camera::GetWindowHeight());
-        glEnd();
-        bgTexture->UnbindTexture();
+            glVertex2f(2*Camera::GetWindowWidth(), Camera::GetWindowHeight());
+            glTexCoord2f(0, totalTexV);
+            glVertex2f(0, Camera::GetWindowHeight());
+            glEnd();
+            bgTexture->UnbindTexture();
 
-        this->menuFBO->GetFBOTexture()->BindTexture();
-        glColor4f(1,1,1,alphaAmt);
-        glBegin(GL_QUADS);
-	        glTexCoord2f(1, 0);
-            glVertex2f(Camera::GetWindowWidth() - moveAmt, 0);
-	        glTexCoord2f(1, 1);
-            glVertex2f(Camera::GetWindowWidth() - moveAmt, Camera::GetWindowHeight());
-	        glTexCoord2f(0, 1);
-	        glVertex2f(-moveAmt, Camera::GetWindowHeight());
+            this->menuFBO->GetFBOTexture()->BindTexture();
+            glColor4f(1,1,1,alphaAmt);
+            glBegin(GL_QUADS);
+            glTexCoord2f(1, 0);
+            glVertex2f(Camera::GetWindowWidth(), 0);
+            glTexCoord2f(1, 1);
+            glVertex2f(Camera::GetWindowWidth(), Camera::GetWindowHeight());
+            glTexCoord2f(0, 1);
+            glVertex2f(0, Camera::GetWindowHeight());
             glTexCoord2f(0, 0);
-	        glVertex2f(-moveAmt, 0);
-        glEnd();
-        this->menuFBO->GetFBOTexture()->UnbindTexture();
-        
-        glPopAttrib();
-        glPopMatrix();
-        Camera::PopWindowCoords();
-        
-        if (animDone) {
-            // Go to the level select for the currently selected world
-            this->display->SetCurrentState(new SelectLevelMenuState(this->display, 
-                DisplayStateInfo::BuildSelectLevelInfo(this->selectedItemIdx), this->bgSoundLoopID));
-            return;
+            glVertex2f(0, 0);
+            glEnd();
+            this->menuFBO->GetFBOTexture()->UnbindTexture();
+
+            glColor4f(1, 1, 1, flashAmt);
+            glBegin(GL_QUADS);
+            glVertex2f(Camera::GetWindowWidth(), 0);
+            glVertex2f(Camera::GetWindowWidth(), Camera::GetWindowHeight());
+            glVertex2f(0, Camera::GetWindowHeight());
+            glVertex2f(0, 0);
+            glEnd();
+
+            glPopAttrib();
+            glPopMatrix();
+            Camera::PopWindowCoords();
+
+            if (animDone) {
+                // In arcade mode we go right to the first level of the world that was selected
+                WorldSelectItem* selectedWorldItem = this->worldItems[this->selectedItemIdx];
+                assert(selectedWorldItem != NULL);
+                const GameWorld* selectedWorld = selectedWorldItem->GetWorld();
+                assert(selectedWorld != NULL);
+
+                // Load all the initial stuffs for the game - this will queue up the next states that we need to go to
+                this->display->GetModel()->StartGameAtWorldAndLevel(selectedWorld->GetWorldIndex(), 0);
+
+                // Place the view into the proper state to play the game	
+                this->display->SetCurrentStateAsNextQueuedState();
+                return;
+            }
+        }
+        else {
+
+            bool animDone = this->goToLevelSelectAlphaAnim.Tick(dT);
+            animDone &= this->goToLevelSelectMoveAnim.Tick(dT);
+
+            float moveAmt  = this->goToLevelSelectMoveAnim.GetInterpolantValue();  
+            float alphaAmt = this->goToLevelSelectAlphaAnim.GetInterpolantValue();
+
+	        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            Camera::PushWindowCoords();
+	        glMatrixMode(GL_MODELVIEW);
+            glPushMatrix();
+	        glLoadIdentity();
+
+            glPushAttrib(GL_CURRENT_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glPolygonMode(GL_FRONT, GL_FILL);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            const Texture* bgTexture = bgRenderer->GetMenuBGTexture();
+
+            float screenWidth = Camera::GetWindowWidth();
+            float screenHeight = Camera::GetWindowHeight();
+            float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(bgTexture->GetWidth()));
+            float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(bgTexture->GetHeight()));
+
+            bgTexture->BindTexture();
+            glColor4f(1,1,1,1);
+            glBegin(GL_QUADS);
+                glTexCoord2f(0, 0);
+	            glVertex2f(-moveAmt, 0);
+                glTexCoord2f(2*totalTexU, 0);
+	            glVertex2f(2*Camera::GetWindowWidth() - moveAmt, 0);
+                glTexCoord2f(2*totalTexU, totalTexV);
+                glVertex2f(2*Camera::GetWindowWidth() - moveAmt, Camera::GetWindowHeight());
+	            glTexCoord2f(0, totalTexV);
+                glVertex2f(-moveAmt, Camera::GetWindowHeight());
+            glEnd();
+            bgTexture->UnbindTexture();
+
+            this->menuFBO->GetFBOTexture()->BindTexture();
+            glColor4f(1,1,1,alphaAmt);
+            glBegin(GL_QUADS);
+	            glTexCoord2f(1, 0);
+                glVertex2f(Camera::GetWindowWidth() - moveAmt, 0);
+	            glTexCoord2f(1, 1);
+                glVertex2f(Camera::GetWindowWidth() - moveAmt, Camera::GetWindowHeight());
+	            glTexCoord2f(0, 1);
+	            glVertex2f(-moveAmt, Camera::GetWindowHeight());
+                glTexCoord2f(0, 0);
+	            glVertex2f(-moveAmt, 0);
+            glEnd();
+            this->menuFBO->GetFBOTexture()->UnbindTexture();
+            
+            glPopAttrib();
+            glPopMatrix();
+            Camera::PopWindowCoords();
+            
+            if (animDone) {
+                // Go to the level select for the currently selected world
+                this->display->SetCurrentState(new SelectLevelMenuState(this->display, 
+                    DisplayStateInfo::BuildSelectLevelInfo(this->selectedItemIdx), this->bgSoundLoopID));
+                return;
+            }
         }
     }
-    else {
+
+    if (!this->itemActivated) {
         this->postMenuFBObj->BindFBObj();
         this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
         this->postMenuFBObj->UnbindFBObj();
@@ -291,10 +382,32 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
                     selectedItem->ExecuteLockedAnimation();
                 }
                 else {
-                    sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
+                    static const float ANIMATION_TIME_S = 0.5;
+                    
+                    if (this->display->IsArcadeModeEnabled()) {
+                        
+                        GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
+                        GameViewEventManager::Instance()->ActionArcadePlayerSelectedWorld();
+                        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+                        sound->StopSound(this->bgSoundLoopID, ANIMATION_TIME_S);
+
+                        std::vector<double> timeVals(7);
+                        timeVals[0] = 0.0; timeVals[1] = 0.1; timeVals[2] = 0.15; timeVals[3] = 0.2; timeVals[4] = 0.25; timeVals[5] = 0.3; timeVals[6] = 0.35;
+                        std::vector<float> flashAlphaVals(timeVals.size());
+                        flashAlphaVals[0] = 0.0; flashAlphaVals[1] = 1.0; flashAlphaVals[2] = 0.0;
+                        flashAlphaVals[3] = 1.0; flashAlphaVals[4] = 0.0; flashAlphaVals[5] = 1.0; flashAlphaVals[6] = 0.0;
+
+                        this->arcadeFlashAnim.SetLerp(timeVals, flashAlphaVals);
+                        this->arcadeFlashAnim.SetRepeat(false);
+
+                        this->goToLevelSelectAlphaAnim.SetLerp(0.1, ANIMATION_TIME_S, 1.0, 0.0);
+                    }
+                    else {
+                        sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
+                        this->goToLevelSelectAlphaAnim.SetLerp(ANIMATION_TIME_S, 0.0);
+                    }
 
                     this->itemActivated = true;
-                    this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
                     this->goToLevelSelectAlphaAnim.SetRepeat(false);
                     this->goToLevelSelectMoveAnim.SetLerp(0.5, Camera::GetWindowWidth());
                     this->goToLevelSelectMoveAnim.SetRepeat(false);
@@ -546,6 +659,10 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
         this->worldUnlockAnim = new WorldUnlockAnimationTracker(this, this->worldItems[this->selectedItemIdx+1]);
     }
     this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
+
+    if (this->display->IsArcadeModeEnabled()) {
+        GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(true);
+    }
 }
 
 // WorldUnlockAnimationTracker Functions **********************************************************

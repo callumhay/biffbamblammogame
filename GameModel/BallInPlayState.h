@@ -63,7 +63,7 @@ public:
     void ShootActionContinuousUse(double dT, float magnitudePercent);
     void MoveKeyPressedForPaddle(int dir, float magnitudePercent);
     void MoveKeyPressedForOther(int dir, float magnitudePercent);
-    void BallBoostDirectionPressed(float x, float y);
+    void BallBoostDirectionPressed(float x, float y, bool allowLargeChangeInDirection);
     void BallBoostDirectionReleased();
     void BallBoostReleasedForBall(const GameBall& ball);
 

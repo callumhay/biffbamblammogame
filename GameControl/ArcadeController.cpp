@@ -6,7 +6,6 @@
 #include "../GameView/GameDisplay.h"
 #include "../GameView/GameViewEventManager.h"
 
-
 ArcadeController::ArcadeController(GameModel* model, GameDisplay* display) : 
 KeyboardSDLController(model, display), eventsListener(NULL), 
 serialComm(new ArcadeSerialComm()), joystick(NULL), joystickX(0), joystickY(0), fireKey(SDLK_SPACE), boostKey(SDLK_RETURN) {
@@ -125,17 +124,8 @@ void ArcadeController::JoystickMotion(const SDL_JoyAxisEvent& joyAxisEvent) {
     }
     assert(SDL_JoystickNumAxes(this->joystick) >= 2);
 
-    if (joyAxisEvent.axis == 0) {
-        this->joystickX = joyAxisEvent.value;
-    }
-    else {
-        this->joystickY = joyAxisEvent.value;
-    }
-
-    Sint16 sensitivityX = 8000;
-    Sint16 sensitivityY = 8000;
-    int absJoystickX = abs(this->joystickX);
-    int absJoystickY = abs(this->joystickY);
+    Sint16 sensitivityX = 5000;
+    Sint16 sensitivityY = 4000;
 
     bool isInGameState = DisplayState::IsGameInPlayDisplayState(this->display->GetCurrentDisplayState());
 
@@ -144,6 +134,20 @@ void ArcadeController::JoystickMotion(const SDL_JoyAxisEvent& joyAxisEvent) {
         sensitivityX = 30000;
         sensitivityY = 10000;
     }
+
+    if (joyAxisEvent.axis == 0) {
+        this->joystickX = abs(joyAxisEvent.value) >= sensitivityX ? joyAxisEvent.value : 0;
+        int tempY = SDL_JoystickGetAxis(this->joystick, 1);
+        this->joystickY = abs(tempY) >= sensitivityY ? tempY : 0;
+    }
+    else {
+        this->joystickY = abs(joyAxisEvent.value) >= sensitivityY ? joyAxisEvent.value : 0;
+        int tempX = SDL_JoystickGetAxis(this->joystick, 0);
+        this->joystickX = abs(tempX) >= sensitivityX ? tempX : 0;
+    }
+
+    int absJoystickX = abs(this->joystickX);
+    int absJoystickY = abs(this->joystickY);
 
     if ((absJoystickY >= sensitivityY && this->joystickY < 0)) {
 
@@ -263,19 +267,19 @@ void ArcadeController::JoystickMotion(const SDL_JoyAxisEvent& joyAxisEvent) {
         const BallBoostModel* boostModel = this->model->GetBallBoostModel();
         if (boostModel == NULL) {
             this->specialDirOn = false;
-            return;
-        }
-
-        if (boostModel->IsInBulletTime()) {
-            if (absJoystickX >= sensitivityX || absJoystickY >= sensitivityY) {
-                this->display->SpecialDirectionPressed(this->joystickX, this->joystickY);
-            }
-            this->specialDirOn = true;
         }
         else {
-            if (this->specialDirOn) {
-                this->display->SpecialDirectionReleased();
-                this->specialDirOn = false;
+            if (boostModel->IsInBulletTime()) {
+                if (this->joystickX != 0 || this->joystickY != 0) {
+                    this->display->SpecialDirectionPressed(-this->joystickX, this->joystickY);
+                    this->specialDirOn = true;
+                }
+            }
+            else {
+                if (this->specialDirOn) {
+                    this->display->SpecialDirectionReleased();
+                    this->specialDirOn = false;
+                }
             }
         }
     }
@@ -307,11 +311,12 @@ void ArcadeController::KeyDown(SDLKey key) {
                 this->display->SpecialDirectionReleased();
             }
             else {
-                Vector2D boostDir(this->joystickX, this->joystickY);
+                Vector2D boostDir(-this->joystickX, this->joystickY);
                 if (boostDir.IsZero()) {
                     boostDir[0] = 1;
                 }
                 this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+                this->specialDirOn = true;
             }
         }
         else {
@@ -334,6 +339,15 @@ void ArcadeController::KeyUp(SDLKey key) {
     }
     else if (key == this->boostKey) {
         this->SetKeyPress(key, false);
+
+        if (DisplayState::IsGameInPlayDisplayState(this->display->GetCurrentDisplayState())) {
+            const BallBoostModel* boostModel = this->model->GetBallBoostModel();
+            if (boostModel == NULL) {
+                return;
+            }
+            this->display->SpecialDirectionReleased();
+            this->specialDirOn = false;
+        }
         return;
     }
 

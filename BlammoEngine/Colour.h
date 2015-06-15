@@ -130,6 +130,12 @@ public:
         this->colours[2] = std::min<float>(1, c[2] + this->colours[2]);
         return *this;
     }
+    Colour& operator*=(const Colour& c) {
+        this->colours[0] *= c[0];
+        this->colours[1] *= c[1];
+        this->colours[2] *= c[2];
+        return *this;
+    }
 };
 
 class ColourRGBA : public Colour {

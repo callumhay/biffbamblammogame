@@ -1,19 +1,59 @@
+/**
+ * ArcadeControllerEventsListener.cpp
+ * 
+ * Copyright (c) 2015, Callum Hay
+ * All rights reserved.
+ * 
+ * Redistribution and use of the Biff! Bam!! Blammo!?! code or any derivative
+ * works are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * 3. The names of its contributors may not be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * 4. Redistributions may not be sold, nor may they be used in a commercial
+ * product or activity without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL CALLUM HAY BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "ArcadeControllerEventsListener.h"
 #include "../GameView/PlayerHurtHUD.h"
 #include "../GameView/GameDisplay.h"
+#include "../GameView/GameAssets.h"
+#include "../GameView/GameFBOAssets.h"
 
 typedef ArcadeControllerEventsListener ACEL;
 
+const unsigned long ACEL::MARQUEE_COLOUR_MAX_NO_UPDATE_TIME_MS = 5000;
+
 ACEL::ArcadeControllerEventsListener(GameDisplay* display, ArcadeSerialComm& serialComm) : display(display),
-serialComm(serialComm), defaultMarqueeColour(25.0/255.0, 25.0/255.0, 25.0/255.0) {
+serialComm(serialComm), defaultMarqueeColour(25.0/255.0, 25.0/255.0, 25.0/255.0), 
+timeOfLastMarqueeColourUpdate(0) {
+
     this->SetMarqueeColour(this->defaultMarqueeColour, ArcadeSerialComm::InstantTransition);
+    this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::Off);
 }
 
 ACEL::~ArcadeControllerEventsListener() {
+    this->SetMarqueeColour(Colour(0,0,0), ArcadeSerialComm::InstantTransition);
+    this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::Off);
 }
 
 void ACEL::PaddleHitWallEvent(const PlayerPaddle&, const Point2D&) {
-    this->serialComm.SetMarqueeFlash(1.25f*this->currMarqueeColour, ArcadeSerialComm::VeryFastMarqueeFlash);
+    this->serialComm.SetMarqueeFlash(2.0f*this->currMarqueeColour, ArcadeSerialComm::VeryFastMarqueeFlash);
 }
 
 void ACEL::PaddlePortalBlockTeleportEvent(const PlayerPaddle&, const PortalBlock& enterPortal) {
@@ -112,9 +152,13 @@ void ACEL::LastBallExplodedEvent(const GameBall&, bool wasSkipped) {
         this->serialComm.SetMarqueeFlash(Colour(1,0,0), ArcadeSerialComm::MediumMarqueeFlash, 
             ArcadeSerialComm::ThreeFlashes, true);
     }
+    this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::Off);
 }
 
 void ACEL::AllBallsDeadEvent(int) {
+    this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::Off);
+    this->SetMarqueeColour(this->defaultMarqueeColour, ArcadeSerialComm::InstantTransition);
+
     if (this->display->GetModel()->IsGameOver()) {
         //this->currMarqueeColour = Colour(1,0,0);
         //this->serialComm.SetMarqueeColour(this->currMarqueeColour, ArcadeSerialComm::InstantTransition);
@@ -125,6 +169,8 @@ void ACEL::AllBallsDeadEvent(int) {
 void ACEL::BallSpawnEvent(const GameBall&) {
     // TODO: Boss levels are more complicated, we need to wait until the player is allowed to launch the ball...
     //this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::SlowButtonFlash);
+    this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::Off);
+    this->SetMarqueeColour(this->defaultMarqueeColour, ArcadeSerialComm::InstantTransition);
 }
 
 void ACEL::BallShotEvent(const GameBall&) {
@@ -139,15 +185,24 @@ void ACEL::BallPaddleCollisionEvent(const GameBall&, const PlayerPaddle&, bool) 
 
 void ACEL::ItemActivatedEvent(const GameItem&) {
     // Check to see if the paddle can shoot anything, if it can then we flash the fire button
-    if (this->display->GetModel()->GetPlayerPaddle()->HasSomethingToShoot()) {
-        this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::FastButtonFlash);
+    GameModel* model = this->display->GetModel();
+    // Check to see if the paddle can shoot anything, if it can't then we deactivate the fire button
+    if (GameState::IsGameInPlayState(*model)) {
+        PlayerPaddle* paddle = model->GetPlayerPaddle();
+        if (paddle != NULL && model->GetPlayerPaddle()->HasSomethingToShoot()) {
+            this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::MediumButtonFlash);
+        }
     }
 }
 
 void ACEL::ItemDeactivatedEvent(const GameItem&) {
+    GameModel* model = this->display->GetModel();
     // Check to see if the paddle can shoot anything, if it can't then we deactivate the fire button
-    if (!this->display->GetModel()->GetPlayerPaddle()->HasSomethingToShoot()) {
-        this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::Off);
+    if (GameState::IsGameInPlayState(*model)) {
+        PlayerPaddle* paddle = model->GetPlayerPaddle();
+        if (paddle != NULL && !model->GetPlayerPaddle()->HasSomethingToShoot()) {
+            this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::Off);
+        }
     }
 }
 
@@ -169,8 +224,94 @@ void ACEL::BallBoostLostEvent(bool allBoostsLost) {
     }
 }
 
+void ACEL::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
+    static ArcadeSerialComm::ButtonGlowCadenceType beforeBoostFireBtnCadence = this->serialComm.GetCurrentFireButtonCadence();
+
+    switch (boostModel.GetBulletTimeState()) {
+        case BallBoostModel::NotInBulletTime:
+            beforeBoostFireBtnCadence = this->serialComm.GetCurrentFireButtonCadence();
+
+            // Check to see if there's still a boost available and turn the boost button on if there is...
+            if (boostModel.IsBoostAvailable()) {
+                this->serialComm.SetButtonCadence(ArcadeSerialComm::BoostButton, ArcadeSerialComm::MediumButtonFlash);
+            }
+            break;
+
+        case BallBoostModel::BulletTimeFadeIn:
+            // Turn off the boost button
+            this->serialComm.SetButtonCadence(ArcadeSerialComm::BoostButton, ArcadeSerialComm::Off);
+        case BallBoostModel::BulletTime:
+            // Make sure the fire button is flashing
+            if (this->serialComm.GetCurrentFireButtonCadence() == ArcadeSerialComm::Off) {
+                this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::FastButtonFlash);
+            }
+            break;
+
+        case BallBoostModel::BulletTimeFadeOut:
+            if (!this->display->GetModel()->GetPlayerPaddle()->HasSomethingToShoot()) {
+                beforeBoostFireBtnCadence = ArcadeSerialComm::Off;
+            }
+            this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, beforeBoostFireBtnCadence);
+
+            break;
+
+        default:
+            break;
+    }
+}
+
 void ACEL::RocketExplodedEvent(const RocketProjectile&) {
     this->serialComm.SetMarqueeFlash(Colour(1,1,1), ArcadeSerialComm::FastMarqueeFlash, ArcadeSerialComm::OneFlash);
+}
+
+// This is called EVERY FRAME so be quick!
+void ACEL::GameModelUpdated() {
+    const GameModel* model = this->display->GetModel();
+    if (!GameState::IsGameInPlayState(*model)) {
+        if (this->currMarqueeColour != this->defaultMarqueeColour) {
+            this->SetMarqueeColour(this->defaultMarqueeColour, ArcadeSerialComm::InstantTransition);
+        }
+        return;
+    }
+
+    // We're in a game play state... check a bunch of stuff to determine the current marquee colour...
+    Colour newMarqueeColour = this->defaultMarqueeColour;
+    ArcadeSerialComm::TransitionTimeType transitionType = ArcadeSerialComm::InstantTransition;
+
+#define DO_MARQUEE_COLOUR_BLEND_MULT(marqueeColour, blendColour) if (marqueeColour == this->defaultMarqueeColour) { marqueeColour = blendColour; } else { marqueeColour *= blendColour; } 
+
+    if (model->IsBlackoutEffectActive()) {
+        newMarqueeColour = Colour(0,0,0);
+    }
+    else {
+        const PlayerPaddle* paddle = model->GetPlayerPaddle();
+        assert(paddle != NULL);
+
+        // Poison paddle
+        if (paddle->HasPaddleType(PlayerPaddle::PoisonPaddle)) {
+
+            DO_MARQUEE_COLOUR_BLEND_MULT(newMarqueeColour, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR);
+
+            transitionType = ArcadeSerialComm::MediumTransition;
+            this->serialComm.SetMarqueeFlash(Colour(0.0f, 0.3f + Randomizer::GetInstance()->RandomNumZeroToOne()*0.7f, 
+                Randomizer::GetInstance()->RandomNumZeroToOne()*0.2f),
+                ArcadeSerialComm::RandomMarqueeFlashType(), ArcadeSerialComm::RandomNumMarqueeFlashes(), false);
+        }
+
+        // Is the ink splatter active?
+        const GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
+        if (fboAssets->IsInkSplatterEffectActive()) {
+            DO_MARQUEE_COLOUR_BLEND_MULT(newMarqueeColour, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
+        }
+    }
+
+#undef DO_MARQUEE_COLOUR_BLEND_MULT
+    
+    unsigned long currTime = BlammoTime::GetSystemTimeInMillisecs();
+    if (newMarqueeColour != this->currMarqueeColour || (currTime - this->timeOfLastMarqueeColourUpdate) > MARQUEE_COLOUR_MAX_NO_UPDATE_TIME_MS) {
+        this->SetMarqueeColour(newMarqueeColour, transitionType);
+        this->timeOfLastMarqueeColourUpdate = currTime;
+    }
 }
 
 void ACEL::DisplayStateChanged(const DisplayState::DisplayStateType& prevState, const DisplayState::DisplayStateType& newState) {
@@ -187,8 +328,7 @@ void ACEL::DisplayStateChanged(const DisplayState::DisplayStateType& prevState, 
     bool wasInGameplayState = DisplayState::IsGameInPlayDisplayState(prevState);
     if (wasInGameplayState && !DisplayState::IsGameInPlayDisplayState(newState)) {
         // Stop flashing all buttons, the player is no longer in a game play state
-        this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::Off);
-        this->serialComm.SetButtonCadence(ArcadeSerialComm::BoostButton, ArcadeSerialComm::Off);
+        this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::Off);
     }
 
     // If we just went from an in-play state to a game over state then we make the marquee red
@@ -212,8 +352,37 @@ void ACEL::BiffBamBlammoSlamEvent(const GameViewEventListener::SlamType& slamTyp
         case GameViewEventListener::BlammoSlam:
             this->serialComm.SetMarqueeFlash(Colour(1, 1, 0), ArcadeSerialComm::VeryFastMarqueeFlash, ArcadeSerialComm::OneFlash, true);
             break;
+
         default:
             break;
+    }
+}
+
+void ACEL::ArcadeWaitingForPlayerState(bool entered) {
+    if (entered) {
+        // In the main menu we flash the buttons
+        this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::VerySlowButtonFlash);
+    }
+    else {
+        // Stop flashing the buttons when leaving the main menu
+        this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::Off);
+    }
+}
+
+void ACEL::ArcadePlayerHitStartGame() {
+    this->serialComm.SetMarqueeFlash(Colour(1, 1, 1), ArcadeSerialComm::VeryFastMarqueeFlash, ArcadeSerialComm::OneFlash, true);
+}
+
+void ACEL::ArcadePlayerSelectedWorld() {
+    this->serialComm.SetMarqueeFlash(Colour(1, 1, 1), ArcadeSerialComm::VeryFastMarqueeFlash, ArcadeSerialComm::ThreeFlashes, true);
+}
+
+void ACEL::ShootBallTutorialHintShown(bool shown) {
+    if (shown) {
+        this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::MediumButtonFlash);
+    }
+    else {
+        this->serialComm.SetButtonCadence(ArcadeSerialComm::FireButton, ArcadeSerialComm::Off);
     }
 }
 

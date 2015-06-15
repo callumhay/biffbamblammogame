@@ -35,6 +35,8 @@
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../ResourceManager.h"
 
+const float MenuBackgroundRenderer::DEFAULT_MOVE_FREQUENCY = 0.007f;
+
 MenuBackgroundRenderer::MenuBackgroundRenderer() : bgEffect(NULL) {
 
     Texture* fgTex = ResourceManager::GetInstance()->GetImgTextureResource(
@@ -43,7 +45,7 @@ MenuBackgroundRenderer::MenuBackgroundRenderer() : bgEffect(NULL) {
         GameViewConstants::GetInstance()->TEXTURE_STARFIELD_BG, Texture::Trilinear);
 
     this->bgEffect = new CgFxSkybox(fgTex, bgTex);
-    this->bgEffect->SetMoveFrequency(0.007f);
+    this->bgEffect->SetMoveFrequency(DEFAULT_MOVE_FREQUENCY);
     this->bgEffect->SetFGScale(1.0f);
 
     glNewList(this->fullscreenQuadDL, GL_COMPILE); 

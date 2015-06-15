@@ -89,8 +89,8 @@ public:
 		this->font = font;
 	}
 	// Set the text colour for this label
-	void SetColour(const Colour& c) {
-		this->colour = ColourRGBA(c, 1.0f);
+	void SetColour(const Colour& c, float alpha = 1.0f) {
+		this->colour = ColourRGBA(c, alpha);
 	}
 	void SetColour(const ColourRGBA& c) {
 		this->colour = c;

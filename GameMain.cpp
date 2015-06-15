@@ -67,10 +67,13 @@ static GameDisplay* display = NULL;
  */
 static void CleanUpMVC() {
     // Order matters here!!!
+
 	if (display != NULL) {
 		delete display;
 		display = NULL;
 	}
+
+    GameControllerManager::DeleteInstance();
 
 	if (model != NULL) {
 		delete model;
@@ -128,8 +131,7 @@ static void KillGraphicsAndWindow(bool gameIsQuiting) {
 	// Clear up MVC
 	CleanUpMVC();
 
-	// Clear up singletons
-    GameControllerManager::DeleteInstance();
+	// Clear up misc. singletons
 	LoadingScreen::DeleteInstance();
 	Noise::DeleteInstance();
 	GeometryMaker::DeleteInstance();
@@ -252,7 +254,7 @@ int main(int argc, char *argv[]) {
         }
 
         model = new GameModel(sound, initCfgOptions.GetDifficulty(), initCfgOptions.GetInvertBallBoost(), initCfgOptions.GetBallBoostMode());
-		display = new GameDisplay(model, sound, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
+		display = new GameDisplay(model, sound, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), arcadeMode);
 
 		// Initialize all controllers that we can...
 		GameControllerManager::GetInstance()->InitAllControllers(model, display, arcadeMode);

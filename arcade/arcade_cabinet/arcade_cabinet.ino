@@ -182,7 +182,7 @@ void clearLedStripAnimators() {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(38400);
   pixels.begin(); // This initializes the NeoPixel library.
   
   // Button LED outputs
@@ -267,7 +267,7 @@ void loop() {
 // |OX -- Tells the orange button to turn its LED off
 void readSerialCommands() {
 
-  if (Serial.available() >= 3) {
+  while (Serial.available() >= 3) {
 
     char serialReadByte = Serial.read();
     if (serialReadByte == PKG_BEGIN_CHAR) {
@@ -286,9 +286,9 @@ void readSerialCommands() {
           uint8_t g = CONVERT_RGB_BYTE(Serial.read());
           uint8_t b = CONVERT_RGB_BYTE(Serial.read());
           
-          Serial.print("Setting all LED colours to (");
-          Serial.print(r); Serial.print(","); Serial.print(g); Serial.print(","); Serial.print(b); 
-          Serial.println(")...");
+          //Serial.print("Setting all LED colours to (");
+          //Serial.print(r); Serial.print(","); Serial.print(g); Serial.print(","); Serial.print(b); 
+          //Serial.println(")...");
           
           bool changed = false;
           for (int j = NUM_LED_STRIP_ANIMATORS-1; j >= 0 ; j--) {
@@ -304,6 +304,7 @@ void readSerialCommands() {
             setAllPixels(r,g,b);
             pixels.show();
           }
+          
           break;
         }
         
@@ -331,10 +332,10 @@ void readSerialCommands() {
           lerpLEDStripAnimator1.setLerp(3, r, g, b, currR, currG, currB);
           currLedStripAnimators[2] = &lerpLEDStripAnimator1;
           
-          Serial.println("Animating flash...");
-          Serial.print("Flash to colour ("); Serial.print(r); Serial.print(","); 
-          Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") flash for ");
-          Serial.print(static_cast<float>(t)*10.0/1000.0); Serial.println(" seconds");
+          //Serial.println("Animating flash...");
+          //Serial.print("Flash to colour ("); Serial.print(r); Serial.print(","); 
+          //Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") flash for ");
+          //Serial.print(static_cast<float>(t)*10.0/1000.0); Serial.println(" seconds");
           
           break;
         }
@@ -374,10 +375,10 @@ void readSerialCommands() {
           lerpLEDStripAnimator2.setLerp(3, r, g, b, currR, currG, currB);
           currLedStripAnimators[4] = &lerpLEDStripAnimator2;
           
-          Serial.println("Animating 2x flash...");
-          Serial.print("Flash to colour ("); Serial.print(r); Serial.print(","); 
-          Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") flash for ");
-          Serial.print(static_cast<float>(t)*10.0/1000.0); Serial.println(" seconds");
+          //Serial.println("Animating 2x flash...");
+          //Serial.print("Flash to colour ("); Serial.print(r); Serial.print(","); 
+          //Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") flash for ");
+          //Serial.print(static_cast<float>(t)*10.0/1000.0); Serial.println(" seconds");
           
           break;
         }
@@ -425,10 +426,10 @@ void readSerialCommands() {
           lerpLEDStripAnimator2.setLerp(3, r, g, b, currR, currG, currB);
           currLedStripAnimators[6] = &lerpLEDStripAnimator2;
           
-          Serial.println("Animating 3x flash...");
-          Serial.print("Flash to colour ("); Serial.print(r); Serial.print(","); 
-          Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") flash for ");
-          Serial.print(static_cast<float>(t)*10.0/1000.0); Serial.println(" seconds");
+          //Serial.println("Animating 3x flash...");
+          //Serial.print("Flash to colour ("); Serial.print(r); Serial.print(","); 
+          //Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") flash for ");
+          //Serial.print(static_cast<float>(t)*10.0/1000.0); Serial.println(" seconds");
           
           break;
         }
@@ -447,10 +448,10 @@ void readSerialCommands() {
           lerpLEDStripAnimator0.setLerp(static_cast<uint32_t>(t * 100.0 / static_cast<float>(MIN_LED_FRAME_TIME_MS)), currR, currG, currB, r, g, b);
           currLedStripAnimators[0] = &lerpLEDStripAnimator0;
         
-          Serial.println("Animating linear interpolation...");
-          Serial.print("Transition to colour ("); Serial.print(r); Serial.print(","); 
-          Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") over ");
-          Serial.print(static_cast<float>(t)/10.0); Serial.println(" seconds");
+          //Serial.println("Animating linear interpolation...");
+          //Serial.print("Transition to colour ("); Serial.print(r); Serial.print(","); 
+          //Serial.print(g); Serial.print(","); Serial.print(b); Serial.print(") over ");
+          //Serial.print(static_cast<float>(t)/10.0); Serial.println(" seconds");
 
           break; 
         }
@@ -476,22 +477,22 @@ void readSerialCommands() {
             buttonAnim->setIsActive(true);
             buttonAnim->setNumFramesForFlash(static_cast<uint32_t>(t * 10.0 / static_cast<float>(MIN_LED_FRAME_TIME_MS)));
             
-            Serial.println("Animating button flashing...");
-            Serial.print("Flashing button every "); Serial.print(static_cast<float>(t)/100.0); Serial.println(" seconds");
+            //Serial.println("Animating button flashing...");
+            //Serial.print("Flashing button every "); Serial.print(static_cast<float>(t)/100.0); Serial.println(" seconds");
           }
           else if (serialReadByte == TURN_OFF_BUTTON_CHAR) {
             buttonAnim->setIsActive(false);
-            Serial.println("Turning off button flashing...");
+            //Serial.println("Turning off button flashing...");
           }
           else {
-            Serial.println("No such button command was found.");
+            //Serial.println("No such button command was found.");
           }
           
           break;
         }
 
         default:
-          Serial.println("No such command was found.");
+          //Serial.println("No such command was found.");
           break;    
       }
     }

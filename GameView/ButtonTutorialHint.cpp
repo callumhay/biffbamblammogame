@@ -69,6 +69,7 @@ mouseLabel(NULL) {
 ButtonTutorialHint::~ButtonTutorialHint() {
     this->ClearKeyboardKeyLabels();
     this->ClearXBoxLabels();
+    this->ClearArcadeLabels();
     this->ClearMouseLabel();
 }
 
@@ -94,6 +95,16 @@ void ButtonTutorialHint::ClearXBoxLabels() {
         label = NULL;
     }
     this->xboxLabels.clear();
+}
+
+void ButtonTutorialHint::ClearArcadeLabels() {
+    for (std::vector<ButtonGlyphLabel*>::iterator iter = this->arcadeLabels.begin();
+        iter != this->arcadeLabels.end(); ++iter) {
+        ButtonGlyphLabel* label = *iter;
+        delete label;
+        label = NULL;
+    }
+    this->arcadeLabels.clear();
 }
 
 void ButtonTutorialHint::ClearMouseLabel() {
@@ -155,6 +166,28 @@ void ButtonTutorialHint::SetXBoxButtons(const std::list<GameViewConstants::XBoxB
         
         this->xboxLabels.push_back(keyLabel);
     }
+}
+
+void ButtonTutorialHint::SetArcadeButton(GameViewConstants::ArcadeButtonType buttonType, 
+                                         const std::string& buttonText, const Colour& buttonColour) {
+    this->ClearArcadeLabels();
+    
+    const Texture* buttonTex = this->tutorialAssets->GetArcadeTexture(buttonType);
+    assert(buttonTex != NULL);
+
+    float buttonHeight = this->actionLabel.GetHeight() * BUTTON_SCALE_MULTIPLIER * 1.5f;
+    ButtonGlyphLabel* arcadeButtonLabel = new ButtonGlyphLabel(buttonTex, buttonText, buttonColour, buttonHeight, 0, 0);
+
+    if (buttonType != GameViewConstants::ArcadeJoystick) {
+        float offsetX, offsetY;
+        GameViewConstants::GetInstance()->GetXBoxButtonLabelOffset(GameViewConstants::XBoxPushButton, arcadeButtonLabel->GetWidth(),
+            arcadeButtonLabel->GetHeight(), arcadeButtonLabel->GetLabelWidth(), arcadeButtonLabel->GetLabelHeight(),
+            offsetX, offsetY);
+        arcadeButtonLabel->SetDimensions(buttonHeight, offsetX, offsetY);
+    }
+
+    this->arcadeLabels.reserve(1);
+    this->arcadeLabels.push_back(arcadeButtonLabel);
 }
 
 void ButtonTutorialHint::SetKeyboardButton(GameViewConstants::KeyboardButtonType buttonType,
@@ -234,6 +267,16 @@ void ButtonTutorialHint::SetMouseButton(GameViewConstants::MouseButtonType butto
 
 float ButtonTutorialHint::GetWidth() const {
     float width = this->actionLabel.GetWidth();
+    if (!this->arcadeLabels.empty()) {
+        for (std::vector<ButtonGlyphLabel*>::const_iterator iter = this->arcadeLabels.begin();
+            iter != this->arcadeLabels.end(); ++iter) {
+
+                const ButtonGlyphLabel* buttonLabel = *iter;
+                width += buttonLabel->GetWidth();
+        }
+        return width;
+    }
+
     for (std::vector<ButtonGlyphLabel*>::const_iterator iter = this->xboxLabels.begin();
          iter != this->xboxLabels.end(); ++iter) {
 
@@ -305,62 +348,81 @@ void ButtonTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float de
     glPushMatrix();
     glLoadIdentity();
 
-    // Draw the XBox Button labels, if any exist
     size_t count = 0;
-    for (std::vector<ButtonGlyphLabel*>::iterator iter = this->xboxLabels.begin();
-         iter != this->xboxLabels.end(); ++iter) {
+    if (!this->arcadeLabels.empty()) {
+        for (std::vector<ButtonGlyphLabel*>::const_iterator iter = this->arcadeLabels.begin();
+             iter != this->arcadeLabels.end(); ++iter) {
 
-        ButtonGlyphLabel* buttonLabel = *iter;
-        buttonLabelDiv2 = buttonLabel->GetWidth() / 2.0f;
-        currX += buttonLabelDiv2;
-        buttonLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
-        currX += buttonLabelDiv2;
+            ButtonGlyphLabel* buttonLabel = *iter;
+            buttonLabelDiv2 = buttonLabel->GetWidth() / 2.0f;
+            currX += buttonLabelDiv2;
+            buttonLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
+            currX += buttonLabelDiv2;
 
-        if (count != this->xboxLabels.size()-1 && this->xboxLabels.size() > 1) {
-            this->commaLabel.SetTopLeftCorner(currX, actualCenterY + commaHeightDiv2);
-            this->commaLabel.Draw(drawWithDepth, depth);
-            currX += this->commaLabel.GetLastRasterWidth();
+            if (count != this->xboxLabels.size()-1 && this->xboxLabels.size() > 1) {
+                this->commaLabel.SetTopLeftCorner(currX, actualCenterY + commaHeightDiv2);
+                this->commaLabel.Draw(drawWithDepth, depth);
+                currX += this->commaLabel.GetLastRasterWidth();
+            }
         }
     }
+    else {
 
-    if (!this->xboxLabels.empty() && !this->keyboardKeyLabels.empty()) {
-        // Draw an 'or' label next to the xbox button label...
-        this->orLabel.SetTopLeftCorner(currX, actualCenterY + this->orLabel.GetHeight()/2.0f);
-        this->orLabel.SetAlpha(alpha);
-        this->orLabel.Draw(drawWithDepth, depth);
-        currX += this->orLabel.GetLastRasterWidth();
-    }
+        // Draw the XBox Button labels, if any exist
+        for (std::vector<ButtonGlyphLabel*>::iterator iter = this->xboxLabels.begin();
+             iter != this->xboxLabels.end(); ++iter) {
 
-    // Draw the keyboard button label(s) if it/they exist...
-    count = 0;
-    for (std::vector<ButtonGlyphLabel*>::const_iterator iter = this->keyboardKeyLabels.begin();
-         iter != this->keyboardKeyLabels.end(); ++iter, count++) {
-    
-        ButtonGlyphLabel* buttonLabel = *iter;
-        buttonLabelDiv2 = buttonLabel->GetWidth() / 2.0f;
-        currX += buttonLabelDiv2;
-        buttonLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
-        currX += buttonLabelDiv2;
-        
-        if (count != this->keyboardKeyLabels.size()-1 && this->keyboardKeyLabels.size() > 1) {
-            this->commaLabel.SetTopLeftCorner(currX, actualCenterY + commaHeightDiv2);
-            this->commaLabel.Draw(drawWithDepth, depth);
-            currX += this->commaLabel.GetLastRasterWidth();
+            ButtonGlyphLabel* buttonLabel = *iter;
+            buttonLabelDiv2 = buttonLabel->GetWidth() / 2.0f;
+            currX += buttonLabelDiv2;
+            buttonLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
+            currX += buttonLabelDiv2;
+
+            if (count != this->xboxLabels.size()-1 && this->xboxLabels.size() > 1) {
+                this->commaLabel.SetTopLeftCorner(currX, actualCenterY + commaHeightDiv2);
+                this->commaLabel.Draw(drawWithDepth, depth);
+                currX += this->commaLabel.GetLastRasterWidth();
+            }
         }
-    }
 
-    if (this->mouseLabel != NULL) {
-        if ((!this->xboxLabels.empty() || !this->keyboardKeyLabels.empty())) {
-            // Draw an 'or' label...
+        if (!this->xboxLabels.empty() && !this->keyboardKeyLabels.empty()) {
+            // Draw an 'or' label next to the xbox button label...
             this->orLabel.SetTopLeftCorner(currX, actualCenterY + this->orLabel.GetHeight()/2.0f);
             this->orLabel.SetAlpha(alpha);
             this->orLabel.Draw(drawWithDepth, depth);
             currX += this->orLabel.GetLastRasterWidth();
         }
-        currX += this->mouseLabel->GetWidth() / 2.0f;
-        this->mouseLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
-    }
 
+        // Draw the keyboard button label(s) if it/they exist...
+        count = 0;
+        for (std::vector<ButtonGlyphLabel*>::const_iterator iter = this->keyboardKeyLabels.begin();
+             iter != this->keyboardKeyLabels.end(); ++iter, count++) {
+        
+            ButtonGlyphLabel* buttonLabel = *iter;
+            buttonLabelDiv2 = buttonLabel->GetWidth() / 2.0f;
+            currX += buttonLabelDiv2;
+            buttonLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
+            currX += buttonLabelDiv2;
+            
+            if (count != this->keyboardKeyLabels.size()-1 && this->keyboardKeyLabels.size() > 1) {
+                this->commaLabel.SetTopLeftCorner(currX, actualCenterY + commaHeightDiv2);
+                this->commaLabel.Draw(drawWithDepth, depth);
+                currX += this->commaLabel.GetLastRasterWidth();
+            }
+        }
+
+        if (this->mouseLabel != NULL) {
+            if ((!this->xboxLabels.empty() || !this->keyboardKeyLabels.empty())) {
+                // Draw an 'or' label...
+                this->orLabel.SetTopLeftCorner(currX, actualCenterY + this->orLabel.GetHeight()/2.0f);
+                this->orLabel.SetAlpha(alpha);
+                this->orLabel.Draw(drawWithDepth, depth);
+                currX += this->orLabel.GetLastRasterWidth();
+            }
+            currX += this->mouseLabel->GetWidth() / 2.0f;
+            this->mouseLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
+        }
+    }
     glPopMatrix();
     Camera::PopWindowCoords();
     glPopAttrib();

@@ -180,8 +180,14 @@ magnetPaddleEffect(NULL)
     this->paddleCamHUD = new PaddleCamHUD(*this);
 
     this->skipLabel = new ButtonTutorialHint(this->tutorialAssets, "Skip");
-    this->skipLabel->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
-    this->skipLabel->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        this->skipLabel->SetArcadeButton(GameViewConstants::ArcadeFireButton, "Fire", 
+            GameViewConstants::GetInstance()->ARCADE_FIRE_BUTTON_COLOUR);
+    }
+    else {
+        this->skipLabel->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+        this->skipLabel->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    }
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();

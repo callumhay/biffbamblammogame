@@ -216,6 +216,8 @@ private:
     bool itemActivated;
     AnimationLerp<float> goToLevelSelectMoveAnim;
     AnimationLerp<float> goToLevelSelectAlphaAnim;
+    AnimationMultiLerp<float> arcadeFlashAnim;
+
 
     void DrawStarTotal(double dT);
 

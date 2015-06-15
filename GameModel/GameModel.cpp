@@ -701,9 +701,9 @@ void GameModel::ToggleAllowPaddleBallLaunching(bool allow) {
     }
 }
 
-void GameModel::BallBoostDirectionPressed(float x, float y) {
+void GameModel::BallBoostDirectionPressed(float x, float y, bool allowLargeChangeInDirection) {
 	if (this->currState != NULL) {
-		this->currState->BallBoostDirectionPressed(x, y);
+		this->currState->BallBoostDirectionPressed(x, y, allowLargeChangeInDirection);
 	}
 }
 void GameModel::BallBoostDirectionReleased() {

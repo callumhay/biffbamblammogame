@@ -66,9 +66,9 @@ const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.7f;
 const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 
 // Default speed of the paddle (units/sec)
-const float PlayerPaddle::DEFAULT_MAX_SPEED = 27.0f;
+const float PlayerPaddle::DEFAULT_MAX_SPEED = 30.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
-const float PlayerPaddle::DEFAULT_ACCELERATION  = 148.0f;
+const float PlayerPaddle::DEFAULT_ACCELERATION  = 150.0f;
 const float PlayerPaddle::DEFAULT_DECCELERATION = -170.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned

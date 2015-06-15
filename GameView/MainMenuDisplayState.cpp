@@ -39,6 +39,7 @@
 #include "GameMenuItem.h"
 #include "GameAssets.h"
 #include "MenuBackgroundRenderer.h"
+#include "GameViewEventManager.h"
 
 #include "../BlammoEngine/FBObj.h"
 #include "../GameModel/GameModel.h"
@@ -152,6 +153,17 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 
     // Clear any previous camera shake
     this->display->GetCamera().ClearCameraShake();
+
+    if (this->display->IsArcadeModeEnabled()) {
+        
+        this->arcadePressButtonLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
+            GameFontAssetsManager::Big), "- Press Any Button to Play -");
+        this->arcadePressButtonLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);
+        this->arcadePressButtonLabel.SetScale(this->display->GetTextScalingFactor());
+
+        this->arcadeLabelColourAnimation = GameViewConstants::GetInstance()->BuildFlashingColourWithAlphaAnimation();
+        this->display->GetMenuBGRenderer()->SetStarMoveFreq(3*MenuBackgroundRenderer::DEFAULT_MOVE_FREQUENCY);
+    }
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -538,7 +550,11 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     if (isTitleFinishedAnimating) {
         // Play the main menu background music...
         if (this->bgLoopedSoundID == INVALID_SOUND_ID) {
-            this->bgLoopedSoundID = this->display->GetSound()->PlaySound(GameSound::MainMenuBackgroundLoop, true);
+            GameSound* sound = this->display->GetSound();
+            this->bgLoopedSoundID = sound->PlaySound(GameSound::MainMenuBackgroundLoop, true);
+            if (this->display->IsArcadeModeEnabled()) {
+                sound->SetSoundVolume(this->bgLoopedSoundID, 0.5);
+            }
         }
         finishFadeAnim = this->fadeAnimation.Tick(dT);
     }
@@ -554,7 +570,8 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     if (finishFadeAnim) {
         static const double SOUND_FADE_OUT_TIME = 0.5;
 	    if (this->changeToPlayGameState) {
-    		
+    		this->display->GetMenuBGRenderer()->SetStarMoveFreq(MenuBackgroundRenderer::DEFAULT_MOVE_FREQUENCY);
+
 		    // Turn off the background music...
             sound->StopSound(this->bgLoopedSoundID);
 		    
@@ -638,25 +655,42 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     // Draw the background...
     bgRenderer->DrawShakeBG(camera, shakeAmt[0], shakeAmt[1]);
 
+    float fadeAlpha = this->fadeAnimation.GetInterpolantValue();
+
     Camera menuCamera;
 	menuCamera.SetPerspective();
 	menuCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
 
 	this->RenderBackgroundEffects(dT, menuCamera);
 	
-    float fadeAlpha = this->fadeAnimation.GetInterpolantValue();
     if (isTitleFinishedAnimating && finishFadeAnim) {
         this->titleDisplay.Draw(dT, camera, this->postMenuFBObj->GetFBOTexture());
     }
 
-    // Figure out where the menu needs to be to ensure it doesn't clip with the bottom of the screen...
-    this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT * this->display->GetTextScalingFactor());
+    // No menu in arcade mode... draw arcade label instead
+    if (this->display->IsArcadeModeEnabled()) {
+        if (isTitleFinishedAnimating) {
+            this->arcadeLabelColourAnimation.Tick(dT);
 
-    glPushAttrib(GL_ENABLE_BIT);
-    glDisable(GL_DEPTH_TEST);
-	// Render the menu
-	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    glPopAttrib();
+            this->arcadePressButtonLabel.SetColour(this->arcadeLabelColourAnimation.GetInterpolantValue().GetColour(),
+                this->arcadeLabelColourAnimation.GetInterpolantValue().A());
+
+            float labelWidth = this->arcadePressButtonLabel.GetLastRasterWidth();
+            this->arcadePressButtonLabel.SetTopLeftCorner((DISPLAY_WIDTH - labelWidth) / 2.0f, 0.25f * DISPLAY_HEIGHT);
+
+            this->arcadePressButtonLabel.Draw();
+        }
+    }
+    else {                
+        // Figure out where the menu needs to be to ensure it doesn't clip with the bottom of the screen...
+        this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT * this->display->GetTextScalingFactor());
+
+        glPushAttrib(GL_ENABLE_BIT);
+        glDisable(GL_DEPTH_TEST);
+	    // Render the menu
+	    this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        glPopAttrib();
+    }
 
     // Render created by text
     static const int NAME_LICENCE_Y_PADDING = 5;
@@ -705,6 +739,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     this->postMenuFBObj->BindFBObj();
     this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
     this->postMenuFBObj->UnbindFBObj();
+
     this->postMenuFBObj->GetFBOTexture()->RenderTextureToFullscreenQuad();
 
 	debug_opengl_state();
@@ -715,6 +750,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
  * random bangs and booms, etc. going off all over the place.
  */
 void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
+
 	const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
 	const float MIN_Z_COORD = -MAX_Z_COORD;
 	const float MAX_Y_COORD = 0.95f * CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
@@ -871,6 +907,15 @@ void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& presse
         return;
     }
 
+    // We only listen for "enter" button presses in arcade mode
+    if (this->display->IsArcadeModeEnabled()) {
+        if (pressedButton == GameControl::EnterButtonAction) {
+            // Go to the world selection screen...
+            this->GoToWorldSelectionScreen();
+        }
+        return;
+    }
+
 	// Tell the main menu about the key pressed event
     if (this->eraseFailedPopup->GetIsVisible() || this->eraseSuccessfulPopup->GetIsVisible()) {
         this->eraseSuccessfulPopup->ButtonPressed(pressedButton);
@@ -885,6 +930,11 @@ void MainMenuDisplayState::ButtonReleased(const GameControl::ActionButton& relea
 	assert(this->mainMenu != NULL);
 
     if (!this->titleDisplay.IsFinishedAnimating() || this->fadeAnimation.GetInterpolantValue() > 0.0f) {
+        return;
+    }
+
+    // Ignore in arcade mode
+    if (this->display->IsArcadeModeEnabled()) {
         return;
     }
 
@@ -906,6 +956,34 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
     this->postMenuFBObj = new FBObj(Camera::GetWindowWidth(), Camera::GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 }
 
+void MainMenuDisplayState::StartGame() {
+    GameSound* sound = this->display->GetSound();
+    sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+
+    this->changeToPlayGameState = true;
+    this->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
+    this->fadeAnimation.SetRepeat(false);
+
+    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
+}
+
+void MainMenuDisplayState::GoToWorldSelectionScreen() {
+    GameSound* sound = this->display->GetSound();
+    if (this->display->IsArcadeModeEnabled()) {
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+        GameViewEventManager::Instance()->ActionArcadePlayerHitStartGame();
+    }
+    else {
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
+    }
+
+    this->changeToLevelSelectState = true;
+    this->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
+    this->fadeAnimation.SetRepeat(false);
+
+    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
+}
+
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	UNUSED_PARAMETER(itemIndex);
     
@@ -924,24 +1002,12 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 	
 	// Do the actual selection of the item
 	if (itemIndex == this->mainMenuState->startGameMenuItemIndex) {
-        
 		debug_output("Selected " << this->mainMenuState->mainMenu->GetMenuItemAt(itemIndex)->GetCurrLabel()->GetText() << " from menu");
-		
-        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
-		
-        this->mainMenuState->changeToPlayGameState = true;
-		this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
-		this->mainMenuState->fadeAnimation.SetRepeat(false);
+		this->mainMenuState->StartGame();
 	}
 	else if (itemIndex == this->mainMenuState->playLevelMenuItemIndex) {
-
 		debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
-		
-        sound->PlaySound(GameSound::MenuItemVerifyAndSelectEvent, false);
-        
-        this->mainMenuState->changeToLevelSelectState = true;
-		this->mainMenuState->fadeAnimation.SetLerp(0.0, MainMenuDisplayState::FADE_OUT_TIME_IN_SECS, 0.0f, 1.0f);
-		this->mainMenuState->fadeAnimation.SetRepeat(false);
+        this->mainMenuState->GoToWorldSelectionScreen();
 	}
 	else if (itemIndex == this->mainMenuState->optionsMenuItemIndex) {
 		sound->PlaySound(GameSound::MenuOpenSubMenuWindowEvent, false);

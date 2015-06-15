@@ -38,6 +38,7 @@
 #include "../GameSound/GameSound.h"
 
 #include "DisplayState.h"
+#include "GameViewEventManager.h"
 
 class GameModel;
 class GameAssets;
@@ -50,10 +51,10 @@ class MenuBackgroundRenderer;
 // and adjust size, etc.
 class GameDisplay {
 public:
-	static const int MAX_FRAMERATE;             // The maximum framerate possible for the game				
+	static const int MAX_FRAMERATE;             // The maximum frame rate possible for the game				
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
 
-	GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight);
+	GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight, bool arcadeMode);
 	~GameDisplay();
 
 	bool HasGameExited() const { return this->gameExited; }
@@ -126,6 +127,8 @@ public:
         return GameState::IsGameInPlayState(gameModel) && DisplayState::IsGameInPlayDisplayState(type);
     }
 
+    static bool IsArcadeModeEnabled() { return GameDisplay::arcadeMode; }
+
 #ifdef _DEBUG
 
 	static void ToggleDrawDebugBounds() {
@@ -171,6 +174,8 @@ private:
 	bool gameReinitialized;		// Whether or not we should reinitialize the whole game (recreate the window, etc.)
 	bool gameExited;  				// Whether or not the game has been exited
 
+    static bool arcadeMode; // Whether arcade mode is enabled or not
+
     GameModel::Difficulty cachedDifficulty; // Bit of a hack - used to cache difficulty for when we need to back it up
                                             // for the tutorial level
 
@@ -209,11 +214,14 @@ inline void GameDisplay::Render(double dT) {
     // Update sounds
     this->sound->SetListenerPosition(this->gameCamera);
     this->sound->Tick(dT);
+
+
 }
 
 inline void GameDisplay::UpdateModel(double dT) {
     this->model->Tick(dT);
     this->model->UpdateState();
+    GameViewEventManager::Instance()->ActionGameModelUpdated();
 }
 
 inline void GameDisplay::ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude) {

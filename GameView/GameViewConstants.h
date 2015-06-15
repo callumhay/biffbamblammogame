@@ -260,6 +260,7 @@ public:
     const char* TEXTURE_BLAMMO_LOGO;
 
     enum XBoxButtonType { XBoxPushButton, XBoxAnalogStick, XBoxTrigger };
+    enum ArcadeButtonType { ArcadeJoystick, ArcadeFireButton, ArcadeBoostButton };
     enum KeyboardButtonType { KeyboardChar, KeyboardSpaceBar };
     enum MouseButtonType { LeftMouseButton, RightMouseButton };
 
@@ -270,8 +271,10 @@ public:
     const char* TEXTURE_XBOX_CONTROLLER_BUTTON;
     const char* TEXTURE_XBOX_CONTROLLER_ANALOG_STICK;
     const char* TEXTURE_XBOX_CONTROLLER_TRIGGER;
+    const char* TEXTURE_ARCADE_JOYSTICK;
 
     const char* GetXBoxButtonTextureName(XBoxButtonType buttonType) const;
+    const char* GetArcadeButtonTextureName(ArcadeButtonType buttonType) const;
     const char* GetKeyboardButtonTextureName(KeyboardButtonType buttonType) const;
     const char* GetMoustButtonTextureName(MouseButtonType buttonType) const;
 
@@ -361,6 +364,9 @@ public:
     const Colour XBOX_CONTROLLER_Y_BUTTON_COLOUR;
     const Colour XBOX_CONTROLLER_A_BUTTON_COLOUR;
     const Colour XBOX_CONTROLLER_B_BUTTON_COLOUR;
+
+    const Colour ARCADE_BOOST_BUTTON_COLOUR;
+    const Colour ARCADE_FIRE_BUTTON_COLOUR;
 
 	const Point3D DEFAULT_FG_KEY_LIGHT_POSITION;
 	const Point3D DEFAULT_FG_FILL_LIGHT_POSITION;
@@ -510,6 +516,7 @@ public:
         ESPInterval& redColour, ESPInterval& greenColour, ESPInterval& blueColour) const;
 
     AnimationMultiLerp<Colour> BuildFlashingColourAnimation() const;
+    AnimationMultiLerp<ColourRGBA> BuildFlashingColourWithAlphaAnimation() const;
 
 private:
 	static GameViewConstants* Instance;

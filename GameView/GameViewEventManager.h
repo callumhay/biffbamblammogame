@@ -45,15 +45,24 @@ public:
 	void RegisterListener(GameViewEventListener* listener);
 	void UnregisterListener(GameViewEventListener* listener);
 
-#define REGISTER_ACTION_FUNC_1ARG(eventName, argType0) void Action##eventName(const argType0& arg0) { \
+#define REGISTER_ACTION_FUNC_0ARG(eventName) void Action##eventName() { \
+    std::list<GameViewEventListener*>::iterator listenerIter = this->eventListeners.begin(); \
+    for (; listenerIter != this->eventListeners.end(); ++listenerIter) { (*listenerIter)->eventName(); } }
+#define REGISTER_ACTION_FUNC_1ARG(eventName, argType0) void Action##eventName(argType0 arg0) { \
     std::list<GameViewEventListener*>::iterator listenerIter = this->eventListeners.begin(); \
     for (; listenerIter != this->eventListeners.end(); ++listenerIter) { (*listenerIter)->eventName(arg0); } }
-#define REGISTER_ACTION_FUNC_2ARG(eventName, argType0, argType1) void Action##eventName(const argType0& arg0, const argType1& arg1) { \
+#define REGISTER_ACTION_FUNC_2ARG(eventName, argType0, argType1) void Action##eventName(argType0 arg0, argType1 arg1) { \
     std::list<GameViewEventListener*>::iterator listenerIter = this->eventListeners.begin(); \
     for (; listenerIter != this->eventListeners.end(); ++listenerIter) { (*listenerIter)->eventName(arg0, arg1); } }
 
-    REGISTER_ACTION_FUNC_2ARG(DisplayStateChanged, DisplayState::DisplayStateType, DisplayState::DisplayStateType);
-    REGISTER_ACTION_FUNC_1ARG(BiffBamBlammoSlamEvent, GameViewEventListener::SlamType);
+    REGISTER_ACTION_FUNC_0ARG(GameModelUpdated);
+
+    REGISTER_ACTION_FUNC_2ARG(DisplayStateChanged, const DisplayState::DisplayStateType&, const DisplayState::DisplayStateType&);
+    REGISTER_ACTION_FUNC_1ARG(BiffBamBlammoSlamEvent, const GameViewEventListener::SlamType&);
+    REGISTER_ACTION_FUNC_1ARG(ArcadeWaitingForPlayerState, bool);
+    REGISTER_ACTION_FUNC_0ARG(ArcadePlayerHitStartGame);
+    REGISTER_ACTION_FUNC_0ARG(ArcadePlayerSelectedWorld);
+    REGISTER_ACTION_FUNC_1ARG(ShootBallTutorialHintShown, bool);
 
 #undef REGISTER_ACTION_FUNC_1ARG
 #undef REGISTER_ACTION_FUNC_2ARG

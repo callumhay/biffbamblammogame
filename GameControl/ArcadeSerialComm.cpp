@@ -2,7 +2,10 @@
 
 #define CHECK_OPEN_TRY_AND_RETURN_ON_FAIL() if (this->serialObj == NULL) { return; } if (!this->serialObj->isOpen()) { this->serialObj->open(); if (!this->serialObj->isOpen()) { return; }} 
 
-ArcadeSerialComm::ArcadeSerialComm() : serialObj(NULL), timeOfLastFlashInMs(0), lastFlashLengthInMs(0) {
+const uint32_t ArcadeSerialComm::BAUD_RATE = 38400;
+
+ArcadeSerialComm::ArcadeSerialComm() : serialObj(NULL), timeOfLastFlashInMs(0), lastFlashLengthInMs(0),
+currFireButtonCadence(Off), currBoostButtonCadence(Off) {
 }
 
 ArcadeSerialComm::~ArcadeSerialComm() {
@@ -16,7 +19,7 @@ void ArcadeSerialComm::OpenSerial(const std::string& serialPort) {
     else {
         try {
             this->CloseSerial();
-            this->serialObj = new serial::Serial(serialPort, 9600, serial::Timeout::simpleTimeout(0));
+            this->serialObj = new serial::Serial(serialPort, BAUD_RATE, serial::Timeout::simpleTimeout(0));
         }
         catch (const serial::SerialException& e) {
             debug_output(e.what());
@@ -38,6 +41,30 @@ void ArcadeSerialComm::CloseSerial() {
 void ArcadeSerialComm::SetButtonCadence(ButtonType buttonType, ButtonGlowCadenceType cadence) {
     CHECK_OPEN_TRY_AND_RETURN_ON_FAIL();
 
+    std::string serialStr = "";
+    switch (buttonType) {
+        case FireButton:
+            this->currFireButtonCadence = cadence;
+            serialStr = GetSingleButtonCadenceSerialStr(buttonType, cadence);
+            break;
+        case BoostButton:
+            this->currBoostButtonCadence = cadence;
+            serialStr = GetSingleButtonCadenceSerialStr(buttonType, cadence);
+            break;
+        case AllButtons:
+            this->currBoostButtonCadence = this->currFireButtonCadence = cadence;
+            serialStr += GetSingleButtonCadenceSerialStr(FireButton, cadence);
+            serialStr += GetSingleButtonCadenceSerialStr(BoostButton, cadence);
+            break;
+        default:
+            assert(false);
+            return;
+    }
+
+    this->SendSerial(serialStr);
+}
+
+std::string ArcadeSerialComm::GetSingleButtonCadenceSerialStr(ButtonType buttonType, ButtonGlowCadenceType cadence) const {
     std::stringstream serialPkt;
     serialPkt << "|";
 
@@ -50,7 +77,7 @@ void ArcadeSerialComm::SetButtonCadence(ButtonType buttonType, ButtonGlowCadence
             break;
         default:
             assert(false);
-            return;
+            return "";
     }
 
     switch (cadence) {
@@ -62,8 +89,12 @@ void ArcadeSerialComm::SetButtonCadence(ButtonType buttonType, ButtonGlowCadence
             serialPkt << "F" << static_cast<char>(0);
             break;
 
+        case VerySlowButtonFlash:
+            serialPkt << "F" << static_cast<char>(127);
+            break;
+
         case SlowButtonFlash:
-            serialPkt << "F" << static_cast<char>(120);
+            serialPkt << "F" << static_cast<char>(100);
             break;
 
         case MediumButtonFlash:
@@ -80,10 +111,10 @@ void ArcadeSerialComm::SetButtonCadence(ButtonType buttonType, ButtonGlowCadence
 
         default:
             assert(false);
-            return;
+            return "";
     }
 
-    this->SendSerial(serialPkt.str());
+    return serialPkt.str();
 }
 
 void ArcadeSerialComm::SetMarqueeColour(const Colour& c, TransitionTimeType timeType) {
@@ -181,7 +212,7 @@ void ArcadeSerialComm::SetMarqueeFlash(const Colour& c, MarqueeFlashType flashTy
             break;
         }
         case VeryFastMarqueeFlash: {
-            static const uint8_t VERY_FAST_TIME = 10;
+            static const uint8_t VERY_FAST_TIME = 1;
             serialPkt << r << g << b << static_cast<char>(VERY_FAST_TIME);
             this->lastFlashLengthInMs = VERY_FAST_TIME*10;
             break;
@@ -221,7 +252,7 @@ void ArcadeSerialComm::FindAndOpenSerial() {
         const serial::PortInfo& currPort = *iter;
         this->CloseSerial();
         try {
-            this->serialObj = new serial::Serial(currPort.port, 9600, serial::Timeout::simpleTimeout(3000));
+            this->serialObj = new serial::Serial(currPort.port, BAUD_RATE, serial::Timeout::simpleTimeout(3000));
         }
         catch (const serial::SerialException& e) {
             debug_output(e.what());

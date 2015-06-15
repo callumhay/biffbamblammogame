@@ -148,7 +148,7 @@ void BallBoostModel::Tick(const GameModel& gameModel, double dT) {
     }
 }
 
-void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
+void BallBoostModel::BallBoostDirectionPressed(float x, float y, bool allowLargeChangeInDirection) {
 
     assert(!Vector2D(x,y).IsZero());
 
@@ -174,7 +174,7 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
         }
 
         // Don't let the direction change dramatically
-        if (this->ballBoostDir.IsZero() || Vector2D::Dot(this->ballBoostDir, newBallBoostDir) >= 0) {
+        if (allowLargeChangeInDirection || this->ballBoostDir.IsZero() || Vector2D::Dot(this->ballBoostDir, newBallBoostDir) >= 0) {
             this->ballBoostDir = newBallBoostDir;
 
             //float magnitude = newBallBoostDir.Magnitude();

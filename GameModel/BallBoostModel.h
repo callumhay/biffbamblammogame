@@ -70,7 +70,7 @@ public:
     void Tick(const GameModel& gameModel, double dT);
 
     // Events that indicate changes to the boost model's state - based on input from the player
-    void BallBoostDirectionPressed(float x, float y);
+    void BallBoostDirectionPressed(float x, float y, bool allowLargeChangeInDirection);
     void BallBoostDirectionReleased();
     bool BallBoosterPressed();
     void BallBoostReleasedForBall(const GameBall& ball);

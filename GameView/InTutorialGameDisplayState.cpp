@@ -40,7 +40,10 @@
 #include "PopupTutorialHint.h"
 #include "LivesLeftHUD.h"
 #include "BallBoostHUD.h"
+#include "GameViewEventManager.h"
+
 #include "../GameModel/GameTransformMgr.h"
+
 #include "../WindowManager.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
@@ -226,50 +229,56 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     // Tutorial hints for moving the paddle around
     ButtonTutorialHint* movePaddleHint = new ButtonTutorialHint(tutorialAssets, "Move");
-    movePaddleHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Left Analog", Colour(1,1,1));
-    
-    keyboardButtonTypes.clear();
-    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
-    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
-    buttonTexts.clear();
-    buttonTexts.push_back("A");
-    buttonTexts.push_back("D");
-
-    movePaddleHint->SetListener(new MovePaddleHintListener(this));
-    movePaddleHint->SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        movePaddleHint->SetArcadeButton(GameViewConstants::ArcadeJoystick, "", Colour(1,1,1));
+    }
+    else {
+        movePaddleHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Left Analog", Colour(1,1,1));
+        keyboardButtonTypes.clear();
+        keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
+        keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
+        buttonTexts.clear();
+        buttonTexts.push_back("A");
+        buttonTexts.push_back("D");
+        movePaddleHint->SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
+    }
     movePaddleHint->SetTopLeftCorner((Camera::GetWindowWidth() - movePaddleHint->GetWidth()) / 2.0f, 
         movePaddleHint->GetHeight() + 150.0f);
+    movePaddleHint->SetListener(new MovePaddleHintListener(this));
 
     this->tutorialListener->SetMovePaddleHint(movePaddleHint);
     this->noDepthTutorialHints.push_back(movePaddleHint);
     
     // Tutorial hint for firing the ball
     ButtonTutorialHint* shootBallHint = new ButtonTutorialHint(tutorialAssets, "Shoot Ball");
-    
-    keyboardButtonTypes.clear();
-    keyboardButtonTypes.push_back(GameViewConstants::KeyboardSpaceBar);
-    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
-    buttonTexts.clear();
-    buttonTexts.push_back("Space");
-    buttonTexts.push_back("W");
-    
-    shootBallHint->SetKeyboardButtons(keyboardButtonTypes, buttonTexts); //GameViewConstants::KeyboardSpaceBar, "Space");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        shootBallHint->SetArcadeButton(GameViewConstants::ArcadeFireButton, "Fire", 
+            GameViewConstants::GetInstance()->ARCADE_FIRE_BUTTON_COLOUR);
+    }
+    else {
+        keyboardButtonTypes.clear();
+        keyboardButtonTypes.push_back(GameViewConstants::KeyboardSpaceBar);
+        keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
+        buttonTexts.clear();
+        buttonTexts.push_back("Space");
+        buttonTexts.push_back("W");
+        shootBallHint->SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
 
-    xboxButtonTypes.clear();
-    xboxButtonTypes.push_back(GameViewConstants::XBoxPushButton);
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    buttonTexts.clear();
-    buttonTexts.push_back("A");
-    buttonTexts.push_back("RT");
-    buttonTexts.push_back("LT");
-    buttonColours.clear();
-    buttonColours.push_back(GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
-    buttonColours.push_back(Colour(1,1,1));
-    buttonColours.push_back(Colour(1,1,1));
+        xboxButtonTypes.clear();
+        xboxButtonTypes.push_back(GameViewConstants::XBoxPushButton);
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        buttonTexts.clear();
+        buttonTexts.push_back("A");
+        buttonTexts.push_back("RT");
+        buttonTexts.push_back("LT");
+        buttonColours.clear();
+        buttonColours.push_back(GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+        buttonColours.push_back(Colour(1,1,1));
+        buttonColours.push_back(Colour(1,1,1));
 
-    shootBallHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours); //GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
-    
+        shootBallHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+    }
     shootBallHint->SetTopLeftCorner((Camera::GetWindowWidth() - shootBallHint->GetWidth()) / 2.0f, shootBallHint->GetHeight() + 150.0f);
     shootBallHint->SetListener(new HintListener(this));
     
@@ -278,22 +287,27 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     // Tutorial hint for firing weapons
     ButtonTutorialHint* fireWeaponHint = new ButtonTutorialHint(tutorialAssets, "Fire Weapons");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        fireWeaponHint->SetArcadeButton(GameViewConstants::ArcadeFireButton, "Fire", 
+            GameViewConstants::GetInstance()->ARCADE_FIRE_BUTTON_COLOUR);
+    }
+    else {
+        xboxButtonTypes.clear();
+        xboxButtonTypes.push_back(GameViewConstants::XBoxPushButton);
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        buttonTexts.clear();
+        buttonTexts.push_back("A");
+        buttonTexts.push_back("RT");
+        buttonTexts.push_back("LT");
+        buttonColours.clear();
+        buttonColours.push_back(GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+        buttonColours.push_back(Colour(1,1,1));
+        buttonColours.push_back(Colour(1,1,1));
 
-    xboxButtonTypes.clear();
-    xboxButtonTypes.push_back(GameViewConstants::XBoxPushButton);
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    buttonTexts.clear();
-    buttonTexts.push_back("A");
-    buttonTexts.push_back("RT");
-    buttonTexts.push_back("LT");
-    buttonColours.clear();
-    buttonColours.push_back(GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
-    buttonColours.push_back(Colour(1,1,1));
-    buttonColours.push_back(Colour(1,1,1));
-
-    fireWeaponHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
-    fireWeaponHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+        fireWeaponHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+        fireWeaponHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    }
     fireWeaponHint->SetTopLeftCorner((Camera::GetWindowWidth() - fireWeaponHint->GetWidth()) / 2.0f,
         fireWeaponHint->GetHeight() + 150.0f);
 
@@ -311,8 +325,14 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     ButtonTutorialHint* startingToBoostHint = new ButtonTutorialHint(tutorialAssets, "");
     startingToBoostHint->SetActionNameWithSeparator("Boost Mode = Hold ");
-    startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
-    startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        startingToBoostHint->SetArcadeButton(GameViewConstants::ArcadeBoostButton, "Boost", 
+            Colour(GameViewConstants::GetInstance()->ARCADE_BOOST_BUTTON_COLOUR));
+    }
+    else {
+        startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
+        startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    }
     startingToBoostHint->SetTopLeftCorner((Camera::GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
         startingToBoostHint->GetHeight() + 200.0f);
     startingToBoostHint->SetListener(new SlowBallHintListener(this));
@@ -321,9 +341,15 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->noDepthTutorialHints.push_back(startingToBoostHint);
 
     ButtonTutorialHint* holdBoostHint = new ButtonTutorialHint(tutorialAssets, "");
-    holdBoostHint->SetActionNameWithSeparator("Now, hold and move ");
-    holdBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
-    holdBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        holdBoostHint->SetActionNameWithSeparator("Move ");
+        holdBoostHint->SetArcadeButton(GameViewConstants::ArcadeJoystick, "", Colour(1,1,1));
+    }
+    else {
+        holdBoostHint->SetActionNameWithSeparator("Hold and move ");
+        holdBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
+        holdBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    }
     holdBoostHint->SetTopLeftCorner((Camera::GetWindowWidth() - holdBoostHint->GetWidth()) / 2.0f,
         Camera::GetWindowHeight()/2.0f + 150.0f);
 
@@ -332,18 +358,23 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     ButtonTutorialHint* doBoostPressToReleaseHint = new ButtonTutorialHint(tutorialAssets, "");
     doBoostPressToReleaseHint->SetActionNameWithSeparator("Perform Boost = ");
-    xboxButtonTypes.clear();
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    buttonTexts.clear();
-    buttonTexts.push_back("RT");
-    buttonTexts.push_back("LT");
-    buttonColours.clear();
-    buttonColours.push_back(Colour(1,1,1));
-    buttonColours.push_back(Colour(1,1,1));
-
-    doBoostPressToReleaseHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
-    doBoostPressToReleaseHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        doBoostPressToReleaseHint->SetArcadeButton(GameViewConstants::ArcadeFireButton, "Fire", 
+            GameViewConstants::GetInstance()->ARCADE_FIRE_BUTTON_COLOUR);
+    }
+    else {
+        xboxButtonTypes.clear();
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        buttonTexts.clear();
+        buttonTexts.push_back("RT");
+        buttonTexts.push_back("LT");
+        buttonColours.clear();
+        buttonColours.push_back(Colour(1,1,1));
+        buttonColours.push_back(Colour(1,1,1));
+        doBoostPressToReleaseHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+        doBoostPressToReleaseHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
+    }
     doBoostPressToReleaseHint->SetTopLeftCorner((Camera::GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
         Camera::GetWindowHeight()/2.0f - 150.0f);
 
@@ -352,8 +383,14 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     ButtonTutorialHint* doBoostSlingshotHint = new ButtonTutorialHint(tutorialAssets, "");
     doBoostSlingshotHint->SetActionNameWithSeparator("Perform Boost = Release ");
-    doBoostSlingshotHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
-    doBoostSlingshotHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        startingToBoostHint->SetArcadeButton(GameViewConstants::ArcadeBoostButton, "Boost", 
+            Colour(GameViewConstants::GetInstance()->ARCADE_BOOST_BUTTON_COLOUR));
+    }
+    else {
+        doBoostSlingshotHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
+        doBoostSlingshotHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    }
     doBoostSlingshotHint->SetTopLeftCorner((Camera::GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
         Camera::GetWindowHeight()/2.0f - 150.0f);
 
@@ -364,16 +401,22 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     const float multiplierHintWidth = 300 * scaleFactor;
     const Colour ballFollowHintColour(1, 0.8f, 0);
 
-    BasicMultiTutorialHint* multiplierHints = new BasicMultiTutorialHint(4.5, 1.0, 1.0);
+    double timeBetweenLabels = 4.0;
+    double multiplierLostTime = 4.0;
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        timeBetweenLabels = 2.0;
+        multiplierLostTime = 2.0;
+    }
+    
+    BasicMultiTutorialHint* multiplierHints = new BasicMultiTutorialHint(timeBetweenLabels, 1.0, 1.0);
     multiplierHints->PushHint("Destroying Blocks Increases Your Multiplier", multiplierHintScale, multiplierHintWidth);
     multiplierHints->PushHint("Higher Multipliers = More Points", multiplierHintScale, multiplierHintWidth);
-    multiplierHints->PushHint("More Points = More Stars", multiplierHintScale, multiplierHintWidth);
     multiplierHints->SetColour(ballFollowHintColour);
     multiplierHints->SetListener(new SlowBallHintListener(this));
     this->ballFollowTutorialHints.push_back(multiplierHints);
     this->tutorialListener->SetMultiplierHints(multiplierHints);
 
-    BasicMultiTutorialHint* multiplierLostHint = new BasicMultiTutorialHint(5.0, 1.0, 1.0);
+    BasicMultiTutorialHint* multiplierLostHint = new BasicMultiTutorialHint(multiplierLostTime, 1.0, 1.0);
     multiplierLostHint->PushHint("Your Multiplier is Lost When a Ball Hits the Paddle", multiplierHintScale, multiplierHintWidth);
     multiplierLostHint->SetColour(ballFollowHintColour);
     multiplierLostHint->SetListener(new SlowBallHintListener(this));
@@ -387,6 +430,15 @@ void InTutorialGameDisplayState::HintListener::OnTutorialHintShown() {
 
 void InTutorialGameDisplayState::HintListener::OnTutorialHintUnshown() {
     this->state->tutorialAttentionEffect.CrossFadeOut(0.5);
+}
+
+void InTutorialGameDisplayState::ShootBallHintListener::OnTutorialHintShown() {
+    HintListener::OnTutorialHintShown();
+    GameViewEventManager::Instance()->ActionShootBallTutorialHintShown(true);
+}
+void InTutorialGameDisplayState::ShootBallHintListener::OnTutorialHintUnshown() {
+    HintListener::OnTutorialHintUnshown();
+    GameViewEventManager::Instance()->ActionShootBallTutorialHintShown(false);
 }
 
 void InTutorialGameDisplayState::MovePaddleHintListener::OnTutorialHintShown() {

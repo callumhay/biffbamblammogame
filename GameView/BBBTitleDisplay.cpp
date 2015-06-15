@@ -188,10 +188,11 @@ void BBBTitleDisplay::Draw(double dT, Camera& camera, const Texture2D* fboTex) {
         this->biffShockwave.Draw(camera);
 
         if (!this->biffSlamEffectDone) {
+            GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BiffSlam);
+
             this->sound->PlaySound(GameSound::MainMenuTitleBiffSlamEvent, false, false);
             camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
             this->biffSlamEffectDone = true;
-            GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BiffSlam);
         }
 
         if (bamDoneAnimating) {
@@ -199,10 +200,11 @@ void BBBTitleDisplay::Draw(double dT, Camera& camera, const Texture2D* fboTex) {
             this->bamShockwave.Draw(camera);
 
             if (!this->bamSlamEffectDone) {
+                GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BamSlam);
+
                 this->sound->PlaySound(GameSound::MainMenuTitleBamSlamEvent, false, false);
                 camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
                 this->bamSlamEffectDone = true;
-                GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BamSlam);
             }
 
             if (blammoDoneAnimating) {
@@ -210,10 +212,12 @@ void BBBTitleDisplay::Draw(double dT, Camera& camera, const Texture2D* fboTex) {
                 this->blammoShockwave.Draw(camera);
 
                 if (!this->blammoSlamEffectDone) {
+                    GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BlammoSlam);
+                    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(true);
+
                     this->sound->PlaySound(GameSound::MainMenuTitleBlammoSlamEvent, false, false);
                     camera.ApplyCameraShake(CAMERA_SHAKE_DURATION, Vector3D(CAMERA_BASE_SHAKE_MAG, CAMERA_BASE_SHAKE_MAG, 0), CAMERA_BASE_SHAKE_SPEED);
                     this->blammoSlamEffectDone = true;
-                    GameViewEventManager::Instance()->ActionBiffBamBlammoSlamEvent(GameViewEventListener::BlammoSlam);
                 }
             }
         }

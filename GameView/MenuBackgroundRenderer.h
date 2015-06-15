@@ -42,8 +42,12 @@ class Camera;
 
 class MenuBackgroundRenderer {
 public:
+    static const float DEFAULT_MOVE_FREQUENCY;
+
     MenuBackgroundRenderer();
     ~MenuBackgroundRenderer();
+
+    void SetStarMoveFreq(float freq) { this->bgEffect->SetMoveFrequency(freq); }
 
     void DrawBG(const Camera& camera, float alpha = 1.0f);
     void DrawShakeBG(const Camera& camera, float shakeX, float shakeY, float alpha = 1.0f);

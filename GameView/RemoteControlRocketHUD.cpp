@@ -31,6 +31,7 @@
 
 #include "RemoteControlRocketHUD.h"
 #include "GameAssets.h"
+#include "GameDisplay.h"
 
 #include "../GameModel/PaddleRemoteControlRocketProjectile.h"
 
@@ -51,29 +52,36 @@ isActive(false), rocketExplodeCountdown(PaddleRemoteControlRocketProjectile::TIM
     // Initialize the hints...
     
     // Rocket movement hint
-    this->moveHint.SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Left Analog", Colour(1,1,1));
-    keyboardButtonTypes.clear();
-    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
-    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
-    buttonTexts.clear();
-    buttonTexts.push_back("A");
-    buttonTexts.push_back("D");
-    
-    this->moveHint.SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        this->moveHint.SetArcadeButton(GameViewConstants::ArcadeJoystick, "", Colour(1,1,1));
+        this->thrustHint.SetArcadeButton(GameViewConstants::ArcadeFireButton, "Fire", 
+            GameViewConstants::GetInstance()->ARCADE_FIRE_BUTTON_COLOUR);
+    }
+    else {
+        this->moveHint.SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Left Analog", Colour(1,1,1));
+        keyboardButtonTypes.clear();
+        keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
+        keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
+        buttonTexts.clear();
+        buttonTexts.push_back("A");
+        buttonTexts.push_back("D");
+        
+        this->moveHint.SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
 
-    // Rocket thrust hint
-    xboxButtonTypes.clear();
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
-    buttonTexts.clear();
-    buttonTexts.push_back("RT");
-    buttonTexts.push_back("LT");
-    buttonColours.clear();
-    buttonColours.push_back(Colour(1,1,1));
-    buttonColours.push_back(Colour(1,1,1));
+        // Rocket thrust hint
+        xboxButtonTypes.clear();
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+        buttonTexts.clear();
+        buttonTexts.push_back("RT");
+        buttonTexts.push_back("LT");
+        buttonColours.clear();
+        buttonColours.push_back(Colour(1,1,1));
+        buttonColours.push_back(Colour(1,1,1));
 
-    this->thrustHint.SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
-    this->thrustHint.SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+        this->thrustHint.SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+        this->thrustHint.SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    }
 }
 
 RemoteControlRocketHUD::~RemoteControlRocketHUD() {

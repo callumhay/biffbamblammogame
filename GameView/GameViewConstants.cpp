@@ -266,6 +266,7 @@ TEXTURE_RIGHT_MOUSE_BUTTON(TEXTURE_DIRECTORY "/right_mouse_button_64x64.png"),
 TEXTURE_XBOX_CONTROLLER_BUTTON(TEXTURE_DIRECTORY "/xbox_360_controller_button_64x64.png"),
 TEXTURE_XBOX_CONTROLLER_ANALOG_STICK(TEXTURE_DIRECTORY "/xbox_360_controller_analog_stick_64x64.png"),
 TEXTURE_XBOX_CONTROLLER_TRIGGER(TEXTURE_DIRECTORY "/xbox_360_controller_trigger_64x64.png"),
+TEXTURE_ARCADE_JOYSTICK(TEXTURE_DIRECTORY "/arcade_joystick_64x64.png"),
 
 // Font Asset Paths
 FONT_SADBAD(FONT_DIRECTORY          "/sadbad.ttf"),
@@ -343,6 +344,9 @@ XBOX_CONTROLLER_X_BUTTON_COLOUR(0.0f, 0.29f, 1.0f),
 XBOX_CONTROLLER_Y_BUTTON_COLOUR(1.0f, 0.78f, 0.16f),
 XBOX_CONTROLLER_A_BUTTON_COLOUR(0.48f, 0.745f, 0.0f),
 XBOX_CONTROLLER_B_BUTTON_COLOUR(1.0f, 0.1f, 0.0f),
+
+ARCADE_BOOST_BUTTON_COLOUR(1, 0.65f, 0),
+ARCADE_FIRE_BUTTON_COLOUR(1.0f, 0.1f, 0.0f),
 
 DEFAULT_FG_KEY_LIGHT_POSITION(Point3D(-15.0f, 5.0f, 65.0f)),
 DEFAULT_FG_FILL_LIGHT_POSITION(Point3D(15.0f, 10.0f, 50.0f)),
@@ -480,8 +484,6 @@ SURREALISM_DADA_PADDLE_MESH(SURREALISM_DADA_MESH_DIRECTORY "/surrealism_dada_pad
 SURREALISM_DADA_BACKGROUND_MESH(SURREALISM_DADA_MESH_DIRECTORY "/surrealism_dada_background.obj"),
 SURREALISM_DADA_BLOCK_MESH(SURREALISM_DADA_MESH_DIRECTORY "/surrealism_dada_block.obj")
 
-
-
 {
 }
 
@@ -497,6 +499,21 @@ const char* GameViewConstants::GetXBoxButtonTextureName(GameViewConstants::XBoxB
             return this->TEXTURE_XBOX_CONTROLLER_ANALOG_STICK;
         case XBoxTrigger:
             return this->TEXTURE_XBOX_CONTROLLER_TRIGGER;
+        default:
+            assert(false);
+            break;
+    }
+    return NULL;
+}
+
+const char* GameViewConstants::GetArcadeButtonTextureName(ArcadeButtonType buttonType) const {
+    switch (buttonType) {
+        case ArcadeJoystick:
+            return this->TEXTURE_ARCADE_JOYSTICK;
+        case ArcadeFireButton:
+            return this->TEXTURE_XBOX_CONTROLLER_BUTTON;
+        case ArcadeBoostButton:
+            return this->TEXTURE_XBOX_CONTROLLER_BUTTON;
         default:
             assert(false);
             break;
@@ -692,5 +709,33 @@ AnimationMultiLerp<Colour> GameViewConstants::BuildFlashingColourAnimation() con
     AnimationMultiLerp<Colour> flashingColourAnimation;
     flashingColourAnimation.SetLerp(timeVals, colourVals);
 	flashingColourAnimation.SetRepeat(true);
+    return flashingColourAnimation;
+}
+
+AnimationMultiLerp<ColourRGBA> GameViewConstants::BuildFlashingColourWithAlphaAnimation() const {
+    static const double FLASH_TIME = 0.3;
+    std::vector<double> timeVals;
+    timeVals.reserve(7);
+    timeVals.push_back(0.0);
+    timeVals.push_back(timeVals.back() + FLASH_TIME);
+    timeVals.push_back(timeVals.back() + FLASH_TIME);
+    timeVals.push_back(timeVals.back() + FLASH_TIME);
+    timeVals.push_back(timeVals.back() + FLASH_TIME);
+    timeVals.push_back(timeVals.back() + FLASH_TIME);
+    timeVals.push_back(timeVals.back() + FLASH_TIME);
+
+    std::vector<ColourRGBA> colourVals;
+    colourVals.reserve(7);
+    colourVals.push_back(ColourRGBA(0.0f, 0.6f, 0.9f, 1.0f));
+    colourVals.push_back(ColourRGBA(0.0f, 0.6f, 0.9f, 0.0f));
+    colourVals.push_back(ColourRGBA(1.0f, 0.8f, 0.0f, 1.0f));
+    colourVals.push_back(ColourRGBA(1.0f, 0.8f, 0.0f, 1.0f));
+    colourVals.push_back(ColourRGBA(1.0f, 0.8f, 0.0f, 0.0f));
+    colourVals.push_back(ColourRGBA(0.0f, 0.6f, 0.9f, 1.0f));
+    colourVals.push_back(ColourRGBA(0.0f, 0.6f, 0.9f, 1.0f));
+
+    AnimationMultiLerp<ColourRGBA> flashingColourAnimation;
+    flashingColourAnimation.SetLerp(timeVals, colourVals);
+    flashingColourAnimation.SetRepeat(true);
     return flashingColourAnimation;
 }

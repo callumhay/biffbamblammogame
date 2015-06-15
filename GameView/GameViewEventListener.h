@@ -38,9 +38,17 @@ class GameViewEventListener {
 public:
     virtual ~GameViewEventListener() {}
 
+    virtual void GameModelUpdated() = 0;
+
     virtual void DisplayStateChanged(const DisplayState::DisplayStateType& prevState, const DisplayState::DisplayStateType& newState) = 0;
     enum SlamType { BiffSlam, BamSlam, BlammoSlam };
     virtual void BiffBamBlammoSlamEvent(const GameViewEventListener::SlamType& slamType) = 0;
+
+    virtual void ArcadeWaitingForPlayerState(bool entered) = 0;
+    virtual void ArcadePlayerHitStartGame() = 0;
+    virtual void ArcadePlayerSelectedWorld() = 0;
+
+    virtual void ShootBallTutorialHintShown(bool shown) = 0;
 
 protected:
     GameViewEventListener() {}

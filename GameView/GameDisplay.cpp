@@ -58,9 +58,13 @@ bool GameDisplay::detachedCamera            = false;
 const int GameDisplay::MAX_FRAMERATE = 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
-GameDisplay::GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight): 
+bool GameDisplay::arcadeMode = false;
+
+GameDisplay::GameDisplay(GameModel* model, GameSound* sound, int initWidth, int initHeight, bool arcadeMode): 
 gameListener(NULL), currState(NULL), mouseRenderer(NULL), menuBGRenderer(NULL), model(model), 
 assets(NULL), sound(sound), gameExited(false), gameReinitialized(false), gameCamera() {
+    
+    GameDisplay::arcadeMode = arcadeMode;
 
 	assert(model != NULL);
     assert(sound != NULL);
@@ -131,6 +135,7 @@ void GameDisplay::SetCurrentState(DisplayState* state) {
         delete this->currState;
     }
     this->currState = state;
+
     // EVENT: The game display state just changed
     GameViewEventManager::Instance()->ActionDisplayStateChanged(prevType, this->currState->GetType());
 }
@@ -167,7 +172,7 @@ float GameDisplay::GetTextScalingFactor() {
 }
 
 void GameDisplay::SpecialDirectionPressed(float x, float y) {
-    this->model->BallBoostDirectionPressed(-x, -y);
+    this->model->BallBoostDirectionPressed(-x, -y, GameDisplay::arcadeMode);
 }
 
 void GameDisplay::SpecialDirectionReleased() {

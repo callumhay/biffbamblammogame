@@ -271,6 +271,13 @@ private:
     //TODO? static const int BG_SOUND_FADEOUT_IN_MILLISECS = 1000;
     SoundID bgLoopedSoundID;
 
+    // Arcade mode members
+    TextLabel2D arcadePressButtonLabel;
+    AnimationMultiLerp<ColourRGBA> arcadeLabelColourAnimation;
+
+    void StartGame();
+    void GoToWorldSelectionScreen();
+
     void InitializeESPEffects();
     void InitializeMainMenu();
     void InitializeOptionsSubMenu();

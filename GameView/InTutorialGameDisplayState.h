@@ -94,10 +94,19 @@ private:
         }
         virtual ~HintListener() {}
 
-        void OnTutorialHintShown();
-        void OnTutorialHintUnshown();
+        virtual void OnTutorialHintShown();
+        virtual void OnTutorialHintUnshown();
     protected:
         InTutorialGameDisplayState* state;
+    };
+
+    class ShootBallHintListener : public HintListener {
+    public:
+        ShootBallHintListener(InTutorialGameDisplayState* state) : HintListener(state) {}
+        ~ShootBallHintListener() {}
+
+        void OnTutorialHintShown();
+        void OnTutorialHintUnshown();
     };
 
     class MovePaddleHintListener : public HintListener {

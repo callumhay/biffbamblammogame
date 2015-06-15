@@ -95,6 +95,7 @@ public:
 	
 	void ActivateInkSplatterEffect();
 	void DeactivateInkSplatterEffect();
+    bool IsInkSplatterEffectActive() const { return this->inkSplatterEffect->IsInkSplatActive(); }
 
 	void SetupPaddleShieldEffect();
     void UpdateBulletTimeState(const BallBoostModel& boostModel) {

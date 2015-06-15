@@ -57,6 +57,9 @@ public:
     void SetXBoxButtons(const std::list<GameViewConstants::XBoxButtonType>& buttonTypes,
         const std::list<std::string>& buttonTexts, const std::list<Colour>& buttonColours);
 
+    void SetArcadeButton(GameViewConstants::ArcadeButtonType buttonType, const std::string& buttonText, 
+        const Colour& buttonColour);
+
     void SetKeyboardButton(GameViewConstants::KeyboardButtonType buttonType, const std::string& buttonText);
     void SetKeyboardButtons(const std::list<GameViewConstants::KeyboardButtonType>& buttonTypes,
         const std::list<std::string>& buttonTexts);
@@ -100,6 +103,7 @@ private:
 
     std::vector<ButtonGlyphLabel*> keyboardKeyLabels;
     std::vector<ButtonGlyphLabel*> xboxLabels;
+    std::vector<ButtonGlyphLabel*> arcadeLabels;
     ButtonGlyphLabel* mouseLabel;
 
     TextLabel2D orLabel;
@@ -107,7 +111,9 @@ private:
 
     void ClearKeyboardKeyLabels();
     void ClearXBoxLabels();
+    void ClearArcadeLabels();
     void ClearMouseLabel();
+    
 
     DISALLOW_COPY_AND_ASSIGN(ButtonTutorialHint);
 };
