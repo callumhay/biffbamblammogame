@@ -271,7 +271,7 @@ void ArcadeController::JoystickMotion(const SDL_JoyAxisEvent& joyAxisEvent) {
         else {
             if (boostModel->IsInBulletTime()) {
                 if (this->joystickX != 0 || this->joystickY != 0) {
-                    this->display->SpecialDirectionPressed(-this->joystickX, this->joystickY);
+                    this->display->SpecialDirectionPressed(this->joystickX, -this->joystickY);
                     this->specialDirOn = true;
                 }
             }
@@ -311,7 +311,7 @@ void ArcadeController::KeyDown(SDLKey key) {
                 this->display->SpecialDirectionReleased();
             }
             else {
-                Vector2D boostDir(-this->joystickX, this->joystickY);
+                Vector2D boostDir(this->joystickX, -this->joystickY);
                 if (boostDir.IsZero()) {
                     boostDir[0] = 1;
                 }

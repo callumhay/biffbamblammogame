@@ -125,6 +125,9 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
 	// Setup the label for the press any key text...
 	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);
 	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        this->pressAnyKeyLabel.SetText("- Press Any Button to Continue -");
+    }
 
     // Setup all the animations...
 
@@ -201,6 +204,8 @@ BossLevelCompleteSummaryDisplayState::~BossLevelCompleteSummaryDisplayState() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
     assert(success);
     UNUSED_VARIABLE(success);
+
+    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
 }
 
 void BossLevelCompleteSummaryDisplayState::RenderFrame(double dT) {

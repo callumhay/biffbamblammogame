@@ -77,6 +77,12 @@ private:
     SoundID gameOverSoundID;
 
 	TextLabel2D gameOverLabel;
+
+    TextLabel2D arcadeContinueLabel;
+    AnimationMultiLerp<Colour> continueLabelColourAnim;
+    double arcadeCountdownSecs;
+    bool continueButtonPushed;
+
     InGameRenderPipeline renderPipeline;
     CgFxPostDeath deathFSEffect;
 

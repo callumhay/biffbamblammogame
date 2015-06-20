@@ -104,6 +104,8 @@ private:
 
     SoundID bgSoundLoopID;
 
+    bool firstShow;
+
     // Inner class for representing a selectable world item in the world select menu
     class WorldSelectItem {
     public:

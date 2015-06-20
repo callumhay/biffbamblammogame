@@ -236,7 +236,6 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
         // world in the game, then the boss was the last boss in the game
         int lastWorldIdx = gameModel->GetLastWorldIndex();
         if (world.GetWorldIndex() == lastWorldIdx) {
-            // TODO? 
             // NOTE: This is already taken care of by the GameCompletedEvent handler
         }
         else {
@@ -260,21 +259,25 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
         this->display->AddStateToQueue(DisplayState::LevelEnd);
 	    this->display->AddStateToQueue(DisplayState::LevelCompleteSummary);
 
-        // Handle special animations in the level selection state -- we only select the next level if
-        // it doesn't have a star lock or if its star lock has been paid for
         int levelSelectionIdx = -1;
         int nextLevelIdx = level.GetLevelIndex()+1;
         GameLevel* nextLevel = world.GetLevelByIndex(nextLevelIdx);
-        if (nextLevel->GetAreUnlockStarsPaidFor()) {
-            levelSelectionIdx = nextLevelIdx;
-        }
-        
-        bool showBasicUnlockBreak = (furthestLevelIdxBefore != furthestLevelIdxAfter && 
-            furthestLevelIdxAfter == nextLevelIdx-1);
 
-        this->display->AddStateToQueue(DisplayState::SelectLevelMenu, 
-            DisplayStateInfo::BuildSelectLevelInfo(world.GetWorldIndex(), levelSelectionIdx, 
-            showBasicUnlockBreak));
+        // In arcade mode we ignore all star locks and never let the player see the level selection screen...
+        if (!GameDisplay::IsArcadeModeEnabled()) {
+            // Handle special animations in the level selection state -- we only select the next level if
+            // it doesn't have a star lock or if its star lock has been paid for
+            if (nextLevel->GetAreUnlockStarsPaidFor()) {
+                levelSelectionIdx = nextLevelIdx;
+            }
+            
+            bool showBasicUnlockBreak = (furthestLevelIdxBefore != furthestLevelIdxAfter && 
+                furthestLevelIdxAfter == nextLevelIdx-1);
+
+            this->display->AddStateToQueue(DisplayState::SelectLevelMenu, 
+                DisplayStateInfo::BuildSelectLevelInfo(world.GetWorldIndex(), levelSelectionIdx, 
+                showBasicUnlockBreak));
+        }
     }
 
 	this->display->SetCurrentStateAsNextQueuedState();

@@ -47,8 +47,8 @@ const Colour GameOverDisplayState::MENU_ITEM_ACTIVE_COLOUR	= Colour(1.0f, 1.0f, 
 const Colour GameOverDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
 GameOverDisplayState::GameOverDisplayState(GameDisplay* display) :
-DisplayState(display), renderPipeline(display), gameOverMenu(NULL), starryBG(NULL),
-deathFSEffect(display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()),
+DisplayState(display), renderPipeline(display), gameOverMenu(NULL), starryBG(NULL), topMenuEventHandler(NULL), quitSubMenuEventHandler(NULL),
+deathFSEffect(display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()), arcadeCountdownSecs(10.9), continueButtonPushed(false),
 maxMenuItemWidth(0.0f), menuHeight(0.0f), selectedAndActivatedItem(-1), gameOverSoundID(INVALID_SOUND_ID) {
 
 	this->gameOverLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
@@ -68,12 +68,18 @@ maxMenuItemWidth(0.0f), menuHeight(0.0f), selectedAndActivatedItem(-1), gameOver
 GameOverDisplayState::~GameOverDisplayState() {
     this->renderPipeline.SetHUDAlpha(1.0f);
 
-    delete this->gameOverMenu;
-    this->gameOverMenu = NULL;
-    delete this->topMenuEventHandler;
-    this->topMenuEventHandler = NULL;
-    delete this->quitSubMenuEventHandler;
-    this->quitSubMenuEventHandler = NULL;
+    if (this->gameOverMenu != NULL) {
+        delete this->gameOverMenu;
+        this->gameOverMenu = NULL;
+    }
+    if (this->topMenuEventHandler != NULL) {
+        delete this->topMenuEventHandler;
+        this->topMenuEventHandler = NULL;
+    }
+    if (this->quitSubMenuEventHandler != NULL) {
+        delete this->quitSubMenuEventHandler;
+        this->quitSubMenuEventHandler = NULL;
+    }
 
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
@@ -91,8 +97,17 @@ void GameOverDisplayState::RenderFrame(double dT) {
 void GameOverDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
                                          const GameControl::ActionMagnitude& magnitude) {
 
-    if (this->currState == IdleState) {
-        this->gameOverMenu->ButtonPressed(pressedButton, magnitude);
+    if (GameDisplay::IsArcadeModeEnabled() && !this->continueButtonPushed) {
+        if (this->currState == IdleState || this->currState == FadeOutState) {
+            this->display->GetSound()->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+            this->continueButtonPushed = true;
+            this->SetState(FadeOutState);
+        }
+    }
+    else {
+        if (this->currState == IdleState) {
+            this->gameOverMenu->ButtonPressed(pressedButton, magnitude);
+        }
     }
 }
 
@@ -121,9 +136,12 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
         Camera::GetWindowHeight() - GAME_OVER_LABEL_Y_BORDER);
 	this->gameOverLabel.Draw();
 
-    this->gameOverMenu->SetTopLeftCorner(this->moveMenuAnim.GetInterpolantValue(),
-        this->menuHeight + GAME_OVER_LABEL_Y_BORDER);
-    this->gameOverMenu->Draw(dT, Camera::GetWindowWidth(), Camera::GetWindowHeight());
+    // Player doesn't get a menu in arcade mode... it's game over for good.
+    if (!GameDisplay::IsArcadeModeEnabled()) {
+        this->gameOverMenu->SetTopLeftCorner(this->moveMenuAnim.GetInterpolantValue(),
+            this->menuHeight + GAME_OVER_LABEL_Y_BORDER);
+        this->gameOverMenu->Draw(dT, Camera::GetWindowWidth(), Camera::GetWindowHeight());
+    }
 
     glPopAttrib();
 
@@ -148,9 +166,37 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
             break;
 
         case IdleState:
+            // In arcade mode we have a max time to spend on this screen before we go back to the main menu
+            if (GameDisplay::IsArcadeModeEnabled()) {
+                // Draw a countdown before we go back to the main menu...
+                // "Continue? 10..9.. etc.
+                this->continueLabelColourAnim.Tick(dT);
+                
+                std::stringstream strStream;
+                strStream << "Continue? ..." << std::max<int>(0, static_cast<int>(floor(this->arcadeCountdownSecs)));
+
+                this->arcadeContinueLabel.SetText(strStream.str());
+                this->arcadeContinueLabel.SetColour(this->continueLabelColourAnim.GetInterpolantValue());
+                this->arcadeContinueLabel.SetTopLeftCorner(this->moveMenuAnim.GetInterpolantValue(), 
+                    this->arcadeContinueLabel.GetHeight() + GAME_OVER_LABEL_Y_BORDER);
+                
+                this->arcadeContinueLabel.Draw();
+
+                this->arcadeCountdownSecs -= (dT*0.5);
+                if (this->arcadeCountdownSecs < 0) {
+                    this->SetState(FadeOutState);
+                }
+            }
             break;
 
         case FadeOutState:
+
+            if (GameDisplay::IsArcadeModeEnabled()) {
+                this->continueLabelColourAnim.Tick(dT);
+                this->arcadeContinueLabel.SetColour(this->continueLabelColourAnim.GetInterpolantValue());
+                this->arcadeContinueLabel.SetAlpha(this->fadeAnim.GetInterpolantValue());
+                this->arcadeContinueLabel.Draw();
+            }
 
             this->deathFSEffect.SetAlpha(this->fadeAnim.GetInterpolantValue());
             this->gameOverLabel.SetAlpha(this->fadeAnim.GetInterpolantValue());
@@ -158,23 +204,36 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
             if (this->moveMenuAnim.Tick(dT) && this->fadeAnim.Tick(dT)) {
                 sound->StopAllEffects();
 
-                assert(this->selectedAndActivatedItem >= 0);
-                if (this->selectedAndActivatedItem == this->retryMenuItem) {
+                if (GameDisplay::IsArcadeModeEnabled()) {
+                    if (this->continueButtonPushed) {
 
-			        // Clean up any misc. visual effects
-			        this->display->GetAssets()->DeactivateMiscEffects();
-			        
-                    // Reset the level
-                    this->display->GetModel()->ResetCurrentLevel();
-
-                    this->display->SetCurrentStateAsNextQueuedState();
-                }
-                else if (this->selectedAndActivatedItem == this->backToMainMenuItem) {
-                    this->display->SetCurrentState(new MainMenuDisplayState(this->display));
+                        // Clean up any misc. visual effects
+                        this->display->GetAssets()->DeactivateMiscEffects();
+                        // Reset the level
+                        this->display->GetModel()->ResetCurrentLevel();
+                        this->display->SetCurrentStateAsNextQueuedState();
+                    }
+                    else {
+                        this->display->SetCurrentState(new MainMenuDisplayState(this->display));
+                    }
                 }
                 else {
-                    assert(this->selectedAndActivatedItem == this->exitGameItem);
-                    this->display->QuitGame();
+                    assert(this->selectedAndActivatedItem >= 0);
+                    if (this->selectedAndActivatedItem == this->retryMenuItem) {
+
+			            // Clean up any misc. visual effects
+			            this->display->GetAssets()->DeactivateMiscEffects();
+                        // Reset the level
+                        this->display->GetModel()->ResetCurrentLevel();
+                        this->display->SetCurrentStateAsNextQueuedState();
+                    }
+                    else if (this->selectedAndActivatedItem == this->backToMainMenuItem) {
+                        this->display->SetCurrentState(new MainMenuDisplayState(this->display));
+                    }
+                    else {
+                        assert(this->selectedAndActivatedItem == this->exitGameItem);
+                        this->display->QuitGame();
+                    }
                 }
             }
 
@@ -279,64 +338,73 @@ void GameOverDisplayState::SetState(const AnimationState& state) {
 void GameOverDisplayState::SetupMenu() {
     assert(this->gameOverMenu == NULL);
     
-    this->menuHeight = 0.0f;
-    this->maxMenuItemWidth = 0.0f;
+    const float textScaleFactor = this->display->GetTextScalingFactor();
 
-	const float textScaleFactor = this->display->GetTextScalingFactor();
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        this->continueLabelColourAnim = GameViewConstants::GetInstance()->BuildFlashingColourAnimation();
 
-	// Set up the handlers
-	this->topMenuEventHandler     = new TopMenuEventHandler(this);
-    this->quitSubMenuEventHandler = new QuitVerifyMenuEventHandler(this);
+        this->arcadeContinueLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "Continue?");
+        this->arcadeContinueLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+        this->arcadeContinueLabel.SetScale(textScaleFactor);
+    }
+    else {
+        this->menuHeight = 0.0f;
+        this->maxMenuItemWidth = 0.0f;
 
-    this->gameOverMenu = new GameMenu();
-	this->gameOverMenu->AddEventHandler(this->topMenuEventHandler);
-	this->gameOverMenu->SetColourScheme(MENU_ITEM_IDLE_COLOUR, MENU_ITEM_SEL_COLOUR, 
-	    MENU_ITEM_ACTIVE_COLOUR, MENU_ITEM_GREYED_COLOUR);
+	    // Set up the handlers
+	    this->topMenuEventHandler     = new TopMenuEventHandler(this);
+        this->quitSubMenuEventHandler = new QuitVerifyMenuEventHandler(this);
 
-	// Prepare some of the properties of the text labels in the top level menu...
-	const float dropShadowAmtSm = 0.10f;
-	const float dropShadowAmtLg = 0.10f;
-	const Colour dropShadowColour = Colour(0.0f, 0.0f, 0.0f);
+        this->gameOverMenu = new GameMenu();
+	    this->gameOverMenu->AddEventHandler(this->topMenuEventHandler);
+	    this->gameOverMenu->SetColourScheme(MENU_ITEM_IDLE_COLOUR, MENU_ITEM_SEL_COLOUR, 
+	        MENU_ITEM_ACTIVE_COLOUR, MENU_ITEM_GREYED_COLOUR);
 
-	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
-        GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  "Retry");
-	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
-        GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),     "Retry");
-	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
-	tempLabelSm.SetScale(textScaleFactor);
-	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
-	tempLabelLg.SetScale(textScaleFactor);
+	    // Prepare some of the properties of the text labels in the top level menu...
+	    const float dropShadowAmtSm = 0.10f;
+	    const float dropShadowAmtLg = 0.10f;
+	    const Colour dropShadowColour = Colour(0.0f, 0.0f, 0.0f);
 
-    // Retry Item...
-    this->retryMenuItem = this->gameOverMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
-    this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
-    this->menuHeight += tempLabelLg.GetHeight() + this->gameOverMenu->GetMenuItemPadding();
+	    TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  "Retry");
+	    TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
+            GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),     "Retry");
+	    tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
+	    tempLabelSm.SetScale(textScaleFactor);
+	    tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
+	    tempLabelLg.SetScale(textScaleFactor);
 
-    // Back to main menu item...
-	tempLabelSm.SetText("Back To Main Menu");
-	tempLabelLg.SetText("Back To Main Menu");
-    this->backToMainMenuItem = this->gameOverMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
-    this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
-    this->menuHeight += tempLabelLg.GetHeight() + this->gameOverMenu->GetMenuItemPadding();
+        // Retry Item...
+        this->retryMenuItem = this->gameOverMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+        this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
+        this->menuHeight += tempLabelLg.GetHeight() + this->gameOverMenu->GetMenuItemPadding();
 
-    // Exit game...
-	tempLabelSm.SetText("Rage Quit");
-	tempLabelLg.SetText("Rage Quit");
+        // Back to main menu item...
+	    tempLabelSm.SetText("Back To Main Menu");
+	    tempLabelLg.SetText("Back To Main Menu");
+        this->backToMainMenuItem = this->gameOverMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+        this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
+        this->menuHeight += tempLabelLg.GetHeight() + this->gameOverMenu->GetMenuItemPadding();
 
-   
-	VerifyMenuItem* exitMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
-		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),
-		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
-		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
-	exitMenuItem->SetVerifyMenuColours(Colour(1,1,1), Colour(0.5f, 0.5f, 0.5f), Colour(1,1,1));
-	exitMenuItem->SetVerifyMenuText("Are you sure you want to quit?", "Yes", "No");
-	exitMenuItem->SetEventHandler(this->quitSubMenuEventHandler);
+        // Exit game...
+	    tempLabelSm.SetText("Rage Quit");
+	    tempLabelLg.SetText("Rage Quit");
 
-    this->exitGameItem = this->gameOverMenu->AddMenuItem(exitMenuItem);
-    this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
-    this->menuHeight += tempLabelLg.GetHeight();
+	    VerifyMenuItem* exitMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
+		    GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),
+		    GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		    GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+	    exitMenuItem->SetVerifyMenuColours(Colour(1,1,1), Colour(0.5f, 0.5f, 0.5f), Colour(1,1,1));
+	    exitMenuItem->SetVerifyMenuText("Are you sure you want to quit?", "Yes", "No");
+	    exitMenuItem->SetEventHandler(this->quitSubMenuEventHandler);
 
-	this->gameOverMenu->SetSelectedMenuItem(this->retryMenuItem, false);
+        this->exitGameItem = this->gameOverMenu->AddMenuItem(exitMenuItem);
+        this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
+        this->menuHeight += tempLabelLg.GetHeight();
+
+	    this->gameOverMenu->SetSelectedMenuItem(this->retryMenuItem, false);
+    }
 }
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {

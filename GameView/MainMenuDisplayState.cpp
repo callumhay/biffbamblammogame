@@ -231,6 +231,8 @@ MainMenuDisplayState::~MainMenuDisplayState() {
     this->eraseSuccessfulPopup = NULL;
     delete this->eraseFailedPopup;
     this->eraseFailedPopup = NULL;
+
+    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
 }
 
 /**

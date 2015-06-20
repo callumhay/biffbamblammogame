@@ -362,6 +362,7 @@ void ACEL::ArcadeWaitingForPlayerState(bool entered) {
     if (entered) {
         // In the main menu we flash the buttons
         this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::VerySlowButtonFlash);
+        this->serialComm.SetButtonCadence(ArcadeSerialComm::AllButtons, ArcadeSerialComm::VerySlowButtonFlash);
     }
     else {
         // Stop flashing the buttons when leaving the main menu

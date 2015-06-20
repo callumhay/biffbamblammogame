@@ -83,7 +83,7 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgPulser(ScaleEffect(1.0f, 1.5f)), haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f),
 flareRotator(0, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
 highScoreSoundID(INVALID_SOUND_ID), allStarSoundID(INVALID_SOUND_ID), bgLoopSoundID(INVALID_SOUND_ID), 
-pointTallySoundID(INVALID_SOUND_ID) {
+pointTallySoundID(INVALID_SOUND_ID), firstTimeDisplayingAnyKeyLabel(true) {
     
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
@@ -191,6 +191,9 @@ pointTallySoundID(INVALID_SOUND_ID) {
 	// Setup the label for the press any key text...
 	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);
 	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        this->pressAnyKeyLabel.SetText("- Press Any Button to Continue -");
+    }
 
 	// Set the footer colour flash animation
     this->footerColourAnimation = GameViewConstants::GetInstance()->BuildFlashingColourAnimation();
@@ -554,6 +557,8 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
         delete *iter;
     }
     this->starAddMoveAnims.clear();
+
+    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
 }
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
@@ -689,10 +694,32 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
             sound->StopSound(this->pointTallySoundID);
             this->pointTallySoundID = INVALID_SOUND_ID;
 
-            // If we're done fading then we can go to the next state
-            // Update the game model until there's a new queued state
-            while (!this->display->SetCurrentStateAsNextQueuedState()) {
-                this->display->UpdateModel(dT);
+            this->firstTimeDisplayingAnyKeyLabel = true;
+
+            if (GameDisplay::IsArcadeModeEnabled()) {
+                GameModel* model = this->display->GetModel();
+                GameLevel* completedLevel = model->GetCurrentLevel();
+                GameWorld* currentWorld = model->GetCurrentWorld();
+
+                // We assume that the completed level is not a boss level (and therefore is not the final level of the world)
+                int worldIdx = currentWorld->GetWorldIndex();
+                int nextLevelIdx = completedLevel->GetLevelIndex() + 1;
+                this->display->GetModel()->StartGameAtWorldAndLevel(worldIdx, nextLevelIdx);
+               
+                GameLevel* nextLevel = currentWorld->GetLevelByIndex(nextLevelIdx);
+
+                // Pay for the stars automatically, start up the new level and save progress
+                nextLevel->SetAreUnlockStarsPaidFor(true);
+                GameProgressIO::SaveGameProgress(model);
+
+                this->display->SetCurrentStateAsNextQueuedState();
+            }
+            else {
+                // If we're done fading then we can go to the next state
+                // Update the game model until there's a new queued state
+                while (!this->display->SetCurrentStateAsNextQueuedState()) {
+                    this->display->UpdateModel(dT);
+                }
             }
 		    return;
         }
@@ -896,6 +923,11 @@ void LevelCompleteSummaryDisplayState::DrawPressAnyKeyTextFooter(float screenWid
         FOOTER_VERTICAL_PADDING + this->pressAnyKeyLabel.GetHeight());
 
 	this->pressAnyKeyLabel.Draw();
+
+    if (this->firstTimeDisplayingAnyKeyLabel) {
+        GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(true);
+        this->firstTimeDisplayingAnyKeyLabel = false;
+    }
 }
 
 void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float screenWidth) {
@@ -1032,6 +1064,9 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
             
             // Play confirm sound
             sound->PlaySound(GameSound::LevelSummaryConfirmEvent, false, false);
+
+            // No longer waiting for the player to hit any button
+            GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
         }
     }
     else {
@@ -1113,32 +1148,39 @@ void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionBu
 
     UNUSED_PARAMETER(magnitude);
 
-    if (this->difficultyChoicePane != NULL) {
-        
-        if (!this->difficultyChoicePane->IsOptionSelectedAndActive()) {
-            // Play the appropriate sound for the difficult choice menu
-            GameSound* sound = this->display->GetSound();
-            switch (pressedButton) {
-                case GameControl::LeftButtonAction:
-                case GameControl::RightButtonAction:
-                    sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false, false);
-                    break;
-                case GameControl::EnterButtonAction:
-                    sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false, false);
-                    break;
-
-                default:
-                    break;
-            }
-
-            this->difficultyChoicePane->ButtonPressed(pressedButton);
-        }
-
-        if (this->difficultyChoicePane->IsOptionSelectedAndActive()) {
-            this->difficultyChoicePane->Hide(0.0, HIDE_DIFFICULTY_CHOICE_PANE_TIME);
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        if (!GameControl::IsDirectionActionButton(pressedButton)) {
+            this->AnyKeyWasPressed();
         }
     }
-    else if (!GameControl::IsDirectionActionButton(pressedButton)) {
-        this->AnyKeyWasPressed();
+    else {
+        if (this->difficultyChoicePane != NULL) {
+            
+            if (!this->difficultyChoicePane->IsOptionSelectedAndActive()) {
+                // Play the appropriate sound for the difficult choice menu
+                GameSound* sound = this->display->GetSound();
+                switch (pressedButton) {
+                    case GameControl::LeftButtonAction:
+                    case GameControl::RightButtonAction:
+                        sound->PlaySound(GameSound::MenuItemChangedSelectionEvent, false, false);
+                        break;
+                    case GameControl::EnterButtonAction:
+                        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false, false);
+                        break;
+
+                    default:
+                        break;
+                }
+
+                this->difficultyChoicePane->ButtonPressed(pressedButton);
+            }
+
+            if (this->difficultyChoicePane->IsOptionSelectedAndActive()) {
+                this->difficultyChoicePane->Hide(0.0, HIDE_DIFFICULTY_CHOICE_PANE_TIME);
+            }
+        }
+        else if (!GameControl::IsDirectionActionButton(pressedButton)) {
+            this->AnyKeyWasPressed();
+        }
     }
 }

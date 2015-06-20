@@ -57,7 +57,7 @@ SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const DisplaySt
 DisplayState(display), bgSoundLoopID(bgSoundLoopID), pressEscAlphaAnim(0.0f), worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
 goBackToMainMenu(false), menuFBO(NULL), postMenuFBObj(NULL), itemActivated(false), padlockTex(NULL),
 goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL), worldUnlockAnim(NULL),
-totalNumGameStarsLabel(NULL), totalLabel(NULL), starGlowTexture(NULL) {
+totalNumGameStarsLabel(NULL), totalLabel(NULL), starGlowTexture(NULL), firstShow(true) {
     this->Init(info);
 }
 
@@ -103,6 +103,11 @@ SelectWorldMenuState::~SelectWorldMenuState() {
 }
 
 void SelectWorldMenuState::RenderFrame(double dT) {
+    if (this->firstShow) {
+        GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(true);
+        this->firstShow = false;
+    }
+
     const int selectedWorldNum = this->selectedItemIdx + 1;
 
     this->pressEscAlphaAnim.Tick(dT);
@@ -660,9 +665,7 @@ void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
     }
     this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
 
-    if (this->display->IsArcadeModeEnabled()) {
-        GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(true);
-    }
+    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(true);
 }
 
 // WorldUnlockAnimationTracker Functions **********************************************************

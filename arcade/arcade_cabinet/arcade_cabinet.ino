@@ -189,14 +189,16 @@ void setup() {
   pinMode(RED_BUTTON_PIN, OUTPUT);
   pinMode(ORANGE_BUTTON_PIN, OUTPUT);
   
-    // For a set of NeoPixels the first NeoPixel is 0, second is 1, all the way up to the count of pixels minus one.
+  /*
+  // For a set of NeoPixels the first NeoPixel is 0, second is 1, all the way up to the count of pixels minus one.
   for(int i = 0; i < NEOPIXEL_NUMPIXELS; i++){
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     pixels.setPixelColor(i, STARTUP_COLOUR); // Moderately bright green color.
     pixels.show(); // This sends the updated pixel color to the hardware.
     delay(STARTUP_DELAY_MS); // Delay for a period of time (in milliseconds).
   }
-  
+  */
+  clearLedStripAnimators();
 }
 
 void loop() {
@@ -248,10 +250,10 @@ void loop() {
 // Checks for available serial data -- this can guide certain operations for the LEDs:
 //
 // Basic/Communications Commands/Queries ----------------------------------------
-// |QQ -- Respond back to inform the sender that this is the correct serial line
+// |QQQQQ -- Respond back to inform the sender that this is the correct serial line
 //
 // Marque Commands --------------------------------------------------------------
-// |Argb -- Sets all of the rgb LEDs to (r,g,b), where r,g, and b are each byte values in [0,127] which are mapped to [0,255]
+// |ArgbX -- Sets all of the rgb LEDs to (r,g,b), where r,g, and b are each byte values in [0,127] which are mapped to [0,255], 'X' is filler
 // |Frgbt -- Causes a flash of a particular colour from the current colour to r,g,b and then back, 
 //           the flash will hold for t centi-seconds (r,g,b,t are all bytes)
 // |Lrgbt -- Causes the current colour to transition to the given colour over t 10th-seconds (r,g,b,t are all bytes)
@@ -261,13 +263,13 @@ void loop() {
 //           the flash will hold for t centi-seconds (r,g,b,t) are all bytes
 //
 // Button Commands --------------------------------------------------------------
-// |RFt -- Tells the red button to flash, with delay between flashes equal to t 100th-seconds (t in bytes), if t is 0 then the LED stays on
-// |OFt -- Tells the orange button to flash, with delay between flashes equal to t 100th-seconds (t in bytes), if t is 0 then the LED stays on
-// |RX -- Tells the red button to turn its LED off
-// |OX -- Tells the orange button to turn its LED off
+// |RFtXX -- Tells the red button to flash, with delay between flashes equal to t 100th-seconds (t in bytes), if t is 0 then the LED stays on
+// |OFtXX -- Tells the orange button to flash, with delay between flashes equal to t 100th-seconds (t in bytes), if t is 0 then the LED stays on
+// |RXXXX -- Tells the red button to turn its LED off
+// |OXXXX -- Tells the orange button to turn its LED off
 void readSerialCommands() {
 
-  while (Serial.available() >= 3) {
+  while (Serial.available() >= 6) {
 
     char serialReadByte = Serial.read();
     if (serialReadByte == PKG_BEGIN_CHAR) {
@@ -277,6 +279,9 @@ void readSerialCommands() {
       switch (serialReadByte) {
         case QUERY_CHAR:
           Serial.read();
+          Serial.read();
+          Serial.read();
+          Serial.read();
           Serial.println(QUERY_RESPONSE);
           break;
         
@@ -285,6 +290,7 @@ void readSerialCommands() {
           uint8_t r = CONVERT_RGB_BYTE(Serial.read());
           uint8_t g = CONVERT_RGB_BYTE(Serial.read());
           uint8_t b = CONVERT_RGB_BYTE(Serial.read());
+          Serial.read();
           
           //Serial.print("Setting all LED colours to (");
           //Serial.print(r); Serial.print(","); Serial.print(g); Serial.print(","); Serial.print(b); 
@@ -466,12 +472,12 @@ void readSerialCommands() {
           }
 
           // What command is it?
-          while (Serial.available() < 1);
           serialReadByte = Serial.read();
           
           if (serialReadByte == FLASH_RGB_CHAR) {
-            while(Serial.available() < 1);
             uint8_t t = Serial.read();
+            Serial.read();
+            Serial.read();
 
             buttonAnim->setFrameDelay(MIN_LED_FRAME_TIME_MS);
             buttonAnim->setIsActive(true);
@@ -480,14 +486,20 @@ void readSerialCommands() {
             //Serial.println("Animating button flashing...");
             //Serial.print("Flashing button every "); Serial.print(static_cast<float>(t)/100.0); Serial.println(" seconds");
           }
-          else if (serialReadByte == TURN_OFF_BUTTON_CHAR) {
-            buttonAnim->setIsActive(false);
-            //Serial.println("Turning off button flashing...");
-          }
           else {
-            //Serial.println("No such button command was found.");
+            Serial.read();
+            Serial.read();
+            Serial.read();
+            
+            if (serialReadByte == TURN_OFF_BUTTON_CHAR) {
+            
+              buttonAnim->setIsActive(false);
+              //Serial.println("Turning off button flashing...");
+            }
+            else {
+              //Serial.println("No such button command was found.");
+            }
           }
-          
           break;
         }
 
@@ -496,8 +508,6 @@ void readSerialCommands() {
           break;    
       }
     }
-
-    while (Serial.available() > 0 && Serial.peek() != '|') { Serial.read(); }
   }
 }
 

@@ -82,7 +82,7 @@ std::string ArcadeSerialComm::GetSingleButtonCadenceSerialStr(ButtonType buttonT
 
     switch (cadence) {
         case Off:
-            serialPkt << "X";
+            serialPkt << "XX";
             break;
 
         case Sustained:
@@ -114,6 +114,9 @@ std::string ArcadeSerialComm::GetSingleButtonCadenceSerialStr(ButtonType buttonT
             return "";
     }
 
+    // Filler for stable packet size
+    serialPkt << "XX";
+
     return serialPkt.str();
 }
 
@@ -129,7 +132,7 @@ void ArcadeSerialComm::SetMarqueeColour(const Colour& c, TransitionTimeType time
 
     switch (timeType) {
         case InstantTransition:
-            serialPkt << "A" << r << g << b;
+            serialPkt << "A" << r << g << b << "X";
             break;
 
         case VerySlowTransition:
@@ -267,7 +270,7 @@ void ArcadeSerialComm::FindAndOpenSerial() {
 
         // Check to see if the serial port is the correct one...
         if (this->serialObj->isOpen()) {
-            this->serialObj->write("|QQ");
+            this->serialObj->write("|QQQQQ");
             this->serialObj->read(readStr, expectedStr.size());
             if (readStr == expectedStr) {
                 this->serialObj->setTimeout(serial::Timeout::max(), 0, 0, 0, 0);

@@ -118,6 +118,8 @@ private:
 
     TextLabel2D starTotalLabel;
 
+    bool firstTimeDisplayingAnyKeyLabel;
+
     // Statistics labels
     //TextLabel2DFixedWidth* maxBlocksTextLabel;
     //TextLabel2D maxBlocksValueLabel;
