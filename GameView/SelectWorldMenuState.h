@@ -122,6 +122,7 @@ private:
         const GameWorld* GetWorld() const { return this->gameWorld; }
 
         bool GetIsLocked() const { return this->isLocked; }
+        bool IsUnlockAnimActive() const { return this->unlockAnimActive; }
         void ExecuteLockedAnimation();
         void ExecuteUnlockAnimation();
 
@@ -164,7 +165,10 @@ private:
         ~WorldUnlockAnimationTracker();
 
         bool AreControlsLocked() const;
+        bool IsFinishedAnimating() const;
+
         void Draw(const Camera& camera, double dT, const Texture2D& bgTexture);
+        WorldSelectItem* GetWorldItem() const { return this->worldItem; }
 
     private:
         SelectWorldMenuState* state;
@@ -226,6 +230,7 @@ private:
     void GoBackToMainMenu();
     void MoveToNextWorld();
     void MoveToPrevWorld();
+    void GoIntoWorld();
 
     void Init(const DisplayStateInfo& info);
 

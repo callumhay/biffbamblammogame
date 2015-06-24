@@ -158,8 +158,10 @@ void SelectWorldMenuState::RenderFrame(double dT) {
     // Perform any necessary world unlocking animation
     if (this->worldUnlockAnim != NULL) {
         this->worldUnlockAnim->Draw(camera, dT, *this->postMenuFBObj->GetFBOTexture());
+        if (GameDisplay::IsArcadeModeEnabled() && !this->itemActivated && this->worldUnlockAnim->IsFinishedAnimating()) {
+            this->GoIntoWorld();
+        }
     }
-    
     
     // Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
@@ -356,12 +358,20 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
 
     // If there's an animation going on that locks the controls then exit immediately
     if (this->worldUnlockAnim != NULL) {
-        if (this->worldUnlockAnim->AreControlsLocked()) {
+        if (!this->worldUnlockAnim->IsFinishedAnimating()) {
+            return;
+        }
+        
+        // In arcade mode if the world unlock animation has happened then we automatically go into
+        // the first level of the next world
+        if (this->display->IsArcadeModeEnabled()) {
+            if (!this->itemActivated) {
+                this->GoIntoWorld();
+            }
             return;
         }
     }
 
-    GameSound* sound = this->display->GetSound();
     switch (pressedButton) {
         case GameControl::EscapeButtonAction:
             this->GoBackToMainMenu();
@@ -380,42 +390,14 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
                 WorldSelectItem* selectedItem = this->worldItems[this->selectedItemIdx];
                 assert(selectedItem != NULL);
                 if (selectedItem->GetIsLocked()) {
-
+                    GameSound* sound = this->display->GetSound();
                     sound->PlaySound(GameSound::WorldMenuItemLockedEvent, false);
 
                     // The world is locked... do an animation to shake it around a bit
                     selectedItem->ExecuteLockedAnimation();
                 }
                 else {
-                    static const float ANIMATION_TIME_S = 0.5;
-                    
-                    if (this->display->IsArcadeModeEnabled()) {
-                        
-                        GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
-                        GameViewEventManager::Instance()->ActionArcadePlayerSelectedWorld();
-                        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
-                        sound->StopSound(this->bgSoundLoopID, ANIMATION_TIME_S);
-
-                        std::vector<double> timeVals(7);
-                        timeVals[0] = 0.0; timeVals[1] = 0.1; timeVals[2] = 0.15; timeVals[3] = 0.2; timeVals[4] = 0.25; timeVals[5] = 0.3; timeVals[6] = 0.35;
-                        std::vector<float> flashAlphaVals(timeVals.size());
-                        flashAlphaVals[0] = 0.0; flashAlphaVals[1] = 1.0; flashAlphaVals[2] = 0.0;
-                        flashAlphaVals[3] = 1.0; flashAlphaVals[4] = 0.0; flashAlphaVals[5] = 1.0; flashAlphaVals[6] = 0.0;
-
-                        this->arcadeFlashAnim.SetLerp(timeVals, flashAlphaVals);
-                        this->arcadeFlashAnim.SetRepeat(false);
-
-                        this->goToLevelSelectAlphaAnim.SetLerp(0.1, ANIMATION_TIME_S, 1.0, 0.0);
-                    }
-                    else {
-                        sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
-                        this->goToLevelSelectAlphaAnim.SetLerp(ANIMATION_TIME_S, 0.0);
-                    }
-
-                    this->itemActivated = true;
-                    this->goToLevelSelectAlphaAnim.SetRepeat(false);
-                    this->goToLevelSelectMoveAnim.SetLerp(0.5, Camera::GetWindowWidth());
-                    this->goToLevelSelectMoveAnim.SetRepeat(false);
+                    this->GoIntoWorld();
                 }
             }
             break;
@@ -513,6 +495,39 @@ void SelectWorldMenuState::MoveToPrevWorld() {
     this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
 
     this->display->GetSound()->PlaySound(GameSound::WorldMenuItemChangedSelectionEvent, false);
+}
+
+void SelectWorldMenuState::GoIntoWorld() {
+    static const float ANIMATION_TIME_S = 0.5;
+
+    GameSound* sound = this->display->GetSound();
+    if (GameDisplay::IsArcadeModeEnabled()) {
+
+        GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
+        GameViewEventManager::Instance()->ActionArcadePlayerSelectedWorld();
+        sound->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+        sound->StopSound(this->bgSoundLoopID, ANIMATION_TIME_S);
+
+        std::vector<double> timeVals(7);
+        timeVals[0] = 0.0; timeVals[1] = 0.1; timeVals[2] = 0.15; timeVals[3] = 0.2; timeVals[4] = 0.25; timeVals[5] = 0.3; timeVals[6] = 0.35;
+        std::vector<float> flashAlphaVals(timeVals.size());
+        flashAlphaVals[0] = 0.0; flashAlphaVals[1] = 1.0; flashAlphaVals[2] = 0.0;
+        flashAlphaVals[3] = 1.0; flashAlphaVals[4] = 0.0; flashAlphaVals[5] = 1.0; flashAlphaVals[6] = 0.0;
+
+        this->arcadeFlashAnim.SetLerp(timeVals, flashAlphaVals);
+        this->arcadeFlashAnim.SetRepeat(false);
+
+        this->goToLevelSelectAlphaAnim.SetLerp(0.1, ANIMATION_TIME_S, 1.0, 0.0);
+    }
+    else {
+        sound->PlaySound(GameSound::WorldMenuItemSelectEvent, false);
+        this->goToLevelSelectAlphaAnim.SetLerp(ANIMATION_TIME_S, 0.0);
+    }
+
+    this->itemActivated = true;
+    this->goToLevelSelectAlphaAnim.SetRepeat(false);
+    this->goToLevelSelectMoveAnim.SetLerp(0.5, Camera::GetWindowWidth());
+    this->goToLevelSelectMoveAnim.SetRepeat(false);
 }
 
 void SelectWorldMenuState::Init(const DisplayStateInfo& info) {
@@ -938,6 +953,10 @@ SelectWorldMenuState::WorldUnlockAnimationTracker::~WorldUnlockAnimationTracker(
 
     this->state->display->GetSound()->StopSound(this->worldUnlockSoundID);
     this->worldUnlockSoundID = INVALID_SOUND_ID;
+}
+
+bool SelectWorldMenuState::WorldUnlockAnimationTracker::IsFinishedAnimating() const {
+    return !this->AreControlsLocked() && this->unlockAnimExecuted && !this->worldItem->IsUnlockAnimActive();
 }
 
 bool SelectWorldMenuState::WorldUnlockAnimationTracker::AreControlsLocked() const {
