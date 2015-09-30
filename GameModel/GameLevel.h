@@ -259,6 +259,8 @@ public:
     bool GetAreUnlockStarsPaidFor() const;
     void SetAreUnlockStarsPaidFor(bool paidFor);
 
+    void ClearProgress(bool arcadeMode);
+
     Boss* GetBoss() const {
         return this->boss;
     }

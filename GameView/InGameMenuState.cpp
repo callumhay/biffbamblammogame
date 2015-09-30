@@ -64,7 +64,7 @@ const int InGameMenuState::STAR_HORIZONTAL_GAP = 3;
 const int InGameMenuState::BOSS_ICON_SIZE = 40;
 
 InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
-DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
+DisplayState(display), cfgOptions(GameDisplay::IsArcadeModeEnabled()), renderPipeline(display), nextAction(InGameMenuState::Nothing),
 topMenu(NULL), topMenuEventHandler(NULL), difficultyEventHandler(NULL), difficultyVerifyHandler(NULL),
 restartVerifyHandler(NULL), exitGameVerifyHandler(NULL), returnToMainMenuVerifyHandler(NULL),
 returnToDisplayState(returnToDisplayState), initialDifficultySelected(-1), starTexture(NULL), bossTexture(NULL),
@@ -88,7 +88,7 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(
 	gameModel->SetPause(GameModel::PauseGame);
 
 	// Read the configuration file to figure out how to initialize each of the options
-	this->cfgOptions = ResourceManager::ReadConfigurationOptions(true);
+    this->cfgOptions = ResourceManager::ReadConfigurationOptions(true, GameDisplay::IsArcadeModeEnabled());
 
     const GameLevel* currentLevel = gameModel->GetCurrentLevel();
 

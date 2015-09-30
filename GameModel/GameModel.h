@@ -204,6 +204,7 @@ public:
     void ResetCurrentLevel();
 	void ClearGameState();
     void ClearAllGameProgress();
+    void ClearAllGameProgressNoReload(bool arcadeMode);
 	
     const std::vector<GameWorld*>& GetGameWorlds() const {
         return this->worlds;

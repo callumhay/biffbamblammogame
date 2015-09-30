@@ -68,7 +68,7 @@ public:
     int GetHeight() const;
 
 	void GetPossibleResolutionsList(std::vector<std::string>& resolutions) const;
-    void GetPossibleResolutionsList(std::vector<std::pair<int, int> >& resolutionWHPairs) const;
+    static void GetPossibleResolutionsList(std::vector<std::pair<int, int> >& resolutionWHPairs);
 
 private:
 	static WindowManager* instance;

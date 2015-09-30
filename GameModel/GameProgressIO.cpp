@@ -37,7 +37,7 @@
 const char* GameProgressIO::PROGRESS_FILENAME = "bbb_progress.dat";
 
 bool GameProgressIO::LoadGameProgress(GameModel* model) {
-#define ON_ERROR_CLEAN_UP_AND_EXIT(condition) if (!(condition)) { debug_output("ERROR WHILE LOADING GAME PROGRESS!"); inFile.close(); return false; }
+#define ON_ERROR_CLEAN_UP_AND_EXIT(condition) if (!(condition)) { debug_output("ERROR WHILE LOADING GAME PROGRESS!"); try { inFile.close(); } catch(...) {} return false; }
 
     if (model == NULL) {
         assert(false);
@@ -51,11 +51,11 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
 	if (success) {
 
         // Read in the progress file and set all the values across the model
-        std::string nameStr;
-        bool isUnlocked;
-        int numWorlds;
-        long highScore;
-        bool starCostPaidFor;
+        std::string nameStr = "";
+        bool isUnlocked = false;
+        int numWorlds = 0;
+        long highScore = 0;
+        bool starCostPaidFor = false;
 
         ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> numWorlds);
         std::getline(inFile, nameStr);  // finish reading the line
@@ -76,7 +76,7 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
             ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> isUnlocked);
             currWorld->SetHasBeenUnlocked(isUnlocked);
 
-            int numLevels;
+            int numLevels = 0;
             ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> numLevels);
             std::getline(inFile, nameStr);  // finish reading the line
             
@@ -92,6 +92,9 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
                     }
                     else if (numLevels == static_cast<int>(currWorld->GetNumLevels())) {
                         currLevel = currWorld->GetLevelByIndex(levelIdx);
+                        if (currLevel == NULL) {
+                            continue;
+                        }
                     }
                 }
 
@@ -109,7 +112,7 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
             currWorld->UpdateLastLevelPassedIndex();
         }
         
-        inFile.close();
+        try { inFile.close(); } catch(...) {}
     }
     else {
         // Failed to read from the progress file, create a new one

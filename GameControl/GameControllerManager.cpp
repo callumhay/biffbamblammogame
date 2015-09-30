@@ -83,11 +83,16 @@ void GameControllerManager::InitAllControllers(GameModel* model, GameDisplay* di
 
 	this->GetXBox360Controller(0);
     this->GetKinectController();
+
+    assert(!this->gameControllers.empty());
 }
 
 void GameControllerManager::SetArcadeSerialPort(const std::string& serialPort) {
     if (this->gameControllers[ARCADE_INDEX] != NULL) {
-        static_cast<ArcadeController*>(this->gameControllers[ARCADE_INDEX])->SetSerialPort(serialPort);
+        ArcadeController* arcadeController = dynamic_cast<ArcadeController*>(this->gameControllers[ARCADE_INDEX]);
+        if (arcadeController != NULL) {
+            arcadeController->SetSerialPort(serialPort);
+        }
     }
 }
 
@@ -168,11 +173,31 @@ void GameControllerManager::TryToLoadPlugAndPlayControllers() {
 	assert(this->model != NULL);
 	assert(this->display != NULL);
 
-	if (this->ControllersCanStillPlugAndPlay()) {
-		// Load any plug and play controllers if possible...
-		GameControllerManager::GetXBox360Controller(0);
-        GameControllerManager::GetKinectController();
-	}
+	// Load any plug and play controllers if possible...
+    if (this->gameControllers[XBOX_360_INDEX] == NULL && XBox360Controller::IsConnected(0)) {
+	    GameControllerManager::GetXBox360Controller(0);
+    }
+
+    if (this->gameControllers[ARCADE_INDEX] == NULL && ArcadeController::IsConnected(0)) {
+        BBBGameController* arcadeController = GameControllerManager::GetArcadeController();
+        if (arcadeController != NULL) {
+            // Remove any keyboard controller
+            BBBGameController* keyboardController = this->gameControllers[KEYBOARD_SDL_INDEX];
+            if (keyboardController != NULL) {
+                
+                this->gameControllers[KEYBOARD_SDL_INDEX] = NULL;
+                for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end();) {
+                    if (keyboardController == *iter) {
+                        this->loadedGameControllers.erase(iter);
+                        break;
+                    }
+                }
+
+                delete keyboardController;
+                keyboardController = NULL;
+            }
+        }
+    }
 }
 
 void GameControllerManager::SetControllerSensitivity(int sensitivity) {

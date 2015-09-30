@@ -34,6 +34,7 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "BBBGameController.h"
+#include "ArcadeController.h"
 
 class GameModel;
 class GameDisplay;
@@ -101,7 +102,7 @@ private:
 };
 
 inline bool GameControllerManager::ControllersCanStillPlugAndPlay() const {
-	return (this->gameControllers[XBOX_360_INDEX] == NULL || this->gameControllers[KINECT_INDEX] == NULL);
+	return (this->gameControllers[XBOX_360_INDEX] == NULL || this->gameControllers[ARCADE_INDEX] == NULL);
 }
 
 /**
@@ -113,7 +114,8 @@ inline bool GameControllerManager::ProcessControllers(double dT) {
 	BBBGameController* currController;
 	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end();) {
 		currController = *iter;
-		// Make sure the controller is still connected...
+		
+        // Make sure the controller is still connected...
 		if (currController->IsConnected()) {
 			quit |= currController->ProcessState(dT);
 			++iter;
@@ -126,6 +128,11 @@ inline bool GameControllerManager::ProcessControllers(double dT) {
 					break;
 				}
 			}
+            if (dynamic_cast<ArcadeController*>(currController) != NULL) {
+                // Load the keyboard controller instead...
+                this->GetSDLKeyboardGameController();
+            }
+
 			delete currController;
 			currController = NULL;
 			

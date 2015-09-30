@@ -232,7 +232,7 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
 }
 
 void TutorialEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) {
-    if (livesLeftBefore != livesLeftAfter) {
+    if (livesLeftBefore != livesLeftAfter && !GameDisplay::IsArcadeModeEnabled()) {
 
         // We don't let the player lose or gain any lives - i.e., they sustain the starting
         // number of lives throughout the tutorial

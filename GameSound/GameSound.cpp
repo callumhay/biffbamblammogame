@@ -74,14 +74,14 @@ GameSound::~GameSound() {
     assert(this->globalEffects.empty());
 }
 
-bool GameSound::Init() {
+bool GameSound::Init(bool arcadeMode) {
     // Load from the game's MSF file, it defines where all sounds can be found and their settings
     if (!this->LoadFromMSF()) {
         return false;
     }
 
     // Set the master volume from the initial configuration options
-    ConfigOptions cfgOptions = ResourceManager::ReadConfigurationOptions(true);
+    ConfigOptions cfgOptions = ResourceManager::ReadConfigurationOptions(true, arcadeMode);
     this->SetMasterVolume(1.0f);
     this->SetMusicVolume(static_cast<float>(cfgOptions.GetMusicVolume()) / 100.0f);
     this->SetSFXVolume(static_cast<float>(cfgOptions.GetSFXVolume()) / 100.0f);

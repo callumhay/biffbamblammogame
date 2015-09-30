@@ -43,6 +43,7 @@ public:
     ArcadeController(GameModel* model, GameDisplay* display);
     ~ArcadeController();
 
+    static bool IsConnected(int joystickIdx);
     bool IsConnected() const;
 
     // ****NOTE: IF YOU IMPLEMENT VIBRATION:
@@ -58,7 +59,7 @@ private:
     ArcadeControllerEventsListener* eventsListener;
     ArcadeSerialComm* serialComm;
 
-    SDL_Joystick* joystick;
+    std::vector<SDL_Joystick*> joysticks;
     Sint16 joystickX, joystickY;
 
     bool leftActionOn;
@@ -85,8 +86,20 @@ private:
 	DISALLOW_COPY_AND_ASSIGN(ArcadeController);
 };
 
+inline bool ArcadeController::IsConnected(int joystickIdx) {
+    return SDL_JoystickOpened(joystickIdx) == 1;
+}
+
 inline bool ArcadeController::IsConnected() const {
-    return this->joystick != NULL && SDL_JoystickOpened(SDL_JoystickIndex(this->joystick)) == 1;
+    bool anyJoystickConnected = false;
+    for (int i = 0; i < static_cast<int>(this->joysticks.size()); i++) {
+        if (ArcadeController::IsConnected(SDL_JoystickIndex(this->joysticks[i]))) {
+            anyJoystickConnected = true;
+            break;
+        }
+    }
+
+    return !this->joysticks.empty() && anyJoystickConnected;
 }
 
 inline bool ArcadeController::isFireActionOn() const {

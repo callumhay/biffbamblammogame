@@ -364,3 +364,13 @@ void GameWorld::UpdateLastLevelPassedIndex() {
         this->lastLevelPassedIndex = NO_LEVEL_PASSED;
     }
 }
+
+void GameWorld::ClearProgress(bool arcadeMode) {
+    this->SetHasBeenUnlocked(false);
+    
+    for (int i = 0; i < static_cast<int>(this->loadedLevels.size()); i++) {
+        GameLevel* level = this->loadedLevels[i];
+        level->ClearProgress(arcadeMode);
+    }
+    this->lastLevelPassedIndex = NO_LEVEL_PASSED;
+}

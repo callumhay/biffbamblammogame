@@ -426,7 +426,7 @@ pointTallySoundID(INVALID_SOUND_ID), firstTimeDisplayingAnyKeyLabel(true) {
 
     // Depending on whether the level was the tutorial level or not and whether the player has 
     // already passed the tutorial before, we create the difficulty choice pane
-    if (gameModel->IsCurrentLevelTheTutorialLevel()) {
+    if (!GameDisplay::IsArcadeModeEnabled() && gameModel->IsCurrentLevelTheTutorialLevel()) {
  
         GameLevel* tutorialLevel = gameModel->GetCurrentLevel();
         if (tutorialLevel->GetPrevHighScore() == 0) {
@@ -1132,7 +1132,7 @@ void LevelCompleteSummaryDisplayState::DifficultyPaneEventHandler::OptionSelecte
         
         if (optionText.compare(difficultyOptions[i]) == 0) {
             // Set the difficulty to the one selected...
-            ConfigOptions cfgOptions = ResourceManager::ReadConfigurationOptions(true);
+            ConfigOptions cfgOptions = ResourceManager::ReadConfigurationOptions(true, GameDisplay::IsArcadeModeEnabled());
            
             GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(i);
             cfgOptions.SetDifficulty(difficultyToSet);

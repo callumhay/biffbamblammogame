@@ -194,7 +194,7 @@ void WindowManager::GetPossibleResolutionsList(std::vector<std::string>& resolut
     assert(resPairs.size() == resolutions.size());
 }
 
-void WindowManager::GetPossibleResolutionsList(std::vector<std::pair<int, int> >& resolutionWHPairs) const {
+void WindowManager::GetPossibleResolutionsList(std::vector<std::pair<int, int> >& resolutionWHPairs) {
     std::set<std::pair<int, int> > resolutionSet;
 
     // cross-compatibility issue

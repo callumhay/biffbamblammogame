@@ -329,7 +329,7 @@ public:
     ~GameSound();
 
     // Initialization function (MUST BE CALLED FIRST!)
-    bool Init();
+    bool Init(bool arcadeMode);
 
     // Tick function (updates the sounds that are attached to moving objects and any sound animations)
     void Tick(double dT);

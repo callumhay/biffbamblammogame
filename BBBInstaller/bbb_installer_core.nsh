@@ -5,7 +5,7 @@ RequestExecutionLevel admin
 
 Function create_desktop_shortcut_action
 SetOutPath $INSTDIR
-CreateShortcut "$DESKTOP\Biff Bam Blammo.lnk" "$INSTDIR\BiffBamBlammo.exe"
+CreateShortcut "$DESKTOP\Biff Bam Blammo.lnk" "$INSTDIR\BiffBamBlammo.exe" "${BBB_SHORTCUT_PARAMETERS}"
 FunctionEnd
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"

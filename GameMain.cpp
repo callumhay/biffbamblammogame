@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
 
 	// Set the default config options - these will be read from and written to
 	// the .ini file as we need them
-	ConfigOptions initCfgOptions;
+	ConfigOptions initCfgOptions(arcadeMode);
 	// ********************************************************************
 
 	// We continue to run the game until a definitive quit has been issued
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
 	while (!quitGame) {
 
 		// Read the .ini file options (used to initialize various settings in the game)
-		initCfgOptions = ResourceManager::ReadConfigurationOptions(true);
+		initCfgOptions = ResourceManager::ReadConfigurationOptions(true, arcadeMode);
 
 		// Setup the window - this initializes OpenGL so that OGL calls may be made after this
 		if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
         // Load basic default in-memory sounds
         LoadingScreen::GetInstance()->UpdateLoadingScreenWithRandomLoadStr();
         sound = new GameSound();
-        if (sound->Init()) {
+        if (sound->Init(arcadeMode)) {
             sound->LoadGlobalSounds();
             sound->SetSFXVolume(static_cast<float>(initCfgOptions.GetSFXVolume()) / 100.0f);
             sound->SetMusicVolume(static_cast<float>(initCfgOptions.GetMusicVolume()) / 100.0f);
@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
 	// Clean up all file and shader resources, ORDER MATTERS HERE!
 
 	// Write whatever the current state of the configuration is back to the config (.ini) file
-	initCfgOptions = ResourceManager::ReadConfigurationOptions(true);
+	initCfgOptions = ResourceManager::ReadConfigurationOptions(true, arcadeMode);
 	bool iniWriteResult = ResourceManager::WriteConfigurationOptionsToFile(initCfgOptions);
     UNUSED_VARIABLE(iniWriteResult);
 	assert(iniWriteResult);

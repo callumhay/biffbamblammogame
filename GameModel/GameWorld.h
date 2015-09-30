@@ -144,6 +144,8 @@ public:
     bool GetHasBeenUnlocked() const;
     void SetHasBeenUnlocked(bool unlocked);
 
+    void ClearProgress(bool arcadeMode);
+
 private:
 	bool isLoaded;                          // Has this world been loaded into memory or not?
 	std::string worldFilepath;              // Path to the world defintion file

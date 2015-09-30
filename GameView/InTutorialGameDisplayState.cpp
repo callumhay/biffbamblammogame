@@ -51,16 +51,19 @@ DisplayState(display), renderPipeline(display), beforeTutorialDifficulty(display
 tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD(BallBoostModel::GetMaxBulletTimeDuration()),
 tutorialAttentionEffect(display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()) {
 
+    // If arcade mode is enabled then we aren't as nice to the player during the tutorial...
+    bool arcadeMode = GameDisplay::IsArcadeModeEnabled();
+
     GameModel* model = this->display->GetModel();
     assert(model != NULL);
 
     // Disable the paddle release timer for the tutorial
-    PlayerPaddle::SetEnablePaddleReleaseTimer(false);
+    PlayerPaddle::SetEnablePaddleReleaseTimer(arcadeMode);
     // Make the boost time longer for the tutorial
     BallBoostModel::SetMaxBulletTimeDuration(10.0);
     
     // Set the life HUD to display an infinite number of lives
-    this->display->GetAssets()->GetLifeHUD()->ToggleInfiniteLivesDisplay(true);
+    this->display->GetAssets()->GetLifeHUD()->ToggleInfiniteLivesDisplay(!arcadeMode);
 
 	// Clear up any stuff to an initial state in cases where things might still 
 	// be set unchanged from a previously loaded game

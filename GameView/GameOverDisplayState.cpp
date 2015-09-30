@@ -97,7 +97,7 @@ void GameOverDisplayState::RenderFrame(double dT) {
 void GameOverDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
                                          const GameControl::ActionMagnitude& magnitude) {
 
-    if (GameDisplay::IsArcadeModeEnabled() && !this->continueButtonPushed) {
+    if (GameDisplay::IsArcadeModeEnabled() && !this->continueButtonPushed && !GameControl::IsDirectionActionButton(pressedButton)) {
         if (this->currState == IdleState || this->currState == FadeOutState) {
             this->display->GetSound()->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
             this->continueButtonPushed = true;

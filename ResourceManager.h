@@ -97,7 +97,7 @@ public:
     static void SetLoadDir(const char* loadDir);
     static inline const std::string& GetLoadDir() { return baseLoadDir; }
 
-	static ConfigOptions ReadConfigurationOptions(bool forceReadFromFile);
+	static ConfigOptions ReadConfigurationOptions(bool forceReadFromFile, bool arcadeMode);
 	static bool WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions);
 
 	// Basic loading functions ****************************************************************************************************

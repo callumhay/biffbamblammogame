@@ -1949,6 +1949,11 @@ void GameLevel::ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& trigg
     }
 }
 
+void GameLevel::ClearProgress(bool arcadeMode) {
+    this->SetAreUnlockStarsPaidFor(arcadeMode);
+    this->SetHighScore(0, !arcadeMode);
+}
+
 /**
  * Collides the given boss AABB with this level's simplified boundaries. If there's
  * a collision the function returns true and the correction vector required to move the boss

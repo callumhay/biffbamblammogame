@@ -2205,10 +2205,6 @@
 						RelativePath=".\GameModel\NouveauBossAIStates.h"
 						>
 					</File>
-					<File
-						RelativePath=".\GameModel\TargetedRefractiveBossBodyPart.h"
-						>
-					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -2255,6 +2251,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\NouveauBossAIStates.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TargetedRefractiveBossBodyPart.h"
 						>
 					</File>
 				</Filter>
@@ -2830,38 +2830,38 @@
 					RelativePath=".\GameControl\XBox360Controller.h"
 					>
 				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				>
-				<File
-					RelativePath=".\GameControl\ArcadeController.cpp"
+				<Filter
+					Name="Source Files"
 					>
-				</File>
-				<File
-					RelativePath=".\GameControl\ArcadeControllerEventsListener.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameControl\ArcadeSerialComm.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameControl\GameControllerManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameControl\KeyboardSDLController.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameControl\KinectController.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameControl\XBox360Controller.cpp"
-					>
-				</File>
+					<File
+						RelativePath=".\GameControl\ArcadeController.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameControl\ArcadeControllerEventsListener.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameControl\ArcadeSerialComm.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameControl\GameControllerManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameControl\KeyboardSDLController.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameControl\KinectController.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameControl\XBox360Controller.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Serial"

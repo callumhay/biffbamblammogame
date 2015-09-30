@@ -46,7 +46,7 @@
 class ConfigOptions {
 	// Befriend the reading and writing functions in the resource manager - we want the
 	// resource manager to be able to use this class easily
-	friend ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile);
+	friend ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile, bool arcadeMode);
 	friend bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& configOptions);
 
 public:
@@ -56,7 +56,7 @@ public:
 	static const int MIN_VOLUME;
 	static const int MAX_VOLUME;
 
-	ConfigOptions();
+	ConfigOptions(bool arcadeMode);
 	~ConfigOptions() {}
 	
 	// Accessor functions for all of the configuration options
@@ -150,7 +150,7 @@ private:
     static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
     static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
 
-	static ConfigOptions* ReadConfigOptionsFromFile();
+	static ConfigOptions* ReadConfigOptionsFromFile(bool arcadeMode);
 	bool WriteConfigOptionsToFile() const;
 
     static const char* SLINGSHOT_STR;

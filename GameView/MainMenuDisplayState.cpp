@@ -76,7 +76,7 @@ const double MainMenuDisplayState::FADE_IN_TIME_IN_SECS  = 0.75;
 const double MainMenuDisplayState::FADE_OUT_TIME_IN_SECS = 1.25;
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info) : 
-DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
+DisplayState(display), cfgOptions(GameDisplay::IsArcadeModeEnabled()), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
 eraseProgVerifyHandler(NULL), musicVolItemHandler(NULL), sfxVolItemHandler(NULL), postMenuFBObj(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
@@ -108,7 +108,7 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 	this->InitializeESPEffects();
 
 	// Read the configuration file to figure out how to initialize each of the options
-	this->cfgOptions = ResourceManager::ReadConfigurationOptions(true);
+    this->cfgOptions = ResourceManager::ReadConfigurationOptions(true, GameDisplay::IsArcadeModeEnabled());
 
 	// Setup handlers for menus and initialize the menus
 	this->mainMenuEventHandler    = new MainMenuEventHandler(this);
@@ -156,6 +156,10 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 
     if (this->display->IsArcadeModeEnabled()) {
         
+        // Always clear the game progress whenever we come back to the main menu in arcade mode
+        GameModel* model = this->display->GetModel();
+        model->ClearAllGameProgressNoReload(true);
+
         this->arcadePressButtonLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
             GameFontAssetsManager::Big), "- Press Any Button to Play -");
         this->arcadePressButtonLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);

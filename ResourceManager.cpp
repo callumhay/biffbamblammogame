@@ -736,7 +736,7 @@ void ResourceManager::SetLoadDir(const char* loadDir) {
  * where the file could not be read a new one is created with default settings and
  * the values from it will be returned.
  */
-ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile) {
+ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile, bool arcadeMode) {
 	
 	// If we don't have to read from file and we already
 	// loaded the configuration options then return them immediately
@@ -752,13 +752,13 @@ ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile) 
 		ResourceManager::configOptions = NULL;
 	}
 	
-	ResourceManager::configOptions = ConfigOptions::ReadConfigOptionsFromFile();
+	ResourceManager::configOptions = ConfigOptions::ReadConfigOptionsFromFile(arcadeMode);
 	if (ResourceManager::configOptions == NULL) {
 		// Couldn't find, open or properly read the file so try to make a 
 		// new one with the default settings and values in it
 		
-		ResourceManager::configOptions = new ConfigOptions(); // By calling the default construtor 
-                                                              // we populate the object with default settings
+		ResourceManager::configOptions = new ConfigOptions(arcadeMode); // By calling the default constructor 
+                                                                        // we populate the object with default settings
 
 		bool writeResult = ResourceManager::configOptions->WriteConfigOptionsToFile();
         UNUSED_VARIABLE(writeResult);

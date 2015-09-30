@@ -61,7 +61,8 @@ areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()),
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
 droppedLifeForMaxMultiplier(false), bottomSafetyNet(NULL), topSafetyNet(NULL),
 ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty),
-ballBoostMode(ballBoostMode), sound(sound) {
+ballBoostMode(ballBoostMode), sound(sound), numInterimBlocksDestroyed(0), maxInterimBlocksDestroyed(0),
+numGoodItemsAcquired(0), numNeutralItemsAcquired(0), numBadItemsAcquired(0), totalLevelTimeInSeconds(0.0) {
 	
     assert(sound != NULL);
 
@@ -369,6 +370,15 @@ void GameModel::ClearAllGameProgress() {
 
     // Reload all of the worlds...
     this->LoadWorldsFromFile();
+}
+
+void GameModel::ClearAllGameProgressNoReload(bool arcadeMode) {
+    for (int i = 0; i < static_cast<int>(this->worlds.size()); i++) {
+        GameWorld* world = this->worlds[i];
+        world->ClearProgress(arcadeMode);
+    }
+    // Always keep the first world unlocked
+    this->worlds.front()->SetHasBeenUnlocked(true);
 }
 
 int GameModel::GetTotalStarsCollectedInGame() const {

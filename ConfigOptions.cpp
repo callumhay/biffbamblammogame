@@ -30,6 +30,7 @@
  */
 
 #include "ConfigOptions.h"
+#include "WindowManager.h"
 
 const char* ConfigOptions::INI_FILEPATH           = "BiffBamBlammo.ini";
 
@@ -65,11 +66,36 @@ const char* ConfigOptions::EASY_DIFFICULTY_STR      = "easy";
 const char* ConfigOptions::MEDIUM_DIFFICULTY_STR    = "medium";
 const char* ConfigOptions::HARD_DIFFICULTY_STR      = "hard";
 
-ConfigOptions::ConfigOptions() : 
+ConfigOptions::ConfigOptions(bool arcadeMode) : 
 windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
-fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), 
-musicVolume(ConfigOptions::DEFAULT_MUSIC_VOLUME), sfxVolume(ConfigOptions::DEFAULT_SFX_VOLUME),
-invertBallBoost(DEFAULT_INVERT_BALL_BOOST_TOGGLE), ballBoostMode(DEFAULT_BALL_BOOST_MODE), difficulty(DEFAULT_DIFFICULTY) {
+fullscreenIsOn((arcadeMode ? true : DEFAULT_FULLSCREEN_TOGGLE)), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), 
+musicVolume(DEFAULT_MUSIC_VOLUME), sfxVolume(DEFAULT_SFX_VOLUME),
+invertBallBoost(DEFAULT_INVERT_BALL_BOOST_TOGGLE), ballBoostMode((arcadeMode ? BallBoostModel::PressToRelease : DEFAULT_BALL_BOOST_MODE)), 
+difficulty(DEFAULT_DIFFICULTY) {
+
+    // Match the screen resolution in arcade mode
+    if (arcadeMode) {
+        std::vector<std::pair<int, int> > resPairs;
+        WindowManager::GetPossibleResolutionsList(resPairs);
+        if (!resPairs.empty()) {
+            // Choose the largest possible resolution
+            int largest = -1;
+            int largestIdx = -1;
+            for (int i = 0; i < static_cast<int>(resPairs.size()); i++) {
+                if (resPairs[i].first > largest) {
+                    largest = resPairs[i].first;
+                    largestIdx = i;
+                }
+            }
+
+            this->windowWidth = resPairs[largestIdx].first;
+            this->windowHeight = resPairs[largestIdx].second;
+        }
+        else {
+            assert(false);
+        }
+    }
+
 }
 
 /**
@@ -123,7 +149,7 @@ std::vector<std::string> ConfigOptions::GetOnOffItems() {
  * Returns: A heap object pointer to a set of configurations created from reading
  * the .ini file on disk, NULL otherwise.
  */
-ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
+ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile(bool arcadeMode) {
 
 	// Open the .ini file off disk
 	std::ifstream inFile;
@@ -136,7 +162,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 
 	// This will load the object with default values - in cases of errors
 	// while we read from the .ini, we can always just use the defaults
-	ConfigOptions* cfgOptions = new ConfigOptions();
+	ConfigOptions* cfgOptions = new ConfigOptions(arcadeMode);
 
 	// Read in all the configuration values
 	std::string currStr;	// stores the currently read string from file

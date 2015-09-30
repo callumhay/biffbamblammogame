@@ -8,7 +8,7 @@
 
 ArcadeController::ArcadeController(GameModel* model, GameDisplay* display) : 
 KeyboardSDLController(model, display), eventsListener(NULL), 
-serialComm(new ArcadeSerialComm()), joystick(NULL), joystickX(0), joystickY(0), fireKey(SDLK_SPACE), boostKey(SDLK_RETURN) {
+serialComm(new ArcadeSerialComm()), joystickX(0), joystickY(0), fireKey(SDLK_SPACE), boostKey(SDLK_RETURN) {
 
     this->eventsListener = new ArcadeControllerEventsListener(display, *this->serialComm);
 
@@ -16,7 +16,18 @@ serialComm(new ArcadeSerialComm()), joystick(NULL), joystickX(0), joystickY(0), 
         this->downActionOn = this->specialDirOn = false;
     this->directionMagnitudePercentLeftRight = this->directionMagnitudePercentUpDown = 0;
 
-    this->joystick = SDL_JoystickOpen(0);
+    const int numJoysticks = SDL_NumJoysticks();
+    this->joysticks.reserve(numJoysticks);
+    for (int i = 0; i < numJoysticks; i++) {
+        SDL_Joystick* joystick = SDL_JoystickOpen(i);
+        if (joystick != NULL) {
+            this->joysticks.push_back(joystick);
+        }
+        else {
+            assert(false);
+        }
+    }
+
     SDL_JoystickEventState(SDL_ENABLE);
 
     GameEventManager::Instance()->RegisterGameEventListener(this->eventsListener);
@@ -24,10 +35,10 @@ serialComm(new ArcadeSerialComm()), joystick(NULL), joystickX(0), joystickY(0), 
 }
 
 ArcadeController::~ArcadeController() {
-    if (this->joystick != NULL) {
-        SDL_JoystickClose(this->joystick);
-        this->joystick = NULL;
+    for (int i = 0; i < static_cast<int>(this->joysticks.size()); i++) {
+        SDL_JoystickClose(this->joysticks[i]);
     }
+    this->joysticks.clear();
     SDL_JoystickEventState(SDL_DISABLE);
 
     GameEventManager::Instance()->UnregisterGameEventListener(this->eventsListener);
@@ -119,10 +130,13 @@ void ArcadeController::SetSerialPort(const std::string& serialPort) {
 }
 
 void ArcadeController::JoystickMotion(const SDL_JoyAxisEvent& joyAxisEvent) {
-    if (this->joystick == NULL || joyAxisEvent.which != SDL_JoystickIndex(this->joystick)) {
+    SDL_Joystick* currJoystick = SDL_JoystickOpen(joyAxisEvent.which);
+
+    if (currJoystick == NULL || this->joysticks.empty() || SDL_JoystickIndex(currJoystick) >= static_cast<int>(this->joysticks.size())) {
         return;
     }
-    assert(SDL_JoystickNumAxes(this->joystick) >= 2);
+
+    assert(SDL_JoystickNumAxes(currJoystick) >= 2);
 
     Sint16 sensitivityX = 5000;
     Sint16 sensitivityY = 4000;
@@ -137,12 +151,12 @@ void ArcadeController::JoystickMotion(const SDL_JoyAxisEvent& joyAxisEvent) {
 
     if (joyAxisEvent.axis == 0) {
         this->joystickX = abs(joyAxisEvent.value) >= sensitivityX ? joyAxisEvent.value : 0;
-        int tempY = SDL_JoystickGetAxis(this->joystick, 1);
+        int tempY = SDL_JoystickGetAxis(currJoystick, 1);
         this->joystickY = abs(tempY) >= sensitivityY ? tempY : 0;
     }
     else {
         this->joystickY = abs(joyAxisEvent.value) >= sensitivityY ? joyAxisEvent.value : 0;
-        int tempX = SDL_JoystickGetAxis(this->joystick, 0);
+        int tempX = SDL_JoystickGetAxis(currJoystick, 0);
         this->joystickX = abs(tempX) >= sensitivityX ? tempX : 0;
     }
 
