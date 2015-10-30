@@ -47,6 +47,8 @@ public:
     virtual void ArcadeWaitingForPlayerState(bool entered) = 0;
     virtual void ArcadePlayerHitStartGame() = 0;
     virtual void ArcadePlayerSelectedWorld() = 0;
+    virtual void ArcadePlayerHitContinue() = 0;
+    virtual void ArcadePlayerHitSummaryConfirm() = 0;
 
     virtual void ShootBallTutorialHintShown(bool shown) = 0;
 

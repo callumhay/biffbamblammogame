@@ -283,6 +283,8 @@ public:
         levelAABB.SetMax(Point2D(this->GetLevelUnitWidth(), this->GetLevelUnitHeight()));
     }
 
+    long GetScoreForNumStars(int numStars) const;
+
 private:
 	// Map of the pairings of Tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active

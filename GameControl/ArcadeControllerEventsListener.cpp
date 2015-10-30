@@ -40,7 +40,7 @@ typedef ArcadeControllerEventsListener ACEL;
 const unsigned long ACEL::MARQUEE_COLOUR_MAX_NO_UPDATE_TIME_MS = 5000;
 
 ACEL::ArcadeControllerEventsListener(GameDisplay* display, ArcadeSerialComm& serialComm) : display(display),
-serialComm(serialComm), defaultMarqueeColour(25.0/255.0, 25.0/255.0, 25.0/255.0), 
+serialComm(serialComm), defaultMarqueeColour(128.0/255.0, 128.0/255.0, 128.0/255.0), 
 timeOfLastMarqueeColourUpdate(0) {
 
     this->SetMarqueeColour(this->defaultMarqueeColour, ArcadeSerialComm::InstantTransition);
@@ -376,6 +376,14 @@ void ACEL::ArcadePlayerHitStartGame() {
 
 void ACEL::ArcadePlayerSelectedWorld() {
     this->serialComm.SetMarqueeFlash(Colour(1, 1, 1), ArcadeSerialComm::VeryFastMarqueeFlash, ArcadeSerialComm::ThreeFlashes, true);
+}
+
+void ACEL::ArcadePlayerHitContinue() {
+    this->serialComm.SetMarqueeFlash(Colour(1, 1, 1), ArcadeSerialComm::VeryFastMarqueeFlash, ArcadeSerialComm::OneFlash, true);
+}
+
+void ACEL::ArcadePlayerHitSummaryConfirm() {
+    this->serialComm.SetMarqueeFlash(Colour(1, 1, 1), ArcadeSerialComm::FastMarqueeFlash, ArcadeSerialComm::OneFlash, true);
 }
 
 void ACEL::ShootBallTutorialHintShown(bool shown) {

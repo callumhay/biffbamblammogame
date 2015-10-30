@@ -155,6 +155,11 @@ public:
 		this->lastRasterWidth = this->font->GetWidth(this->text);
 	}
 
+    void SetCenter(const Point2D& p) {
+        float width = this->GetLastRasterWidth();
+        this->topLeftCorner = p - Vector2D(width/2.0, -this->GetHeight()/2.0);
+    }
+
 	// Obtain the height of this label
 	float GetHeight() const {
 		return this->scale * static_cast<float>(this->font->GetHeight());

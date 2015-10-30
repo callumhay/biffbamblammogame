@@ -267,6 +267,7 @@ private:
     bool changeToBlammopediaState;
     bool changeToLevelSelectState;
     bool changeToCreditsState;
+    bool changeToLeaderboardState;
 
     //TODO? static const int BG_SOUND_FADEOUT_IN_MILLISECS = 1000;
     SoundID bgLoopedSoundID;
@@ -274,6 +275,7 @@ private:
     // Arcade mode members
     TextLabel2D arcadePressButtonLabel;
     AnimationMultiLerp<ColourRGBA> arcadeLabelColourAnimation;
+    double timeUntilLeaderboard;
 
     void StartGame();
     void GoToWorldSelectionScreen();

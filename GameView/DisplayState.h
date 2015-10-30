@@ -54,7 +54,6 @@ public:
         info.doAnimatedFadeIn = doAnimatedFadeIn;
         return info;
     }
-
     static DisplayStateInfo BuildSelectWorldInfo(int worldSelectionIdx) {
         DisplayStateInfo info;
         info.worldSelectionIdx = worldSelectionIdx;
@@ -72,6 +71,11 @@ public:
         info.doBasicLevelUnlockAnim = doBasicUnlockAnim;
         return info;
     }
+    static DisplayStateInfo BuildHighScoreEntryInfo(long highScore) {
+        DisplayStateInfo info;
+        info.highScore = highScore;
+        return info;
+    }
 
     int GetWorldSelectionIndex() const { return this->worldSelectionIdx; }
     int GetWorldUnlockIndex() const { return this->worldUnlockIdx; }
@@ -79,10 +83,12 @@ public:
     bool GetDoBasicLevelUnlockAnimation() const { return this->doBasicLevelUnlockAnim; }
     bool GetDoAnimatedFadeIn() const { return this->doAnimatedFadeIn; }
 
+    long GetHighScore() const { return this->highScore; }
 private:
     int worldSelectionIdx;
     int worldUnlockIdx;
     int levelSelectionIdx;
+    long highScore;
     bool doBasicLevelUnlockAnim;
     bool doAnimatedFadeIn;
 };
@@ -92,7 +98,7 @@ class DisplayState {
 public:
 	enum DisplayStateType { NoState, MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart,  
                             InTutorialGame, InGame, InGameBossLevel, InGameMenu, LevelEnd, LevelCompleteSummary,
-                            BossLevelCompleteSummary, GameComplete, GameOver, Credits };
+                            BossLevelCompleteSummary, GameComplete, GameOver, HighScoreEntry, Credits };
 
     DisplayState(GameDisplay* display);
     virtual ~DisplayState();

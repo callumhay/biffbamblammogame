@@ -255,6 +255,7 @@ public:
 	long GetScore() const {
 		return this->currPlayerScore;
 	}
+    long GetTotalBestScore(bool arcadeMode) const;
 
     int GetNumStarsAwarded() const {
         return this->numStarsAwarded;

@@ -75,13 +75,15 @@ const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
 const double MainMenuDisplayState::FADE_IN_TIME_IN_SECS  = 0.75;
 const double MainMenuDisplayState::FADE_OUT_TIME_IN_SECS = 1.25;
 
+#define ARCADE_GOTO_LEADERBOARD_TIME_SECS 300.0
+
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display, const DisplayStateInfo& info) : 
 DisplayState(display), cfgOptions(GameDisplay::IsArcadeModeEnabled()), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), selectListItemsHandler(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), quitVerifyHandler(NULL), particleEventHandler(NULL),
 eraseProgVerifyHandler(NULL), musicVolItemHandler(NULL), sfxVolItemHandler(NULL), postMenuFBObj(NULL),
-changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false),
+changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false), changeToCreditsState(false), changeToLeaderboardState(false),
 menuFBO(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
-musicVolumeMenuItem(NULL), sfxVolumeMenuItem(NULL),
+musicVolumeMenuItem(NULL), sfxVolumeMenuItem(NULL), timeUntilLeaderboard(ARCADE_GOTO_LEADERBOARD_TIME_SECS),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), bgLoopedSoundID(INVALID_SOUND_ID),
 titleDisplay(display->GetTextScalingFactor(), 0.25, display->GetSound()),
 blammopediaItemIndex(-1), creditsItemIndex(-1), doAnimatedFadeIn(info.GetDoAnimatedFadeIn()),
@@ -155,7 +157,11 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
     this->display->GetCamera().ClearCameraShake();
 
     if (this->display->IsArcadeModeEnabled()) {
-        
+        if (!doAnimatedFadeIn) {
+            this->fadeAnimation.ClearLerp();
+            this->fadeAnimation.SetInterpolantValue(0.0f);
+        }
+
         // Always clear the game progress whenever we come back to the main menu in arcade mode
         GameModel* model = this->display->GetModel();
         model->ClearAllGameProgressNoReload(true);
@@ -166,7 +172,7 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
         this->arcadePressButtonLabel.SetScale(this->display->GetTextScalingFactor());
 
         this->arcadeLabelColourAnimation = GameViewConstants::GetInstance()->BuildFlashingColourWithAlphaAnimation();
-        this->display->GetMenuBGRenderer()->SetStarMoveFreq(3*MenuBackgroundRenderer::DEFAULT_MOVE_FREQUENCY);
+        this->display->GetMenuBGRenderer()->SetStarMoveFreq(MenuBackgroundRenderer::FAST_MOVE_FREQUENCY);
     }
 }
 
@@ -576,10 +582,11 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     if (finishFadeAnim) {
         static const double SOUND_FADE_OUT_TIME = 0.5;
 	    if (this->changeToPlayGameState) {
-    		this->display->GetMenuBGRenderer()->SetStarMoveFreq(MenuBackgroundRenderer::DEFAULT_MOVE_FREQUENCY);
+    		bgRenderer->SetStarMoveFreq(MenuBackgroundRenderer::DEFAULT_MOVE_FREQUENCY);
 
 		    // Turn off the background music...
             sound->StopSound(this->bgLoopedSoundID);
+            GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
 		    
             // Figure out the furthest world and level that the player has progressed to
             int furthestWorldIdx = -1;
@@ -641,10 +648,15 @@ void MainMenuDisplayState::RenderFrame(double dT) {
             return;
         }
         else if (this->changeToLevelSelectState) {
-
             // Turn off the background music...
             sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
             this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::SelectWorldMenu, DisplayStateInfo(), this->display));
+            return;
+        }
+        else if (this->changeToLeaderboardState) {
+            sound->StopSound(this->bgLoopedSoundID, SOUND_FADE_OUT_TIME);
+            GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
+            this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::HighScoreEntry, DisplayStateInfo::BuildHighScoreEntryInfo(0), this->display));
             return;
         }
     }
@@ -685,6 +697,13 @@ void MainMenuDisplayState::RenderFrame(double dT) {
             this->arcadePressButtonLabel.SetTopLeftCorner((DISPLAY_WIDTH - labelWidth) / 2.0f, 0.25f * DISPLAY_HEIGHT);
 
             this->arcadePressButtonLabel.Draw();
+            
+            this->timeUntilLeaderboard -= dT;
+            if (this->timeUntilLeaderboard <= 0.0 && !this->changeToLeaderboardState) {
+                this->changeToLeaderboardState = true;
+                this->fadeAnimation.SetLerp(0.0, 3.0, 0.0f, 1.0f);
+                this->fadeAnimation.SetRepeat(false);
+            }
         }
     }
     else {                
@@ -909,7 +928,7 @@ void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& presse
 
 	assert(this->mainMenu != NULL);
 
-    if (!this->titleDisplay.IsFinishedAnimating()) {
+    if (!this->titleDisplay.IsFinishedAnimating() || (this->fadeAnimation.GetInterpolantValue() > 0.0f && !this->changeToLeaderboardState)) {
         return;
     }
 

@@ -62,7 +62,10 @@ public:
     REGISTER_ACTION_FUNC_1ARG(ArcadeWaitingForPlayerState, bool);
     REGISTER_ACTION_FUNC_0ARG(ArcadePlayerHitStartGame);
     REGISTER_ACTION_FUNC_0ARG(ArcadePlayerSelectedWorld);
+    REGISTER_ACTION_FUNC_0ARG(ArcadePlayerHitContinue);
+    REGISTER_ACTION_FUNC_0ARG(ArcadePlayerHitSummaryConfirm);
     REGISTER_ACTION_FUNC_1ARG(ShootBallTutorialHintShown, bool);
+
 
 #undef REGISTER_ACTION_FUNC_1ARG
 #undef REGISTER_ACTION_FUNC_2ARG

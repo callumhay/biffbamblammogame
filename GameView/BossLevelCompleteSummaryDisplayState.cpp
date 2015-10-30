@@ -73,6 +73,8 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
     assert(completedWorld != NULL);
     int completedWorldIdx = completedWorld->GetWorldIndex();
 
+    bool arcadeMode = GameDisplay::IsArcadeModeEnabled();
+
     this->display->GetCamera().ClearCameraShake();
     // Pause all game play elements in the game model
 	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
@@ -109,7 +111,8 @@ victoryLabel2(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManage
         const GameWorld* nextWorld = gameModel->GetWorldByIndex(completedWorldIdx + 1);
         assert(nextWorld != NULL);
 
-        if (!nextWorld->GetHasBeenUnlocked()) {
+        if (!arcadeMode && !nextWorld->GetHasBeenUnlocked()) {
+
             this->unlockedLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(
                 GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), nextWorld->GetName() + " movement UNLOCKED.");
             this->unlockedLabel->SetColour(Colour(1,1,1));
@@ -437,4 +440,6 @@ void BossLevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
     
     // Play the confirm sound
     sound->PlaySound(GameSound::WorldSummaryConfirmEvent, false, false);
+
+    GameViewEventManager::Instance()->ActionArcadePlayerHitSummaryConfirm();
 }

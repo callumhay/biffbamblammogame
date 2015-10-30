@@ -40,6 +40,8 @@ class Mesh;
 class CgFxMaterialEffect;
 class TextureFontSet;
 class Blammopedia;
+class GameModel;
+class ArcadeLeaderboard;
 
 /**
  * This class is important for the quick loading of all resources relevant to BiffBlamBlammo
@@ -100,6 +102,9 @@ public:
 	static ConfigOptions ReadConfigurationOptions(bool forceReadFromFile, bool arcadeMode);
 	static bool WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions);
 
+    static ArcadeLeaderboard ReadLeaderboard(bool forceReadFromFile, const GameModel& model);
+    static bool WriteLeaderboard(const ArcadeLeaderboard& lb);
+
 	// Basic loading functions ****************************************************************************************************
 	static std::map<unsigned int, TextureFontSet*> LoadFont(const std::string &filepath, const std::vector<unsigned int> &heights, Texture::TextureFilterType filterType);
 	static std::istringstream* FilepathToInStream(const std::string &filepath);
@@ -144,6 +149,7 @@ private:
 	Blammopedia* blammopedia;
 
 	static ConfigOptions* configOptions;	// The configuration options read from the game's ini file
+    static ArcadeLeaderboard* leaderboard;  // The arcade leaderboard read from file
 
 	void InitCgContext();
 	static void LoadEffectTechniques(const CGeffect effect, std::map<std::string, CGtechnique>& techniques);

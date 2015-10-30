@@ -1875,6 +1875,22 @@ bool GameModel::RemoveStatusForLevelPiece(LevelPiece* p, const LevelPiece::Piece
 	return true;
 }
 
+long GameModel::GetTotalBestScore(bool arcadeMode) const {
+    long totalScore = 0;
+    // Go through every level up to the last level passed by the player and accumulate the score
+    for (int worldIdx = 0; worldIdx < static_cast<int>(this->worlds.size()); worldIdx++) {
+        const GameWorld* world = this->GetWorldByIndex(worldIdx);
+        // Accumulate score for the world...
+        long worldScore = world->GetTotalHighscoresInWorld(arcadeMode);
+        if (worldScore == 0) {
+            break;
+        }
+        totalScore += worldScore;
+    }
+
+    return totalScore;
+}
+
 void GameModel::WipePieceFromAuxLists(LevelPiece* piece) {
 	if (!this->doingPieceStatusListIteration) {
 		// If the piece is in the status update piece list then we remove it from it (as

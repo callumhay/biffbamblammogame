@@ -82,6 +82,8 @@ public:
     void ArcadeWaitingForPlayerState(bool entered);
     void ArcadePlayerHitStartGame();
     void ArcadePlayerSelectedWorld();
+    void ArcadePlayerHitContinue();
+    void ArcadePlayerHitSummaryConfirm();
     void ShootBallTutorialHintShown(bool shown);
 
 private:

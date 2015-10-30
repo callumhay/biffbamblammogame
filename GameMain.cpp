@@ -51,6 +51,7 @@
 #include "GameModel/GameEventManager.h"
 #include "GameModel/GameModelConstants.h"
 #include "GameModel/Onomatoplex.h"
+#include "GameModel/ArcadeLeaderboard.h"
 
 #include "GameControl/GameControllerManager.h"
 
@@ -61,6 +62,8 @@
 static GameSound* sound     = NULL;
 static GameModel* model     = NULL;
 static GameDisplay* display = NULL;
+
+static bool arcadeMode = false;
 
 /**
  * Clean up the ModelViewController classes that run the game.
@@ -74,6 +77,10 @@ static void CleanUpMVC() {
 	}
 
     GameControllerManager::DeleteInstance();
+
+    if (arcadeMode) {
+        ResourceManager::WriteLeaderboard(ResourceManager::ReadLeaderboard(true, *model));
+    }
 
 	if (model != NULL) {
 		delete model;
@@ -166,7 +173,6 @@ int main(int argc, char *argv[]) {
     assert(argc > 0 && argv != NULL);
     ResourceManager::SetLoadDir(argv[0]);
 
-    bool arcadeMode = false;
     std::string serialPort = "";
     if (argc > 1) {
         if (std::string(argv[1]) == std::string("-a")) {
@@ -254,6 +260,9 @@ int main(int argc, char *argv[]) {
         }
 
         model = new GameModel(sound, initCfgOptions.GetDifficulty(), initCfgOptions.GetInvertBallBoost(), initCfgOptions.GetBallBoostMode());
+        if (arcadeMode) {
+            ResourceManager::ReadLeaderboard(true, *model);
+        }
 		display = new GameDisplay(model, sound, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), arcadeMode);
 
 		// Initialize all controllers that we can...

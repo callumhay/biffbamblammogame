@@ -43,6 +43,7 @@ class Camera;
 class MenuBackgroundRenderer {
 public:
     static const float DEFAULT_MOVE_FREQUENCY;
+    static const float FAST_MOVE_FREQUENCY;
 
     MenuBackgroundRenderer();
     ~MenuBackgroundRenderer();

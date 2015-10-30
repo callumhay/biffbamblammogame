@@ -210,7 +210,11 @@ pointTallySoundID(INVALID_SOUND_ID), firstTimeDisplayingAnyKeyLabel(true) {
 
     // We count up to the new total of stars that the player has -- this will depend on whether any
     // new stars were awarded, to do this we need to compare the previous and current star totals for the completed level...
-    this->currStarTotal = this->display->GetModel()->GetTotalStarsCollectedInGame();
+    
+    bool arcadeMode = GameDisplay::IsArcadeModeEnabled();
+
+    this->currStarTotal = arcadeMode ? 0 : this->display->GetModel()->GetTotalStarsCollectedInGame();
+
     int numPrevLevelStars = completedLevel->GetNumStarsForScore(completedLevel->GetPrevHighScore());
     int numCurrLevelStars = completedLevel->GetNumStarsForScore(completedLevel->GetHighScore());
 
@@ -218,8 +222,9 @@ pointTallySoundID(INVALID_SOUND_ID), firstTimeDisplayingAnyKeyLabel(true) {
     assert(this->starAddAnimationCount >= 0);
 
     //this->starAddAnimationCount = 5;
-
-    this->currStarTotal -= this->starAddAnimationCount;
+    if (!arcadeMode) {
+        this->currStarTotal -= this->starAddAnimationCount;
+    }
 
     std::stringstream starTotalStrStream;
     starTotalStrStream << this->currStarTotal;
@@ -669,8 +674,9 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         this->DrawTotalTimeLabel(yPos, Camera::GetWindowWidth());
         */
 
-        this->DrawStarTotalLabel(dT, Camera::GetWindowWidth());
-
+        if (!GameDisplay::IsArcadeModeEnabled()) {
+            this->DrawStarTotalLabel(dT, Camera::GetWindowWidth());
+        }
         Camera::PopWindowCoords();
     }
 
@@ -1064,6 +1070,8 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
             
             // Play confirm sound
             sound->PlaySound(GameSound::LevelSummaryConfirmEvent, false, false);
+
+            GameViewEventManager::Instance()->ActionArcadePlayerHitSummaryConfirm();
 
             // No longer waiting for the player to hit any button
             GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);

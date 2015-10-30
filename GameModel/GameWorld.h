@@ -69,6 +69,7 @@ public:
 
 	static bool IsValidWorldStyle(const std::string &s);
 	static WorldStyle GetWorldStyleFromString(const std::string &s);
+    static int WorldBossArcadeScore(WorldStyle worldType);
 
 	GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr);
 	~GameWorld();
@@ -80,6 +81,7 @@ public:
 		return this->loadedLevels;
 	}
 
+    long GetTotalHighscoresInWorld(bool arcadeMode) const;
     int GetNumStarsCollectedInWorld() const;
     int GetTotalAchievableStarsInWorld() const;
 

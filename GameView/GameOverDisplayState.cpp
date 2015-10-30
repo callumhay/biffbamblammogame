@@ -32,10 +32,12 @@
 // GameDisplay Includes
 #include "GameOverDisplayState.h"
 #include "MainMenuDisplayState.h"
+#include "HighScoreEntryDisplayState.h"
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "GameFBOAssets.h"
+#include "../GameModel/ArcadeLeaderboard.h"
 
 const char* GameOverDisplayState::GAME_OVER_TEXT         = "Game Over";
 const int GameOverDisplayState::GAME_OVER_LABEL_X_BORDER = 50;
@@ -97,11 +99,26 @@ void GameOverDisplayState::RenderFrame(double dT) {
 void GameOverDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
                                          const GameControl::ActionMagnitude& magnitude) {
 
-    if (GameDisplay::IsArcadeModeEnabled() && !this->continueButtonPushed && !GameControl::IsDirectionActionButton(pressedButton)) {
-        if (this->currState == IdleState || this->currState == FadeOutState) {
-            this->display->GetSound()->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
-            this->continueButtonPushed = true;
-            this->SetState(FadeOutState);
+    if (GameDisplay::IsArcadeModeEnabled()) {
+        if (!this->continueButtonPushed) {
+            if (GameControl::IsDirectionActionButton(pressedButton)) {
+                // Make the countdown go faster...
+                static unsigned long lastTime = BlammoTime::GetSystemTimeInMillisecs();
+                if (BlammoTime::GetSystemTimeInMillisecs() - lastTime > 250) {
+                    this->arcadeCountdownSecs = std::max<double>(0.5, this->arcadeCountdownSecs - 1.0);
+                }
+            }
+            else {
+                if (this->currState == IdleState || this->currState == FadeOutState) {
+                    this->display->GetSound()->PlaySound(GameSound::MenuItemVerifyAndSelectStartGameEvent, false);
+                    
+                    GameViewEventManager::Instance()->ActionArcadePlayerHitContinue();
+                    GameViewEventManager::Instance()->ActionArcadeWaitingForPlayerState(false);
+
+                    this->continueButtonPushed = true;
+                    this->SetState(FadeOutState);
+                }
+            }
         }
     }
     else {
@@ -183,7 +200,7 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
                 this->arcadeContinueLabel.Draw();
 
                 this->arcadeCountdownSecs -= (dT*0.5);
-                if (this->arcadeCountdownSecs < 0) {
+                if (this->arcadeCountdownSecs <= -1.0) {
                     this->SetState(FadeOutState);
                 }
             }
@@ -204,17 +221,22 @@ void GameOverDisplayState::UpdateAndDrawState(double dT) {
             if (this->moveMenuAnim.Tick(dT) && this->fadeAnim.Tick(dT)) {
                 sound->StopAllEffects();
 
-                if (GameDisplay::IsArcadeModeEnabled()) {
+                bool arcadeMode = GameDisplay::IsArcadeModeEnabled();
+                if (arcadeMode) {
+
+                    GameModel* model = this->display->GetModel();
                     if (this->continueButtonPushed) {
 
                         // Clean up any misc. visual effects
                         this->display->GetAssets()->DeactivateMiscEffects();
                         // Reset the level
-                        this->display->GetModel()->ResetCurrentLevel();
+                        model->ResetCurrentLevel();
                         this->display->SetCurrentStateAsNextQueuedState();
                     }
                     else {
-                        this->display->SetCurrentState(new MainMenuDisplayState(this->display));
+                        // Go to the leaderboard...
+                        this->display->SetCurrentState(new HighScoreEntryDisplayState(this->display, 
+                            DisplayStateInfo::BuildHighScoreEntryInfo(model->GetTotalBestScore(arcadeMode))));
                     }
                 }
                 else {

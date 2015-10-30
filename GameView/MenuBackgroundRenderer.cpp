@@ -36,6 +36,7 @@
 #include "../ResourceManager.h"
 
 const float MenuBackgroundRenderer::DEFAULT_MOVE_FREQUENCY = 0.007f;
+const float MenuBackgroundRenderer::FAST_MOVE_FREQUENCY = 3 * DEFAULT_MOVE_FREQUENCY;
 
 MenuBackgroundRenderer::MenuBackgroundRenderer() : bgEffect(NULL) {
 

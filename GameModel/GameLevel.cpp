@@ -1951,7 +1951,7 @@ void GameLevel::ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& trigg
 
 void GameLevel::ClearProgress(bool arcadeMode) {
     this->SetAreUnlockStarsPaidFor(arcadeMode);
-    this->SetHighScore(0, !arcadeMode);
+    this->SetHighScore(0, true);
 }
 
 /**
@@ -2016,6 +2016,15 @@ void GameLevel::TickAIEntities(double dT, GameModel* gameModel) {
     if (this->GetHasBoss()) {
         this->boss->Tick(dT, gameModel);
     }
+}
+
+long GameLevel::GetScoreForNumStars(int numStars) const {
+    if (numStars < 1 || numStars > GameLevel::MAX_STARS_PER_LEVEL) {
+        return 0;
+    }
+
+    int starIdx = numStars - 1;
+    return this->starAwardScores[starIdx];
 }
 
 void GameLevel::RebuildTeslaLightningBoundingLines() {

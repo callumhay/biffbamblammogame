@@ -43,6 +43,7 @@
 #include "BlammoEngine/TextureFontSet.h"
 
 #include "GameModel/LevelPiece.h"
+#include "GameModel/ArcadeLeaderboard.h"
 
 #include "GameView/CgFxInkBlock.h"
 #include "GameView/CgFxPortalBlock.h"
@@ -51,6 +52,7 @@
 
 ResourceManager* ResourceManager::instance = NULL;
 ConfigOptions* ResourceManager::configOptions = NULL;
+ArcadeLeaderboard* ResourceManager::leaderboard = NULL;
 
 // Initialization Constants for the application
 const char* ResourceManager::RESOURCE_ZIP     = "BBBResources.zip";
@@ -170,6 +172,10 @@ ResourceManager::~ResourceManager() {
 		delete ResourceManager::configOptions;
 		ResourceManager::configOptions = NULL;
 	}
+    if (ResourceManager::leaderboard != NULL) {
+        delete ResourceManager::leaderboard;
+        ResourceManager::leaderboard = NULL;
+    }
 }
 
 /**
@@ -789,8 +795,48 @@ bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& cfgOp
 	return writeResult;
 }
 
+ArcadeLeaderboard ResourceManager::ReadLeaderboard(bool forceReadFromFile, const GameModel& model) {
+    if (!forceReadFromFile && ResourceManager::leaderboard != NULL) {
+        return *ResourceManager::leaderboard;
+    }
+
+    // No matter what we need to read the leaderboard from file
+
+    // If it already exists we must delete and overwrite it
+    if (ResourceManager::leaderboard != NULL) {
+        delete ResourceManager::leaderboard;
+        ResourceManager::leaderboard = NULL;
+    }
+
+    ResourceManager::leaderboard = ArcadeLeaderboard::ReadFromFile(model);
+    if (ResourceManager::leaderboard == NULL) {
+        // Couldn't find, open or properly read the file so try to make a 
+        // new one with the default settings and values in it
+
+        ResourceManager::leaderboard = new ArcadeLeaderboard(model);
+        bool writeResult = ResourceManager::leaderboard->WriteToFile();
+        UNUSED_VARIABLE(writeResult);
+        assert(writeResult);
+    }
+
+    assert(ResourceManager::leaderboard != NULL);
+    return *ResourceManager::leaderboard;
+}
+
+bool ResourceManager::WriteLeaderboard(const ArcadeLeaderboard& lb) {
+    if (ResourceManager::leaderboard == NULL) {
+        ResourceManager::leaderboard = new ArcadeLeaderboard(lb);
+    }
+    else {
+        *ResourceManager::leaderboard = lb;
+    }
+
+    // Now write to file
+    return ResourceManager::leaderboard->WriteToFile();
+}
+
 /**
- * Convert a file stored in the resource zip filesystem into an input stream using physfs.
+ * Convert a file stored in the resource zip file system into an input stream using physfs.
  */ 
 std::istringstream* ResourceManager::FilepathToInStream(const std::string &filepath) {
 	std::istringstream* inFile = NULL;

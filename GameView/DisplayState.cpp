@@ -45,6 +45,7 @@
 #include "BossLevelCompleteSummaryDisplayState.h"
 #include "GameCompleteDisplayState.h"
 #include "GameOverDisplayState.h"
+#include "HighScoreEntryDisplayState.h"
 #include "CgFxSkybox.h"
 
 #include "../GameModel/BallBoostModel.h"
@@ -89,7 +90,8 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 			return new GameCompleteDisplayState(display);
 		case DisplayState::GameOver:
 			return new GameOverDisplayState(display);
-
+        case DisplayState::HighScoreEntry:
+            return new HighScoreEntryDisplayState(display, info);
 		default:
 			assert(false);
 			break;

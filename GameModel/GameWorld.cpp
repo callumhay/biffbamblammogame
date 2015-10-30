@@ -220,6 +220,28 @@ bool GameWorld::Unload() {
 	return true;
 }
 
+long GameWorld::GetTotalHighscoresInWorld(bool arcadeMode) const {
+    long totalScore = 0;
+    for (std::vector<GameLevel*>::const_iterator iter = this->loadedLevels.begin();
+        iter != this->loadedLevels.end(); ++iter) {
+
+            GameLevel* level = *iter;
+            if (level->GetHasBoss()) {
+                if (arcadeMode) {
+                    totalScore += GameWorld::WorldBossArcadeScore(this->style);
+                }
+                else {
+                    continue;
+                }
+            }
+            if (level->GetIsLevelPassedWithScore()) {
+                totalScore += level->GetHighScore();
+            }
+    }
+
+    return totalScore;
+}
+
 int GameWorld::GetNumStarsCollectedInWorld() const {
     int numStarsCollected = 0;
     for (std::vector<GameLevel*>::const_iterator iter = this->loadedLevels.begin();
@@ -324,6 +346,28 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
         ret = SurrealismDada;
     }
 	return ret;
+}
+
+int GameWorld::WorldBossArcadeScore(GameWorld::WorldStyle worldType) {
+    switch (worldType) {
+
+        case Classical:
+            return 15000;
+        case GothicRomantic:
+            return 20000;
+        case Nouveau:
+            return 25000;
+        case Deco:
+            return 30000;
+        case Futurism:
+            return 40000;
+
+        case None:
+        default:
+            break;
+
+    }
+    return 0;
 }
 
 /**

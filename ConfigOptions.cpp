@@ -168,7 +168,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile(bool arcadeMode) {
 	std::string currStr;	// stores the currently read string from file
 	char skipEquals;			// temporary variable for throwing away the '='
 
-#define READ_IN_FILE_FAIL(inFile, valueToRead) if (!(inFile >> valueToRead)) { inFile.close(); return cfgOptions; }
+#define READ_IN_FILE_FAIL(inFile, valueToRead) if (!(inFile >> valueToRead)) { try { inFile.close(); } catch(...) {} return cfgOptions; }
 
 	while (inFile >> currStr) {
 		

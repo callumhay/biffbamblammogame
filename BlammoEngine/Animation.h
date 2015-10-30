@@ -106,6 +106,13 @@ public:
         this->x = t;
     }
 
+    void SetInitialInterpolantValue(const T& y) {
+        this->y0 = y;
+    }
+    void SetFinalInterpolantValue(const T& y) {
+        this->y1 = y;
+    }
+
 	/**
 	 * Set whether the animation is on repeat or not.
 	 */
