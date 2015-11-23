@@ -22,9 +22,11 @@ void ArcadeSerialComm::OpenSerial(const std::string& serialPort) {
             this->serialObj = new serial::Serial(serialPort, BAUD_RATE, serial::Timeout::simpleTimeout(0));
         }
         catch (const serial::SerialException& e) {
+            UNUSED_VARIABLE(e);
             debug_output(e.what());
         }
         catch (const serial::IOException& e) {
+            UNUSED_VARIABLE(e);
             debug_output(e.what());
         }
     }
@@ -236,12 +238,15 @@ void ArcadeSerialComm::SendSerial(const std::string& serialStr) {
         this->serialObj->write(serialStr);
     }
     catch (const serial::IOException& e) {
+        UNUSED_VARIABLE(e);
         debug_output(e.what());
     }
     catch (const serial::PortNotOpenedException& e) {
+        UNUSED_VARIABLE(e);
         debug_output(e.what());
     }
     catch (const serial::SerialException& e) {
+        UNUSED_VARIABLE(e);
         debug_output(e.what());
     }
 }
@@ -258,11 +263,13 @@ void ArcadeSerialComm::FindAndOpenSerial() {
             this->serialObj = new serial::Serial(currPort.port, BAUD_RATE, serial::Timeout::simpleTimeout(3000));
         }
         catch (const serial::SerialException& e) {
+            UNUSED_VARIABLE(e);
             debug_output(e.what());
             this->serialObj = NULL;
             continue;
         }
         catch (const serial::IOException& e) {
+            UNUSED_VARIABLE(e);
             debug_output(e.what());
             this->serialObj = NULL;
             continue;
@@ -271,12 +278,14 @@ void ArcadeSerialComm::FindAndOpenSerial() {
         // Check to see if the serial port is the correct one...
         if (this->serialObj->isOpen()) {
             this->serialObj->write("|QQQQQ");
-            this->serialObj->read(readStr, expectedStr.size());
-            if (readStr == expectedStr) {
-                this->serialObj->setTimeout(serial::Timeout::max(), 0, 0, 0, 0);
-                return;
-            }
         }
     }
 
+    for (std::vector<serial::PortInfo>::const_iterator iter = portList.begin(); iter != portList.end(); ++iter) {
+        this->serialObj->read(readStr, expectedStr.size());
+        if (readStr == expectedStr) {
+            this->serialObj->setTimeout(serial::Timeout::max(), 0, 0, 0, 0);
+            return;
+        }
+    }
 }
